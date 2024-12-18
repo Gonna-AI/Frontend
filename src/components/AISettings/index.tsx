@@ -29,7 +29,7 @@ export default function AISettings() {
           </h2>
           <textarea
             className={cn(
-              "w-full h-32 p-3 rounded-lg",
+              "w-full h-32 p-3 rounded-lg transition-all",
               isDark
                 ? "bg-white/5 border-white/10 text-white placeholder-white/40"
                 : "bg-black/5 border-black/10 text-black placeholder-black/40"
@@ -61,10 +61,10 @@ export default function AISettings() {
               <input
                 type="text"
                 className={cn(
-                  "w-full p-2 rounded-lg",
+                  "w-full p-2 rounded-lg transition-all",
                   isDark
-                    ? "bg-white/5 border-white/10 text-white"
-                    : "bg-black/5 border-black/10 text-black"
+                    ? "bg-white/5 border-white/10 text-white placeholder-white/40"
+                    : "bg-black/5 border-black/10 text-black placeholder-black/40"
                 )}
                 placeholder="Enter AI assistant name"
               />
@@ -77,7 +77,7 @@ export default function AISettings() {
                 Tone of Voice
               </label>
               <select className={cn(
-                "w-full p-2 rounded-lg",
+                "w-full p-2 rounded-lg transition-all",
                 isDark
                   ? "bg-white/5 border-white/10 text-white"
                   : "bg-black/5 border-black/10 text-black"
