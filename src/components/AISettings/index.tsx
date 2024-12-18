@@ -1,6 +1,12 @@
 import React from 'react';
 import { useTheme } from '../../hooks/useTheme';
 import { cn } from '../../utils/cn';
+import Section from './Section';
+import FormField from './FormField';
+import Input from './Input';
+import Select from './Select';
+import Textarea from './Textarea';
+import Button from './Button';
 
 export default function AISettings() {
   const { isDark } = useTheme();
@@ -15,91 +21,68 @@ export default function AISettings() {
       </h1>
 
       <div className="space-y-6">
-        <section className={cn(
-          "rounded-xl p-6",
-          isDark
-            ? "bg-gradient-to-br from-white/5 via-white/10 to-white/5 backdrop-blur-lg border border-white/10"
-            : "bg-gradient-to-br from-black/5 via-black/10 to-black/5 backdrop-blur-lg border border-black/10"
-        )}>
-          <h2 className={cn(
-            "text-xl font-semibold mb-4",
-            isDark ? "text-white" : "text-black"
-          )}>
-            Knowledge Base
-          </h2>
-          <textarea
-            className={cn(
-              "w-full h-32 p-3 rounded-lg transition-all",
-              isDark
-                ? "bg-white/5 border-white/10 text-white placeholder-white/40"
-                : "bg-black/5 border-black/10 text-black placeholder-black/40"
-            )}
-            placeholder="Add your company's knowledge base, FAQs, or any specific information..."
+        <Section title="Knowledge Base">
+          <Textarea
+            placeholder="Add your company's knowledge base, FAQs, or any specific information you want the AI to know..."
           />
-        </section>
+        </Section>
 
-        <section className={cn(
-          "rounded-xl p-6",
-          isDark
-            ? "bg-gradient-to-br from-white/5 via-white/10 to-white/5 backdrop-blur-lg border border-white/10"
-            : "bg-gradient-to-br from-black/5 via-black/10 to-black/5 backdrop-blur-lg border border-black/10"
-        )}>
-          <h2 className={cn(
-            "text-xl font-semibold mb-4",
-            isDark ? "text-white" : "text-black"
-          )}>
-            Personality Settings
-          </h2>
+        <Section title="Personality Settings">
           <div className="space-y-4">
-            <div>
-              <label className={cn(
-                "block text-sm font-medium mb-1",
-                isDark ? "text-white/80" : "text-black/80"
-              )}>
-                AI Name
-              </label>
-              <input
+            <FormField label="AI Name">
+              <Input
                 type="text"
-                className={cn(
-                  "w-full p-2 rounded-lg transition-all",
-                  isDark
-                    ? "bg-white/5 border-white/10 text-white placeholder-white/40"
-                    : "bg-black/5 border-black/10 text-black placeholder-black/40"
-                )}
                 placeholder="Enter AI assistant name"
               />
-            </div>
-            <div>
-              <label className={cn(
-                "block text-sm font-medium mb-1",
-                isDark ? "text-white/80" : "text-black/80"
-              )}>
-                Tone of Voice
-              </label>
-              <select className={cn(
-                "w-full p-2 rounded-lg transition-all",
-                isDark
-                  ? "bg-white/5 border-white/10 text-white"
-                  : "bg-black/5 border-black/10 text-black"
-              )}>
+            </FormField>
+            <FormField label="Tone of Voice">
+              <Select>
                 <option>Professional</option>
                 <option>Friendly</option>
                 <option>Casual</option>
                 <option>Formal</option>
-              </select>
+              </Select>
+            </FormField>
+          </div>
+        </Section>
+
+        <Section title="Response Settings">
+          <div className="space-y-4">
+            <FormField label="Response Length">
+              <Select>
+                <option>Concise</option>
+                <option>Moderate</option>
+                <option>Detailed</option>
+              </Select>
+            </FormField>
+            <div className="flex items-center space-x-3">
+              <input
+                type="checkbox"
+                id="followUp"
+                className={cn(
+                  "w-5 h-5 rounded transition-all",
+                  isDark
+                    ? "bg-white/5 border border-white/10 checked:bg-white/20"
+                    : "bg-black/5 border border-black/10 checked:bg-blue-500"
+                )}
+              />
+              <label
+                htmlFor="followUp"
+                className={cn(
+                  "text-sm font-medium",
+                  isDark ? "text-white/80" : "text-black/80"
+                )}
+              >
+                Enable follow-up questions
+              </label>
             </div>
           </div>
-        </section>
+        </Section>
 
         <div className="flex justify-end">
-          <button className={cn(
-            "px-4 py-2 rounded-lg transition-all",
-            isDark
-              ? "bg-gradient-to-r from-blue-500 to-purple-500 text-white hover:opacity-90"
-              : "bg-gradient-to-r from-blue-500 to-purple-500 text-white hover:opacity-90"
-          )}>
+          <Button>
             Save Settings
-          </button>
+          </Button>
         </div>
       </div>
     </div>
