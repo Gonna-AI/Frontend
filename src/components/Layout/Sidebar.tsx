@@ -1,29 +1,24 @@
 import React, { useState } from 'react';
-import { 
-  Settings, 
-  User, 
-  CreditCard, 
-  LogOut, 
-  Brain,
-  Menu,
-  BarChart2
-} from 'lucide-react';
+import { LogOut, Menu } from 'lucide-react';
 import { useTheme } from '../../hooks/useTheme';
 import { cn } from '../../utils/cn';
 import ThemeToggle from './ThemeToggle';
 import SidebarItem from './SidebarItem';
+import { menuItems } from '../../config/navigation';
+import { ViewType } from '../../types/navigation';
 
-const menuItems = [
-  { icon: BarChart2, label: 'Dashboard', id: 'dashboard' },
-  { icon: Brain, label: 'AI Settings', id: 'ai-settings' },
-  { icon: User, label: 'Profile', id: 'profile' },
-  { icon: CreditCard, label: 'Billing', id: 'billing' },
-  { icon: Settings, label: 'Settings', id: 'settings' },
-];
+interface SidebarProps {
+  currentView: ViewType;
+  onViewChange: (view: ViewType) => void;
+}
 
-export default function Sidebar() {
+export default function Sidebar({ currentView, onViewChange }: SidebarProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const { isDark } = useTheme();
+
+  const handleSignOut = () => {
+    console.log('Signing out...');
+  };
 
   return (
     <div 
@@ -54,6 +49,8 @@ export default function Sidebar() {
             icon={item.icon}
             label={item.label}
             isExpanded={isExpanded}
+            isActive={currentView === item.id}
+            onClick={() => onViewChange(item.id)}
           />
         ))}
       </div>
@@ -64,6 +61,7 @@ export default function Sidebar() {
           icon={LogOut}
           label="Sign Out"
           isExpanded={isExpanded}
+          onClick={handleSignOut}
         />
       </div>
     </div>

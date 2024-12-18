@@ -17,12 +17,12 @@ export default function AnalyticsCard({ title, value, change, icon: Icon }: Anal
     <div className={cn(
       "p-6 rounded-xl relative z-10",
       isDark
-        ? "bg-white/5 backdrop-blur-lg border border-white/10"
-        : "bg-black/5 backdrop-blur-lg border border-black/10"
+        ? "bg-gradient-to-br from-white/5 via-white/10 to-white/5 backdrop-blur-lg border border-white/10"
+        : "bg-gradient-to-br from-black/5 via-black/10 to-black/5 backdrop-blur-lg border border-black/10"
     )}>
       <div className="flex justify-between items-start">
         <div>
-          <p className={isDark ? "text-sm text-white/60" : "text-sm text-black/60"}>{title}</p>
+          <p className={isDark ? "text-white/60" : "text-black/60"}>{title}</p>
           <h3 className={cn(
             "text-2xl font-bold mt-1",
             isDark ? "text-white" : "text-black"
