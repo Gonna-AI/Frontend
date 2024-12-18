@@ -10,15 +10,12 @@ import { ViewType } from '../../types/navigation';
 interface SidebarProps {
   currentView: ViewType;
   onViewChange: (view: ViewType) => void;
+  onSignOut: () => void;
 }
 
-export default function Sidebar({ currentView, onViewChange }: SidebarProps) {
+export default function Sidebar({ currentView, onViewChange, onSignOut }: SidebarProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const { isDark } = useTheme();
-
-  const handleSignOut = () => {
-    console.log('Signing out...');
-  };
 
   return (
     <div 
@@ -61,7 +58,7 @@ export default function Sidebar({ currentView, onViewChange }: SidebarProps) {
           icon={LogOut}
           label="Sign Out"
           isExpanded={isExpanded}
-          onClick={handleSignOut}
+          onClick={onSignOut}
         />
       </div>
     </div>

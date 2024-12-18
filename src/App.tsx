@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import Header from './components/Layout/Header';
 import Sidebar from './components/Layout/Sidebar';
+import Landing from './components/Landing';
 import { Dashboard, AISettings, ComingSoon } from './components/Views';
 import { useTheme } from './hooks/useTheme';
 import { cn } from './utils/cn';
@@ -8,7 +9,16 @@ import { ViewType } from './types/navigation';
 
 function App() {
   const { isDark } = useTheme();
+  const [isSignedIn, setIsSignedIn] = useState(true);
   const [currentView, setCurrentView] = useState<ViewType>('dashboard');
+
+  const handleSignOut = () => {
+    setIsSignedIn(false);
+  };
+
+  const handleGetStarted = () => {
+    setIsSignedIn(true);
+  };
 
   const renderView = () => {
     switch (currentView) {
@@ -27,6 +37,10 @@ function App() {
     }
   };
 
+  if (!isSignedIn) {
+    return <Landing onGetStarted={handleGetStarted} />;
+  }
+
   return (
     <div className={cn(
       "min-h-screen transition-colors duration-200",
@@ -36,7 +50,8 @@ function App() {
     )}>
       <Sidebar 
         currentView={currentView} 
-        onViewChange={setCurrentView} 
+        onViewChange={setCurrentView}
+        onSignOut={handleSignOut}
       />
       <div className="pr-16">
         <Header />
