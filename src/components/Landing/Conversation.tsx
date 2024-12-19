@@ -1,11 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { cn } from '../../utils/cn';
-import { 
-  Phone, PhoneCall, Bot, User, Mic, Clock, Calendar,
-  Settings, Database, MessageSquare, Sliders, Activity,
-  VolumeUp, BrainCircuit, ChevronRight, BarChart4,
-  Sparkles, Shield, Zap, Gauge
-} from 'lucide-react';
+import { Phone, PhoneCall, Bot, User, Mic, Clock, Calendar, Settings, Database, MessageSquare, Sliders, Activity, VolumeIcon as VolumeUp, BrainCircuit, ChevronRight, BarChart4, Sparkles, Shield, Zap, Gauge } from 'lucide-react';
+import { LineChart, Line, Tooltip, ResponsiveContainer } from 'recharts';
 
 const messages = [
   { isAI: true, text: "Hello! I notice this is a high-priority medical claim. How can I assist you today?" },
@@ -27,6 +23,9 @@ export default function Conversation() {
   const [selectedLength, setSelectedLength] = useState("Moderate");
   const [enableFollowUp, setEnableFollowUp] = useState(true);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [performanceData, setPerformanceData] = useState(
+    Array.from({ length: 24 }, (_, i) => ({ time: i, value: Math.floor(Math.random() * 100) }))
+  );
 
   // Mouse movement handler
   const handleMouseMove = (event) => {
@@ -37,6 +36,17 @@ export default function Conversation() {
   useEffect(() => {
     window.addEventListener('mousemove', handleMouseMove);
     return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, []);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setPerformanceData(prevData => {
+        const newData = [...prevData.slice(1), { time: prevData.length, value: Math.floor(Math.random() * 100) }];
+        return newData;
+      });
+    }, 5000);
+
+    return () => clearInterval(interval);
   }, []);
 
   return (
@@ -186,11 +196,29 @@ export default function Conversation() {
               transition: 'transform 0.1s ease-out'
             }}
           >
+            {/* iPhone Status Bar */}
+            <div className="absolute top-0 left-0 right-0 flex justify-between items-center px-6 py-2 text-white text-xs z-30">
+              <div>9:41</div>
+              <div className="flex items-center space-x-1">
+                <div className="w-4 h-4">
+                  <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 20.5a8.5 8.5 0 100-17 8.5 8.5 0 000 17z" />
+                  </svg>
+                </div>
+                <div className="w-4 h-4">
+                  <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M1 9l2 2c4.97-4.97 13.03-4.97 18 0l2-2C16.93 2.93 7.08 2.93 1 9zm8 8l3 3 3-3c-1.65-1.66-4.34-1.66-6 0zm-4-4l2 2c2.76-2.76 7.24-2.76 10 0l2-2C15.14 9.14 8.87 9.14 5 13z" />
+                  </svg>
+                </div>
+                <div>100%</div>
+              </div>
+            </div>
+
             {/* Dynamic Island */}
             <div className="absolute top-2 left-1/2 transform -translate-x-1/2 w-[120px] h-[35px] bg-black rounded-full flex items-center justify-center z-20">
               <div className="flex items-center space-x-2">
                 <div className="w-2 h-2 rounded-full bg-blue-400 animate-pulse" />
-                <span className="text-[10px] text-white/60">Settings Active</span>
+                <span className="text-[10px] text-white/60">Donna.AI</span>
               </div>
             </div>
 
@@ -243,7 +271,7 @@ export default function Conversation() {
                     <div className="flex justify-between items-center">
                       <span className="text-white/80">Length</span>
                       <div className="flex space-x-2">
-                        {["Concise", "Moderate", "Detailed"].map((length) => (
+                        {["Concise", "Moderate"].map((length) => (
                           <button
                             key={length}
                             className={cn(
@@ -272,88 +300,96 @@ export default function Conversation() {
                         enableFollowUp ? "bg-purple-500/50" : "bg-white/10"
                       )}
                       onClick={() => setEnableFollowUp(!enableFollowUp)}
-                      >
-                        <div
-                          className={cn(
-                            "w-5 h-5 rounded-full bg-white transform transition-transform duration-200",
-                            enableFollowUp ? "translate-x-6" : "translate-x-1"
-                          )}
-                        />
-                      </div>
+                    >
+                      <div
+                        className={cn(
+                          "w-5 h-5 rounded-full bg-white transform transition-transform duration-200",
+                          enableFollowUp ? "translate-x-6" : "translate-x-1"
+                        )}
+                      />
                     </div>
                   </div>
-  
-                  {/* Knowledge Base */}
-                  <div className="p-4 rounded-xl bg-white/5 backdrop-blur-sm border border-white/10">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-3">
-                        <Database className="w-5 h-5 text-emerald-400" />
-                        <span className="text-white font-semibold">Knowledge Base</span>
-                      </div>
-                      <span className="text-white/40 text-sm">Last updated 2h ago</span>
+                </div>
+
+                {/* Knowledge Base */}
+                <div className="p-4 rounded-xl bg-white/5 backdrop-blur-sm border border-white/10">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <Database className="w-5 h-5 text-emerald-400" />
+                      <span className="text-white font-semibold">Knowledge Base</span>
                     </div>
-                    <div className="mt-4 space-y-2">
-                      <div className="flex justify-between items-center p-2 rounded-lg bg-white/5">
-                        <span className="text-white/60 text-sm">Claims Processing</span>
-                        <span className="text-emerald-400 text-xs">Active</span>
-                      </div>
-                      <div className="flex justify-between items-center p-2 rounded-lg bg-white/5">
-                        <span className="text-white/60 text-sm">Medical Terms</span>
-                        <span className="text-emerald-400 text-xs">Active</span>
-                      </div>
-                      <div className="flex justify-between items-center p-2 rounded-lg bg-white/5">
-                        <span className="text-white/60 text-sm">Company Policies</span>
-                        <span className="text-emerald-400 text-xs">Active</span>
-                      </div>
+                    <span className="text-white/40 text-sm">Last updated 2h ago</span>
+                  </div>
+                  <div className="mt-4 space-y-2">
+                    <div className="flex justify-between items-center p-2 rounded-lg bg-white/5">
+                      <span className="text-white/60 text-sm">Claims Processing</span>
+                      <span className="text-emerald-400 text-xs">Active</span>
+                    </div>
+                    <div className="flex justify-between items-center p-2 rounded-lg bg-white/5">
+                      <span className="text-white/60 text-sm">Medical Terms</span>
+                      <span className="text-emerald-400 text-xs">Active</span>
+                    </div>
+                    <div className="flex justify-between items-center p-2 rounded-lg bg-white/5">
+                      <span className="text-white/60 text-sm">Company Policies</span>
+                      <span className="text-emerald-400 text-xs">Active</span>
                     </div>
                   </div>
-  
-                  {/* Performance Metrics Graph */}
-                  <div className="p-4 rounded-xl bg-white/5 backdrop-blur-sm border border-white/10">
-                    <div className="flex items-center space-x-3 mb-4">
-                      <Activity className="w-5 h-5 text-blue-400" />
-                      <span className="text-white font-semibold">Performance</span>
-                    </div>
-                    <div className="h-32 flex items-end justify-between space-x-1">
-                      {[...Array(12)].map((_, i) => (
-                        <div
-                          key={i}
-                          className="flex-1 bg-gradient-to-t from-blue-500/20 to-purple-500/20 rounded-t"
-                          style={{
-                            height: `${Math.random() * 100}%`,
-                            transition: 'height 0.5s ease'
+                </div>
+
+                {/* Performance Metrics Graph */}
+                <div className="p-4 rounded-xl bg-white/5 backdrop-blur-sm border border-white/10">
+                  <div className="flex items-center space-x-3 mb-4">
+                    <Activity className="w-5 h-5 text-blue-400" />
+                    <span className="text-white font-semibold">Performance</span>
+                  </div>
+                  <div className="h-32">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={performanceData}>
+                        <Line type="monotone" dataKey="value" stroke="#8884d8" strokeWidth={2} dot={false} />
+                        <Tooltip
+                          content={({ active, payload }) => {
+                            if (active && payload && payload.length) {
+                              return (
+                                <div className="bg-white/10 backdrop-blur-sm p-2 rounded-lg border border-white/20">
+                                  <p className="text-white text-xs">{`Value: ${payload[0].value}`}</p>
+                                </div>
+                              );
+                            }
+                            return null;
                           }}
                         />
-                      ))}
-                    </div>
-                    <div className="flex justify-between mt-2 text-xs text-white/40">
-                      <span>12h ago</span>
-                      <span>Now</span>
-                    </div>
+                      </LineChart>
+                    </ResponsiveContainer>
                   </div>
-  
-                  {/* Save Button */}
-                  <button className="w-full py-3 rounded-xl bg-gradient-to-r from-blue-500 to-purple-500 text-white font-semibold hover:opacity-90 transition-opacity">
-                    Save Settings
-                  </button>
+                  <div className="flex justify-between mt-2 text-xs text-white/40">
+                    <span>12h ago</span>
+                    <span>Now</span>
+                  </div>
                 </div>
+
+                {/* Save Button */}
+                <button className="w-full py-3 rounded-xl bg-gradient-to-r from-blue-500 to-purple-500 text-white font-semibold hover:opacity-90 transition-opacity">
+                  Save Settings
+                </button>
               </div>
-  
-              {/* Bottom Bar */}
-              <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 w-[40%] h-1 bg-white/20 rounded-full" />
             </div>
-  
-            {/* Mouse-following glow effect */}
-            <div 
-              className="absolute w-64 h-64 bg-blue-500/10 rounded-full blur-3xl pointer-events-none"
-              style={{
-                left: mousePosition.x - 128,
-                top: mousePosition.y - 128,
-                transition: 'all 0.1s ease-out'
-              }}
-            />
+
+            {/* Bottom Bar */}
+            <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 w-[40%] h-1 bg-white/20 rounded-full" />
           </div>
+
+          {/* Mouse-following glow effect */}
+          <div 
+            className="absolute w-64 h-64 bg-blue-500/10 rounded-full blur-3xl pointer-events-none"
+            style={{
+              left: mousePosition.x - 128,
+              top: mousePosition.y - 128,
+              transition: 'all 0.1s ease-out'
+            }}
+          />
         </div>
       </div>
-    );
-  }
+    </div>
+  );
+}
+

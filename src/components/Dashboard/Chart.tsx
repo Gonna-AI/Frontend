@@ -17,7 +17,7 @@ export default function Chart() {
 
   return (
     <div className={cn(
-      "p-6 rounded-xl h-[400px] relative z-10",
+      "p-4 rounded-xl h-[400px] relative z-10",
       isDark
         ? "bg-white/5 backdrop-blur-lg border border-white/10"
         : "bg-black/5 backdrop-blur-lg border border-black/10"
@@ -26,8 +26,8 @@ export default function Chart() {
         "text-lg font-semibold mb-4",
         isDark ? "text-white" : "text-black"
       )}>AI Interactions</h3>
-      <ResponsiveContainer width="100%" height="100%">
-        <LineChart data={data}>
+      <ResponsiveContainer width="100%" height="90%">
+        <LineChart data={data} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
           <CartesianGrid 
             strokeDasharray="3 3" 
             stroke={isDark ? "#ffffff10" : "#00000010"} 
@@ -59,3 +59,4 @@ export default function Chart() {
     </div>
   );
 }
+
