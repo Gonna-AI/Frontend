@@ -10,12 +10,17 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@react-three/drei": "^9.102.3",
+    "@react-three/fiber": "^8.15.19",
+    "@types/three": "^0.162.0",
     "clsx": "^2.1.0",
+    "framer-motion": "^11.0.8",
     "lucide-react": "^0.344.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "recharts": "^2.12.2",
     "tailwind-merge": "^2.2.1",
+    "three": "^0.162.0",
     "zustand": "^4.5.5"
   },
   "devDependencies": {

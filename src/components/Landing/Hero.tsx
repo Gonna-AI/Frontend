@@ -1,75 +1,134 @@
-import React from 'react';
-import { Sparkles, PhoneCall, Brain, Clock, Users } from 'lucide-react';
+import React, { useState } from 'react';
+import { Sparkles, Brain, Zap, Shield } from 'lucide-react';
+import { motion } from 'framer-motion';
 
-export default function Hero() {
+interface HeroProps {
+  onGetStarted: () => void;
+}
+
+export default function Hero({ onGetStarted }: HeroProps) {
+  const [isHovered, setIsHovered] = useState(false);
+
+  const container = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.2
+      }
+    }
+  };
+
+  const item = {
+    hidden: { opacity: 0, y: 20 },
+    show: { opacity: 1, y: 0 }
+  };
+
   return (
-    <div className="relative min-h-screen flex items-center justify-center p-6 overflow-hidden bg-black">
-      {/* Enhanced Corner Gradient */}
-      <div className="absolute top-0 right-0 w-[45rem] h-[45rem] bg-gradient-to-bl from-purple-6220/20 via-purple-500/90 to-transparent blur-2xl animate-pulse" />
-      <div className="absolute top-0 right-0 w-[35rem] h-[35rem] bg-gradient-to-bl from-indigo-600/30 via-purple-400/20 to-transparent blur-3xl" />
-
-      <div className="relative z-10 max-w-4xl mx-auto text-center">
-        <div className="flex items-center justify-center space-x-2 mb-6 animate-float">
-          <Sparkles className="w-6 h-6 text-white" />
-          <span className="text-lg font-semibold text-white">
+    <div className="relative min-h-screen flex items-center justify-center px-6">
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/20 to-black/40 pointer-events-none" />
+      
+      <motion.div
+        variants={container}
+        initial="hidden"
+        animate="show"
+        className="relative z-10 max-w-5xl mx-auto text-center"
+      >
+        {/* Logo Section */}
+        <motion.div 
+          variants={item}
+          className="flex items-center justify-center space-x-2 mb-8"
+        >
+          <div className="relative">
+            <Brain className="w-12 h-12 text-purple-400" />
+            <div className="absolute -top-1 -right-1">
+              <Sparkles className="w-4 h-4 text-blue-400" />
+            </div>
+          </div>
+          <span className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 via-blue-400 to-purple-400">
             Gonna.AI
           </span>
-        </div>
+        </motion.div>
 
-        <h1 className="text-5xl font-bold mb-6 text-white">
-          Revolutionizing BPO Claims Processing with AI
-        </h1>
-
-        <p className="text-xl mb-8 max-w-2xl mx-auto text-white/70">
-          Empower your claims processing team with AI-driven automation, smart callback scheduling, and real-time sentiment analysis
-        </p>
-
-        <button
-          className="px-8 py-4 rounded-2xl font-semibold text-white bg-white/5 hover:bg-white/10 backdrop-blur-sm border border-white/10 transition-all transform hover:scale-105 relative group"
+        {/* Main Heading */}
+        <motion.h1 
+          variants={item}
+          className="text-6xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-white via-purple-200 to-white"
         >
-          <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 via-purple-500/10 to-pink-500/10 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity" />
-          <span className="relative z-10">Transform Your Workflow</span>
-        </button>
+          Revolutionizing BPO Claims
+          <br />
+          Processing with AI
+        </motion.h1>
 
-        <div className="mt-16 grid grid-cols-1 md:grid-cols-2 gap-8">
+        {/* Description */}
+        <motion.p 
+          variants={item}
+          className="text-xl mb-12 text-white/70 max-w-3xl mx-auto leading-relaxed"
+        >
+          Transform your claims processing workflow with AI-driven automation,
+          intelligent callback scheduling, and real-time sentiment analysis
+        </motion.p>
+
+        {/* CTA Button */}
+        <motion.div variants={item}>
+          <button
+            onClick={onGetStarted}
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+            className="group relative px-8 py-4 rounded-2xl overflow-hidden transition-all duration-300"
+          >
+            {/* Button Background */}
+            <div className="absolute inset-0 bg-gradient-to-r from-purple-600 via-blue-600 to-purple-600 opacity-80 group-hover:opacity-100 transition-opacity" />
+            
+            {/* Animated Glow */}
+            <div className={`absolute inset-0 bg-gradient-to-r from-purple-400 via-blue-400 to-purple-400 blur-xl transition-opacity duration-500 ${isHovered ? 'opacity-30' : 'opacity-0'}`} />
+
+            {/* Button Content */}
+            <div className="relative flex items-center space-x-2">
+              <span className="text-lg font-semibold text-white">Get Started</span>
+              <Zap className="w-5 h-5 text-white" />
+            </div>
+          </button>
+        </motion.div>
+
+        {/* Features Grid */}
+        <motion.div 
+          variants={item}
+          className="mt-24 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+        >
           {[
             {
-              icon: PhoneCall,
-              title: "Smart Call Scheduling",
-              description: "Automatically prioritize and schedule callbacks based on claim urgency and client needs"
-            },
-            {
               icon: Brain,
-              title: "Sentiment Analysis",
-              description: "Real-time analysis of client emotions to provide better support and escalation"
+              title: "AI-Powered Analysis",
+              description: "Advanced machine learning for accurate claim processing"
             },
             {
-              icon: Clock,
-              title: "Automated Workflows",
-              description: "Streamline routine tasks and data entry across multiple systems"
+              icon: Shield,
+              title: "Secure Processing",
+              description: "Enterprise-grade security for sensitive data"
             },
             {
-              icon: Users,
-              title: "Enhanced Client Experience",
-              description: "Provide faster resolutions and personalized support for every claim"
+              icon: Zap,
+              title: "Real-time Processing",
+              description: "Instant analysis and automated decision making"
             }
           ].map((feature, index) => (
-            <div
+            <motion.div
               key={index}
-              className="p-6 rounded-2xl relative group cursor-pointer transform hover:scale-105 transition-all bg-white/5 hover:bg-white/10 backdrop-blur-sm border border-white/10"
+              whileHover={{ scale: 1.05 }}
+              className="p-6 rounded-2xl bg-white/5 backdrop-blur-lg border border-white/10 hover:bg-white/10 transition-all duration-300"
             >
-              <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 via-purple-500/10 to-pink-500/10 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity" />
-              <feature.icon className="w-8 h-8 mb-4 text-white/80" />
-              <h3 className="text-lg font-semibold mb-2 text-white">
+              <feature.icon className="w-10 h-10 text-purple-400 mb-4" />
+              <h3 className="text-xl font-semibold text-white mb-2">
                 {feature.title}
               </h3>
               <p className="text-white/60">
                 {feature.description}
               </p>
-            </div>
+            </motion.div>
           ))}
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
     </div>
   );
 }
