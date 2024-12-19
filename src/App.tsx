@@ -11,6 +11,7 @@ function App() {
   const { isDark } = useTheme();
   const [isSignedIn, setIsSignedIn] = useState(true);
   const [currentView, setCurrentView] = useState<ViewType>('dashboard');
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const handleSignOut = () => {
     setIsSignedIn(false);
@@ -48,17 +49,17 @@ function App() {
         ? "bg-gradient-to-br from-gray-900 via-black to-gray-900" 
         : "bg-gradient-to-br from-gray-100 via-white to-gray-100"
     )}>
+      <Header onMobileMenuClick={() => setIsMobileMenuOpen(true)} />
       <Sidebar 
         currentView={currentView} 
         onViewChange={setCurrentView}
         onSignOut={handleSignOut}
+        isOpen={isMobileMenuOpen}
+        onClose={() => setIsMobileMenuOpen(false)}
       />
-      <div className="pr-16">
-        <Header />
-        <main className="overflow-y-auto h-[calc(100vh-4rem)]">
-          {renderView()}
-        </main>
-      </div>
+      <main className="md:pr-20 overflow-y-auto h-[calc(100vh-3rem)] md:h-[calc(100vh-4rem)]">
+        {renderView()}
+      </main>
     </div>
   );
 }

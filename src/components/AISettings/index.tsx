@@ -12,15 +12,15 @@ export default function AISettings() {
   const { isDark } = useTheme();
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
+    <div className="p-4 md:p-6 max-w-4xl mx-auto">
       <h1 className={cn(
-        "text-2xl font-bold mb-6",
+        "text-xl md:text-2xl font-bold mb-4 md:mb-6",
         isDark ? "text-white" : "text-black"
       )}>
         AI Assistant Settings
       </h1>
 
-      <div className="space-y-6">
+      <div className="space-y-4 md:space-y-6">
         <Section title="Knowledge Base">
           <Textarea
             placeholder="Add your company's knowledge base, FAQs, or any specific information you want the AI to know..."
@@ -28,7 +28,7 @@ export default function AISettings() {
         </Section>
 
         <Section title="Personality Settings">
-          <div className="space-y-4">
+          <div className="space-y-3 md:space-y-4">
             <FormField label="AI Name">
               <Input
                 type="text"
@@ -47,7 +47,7 @@ export default function AISettings() {
         </Section>
 
         <Section title="Response Settings">
-          <div className="space-y-4">
+          <div className="space-y-3 md:space-y-4">
             <FormField label="Response Length">
               <Select>
                 <option>Concise</option>
@@ -60,7 +60,7 @@ export default function AISettings() {
                 type="checkbox"
                 id="followUp"
                 className={cn(
-                  "w-5 h-5 rounded transition-all",
+                  "w-4 h-4 md:w-5 md:h-5 rounded transition-all",
                   isDark
                     ? "bg-white/5 border border-white/10 checked:bg-white/20"
                     : "bg-black/5 border border-black/10 checked:bg-blue-500"
@@ -69,7 +69,7 @@ export default function AISettings() {
               <label
                 htmlFor="followUp"
                 className={cn(
-                  "text-sm font-medium",
+                  "text-sm md:text-base font-medium",
                   isDark ? "text-white/80" : "text-black/80"
                 )}
               >
@@ -79,7 +79,7 @@ export default function AISettings() {
           </div>
         </Section>
 
-        <div className="flex justify-end">
+        <div className="flex justify-end pt-4">
           <Button>
             Save Settings
           </Button>
