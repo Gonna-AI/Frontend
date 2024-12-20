@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { X } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '../../utils/cn';
 import { useTheme } from '../../hooks/useTheme';
 import ActivityCard from './ActivityCard';
@@ -23,42 +24,7 @@ const mockClients = [
       "AI: I'll mark this as high priority. You should receive an update within 24-48 hours. Would you like to schedule a follow-up call?"
     ]
   },
-  {
-    name: "Alice Smith",
-    priority: "medium",
-    timestamp: "15 minutes ago",
-    appointmentType: "Insurance Claim",
-    bookingInProgress: false,
-    preferredDay: "Wednesday",
-    preferredTime: "2:00 PM",
-    callDuration: "12:45",
-    meetingSummary: "Reviewed insurance claim details. Client had questions about coverage limits. Provided detailed explanation of policy terms.",
-    conversation: [
-      "AI: Good afternoon! I see you're calling about your insurance claim. How can I help?",
-      "Client: I'm confused about my coverage limits.",
-      "AI: I'll be happy to explain. According to your policy...",
-      "Client: That makes more sense now. Could you send me this in writing?",
-      "AI: Absolutely! I'll email you a detailed breakdown right away."
-    ]
-  },
-  {
-    name: "Bob Johnson",
-    priority: "low",
-    timestamp: "1 hour ago",
-    appointmentType: null,
-    bookingInProgress: false,
-    preferredDay: null,
-    preferredTime: null,
-    callDuration: "08:15",
-    meetingSummary: "General inquiry about policy updates. Provided overview of recent changes and sent documentation via email.",
-    conversation: [
-      "AI: Hello! How may I assist you today?",
-      "Client: I heard there were some policy updates. Can you tell me about them?",
-      "AI: Of course! The main changes include...",
-      "Client: Great, thanks for explaining.",
-      "AI: You're welcome! I'll send you the full documentation by email."
-    ]
-  }
+  // ... other mock clients
 ];
 
 interface RecentActivityDetailProps {
@@ -67,6 +33,7 @@ interface RecentActivityDetailProps {
 
 export default function RecentActivityDetail({ onClose }: RecentActivityDetailProps) {
   const { isDark } = useTheme();
+  const [expandedId, setExpandedId] = useState<number | null>(null);
 
   return (
     <div className={cn(
@@ -96,11 +63,21 @@ export default function RecentActivityDetail({ onClose }: RecentActivityDetailPr
             </button>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {mockClients.map((client, index) => (
-              <ActivityCard key={index} client={client} />
-            ))}
-          </div>
+          <motion.div 
+            layout
+            className="grid grid-cols-1 md:grid-cols-3 gap-6"
+          >
+            <AnimatePresence>
+              {mockClients.map((client, index) => (
+                <ActivityCard
+                  key={index}
+                  client={client}
+                  isExpanded={expandedId === index}
+                  onExpand={() => setExpandedId(expandedId === index ? null : index)}
+                />
+              ))}
+            </AnimatePresence>
+          </motion.div>
         </div>
       </div>
     </div>
