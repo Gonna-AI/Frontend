@@ -29,11 +29,13 @@ export default function ActivityCard({ client, isExpanded, onExpand }: ActivityC
 
   return (
     <motion.div
-      layout="position"
-      initial={false}
-      animate={{
-        scale: 1,
-        transition: { duration: 0.5, ease: [0.23, 1, 0.32, 1] }
+      layout
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.95 }}
+      transition={{
+        layout: { duration: 0.3, ease: "easeInOut" },
+        opacity: { duration: 0.2 }
       }}
       className={cn(
         "rounded-xl backdrop-blur-lg border relative overflow-hidden",
@@ -43,8 +45,9 @@ export default function ActivityCard({ client, isExpanded, onExpand }: ActivityC
     >
       {/* Expand Button */}
       <motion.button
+        layout="position"
         animate={{ rotate: isExpanded ? 90 : 0 }}
-        transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
+        transition={{ duration: 0.3, ease: "easeInOut" }}
         onClick={onExpand}
         className={cn(
           "absolute top-4 left-4 p-2 rounded-lg z-10 transition-colors",
@@ -59,6 +62,7 @@ export default function ActivityCard({ client, isExpanded, onExpand }: ActivityC
 
       <motion.div 
         layout="position"
+        transition={{ duration: 0.3, ease: "easeInOut" }}
         className="p-6"
       >
         {/* Header Section */}
@@ -75,6 +79,7 @@ export default function ActivityCard({ client, isExpanded, onExpand }: ActivityC
         {/* Content Grid */}
         <motion.div
           layout="position"
+          transition={{ duration: 0.3, ease: "easeInOut" }}
           className={cn(
             "grid gap-4",
             isExpanded ? "md:grid-cols-2" : "grid-cols-1"
@@ -133,10 +138,10 @@ export default function ActivityCard({ client, isExpanded, onExpand }: ActivityC
           <AnimatePresence mode="wait">
             {isExpanded && (
               <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 20 }}
-                transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
                 className="space-y-4"
               >
                 {client.callDuration && <AudioPlayer duration={client.callDuration} />}
