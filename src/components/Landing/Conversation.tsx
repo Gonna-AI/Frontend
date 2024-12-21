@@ -50,7 +50,7 @@ export default function Conversation() {
   }, []);
 
   return (
-    <div className="relative bg-black min-h-screen">
+    <div className="relative bg-gray-900 min-h-screen">
       <div className="py-20 px-6">
         {/* Main Chat Interface */}
         <div className="relative">
@@ -60,15 +60,15 @@ export default function Conversation() {
 
           <div className="relative z-10 max-w-4xl mx-auto">
             {/* MacOS Window Frame */}
-            <div className="rounded-2xl overflow-hidden backdrop-blur-xl bg-white/5 border border-white/10">
+            <div className="rounded-2xl overflow-hidden backdrop-blur-xl bg-gray-800/90 border border-gray-700">
               {/* Window Header */}
-              <div className="px-4 py-3 bg-black/40 border-b border-white/5 flex items-center">
+              <div className="px-4 py-3 bg-gray-800 border-b border-gray-700 flex items-center">
                 <div className="flex space-x-2">
                   <div className="w-3 h-3 rounded-full bg-red-500 hover:bg-red-600 transition-colors" />
                   <div className="w-3 h-3 rounded-full bg-yellow-500 hover:bg-yellow-600 transition-colors" />
                   <div className="w-3 h-3 rounded-full bg-green-500 hover:bg-green-600 transition-colors" />
                 </div>
-                <div className="flex-1 text-center text-white/40 text-sm font-medium">
+                <div className="flex-1 text-center text-gray-400 text-sm font-medium">
                   Claims Processing Assistant - Active Call
                 </div>
                 <div className="w-16" />
@@ -77,7 +77,7 @@ export default function Conversation() {
               {/* Content Area */}
               <div className="p-8">
                 {/* Call Status Header */}
-                <div className="mb-8 p-4 rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10">
+                <div className="mb-8 p-4 rounded-2xl bg-gray-900/90 backdrop-blur-sm border border-gray-700">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-4">
                       <div className="relative">
@@ -85,8 +85,8 @@ export default function Conversation() {
                         <div className="absolute -top-1 -right-1 w-3 h-3 bg-emerald-400 rounded-full animate-pulse" />
                       </div>
                       <div>
-                        <h3 className="text-white font-semibold">Active Call Session</h3>
-                        <p className="text-white/60 text-sm">Duration: 3:24</p>
+                        <h3 className="text-gray-200 font-semibold">Active Call Session</h3>
+                        <p className="text-gray-400 text-sm">Duration: 3:24</p>
                       </div>
                     </div>
                     <div className="flex items-center space-x-2">
@@ -107,11 +107,11 @@ export default function Conversation() {
                   </div>
                 </div>
 
-                <h2 className="text-3xl font-bold text-center mb-4 text-white">
+                <h2 className="text-3xl font-bold text-center mb-4 text-gray-200">
                   AI-Powered Claims Assistant in Action
                 </h2>
                 
-                <p className="text-white/60 text-center mb-12 text-sm">
+                <p className="text-gray-400 text-center mb-12 text-sm">
                   * This demonstration showcases real-time voice-to-text transcription. The AI system automatically converts spoken dialogue into text for enhanced accessibility and documentation.
                 </p>
 
@@ -126,15 +126,15 @@ export default function Conversation() {
                       )}
                     >
                       {message.isAI && (
-                        <div className="w-8 h-8 rounded-full bg-white/5 backdrop-blur-sm border border-white/10 flex items-center justify-center">
+                        <div className="w-8 h-8 rounded-full bg-gray-700 border border-gray-600 flex items-center justify-center">
                           <Bot className="w-5 h-5 text-emerald-400" />
                         </div>
                       )}
                       <div className={cn(
-                        "max-w-[75%] p-4 rounded-2xl relative group transform hover:scale-105 transition-all backdrop-blur-sm border border-white/10",
+                        "max-w-[75%] p-4 rounded-2xl relative group transform hover:scale-105 transition-all",
                         message.isAI
-                          ? "bg-gray-800/80 hover:bg-gray-800/90"
-                          : "bg-purple-900/80 hover:bg-purple-900/90"
+                          ? "bg-gray-800 text-gray-200"
+                          : "bg-purple-900 text-gray-200"
                       )}>
                         <div className={cn(
                           "absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity",
@@ -142,12 +142,12 @@ export default function Conversation() {
                             ? "bg-gradient-to-br from-emerald-500/10 via-purple-500/10 to-purple-500/10"
                             : "bg-gradient-to-br from-purple-500/10 via-emerald-500/10 to-emerald-500/10"
                         )} />
-                        <p className="relative z-10 text-gray-100">
+                        <p className="relative z-10">
                           {message.text}
                         </p>
                       </div>
                       {!message.isAI && (
-                        <div className="w-8 h-8 rounded-full bg-white/5 backdrop-blur-sm border border-white/10 flex items-center justify-center">
+                        <div className="w-8 h-8 rounded-full bg-gray-700 border border-gray-600 flex items-center justify-center">
                           <User className="w-5 h-5 text-purple-400" />
                         </div>
                       )}
@@ -158,20 +158,14 @@ export default function Conversation() {
                 {/* Call Actions */}
                 <div className="mt-8">
                   <div className="flex justify-center items-center space-x-8">
-                    <div className="p-3 rounded-full bg-white/5 backdrop-blur-sm border border-white/10 hover:bg-white/10 transition-all cursor-pointer">
-                      <Calendar className="w-5 h-5 text-white" />
-                    </div>
                     
                     <div className="text-center">
-                      <div className="p-3 rounded-full bg-red-500/20 backdrop-blur-sm border border-red-500/30 hover:bg-red-500/30 transition-all cursor-pointer">
+                      <div className="p-3 rounded-full bg-red-500/20 border border-red-500/30 hover:bg-red-500/30 transition-all cursor-pointer">
                         <Phone className="w-5 h-5 text-red-400" />
                       </div>
                       <span className="text-red-400 text-xs mt-1 block">End Call</span>
                     </div>
                     
-                    <div className="p-3 rounded-full bg-white/5 backdrop-blur-sm border border-white/10 hover:bg-white/10 transition-all cursor-pointer">
-                      <Clock className="w-5 h-5 text-white" />
-                    </div>
                   </div>
                 </div>
               </div>
@@ -179,25 +173,25 @@ export default function Conversation() {
           </div>
         </div>
 
-        {/* iPhone Admin Panel Section */}
+        {/* Performance Metrics Section */}
         <div className="relative z-10 max-w-lg mx-auto mt-32">
-          <h2 className="text-4xl font-bold text-center mb-4 text-white">
+          <h2 className="text-4xl font-bold text-center mb-4 text-gray-200">
             AI Assistant Control Panel
           </h2>
-          <p className="text-white/60 text-center mb-16 text-lg">
+          <p className="text-gray-400 text-center mb-16 text-lg">
             Fine-tune your AI assistant's behavior and monitor performance metrics
           </p>
 
-          {/* iPhone Frame */}
+          {/* Control Panel */}
           <div 
-            className="relative mx-auto rounded-[3rem] overflow-hidden backdrop-blur-xl bg-white/5 border-4 border-white/20 aspect-[9/19.5] max-w-[300px]"
+            className="relative mx-auto rounded-[3rem] overflow-hidden backdrop-blur-xl bg-gray-800/90 border-4 border-gray-700 aspect-[9/19.5] max-w-[300px]"
             style={{
               transform: `perspective(1000px) rotateY(${(mousePosition.x - window.innerWidth/2) / 50}deg) rotateX(${(mousePosition.y - window.innerHeight/2) / 50}deg)`,
               transition: 'transform 0.1s ease-out'
             }}
           >
-            {/* iPhone Status Bar */}
-            <div className="absolute top-0 left-0 right-0 flex justify-between items-center px-6 py-2 text-white text-xs z-30">
+            {/* Status Bar */}
+            <div className="absolute top-0 left-0 right-0 flex justify-between items-center px-6 py-2 text-gray-300 text-xs z-30">
               <div>9:41</div>
               <div className="flex items-center space-x-1">
                 <div className="w-4 h-4">
@@ -218,18 +212,18 @@ export default function Conversation() {
             <div className="absolute top-2 left-1/2 transform -translate-x-1/2 w-[120px] h-[35px] bg-black rounded-full flex items-center justify-center z-20">
               <div className="flex items-center space-x-2">
                 <div className="w-2 h-2 rounded-full bg-blue-400 animate-pulse" />
-                <span className="text-[10px] text-white/60">Donna.AI</span>
+                <span className="text-[10px] text-gray-400">Donna.AI</span>
               </div>
             </div>
 
             {/* Screen Content */}
-            <div className="relative h-full bg-black/40 px-4 pt-14 pb-8 overflow-y-auto">
+            <div className="relative h-full bg-gray-900/90 px-4 pt-14 pb-8 overflow-y-auto">
               {/* Performance Cards */}
               <div className="grid grid-cols-1 gap-2 mb-6">
                 {performanceMetrics.map((metric, index) => (
-                  <div key={index} className="p-3 rounded-xl bg-white/5 backdrop-blur-sm border border-white/10">
+                  <div key={index} className="p-3 rounded-xl bg-gray-800/90 border border-gray-700">
                     <div className="flex justify-between items-center">
-                      <span className="text-white/60 text-sm">{metric.label}</span>
+                      <span className="text-gray-400 text-sm">{metric.label}</span>
                       <span className={`text-${metric.color}-400 text-sm font-semibold`}>
                         {metric.value}
                       </span>
@@ -244,17 +238,17 @@ export default function Conversation() {
               {/* Settings Sections */}
               <div className="space-y-4">
                 {/* AI Personality */}
-                <div className="p-4 rounded-xl bg-white/5 backdrop-blur-sm border border-white/10">
+                <div className="p-4 rounded-xl bg-gray-800/90 border border-gray-700">
                   <div className="flex items-center space-x-3 mb-4">
                     <BrainCircuit className="w-5 h-5 text-blue-400" />
-                    <span className="text-white font-semibold">AI Personality</span>
+                    <span className="text-gray-200 font-semibold">AI Personality</span>
                   </div>
                   <div className="space-y-3">
-                    <button className="w-full p-3 rounded-lg bg-white/5 hover:bg-white/10 text-white/80 text-left flex justify-between items-center">
+                    <button className="w-full p-3 rounded-lg bg-gray-700 hover:bg-gray-600 text-gray-300 text-left flex justify-between items-center">
                       <span>Professional</span>
                       <ChevronRight className="w-4 h-4" />
                     </button>
-                    <button className="w-full p-3 rounded-lg bg-white/5 hover:bg-white/10 text-white/80 text-left flex justify-between items-center">
+                    <button className="w-full p-3 rounded-lg bg-gray-700 hover:bg-gray-600 text-gray-300 text-left flex justify-between items-center">
                       <span>Friendly</span>
                       <ChevronRight className="w-4 h-4" />
                     </button>
@@ -262,14 +256,14 @@ export default function Conversation() {
                 </div>
 
                 {/* Response Settings */}
-                <div className="p-4 rounded-xl bg-white/5 backdrop-blur-sm border border-white/10">
+                <div className="p-4 rounded-xl bg-gray-800/90 border border-gray-700">
                   <div className="flex items-center space-x-3 mb-4">
                     <MessageSquare className="w-5 h-5 text-purple-400" />
-                    <span className="text-white font-semibold">Response Settings</span>
+                    <span className="text-gray-200 font-semibold">Response Settings</span>
                   </div>
                   <div className="space-y-3">
                     <div className="flex justify-between items-center">
-                      <span className="text-white/80">Length</span>
+                      <span className="text-gray-300">Length</span>
                       <div className="flex space-x-2">
                         {["Concise", "Moderate"].map((length) => (
                           <button
@@ -278,7 +272,7 @@ export default function Conversation() {
                               "px-3 py-1 rounded-lg text-xs",
                               selectedLength === length
                                 ? "bg-purple-500/20 text-purple-400"
-                                : "bg-white/5 text-white/60"
+                                : "bg-gray-700 text-gray-400"
                             )}
                             onClick={() => setSelectedLength(length)}
                           >
@@ -291,13 +285,13 @@ export default function Conversation() {
                 </div>
 
                 {/* Follow-up Toggle */}
-                <div className="p-4 rounded-xl bg-white/5 backdrop-blur-sm border border-white/10">
+                <div className="p-4 rounded-xl bg-gray-800/90 border border-gray-700">
                   <div className="flex justify-between items-center">
-                    <span className="text-white/80">Enable Follow-up</span>
+                    <span className="text-gray-300">Enable Follow-up</span>
                     <div
                       className={cn(
                         "w-12 h-6 rounded-full transition-colors cursor-pointer",
-                        enableFollowUp ? "bg-purple-500/50" : "bg-white/10"
+                        enableFollowUp ? "bg-purple-500/50" : "bg-gray-700"
                       )}
                       onClick={() => setEnableFollowUp(!enableFollowUp)}
                     >
@@ -312,35 +306,35 @@ export default function Conversation() {
                 </div>
 
                 {/* Knowledge Base */}
-                <div className="p-4 rounded-xl bg-white/5 backdrop-blur-sm border border-white/10">
+                <div className="p-4 rounded-xl bg-gray-800/90 border border-gray-700">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
                       <Database className="w-5 h-5 text-emerald-400" />
-                      <span className="text-white font-semibold">Knowledge Base</span>
+                      <span className="text-gray-200 font-semibold">Knowledge Base</span>
                     </div>
-                    <span className="text-white/40 text-sm">Last updated 2h ago</span>
+                    <span className="text-gray-400 text-sm">Last updated 2h ago</span>
                   </div>
                   <div className="mt-4 space-y-2">
-                    <div className="flex justify-between items-center p-2 rounded-lg bg-white/5">
-                      <span className="text-white/60 text-sm">Claims Processing</span>
+                    <div className="flex justify-between items-center p-2 rounded-lg bg-gray-700">
+                      <span className="text-gray-300 text-sm">Claims Processing</span>
                       <span className="text-emerald-400 text-xs">Active</span>
                     </div>
-                    <div className="flex justify-between items-center p-2 rounded-lg bg-white/5">
-                      <span className="text-white/60 text-sm">Medical Terms</span>
+                    <div className="flex justify-between items-center p-2 rounded-lg bg-gray-700">
+                      <span className="text-gray-300 text-sm">Medical Terms</span>
                       <span className="text-emerald-400 text-xs">Active</span>
                     </div>
-                    <div className="flex justify-between items-center p-2 rounded-lg bg-white/5">
-                      <span className="text-white/60 text-sm">Company Policies</span>
+                    <div className="flex justify-between items-center p-2 rounded-lg bg-gray-700">
+                      <span className="text-gray-300 text-sm">Company Policies</span>
                       <span className="text-emerald-400 text-xs">Active</span>
                     </div>
                   </div>
                 </div>
 
                 {/* Performance Metrics Graph */}
-                <div className="p-4 rounded-xl bg-white/5 backdrop-blur-sm border border-white/10">
+                <div className="p-4 rounded-xl bg-gray-800/90 border border-gray-700">
                   <div className="flex items-center space-x-3 mb-4">
                     <Activity className="w-5 h-5 text-blue-400" />
-                    <span className="text-white font-semibold">Performance</span>
+                    <span className="text-gray-200 font-semibold">Performance</span>
                   </div>
                   <div className="h-32">
                     <ResponsiveContainer width="100%" height="100%">
@@ -350,8 +344,8 @@ export default function Conversation() {
                           content={({ active, payload }) => {
                             if (active && payload && payload.length) {
                               return (
-                                <div className="bg-white/10 backdrop-blur-sm p-2 rounded-lg border border-white/20">
-                                  <p className="text-white text-xs">{`Value: ${payload[0].value}`}</p>
+                                <div className="bg-gray-800 p-2 rounded-lg border border-gray-700">
+                                  <p className="text-gray-200 text-xs">{`Value: ${payload[0].value}`}</p>
                                 </div>
                               );
                             }
@@ -361,7 +355,7 @@ export default function Conversation() {
                       </LineChart>
                     </ResponsiveContainer>
                   </div>
-                  <div className="flex justify-between mt-2 text-xs text-white/40">
+                  <div className="flex justify-between mt-2 text-xs text-gray-400">
                     <span>12h ago</span>
                     <span>Now</span>
                   </div>
@@ -375,18 +369,8 @@ export default function Conversation() {
             </div>
 
             {/* Bottom Bar */}
-            <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 w-[40%] h-1 bg-white/20 rounded-full" />
+            <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 w-[40%] h-1 bg-gray-600 rounded-full" />
           </div>
-
-          {/* Mouse-following glow effect */}
-          <div 
-            className="absolute w-64 h-64 bg-blue-500/10 rounded-full blur-3xl pointer-events-none"
-            style={{
-              left: mousePosition.x - 128,
-              top: mousePosition.y - 128,
-              transition: 'all 0.1s ease-out'
-            }}
-          />
         </div>
       </div>
     </div>
