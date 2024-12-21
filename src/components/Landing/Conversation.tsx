@@ -133,8 +133,8 @@ export default function Conversation() {
                       <div className={cn(
                         "max-w-[75%] p-4 rounded-2xl relative group transform hover:scale-105 transition-all",
                         message.isAI
-                          ? "bg-gray-800 text-gray-200"
-                          : "bg-purple-900 text-gray-200"
+                          ? "bg-gray-700 text-gray-200"
+                          : "bg-purple-700 text-gray-200"
                       )}>
                         <div className={cn(
                           "absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity",
@@ -158,6 +158,9 @@ export default function Conversation() {
                 {/* Call Actions */}
                 <div className="mt-8">
                   <div className="flex justify-center items-center space-x-8">
+                    <div className="p-3 rounded-full bg-gray-700 border border-gray-600 hover:bg-gray-600 transition-all cursor-pointer">
+                      <Calendar className="w-5 h-5 text-gray-200" />
+                    </div>
                     
                     <div className="text-center">
                       <div className="p-3 rounded-full bg-red-500/20 border border-red-500/30 hover:bg-red-500/30 transition-all cursor-pointer">
@@ -166,6 +169,9 @@ export default function Conversation() {
                       <span className="text-red-400 text-xs mt-1 block">End Call</span>
                     </div>
                     
+                    <div className="p-3 rounded-full bg-gray-700 border border-gray-600 hover:bg-gray-600 transition-all cursor-pointer">
+                      <Clock className="w-5 h-5 text-gray-200" />
+                    </div>
                   </div>
                 </div>
               </div>
@@ -190,34 +196,28 @@ export default function Conversation() {
               transition: 'transform 0.1s ease-out'
             }}
           >
-            {/* Status Bar */}
-            <div className="absolute top-0 left-0 right-0 flex justify-between items-center px-6 py-2 text-gray-300 text-xs z-30">
-              <div>9:41</div>
+            {/* Status Bar and Dynamic Island */}
+            <div className="absolute top-6 left-0 right-0 flex justify-between items-center px-6 z-20">
+              <div className="text-gray-300 text-xs">9:41</div>
+              <div className="absolute left-1/2 transform -translate-x-1/2 w-[90px] h-[24px] bg-black rounded-full flex items-center justify-center" />
               <div className="flex items-center space-x-1">
-                <div className="w-4 h-4">
-                  <svg viewBox="0 0 24 24" fill="currentColor">
+                <div className="w-3 h-3">
+                  <svg viewBox="0 0 24 24" fill="currentColor" className="text-gray-300">
                     <path d="M12 20.5a8.5 8.5 0 100-17 8.5 8.5 0 000 17z" />
                   </svg>
                 </div>
-                <div className="w-4 h-4">
-                  <svg viewBox="0 0 24 24" fill="currentColor">
+                <div className="w-3 h-3">
+                  <svg viewBox="0 0 24 24" fill="currentColor" className="text-gray-300">
                     <path d="M1 9l2 2c4.97-4.97 13.03-4.97 18 0l2-2C16.93 2.93 7.08 2.93 1 9zm8 8l3 3 3-3c-1.65-1.66-4.34-1.66-6 0zm-4-4l2 2c2.76-2.76 7.24-2.76 10 0l2-2C15.14 9.14 8.87 9.14 5 13z" />
                   </svg>
                 </div>
-                <div>100%</div>
+                <div className="text-gray-300 text-xs">100%</div>
               </div>
             </div>
 
-            {/* Dynamic Island */}
-            <div className="absolute top-2 left-1/2 transform -translate-x-1/2 w-[120px] h-[35px] bg-black rounded-full flex items-center justify-center z-20">
-              <div className="flex items-center space-x-2">
-                <div className="w-2 h-2 rounded-full bg-blue-400 animate-pulse" />
-                <span className="text-[10px] text-gray-400">Donna.AI</span>
-              </div>
-            </div>
 
             {/* Screen Content */}
-            <div className="relative h-full bg-gray-900/90 px-4 pt-14 pb-8 overflow-y-auto">
+            <div className="relative h-full bg-gray-900/90 px-4 pt-16 pb-8 overflow-y-auto">
               {/* Performance Cards */}
               <div className="grid grid-cols-1 gap-2 mb-6">
                 {performanceMetrics.map((metric, index) => (
@@ -344,7 +344,7 @@ export default function Conversation() {
                           content={({ active, payload }) => {
                             if (active && payload && payload.length) {
                               return (
-                                <div className="bg-gray-800 p-2 rounded-lg border border-gray-700">
+                                <div className="Vbg-gray-800 p-2 rounded-lg border border-gray-700">
                                   <p className="text-gray-200 text-xs">{`Value: ${payload[0].value}`}</p>
                                 </div>
                               );
@@ -369,7 +369,7 @@ export default function Conversation() {
             </div>
 
             {/* Bottom Bar */}
-            <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 w-[40%] h-1 bg-gray-600 rounded-full" />
+            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 w-[30%] h-1 bg-gray-600 rounded-full" />
           </div>
         </div>
       </div>

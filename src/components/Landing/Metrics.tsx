@@ -1,164 +1,23 @@
-import React, { useCallback, useEffect, useRef, useState, useMemo } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { PhoneCall, Clock, Brain, Smile } from 'lucide-react';
 
-// FlickeringGrid Component
-const FlickeringGrid = ({
-  squareSize = 4,
-  gridGap = 6,
-  flickerChance = 0.3,
-  color = "rgb(0, 0, 0)",
-  width,
-  height,
-  className,
-  maxOpacity = 0.3,
-}) => {
-  const canvasRef = useRef(null);
-  const containerRef = useRef(null);
-  const [isInView, setIsInView] = useState(false);
-  const [canvasSize, setCanvasSize] = useState({ width: 0, height: 0 });
-
-  const memoizedColor = useMemo(() => {
-    const toRGBA = (color) => {
-      if (typeof window === "undefined") return `rgba(0, 0, 0,`;
-      const canvas = document.createElement("canvas");
-      canvas.width = canvas.height = 1;
-      const ctx = canvas.getContext("2d");
-      if (!ctx) return "rgba(255, 0, 0,";
-      ctx.fillStyle = color;
-      ctx.fillRect(0, 0, 1, 1);
-      const [r, g, b] = Array.from(ctx.getImageData(0, 0, 1, 1).data);
-      return `rgba(${r}, ${g}, ${b},`;
-    };
-    return toRGBA(color);
-  }, [color]);
-
-  const setupCanvas = useCallback(
-    (canvas, width, height) => {
-      const dpr = window.devicePixelRatio || 1;
-      canvas.width = width * dpr;
-      canvas.height = height * dpr;
-      canvas.style.width = `${width}px`;
-      canvas.style.height = `${height}px`;
-      const cols = Math.floor(width / (squareSize + gridGap));
-      const rows = Math.floor(height / (squareSize + gridGap));
-      const squares = new Float32Array(cols * rows);
-      for (let i = 0; i < squares.length; i++) {
-        squares[i] = Math.random() * maxOpacity;
-      }
-      return { cols, rows, squares, dpr };
-    },
-    [squareSize, gridGap, maxOpacity]
-  );
-
-  const updateSquares = useCallback(
-    (squares, deltaTime) => {
-      for (let i = 0; i < squares.length; i++) {
-        if (Math.random() < flickerChance * deltaTime) {
-          squares[i] = Math.random() * maxOpacity;
-        }
-      }
-    },
-    [flickerChance, maxOpacity]
-  );
-
-  const drawGrid = useCallback(
-    (ctx, width, height, cols, rows, squares, dpr) => {
-      ctx.clearRect(0, 0, width, height);
-      ctx.fillStyle = "transparent";
-      ctx.fillRect(0, 0, width, height);
-
-      for (let i = 0; i < cols; i++) {
-        for (let j = 0; j < rows; j++) {
-          const opacity = squares[i * rows + j];
-          ctx.fillStyle = `${memoizedColor}${opacity})`;
-          ctx.fillRect(
-            i * (squareSize + gridGap) * dpr,
-            j * (squareSize + gridGap) * dpr,
-            squareSize * dpr,
-            squareSize * dpr
-          );
-        }
-      }
-    },
-    [memoizedColor, squareSize, gridGap]
-  );
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    const container = containerRef.current;
-    if (!canvas || !container) return;
-
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
-    let animationFrameId;
-    let gridParams;
-
-    const updateCanvasSize = () => {
-      const newWidth = width || container.clientWidth;
-      const newHeight = height || container.clientHeight;
-      setCanvasSize({ width: newWidth, height: newHeight });
-      gridParams = setupCanvas(canvas, newWidth, newHeight);
-    };
-
-    updateCanvasSize();
-
-    let lastTime = 0;
-    const animate = (time) => {
-      if (!isInView) return;
-
-      const deltaTime = (time - lastTime) / 1000;
-      lastTime = time;
-
-      updateSquares(gridParams.squares, deltaTime);
-      drawGrid(
-        ctx,
-        canvas.width,
-        canvas.height,
-        gridParams.cols,
-        gridParams.rows,
-        gridParams.squares,
-        gridParams.dpr
-      );
-      animationFrameId = requestAnimationFrame(animate);
-    };
-
-    const resizeObserver = new ResizeObserver(() => {
-      updateCanvasSize();
-    });
-
-    resizeObserver.observe(container);
-
-    const intersectionObserver = new IntersectionObserver(
-      ([entry]) => {
-        setIsInView(entry.isIntersecting);
-      },
-      { threshold: 0 }
-    );
-
-    intersectionObserver.observe(canvas);
-
-    if (isInView) {
-      animationFrameId = requestAnimationFrame(animate);
-    }
-
-    return () => {
-      cancelAnimationFrame(animationFrameId);
-      resizeObserver.disconnect();
-      intersectionObserver.disconnect();
-    };
-  }, [setupCanvas, updateSquares, drawGrid, width, height, isInView]);
-
+// Background Gradient Animation Component
+const BackgroundGradientAnimation = ({ children }) => {
   return (
-    <div ref={containerRef} className={`w-full h-full ${className}`}>
-      <canvas
-        ref={canvasRef}
-        className="pointer-events-none"
-        style={{
-          width: canvasSize.width,
-          height: canvasSize.height,
-        }}
-      />
+    <div className="relative h-screen w-full bg-black flex items-center justify-center overflow-hidden">
+      <div className="absolute inset-0 w-full h-full bg-black">
+        <div className="absolute h-full w-full z-10 backdrop-blur-[100px]" />
+        <div className="absolute top-0 z-[1] w-full h-full">
+          <div className="absolute inset-0">
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[40rem] w-[40rem] bg-red-500/30 rounded-full blur-3xl animate-first" />
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[35rem] w-[35rem] bg-purple-500/30 rounded-full blur-3xl animate-second" />
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[30rem] w-[30rem] bg-rose-500/30 rounded-full blur-3xl animate-third" />
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[25rem] w-[25rem] bg-red-500/30 rounded-full blur-3xl animate-fourth" />
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[20rem] w-[20rem] bg-purple-500/30 rounded-full blur-3xl animate-fifth" />
+          </div>
+        </div>
+      </div>
+      {children}
     </div>
   );
 };
@@ -291,8 +150,36 @@ const metrics = [
   }
 ];
 
+// Glassmorphic Card Component
+const GlassmorphicCard = ({ icon: Icon, value, label }) => {
+  return (
+    <div className="group relative transform rounded-2xl border border-white/10 bg-white/5 p-6 text-center transition-all hover:scale-105 hover:bg-white/10 backdrop-blur-sm">
+      <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-red-500/10 via-rose-500/10 to-purple-500/10 opacity-0 transition-opacity group-hover:opacity-100" />
+      
+      <div className="relative z-10">
+        <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl border border-white/10 bg-white/5 transition-all group-hover:bg-white/10">
+          <Icon className="h-8 w-8 text-red-400 transition-colors group-hover:text-red-300" />
+        </div>
+        
+        <div className="mb-3 text-4xl font-bold text-white transition-colors group-hover:text-red-300">
+          {value}
+        </div>
+        
+        <div className="font-medium text-white/60 transition-colors group-hover:text-white/80">
+          {label}
+        </div>
+      </div>
+      
+      <div className="absolute right-2 top-2 flex space-x-1">
+        <div className="h-1 w-1 rounded-full bg-red-400/40" />
+        <div className="h-1 w-1 rounded-full bg-red-400/40" />
+      </div>
+    </div>
+  );
+};
+
 // Main Component
-const Metrics = () => {
+const GlassmorphicMetrics = () => {
   const titleTexts = [
     "Your Donna",
     "Your Jarvis",
@@ -311,24 +198,8 @@ const Metrics = () => {
   ];
   
   return (
-    <div className="relative min-h-screen overflow-hidden bg-black px-6 py-20">
-      {/* FlickeringGrid Background */}
-      <div className="absolute inset-0">
-        <FlickeringGrid
-          className="z-0 absolute inset-0 size-full"
-          squareSize={4}
-          gridGap={6}
-          color="#6B7280"
-          maxOpacity={0.5}
-          flickerChance={0.1}
-        />
-      </div>
-
-      {/* Enhanced Corner Gradients */}
-      <div className="absolute right-0 top-0 h-[45rem] w-[45rem] blur-2xl bg-gradient-to-bl from-red-600/20 via-rose-500/20 to-transparent" />
-      <div className="absolute bottom-0 left-0 h-[35rem] w-[35rem] blur-3xl bg-gradient-to-tr from-red-600/20 via-purple-500/20 to-transparent" />
-      
-      <div className="relative z-10 mx-auto max-w-4xl">
+    <BackgroundGradientAnimation>
+      <div className="relative z-50 mx-auto max-w-4xl px-6 py-20">
         <MorphingTitle texts={titleTexts} />
         
         <p className="mx-auto mb-12 mt-4 max-w-2xl text-center text-lg text-white/60">
@@ -337,36 +208,17 @@ const Metrics = () => {
         
         <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4">
           {metrics.map((metric, index) => (
-            <div
+            <GlassmorphicCard
               key={index}
-              className="group relative transform rounded-2xl border border-white/10 bg-white/5 p-6 text-center transition-all hover:scale-105 hover:bg-white/10 backdrop-blur-sm"
-            >
-              <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-red-500/10 via-rose-500/10 to-purple-500/10 opacity-0 transition-opacity group-hover:opacity-100" />
-              
-              <div className="relative z-10">
-                <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl border border-white/10 bg-white/5 transition-all group-hover:bg-white/10">
-                  <metric.icon className="h-8 w-8 text-red-400 transition-colors group-hover:text-red-300" />
-                </div>
-                
-                <div className="mb-3 text-4xl font-bold text-white transition-colors group-hover:text-red-300">
-                  {metric.value}
-                </div>
-                
-                <div className="font-medium text-white/60 transition-colors group-hover:text-white/80">
-                  {metric.label}
-                </div>
-              </div>
-              
-              <div className="absolute right-2 top-2 flex space-x-1">
-                <div className="h-1 w-1 rounded-full bg-red-400/40" />
-                <div className="h-1 w-1 rounded-full bg-red-400/40" />
-              </div>
-            </div>
+              icon={metric.icon}
+              value={metric.value}
+              label={metric.label}
+            />
           ))}
         </div>
       </div>
-    </div>
+    </BackgroundGradientAnimation>
   );
 };
 
-export default Metrics;
+export default GlassmorphicMetrics;

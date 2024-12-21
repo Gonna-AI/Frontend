@@ -1,55 +1,141 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
+import { motion, useMotionValue, useMotionTemplate } from "framer-motion";
 import { Sparkles, Brain, Zap, Shield, ArrowRight } from "lucide-react";
+import { ClassValue, clsx } from "clsx";
+import { twMerge } from "tailwind-merge";
+import { svgToDataUri } from "mini-svg-data-uri";
 
-// Utility function to merge classnames
-const cn = (...classes: (string | undefined)[]) => {
-  return classes.filter(Boolean).join(" ");
-};
-
-interface RetroGridProps {
-  className?: string;
-  angle?: number;
-  cellSize?: number;
-  opacity?: number;
-  lightLineColor?: string;
-  darkLineColor?: string;
+// Utility functions
+function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
 }
 
-const RetroGrid = ({
+function flattenColorPalette(colors: any) {
+  return Object.assign(
+    {},
+    ...Object.entries(colors).flatMap(([color, values]) =>
+      typeof values == "object"
+        ? Object.entries(values).map(([key, value]) => ({
+            [color + (key === "DEFAULT" ? "" : `-${key}`)]: value,
+          }))
+        : [{ [`${color}`]: values }]
+    )
+  );
+}
+
+// Tailwind Configuration
+const addVariablesForColors = ({ addBase, theme }: any) => {
+  let allColors = flattenColorPalette(theme("colors"));
+  let newVars = Object.fromEntries(
+    Object.entries(allColors).map(([key, val]) => [`--${key}`, val])
+  );
+  addBase({
+    ":root": newVars,
+  });
+};
+
+// Add to your tailwind.config.js plugins array
+const dotPattern = ({ matchUtilities, theme }: any) => {
+  matchUtilities(
+    {
+      "bg-dot-thick": (value: any) => ({
+        backgroundImage: `url("${svgToDataUri(
+          `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="16" height="16" fill="none"><circle fill="${value}" id="pattern-circle" cx="10" cy="10" r="2.5"></circle></svg>`
+        )}")`,
+      }),
+    },
+    { values: flattenColorPalette(theme("backgroundColor")), type: "color" }
+  );
+};
+
+// Hero Highlight Component
+const HeroHighlight = ({
+  children,
   className,
-  angle = 65,
-  cellSize = 60,
-  opacity = 0.5,
-  lightLineColor = "gray",
-  darkLineColor = "gray",
-}: RetroGridProps) => {
-  const gridStyles = {
-    "--grid-angle": `${angle}deg`,
-    "--cell-size": `${cellSize}px`,
-    "--opacity": opacity,
-    "--light-line": lightLineColor,
-    "--dark-line": darkLineColor,
-  } as React.CSSProperties;
+  containerClassName,
+}: {
+  children: React.ReactNode;
+  className?: string;
+  containerClassName?: string;
+}) => {
+  let mouseX = useMotionValue(0);
+  let mouseY = useMotionValue(0);
+
+  function handleMouseMove({
+    currentTarget,
+    clientX,
+    clientY,
+  }: React.MouseEvent<HTMLDivElement>) {
+    if (!currentTarget) return;
+    let { left, top } = currentTarget.getBoundingClientRect();
+    mouseX.set(clientX - left);
+    mouseY.set(clientY - top);
+  }
 
   return (
     <div
       className={cn(
-        "pointer-events-none absolute size-full overflow-hidden [perspective:200px]",
-        `opacity-[var(--opacity)]`,
-        className,
+        "relative min-h-screen flex items-center bg-white dark:bg-black justify-center w-full group",
+        containerClassName
       )}
-      style={gridStyles}
+      onMouseMove={handleMouseMove}
     >
-      <div className="absolute inset-0 [transform:rotateX(var(--grid-angle))]">
-        <div className="animate-grid [background-image:linear-gradient(to_right,var(--light-line)_1px,transparent_0),linear-gradient(to_bottom,var(--light-line)_1px,transparent_0)] [background-repeat:repeat] [background-size:var(--cell-size)_var(--cell-size)] [height:300vh] [inset:0%_0px] [margin-left:-200%] [transform-origin:100%_0_0] [width:600vw] dark:[background-image:linear-gradient(to_right,var(--dark-line)_1px,transparent_0),linear-gradient(to_bottom,var(--dark-line)_1px,transparent_0)]" />
-      </div>
-      <div className="absolute inset-0 bg-gradient-to-t from-white to-transparent to-90% dark:from-black" />
+      <div className="absolute inset-0 bg-dot-thick-neutral-300 dark:bg-dot-thick-neutral-800 pointer-events-none" />
+      <motion.div
+        className="pointer-events-none bg-dot-thick-indigo-500 dark:bg-dot-thick-indigo-500 absolute inset-0 opacity-0 transition duration-300 group-hover:opacity-100"
+        style={{
+          WebkitMaskImage: useMotionTemplate`
+            radial-gradient(
+              200px circle at ${mouseX}px ${mouseY}px,
+              black 0%,
+              transparent 100%
+            )
+          `,
+          maskImage: useMotionTemplate`
+            radial-gradient(
+              200px circle at ${mouseX}px ${mouseY}px,
+              black 0%,
+              transparent 100%
+            )
+          `,
+        }}
+      />
+      <div className={cn("relative z-20", className)}>{children}</div>
     </div>
   );
 };
 
+// Highlight Component
+const Highlight = ({
+  children,
+  className,
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) => {
+  return (
+    <motion.span
+      initial={{ backgroundSize: "0% 100%" }}
+      animate={{ backgroundSize: "100% 100%" }}
+      transition={{ duration: 2, ease: "linear", delay: 0.5 }}
+      style={{
+        backgroundRepeat: "no-repeat",
+        backgroundPosition: "left center",
+        display: "inline",
+      }}
+      className={cn(
+        "relative inline-block pb-1 px-1 rounded-lg bg-gradient-to-r from-indigo-300 to-purple-300 dark:from-indigo-500 dark:to-purple-500",
+        className
+      )}
+    >
+      {children}
+    </motion.span>
+  );
+};
+
+// Rainbow Button Component
 const RainbowButton = ({ onClick, children }: { onClick: () => void; children: React.ReactNode }) => {
   const [isHovered, setIsHovered] = useState(false);
   
@@ -81,11 +167,24 @@ const RainbowButton = ({ onClick, children }: { onClick: () => void; children: R
       <div className="relative flex items-center space-x-2">
         {children}
       </div>
-      <style jsx>{`
+      <style jsx global>{`
         @keyframes gradient {
           0% { background-position: 0% 50%; }
           50% { background-position: 100% 50%; }
           100% { background-position: 0% 50%; }
+        }
+        
+        .dark {
+          color-scheme: dark;
+        }
+        
+        @keyframes grid {
+          0% { transform: translateY(0); }
+          100% { transform: translateY(calc(var(--cell-size) * -1)); }
+        }
+        
+        .animate-grid {
+          animation: grid 20s linear infinite;
         }
         
         @keyframes glow {
@@ -127,6 +226,7 @@ const RainbowButton = ({ onClick, children }: { onClick: () => void; children: R
   );
 };
 
+// Interactive Hover Button Component
 const InteractiveHoverButton = ({ text = "Button", onClick }: { text?: string; onClick: () => void }) => {
   return (
     <button
@@ -145,6 +245,7 @@ const InteractiveHoverButton = ({ text = "Button", onClick }: { text?: string; o
   );
 };
 
+// Feature Card Component
 interface FeatureCardProps {
   icon: React.ElementType;
   title: string;
@@ -167,6 +268,7 @@ const FeatureCard = ({ icon: Icon, title, description }: FeatureCardProps) => {
   );
 };
 
+// Main Hero Component
 interface HeroProps {
   onGetStarted: () => void;
   onJoinWaitlist: () => void;
@@ -174,22 +276,14 @@ interface HeroProps {
 
 const Hero = ({ onGetStarted, onJoinWaitlist }: HeroProps) => {
   return (
-    <div className="relative min-h-screen flex items-center justify-center px-6 bg-black">
-      {/* Background with both RetroGrid and gradient */}
-      <div className="absolute inset-0 overflow-hidden">
-        <RetroGrid />
-        <div 
-          className="absolute inset-0"
-          style={{
-            background: 'linear-gradient(-45deg, #ee775233, #e73c7e33, #23a6d533, #23d5ab33)',
-            backgroundSize: '400% 400%',
-            animation: 'gradient 15s ease infinite'
-          }}
-        />
-      </div>
-      
-      <div className="relative z-10 max-w-5xl mx-auto text-center">
-        <div className="flex items-center justify-center space-x-2 mb-8">
+    <HeroHighlight containerClassName="bg-black">
+      <div className="max-w-5xl mx-auto text-center px-6">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="flex items-center justify-center space-x-2 mb-8"
+        >
           <div className="relative">
             <Brain className="w-12 h-12 text-purple-400" />
             <div className="absolute -top-1 -right-1">
@@ -199,20 +293,42 @@ const Hero = ({ onGetStarted, onJoinWaitlist }: HeroProps) => {
           <span className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 via-blue-400 to-purple-400">
             Gonna.AI
           </span>
-        </div>
+        </motion.div>
 
-        <h1 className="text-6xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-white via-purple-200 to-white">
-          Revolutionizing BPO Claims
-          <br />
-          Processing with AI
-        </h1>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="flex flex-col items-center space-y-6 mb-6"
+        >
+          <h1 className="text-6xl font-bold flex flex-col items-center">
+            <span className="mb-4">
+              <Highlight className="text-black dark:text-white">
+                Revolutionizing
+              </Highlight>
+            </span>
+            <span className="text-neutral-700 dark:text-white/90">
+              BPO Claims Processing
+            </span>
+          </h1>
+        </motion.div>
 
-        <p className="text-xl mb-12 text-white/70 max-w-3xl mx-auto leading-relaxed">
+        <motion.p
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.4 }}
+          className="text-xl mb-12 text-neutral-700 dark:text-white/70 max-w-3xl mx-auto leading-relaxed"
+        >
           Transform your claims processing workflow with AI-driven automation,
           intelligent callback scheduling, and real-time sentiment analysis
-        </p>
+        </motion.p>
 
-        <div className="flex items-center justify-center space-x-6">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.6 }}
+          className="flex items-center justify-center space-x-6"
+        >
           <RainbowButton onClick={onGetStarted}>
             <span className="text-lg font-semibold text-white">Get Started</span>
             <Zap className="w-5 h-5 text-white" />
@@ -222,9 +338,14 @@ const Hero = ({ onGetStarted, onJoinWaitlist }: HeroProps) => {
             text="Join Waitlist" 
             onClick={onJoinWaitlist}
           />
-        </div>
+        </motion.div>
 
-        <div className="mt-24 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.8 }}
+          className="mt-24 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+        >
           {[
             {
               icon: Brain,
@@ -244,21 +365,72 @@ const Hero = ({ onGetStarted, onJoinWaitlist }: HeroProps) => {
           ].map((feature, index) => (
             <FeatureCard key={index} {...feature} />
           ))}
-        </div>
+        </motion.div>
       </div>
-
-      <style jsx global>{`
-        @keyframes grid {
-          0% { transform: translateY(0); }
-          100% { transform: translateY(calc(var(--cell-size) * -1)); }
-        }
-        
-        .animate-grid {
-          animation: grid 20s linear infinite;
-        }
-      `}</style>
-    </div>
+    </HeroHighlight>
   );
 };
 
-export default Hero;
+// Export configuration for Tailwind
+const config = {
+  content: ["./src/**/*.{ts,tsx}"],
+  darkMode: "class",
+  theme: {
+    extend: {
+      animation: {
+        first: "moveVertical 30s ease infinite",
+        second: "moveInCircle 20s reverse infinite",
+        third: "moveInCircle 40s linear infinite",
+        fourth: "moveHorizontal 40s ease infinite",
+        fifth: "moveInCircle 20s ease infinite",
+      },
+      keyframes: {
+        moveHorizontal: {
+          "0%": {
+            transform: "translateX(-50%) translateY(-10%)",
+          },
+          "50%": {
+            transform: "translateX(50%) translateY(10%)",
+          },
+          "100%": {
+            transform: "translateX(-50%) translateY(-10%)",
+          },
+        },
+        moveInCircle: {
+          "0%": {
+            transform: "rotate(0deg)",
+          },
+          "50%": {
+            transform: "rotate(180deg)",
+          },
+          "100%": {
+            transform: "rotate(360deg)",
+          },
+        },
+        moveVertical: {
+          "0%": {
+            transform: "translateY(-50%)",
+          },
+          "50%": {
+            transform: "translateY(50%)",
+          },
+          "100%": {
+            transform: "translateY(-50%)",
+          },
+        },
+        grid: {
+          "0%": { transform: "translateY(0)" },
+          "100%": { transform: "translateY(calc(var(--cell-size) * -1))" },
+        }
+      },
+    },
+  },
+  plugins: [
+    addVariablesForColors,
+    dotPattern,
+    // Add any additional plugins here
+  ],
+};
+
+// Export main component and config
+export { Hero as default, config as tailwindConfig };
