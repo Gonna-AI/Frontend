@@ -1,193 +1,207 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import type { ReactNode } from 'react';
-import { motion } from 'framer-motion';
+import React, { useEffect, useState, useRef } from 'react';
+import { motion, useAnimationFrame, useMotionValue, useScroll, useSpring, useTransform, useVelocity } from 'framer-motion';
 import { PhoneCall, Clock, Brain, Smile } from 'lucide-react';
 
-type BackgroundProps = {
-  children: ReactNode;
-};
-
-type HighlightProps = {
-  children: ReactNode;
-  className?: string;
-};
-
-type Card = {
-  id: number;
-  name: string;
-  designation: string;
-  content: ReactNode;
-};
-
-type CardStackProps = {
-  items: Card[];
-  offset?: number;
-  scaleFactor?: number;
-};
-
 // Utility function to combine class names
-const cn = (...inputs: string[]) => {
+const cn = (...inputs) => {
   return inputs.filter(Boolean).join(' ');
 };
 
-// Background Gradient Animation Component
-const BackgroundGradientAnimation = ({ children }: BackgroundProps) => {
+// Wrap function for scroll animation
+const wrap = (min, max, v) => {
+  const rangeSize = max - min;
+  return ((((v - min) % rangeSize) + rangeSize) % rangeSize) + min;
+};
+
+// Enhanced Background Gradient Animation Component
+const BackgroundGradientAnimation = ({ children }) => {
+  const { scrollY } = useScroll();
+  const [isInView, setIsInView] = useState(true);
+  const containerRef = useRef(null);
+  const gradientOpacity = useSpring(1, {
+    stiffness: 100,
+    damping: 30,
+  });
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsInView(entry.isIntersecting);
+        // Reverse the opacity logic - high when in view, low when out
+        gradientOpacity.set(entry.isIntersecting ? 1 : 0.1);
+      },
+      {
+        threshold: [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1],
+        rootMargin: '-10% 0px',
+      }
+    );
+
+    observer.observe(containerRef.current);
+    return () => observer.disconnect();
+  }, []);
+
+  // Inverse scroll progress - increase intensity as element comes into view
+  const scrollProgress = useTransform(
+    scrollY,
+    [0, window.innerHeight],
+    [0.1, 1]
+  );
+
+  const combinedOpacity = useTransform(
+    [gradientOpacity, scrollProgress],
+    ([opacity, scroll]) => Math.max(opacity, scroll)
+  );
+
   return (
-    <div className="relative h-screen w-full bg-black flex items-center justify-center overflow-hidden">
-      <div className="absolute inset-0 w-full h-full bg-black">
+    <div ref={containerRef} className="relative h-screen w-full bg-black flex items-center justify-center overflow-hidden">
+      <motion.div 
+        className="absolute inset-0 w-full h-full bg-black"
+        style={{ opacity: combinedOpacity }}
+      >
         <div className="absolute h-full w-full z-10 backdrop-blur-[100px]" />
         <div className="absolute top-0 z-[1] w-full h-full">
           <div className="absolute inset-0">
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[40rem] w-[40rem] bg-red-500/30 rounded-full blur-3xl animate-first" />
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[35rem] w-[35rem] bg-purple-500/30 rounded-full blur-3xl animate-second" />
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[30rem] w-[30rem] bg-rose-500/30 rounded-full blur-3xl animate-third" />
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[25rem] w-[25rem] bg-red-500/30 rounded-full blur-3xl animate-fourth" />
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[20rem] w-[20rem] bg-purple-500/30 rounded-full blur-3xl animate-fifth" />
+            <motion.div 
+              style={{ opacity: combinedOpacity }}
+              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[45rem] w-[45rem] bg-red-500/40 rounded-full blur-3xl animate-first"
+            />
+            <motion.div 
+              style={{ opacity: combinedOpacity }}
+              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[40rem] w-[40rem] bg-purple-500/40 rounded-full blur-3xl animate-second"
+            />
+            <motion.div 
+              style={{ opacity: combinedOpacity }}
+              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[35rem] w-[35rem] bg-rose-500/40 rounded-full blur-3xl animate-third"
+            />
+            <motion.div 
+              style={{ opacity: combinedOpacity }}
+              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[30rem] w-[30rem] bg-red-500/40 rounded-full blur-3xl animate-fourth"
+            />
+            <motion.div 
+              style={{ opacity: combinedOpacity }}
+              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[25rem] w-[25rem] bg-purple-500/40 rounded-full blur-3xl animate-fifth"
+            />
           </div>
         </div>
-      </div>
+      </motion.div>
       {children}
     </div>
   );
 };
 
-// Morphing Text Hook
-const useMorphingText = (texts: string[]) => {
-  const morphTime = 1.5;
-  const cooldownTime = 0.5;
-  
-  const textIndexRef = useRef(0);
-  const morphRef = useRef(0);
-  const cooldownRef = useRef(0);
-  const timeRef = useRef(new Date());
-  const text1Ref = useRef<HTMLSpanElement>(null);
-  const text2Ref = useRef<HTMLSpanElement>(null);
+// ParallaxText Component - Optimized with useCallback and memo
+const ParallaxText = React.memo(({ children, baseVelocity = 100, className }) => {
+  const baseX = useMotionValue(0);
+  const { scrollY } = useScroll();
+  const scrollVelocity = useVelocity(scrollY);
+  const smoothVelocity = useSpring(scrollVelocity, {
+    damping: 50,
+    stiffness: 400,
+  });
+  const velocityFactor = useTransform(smoothVelocity, [0, 1000], [0, 5], {
+    clamp: false,
+  });
 
-  const setStyles = useCallback(
-    (fraction: number) => {
-      const [current1, current2] = [text1Ref.current, text2Ref.current];
-      if (!current1 || !current2) return;
-      current2.style.filter = `blur(${Math.min(4 / fraction - 4, 100)}px)`;
-      current2.style.opacity = `${Math.pow(fraction, 0.3) * 100}%`;
-      const invertedFraction = 1 - fraction;
-      current1.style.filter = `blur(${Math.min(4 / invertedFraction - 4, 100)}px)`;
-      current1.style.opacity = `${Math.pow(invertedFraction, 0.4) * 100}%`;
-      current1.textContent = texts[textIndexRef.current % texts.length];
-      current2.textContent = texts[(textIndexRef.current + 1) % texts.length];
-    },
-    [texts]
-  );
-
-  const doMorph = useCallback(() => {
-    morphRef.current -= cooldownRef.current;
-    cooldownRef.current = 0;
-    let fraction = morphRef.current / morphTime;
-    if (fraction > 1) {
-      cooldownRef.current = cooldownTime;
-      fraction = 1;
-    }
-    setStyles(fraction);
-    if (fraction === 1) {
-      textIndexRef.current++;
-    }
-  }, [setStyles]);
-
-  const doCooldown = useCallback(() => {
-    morphRef.current = 0;
-    const [current1, current2] = [text1Ref.current, text2Ref.current];
-    if (current1 && current2) {
-      current2.style.filter = "none";
-      current2.style.opacity = "100%";
-      current1.style.filter = "none";
-      current1.style.opacity = "0%";
-    }
-  }, []);
+  const [repetitions, setRepetitions] = useState(1);
+  const containerRef = useRef(null);
+  const textRef = useRef(null);
 
   useEffect(() => {
-    let animationFrameId: number;
-    const animate = () => {
-      animationFrameId = requestAnimationFrame(animate);
-      const newTime = new Date();
-      const dt = (newTime.getTime() - timeRef.current.getTime()) / 1000;
-      timeRef.current = newTime;
-      cooldownRef.current -= dt;
-      if (cooldownRef.current <= 0) doMorph();
-      else doCooldown();
+    const calculateRepetitions = () => {
+      if (containerRef.current && textRef.current) {
+        const containerWidth = containerRef.current.offsetWidth;
+        const textWidth = textRef.current.offsetWidth;
+        const newRepetitions = Math.ceil(containerWidth / textWidth) + 2;
+        setRepetitions(newRepetitions);
+      }
     };
-    animate();
-    return () => {
-      cancelAnimationFrame(animationFrameId);
+
+    const debouncedCalculate = () => {
+      window.requestAnimationFrame(calculateRepetitions);
     };
-  }, [doMorph, doCooldown]);
 
-  return { text1Ref, text2Ref };
-};
+    calculateRepetitions();
+    window.addEventListener('resize', debouncedCalculate);
+    return () => window.removeEventListener('resize', debouncedCalculate);
+  }, [children]);
 
-// Morphing Title Component
-const MorphingTitle = ({ texts }: { texts: string[] }) => {
-  const { text1Ref, text2Ref } = useMorphingText(texts);
-  
+  const x = useTransform(baseX, (v) => `${wrap(-100 / repetitions, 0, v)}%`);
+  const directionFactor = useRef(1);
+
+  useAnimationFrame((t, delta) => {
+    let moveBy = directionFactor.current * baseVelocity * (delta / 1000);
+    if (velocityFactor.get() < 0) {
+      directionFactor.current = -1;
+    } else if (velocityFactor.get() > 0) {
+      directionFactor.current = 1;
+    }
+    moveBy += directionFactor.current * moveBy * velocityFactor.get();
+    baseX.set(baseX.get() + moveBy);
+  });
+
   return (
-    <div className="relative w-full text-center h-32">
-      <div className="relative text-5xl sm:text-6xl md:text-7xl font-bold text-white [filter:url(#threshold)_blur(0.3px)] z-50 mx-auto pt-4">
-        <span
-          className="absolute left-1/2 top-0 -translate-x-1/2 w-full"
-          ref={text1Ref}
-        />
-        <span
-          className="absolute left-1/2 top-0 -translate-x-1/2 w-full"
-          ref={text2Ref}
-        />
-      </div>
-      <svg className="hidden">
-        <defs>
-          <filter id="threshold">
-            <feColorMatrix
-              in="SourceGraphic"
-              type="matrix"
-              values="1 0 0 0 0
-                      0 1 0 0 0
-                      0 0 1 0 0
-                      0 0 0 255 -140"
-            />
-          </filter>
-        </defs>
-      </svg>
+    <div className="w-full overflow-hidden whitespace-nowrap" ref={containerRef}>
+      <motion.div className={cn("inline-block", className)} style={{ x }}>
+        {Array.from({ length: repetitions }).map((_, i) => (
+          <span key={i} ref={i === 0 ? textRef : null}>
+            {children}{" "}
+          </span>
+        ))}
+      </motion.div>
     </div>
   );
-};
+});
 
-// Highlight Component
-const Highlight = ({ children, className }: HighlightProps) => {
+// VelocityScroll Component
+const VelocityScroll = React.memo(({ text, default_velocity = 5, className }) => {
   return (
-    <span 
-      className={cn(
-        "font-bold bg-emerald-100 text-emerald-700 dark:bg-emerald-700/[0.2] dark:text-emerald-500 px-1 py-0.5",
-        className || ""
-      )}
-    >
-      {children}
-    </span>
+    <section className="relative w-full">
+      <ParallaxText baseVelocity={default_velocity} className={className}>
+        {text}
+      </ParallaxText>
+      <ParallaxText baseVelocity={-default_velocity} className={className}>
+        {text}
+      </ParallaxText>
+    </section>
   );
-};
+});
 
-// Card Stack Component
-const CardStack = ({ items, offset = 10, scaleFactor = 0.06 }: CardStackProps) => {
+// Optimized Card Stack Component
+const CardStack = React.memo(({ items, offset = 10, scaleFactor = 0.06 }) => {
   const [cards, setCards] = useState(items);
+  const isVisible = useRef(true);
 
   useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        isVisible.current = entry.isIntersecting;
+      },
+      { threshold: 0.1 }
+    );
+
     const interval = setInterval(() => {
-      setCards((prevCards) => {
-        const newArray = [...prevCards];
-        newArray.unshift(newArray.pop()!);
-        return newArray;
-      });
+      if (isVisible.current) {
+        setCards((prevCards) => {
+          const newArray = [...prevCards];
+          newArray.unshift(newArray.pop());
+          return newArray;
+        });
+      }
     }, 5000);
-    return () => clearInterval(interval);
+
+    const container = document.querySelector('.card-stack-container');
+    if (container) observer.observe(container);
+
+    return () => {
+      clearInterval(interval);
+      observer.disconnect();
+    };
   }, []);
 
   return (
-    <div className="relative h-80 w-80 md:h-96 md:w-[32rem] lg:h-[28rem] lg:w-[40rem]">
+    <div className="card-stack-container relative h-80 w-80 md:h-96 md:w-[32rem] lg:h-[28rem] lg:w-[40rem]">
       {cards.map((card, index) => (
         <motion.div
           key={card.id}
@@ -200,6 +214,8 @@ const CardStack = ({ items, offset = 10, scaleFactor = 0.06 }: CardStackProps) =
             scale: 1 - index * scaleFactor,
             zIndex: items.length - index,
           }}
+          initial={false}
+          layoutScroll
         >
           <div className="font-normal text-white dark:text-neutral-200">
             {card.content}
@@ -216,10 +232,10 @@ const CardStack = ({ items, offset = 10, scaleFactor = 0.06 }: CardStackProps) =
       ))}
     </div>
   );
-};
+});
 
 // Card Data
-const CARDS: Card[] = [
+const CARDS = [
   {
     id: 0,
     name: "AI Assistant",
@@ -268,30 +284,17 @@ const CARDS: Card[] = [
 ];
 
 // Main Component
-const GlassmorphicCardStack = () => {
-  const titleTexts = [
-    "Your Donna",
-    "Your Jarvis",
-    "Your Samantha",
-    "Your Cortana",
-    "Your VIKI",
-    "Your GLaDOS",
-    "Your KITT",
-    "Your Marvin",
-    "Your TARS",
-    "Your Ava",
-    "Your Chappie",
-    "Your EVE",
-    "Your Red Queen",
-    "Your Athena"
-  ];
-  
+const EnhancedAnimation = () => {
   return (
     <BackgroundGradientAnimation>
       <div className="relative z-50 w-full h-full flex flex-col items-center justify-center">
         <div className="w-full max-w-4xl px-4">
           <div className="flex flex-col items-center gap-4">
-            <MorphingTitle texts={titleTexts} />
+            <VelocityScroll 
+              text="Gonna.ai"
+              default_velocity={5}
+              className="font-display text-center text-4xl font-bold tracking-[-0.02em] text-white drop-shadow-sm md:text-7xl md:leading-[5rem] mb-8"
+            />
             
             <p className="text-center text-sm md:text-base text-white/60 max-w-2xl">
               Revolutionizing claims processing with AI-powered intelligence and real-time analytics
@@ -307,5 +310,4 @@ const GlassmorphicCardStack = () => {
   );
 };
 
-export default GlassmorphicCardStack;
-
+export default EnhancedAnimation;
