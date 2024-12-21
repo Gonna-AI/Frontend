@@ -301,7 +301,7 @@ const Hero = ({ onGetStarted, onJoinWaitlist }: HeroProps) => {
           transition={{ duration: 0.5, delay: 0.2 }}
           className="flex flex-col items-center space-y-6 mb-6"
         >
-          <h1 className="text-6xl font-bold flex flex-col items-center">
+          <h1 className="text-4xl font-bold flex flex-col items-center">
             <span className="mb-4">
               <Highlight className="text-black dark:text-white">
                 Revolutionizing
