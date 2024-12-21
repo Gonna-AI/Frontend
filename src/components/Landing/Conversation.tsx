@@ -31,7 +31,7 @@ export function PlaceholdersAndVanishInput({
   const startAnimation = () => {
     intervalRef.current = setInterval(() => {
       setCurrentPlaceholder((prev) => (prev + 1) % placeholders.length);
-    }, 5000); 
+    }, 2000); 
   };
 
   const handleVisibilityChange = () => {
