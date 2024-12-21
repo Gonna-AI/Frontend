@@ -31,7 +31,7 @@ export function PlaceholdersAndVanishInput({
   const startAnimation = () => {
     intervalRef.current = setInterval(() => {
       setCurrentPlaceholder((prev) => (prev + 1) % placeholders.length);
-    }, 5000); // Changed from 3000 to 5000 for slower transitions
+    }, 5000); 
   };
 
   const handleVisibilityChange = () => {
@@ -421,7 +421,7 @@ export default function Conversation() {
         const newData = [...prevData.slice(1), { time: prevData.length, value: Math.floor(Math.random() * 100) }];
         return newData;
       });
-    }, 5000);
+    }, 2000);
 
     return () => clearInterval(interval);
   }, []);
