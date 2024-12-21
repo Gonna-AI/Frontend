@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
-import { motion } from "framer-motion";
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { motion, AnimatePresence } from "framer-motion";
 import { Phone, PhoneCall, Bot, User, Mic, Clock, Calendar, Settings, Database, MessageSquare, Sliders, Activity, VolumeIcon as VolumeUp, BrainCircuit, ChevronRight, BarChart4, Sparkles, Shield, Zap, Gauge, ChevronDown } from 'lucide-react';
 import { LineChart, Line, Tooltip, ResponsiveContainer } from 'recharts';
 
@@ -10,19 +10,278 @@ function cn(...inputs: any[]) {
   return inputs.filter(Boolean).join(' ');
 }
 
-const messages = [
-  { isAI: true, text: "Hello! I notice this is a high-priority medical claim. How can I assist you today?" },
-  { isAI: false, text: "I need an urgent update on the claim status from last week." },
-  { isAI: true, text: "I've analyzed the claim history and detected urgency. Would you like me to schedule a priority callback within the next 2 hours?" },
-  { isAI: false, text: "Yes, that would be helpful. Can you also prepare a summary of the claim status?" },
-  { isAI: true, text: "I've scheduled a priority callback for 2:30 PM. Here's the claim summary: Initial filing date 03/15, current status: Under Review, Expected resolution: 48 hours. Sentiment analysis indicates the client needs reassurance about the timeline." }
-];
+// PlaceholdersAndVanishInput Component
+export function PlaceholdersAndVanishInput({
+  placeholders,
+  onChange,
+  onSubmit,
+}: {
+  placeholders: string[];
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
+}) {
+  const [currentPlaceholder, setCurrentPlaceholder] = useState(0);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const [value, setValue] = useState("");
+  const [animating, setAnimating] = useState(false);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const newDataRef = useRef<any[]>([]);
 
-const performanceMetrics = [
-  { label: "Response Time", value: "1.2s", trend: "-15%", color: "emerald" },
-  { label: "Accuracy", value: "99.2%", trend: "+2.5%", color: "blue" },
-  { label: "User Rating", value: "4.9/5", trend: "+0.3", color: "purple" }
-];
+  const startAnimation = () => {
+    intervalRef.current = setInterval(() => {
+      setCurrentPlaceholder((prev) => (prev + 1) % placeholders.length);
+    }, 5000); // Changed from 3000 to 5000 for slower transitions
+  };
+
+  const handleVisibilityChange = () => {
+    if (document.visibilityState !== "visible" && intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    } else if (document.visibilityState === "visible") {
+      startAnimation();
+    }
+  };
+
+  useEffect(() => {
+    startAnimation();
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [placeholders]);
+
+  const draw = useCallback(() => {
+    if (!inputRef.current) return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    canvas.width = 800;
+    canvas.height = 800;
+    ctx.clearRect(0, 0, 800, 800);
+    const computedStyles = getComputedStyle(inputRef.current);
+
+    const fontSize = parseFloat(computedStyles.getPropertyValue("font-size"));
+    ctx.font = `${fontSize * 2}px ${computedStyles.fontFamily}`;
+    ctx.fillStyle = "#FFF";
+    ctx.fillText(value, 16, 40);
+
+    const imageData = ctx.getImageData(0, 0, 800, 800);
+    const pixelData = imageData.data;
+    const newData: any[] = [];
+
+    for (let y = 0; y < 800; y++) {
+      let i = 4 * y * 800;
+      for (let x = 0; x < 800; x++) {
+        let e = i + 4 * x;
+        if (
+          pixelData[e] !== 0 &&
+          pixelData[e + 1] !== 0 &&
+          pixelData[e + 2] !== 0
+        ) {
+          newData.push({
+            x,
+            y,
+            color: [
+              pixelData[e],
+              pixelData[e + 1],
+              pixelData[e + 2],
+              pixelData[e + 3],
+            ],
+          });
+        }
+      }
+    }
+
+    newDataRef.current = newData.map(({ x, y, color }) => ({
+      x,
+      y,
+      r: 1,
+      color: `rgba(${color[0]}, ${color[1]}, ${color[2]}, ${color[3]})`,
+    }));
+  }, [value]);
+
+  useEffect(() => {
+    draw();
+  }, [value, draw]);
+
+  const animate = (start: number) => {
+    const animateFrame = (pos: number = 0) => {
+      requestAnimationFrame(() => {
+        const newArr = [];
+        for (let i = 0; i < newDataRef.current.length; i++) {
+          const current = newDataRef.current[i];
+          if (current.x < pos) {
+            newArr.push(current);
+          } else {
+            if (current.r <= 0) {
+              current.r = 0;
+              continue;
+            }
+            current.x += Math.random() > 0.5 ? 1 : -1;
+            current.y += Math.random() > 0.5 ? 1 : -1;
+            current.r -= 0.05 * Math.random();
+            newArr.push(current);
+          }
+        }
+        newDataRef.current = newArr;
+        const ctx = canvasRef.current?.getContext("2d");
+        if (ctx) {
+          ctx.clearRect(pos, 0, 800, 800);
+          newDataRef.current.forEach((t) => {
+            const { x: n, y: i, r: s, color } = t;
+            if (n > pos) {
+              ctx.beginPath();
+              ctx.rect(n, i, s, s);
+              ctx.fillStyle = color;
+              ctx.strokeStyle = color;
+              ctx.stroke();
+            }
+          });
+        }
+        if (newDataRef.current.length > 0) {
+          animateFrame(pos - 8);
+        } else {
+          setValue("");
+          setAnimating(false);
+        }
+      });
+    };
+    animateFrame(start);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter" && !animating) {
+      vanishAndSubmit();
+    }
+  };
+
+  const vanishAndSubmit = () => {
+    setAnimating(true);
+    draw();
+
+    const value = inputRef.current?.value || "";
+    if (value && inputRef.current) {
+      const maxX = newDataRef.current.reduce(
+        (prev, current) => (current.x > prev ? current.x : prev),
+        0
+      );
+      animate(maxX);
+    }
+  };
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    vanishAndSubmit();
+    onSubmit && onSubmit(e);
+  };
+
+  return (
+    <form
+      className={cn(
+        "w-full relative max-w-xl mx-auto bg-white dark:bg-zinc-800 h-12 rounded-full overflow-hidden shadow-[0px_2px_3px_-1px_rgba(0,0,0,0.1),_0px_1px_0px_0px_rgba(25,28,33,0.02),_0px_0px_0px_1px_rgba(25,28,33,0.08)] transition duration-200",
+        value && "bg-gray-50 dark:bg-zinc-900"
+      )}
+      onSubmit={handleSubmit}
+    >
+      <canvas
+        className={cn(
+          "absolute pointer-events-none text-base transform scale-50 top-[20%] left-2 sm:left-8 origin-top-left filter invert dark:invert-0 pr-20",
+          !animating ? "opacity-0" : "opacity-100"
+        )}
+        ref={canvasRef}
+      />
+      <input
+        onChange={(e) => {
+          if (!animating) {
+            setValue(e.target.value);
+            onChange && onChange(e);
+          }
+        }}
+        onKeyDown={handleKeyDown}
+        ref={inputRef}
+        value={value}
+        type="text"
+        className={cn(
+          "w-full relative text-sm sm:text-base z-50 border-none dark:text-white bg-transparent text-black h-full rounded-full focus:outline-none focus:ring-0 pl-4 sm:pl-10 pr-20",
+          animating && "text-transparent dark:text-transparent"
+        )}
+      />
+
+      <button
+        disabled={!value}
+        type="submit"
+        className="absolute right-2 top-1/2 z-50 -translate-y-1/2 h-8 w-8 rounded-full disabled:bg-gray-100 dark:disabled:bg-zinc-700 bg-black dark:bg-zinc-600 transition duration-200 flex items-center justify-center"
+      >
+        <motion.svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="text-gray-300 h-4 w-4"
+        >
+          <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+          <motion.path
+            d="M5 12l14 0"
+            initial={{
+              strokeDasharray: "50%",
+              strokeDashoffset: "50%",
+            }}
+            animate={{
+              strokeDashoffset: value ? 0 : "50%",
+            }}
+            transition={{
+              duration: 0.3,
+              ease: "linear",
+            }}
+          />
+          <path d="M13 18l6 -6" />
+          <path d="M13 6l6 6" />
+        </motion.svg>
+      </button>
+
+      <div className="absolute inset-0 flex items-center rounded-full pointer-events-none">
+        <AnimatePresence mode="wait">
+          {!value && (
+            <motion.p
+              initial={{
+                y: 5,
+                opacity: 0,
+              }}
+              key={`current-placeholder-${currentPlaceholder}`}
+              animate={{
+                y: 0,
+                opacity: 1,
+              }}
+              exit={{
+                y: -15,
+                opacity: 0,
+              }}
+              transition={{
+                duration: 0.3,
+                ease: "linear",
+              }}
+              className="dark:text-zinc-500 text-sm sm:text-base font-normal text-neutral-500 pl-4 sm:pl-12 text-left w-[calc(100%-2rem)] truncate"
+            >
+              {placeholders[currentPlaceholder]}
+            </motion.p>
+          )}
+        </AnimatePresence>
+      </div>
+    </form>
+  );
+}
 
 export const LampContainer = ({
   children,
@@ -32,13 +291,10 @@ export const LampContainer = ({
   className?: string;
 }) => {
   return (
-    <div
-      className={cn(
-        "relative flex flex-col items-center justify-center overflow-hidden bg-slate-950 w-full rounded-md",
-        className
-      )}
-    >
-      {/* Move the lamp effect above the content */}
+    <div className={cn(
+      "relative flex flex-col items-center justify-center overflow-hidden bg-slate-950 w-full rounded-md",
+      className
+    )}>
       <div className="absolute top-0 left-0 right-0 h-[40vh] z-0">
         <div className="relative flex w-full flex-1 scale-y-125 items-center justify-center isolate z-0 h-full">
           <motion.div
@@ -100,7 +356,6 @@ export const LampContainer = ({
         </div>
       </div>
 
-      {/* Content container with adjusted positioning and z-index */}
       <div className="relative w-full pt-[13vh]">
         <div className="relative z-50 px-5">
           {children}
@@ -110,6 +365,20 @@ export const LampContainer = ({
   );
 };
 
+const messages = [
+  { isAI: true, text: "Hello! I notice this is a high-priority medical claim. How can I assist you today?" },
+  { isAI: false, text: "I need an urgent update on the claim status from last week." },
+  { isAI: true, text: "I've analyzed the claim history and detected urgency. Would you like me to schedule a priority callback within the next 2 hours?" },
+  { isAI: false, text: "Yes, that would be helpful. Can you also prepare a summary of the claim status?" },
+  { isAI: true, text: "I've scheduled a priority callback for 2:30 PM. Here's the claim summary: Initial filing date 03/15, current status: Under Review, Expected resolution: 48 hours. Sentiment analysis indicates the client needs reassurance about the timeline." }
+];
+
+const performanceMetrics = [
+  { label: "Response Time", value: "1.2s", trend: "-15%", color: "emerald" },
+  { label: "Accuracy", value: "99.2%", trend: "+2.5%", color: "blue" },
+  { label: "User Rating", value: "4.9/5", trend: "+0.3", color: "purple" }
+];
+
 export default function Conversation() {
   const [selectedTone, setSelectedTone] = useState("Professional");
   const [selectedLength, setSelectedLength] = useState("Moderate");
@@ -118,6 +387,23 @@ export default function Conversation() {
   const [performanceData, setPerformanceData] = useState(
     Array.from({ length: 24 }, (_, i) => ({ time: i, value: Math.floor(Math.random() * 100) }))
   );
+
+  const placeholders = [
+    "When will my insurance claim be processed?",
+    "Schedule a follow-up call for my pending claim",
+    "What documents are required for filing a medical claim?",
+    "Check the status of claim #CR12345",
+    "Help me understand why my claim was rejected",
+];
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    console.log(e.target.value);
+  };
+
+  const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    console.log("submitted");
+  };
 
   const handleMouseMove = (event: React.MouseEvent) => {
     const { clientX, clientY } = event;
@@ -144,14 +430,14 @@ export default function Conversation() {
     <div className="min-h-screen bg-slate-950 overflow-x-hidden pt-20 pb-40">
       <LampContainer>
         <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12">
-  <h2 className="mt-8 bg-gradient-to-br from-slate-300 to-slate-500 bg-clip-text text-center text-4xl font-medium tracking-tight text-transparent md:text-7xl">
-    AI-Powered Claims Assistant in Action
-  </h2>
-  <p className="text-gray-400 text-sm sm:text-base max-w-2xl mx-auto mt-4 leading-relaxed">
-    * This demonstration showcases real-time voice-to-text transcription. The AI system automatically converts spoken dialogue into text for enhanced accessibility and documentation.
-  </p>
-</div>
+          <div className="text-center mb-12">
+            <h2 className="mt-8 bg-gradient-to-br from-slate-300 to-slate-500 bg-clip-text text-center text-4xl font-medium tracking-tight text-transparent md:text-7xl">
+              AI-Powered Claims Assistant in Action
+            </h2>
+            <p className="text-gray-400 text-sm sm:text-base max-w-2xl mx-auto mt-4 leading-relaxed">
+              * This demonstration showcases real-time voice-to-text transcription. The AI system automatically converts spoken dialogue into text for enhanced accessibility and documentation.
+            </p>
+          </div>
 
           <div className="flex flex-col items-center space-y-12">
             {/* Main Chat Interface */}
@@ -270,6 +556,20 @@ export default function Conversation() {
               </div>
             </div>
 
+            {/* Search Box Section */}
+            <div className="w-full max-w-4xl mb-8">
+              <div className="text-center mb-8">
+                <h2 className="text-xl sm:text-3xl font-semibold text-gray-200 mb-4">
+                  Personalize your assistant
+                </h2>
+              </div>
+              <PlaceholdersAndVanishInput
+                placeholders={placeholders}
+                onChange={handleChange}
+                onSubmit={onSubmit}
+              />
+            </div>
+
             {/* Performance Metrics Section */}
             <div className="w-full max-w-sm">
               {/* Control Panel */}
@@ -320,74 +620,6 @@ export default function Conversation() {
 
                   {/* Settings Sections */}
                   <div className="space-y-4">
-                    {/* AI Personality */}
-                    <div className="p-4 rounded-xl bg-gray-800/90 border border-gray-700">
-                      <div className="flex items-center space-x-3 mb-4">
-                        <BrainCircuit className="w-5 h-5 text-blue-400" />
-                        <span className="text-gray-200 font-semibold">AI Personality</span>
-                      </div>
-                      <div className="space-y-3">
-                        <button className="w-full p-3 rounded-lg bg-gray-700 hover:bg-gray-600 text-gray-300 text-left flex justify-between items-center">
-                          <span>Professional</span>
-                          <ChevronRight className="w-4 h-4" />
-                        </button>
-                        <button className="w-full p-3 rounded-lg bg-gray-700 hover:bg-gray-600 text-gray-300 text-left flex justify-between items-center">
-                          <span>Friendly</span>
-                          <ChevronRight className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Response Settings */}
-                    <div className="p-4 rounded-xl bg-gray-800/90 border border-gray-700">
-                      <div className="flex items-center space-x-3 mb-4">
-                        <MessageSquare className="w-5 h-5 text-purple-400" />
-                        <span className="text-gray-200 font-semibold">Response Settings</span>
-                      </div>
-                      <div className="space-y-3">
-                        <div className="flex justify-between items-center">
-                          <span className="text-gray-300">Length</span>
-                          <div className="flex space-x-2">
-                            {["Concise", "Moderate"].map((length) => (
-                              <button
-                                key={length}
-                                className={cn(
-                                  "px-3 py-1 rounded-lg text-xs",
-                                  selectedLength === length
-                                    ? "bg-purple-500/20 text-purple-400"
-                                    : "bg-gray-700 text-gray-400"
-                                )}
-                                onClick={() => setSelectedLength(length)}
-                              >
-                                {length}
-                              </button>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Follow-up Toggle */}
-                    <div className="p-4 rounded-xl bg-gray-800/90 border border-gray-700">
-                      <div className="flex justify-between items-center">
-                        <span className="text-gray-300">Enable Follow-up</span>
-                        <div
-                          className={cn(
-                            "w-12 h-6 rounded-full transition-colors cursor-pointer",
-                            enableFollowUp ? "bg-purple-500/50" : "bg-gray-700"
-                          )}
-                          onClick={() => setEnableFollowUp(!enableFollowUp)}
-                        >
-                          <div
-                            className={cn(
-                              "w-5 h-5 rounded-full bg-white transform transition-transform duration-200",
-                              enableFollowUp ? "translate-x-6" : "translate-x-1"
-                            )}
-                          />
-                        </div>
-                      </div>
-                    </div>
-
                     {/* Knowledge Base */}
                     <div className="p-4 rounded-xl bg-gray-800/90 border border-gray-700">
                       <div className="flex items-center justify-between">
@@ -422,7 +654,13 @@ export default function Conversation() {
                       <div className="h-32">
                         <ResponsiveContainer width="100%" height="100%">
                           <LineChart data={performanceData}>
-                            <Line type="monotone" dataKey="value" stroke="#8884d8" strokeWidth={2} dot={false} />
+                            <Line 
+                              type="monotone" 
+                              dataKey="value" 
+                              stroke="#8884d8" 
+                              strokeWidth={2} 
+                              dot={false} 
+                            />
                             <Tooltip
                               content={({ active, payload }) => {
                                 if (active && payload && payload.length) {
@@ -444,9 +682,105 @@ export default function Conversation() {
                       </div>
                     </div>
 
+                    {/* AI Settings */}
+                    <div className="p-4 rounded-xl bg-gray-800/90 border border-gray-700">
+                      <div className="flex items-center space-x-3 mb-4">
+                        <BrainCircuit className="w-5 h-5 text-purple-400" />
+                        <span className="text-gray-200 font-semibold">AI Settings</span>
+                      </div>
+                      <div className="space-y-4">
+                        <div className="flex justify-between items-center">
+                          <span className="text-gray-300">Model</span>
+                          <div className="flex space-x-2">
+                            <button className="px-3 py-1 rounded-lg bg-purple-500/20 text-purple-400 text-xs">
+                              GPT-4
+                            </button>
+                          </div>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-gray-300">Temperature</span>
+                          <div className="w-32 h-2 bg-gray-700 rounded-full overflow-hidden">
+                            <div className="w-3/4 h-full bg-purple-500"></div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Response Settings */}
+                    <div className="p-4 rounded-xl bg-gray-800/90 border border-gray-700">
+                      <div className="flex items-center space-x-3 mb-4">
+                        <MessageSquare className="w-5 h-5 text-emerald-400" />
+                        <span className="text-gray-200 font-semibold">Response Settings</span>
+                      </div>
+                      <div className="space-y-3">
+                        <div className="flex justify-between items-center">
+                          <span className="text-gray-300">Tone</span>
+                          <div className="flex space-x-2">
+                            {["Professional", "Friendly"].map((tone) => (
+                              <button
+                                key={tone}
+                                className={cn(
+                                  "px-3 py-1 rounded-lg text-xs",
+                                  selectedTone === tone
+                                    ? "bg-emerald-500/20 text-emerald-400"
+                                    : "bg-gray-700 text-gray-400"
+                                )}
+                                onClick={() => setSelectedTone(tone)}
+                              >
+                                {tone}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-gray-300">Length</span>
+                          <div className="flex space-x-2">
+                            {["Concise", "Moderate"].map((length) => (
+                              <button
+                                key={length}
+                                className={cn(
+                                  "px-3 py-1 rounded-lg text-xs",
+                                  selectedLength === length
+                                    ? "bg-emerald-500/20 text-emerald-400"
+                                    : "bg-gray-700 text-gray-400"
+                                )}
+                                onClick={() => setSelectedLength(length)}
+                              >
+                                {length}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Additional Settings */}
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-center p-4 rounded-xl bg-gray-800/90 border border-gray-700">
+                        <div className="flex items-center space-x-3">
+                          <VolumeUp className="w-5 h-5 text-blue-400" />
+                          <span className="text-gray-300">Text-to-Speech</span>
+                        </div>
+                        <div
+                          className={cn(
+                            "w-12 h-6 rounded-full transition-colors cursor-pointer",
+                            enableFollowUp ? "bg-blue-500/50" : "bg-gray-700"
+                          )}
+                          onClick={() => setEnableFollowUp(!enableFollowUp)}
+                        >
+                          <div
+                            className={cn(
+                              "w-5 h-5 rounded-full bg-white transform transition-transform duration-200",
+                              enableFollowUp ? "translate-x-6" : "translate-x-1"
+                            )}
+                          />
+                        </div>
+                      </div>
+                    </div>
+
                     {/* Save Button */}
-                    <button className="w-full py-3 rounded-xl bg-gradient-to-r from-blue-500 to-purple-500 text-white font-semibold hover:opacity-90 transition-opacity">
-                      Save Settings
+                    <button className="w-full py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-blue-500 text-white font-semibold hover:opacity-90 transition-opacity">
+                      Save Changes
                     </button>
                   </div>
                 </div>
@@ -461,4 +795,3 @@ export default function Conversation() {
     </div>
   );
 }
-
