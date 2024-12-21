@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState, useEffect } from 'react';
 import { cn } from '../../utils/cn';
 import { Phone, PhoneCall, Bot, User, Mic, Clock, Calendar, Settings, Database, MessageSquare, Sliders, Activity, VolumeIcon as VolumeUp, BrainCircuit, ChevronRight, BarChart4, Sparkles, Shield, Zap, Gauge } from 'lucide-react';
@@ -18,7 +20,6 @@ const performanceMetrics = [
 ];
 
 export default function Conversation() {
-  // State management
   const [selectedTone, setSelectedTone] = useState("Professional");
   const [selectedLength, setSelectedLength] = useState("Moderate");
   const [enableFollowUp, setEnableFollowUp] = useState(true);
@@ -27,7 +28,6 @@ export default function Conversation() {
     Array.from({ length: 24 }, (_, i) => ({ time: i, value: Math.floor(Math.random() * 100) }))
   );
 
-  // Mouse movement handler
   const handleMouseMove = (event) => {
     const { clientX, clientY } = event;
     setMousePosition({ x: clientX, y: clientY });
@@ -131,18 +131,18 @@ export default function Conversation() {
                         </div>
                       )}
                       <div className={cn(
-                        "max-w-md p-4 rounded-2xl relative group transform hover:scale-105 transition-all backdrop-blur-sm border border-white/10",
+                        "max-w-[75%] p-4 rounded-2xl relative group transform hover:scale-105 transition-all backdrop-blur-sm border border-white/10",
                         message.isAI
-                          ? "bg-white/5 hover:bg-white/10"
-                          : "bg-white/5 hover:bg-white/10"
+                          ? "bg-gray-800/80 hover:bg-gray-800/90"
+                          : "bg-purple-900/80 hover:bg-purple-900/90"
                       )}>
                         <div className={cn(
-                          "absolute inset-0 bg-gradient-to-br rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity",
+                          "absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity",
                           message.isAI
-                            ? "from-emerald-500/10 via-purple-500/10 to-purple-500/10"
-                            : "from-purple-500/10 via-emerald-500/10 to-emerald-500/10"
+                            ? "bg-gradient-to-br from-emerald-500/10 via-purple-500/10 to-purple-500/10"
+                            : "bg-gradient-to-br from-purple-500/10 via-emerald-500/10 to-emerald-500/10"
                         )} />
-                        <p className="relative z-10 text-white">
+                        <p className="relative z-10 text-gray-100">
                           {message.text}
                         </p>
                       </div>
