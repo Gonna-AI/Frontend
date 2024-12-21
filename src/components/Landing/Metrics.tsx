@@ -289,15 +289,15 @@ const GlassmorphicCardStack = () => {
   return (
     <BackgroundGradientAnimation>
       <div className="relative z-50 w-full h-full flex flex-col items-center justify-center">
-        <div className="w-full max-w-4xl px-6">
-          <div className="flex flex-col items-center gap-8">
+        <div className="w-full max-w-4xl px-4">
+          <div className="flex flex-col items-center gap-4">
             <MorphingTitle texts={titleTexts} />
             
-            <p className="text-center text-lg text-white/60 max-w-2xl mt-8">
+            <p className="text-center text-sm md:text-base text-white/60 max-w-2xl">
               Revolutionizing claims processing with AI-powered intelligence and real-time analytics
             </p>
             
-            <div className="mt-8">
+            <div className="mt-4">
               <CardStack items={CARDS} />
             </div>
           </div>
@@ -308,3 +308,4 @@ const GlassmorphicCardStack = () => {
 };
 
 export default GlassmorphicCardStack;
+
