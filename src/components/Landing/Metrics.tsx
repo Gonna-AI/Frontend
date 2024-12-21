@@ -1,8 +1,37 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import type { ReactNode } from 'react';
+import { motion } from 'framer-motion';
 import { PhoneCall, Clock, Brain, Smile } from 'lucide-react';
 
+type BackgroundProps = {
+  children: ReactNode;
+};
+
+type HighlightProps = {
+  children: ReactNode;
+  className?: string;
+};
+
+type Card = {
+  id: number;
+  name: string;
+  designation: string;
+  content: ReactNode;
+};
+
+type CardStackProps = {
+  items: Card[];
+  offset?: number;
+  scaleFactor?: number;
+};
+
+// Utility function to combine class names
+const cn = (...inputs: string[]) => {
+  return inputs.filter(Boolean).join(' ');
+};
+
 // Background Gradient Animation Component
-const BackgroundGradientAnimation = ({ children }) => {
+const BackgroundGradientAnimation = ({ children }: BackgroundProps) => {
   return (
     <div className="relative h-screen w-full bg-black flex items-center justify-center overflow-hidden">
       <div className="absolute inset-0 w-full h-full bg-black">
@@ -23,7 +52,7 @@ const BackgroundGradientAnimation = ({ children }) => {
 };
 
 // Morphing Text Hook
-const useMorphingText = (texts) => {
+const useMorphingText = (texts: string[]) => {
   const morphTime = 1.5;
   const cooldownTime = 0.5;
   
@@ -31,11 +60,11 @@ const useMorphingText = (texts) => {
   const morphRef = useRef(0);
   const cooldownRef = useRef(0);
   const timeRef = useRef(new Date());
-  const text1Ref = useRef(null);
-  const text2Ref = useRef(null);
+  const text1Ref = useRef<HTMLSpanElement>(null);
+  const text2Ref = useRef<HTMLSpanElement>(null);
 
   const setStyles = useCallback(
-    (fraction) => {
+    (fraction: number) => {
       const [current1, current2] = [text1Ref.current, text2Ref.current];
       if (!current1 || !current2) return;
       current2.style.filter = `blur(${Math.min(4 / fraction - 4, 100)}px)`;
@@ -75,7 +104,7 @@ const useMorphingText = (texts) => {
   }, []);
 
   useEffect(() => {
-    let animationFrameId;
+    let animationFrameId: number;
     const animate = () => {
       animationFrameId = requestAnimationFrame(animate);
       const newTime = new Date();
@@ -95,19 +124,21 @@ const useMorphingText = (texts) => {
 };
 
 // Morphing Title Component
-const MorphingTitle = ({ texts }) => {
+const MorphingTitle = ({ texts }: { texts: string[] }) => {
   const { text1Ref, text2Ref } = useMorphingText(texts);
   
   return (
-    <div className="relative h-24 text-center text-6xl lg:text-7xl font-bold text-white [filter:url(#threshold)_blur(0.3px)]">
-      <span
-        className="absolute inset-x-0 top-0 m-auto inline-block w-full"
-        ref={text1Ref}
-      />
-      <span
-        className="absolute inset-x-0 top-0 m-auto inline-block w-full"
-        ref={text2Ref}
-      />
+    <div className="relative w-full text-center h-32">
+      <div className="relative text-5xl sm:text-6xl md:text-7xl font-bold text-white [filter:url(#threshold)_blur(0.3px)] z-50 mx-auto pt-4">
+        <span
+          className="absolute left-1/2 top-0 -translate-x-1/2 w-full"
+          ref={text1Ref}
+        />
+        <span
+          className="absolute left-1/2 top-0 -translate-x-1/2 w-full"
+          ref={text2Ref}
+        />
+      </div>
       <svg className="hidden">
         <defs>
           <filter id="threshold">
@@ -126,60 +157,118 @@ const MorphingTitle = ({ texts }) => {
   );
 };
 
-// Metrics Data
-const metrics = [
-  {
-    icon: PhoneCall,
-    value: "60%",
-    label: "Reduced Call Wait Time"
-  },
-  {
-    icon: Clock,
-    value: "85%",
-    label: "Faster Claims Processing"
-  },
-  {
-    icon: Brain,
-    value: "98%",
-    label: "Accurate Prioritization"
-  },
-  {
-    icon: Smile,
-    value: "92%",
-    label: "Client Satisfaction"
-  }
-];
-
-// Glassmorphic Card Component
-const GlassmorphicCard = ({ icon: Icon, value, label }) => {
+// Highlight Component
+const Highlight = ({ children, className }: HighlightProps) => {
   return (
-    <div className="group relative transform rounded-2xl border border-white/10 bg-white/5 p-6 text-center transition-all hover:scale-105 hover:bg-white/10 backdrop-blur-sm">
-      <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-red-500/10 via-rose-500/10 to-purple-500/10 opacity-0 transition-opacity group-hover:opacity-100" />
-      
-      <div className="relative z-10">
-        <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl border border-white/10 bg-white/5 transition-all group-hover:bg-white/10">
-          <Icon className="h-8 w-8 text-red-400 transition-colors group-hover:text-red-300" />
-        </div>
-        
-        <div className="mb-3 text-4xl font-bold text-white transition-colors group-hover:text-red-300">
-          {value}
-        </div>
-        
-        <div className="font-medium text-white/60 transition-colors group-hover:text-white/80">
-          {label}
-        </div>
-      </div>
-      
-      <div className="absolute right-2 top-2 flex space-x-1">
-        <div className="h-1 w-1 rounded-full bg-red-400/40" />
-        <div className="h-1 w-1 rounded-full bg-red-400/40" />
-      </div>
+    <span 
+      className={cn(
+        "font-bold bg-emerald-100 text-emerald-700 dark:bg-emerald-700/[0.2] dark:text-emerald-500 px-1 py-0.5",
+        className || ""
+      )}
+    >
+      {children}
+    </span>
+  );
+};
+
+// Card Stack Component
+const CardStack = ({ items, offset = 10, scaleFactor = 0.06 }: CardStackProps) => {
+  const [cards, setCards] = useState(items);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCards((prevCards) => {
+        const newArray = [...prevCards];
+        newArray.unshift(newArray.pop()!);
+        return newArray;
+      });
+    }, 5000);
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <div className="relative h-80 w-80 md:h-96 md:w-[32rem] lg:h-[28rem] lg:w-[40rem]">
+      {cards.map((card, index) => (
+        <motion.div
+          key={card.id}
+          className="absolute dark:bg-black bg-white/10 h-80 w-80 md:h-96 md:w-[32rem] lg:h-[28rem] lg:w-[40rem] rounded-3xl p-4 shadow-xl border border-neutral-200/20 dark:border-white/[0.1] shadow-black/[0.1] dark:shadow-white/[0.05] flex flex-col justify-between backdrop-blur-sm"
+          style={{
+            transformOrigin: "top center",
+          }}
+          animate={{
+            top: index * -offset,
+            scale: 1 - index * scaleFactor,
+            zIndex: items.length - index,
+          }}
+        >
+          <div className="font-normal text-white dark:text-neutral-200">
+            {card.content}
+          </div>
+          <div>
+            <p className="text-white font-medium dark:text-white">
+              {card.name}
+            </p>
+            <p className="text-white/60 font-normal dark:text-neutral-200">
+              {card.designation}
+            </p>
+          </div>
+        </motion.div>
+      ))}
     </div>
   );
 };
 
+// Card Data
+const CARDS: Card[] = [
+  {
+    id: 0,
+    name: "AI Assistant",
+    designation: "Natural Language Processing",
+    content: (
+      <div className="flex flex-col items-center justify-center h-full">
+        <div className="text-6xl md:text-7xl lg:text-8xl font-bold mb-4 bg-gradient-to-r from-emerald-400 to-emerald-600 bg-clip-text text-transparent">
+          60%
+        </div>
+        <p className="text-lg md:text-xl text-center text-white/80">
+          Faster response time with <br/> 98% accuracy in intent recognition
+        </p>
+      </div>
+    ),
+  },
+  {
+    id: 1,
+    name: "Claims Processor",
+    designation: "Automated Processing",
+    content: (
+      <div className="flex flex-col items-center justify-center h-full">
+        <div className="text-6xl md:text-7xl lg:text-8xl font-bold mb-4 bg-gradient-to-r from-rose-400 to-rose-600 bg-clip-text text-transparent">
+          85%
+        </div>
+        <p className="text-lg md:text-xl text-center text-white/80">
+          Reduction in manual processing time<br/>with enhanced accuracy
+        </p>
+      </div>
+    ),
+  },
+  {
+    id: 2,
+    name: "Customer Service",
+    designation: "Support Enhancement",
+    content: (
+      <div className="flex flex-col items-center justify-center h-full">
+        <div className="text-6xl md:text-7xl lg:text-8xl font-bold mb-4 bg-gradient-to-r from-purple-400 to-purple-600 bg-clip-text text-transparent">
+          92%
+        </div>
+        <p className="text-lg md:text-xl text-center text-white/80">
+          Client satisfaction rate with<br/>AI-powered assistance
+        </p>
+      </div>
+    ),
+  },
+];
+
 // Main Component
-const GlassmorphicMetrics = () => {
+const GlassmorphicCardStack = () => {
   const titleTexts = [
     "Your Donna",
     "Your Jarvis",
@@ -199,26 +288,23 @@ const GlassmorphicMetrics = () => {
   
   return (
     <BackgroundGradientAnimation>
-      <div className="relative z-50 mx-auto max-w-4xl px-6 py-20">
-        <MorphingTitle texts={titleTexts} />
-        
-        <p className="mx-auto mb-12 mt-4 max-w-2xl text-center text-lg text-white/60">
-          Revolutionizing claims processing with AI-powered intelligence and real-time analytics
-        </p>
-        
-        <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4">
-          {metrics.map((metric, index) => (
-            <GlassmorphicCard
-              key={index}
-              icon={metric.icon}
-              value={metric.value}
-              label={metric.label}
-            />
-          ))}
+      <div className="relative z-50 w-full h-full flex flex-col items-center justify-center">
+        <div className="w-full max-w-4xl px-6">
+          <div className="flex flex-col items-center gap-8">
+            <MorphingTitle texts={titleTexts} />
+            
+            <p className="text-center text-lg text-white/60 max-w-2xl mt-8">
+              Revolutionizing claims processing with AI-powered intelligence and real-time analytics
+            </p>
+            
+            <div className="mt-8">
+              <CardStack items={CARDS} />
+            </div>
+          </div>
         </div>
       </div>
     </BackgroundGradientAnimation>
   );
 };
 
-export default GlassmorphicMetrics;
+export default GlassmorphicCardStack;
