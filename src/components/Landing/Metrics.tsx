@@ -26,7 +26,7 @@ const dummyContent = [
     ),
     badge: "Intelligence",
     overlayWord: "Automated",
-    imageUrl: "/api/placeholder/800/600"
+    imageUrl: "images/1.jpeg" // Update with your actual image path
   },
   {
     title: "Time: The Ultimate Resource",
@@ -44,7 +44,7 @@ const dummyContent = [
     ),
     badge: "Efficiency",
     overlayWord: "Personalized",
-    imageUrl: "/api/placeholder/800/600"
+    imageUrl: "/images2.jpg" // Update with your actual image path
   },
   {
     title: "The Art of Digital Empathy",
@@ -60,7 +60,7 @@ const dummyContent = [
     ),
     badge: "Experience",
     overlayWord: "Intelligence",
-    imageUrl: "/api/placeholder/800/600"
+    imageUrl: "/images/3.jpeg" // Update with your actual image path
   },
 ];
 
