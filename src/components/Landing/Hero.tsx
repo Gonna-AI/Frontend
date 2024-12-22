@@ -330,14 +330,10 @@ const Hero = ({ onGetStarted, onJoinWaitlist }: HeroProps) => {
           className="flex items-center justify-center space-x-6"
         >
           <RainbowButton onClick={onGetStarted}>
-            <span className="text-lg font-semibold text-white">Get Started</span>
+            <span className="text-lg font-semibold text-white">Learn More</span>
             <Zap className="w-5 h-5 text-white" />
           </RainbowButton>
           
-          <InteractiveHoverButton 
-            text="Join Waitlist" 
-            onClick={onJoinWaitlist}
-          />
         </motion.div>
 
         <motion.div
