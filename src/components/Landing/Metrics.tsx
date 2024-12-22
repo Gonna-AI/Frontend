@@ -26,7 +26,7 @@ const dummyContent = [
     ),
     badge: "Intelligence",
     overlayWord: "Automated",
-    backgroundImage: "https://imgur.com/q5YOow1.jpg"
+    imageUrl: "/api/placeholder/800/600"
   },
   {
     title: "Time: The Ultimate Resource",
@@ -44,7 +44,7 @@ const dummyContent = [
     ),
     badge: "Efficiency",
     overlayWord: "Personalized",
-    backgroundImage: "https://imgur.com/mfXXse1.jpg"
+    imageUrl: "/api/placeholder/800/600"
   },
   {
     title: "The Art of Digital Empathy",
@@ -60,7 +60,7 @@ const dummyContent = [
     ),
     badge: "Experience",
     overlayWord: "Intelligence",
-    backgroundImage: "https://i.imgur.com/dpZ8Nyz.jpg"
+    imageUrl: "/api/placeholder/800/600"
   },
 ];
 
@@ -91,16 +91,15 @@ const GradientCard = ({ item }) => {
 
       <div className="text-sm prose prose-sm dark:prose-invert">
         <div className="relative h-48 sm:h-56 md:h-64 rounded-2xl mb-10 overflow-hidden">
-          {/* Background Image */}
-          <div 
-            className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-            style={{
-              backgroundImage: `url(${item.backgroundImage})`,
-            }}
+          {/* Image Background */}
+          <img 
+            src={item.imageUrl}
+            alt={item.title}
+            className="absolute inset-0 w-full h-full object-cover"
           />
           
-          {/* Glass Text */}
-          <div className="absolute inset-0 flex items-center justify-center">
+          {/* Glass Text Overlay */}
+          <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-40">
             <h3 className="text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-bold tracking-wider text-center glass-text"
                 style={{
                   fontFamily: "'Bebas Neue', sans-serif",
