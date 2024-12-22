@@ -1,121 +1,13 @@
-import React, { useEffect, useRef, useState } from "react";
-import { motion, useTransform, useScroll, useSpring } from "framer-motion";
+import React from "react";
+import { motion } from "framer-motion";
 
 const cn = (...classes) => classes.filter(Boolean).join(" ");
 
-const TracingBeam = ({
-  children,
-  className,
-}) => {
-  const ref = useRef(null);
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: ["start start", "end start"],
-  });
-
-  const contentRef = useRef(null);
-  const [svgHeight, setSvgHeight] = useState(0);
-
-  useEffect(() => {
-    if (contentRef.current) {
-      setSvgHeight(contentRef.current.offsetHeight);
-    }
-  }, []);
-
-  const y1 = useSpring(
-    useTransform(scrollYProgress, [0, 0.8], [50, svgHeight]),
-    {
-      stiffness: 500,
-      damping: 90,
-    }
-  );
-  const y2 = useSpring(
-    useTransform(scrollYProgress, [0, 1], [50, svgHeight - 400]),
-    {
-      stiffness: 500,
-      damping: 90,
-    }
-  );
-
+const SmoothContent = ({ children, className }) => {
   return (
-    <motion.div
-      ref={ref}
-      className={cn("relative w-full max-w-4xl mx-auto h-full", className)}
-    >
-      <div className="absolute -left-4 md:-left-20 top-3">
-        <motion.div
-          transition={{
-            duration: 0.2,
-            delay: 0.5,
-          }}
-          animate={{
-            boxShadow:
-              scrollYProgress.get() > 0
-                ? "none"
-                : "rgba(0, 0, 0, 0.24) 0px 3px 8px",
-          }}
-          className="ml-[27px] h-4 w-4 rounded-full border border-neutral-200 shadow-sm flex items-center justify-center"
-        >
-          <motion.div
-            transition={{
-              duration: 0.2,
-              delay: 0.5,
-            }}
-            animate={{
-              backgroundColor:
-                scrollYProgress.get() > 0 ? "white" : "rgb(16 185 129)",
-              borderColor:
-                scrollYProgress.get() > 0 ? "white" : "rgb(5 150 105)",
-            }}
-            className="h-2 w-2 rounded-full border border-neutral-300 bg-white"
-          />
-        </motion.div>
-        <svg
-          viewBox={`0 0 20 ${svgHeight}`}
-          width="20"
-          height={svgHeight}
-          className="ml-4 block"
-          aria-hidden="true"
-        >
-          <motion.path
-            d={`M 1 0V -36 l 18 24 V ${svgHeight * 0.9} l -18 24V ${svgHeight}`}
-            fill="none"
-            stroke="#9091A0"
-            strokeOpacity="0.16"
-            strokeWidth="1.5"
-            transition={{
-              duration: 10,
-            }}
-          />
-          <motion.path
-            d={`M 1 0V -36 l 18 24 V ${svgHeight * 0.9} l -18 24V ${svgHeight}`}
-            fill="none"
-            stroke="url(#gradient)"
-            strokeWidth="1.5"
-            className="motion-reduce:hidden"
-            transition={{
-              duration: 10,
-            }}
-          />
-          <defs>
-            <motion.linearGradient
-              id="gradient"
-              gradientUnits="userSpaceOnUse"
-              x1="0"
-              x2="0"
-              y1={y1}
-              y2={y2}
-            >
-              <stop stopColor="#18CCFC" stopOpacity="0" />
-              <stop stopColor="#18CCFC" />
-              <stop offset="0.325" stopColor="#6344F5" />
-              <stop offset="1" stopColor="#AE48FF" stopOpacity="0" />
-            </motion.linearGradient>
-          </defs>
-        </svg>
-      </div>
-      <div ref={contentRef}>{children}</div>
-    </motion.div>
+    <div className={cn("relative w-full max-w-4xl mx-auto h-full", className)}>
+      <div>{children}</div>
+    </div>
   );
 };
 
@@ -125,15 +17,19 @@ const dummyContent = [
     description: (
       <>
         <p className="mb-4">
-        As Marcus Aurelius taught us, 'The universe is change; our life is what our thoughts make it.' Our AI solution embodies this principle by transforming complex claims processing into clear, manageable actions.
+          As Marcus Aurelius taught us, 'The universe is change; our life is what our thoughts make it.' Our AI solution embodies this principle by transforming complex claims processing into clear, manageable actions.
         </p>
         <p>
-        Like a stoic mind that remains unperturbed in chaos, our system brings order to overwhelming workloads, automatically prioritizing and scheduling tasks with unwavering logic and precision.
+          Like a stoic mind that remains unperturbed in chaos, our system brings order to overwhelming workloads, automatically prioritizing and scheduling tasks with unwavering logic and precision.
         </p>
       </>
     ),
     badge: "Intelligence",
-    image: "src/api/placeholder/image6.png"
+    overlayWord: "Adaptive.",
+    gradientColors: {
+      primary: "from-[#E0F7FF] via-[#B3E5FC] to-[#81D4FA]",
+      accent: "from-[#B3E5FC] via-[#4FC3F7] to-[#29B6F6]"
+    }
   },
   {
     title: "Time: The Ultimate Resource",
@@ -150,50 +46,143 @@ const dummyContent = [
       </>
     ),
     badge: "Efficiency",
-    image: "src/api/placeholder/image10.jpeg"
+    overlayWord: "Streamlined.",
+    gradientColors: {
+      primary: "from-[#E0F2F1] via-[#B2DFDB] to-[#80CBC4]",
+      accent: "from-[#B2DFDB] via-[#4DB6AC] to-[#26A69A]"
+    }
   },
   {
     title: "The Art of Digital Empathy",
     description: (
       <>
         <p className="mb-4">
-        Epictetus said, 'It's not what happens to you, but how you react to it that matters.' Our sentiment analysis technology embodies this principle by understanding not just what clients say, but how they feel.        </p>
+          Epictetus said, 'It's not what happens to you, but how you react to it that matters.' Our sentiment analysis technology embodies this principle by understanding not just what clients say, but how they feel.
+        </p>
         <p>
-        By combining stoic rationality with emotional intelligence, we create a system that maintains composure under pressure while delivering deeply empathetic service. The result is a transformed claims experience that honors both efficiency and humanity.        </p>
+          By combining stoic rationality with emotional intelligence, we create a system that maintains composure under pressure while delivering deeply empathetic service. The result is a transformed claims experience that honors both efficiency and humanity.
+        </p>
       </>
     ),
     badge: "Experience",
-    image: "src/api/placeholder/image15.png"
+    overlayWord: "automation.",
+    gradientColors: {
+      primary: "from-[#EDE7F6] via-[#D1C4E9] to-[#B39DDB]",
+      accent: "from-[#D1C4E9] via-[#9575CD] to-[#7E57C2]"
+    }
   },
 ];
 
-export default function TracingBeamDemo() {
+const GradientCard = ({ item }) => {
+  return (
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.5 }}
+      className="mb-16"
+    >
+      <div className="flex items-center gap-2 mb-4">
+        <div className="bg-white rounded-full text-black text-sm px-4 py-1">
+          {item.badge}
+        </div>
+      </div>
+
+      <p className="text-xl mb-4 font-semibold">
+        {item.title}
+      </p>
+
+      <div className="text-sm prose prose-sm dark:prose-invert">
+        <div className="relative h-64 rounded-2xl mb-10 overflow-hidden">
+          {/* Base white layer */}
+          <div className="absolute inset-0 bg-white/5" />
+          
+          {/* Luminous gradient layers */}
+          <div className="absolute inset-0">
+            {/* Soft base gradient */}
+            <div className={cn(
+              "absolute inset-0 bg-gradient-to-br",
+              item.gradientColors.primary,
+              "animate-pulse-slow opacity-70"
+            )} />
+            
+            {/* Glowing accent layer */}
+            <div className={cn(
+              "absolute inset-0 bg-gradient-to-br",
+              item.gradientColors.accent,
+              "animate-glow-fast opacity-40"
+            )} />
+
+            {/* Light rays effect */}
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,_var(--tw-gradient-stops))] from-white/20 via-transparent to-transparent animate-light-rays" />
+
+            {/* Subtle glass effect */}
+            <div className="absolute inset-0 backdrop-blur-[1px]" />
+          </div>
+
+          {/* Typography */}
+          <div className="absolute inset-0 flex items-center justify-center">
+            <h3 className="text-8xl font-bold tracking-wider text-center"
+                style={{
+                  fontFamily: "'Bebas Neue', sans-serif",
+                }}>
+              <span className="text-white/90 mix-blend-overlay">
+                {item.overlayWord}
+              </span>
+            </h3>
+          </div>
+        </div>
+        {item.description}
+      </div>
+    </motion.div>
+  );
+};
+
+export default function SmoothContentDemo() {
   return (
     <div className="min-h-screen bg-[rgb(10,10,10)] text-white py-20">
-      <TracingBeam className="px-6">
+      <style jsx global>{`
+        @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap');
+        
+        @keyframes pulse-slow {
+          0%, 100% { opacity: 0.7; transform: scale(1); }
+          50% { opacity: 0.4; transform: scale(1.02); }
+        }
+        
+        @keyframes glow-fast {
+          0%, 100% { opacity: 0.4; transform: scale(1.1); }
+          25% { opacity: 0.2; transform: scale(1.15) translateY(-1%); }
+          50% { opacity: 0.5; transform: scale(1.1) translateY(1%); }
+          75% { opacity: 0.3; transform: scale(1.12) translateY(-0.5%); }
+        }
+
+        @keyframes light-rays {
+          0% { opacity: 0.2; transform: scale(1) rotate(0deg); }
+          25% { opacity: 0.3; transform: scale(1.1) rotate(90deg); }
+          50% { opacity: 0.4; transform: scale(1.2) rotate(180deg); }
+          75% { opacity: 0.3; transform: scale(1.1) rotate(270deg); }
+          100% { opacity: 0.2; transform: scale(1) rotate(360deg); }
+        }
+        
+        .animate-pulse-slow {
+          animation: pulse-slow 6s ease-in-out infinite;
+        }
+        
+        .animate-glow-fast {
+          animation: glow-fast 8s ease-in-out infinite;
+        }
+
+        .animate-light-rays {
+          animation: light-rays 12s linear infinite;
+        }
+      `}</style>
+      <SmoothContent className="px-6">
         <div className="max-w-2xl mx-auto antialiased pt-4 relative">
           {dummyContent.map((item, index) => (
-            <div key={`content-${index}`} className="mb-10">
-              <h2 className="bg-white text-black rounded-full text-sm w-fit px-4 py-1 mb-4">
-                {item.badge}
-              </h2>
-
-              <p className="text-xl mb-4 font-semibold">
-                {item.title}
-              </p>
-
-              <div className="text-sm prose prose-sm dark:prose-invert">
-                <img
-                  src={item.image}
-                  alt={`${item.title} thumbnail`}
-                  className="rounded-lg mb-10 object-cover w-full h-64"
-                />
-                {item.description}
-              </div>
-            </div>
+            <GradientCard key={`content-${index}`} item={item} />
           ))}
         </div>
-      </TracingBeam>
+      </SmoothContent>
     </div>
   );
 }
