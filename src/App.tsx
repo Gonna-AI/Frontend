@@ -62,7 +62,7 @@ function App() {
         isDark ? (
           "bg-gradient-to-b from-purple-500/20 via-blue-500/10 to-transparent"
         ) : (
-          "bg-gradient-to-b from-blue-100/50 via-purple-100/30 to-transparent"
+          "bg-gradient-to-b from-blue-900/40 via-purple-200/30 to-transparent"
         )
       )} />
 
