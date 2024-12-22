@@ -41,10 +41,10 @@ const dummyContent = [
           but when there is nothing left to take away.
         </p>
       </>
-    ),
+    ),  
     badge: "Efficiency",
     overlayWord: "Personalized",
-    imageUrl: "/images/2.jpg" // Update with your actual image path
+    imageUrl: "images/2.jpeg" // Update with your actual image path
   },
   {
     title: "The Art of Digital Empathy",
