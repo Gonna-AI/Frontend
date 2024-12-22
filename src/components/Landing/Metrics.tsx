@@ -26,7 +26,7 @@ const dummyContent = [
     ),
     badge: "Intelligence",
     overlayWord: "Automated",
-    imageUrl: "images/1.jpeg" // Update with your actual image path
+    imageUrl: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80&w=1200"
   },
   {
     title: "Time: The Ultimate Resource",
@@ -44,7 +44,7 @@ const dummyContent = [
     ),  
     badge: "Efficiency",
     overlayWord: "Personalized",
-    imageUrl: "images/2.jpeg" // Update with your actual image path
+    imageUrl: "https://images.unsplash.com/photo-1516110833967-0b5716ca1387?auto=format&fit=crop&q=80&w=1200"
   },
   {
     title: "The Art of Digital Empathy",
@@ -60,7 +60,7 @@ const dummyContent = [
     ),
     badge: "Experience",
     overlayWord: "Intelligence",
-    imageUrl: "/images/3.jpeg" // Update with your actual image path
+    imageUrl: "https://images.unsplash.com/photo-1507413245164-6160d8298b31?auto=format&fit=crop&q=80&w=1200"
   },
 ];
 
@@ -85,21 +85,22 @@ const GradientCard = ({ item }) => {
         </div>
       </div>
 
-      <p className="text-xl mb-4 font-semibold">
+      <p className="text-xl mb-4 font-semibold text-white">
         {item.title}
       </p>
 
-      <div className="text-sm prose prose-sm dark:prose-invert">
+      <div className="text-sm prose prose-sm dark:prose-invert prose-p:text-gray-200">
         <div className="relative h-48 sm:h-56 md:h-64 rounded-2xl mb-10 overflow-hidden">
           {/* Image Background */}
           <img 
             src={item.imageUrl}
             alt={item.title}
             className="absolute inset-0 w-full h-full object-cover"
+            loading="eager"
           />
           
           {/* Glass Text Overlay */}
-          <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-40">
+          <div className="absolute inset-0 flex items-center justify-center">
             <h3 className="text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-bold tracking-wider text-center glass-text"
                 style={{
                   fontFamily: "'Bebas Neue', sans-serif",
@@ -121,22 +122,9 @@ export default function SmoothContentDemo() {
         @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap');
         
         .glass-text {
-          background: linear-gradient(
-            135deg,
-            rgba(255, 255, 255, 0.9) 0%,
-            rgba(255, 255, 255, 0.7) 50%,
-            rgba(255, 255, 255, 0.8) 100%
-          );
-          -webkit-background-clip: text;
-          background-clip: text;
-          color: transparent;
-          text-shadow: 
-            0 0 10px rgba(255, 255, 255, 0.5),
-            0 0 20px rgba(255, 255, 255, 0.3),
-            0 0 30px rgba(255, 255, 255, 0.2);
+          color: white;
+          text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
           letter-spacing: 0.05em;
-          filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.6));
-          mix-blend-mode: overlay;
           font-weight: 700;
         }
       `}</style>
