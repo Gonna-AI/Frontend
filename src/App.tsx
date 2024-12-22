@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Header from './components/Layout/Header';
 import Sidebar from './components/Layout/Sidebar';
 import Landing from './components/Landing';
-import { Dashboard, AISettings, ComingSoon } from './components/Views';
+import { Dashboard, AISettings, Profile, Billing, Settings } from './components/Views';
 import { useTheme } from './hooks/useTheme';
 import { cn } from './utils/cn';
 import { ViewType } from './types/navigation';
@@ -12,6 +12,11 @@ function App() {
   const [isSignedIn, setIsSignedIn] = useState(true);
   const [currentView, setCurrentView] = useState<ViewType>('dashboard');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  // Initialize theme class on mount
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', isDark);
+  }, []);
 
   const handleSignOut = () => {
     setIsSignedIn(false);
@@ -28,11 +33,11 @@ function App() {
       case 'ai-settings':
         return <AISettings />;
       case 'profile':
-        return <ComingSoon feature="User Profile" />;
+        return <Profile />;
       case 'billing':
-        return <ComingSoon feature="Billing Management" />;
+        return <Billing />;
       case 'settings':
-        return <ComingSoon feature="System Settings" />;
+        return <Settings />;
       default:
         return <Dashboard />;
     }
@@ -44,11 +49,23 @@ function App() {
 
   return (
     <div className={cn(
-      "min-h-screen transition-colors duration-200",
-      isDark 
-        ? "bg-gradient-to-br from-gray-900 via-black to-gray-900" 
-        : "bg-gradient-to-br from-gray-100 via-white to-gray-100"
+      "min-h-screen transition-colors duration-500",
+      isDark ? (
+        "bg-gradient-to-b from-gray-900 to-black"
+      ) : (
+        "bg-gradient-to-b from-gray-50 to-white"
+      )
     )}>
+      {/* Top gradient decoration */}
+      <div className={cn(
+        "fixed top-0 left-0 right-0 h-[40vh] pointer-events-none",
+        isDark ? (
+          "bg-gradient-to-b from-purple-500/20 via-blue-500/10 to-transparent"
+        ) : (
+          "bg-gradient-to-b from-blue-100/50 via-purple-100/30 to-transparent"
+        )
+      )} />
+
       <Header onMobileMenuClick={() => setIsMobileMenuOpen(true)} />
       <Sidebar 
         currentView={currentView} 
@@ -57,7 +74,7 @@ function App() {
         isOpen={isMobileMenuOpen}
         onClose={() => setIsMobileMenuOpen(false)}
       />
-      <main className="md:pr-20 overflow-y-auto h-[calc(100vh-3rem)] md:h-[calc(100vh-4rem)]">
+      <main className="relative z-10 md:pr-20 overflow-y-auto h-[calc(100vh-3rem)] md:h-[calc(100vh-4rem)]">
         {renderView()}
       </main>
     </div>
