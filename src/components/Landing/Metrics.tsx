@@ -25,7 +25,7 @@ const dummyContent = [
       </>
     ),
     badge: "Intelligence",
-    overlayWord: "Adaptive.",
+    overlayWord: "INNOVATE",
     gradientColors: {
       primary: "from-[#E0F7FF] via-[#B3E5FC] to-[#81D4FA]",
       accent: "from-[#B3E5FC] via-[#4FC3F7] to-[#29B6F6]"
@@ -46,7 +46,7 @@ const dummyContent = [
       </>
     ),
     badge: "Efficiency",
-    overlayWord: "Streamlined.",
+    overlayWord: "TRANSFORM",
     gradientColors: {
       primary: "from-[#E0F2F1] via-[#B2DFDB] to-[#80CBC4]",
       accent: "from-[#B2DFDB] via-[#4DB6AC] to-[#26A69A]"
@@ -65,7 +65,7 @@ const dummyContent = [
       </>
     ),
     badge: "Experience",
-    overlayWord: "automation.",
+    overlayWord: "DISRUPT",
     gradientColors: {
       primary: "from-[#EDE7F6] via-[#D1C4E9] to-[#B39DDB]",
       accent: "from-[#D1C4E9] via-[#9575CD] to-[#7E57C2]"
@@ -93,7 +93,7 @@ const GradientCard = ({ item }) => {
       </p>
 
       <div className="text-sm prose prose-sm dark:prose-invert">
-        <div className="relative h-64 rounded-2xl mb-10 overflow-hidden">
+        <div className="relative h-48 sm:h-56 md:h-64 rounded-2xl mb-10 overflow-hidden">
           {/* Base white layer */}
           <div className="absolute inset-0 bg-white/5" />
           
@@ -122,7 +122,7 @@ const GradientCard = ({ item }) => {
 
           {/* Typography */}
           <div className="absolute inset-0 flex items-center justify-center">
-            <h3 className="text-8xl font-bold tracking-wider text-center"
+            <h3 className="text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-bold tracking-wider text-center"
                 style={{
                   fontFamily: "'Bebas Neue', sans-serif",
                 }}>
