@@ -191,7 +191,7 @@ const EnhancedAnimation = () => {
             <VelocityScroll 
               text="Gonna.ai"
               default_velocity={5}
-              className="font-display text-center text-3xl font-bold tracking-[-0.02em] text-white drop-shadow-sm md:text-5xl md:leading-[4rem] mb-4"
+              className="font-display text-center text-3xl font-bold tracking-[-0.02em] text-white drop-shadow-sm md:text-5xl md:leading-[4rem] mb-4 overflow-hidden"
             />
             
             <p className="text-center text-sm md:text-base text-white/60 max-w-2xl mb-8">
