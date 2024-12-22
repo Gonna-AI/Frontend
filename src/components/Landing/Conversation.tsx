@@ -152,7 +152,7 @@ const WaitlistForm = () => {
             type="email"
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
-            placeholder="hi@manuarora.in"
+            placeholder="hi@animeshmishra0567@gmail.com"
             className="w-full px-4 py-2 text-white bg-white/10 rounded-lg backdrop-blur-sm border border-white/20 focus:outline-none focus:ring-2 focus:ring-white/50"
             required
           />
