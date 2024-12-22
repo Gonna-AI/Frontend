@@ -44,7 +44,7 @@ const dummyContent = [
     ),
     badge: "Efficiency",
     overlayWord: "Personalized",
-    imageUrl: "/images2.jpg" // Update with your actual image path
+    imageUrl: "/images/2.jpg" // Update with your actual image path
   },
   {
     title: "The Art of Digital Empathy",
