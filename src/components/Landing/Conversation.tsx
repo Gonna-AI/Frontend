@@ -175,11 +175,7 @@ export const WaitlistWithBeams = () => {
           Join the waitlist
         </h1>
         <p className="mt-4 font-normal text-base text-neutral-300 max-w-lg text-center">
-          Welcome to MailJet, the best transactional email service on the web.
-          We provide reliable, scalable, and customizable email solutions for
-          your business. Whether you're sending order confirmations,
-          password reset emails, or promotional campaigns, MailJet has got you
-          covered.
+        Be among the first to experience how gonna.ai is revolutionizing claims processing. Our AI-powered platform is designed to make claims handling smarter, faster, and more human.
         </p>
         <div className="mt-8 w-full">
           <WaitlistForm />
