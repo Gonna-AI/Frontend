@@ -25,11 +25,8 @@ const dummyContent = [
       </>
     ),
     badge: "Intelligence",
-    overlayWord: "INNOVATE",
-    gradientColors: {
-      primary: "from-[#E0F7FF] via-[#B3E5FC] to-[#81D4FA]",
-      accent: "from-[#B3E5FC] via-[#4FC3F7] to-[#29B6F6]"
-    }
+    overlayWord: "Automated",
+    backgroundImage: "https://imgur.com/q5YOow1.jpg"
   },
   {
     title: "Time: The Ultimate Resource",
@@ -46,11 +43,8 @@ const dummyContent = [
       </>
     ),
     badge: "Efficiency",
-    overlayWord: "TRANSFORM",
-    gradientColors: {
-      primary: "from-[#E0F2F1] via-[#B2DFDB] to-[#80CBC4]",
-      accent: "from-[#B2DFDB] via-[#4DB6AC] to-[#26A69A]"
-    }
+    overlayWord: "Personalized",
+    backgroundImage: "https://imgur.com/mfXXse1.jpg"
   },
   {
     title: "The Art of Digital Empathy",
@@ -65,11 +59,8 @@ const dummyContent = [
       </>
     ),
     badge: "Experience",
-    overlayWord: "DISRUPT",
-    gradientColors: {
-      primary: "from-[#EDE7F6] via-[#D1C4E9] to-[#B39DDB]",
-      accent: "from-[#D1C4E9] via-[#9575CD] to-[#7E57C2]"
-    }
+    overlayWord: "Intelligence",
+    backgroundImage: "https://i.imgur.com/dpZ8Nyz.jpg"
   },
 ];
 
@@ -77,9 +68,15 @@ const GradientCard = ({ item }) => {
   return (
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ duration: 0.5 }}
+      whileInView={{ 
+        opacity: 1, 
+        y: 0,
+        transition: {
+          duration: 0.6,
+          ease: [0.23, 1, 0.32, 1]
+        }
+      }}
+      viewport={{ once: true, margin: "-100px" }}
       className="mb-16"
     >
       <div className="flex items-center gap-2 mb-4">
@@ -94,41 +91,21 @@ const GradientCard = ({ item }) => {
 
       <div className="text-sm prose prose-sm dark:prose-invert">
         <div className="relative h-48 sm:h-56 md:h-64 rounded-2xl mb-10 overflow-hidden">
-          {/* Base white layer */}
-          <div className="absolute inset-0 bg-white/5" />
+          {/* Background Image */}
+          <div 
+            className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+            style={{
+              backgroundImage: `url(${item.backgroundImage})`,
+            }}
+          />
           
-          {/* Luminous gradient layers */}
-          <div className="absolute inset-0">
-            {/* Soft base gradient */}
-            <div className={cn(
-              "absolute inset-0 bg-gradient-to-br",
-              item.gradientColors.primary,
-              "animate-pulse-slow opacity-70"
-            )} />
-            
-            {/* Glowing accent layer */}
-            <div className={cn(
-              "absolute inset-0 bg-gradient-to-br",
-              item.gradientColors.accent,
-              "animate-glow-fast opacity-40"
-            )} />
-
-            {/* Light rays effect */}
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,_var(--tw-gradient-stops))] from-white/20 via-transparent to-transparent animate-light-rays" />
-
-            {/* Subtle glass effect */}
-            <div className="absolute inset-0 backdrop-blur-[1px]" />
-          </div>
-
-          {/* Typography */}
+          {/* Glass Text */}
           <div className="absolute inset-0 flex items-center justify-center">
-            <h3 className="text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-bold tracking-wider text-center"
+            <h3 className="text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-bold tracking-wider text-center glass-text"
                 style={{
                   fontFamily: "'Bebas Neue', sans-serif",
                 }}>
-              <span className="text-white/90 mix-blend-overlay">
-                {item.overlayWord}
-              </span>
+              {item.overlayWord}
             </h3>
           </div>
         </div>
@@ -144,36 +121,24 @@ export default function SmoothContentDemo() {
       <style jsx global>{`
         @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap');
         
-        @keyframes pulse-slow {
-          0%, 100% { opacity: 0.7; transform: scale(1); }
-          50% { opacity: 0.4; transform: scale(1.02); }
-        }
-        
-        @keyframes glow-fast {
-          0%, 100% { opacity: 0.4; transform: scale(1.1); }
-          25% { opacity: 0.2; transform: scale(1.15) translateY(-1%); }
-          50% { opacity: 0.5; transform: scale(1.1) translateY(1%); }
-          75% { opacity: 0.3; transform: scale(1.12) translateY(-0.5%); }
-        }
-
-        @keyframes light-rays {
-          0% { opacity: 0.2; transform: scale(1) rotate(0deg); }
-          25% { opacity: 0.3; transform: scale(1.1) rotate(90deg); }
-          50% { opacity: 0.4; transform: scale(1.2) rotate(180deg); }
-          75% { opacity: 0.3; transform: scale(1.1) rotate(270deg); }
-          100% { opacity: 0.2; transform: scale(1) rotate(360deg); }
-        }
-        
-        .animate-pulse-slow {
-          animation: pulse-slow 6s ease-in-out infinite;
-        }
-        
-        .animate-glow-fast {
-          animation: glow-fast 8s ease-in-out infinite;
-        }
-
-        .animate-light-rays {
-          animation: light-rays 12s linear infinite;
+        .glass-text {
+          background: linear-gradient(
+            135deg,
+            rgba(255, 255, 255, 0.9) 0%,
+            rgba(255, 255, 255, 0.7) 50%,
+            rgba(255, 255, 255, 0.8) 100%
+          );
+          -webkit-background-clip: text;
+          background-clip: text;
+          color: transparent;
+          text-shadow: 
+            0 0 10px rgba(255, 255, 255, 0.5),
+            0 0 20px rgba(255, 255, 255, 0.3),
+            0 0 30px rgba(255, 255, 255, 0.2);
+          letter-spacing: 0.05em;
+          filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.6));
+          mix-blend-mode: overlay;
+          font-weight: 700;
         }
       `}</style>
       <SmoothContent className="px-6">
