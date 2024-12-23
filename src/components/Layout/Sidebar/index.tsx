@@ -9,6 +9,7 @@ interface SidebarProps {
   onSignOut: () => void;
   isOpen: boolean;
   onClose: () => void;
+  onExpandedChange: (expanded: boolean) => void;
 }
 
 export default function Sidebar({
@@ -16,9 +17,15 @@ export default function Sidebar({
   onViewChange,
   onSignOut,
   isOpen,
-  onClose
+  onClose,
+  onExpandedChange
 }: SidebarProps) {
   const [isExpanded, setIsExpanded] = useState(false);
+
+  const handleExpanded = (expanded: boolean) => {
+    setIsExpanded(expanded);
+    onExpandedChange(expanded);
+  };
 
   return (
     <>
@@ -27,7 +34,7 @@ export default function Sidebar({
         onViewChange={onViewChange}
         onSignOut={onSignOut}
         isExpanded={isExpanded}
-        setIsExpanded={setIsExpanded}
+        setIsExpanded={handleExpanded}
       />
       <MobileSidebar
         currentView={currentView}

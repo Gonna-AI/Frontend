@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from 'react';
-import { Sparkles, Menu } from 'lucide-react';
+import { Menu } from 'lucide-react';
 import DatePicker from '../DatePicker';
 import { cn } from '../../utils/cn';
 import { useTheme } from '../../hooks/useTheme';
@@ -33,20 +33,15 @@ export default function Header({ onMobileMenuClick }: HeaderProps) {
           : "bg-white/60",
         "border-b border-white/5",
         "backdrop-blur-[6px]",
-        "shadow-sm",
-        "relative",
-        "after:absolute after:top-0 after:left-0 after:w-1/4 after:h-full",
-        isDark 
-          ? "after:bg-gradient-to-r after:from-blue-500/10 after:to-transparent"
-          : "after:bg-gradient-to-r after:from-blue-200/15 after:to-transparent",
+        "shadow-sm"
       )}>
         <div className="flex items-center justify-between w-full relative z-10">
-          {/* Left: Mobile Menu Button (mobile only) and Logo */}
-          <div className="flex items-center space-x-4">
+          {/* Mobile: Menu Button */}
+          <div className="md:hidden">
             <button
               onClick={onMobileMenuClick}
               className={cn(
-                "md:hidden p-3 rounded-lg transition-colors",
+                "p-3 rounded-lg transition-colors",
                 "bg-white/5 hover:bg-white/10 backdrop-blur-sm",
                 "relative overflow-hidden",
                 isDark ? "text-white" : "text-gray-800"
@@ -54,19 +49,22 @@ export default function Header({ onMobileMenuClick }: HeaderProps) {
             >
               <Menu className="w-6 h-6 relative z-10" />
             </button>
-            <div className="flex items-center space-x-2">
-              <span className={cn(
-                "text-xl md:text-2xl font-bold",
-                "bg-clip-text text-transparent bg-gradient-to-r",
-                "from-blue-400 to-purple-400"
-              )}>
-                AI
-              </span>
-              <Sparkles className="w-4 h-4 md:w-5 md:h-5 text-blue-400" />
-            </div>
           </div>
 
-          {/* Center: Clock */}
+          {/* Desktop: Logo */}
+          <div className="hidden md:flex items-center space-x-2">
+            <span className={cn(
+              "text-xl md:text-2xl font-bold",
+              isDark ? "text-white" : "text-black"
+            )}>
+              gonna.ai
+            </span>
+          </div>
+
+          {/* Mobile: Empty space */}
+          <div className="flex-1 md:hidden" />
+
+          {/* Clock (both mobile and desktop) */}
           <div
             onClick={() => setShowCalendar(!showCalendar)}
             className={cn(
@@ -87,14 +85,12 @@ export default function Header({ onMobileMenuClick }: HeaderProps) {
               })}
             </span>
           </div>
-
-          {/* Right: Placeholder for future elements */}
-          <div className="w-10 md:w-20"></div>
         </div>
       </header>
 
+      {/* Calendar Modal */}
       {showCalendar && (
-        <div className="fixed inset-0 flex items-start justify-center pt-20 md:pt-24 z-[100]">
+        <div className="fixed inset-0 z-[100]">
           <div
             className={cn(
               "fixed inset-0",
@@ -102,16 +98,40 @@ export default function Header({ onMobileMenuClick }: HeaderProps) {
             )}
             onClick={() => setShowCalendar(false)}
           />
-          <div className={cn(
-            "relative rounded-xl overflow-hidden w-[90%] md:w-auto",
-            isDark 
-              ? "bg-black/80"
-              : "bg-white/80",
-            "border border-white/5",
-            "shadow-lg backdrop-blur-xl",
-            "animate-in fade-in-0 slide-in-from-top-4"
-          )}>
-            <DatePicker onClose={() => setShowCalendar(false)} />
+          
+          {/* Mobile Calendar */}
+          <div className="md:hidden">
+            <div className={cn(
+              "fixed bottom-0 left-0 right-0",
+              "animate-in slide-in-from-bottom duration-500"
+            )}>
+              <div className={cn(
+                isDark 
+                  ? "bg-black/80 border-t border-white/10" 
+                  : "bg-white/80 border-t border-black/10",
+                "backdrop-blur-xl",
+                "rounded-t-2xl",
+                "overflow-hidden"
+              )}>
+                <DatePicker onClose={() => setShowCalendar(false)} />
+              </div>
+            </div>
+          </div>
+
+          {/* Desktop Calendar */}
+          <div className="hidden md:flex items-center justify-center h-full">
+            <div className={cn(
+              "animate-in fade-in-0 slide-in-from-top-4 duration-300",
+              isDark 
+                ? "bg-black/80 border border-white/10" 
+                : "bg-white/80 border border-black/10",
+              "backdrop-blur-xl",
+              "rounded-2xl",
+              "overflow-hidden",
+              "w-[380px]"
+            )}>
+              <DatePicker onClose={() => setShowCalendar(false)} />
+            </div>
           </div>
         </div>
       )}
