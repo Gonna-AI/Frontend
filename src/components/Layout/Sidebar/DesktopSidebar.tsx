@@ -1,5 +1,4 @@
 import React from 'react';
-import { motion } from 'framer-motion';
 import { ChevronRight } from 'lucide-react';
 import { useTheme } from '../../../hooks/useTheme';
 import { cn } from '../../../utils/cn';
@@ -24,75 +23,45 @@ export default function DesktopSidebar({
   setIsExpanded
 }: DesktopSidebarProps) {
   const { isDark } = useTheme();
-  const [isHovered, setIsHovered] = React.useState(false);
-
-  const handleMouseEnter = () => {
-    setIsHovered(true);
-    setTimeout(() => {
-      if (isHovered) {
-        setIsExpanded(true);
-      }
-    }, 200); // Delay before expanding
-  };
-
-  const handleMouseLeave = () => {
-    setIsHovered(false);
-    setIsExpanded(false);
-  };
 
   return (
-    <motion.div
+    <div
       className={cn(
         "hidden md:flex fixed right-0 top-20 bottom-0 flex-col",
-        "z-40 overflow-hidden",
+        "z-40",
         isDark
           ? "bg-black/40 backdrop-blur-2xl border-l border-white/10"
           : "bg-white/40 backdrop-blur-2xl border-l border-black/10"
       )}
-      initial={false}
-      animate={{
-        width: isExpanded ? 280 : 72,
+      style={{
+        width: isExpanded ? '280px' : '72px',
+        transition: 'width 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
       }}
-      transition={{
-        duration: 0.3,
-        ease: [0.4, 0, 0.2, 1]
-      }}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
+      onMouseEnter={() => setIsExpanded(true)}
+      onMouseLeave={() => setIsExpanded(false)}
     >
-      <motion.div 
-        className="flex flex-col h-full"
-        animate={{
-          x: isExpanded ? 0 : 4,
-        }}
-        transition={{
-          duration: 0.3,
-          ease: [0.4, 0, 0.2, 1]
-        }}
-      >
-        <div className="flex-1 py-6 space-y-2 px-4 overflow-y-auto custom-scrollbar">
-          {menuItems.map((item, index) => (
-            <motion.div
+      <div className="flex flex-col h-full w-[280px]">
+        {/* Logo Section */}
+        <div className={cn(
+          "p-4 border-b transition-opacity duration-300",
+          isDark ? "border-white/10" : "border-black/10",
+          isExpanded ? "opacity-100" : "opacity-0"
+        )}>
+          <h1 className="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent whitespace-nowrap">
+            gonna.ai
+          </h1>
+        </div>
+
+        <div className="flex-1 py-6 space-y-2 px-4 overflow-hidden">
+          {menuItems.map((item) => (
+            <SidebarItem
               key={item.id}
-              initial={false}
-              animate={{
-                opacity: 1,
-                y: 0,
-              }}
-              transition={{
-                duration: 0.3,
-                delay: index * 0.05,
-                ease: [0.4, 0, 0.2, 1]
-              }}
-            >
-              <SidebarItem
-                icon={item.icon}
-                label={item.label}
-                isActive={currentView === item.id}
-                isExpanded={isExpanded}
-                onClick={() => onViewChange(item.id)}
-              />
-            </motion.div>
+              icon={item.icon}
+              label={item.label}
+              isActive={currentView === item.id}
+              isExpanded={isExpanded}
+              onClick={() => onViewChange(item.id)}
+            />
           ))}
         </div>
 
@@ -106,7 +75,7 @@ export default function DesktopSidebar({
             onClick={onSignOut}
           />
         </div>
-      </motion.div>
-    </motion.div>
+      </div>
+    </div>
   );
 }
