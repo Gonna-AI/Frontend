@@ -2,6 +2,7 @@ import React from 'react';
 import { useTheme } from '../../hooks/useTheme';
 import { useMouseGradient } from '../../hooks/useMouseGradient';
 import Hero from './Hero';
+import Features from './Features';
 import Metrics from './Metrics';
 import Conversation from './Conversation';
 import ThreeBackground from './ThreeBackground';
@@ -23,6 +24,7 @@ export default function Landing({ onGetStarted }: LandingProps) {
       />
       <div className="relative z-10">
         <Hero onGetStarted={onGetStarted} />
+        <Features />
         <Metrics />
         <Conversation />
       </div>
