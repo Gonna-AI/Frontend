@@ -3,7 +3,7 @@
 import React, { useState } from 'react'
 import { motion } from 'framer-motion'
 
-export default function FullLanding() {
+export default function Features() {
   const [activeFeature, setActiveFeature] = useState(null)
   const [activeTestimonial, setActiveTestimonial] = useState(0)
 
@@ -35,27 +35,24 @@ export default function FullLanding() {
       quote: "Gonna.AI has transformed our claims processing workflow. The efficiency gains are remarkable.",
       author: "Sarah Chen",
       role: "Operations Director",
-      company: "Technical University of Munich",
-      image: "images/image.png"
+      company: "Technical University of Munich"
     },
     {
       quote: "The AI-powered analytics have given us insights we never had before. Game-changing platform.",
       author: "Michael Rivera",
       role: "Claims Manager",
-      company: "Shiv Nadar University",
-      image: "images/image2.png"
+      company: "Shiv Nadar University"
     },
     {
       quote: "Customer satisfaction has improved significantly since implementing Gonna.AI's smart scheduling.",
       author: "Emma Thompson",
       role: "Customer Success Lead",
-      company: "Friedrich-Alexander University",
-      image: "images/image3.png"
+      company: "Friedrich-Alexander University"
     }
   ]
 
   return (
-    <main className="min-h-screen bg-[#0a0a0a] overflow-hidden">
+    <section className="py-24 bg-[rgb(10,10,10)]">
       {/* Curved decoration lines */}
       <div className="absolute inset-0 overflow-hidden">
         <svg className="w-full h-full opacity-20" viewBox="0 0 1000 1000" preserveAspectRatio="none">
@@ -222,11 +219,6 @@ export default function FullLanding() {
                       <div className="text-gray-400 text-sm">{testimonial.role}</div>
                       <div className="text-purple-400 text-sm font-mono">{testimonial.company}</div>
                     </div>
-                    <img 
-                      src={testimonial.image}
-                      alt={testimonial.company}
-                      className="h-12 w-auto opacity-80 hover:opacity-100 transition-opacity"
-                    />
                   </div>
                 </div>
               </motion.div>
@@ -247,7 +239,19 @@ export default function FullLanding() {
           </div>
         </div>
 
+        {/* Partners Section */}
+        <div className="mt-24 text-center">
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true }}
+            className="text-white/60 text-sm mb-8"
+          >
+            Used by professionals from
+          </motion.p>
+        </div>
       </div>
-    </main>
+    </section>
   )
 }
