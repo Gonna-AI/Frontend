@@ -9,11 +9,11 @@ export default function Dashboard() {
   const { isDark } = useTheme();
 
   return (
-    <div className="p-4 md:p-6 space-y-4 md:space-y-6">
-      <div className={cn(
-        "text-white",
-        isDark ? "text-white" : "text-black"
-      )}>
+    <div className={cn(
+      "p-4 md:p-6 space-y-4 md:space-y-6",
+      isDark ? "text-white" : "text-black"
+    )}>
+      <div>
         <AnalyticsCards />
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
