@@ -19,29 +19,29 @@ export default function Chart() {
     <div className={cn(
       "p-4 rounded-xl h-[400px] relative z-10",
       isDark
-        ? "bg-white/5 backdrop-blur-lg border border-white/10"
-        : "bg-black/5 backdrop-blur-lg border border-black/10"
+        ? "bg-black/40 border border-white/10 backdrop-blur-md"
+        : "bg-white/40 border border-black/10 backdrop-blur-md"
     )}>
       <h3 className={cn(
         "text-lg font-semibold mb-4",
-        isDark ? "text-white" : "text-black"
+        isDark ? "text-white/90" : "text-black"
       )}>AI Interactions</h3>
       <ResponsiveContainer width="100%" height="90%">
         <LineChart data={data} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
           <CartesianGrid 
             strokeDasharray="3 3" 
-            stroke={isDark ? "#ffffff10" : "#00000010"} 
+            stroke={isDark ? "#ffffff20" : "#00000020"} 
           />
           <XAxis 
             dataKey="name" 
-            stroke={isDark ? "#ffffff60" : "#00000060"} 
+            stroke={isDark ? "#ffffff90" : "#00000090"} 
           />
           <YAxis 
-            stroke={isDark ? "#ffffff60" : "#00000060"} 
+            stroke={isDark ? "#ffffff90" : "#00000090"} 
           />
           <Tooltip 
             contentStyle={{ 
-              backgroundColor: isDark ? '#000000' : '#ffffff',
+              backgroundColor: isDark ? 'rgba(0,0,0,0.8)' : 'rgba(255,255,255,0.8)',
               border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(0,0,0,0.1)',
               borderRadius: '8px'
             }}
