@@ -17,12 +17,7 @@ export default function DatePicker({ onClose }: DatePickerProps) {
   const { selectedDates, toggleDate } = useCalendar();
 
   return (
-    <div className={cn(
-      "p-6 rounded-xl shadow-xl w-80",
-      isDark
-        ? "bg-gradient-to-br from-white/5 via-white/10 to-white/5 backdrop-blur-xl border border-white/10"
-        : "bg-gradient-to-br from-black/5 via-black/10 to-black/5 backdrop-blur-xl border border-black/10"
-    )}>
+    <div className="p-4 md:p-6">
       <CalendarHeader
         isEditing={isEditing}
         onEditToggle={() => setIsEditing(!isEditing)}

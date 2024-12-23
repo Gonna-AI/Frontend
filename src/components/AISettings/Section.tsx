@@ -1,32 +1,36 @@
 import React from 'react';
 import { useTheme } from '../../hooks/useTheme';
 import { cn } from '../../utils/cn';
+import { LucideIcon } from 'lucide-react';
 
 interface SectionProps {
   title: string;
   children: React.ReactNode;
+  icon?: LucideIcon;
+  iconColor?: string;
 }
 
-export default function Section({ title, children }: SectionProps) {
+export default function Section({ title, children, icon: Icon, iconColor }: SectionProps) {
   const { isDark } = useTheme();
 
   return (
     <section className={cn(
-      "rounded-xl p-6 relative overflow-hidden",
-      isDark
-        ? "bg-gradient-to-br from-white/10 via-white/5 to-white/10 backdrop-blur-xl border border-white/10"
-        : "bg-gradient-to-br from-black/5 via-black/20 to-black/5 backdrop-blur-xl border border-black/10"
+      "rounded-xl p-6",
+      isDark 
+        ? "bg-black/40 border-white/10" 
+        : "bg-white/60 border-black/5",
+      "border backdrop-blur-sm"
     )}>
-      {/* Gradient overlay */}
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-purple-500/5 to-pink-500/10 pointer-events-none" />
-      
       <div className="relative z-10">
-        <h2 className={cn(
-          "text-xl font-semibold mb-4",
-          isDark ? "text-white" : "text-black"
-        )}>
-          {title}
-        </h2>
+        <div className="flex items-center gap-3 mb-4">
+          {Icon && <Icon className={cn("w-5 h-5", iconColor)} />}
+          <h2 className={cn(
+            "text-lg font-semibold",
+            isDark ? "text-white" : "text-black"
+          )}>
+            {title}
+          </h2>
+        </div>
         {children}
       </div>
     </section>

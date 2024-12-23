@@ -1,39 +1,72 @@
 import React from 'react';
 import { useTheme } from '../../hooks/useTheme';
 import { cn } from '../../utils/cn';
-import Section from './Section';
-import FormField from './FormField';
-import Input from './Input';
-import Select from './Select';
-import Textarea from './Textarea';
-import Button from './Button';
+import { Database, Bot, MessageSquare } from 'lucide-react';
+import Section from '../AISettings/Section';
+import FormField from '../AISettings/FormField';
+import Input from '../AISettings/Input';
+import Select from '../AISettings/Select';
+import Textarea from '../AISettings/Textarea';
+import Button from '../AISettings/Button';
 
 export default function AISettings() {
   const { isDark } = useTheme();
 
   return (
     <div className="p-4 md:p-6 max-w-4xl mx-auto">
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-500/10 via-blue-500/5 to-transparent border border-white/10 backdrop-blur-xl p-6 md:p-8">
+      <div className={cn(
+        "relative overflow-hidden rounded-2xl p-6 md:p-8",
+        isDark 
+          ? "bg-black/40 border-white/10" 
+          : "bg-white/80 border-black/5",
+        "border backdrop-blur-xl"
+      )}>
         {/* Background Gradients */}
-        <div className="absolute top-0 right-0 w-[25rem] h-[25rem] bg-gradient-to-bl from-blue-500/20 via-purple-500/5 to-transparent blur-2xl pointer-events-none" />
-        <div className="absolute bottom-0 left-0 w-[25rem] h-[25rem] bg-gradient-to-tr from-purple-500/10 to-transparent blur-2xl pointer-events-none" />
+        <div className={cn(
+          "absolute top-0 right-0 w-[25rem] h-[25rem] blur-2xl pointer-events-none",
+          "bg-gradient-to-bl",
+          isDark 
+            ? "from-blue-500/20 via-purple-500/5 to-transparent"
+            : "from-blue-500/10 via-purple-500/5 to-transparent"
+        )} />
+        <div className={cn(
+          "absolute bottom-0 left-0 w-[25rem] h-[25rem] blur-2xl pointer-events-none",
+          "bg-gradient-to-tr",
+          isDark 
+            ? "from-purple-500/10 to-transparent"
+            : "from-purple-500/5 to-transparent"
+        )} />
 
         <div className="relative z-10">
           <h1 className={cn(
-            "text-2xl font-bold mb-8",
+            "text-2xl font-bold mb-2",
             isDark ? "text-white" : "text-black"
           )}>
             AI Assistant Settings
           </h1>
+          <p className={cn(
+            "mb-8",
+            isDark ? "text-white/60" : "text-black/60"
+          )}>
+            Configure your AI assistant's behavior and responses
+          </p>
 
           <div className="space-y-6">
-            <Section title="Knowledge Base">
+            <Section 
+              icon={Database} 
+              title="Knowledge Base"
+              iconColor="text-blue-400"
+            >
               <Textarea
                 placeholder="Add your company's knowledge base, FAQs, or any specific information you want the AI to know..."
               />
             </Section>
 
-            <Section title="Personality Settings">
+            <Section 
+              icon={Bot}
+              title="Personality Settings"
+              iconColor="text-purple-400"
+            >
               <div className="space-y-4">
                 <FormField label="AI Name">
                   <Input
@@ -52,7 +85,11 @@ export default function AISettings() {
               </div>
             </Section>
 
-            <Section title="Response Settings">
+            <Section 
+              icon={MessageSquare}
+              title="Response Settings"
+              iconColor="text-emerald-400"
+            >
               <div className="space-y-4">
                 <FormField label="Response Length">
                   <Select defaultValue="Moderate">
