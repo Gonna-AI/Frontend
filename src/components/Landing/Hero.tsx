@@ -10,7 +10,7 @@ interface HeroProps {
 const Hero = ({ onGetStarted }: HeroProps) => {
   return (
     <div className="bg-[rgb(10,10,10)] min-h-screen flex items-center justify-center relative overflow-hidden">
-      {/* Gradient Spotlight - increased brightness and opacity */}
+      {/* Gradient Spotlight */}
       <div 
         className="absolute top-0 right-0 -translate-y-1/4 translate-x-1/4 w-[800px] h-[800px] opacity-[0.25] rounded-full"
         style={{
@@ -26,7 +26,7 @@ const Hero = ({ onGetStarted }: HeroProps) => {
           transition={{ duration: 0.8 }}
           className="mb-8"
         >
-          {/* Logo with enhanced gradient */}
+          {/* Original logo gradient */}
           <div className="bg-gradient-to-r from-emerald-400 via-blue-500 to-purple-600 text-transparent bg-clip-text">
             <h1 className="text-7xl md:text-8xl font-bold tracking-tight">gonna.ai</h1>
           </div>
