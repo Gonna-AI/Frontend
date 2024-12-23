@@ -39,8 +39,8 @@ export default function Features() {
     },
     {
       quote: "The AI-powered analytics have given us insights we never had before. Game-changing platform.",
-      author: "Michael Rivera",
-      role: "Claims Manager",
+      author: "",
+      role: "",
       company: "Shiv Nadar University"
     },
     {
@@ -76,7 +76,7 @@ export default function Features() {
         <div className="pt-20 mb-24">
           <div className="flex items-center space-x-2 mb-6">
             <div className="text-purple-500 text-2xl">{"{"}</div>
-            <h1 className="text-2xl font-medium text-white">ClaimFlow</h1>
+            <h1 className="text-2xl font-medium text-white">Claim & Flow</h1>
           </div>
           
           <div className="max-w-3xl">
@@ -248,10 +248,9 @@ export default function Features() {
             viewport={{ once: true }}
             className="text-white/60 text-sm mb-8"
           >
-            Used by professionals from
           </motion.p>
         </div>
-      </div>
+      </div> 
     </section>
   )
 }
