@@ -8,28 +8,6 @@ interface HeroProps {
 }
 
 const Hero = ({ onGetStarted }: HeroProps) => {
-  const [currentSection, setCurrentSection] = useState<number | null>(null);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      const scrollPosition = window.scrollY;
-      const windowHeight = window.innerHeight;
-      
-      if (scrollPosition < windowHeight * 0.5) {
-        setCurrentSection(0);
-      } else if (scrollPosition < windowHeight * 1.5) {
-        setCurrentSection(1);
-      } else if (scrollPosition < windowHeight * 2.5) {
-        setCurrentSection(2);
-      } else {
-        setCurrentSection(3);
-      }
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
   return (
     <div className="bg-[rgb(10,10,10)] min-h-screen flex items-center justify-center relative overflow-hidden">
       {/* Gradient Spotlight */}
@@ -89,29 +67,22 @@ const Hero = ({ onGetStarted }: HeroProps) => {
           transition={{ duration: 0.8, delay: 0.6 }}
           className="flex justify-center"
         >
-          <RainbowButton 
+          <button 
             onClick={onGetStarted}
-            className={cn(
-              "!bg-[linear-gradient(#000,#000),linear-gradient(to_right,#4F46E5,#9333EA,#4F46E5)]",
-              "!text-white",
-              "dark:!bg-[linear-gradient(#000,#000),linear-gradient(to_right,#4F46E5,#9333EA,#4F46E5)]",
-              "dark:!text-white",
-              "before:!bg-[linear-gradient(to_right,#4F46E5,#9333EA,#4F46E5)]",
-              "hover:!shadow-lg hover:!shadow-purple-500/20",
-              "[--speed:3s]",
-              "!border-[3px]",
-              "!bg-[length:300%]",
-              "!animate-[rainbow_3s_linear_infinite]"
-            )}
+            className="bg-[rgb(10,10,10)] text-white/80 border border-purple-500/20 hover:border-purple-500/40 transition-colors duration-200 rounded-[20px] px-8 py-3 text-sm font-medium tracking-wide"
           >
             Learn More
-          </RainbowButton>
+          </button>
         </motion.div>
       </div>
 
-      {/* Bottom Text Only */}
-      <div className="fixed bottom-4 left-4 text-sm font-mono text-white/60">
-        Gonna.AI
+      {/* Bottom Text Only with Pulsating Dot */}
+      <div className="fixed bottom-4 left-4 text-sm font-mono text-white/60 z-50 flex items-center gap-2">
+        <span>Gonna.AI</span>
+        <div className="relative flex h-1 w-1">
+          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-500 opacity-75"></span>
+          <span className="relative inline-flex rounded-full h-1 w-1 bg-purple-500"></span>
+        </div>
       </div>
     </div>
   );
