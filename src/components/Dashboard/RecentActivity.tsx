@@ -40,13 +40,13 @@ export default function RecentActivity() {
       <div className={cn(
         "p-6 rounded-xl h-[400px] relative z-10",
         isDark
-          ? "bg-gradient-to-br from-white/5 via-white/10 to-white/5 backdrop-blur-lg border border-white/10"
-          : "bg-gradient-to-br from-black/5 via-black/10 to-black/5 backdrop-blur-lg border border-black/10"
+          ? "bg-black/40 border border-white/10 backdrop-blur-md"
+          : "bg-white/40 border border-black/10 backdrop-blur-md"
       )}>
         <div className="flex justify-between items-center mb-4">
           <h3 className={cn(
             "text-lg font-semibold",
-            isDark ? "text-white" : "text-black"
+            isDark ? "text-white/90" : "text-black"
           )}>
             Recent Activity
           </h3>
@@ -55,7 +55,7 @@ export default function RecentActivity() {
             className={cn(
               "px-3 py-1 text-sm rounded-lg transition-colors",
               isDark
-                ? "bg-white/5 hover:bg-white/10 text-white"
+                ? "bg-white/10 hover:bg-white/20 text-white/90"
                 : "bg-black/5 hover:bg-black/10 text-black"
             )}
           >
@@ -73,13 +73,13 @@ export default function RecentActivity() {
                   : "bg-black/5 hover:bg-black/10"
               )}
             >
-              <p className={isDark ? "text-white font-medium" : "text-black font-medium"}>
+              <p className={isDark ? "text-white/90 font-medium" : "text-black font-medium"}>
                 {activity.user}
               </p>
-              <p className={isDark ? "text-white/60 text-sm" : "text-black/60 text-sm"}>
+              <p className={isDark ? "text-white/70 text-sm" : "text-black/60 text-sm"}>
                 {activity.action}
               </p>
-              <p className={isDark ? "text-white/40 text-xs mt-1" : "text-black/40 text-xs mt-1"}>
+              <p className={isDark ? "text-white/50 text-xs mt-1" : "text-black/40 text-xs mt-1"}>
                 {activity.time}
               </p>
             </div>
