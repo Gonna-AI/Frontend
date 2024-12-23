@@ -1,5 +1,5 @@
 import React from 'react';
-import { CreditCard, DollarSign, Clock, Shield, Package, ChevronRight } from 'lucide-react';
+import { CreditCard, DollarSign, Clock, Shield, Package, ChevronRight, Activity } from 'lucide-react';
 import { useTheme } from '../../hooks/useTheme';
 import { cn } from '../../utils/cn';
 
@@ -44,26 +44,33 @@ const transactions = [
 export default function Billing() {
   const { isDark } = useTheme();
 
+  const renderUsageBar = (used, total) => {
+    const percentage = Math.min((used / total) * 100, 100);
+    return (
+      <div className="h-2 w-full bg-white/10 rounded-full overflow-hidden">
+        <div 
+          className="h-full bg-gradient-to-r from-blue-500 to-purple-500 transition-all duration-500"
+          style={{ width: `${percentage}%` }}
+        />
+      </div>
+    );
+  };
+
   return (
     <div className="p-4 md:p-6 max-w-6xl mx-auto space-y-6">
       {/* Current Plan Section */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-500/10 via-emerald-500/5 to-transparent border border-white/10 backdrop-blur-xl p-6">
-        <div className="absolute top-0 right-0 w-[25rem] h-[25rem] bg-gradient-to-bl from-emerald-500/20 via-blue-500/5 to-transparent blur-2xl pointer-events-none" />
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-white/10 via-white/5 to-transparent border border-white/20 backdrop-blur-xl p-8">
+        <div className="absolute top-0 right-0 w-[35rem] h-[35rem] bg-gradient-to-bl from-blue-500/20 via-purple-500/5 to-transparent blur-3xl pointer-events-none" />
         
         <div className="relative z-10">
-          <h2 className={cn(
-            "text-xl font-semibold mb-4",
-            isDark ? "text-white" : "text-black"
-          )}>Current Plan</h2>
-          
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between mb-8">
             <div className="flex items-center space-x-4">
-              <div className="w-12 h-12 rounded-xl bg-emerald-500/20 flex items-center justify-center">
-                <Package className="w-6 h-6 text-emerald-400" />
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-r from-blue-500/20 to-purple-500/20 border border-white/10 flex items-center justify-center">
+                <Package className="w-6 h-6 text-blue-400" />
               </div>
               <div>
                 <h3 className={cn(
-                  "text-lg font-medium",
+                  "text-xl font-bold",
                   isDark ? "text-white" : "text-black"
                 )}>Pro Plan</h3>
                 <p className={isDark ? "text-white/60" : "text-black/60"}>
@@ -72,30 +79,80 @@ export default function Billing() {
               </div>
             </div>
             <button className={cn(
-              "px-4 py-2 rounded-lg transition-all",
-              isDark
-                ? "bg-white/10 hover:bg-white/20 text-white"
-                : "bg-black/10 hover:bg-black/20 text-black"
+              "px-6 py-2 rounded-xl transition-all",
+              "bg-gradient-to-r from-blue-400/30 to-purple-400/30 backdrop-blur-sm",
+              "border border-white/20",
+              "shadow-[inset_0_0_0_1px_rgba(255,255,255,0.1)]",
+              isDark ? "text-white" : "text-black",
+              "hover:from-blue-400/40 hover:to-purple-400/40"
             )}>
               Change Plan
             </button>
+          </div>
+
+          {/* API Usage Section */}
+          <div className="space-y-6">
+            <div>
+              <div className="flex justify-between text-sm mb-2">
+                <span className={isDark ? "text-white/60" : "text-black/60"}>
+                  API Calls (This Month)
+                </span>
+                <span className={isDark ? "text-white/60" : "text-black/60"}>
+                  25,420 / 50,000
+                </span>
+              </div>
+              {renderUsageBar(25420, 50000)}
+            </div>
+
+            <div>
+              <div className="flex justify-between text-sm mb-2">
+                <span className={isDark ? "text-white/60" : "text-black/60"}>
+                  Active Tokens
+                </span>
+                <span className={isDark ? "text-white/60" : "text-black/60"}>
+                  3 / 5
+                </span>
+              </div>
+              {renderUsageBar(3, 5)}
+            </div>
+
+            <div className={cn(
+              "mt-6 p-4 rounded-2xl",
+              "bg-gradient-to-r from-blue-400/10 to-purple-400/10",
+              "border border-white/10 backdrop-blur-sm"
+            )}>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <Activity className="w-5 h-5 text-blue-400" />
+                  <span className={isDark ? "text-white/80" : "text-black/80"}>
+                    API Health
+                  </span>
+                </div>
+                <span className={cn(
+                  "px-3 py-1 rounded-full text-sm",
+                  "bg-emerald-400/20 text-emerald-400"
+                )}>
+                  Optimal
+                </span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
       {/* Payment Method Section */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-purple-500/10 via-purple-500/5 to-transparent border border-white/10 backdrop-blur-xl p-6">
-        <div className="absolute top-0 right-0 w-[25rem] h-[25rem] bg-gradient-to-bl from-purple-500/20 via-blue-500/5 to-transparent blur-2xl pointer-events-none" />
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-white/10 via-white/5 to-transparent border border-white/20 backdrop-blur-xl p-8">
+        <div className="absolute top-0 right-0 w-[35rem] h-[35rem] bg-gradient-to-bl from-purple-500/20 via-blue-500/5 to-transparent blur-3xl pointer-events-none" />
         
         <div className="relative z-10">
           <h2 className={cn(
-            "text-xl font-semibold mb-4",
+            "text-xl font-bold mb-6",
             isDark ? "text-white" : "text-black"
           )}>Payment Method</h2>
           
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <div className="w-12 h-12 rounded-xl bg-purple-500/20 flex items-center justify-center">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-r from-blue-500/20 to-purple-500/20 border border-white/10 flex items-center justify-center">
                 <CreditCard className="w-6 h-6 text-purple-400" />
               </div>
               <div>
@@ -109,10 +166,12 @@ export default function Billing() {
               </div>
             </div>
             <button className={cn(
-              "px-4 py-2 rounded-lg transition-all",
-              isDark
-                ? "bg-white/10 hover:bg-white/20 text-white"
-                : "bg-black/10 hover:bg-black/20 text-black"
+              "px-6 py-2 rounded-xl transition-all",
+              "bg-gradient-to-r from-blue-400/30 to-purple-400/30 backdrop-blur-sm",
+              "border border-white/20",
+              "shadow-[inset_0_0_0_1px_rgba(255,255,255,0.1)]",
+              isDark ? "text-white" : "text-black",
+              "hover:from-blue-400/40 hover:to-purple-400/40"
             )}>
               Update
             </button>
@@ -126,26 +185,25 @@ export default function Billing() {
           <div
             key={plan.name}
             className={cn(
-              "relative overflow-hidden rounded-2xl border backdrop-blur-xl p-6",
+              "relative overflow-hidden rounded-3xl border backdrop-blur-xl p-8",
+              "bg-gradient-to-br from-white/5 via-white/10 to-transparent",
               "transition-all duration-300 hover:scale-105",
-              isDark
-                ? "bg-white/5 border-white/10"
-                : "bg-black/5 border-black/10",
+              "border-white/20",
               plan.recommended && "ring-2 ring-blue-500"
             )}
           >
             {plan.recommended && (
-              <div className="absolute top-3 right-3 px-2 py-1 rounded-full text-xs font-medium bg-blue-500 text-white">
+              <div className="absolute top-3 right-3 px-3 py-1 rounded-full text-xs font-medium bg-blue-500 text-white">
                 Recommended
               </div>
             )}
             
             <h3 className={cn(
-              "text-xl font-semibold mb-2",
+              "text-xl font-bold mb-2",
               isDark ? "text-white" : "text-black"
             )}>{plan.name}</h3>
             
-            <div className="flex items-baseline mb-4">
+            <div className="flex items-baseline mb-6">
               <span className={cn(
                 "text-3xl font-bold",
                 isDark ? "text-white" : "text-black"
@@ -153,10 +211,10 @@ export default function Billing() {
               <span className={isDark ? "text-white/60" : "text-black/60"}>/month</span>
             </div>
             
-            <ul className="space-y-2 mb-6">
+            <ul className="space-y-3 mb-6">
               {plan.features.map((feature, index) => (
-                <li key={index} className="flex items-center space-x-2">
-                  <Shield className="w-4 h-4 text-blue-400" />
+                <li key={index} className="flex items-center space-x-3">
+                  <Shield className="w-5 h-5 text-blue-400" />
                   <span className={isDark ? "text-white/80" : "text-black/80"}>
                     {feature}
                   </span>
@@ -165,12 +223,12 @@ export default function Billing() {
             </ul>
             
             <button className={cn(
-              "w-full py-2 rounded-lg transition-all",
+              "w-full py-2 rounded-xl transition-all",
               plan.recommended
-                ? "bg-blue-500 text-white hover:bg-blue-600"
-                : isDark
-                  ? "bg-white/10 hover:bg-white/20 text-white"
-                  : "bg-black/10 hover:bg-black/20 text-black"
+                ? "bg-gradient-to-r from-blue-400/30 to-purple-400/30 backdrop-blur-sm border border-white/20"
+                : "bg-white/10 backdrop-blur-sm border border-white/10",
+              isDark ? "text-white" : "text-black",
+              "hover:bg-white/20"
             )}>
               {plan.recommended ? 'Current Plan' : 'Select Plan'}
             </button>
@@ -179,12 +237,12 @@ export default function Billing() {
       </div>
 
       {/* Transaction History */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-500/10 via-blue-500/5 to-transparent border border-white/10 backdrop-blur-xl p-6">
-        <div className="absolute top-0 right-0 w-[25rem] h-[25rem] bg-gradient-to-bl from-blue-500/20 via-purple-500/5 to-transparent blur-2xl pointer-events-none" />
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-white/10 via-white/5 to-transparent border border-white/20 backdrop-blur-xl p-8">
+        <div className="absolute top-0 right-0 w-[35rem] h-[35rem] bg-gradient-to-bl from-blue-500/20 via-purple-500/5 to-transparent blur-3xl pointer-events-none" />
         
         <div className="relative z-10">
           <h2 className={cn(
-            "text-xl font-semibold mb-4",
+            "text-xl font-bold mb-6",
             isDark ? "text-white" : "text-black"
           )}>Transaction History</h2>
           
@@ -194,13 +252,13 @@ export default function Billing() {
                 key={transaction.id}
                 className={cn(
                   "flex items-center justify-between p-4 rounded-xl transition-all",
-                  isDark
-                    ? "bg-white/5 hover:bg-white/10"
-                    : "bg-black/5 hover:bg-black/10"
+                  "bg-gradient-to-r from-white/5 to-white/10 backdrop-blur-sm",
+                  "border border-white/10",
+                  "hover:bg-white/20"
                 )}
               >
                 <div className="flex items-center space-x-4">
-                  <div className="w-10 h-10 rounded-lg bg-blue-500/20 flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-r from-blue-500/20 to-purple-500/20 border border-white/10 flex items-center justify-center">
                     <DollarSign className="w-5 h-5 text-blue-400" />
                   </div>
                   <div>
