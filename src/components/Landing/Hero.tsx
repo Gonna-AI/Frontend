@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Particles } from './Particles';
-import { RainbowButton } from '../../components/magicui/rainbow-button';
+import { RainbowButton } from '../magicui/rainbow-button';
+import { cn } from '../../utils/cn';
 
 interface HeroProps {
   onGetStarted: () => void;
@@ -9,21 +9,15 @@ interface HeroProps {
 
 const Hero = ({ onGetStarted }: HeroProps) => {
   return (
-    <div className="bg-black min-h-screen flex items-center justify-center relative overflow-hidden">
-      <Particles
-        className="absolute inset-0"
-        quantity={100}
-        staticity={50}
-        ease={50}
-        color="#ffffff"
+    <div className="bg-[rgb(10,10,10)] min-h-screen flex items-center justify-center relative overflow-hidden">
+      {/* Gradient Spotlight - increased brightness and opacity */}
+      <div 
+        className="absolute top-0 right-0 -translate-y-1/4 translate-x-1/4 w-[800px] h-[800px] opacity-[0.25] rounded-full"
+        style={{
+          background: 'radial-gradient(circle, rgba(147,51,234,0.8) 0%, rgba(147,51,234,0.3) 40%, transparent 100%)',
+          filter: 'blur(40px)',
+        }}
       />
-      
-      {/* Gradient Orbs */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -left-4 -top-24 w-72 h-72 bg-purple-500 rounded-full mix-blend-multiply filter blur-2xl opacity-20 animate-blob" />
-        <div className="absolute -right-4 -top-24 w-72 h-72 bg-blue-500 rounded-full mix-blend-multiply filter blur-2xl opacity-20 animate-blob animation-delay-2000" />
-        <div className="absolute -bottom-8 left-20 w-72 h-72 bg-emerald-500 rounded-full mix-blend-multiply filter blur-2xl opacity-20 animate-blob animation-delay-4000" />
-      </div>
 
       <div className="max-w-7xl mx-auto text-center px-6 relative z-10">
         <motion.div
@@ -46,7 +40,7 @@ const Hero = ({ onGetStarted }: HeroProps) => {
         >
           <h2 className="text-5xl md:text-7xl font-bold mb-8">
             <span className="inline-block mb-4">
-              <span className="bg-gradient-to-r from-purple-500 to-blue-500 px-6 py-2 rounded-2xl">
+              <span className="bg-gradient-to-r from-white to-white/90 text-black px-6 py-2 rounded-2xl">
                 Revolutionizing
               </span>
             </span>
@@ -71,9 +65,27 @@ const Hero = ({ onGetStarted }: HeroProps) => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.6 }}
+          className="flex flex-col sm:flex-row items-center justify-center gap-4"
         >
           <RainbowButton onClick={onGetStarted}>
             Learn More
+          </RainbowButton>
+          <RainbowButton 
+            onClick={() => window.location.href = '/schedule-demo'}
+            className={cn(
+              "!bg-[linear-gradient(#000,#000),linear-gradient(to_right,#FF6B6B,#4ECDC4,#45B7D1,#FF6B6B)]",
+              "!text-white",
+              "dark:!bg-[linear-gradient(#000,#000),linear-gradient(to_right,#FF6B6B,#4ECDC4,#45B7D1,#FF6B6B)]",
+              "dark:!text-white",
+              "before:!bg-[linear-gradient(to_right,#FF6B6B,#4ECDC4,#45B7D1,#FF6B6B)]",
+              "hover:!shadow-lg hover:!shadow-blue-500/20",
+              "[--speed:3s]",
+              "!border-[3px]",
+              "!bg-[length:300%]",
+              "!animate-[rainbow_3s_linear_infinite]"
+            )}
+          >
+            Schedule Demo
           </RainbowButton>
         </motion.div>
       </div>
