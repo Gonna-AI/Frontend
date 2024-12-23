@@ -139,6 +139,15 @@ export default function MobileSidebar({
 
             {/* Footer */}
             <div className="p-3 space-y-1 border-t border-white/5">
+              {/* Subtle divider line */}
+              <div className="flex justify-center py-1">
+                <div className={cn(
+                  "w-24 h-px rounded-full",
+                  isDark 
+                    ? "bg-white/20" 
+                    : "bg-black/20"
+                )}/>
+              </div>
               <ThemeToggle isExpanded={true} />
               <SidebarItem
                 icon={ChevronRight}
