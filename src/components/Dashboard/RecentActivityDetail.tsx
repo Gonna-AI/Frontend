@@ -117,11 +117,17 @@ export default function RecentActivityDetail({ onClose }: RecentActivityDetailPr
         "backdrop-blur-xl"
       )}
     >
-      <div className="h-full overflow-y-auto p-6">
+      {/* Header - Fixed at the top */}
+      <div className={cn(
+        "sticky top-0 z-10 px-4 py-3 md:px-6 md:py-4",
+        isDark ? "bg-black/90" : "bg-white/90",
+        "backdrop-blur-xl border-b",
+        isDark ? "border-white/10" : "border-black/10"
+      )}>
         <div className="max-w-7xl mx-auto">
-          <div className="flex justify-between items-center mb-8">
+          <div className="flex justify-between items-center">
             <h2 className={cn(
-              "text-2xl font-bold",
+              "text-xl md:text-2xl font-bold",
               isDark ? "text-white" : "text-black"
             )}>
               Recent Client Activities
@@ -138,22 +144,30 @@ export default function RecentActivityDetail({ onClose }: RecentActivityDetailPr
               <X className="w-6 h-6" />
             </button>
           </div>
+        </div>
+      </div>
 
-          <motion.div 
-            layout
-            className="grid grid-cols-1 md:grid-cols-3 gap-6"
-          >
-            <AnimatePresence mode="popLayout">
-              {mockClients.map((client, index) => (
-                <ActivityCard
-                  key={index}
-                  client={client}
-                  isExpanded={expandedId === index}
-                  onExpand={() => setExpandedId(expandedId === index ? null : index)}
-                />
-              ))}
-            </AnimatePresence>
-          </motion.div>
+      {/* Scrollable Content Area */}
+      <div className="h-[calc(100%-4rem)] overflow-y-auto overscroll-contain">
+        <div className="px-4 py-3 md:px-6 md:py-4">
+          <div className="max-w-7xl mx-auto">
+            <motion.div 
+              layout
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6"
+            >
+              <AnimatePresence mode="popLayout">
+                {mockClients.map((client, index) => (
+                  <div key={index} className="w-full">
+                    <ActivityCard
+                      client={client}
+                      isExpanded={expandedId === index}
+                      onExpand={() => setExpandedId(expandedId === index ? null : index)}
+                    />
+                  </div>
+                ))}
+              </AnimatePresence>
+            </motion.div>
+          </div>
         </div>
       </div>
     </motion.div>
