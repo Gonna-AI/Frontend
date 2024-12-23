@@ -1,9 +1,11 @@
 'use client'
 
 import React, { useState } from 'react'
+import { motion } from 'framer-motion'
 
 export default function FullLanding() {
   const [activeFeature, setActiveFeature] = useState(null)
+  const [activeTestimonial, setActiveTestimonial] = useState(0)
 
   const features = [
     {
@@ -25,6 +27,30 @@ export default function FullLanding() {
       number: '04',
       title: 'Sentiment Analysis',
       description: 'Real-time customer sentiment tracking for improved service quality.'
+    }
+  ]
+
+  const testimonials = [
+    {
+      quote: "Gonna.AI has transformed our claims processing workflow. The efficiency gains are remarkable.",
+      author: "Sarah Chen",
+      role: "Operations Director",
+      company: "Technical University of Munich",
+      image: "images/image.png"
+    },
+    {
+      quote: "The AI-powered analytics have given us insights we never had before. Game-changing platform.",
+      author: "Michael Rivera",
+      role: "Claims Manager",
+      company: "Shiv Nadar University",
+      image: "images/image2.png"
+    },
+    {
+      quote: "Customer satisfaction has improved significantly since implementing Gonna.AI's smart scheduling.",
+      author: "Emma Thompson",
+      role: "Customer Success Lead",
+      company: "Friedrich-Alexander University",
+      image: "images/image3.png"
     }
   ]
 
@@ -129,6 +155,85 @@ export default function FullLanding() {
           ))}
         </div>
 
+        {/* Testimonials Section */}
+        <div className="mb-32 relative">
+          <div className="text-center mb-12">
+            <motion.h3
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8 }}
+              viewport={{ once: true }}
+              className="text-3xl font-bold bg-gradient-to-r from-white/80 to-white/40 text-transparent bg-clip-text mb-4"
+            >
+              What Our Clients Say
+            </motion.h3>
+            
+            {/* Interactive dots above testimonials */}
+            <div className="flex justify-center gap-4 mb-8">
+              {testimonials.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => setActiveTestimonial(index)}
+                  className="group relative"
+                >
+                  <div 
+                    className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                      activeTestimonial === index 
+                        ? 'bg-purple-500 scale-125' 
+                        : 'bg-purple-500/20 border border-purple-500/40'
+                    }`}
+                  />
+                  {activeTestimonial !== index && (
+                    <div className="absolute inset-0 animate-ping bg-purple-500 rounded-full opacity-20" />
+                  )}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="max-w-4xl mx-auto relative h-[200px]">
+            {testimonials.map((testimonial, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ 
+                  opacity: activeTestimonial === index ? 1 : 0,
+                  x: activeTestimonial === index ? 0 : 20
+                }}
+                transition={{ duration: 0.5 }}
+                className={`absolute w-full ${activeTestimonial === index ? 'block' : 'hidden'}`}
+              >
+                <div className="bg-black/40 backdrop-blur-sm border border-purple-500/20 rounded-2xl p-8 relative">
+                  {/* Decorative elements */}
+                  <div className="absolute -top-3 -left-3">
+                    <div className="w-6 h-6">
+                      <div className="absolute inset-0 animate-ping bg-purple-500 rounded-full opacity-20" />
+                      <div className="absolute inset-0 bg-purple-500/20 border border-purple-500/40 rounded-full" />
+                    </div>
+                  </div>
+                  
+                  <blockquote className="text-xl text-white/90 mb-6 relative">
+                    "{testimonial.quote}"
+                  </blockquote>
+                  
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="text-white font-medium">{testimonial.author}</div>
+                      <div className="text-gray-400 text-sm">{testimonial.role}</div>
+                      <div className="text-purple-400 text-sm font-mono">{testimonial.company}</div>
+                    </div>
+                    <img 
+                      src={testimonial.image}
+                      alt={testimonial.company}
+                      className="h-12 w-auto opacity-80 hover:opacity-100 transition-opacity"
+                    />
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+
         {/* Gonna.AI Section */}
         <div className="flex justify-end mb-12">
           <div className="flex items-center gap-4">
@@ -142,15 +247,6 @@ export default function FullLanding() {
           </div>
         </div>
 
-        {/* Partners Section */}
-        <div className="flex items-center justify-center space-x-8 pb-32">
-          {[1, 2, 3, 4].map((_, index) => (
-            <div
-              key={index}
-              className="w-12 h-12 rounded-full bg-white/5 border border-white/10"
-            />
-          ))}
-        </div>
       </div>
     </main>
   )
