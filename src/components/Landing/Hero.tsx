@@ -67,7 +67,21 @@ const Hero = ({ onGetStarted }: HeroProps) => {
           transition={{ duration: 0.8, delay: 0.6 }}
           className="flex flex-col sm:flex-row items-center justify-center gap-4"
         >
-          <RainbowButton onClick={onGetStarted}>
+          <RainbowButton 
+            onClick={onGetStarted}
+            className={cn(
+              "!bg-[linear-gradient(#000,#000),linear-gradient(to_right,#4F46E5,#9333EA,#4F46E5)]",
+              "!text-white",
+              "dark:!bg-[linear-gradient(#000,#000),linear-gradient(to_right,#4F46E5,#9333EA,#4F46E5)]",
+              "dark:!text-white",
+              "before:!bg-[linear-gradient(to_right,#4F46E5,#9333EA,#4F46E5)]",
+              "hover:!shadow-lg hover:!shadow-purple-500/20",
+              "[--speed:3s]",
+              "!border-[3px]",
+              "!bg-[length:300%]",
+              "!animate-[rainbow_3s_linear_infinite]"
+            )}
+          >
             Learn More
           </RainbowButton>
           <RainbowButton 
