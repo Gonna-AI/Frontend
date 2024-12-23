@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Particles } from './Particles';
+import { RainbowButton } from '../../components/magicui/rainbow-button';
 
 interface HeroProps {
   onGetStarted: () => void;
@@ -71,13 +72,9 @@ const Hero = ({ onGetStarted }: HeroProps) => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.6 }}
         >
-          <button
-            onClick={onGetStarted}
-            className="relative inline-flex group items-center justify-center px-8 py-4 text-lg font-bold text-white transition-all duration-300 bg-gradient-to-r from-purple-500 via-blue-500 to-emerald-500 rounded-xl hover:scale-105 hover:shadow-xl hover:shadow-purple-500/25"
-          >
-            <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-purple-500 via-blue-500 to-emerald-500 rounded-xl blur-lg group-hover:opacity-75 transition-opacity duration-300 opacity-0" />
-            <span className="relative">Learn More</span>
-          </button>
+          <RainbowButton onClick={onGetStarted}>
+            Learn More
+          </RainbowButton>
         </motion.div>
       </div>
     </div>
