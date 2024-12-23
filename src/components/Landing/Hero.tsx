@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { RainbowButton } from '../magicui/rainbow-button';
 import { cn } from '../../utils/cn';
@@ -8,6 +8,28 @@ interface HeroProps {
 }
 
 const Hero = ({ onGetStarted }: HeroProps) => {
+  const [currentSection, setCurrentSection] = useState<number | null>(null);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollPosition = window.scrollY;
+      const windowHeight = window.innerHeight;
+      
+      if (scrollPosition < windowHeight * 0.5) {
+        setCurrentSection(0);
+      } else if (scrollPosition < windowHeight * 1.5) {
+        setCurrentSection(1);
+      } else if (scrollPosition < windowHeight * 2.5) {
+        setCurrentSection(2);
+      } else {
+        setCurrentSection(3);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   return (
     <div className="bg-[rgb(10,10,10)] min-h-screen flex items-center justify-center relative overflow-hidden">
       {/* Gradient Spotlight */}
@@ -26,7 +48,7 @@ const Hero = ({ onGetStarted }: HeroProps) => {
           transition={{ duration: 0.8 }}
           className="mb-8"
         >
-          {/* Original logo gradient */}
+          {/* Logo gradient */}
           <div className="bg-gradient-to-r from-emerald-400 via-blue-500 to-purple-600 text-transparent bg-clip-text">
             <h1 className="text-7xl md:text-8xl font-bold tracking-tight">gonna.ai</h1>
           </div>
@@ -65,7 +87,7 @@ const Hero = ({ onGetStarted }: HeroProps) => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.6 }}
-          className="flex flex-col sm:flex-row items-center justify-center gap-4"
+          className="flex justify-center"
         >
           <RainbowButton 
             onClick={onGetStarted}
@@ -84,24 +106,12 @@ const Hero = ({ onGetStarted }: HeroProps) => {
           >
             Learn More
           </RainbowButton>
-          <RainbowButton 
-            onClick={() => window.location.href = '/schedule-demo'}
-            className={cn(
-              "!bg-[linear-gradient(#000,#000),linear-gradient(to_right,#FF6B6B,#4ECDC4,#45B7D1,#FF6B6B)]",
-              "!text-white",
-              "dark:!bg-[linear-gradient(#000,#000),linear-gradient(to_right,#FF6B6B,#4ECDC4,#45B7D1,#FF6B6B)]",
-              "dark:!text-white",
-              "before:!bg-[linear-gradient(to_right,#FF6B6B,#4ECDC4,#45B7D1,#FF6B6B)]",
-              "hover:!shadow-lg hover:!shadow-blue-500/20",
-              "[--speed:3s]",
-              "!border-[3px]",
-              "!bg-[length:300%]",
-              "!animate-[rainbow_3s_linear_infinite]"
-            )}
-          >
-            Schedule Demo
-          </RainbowButton>
         </motion.div>
+      </div>
+
+      {/* Bottom Text Only */}
+      <div className="fixed bottom-4 left-4 text-sm font-mono text-white/60">
+        Gonna.AI
       </div>
     </div>
   );
