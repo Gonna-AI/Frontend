@@ -21,7 +21,8 @@ export function RainbowButton({
 
         // Border gradient
         "border-2 border-transparent",
-        "bg-gradient-to-r from-[#4F46E5] via-[#9333EA] to-[#4F46E5] bg-[length:200%]",
+        "bg-gradient-to-r from-[#4F46E5] via-[#9333EA] to-[#4F46E5]",
+        "bg-[length:200%]",
         "[background-clip:padding-box,border-box] [background-origin:border-box]",
         "[background-image:linear-gradient(white,white),linear-gradient(to_right,#4F46E5,#9333EA,#4F46E5)]",
 
@@ -41,9 +42,9 @@ export function RainbowButton({
         "before:from-[#4F46E5] before:via-[#9333EA] before:to-[#4F46E5]",
         "before:blur-xl before:opacity-20 before:-z-10",
 
-        // Dark mode adjustments
-        "dark:bg-[linear-gradient(black,black),linear-gradient(to_right,#6366F1,#A855F7,#6366F1)]",
-        "dark:text-white",
+        // Animation speed variable
+        "[--speed:2s]",
+        "animate-[rainbow_2s_linear_infinite]",
 
         className
       )}
