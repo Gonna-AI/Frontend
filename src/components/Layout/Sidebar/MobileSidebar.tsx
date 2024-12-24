@@ -6,6 +6,7 @@ import { cn } from '../../../utils/cn';
 import { menuItems } from '../../../config/navigation';
 import ThemeToggle from '../ThemeToggle';
 import { ViewType } from '../../../types/navigation';
+import { useNavigate } from 'react-router-dom';
 
 // Sidebar Item Component
 interface SidebarItemProps {
@@ -65,6 +66,7 @@ export default function MobileSidebar({
   onClose
 }: MobileSidebarProps) {
   const { isDark } = useTheme();
+  const navigate = useNavigate();
 
   return (
     <AnimatePresence>
@@ -126,10 +128,10 @@ export default function MobileSidebar({
                   key={item.id}
                   icon={item.icon}
                   label={item.label}
-                  isActive={currentView === item.id}
+                  to={item.path}
                   isExpanded={true}
                   onClick={() => {
-                    onViewChange(item.id);
+                    navigate(item.path);
                     onClose();
                   }}
                   className="py-2"
@@ -152,7 +154,6 @@ export default function MobileSidebar({
               <SidebarItem
                 icon={ChevronRight}
                 label="Sign Out"
-                isActive={false}
                 isExpanded={true}
                 onClick={onSignOut}
                 className="py-2"

@@ -1,16 +1,34 @@
-import { 
-  BarChart2, 
-  Brain,
-  User, 
-  CreditCard, 
-  Settings
-} from 'lucide-react';
-import { MenuItem } from '../types/navigation';
+import { Home, Settings, User, CreditCard, Bot } from 'lucide-react';
 
-export const menuItems: MenuItem[] = [
-  { icon: BarChart2, label: 'Dashboard', id: 'dashboard' },
-  { icon: Brain, label: 'AI Settings', id: 'ai-settings' },
-  { icon: User, label: 'Profile', id: 'profile' },
-  { icon: CreditCard, label: 'Billing', id: 'billing' },
-  { icon: Settings, label: 'Settings', id: 'settings' },
-];
+export const menuItems = [
+  {
+    id: 'dashboard',
+    icon: Home,
+    label: 'Dashboard',
+    path: '/dashboard'
+  },
+  {
+    id: 'ai-settings',
+    icon: Bot,
+    label: 'AI Settings',
+    path: '/ai-settings'
+  },
+  {
+    id: 'profile',
+    icon: User,
+    label: 'Profile',
+    path: '/profile'
+  },
+  {
+    id: 'billing',
+    icon: CreditCard,
+    label: 'Billing',
+    path: '/billing'
+  },
+  {
+    id: 'settings',
+    icon: Settings,
+    label: 'Settings',
+    path: '/settings'
+  }
+] as const;
