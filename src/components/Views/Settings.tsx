@@ -8,8 +8,6 @@ export default function Settings() {
   const { isDark } = useTheme();
   const [activeTab, setActiveTab] = useState('general');
   const [showTwoFactor, setShowTwoFactor] = useState(false);
-  const [expandedIcon, setExpandedIcon] = useState(null);
-  const [boxWidth, setBoxWidth] = useState('100%');
 
   const sidebarItems = [
     { icon: FileText, label: 'General', id: 'general' },
@@ -22,84 +20,117 @@ export default function Settings() {
     { icon: MessageSquare, label: 'Support', id: 'support' },
   ];
 
-  const handleIconClick = (id) => {
-    setActiveTab(id);
-    setExpandedIcon(expandedIcon === id ? null : id);
-  };
+  const GlassContainer = ({ children, className }: { children: React.ReactNode, className?: string }) => (
+    <div className={cn(
+      "rounded-2xl transition-all border backdrop-blur-lg",
+      isDark 
+        ? "bg-white/5 border-white/10" 
+        : "bg-black/5 border-black/10",
+      className
+    )}>
+      {children}
+    </div>
+  );
 
   return (
     <div className="min-h-screen">
-      <div className="p-2 sm:p-4 md:p-6 max-w-[95rem] mx-auto">
-        <div className="relative overflow-hidden rounded-xl sm:rounded-3xl border backdrop-blur-xl bg-gradient-to-br from-white/5 via-white/10 to-transparent border-white/20 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.1)] min-h-[85vh]">
-          {/* Background Gradients */}
-          <div className="absolute top-0 right-0 w-48 sm:w-96 h-48 sm:h-96 bg-gradient-to-bl from-blue-500/20 via-purple-500/5 to-transparent blur-3xl pointer-events-none" />
-          <div className="absolute bottom-0 left-0 w-48 sm:w-96 h-48 sm:h-96 bg-gradient-to-tr from-purple-500/10 to-transparent blur-3xl pointer-events-none" />
-
-          <div className="relative z-10 flex flex-col md:flex-row">
-            {/* Icon Bar */}
-            <div className="md:w-20 border-r border-white/10 flex md:flex-col justify-start overflow-x-auto md:overflow-x-visible">
-              <div className="flex md:flex-col items-center p-3 gap-2">
-                <div className="w-12 h-12 rounded-full bg-gradient-to-r from-blue-500/20 to-purple-500/20 flex items-center justify-center mb-6 hidden md:flex">
-                  <SettingsIcon className="w-6 h-6 text-blue-400" />
+      <div className="p-4 md:p-6 max-w-[95rem] mx-auto">
+        <GlassContainer className="min-h-[85vh] overflow-hidden">
+          <div className="flex flex-col md:flex-row">
+            {/* Sidebar */}
+            <div className="sticky top-0 md:w-20 border-r border-inherit">
+              <div className="flex md:flex-col md:h-[85vh] p-4 gap-3 items-center">
+                {/* Settings Icon */}
+                <div className={cn(
+                  "w-10 h-10 rounded-xl flex items-center justify-center mb-6 hidden md:flex",
+                  isDark ? "bg-white/5" : "bg-black/5"
+                )}>
+                  <SettingsIcon className={cn(
+                    "w-5 h-5",
+                    isDark ? "text-white/70" : "text-black/70"
+                  )} />
                 </div>
                 
-                {sidebarItems.map((item) => (
-                  <div key={item.id} className="relative group">
+                {/* Navigation Icons */}
+                <div className="flex md:flex-col w-full gap-2 overflow-x-auto md:overflow-x-visible md:overflow-y-auto">
+                  {sidebarItems.map((item) => (
                     <button
-                      onClick={() => handleIconClick(item.id)}
+                      key={item.id}
+                      onClick={() => setActiveTab(item.id)}
                       className={cn(
-                        "flex items-center gap-3 p-3 rounded-xl transition-all whitespace-nowrap",
+                        "flex items-center gap-3 p-2.5 rounded-xl transition-all",
+                        "group outline-none",
                         activeTab === item.id
-                          ? "bg-gradient-to-r from-blue-400/30 to-purple-400/30 backdrop-blur-sm border border-white/20"
-                          : "hover:bg-white/5",
-                        isDark ? "text-white" : "text-black",
-                        expandedIcon === item.id ? "w-auto" : "w-12 md:w-14"
+                          ? isDark 
+                            ? "bg-white/10" 
+                            : "bg-black/10"
+                          : isDark
+                            ? "hover:bg-white/5"
+                            : "hover:bg-black/5"
                       )}
                     >
-                      <item.icon className="w-6 h-6 flex-shrink-0" />
-                      <span className={cn(
-                        "transition-all overflow-hidden",
-                        expandedIcon === item.id ? "w-auto opacity-100" : "w-0 opacity-0"
+                      <div className={cn(
+                        "w-9 h-9 rounded-lg flex items-center justify-center",
+                        activeTab === item.id
+                          ? isDark 
+                            ? "bg-white/10" 
+                            : "bg-black/10"
+                          : "bg-transparent"
                       )}>
-                        {item.label}
-                      </span>
+                        <item.icon className={cn(
+                          "w-5 h-5",
+                          activeTab === item.id
+                            ? isDark 
+                              ? "text-white/90" 
+                              : "text-black/90"
+                            : isDark
+                              ? "text-white/60"
+                              : "text-black/60"
+                        )} />
+                      </div>
                     </button>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
             </div>
 
             {/* Main Content */}
-            <div className="flex-1 p-4 sm:p-6 md:p-8">
+            <div className="flex-1 p-6">
               {activeTab === 'general' && (
                 <div className="space-y-6">
                   <h2 className={cn(
-                    "text-lg sm:text-xl font-semibold",
+                    "text-xl font-semibold",
                     isDark ? "text-white" : "text-black"
                   )}>General Settings</h2>
                   
                   <div className="space-y-6">
-                    <div>
+                    <GlassContainer className="p-6">
                       <h3 className={cn(
-                        "text-base sm:text-lg mb-4",
+                        "text-lg mb-4",
                         isDark ? "text-white" : "text-black"
                       )}>Your Photo</h3>
                       <div className="flex flex-col sm:flex-row items-center gap-4">
-                        <div className="w-16 sm:w-20 h-16 sm:h-20 rounded-2xl bg-gradient-to-r from-blue-500/20 to-purple-500/20 flex items-center justify-center">
-                          <User className="w-8 sm:w-10 h-8 sm:h-10 text-blue-400" />
+                        <div className={cn(
+                          "w-16 h-16 rounded-xl flex items-center justify-center",
+                          isDark ? "bg-white/5" : "bg-black/5"
+                        )}>
+                          <User className={cn(
+                            "w-8 h-8",
+                            isDark ? "text-white/70" : "text-black/70"
+                          )} />
                         </div>
                         <button className={cn(
-                          "px-4 py-2 rounded-xl transition-all w-full sm:w-auto",
-                          "bg-gradient-to-r from-blue-400/30 to-purple-400/30 backdrop-blur-sm",
-                          "border border-white/20",
-                          isDark ? "text-white" : "text-black",
+                          "px-4 py-2 rounded-xl transition-colors w-full sm:w-auto",
+                          isDark 
+                            ? "bg-white/10 hover:bg-white/20 text-white" 
+                            : "bg-black/10 hover:bg-black/20 text-black"
                         )}>
                           Update
                         </button>
                       </div>
-                    </div>
+                    </GlassContainer>
 
-                    <div className="space-y-4">
+                    <GlassContainer className="p-6 space-y-4">
                       <div>
                         <label className={cn(
                           "block text-sm font-medium mb-2",
@@ -108,10 +139,14 @@ export default function Settings() {
                         <input
                           type="text"
                           className={cn(
-                            "w-full px-4 py-2 rounded-xl transition-all",
+                            "w-full px-4 py-2 rounded-xl transition-colors",
                             isDark
                               ? "bg-white/5 border border-white/10 text-white"
-                              : "bg-black/5 border border-black/10 text-black"
+                              : "bg-black/5 border border-black/10 text-black",
+                            "focus:outline-none focus:ring-2",
+                            isDark
+                              ? "focus:ring-white/20"
+                              : "focus:ring-black/20"
                           )}
                           placeholder="Enter your name"
                         />
@@ -124,15 +159,19 @@ export default function Settings() {
                         <input
                           type="email"
                           className={cn(
-                            "w-full px-4 py-2 rounded-xl transition-all",
+                            "w-full px-4 py-2 rounded-xl transition-colors",
                             isDark
                               ? "bg-white/5 border border-white/10 text-white"
-                              : "bg-black/5 border border-black/10 text-black"
+                              : "bg-black/5 border border-black/10 text-black",
+                            "focus:outline-none focus:ring-2",
+                            isDark
+                              ? "focus:ring-white/20"
+                              : "focus:ring-black/20"
                           )}
                           placeholder="Enter your email"
                         />
                       </div>
-                    </div>
+                    </GlassContainer>
                   </div>
                 </div>
               )}
@@ -140,20 +179,17 @@ export default function Settings() {
               {activeTab === '2fa' && (
                 <div className="space-y-6">
                   <h2 className={cn(
-                    "text-lg sm:text-xl font-semibold",
+                    "text-xl font-semibold",
                     isDark ? "text-white" : "text-black"
                   )}>Two-Factor Authentication</h2>
 
-                  <div className={cn(
-                    "p-4 sm:p-6 rounded-xl sm:rounded-2xl",
-                    isDark ? "bg-black/20" : "bg-black/5"
-                  )}>
-                    <div className="space-y-4">
+                  <GlassContainer className="p-6">
+                    <div className="space-y-6">
                       {!showTwoFactor ? (
                         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                           <div>
                             <h3 className={cn(
-                              "text-base sm:text-lg font-medium mb-1",
+                              "text-lg font-medium mb-1",
                               isDark ? "text-white" : "text-black"
                             )}>Enable Two-Factor Auth</h3>
                             <p className={cn(
@@ -166,25 +202,40 @@ export default function Settings() {
                           <button
                             onClick={() => setShowTwoFactor(true)}
                             className={cn(
-                              "px-4 py-2 rounded-xl transition-all w-full sm:w-auto",
-                              "bg-gradient-to-r from-blue-400/30 to-purple-400/30 backdrop-blur-sm",
-                              "border border-white/20",
-                              isDark ? "text-white" : "text-black",
+                              "px-4 py-2 rounded-xl transition-colors w-full sm:w-auto",
+                              isDark 
+                                ? "bg-white/10 hover:bg-white/20 text-white" 
+                                : "bg-black/10 hover:bg-black/20 text-black"
                             )}>
                             Configure
                           </button>
                         </div>
                       ) : (
                         <div className="space-y-6">
-                          <div className="flex items-center gap-2 text-emerald-400">
-                            <Check className="w-5 h-5" />
-                            <span className="text-sm">Scan the QR code with your authenticator app</span>
+                          <div className="flex items-center gap-2">
+                            <div className={cn(
+                              "w-8 h-8 rounded-lg flex items-center justify-center",
+                              isDark ? "bg-emerald-500/20" : "bg-emerald-500/10"
+                            )}>
+                              <Check className={cn(
+                                "w-5 h-5",
+                                isDark ? "text-emerald-400" : "text-emerald-600"
+                              )} />
+                            </div>
+                            <span className={cn(
+                              "text-sm",
+                              isDark ? "text-emerald-400" : "text-emerald-600"
+                            )}>
+                              Scan the QR code with your authenticator app
+                            </span>
                           </div>
                           
-                          <div className="w-36 sm:w-48 h-36 sm:h-48 bg-white p-4 rounded-xl mx-auto">
-                            <div className="w-full h-full bg-black/10 rounded-lg flex items-center justify-center text-sm">
-                              QR Code Placeholder
-                            </div>
+                          <div className="mx-auto">
+                            <GlassContainer className="p-4 w-40 h-40">
+                              <div className="w-full h-full rounded-lg flex items-center justify-center text-sm">
+                                QR Code
+                              </div>
+                            </GlassContainer>
                           </div>
 
                           <div className="space-y-4">
@@ -196,20 +247,24 @@ export default function Settings() {
                               <input
                                 type="text"
                                 className={cn(
-                                  "w-full px-4 py-2 rounded-xl transition-all",
+                                  "w-full px-4 py-2 rounded-xl transition-colors",
                                   isDark
                                     ? "bg-white/5 border border-white/10 text-white"
-                                    : "bg-black/5 border border-black/10 text-black"
+                                    : "bg-black/5 border border-black/10 text-black",
+                                  "focus:outline-none focus:ring-2",
+                                  isDark
+                                    ? "focus:ring-white/20"
+                                    : "focus:ring-black/20"
                                 )}
                                 placeholder="Enter the 6-digit code"
                               />
                             </div>
                             <div className="flex justify-end">
                               <button className={cn(
-                                "px-4 py-2 rounded-xl transition-all w-full sm:w-auto",
-                                "bg-gradient-to-r from-blue-400/30 to-purple-400/30 backdrop-blur-sm",
-                                "border border-white/20",
-                                isDark ? "text-white" : "text-black",
+                                "px-4 py-2 rounded-xl transition-colors",
+                                isDark 
+                                  ? "bg-white/10 hover:bg-white/20 text-white" 
+                                  : "bg-black/10 hover:bg-black/20 text-black"
                               )}>
                                 Verify & Enable
                               </button>
@@ -218,12 +273,12 @@ export default function Settings() {
                         </div>
                       )}
                     </div>
-                  </div>
+                  </GlassContainer>
                 </div>
               )}
             </div>
           </div>
-        </div>
+        </GlassContainer>
       </div>
     </div>
   );
