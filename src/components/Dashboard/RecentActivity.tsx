@@ -1,11 +1,38 @@
-import React, { useState } from 'react';
-import { X } from 'lucide-react';
+// ActivityDashboard.tsx
+import React, { useState, useRef, useEffect } from 'react';
+import { Play, Pause, SkipBack, SkipForward, ChevronDown, ChevronUp, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '../../utils/cn';
 import { useTheme } from '../../hooks/useTheme';
-import ActivityCard from './ActivityCard';
 
-const mockClients = [
+// Types
+interface Client {
+  name: string;
+  priority: string;
+  timestamp: string;
+  appointmentType: string;
+  bookingInProgress: boolean;
+  preferredDay: string;
+  preferredTime: string;
+  callDuration: string;
+  audioUrl: string;
+  meetingSummary: string;
+  conversation: string[];
+}
+
+interface AudioPlayerProps {
+  audioUrl: string;
+  onTimeUpdate?: (currentTime: number) => void;
+}
+
+interface ActivityCardProps {
+  client: Client;
+  isExpanded: boolean;
+  onToggleExpand: () => void;
+}
+
+// Mock Data
+const mockClients: Client[] = [
   {
     name: "John Doe",
     priority: "high",
@@ -15,13 +42,12 @@ const mockClients = [
     preferredDay: "Monday",
     preferredTime: "10:00 AM",
     callDuration: "15:30",
-    meetingSummary: "Discussed medical claim for recent hospital visit. Client requested expedited processing due to urgent nature. Agreed to schedule follow-up next week.",
+    audioUrl: "/sample-audio-1.mp3",
+    meetingSummary: "Discussed medical claim for recent hospital visit. Client requested expedited processing due to urgent nature.",
     conversation: [
       "AI: Hello! I notice this is a high-priority medical claim. How can I assist you today?",
       "Client: I need help with processing my recent hospital claim. It's quite urgent.",
-      "AI: I understand the urgency. I can see your claim from St. Mary's Hospital. Would you like me to expedite this?",
-      "Client: Yes, please. When can I expect to hear back?",
-      "AI: I'll mark this as high priority. You should receive an update within 24-48 hours. Would you like to schedule a follow-up call?"
+      "AI: I'll mark this as high priority. You should receive an update within 24-48 hours."
     ]
   },
   {
@@ -33,13 +59,12 @@ const mockClients = [
     preferredDay: "Wednesday",
     preferredTime: "2:30 PM",
     callDuration: "12:45",
-    meetingSummary: "Reviewed current policy coverage and discussed potential upgrades. Client interested in adding dental coverage. Follow-up scheduled for next week.",
+    audioUrl: "/sample-audio-2.mp3",
+    meetingSummary: "Reviewed current policy coverage and discussed dental coverage options.",
     conversation: [
       "AI: Welcome Sarah! I see you're interested in reviewing your insurance policy.",
       "Client: Yes, I'd like to know more about dental coverage options.",
-      "AI: I'll be happy to help. Your current plan is the Silver Package. Would you like to compare it with plans that include dental?",
-      "Client: That would be great. What are my options?",
-      "AI: Let me show you our Gold and Platinum packages which include comprehensive dental coverage..."
+      "AI: Let me show you our available dental coverage plans."
     ]
   },
   {
@@ -51,155 +76,334 @@ const mockClients = [
     preferredDay: "Friday",
     preferredTime: "11:15 AM",
     callDuration: "18:20",
-    meetingSummary: "Emergency room visit claim review. Client needs immediate assistance with pre-authorization. Escalated to urgent processing.",
+    audioUrl: "/sample-audio-3.mp3",
+    meetingSummary: "Emergency room visit claim review. Escalated to urgent processing.",
     conversation: [
-      "AI: Hello Michael, I see this is regarding an urgent care claim. How can I assist you?",
-      "Client: I need help with a pre-authorization for an ER visit.",
-      "AI: I understand this is time-sensitive. I'm looking at your case now. When did the ER visit occur?",
-      "Client: Last night around 9 PM.",
-      "AI: Thank you. I'm expediting this case right now. Let me walk you through the process..."
+      "AI: Hello Michael, I see this is regarding an urgent care claim.",
+      "Client: Yes, I need help with a pre-authorization for an ER visit.",
+      "AI: I'm expediting this case right now."
     ]
-  }
+  },
+  // Add more mock clients...
 ];
 
-interface RecentActivityDetailProps {
-  onClose: () => void;
-}
-
-export default function RecentActivityDetail({ onClose }: RecentActivityDetailProps) {
+// Audio Player Component
+function AudioPlayer({ audioUrl, onTimeUpdate }: AudioPlayerProps) {
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const audioRef = useRef<HTMLAudioElement>(null);
   const { isDark } = useTheme();
-  const [expandedId, setExpandedId] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.addEventListener('loadedmetadata', () => {
+        setDuration(audioRef.current?.duration || 0);
+      });
+
+      audioRef.current.addEventListener('timeupdate', () => {
+        setCurrentTime(audioRef.current?.currentTime || 0);
+        onTimeUpdate?.(audioRef.current?.currentTime || 0);
+      });
+
+      // Cleanup listeners
+      return () => {
+        if (audioRef.current) {
+          audioRef.current.removeEventListener('loadedmetadata', () => {});
+          audioRef.current.removeEventListener('timeupdate', () => {});
+        }
+      };
+    }
+  }, [onTimeUpdate]);
+
+  const togglePlayPause = () => {
+    if (audioRef.current) {
+      if (isPlaying) {
+        audioRef.current.pause();
+      } else {
+        audioRef.current.play();
+      }
+      setIsPlaying(!isPlaying);
+    }
+  };
+
+  const skipBackward = () => {
+    if (audioRef.current) {
+      audioRef.current.currentTime = Math.max(0, currentTime - 10);
+    }
+  };
+
+  const skipForward = () => {
+    if (audioRef.current) {
+      audioRef.current.currentTime = Math.min(duration, currentTime + 10);
+    }
+  };
+
+  const formatTime = (time: number) => {
+    const minutes = Math.floor(time / 60);
+    const seconds = Math.floor(time % 60);
+    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+  };
+
+  const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const time = parseFloat(e.target.value);
+    if (audioRef.current) {
+      audioRef.current.currentTime = time;
+      setCurrentTime(time);
+    }
+  };
 
   return (
-    <>
-      {/* Desktop View */}
-      <div className="hidden md:block">
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className={cn(
-            "fixed inset-0 z-50",
-            isDark ? "bg-black/90" : "bg-white/90",
-            "backdrop-blur-xl"
-          )}
-        >
-          <div className={cn(
-            "sticky top-0 z-10 px-6 py-4",
-            isDark ? "bg-black/90" : "bg-white/90",
-            "backdrop-blur-xl border-b",
-            isDark ? "border-white/10" : "border-black/10"
-          )}>
-            <div className="max-w-7xl mx-auto">
-              <div className="flex justify-between items-center">
-                <h2 className={cn(
-                  "text-2xl font-bold",
-                  isDark ? "text-white" : "text-black"
-                )}>
-                  Recent Client Activities
-                </h2>
-                <button
-                  onClick={onClose}
-                  className={cn(
-                    "p-2 rounded-lg transition-colors",
-                    isDark
-                      ? "hover:bg-white/10 text-white"
-                      : "hover:bg-black/10 text-black"
-                  )}
-                >
-                  <X className="w-6 h-6" />
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <div className="h-[calc(100%-4rem)] overflow-y-auto">
-            <div className="px-6 py-4">
-              <div className="max-w-7xl mx-auto">
-                <motion.div 
-                  layout
-                  className="grid grid-cols-2 lg:grid-cols-3 gap-6"
-                >
-                  <AnimatePresence mode="popLayout">
-                    {mockClients.map((client, index) => (
-                      <div key={index}>
-                        <ActivityCard
-                          client={client}
-                          isExpanded={expandedId === index}
-                          onExpand={() => setExpandedId(expandedId === index ? null : index)}
-                        />
-                      </div>
-                    ))}
-                  </AnimatePresence>
-                </motion.div>
-              </div>
-            </div>
-          </div>
-        </motion.div>
+    <div className="space-y-2">
+      <audio ref={audioRef} src={audioUrl} />
+      
+      {/* Progress bar */}
+      <div className="relative w-full h-1 bg-gray-200 rounded-full">
+        <input
+          type="range"
+          min={0}
+          max={duration}
+          value={currentTime}
+          onChange={handleSeek}
+          className="absolute w-full h-full opacity-0 cursor-pointer"
+        />
+        <div 
+          className="h-full bg-blue-500 rounded-full"
+          style={{ width: `${(currentTime / duration) * 100}%` }}
+        />
+      </div>
+      
+      {/* Time display */}
+      <div className="flex justify-between text-sm">
+        <span>{formatTime(currentTime)}</span>
+        <span>{formatTime(duration)}</span>
       </div>
 
-      {/* Mobile View */}
-      <div className="md:hidden">
-        <motion.div
-          initial={{ y: "100%" }}
-          animate={{ y: 0 }}
-          exit={{ y: "100%" }}
-          transition={{ type: "spring", damping: 25, stiffness: 500 }}
+      {/* Controls */}
+      <div className="flex items-center justify-center gap-4">
+        <button
+          onClick={skipBackward}
           className={cn(
-            "fixed bottom-0 left-0 right-0 z-50",
-            "h-[85vh]",
-            isDark ? "bg-black" : "bg-white",
-            "rounded-t-xl border-t",
-            isDark ? "border-white/10" : "border-black/10"
+            "p-2 rounded-full transition-colors",
+            isDark ? "hover:bg-white/10" : "hover:bg-black/10"
           )}
         >
-          {/* Mobile Header */}
-          <div className={cn(
-            "sticky top-0 z-10 px-4 py-3",
-            isDark ? "bg-black" : "bg-white",
-            "border-b",
-            isDark ? "border-white/10" : "border-black/10"
-          )}>
-            <div className="flex justify-between items-center">
-              <h2 className={cn(
-                "text-lg font-semibold",
-                isDark ? "text-white" : "text-black"
-              )}>
-                Recent Client Activities
-              </h2>
-              <button
-                onClick={onClose}
-                className={cn(
-                  "p-2 rounded-lg transition-colors",
-                  isDark
-                    ? "hover:bg-white/10 text-white"
-                    : "hover:bg-black/10 text-black"
-                )}
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-          </div>
+          <SkipBack className="w-5 h-5" />
+        </button>
 
-          {/* Mobile Content */}
-          <div className="h-[calc(100%-3.5rem)] overflow-y-auto overscroll-contain px-4 py-3">
-            <motion.div layout className="flex flex-col gap-3">
-              <AnimatePresence mode="popLayout">
-                {mockClients.map((client, index) => (
-                  <div key={index}>
-                    <ActivityCard
-                      client={client}
-                      isExpanded={expandedId === index}
-                      onExpand={() => setExpandedId(expandedId === index ? null : index)}
-                    />
-                  </div>
-                ))}
-              </AnimatePresence>
-            </motion.div>
-          </div>
-        </motion.div>
+        <button
+          onClick={togglePlayPause}
+          className={cn(
+            "p-3 rounded-full transition-colors",
+            isDark ? "bg-white/10 hover:bg-white/20" : "bg-black/10 hover:bg-black/20"
+          )}
+        >
+          {isPlaying ? (
+            <Pause className="w-6 h-6" />
+          ) : (
+            <Play className="w-6 h-6" />
+          )}
+        </button>
+
+        <button
+          onClick={skipForward}
+          className={cn(
+            "p-2 rounded-full transition-colors",
+            isDark ? "hover:bg-white/10" : "hover:bg-black/10"
+          )}
+        >
+          <SkipForward className="w-5 h-5" />
+        </button>
       </div>
-    </>
+    </div>
   );
 }
 
+// Activity Card Component
+function ActivityCard({ client, isExpanded, onToggleExpand }: ActivityCardProps) {
+  const { isDark } = useTheme();
+
+  return (
+    <motion.div
+      layout
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      className={cn(
+        "p-4 rounded-xl transition-all",
+        isDark ? "bg-white/5" : "bg-black/5",
+        "border",
+        isDark ? "border-white/10" : "border-black/10"
+      )}
+    >
+      <div className="space-y-4">
+        {/* Header */}
+        <div className="flex justify-between items-start">
+          <div>
+            <h3 className={cn(
+              "font-semibold",
+              isDark ? "text-white" : "text-black"
+            )}>{client.name}</h3>
+            <p className={cn(
+              "text-sm",
+              isDark ? "text-white/60" : "text-black/60"
+            )}>{client.appointmentType}</p>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className={cn(
+              "px-2 py-1 text-xs rounded-full",
+              client.priority === "high" 
+                ? "bg-red-500/10 text-red-500" 
+                : "bg-yellow-500/10 text-yellow-500"
+            )}>
+              {client.priority}
+            </span>
+            <button
+              onClick={onToggleExpand}
+              className={cn(
+                "p-1 rounded-lg transition-colors",
+                isDark ? "hover:bg-white/10" : "hover:bg-black/10"
+              )}
+            >
+              {isExpanded ? (
+                <ChevronUp className="w-5 h-5" />
+              ) : (
+                <ChevronDown className="w-5 h-5" />
+              )}
+            </button>
+          </div>
+        </div>
+
+        {/* Basic Info */}
+        <div className={cn(
+          "text-sm",
+          isDark ? "text-white/60" : "text-black/60"
+        )}>
+          <p>{client.timestamp}</p>
+          <p>Duration: {client.callDuration}</p>
+        </div>
+
+        {/* Expanded Content */}
+        <AnimatePresence>
+          {isExpanded && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.3 }}
+              className="space-y-4"
+            >
+              {/* Audio Player */}
+              <div className="border-t border-b py-4">
+                <AudioPlayer audioUrl={client.audioUrl} />
+              </div>
+
+              {/* Meeting Summary */}
+              <div>
+                <h4 className="font-medium mb-2">Meeting Summary</h4>
+                <p className="text-sm">{client.meetingSummary}</p>
+              </div>
+              
+              {/* Conversation */}
+              <div>
+                <h4 className="font-medium mb-2">Conversation</h4>
+                <div className="space-y-2">
+                  {client.conversation.map((message, index) => (
+                    <p key={index} className={cn(
+                      "text-sm",
+                      isDark ? "text-white/80" : "text-black/80"
+                    )}>
+                      {message}
+                    </p>
+                  ))}
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    </motion.div>
+  );
+}
+
+// Main Dashboard Component
+export default function ActivityDashboard() {
+  const { isDark } = useTheme();
+  const [expandedId, setExpandedId] = useState<number | null>(null);
+  const [showAll, setShowAll] = useState(false);
+  const displayedClients = showAll ? mockClients : mockClients.slice(0, 3);
+
+  return (
+    <motion.div
+      layout
+      className={cn(
+        "rounded-xl p-6",
+        isDark ? "bg-white/5" : "bg-black/5",
+        "border",
+        isDark ? "border-white/10" : "border-black/10"
+      )}
+    >
+      <div className="flex justify-between items-center mb-6">
+        <h2 className={cn(
+          "text-xl font-semibold",
+          isDark ? "text-white" : "text-black"
+        )}>
+          Recent Activities
+        </h2>
+        <button
+          onClick={() => setShowAll(!showAll)}
+          className={cn(
+            "flex items-center gap-2 px-3 py-1.5 rounded-lg transition-colors",
+            isDark 
+              ? "hover:bg-white/10 text-white" 
+              : "hover:bg-black/10 text-black"
+          )}
+        >
+          {showAll ? 'Show Less' : 'View All'}
+          <ChevronRight className={cn(
+            "w-4 h-4 transition-transform",
+            showAll ? "rotate-90" : ""
+          )} />
+        </button>
+      </div>
+
+      <motion.div 
+        layout
+        className="space-y-4"
+      >
+        <AnimatePresence mode="popLayout">
+          {displayedClients.map((client, index) => (
+            <motion.div
+              key={index}
+              layout
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+            >
+              <ActivityCard
+                client={client}
+                isExpanded={expandedId === index}
+                onToggleExpand={() => setExpandedId(expandedId === index ? null : index)}
+              />
+            </motion.div>
+          ))}
+        </AnimatePresence>
+
+        {/* Placeholder when no activities */}
+        {displayedClients.length === 0 && (
+          <div className={cn(
+            "p-8 text-center rounded-xl",
+            isDark ? "bg-white/5" : "bg-black/5"
+          )}>
+            <p className={cn(
+              "text-lg font-medium",
+              isDark ? "text-white/60" : "text-black/60"
+            )}>
+              No recent activities
+            </p>
+          </div>
+        )}
+      </motion.div>
+    </motion.div>
+  );
+}
