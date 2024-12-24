@@ -15,16 +15,20 @@ export default function AnalyticsCard({ title, value, change, icon: Icon }: Anal
 
   return (
     <div className={cn(
-      "p-6 rounded-xl relative group transition-all duration-200",
-      "border",
+      "relative overflow-hidden",
+      "rounded-xl p-6",
       isDark 
-        ? "bg-white/5 hover:bg-white/[0.07] border-white/10" 
-        : "bg-black/5 hover:bg-black/[0.07] border-black/10",
-      "backdrop-blur-lg"
+        ? "bg-black/40 border border-white/[0.08]" 
+        : "bg-white/40 border border-black/[0.08]",
+      "backdrop-blur-xl",
+      "transition-all duration-200",
+      "hover:shadow-lg",
+      isDark 
+        ? "hover:bg-black/50 hover:border-white/[0.12]" 
+        : "hover:bg-white/50 hover:border-black/[0.12]"
     )}>
-      {/* Content */}
-      <div className="flex justify-between items-start">
-        <div>
+      <div className="flex justify-between items-start mb-4">
+        <div className="space-y-1">
           <p className={cn(
             "text-sm font-medium",
             isDark ? "text-white/60" : "text-black/60"
@@ -32,30 +36,27 @@ export default function AnalyticsCard({ title, value, change, icon: Icon }: Anal
             {title}
           </p>
           <h3 className={cn(
-            "text-2xl font-bold mt-1",
-            isDark ? "text-white/90" : "text-black"
+            "text-2xl font-semibold",
+            isDark ? "text-white" : "text-black"
           )}>
             {value}
           </h3>
         </div>
         
         <div className={cn(
-          "p-2 rounded-lg transition-colors",
+          "p-2 rounded-lg",
           isDark
-            ? "bg-white/5 group-hover:bg-white/10"
-            : "bg-black/5 group-hover:bg-black/10"
+            ? "bg-white/[0.06] text-white/70"
+            : "bg-black/[0.06] text-black/70"
         )}>
-          <Icon className={cn(
-            "w-6 h-6",
-            isDark ? "text-white/60" : "text-black/60"
-          )} />
+          <Icon className="w-5 h-5" />
         </div>
       </div>
 
-      <div className="flex items-center gap-2 mt-4">
+      <div className="flex items-center gap-2">
         <span className={cn(
           "text-sm font-medium",
-          isPositive ? "text-emerald-400" : "text-red-400"
+          isPositive ? "text-emerald-500" : "text-red-500"
         )}>
           {isPositive ? '+' : ''}{change}%
         </span>
@@ -63,7 +64,7 @@ export default function AnalyticsCard({ title, value, change, icon: Icon }: Anal
           "text-sm",
           isDark ? "text-white/40" : "text-black/40"
         )}>
-          from last month
+          vs last month
         </span>
       </div>
     </div>

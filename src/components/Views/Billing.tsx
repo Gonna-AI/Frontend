@@ -61,12 +61,54 @@ export default function Billing() {
 
   const GlassContainer = ({ children, className }: { children: React.ReactNode, className?: string }) => (
     <div className={cn(
-      "p-6 rounded-2xl transition-all",
-      "border backdrop-blur-lg",
+      "relative overflow-hidden",
+      "rounded-xl p-6",
+      "border backdrop-blur-xl",
       isDark 
-        ? "bg-white/5 border-white/10" 
-        : "bg-black/5 border-black/10",
+        ? "bg-black/40 border-white/[0.08]" 
+        : "bg-white/40 border-black/[0.08]",
+      "transition-all duration-200",
+      "hover:shadow-lg",
+      isDark 
+        ? "hover:bg-black/50 hover:border-white/[0.12]" 
+        : "hover:bg-white/50 hover:border-black/[0.12]",
       className
+    )}>
+      {children}
+    </div>
+  );
+
+  const InnerGlassContainer = ({ children, className }: { children: React.ReactNode, className?: string }) => (
+    <div className={cn(
+      "rounded-xl backdrop-blur-sm",
+      isDark 
+        ? "bg-white/[0.06] border-white/[0.08]" 
+        : "bg-black/[0.06] border-black/[0.08]",
+      className
+    )}>
+      {children}
+    </div>
+  );
+
+  const GlassButton = ({ children, className }: { children: React.ReactNode, className?: string }) => (
+    <button className={cn(
+      "px-6 py-2 rounded-xl",
+      "backdrop-blur-sm transition-all duration-200",
+      isDark 
+        ? "bg-white/10 hover:bg-white/20 text-white border border-white/[0.08]" 
+        : "bg-black/10 hover:bg-black/20 text-black border border-black/[0.08]",
+      className
+    )}>
+      {children}
+    </button>
+  );
+
+  const IconContainer = ({ children }: { children: React.ReactNode }) => (
+    <div className={cn(
+      "w-12 h-12 rounded-xl flex items-center justify-center backdrop-blur-sm",
+      isDark 
+        ? "bg-white/[0.06] border border-white/[0.08]" 
+        : "bg-black/[0.06] border border-black/[0.08]"
     )}>
       {children}
     </div>
@@ -205,15 +247,19 @@ export default function Billing() {
             key={plan.name}
             className={cn(
               "transition-transform duration-200 hover:scale-[1.02]",
-              plan.recommended && "ring-2 ring-purple-500"
+              plan.recommended && (
+                isDark 
+                  ? "ring-2 ring-purple-400/50" 
+                  : "ring-2 ring-purple-600/50"
+              )
             )}
           >
             {plan.recommended && (
               <div className={cn(
-                "absolute top-3 right-3 px-3 py-1 rounded-full text-xs font-medium",
+                "absolute top-3 right-3 px-3 py-1 rounded-full text-xs font-medium backdrop-blur-xl",
                 isDark 
-                  ? "bg-purple-500 text-white" 
-                  : "bg-purple-600 text-white"
+                  ? "bg-purple-400/20 text-purple-200 border border-purple-400/30" 
+                  : "bg-purple-600/20 text-purple-800 border border-purple-600/30"
               )}>
                 Recommended
               </div>
@@ -271,13 +317,13 @@ export default function Billing() {
         
         <div className="space-y-4">
           {transactions.map((transaction) => (
-            <div
+            <InnerGlassContainer
               key={transaction.id}
               className={cn(
-                "flex items-center justify-between p-4 rounded-xl transition-colors",
+                "flex items-center justify-between p-4 transition-all duration-200",
                 isDark 
-                  ? "bg-white/5 hover:bg-white/10" 
-                  : "bg-black/5 hover:bg-black/10"
+                  ? "hover:bg-white/10" 
+                  : "hover:bg-black/10"
               )}
             >
               <div className="flex items-center space-x-4">
@@ -313,7 +359,7 @@ export default function Billing() {
                 )}>${transaction.amount}</span>
                 <ChevronRight className={isDark ? "text-white/40" : "text-black/40"} />
               </div>
-            </div>
+            </InnerGlassContainer>
           ))}
         </div>
       </GlassContainer>
