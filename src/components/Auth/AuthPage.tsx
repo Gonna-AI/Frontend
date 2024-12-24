@@ -2,17 +2,75 @@ import React, { useState } from 'react';
 import { GalleryVerticalEnd } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import { auth, LoginData, SignupData } from '../../services/auth';
 
 interface AuthFormProps extends React.ComponentPropsWithoutRef<"div"> {
   className?: string;
   onGuestLogin: () => void;
+  onSuccess?: () => void;
 }
 
-function AuthForm({ className, onGuestLogin, ...props }: AuthFormProps) {
+function AuthForm({ className, onGuestLogin, onSuccess, ...props }: AuthFormProps) {
   const [isLogin, setIsLogin] = useState(true);
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+    name: '',
+    confirmPassword: ''
+  });
+  const [error, setError] = useState('');
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+
+    try {
+      if (isLogin) {
+        await auth.login({
+          email: formData.email,
+          password: formData.password
+        });
+      } else {
+        if (formData.password !== formData.confirmPassword) {
+          setError('Passwords do not match');
+          return;
+        }
+        await auth.signup({
+          email: formData.email,
+          password: formData.password,
+          name: formData.name
+        });
+      }
+      onSuccess?.();
+    } catch (error: any) {
+      setError(error.response?.data?.error || 'An error occurred');
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    try {
+      const { auth_url } = await auth.googleLogin();
+      sessionStorage.setItem('redirectUrl', window.location.pathname);
+      window.location.href = auth_url;
+    } catch (error) {
+      setError('Google login failed');
+    }
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({
+      ...formData,
+      [e.target.id]: e.target.value
+    });
+  };
 
   return (
     <div className="flex flex-col gap-6" {...props}>
+      {error && (
+        <div className="bg-red-500/10 border border-red-500/50 text-red-400 p-3 rounded-lg text-sm">
+          {error}
+        </div>
+      )}
       <div className="bg-black/40 backdrop-blur-xl border border-white/10 rounded-xl overflow-hidden">
         <div className="p-6 text-center">
           <h2 className="text-xl font-semibold text-white">
@@ -26,7 +84,7 @@ function AuthForm({ className, onGuestLogin, ...props }: AuthFormProps) {
           </p>
         </div>
         <div className="p-6">
-          <form>
+          <form onSubmit={handleSubmit}>
             <div className="grid gap-6">
               {!isLogin && (
                 <div className="grid gap-2">
@@ -38,6 +96,8 @@ function AuthForm({ className, onGuestLogin, ...props }: AuthFormProps) {
                     type="text"
                     placeholder="John Doe"
                     required
+                    value={formData.name}
+                    onChange={handleInputChange}
                     className="w-full px-3 py-2 bg-gray-800/50 border border-gray-700/50 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-500/30 focus:border-transparent"
                   />
                 </div>
@@ -52,6 +112,8 @@ function AuthForm({ className, onGuestLogin, ...props }: AuthFormProps) {
                   type="email"
                   placeholder="m@example.com"
                   required
+                  value={formData.email}
+                  onChange={handleInputChange}
                   className="w-full px-3 py-2 bg-gray-800/50 border border-gray-700/50 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-500/30 focus:border-transparent"
                 />
               </div>
@@ -71,6 +133,8 @@ function AuthForm({ className, onGuestLogin, ...props }: AuthFormProps) {
                   id="password"
                   type="password"
                   required
+                  value={formData.password}
+                  onChange={handleInputChange}
                   className="w-full px-3 py-2 bg-gray-800/50 border border-gray-700/50 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-500/30 focus:border-transparent"
                 />
               </div>
@@ -84,6 +148,8 @@ function AuthForm({ className, onGuestLogin, ...props }: AuthFormProps) {
                     id="confirmPassword"
                     type="password"
                     required
+                    value={formData.confirmPassword}
+                    onChange={handleInputChange}
                     className="w-full px-3 py-2 bg-gray-800/50 border border-gray-700/50 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-500/30 focus:border-transparent"
                   />
                 </div>
@@ -98,7 +164,11 @@ function AuthForm({ className, onGuestLogin, ...props }: AuthFormProps) {
                       </svg>
                       Login with Apple
                     </button>
-                    <button className="w-full py-2 px-4 bg-gray-800/50 text-white border border-gray-700/50 rounded-lg hover:bg-gray-700/50 transition-colors flex items-center justify-center gap-2">
+                    <button
+                      type="button"
+                      onClick={handleGoogleLogin}
+                      className="w-full py-2 px-4 bg-gray-800/50 text-white border border-gray-700/50 rounded-lg hover:bg-gray-700/50 transition-colors flex items-center justify-center gap-2"
+                    >
                       <svg className="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
                         <path d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z" fill="currentColor"/>
                       </svg>
@@ -181,6 +251,11 @@ export default function AuthPage({ setIsSignedIn }: AuthPageProps) {
     navigate('/dashboard');
   };
 
+  const handleSuccess = () => {
+    setIsSignedIn(true);
+    navigate('/dashboard');
+  };
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-6 md:p-10 relative bg-[#0a0a0a]">
       <div 
@@ -203,7 +278,7 @@ export default function AuthPage({ setIsSignedIn }: AuthPageProps) {
           </div>
           gonna.ai
         </a>
-        <AuthForm onGuestLogin={handleGuestLogin} />
+        <AuthForm onSuccess={handleSuccess} onGuestLogin={handleGuestLogin} />
       </motion.div>
     </div>
   );

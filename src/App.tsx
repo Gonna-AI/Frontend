@@ -7,21 +7,55 @@ import { Dashboard, AISettings, Profile, Billing, Settings } from './components/
 import { useTheme } from './hooks/useTheme';
 import { cn } from './utils/cn';
 import AuthPage from './components/Auth/AuthPage';
+import { auth } from './services/auth';
+import GoogleCallback from './components/Auth/GoogleCallback';
 
 function App() {
   const { isDark } = useTheme();
   const [isSignedIn, setIsSignedIn] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
 
   useEffect(() => {
-    document.documentElement.classList.toggle('dark', isDark);
-  }, [isDark]);
+    checkAuthStatus();
+    
+    // Listen for auth state changes
+    const handleAuthStateChange = (event: CustomEvent) => {
+      setIsSignedIn(event.detail.isAuthenticated);
+    };
 
-  const handleSignOut = () => {
-    setIsSignedIn(false);
-    setIsSidebarExpanded(false);
+    window.addEventListener('auth-state-changed', handleAuthStateChange as EventListener);
+
+    return () => {
+      window.removeEventListener('auth-state-changed', handleAuthStateChange as EventListener);
+    };
+  }, []);
+
+  const checkAuthStatus = async () => {
+    try {
+      const response = await auth.checkAuth();
+      setIsSignedIn(response.isAuthenticated);
+    } catch (error) {
+      setIsSignedIn(false);
+    } finally {
+      setIsLoading(false);
+    }
   };
+
+  const handleSignOut = async () => {
+    try {
+      await auth.logout();
+      setIsSignedIn(false);
+      setIsSidebarExpanded(false);
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
+  };
+
+  if (isLoading) {
+    return <div>Loading...</div>; // Add a proper loading component
+  }
 
   // Protected Route wrapper
   const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -115,6 +149,8 @@ function App() {
 
         {/* Catch all route */}
         <Route path="*" element={<Navigate to="/" />} />
+
+        <Route path="/auth/google/callback" element={<GoogleCallback />} />
       </Routes>
     </BrowserRouter>
   );
