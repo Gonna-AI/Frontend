@@ -44,162 +44,183 @@ const transactions = [
 export default function Billing() {
   const { isDark } = useTheme();
 
-  const renderUsageBar = (used, total) => {
+  const renderUsageBar = (used: number, total: number) => {
     const percentage = Math.min((used / total) * 100, 100);
     return (
-      <div className="h-2 w-full bg-white/10 rounded-full overflow-hidden">
+      <div className="h-1.5 w-full bg-gray-200 dark:bg-white/10 rounded-full overflow-hidden">
         <div 
-          className="h-full bg-gradient-to-r from-blue-500 to-purple-500 transition-all duration-500"
+          className={cn(
+            "h-full transition-all duration-500 rounded-full",
+            isDark ? "bg-purple-500" : "bg-purple-600"
+          )}
           style={{ width: `${percentage}%` }}
         />
       </div>
     );
   };
 
+  const GlassContainer = ({ children, className }: { children: React.ReactNode, className?: string }) => (
+    <div className={cn(
+      "p-6 rounded-2xl transition-all",
+      "border backdrop-blur-lg",
+      isDark 
+        ? "bg-white/5 border-white/10" 
+        : "bg-black/5 border-black/10",
+      className
+    )}>
+      {children}
+    </div>
+  );
+
   return (
     <div className="p-4 md:p-6 max-w-6xl mx-auto space-y-6">
-      {/* Current Plan Section */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-white/10 via-white/5 to-transparent border border-white/20 backdrop-blur-xl p-8">
-        <div className="absolute top-0 right-0 w-[35rem] h-[35rem] bg-gradient-to-bl from-blue-500/20 via-purple-500/5 to-transparent blur-3xl pointer-events-none" />
-        
-        <div className="relative z-10">
-          <div className="flex items-center justify-between mb-8">
-            <div className="flex items-center space-x-4">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-r from-blue-500/20 to-purple-500/20 border border-white/10 flex items-center justify-center">
-                <Package className="w-6 h-6 text-blue-400" />
-              </div>
-              <div>
-                <h3 className={cn(
-                  "text-xl font-bold",
-                  isDark ? "text-white" : "text-black"
-                )}>Pro Plan</h3>
-                <p className={isDark ? "text-white/60" : "text-black/60"}>
-                  Next billing date: April 15, 2024
-                </p>
-              </div>
-            </div>
-            <button className={cn(
-              "px-6 py-2 rounded-xl transition-all",
-              "bg-gradient-to-r from-blue-400/30 to-purple-400/30 backdrop-blur-sm",
-              "border border-white/20",
-              "shadow-[inset_0_0_0_1px_rgba(255,255,255,0.1)]",
-              isDark ? "text-white" : "text-black",
-              "hover:from-blue-400/40 hover:to-purple-400/40"
-            )}>
-              Change Plan
-            </button>
-          </div>
-
-          {/* API Usage Section */}
-          <div className="space-y-6">
-            <div>
-              <div className="flex justify-between text-sm mb-2">
-                <span className={isDark ? "text-white/60" : "text-black/60"}>
-                  API Calls (This Month)
-                </span>
-                <span className={isDark ? "text-white/60" : "text-black/60"}>
-                  25,420 / 50,000
-                </span>
-              </div>
-              {renderUsageBar(25420, 50000)}
-            </div>
-
-            <div>
-              <div className="flex justify-between text-sm mb-2">
-                <span className={isDark ? "text-white/60" : "text-black/60"}>
-                  Active Tokens
-                </span>
-                <span className={isDark ? "text-white/60" : "text-black/60"}>
-                  3 / 5
-                </span>
-              </div>
-              {renderUsageBar(3, 5)}
-            </div>
-
+      {/* Current Plan */}
+      <GlassContainer>
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center space-x-4">
             <div className={cn(
-              "mt-6 p-4 rounded-2xl",
-              "bg-gradient-to-r from-blue-400/10 to-purple-400/10",
-              "border border-white/10 backdrop-blur-sm"
+              "w-12 h-12 rounded-xl flex items-center justify-center",
+              isDark ? "bg-white/5" : "bg-black/5"
             )}>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <Activity className="w-5 h-5 text-blue-400" />
-                  <span className={isDark ? "text-white/80" : "text-black/80"}>
-                    API Health
-                  </span>
-                </div>
-                <span className={cn(
-                  "px-3 py-1 rounded-full text-sm",
-                  "bg-emerald-400/20 text-emerald-400"
-                )}>
-                  Optimal
+              <Package className={cn(
+                "w-6 h-6",
+                isDark ? "text-purple-400" : "text-purple-600"
+              )} />
+            </div>
+            <div>
+              <h3 className={cn(
+                "text-xl font-semibold",
+                isDark ? "text-white" : "text-black"
+              )}>Pro Plan</h3>
+              <p className={isDark ? "text-white/60" : "text-black/60"}>
+                Next billing date: April 15, 2024
+              </p>
+            </div>
+          </div>
+          <button className={cn(
+            "px-6 py-2 rounded-xl transition-colors",
+            isDark 
+              ? "bg-white/10 hover:bg-white/20 text-white" 
+              : "bg-black/10 hover:bg-black/20 text-black"
+          )}>
+            Change Plan
+          </button>
+        </div>
+
+        {/* API Usage */}
+        <div className="space-y-6">
+          <div>
+            <div className="flex justify-between text-sm mb-2">
+              <span className={isDark ? "text-white/60" : "text-black/60"}>
+                API Calls (This Month)
+              </span>
+              <span className={isDark ? "text-white/60" : "text-black/60"}>
+                25,420 / 50,000
+              </span>
+            </div>
+            {renderUsageBar(25420, 50000)}
+          </div>
+
+          <div>
+            <div className="flex justify-between text-sm mb-2">
+              <span className={isDark ? "text-white/60" : "text-black/60"}>
+                Active Tokens
+              </span>
+              <span className={isDark ? "text-white/60" : "text-black/60"}>
+                3 / 5
+              </span>
+            </div>
+            {renderUsageBar(3, 5)}
+          </div>
+
+          <div className={cn(
+            "p-4 rounded-xl",
+            isDark ? "bg-white/5" : "bg-black/5"
+          )}>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Activity className={cn(
+                  isDark ? "text-purple-400" : "text-purple-600"
+                )} />
+                <span className={isDark ? "text-white/80" : "text-black/80"}>
+                  API Health
                 </span>
               </div>
+              <span className={cn(
+                "px-3 py-1 rounded-full text-sm",
+                isDark 
+                  ? "bg-emerald-500/20 text-emerald-400"
+                  : "bg-emerald-500/10 text-emerald-600"
+              )}>
+                Optimal
+              </span>
             </div>
           </div>
         </div>
-      </div>
+      </GlassContainer>
 
-      {/* Payment Method Section */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-white/10 via-white/5 to-transparent border border-white/20 backdrop-blur-xl p-8">
-        <div className="absolute top-0 right-0 w-[35rem] h-[35rem] bg-gradient-to-bl from-purple-500/20 via-blue-500/5 to-transparent blur-3xl pointer-events-none" />
+      {/* Payment Method */}
+      <GlassContainer>
+        <h2 className={cn(
+          "text-xl font-semibold mb-6",
+          isDark ? "text-white" : "text-black"
+        )}>Payment Method</h2>
         
-        <div className="relative z-10">
-          <h2 className={cn(
-            "text-xl font-bold mb-6",
-            isDark ? "text-white" : "text-black"
-          )}>Payment Method</h2>
-          
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-r from-blue-500/20 to-purple-500/20 border border-white/10 flex items-center justify-center">
-                <CreditCard className="w-6 h-6 text-purple-400" />
-              </div>
-              <div>
-                <h3 className={cn(
-                  "text-lg font-medium",
-                  isDark ? "text-white" : "text-black"
-                )}>•••• •••• •••• 4242</h3>
-                <p className={isDark ? "text-white/60" : "text-black/60"}>
-                  Expires 12/25
-                </p>
-              </div>
-            </div>
-            <button className={cn(
-              "px-6 py-2 rounded-xl transition-all",
-              "bg-gradient-to-r from-blue-400/30 to-purple-400/30 backdrop-blur-sm",
-              "border border-white/20",
-              "shadow-[inset_0_0_0_1px_rgba(255,255,255,0.1)]",
-              isDark ? "text-white" : "text-black",
-              "hover:from-blue-400/40 hover:to-purple-400/40"
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <div className={cn(
+              "w-12 h-12 rounded-xl flex items-center justify-center",
+              isDark ? "bg-white/5" : "bg-black/5"
             )}>
-              Update
-            </button>
+              <CreditCard className={cn(
+                "w-6 h-6",
+                isDark ? "text-purple-400" : "text-purple-600"
+              )} />
+            </div>
+            <div>
+              <h3 className={cn(
+                "text-lg font-medium",
+                isDark ? "text-white" : "text-black"
+              )}>•••• •••• •••• 4242</h3>
+              <p className={isDark ? "text-white/60" : "text-black/60"}>
+                Expires 12/25
+              </p>
+            </div>
           </div>
+          <button className={cn(
+            "px-6 py-2 rounded-xl transition-colors",
+            isDark 
+              ? "bg-white/10 hover:bg-white/20 text-white" 
+              : "bg-black/10 hover:bg-black/20 text-black"
+          )}>
+            Update
+          </button>
         </div>
-      </div>
+      </GlassContainer>
 
-      {/* Plans Section */}
+      {/* Plans */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {plans.map((plan) => (
-          <div
+          <GlassContainer
             key={plan.name}
             className={cn(
-              "relative overflow-hidden rounded-3xl border backdrop-blur-xl p-8",
-              "bg-gradient-to-br from-white/5 via-white/10 to-transparent",
-              "transition-all duration-300 hover:scale-105",
-              "border-white/20",
-              plan.recommended && "ring-2 ring-blue-500"
+              "transition-transform duration-200 hover:scale-[1.02]",
+              plan.recommended && "ring-2 ring-purple-500"
             )}
           >
             {plan.recommended && (
-              <div className="absolute top-3 right-3 px-3 py-1 rounded-full text-xs font-medium bg-blue-500 text-white">
+              <div className={cn(
+                "absolute top-3 right-3 px-3 py-1 rounded-full text-xs font-medium",
+                isDark 
+                  ? "bg-purple-500 text-white" 
+                  : "bg-purple-600 text-white"
+              )}>
                 Recommended
               </div>
             )}
             
             <h3 className={cn(
-              "text-xl font-bold mb-2",
+              "text-xl font-semibold mb-2",
               isDark ? "text-white" : "text-black"
             )}>{plan.name}</h3>
             
@@ -214,7 +235,10 @@ export default function Billing() {
             <ul className="space-y-3 mb-6">
               {plan.features.map((feature, index) => (
                 <li key={index} className="flex items-center space-x-3">
-                  <Shield className="w-5 h-5 text-blue-400" />
+                  <Shield className={cn(
+                    "w-5 h-5",
+                    isDark ? "text-purple-400" : "text-purple-600"
+                  )} />
                   <span className={isDark ? "text-white/80" : "text-black/80"}>
                     {feature}
                   </span>
@@ -223,69 +247,76 @@ export default function Billing() {
             </ul>
             
             <button className={cn(
-              "w-full py-2 rounded-xl transition-all",
+              "w-full py-2 rounded-xl transition-colors",
               plan.recommended
-                ? "bg-gradient-to-r from-blue-400/30 to-purple-400/30 backdrop-blur-sm border border-white/20"
-                : "bg-white/10 backdrop-blur-sm border border-white/10",
-              isDark ? "text-white" : "text-black",
-              "hover:bg-white/20"
+                ? isDark 
+                  ? "bg-white/20 hover:bg-white/30 text-white" 
+                  : "bg-black/20 hover:bg-black/30 text-black"
+                : isDark 
+                  ? "bg-white/10 hover:bg-white/20 text-white" 
+                  : "bg-black/10 hover:bg-black/20 text-black"
             )}>
               {plan.recommended ? 'Current Plan' : 'Select Plan'}
             </button>
-          </div>
+          </GlassContainer>
         ))}
       </div>
 
       {/* Transaction History */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-white/10 via-white/5 to-transparent border border-white/20 backdrop-blur-xl p-8">
-        <div className="absolute top-0 right-0 w-[35rem] h-[35rem] bg-gradient-to-bl from-blue-500/20 via-purple-500/5 to-transparent blur-3xl pointer-events-none" />
+      <GlassContainer>
+        <h2 className={cn(
+          "text-xl font-semibold mb-6",
+          isDark ? "text-white" : "text-black"
+        )}>Transaction History</h2>
         
-        <div className="relative z-10">
-          <h2 className={cn(
-            "text-xl font-bold mb-6",
-            isDark ? "text-white" : "text-black"
-          )}>Transaction History</h2>
-          
-          <div className="space-y-4">
-            {transactions.map((transaction) => (
-              <div
-                key={transaction.id}
-                className={cn(
-                  "flex items-center justify-between p-4 rounded-xl transition-all",
-                  "bg-gradient-to-r from-white/5 to-white/10 backdrop-blur-sm",
-                  "border border-white/10",
-                  "hover:bg-white/20"
-                )}
-              >
-                <div className="flex items-center space-x-4">
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-r from-blue-500/20 to-purple-500/20 border border-white/10 flex items-center justify-center">
-                    <DollarSign className="w-5 h-5 text-blue-400" />
-                  </div>
-                  <div>
-                    <h4 className={cn(
-                      "font-medium",
-                      isDark ? "text-white" : "text-black"
-                    )}>{transaction.description}</h4>
-                    <div className="flex items-center space-x-2">
-                      <Clock className="w-4 h-4 text-purple-400" />
-                      <span className={isDark ? "text-white/60" : "text-black/60"}>
-                        {transaction.date}
-                      </span>
-                    </div>
-                  </div>
+        <div className="space-y-4">
+          {transactions.map((transaction) => (
+            <div
+              key={transaction.id}
+              className={cn(
+                "flex items-center justify-between p-4 rounded-xl transition-colors",
+                isDark 
+                  ? "bg-white/5 hover:bg-white/10" 
+                  : "bg-black/5 hover:bg-black/10"
+              )}
+            >
+              <div className="flex items-center space-x-4">
+                <div className={cn(
+                  "w-10 h-10 rounded-xl flex items-center justify-center",
+                  isDark ? "bg-white/5" : "bg-black/5"
+                )}>
+                  <DollarSign className={cn(
+                    "w-5 h-5",
+                    isDark ? "text-purple-400" : "text-purple-600"
+                  )} />
                 </div>
-                <div className="flex items-center space-x-4">
-                  <span className={cn(
+                <div>
+                  <h4 className={cn(
                     "font-medium",
                     isDark ? "text-white" : "text-black"
-                  )}>${transaction.amount}</span>
-                  <ChevronRight className={isDark ? "text-white/40" : "text-black/40"} />
+                  )}>{transaction.description}</h4>
+                  <div className="flex items-center space-x-2">
+                    <Clock className={cn(
+                      "w-4 h-4",
+                      isDark ? "text-purple-400" : "text-purple-600"
+                    )} />
+                    <span className={isDark ? "text-white/60" : "text-black/60"}>
+                      {transaction.date}
+                    </span>
+                  </div>
                 </div>
               </div>
-            ))}
-          </div>
+              <div className="flex items-center space-x-4">
+                <span className={cn(
+                  "font-medium",
+                  isDark ? "text-white" : "text-black"
+                )}>${transaction.amount}</span>
+                <ChevronRight className={isDark ? "text-white/40" : "text-black/40"} />
+              </div>
+            </div>
+          ))}
         </div>
-      </div>
+      </GlassContainer>
     </div>
   );
 }
