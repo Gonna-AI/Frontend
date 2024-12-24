@@ -59,117 +59,152 @@ const mockClients = [
       "Client: Last night around 9 PM.",
       "AI: Thank you. I'm expediting this case right now. Let me walk you through the process..."
     ]
-  },
-  {
-    name: "Emily Rodriguez",
-    priority: "low",
-    timestamp: "1 hour ago",
-    appointmentType: "General Inquiry",
-    bookingInProgress: false,
-    preferredDay: null,
-    preferredTime: null,
-    callDuration: "08:15",
-    meetingSummary: "General questions about coverage limits and deductibles. Provided detailed explanation of current policy terms.",
-    conversation: [
-      "AI: Hi Emily! How can I help you today?",
-      "Client: I have some questions about my coverage limits.",
-      "AI: I'd be happy to explain those. Which specific areas would you like to know more about?",
-      "Client: Mainly about deductibles and out-of-pocket maximums.",
-      "AI: Let me break down those numbers for you..."
-    ]
-  },
-  {
-    name: "David Kim",
-    priority: "medium",
-    timestamp: "2 hours ago",
-    appointmentType: "Policy Update",
-    bookingInProgress: false,
-    preferredDay: "Thursday",
-    preferredTime: "3:45 PM",
-    callDuration: "10:50",
-    meetingSummary: "Discussed policy updates and new coverage options. Client requested information about family plan expansion.",
-    conversation: [
-      "AI: Good morning David! I understand you're interested in updating your policy.",
-      "Client: Yes, I need to add my new baby to our family plan.",
-      "AI: Congratulations! I'll help you with that right away. When was your baby born?",
-      "Client: Two weeks ago, on the 15th.",
-      "AI: Perfect, let me guide you through the process of adding your new family member..."
-    ]
   }
 ];
 
 interface RecentActivityDetailProps {
   onClose: () => void;
+  isOpen: boolean;
 }
 
-export default function RecentActivityDetail({ onClose }: RecentActivityDetailProps) {
+export default function RecentActivityDetail({ onClose, isOpen }: RecentActivityDetailProps) {
   const { isDark } = useTheme();
   const [expandedId, setExpandedId] = useState<number | null>(null);
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className={cn(
-        "fixed inset-0 z-50",
-        isDark ? "bg-black/90" : "bg-white/90",
-        "backdrop-blur-xl"
-      )}
-    >
-      {/* Header - Fixed at the top */}
-      <div className={cn(
-        "sticky top-0 z-10 px-4 py-3 md:px-6 md:py-4",
-        isDark ? "bg-black/90" : "bg-white/90",
-        "backdrop-blur-xl border-b",
-        isDark ? "border-white/10" : "border-black/10"
-      )}>
-        <div className="max-w-7xl mx-auto">
-          <div className="flex justify-between items-center">
-            <h2 className={cn(
-              "text-xl md:text-2xl font-bold",
-              isDark ? "text-white" : "text-black"
-            )}>
-              Recent Client Activities
-            </h2>
-            <button
-              onClick={onClose}
+    <AnimatePresence>
+      {isOpen && (
+        <>
+          {/* Desktop View */}
+          <div className="hidden md:block">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
               className={cn(
-                "p-2 rounded-lg transition-colors",
-                isDark
-                  ? "hover:bg-white/10 text-white"
-                  : "hover:bg-black/10 text-black"
+                "fixed inset-0 z-50",
+                isDark ? "bg-black/90" : "bg-white/90",
+                "backdrop-blur-xl"
               )}
             >
-              <X className="w-6 h-6" />
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Scrollable Content Area */}
-      <div className="h-[calc(100%-4rem)] overflow-y-auto overscroll-contain">
-        <div className="px-4 py-3 md:px-6 md:py-4">
-          <div className="max-w-7xl mx-auto">
-            <motion.div 
-              layout
-              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6"
-            >
-              <AnimatePresence mode="popLayout">
-                {mockClients.map((client, index) => (
-                  <div key={index} className="w-full">
-                    <ActivityCard
-                      client={client}
-                      isExpanded={expandedId === index}
-                      onExpand={() => setExpandedId(expandedId === index ? null : index)}
-                    />
+              <div className={cn(
+                "sticky top-0 z-10 px-6 py-4",
+                isDark ? "bg-black/90" : "bg-white/90",
+                "backdrop-blur-xl border-b",
+                isDark ? "border-white/10" : "border-black/10"
+              )}>
+                <div className="max-w-7xl mx-auto">
+                  <div className="flex justify-between items-center">
+                    <h2 className={cn(
+                      "text-2xl font-bold",
+                      isDark ? "text-white" : "text-black"
+                    )}>
+                      Recent Client Activities
+                    </h2>
+                    <button
+                      onClick={onClose}
+                      className={cn(
+                        "p-2 rounded-lg transition-colors",
+                        isDark
+                          ? "hover:bg-white/10 text-white"
+                          : "hover:bg-black/10 text-black"
+                      )}
+                    >
+                      <X className="w-6 h-6" />
+                    </button>
                   </div>
-                ))}
-              </AnimatePresence>
+                </div>
+              </div>
+
+              <div className="h-[calc(100%-4rem)] overflow-y-auto">
+                <div className="px-6 py-4">
+                  <div className="max-w-7xl mx-auto">
+                    <motion.div 
+                      layout
+                      className="grid grid-cols-2 lg:grid-cols-3 gap-6"
+                    >
+                      <AnimatePresence mode="popLayout">
+                        {mockClients.map((client, index) => (
+                          <div key={index}>
+                            <ActivityCard
+                              client={client}
+                              isExpanded={expandedId === index}
+                              onExpand={() => setExpandedId(expandedId === index ? null : index)}
+                            />
+                          </div>
+                        ))}
+                      </AnimatePresence>
+                    </motion.div>
+                  </div>
+                </div>
+              </div>
             </motion.div>
           </div>
-        </div>
-      </div>
-    </motion.div>
+
+          {/* Mobile View */}
+          <div className="md:hidden">
+            <motion.div
+              initial={{ y: "100%" }}
+              animate={{ y: 0 }}
+              exit={{ y: "100%" }}
+              transition={{ type: "spring", damping: 25, stiffness: 500 }}
+              className={cn(
+                "fixed bottom-0 left-0 right-0 z-50",
+                "h-[85vh]",
+                isDark ? "bg-black" : "bg-white",
+                "rounded-t-xl border-t",
+                isDark ? "border-white/10" : "border-black/10"
+              )}
+            >
+              {/* Mobile Header */}
+              <div className={cn(
+                "sticky top-0 z-10 px-4 py-3",
+                isDark ? "bg-black" : "bg-white",
+                "border-b",
+                isDark ? "border-white/10" : "border-black/10"
+              )}>
+                <div className="flex justify-between items-center">
+                  <h2 className={cn(
+                    "text-lg font-semibold",
+                    isDark ? "text-white" : "text-black"
+                  )}>
+                    Recent Client Activities
+                  </h2>
+                  <button
+                    onClick={onClose}
+                    className={cn(
+                      "p-2 rounded-lg transition-colors",
+                      isDark
+                        ? "hover:bg-white/10 text-white"
+                        : "hover:bg-black/10 text-black"
+                    )}
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Mobile Content */}
+              <div className="h-[calc(100%-3.5rem)] overflow-y-auto overscroll-contain px-4 py-3">
+                <motion.div layout className="flex flex-col gap-3">
+                  <AnimatePresence mode="popLayout">
+                    {mockClients.map((client, index) => (
+                      <div key={index}>
+                        <ActivityCard
+                          client={client}
+                          isExpanded={expandedId === index}
+                          onExpand={() => setExpandedId(expandedId === index ? null : index)}
+                        />
+                      </div>
+                    ))}
+                  </AnimatePresence>
+                </motion.div>
+              </div>
+            </motion.div>
+          </div>
+        </>
+      )}
+    </AnimatePresence>
   );
 }
+
