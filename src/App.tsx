@@ -1,22 +1,22 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import Header from './components/Layout/Header';
 import Sidebar from './components/Layout/Sidebar/index';
 import Landing from './components/Landing';
 import { Dashboard, AISettings, Profile, Billing, Settings } from './components/Views';
 import { useTheme } from './hooks/useTheme';
 import { cn } from './utils/cn';
-import { ViewType } from './types/navigation';
+import AuthPage from './components/Auth/AuthPage';
 
 function App() {
   const { isDark } = useTheme();
-  const [isSignedIn, setIsSignedIn] = useState(true);
+  const [isSignedIn, setIsSignedIn] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', isDark);
-  }, []);
+  }, [isDark]);
 
   const handleSignOut = () => {
     setIsSignedIn(false);
@@ -25,7 +25,10 @@ function App() {
 
   const handleGetStarted = () => {
     setIsSignedIn(true);
-    setIsSidebarExpanded(false);
+  };
+
+  const handleGoogleLogin = () => {
+    setIsSignedIn(true);
   };
 
   // Layout wrapper for authenticated routes
@@ -78,9 +81,24 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
+        {/* Public Routes */}
         <Route path="/" element={
-          isSignedIn ? <Navigate to="/dashboard" /> : <Landing onGetStarted={handleGetStarted} />
+          isSignedIn ? 
+            <Navigate to="/dashboard" /> : 
+            <Landing />
         } />
+        
+        <Route path="/auth" element={
+          isSignedIn ? 
+            <Navigate to="/dashboard" /> : 
+            <AuthPage 
+              onGoogleLogin={handleGoogleLogin}
+              onEmailLogin={() => {/* Implement email login */}}
+              onSignUp={() => {/* Implement sign up */}}
+            />
+        } />
+
+        {/* Protected Routes */}
         <Route path="/dashboard" element={
           <ProtectedRoute><Dashboard /></ProtectedRoute>
         } />
@@ -96,6 +114,9 @@ function App() {
         <Route path="/settings" element={
           <ProtectedRoute><Settings /></ProtectedRoute>
         } />
+
+        {/* Catch all route */}
+        <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </BrowserRouter>
   );

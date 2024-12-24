@@ -2,12 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { RainbowButton } from '../magicui/rainbow-button';
 import { cn } from '../../utils/cn';
+import { useNavigate } from 'react-router-dom';
 
 interface HeroProps {
   onGetStarted: () => void;
 }
 
 const Hero = ({ onGetStarted }: HeroProps) => {
+  const navigate = useNavigate();
+
   return (
     <div className="bg-[rgb(10,10,10)] min-h-screen flex items-center justify-center relative overflow-hidden">
       {/* Gradient Spotlight */}
@@ -65,13 +68,20 @@ const Hero = ({ onGetStarted }: HeroProps) => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.6 }}
-          className="flex justify-center"
+          className="flex flex-col sm:flex-row items-center justify-center gap-4"
         >
           <button 
             onClick={onGetStarted}
             className="bg-[rgb(10,10,10)] text-white/80 border border-purple-500/20 hover:border-purple-500/40 transition-colors duration-200 rounded-[20px] px-8 py-3 text-sm font-medium tracking-wide"
           >
             Learn More
+          </button>
+
+          <button 
+            onClick={() => navigate('/auth')}
+            className="bg-purple-500/20 text-white border border-purple-500/30 hover:bg-purple-500/30 transition-colors duration-200 rounded-[20px] px-8 py-3 text-sm font-medium tracking-wide"
+          >
+            Get Started
           </button>
         </motion.div>
       </div>
