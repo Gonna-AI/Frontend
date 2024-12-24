@@ -82,7 +82,7 @@ export default function MobileSidebar({
             onClick={onClose}
           />
 
-          {/* Sidebar */}
+          {/* Card-style Sidebar */}
           <motion.div
             initial={{ y: "100%" }}
             animate={{ y: 0 }}
@@ -93,28 +93,38 @@ export default function MobileSidebar({
               damping: 30
             }}
             className={cn(
-              "fixed inset-x-0 bottom-0 z-50 flex flex-col",
-              "h-[60vh] max-h-screen rounded-t-2xl",
+              "fixed inset-x-0 bottom-0 z-50",
+              "h-[70vh] max-h-screen",
+              "rounded-t-[1.25rem] shadow-2xl",
               isDark
-                ? "bg-black/90 backdrop-blur-xl border-t border-white/10"
-                : "bg-white/90 backdrop-blur-xl border-t border-black/10"
+                ? [
+                    "bg-black/95",
+                    "border-t border-white/10",
+                    "bg-gradient-to-br from-purple-500/10 via-purple-600/10 to-purple-800/10"
+                  ]
+                : [
+                    "bg-white/60",
+                    "border-t border-white/20",
+                    "backdrop-blur-xl",
+                    "bg-gradient-to-br from-purple-50/30 via-transparent to-purple-100/20"
+                  ]
             )}
           >
             {/* Header */}
-            <div className="flex justify-between items-center p-3 border-b border-white/5">
-              <span className={cn(
-                "text-sm font-medium",
+            <div className="flex items-center justify-between p-6 border-b border-white/5">
+              <h2 className={cn(
+                "text-lg font-semibold",
                 isDark ? "text-white" : "text-black"
               )}>
                 Menu
-              </span>
+              </h2>
               <button
                 onClick={onClose}
                 className={cn(
-                  "p-1.5 rounded-lg transition-colors",
+                  "rounded-full p-2.5 transition-colors",
                   isDark
                     ? "hover:bg-white/10 text-white"
-                    : "hover:bg-black/10 text-black"
+                    : "hover:bg-black/5 text-black"
                 )}
               >
                 <X className="w-5 h-5" />
@@ -122,42 +132,48 @@ export default function MobileSidebar({
             </div>
 
             {/* Menu Items */}
-            <div className="flex-1 py-2 space-y-1 px-3 overflow-y-auto custom-scrollbar">
+            <div className="flex-1 p-6 space-y-2 overflow-y-auto custom-scrollbar">
               {menuItems.map((item) => (
-                <SidebarItem
+                <button
                   key={item.id}
-                  icon={item.icon}
-                  label={item.label}
-                  to={item.path}
-                  isExpanded={true}
                   onClick={() => {
                     navigate(item.path);
                     onClose();
                   }}
-                  className="py-2"
-                />
+                  className={cn(
+                    "w-full flex items-center gap-3 p-3 rounded-lg",
+                    "transition-all duration-200",
+                    currentView === item.id
+                      ? isDark
+                        ? "bg-white/10 text-white"
+                        : "bg-black/10 text-black"
+                      : isDark
+                        ? "text-white/70 hover:bg-white/5 hover:text-white"
+                        : "text-black/70 hover:bg-black/5 hover:text-black"
+                  )}
+                >
+                  <item.icon className="w-5 h-5" />
+                  <span className="text-sm font-medium">{item.label}</span>
+                </button>
               ))}
             </div>
 
             {/* Footer */}
-            <div className="p-3 space-y-1 border-t border-white/5">
-              {/* Subtle divider line */}
-              <div className="flex justify-center py-1">
-                <div className={cn(
-                  "w-24 h-px rounded-full",
-                  isDark 
-                    ? "bg-white/20" 
-                    : "bg-black/20"
-                )}/>
-              </div>
+            <div className="p-6 space-y-2 border-t border-white/5">
               <ThemeToggle isExpanded={true} />
-              <SidebarItem
-                icon={ChevronRight}
-                label="Sign Out"
-                isExpanded={true}
+              <button
                 onClick={onSignOut}
-                className="py-2"
-              />
+                className={cn(
+                  "w-full flex items-center gap-3 p-3 rounded-lg",
+                  "transition-colors",
+                  isDark
+                    ? "text-white/70 hover:bg-white/5 hover:text-white"
+                    : "text-black/70 hover:bg-black/5 hover:text-black"
+                )}
+              >
+                <ChevronRight className="w-5 h-5" />
+                <span className="text-sm font-medium">Sign Out</span>
+              </button>
             </div>
           </motion.div>
         </>
