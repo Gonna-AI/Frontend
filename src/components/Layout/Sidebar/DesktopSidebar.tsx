@@ -4,15 +4,64 @@ import { useTheme } from '../../../hooks/useTheme';
 import { cn } from '../../../utils/cn';
 import { menuItems } from '../../../config/navigation';
 import ThemeToggle from '../ThemeToggle';
-import SidebarItem from './SidebarItem';
+import { ViewType } from '../../../types/navigation';
+
+interface SidebarItemProps {
+  icon: React.ElementType;
+  label: string;
+  isActive: boolean;
+  isExpanded: boolean;
+  onClick: () => void;
+  isDark?: boolean;
+}
+
+// Separate SidebarItem component with enhanced animations
+function SidebarItem({
+  icon: Icon,
+  label,
+  isActive,
+  isExpanded,
+  onClick,
+  isDark,
+}: SidebarItemProps) {
+  return (
+    <button
+      onClick={onClick}
+      className={cn(
+        "w-full px-3 py-2 rounded-lg flex items-center gap-3",
+        "transition-all duration-300 ease-in-out",
+        isActive ? "bg-blue-500/20 text-blue-500" : isDark ? "text-white hover:bg-gray-500/10" : "hover:bg-gray-500/10"
+      )}
+    >
+      <Icon className="w-5 h-5 flex-shrink-0" />
+      <div className="min-w-[180px] overflow-hidden">
+        <span 
+          className={cn(
+            "whitespace-nowrap block transition-all duration-500 ease-in-out",
+            isExpanded 
+              ? "opacity-100 translate-x-0" 
+              : "opacity-0 -translate-x-4",
+            isDark && !isActive && "text-white"
+          )}
+        >
+          {label}
+        </span>
+      </div>
+    </button>
+  );
+}
 
 interface DesktopSidebarProps {
+  currentView: ViewType;
+  onViewChange: (view: ViewType) => void;
   onSignOut: () => void;
   isExpanded: boolean;
   setIsExpanded: (expanded: boolean) => void;
 }
 
 export default function DesktopSidebar({
+  currentView,
+  onViewChange,
   onSignOut,
   isExpanded,
   setIsExpanded
@@ -43,8 +92,10 @@ export default function DesktopSidebar({
               key={item.id}
               icon={item.icon}
               label={item.label}
-              to={item.path}
+              isActive={currentView === item.id}
               isExpanded={isExpanded}
+              onClick={() => onViewChange(item.id)}
+              isDark={isDark}
             />
           ))}
         </div>
@@ -54,8 +105,10 @@ export default function DesktopSidebar({
           <SidebarItem
             icon={ChevronRight}
             label="Sign Out"
+            isActive={false}
             isExpanded={isExpanded}
             onClick={onSignOut}
+            isDark={isDark}
           />
         </div>
       </div>
