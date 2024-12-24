@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Header from './components/Layout/Header';
 import Sidebar from './components/Layout/Sidebar/index';
 import Landing from './components/Landing';
@@ -23,12 +23,9 @@ function App() {
     setIsSidebarExpanded(false);
   };
 
-  const handleGetStarted = () => {
-    setIsSignedIn(true);
-  };
-
-  const handleGoogleLogin = () => {
-    setIsSignedIn(true);
+  // Protected Route wrapper
+  const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+    return isSignedIn ? <AuthenticatedLayout>{children}</AuthenticatedLayout> : <Navigate to="/auth" />;
   };
 
   // Layout wrapper for authenticated routes
@@ -73,11 +70,6 @@ function App() {
     );
   };
 
-  // Protected Route wrapper
-  const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-    return isSignedIn ? <AuthenticatedLayout>{children}</AuthenticatedLayout> : <Navigate to="/" />;
-  };
-
   return (
     <BrowserRouter>
       <Routes>
@@ -91,28 +83,34 @@ function App() {
         <Route path="/auth" element={
           isSignedIn ? 
             <Navigate to="/dashboard" /> : 
-            <AuthPage 
-              onGoogleLogin={handleGoogleLogin}
-              onEmailLogin={() => {/* Implement email login */}}
-              onSignUp={() => {/* Implement sign up */}}
-            />
+            <AuthPage setIsSignedIn={setIsSignedIn} />
         } />
 
         {/* Protected Routes */}
         <Route path="/dashboard" element={
-          <ProtectedRoute><Dashboard /></ProtectedRoute>
+          <ProtectedRoute>
+            <Dashboard />
+          </ProtectedRoute>
         } />
         <Route path="/ai-settings" element={
-          <ProtectedRoute><AISettings /></ProtectedRoute>
+          <ProtectedRoute>
+            <AISettings />
+          </ProtectedRoute>
         } />
         <Route path="/profile" element={
-          <ProtectedRoute><Profile /></ProtectedRoute>
+          <ProtectedRoute>
+            <Profile />
+          </ProtectedRoute>
         } />
         <Route path="/billing" element={
-          <ProtectedRoute><Billing /></ProtectedRoute>
+          <ProtectedRoute>
+            <Billing />
+          </ProtectedRoute>
         } />
         <Route path="/settings" element={
-          <ProtectedRoute><Settings /></ProtectedRoute>
+          <ProtectedRoute>
+            <Settings />
+          </ProtectedRoute>
         } />
 
         {/* Catch all route */}
