@@ -5,6 +5,7 @@ import { cn } from '../../../utils/cn';
 import { menuItems } from '../../../config/navigation';
 import ThemeToggle from '../ThemeToggle';
 import { ViewType } from '../../../types/navigation';
+import { useNavigate } from 'react-router-dom';
 
 interface SidebarItemProps {
   icon: React.ElementType;
@@ -67,6 +68,7 @@ export default function DesktopSidebar({
   setIsExpanded
 }: DesktopSidebarProps) {
   const { isDark } = useTheme();
+  const navigate = useNavigate();
 
   return (
     <div
@@ -94,7 +96,10 @@ export default function DesktopSidebar({
               label={item.label}
               isActive={currentView === item.id}
               isExpanded={isExpanded}
-              onClick={() => onViewChange(item.id)}
+              onClick={() => {
+                navigate(item.path);
+                onViewChange(item.id);
+              }}
               isDark={isDark}
             />
           ))}
