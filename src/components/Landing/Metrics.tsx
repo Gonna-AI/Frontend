@@ -1,140 +1,178 @@
-import React from "react";
-import { motion } from "framer-motion";
+import React from 'react';
+import { ChevronLeft, ChevronRight, Phone, Clock, Database, MessageSquare } from 'lucide-react';
 
-const cn = (...classes) => classes.filter(Boolean).join(" ");
+const Card = ({ type, title, image, hasAction }) => {
+  const renderContent = () => {
+    switch (type) {
+      case 'analytics':
+        return (
+          <div className="h-full w-full bg-black/80 backdrop-blur-md rounded-3xl p-8 border border-gray-800">
+            <h2 className="text-white text-5xl font-display mt-36">AI ANALYTICS</h2>
+            <p className="text-gray-300 mt-4">Real-time sentiment analysis and call metrics</p>
+          </div>
+        );
+      
+      case 'sections':
+        return (
+          <div className="h-full w-full bg-black/80 backdrop-blur-md rounded-3xl p-6 text-white relative border border-gray-800">
+            <h2 className="text-4xl font-display mb-4">CLAIM CATEGORIES</h2>
+            <div className="flex flex-wrap gap-2">
+              {['Health Insurance', 'Auto Claims', 'Property Damage', 'Life Insurance', 'Workers Comp', 'Liability', 'Emergency', 'Routine', 'Appeals', 'Documentation', 'Follow-ups'].map((item, i) => (
+                <span key={i} className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 text-white rounded-full px-3 py-1 text-sm whitespace-nowrap">
+                  {item}
+                </span>
+              ))}
+            </div>
+          </div>
+        );
+      
+      case 'callbacks':
+      case 'knowledge':
+        return (
+          <div className="relative h-full w-full rounded-3xl overflow-hidden border border-gray-800">
+            <img 
+              src={type === 'callbacks' ? 
+                "https://images.unsplash.com/photo-1521791136064-7986c2920216" : 
+                "https://images.unsplash.com/photo-1553877522-43269d4ea984"} 
+              alt={title}
+              className="absolute inset-0 w-full h-full object-cover"
+            />
+            <div className="absolute inset-0 bg-black/70 p-8 flex flex-col justify-between backdrop-blur-md">
+              <div className="flex justify-between items-start">
+                <h2 className="text-4xl font-display text-white">{title}</h2>
+                {hasAction && (
+                  <div className="flex gap-3">
+                    {type === 'callbacks' ? (
+                      <Phone className="w-6 h-6 text-purple-300" />
+                    ) : (
+                      <Database className="w-6 h-6 text-purple-300" />
+                    )}
+                    <MessageSquare className="w-6 h-6 text-purple-300" />
+                  </div>
+                )}
+              </div>
+              <p className="text-gray-300 mt-4">
+                {type === 'callbacks' ? 
+                  'AI-powered scheduling system for priority-based follow-ups' :
+                  'Smart knowledge base with instant solution suggestions'}
+              </p>
+            </div>
+          </div>
+        );
+      
+      case 'efficiency':
+        return (
+          <div className="h-full w-full bg-black/80 backdrop-blur-md rounded-3xl p-8 text-white relative border border-gray-800">
+            <div className="absolute right-8 top-8">
+              <div className="flex items-center gap-4">
+                <Clock className="w-6 h-6 text-purple-300" />
+              </div>
+            </div>
+            <p className="mt-36 text-lg">
+              Automated workflow optimization and performance tracking
+            </p>
+          </div>
+        );
+    }
+  };
 
-const SmoothContent = ({ children, className }) => {
   return (
-    <div className={cn("relative w-full max-w-4xl mx-auto h-full", className)}>
-      <div>{children}</div>
+    <div className="min-w-[360px] h-[400px] rounded-3xl">
+      {renderContent()}
     </div>
   );
 };
 
-const dummyContent = [
-  {
-    title: "The Virtue of Automated Wisdom",
-    description: (
-      <>
-        <p className="mb-4">
-          As Marcus Aurelius taught us, 'The universe is change; our life is what our thoughts make it.' Our AI solution embodies this principle by transforming complex claims processing into clear, manageable actions.
-        </p>
-        <p>
-          Like a stoic mind that remains unperturbed in chaos, our system brings order to overwhelming workloads, automatically prioritizing and scheduling tasks with unwavering logic and precision.
-        </p>
-      </>
-    ),
-    badge: "Intelligence",
-    overlayWord: "Automated",
-    imageUrl: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80&w=1200"
-  },
-  {
-    title: "Time: The Ultimate Resource",
-    description: (
-      <>
-        <p className="mb-4">
-          Minimalism is not a lack of something. It's simply the perfect amount of something.
-          The simplest solution is often the best solution.
-        </p>
-        <p>
-          Less is more. Perfection is achieved not when there is nothing more to add, 
-          but when there is nothing left to take away.
-        </p>
-      </>
-    ),  
-    badge: "Efficiency",
-    overlayWord: "Personalized",
-    imageUrl: "https://images.unsplash.com/photo-1516110833967-0b5716ca1387?auto=format&fit=crop&q=80&w=1200"
-  },
-  {
-    title: "The Art of Digital Empathy",
-    description: (
-      <>
-        <p className="mb-4">
-          Epictetus said, 'It's not what happens to you, but how you react to it that matters.' Our sentiment analysis technology embodies this principle by understanding not just what clients say, but how they feel.
-        </p>
-        <p>
-          By combining stoic rationality with emotional intelligence, we create a system that maintains composure under pressure while delivering deeply empathetic service. The result is a transformed claims experience that honors both efficiency and humanity.
-        </p>
-      </>
-    ),
-    badge: "Experience",
-    overlayWord: "Intelligence",
-    imageUrl: "https://images.unsplash.com/photo-1507413245164-6160d8298b31?auto=format&fit=crop&q=80&w=1200"
-  },
-];
-
-const GradientCard = ({ item }) => {
+const ScrollButton = ({ direction, onClick }) => {
+  const Icon = direction === 'left' ? ChevronLeft : ChevronRight;
   return (
-    <motion.div 
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ 
-        opacity: 1, 
-        y: 0,
-        transition: {
-          duration: 0.6,
-          ease: [0.23, 1, 0.32, 1]
-        }
-      }}
-      viewport={{ once: true, margin: "-100px" }}
-      className="mb-16"
+    <button
+      onClick={onClick}
+      className={`absolute top-1/2 -translate-y-1/2 z-10 w-8 h-8 flex items-center justify-center
+                  rounded-full transition-all bg-purple-500/20 hover:bg-purple-500/30 backdrop-blur-sm
+                  border border-purple-500/30 text-white`}
+      style={{ [direction]: '-24px' }}
     >
-      <div className="flex items-center gap-2 mb-4">
-        <div className="bg-white rounded-full text-black text-sm px-4 py-1">
-          {item.badge}
-        </div>
-      </div>
-
-      <p className="text-xl mb-4 font-semibold text-white">
-        {item.title}
-      </p>
-
-      <div className="text-sm prose prose-sm dark:prose-invert prose-p:text-gray-200">
-        <div className="relative h-48 sm:h-56 md:h-64 rounded-2xl mb-10 overflow-hidden">
-          {/* Image Background */}
-          <img 
-            src={item.imageUrl}
-            alt={item.title}
-            className="absolute inset-0 w-full h-full object-cover"
-            loading="eager"
-          />
-          
-          {/* Glass Text Overlay */}
-          <div className="absolute inset-0 flex items-center justify-center">
-            <h3 className="text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-bold tracking-wider text-center glass-text"
-                style={{
-                  fontFamily: "'Bebas Neue', sans-serif",
-                }}>
-              {item.overlayWord}
-            </h3>
-          </div>
-        </div>
-        {item.description}
-      </div>
-    </motion.div>
+      <Icon size={16} />
+    </button>
   );
 };
 
-export default function SmoothContentDemo() {
+export default function HorizontalScroll() {
+  const containerRef = React.useRef(null);
+  
+  const scroll = (direction) => {
+    const container = containerRef.current;
+    if (container) {
+      const scrollAmount = direction === 'left' ? -400 : 400;
+      container.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-[rgb(10,10,10)] text-white py-20">
+    <div className="min-h-screen bg-[rgb(10,10,10)] py-20 relative overflow-hidden">
+      {/* Ambient Gradients */}
+      <div className="absolute left-1/4 top-1/2 -translate-y-1/2 w-[1200px] h-[600px] bg-purple-900/20 rounded-full blur-3xl" />
+      <div className="absolute right-1/4 top-1/2 -translate-y-1/2 w-[900px] h-[500px] bg-purple-800/15 rounded-full blur-3xl" />
+      <div className="absolute left-1/3 top-1/2 -translate-y-1/2 w-[700px] h-[400px] bg-indigo-900/10 rounded-full blur-3xl" />
+
       <style jsx global>{`
         @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap');
         
-        .glass-text {
-          color: white;
-          text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-          letter-spacing: 0.05em;
-          font-weight: 700;
+        .font-display {
+          font-family: 'Bebas Neue', sans-serif;
+        }
+
+        .hide-scrollbar::-webkit-scrollbar {
+          display: none;
+        }
+        .hide-scrollbar {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
         }
       `}</style>
-      <SmoothContent className="px-6">
-        <div className="max-w-2xl mx-auto antialiased pt-4 relative">
-          {dummyContent.map((item, index) => (
-            <GradientCard key={`content-${index}`} item={item} />
-          ))}
+
+      <div className="max-w-7xl mx-auto px-6 relative">
+        <div className="flex justify-between items-center mb-12">
+          <h1 className="text-6xl md:text-7xl font-display text-white">
+          AI That Works as Hard as You Do
+          </h1>
         </div>
-      </SmoothContent>
+
+        <div className="relative bg-black/50 backdrop-blur-lg rounded-3xl p-8 border border-gray-800">
+          <div 
+            ref={containerRef}
+            className="flex overflow-x-auto hide-scrollbar gap-6 pb-6"
+          >
+            <Card type="analytics" />
+            <Card 
+              type="callbacks"
+              title="SMART CALLBACKS"
+              hasAction={true}
+            />
+            <Card type="sections" />
+            <Card 
+              type="knowledge"
+              title="KNOWLEDGE BASE"
+              hasAction={true}
+            />
+            <Card type="efficiency" />
+          </div>
+          
+          <div className="absolute bottom-8 right-8">
+            <div className="flex items-center">
+              <div className="relative right-10">
+                <ScrollButton direction="left" onClick={() => scroll('left')} />
+              </div>
+              <ScrollButton direction="right" onClick={() => scroll('right')} />
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-8 text-lg text-gray-300 max-w-2xl">
+          AI-powered workflow optimization for enhanced claims processing efficiency and customer satisfaction.
+        </div>
+      </div>
     </div>
   );
 }
