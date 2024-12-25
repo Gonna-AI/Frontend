@@ -2,6 +2,13 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Database, Bot, MessageSquare, CheckCircle, Plus, Trash2, Save, Edit2, Check, X } from 'lucide-react';
 import { useTheme } from '../hooks/useTheme';
 import { cn } from '../utils/cn';
+import api from '../config/api';
+
+interface KnowledgeData {
+  custom_knowledge: {
+    [key: string]: string;
+  };
+}
 
 interface KnowledgeBaseEntry {
   id: string;
@@ -107,6 +114,29 @@ export default function AISettings() {
     }
   }, [showError]);
 
+  useEffect(() => {
+    fetchKnowledge();
+  }, []);
+
+  const fetchKnowledge = async () => {
+    try {
+      const response = await api.get<KnowledgeData>('/api/knowledge');
+      const knowledge = response.data.custom_knowledge;
+      
+      const entries: KnowledgeBaseEntry[] = Object.entries(knowledge).map(([category, description]) => ({
+        id: category,
+        category,
+        description,
+        selected: false
+      }));
+      
+      setKnowledgeBase(entries);
+    } catch (error) {
+      setShowError(true);
+      setErrorMessage('Failed to fetch knowledge base');
+    }
+  };
+
   const GlassContainer = ({ children, className }: { children: React.ReactNode, className?: string }) => (
     <div className={cn(
       "p-4 sm:p-6 rounded-2xl border transition-all",
@@ -128,20 +158,31 @@ export default function AISettings() {
     </div>
   );
 
-  const handleAddEntry = () => {
+  const handleAddEntry = async () => {
     if (newCategory.trim() && newDescription.trim()) {
-      setKnowledgeBase([
-        ...knowledgeBase,
-        {
-          id: Date.now().toString(),
+      try {
+        await api.post('/api/knowledge', {
           category: newCategory,
-          description: newDescription,
-          selected: false
-        }
-      ]);
-      setNewCategory('');
-      setNewDescription('');
-      categoryInputRef.current?.focus();
+          content: newDescription
+        });
+
+        setKnowledgeBase([
+          ...knowledgeBase,
+          {
+            id: newCategory,
+            category: newCategory,
+            description: newDescription,
+            selected: false
+          }
+        ]);
+        
+        setNewCategory('');
+        setNewDescription('');
+        categoryInputRef.current?.focus();
+      } catch (error) {
+        setShowError(true);
+        setErrorMessage('Failed to add knowledge entry');
+      }
     }
   };
 
@@ -149,9 +190,20 @@ export default function AISettings() {
     setShowDeleteWarning(id);
   };
 
-  const confirmDelete = (id: string) => {
-    setKnowledgeBase(knowledgeBase.filter(entry => entry.id !== id));
-    setShowDeleteWarning(null);
+  const confirmDelete = async (id: string) => {
+    try {
+      await api.delete('/api/knowledge', {
+        data: {
+          categories: [id]
+        }
+      });
+
+      setKnowledgeBase(knowledgeBase.filter(entry => entry.id !== id));
+      setShowDeleteWarning(null);
+    } catch (error) {
+      setShowError(true);
+      setErrorMessage('Failed to delete knowledge entry');
+    }
   };
 
   const cancelDelete = () => {
@@ -163,15 +215,25 @@ export default function AISettings() {
     setEditingValue(entry.description);
   };
 
-  const handleSaveEdit = () => {
+  const handleSaveEdit = async () => {
     if (editingId) {
-      setKnowledgeBase(knowledgeBase.map(entry =>
-        entry.id === editingId
-          ? { ...entry, description: editingValue }
-          : entry
-      ));
-      setEditingId(null);
-      setEditingValue('');
+      try {
+        await api.put(`/api/knowledge/${editingId}`, {
+          content: editingValue
+        });
+
+        setKnowledgeBase(knowledgeBase.map(entry =>
+          entry.id === editingId
+            ? { ...entry, description: editingValue }
+            : entry
+        ));
+        
+        setEditingId(null);
+        setEditingValue('');
+      } catch (error) {
+        setShowError(true);
+        setErrorMessage('Failed to update knowledge entry');
+      }
     }
   };
 
@@ -216,11 +278,26 @@ export default function AISettings() {
     }
   };
 
-  const confirmMultipleDelete = () => {
-    setKnowledgeBase(knowledgeBase.filter(entry => !entry.selected));
-    setShowMultipleDeleteWarning(false);
-    setAllSelected(false);
-    setShowSelectAllText(false);
+  const confirmMultipleDelete = async () => {
+    try {
+      const categoriesToDelete = knowledgeBase
+        .filter(entry => entry.selected)
+        .map(entry => entry.category);
+
+      await api.delete('/api/knowledge', {
+        data: {
+          categories: categoriesToDelete
+        }
+      });
+
+      setKnowledgeBase(knowledgeBase.filter(entry => !entry.selected));
+      setShowMultipleDeleteWarning(false);
+      setAllSelected(false);
+      setShowSelectAllText(false);
+    } catch (error) {
+      setShowError(true);
+      setErrorMessage('Failed to delete selected entries');
+    }
   };
 
   const showConfirmSelection = knowledgeBase.some(entry => entry.selected);
