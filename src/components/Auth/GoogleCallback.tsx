@@ -9,15 +9,18 @@ export default function GoogleCallback() {
   useEffect(() => {
     const handleCallback = async () => {
       try {
-        // Get the code from URL parameters
         const urlParams = new URLSearchParams(window.location.search);
         const code = urlParams.get('code');
+        const error = urlParams.get('error');
 
-        if (!code) {
-          throw new Error('No code provided');
+        if (error) {
+          throw new Error(`Google auth error: ${error}`);
         }
 
-        // Call the backend callback endpoint with the code
+        if (!code) {
+          throw new Error('No authorization code received');
+        }
+
         const response = await axios.get(
           `http://localhost:5000/api/auth/google/callback`,
           { 
@@ -26,23 +29,23 @@ export default function GoogleCallback() {
           }
         );
 
-        if (response.data.message === 'Logged in successfully') {
-          // Get the stored redirect URL or default to dashboard
-          const redirectUrl = sessionStorage.getItem('redirectUrl') || '/dashboard';
-          sessionStorage.removeItem('redirectUrl'); // Clean up
-          
+        if (response.data.isAuthenticated) {
           // Update app state to reflect logged in status
           window.dispatchEvent(new CustomEvent('auth-state-changed', { 
             detail: { isAuthenticated: true } 
           }));
           
+          // Get the stored redirect URL or default to dashboard
+          const redirectUrl = sessionStorage.getItem('redirectUrl') || '/dashboard';
+          sessionStorage.removeItem('redirectUrl'); // Clean up
           navigate(redirectUrl);
         } else {
-          throw new Error('Login failed');
+          throw new Error('Authentication failed');
         }
-      } catch (err) {
+      } catch (err: any) {
         console.error('Google auth error:', err);
-        setError('Failed to complete Google authentication');
+        const errorMessage = err.response?.data?.error || err.message || 'Authentication failed';
+        setError(errorMessage);
         // Redirect to login page after a delay if there's an error
         setTimeout(() => navigate('/auth'), 3000);
       }
@@ -55,7 +58,11 @@ export default function GoogleCallback() {
     <div className="min-h-screen flex items-center justify-center bg-[#0a0a0a]">
       <div className="text-center">
         {error ? (
-          <div className="text-red-400">{error}</div>
+          <div className="text-red-400">
+            <p>Authentication Error</p>
+            <p className="text-sm mt-2">{error}</p>
+            <p className="text-sm mt-4">Redirecting to login page...</p>
+          </div>
         ) : (
           <div className="text-white">Completing authentication...</div>
         )}
