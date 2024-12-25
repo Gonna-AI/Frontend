@@ -16,6 +16,7 @@
     "@tsparticles/react": "^3.0.0",
     "@tsparticles/slim": "^3.7.1",
     "@types/three": "^0.162.0",
+    "axios": "^1.7.9",
     "clsx": "^2.1.1",
     "cobe": "^0.6.3",
     "dotted-map": "^2.2.3",
