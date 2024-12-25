@@ -56,16 +56,12 @@ interface DesktopSidebarProps {
   currentView: ViewType;
   onViewChange: (view: ViewType) => void;
   onSignOut: () => void;
-  isExpanded: boolean;
-  setIsExpanded: (expanded: boolean) => void;
 }
 
 export default function DesktopSidebar({
   currentView,
   onViewChange,
   onSignOut,
-  isExpanded,
-  setIsExpanded
 }: DesktopSidebarProps) {
   const { isDark } = useTheme();
   const navigate = useNavigate();
@@ -82,20 +78,18 @@ export default function DesktopSidebar({
           : "bg-white/40 backdrop-blur-2xl border-t border-black/10"
       )}
       style={{
-        width: isExpanded ? '280px' : '72px'
+        width: '60px'
       }}
-      onMouseEnter={() => setIsExpanded(true)}
-      onMouseLeave={() => setIsExpanded(false)}
     >
       <div className="flex flex-col h-full relative z-10">
-        <div className="flex-1 py-6 space-y-2 px-4">
+        <div className="flex-1 py-6 space-y-2 px-2">
           {menuItems.map((item) => (
             <SidebarItem
               key={item.id}
               icon={item.icon}
-              label={item.label}
+              label=""
               isActive={currentView === item.id}
-              isExpanded={isExpanded}
+              isExpanded={false}
               onClick={() => {
                 navigate(item.path);
                 onViewChange(item.id);
@@ -106,12 +100,12 @@ export default function DesktopSidebar({
         </div>
 
         <div className="p-4 space-y-3 border-t border-white/5">
-          <ThemeToggle isExpanded={isExpanded} />
+          <ThemeToggle isExpanded={false} />
           <SidebarItem
             icon={ChevronRight}
-            label="Sign Out"
+            label=""
             isActive={false}
-            isExpanded={isExpanded}
+            isExpanded={false}
             onClick={onSignOut}
             isDark={isDark}
           />
