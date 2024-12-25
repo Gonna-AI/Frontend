@@ -1,7 +1,14 @@
 import React, { useState } from 'react';
-import { Database, Bot, MessageSquare, CheckCircle } from 'lucide-react';
+import { Database, Bot, MessageSquare, CheckCircle, Plus, Trash2, Save } from 'lucide-react';
 import { useTheme } from '../hooks/useTheme';
 import { cn } from '../utils/cn';
+
+interface KnowledgeBaseEntry {
+  id: string;
+  category: string;
+  description: string;
+  isEditing?: boolean;
+}
 
 export default function AISettings() {
   const { isDark } = useTheme();
@@ -9,6 +16,9 @@ export default function AISettings() {
   const [tone, setTone] = useState('Professional');
   const [length, setLength] = useState('Moderate');
   const [enableFollowUp, setEnableFollowUp] = useState(true);
+  const [knowledgeBase, setKnowledgeBase] = useState<KnowledgeBaseEntry[]>([]);
+  const [newCategory, setNewCategory] = useState('');
+  const [newDescription, setNewDescription] = useState('');
 
   const GlassContainer = ({ children, className }: { children: React.ReactNode, className?: string }) => (
     <div className={cn(
@@ -30,6 +40,37 @@ export default function AISettings() {
       <Icon className={cn("w-5 h-5", color)} />
     </div>
   );
+
+  const handleAddEntry = () => {
+    if (newCategory.trim() && newDescription.trim()) {
+      setKnowledgeBase([
+        ...knowledgeBase,
+        {
+          id: Date.now().toString(),
+          category: newCategory,
+          description: newDescription
+        }
+      ]);
+      setNewCategory('');
+      setNewDescription('');
+    }
+  };
+
+  const handleDeleteEntry = (id: string) => {
+    setKnowledgeBase(knowledgeBase.filter(entry => entry.id !== id));
+  };
+
+  const handleEditToggle = (id: string) => {
+    setKnowledgeBase(knowledgeBase.map(entry => 
+      entry.id === id ? { ...entry, isEditing: !entry.isEditing } : entry
+    ));
+  };
+
+  const handleUpdateEntry = (id: string, category: string, description: string) => {
+    setKnowledgeBase(knowledgeBase.map(entry => 
+      entry.id === id ? { ...entry, category, description, isEditing: false } : entry
+    ));
+  };
 
   return (
     <div className="p-2 sm:p-4 md:p-6 max-w-[95rem] mx-auto">
@@ -74,16 +115,139 @@ export default function AISettings() {
                 isDark ? "text-white" : "text-black"
               )}>Knowledge Base</h2>
             </div>
-            <textarea
+
+            {/* Add New Entry Form */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+              <input
+                type="text"
+                value={newCategory}
+                onChange={(e) => setNewCategory(e.target.value)}
+                placeholder="Category"
+                className={cn(
+                  "w-full p-4 rounded-xl transition-all",
+                  "focus:outline-none focus:ring-2",
+                  isDark
+                    ? "bg-black/40 border border-white/10 text-white placeholder-white/30 focus:ring-white/20"
+                    : "bg-black/5 border border-black/10 text-black placeholder-black/30 focus:ring-black/20"
+                )}
+              />
+              <input
+                type="text"
+                value={newDescription}
+                onChange={(e) => setNewDescription(e.target.value)}
+                placeholder="Description"
+                className={cn(
+                  "w-full p-4 rounded-xl transition-all",
+                  "focus:outline-none focus:ring-2",
+                  isDark
+                    ? "bg-black/40 border border-white/10 text-white placeholder-white/30 focus:ring-white/20"
+                    : "bg-black/5 border border-black/10 text-black placeholder-black/30 focus:ring-black/20"
+                )}
+              />
+            </div>
+            <button
+              onClick={handleAddEntry}
               className={cn(
-                "w-full h-40 p-4 rounded-xl transition-all resize-none",
-                "focus:outline-none focus:ring-2",
+                "w-full p-4 rounded-xl mb-6 transition-colors flex items-center justify-center gap-2",
                 isDark
-                  ? "bg-black/40 border border-white/10 text-white placeholder-white/30 focus:ring-white/20"
-                  : "bg-black/5 border border-black/10 text-black placeholder-black/30 focus:ring-black/20"
+                  ? "bg-white/10 hover:bg-white/20 text-white"
+                  : "bg-black/10 hover:bg-black/20 text-black"
               )}
-              placeholder="Add your company's knowledge base, FAQs, or any specific information..."
-            />
+            >
+              <Plus className="w-5 h-5" />
+              Add Entry
+            </button>
+
+            {/* Knowledge Base Entries */}
+            <div className="space-y-4">
+              {knowledgeBase.map((entry) => (
+                <div
+                  key={entry.id}
+                  className={cn(
+                    "p-4 rounded-xl transition-all",
+                    isDark
+                      ? "bg-black/40 border border-white/10"
+                      : "bg-black/5 border border-black/10"
+                  )}
+                >
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {entry.isEditing ? (
+                      <>
+                        <input
+                          type="text"
+                          defaultValue={entry.category}
+                          className={cn(
+                            "w-full p-4 rounded-xl transition-all",
+                            "focus:outline-none focus:ring-2",
+                            isDark
+                              ? "bg-black/40 border border-white/10 text-white"
+                              : "bg-black/5 border border-black/10 text-black"
+                          )}
+                          onChange={(e) => {
+                            const newCategory = e.target.value;
+                            setKnowledgeBase(knowledgeBase.map(item => 
+                              item.id === entry.id ? { ...item, category: newCategory } : item
+                            ));
+                          }}
+                        />
+                        <input
+                          type="text"
+                          defaultValue={entry.description}
+                          className={cn(
+                            "w-full p-4 rounded-xl transition-all",
+                            "focus:outline-none focus:ring-2",
+                            isDark
+                              ? "bg-black/40 border border-white/10 text-white"
+                              : "bg-black/5 border border-black/10 text-black"
+                          )}
+                          onChange={(e) => {
+                            const newDescription = e.target.value;
+                            setKnowledgeBase(knowledgeBase.map(item => 
+                              item.id === entry.id ? { ...item, description: newDescription } : item
+                            ));
+                          }}
+                        />
+                      </>
+                    ) : (
+                      <>
+                        <div className={isDark ? "text-white" : "text-black"}>
+                          {entry.category}
+                        </div>
+                        <div className={isDark ? "text-white" : "text-black"}>
+                          {entry.description}
+                        </div>
+                      </>
+                    )}
+                  </div>
+                  <div className="flex justify-end mt-4">
+                    <button
+                      onClick={() => entry.isEditing 
+                        ? handleUpdateEntry(entry.id, entry.category, entry.description)
+                        : handleEditToggle(entry.id)
+                      }
+                      className={cn(
+                        "p-2 rounded-lg transition-colors",
+                        isDark
+                          ? "hover:bg-white/10 text-white"
+                          : "hover:bg-black/10 text-black"
+                      )}
+                    >
+                      {entry.isEditing ? (
+                        <Save className="w-5 h-5" />
+                      ) : (
+                        <Trash2 
+                          className="w-5 h-5"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteEntry(entry.id);
+                          }}
+                        />
+                      )}
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
           </GlassContainer>
 
           {/* Personality Settings */}
