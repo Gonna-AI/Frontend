@@ -78,7 +78,7 @@ export default function DesktopSidebar({
           : "bg-white/40 backdrop-blur-2xl border-t border-black/10"
       )}
       style={{
-        width: '60px'
+        width: '80px'
       }}
     >
       <div className="flex flex-col h-full relative z-10">
