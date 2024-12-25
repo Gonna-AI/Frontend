@@ -66,12 +66,12 @@ export default function Billing() {
       "border backdrop-blur-xl",
       isDark 
         ? "bg-black/40 border-white/[0.08]" 
-        : "bg-white/40 border-black/[0.08]",
+        : "bg-black/[0.06] border-black/[0.08]",
       "transition-all duration-200",
       "hover:shadow-lg",
       isDark 
         ? "hover:bg-black/50 hover:border-white/[0.12]" 
-        : "hover:bg-white/50 hover:border-black/[0.12]",
+        : "hover:bg-black/[0.08] hover:border-black/[0.12]",
       className
     )}>
       {children}
@@ -122,7 +122,7 @@ export default function Billing() {
           <div className="flex items-center space-x-4">
             <div className={cn(
               "w-12 h-12 rounded-xl flex items-center justify-center",
-              isDark ? "bg-white/5" : "bg-black/5"
+              isDark ? "bg-white/[0.06]" : "bg-black/[0.06]"
             )}>
               <Package className={cn(
                 "w-6 h-6",
@@ -142,8 +142,8 @@ export default function Billing() {
           <button className={cn(
             "px-6 py-2 rounded-xl transition-colors",
             isDark 
-              ? "bg-white/10 hover:bg-white/20 text-white" 
-              : "bg-black/10 hover:bg-black/20 text-black"
+              ? "bg-white/[0.06] hover:bg-white/20 text-white" 
+              : "bg-black/[0.06] hover:bg-black/20 text-black"
           )}>
             Change Plan
           </button>
@@ -177,7 +177,7 @@ export default function Billing() {
 
           <div className={cn(
             "p-4 rounded-xl",
-            isDark ? "bg-white/5" : "bg-black/5"
+            isDark ? "bg-white/[0.06]" : "bg-black/[0.06]"
           )}>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -212,7 +212,7 @@ export default function Billing() {
           <div className="flex items-center space-x-4">
             <div className={cn(
               "w-12 h-12 rounded-xl flex items-center justify-center",
-              isDark ? "bg-white/5" : "bg-black/5"
+              isDark ? "bg-white/[0.06]" : "bg-black/[0.06]"
             )}>
               <CreditCard className={cn(
                 "w-6 h-6",
@@ -232,8 +232,8 @@ export default function Billing() {
           <button className={cn(
             "px-6 py-2 rounded-xl transition-colors",
             isDark 
-              ? "bg-white/10 hover:bg-white/20 text-white" 
-              : "bg-black/10 hover:bg-black/20 text-black"
+              ? "bg-white/[0.06] hover:bg-white/20 text-white" 
+              : "bg-black/[0.06] hover:bg-black/20 text-black"
           )}>
             Update
           </button>
@@ -296,11 +296,11 @@ export default function Billing() {
               "w-full py-2 rounded-xl transition-colors",
               plan.recommended
                 ? isDark 
-                  ? "bg-white/20 hover:bg-white/30 text-white" 
-                  : "bg-black/20 hover:bg-black/30 text-black"
+                  ? "bg-white/[0.06] hover:bg-white/20 text-white" 
+                  : "bg-black/[0.06] hover:bg-black/20 text-black"
                 : isDark 
-                  ? "bg-white/10 hover:bg-white/20 text-white" 
-                  : "bg-black/10 hover:bg-black/20 text-black"
+                  ? "bg-white/[0.06] hover:bg-white/20 text-white" 
+                  : "bg-black/[0.06] hover:bg-black/20 text-black"
             )}>
               {plan.recommended ? 'Current Plan' : 'Select Plan'}
             </button>
@@ -329,7 +329,7 @@ export default function Billing() {
               <div className="flex items-center space-x-4">
                 <div className={cn(
                   "w-10 h-10 rounded-xl flex items-center justify-center",
-                  isDark ? "bg-white/5" : "bg-black/5"
+                  isDark ? "bg-white/[0.06]" : "bg-black/[0.06]"
                 )}>
                   <DollarSign className={cn(
                     "w-5 h-5",
