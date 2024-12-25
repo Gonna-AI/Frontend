@@ -22,10 +22,10 @@ export default function Settings() {
 
   const GlassContainer = ({ children, className }: { children: React.ReactNode, className?: string }) => (
     <div className={cn(
-      "rounded-2xl transition-all border backdrop-blur-lg",
+      "rounded-2xl border",
       isDark 
-        ? "bg-white/5 border-white/10" 
-        : "bg-black/5 border-black/10",
+        ? "bg-black/20 border-white/10" 
+        : "bg-white/10 border-black/10",
       className
     )}>
       {children}
@@ -38,12 +38,17 @@ export default function Settings() {
         <GlassContainer className="min-h-[85vh] overflow-hidden">
           <div className="flex flex-col md:flex-row">
             {/* Sidebar */}
-            <div className="sticky top-0 md:w-20 border-r border-inherit">
+            <div className={cn(
+              "sticky top-0 md:w-20 border-r",
+              isDark ? "border-white/10" : "border-black/10"
+            )}>
               <div className="flex md:flex-col md:h-[85vh] p-4 gap-3 items-center">
                 {/* Settings Icon */}
                 <div className={cn(
                   "w-10 h-10 rounded-xl flex items-center justify-center mb-6 hidden md:flex",
-                  isDark ? "bg-white/5" : "bg-black/5"
+                  isDark 
+                    ? "bg-black/20 border border-white/10" 
+                    : "bg-white/10 border border-black/10"
                 )}>
                   <SettingsIcon className={cn(
                     "w-5 h-5",
@@ -62,27 +67,27 @@ export default function Settings() {
                         "group outline-none",
                         activeTab === item.id
                           ? isDark 
-                            ? "bg-white/10" 
-                            : "bg-black/10"
+                            ? "bg-black/20 border border-white/10" 
+                            : "bg-white/10 border border-black/10"
                           : isDark
-                            ? "hover:bg-white/5"
-                            : "hover:bg-black/5"
+                            ? "hover:bg-black/20 hover:border hover:border-white/10"
+                            : "hover:bg-white/10 hover:border hover:border-black/10"
                       )}
                     >
                       <div className={cn(
                         "w-9 h-9 rounded-lg flex items-center justify-center",
                         activeTab === item.id
                           ? isDark 
-                            ? "bg-white/10" 
-                            : "bg-black/10"
+                            ? "bg-black/20" 
+                            : "bg-white/10"
                           : "bg-transparent"
                       )}>
                         <item.icon className={cn(
                           "w-5 h-5",
                           activeTab === item.id
                             ? isDark 
-                              ? "text-white/90" 
-                              : "text-black/90"
+                              ? "text-white" 
+                              : "text-black"
                             : isDark
                               ? "text-white/60"
                               : "text-black/60"
@@ -112,7 +117,9 @@ export default function Settings() {
                       <div className="flex flex-col sm:flex-row items-center gap-4">
                         <div className={cn(
                           "w-16 h-16 rounded-xl flex items-center justify-center",
-                          isDark ? "bg-white/5" : "bg-black/5"
+                          isDark 
+                            ? "bg-black/20 border border-white/10" 
+                            : "bg-white/10 border border-black/10"
                         )}>
                           <User className={cn(
                             "w-8 h-8",
@@ -122,8 +129,8 @@ export default function Settings() {
                         <button className={cn(
                           "px-4 py-2 rounded-xl transition-colors w-full sm:w-auto",
                           isDark 
-                            ? "bg-white/10 hover:bg-white/20 text-white" 
-                            : "bg-black/10 hover:bg-black/20 text-black"
+                            ? "bg-black/20 hover:bg-black/30 border border-white/10 text-white" 
+                            : "bg-white/10 hover:bg-white/20 border border-black/10 text-black"
                         )}>
                           Update
                         </button>
@@ -141,8 +148,8 @@ export default function Settings() {
                           className={cn(
                             "w-full px-4 py-2 rounded-xl transition-colors",
                             isDark
-                              ? "bg-white/5 border border-white/10 text-white"
-                              : "bg-black/5 border border-black/10 text-black",
+                              ? "bg-black/20 border border-white/10 text-white"
+                              : "bg-white/10 border border-black/10 text-black",
                             "focus:outline-none focus:ring-2",
                             isDark
                               ? "focus:ring-white/20"
@@ -161,8 +168,8 @@ export default function Settings() {
                           className={cn(
                             "w-full px-4 py-2 rounded-xl transition-colors",
                             isDark
-                              ? "bg-white/5 border border-white/10 text-white"
-                              : "bg-black/5 border border-black/10 text-black",
+                              ? "bg-black/20 border border-white/10 text-white"
+                              : "bg-white/10 border border-black/10 text-black",
                             "focus:outline-none focus:ring-2",
                             isDark
                               ? "focus:ring-white/20"
@@ -199,13 +206,13 @@ export default function Settings() {
                               Add an extra layer of security to your account
                             </p>
                           </div>
-                          <button
+                                                      <button
                             onClick={() => setShowTwoFactor(true)}
                             className={cn(
                               "px-4 py-2 rounded-xl transition-colors w-full sm:w-auto",
                               isDark 
-                                ? "bg-white/10 hover:bg-white/20 text-white" 
-                                : "bg-black/10 hover:bg-black/20 text-black"
+                                ? "bg-black/20 hover:bg-black/30 border border-white/10 text-white" 
+                                : "bg-white/10 hover:bg-white/20 border border-black/10 text-black"
                             )}>
                             Configure
                           </button>
@@ -232,7 +239,10 @@ export default function Settings() {
                           
                           <div className="mx-auto">
                             <GlassContainer className="p-4 w-40 h-40">
-                              <div className="w-full h-full rounded-lg flex items-center justify-center text-sm">
+                              <div className={cn(
+                                "w-full h-full rounded-lg flex items-center justify-center text-sm",
+                                isDark ? "text-white/70" : "text-black/70"
+                              )}>
                                 QR Code
                               </div>
                             </GlassContainer>
@@ -249,8 +259,8 @@ export default function Settings() {
                                 className={cn(
                                   "w-full px-4 py-2 rounded-xl transition-colors",
                                   isDark
-                                    ? "bg-white/5 border border-white/10 text-white"
-                                    : "bg-black/5 border border-black/10 text-black",
+                                    ? "bg-black/20 border border-white/10 text-white"
+                                    : "bg-white/10 border border-black/10 text-black",
                                   "focus:outline-none focus:ring-2",
                                   isDark
                                     ? "focus:ring-white/20"
@@ -263,8 +273,8 @@ export default function Settings() {
                               <button className={cn(
                                 "px-4 py-2 rounded-xl transition-colors",
                                 isDark 
-                                  ? "bg-white/10 hover:bg-white/20 text-white" 
-                                  : "bg-black/10 hover:bg-black/20 text-black"
+                                  ? "bg-black/20 hover:bg-black/30 border border-white/10 text-white" 
+                                  : "bg-white/10 hover:bg-white/20 border border-black/10 text-black"
                               )}>
                                 Verify & Enable
                               </button>
