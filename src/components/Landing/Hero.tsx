@@ -83,6 +83,24 @@ const Hero = ({ onGetStarted }: HeroProps) => {
           >
             Get Started
           </button>
+
+          <button 
+            onClick={() => navigate('/chat')}
+            className={cn(
+              "relative group",
+              "px-8 py-3 rounded-[20px]",
+              "text-sm font-medium tracking-wide",
+              "transition-all duration-200",
+              "bg-gradient-to-r from-emerald-500/20 via-emerald-500/30 to-emerald-400/20",
+              "hover:from-emerald-500/30 hover:via-emerald-500/40 hover:to-emerald-400/30",
+              "border border-emerald-500/30",
+              "text-emerald-300",
+              "overflow-hidden"
+            )}
+          >
+            <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-emerald-500/20 to-emerald-400/20 blur-xl group-hover:opacity-75 transition-opacity opacity-0" />
+            <span className="relative z-10">Support Ticket</span>
+          </button>
         </motion.div>
       </div>
 

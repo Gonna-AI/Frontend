@@ -10,6 +10,7 @@ import { cn } from './utils/cn';
 import AuthPage from './components/Auth/AuthPage';
 import { auth } from './services/auth';
 import GoogleCallback from './components/Auth/GoogleCallback';
+import ClientChat from './components/ClientChat';
 
 function App() {
   const { isDark } = useTheme();
@@ -127,11 +128,8 @@ function App() {
             <Dashboard />
           </ProtectedRoute>
         } />
-        <Route path="/chat" element={
-          <ProtectedRoute>
-            <Chat />
-          </ProtectedRoute>
-        } />
+        {/* Chat route - accessible without auth */}
+        <Route path="/chat" element={<ClientChat />} />
         <Route path="/ai-settings" element={
           <ProtectedRoute>
             <AISettings />
