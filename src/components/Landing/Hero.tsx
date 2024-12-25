@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
 import { RainbowButton } from '../magicui/rainbow-button';
 import { cn } from '../../utils/cn';
@@ -11,6 +11,16 @@ interface HeroProps {
 
 const Hero = ({ onGetStarted }: HeroProps) => {
   const navigate = useNavigate();
+
+  const scrollToWaitlist = () => {
+    const waitlistSection = document.getElementById('waitlist-section');
+    if (waitlistSection) {
+      waitlistSection.scrollIntoView({ 
+        behavior: 'smooth',
+        block: 'start'
+      });
+    }
+  };
 
   return (
     <div className="bg-[rgb(10,10,10)] min-h-screen relative overflow-hidden">
@@ -97,7 +107,7 @@ const Hero = ({ onGetStarted }: HeroProps) => {
             className="flex flex-col sm:flex-row items-center justify-center gap-4"
           >
             <button 
-              onClick={onGetStarted}
+              onClick={scrollToWaitlist}
               className="bg-[rgb(10,10,10)] text-white/80 border border-purple-500/20 hover:border-purple-500/40 transition-colors duration-200 rounded-[20px] px-8 py-3 text-sm font-medium tracking-wide"
             >
               Learn More
