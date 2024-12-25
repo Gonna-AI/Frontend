@@ -38,20 +38,21 @@ export default function AgentProfile() {
     <div className="p-2 sm:p-4 md:p-6 max-w-[95rem] mx-auto">
       <div className={cn(
         "relative overflow-hidden rounded-xl sm:rounded-3xl min-h-[85vh]",
-        isDark ? "bg-[#1c1c1c]" : "bg-white",
-        "border",
-        isDark ? "border-white/10" : "border-black/10",
+        isDark 
+          ? "bg-black/20 border border-white/10" 
+          : "bg-white/10 border border-black/10",
         "p-4 sm:p-6 md:p-8"
       )}>
-        {/* Background Gradients */}
-        <div className="absolute top-0 right-0 w-[35rem] h-[35rem] bg-gradient-to-bl from-blue-500/10 via-purple-500/5 to-transparent blur-3xl pointer-events-none" />
-        <div className="absolute bottom-0 left-0 w-[35rem] h-[35rem] bg-gradient-to-tr from-purple-500/10 to-transparent blur-3xl pointer-events-none" />
-
         <div className="relative z-10">
           {/* Header with Icon Navigation */}
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-r from-blue-500/20 to-purple-500/20 flex items-center justify-center">
+              <div className={cn(
+                "w-10 h-10 rounded-xl flex items-center justify-center",
+                isDark 
+                  ? "bg-black/20 border border-white/10" 
+                  : "bg-white/10 border border-black/10"
+              )}>
                 <BarChart3 className="w-5 h-5 text-blue-400" />
               </div>
               <span className={cn(
@@ -62,7 +63,9 @@ export default function AgentProfile() {
             <div className="flex gap-2 w-full sm:w-auto">
               <button className={cn(
                 "p-2 rounded-xl transition-all flex-1 sm:flex-none",
-                isDark ? "bg-white/5 hover:bg-white/10" : "bg-black/5 hover:bg-black/10",
+                isDark 
+                  ? "bg-black/20 border border-white/10 hover:bg-black/30" 
+                  : "bg-white/10 border border-black/10 hover:bg-white/20",
                 "flex items-center justify-center gap-2"
               )}>
                 <History size={18} className={isDark ? "text-white/60" : "text-black/60"} />
@@ -73,7 +76,9 @@ export default function AgentProfile() {
               </button>
               <button className={cn(
                 "p-2 rounded-xl transition-all flex-1 sm:flex-none",
-                isDark ? "bg-white/5 hover:bg-white/10" : "bg-black/5 hover:bg-black/10",
+                isDark 
+                  ? "bg-black/20 border border-white/10 hover:bg-black/30" 
+                  : "bg-white/10 border border-black/10 hover:bg-white/20",
                 "flex items-center justify-center gap-2"
               )}>
                 <Download size={18} className={isDark ? "text-white/60" : "text-black/60"} />
@@ -89,10 +94,17 @@ export default function AgentProfile() {
           <div className="mb-6">
             <div className={cn(
               "p-4 sm:p-6 rounded-2xl",
-              isDark ? "bg-black/40" : "bg-black/5"
+              isDark 
+                ? "bg-black/20 border border-white/10" 
+                : "bg-white/10 border border-black/10"
             )}>
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6">
-                <div className="w-16 sm:w-20 h-16 sm:h-20 rounded-2xl bg-gradient-to-r from-blue-500/20 to-purple-500/20 border border-white/10 flex items-center justify-center">
+                <div className={cn(
+                  "w-16 sm:w-20 h-16 sm:h-20 rounded-2xl flex items-center justify-center",
+                  isDark 
+                    ? "bg-black/20 border border-white/10" 
+                    : "bg-white/10 border border-black/10"
+                )}>
                   <User className="w-8 sm:w-10 h-8 sm:h-10 text-blue-400" />
                 </div>
                 <div className="flex-1">
@@ -132,7 +144,9 @@ export default function AgentProfile() {
                 key={index}
                 className={cn(
                   "p-4 sm:p-6 rounded-xl sm:rounded-2xl",
-                  isDark ? "bg-black/40" : "bg-black/5"
+                  isDark 
+                    ? "bg-black/20 border border-white/10" 
+                    : "bg-white/10 border border-black/10"
                 )}
               >
                 <div className="flex items-center gap-3 mb-2">
@@ -165,13 +179,17 @@ export default function AgentProfile() {
               <div className="flex gap-2">
                 <button className={cn(
                   "p-2 rounded-xl transition-all",
-                  isDark ? "bg-white/5 hover:bg-white/10" : "bg-black/5 hover:bg-black/10"
+                  isDark 
+                    ? "bg-black/20 border border-white/10 hover:bg-black/30" 
+                    : "bg-white/10 border border-black/10 hover:bg-white/20"
                 )}>
                   <Filter size={18} className={isDark ? "text-white/60" : "text-black/60"} />
                 </button>
                 <button className={cn(
                   "p-2 rounded-xl transition-all",
-                  isDark ? "bg-white/5 hover:bg-white/10" : "bg-black/5 hover:bg-black/10"
+                  isDark 
+                    ? "bg-black/20 border border-white/10 hover:bg-black/30" 
+                    : "bg-white/10 border border-black/10 hover:bg-white/20"
                 )}>
                   <ArrowUpDown size={18} className={isDark ? "text-white/60" : "text-black/60"} />
                 </button>
@@ -181,7 +199,9 @@ export default function AgentProfile() {
             {/* Claims Records */}
             <div className={cn(
               "space-y-3 p-4 sm:p-6 rounded-xl sm:rounded-2xl",
-              isDark ? "bg-black/40" : "bg-black/5"
+              isDark 
+                ? "bg-black/20 border border-white/10" 
+                : "bg-white/10 border border-black/10"
             )}>
               {[
                 { date: 'Dec 23', claimId: 'CLM-089', status: 'Resolved', priority: 'High' },
