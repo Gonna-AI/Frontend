@@ -110,7 +110,7 @@ const Hero = ({ onGetStarted }: HeroProps) => {
               onClick={scrollToWaitlist}
               className="bg-[rgb(10,10,10)] text-white/80 border border-purple-500/20 hover:border-purple-500/40 transition-colors duration-200 rounded-[20px] px-8 py-3 text-sm font-medium tracking-wide"
             >
-              Learn More
+              Request a demo
             </button>
 
             <button 
