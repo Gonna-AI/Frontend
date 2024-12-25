@@ -59,19 +59,15 @@ export default function Billing() {
     );
   };
 
+  // Updated GlassContainer to match Enterprise box styling
   const GlassContainer = ({ children, className }: { children: React.ReactNode, className?: string }) => (
     <div className={cn(
       "relative overflow-hidden",
       "rounded-xl p-6",
-      "border",
       isDark 
-        ? "bg-black/25 border-white/10 backdrop-blur-md" 
-        : "bg-white/10 border-black/10 backdrop-blur-md",
+        ? "bg-black/20 border border-white/10" 
+        : "bg-white/10 border border-black/10",
       "transition-all duration-200",
-      "hover:shadow-lg",
-      isDark 
-        ? "hover:bg-black/30" 
-        : "hover:bg-white/20",
       className
     )}>
       {children}
@@ -80,35 +76,22 @@ export default function Billing() {
 
   const InnerGlassContainer = ({ children, className }: { children: React.ReactNode, className?: string }) => (
     <div className={cn(
-      "rounded-xl backdrop-blur-sm",
+      "rounded-xl",
       isDark 
-        ? "bg-white/[0.06] border-white/[0.08]" 
-        : "bg-black/[0.06] border-black/[0.08]",
+        ? "bg-black/20 border border-white/10" 
+        : "bg-white/10 border border-black/10",
       className
     )}>
       {children}
     </div>
   );
 
-  const GlassButton = ({ children, className }: { children: React.ReactNode, className?: string }) => (
-    <button className={cn(
-      "px-6 py-2 rounded-xl",
-      "backdrop-blur-sm transition-all duration-200",
-      isDark 
-        ? "bg-white/10 hover:bg-white/20 text-white border border-white/[0.08]" 
-        : "bg-black/10 hover:bg-black/20 text-black border border-black/[0.08]",
-      className
-    )}>
-      {children}
-    </button>
-  );
-
   const IconContainer = ({ children }: { children: React.ReactNode }) => (
     <div className={cn(
-      "w-12 h-12 rounded-xl flex items-center justify-center backdrop-blur-sm",
+      "w-12 h-12 rounded-xl flex items-center justify-center",
       isDark 
-        ? "bg-white/[0.06] border border-white/[0.08]" 
-        : "bg-black/[0.06] border border-black/[0.08]"
+        ? "bg-black/20 border border-white/10" 
+        : "bg-white/10 border border-black/10"
     )}>
       {children}
     </div>
@@ -120,15 +103,12 @@ export default function Billing() {
       <GlassContainer>
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center space-x-4">
-            <div className={cn(
-              "w-12 h-12 rounded-xl flex items-center justify-center",
-              isDark ? "bg-white/[0.06]" : "bg-black/[0.06]"
-            )}>
+            <IconContainer>
               <Package className={cn(
                 "w-6 h-6",
                 isDark ? "text-purple-400" : "text-purple-600"
               )} />
-            </div>
+            </IconContainer>
             <div>
               <h3 className={cn(
                 "text-xl font-semibold",
@@ -142,8 +122,8 @@ export default function Billing() {
           <button className={cn(
             "px-6 py-2 rounded-xl transition-colors",
             isDark 
-              ? "bg-white/[0.06] hover:bg-white/20 text-white" 
-              : "bg-black/[0.06] hover:bg-black/20 text-black"
+              ? "bg-black/20 hover:bg-black/30 text-white border border-white/10" 
+              : "bg-white/10 hover:bg-white/20 text-black border border-black/10"
           )}>
             Change Plan
           </button>
@@ -177,7 +157,7 @@ export default function Billing() {
 
           <div className={cn(
             "p-4 rounded-xl",
-            isDark ? "bg-white/[0.06]" : "bg-black/[0.06]"
+            isDark ? "bg-black/20 border border-white/10" : "bg-white/10 border border-black/10"
           )}>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -210,15 +190,12 @@ export default function Billing() {
         
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
-            <div className={cn(
-              "w-12 h-12 rounded-xl flex items-center justify-center",
-              isDark ? "bg-white/[0.06]" : "bg-black/[0.06]"
-            )}>
+            <IconContainer>
               <CreditCard className={cn(
                 "w-6 h-6",
                 isDark ? "text-purple-400" : "text-purple-600"
               )} />
-            </div>
+            </IconContainer>
             <div>
               <h3 className={cn(
                 "text-lg font-medium",
@@ -232,8 +209,8 @@ export default function Billing() {
           <button className={cn(
             "px-6 py-2 rounded-xl transition-colors",
             isDark 
-              ? "bg-white/[0.06] hover:bg-white/20 text-white" 
-              : "bg-black/[0.06] hover:bg-black/20 text-black"
+              ? "bg-black/20 hover:bg-black/30 text-white border border-white/10" 
+              : "bg-white/10 hover:bg-white/20 text-black border border-black/10"
           )}>
             Update
           </button>
@@ -256,7 +233,7 @@ export default function Billing() {
           >
             {plan.recommended && (
               <div className={cn(
-                "absolute top-3 right-3 px-3 py-1 rounded-full text-xs font-medium backdrop-blur-xl",
+                "absolute top-3 right-3 px-3 py-1 rounded-full text-xs font-medium",
                 isDark 
                   ? "bg-purple-400/20 text-purple-200 border border-purple-400/30" 
                   : "bg-purple-600/20 text-purple-800 border border-purple-600/30"
@@ -294,13 +271,9 @@ export default function Billing() {
             
             <button className={cn(
               "w-full py-2 rounded-xl transition-colors",
-              plan.recommended
-                ? isDark 
-                  ? "bg-white/[0.06] hover:bg-white/20 text-white" 
-                  : "bg-black/[0.06] hover:bg-black/20 text-black"
-                : isDark 
-                  ? "bg-white/[0.06] hover:bg-white/20 text-white" 
-                  : "bg-black/[0.06] hover:bg-black/20 text-black"
+              isDark 
+                ? "bg-black/20 hover:bg-black/30 text-white border border-white/10" 
+                : "bg-white/10 hover:bg-white/20 text-black border border-black/10"
             )}>
               {plan.recommended ? 'Current Plan' : 'Select Plan'}
             </button>
@@ -322,14 +295,14 @@ export default function Billing() {
               className={cn(
                 "flex items-center justify-between p-4 transition-all duration-200",
                 isDark 
-                  ? "hover:bg-white/10" 
-                  : "hover:bg-black/10"
+                  ? "hover:bg-black/30" 
+                  : "hover:bg-white/20"
               )}
             >
               <div className="flex items-center space-x-4">
                 <div className={cn(
                   "w-10 h-10 rounded-xl flex items-center justify-center",
-                  isDark ? "bg-white/[0.06]" : "bg-black/[0.06]"
+                  isDark ? "bg-black/20 border border-white/10" : "bg-white/10 border border-black/10"
                 )}>
                   <DollarSign className={cn(
                     "w-5 h-5",
