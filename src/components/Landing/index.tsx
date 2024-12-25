@@ -16,7 +16,7 @@ export default function Landing({ onGetStarted }: LandingProps) {
   const { gradientStyle } = useMouseGradient();
 
   return (
-    <div className="min-h-screen bg-gray-900 overflow-x-hidden">
+    <div className="min-h-screen bg-gray-900 overflow-hidden">
       <ThreeBackground />
       <div 
         className="fixed inset-0 opacity-30 mix-blend-overlay" 
