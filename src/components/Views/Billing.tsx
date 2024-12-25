@@ -63,15 +63,15 @@ export default function Billing() {
     <div className={cn(
       "relative overflow-hidden",
       "rounded-xl p-6",
-      "border backdrop-blur-xl",
+      "border",
       isDark 
-        ? "bg-black/40 border-white/[0.08]" 
-        : "bg-black/[0.06] border-black/[0.08]",
+        ? "bg-black/25 border-white/10 backdrop-blur-md" 
+        : "bg-white/10 border-black/10 backdrop-blur-md",
       "transition-all duration-200",
       "hover:shadow-lg",
       isDark 
-        ? "hover:bg-black/50 hover:border-white/[0.12]" 
-        : "hover:bg-black/[0.08] hover:border-black/[0.12]",
+        ? "hover:bg-black/30" 
+        : "hover:bg-white/20",
       className
     )}>
       {children}
