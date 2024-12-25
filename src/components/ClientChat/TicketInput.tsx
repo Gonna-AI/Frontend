@@ -1,15 +1,14 @@
 import React, { useState } from 'react';
 import { Ticket, ArrowRight } from 'lucide-react';
-import { useTheme } from '../../hooks/useTheme';
 import { cn } from '../../utils/cn';
 
 interface TicketInputProps {
   onSubmit: (code: string) => void;
   error?: string;
+  isDark: boolean;
 }
 
-export default function TicketInput({ onSubmit, error }: TicketInputProps) {
-  const { isDark } = useTheme();
+export default function TicketInput({ onSubmit, error, isDark }: TicketInputProps) {
   const [code, setCode] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
