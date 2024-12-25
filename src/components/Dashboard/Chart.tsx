@@ -18,10 +18,9 @@ export default function Chart() {
   return (
     <div className={cn(
       "rounded-xl overflow-hidden",
-      "border backdrop-blur-xl",
       isDark 
-        ? "bg-black/40 border-white/[0.08]" 
-        : "bg-white/40 border-black/[0.08]",
+        ? "bg-black/20 border border-white/10" 
+        : "bg-white/10 border border-black/10",
       "h-[400px]"
     )}>
       <div className="p-6">
@@ -34,7 +33,7 @@ export default function Chart() {
           </h3>
           <div className={cn(
             "text-sm",
-            isDark ? "text-white/40" : "text-black/40"
+            isDark ? "text-white/60" : "text-black/60"
           )}>
             Last 6 months
           </div>
@@ -42,24 +41,24 @@ export default function Chart() {
 
         <ResponsiveContainer width="100%" height={300}>
           <LineChart 
-            data={data} 
+            data={data}
             margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
           >
-            <CartesianGrid 
-              strokeDasharray="3 3" 
-              stroke={isDark ? "#ffffff10" : "#00000010"} 
+            <CartesianGrid
+              strokeDasharray="3 3"
+              stroke={isDark ? "#ffffff10" : "#00000010"}
               vertical={false}
             />
-            <XAxis 
-              dataKey="name" 
-              stroke={isDark ? "#ffffff40" : "#00000040"}
+            <XAxis
+              dataKey="name"
+              stroke={isDark ? "#ffffff60" : "#00000060"}
               fontSize={12}
               tickLine={false}
               axisLine={false}
               padding={{ left: 10, right: 10 }}
             />
-            <YAxis 
-              stroke={isDark ? "#ffffff40" : "#00000040"}
+            <YAxis
+              stroke={isDark ? "#ffffff60" : "#00000060"}
               fontSize={12}
               tickLine={false}
               axisLine={false}
@@ -67,13 +66,12 @@ export default function Chart() {
             />
             <Tooltip
               contentStyle={{
-                backgroundColor: isDark ? 'rgba(0,0,0,0.8)' : 'rgba(255,255,255,0.8)',
+                backgroundColor: isDark ? 'rgba(0,0,0,0.2)' : 'rgba(255,255,255,0.1)',
                 border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(0,0,0,0.1)',
                 borderRadius: '8px',
-                boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)',
                 backdropFilter: 'blur(8px)',
               }}
-              labelStyle={{ 
+              labelStyle={{
                 color: isDark ? '#ffffff80' : '#00000080',
                 fontSize: '12px',
                 fontWeight: 500,
