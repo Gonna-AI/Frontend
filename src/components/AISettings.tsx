@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Database, Bot, MessageSquare, CheckCircle, Plus, Trash2, Save } from 'lucide-react';
 import { useTheme } from '../hooks/useTheme';
 import { cn } from '../utils/cn';
@@ -19,6 +19,25 @@ export default function AISettings() {
   const [knowledgeBase, setKnowledgeBase] = useState<KnowledgeBaseEntry[]>([]);
   const [newCategory, setNewCategory] = useState('');
   const [newDescription, setNewDescription] = useState('');
+
+  const categoryInputRef = useRef<HTMLInputElement>(null);
+  const descriptionInputRef = useRef<HTMLInputElement>(null);
+  const aiNameInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    // Keep focus on the category input field
+    categoryInputRef.current?.focus();
+  }, [newCategory]);
+
+  useEffect(() => {
+    // Keep focus on the description input field
+    descriptionInputRef.current?.focus();
+  }, [newDescription]);
+
+  useEffect(() => {
+    // Keep focus on the AI Name input field
+    aiNameInputRef.current?.focus();
+  }, [aiName]);
 
   const GlassContainer = ({ children, className }: { children: React.ReactNode, className?: string }) => (
     <div className={cn(
@@ -53,6 +72,7 @@ export default function AISettings() {
       ]);
       setNewCategory('');
       setNewDescription('');
+      categoryInputRef.current?.focus();
     }
   };
 
@@ -119,6 +139,7 @@ export default function AISettings() {
             {/* Add New Entry Form */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
               <input
+                ref={categoryInputRef}
                 type="text"
                 value={newCategory}
                 onChange={(e) => setNewCategory(e.target.value)}
@@ -132,6 +153,7 @@ export default function AISettings() {
                 )}
               />
               <input
+                ref={descriptionInputRef}
                 type="text"
                 value={newDescription}
                 onChange={(e) => setNewDescription(e.target.value)}
@@ -271,6 +293,7 @@ export default function AISettings() {
                   AI Name
                 </label>
                 <input
+                  ref={aiNameInputRef}
                   type="text"
                   value={aiName}
                   onChange={(e) => setAiName(e.target.value)}
