@@ -11,7 +11,7 @@ export default function ClientChat() {
   const [ticketCode, setTicketCode] = useState('');
   const [error, setError] = useState('');
 
-  const handleVerification = (code: string) => {
+  const handleVerification = (code) => {
     setError('');
     // For demo, accept '123' as valid code
     if (code === '123') {
@@ -23,11 +23,11 @@ export default function ClientChat() {
   };
 
   return (
-    <div className="min-h-screen bg-[rgb(10,10,10)]">
+    <div className="min-h-screen bg-gradient-to-br from-white via-gray-50 to-gray-100">
       {/* Background Gradients */}
-      <div className="fixed inset-0">
-        <div className="absolute top-0 right-0 w-[800px] h-[800px] opacity-30 rounded-full bg-gradient-to-b from-purple-500/30 via-purple-500/10 to-transparent blur-3xl" />
-        <div className="absolute bottom-0 left-0 w-[800px] h-[800px] opacity-30 rounded-full bg-gradient-to-t from-blue-500/30 via-blue-500/10 to-transparent blur-3xl" />
+      <div className="fixed inset-0 pointer-events-none">
+        <div className="absolute top-0 right-0 w-96 h-96 opacity-20 rounded-full bg-gradient-to-b from-blue-200 via-blue-100 to-transparent blur-2xl" />
+        <div className="absolute bottom-0 left-0 w-96 h-96 opacity-20 rounded-full bg-gradient-to-t from-purple-200 via-purple-100 to-transparent blur-2xl" />
       </div>
 
       {/* Content */}
@@ -41,21 +41,17 @@ export default function ClientChat() {
         <div className={cn(
           "max-w-2xl mx-auto",
           "rounded-2xl overflow-hidden",
-          "border backdrop-blur-xl",
-          isDark 
-            ? "bg-black/40 border-white/10" 
-            : "bg-white/40 border-black/10"
+          "shadow-xl",
+          "bg-white border border-gray-200",
+          "backdrop-blur-lg"
         )}>
           {!isVerified ? (
             <div className="p-6 md:p-8">
               <div className="text-center mb-8">
-                <h1 className={cn(
-                  "text-2xl font-bold mb-2",
-                  isDark ? "text-white" : "text-black"
-                )}>
+                <h1 className="text-2xl font-bold mb-2 text-gray-900">
                   Welcome to Support
                 </h1>
-                <p className={isDark ? "text-white/60" : "text-black/60"}>
+                <p className="text-gray-600">
                   Please enter your support ticket code to continue
                 </p>
               </div>
@@ -64,6 +60,11 @@ export default function ClientChat() {
           ) : (
             <ChatInterface ticketCode={ticketCode} />
           )}
+        </div>
+
+        {/* Footer */}
+        <div className="text-center mt-8 text-sm text-gray-500">
+          Need help? Contact our support team
         </div>
       </div>
     </div>
