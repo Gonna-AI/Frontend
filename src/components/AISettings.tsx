@@ -17,6 +17,18 @@ interface KnowledgeBaseEntry {
   selected?: boolean;
 }
 
+// Add new interface for settings data
+interface SettingsData {
+  ai_name: string;
+  tone_of_voice: string;
+  response_style: string;
+  response_length: string;
+  enable_follow_up: boolean;
+  custom_knowledge: {
+    [key: string]: string;
+  };
+}
+
 const EditableInput = ({ 
   value, 
   onChange, 
@@ -115,27 +127,35 @@ export default function AISettings() {
   }, [showError]);
 
   useEffect(() => {
-    fetchKnowledge();
-  }, []);
+    const fetchData = async () => {
+      try {
+        const response = await api.get<SettingsData>('/api/knowledge');
+        const data = response.data;
+        
+        // Update states with received values
+        setAiName(data.ai_name || '');
+        setTone(data.tone_of_voice || '');
+        setLength(data.response_length || '');
+        setEnableFollowUp(data.enable_follow_up);
+        
+        // Handle knowledge base data
+        const knowledge = data.custom_knowledge;
+        const entries: KnowledgeBaseEntry[] = Object.entries(knowledge).map(([category, description]) => ({
+          id: category,
+          category,
+          description,
+          selected: false
+        }));
+        
+        setKnowledgeBase(entries);
+      } catch (error) {
+        setShowError(true);
+        setErrorMessage('Failed to fetch settings');
+      }
+    };
 
-  const fetchKnowledge = async () => {
-    try {
-      const response = await api.get<KnowledgeData>('/api/knowledge');
-      const knowledge = response.data.custom_knowledge;
-      
-      const entries: KnowledgeBaseEntry[] = Object.entries(knowledge).map(([category, description]) => ({
-        id: category,
-        category,
-        description,
-        selected: false
-      }));
-      
-      setKnowledgeBase(entries);
-    } catch (error) {
-      setShowError(true);
-      setErrorMessage('Failed to fetch knowledge base');
-    }
-  };
+    fetchData();
+  }, []);
 
   const GlassContainer = ({ children, className }: { children: React.ReactNode, className?: string }) => (
     <div className={cn(
@@ -302,6 +322,24 @@ export default function AISettings() {
 
   const showConfirmSelection = knowledgeBase.some(entry => entry.selected);
   const showSelectAll = knowledgeBase.length > 1;
+
+  const handleSaveSettings = async () => {
+    try {
+      await api.put('/api/settings', {
+        ai_name: aiName,
+        tone_of_voice: tone,
+        response_style: 'Moderate', // This seems to be fixed in your backend
+        response_length: length,
+        enable_follow_up: enableFollowUp
+      });
+
+      // Reload the page to reflect changes
+      window.location.reload();
+    } catch (error) {
+      setShowError(true);
+      setErrorMessage('Failed to update settings');
+    }
+  };
 
   return (
     <div className="p-2 sm:p-4 md:p-6 max-w-[95rem] mx-auto">
@@ -740,12 +778,14 @@ export default function AISettings() {
 
           {/* Save Button */}
           <div className="flex justify-end pt-4">
-            <button className={cn(
-              "px-6 py-2.5 rounded-xl transition-all font-medium",
-              isDark 
-                ? "bg-black/40 hover:bg-black/60 text-white border border-white/10" 
-                : "bg-black/5 hover:bg-black/10 text-black border border-black/10"
-            )}>
+            <button 
+              onClick={handleSaveSettings}
+              className={cn(
+                "px-6 py-2.5 rounded-xl transition-all font-medium",
+                isDark 
+                  ? "bg-black/40 hover:bg-black/60 text-white border border-white/10" 
+                  : "bg-black/5 hover:bg-black/10 text-black border border-black/10"
+              )}>
               Save Settings
             </button>
           </div>
