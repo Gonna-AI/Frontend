@@ -1,12 +1,17 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-import { Send, GalleryVerticalEnd } from 'lucide-react';
+import { Send, GalleryVerticalEnd, Phone, Upload } from 'lucide-react';
 import { cn } from '../../utils/cn';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
+import CallWindow from './CallWindow';
 
 interface Message {
   text: string;
   isUser: boolean;
+  image?: {
+    name: string;
+    url: string;
+  };
 }
 
 interface ChatInterfaceProps {
@@ -18,7 +23,10 @@ export default function ChatInterface({ ticketCode, isDark }: ChatInterfaceProps
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputMessage, setInputMessage] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [isCallWindowOpen, setIsCallWindowOpen] = useState(false);
   const messagesEndRef = useRef<null | HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -44,22 +52,101 @@ export default function ChatInterface({ ticketCode, isDark }: ChatInterfaceProps
     setInputMessage('');
     setIsTyping(true);
 
+    abortControllerRef.current = new AbortController();
+
     try {
       const response = await axios.post('http://localhost:5000/api/chat', 
         { 
           message: inputMessage,
           ticketCode: ticketCode
         }, 
-        { withCredentials: true }
+        { 
+          withCredentials: true,
+          signal: abortControllerRef.current.signal
+        }
       );
       
       const aiMessage: Message = { text: response.data.response, isUser: false };
       setMessages(prev => [...prev, aiMessage]);
     } catch (error) {
-      console.error('Error sending message:', error);
-      const errorMessage: Message = { 
-        text: 'Sorry, I encountered an error. Please try again.',
-        isUser: false 
+      if (axios.isCancel(error)) {
+        console.log('Request canceled:', error.message);
+      } else {
+        console.error('Error sending message:', error);
+        const errorMessage: Message = { 
+          text: 'Sorry, I encountered an error. Please try again.',
+          isUser: false 
+        };
+        setMessages(prev => [...prev, errorMessage]);
+      }
+    } finally {
+      setIsTyping(false);
+      abortControllerRef.current = null;
+    }
+  };
+
+  const handleCallButtonClick = () => {
+    setIsCallWindowOpen(true);
+  };
+
+  const handleStopAI = () => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      setIsTyping(false);
+    }
+    setMessages(prev => [...prev, { text: "AI response stopped. You can ask another question.", isUser: false }]);
+  };
+
+  const validateImageFile = (file: File) => {
+    const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+    if (!validTypes.includes(file.type)) {
+      throw new Error('Please upload only image files (JPEG, PNG, GIF, or WebP)');
+    }
+    // 10MB size limit
+    if (file.size > 10 * 1024 * 1024) {
+      throw new Error('Image size should be less than 10MB');
+    }
+  };
+
+  const handleImageUpload = async (file: File) => {
+    try {
+      validateImageFile(file);
+      
+      const formData = new FormData();
+      formData.append('image', file);
+      formData.append('ticketCode', ticketCode);
+
+      // Create a temporary URL for preview
+      const imageUrl = URL.createObjectURL(file);
+      
+      const userMessage: Message = {
+        text: `Uploaded image: ${file.name}`,
+        isUser: true,
+        image: {
+          name: file.name,
+          url: imageUrl
+        }
+      };
+      setMessages(prev => [...prev, userMessage]);
+      setIsTyping(true);
+
+      const response = await axios.post('http://localhost:5000/api/upload-image',
+        formData,
+        {
+          withCredentials: true,
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        }
+      );
+
+      const aiMessage: Message = { text: response.data.response, isUser: false };
+      setMessages(prev => [...prev, aiMessage]);
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      const errorMessage: Message = {
+        text: error instanceof Error ? error.message : 'Sorry, I encountered an error uploading the image. Please try again.',
+        isUser: false
       };
       setMessages(prev => [...prev, errorMessage]);
     } finally {
@@ -67,8 +154,21 @@ export default function ChatInterface({ ticketCode, isDark }: ChatInterfaceProps
     }
   };
 
+  const handleFileButtonClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      handleImageUpload(file);
+      // Reset the input so the same file can be uploaded again if needed
+      event.target.value = '';
+    }
+  };
+
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full relative">
       {/* Header */}
       <div className={cn(
         "flex items-center justify-between px-6 py-4 border-b",
@@ -123,6 +223,18 @@ export default function ChatInterface({ ticketCode, isDark }: ChatInterfaceProps
                   : "bg-white text-gray-900"
             )}>
               {message.text}
+              {message.image && (
+                <div className="mt-2">
+                  <img 
+                    src={message.image.url} 
+                    alt={message.image.name}
+                    className="max-w-full rounded-lg max-h-64 object-contain"
+                  />
+                  <div className="mt-1 text-sm opacity-80">
+                    {message.image.name}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         ))}
@@ -164,6 +276,30 @@ export default function ChatInterface({ ticketCode, isDark }: ChatInterfaceProps
             )}
           />
           <button
+            type="button"
+            onClick={handleFileButtonClick}
+            className={cn(
+              "px-4 py-4 rounded-xl transition-colors flex items-center justify-center",
+              isDark
+                ? "bg-purple-600 text-white hover:bg-purple-700"
+                : "bg-purple-500 text-white hover:bg-purple-600"
+            )}
+          >
+            <Upload className="w-6 h-6" />
+          </button>
+          <button
+            type="button"
+            onClick={handleCallButtonClick}
+            className={cn(
+              "px-4 py-4 rounded-xl transition-colors flex items-center justify-center",
+              isDark
+                ? "bg-purple-600 text-white hover:bg-purple-700"
+                : "bg-purple-500 text-white hover:bg-purple-600"
+            )}
+          >
+            <Phone className="w-6 h-6" />
+          </button>
+          <button
             type="submit"
             disabled={isTyping}
             className={cn(
@@ -176,7 +312,26 @@ export default function ChatInterface({ ticketCode, isDark }: ChatInterfaceProps
             <Send className="w-6 h-6" />
           </button>
         </form>
+        <input
+          type="file"
+          ref={fileInputRef}
+          onChange={handleFileChange}
+          className="hidden"
+          accept="image/jpeg,image/png,image/gif,image/webp"
+        />
       </div>
+
+      {/* Call Window */}
+      <AnimatePresence>
+        {isCallWindowOpen && (
+          <CallWindow
+            isDark={isDark}
+            onClose={() => setIsCallWindowOpen(false)}
+            onStopAI={handleStopAI}
+            onFileUpload={handleImageUpload}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }

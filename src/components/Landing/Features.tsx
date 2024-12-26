@@ -2,10 +2,12 @@
 
 import React, { useState } from 'react'
 import { motion } from 'framer-motion'
+import { QuoteForm } from './QuoteForm'
 
 export default function Features() {
   const [activeFeature, setActiveFeature] = useState(null)
   const [activeTestimonial, setActiveTestimonial] = useState(0)
+  const [showQuoteForm, setShowQuoteForm] = useState(false)
 
   const features = [
     {
@@ -51,6 +53,11 @@ export default function Features() {
     }
   ]
 
+  const handleQuoteFormSubmit = (formData) => {
+    console.log('Form submitted:', formData);
+    // Here you would typically send the form data to your backend
+  };
+
   return (
     <section className="py-24 bg-[rgb(10,10,10)]">
       {/* Curved decoration lines */}
@@ -89,8 +96,11 @@ export default function Features() {
             </p>
             
             <div className="flex items-center gap-6">
-              <button className="bg-black text-white px-8 py-3 rounded-full border border-purple-500/30 hover:border-purple-500/60 transition-colors font-mono uppercase text-sm tracking-wider">
-                GET IN TOUCH
+              <button 
+                className="bg-black text-white px-8 py-3 rounded-full border border-purple-500/30 hover:border-purple-500/60 transition-colors font-mono uppercase text-sm tracking-wider"
+                onClick={() => setShowQuoteForm(true)}
+              >
+                GET A CUSTOM QUOTE
               </button>
 
               {/* Interactive dots */}
@@ -248,9 +258,21 @@ export default function Features() {
             viewport={{ once: true }}
             className="text-white/60 text-sm mb-8"
           >
+            Trusted by leading institutions worldwide
           </motion.p>
+          <div className="flex justify-center items-center space-x-12">
+            {/* Add partner logos here */}
+          </div>
         </div>
-      </div> 
+      </div>
+      
+      {showQuoteForm && (
+        <QuoteForm 
+          onClose={() => setShowQuoteForm(false)} 
+          onSubmit={handleQuoteFormSubmit}
+        />
+      )}
     </section>
   )
 }
+
