@@ -3,7 +3,6 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Header from './components/Layout/Header';
 import Sidebar from './components/Layout/Sidebar/index';
 import Landing from './components/Landing';
-import Chat from './components/chat';
 import { Dashboard, AISettings, Profile, Billing, Settings } from './components/Views';
 import { useTheme } from './hooks/useTheme';
 import { cn } from './utils/cn';
