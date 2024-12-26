@@ -62,7 +62,7 @@ const Hero = ({ onGetStarted }: HeroProps) => {
           )}
         >
           <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-emerald-500/20 to-emerald-400/20 blur-xl group-hover:opacity-75 transition-opacity opacity-0" />
-          <LifeBuoy className="w-5 h-5" />
+          <LifeBuoy className="w-5 h-5 md:w-6 md-6" />
           <span className="relative z-10 hidden md:inline">Support Ticket</span>
         </button>
       </div>
@@ -88,12 +88,12 @@ const Hero = ({ onGetStarted }: HeroProps) => {
             {/* Logo container with adjusted spacing for larger logo */}
             <div className="flex items-center gap-6">
               <div className="flex items-center justify-center pt-4">
-                <Logo />
+                <Logo className="w-24 h-24 md:w-32 md:h-32" />
               </div>
               
               {/* Logo text gradient */}
               <div className="bg-gradient-to-r from-emerald-400 via-blue-500 to-purple-600 text-transparent bg-clip-text">
-                <h1 className="text-8xl md:text-9xl font-bold tracking-tight">gonna.ai</h1>
+                <h1 className="text-6xl md:text-8xl font-bold tracking-tight">gonna.ai</h1>
               </div>
             </div>
           </motion.div>
