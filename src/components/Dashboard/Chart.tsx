@@ -3,17 +3,21 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { cn } from '../../utils/cn';
 import { useTheme } from '../../hooks/useTheme';
 
-const data = [
-  { name: 'Jan', value: 400 },
-  { name: 'Feb', value: 300 },
-  { name: 'Mar', value: 600 },
-  { name: 'Apr', value: 800 },
-  { name: 'May', value: 700 },
-  { name: 'Jun', value: 900 },
-];
+interface ChartProps {
+  monthlyData: Array<{
+    month: string;
+    count: number;
+  }>;
+}
 
-export default function Chart() {
+export default function Chart({ monthlyData }: ChartProps) {
   const { isDark } = useTheme();
+
+  // Format month strings to be more readable
+  const formattedData = monthlyData.map(item => ({
+    name: new Date(item.month + '-01').toLocaleString('default', { month: 'short' }),
+    value: item.count
+  }));
 
   return (
     <div className={cn(
@@ -41,7 +45,7 @@ export default function Chart() {
 
         <ResponsiveContainer width="100%" height={300}>
           <LineChart 
-            data={data}
+            data={formattedData}
             margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
           >
             <CartesianGrid
