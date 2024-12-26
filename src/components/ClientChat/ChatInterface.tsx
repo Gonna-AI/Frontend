@@ -102,7 +102,6 @@ export default function ChatInterface({ ticketCode, isDark }: ChatInterfaceProps
     if (!validTypes.includes(file.type)) {
       throw new Error('Please upload only image files (JPEG, PNG, GIF, or WebP)');
     }
-    // 10MB size limit
     if (file.size > 10 * 1024 * 1024) {
       throw new Error('Image size should be less than 10MB');
     }
@@ -116,7 +115,6 @@ export default function ChatInterface({ ticketCode, isDark }: ChatInterfaceProps
       formData.append('image', file);
       formData.append('ticketCode', ticketCode);
 
-      // Create a temporary URL for preview
       const imageUrl = URL.createObjectURL(file);
       
       const userMessage: Message = {
@@ -162,7 +160,6 @@ export default function ChatInterface({ ticketCode, isDark }: ChatInterfaceProps
     const file = event.target.files?.[0];
     if (file) {
       handleImageUpload(file);
-      // Reset the input so the same file can be uploaded again if needed
       event.target.value = '';
     }
   };
@@ -172,25 +169,32 @@ export default function ChatInterface({ ticketCode, isDark }: ChatInterfaceProps
       {/* Header */}
       <div className={cn(
         "flex items-center justify-between px-6 py-4 border-b",
-        isDark ? "bg-black/40 border-white/10" : "bg-white/60 border-black/10"
+        isDark 
+          ? "bg-black/20 border-white/10" 
+          : "bg-white/10 border-black/10"
       )}>
         <div className="flex items-center gap-4">
           <div className={cn(
             "flex h-10 w-10 items-center justify-center rounded-lg",
-            isDark ? "bg-purple-600" : "bg-purple-500"
+            isDark 
+              ? "bg-black/20 border border-white/10" 
+              : "bg-white/10 border border-black/10"
           )}>
-            <GalleryVerticalEnd className="h-6 w-6 text-white" />
+            <GalleryVerticalEnd className={cn(
+              "h-6 w-6",
+              isDark ? "text-purple-400" : "text-purple-600"
+            )} />
           </div>
           <div>
             <h1 className={cn(
               "text-xl font-semibold",
-              isDark ? "text-white" : "text-gray-900"
+              isDark ? "text-white" : "text-black"
             )}>
-              Gonna AI Support
+              Gonna Support
             </h1>
             <p className={cn(
               "text-sm",
-              isDark ? "text-gray-400" : "text-gray-600"
+              isDark ? "text-white/60" : "text-black/60"
             )}>
               Ticket: {ticketCode}
             </p>
@@ -200,9 +204,10 @@ export default function ChatInterface({ ticketCode, isDark }: ChatInterfaceProps
 
       {/* Messages */}
       <div className={cn(
-        "flex-1 overflow-y-auto p-6",
-        "space-y-6",
-        isDark ? "bg-black/20" : "bg-gray-50/50"
+        "flex-1 overflow-y-auto p-6 space-y-6",
+        isDark 
+          ? "bg-black/20" 
+          : "bg-white/10"
       )}>
         {messages.map((message, index) => (
           <div
@@ -216,11 +221,11 @@ export default function ChatInterface({ ticketCode, isDark }: ChatInterfaceProps
               "max-w-3xl px-6 py-4 rounded-xl text-base md:text-lg",
               message.isUser
                 ? isDark
-                  ? "bg-purple-500 text-white"
-                  : "bg-purple-500 text-white"
+                  ? "bg-black/20 border border-white/10 text-white"
+                  : "bg-white/10 border border-black/10 text-black"
                 : isDark
-                  ? "bg-gray-800/50 text-white"
-                  : "bg-white text-gray-900"
+                  ? "bg-black/20 border border-white/10 text-white"
+                  : "bg-white/10 border border-black/10 text-black"
             )}>
               {message.text}
               {message.image && (
@@ -230,7 +235,10 @@ export default function ChatInterface({ ticketCode, isDark }: ChatInterfaceProps
                     alt={message.image.name}
                     className="max-w-full rounded-lg max-h-64 object-contain"
                   />
-                  <div className="mt-1 text-sm opacity-80">
+                  <div className={cn(
+                    "mt-1 text-sm",
+                    isDark ? "text-white/60" : "text-black/60"
+                  )}>
                     {message.image.name}
                   </div>
                 </div>
@@ -243,8 +251,8 @@ export default function ChatInterface({ ticketCode, isDark }: ChatInterfaceProps
             <div className={cn(
               "px-6 py-4 rounded-xl text-base md:text-lg",
               isDark
-                ? "bg-gray-800/50 text-white"
-                : "bg-white text-gray-900"
+                ? "bg-black/20 border border-white/10 text-white"
+                : "bg-white/10 border border-black/10 text-black"
             )}>
               Typing...
             </div>
@@ -256,7 +264,9 @@ export default function ChatInterface({ ticketCode, isDark }: ChatInterfaceProps
       {/* Input Form */}
       <div className={cn(
         "border-t p-4 md:p-6",
-        isDark ? "bg-black/40 border-white/10" : "bg-white/60 border-black/10"
+        isDark 
+          ? "bg-black/20 border-white/10" 
+          : "bg-white/10 border-black/10"
       )}>
         <form 
           onSubmit={handleSubmit}
@@ -271,8 +281,8 @@ export default function ChatInterface({ ticketCode, isDark }: ChatInterfaceProps
               "flex-1 px-6 py-4 rounded-xl text-base md:text-lg",
               "focus:ring-2 focus:ring-purple-500/30 focus:outline-none",
               isDark 
-                ? "bg-gray-800/50 text-white placeholder-gray-500 border-gray-700/50"
-                : "bg-gray-50 text-gray-900 placeholder-gray-500 border border-gray-200"
+                ? "bg-black/20 border border-white/10 text-white placeholder-white/40" 
+                : "bg-white/10 border border-black/10 text-black placeholder-black/40"
             )}
           />
           <button
@@ -281,8 +291,8 @@ export default function ChatInterface({ ticketCode, isDark }: ChatInterfaceProps
             className={cn(
               "px-4 py-4 rounded-xl transition-colors flex items-center justify-center",
               isDark
-                ? "bg-purple-600 text-white hover:bg-purple-700"
-                : "bg-purple-500 text-white hover:bg-purple-600"
+                ? "bg-black/20 border border-white/10 text-white hover:bg-black/30"
+                : "bg-white/10 border border-black/10 text-black hover:bg-white/20"
             )}
           >
             <Upload className="w-6 h-6" />
@@ -293,8 +303,8 @@ export default function ChatInterface({ ticketCode, isDark }: ChatInterfaceProps
             className={cn(
               "px-4 py-4 rounded-xl transition-colors flex items-center justify-center",
               isDark
-                ? "bg-purple-600 text-white hover:bg-purple-700"
-                : "bg-purple-500 text-white hover:bg-purple-600"
+                ? "bg-black/20 border border-white/10 text-white hover:bg-black/30"
+                : "bg-white/10 border border-black/10 text-black hover:bg-white/20"
             )}
           >
             <Phone className="w-6 h-6" />
@@ -305,8 +315,8 @@ export default function ChatInterface({ ticketCode, isDark }: ChatInterfaceProps
             className={cn(
               "px-8 py-4 rounded-xl transition-colors flex items-center justify-center",
               isDark
-                ? "bg-purple-600 text-white hover:bg-purple-700 disabled:bg-purple-800 disabled:text-gray-300"
-                : "bg-purple-500 text-white hover:bg-purple-600 disabled:bg-purple-300 disabled:text-gray-100"
+                ? "bg-black/20 border border-white/10 text-white hover:bg-black/30 disabled:opacity-50"
+                : "bg-white/10 border border-black/10 text-black hover:bg-white/20 disabled:opacity-50"
             )}
           >
             <Send className="w-6 h-6" />
