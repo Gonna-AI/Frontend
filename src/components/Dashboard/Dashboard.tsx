@@ -5,6 +5,16 @@ import RecentActivity from './RecentActivity';
 import { useTheme } from '../../hooks/useTheme';
 import { cn } from '../../utils/cn';
 import { analytics, AnalyticsData } from '../../services/analytics';
+import { ErrorBoundary } from 'react-error-boundary';
+
+function ErrorFallback({ error }: { error: Error }) {
+  return (
+    <div className="p-4 text-red-500">
+      <h2>Something went wrong:</h2>
+      <pre>{error.message}</pre>
+    </div>
+  );
+}
 
 export default function Dashboard() {
   const { isDark } = useTheme();
@@ -18,6 +28,7 @@ export default function Dashboard() {
         setAnalyticsData(data);
       } catch (error) {
         console.error('Failed to fetch analytics:', error);
+        throw new Error('Failed to load dashboard data. Please try again later.');
       } finally {
         setLoading(false);
       }
@@ -31,30 +42,32 @@ export default function Dashboard() {
   }
 
   return (
-    <div className={cn(
-      "p-4 md:p-6 space-y-4 md:space-y-6",
-      isDark ? "text-white" : "text-black"
-    )}>
-      <div>
-        {analyticsData && (
-          <AnalyticsCards
-            totalClients={analyticsData.total_clients}
-            totalConversations={analyticsData.total_conversations}
-            kbItems={analyticsData.kb_items}
-            dailyConversations={analyticsData.daily_conversations}
-          />
-        )}
-      </div>
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <div className="lg:col-span-2">
+    <ErrorBoundary FallbackComponent={ErrorFallback}>
+      <div className={cn(
+        "p-4 md:p-6 space-y-4 md:space-y-6",
+        isDark ? "text-white" : "text-black"
+      )}>
+        <div>
           {analyticsData && (
-            <Chart monthlyData={analyticsData.monthly_conversations} />
+            <AnalyticsCards
+              totalClients={analyticsData.total_clients}
+              totalConversations={analyticsData.total_conversations}
+              kbItems={analyticsData.metrics.total_cases}
+              dailyConversations={parseInt(analyticsData.daily_conversations)}
+            />
           )}
         </div>
-        <div>
-          <RecentActivity />
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          <div className="lg:col-span-2">
+            {analyticsData && (
+              <Chart monthlyData={analyticsData.monthly_conversations} />
+            )}
+          </div>
+          <div>
+            <RecentActivity />
+          </div>
         </div>
       </div>
-    </div>
+    </ErrorBoundary>
   );
 }
