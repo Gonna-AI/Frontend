@@ -4,10 +4,23 @@ import { User, Mail, Phone, Calendar, Clock, Download, Grid, AlignLeft,
   Star, FileCheck } from 'lucide-react';
 import { useTheme } from '../../hooks/useTheme';
 import { cn } from '../../utils/cn';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import api, { API_BASE_URL } from '../../config/api';
 
 export default function AgentProfile() {
   const { isDark } = useTheme();
   const [expandedSection, setExpandedSection] = useState(null);
+
+  const { data: user, isLoading, error } = useQuery({
+    queryKey: ['user'],
+    queryFn: async () => {
+      const response = await api.get('/api/auth/user');
+      return response.data;
+    },
+  });
+
+  if (isLoading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error.message}</div>;
 
   const stats = [
     {
@@ -100,18 +113,26 @@ export default function AgentProfile() {
             )}>
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6">
                 <div className={cn(
-                  "w-16 sm:w-20 h-16 sm:h-20 rounded-2xl flex items-center justify-center",
+                  "w-16 sm:w-20 h-16 sm:h-20 rounded-2xl flex items-center justify-center overflow-hidden",
                   isDark 
                     ? "bg-black/20 border border-white/10" 
                     : "bg-white/10 border border-black/10"
                 )}>
-                  <User className="w-8 sm:w-10 h-8 sm:h-10 text-blue-400" />
+                  {user.profile_picture ? (
+                    <img 
+                      src={`${API_BASE_URL}${user.profile_picture}`} 
+                      alt="Profile" 
+                      className="w-full h-full object-cover" 
+                    />
+                  ) : (
+                    <User className="w-8 sm:w-10 h-8 sm:h-10 text-blue-400" />
+                  )}
                 </div>
                 <div className="flex-1">
                   <h2 className={cn(
                     "text-xl sm:text-2xl font-bold mb-1",
                     isDark ? "text-white" : "text-black"
-                  )}>Nisha Sharma</h2>
+                  )}>{user.name ? user.name : 'No Name'}</h2>
                   <h3 className={cn(
                     "text-base sm:text-lg mb-2",
                     isDark ? "text-white/60" : "text-black/60"
@@ -122,7 +143,7 @@ export default function AgentProfile() {
                       <span className={cn(
                         "text-sm",
                         isDark ? "text-white/60" : "text-black/60"
-                      )}>nisha.s@claimstech.com</span>
+                      )}>{user.email ? user.email : 'No Email'}</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <Phone className="w-4 h-4 text-purple-400" />

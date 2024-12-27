@@ -3,11 +3,84 @@ import { Bell, Lock, Settings as SettingsIcon, User,
   FileText, Users, Database, Boxes, HelpCircle, MessageSquare, Check } from 'lucide-react';
 import { useTheme } from '../../hooks/useTheme';
 import { cn } from '../../utils/cn';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import api, { API_BASE_URL } from '../../config/api';
 
 export default function Settings() {
   const { isDark } = useTheme();
   const [activeTab, setActiveTab] = useState('general');
   const [showTwoFactor, setShowTwoFactor] = useState(false);
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [isSaveDisabled, setIsSaveDisabled] = useState(true);
+  const [profilePicture, setProfilePicture] = useState<string | null>(null);
+  const [isUpdateDisabled, setIsUpdateDisabled] = useState(true);
+  const [updateButtonOutline, setUpdateButtonOutline] = useState('');
+
+  const { data: user, isLoading, error, refetch } = useQuery({
+    queryKey: ['user'],
+    queryFn: async () => {
+      const response = await api.get('/api/auth/user');
+      const userData = response.data;
+      setName(userData.name);
+      setEmail(userData.email);
+      setProfilePicture(userData.profile_picture);
+      return userData;
+    },
+  });
+
+  const queryClient = useQueryClient();
+
+  const updateUserMutation = useMutation({
+    mutationFn: (data: { name?: string, email?: string, profile_picture?: string }) => {
+      return api.put('/api/auth/user', data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['user'] });
+      setIsSaveDisabled(true);
+    },
+  });
+
+  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setName(e.target.value);
+    setIsSaveDisabled(false);
+  };
+
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setEmail(e.target.value);
+    setIsSaveDisabled(false);
+  };
+
+  const handleSave = () => {
+    updateUserMutation.mutate({ name, email });
+  };
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files && event.target.files[0]) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setProfilePicture(e.target?.result as string);
+      };
+      reader.readAsDataURL(event.target.files[0]);
+      setIsUpdateDisabled(false);
+      setUpdateButtonOutline('outline outline-emerald-500');
+    }
+  };
+
+  const handleUpdatePicture = async () => {
+    if (!isUpdateDisabled) {
+      const formData = new FormData();
+      const blob = await fetch(profilePicture!).then(r => r.blob());
+      formData.append('profile_picture', blob);
+      updateUserMutation.mutate({ profile_picture: formData.get('profile_picture') as string });
+      setIsUpdateDisabled(true);
+      setUpdateButtonOutline('');
+      refetch();
+    }
+  };
+
+  if (isLoading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error.message}</div>;
 
   const sidebarItems = [
     { icon: FileText, label: 'General', id: 'general' },
@@ -116,23 +189,52 @@ export default function Settings() {
                       )}>Your Photo</h3>
                       <div className="flex flex-col sm:flex-row items-center gap-4">
                         <div className={cn(
-                          "w-16 h-16 rounded-xl flex items-center justify-center",
+                          "w-16 h-16 rounded-xl flex items-center justify-center overflow-hidden",
                           isDark 
                             ? "bg-black/20 border border-white/10" 
                             : "bg-white/10 border border-black/10"
                         )}>
-                          <User className={cn(
-                            "w-8 h-8",
-                            isDark ? "text-white/70" : "text-black/70"
-                          )} />
+                          {profilePicture ? (
+                            <img 
+                              src={profilePicture.startsWith('data') ? profilePicture : `${API_BASE_URL}${profilePicture}`} 
+                              alt="Profile" 
+                              className="w-full h-full object-cover" 
+                            />
+                          ) : (
+                            <User className={cn(
+                              "w-8 h-8",
+                              isDark ? "text-white/70" : "text-black/70"
+                            )} />
+                          )}
                         </div>
-                        <button className={cn(
-                          "px-4 py-2 rounded-xl transition-colors w-full sm:w-auto",
+                        <input
+                          type="file"
+                          id="profile-picture"
+                          accept="image/*"
+                          onChange={handleFileChange}
+                          hidden
+                        />
+                        <label htmlFor="profile-picture" className={cn(
+                          "px-4 py-2 rounded-xl transition-colors w-full sm:w-auto cursor-pointer text-center",
                           isDark 
                             ? "bg-black/20 hover:bg-black/30 border border-white/10 text-white" 
-                            : "bg-white/10 hover:bg-white/20 border border-black/10 text-black"
+                            : "bg-white/10 hover:bg-white/20 border border-black/10 text-black",
+                          updateButtonOutline
                         )}>
                           Update
+                        </label>
+                        <button
+                          onClick={handleUpdatePicture}
+                          disabled={isUpdateDisabled}
+                          className={cn(
+                            "px-4 py-2 rounded-xl transition-colors w-full sm:w-auto",
+                            isDark
+                              ? "bg-black/20 hover:bg-black/30 border border-white/10 text-white"
+                              : "bg-white/10 hover:bg-white/20 border border-black/10 text-black",
+                            !isUpdateDisabled && "outline outline-emerald-500"
+                          )}
+                        >
+                          Save
                         </button>
                       </div>
                     </GlassContainer>
@@ -145,6 +247,8 @@ export default function Settings() {
                         )}>Name</label>
                         <input
                           type="text"
+                          value={name}
+                          onChange={handleNameChange}
                           className={cn(
                             "w-full px-4 py-2 rounded-xl transition-colors",
                             isDark
@@ -165,6 +269,8 @@ export default function Settings() {
                         )}>Email</label>
                         <input
                           type="email"
+                          value={email}
+                          onChange={handleEmailChange}
                           className={cn(
                             "w-full px-4 py-2 rounded-xl transition-colors",
                             isDark
@@ -178,6 +284,19 @@ export default function Settings() {
                           placeholder="Enter your email"
                         />
                       </div>
+                      <button
+                        onClick={handleSave}
+                        disabled={isSaveDisabled}
+                        className={cn(
+                          "px-4 py-2 rounded-xl transition-colors w-full sm:w-auto",
+                          isDark
+                            ? "bg-black/20 hover:bg-black/30 border border-white/10 text-white"
+                            : "bg-white/10 hover:bg-white/20 border border-black/10 text-black",
+                          !isSaveDisabled && "outline outline-emerald-500"
+                        )}
+                      >
+                        Save
+                      </button>
                     </GlassContainer>
                   </div>
                 </div>
