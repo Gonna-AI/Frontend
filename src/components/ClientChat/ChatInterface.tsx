@@ -4,6 +4,7 @@ import { Send, GalleryVerticalEnd, Phone, Upload } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { motion, AnimatePresence } from 'framer-motion';
 import CallWindow from './CallWindow';
+import { documentApi } from '../../config/api';
 
 interface Message {
   text: string;
@@ -111,39 +112,30 @@ export default function ChatInterface({ ticketCode, isDark }: ChatInterfaceProps
     try {
       validateImageFile(file);
       
-      const formData = new FormData();
-      formData.append('image', file);
-      formData.append('ticketCode', ticketCode);
-
-      const imageUrl = URL.createObjectURL(file);
-      
       const userMessage: Message = {
         text: `Uploaded image: ${file.name}`,
         isUser: true,
         image: {
           name: file.name,
-          url: imageUrl
+          url: URL.createObjectURL(file)
         }
       };
       setMessages(prev => [...prev, userMessage]);
       setIsTyping(true);
 
-      const response = await axios.post('http://localhost:5000/api/upload-image',
-        formData,
-        {
-          withCredentials: true,
-          headers: {
-            'Content-Type': 'multipart/form-data'
-          }
-        }
-      );
-
-      const aiMessage: Message = { text: response.data.response, isUser: false };
+      const response = await documentApi.analyzeDocument(file);
+      
+      const aiMessage: Message = { text: response.data.analysis, isUser: false };
       setMessages(prev => [...prev, aiMessage]);
+
+      if (response.data.audio_url) {
+        const audio = new Audio(`${API_BASE_URL}${response.data.audio_url}`);
+        audio.play();
+      }
     } catch (error) {
       console.error('Error uploading image:', error);
       const errorMessage: Message = {
-        text: error instanceof Error ? error.message : 'Sorry, I encountered an error uploading the image. Please try again.',
+        text: error instanceof Error ? error.message : 'Sorry, I encountered an error uploading the image.',
         isUser: false
       };
       setMessages(prev => [...prev, errorMessage]);

@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Phone, X, Mic, MicOff, Square, MessageSquare, Upload } from 'lucide-react';
 import { cn } from '../../utils/cn';
+import { audioApi, documentApi } from '../../config/api';
+import { API_BASE_URL } from '../../config/api';
 
 interface CallWindowProps {
   isDark: boolean;
@@ -15,6 +17,10 @@ export default function CallWindow({ isDark, onClose, onStopAI, onFileUpload }: 
   const [isMuted, setIsMuted] = useState(false);
   const [isAIStopped, setIsAIStopped] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isRecording, setIsRecording] = useState(false);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
+  const audioPlayerRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -29,9 +35,75 @@ export default function CallWindow({ isDark, onClose, onStopAI, onFileUpload }: 
     return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
   };
 
-  const handleStopAI = () => {
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream);
+      mediaRecorderRef.current = mediaRecorder;
+      audioChunksRef.current = [];
+
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          audioChunksRef.current.push(event.data);
+        }
+      };
+
+      mediaRecorder.onstop = async () => {
+        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/wav' });
+        await sendAudioToServer(audioBlob);
+      };
+
+      mediaRecorder.start();
+      setIsRecording(true);
+    } catch (error) {
+      console.error('Error starting recording:', error);
+    }
+  };
+
+  const stopRecording = () => {
+    if (mediaRecorderRef.current && isRecording) {
+      mediaRecorderRef.current.stop();
+      setIsRecording(false);
+    }
+  };
+
+  const sendAudioToServer = async (audioBlob: Blob) => {
+    try {
+      const response = await audioApi.startConversation(audioBlob);
+      if (response.data.audio_url) {
+        playAudioResponse(response.data.audio_url);
+      }
+    } catch (error) {
+      console.error('Error sending audio:', error);
+    }
+  };
+
+  const playAudioResponse = (audioUrl: string) => {
+    if (audioPlayerRef.current) {
+      audioPlayerRef.current.src = `${API_BASE_URL}${audioUrl}`;
+      audioPlayerRef.current.play();
+    }
+  };
+
+  const handleMicToggle = () => {
+    setIsMuted(!isMuted);
+    if (mediaRecorderRef.current) {
+      if (!isMuted) {
+        stopRecording();
+      } else {
+        startRecording();
+      }
+    }
+  };
+
+  const handleStopAI = async () => {
+    if (audioPlayerRef.current) {
+      audioPlayerRef.current.pause();
+    }
+    await audioApi.stopAIResponse();
     setIsAIStopped(true);
     onStopAI();
+    startRecording();
   };
 
   const handleUploadClick = () => {
@@ -54,6 +126,38 @@ export default function CallWindow({ isDark, onClose, onStopAI, onFileUpload }: 
       event.target.value = '';
     }
   };
+
+  const handleFileUpload = async (file: File) => {
+    try {
+      const response = await documentApi.analyzeDocument(file);
+      if (response.data.audio_url) {
+        playAudioResponse(response.data.audio_url);
+      }
+      if (onFileUpload) {
+        onFileUpload(file);
+      }
+    } catch (error) {
+      console.error('Error uploading document:', error);
+    }
+  };
+
+  useEffect(() => {
+    // Start recording when component mounts
+    startRecording();
+    
+    // Create audio player
+    audioPlayerRef.current = new Audio();
+    
+    return () => {
+      // Cleanup
+      if (mediaRecorderRef.current) {
+        stopRecording();
+      }
+      if (audioPlayerRef.current) {
+        audioPlayerRef.current.pause();
+      }
+    };
+  }, []);
 
   return (
     <>
@@ -125,7 +229,7 @@ export default function CallWindow({ isDark, onClose, onStopAI, onFileUpload }: 
 
         <div className="flex space-x-4 relative z-10 p-6">
           <button
-            onClick={() => setIsMuted(!isMuted)}
+            onClick={handleMicToggle}
             className={cn(
               "p-4 rounded-xl transition-colors",
               isMuted
@@ -186,6 +290,7 @@ export default function CallWindow({ isDark, onClose, onStopAI, onFileUpload }: 
           className="hidden"
           accept="image/jpeg,image/png,image/gif,image/webp"
         />
+        <audio ref={audioPlayerRef} className="hidden" />
       </motion.div>
     </>
   );
