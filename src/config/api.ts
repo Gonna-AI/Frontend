@@ -18,4 +18,27 @@ export const notificationsApi = {
     api.post('/api/notifications/mark-read', { notification_ids }),
 };
 
+// Audio handling
+export const audioApi = {
+  startConversation: (audioBlob: Blob) => {
+    const formData = new FormData();
+    formData.append('audio', audioBlob, 'input.wav');
+    return api.post('/api/conversation/stream', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+  },
+  stopAIResponse: () => api.post('/api/conversation/stop'),
+};
+
+// Document handling
+export const documentApi = {
+  analyzeDocument: (file: File) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    return api.post('/api/upload/document', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+  }
+};
+
 export default api; 
