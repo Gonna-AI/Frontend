@@ -2,6 +2,7 @@ import api from '../config/api';
 
 export interface AnalyticsData {
   total_clients: number;
+  kb_count: number;
   total_conversations: number;
   daily_conversations: string;
   monthly_conversations: Array<{

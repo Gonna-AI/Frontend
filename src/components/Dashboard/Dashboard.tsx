@@ -52,7 +52,7 @@ export default function Dashboard() {
             <AnalyticsCards
               totalClients={analyticsData.total_clients}
               totalConversations={analyticsData.total_conversations}
-              kbItems={analyticsData.metrics.total_cases}
+              kbItems={analyticsData.kb_count}
               dailyConversations={parseInt(analyticsData.daily_conversations)}
             />
           )}
