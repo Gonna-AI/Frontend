@@ -11,4 +11,11 @@ const api = axios.create({
   withCredentials: true, // Important for cookies/sessions
 });
 
+// Notification API endpoints
+export const notificationsApi = {
+  getAll: () => api.get('/api/notifications'),
+  markAsRead: (notification_ids: number[]) => 
+    api.post('/api/notifications/mark-read', { notification_ids }),
+};
+
 export default api; 

@@ -10,6 +10,10 @@ import AuthPage from './components/Auth/AuthPage';
 import { auth } from './services/auth';
 import GoogleCallback from './components/Auth/GoogleCallback';
 import ClientChat from './components/ClientChat';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+
+// Create a client
+const queryClient = new QueryClient();
 
 function App() {
   const { isDark } = useTheme();
@@ -106,56 +110,58 @@ function App() {
   };
 
   return (
-    <BrowserRouter>
-      <Routes>
-        {/* Public Routes */}
-        <Route path="/" element={
-          isSignedIn ? 
-            <Navigate to="/dashboard" /> : 
-            <Landing />
-        } />
-        
-        <Route path="/auth" element={
-          isSignedIn ? 
-            <Navigate to="/dashboard" /> : 
-            <AuthPage setIsSignedIn={setIsSignedIn} />
-        } />
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter>
+        <Routes>
+          {/* Public Routes */}
+          <Route path="/" element={
+            isSignedIn ? 
+              <Navigate to="/dashboard" /> : 
+              <Landing />
+          } />
+          
+          <Route path="/auth" element={
+            isSignedIn ? 
+              <Navigate to="/dashboard" /> : 
+              <AuthPage setIsSignedIn={setIsSignedIn} />
+          } />
 
-        {/* Protected Routes */}
-        <Route path="/dashboard" element={
-          <ProtectedRoute>
-            <Dashboard />
-          </ProtectedRoute>
-        } />
-        {/* Chat route - accessible without auth */}
-        <Route path="/chat" element={<ClientChat />} />
-        <Route path="/ai-settings" element={
-          <ProtectedRoute>
-            <AISettings />
-          </ProtectedRoute>
-        } />
-        <Route path="/profile" element={
-          <ProtectedRoute>
-            <Profile />
-          </ProtectedRoute>
-        } />
-        <Route path="/billing" element={
-          <ProtectedRoute>
-            <Billing />
-          </ProtectedRoute>
-        } />
-        <Route path="/settings" element={
-          <ProtectedRoute>
-            <Settings />
-          </ProtectedRoute>
-        } />
+          {/* Protected Routes */}
+          <Route path="/dashboard" element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          } />
+          {/* Chat route - accessible without auth */}
+          <Route path="/chat" element={<ClientChat />} />
+          <Route path="/ai-settings" element={
+            <ProtectedRoute>
+              <AISettings />
+            </ProtectedRoute>
+          } />
+          <Route path="/profile" element={
+            <ProtectedRoute>
+              <Profile />
+            </ProtectedRoute>
+          } />
+          <Route path="/billing" element={
+            <ProtectedRoute>
+              <Billing />
+            </ProtectedRoute>
+          } />
+          <Route path="/settings" element={
+            <ProtectedRoute>
+              <Settings />
+            </ProtectedRoute>
+          } />
 
-        {/* Catch all route */}
-        <Route path="*" element={<Navigate to="/" />} />
+          {/* Catch all route */}
+          <Route path="*" element={<Navigate to="/" />} />
 
-        <Route path="/auth/google/callback" element={<GoogleCallback />} />
-      </Routes>
-    </BrowserRouter>
+          <Route path="/auth/google/callback" element={<GoogleCallback />} />
+        </Routes>
+      </BrowserRouter>
+    </QueryClientProvider>
   );
 }
 
