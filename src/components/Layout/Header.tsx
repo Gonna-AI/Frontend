@@ -7,45 +7,65 @@ import { cn } from '../../utils/cn';
 import { useTheme } from '../../hooks/useTheme';
 import { motion, AnimatePresence } from 'framer-motion';
 import AnalogClock from '../AnalogClock';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { notificationsApi } from '../../config/api';
 
 interface HeaderProps {
   onMobileMenuClick: () => void;
 }
 
-// Mock notifications data - In the future, this would come from your API
-const MOCK_NOTIFICATIONS = [
-  {
-    id: 1,
-    title: "New Message",
-    description: "Sarah sent you a new message about the project",
-    type: "message",
-    timestamp: new Date(Date.now() - 1000 * 60 * 5), // 5 minutes ago
-    read: false
-  },
-  {
-    id: 2,
-    title: "Task Completed",
-    description: "AI Training model has finished processing",
-    type: "task",
-    timestamp: new Date(Date.now() - 1000 * 60 * 30), // 30 minutes ago
-    read: false
-  },
-  {
-    id: 3,
-    title: "System Update",
-    description: "New features have been deployed to production",
-    type: "system",
-    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2), // 2 hours ago
-    read: true
-  }
-];
+// Add interface for API notification type
+interface Notification {
+  id: number;
+  message: string;
+  type: string;
+  is_read: boolean;
+  created_at: string;
+}
 
 export default function Header({ onMobileMenuClick }: HeaderProps) {
   const [showCalendar, setShowCalendar] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
   const { isDark } = useTheme();
   const [showNotifications, setShowNotifications] = useState(false);
-  const [notifications, setNotifications] = useState(MOCK_NOTIFICATIONS);
+  const queryClient = useQueryClient();
+
+  // Replace MOCK_NOTIFICATIONS with API call
+  const { data: notifications = [] } = useQuery<Notification[]>({
+    queryKey: ['notifications'],
+    queryFn: async () => {
+      const response = await notificationsApi.getAll();
+      return response.data.notifications;
+    },
+    refetchInterval: 30000, // Refetch every 30 seconds
+  });
+
+  // Mutation for marking single notification as read
+  const markAsReadMutation = useMutation({
+    mutationFn: async (notificationId: number) => {
+      await notificationsApi.markAsRead([notificationId]);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['notifications'] });
+    },
+  });
+
+  // Mutation for marking all notifications as read
+  const markAllAsReadMutation = useMutation({
+    mutationFn: async () => {
+      const notificationIds = notifications.map(n => n.id);
+      await notificationsApi.markAsRead(notificationIds);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['notifications'] });
+      setShowNotifications(false); // Close notification panel
+    },
+  });
+
+  // Handle notification click
+  const handleNotificationClick = async (id: number) => {
+    await markAsReadMutation.mutate(id);
+  };
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -64,15 +84,6 @@ export default function Header({ onMobileMenuClick }: HeaderProps) {
     const hours = Math.floor(minutes / 60);
     if (hours < 24) return `${hours}h ago`;
     return `${Math.floor(hours / 24)}d ago`;
-  };
-
-  // Mark notification as read
-  const handleNotificationClick = (id: number) => {
-    setNotifications(prev =>
-      prev.map(notif =>
-        notif.id === id ? { ...notif, read: true } : notif
-      )
-    );
   };
 
   return (
@@ -203,19 +214,18 @@ export default function Header({ onMobileMenuClick }: HeaderProps) {
                     )}>
                       Notifications
                     </h2>
-                    <button
-                      className={cn(
-                        "text-sm underline-offset-4 hover:underline",
-                        isDark ? "text-white/60" : "text-black/60"
-                      )}
-                      onClick={() => {
-                        setNotifications(prev =>
-                          prev.map(notif => ({ ...notif, read: true }))
-                        );
-                      }}
-                    >
-                      Mark all as read
-                    </button>
+                    {notifications.length > 0 && (
+                      <button
+                        className={cn(
+                          "text-sm underline-offset-4 hover:underline",
+                          isDark ? "text-white/60" : "text-black/60"
+                        )}
+                        onClick={() => markAllAsReadMutation.mutate()}
+                        disabled={markAllAsReadMutation.isPending}
+                      >
+                        Mark all as read
+                      </button>
+                    )}
                   </div>
                   <p className={cn(
                     "text-sm",
@@ -240,7 +250,7 @@ export default function Header({ onMobileMenuClick }: HeaderProps) {
                             isDark 
                               ? "hover:bg-white/10" 
                               : "hover:bg-black/10",
-                            !notification.read && (
+                            !notification.is_read && (
                               isDark 
                                 ? "bg-white/5" 
                                 : "bg-black/5"
@@ -253,20 +263,20 @@ export default function Header({ onMobileMenuClick }: HeaderProps) {
                               "text-sm font-medium",
                               isDark ? "text-white" : "text-black"
                             )}>
-                              {notification.title}
+                              {notification.type.toUpperCase()}
                             </h3>
                             <span className={cn(
                               "text-xs",
                               isDark ? "text-white/40" : "text-black/40"
                             )}>
-                              {formatRelativeTime(notification.timestamp)}
+                              {formatRelativeTime(new Date(notification.created_at))}
                             </span>
                           </div>
                           <p className={cn(
                             "text-sm",
                             isDark ? "text-white/60" : "text-black/60"
                           )}>
-                            {notification.description}
+                            {notification.message}
                           </p>
                         </div>
                       ))}
