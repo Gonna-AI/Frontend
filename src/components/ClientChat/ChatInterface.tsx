@@ -210,7 +210,7 @@ export default function ChatInterface({ ticketCode, isDark }: ChatInterfaceProps
             )}
           >
             <div className={cn(
-              "max-w-3xl px-6 py-4 rounded-xl text-base md:text-lg",
+              "max-w-3xl px-6 py-4 rounded-xl text-base md:text-lg whitespace-pre-line",
               message.isUser
                 ? isDark
                   ? "bg-black/20 border border-white/10 text-white"
