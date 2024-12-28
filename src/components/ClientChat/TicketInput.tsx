@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Ticket, ArrowRight, Copy, RefreshCw } from 'lucide-react';
+import { Ticket, ArrowRight, Copy, RefreshCw, User } from 'lucide-react';
 import { ticketApi } from '../../config/api';
 
 // Utility function to combine class names
@@ -59,19 +59,33 @@ const styles = `
 
 export default function TicketInput({ onSubmit, error, isDark }: TicketInputProps) {
   const [code, setCode] = useState('');
+  const [userName, setUserName] = useState('');
   const [generatedTicket, setGeneratedTicket] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [isCopying, setIsCopying] = useState(false);
   const [hasGenerated, setHasGenerated] = useState(false);
+  const [showNameInput, setShowNameInput] = useState(false);
+  const [nameError, setNameError] = useState('');
+
+  const handleGenerateClick = () => {
+    setShowNameInput(true);
+    setNameError('');
+  };
 
   const generateTicket = async () => {
     if (hasGenerated) return;
     
+    if (!userName.trim()) {
+      setNameError('Please enter your name');
+      return;
+    }
+
     setIsGenerating(true);
     try {
-      const response = await ticketApi.create('John Doe');
+      const response = await ticketApi.create(userName);
       setGeneratedTicket(response.data.ticket_id);
       setHasGenerated(true);
+      setShowNameInput(false);
     } catch (err) {
       console.error('Failed to generate ticket:', err);
     } finally {
@@ -119,22 +133,68 @@ export default function TicketInput({ onSubmit, error, isDark }: TicketInputProp
           </div>
 
           <div className="flex flex-col gap-3">
-            {!generatedTicket ? (
+            {showNameInput ? (
+              <div className="animate-fadeIn">
+                <div className="flex items-center gap-3 mb-2">
+                  <User className={cn(
+                    "w-4 h-4",
+                    isDark ? "text-emerald-400" : "text-emerald-600"
+                  )} />
+                  <span className={isDark ? "text-white/60" : "text-black/60"}>
+                    Enter your name
+                  </span>
+                </div>
+                <input
+                  type="text"
+                  value={userName}
+                  onChange={(e) => {
+                    setUserName(e.target.value);
+                    setNameError('');
+                  }}
+                  placeholder="Your full name"
+                  className={cn(
+                    "w-full px-4 py-3 rounded-lg mb-2",
+                    "transition-all duration-300",
+                    "focus:outline-none focus:ring-2",
+                    isDark
+                      ? "bg-black/40 border border-white/10 text-white placeholder-white/30 focus:ring-emerald-500/30"
+                      : "bg-white/40 border border-black/10 text-black placeholder-black/30 focus:ring-emerald-500/30"
+                  )}
+                />
+                {nameError && (
+                  <p className="text-sm text-red-400 mb-2">{nameError}</p>
+                )}
+                <button
+                  type="button"
+                  onClick={generateTicket}
+                  disabled={isGenerating}
+                  className={cn(
+                    "w-full px-4 py-3 rounded-lg",
+                    "transition-all duration-300",
+                    "flex items-center justify-center gap-2",
+                    isDark
+                      ? "bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 border border-emerald-500/30"
+                      : "bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 border border-emerald-500/20",
+                    isGenerating && "opacity-50 cursor-not-allowed"
+                  )}
+                >
+                  {isGenerating ? "Generating..." : "Generate"}
+                </button>
+              </div>
+            ) : !generatedTicket ? (
               <button
                 type="button"
-                onClick={generateTicket}
-                disabled={isGenerating}
+                onClick={handleGenerateClick}
                 className={cn(
                   "w-full px-4 py-3 rounded-lg",
                   "transition-all duration-300",
                   "flex items-center justify-center gap-2",
                   isDark
                     ? "bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 border border-emerald-500/30"
-                    : "bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 border border-emerald-500/20",
-                  isGenerating && "opacity-50 cursor-not-allowed"
+                    : "bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 border border-emerald-500/20"
                 )}
               >
-                {isGenerating ? "Generating..." : "Generate New Ticket"}
+                Generate New Ticket
               </button>
             ) : (
               <div 
