@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { GalleryVerticalEnd } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { auth, LoginData, SignupData } from '../../services/auth';
 
 interface AuthFormProps extends React.ComponentPropsWithoutRef<"div"> {
@@ -231,9 +231,9 @@ function AuthForm({ className, onGuestLogin, onSuccess, ...props }: AuthFormProp
 
       <div className="text-center text-xs text-gray-400">
         By clicking continue, you agree to our{" "}
-        <a href="#" className="text-purple-400 hover:text-purple-300">Terms of Service</a>{" "}
+        <Link to="/terms-of-service" className="text-purple-400 hover:text-purple-300">Terms of Service</Link>{" "}
         and{" "}
-        <a href="#" className="text-purple-400 hover:text-purple-300">Privacy Policy</a>.
+        <Link to="/privacy-policy" className="text-purple-400 hover:text-purple-300">Privacy Policy</Link>.
       </div>
     </div>
   );
