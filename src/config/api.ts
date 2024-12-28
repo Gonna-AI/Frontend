@@ -41,10 +41,15 @@ export const documentApi = {
   }
 };
 
+interface CreateTicketData {
+  name: string;
+  mobile?: string;
+}
+
 // Add new ticket-related endpoints
 export const ticketApi = {
-  create: (clientName: string) => 
-    api.post('/api/ticket/create', { client_name: clientName }),
+  create: (data: CreateTicketData) => 
+    api.post('/api/ticket/create', { client_name: data.name, mobile: data.mobile }),
   validate: (ticketId: string) => 
     api.get(`/api/ticket/${ticketId}`),
 };
