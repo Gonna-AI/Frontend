@@ -11,7 +11,8 @@ import { auth } from './services/auth';
 import GoogleCallback from './components/Auth/GoogleCallback';
 import ClientChat from './components/ClientChat';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-
+import PrivacyPolicy from './components/Legal/PrivacyPolicy';
+import TermsOfService from './components/Legal/TermsOfService';
 // Create a client
 const queryClient = new QueryClient();
 
@@ -154,7 +155,9 @@ function App() {
               <Settings />
             </ProtectedRoute>
           } />
-
+          
+          <Route path="/terms-of-service" element={<TermsOfService />} />
+          <Route path="privacy-policy" element={<PrivacyPolicy/>} />
           {/* Catch all route */}
           <Route path="*" element={<Navigate to="/" />} />
 
