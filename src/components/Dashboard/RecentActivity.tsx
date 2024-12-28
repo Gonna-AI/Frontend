@@ -25,7 +25,7 @@ const PriorityDashboard = () => {
       id: 1,
       ticketNumber: "TKT-2024-001",
       clientName: "John Doe",
-      claimType: "Health Insurance",
+      topic_tags: ["database", "connectivity", "troubleshooting"],
       priority: "high",
       callbackTime: "2024-12-27 14:00",
       status: "pending",
@@ -43,7 +43,7 @@ const PriorityDashboard = () => {
       id: 2,
       ticketNumber: "TKT-2024-002",
       clientName: "Jane Smith",
-      claimType: "Auto Insurance",
+      topic_tags: ["security", "access", "permissions"],
       priority: "medium",
       callbackTime: "2024-12-27 16:00",
       status: "scheduled",
@@ -62,7 +62,7 @@ const PriorityDashboard = () => {
       id: index + 3,
       ticketNumber: `TKT-2024-${String(index + 3).padStart(3, '0')}`,
       clientName: `Test Client ${index + 3}`,
-      claimType: "Life Insurance",
+      topic_tags: ["performance", "optimization", "monitoring"],
       priority: ["low", "medium", "high"][index % 3],
       callbackTime: "2024-12-28 10:00",
       status: "pending",
@@ -296,12 +296,21 @@ const PriorityDashboard = () => {
                         <AlertTriangle className="h-4 w-4 text-amber-500 flex-shrink-0" />
                       )}
                     </div>
-                    <p className={cn(
-                      "text-sm mt-1",
-                      isDark ? "text-white/60" : "text-black/60"
-                    )}>
-                      {claim.claimType} - {claim.grievanceType}
-                    </p>
+                    <div className="flex flex-wrap gap-1.5 mt-2">
+                      {claim.topic_tags.map((tag, index) => (
+                        <span
+                          key={index}
+                          className={cn(
+                            "px-2 py-0.5 rounded-full text-xs font-medium",
+                            isDark 
+                              ? "bg-blue-500/10 text-blue-400 border border-blue-500/20" 
+                              : "bg-blue-50 text-blue-600 border border-blue-200"
+                          )}
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
                   </div>
                 </div>
 

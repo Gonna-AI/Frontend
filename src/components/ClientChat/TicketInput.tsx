@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Ticket, ArrowRight, Copy, RefreshCw, User, Phone } from 'lucide-react';
+import { Ticket, ArrowRight, Copy, RefreshCw, User, Phone, Mail } from 'lucide-react';
 import { ticketApi } from '../../config/api';
 
 // Utility function to combine class names
@@ -57,10 +57,11 @@ const styles = `
   }
 `;
 
-export default function TicketInput({ onSubmit, error, isDark }: TicketInputProps) {
+const TicketInput: React.FC<TicketInputProps> = ({ onSubmit, error, isDark }) => {
   const [code, setCode] = useState('');
   const [userName, setUserName] = useState('');
   const [mobileNumber, setMobileNumber] = useState('');
+  const [email, setEmail] = useState('');
   const [generatedTicket, setGeneratedTicket] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [isCopying, setIsCopying] = useState(false);
@@ -68,37 +69,62 @@ export default function TicketInput({ onSubmit, error, isDark }: TicketInputProp
   const [showNameInput, setShowNameInput] = useState(false);
   const [nameError, setNameError] = useState('');
   const [mobileError, setMobileError] = useState('');
+  const [emailError, setEmailError] = useState('');
+  const [contactError, setContactError] = useState('');
 
   const handleGenerateClick = () => {
     setShowNameInput(true);
     setNameError('');
     setMobileError('');
+    setEmailError('');
+    setContactError('');
   };
 
   const validateMobileNumber = (number: string) => {
-    if (!number) return true; // Optional field
+    if (!number) return true;
     const mobileRegex = /^\+?[\d\s-]{10,}$/;
     return mobileRegex.test(number);
+  };
+
+  const validateEmail = (email: string) => {
+    if (!email) return true;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
   };
 
   const generateTicket = async () => {
     if (hasGenerated) return;
     
+    let hasError = false;
+
     if (!userName.trim()) {
       setNameError('Please enter your name');
-      return;
+      hasError = true;
     }
 
     if (mobileNumber && !validateMobileNumber(mobileNumber)) {
       setMobileError('Please enter a valid mobile number');
-      return;
+      hasError = true;
     }
+
+    if (email && !validateEmail(email)) {
+      setEmailError('Please enter a valid email address');
+      hasError = true;
+    }
+
+    if (!mobileNumber && !email) {
+      setContactError('Please provide either a mobile number or email address');
+      hasError = true;
+    }
+
+    if (hasError) return;
 
     setIsGenerating(true);
     try {
       const response = await ticketApi.create({
         name: userName,
-        mobile: mobileNumber || undefined
+        mobile: mobileNumber || undefined,
+        email: email || undefined
       });
       setGeneratedTicket(response.data.ticket_id);
       setHasGenerated(true);
@@ -131,7 +157,6 @@ export default function TicketInput({ onSubmit, error, isDark }: TicketInputProp
     <>
       <style>{styles}</style>
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Generate Ticket Section */}
         <div className={cn(
           "p-4 rounded-xl transition-all duration-300",
           isDark ? "bg-white/5" : "bg-black/5"
@@ -152,7 +177,6 @@ export default function TicketInput({ onSubmit, error, isDark }: TicketInputProp
           <div className="flex flex-col gap-3">
             {showNameInput ? (
               <div className="animate-fadeIn space-y-4">
-                {/* Name Input */}
                 <div>
                   <div className="flex items-center gap-3 mb-2">
                     <User className={cn(
@@ -185,7 +209,39 @@ export default function TicketInput({ onSubmit, error, isDark }: TicketInputProp
                   )}
                 </div>
 
-                {/* Mobile Number Input */}
+                <div>
+                  <div className="flex items-center gap-3 mb-2">
+                    <Mail className={cn(
+                      "w-4 h-4",
+                      isDark ? "text-emerald-400" : "text-emerald-600"
+                    )} />
+                    <span className={isDark ? "text-white/60" : "text-black/60"}>
+                      Email address
+                    </span>
+                  </div>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => {
+                      setEmail(e.target.value);
+                      setEmailError('');
+                      setContactError('');
+                    }}
+                    placeholder="Enter email address"
+                    className={cn(
+                      "w-full px-4 py-3 rounded-lg mb-2",
+                      "transition-all duration-300",
+                      "focus:outline-none focus:ring-2",
+                      isDark
+                        ? "bg-black/40 border border-white/10 text-white placeholder-white/30 focus:ring-emerald-500/30"
+                        : "bg-white/40 border border-black/10 text-black placeholder-black/30 focus:ring-emerald-500/30"
+                    )}
+                  />
+                  {emailError && (
+                    <p className="text-sm text-red-400">{emailError}</p>
+                  )}
+                </div>
+
                 <div>
                   <div className="flex items-center gap-3 mb-2">
                     <Phone className={cn(
@@ -193,7 +249,7 @@ export default function TicketInput({ onSubmit, error, isDark }: TicketInputProp
                       isDark ? "text-emerald-400" : "text-emerald-600"
                     )} />
                     <span className={isDark ? "text-white/60" : "text-black/60"}>
-                      Mobile number (optional)
+                      Mobile number
                     </span>
                   </div>
                   <input
@@ -202,6 +258,7 @@ export default function TicketInput({ onSubmit, error, isDark }: TicketInputProp
                     onChange={(e) => {
                       setMobileNumber(e.target.value);
                       setMobileError('');
+                      setContactError('');
                     }}
                     placeholder="Enter mobile number"
                     className={cn(
@@ -217,6 +274,10 @@ export default function TicketInput({ onSubmit, error, isDark }: TicketInputProp
                     <p className="text-sm text-red-400">{mobileError}</p>
                   )}
                 </div>
+
+                {contactError && (
+                  <p className="text-sm text-red-400 mt-2">{contactError}</p>
+                )}
 
                 <button
                   type="button"
@@ -292,7 +353,6 @@ export default function TicketInput({ onSubmit, error, isDark }: TicketInputProp
           </div>
         </div>
 
-        {/* Support Ticket Input */}
         <div className={cn(
           "p-4 rounded-xl",
           isDark ? "bg-white/5" : "bg-black/5"
@@ -347,4 +407,6 @@ export default function TicketInput({ onSubmit, error, isDark }: TicketInputProp
       </form>
     </>
   );
-}
+};
+
+export default TicketInput;
