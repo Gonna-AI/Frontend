@@ -361,7 +361,7 @@ const PriorityDashboard = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50"
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-start sm:items-center justify-center z-50 p-4 overflow-y-auto"
             onClick={() => setSelectedClaim(null)}
           >
             <motion.div
@@ -370,7 +370,7 @@ const PriorityDashboard = () => {
               exit={{ scale: 0.95, opacity: 0 }}
               transition={{ type: "spring", duration: 0.3 }}
               className={cn(
-                "w-full max-w-2xl p-6 rounded-xl shadow-xl backdrop-blur-sm",
+                "w-full max-w-2xl mx-auto my-4 sm:my-8 p-4 sm:p-6 rounded-xl shadow-xl backdrop-blur-sm max-h-[90vh] overflow-y-auto",
                 isDark 
                   ? "bg-black/90 border border-white/10" 
                   : "bg-white/95 border border-black/10",
@@ -422,7 +422,7 @@ const PriorityDashboard = () => {
               </div>
 
               {/* Content Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
                 <DetailItem
                   icon={PhoneCall}
                   label="Phone Number"
@@ -496,7 +496,7 @@ const PriorityDashboard = () => {
               </div>
 
               {/* Action Buttons */}
-              <div className="flex gap-3 justify-end">
+              <div className="mt-6 flex flex-col sm:flex-row gap-3 justify-end">
                 <motion.button
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
