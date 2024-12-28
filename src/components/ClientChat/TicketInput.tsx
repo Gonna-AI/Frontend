@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Ticket, ArrowRight, Copy, RefreshCw, User } from 'lucide-react';
+import { Ticket, ArrowRight, Copy, RefreshCw, User, Phone } from 'lucide-react';
 import { ticketApi } from '../../config/api';
 
 // Utility function to combine class names
@@ -60,16 +60,25 @@ const styles = `
 export default function TicketInput({ onSubmit, error, isDark }: TicketInputProps) {
   const [code, setCode] = useState('');
   const [userName, setUserName] = useState('');
+  const [mobileNumber, setMobileNumber] = useState('');
   const [generatedTicket, setGeneratedTicket] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [isCopying, setIsCopying] = useState(false);
   const [hasGenerated, setHasGenerated] = useState(false);
   const [showNameInput, setShowNameInput] = useState(false);
   const [nameError, setNameError] = useState('');
+  const [mobileError, setMobileError] = useState('');
 
   const handleGenerateClick = () => {
     setShowNameInput(true);
     setNameError('');
+    setMobileError('');
+  };
+
+  const validateMobileNumber = (number: string) => {
+    if (!number) return true; // Optional field
+    const mobileRegex = /^\+?[\d\s-]{10,}$/;
+    return mobileRegex.test(number);
   };
 
   const generateTicket = async () => {
@@ -80,9 +89,17 @@ export default function TicketInput({ onSubmit, error, isDark }: TicketInputProp
       return;
     }
 
+    if (mobileNumber && !validateMobileNumber(mobileNumber)) {
+      setMobileError('Please enter a valid mobile number');
+      return;
+    }
+
     setIsGenerating(true);
     try {
-      const response = await ticketApi.create(userName);
+      const response = await ticketApi.create({
+        name: userName,
+        mobile: mobileNumber || undefined
+      });
       setGeneratedTicket(response.data.ticket_id);
       setHasGenerated(true);
       setShowNameInput(false);
@@ -134,36 +151,73 @@ export default function TicketInput({ onSubmit, error, isDark }: TicketInputProp
 
           <div className="flex flex-col gap-3">
             {showNameInput ? (
-              <div className="animate-fadeIn">
-                <div className="flex items-center gap-3 mb-2">
-                  <User className={cn(
-                    "w-4 h-4",
-                    isDark ? "text-emerald-400" : "text-emerald-600"
-                  )} />
-                  <span className={isDark ? "text-white/60" : "text-black/60"}>
-                    Enter your name
-                  </span>
-                </div>
-                <input
-                  type="text"
-                  value={userName}
-                  onChange={(e) => {
-                    setUserName(e.target.value);
-                    setNameError('');
-                  }}
-                  placeholder="Your full name"
-                  className={cn(
-                    "w-full px-4 py-3 rounded-lg mb-2",
-                    "transition-all duration-300",
-                    "focus:outline-none focus:ring-2",
-                    isDark
-                      ? "bg-black/40 border border-white/10 text-white placeholder-white/30 focus:ring-emerald-500/30"
-                      : "bg-white/40 border border-black/10 text-black placeholder-black/30 focus:ring-emerald-500/30"
+              <div className="animate-fadeIn space-y-4">
+                {/* Name Input */}
+                <div>
+                  <div className="flex items-center gap-3 mb-2">
+                    <User className={cn(
+                      "w-4 h-4",
+                      isDark ? "text-emerald-400" : "text-emerald-600"
+                    )} />
+                    <span className={isDark ? "text-white/60" : "text-black/60"}>
+                      Enter your name
+                    </span>
+                  </div>
+                  <input
+                    type="text"
+                    value={userName}
+                    onChange={(e) => {
+                      setUserName(e.target.value);
+                      setNameError('');
+                    }}
+                    placeholder="Your full name"
+                    className={cn(
+                      "w-full px-4 py-3 rounded-lg mb-2",
+                      "transition-all duration-300",
+                      "focus:outline-none focus:ring-2",
+                      isDark
+                        ? "bg-black/40 border border-white/10 text-white placeholder-white/30 focus:ring-emerald-500/30"
+                        : "bg-white/40 border border-black/10 text-black placeholder-black/30 focus:ring-emerald-500/30"
+                    )}
+                  />
+                  {nameError && (
+                    <p className="text-sm text-red-400">{nameError}</p>
                   )}
-                />
-                {nameError && (
-                  <p className="text-sm text-red-400 mb-2">{nameError}</p>
-                )}
+                </div>
+
+                {/* Mobile Number Input */}
+                <div>
+                  <div className="flex items-center gap-3 mb-2">
+                    <Phone className={cn(
+                      "w-4 h-4",
+                      isDark ? "text-emerald-400" : "text-emerald-600"
+                    )} />
+                    <span className={isDark ? "text-white/60" : "text-black/60"}>
+                      Mobile number (optional)
+                    </span>
+                  </div>
+                  <input
+                    type="tel"
+                    value={mobileNumber}
+                    onChange={(e) => {
+                      setMobileNumber(e.target.value);
+                      setMobileError('');
+                    }}
+                    placeholder="Enter mobile number"
+                    className={cn(
+                      "w-full px-4 py-3 rounded-lg mb-2",
+                      "transition-all duration-300",
+                      "focus:outline-none focus:ring-2",
+                      isDark
+                        ? "bg-black/40 border border-white/10 text-white placeholder-white/30 focus:ring-emerald-500/30"
+                        : "bg-white/40 border border-black/10 text-black placeholder-black/30 focus:ring-emerald-500/30"
+                    )}
+                  />
+                  {mobileError && (
+                    <p className="text-sm text-red-400">{mobileError}</p>
+                  )}
+                </div>
+
                 <button
                   type="button"
                   onClick={generateTicket}
