@@ -52,6 +52,12 @@ export const ticketApi = {
     api.post('/api/ticket/create', { client_name: data.name, mobile: data.mobile }),
   validate: (ticketId: string) => 
     api.get(`/api/ticket/${ticketId}`),
+  getPriority: () => 
+    api.get('/api/priority'),
+  getDetails: (ticketId: string) =>
+    api.get(`/api/client/${ticketId}/contact`),
+  getSummary: (clientId: number) => 
+    api.get(`/api/conversations/summary/${clientId}`)
 };
 
 // Update api instance to handle ticket header
