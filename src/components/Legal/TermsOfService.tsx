@@ -11,53 +11,229 @@ const TermsOfService = () => {
 
   const sections = [
     {
-      title: "1. DEFINITIONS AND INTERPRETATION",
-      content: `1.1 In these Terms of Service and all documents incorporated herein by reference, the following words and expressions have the following meanings unless the context otherwise requires: "Agreement" means collectively these Terms of Service, Privacy Policy, and any other documents incorporated by reference herein; "Service" means any and all services, features, content, applications, software, and websites provided by Us; "User", "You", or "Your" refers to the individual, entity, or organization that accepts this Agreement by using the Service; "We", "Us", "Our", or "Company" refers to [Company Name], a corporation duly organized and existing under the laws of [Jurisdiction], with its principal place of business at [Address].
-
-1.2 The headings in this Agreement are inserted for convenience only and shall not affect the interpretation of these Terms of Service. Words importing the singular shall include the plural and vice versa. A reference to a statute or statutory provision is a reference to it as amended, extended, or re-enacted from time to time. References to Clauses and Schedules are to the clauses and schedules of this Agreement.
-
-1.3 In the event of any conflict between these Terms of Service and any other document incorporated herein by reference, these Terms of Service shall prevail to the extent of the inconsistency.`
-    },
-    {
-      title: "2. ACCEPTANCE OF TERMS",
-      content: `2.1 PLEASE READ THESE TERMS OF SERVICE CAREFULLY. BY ACCESSING, DOWNLOADING, INSTALLING, REGISTERING TO USE, OR USING THE SERVICE, YOU AGREE TO BE BOUND BY THESE TERMS OF SERVICE AND ALL TERMS INCORPORATED BY REFERENCE. IF YOU DO NOT AGREE TO ALL OF THESE TERMS, DO NOT ACCESS OR USE THE SERVICE.
-
-2.2 You represent and warrant that: (i) You have full legal capacity and authority to agree and bind yourself to these Terms of Service; (ii) You are eighteen (18) years of age or older or have otherwise reached the age of majority in your jurisdiction; (iii) Your use of the Service will be solely for purposes that are permitted by this Agreement; (iv) Your use of the Service will not infringe or misappropriate any third party's rights; and (v) Your use of the Service will comply with all applicable laws and regulations.
-
-2.3 The Service is not available to any Users previously suspended or removed from the Service by Us.`
-    },
-    {
-      title: "3. MODIFICATIONS TO TERMS OR SERVICES",
-      content: `3.1 We reserve the right, at Our sole discretion, to modify, discontinue, or terminate the Service or to modify these Terms of Service at any time and without prior notice. If We modify these Terms of Service, We will post the modification on the Service or provide You with notice of the modification. By continuing to access or use the Service after We have posted a modification or have provided You with notice of a modification, You are indicating that You agree to be bound by the modified Terms of Service. If the modified Terms of Service are not acceptable to You, Your only recourse is to cease using the Service.
-
-3.2 Notwithstanding Section 3.1, no modification to these Terms of Service will apply to any dispute between You and Us that arose prior to the effective date of such modification.
-
-3.3 We may, without prior notice, change the Service; add or remove functionalities or features; stop providing the Service or features of the Service, to You or to Users generally; or create usage limits for the Service.`
-    },
-    {
-      title: "4. INTELLECTUAL PROPERTY RIGHTS",
-      content: `4.1 The Service and its original content, features, and functionality are and will remain the exclusive property of the Company and its licensors. The Service is protected by copyright, trademark, and other laws of both the United States and foreign countries. Our trademarks and trade dress may not be used in connection with any product or service without the prior written consent of the Company.
-
-4.2 Subject to Your compliance with these Terms of Service, We grant You a limited, non-exclusive, non-transferable, non-sublicensable license to access and use the Service solely for Your personal or internal business purposes.
-
-4.3 You acknowledge and agree that any feedback, comments, or suggestions You may provide regarding the Service ("Feedback") will be the sole and exclusive property of the Company and You hereby irrevocably assign to Us all of Your right, title, and interest in and to all Feedback.
-
-4.4 The Company name, the Company logo, and all related names, logos, product and service names, designs, and slogans are trademarks of the Company or its affiliates or licensors. You must not use such marks without the prior written permission of the Company. All other names, logos, product and service names, designs, and slogans on the Service are the trademarks of their respective owners.`
-    },
-    {
-      title: "5. USER REPRESENTATIONS AND WARRANTIES",
-      content: `5.1 By using the Service, You represent and warrant that: (a) all registration information You submit is truthful and accurate; (b) You will maintain the accuracy of such information; (c) You are 18 years of age or older; and (d) Your use of the Service does not violate any applicable law or regulation.
-
-5.2 Your use of the Service is subject to all applicable local, state, national and international laws and regulations. You agree not to: (i) upload, post, email, transmit or otherwise make available any User Content that is unlawful, harmful, threatening, abusive, harassing, tortious, defamatory, vulgar, obscene, libelous, invasive of another's privacy, hateful, or racially, ethnically or otherwise objectionable; (ii) impersonate any person or entity, including, but not limited to, a Company official, forum leader, guide or host, or falsely state or otherwise misrepresent Your affiliation with a person or entity; (iii) forge headers or otherwise manipulate identifiers in order to disguise the origin of any User Content transmitted through the Service.`
-    },
-    {
-      title: "6. LIMITATION OF LIABILITY",
-      content: `6.1 TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, IN NO EVENT SHALL THE COMPANY, ITS AFFILIATES, AGENTS, DIRECTORS, EMPLOYEES, SUPPLIERS OR LICENSORS BE LIABLE FOR ANY INDIRECT, PUNITIVE, INCIDENTAL, SPECIAL, CONSEQUENTIAL OR EXEMPLARY DAMAGES, INCLUDING WITHOUT LIMITATION DAMAGES FOR LOSS OF PROFITS, GOODWILL, USE, DATA OR OTHER INTANGIBLE LOSSES, ARISING OUT OF OR RELATING TO THE USE OF, OR INABILITY TO USE, THE SERVICE.
-
-6.2 WITHOUT LIMITING THE GENERALITY OF THE FOREGOING, THE COMPANY'S AGGREGATE LIABILITY TO YOU (WHETHER UNDER CONTRACT, TORT, STATUTE OR OTHERWISE) SHALL NOT EXCEED THE AMOUNT OF FIFTY UNITED STATES DOLLARS ($50.00).
-
-6.3 THE FOREGOING LIMITATIONS SHALL APPLY EVEN IF THE COMPANY HAS BEEN INFORMED OF THE POSSIBILITY OF SUCH DAMAGES. SOME JURISDICTIONS DO NOT ALLOW THE EXCLUSION OF CERTAIN WARRANTIES OR THE LIMITATION OR EXCLUSION OF LIABILITY FOR INCIDENTAL OR CONSEQUENTIAL DAMAGES. ACCORDINGLY, SOME OF THE LIMITATIONS SET FORTH ABOVE MAY NOT APPLY TO YOU.`
-    }
+        title: "1. DEFINITIONS AND INTERPRETATION",
+        content: `1.1 In these Terms of Service ("Terms") and all documents incorporated herein by reference, the following words and expressions have the following meanings:
+  
+  "Agreement" means collectively these Terms of Service, Privacy Policy, and any other documents incorporated by reference herein;
+  
+  "Service" means any and all services, features, content, and functionality provided through our AI-powered claims processing platform, including:
+  (a) Our claims management system;
+  (b) AI-powered analysis and processing tools;
+  (c) Customer service interaction management;
+  (d) Automated scheduling systems;
+  (e) Knowledge base and documentation systems;
+  (f) Any related websites, applications, and digital platforms;
+  
+  "User", "You", or "Your" refers to the individual, entity, or organization accessing the Service, including claims processing agents, administrators, and authorized personnel;
+  
+  "We", "Us", "Our", or "Company" refers to [Company Name], a corporation organized under the laws of [Jurisdiction];
+  
+  "Claims Data" means all information, documentation, and data related to insurance claims processed through the Service;
+  
+  "AI System" means our proprietary artificial intelligence and machine learning systems used for claims processing, analysis, and automation.
+  
+  1.2 The headings in this Agreement are for convenience only and shall not affect interpretation. Words importing the singular shall include the plural and vice versa.
+  
+  1.3 In the event of any conflict between these Terms and any other document incorporated herein by reference, these Terms shall prevail to the extent of the inconsistency.`
+      },
+      {
+        title: "2. ACCEPTANCE AND ELIGIBILITY",
+        content: `2.1 BY ACCESSING OR USING THE SERVICE IN ANY WAY, YOU:
+  
+  (a) REPRESENT AND WARRANT THAT:
+      (i) You have reached the legal age of majority in your jurisdiction;
+      (ii) You have the capacity to enter into binding obligations;
+      (iii) You are an authorized representative of your organization with authority to bind it;
+      (iv) You have completed all required training for using AI-assisted claims processing systems.
+  
+  (b) AGREE TO BE BOUND BY:
+      (i) These Terms of Service;
+      (ii) Our Privacy Policy;
+      (iii) All applicable laws and regulations;
+      (iv) All security and data protection requirements.
+  
+  2.2 User Eligibility Requirements:
+  (a) Must be a verified claims processing professional;
+  (b) Must complete mandatory system training;
+  (c) Must maintain required certifications and credentials;
+  (d) Must comply with all applicable insurance regulations.
+  
+  2.3 Account Requirements:
+  (a) One account per authorized user;
+  (b) Accurate and current professional credentials;
+  (c) Valid organizational email address;
+  (d) Completed verification process.`
+      },
+      {
+        title: "3. SERVICE ACCESS AND MODIFICATIONS",
+        content: `3.1 Service Access:
+  (a) Access is granted on a subscription basis;
+  (b) Requires valid authentication credentials;
+  (c) Subject to usage limitations and quotas;
+  (d) May be restricted based on jurisdiction or role.
+  
+  3.2 Modifications to Service:
+  We reserve the right to modify, update, or discontinue the Service at our discretion:
+  (a) System updates and improvements;
+  (b) AI model refinements;
+  (c) Interface modifications;
+  (d) Feature additions or removals;
+  (e) Processing workflow changes;
+  (f) Security enhancements.
+  
+  3.3 System Availability:
+  (a) We strive for 99.9% uptime but do not guarantee continuous availability;
+  (b) Scheduled maintenance windows will be communicated in advance;
+  (c) Emergency updates may be deployed without notice;
+  (d) Service may be interrupted for security or compliance reasons.
+  
+  3.4 Version Control:
+  (a) Only authorized versions of the Service may be used;
+  (b) Automatic updates may be required;
+  (c) Legacy versions may be deprecated;
+  (d) Compatibility requirements must be maintained.`
+      },
+      {
+        title: "4. DATA HANDLING AND PRIVACY",
+        content: `4.1 Data Processing:
+  (a) All Claims Data processed according to applicable laws;
+  (b) Strict confidentiality maintained;
+  (c) Data encryption in transit and at rest;
+  (d) Regular security audits and compliance checks.
+  
+  4.2 Data Rights:
+  (a) Company retains rights to aggregated and anonymized data;
+  (b) Training data used for AI system improvement;
+  (c) Analytics data used for service optimization;
+  (d) Audit logs maintained for compliance.
+  
+  4.3 Privacy Compliance:
+  (a) GDPR compliance where applicable;
+  (b) HIPAA compliance for health-related claims;
+  (c) State and federal privacy regulations;
+  (d) Industry-specific data protection requirements.
+  
+  4.4 Data Retention:
+  (a) Claims Data retained per regulatory requirements;
+  (b) Audit logs maintained for 7 years;
+  (c) User activity records preserved as required;
+  (d) Backup data maintained securely.`
+      },
+      {
+        title: "5. USER OBLIGATIONS AND RESTRICTIONS",
+        content: `5.1 User Responsibilities:
+  (a) Maintain accurate credentials;
+  (b) Ensure secure access to the Service;
+  (c) Report security incidents promptly;
+  (d) Complete required training;
+  (e) Verify AI processing results;
+  (f) Maintain data accuracy.
+  
+  5.2 Prohibited Activities:
+  Users shall not:
+  (a) Share access credentials;
+  (b) Bypass security measures;
+  (c) Modify AI processing results;
+  (d) Extract data unauthorized;
+  (e) Interface with other systems without permission;
+  (f) Upload malicious content.
+  
+  5.3 Security Requirements:
+  (a) Multi-factor authentication use;
+  (b) Regular password updates;
+  (c) Secure workstation maintenance;
+  (d) Encrypted communications;
+  (e) Clean desk policy compliance.
+  
+  5.4 Performance Standards:
+  (a) Maintain processing accuracy;
+  (b) Meet response time requirements;
+  (c) Follow quality control procedures;
+  (d) Adhere to compliance checklist.`
+      },
+      {
+        title: "6. INTELLECTUAL PROPERTY",
+        content: `6.1 Ownership:
+  (a) All Service components remain Company property;
+  (b) AI models and algorithms are proprietary;
+  (c) Interface designs are protected;
+  (d) Documentation is copyrighted.
+  
+  6.2 License Grant:
+  (a) Limited, non-exclusive license to use Service;
+  (b) No modification rights granted;
+  (c) No redistribution permitted;
+  (d) No white-labeling allowed.
+  
+  6.3 Restrictions:
+  (a) No reverse engineering;
+  (b) No competitive analysis;
+  (c) No unauthorized access;
+  (d) No derivative works.`
+      },
+      {
+        title: "7. LIABILITY AND INDEMNIFICATION",
+        content: `7.1 Limitation of Liability:
+  TO THE MAXIMUM EXTENT PERMITTED BY LAW:
+  (a) No liability for indirect damages;
+  (b) No liability for AI processing decisions;
+  (c) Limited to direct damages;
+  (d) Capped at fees paid.
+  
+  7.2 Indemnification:
+  User shall indemnify Company against:
+  (a) Unauthorized use;
+  (b) Data breaches caused by User;
+  (c) Regulatory violations;
+  (d) Third-party claims.
+  
+  7.3 Insurance:
+  (a) Users must maintain professional liability insurance;
+  (b) Cyber insurance requirements;
+  (c) Coverage minimums;
+  (d) Proof of insurance.`
+      },
+      {
+        title: "8. TERM AND TERMINATION",
+        content: `8.1 Term:
+  (a) Effective upon Service access;
+  (b) Continues until terminated;
+  (c) Subject to renewal requirements;
+  (d) Minimum commitment periods.
+  
+  8.2 Termination Rights:
+  (a) By either party with notice;
+  (b) Immediate for breach;
+  (c) Automatic for non-compliance;
+  (d) Regulatory requirement changes.
+  
+  8.3 Post-Termination:
+  (a) Immediate access termination;
+  (b) Data preservation requirements;
+  (c) Confidentiality obligations continue;
+  (d) Wind-down procedures.`
+      },
+      {
+        title: "9. GOVERNING LAW AND JURISDICTION",
+        content: `9.1 Governing Law:
+  (a) Laws of [Jurisdiction];
+  (b) Without regard to conflicts;
+  (c) Excluding UN Convention;
+  (d) Local regulations apply.
+  
+  9.2 Dispute Resolution:
+  (a) Mandatory mediation first;
+  (b) Arbitration if required;
+  (c) Court proceedings as last resort;
+  (d) Venue restrictions.
+  
+  9.3 Compliance:
+  (a) Industry regulations;
+  (b) Data protection laws;
+  (c) Insurance requirements;
+  (d) Professional standards.`
+      }
+  
   ];
 
   const GlassContainer = ({ children, className }) => (

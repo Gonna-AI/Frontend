@@ -11,109 +11,327 @@ const PrivacyPolicy = () => {
 
   const sections = [
     {
-      title: "1. DEFINITIONS AND SCOPE",
-      content: `1.1 In this Privacy Policy ("Policy"), the following terms shall have the following meanings unless the context requires otherwise:
-
-"Personal Data" means any information relating to an identified or identifiable natural person ("Data Subject"); an identifiable natural person is one who can be identified, directly or indirectly, in particular by reference to an identifier such as a name, an identification number, location data, an online identifier or to one or more factors specific to the physical, physiological, genetic, mental, economic, cultural or social identity of that natural person.
-
-1.2 This Policy applies to all Personal Data processed by Us through Your use of Our Services, websites, applications, and other digital platforms (collectively, the "Services").
-
-1.3 By accessing or using Our Services, You acknowledge that You have read and understood this Privacy Policy and agree to the collection, use, and disclosure of Your Personal Data as described herein.`
-    },
-    {
-      title: "2. INFORMATION COLLECTION AND PROCESSING",
-      content: `2.1 Categories of Personal Data Collected
-
-2.1.1 Information You Provide to Us:
-(a) Account and Profile Information: When You register for Our Services, We collect Your name, email address, password, and other registration information;
-(b) Communication Data: Information You provide when communicating with Us, including customer support inquiries and feedback;
-(c) Transaction Data: Information related to Your purchases and billing, including payment card details and billing address.
-
-2.1.2 Information Automatically Collected:
-(a) Device and Usage Data: Including but not limited to Your IP address, browser type and version, operating system, device identifiers, and interaction patterns with Our Services;
-(b) Location Data: Approximate location derived from IP address;
-(c) Cookie and Tracking Data: Information collected through cookies, web beacons, and similar technologies as detailed in Our Cookie Policy.
-
-2.2 Legal Basis for Processing
-
-2.2.1 We process Your Personal Data on the following legal bases:
-(a) Performance of a contract with You;
-(b) Our legitimate interests;
-(c) Compliance with legal obligations;
-(d) Your consent, where specifically requested.`
-    },
-    {
-      title: "3. USE AND DISCLOSURE OF PERSONAL DATA",
-      content: `3.1 Purposes of Processing
-
-3.1.1 We process Your Personal Data for the following purposes:
-(a) To provide and maintain Our Services;
-(b) To process Your transactions and manage Your account;
-(c) To communicate with You regarding Service updates, security alerts, and support messages;
-(d) To detect, prevent, and address technical issues, fraud, or other illegal activities;
-(e) To analyze and improve Our Services;
-(f) To comply with legal obligations.
-
-3.2 Information Sharing and Disclosure
-
-3.2.1 We may share Your Personal Data with:
-(a) Service Providers: Third-party vendors who assist in providing Our Services;
-(b) Business Partners: In connection with offering co-branded services or products;
-(c) Legal Requirements: When required by applicable law, regulation, or legal process;
-(d) Business Transfers: In connection with a merger, acquisition, or sale of assets.
-
-3.2.2 All third parties are contractually obligated to protect Your Personal Data and may only process it for specified purposes.`
-    },
-    {
-      title: "4. DATA RETENTION AND SECURITY",
-      content: `4.1 Data Retention
-
-4.1.1 We retain Your Personal Data for as long as necessary to:
-(a) Provide Our Services to You;
-(b) Comply with legal obligations;
-(c) Resolve disputes;
-(d) Enforce Our agreements.
-
-4.2 Security Measures
-
-4.2.1 We implement appropriate technical and organizational measures to protect Your Personal Data, including:
-(a) Encryption of data in transit and at rest;
-(b) Regular security assessments and penetration testing;
-(c) Access controls and authentication mechanisms;
-(d) Physical and environmental security measures.
-
-4.2.2 While We strive to protect Your Personal Data, no method of transmission over the Internet or electronic storage is 100% secure. Therefore, We cannot guarantee absolute security.`
-    },
-    {
-      title: "5. YOUR RIGHTS AND CHOICES",
-      content: `5.1 Data Subject Rights
-
-5.1.1 You have the following rights regarding Your Personal Data:
-(a) Right to Access: Obtain confirmation of whether We process Your Personal Data and request copies of such data;
-(b) Right to Rectification: Request correction of inaccurate data or completion of incomplete data;
-(c) Right to Erasure: Request deletion of Personal Data in certain circumstances;
-(d) Right to Restrict Processing: Limit Our processing of Your Personal Data;
-(e) Right to Data Portability: Receive Your Personal Data in a structured, commonly used format;
-(f) Right to Object: Object to processing based on legitimate interests or direct marketing.
-
-5.2 Exercise of Rights
-
-5.2.1 To exercise Your rights:
-(a) Submit a request through Our privacy portal;
-(b) Contact Our Data Protection Officer at privacy@example.com;
-(c) Response will be provided within 30 days unless extended by applicable law.`
-    },
-    {
-      title: "6. INTERNATIONAL TRANSFERS",
-      content: `6.1 Cross-border Data Transfers
-
-6.1.1 We may transfer Your Personal Data to countries outside Your jurisdiction. When We do so, We ensure appropriate safeguards are in place, including:
-(a) Standard contractual clauses approved by relevant data protection authorities;
-(b) Binding corporate rules for transfers within Our corporate group;
-(c) Other legally approved transfer mechanisms.
-
-6.1.2 By using Our Services, You consent to the transfer of Your Personal Data to countries that may have different data protection laws than Your jurisdiction.`
-    }
+        title: "1. DEFINITIONS AND SCOPE",
+        content: `1.1 Key Definitions
+  
+  "Personal Data" means any information relating to an identified or identifiable natural person, including but not limited to:
+  (a) Customer identification information
+  (b) Claims documentation and details
+  (c) Health and medical information
+  (d) Financial records and information
+  (e) Contact information and preferences
+  (f) Authentication credentials
+  (g) System usage patterns and history
+  
+  "Sensitive Data" includes:
+  (a) Medical records and health information
+  (b) Financial account details
+  (c) Government-issued identification numbers
+  (d) Biometric data
+  (e) Protected health information under HIPAA
+  
+  "Processing" means any operation performed on Personal Data, including:
+  (a) Collection and recording
+  (b) Organization and structuring
+  (c) Storage and retrieval
+  (d) AI analysis and automated processing
+  (e) Transmission and disclosure
+  (f) Deletion and destruction
+  
+  1.2 Scope of Policy
+  
+  This Privacy Policy applies to:
+  (a) All users of our AI-powered claims processing system
+  (b) All data processed through our platform
+  (c) All related services and features
+  (d) All jurisdictions where our service operates
+  (e) All forms of data collection and processing`
+      },
+      {
+        title: "2. DATA COLLECTION AND SOURCES",
+        content: `2.1 Categories of Data Collected
+  
+  2.1.1 Claims Processing Data:
+  (a) Policy information and details
+  (b) Claim documentation and evidence
+  (c) Assessment reports and evaluations
+  (d) Payment and settlement information
+  (e) Historical claims data
+  
+  2.1.2 User Account Data:
+  (a) Professional credentials
+  (b) Authentication information
+  (c) System access logs
+  (d) Usage patterns and preferences
+  (e) Training and certification records
+  
+  2.1.3 Technical Data:
+  (a) Device information and identifiers
+  (b) IP addresses and location data
+  (c) Browser type and settings
+  (d) Operating system information
+  (e) Network connection details
+  
+  2.2 Collection Methods
+  
+  2.2.1 Direct Collection:
+  (a) User input and submissions
+  (b) Account registration
+  (c) File uploads
+  (d) Communication records
+  (e) Training interactions
+  
+  2.2.2 Automated Collection:
+  (a) AI processing systems
+  (b) Analytics tools
+  (c) Cookies and tracking technologies
+  (d) System logs
+  (e) Security monitoring
+  
+  2.3 Data Source Categories:
+  (a) Insurance providers
+  (b) Healthcare providers
+  (c) Financial institutions
+  (d) Government agencies
+  (e) Third-party service providers`
+      },
+      {
+        title: "3. USE OF PERSONAL DATA",
+        content: `3.1 Primary Processing Purposes
+  
+  3.1.1 Claims Processing:
+  (a) Claim verification and validation
+  (b) Risk assessment and analysis
+  (c) Fraud detection and prevention
+  (d) Payment processing
+  (e) Documentation management
+  
+  3.1.2 Service Optimization:
+  (a) AI model training and improvement
+  (b) System performance enhancement
+  (c) User experience optimization
+  (d) Process automation refinement
+  (e) Quality control measures
+  
+  3.1.3 Compliance and Reporting:
+  (a) Regulatory compliance
+  (b) Audit trail maintenance
+  (c) Legal requirement fulfillment
+  (d) Industry standard adherence
+  (e) Statistical reporting
+  
+  3.2 Legal Bases for Processing
+  
+  3.2.1 Contractual Necessity:
+  (a) Service provision
+  (b) Account management
+  (c) Payment processing
+  (d) Communication delivery
+  
+  3.2.2 Legal Obligations:
+  (a) Insurance regulations
+  (b) Data protection laws
+  (c) Financial reporting requirements
+  (d) Healthcare information standards
+  
+  3.2.3 Legitimate Interests:
+  (a) Fraud prevention
+  (b) Security maintenance
+  (c) Service improvement
+  (d) Research and development`
+      },
+      {
+        title: "4. DATA SHARING AND DISCLOSURE",
+        content: `4.1 Categories of Recipients
+  
+  4.1.1 Service Providers:
+  (a) Cloud infrastructure providers
+  (b) Payment processors
+  (c) Analytics services
+  (d) Security vendors
+  (e) Professional service providers
+  
+  4.1.2 Business Partners:
+  (a) Insurance companies
+  (b) Healthcare providers
+  (c) Financial institutions
+  (d) Audit firms
+  (e) Legal advisors
+  
+  4.1.3 Regulatory Bodies:
+  (a) Insurance regulators
+  (b) Data protection authorities
+  (c) Healthcare oversight agencies
+  (d) Financial regulators
+  
+  4.2 Data Transfer Safeguards
+  
+  4.2.1 International Transfers:
+  (a) Standard contractual clauses
+  (b) Adequacy decisions
+  (c) Binding corporate rules
+  (d) Security certifications
+  
+  4.2.2 Third-Party Requirements:
+  (a) Data processing agreements
+  (b) Security assessments
+  (c) Compliance verifications
+  (d) Regular audits`
+      },
+      {
+        title: "5. DATA SECURITY",
+        content: `5.1 Technical Measures
+  
+  5.1.1 Infrastructure Security:
+  (a) Encryption in transit and at rest
+  (b) Firewalls and intrusion detection
+  (c) Access controls and authentication
+  (d) Backup and recovery systems
+  (e) Network segmentation
+  
+  5.1.2 Application Security:
+  (a) Secure development practices
+  (b) Vulnerability scanning
+  (c) Penetration testing
+  (d) Code reviews
+  (e) Security patches
+  
+  5.2 Organizational Measures
+  
+  5.2.1 Access Management:
+  (a) Role-based access control
+  (b) Authentication requirements
+  (c) Access review procedures
+  (d) Account termination process
+  
+  5.2.2 Employee Controls:
+  (a) Security training
+  (b) Confidentiality agreements
+  (c) Background checks
+  (d) Security awareness programs
+  
+  5.3 Incident Response
+  
+  5.3.1 Breach Procedures:
+  (a) Detection and assessment
+  (b) Containment measures
+  (c) Notification procedures
+  (d) Recovery processes`
+      },
+      {
+        title: "6. DATA RETENTION AND DELETION",
+        content: `6.1 Retention Periods
+  
+  6.1.1 Claims Data:
+  (a) Active claims: Duration of processing
+  (b) Closed claims: 7 years minimum
+  (c) Disputed claims: Until resolution plus 7 years
+  (d) Regulatory requirements: As mandated
+  
+  6.1.2 Account Data:
+  (a) Active accounts: Duration of service
+  (b) Inactive accounts: 2 years
+  (c) Audit logs: 7 years
+  (d) Training records: 5 years
+  
+  6.2 Deletion Procedures
+  
+  6.2.1 Data Removal:
+  (a) Secure erasure protocols
+  (b) Media sanitization
+  (c) Archive purging
+  (d) Backup cleanup
+  
+  6.2.2 Retention Exceptions:
+  (a) Legal holds
+  (b) Regulatory requirements
+  (c) Contractual obligations
+  (d) Technical constraints`
+      },
+      {
+        title: "7. USER RIGHTS AND CHOICES",
+        content: `7.1 Data Subject Rights
+  
+  7.1.1 Access Rights:
+  (a) Data copy requests
+  (b) Processing information
+  (c) Recipients disclosure
+  (d) Retention periods
+  
+  7.1.2 Control Rights:
+  (a) Rectification requests
+  (b) Processing restrictions
+  (c) Portability options
+  (d) Deletion requests
+  
+  7.2 Exercise of Rights
+  
+  7.2.1 Request Procedures:
+  (a) Verification requirements
+  (b) Response timeframes
+  (c) Format options
+  (d) Appeal process
+  
+  7.2.2 Limitations:
+  (a) Legal restrictions
+  (b) Technical constraints
+  (c) Third-party rights
+  (d) Legitimate business needs`
+      },
+      {
+        title: "8. COMPLIANCE AND ACCOUNTABILITY",
+        content: `8.1 Regulatory Framework
+  
+  8.1.1 Applicable Laws:
+  (a) Data protection regulations
+  (b) Insurance laws
+  (c) Healthcare privacy rules
+  (d) Industry standards
+  
+  8.1.2 Compliance Measures:
+  (a) Policy implementation
+  (b) Training programs
+  (c) Audit procedures
+  (d) Documentation maintenance
+  
+  8.2 Governance Structure
+  
+  8.2.1 Responsibilities:
+  (a) Data Protection Officer
+  (b) Privacy team
+  (c) Security team
+  (d) Compliance officers
+  
+  8.2.2 Assessment Procedures:
+  (a) Impact assessments
+  (b) Risk evaluations
+  (c) Compliance audits
+  (d) Regular reviews`
+      },
+      {
+        title: "9. CONTACT AND COMPLAINTS",
+        content: `9.1 Contact Information
+  
+  9.1.1 Privacy Inquiries:
+  (a) Data Protection Officer
+  (b) Privacy team
+  (c) Support channels
+  (d) Legal department
+  
+  9.1.2 Complaint Procedures:
+  (a) Internal resolution process
+  (b) Escalation paths
+  (c) External resources
+  (d) Regulatory contacts
+  
+  9.2 Updates and Notifications
+  
+  9.2.1 Policy Changes:
+  (a) Review procedures
+  (b) Update notifications
+  (c) Version control
+  (d) Archive maintenance`
+      }
   ];
 
   const GlassContainer = ({ children, className }) => (
