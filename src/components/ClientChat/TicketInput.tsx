@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Ticket, ArrowRight } from 'lucide-react';
+import { Ticket, ArrowRight, Copy, RefreshCw } from 'lucide-react';
 import { cn } from '../../utils/cn';
 
 interface TicketInputProps {
@@ -10,6 +10,21 @@ interface TicketInputProps {
 
 export default function TicketInput({ onSubmit, error, isDark }: TicketInputProps) {
   const [code, setCode] = useState('');
+  const [generatedTicket, setGeneratedTicket] = useState('');
+
+  const generateTicket = () => {
+    const randomTicket = Math.random().toString(36).substring(2, 10).toUpperCase();
+    setGeneratedTicket(randomTicket);
+  };
+
+  const copyToClipboard = async () => {
+    try {
+      await navigator.clipboard.writeText(generatedTicket);
+      // You could add a toast notification here
+    } catch (err) {
+      console.error('Failed to copy text: ', err);
+    }
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -19,7 +34,69 @@ export default function TicketInput({ onSubmit, error, isDark }: TicketInputProp
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-6">
+      {/* Generate Ticket Section */}
+      <div className={cn(
+        "p-4 rounded-xl",
+        isDark ? "bg-white/5" : "bg-black/5"
+      )}>
+        <div className="flex items-center gap-3 mb-4">
+          <RefreshCw className={cn(
+            "w-5 h-5",
+            isDark ? "text-emerald-400" : "text-emerald-600"
+          )} />
+          <span className={isDark ? "text-white/60" : "text-black/60"}>
+            Generate Ticket
+          </span>
+        </div>
+
+        <div className="flex flex-col gap-3">
+          <button
+            type="button"
+            onClick={generateTicket}
+            className={cn(
+              "w-full px-4 py-3 rounded-lg",
+              "transition-colors duration-200",
+              "flex items-center justify-center gap-2",
+              isDark
+                ? "bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 border border-emerald-500/30"
+                : "bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 border border-emerald-500/20"
+            )}
+          >
+            Generate New Ticket
+          </button>
+
+          {generatedTicket && (
+            <div className={cn(
+              "flex items-center gap-2 p-3 rounded-lg",
+              isDark ? "bg-black/40" : "bg-white/40",
+              "border",
+              isDark ? "border-white/10" : "border-black/10"
+            )}>
+              <span className={cn(
+                "flex-1 font-mono",
+                isDark ? "text-white" : "text-black"
+              )}>
+                {generatedTicket}
+              </span>
+              <button
+                type="button"
+                onClick={copyToClipboard}
+                className={cn(
+                  "p-2 rounded-lg transition-colors",
+                  isDark
+                    ? "hover:bg-white/10 text-white/60"
+                    : "hover:bg-black/10 text-black/60"
+                )}
+              >
+                <Copy className="w-4 h-4" />
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Support Ticket Input */}
       <div className={cn(
         "p-4 rounded-xl",
         isDark ? "bg-white/5" : "bg-black/5"
