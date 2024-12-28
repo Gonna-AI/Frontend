@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '../../utils/cn';
 import { useTheme } from '../../hooks/useTheme';
@@ -17,71 +17,90 @@ import {
   FileText,
   AlertCircle
 } from 'lucide-react';
+import { ticketApi } from '../../config/api';
+
+interface Client {
+  client_name: string;
+  urgency: string;
+  tags: string | null;
+  last_interaction: string;
+  follow_up_date: string;
+  ticket_id: string;
+  category: string;
+  issue: string;
+}
+
+interface ClientDetails {
+  phone: string;
+  email: string;
+  ticket_id: string;
+  client_id: number;
+}
 
 const PriorityDashboard = () => {
   const { isDark } = useTheme();
-  const [claims] = useState([
-    {
-      id: 1,
-      ticketNumber: "TKT-2024-001",
-      clientName: "John Doe",
-      topic_tags: ["database", "connectivity", "troubleshooting"],
-      priority: "high",
-      callbackTime: "2024-12-27 14:00",
-      status: "pending",
-      sentiment: "frustrated",
-      grievanceType: "Claim Rejection",
-      lastInteraction: "2024-12-26 10:30",
-      isOnline: true,
-      email: "john.doe@example.com",
-      phone: "+1 (555) 123-4567",
-      policyNumber: "POL-2024-001",
-      description: "Client reported issues with claim rejection for recent medical procedure.",
-      notes: "Multiple follow-up attempts made. Client expressed significant frustration with process."
-    },
-    {
-      id: 2,
-      ticketNumber: "TKT-2024-002",
-      clientName: "Jane Smith",
-      topic_tags: ["security", "access", "permissions"],
-      priority: "medium",
-      callbackTime: "2024-12-27 16:00",
-      status: "scheduled",
-      sentiment: "neutral",
-      grievanceType: "Delay in Processing",
-      lastInteraction: "2024-12-26 11:45",
-      isOnline: false,
-      email: "jane.smith@example.com",
-      phone: "+1 (555) 987-6543",
-      policyNumber: "POL-2024-002",
-      description: "Pending resolution for vehicle damage claim from accident on Dec 15.",
-      notes: "Documentation received, awaiting adjuster review."
-    },
-    // Adding more items to demonstrate scroll
-    ...Array(4).fill(null).map((_, index) => ({
-      id: index + 3,
-      ticketNumber: `TKT-2024-${String(index + 3).padStart(3, '0')}`,
-      clientName: `Test Client ${index + 3}`,
-      topic_tags: ["performance", "optimization", "monitoring"],
-      priority: ["low", "medium", "high"][index % 3],
-      callbackTime: "2024-12-28 10:00",
-      status: "pending",
-      sentiment: "neutral",
-      grievanceType: "Documentation Issue",
-      lastInteraction: "2024-12-26 09:00",
-      isOnline: Boolean(index % 2),
-      email: `client${index + 3}@example.com`,
-      phone: `+1 (555) ${String(index + 1).padStart(3, '0')}-${String(index + 1000).slice(1)}`,
-      policyNumber: `POL-2024-00${index + 3}`,
-      description: "Standard documentation review pending.",
-      notes: "Awaiting client response on required documents."
-    }))
-  ]);
+  const [clients, setClients] = useState<Client[]>([]);
+  const [selectedClient, setSelectedClient] = useState<Client | null>(null);
+  const [clientDetails, setClientDetails] = useState<ClientDetails | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [summary, setSummary] = useState<string | null>(null);
+  const [loadingSummary, setLoadingSummary] = useState(false);
 
-  const [selectedClaim, setSelectedClaim] = useState(null);
+  useEffect(() => {
+    const fetchPriorityClients = async () => {
+      try {
+        const response = await ticketApi.getPriority();
+        setClients(response.data);
+      } catch (error) {
+        console.error('Failed to fetch priority clients:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const handleClaimClick = (claim) => {
-    setSelectedClaim(claim);
+    fetchPriorityClients();
+  }, []);
+
+  const fetchSummary = async (clientId: number) => {
+    setLoadingSummary(true);
+    try {
+      const response = await ticketApi.getSummary(clientId);
+      setSummary(response.data.summary);
+    } catch (error) {
+      console.error('Failed to fetch conversation summary:', error);
+    } finally {
+      setLoadingSummary(false);
+    }
+  };
+
+  const handleClaimClick = async (client: Client) => {
+    setSelectedClient(client);
+    setSummary(null);
+    try {
+      const response = await ticketApi.getDetails(client.ticket_id);
+      setClientDetails(response.data);
+      fetchSummary(response.data.client_id);
+    } catch (error) {
+      console.error('Failed to fetch client details:', error);
+    }
+  };
+
+  const formatDate = (dateString: string | null) => {
+    if (!dateString) return '-';
+    const date = new Date(dateString);
+    return date.toLocaleString('en-US', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true,
+      month: 'short',
+      day: 'numeric'
+    });
+  };
+
+  const parseTags = (tagsString: string | null): string[] => {
+    if (!tagsString) return [];
+    const tags = tagsString.split(',').map(tag => tag.trim());
+    return tags.slice(0, 3); // Return maximum 3 tags
   };
 
   const getPriorityColor = (priority) => {
@@ -91,17 +110,6 @@ const PriorityDashboard = () => {
       low: isDark ? "bg-green-500/20 text-green-400" : "bg-green-100 text-green-800"
     };
     return colors[priority] || colors.low;
-  };
-
-  const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleString('en-US', {
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: true,
-      month: 'short',
-      day: 'numeric'
-    });
   };
 
   const scrollToTop = () => {
@@ -240,22 +248,8 @@ const PriorityDashboard = () => {
         id="claims-container"
         className="flex-1 overflow-y-auto p-6 space-y-4 relative scrollbar-thin scrollbar-track-transparent scrollbar-thumb-gray-400"
       >
-        {claims.map((claim) => (
-          <div key={claim.id} className="relative" onClick={() => handleClaimClick(claim)}>
-            {/* Online Status Indicator */}
-            {claim.isOnline && (
-              <motion.div
-                className="absolute -right-1 -top-1 flex items-center justify-center z-10"
-                initial={{ opacity: 0.5 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 1, repeat: Infinity, repeatType: "reverse" }}
-              >
-                <div className="w-3 h-3 rounded-full bg-emerald-500" />
-                <div className="absolute w-3 h-3 rounded-full bg-emerald-500 animate-ping" />
-              </motion.div>
-            )}
-
-            {/* Claim Card */}
+        {clients.map((client) => (
+          <div key={client.ticket_id} onClick={() => handleClaimClick(client)}>
             <motion.div 
               whileHover={{ scale: 1.01 }}
               className={cn(
@@ -284,20 +278,19 @@ const PriorityDashboard = () => {
                         "font-medium truncate",
                         isDark ? "text-white" : "text-black"
                       )}>
-                        {claim.clientName}
+                        {client.client_name || '<no name>'}
                       </h3>
-                      <span className={cn(
-                        "px-2 py-1 rounded text-xs font-medium flex-shrink-0",
-                        getPriorityColor(claim.priority)
-                      )}>
-                        {claim.priority.toUpperCase()}
-                      </span>
-                      {claim.sentiment === "frustrated" && (
-                        <AlertTriangle className="h-4 w-4 text-amber-500 flex-shrink-0" />
+                      {client.urgency && (
+                        <span className={cn(
+                          "px-2 py-1 rounded text-xs font-medium flex-shrink-0",
+                          getPriorityColor(client.urgency.toLowerCase())
+                        )}>
+                          {client.urgency.toUpperCase()}
+                        </span>
                       )}
                     </div>
                     <div className="flex flex-wrap gap-1.5 mt-2">
-                      {claim.topic_tags.map((tag, index) => (
+                      {parseTags(client.tags).map((tag, index) => (
                         <span
                           key={index}
                           className={cn(
@@ -323,7 +316,7 @@ const PriorityDashboard = () => {
                     <span className={cn(
                       isDark ? "text-white/60" : "text-black/60"
                     )}>
-                      {formatDate(claim.callbackTime)}
+                      {formatDate(client.follow_up_date)}
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
@@ -334,7 +327,7 @@ const PriorityDashboard = () => {
                     <span className={cn(
                       isDark ? "text-white/60" : "text-black/60"
                     )}>
-                      {formatDate(claim.lastInteraction)}
+                      {formatDate(client.last_interaction)}
                     </span>
                   </div>
                 </div>
@@ -365,13 +358,13 @@ const PriorityDashboard = () => {
 
       {/* Detailed View Modal */}
       <AnimatePresence>
-        {selectedClaim && (
+        {selectedClient && clientDetails && (
           <motion.div 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
-            onClick={() => setSelectedClaim(null)}
+            onClick={() => setSelectedClient(null)}
           >
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
@@ -404,18 +397,18 @@ const PriorityDashboard = () => {
                       "text-xl font-semibold",
                       isDark ? "text-white" : "text-black"
                     )}>
-                      {selectedClaim.clientName}
+                      {selectedClient.client_name}
                     </h3>
                     <p className={cn(
                       "text-sm",
                       isDark ? "text-white/60" : "text-black/60"
                     )}>
-                      {selectedClaim.claimType}
+                      {selectedClient.category}
                     </p>
                   </div>
                 </div>
                 <button
-                  onClick={() => setSelectedClaim(null)}
+                  onClick={() => setSelectedClient(null)}
                   className={cn(
                     "p-2 rounded-lg transition-colors",
                     isDark 
@@ -435,36 +428,38 @@ const PriorityDashboard = () => {
                 <DetailItem
                   icon={PhoneCall}
                   label="Phone Number"
-                  value={selectedClaim.phone}
+                  value={clientDetails.phone || '-'}
                 />
                 <DetailItem
                   icon={Mail}
                   label="Email"
-                  value={selectedClaim.email}
-                />
-                <DetailItem
-                  icon={Badge}
-                  label="Policy Number"
-                  value={selectedClaim.policyNumber}
-                />
-                <DetailItem
-                  icon={AlertCircle}
-                  label="Priority Status"
-                  value={selectedClaim.priority.toUpperCase()}
-                />
-                <DetailItem
-                  icon={FileText}
-                  label="Grievance Type"
-                  value={selectedClaim.grievanceType}
+                  value={clientDetails.email || '-'}
                 />
                 <DetailItem
                   icon={FileText}
                   label="Ticket Number"
-                  value={selectedClaim.ticketNumber}
+                  value={clientDetails.ticket_id}
                 />
+                <DetailItem
+                  icon={Badge}
+                  label="Grievance Type"
+                  value={selectedClient.category || '-'}
+                />
+                <DetailItem
+                  icon={FileText}
+                  label="Issue"
+                  value={selectedClient.issue || '-'}
+                />
+                {selectedClient.urgency && (
+                  <DetailItem
+                    icon={AlertCircle}
+                    label="Priority Status"
+                    value={selectedClient.urgency.toUpperCase()}
+                  />
+                )}
               </div>
 
-              {/* Description Section */}
+              {/* Description Section with Summary */}
               <div className={cn(
                 "p-4 rounded-lg mb-6 transition-all duration-200",
                 isDark 
@@ -477,12 +472,23 @@ const PriorityDashboard = () => {
                 )}>
                   Case Description
                 </h4>
-                <p className={cn(
+                <div className={cn(
                   "text-sm",
                   isDark ? "text-white/70" : "text-black/70"
                 )}>
-                  {selectedClaim.description}
-                </p>
+                  {loadingSummary ? (
+                    <div className="flex items-center justify-center py-4">
+                      <div className={cn(
+                        "animate-spin rounded-full h-6 w-6 border-2",
+                        isDark 
+                          ? "border-white/20 border-t-white/70" 
+                          : "border-black/20 border-t-black/70"
+                      )} />
+                    </div>
+                  ) : (
+                    summary || 'No conversation summary available.'
+                  )}
+                </div>
               </div>
 
               {/* Notes Section */}
@@ -500,7 +506,7 @@ const PriorityDashboard = () => {
                   "text-sm",
                   isDark ? "text-white/70" : "text-black/70"
                 )}>
-                  {selectedClaim.notes}
+                  {/* Add notes section content here */}
                 </p>
               </div>
 
