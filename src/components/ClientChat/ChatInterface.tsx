@@ -4,7 +4,7 @@ import { Send, GalleryVerticalEnd, Phone, Upload } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { motion, AnimatePresence } from 'framer-motion';
 import CallWindow from './CallWindow';
-import { documentApi } from '../../config/api';
+import api, { API_BASE_URL, documentApi } from '../../config/api';  // Import the configured api instance
 
 interface Message {
   text: string;
@@ -56,13 +56,12 @@ export default function ChatInterface({ ticketCode, isDark }: ChatInterfaceProps
     abortControllerRef.current = new AbortController();
 
     try {
-      const response = await axios.post('http://localhost:5000/api/chat', 
+      const response = await api.post('/api/chat', 
         { 
           message: inputMessage,
           ticketCode: ticketCode
         }, 
         { 
-          withCredentials: true,
           signal: abortControllerRef.current.signal
         }
       );

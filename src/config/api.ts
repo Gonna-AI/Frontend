@@ -41,4 +41,21 @@ export const documentApi = {
   }
 };
 
+// Add new ticket-related endpoints
+export const ticketApi = {
+  create: (clientName: string) => 
+    api.post('/api/ticket/create', { client_name: clientName }),
+  validate: (ticketId: string) => 
+    api.get(`/api/ticket/${ticketId}`),
+};
+
+// Update api instance to handle ticket header
+export const setTicketHeader = (ticketId: string | null) => {
+  if (ticketId) {
+    api.defaults.headers['X-Ticket-ID'] = ticketId;
+  } else {
+    delete api.defaults.headers['X-Ticket-ID'];
+  }
+};
+
 export default api; 
