@@ -4,6 +4,7 @@ import Logo from './Logo';
 import TicketInput from './TicketInput';
 import ChatInterface from './ChatInterface';
 import ThemeToggle from './ThemeToggle';
+import { ticketApi, setTicketHeader } from '../../config/api';
 
 export default function ClientChat() {
   const [isVerified, setIsVerified] = useState(false);
@@ -20,13 +21,20 @@ export default function ClientChat() {
     localStorage.setItem('clientChatTheme', newTheme ? 'dark' : 'light');
   };
 
-  const handleVerification = (code) => {
+  const handleVerification = async (code: string) => {
     setError('');
-    if (code === '123') {
-      setIsVerified(true);
-      setTicketCode(code);
-    } else {
-      setError('Invalid ticket code');
+    try {
+      const response = await ticketApi.validate(code);
+      if (response.data.valid) {
+        setTicketHeader(code); // Set the ticket header for future requests
+        setIsVerified(true);
+        setTicketCode(code);
+      } else {
+        setError('Invalid ticket code');
+      }
+    } catch (err) {
+      console.error('Ticket validation failed:', err);
+      setError('Failed to validate ticket');
     }
   };
 

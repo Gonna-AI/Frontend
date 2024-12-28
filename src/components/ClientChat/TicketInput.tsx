@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Ticket, ArrowRight, Copy, RefreshCw } from 'lucide-react';
+import { ticketApi } from '../../config/api';
 
 // Utility function to combine class names
 const cn = (...classes: (string | boolean | undefined)[]) => {
@@ -63,17 +64,19 @@ export default function TicketInput({ onSubmit, error, isDark }: TicketInputProp
   const [isCopying, setIsCopying] = useState(false);
   const [hasGenerated, setHasGenerated] = useState(false);
 
-  const generateTicket = () => {
+  const generateTicket = async () => {
     if (hasGenerated) return;
     
     setIsGenerating(true);
-    const randomTicket = Math.random().toString(36).substring(2, 10).toUpperCase();
-    
-    setTimeout(() => {
-      setGeneratedTicket(randomTicket);
-      setIsGenerating(false);
+    try {
+      const response = await ticketApi.create('John Doe');
+      setGeneratedTicket(response.data.ticket_id);
       setHasGenerated(true);
-    }, 800);
+    } catch (err) {
+      console.error('Failed to generate ticket:', err);
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   const copyToClipboard = async () => {
