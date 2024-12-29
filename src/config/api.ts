@@ -69,4 +69,19 @@ export const setTicketHeader = (ticketId: string | null) => {
   }
 };
 
+// Add ElevenLabs endpoints
+export const elevenLabsApi = {
+  startConversation: async () => {
+    const response = await axios.post(`${API_BASE_URL}/api/elevenlabs/start`);
+    return response.data;
+  },
+  
+  stopConversation: async () => {
+    const response = await axios.post(`${API_BASE_URL}/api/elevenlabs/stop`);
+    return response.data;
+  },
+  
+  // Add other ElevenLabs-related endpoints
+};
+
 export default api; 
