@@ -217,25 +217,22 @@ const PriorityDashboard = () => {
 
   return (
     <div className={cn(
-      "rounded-xl overflow-hidden h-[600px] w-full flex flex-col",
+      "rounded-xl h-full w-full flex flex-col overflow-hidden",
       isDark 
         ? "bg-black/20 border border-white/10" 
         : "bg-white/10 border border-black/10"
     )}>
       {/* Header */}
       <div className={cn(
-        "p-6",
+        "p-4 sticky top-0 z-10",
         isDark 
-          ? "border-b border-white/10" 
-          : "border-b border-black/10"
+          ? "border-b border-white/10 bg-black/20 backdrop-blur-sm" 
+          : "border-b border-black/10 bg-white/20 backdrop-blur-sm"
       )}>
         <div className="flex items-center gap-2">
-          <Bell className={cn(
-            "w-5 h-5 flex-shrink-0",
-            isDark ? "text-white/70" : "text-black/70"
-          )} />
+          <Bell className="w-4 h-4" />
           <h2 className={cn(
-            "text-lg font-semibold",
+            "text-base font-semibold",
             isDark ? "text-white" : "text-black"
           )}>
             Priority Claims Dashboard
@@ -246,31 +243,28 @@ const PriorityDashboard = () => {
       {/* Claims List */}
       <div 
         id="claims-container"
-        className="flex-1 overflow-y-auto p-6 space-y-4 relative scrollbar-thin scrollbar-track-transparent scrollbar-thumb-gray-400"
+        className="flex-1 p-4 space-y-3 relative overflow-y-auto"
       >
         {clients.map((client) => (
           <div key={client.ticket_id} onClick={() => handleClaimClick(client)}>
             <motion.div 
               whileHover={{ scale: 1.01 }}
               className={cn(
-                "p-4 rounded-lg transition-colors duration-200 cursor-pointer",
+                "p-3 rounded-lg transition-colors duration-200 cursor-pointer",
                 isDark 
                   ? "bg-black/20 border border-white/10 hover:bg-black/30" 
                   : "bg-white/10 border border-black/10 hover:bg-white/20"
               )}
             >
-              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-                <div className="flex items-start gap-3">
+              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+                <div className="flex items-start gap-2">
                   <div className={cn(
-                    "p-2 rounded-lg flex-shrink-0",
+                    "p-1.5 rounded-lg flex-shrink-0",
                     isDark 
                       ? "bg-black/20 border border-white/10" 
                       : "bg-white/10 border border-black/10"
                   )}>
-                    <User className={cn(
-                      "w-4 h-4",
-                      isDark ? "text-white/70" : "text-black/70"
-                    )} />
+                    <User className="w-3.5 h-3.5" />
                   </div>
                   <div className="min-w-0">
                     <div className="flex items-center flex-wrap gap-2">
@@ -307,7 +301,7 @@ const PriorityDashboard = () => {
                   </div>
                 </div>
 
-                <div className="flex flex-col lg:items-end gap-2 text-sm">
+                <div className="flex flex-col lg:items-end gap-1.5 text-xs">
                   <div className="flex items-center gap-2">
                     <Calendar className={cn(
                       "w-4 h-4 flex-shrink-0",
@@ -333,9 +327,9 @@ const PriorityDashboard = () => {
                 </div>
               </div>
 
-              <div className="mt-4 flex justify-end gap-2">
+              <div className="mt-3 flex justify-end gap-2">
                 <button className={cn(
-                  "px-3 py-1.5 text-sm rounded-lg transition-colors duration-200",
+                  "px-2.5 py-1 text-xs rounded-lg transition-colors duration-200",
                   isDark 
                     ? "bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 border border-blue-500/20" 
                     : "bg-blue-100 text-blue-800 hover:bg-blue-200 border border-blue-200"
@@ -343,7 +337,7 @@ const PriorityDashboard = () => {
                   Reschedule
                 </button>
                 <button className={cn(
-                  "px-3 py-1.5 text-sm rounded-lg transition-colors duration-200",
+                  "px-2.5 py-1 text-xs rounded-lg transition-colors duration-200",
                   isDark 
                     ? "bg-green-500/20 text-green-400 hover:bg-green-500/30 border border-green-500/20" 
                     : "bg-green-100 text-green-800 hover:bg-green-200 border border-green-200"
@@ -363,7 +357,7 @@ const PriorityDashboard = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-start justify-center z-50 p-4 overflow-y-auto"
             onClick={() => setSelectedClient(null)}
           >
             <motion.div
@@ -372,11 +366,10 @@ const PriorityDashboard = () => {
               exit={{ scale: 0.95, opacity: 0 }}
               transition={{ type: "spring", duration: 0.3 }}
               className={cn(
-                "w-full max-w-2xl mx-auto my-4 sm:my-8 p-4 sm:p-6 rounded-xl shadow-xl backdrop-blur-sm max-h-[90vh] overflow-y-auto",
+                "w-full max-w-2xl mx-auto my-4 p-4 rounded-xl shadow-xl backdrop-blur-sm",
                 isDark 
                   ? "bg-black/90 border border-white/10" 
-                  : "bg-white/95 border border-black/10",
-                "overflow-hidden"
+                  : "bg-white/95 border border-black/10"
               )}
               onClick={(e) => e.stopPropagation()}
             >
@@ -548,13 +541,13 @@ const PriorityDashboard = () => {
       <button
         onClick={scrollToTop}
         className={cn(
-          "absolute bottom-4 right-4 p-2 rounded-full transition-colors duration-200",
+          "absolute bottom-3 right-3 p-1.5 rounded-full transition-colors duration-200",
           isDark 
             ? "bg-white/10 hover:bg-white/20 text-white/70" 
             : "bg-black/10 hover:bg-black/20 text-black/70"
         )}
       >
-        <ChevronUp className="w-5 h-5" />
+        <ChevronUp className="w-4 h-4" />
       </button>
     </div>
   );

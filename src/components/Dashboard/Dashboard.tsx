@@ -44,6 +44,7 @@ export default function Dashboard() {
   return (
     <ErrorBoundary FallbackComponent={ErrorFallback}>
       <div className={cn(
+        "h-[calc(100vh-5rem)] overflow-y-auto",
         "p-4 md:p-6 space-y-4 md:space-y-6",
         isDark ? "text-white" : "text-black"
       )}>
@@ -58,13 +59,13 @@ export default function Dashboard() {
           )}
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-2 h-[400px]">
             {analyticsData && (
               <Chart monthlyData={analyticsData.monthly_conversations} />
             )}
           </div>
-          <div>
-            <RecentActivity />
+          <div className="h-[400px]">
+            <RecentActivity className="h-full" />
           </div>
         </div>
       </div>
