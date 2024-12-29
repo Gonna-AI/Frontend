@@ -89,31 +89,39 @@ export default function CallWindow({ isDark, onClose, onStopAI, onFileUpload, ti
     setAgentStatus('speaking');
 
     try {
-      // Use the backend API for Gemini integration
-      const response = await api.post('/api/chat/voice', {
+      // Use the backend API for voice conversation
+      const response = await api.post('/api/chat', {
         message: input,
-        ticketCode: ticketCode,
-        language: recognitionRef.current?.lang || 'en-US'
+        ticketCode: ticketCode
       });
 
-      const aiResponse = response.data.response;
+      // Get the AI response text
+      const aiResponse = response.data.response || response.data.text || '';
       setResponse(aiResponse);
       
-      // Text-to-speech
+      // Create and configure speech synthesis
       const utterance = new SpeechSynthesisUtterance(aiResponse);
       utterance.lang = recognitionRef.current?.lang || 'en-US';
+      utterance.rate = 1.0;  // Normal speed
+      utterance.pitch = 1.0; // Normal pitch
       
-      // Cancel any ongoing speech
+      // Clear any existing speech
       window.speechSynthesis.cancel();
       
-      // Wait a brief moment before starting new speech
-      setTimeout(() => {
-        window.speechSynthesis.speak(utterance);
-      }, 100);
-
+      utterance.onstart = () => {
+        setAgentStatus('speaking');
+      };
+      
       utterance.onend = () => {
         setAgentStatus('listening');
         setIsProcessing(false);
+        
+        // Restart recognition after speech ends
+        if (!isMuted && recognitionRef.current) {
+          setTimeout(() => {
+            recognitionRef.current?.start();
+          }, 100);
+        }
       };
 
       utterance.onerror = (event) => {
@@ -122,10 +130,16 @@ export default function CallWindow({ isDark, onClose, onStopAI, onFileUpload, ti
         setIsProcessing(false);
       };
 
+      // Add a small delay before speaking to ensure proper state updates
+      setTimeout(() => {
+        window.speechSynthesis.speak(utterance);
+      }, 100);
+
     } catch (error) {
       console.error('Error processing input:', error);
       setAgentStatus('idle');
       setIsProcessing(false);
+      setResponse('Sorry, I encountered an error. Please try again.');
     }
   };
 
@@ -133,11 +147,19 @@ export default function CallWindow({ isDark, onClose, onStopAI, onFileUpload, ti
     if (!recognitionRef.current) return;
 
     if (isMuted) {
-      recognitionRef.current.start();
-      setAgentStatus('listening');
+      try {
+        recognitionRef.current.start();
+        setAgentStatus('listening');
+      } catch (error) {
+        console.error('Error starting recognition:', error);
+      }
     } else {
-      recognitionRef.current.stop();
-      setAgentStatus('idle');
+      try {
+        recognitionRef.current.stop();
+        setAgentStatus('idle');
+      } catch (error) {
+        console.error('Error stopping recognition:', error);
+      }
     }
     setIsMuted(!isMuted);
   };
