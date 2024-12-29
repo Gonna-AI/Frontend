@@ -4,6 +4,7 @@ import { Phone, X, Mic, MicOff, Square, MessageSquare, Upload } from 'lucide-rea
 import { cn } from '../../utils/cn';
 import { audioApi, documentApi } from '../../config/api';
 import { API_BASE_URL } from '../../config/api';
+import { Conversation } from '@11labs/client';
 
 interface CallWindowProps {
   isDark: boolean;
@@ -14,13 +15,15 @@ interface CallWindowProps {
 
 export default function CallWindow({ isDark, onClose, onStopAI, onFileUpload }: CallWindowProps) {
   const [callDuration, setCallDuration] = useState(0);
-  const [isMuted, setIsMuted] = useState(false);
+  const [isMuted, setIsMuted] = useState(true);
   const [isAIStopped, setIsAIStopped] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [isRecording, setIsRecording] = useState(false);
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const audioChunksRef = useRef<Blob[]>([]);
-  const audioPlayerRef = useRef<HTMLAudioElement | null>(null);
+  const conversationRef = useRef<any>(null);
+  const [connectionStatus, setConnectionStatus] = useState<'disconnected' | 'connected'>('disconnected');
+  const [agentStatus, setAgentStatus] = useState<'idle' | 'speaking' | 'listening'>('idle');
+
+  const ELEVENLABS_API_KEY = 'sk_d2a3556683942636ebb36b517e8369542866afe5bd914a51';
+  const AGENT_ID = 'y3uv6b8h6XigSqRSiqab';
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -35,75 +38,106 @@ export default function CallWindow({ isDark, onClose, onStopAI, onFileUpload }: 
     return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
   };
 
-  const startRecording = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const mediaRecorder = new MediaRecorder(stream);
-      mediaRecorderRef.current = mediaRecorder;
-      audioChunksRef.current = [];
+  useEffect(() => {
+    let isActive = true;
 
-      mediaRecorder.ondataavailable = (event) => {
-        if (event.data.size > 0) {
-          audioChunksRef.current.push(event.data);
+    const initConversation = async () => {
+      if (conversationRef.current) return;
+      
+      try {
+        await navigator.mediaDevices.getUserMedia({ audio: true });
+
+        if (!isActive) return;
+
+        const conv = await Conversation.startSession({
+          apiKey: ELEVENLABS_API_KEY,
+          agentId: AGENT_ID,
+          onConnect: () => {
+            if (!isActive) return;
+            setConnectionStatus('connected');
+          },
+          onDisconnect: () => {
+            if (!isActive) return;
+            setConnectionStatus('disconnected');
+            setIsMuted(true);
+          },
+          onError: (error) => {
+            console.error('ElevenLabs Error:', error);
+          },
+          onModeChange: (mode) => {
+            if (!isActive) return;
+            setAgentStatus(mode.mode === 'speaking' ? 'speaking' : 'listening');
+          },
+        });
+
+        if (!isActive) {
+          conv.endSession();
+          return;
         }
-      };
 
-      mediaRecorder.onstop = async () => {
-        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/wav' });
-        await sendAudioToServer(audioBlob);
-      };
+        conversationRef.current = conv;
+      } catch (error) {
+        console.error('Failed to start conversation:', error);
+      }
+    };
 
-      mediaRecorder.start();
-      setIsRecording(true);
-    } catch (error) {
-      console.error('Error starting recording:', error);
+    initConversation();
+
+    return () => {
+      isActive = false;
+      if (conversationRef.current) {
+        conversationRef.current.endSession();
+        conversationRef.current = null;
+      }
+    };
+  }, []);
+
+  const handleMicToggle = async () => {
+    console.log('Mic toggle clicked. Current state:', { isMuted, conversation: !!conversationRef.current });
+    
+    if (!conversationRef.current) {
+      console.log('No conversation available');
+      return;
     }
-  };
 
-  const stopRecording = () => {
-    if (mediaRecorderRef.current && isRecording) {
-      mediaRecorderRef.current.stop();
-      setIsRecording(false);
-    }
-  };
-
-  const sendAudioToServer = async (audioBlob: Blob) => {
     try {
-      const response = await audioApi.startConversation(audioBlob);
-      if (response.data.audio_url) {
-        playAudioResponse(response.data.audio_url);
+      if (isMuted) {
+        console.log('Attempting to start recording...');
+        await conversationRef.current.startRecording();
+        console.log('Recording started successfully');
+        setIsMuted(false);
+      } else {
+        console.log('Attempting to stop recording...');
+        await conversationRef.current.stopRecording();
+        console.log('Recording stopped successfully');
+        setIsMuted(true);
       }
     } catch (error) {
-      console.error('Error sending audio:', error);
+      console.error('Error in mic toggle:', error);
+      // Don't change mute state if there was an error
     }
   };
 
-  const playAudioResponse = (audioUrl: string) => {
-    if (audioPlayerRef.current) {
-      audioPlayerRef.current.src = `${API_BASE_URL}${audioUrl}`;
-      audioPlayerRef.current.play();
-    }
-  };
-
-  const handleMicToggle = () => {
-    setIsMuted(!isMuted);
-    if (mediaRecorderRef.current) {
-      if (!isMuted) {
-        stopRecording();
-      } else {
-        startRecording();
-      }
-    }
-  };
+  // Add debug logging for state changes
+  useEffect(() => {
+    console.log('State changed:', {
+      isMuted,
+      connectionStatus,
+      agentStatus,
+      hasConversation: !!conversationRef.current
+    });
+  }, [isMuted, connectionStatus, agentStatus]);
 
   const handleStopAI = async () => {
-    if (audioPlayerRef.current) {
-      audioPlayerRef.current.pause();
+    if (conversationRef.current && agentStatus === 'speaking') {
+      try {
+        await conversationRef.current.stopSpeaking();
+        setIsAIStopped(true);
+        onStopAI();
+      } catch (error) {
+        console.error('Error stopping AI:', error);
+      }
     }
-    await audioApi.stopAIResponse();
-    setIsAIStopped(true);
-    onStopAI();
-    startRecording();
   };
 
   const handleUploadClick = () => {
@@ -113,51 +147,10 @@ export default function CallWindow({ isDark, onClose, onStopAI, onFileUpload }: 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file && onFileUpload) {
-      const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
-      if (!validTypes.includes(file.type)) {
-        alert('Please upload only image files (JPEG, PNG, GIF, or WebP)');
-        return;
-      }
-      if (file.size > 10 * 1024 * 1024) {
-        alert('Image size should be less than 10MB');
-        return;
-      }
       onFileUpload(file);
       event.target.value = '';
     }
   };
-
-  const handleFileUpload = async (file: File) => {
-    try {
-      const response = await documentApi.analyzeDocument(file);
-      if (response.data.audio_url) {
-        playAudioResponse(response.data.audio_url);
-      }
-      if (onFileUpload) {
-        onFileUpload(file);
-      }
-    } catch (error) {
-      console.error('Error uploading document:', error);
-    }
-  };
-
-  useEffect(() => {
-    // Start recording when component mounts
-    startRecording();
-    
-    // Create audio player
-    audioPlayerRef.current = new Audio();
-    
-    return () => {
-      // Cleanup
-      if (mediaRecorderRef.current) {
-        stopRecording();
-      }
-      if (audioPlayerRef.current) {
-        audioPlayerRef.current.pause();
-      }
-    };
-  }, []);
 
   return (
     <>
@@ -177,7 +170,6 @@ export default function CallWindow({ isDark, onClose, onStopAI, onFileUpload }: 
             : "bg-white/10 border-t border-black/10 backdrop-blur-md"
         )}
       >
-        {/* Background Gradients */}
         <div className="absolute top-0 right-0 w-[35rem] h-[35rem] bg-gradient-to-bl from-blue-500/10 via-purple-500/5 to-transparent blur-3xl pointer-events-none" />
         <div className="absolute bottom-0 left-0 w-[35rem] h-[35rem] bg-gradient-to-tr from-purple-500/10 to-transparent blur-3xl pointer-events-none" />
 
@@ -219,17 +211,32 @@ export default function CallWindow({ isDark, onClose, onStopAI, onFileUpload }: 
           )}>
             Gonna Support
           </h2>
-          <p className={cn(
-            "text-lg",
-            isDark ? "text-white/60" : "text-black/60"
-          )}>
-            {formatDuration(callDuration)}
-          </p>
+          <div className="flex flex-col items-center gap-2">
+            <p className={cn(
+              "text-lg",
+              isDark ? "text-white/60" : "text-black/60"
+            )}>
+              {formatDuration(callDuration)}
+            </p>
+            <p className={cn(
+              "text-sm",
+              isDark ? "text-white/40" : "text-black/40"
+            )}>
+              Status: {connectionStatus === 'connected' ? 'Connected' : 'Disconnected'}
+            </p>
+            <p className={cn(
+              "text-sm",
+              isDark ? "text-white/40" : "text-black/40"
+            )}>
+              Agent: {agentStatus}
+            </p>
+          </div>
         </div>
 
         <div className="flex space-x-4 relative z-10 p-6">
           <button
             onClick={handleMicToggle}
+            disabled={!conversationRef.current || connectionStatus === 'disconnected'}
             className={cn(
               "p-4 rounded-xl transition-colors",
               isMuted
@@ -237,8 +244,9 @@ export default function CallWindow({ isDark, onClose, onStopAI, onFileUpload }: 
                   ? "bg-red-500/20 border border-red-500/30 text-red-400"
                   : "bg-red-500/10 border border-red-500/20 text-red-600"
                 : isDark
-                  ? "bg-black/20 border border-white/10 text-white hover:bg-black/30"
-                  : "bg-white/10 border border-black/10 text-black hover:bg-white/20"
+                  ? "bg-green-500/20 border border-green-500/30 text-green-400"
+                  : "bg-green-500/10 border border-green-500/20 text-green-600",
+              (!conversationRef.current || connectionStatus === 'disconnected') && "opacity-50 cursor-not-allowed"
             )}
           >
             {isMuted ? <MicOff className="w-6 h-6" /> : <Mic className="w-6 h-6" />}
@@ -290,7 +298,6 @@ export default function CallWindow({ isDark, onClose, onStopAI, onFileUpload }: 
           className="hidden"
           accept="image/jpeg,image/png,image/gif,image/webp"
         />
-        <audio ref={audioPlayerRef} className="hidden" />
       </motion.div>
     </>
   );
