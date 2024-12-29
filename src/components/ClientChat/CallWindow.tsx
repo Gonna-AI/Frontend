@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Phone, X, Mic, MicOff } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import api from '../../config/api';
@@ -38,6 +38,14 @@ export default function CallWindow({ isDark, onClose, onStopAI, onFileUpload, ti
   const [agentStatus, setAgentStatus] = useState<'idle' | 'speaking' | 'listening'>('idle');
   const recognitionRef = useRef<SpeechRecognitionInstance | null>(null);
 
+  // Prevent body scroll when modal is open
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, []);
+
   // Initialize timer
   useEffect(() => {
     const timer = setInterval(() => {
@@ -51,9 +59,9 @@ export default function CallWindow({ isDark, onClose, onStopAI, onFileUpload, ti
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (SpeechRecognition) {
       recognitionRef.current = new SpeechRecognition();
-      recognitionRef.current.continuous = false; // Changed to false to prevent continuous recording
+      recognitionRef.current.continuous = false;
       recognitionRef.current.interimResults = true;
-      recognitionRef.current.lang = 'en-US'; // Default to English
+      recognitionRef.current.lang = 'en-US';
 
       recognitionRef.current.onresult = (event) => {
         const current = event.resultIndex;
@@ -89,23 +97,19 @@ export default function CallWindow({ isDark, onClose, onStopAI, onFileUpload, ti
     setAgentStatus('speaking');
 
     try {
-      // Use the backend API for voice conversation
       const response = await api.post('/api/chat', {
         message: input,
         ticketCode: ticketCode
       });
 
-      // Get the AI response text
       const aiResponse = response.data.response || response.data.text || '';
       setResponse(aiResponse);
       
-      // Create and configure speech synthesis
       const utterance = new SpeechSynthesisUtterance(aiResponse);
       utterance.lang = recognitionRef.current?.lang || 'en-US';
-      utterance.rate = 1.0;  // Normal speed
-      utterance.pitch = 1.0; // Normal pitch
+      utterance.rate = 1.0;
+      utterance.pitch = 1.0;
       
-      // Clear any existing speech
       window.speechSynthesis.cancel();
       
       utterance.onstart = () => {
@@ -116,7 +120,6 @@ export default function CallWindow({ isDark, onClose, onStopAI, onFileUpload, ti
         setAgentStatus('listening');
         setIsProcessing(false);
         
-        // Restart recognition after speech ends
         if (!isMuted && recognitionRef.current) {
           setTimeout(() => {
             recognitionRef.current?.start();
@@ -130,7 +133,6 @@ export default function CallWindow({ isDark, onClose, onStopAI, onFileUpload, ti
         setIsProcessing(false);
       };
 
-      // Add a small delay before speaking to ensure proper state updates
       setTimeout(() => {
         window.speechSynthesis.speak(utterance);
       }, 100);
@@ -164,35 +166,18 @@ export default function CallWindow({ isDark, onClose, onStopAI, onFileUpload, ti
     setIsMuted(!isMuted);
   };
 
-  const handleLanguageSwitch = () => {
-    if (!recognitionRef.current) return;
-    
-    const currentLang = recognitionRef.current.lang;
-    recognitionRef.current.lang = currentLang === 'hi-IN' ? 'en-US' : 'hi-IN';
-    
-    // Restart recognition if it's currently active
-    if (!isMuted) {
-      recognitionRef.current.stop();
-      recognitionRef.current.start();
-    }
-  };
-
   const handleClose = () => {
-    // Stop any ongoing speech synthesis
     window.speechSynthesis.cancel();
     
-    // Stop speech recognition if active
     if (recognitionRef.current) {
       recognitionRef.current.stop();
       recognitionRef.current.abort();
     }
     
-    // Reset states
     setIsMuted(true);
     setAgentStatus('idle');
     setIsProcessing(false);
     
-    // Call the original onClose
     onClose();
   };
 
@@ -218,7 +203,7 @@ export default function CallWindow({ isDark, onClose, onStopAI, onFileUpload, ti
         <div className="absolute top-0 right-0 w-[35rem] h-[35rem] bg-gradient-to-bl from-blue-500/10 via-purple-500/5 to-transparent blur-3xl pointer-events-none" />
         <div className="absolute bottom-0 left-0 w-[35rem] h-[35rem] bg-gradient-to-tr from-purple-500/10 to-transparent blur-3xl pointer-events-none" />
 
-        {/* Header with close and language buttons */}
+        {/* Header */}
         <div className="flex justify-between w-full relative z-10 p-4">
           <button
             onClick={handleClose}
@@ -231,39 +216,28 @@ export default function CallWindow({ isDark, onClose, onStopAI, onFileUpload, ti
           >
             <X className="w-5 h-5" />
           </button>
-          
-          <button
-            onClick={handleLanguageSwitch}
-            className={cn(
-              "p-2 px-4 rounded-xl transition-colors",
-              isDark 
-                ? "bg-black/20 border border-white/10 text-white hover:bg-black/30" 
-                : "bg-white/10 border border-black/10 text-black hover:bg-white/20"
-            )}
-          >
-            {recognitionRef.current?.lang === 'hi-IN' ? 'HI' : 'EN'}
-          </button>
         </div>
 
         {/* Main content area with two columns */}
         <div className="flex-1 w-full flex gap-4 px-6 overflow-hidden">
           {/* Left column - AI Avatar and Status */}
           <div className="w-1/2 flex flex-col items-center justify-center">
-            {/* AI Icon */}
+            {/* AI Logo */}
             <div className={cn(
               "w-20 h-20 rounded-xl flex items-center justify-center mb-4",
               isDark 
                 ? "bg-black/20 border border-white/10" 
                 : "bg-white/10 border border-black/10"
             )}>
-              <svg
-                viewBox="0 0 500 500"
+              <svg 
+                xmlns="http://www.w3.org/2000/svg" 
+                viewBox="0 0 464 468"
                 className="w-16 h-16"
-                xmlns="http://www.w3.org/2000/svg"
+                aria-label="Gonna.ai Logo"
               >
                 <path 
                   fill={isDark ? "white" : "black"}
-                  d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z" fill="currentColor"
+                  d="M275.9 63.5c37.7 5.3 76.6 24.1 103.7 50.2 30 28.8 41.8 57.6 35.8 87.1-6.1 30.1-33.6 52.9-70.6 58.3-6 0.9-18.3 1-44.9 0.6l-36.6-0.7-0.5 17.8c-0.3 9.7-0.4 17.8-0.4 17.9 0.1 0.1 19.1 0.3 42.2 0.4 23.2 0 42.7 0.5 43.5 1 1.2 0.7 1.1 2.2-0.8 9.4-6 23-20.5 42.1-41.8 55-7.3 4.3-26.7 11.9-36 14.1-9 2-34 2-44.5 0-41.3-7.9-74.2-38-82.9-75.7-8.1-35.7 2.2-71.5 27.5-94.7 16.1-14.9 35.5-22.4 63.7-24.7l7.7-0.7v-34.1l-11.7 0.7c-22.2 1.3-37 5.3-56.4 15.2-28.7 14.6-49.7 39.3-59.9 70.2-9.6 29.3-9.3 62.6 0.8 91.4 3.3 9.2 12.2 25.6 18.3 33.8 11.3 14.9 30.6 30.8 48.7 39.9 19.9 10 49.2 15.9 73.2 14.7 26.5-1.3 52.5-9.6 74.2-23.9 26.9-17.6 47.2-47.9 53.3-79.7 1-5.2 2.3-10.1 2.8-10.8 0.8-0.9 6.9-1.2 27.1-1l26.1 0.3 0.3 3.8c1.2 14.6-10.9 52.1-23.9 74-17.8 30-43.2 54-75.9 71.5-20.9 11.2-38.3 16.5-67.2 20.7-27.6 3.9-47.9 3.1-75.8-3.1-36.9-8.3-67.8-25.6-97.1-54.6-23.6-23.2-44.8-61.9-51.7-93.8-5.1-23.7-5.5-28.1-4.9-48.8 1.7-63.2 23.4-111.8 67.7-152 28-25.4 60.4-41.3 99-48.8 18.5-3.6 46.1-4 67.9-0.9zm16.4 92.6c-6.3 2.4-12.8 8.5-15.4 14.5-2.6 6.1-2.6 18.3 0 23.9 5 11 20.2 17.7 32.3 14.1 11.9-3.4 19.8-14.3 19.8-27.1-0.1-19.9-18.2-32.5-36.7-25.4z"
                 />
               </svg>
             </div>
