@@ -330,6 +330,7 @@ export default function ChatInterface({ ticketCode, isDark }: ChatInterfaceProps
             onClose={() => setIsCallWindowOpen(false)}
             onStopAI={handleStopAI}
             onFileUpload={handleImageUpload}
+            ticketCode={ticketCode}
           />
         )}
       </AnimatePresence>
