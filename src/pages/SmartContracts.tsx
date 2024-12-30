@@ -1,6 +1,35 @@
 import React, { useState, useEffect } from 'react';
 import { FileCheck, Upload, CheckCircle, XCircle, Activity, User, Clock, FileText, X, AlertCircle } from 'lucide-react';
-import { ticketApi } from '../config/api';
+import { documentApi, ticketApi, setTicketHeader } from '../config/api';
+
+// Add a type for the AI analysis response
+interface AIAnalysis {
+  documentCompleteness?: {
+    missingInformation: string[];
+    clarificationNeeded: string[];
+  };
+  requiredActions?: {
+    specificItems: string[];
+    additionalDocuments: string[];
+  };
+  recommendations?: {
+    improvements: string[];
+    nextSteps: string[];
+  };
+  // For the older format
+  "Document Completeness"?: {
+    "Missing Information": string[];
+    "Clarification Needed": string[];
+  };
+  "Required Actions"?: {
+    "Specific Items": string[];
+    "Additional Documents": string[];
+  };
+  "Recommendations"?: {
+    "Improvements": string[];
+    "Next Steps": string[];
+  };
+}
 
 const DocumentVerification = () => {
   const [selectedFile, setSelectedFile] = useState(null);
@@ -13,6 +42,8 @@ const DocumentVerification = () => {
   const [aiProcessing, setAiProcessing] = useState(false);
   const [aiSuggestion, setAiSuggestion] = useState(null);
   const [showConfirmation, setShowConfirmation] = useState(false);
+  const [documents, setDocuments] = useState([]);
+  const [uploadStatus, setUploadStatus] = useState('');
 
   // State for recent verifications
   const [recentVerifications, setRecentVerifications] = useState([
@@ -29,6 +60,48 @@ const DocumentVerification = () => {
       hash: "0x5678...9012",
     }
   ]);
+
+  // Add new state for document stats
+  const [documentStats, setDocumentStats] = useState({
+    total: 0,
+    verified: 0,
+    pending: 0
+  });
+
+  // Fetch documents on component mount and after operations
+  const fetchDocuments = async () => {
+    try {
+      const response = await documentApi.listDocuments();
+      setDocuments(response.data.documents);
+      
+      // Update stats separately
+      const verified = response.data.documents.filter(doc => doc.is_submitted && doc.is_verified).length;
+      const pending = response.data.documents.filter(doc => doc.is_submitted && !doc.is_verified).length;
+      const total = response.data.documents.length;
+      
+      setDocumentStats({
+        total,
+        verified,
+        pending
+      });
+    } catch (error) {
+      console.error('Error fetching documents:', error);
+    }
+  };
+
+  // Update the useEffect to not depend on userInfo changes
+  useEffect(() => {
+    if (userInfo) {
+      // Initial fetch when user is verified
+      fetchDocuments();
+      
+      // Optional: Set up periodic refresh (every 30 seconds)
+      const interval = setInterval(fetchDocuments, 30000);
+      
+      // Cleanup interval on unmount
+      return () => clearInterval(interval);
+    }
+  }, []); // Empty dependency array
 
   const simulateAiProcessing = async (file) => {
     setAiProcessing(true);
@@ -62,7 +135,27 @@ const DocumentVerification = () => {
       setVerificationStatus(null);
       setAiSuggestion(null);
       setShowConfirmation(false);
-      await simulateAiProcessing(file);
+      
+      setUploadStatus('uploading');
+      try {
+        const uploadResponse = await documentApi.uploadDocument(file);
+        setUploadStatus('analyzing');
+        
+        const analysisResponse = await documentApi.analyzeDocuments();
+        
+        // Parse the JSON string from the analysis
+        const parsedAnalysis = JSON.parse(analysisResponse.data.documents[0].analysis.replace(/```json\n|\n```/g, ''));
+        
+        setAiSuggestion(parsedAnalysis);
+        setShowConfirmation(true);
+        setUploadStatus('');
+        
+        await fetchDocuments();
+        
+      } catch (error) {
+        console.error('Error processing document:', error);
+        setUploadStatus('error');
+      }
     }
   };
 
@@ -71,27 +164,20 @@ const DocumentVerification = () => {
     
     setIsLoading(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Submit document for verification
+      await documentApi.submitDocuments([selectedFile.document_id]);
       
-      const newVerification = {
-        documentName: selectedFile.name,
-        status: "Verified",
-        timestamp: new Date().toLocaleString(),
-        hash: "0x" + Math.random().toString(36).substr(2, 40)
-      };
-
-      setRecentVerifications(prev => [newVerification, ...prev]);
+      // Refresh document list
+      await fetchDocuments();
       
       setVerificationStatus({
         success: true,
-        documentHash: "0x" + Math.random().toString(36).substr(2, 40),
-        transactionHash: "0x" + Math.random().toString(36).substr(2, 40),
-        timestamp: new Date().toISOString()
+        message: "Document submitted for verification successfully"
       });
     } catch (error) {
       setVerificationStatus({
         success: false,
-        error: "Verification failed. Please try again."
+        error: "Submission failed. Please try again."
       });
     } finally {
       setIsLoading(false);
@@ -105,6 +191,9 @@ const DocumentVerification = () => {
     
     setIsLoading(true);
     try {
+      // Set the ticket ID in API headers
+      setTicketHeader(ticketId);
+      
       const response = await ticketApi.getDetails(ticketId);
       
       if (response.data) {
@@ -121,10 +210,14 @@ const DocumentVerification = () => {
           lastActivity: '2024-12-30 15:45'
         });
         setShowTicketModal(false);
+        
+        // Fetch documents after successful ticket verification
+        await fetchDocuments();
       }
     } catch (error) {
       console.error('Ticket verification failed:', error);
       setUserInfo(null);
+      setTicketHeader(null);
     } finally {
       setIsLoading(false);
     }
@@ -141,6 +234,28 @@ const DocumentVerification = () => {
   };
 
   const renderUploadContent = () => {
+    if (uploadStatus === 'uploading') {
+      return (
+        <div className="flex flex-col items-center space-y-3">
+          <div className="p-4 bg-purple-600/20 rounded-full">
+            <Upload className="h-8 w-8 text-purple-400 animate-pulse" />
+          </div>
+          <span className="text-lg text-gray-300">Uploading document...</span>
+        </div>
+      );
+    }
+
+    if (uploadStatus === 'analyzing') {
+      return (
+        <div className="flex flex-col items-center space-y-3">
+          <div className="p-4 bg-purple-600/20 rounded-full">
+            <Activity className="h-8 w-8 text-purple-400 animate-pulse" />
+          </div>
+          <span className="text-lg text-gray-300">Analyzing document...</span>
+        </div>
+      );
+    }
+
     if (aiProcessing) {
       return (
         <div className="flex flex-col items-center space-y-3 animate-pulse">
@@ -154,6 +269,16 @@ const DocumentVerification = () => {
     }
 
     if (aiSuggestion && showConfirmation) {
+      // Handle both new and old response formats
+      const analysis = {
+        missing: aiSuggestion.documentCompleteness?.missingInformation || 
+                 aiSuggestion["Document Completeness"]?.["Missing Information"] || [],
+        actions: aiSuggestion.requiredActions?.specificItems ||
+                aiSuggestion["Required Actions"]?.["Specific Items"] || [],
+        improvements: aiSuggestion.recommendations?.improvements ||
+                     aiSuggestion["Recommendations"]?.["Improvements"] || []
+      };
+
       return (
         <div className="flex flex-col items-center space-y-4">
           <div className="p-4 bg-purple-600/20 rounded-full">
@@ -161,14 +286,41 @@ const DocumentVerification = () => {
           </div>
           <div className="text-center space-y-2">
             <h3 className="text-lg font-medium text-white">AI Analysis Results</h3>
-            <p className="text-gray-400">Document Type: {aiSuggestion.documentType}</p>
-            <p className="text-gray-400">Confidence: {aiSuggestion.confidence}%</p>
-            <div className="space-y-1 mt-3">
-              {aiSuggestion.recommendations.map((rec, index) => (
-                <p key={index} className="text-sm text-gray-500">{rec}</p>
-              ))}
-            </div>
+            
+            {analysis.missing.length > 0 && (
+              <div className="mt-4">
+                <h4 className="text-purple-400 font-medium">Missing Information:</h4>
+                <ul className="text-sm text-gray-400">
+                  {analysis.missing.map((item, index) => (
+                    <li key={index} className="mt-1">• {item}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {analysis.actions.length > 0 && (
+              <div className="mt-4">
+                <h4 className="text-purple-400 font-medium">Required Actions:</h4>
+                <ul className="text-sm text-gray-400">
+                  {analysis.actions.map((item, index) => (
+                    <li key={index} className="mt-1">• {item}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {analysis.improvements.length > 0 && (
+              <div className="mt-4">
+                <h4 className="text-purple-400 font-medium">Recommendations:</h4>
+                <ul className="text-sm text-gray-400">
+                  {analysis.improvements.map((item, index) => (
+                    <li key={index} className="mt-1">• {item}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
+          
           <div className="flex gap-3 mt-4">
             <button
               onClick={handleVerification}
@@ -203,6 +355,40 @@ const DocumentVerification = () => {
       </label>
     );
   };
+
+  const renderRecentVerifications = () => (
+    <div className="space-y-4">
+      {documents.map((doc) => (
+        <div 
+          key={doc.document_id}
+          className="p-4 rounded-xl bg-purple-500/5 border border-purple-500/20 backdrop-blur-sm hover:border-purple-500/30 transition-colors"
+        >
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-gray-300 font-medium">{doc.document_name}</span>
+            <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+              doc.is_verified 
+                ? 'bg-green-500/20 text-green-400'
+                : doc.is_submitted
+                  ? 'bg-yellow-500/20 text-yellow-400'
+                  : 'bg-gray-500/20 text-gray-400'
+            }`}>
+              {doc.is_verified 
+                ? 'Verified' 
+                : doc.is_submitted 
+                  ? 'Processing' 
+                  : 'Not Submitted'}
+            </span>
+          </div>
+          <div className="text-sm space-y-1 text-gray-400">
+            <p>Document ID: <span className="text-gray-300">{doc.document_id}</span></p>
+            <p>Uploaded: <span className="text-gray-300">
+              {new Date(doc.uploaded_at).toLocaleString()}
+            </span></p>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-6 md:p-10 relative bg-gradient-to-b from-[#0a0a0a] to-[#1a1a1a]">
@@ -389,29 +575,7 @@ const DocumentVerification = () => {
                   <h2 className="text-2xl font-semibold text-white">Recent Verifications</h2>
                 </div>
                 
-                <div className="space-y-4">
-                  {recentVerifications.map((verification, index) => (
-                    <div 
-                      key={index}
-                      className="p-4 rounded-xl bg-purple-500/5 border border-purple-500/20 backdrop-blur-sm hover:border-purple-500/30 transition-colors"
-                    >
-                      <div className="flex items-center justify-between mb-3">
-                        <span className="text-gray-300 font-medium">{verification.documentName}</span>
-                        <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                          verification.status === 'Verified' 
-                            ? 'bg-green-500/20 text-green-400'
-                            : 'bg-yellow-500/20 text-yellow-400'
-                        }`}>
-                          {verification.status}
-                        </span>
-                      </div>
-                      <div className="text-sm space-y-1 text-gray-400">
-                        <p>Hash: <span className="text-gray-300">{verification.hash}</span></p>
-                        <p>Timestamp: <span className="text-gray-300">{verification.timestamp}</span></p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                {renderRecentVerifications()}
               </div>
             </div>
 
@@ -427,16 +591,16 @@ const DocumentVerification = () => {
                   <div className="grid gap-4">
                     <div className="p-6 rounded-xl bg-purple-500/5 border border-purple-500/20 backdrop-blur-sm">
                       <p className="text-gray-400 mb-2">Total Documents</p>
-                      <p className="text-3xl font-semibold text-white">{userInfo.totalDocuments}</p>
+                      <p className="text-3xl font-semibold text-white">{documentStats.total}</p>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div className="p-6 rounded-xl bg-purple-500/5 border border-purple-500/20 backdrop-blur-sm">
                         <p className="text-gray-400 mb-2">Verified</p>
-                        <p className="text-3xl font-semibold text-green-400">{userInfo.verifiedDocuments}</p>
+                        <p className="text-3xl font-semibold text-green-400">{documentStats.verified}</p>
                       </div>
                       <div className="p-6 rounded-xl bg-purple-500/5 border border-purple-500/20 backdrop-blur-sm">
                         <p className="text-gray-400 mb-2">Pending</p>
-                        <p className="text-3xl font-semibold text-yellow-400">{userInfo.pendingDocuments}</p>
+                        <p className="text-3xl font-semibold text-yellow-400">{documentStats.pending}</p>
                       </div>
                     </div>
                     <div className="p-6 rounded-xl bg-purple-500/5 border border-purple-500/20 backdrop-blur-sm">

@@ -38,7 +38,35 @@ export const documentApi = {
     return api.post('/api/upload/document', formData, {
       headers: { 'Content-Type': 'multipart/form-data' }
     });
-  }
+  },
+  uploadDocument: (file: File) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    return api.post('/api/documents', formData, {
+      headers: { 
+        'Content-Type': 'multipart/form-data',
+        'X-Ticket-ID': api.defaults.headers['X-Ticket-ID']
+      }
+    });
+  },
+  submitDocuments: (documentIds: string[]) => 
+    api.put('/api/documents', { document_ids: documentIds }, {
+      headers: {
+        'X-Ticket-ID': api.defaults.headers['X-Ticket-ID']
+      }
+    }),
+  listDocuments: () => 
+    api.get('/api/documents/list', {
+      headers: {
+        'X-Ticket-ID': api.defaults.headers['X-Ticket-ID']
+      }
+    }),
+  analyzeDocuments: () => 
+    api.get('/api/documents', {
+      headers: {
+        'X-Ticket-ID': api.defaults.headers['X-Ticket-ID']
+      }
+    })
 };
 
 interface CreateTicketData {
