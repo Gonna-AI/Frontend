@@ -1,11 +1,31 @@
 import React, { useState } from 'react';
 import { FileCheck, Search, Filter, CheckCircle, XCircle, AlertCircle, MoreVertical, Download, History, Eye, User, Calendar, Clock, Shield, Sun, Moon } from 'lucide-react';
 
+// Add type definitions to fix type errors
+interface Document {
+  id: string;
+  title: string;
+  status: 'pending' | 'verified' | 'rejected';
+  priority: 'high' | 'medium' | 'low';
+  submittedBy: string;
+  submittedAt: string;
+  ticketId: string;
+  type: string;
+  size: string;
+  lastReviewed: string | null;
+  hash: string;
+  documents?: Array<{
+    name: string;
+    size: string;
+    type: string;
+  }>;
+}
+
 const AdminDashboard = () => {
-  const [documents, setDocuments] = useState([
+  const [documents, setDocuments] = useState<Document[]>([
     {
       id: '1',
-      title: 'Medical_Claim_2024.pdf',
+      title: 'Medical Claim Request',
       status: 'pending',
       priority: 'high',
       submittedBy: 'John Doe',
@@ -14,7 +34,12 @@ const AdminDashboard = () => {
       type: 'Medical Claim',
       size: '2.4 MB',
       lastReviewed: null,
-      hash: '0x1234...5678'
+      hash: '0x1234...5678',
+      documents: [
+        { name: 'Medical_Claim_2024.pdf', size: '1.2 MB', type: 'PDF' },
+        { name: 'Hospital_Bill.pdf', size: '0.8 MB', type: 'PDF' },
+        { name: 'Insurance_Card.jpg', size: '0.4 MB', type: 'Image' }
+      ]
     },
     {
       id: '2',
@@ -73,7 +98,7 @@ const AdminDashboard = () => {
 
   const theme = getThemeColors();
 
-  const getStatusColor = (status) => {
+  const getStatusColor = (status: Document['status']) => {
     switch (status) {
       case 'verified':
         return 'text-green-400 bg-green-500/10 border-green-500/30';
@@ -84,7 +109,7 @@ const AdminDashboard = () => {
     }
   };
 
-  const getPriorityColor = (priority) => {
+  const getPriorityColor = (priority: Document['priority']) => {
     switch (priority) {
       case 'high':
         return 'text-red-400';
@@ -95,7 +120,7 @@ const AdminDashboard = () => {
     }
   };
 
-  const handleVerify = (docId) => {
+  const handleVerify = (docId: string) => {
     setDocuments(docs => 
       docs.map(doc => 
         doc.id === docId 
@@ -105,7 +130,7 @@ const AdminDashboard = () => {
     );
   };
 
-  const handleReject = (docId) => {
+  const handleReject = (docId: string) => {
     setDocuments(docs => 
       docs.map(doc => 
         doc.id === docId 
@@ -210,15 +235,15 @@ const AdminDashboard = () => {
               >
                 <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between mb-4">
                   <div className="flex items-start gap-3 mb-2 sm:mb-0">
-                    <FileCheck className="h-8 w-8 text-purple-400 flex-shrink-0" />
+                    <div className="flex-shrink-0">
+                      <User className="h-8 w-8 text-purple-400" />
+                    </div>
                     <div>
-                      <h3 className="font-medium">{doc.title}</h3>
+                      <h3 className="font-medium">{doc.submittedBy}</h3>
                       <div className="flex flex-wrap items-center gap-2 text-sm text-gray-400 mt-1">
                         <span>Ticket: {doc.ticketId}</span>
                         <span className="hidden sm:inline">•</span>
                         <span>{doc.type}</span>
-                        <span className="hidden sm:inline">•</span>
-                        <span>{doc.size}</span>
                       </div>
                     </div>
                   </div>
@@ -242,6 +267,26 @@ const AdminDashboard = () => {
                     <div className="flex items-center gap-2">
                       <Calendar className="h-4 w-4" />
                       {new Date(doc.submittedAt).toLocaleDateString()}
+                    </div>
+                    <div className="flex items-center gap-2 mt-2 sm:mt-0">
+                      <button
+                        className={`px-3 py-1 ${
+                          isDarkMode ? 'bg-blue-500/20 text-blue-400' : 'bg-blue-100 text-blue-600'
+                        } rounded-lg hover:${
+                          isDarkMode ? 'bg-blue-500/30' : 'bg-blue-200'
+                        } transition-colors text-sm`}
+                      >
+                        Contact Details
+                      </button>
+                      <button
+                        className={`px-3 py-1 ${
+                          isDarkMode ? 'bg-purple-500/20 text-purple-400' : 'bg-purple-100 text-purple-600'
+                        } rounded-lg hover:${
+                          isDarkMode ? 'bg-purple-500/30' : 'bg-purple-200'
+                        } transition-colors text-sm`}
+                      >
+                        Schedule Appointment
+                      </button>
                     </div>
                   </div>
 
@@ -278,6 +323,26 @@ const AdminDashboard = () => {
                     >
                       <Eye className={`h-4 w-4 ${theme.text}`} />
                     </button>
+                  </div>
+                </div>
+
+                {/* Add documents list */}
+                <div className={`mt-4 p-3 ${theme.statsBg} border ${theme.statsBorder} rounded-lg`}>
+                  <div className="text-sm font-medium mb-2">Uploaded Documents</div>
+                  <div className="space-y-2">
+                    {doc.documents?.map((file, index) => (
+                      <div key={index} className="flex items-center justify-between text-sm">
+                        <div className="flex items-center gap-2">
+                          <FileCheck className="h-4 w-4 text-purple-400" />
+                          <span>{file.name}</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-gray-400">
+                          <span>{file.type}</span>
+                          <span>•</span>
+                          <span>{file.size}</span>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
               </div>
