@@ -466,7 +466,7 @@ const PriorityDashboard = () => {
                   Case Description
                 </h4>
                 <div className={cn(
-                  "text-sm",
+                  "text-sm whitespace-pre-wrap",
                   isDark ? "text-white/70" : "text-black/70"
                 )}>
                   {loadingSummary ? (
@@ -479,7 +479,13 @@ const PriorityDashboard = () => {
                       )} />
                     </div>
                   ) : (
-                    summary || 'No conversation summary available.'
+                    <div dangerouslySetInnerHTML={{ 
+                      __html: summary
+                        ?.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                        ?.replace(/\*(?!\*)/g, '•')
+                        ?.replace(/\n/g, '<br/>') || 
+                        'No conversation summary available.' 
+                    }} />
                   )}
                 </div>
               </div>
