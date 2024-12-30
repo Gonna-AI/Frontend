@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-import { Send, GalleryVerticalEnd, Phone, Upload } from 'lucide-react';
+import { Send, GalleryVerticalEnd, Phone, Upload, FileCode2 } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { motion, AnimatePresence } from 'framer-motion';
 import CallWindow from './CallWindow';
 import api, { API_BASE_URL, documentApi } from '../../config/api';  // Import the configured api instance
+import { useNavigate } from 'react-router-dom';
 
 interface Message {
   text: string;
@@ -28,6 +29,7 @@ export default function ChatInterface({ ticketCode, isDark }: ChatInterfaceProps
   const messagesEndRef = useRef<null | HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
+  const navigate = useNavigate();
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -299,6 +301,19 @@ export default function ChatInterface({ ticketCode, isDark }: ChatInterfaceProps
             )}
           >
             <Phone className="w-6 h-6" />
+          </button>
+          <button
+            type="button"
+            onClick={() => navigate('/smart-contracts')}
+            className={cn(
+              "px-4 py-4 rounded-xl transition-colors flex items-center justify-center",
+              "bg-gradient-to-r from-blue-500/20 via-blue-500/30 to-blue-400/20",
+              "hover:from-blue-500/30 hover:via-blue-500/40 hover:to-blue-400/30",
+              "border border-blue-500/30",
+              "text-blue-300"
+            )}
+          >
+            <FileCode2 className="w-6 h-6" />
           </button>
           <button
             type="submit"
