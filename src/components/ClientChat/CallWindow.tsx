@@ -31,7 +31,7 @@ declare global {
 
 export default function CallWindow({ isDark, onClose, onStopAI, onFileUpload, ticketCode }: CallWindowProps) {
   const [callDuration, setCallDuration] = useState(0);
-  const [isMuted, setIsMuted] = useState(true);
+  const [isMuted, setIsMuted] = useState(false);
   const [transcript, setTranscript] = useState('');
   const [response, setResponse] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
@@ -77,6 +77,14 @@ export default function CallWindow({ isDark, onClose, onStopAI, onFileUpload, ti
         console.error('Speech recognition error:', event.error);
         setAgentStatus('idle');
       };
+
+      // Start recognition immediately since we're unmuted by default
+      try {
+        recognitionRef.current.start();
+        setAgentStatus('listening');
+      } catch (error) {
+        console.error('Error starting initial recognition:', error);
+      }
     }
 
     return () => {
