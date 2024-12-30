@@ -315,9 +315,10 @@ const AdminDashboard = () => {
 
       {/* Document Details Modal */}
       {showDetails && selectedDocument && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 md:p-6">
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 md:p-6">
           <div className={`
             ${theme.cardBg} 
+            ${isDarkMode ? 'bg-[rgb(10,10,10)]' : 'bg-white/95'}
             border 
             ${theme.border} 
             rounded-xl 
