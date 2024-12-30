@@ -13,6 +13,7 @@ import ClientChat from './components/ClientChat';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import PrivacyPolicy from './components/Legal/PrivacyPolicy';
 import TermsOfService from './components/Legal/TermsOfService';
+import SmartContracts from './pages/SmartContracts';
 // Create a client
 const queryClient = new QueryClient();
 
@@ -162,6 +163,7 @@ function App() {
           <Route path="*" element={<Navigate to="/" />} />
 
           <Route path="/auth/google/callback" element={<GoogleCallback />} />
+          <Route path="/smart-contracts" element={<SmartContracts />} />
         </Routes>
       </BrowserRouter>
     </QueryClientProvider>

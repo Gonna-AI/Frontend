@@ -31,6 +31,7 @@
     "react-error-boundary": "^5.0.0",
     "react-router-dom": "^7.1.1",
     "recharts": "^2.12.2",
+    "shadcn-ui": "^0.9.4",
     "tailwind-merge": "^2.5.5",
     "three": "^0.162.0",
     "zustand": "^4.5.5"

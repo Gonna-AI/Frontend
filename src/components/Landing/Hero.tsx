@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { LifeBuoy } from 'lucide-react';
+import { LifeBuoy, FileCode2 } from 'lucide-react';
 import { cn } from '../../utils/cn';
 
 const Logo = () => (
@@ -44,8 +44,28 @@ const Hero = ({ onGetStarted }: HeroProps) => {
 
   return (
     <div className="bg-[rgb(10,10,10)] min-h-screen relative overflow-hidden">
-      {/* Support Ticket Button - Top Right */}
-      <div className="absolute top-4 right-4 z-50">
+      {/* Support Ticket and Smart Contracts Buttons - Top Right */}
+      <div className="absolute top-4 right-4 z-50 flex gap-2">
+        <button 
+          onClick={() => navigate('/smart-contracts')}
+          className={cn(
+            "relative group",
+            "md:px-8 md:py-3 p-3 rounded-[20px]",
+            "text-sm font-medium tracking-wide",
+            "transition-all duration-200",
+            "bg-gradient-to-r from-blue-500/20 via-blue-500/30 to-blue-400/20",
+            "hover:from-blue-500/30 hover:via-blue-500/40 hover:to-blue-400/30",
+            "border border-blue-500/30",
+            "text-blue-300",
+            "overflow-hidden",
+            "flex items-center gap-2"
+          )}
+        >
+          <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-blue-500/20 to-blue-400/20 blur-xl group-hover:opacity-75 transition-opacity opacity-0" />
+          <FileCode2 className="w-5 h-5 md:w-6 md-6" />
+          <span className="relative z-10 hidden md:inline">Smart Contracts</span>
+        </button>
+
         <button 
           onClick={() => navigate('/chat')}
           className={cn(
