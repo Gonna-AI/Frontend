@@ -1,22 +1,5 @@
 import React, { useState } from 'react';
-import { 
-  FileCheck, 
-  Search, 
-  Filter, 
-  CheckCircle, 
-  XCircle, 
-  AlertCircle, 
-  MoreVertical,
-  Download,
-  History,
-  Eye,
-  User,
-  Calendar,
-  Clock,
-  Shield,
-  Sun,
-  Moon
-} from 'lucide-react';
+import { FileCheck, Search, Filter, CheckCircle, XCircle, AlertCircle, MoreVertical, Download, History, Eye, User, Calendar, Clock, Shield, Sun, Moon } from 'lucide-react';
 
 const AdminDashboard = () => {
   const [documents, setDocuments] = useState([
@@ -72,19 +55,19 @@ const AdminDashboard = () => {
 
   const getThemeColors = () => ({
     background: isDarkMode ? 'bg-[#0a0a0a]' : 'bg-gray-50',
-    text: isDarkMode ? 'text-white' : 'text-gray-900',
+    text: isDarkMode ? 'text-white' : 'text-gray-800',
     cardBg: isDarkMode ? 'bg-black/40' : 'bg-white',
     border: isDarkMode ? 'border-white/10' : 'border-gray-200',
     inputBg: isDarkMode ? 'bg-black/40' : 'bg-white',
-    inputBorder: isDarkMode ? 'border-purple-500/20' : 'border-gray-300',
-    secondaryText: isDarkMode ? 'text-gray-400' : 'text-gray-600',
+    inputBorder: isDarkMode ? 'border-purple-500/20' : 'border-purple-200',
+    secondaryText: isDarkMode ? 'text-gray-400' : 'text-gray-500',
     searchInput: isDarkMode ? 'bg-black/40' : 'bg-white',
-    searchText: isDarkMode ? 'text-white' : 'text-gray-900',
+    searchText: isDarkMode ? 'text-white' : 'text-gray-800',
     searchPlaceholder: isDarkMode ? 'placeholder-gray-500' : 'placeholder-gray-400',
     selectBg: isDarkMode ? 'bg-black/40' : 'bg-white',
-    selectText: isDarkMode ? 'text-white' : 'text-gray-900',
+    selectText: isDarkMode ? 'text-white' : 'text-gray-800',
     statsBg: isDarkMode ? 'bg-purple-500/5' : 'bg-purple-50',
-    statsBorder: isDarkMode ? 'border-purple-500/20' : 'border-purple-200',
+    statsBorder: isDarkMode ? 'border-purple-500/20' : 'border-purple-100',
     statsText: isDarkMode ? 'text-gray-400' : 'text-gray-600',
   });
 
@@ -275,9 +258,10 @@ const AdminDashboard = () => {
                         setSelectedDocument(doc);
                         setShowDetails(true);
                       }}
-                      className="p-1 hover:bg-white/10 rounded transition-colors"
+                      className={`p-1 hover:${isDarkMode ? 'bg-white/10' : 'bg-gray-200'} rounded transition-colors`}
+                      aria-label="View document details"
                     >
-                      <Eye className="h-4 w-4" />
+                      <Eye className={`h-4 w-4 ${theme.text}`} />
                     </button>
                   </div>
                 </div>
@@ -331,110 +315,131 @@ const AdminDashboard = () => {
 
       {/* Document Details Modal */}
       {showDetails && selectedDocument && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
-          <div className={`${theme.cardBg} border ${theme.border} rounded-xl w-full max-w-2xl p-6`}>
-            <div className="flex items-center justify-between mb-6">
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 md:p-6">
+          <div className={`
+            ${theme.cardBg} 
+            ${isDarkMode ? 'bg-[rgb(10,10,10)]' : 'bg-white/95'}
+            border 
+            ${theme.border} 
+            rounded-xl 
+            w-full 
+            h-[calc(100vh-2rem)] 
+            md:h-[calc(100vh-4rem)] 
+            md:max-h-[900px] 
+            overflow-hidden 
+            flex 
+            flex-col
+          `}>
+            <div className={`flex items-center justify-between p-4 md:p-6 border-b ${theme.border}`}>
               <h2 className="text-xl font-semibold">Document Details</h2>
               <button 
                 onClick={() => setShowDetails(false)}
-                className="text-gray-400 hover:text-white"
+                className={`${theme.text} hover:${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}
               >
                 <XCircle className="h-6 w-6" />
               </button>
             </div>
 
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1">
-                  <label className="text-sm text-gray-400">Submission Date</label>
-                  <p className="font-medium">{new Date(selectedDocument.submittedAt).toLocaleString()}</p>
-                </div>
-              </div>
+            <div className="flex-1 overflow-y-auto p-4 md:p-6">
+              <div className="h-full md:grid md:grid-cols-2 md:gap-6">
+                {/* Left Column */}
+                <div className="space-y-4 mb-6 md:mb-0">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-1">
+                      <label className={`text-sm ${theme.secondaryText}`}>Submission Date</label>
+                      <p className="font-medium">{new Date(selectedDocument.submittedAt).toLocaleString()}</p>
+                    </div>
+                  </div>
 
-              <div className="mt-6 space-y-4">
-                {/* Document Preview */}
-                <div className="bg-purple-500/5 border border-purple-500/20 rounded-lg p-4">
-                  <h3 className="text-lg font-medium mb-3">Document Preview</h3>
-                  <div className="aspect-video bg-black/60 rounded-lg flex items-center justify-center">
-                    <FileCheck className="h-12 w-12 text-gray-500" />
+                  {/* Document Preview */}
+                  <div className={`${theme.statsBg} border ${theme.statsBorder} rounded-lg p-4`}>
+                    <h3 className="text-lg font-medium mb-3">Document Preview</h3>
+                    <div className={`aspect-video ${isDarkMode ? 'bg-black/60' : 'bg-gray-200'} rounded-lg flex items-center justify-center`}>
+                      <FileCheck className={`h-12 w-12 ${theme.secondaryText}`} />
+                    </div>
                   </div>
                 </div>
 
-                {/* Review History */}
-                <div className="bg-purple-500/5 border border-purple-500/20 rounded-lg p-4">
-                  <h3 className="text-lg font-medium mb-3">Review History</h3>
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between text-sm">
-                      <div className="flex items-center gap-2">
-                        <History className="h-4 w-4 text-purple-400" />
-                        <span>Initial Submission</span>
-                      </div>
-                      <span className="text-gray-400">{selectedDocument.submittedAt}</span>
-                    </div>
-                    {selectedDocument.lastReviewed && (
+                {/* Right Column */}
+                <div className="space-y-4">
+                  {/* Review History */}
+                  <div className={`${theme.statsBg} border ${theme.statsBorder} rounded-lg p-4`}>
+                    <h3 className="text-lg font-medium mb-3">Review History</h3>
+                    <div className="space-y-3">
                       <div className="flex items-center justify-between text-sm">
                         <div className="flex items-center gap-2">
-                          <CheckCircle className="h-4 w-4 text-green-400" />
-                          <span>Document Reviewed</span>
+                          <History className="h-4 w-4 text-purple-400" />
+                          <span>Initial Submission</span>
                         </div>
-                        <span className="text-gray-400">{selectedDocument.lastReviewed}</span>
+                        <span className={theme.secondaryText}>{selectedDocument.submittedAt}</span>
                       </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Blockchain Information */}
-                <div className="bg-purple-500/5 border border-purple-500/20 rounded-lg p-4">
-                  <h3 className="text-lg font-medium mb-3">Blockchain Details</h3>
-                  <div className="space-y-2 text-sm">
-                    <div className="flex justify-between">
-                      <span className="text-gray-400">Document Hash:</span>
-                      <span className="font-mono">{selectedDocument.hash}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-400">Block Number:</span>
-                      <span className="font-mono">12345678</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-400">Transaction Hash:</span>
-                      <span className="font-mono">0xabcd...efgh</span>
+                      {selectedDocument.lastReviewed && (
+                        <div className="flex items-center justify-between text-sm">
+                          <div className="flex items-center gap-2">
+                            <CheckCircle className="h-4 w-4 text-green-400" />
+                            <span>Document Reviewed</span>
+                          </div>
+                          <span className={theme.secondaryText}>{selectedDocument.lastReviewed}</span>
+                        </div>
+                      )}
                     </div>
                   </div>
-                </div>
 
-                {/* Action Buttons */}
-                <div className="flex gap-3">
-                  {selectedDocument.status === 'pending' && (
-                    <>
-                      <button
-                        onClick={() => {
-                          handleVerify(selectedDocument.id);
-                          setShowDetails(false);
-                        }}
-                        className="flex-1 py-2 bg-green-500/20 text-green-400 rounded-lg hover:bg-green-500/30 transition-colors flex items-center justify-center gap-2"
-                      >
-                        <CheckCircle className="h-4 w-4" />
-                        Verify Document
-                      </button>
-                      <button
-                        onClick={() => {
-                          handleReject(selectedDocument.id);
-                          setShowDetails(false);
-                        }}
-                        className="flex-1 py-2 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 transition-colors flex items-center justify-center gap-2"
-                      >
-                        <XCircle className="h-4 w-4" />
-                        Reject Document
-                      </button>
-                    </>
-                  )}
-                  <button
-                    onClick={() => setShowDetails(false)}
-                    className="flex-1 py-2 bg-gray-500/20 text-gray-400 rounded-lg hover:bg-gray-500/30 transition-colors"
-                  >
-                    Close
-                  </button>
+                  {/* Blockchain Information */}
+                  <div className={`${theme.statsBg} border ${theme.statsBorder} rounded-lg p-4`}>
+                    <h3 className="text-lg font-medium mb-3">Blockchain Details</h3>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between">
+                        <span className={theme.secondaryText}>Document Hash:</span>
+                        <span className="font-mono">{selectedDocument.hash}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className={theme.secondaryText}>Block Number:</span>
+                        <span className="font-mono">12345678</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className={theme.secondaryText}>Transaction Hash:</span>
+                        <span className="font-mono">0xabcd...efgh</span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
+              </div>
+            </div>
+
+            {/* Action Buttons - Fixed at bottom */}
+            <div className={`border-t ${theme.border} p-4 md:p-6`}>
+              <div className="flex gap-3">
+                {selectedDocument.status === 'pending' && (
+                  <>
+                    <button
+                      onClick={() => {
+                        handleVerify(selectedDocument.id);
+                        setShowDetails(false);
+                      }}
+                      className={`flex-1 py-2 ${isDarkMode ? 'bg-green-500/20 text-green-400' : 'bg-green-100 text-green-600'} rounded-lg hover:${isDarkMode ? 'bg-green-500/30' : 'bg-green-200'} transition-colors flex items-center justify-center gap-2`}
+                    >
+                      <CheckCircle className="h-4 w-4" />
+                      Verify Document
+                    </button>
+                    <button
+                      onClick={() => {
+                        handleReject(selectedDocument.id);
+                        setShowDetails(false);
+                      }}
+                      className={`flex-1 py-2 ${isDarkMode ? 'bg-red-500/20 text-red-400' : 'bg-red-100 text-red-600'} rounded-lg hover:${isDarkMode ? 'bg-red-500/30' : 'bg-red-200'} transition-colors flex items-center justify-center gap-2`}
+                    >
+                      <XCircle className="h-4 w-4" />
+                      Reject Document
+                    </button>
+                  </>
+                )}
+                <button
+                  onClick={() => setShowDetails(false)}
+                  className={`flex-1 py-2 ${isDarkMode ? 'bg-gray-500/20 text-gray-400' : 'bg-gray-200 text-gray-600'} rounded-lg hover:${isDarkMode ? 'bg-gray-500/30' : 'bg-gray-300'} transition-colors`}
+                >
+                  Close
+                </button>
               </div>
             </div>
           </div>
@@ -445,4 +450,4 @@ const AdminDashboard = () => {
 };
 
 export default AdminDashboard;
-                
+
