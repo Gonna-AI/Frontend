@@ -66,7 +66,19 @@ export const documentApi = {
       headers: {
         'X-Ticket-ID': api.defaults.headers['X-Ticket-ID']
       }
-    })
+    }),
+  processBlockchain: async (formData: FormData) => {
+    return await api.post('/api/documents/blockchain', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
+  },
+  verifyBlockchain: async (documentHash: string) => {
+    return await api.post('/api/documents/blockchain/verify', {
+      document_hash: documentHash
+    });
+  }
 };
 
 interface CreateTicketData {

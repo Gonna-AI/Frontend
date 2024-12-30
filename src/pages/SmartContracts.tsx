@@ -31,6 +31,19 @@ interface AIAnalysis {
   };
 }
 
+// Add new interface for blockchain verification
+interface BlockchainVerification {
+  exists: boolean;
+  uploader?: string;
+  timestamp?: string;
+  metadata?: {
+    filename?: string;
+    file_size?: number;
+    analysis_summary?: string;
+    processed_at?: string;
+  };
+}
+
 const DocumentVerification = () => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -67,6 +80,11 @@ const DocumentVerification = () => {
     verified: 0,
     pending: 0
   });
+
+  // Add new state for blockchain verification
+  const [blockchainProcessing, setBlockchainProcessing] = useState(false);
+  const [blockchainResult, setBlockchainResult] = useState<BlockchainVerification | null>(null);
+  const [documentHash, setDocumentHash] = useState('');
 
   // Fetch documents on component mount and after operations
   const fetchDocuments = async () => {
@@ -142,10 +160,22 @@ const DocumentVerification = () => {
         const uploadResponse = await documentApi.uploadDocument(file);
         setUploadStatus('analyzing');
         
+        // Add the document to the list immediately as "Processing"
+        const newDocument = {
+          document_id: uploadResponse.data.document_id,
+          document_name: file.name,
+          is_submitted: true,
+          is_verified: false,
+          uploaded_at: new Date().toISOString()
+        };
+        
+        // Update documents list with the new document at the top
+        setDocuments(prevDocs => [newDocument, ...prevDocs]);
+        
         // Store the document ID from the upload response
         setSelectedFile({
           ...file,
-          document_id: uploadResponse.data.document_id // Make sure this matches your API response
+          document_id: uploadResponse.data.document_id
         });
         
         const analysisResponse = await documentApi.analyzeDocuments();
@@ -157,6 +187,7 @@ const DocumentVerification = () => {
         setShowConfirmation(true);
         setUploadStatus('');
         
+        // Fetch updated documents to ensure consistency
         await fetchDocuments();
         
       } catch (error) {
@@ -265,6 +296,46 @@ const DocumentVerification = () => {
 
   const redirectToChatInterface = () => {
     window.location.href = '/chat';
+  };
+
+  const handleBlockchainVerification = async (file: File) => {
+    setBlockchainProcessing(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      const response = await documentApi.processBlockchain(formData);
+      setBlockchainResult(response.data);
+      setDocumentHash(response.data.document_hash);
+      
+      // Add the new document to the documents list immediately
+      const newDocument = {
+        document_id: token_urlsafe(16), // You might want to get this from the backend response
+        document_name: file.name,
+        is_submitted: true,
+        is_verified: true, // Blockchain documents are verified immediately
+        uploaded_at: new Date().toISOString(),
+        document_hash: response.data.document_hash
+      };
+      
+      // Update documents list with the new document at the top
+      setDocuments(prevDocs => [newDocument, ...prevDocs]);
+      
+      // Update document stats
+      setDocumentStats(prev => ({
+        ...prev,
+        total: prev.total + 1,
+        verified: prev.verified + 1
+      }));
+      
+      // Fetch updated documents to ensure consistency
+      await fetchDocuments();
+      
+    } catch (error) {
+      console.error('Blockchain verification error:', error);
+    } finally {
+      setBlockchainProcessing(false);
+    }
   };
 
   const renderUploadContent = () => {
@@ -432,6 +503,157 @@ const DocumentVerification = () => {
       ))}
     </div>
   );
+
+  const renderBlockchainBox = () => {
+    const [showHashVerification, setShowHashVerification] = useState(false);
+
+    return (
+      <div className="bg-black/40 backdrop-blur-xl border border-blue-500/20 rounded-xl overflow-hidden shadow-xl mt-6">
+        <div className="p-8">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-2xl font-semibold text-white">Blockchain Verification</h2>
+            <button
+              onClick={() => setShowHashVerification(!showHashVerification)}
+              className="flex items-center gap-2 px-4 py-2 bg-blue-500/20 text-blue-400 rounded-lg hover:bg-blue-500/30 transition-colors"
+            >
+              <AlertCircle className="w-4 h-4" />
+              <span>Verify Hash</span>
+            </button>
+          </div>
+          
+          {/* Hash Verification Section */}
+          {showHashVerification && (
+            <div className="mb-8 border border-blue-500/30 rounded-xl p-6 animate-fadeIn">
+              <h3 className="text-lg font-medium text-white mb-4">Verify Document Hash</h3>
+              <div className="flex gap-3">
+                <input
+                  type="text"
+                  placeholder="Enter document hash to verify"
+                  value={documentHash}
+                  onChange={(e) => setDocumentHash(e.target.value)}
+                  className="flex-1 px-4 py-3 bg-blue-900/20 border border-blue-500/30 rounded-lg text-white placeholder:text-gray-400 focus:outline-none focus:border-blue-500"
+                />
+                <button
+                  onClick={async () => {
+                    if (!documentHash) return;
+                    setBlockchainProcessing(true);
+                    try {
+                      const response = await documentApi.verifyBlockchain(documentHash);
+                      setBlockchainResult(response.data);
+                    } catch (error) {
+                      console.error('Verification failed:', error);
+                    } finally {
+                      setBlockchainProcessing(false);
+                    }
+                  }}
+                  disabled={!documentHash || blockchainProcessing}
+                  className="px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Verify Hash
+                </button>
+              </div>
+            </div>
+          )}
+          
+          {/* File Upload Section */}
+          <div className="border-2 border-dashed border-blue-500/30 rounded-xl p-10 text-center transition-colors hover:border-blue-500/50">
+            <input
+              type="file"
+              onChange={(e) => e.target.files?.[0] && handleBlockchainVerification(e.target.files[0])}
+              className="hidden"
+              id="blockchainInput"
+              accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+            />
+            
+            {blockchainProcessing ? (
+              <div className="flex flex-col items-center space-y-3">
+                <div className="p-4 bg-blue-600/20 rounded-full">
+                  <Activity className="h-8 w-8 text-blue-400 animate-pulse" />
+                </div>
+                <span className="text-lg text-gray-300">Processing on Blockchain...</span>
+              </div>
+            ) : blockchainResult ? (
+              <div className="space-y-4">
+                <div className="p-4 bg-blue-600/20 rounded-full mx-auto w-fit">
+                  {blockchainResult.exists ? (
+                    <FileCheck className="h-8 w-8 text-green-400" />
+                  ) : (
+                    <XCircle className="h-8 w-8 text-red-400" />
+                  )}
+                </div>
+                
+                <div className="text-left space-y-3">
+                  <h3 className="text-lg font-medium text-white text-center mb-4">
+                    Blockchain Verification Results
+                  </h3>
+                  
+                  <div className="bg-blue-500/5 border border-blue-500/20 rounded-lg p-4 space-y-2">
+                    <p className="text-gray-300">
+                      <span className="text-blue-400">Document Hash:</span> {documentHash}
+                    </p>
+                    <p className="text-gray-300">
+                      <span className="text-blue-400">Status:</span>{' '}
+                      {blockchainResult.exists ? (
+                        <span className="text-green-400">Verified</span>
+                      ) : (
+                        <span className="text-red-400">Not Found in Blockchain</span>
+                      )}
+                    </p>
+                    {blockchainResult.exists && (
+                      <>
+                        <p className="text-gray-300">
+                          <span className="text-blue-400">Transaction Hash:</span>{' '}
+                          {blockchainResult.transaction_hash}
+                        </p>
+                        <p className="text-gray-300">
+                          <span className="text-blue-400">Processed At:</span>{' '}
+                          {new Date(blockchainResult.timestamp).toLocaleString()}
+                        </p>
+                        <p className="text-gray-300">
+                          <span className="text-blue-400">File Type:</span>{' '}
+                          {blockchainResult.metadata.file_type}
+                        </p>
+                        <p className="text-gray-300">
+                          <span className="text-blue-400">Verification Status:</span>{' '}
+                          <span className="text-green-400">
+                            {blockchainResult.metadata.verification_status}
+                          </span>
+                        </p>
+                      </>
+                    )}
+                  </div>
+                </div>
+                
+                <button
+                  onClick={() => {
+                    setBlockchainResult(null);
+                    setDocumentHash('');
+                  }}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors mt-4"
+                >
+                  Upload Another Document
+                </button>
+              </div>
+            ) : (
+              <label htmlFor="blockchainInput" className="cursor-pointer">
+                <div className="flex flex-col items-center space-y-3">
+                  <div className="p-4 bg-blue-600/20 rounded-full">
+                    <Upload className="h-8 w-8 text-blue-400" />
+                  </div>
+                  <span className="text-lg text-gray-300">
+                    Click to verify document on blockchain
+                  </span>
+                  <span className="text-sm text-gray-500">
+                    Secure, immutable verification with blockchain technology
+                  </span>
+                </div>
+              </label>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-6 md:p-10 relative bg-gradient-to-b from-[#0a0a0a] to-[#1a1a1a]">
@@ -608,6 +830,9 @@ const DocumentVerification = () => {
               )}
             </div>
           </div>
+
+          {/* New Blockchain Verification Box */}
+          {renderBlockchainBox()}
 
           <div className="grid gap-6 md:grid-cols-2">
             {/* Recent Verifications */}
