@@ -1,540 +1,338 @@
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { 
-  FileCheck2, AlertCircle, ArrowRight, Activity, 
-  Shield, File, Upload, RefreshCcw, Check, X,
-  Info, ClipboardCheck, AlertTriangle, Clock,
-  Eye, ThumbsUp, Ban, Plus, FileUp
-} from 'lucide-react';
+import { FileCheck, Upload, CheckCircle, XCircle, Activity, Shield, GalleryVerticalEnd, X } from 'lucide-react';
+import axios from 'axios';
 
-const ClaimsPortal = () => {
-  const [showNewClaimModal, setShowNewClaimModal] = useState(false);
-  const [showUploadModal, setShowUploadModal] = useState(false);
-  const [selectedClaim, setSelectedClaim] = useState(null);
+const DocumentVerification = () => {
+  const [selectedFile, setSelectedFile] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState({});
-  const [documents, setDocuments] = useState([]);
+  const [verificationStatus, setVerificationStatus] = useState(null);
+  const [ticketId, setTicketId] = useState('');
+  const [userInfo, setUserInfo] = useState(null);
+  const [showTicketModal, setShowTicketModal] = useState(true);
 
-  const requiredDocuments = {
-    "Health": [
-      { name: "Hospital Bills", required: true },
-      { name: "Medical Reports", required: true },
-      { name: "Prescription Details", required: true },
-      { name: "Lab Test Results", required: false },
-      { name: "Doctor's Notes", required: false }
-    ],
-    "Auto": [
-      { name: "Accident Report", required: true },
-      { name: "Police Report", required: true },
-      { name: "Repair Estimates", required: true },
-      { name: "Vehicle Photos", required: true },
-      { name: "Driver's License", required: true }
-    ],
-    "Property": [
-      { name: "Damage Photos", required: true },
-      { name: "Property Value Assessment", required: true },
-      { name: "Repair Quotes", required: true },
-      { name: "Ownership Documents", required: true },
-      { name: "Previous Claims History", required: false }
-    ]
+  // Placeholder recent verifications
+  const recentVerifications = [
+    {
+      documentName: "Medical_Report_123.pdf",
+      status: "Verified",
+      timestamp: "2024-12-30 14:30",
+      hash: "0x1234...5678",
+    },
+    {
+      documentName: "Insurance_Claim_456.pdf",
+      status: "Processing",
+      timestamp: "2024-12-30 14:25",
+      hash: "0x5678...9012",
+    }
+  ];
+
+  const handleFileSelect = (event) => {
+    const file = event.target.files[0];
+    setSelectedFile(file);
+    setVerificationStatus(null);
   };
 
-  const myClaims = [
-    {
-      id: "CLM001",
-      type: "Health",
-      title: "Hospital Expense Claim",
-      description: "Emergency room visit and follow-up care",
-      status: "Pending Documents",
-      submissionDate: "2024-12-28",
-      documentsRequired: 5,
-      documentsUploaded: 3,
-      claimAmount: "$2,500",
-      icon: FileCheck2,
-      details: {
-        policyNumber: "POL123456",
-        incidentDate: "2024-12-20",
-        hospital: "City General Hospital"
-      }
-    },
-    {
-      id: "CLM002",
-      type: "Auto",
-      title: "Car Accident Claim",
-      description: "Front bumper damage from collision",
-      status: "Under Review",
-      submissionDate: "2024-12-29",
-      documentsRequired: 5,
-      documentsUploaded: 5,
-      claimAmount: "$3,800",
-      icon: Shield,
-      details: {
-        policyNumber: "POL789012",
-        incidentDate: "2024-12-27",
-        vehicle: "Toyota Camry 2022"
-      }
-    }
-  ];
-
-  const recentActivities = [
-    {
-      id: 1,
-      type: "Document Uploaded",
-      claimId: "CLM001",
-      document: "Hospital Bills",
-      timestamp: "2 minutes ago",
-      status: "Success"
-    },
-    {
-      id: 2,
-      type: "Claim Submitted",
-      claimId: "CLM002",
-      timestamp: "1 hour ago",
-      status: "Success"
-    },
-    {
-      id: 3,
-      type: "Document Required",
-      claimId: "CLM001",
-      document: "Medical Reports",
-      timestamp: "2 hours ago",
-      status: "Pending"
-    }
-  ];
-
-  const handleFileUpload = (claimId, documentType, file) => {
+  const handleVerification = async () => {
+    if (!selectedFile) return;
+    
     setIsLoading(true);
-    setUploadProgress(prev => ({
-      ...prev,
-      [documentType]: 0
-    }));
-
-    // Simulate file upload progress
-    const interval = setInterval(() => {
-      setUploadProgress(prev => {
-        const currentProgress = prev[documentType] || 0;
-        if (currentProgress >= 100) {
-          clearInterval(interval);
-          setIsLoading(false);
-          setDocuments(prev => [...prev, {
-            name: file.name,
-            type: documentType,
-            size: file.size,
-            uploadDate: new Date().toISOString()
-          }]);
-          return prev;
-        }
-        return {
-          ...prev,
-          [documentType]: currentProgress + 10
-        };
+    try {
+      // Simulate verification process
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      setVerificationStatus({
+        success: true,
+        documentHash: "0x" + Math.random().toString(36).substr(2, 40),
+        transactionHash: "0x" + Math.random().toString(36).substr(2, 40),
+        timestamp: new Date().toISOString()
       });
-    }, 300);
-  };
-
-  const handleNewClaim = () => {
-    setShowNewClaimModal(true);
-  };
-
-  const handleClaimSubmit = (claimData) => {
-    setIsLoading(true);
-    // Simulate API call
-    setTimeout(() => {
-      alert('Claim submitted successfully!');
-      setShowNewClaimModal(false);
+    } catch (error) {
+      setVerificationStatus({
+        success: false,
+        error: "Verification failed. Please try again."
+      });
+    } finally {
       setIsLoading(false);
-    }, 1500);
+    }
+  };
+
+  const handleTicketVerification = async () => {
+    if (!ticketId) return;
+    
+    setIsLoading(true);
+    try {
+      const response = await axios.get(`http://localhost:5000/api/chat/history/${ticketId}`, {
+        headers: {
+          'X-Ticket-ID': ticketId
+        }
+      });
+      
+      if (response.data) {
+        setUserInfo({
+          name: response.data.user || 'Anonymous',
+          email: response.data.email || 'N/A',
+          phone: response.data.phone || 'N/A',
+          ticketStatus: 'Active',
+          createdAt: response.data.timestamp
+        });
+        setShowTicketModal(false); // Close modal on success
+      }
+    } catch (error) {
+      console.error('Ticket verification failed:', error);
+      setUserInfo(null);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
-    <div className="min-h-screen bg-[rgb(10,10,10)] text-white p-8">
-      {/* New Claim Modal */}
-      {showNewClaimModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="bg-[rgb(20,20,20)] rounded-lg p-6 max-w-2xl w-full border border-blue-500/20"
-          >
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-2xl font-bold">File New Claim</h2>
-              <button 
-                onClick={() => setShowNewClaimModal(false)}
-                className="text-gray-400 hover:text-white"
-              >
-                <X className="w-6 h-6" />
-              </button>
-            </div>
-
-            <form onSubmit={(e) => {
-              e.preventDefault();
-              handleClaimSubmit({
-                type: e.target.claimType.value,
-                description: e.target.description.value,
-                amount: e.target.amount.value,
-                date: e.target.date.value
-              });
-            }} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-2">Claim Type</label>
-                <select 
-                  name="claimType"
-                  className="w-full bg-blue-500/5 border border-blue-500/20 rounded-lg p-3 text-white"
-                  required
-                >
-                  <option value="Health">Health Insurance</option>
-                  <option value="Auto">Auto Insurance</option>
-                  <option value="Property">Property Insurance</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-2">Description</label>
-                <textarea 
-                  name="description"
-                  className="w-full h-32 bg-blue-500/5 border border-blue-500/20 rounded-lg p-3 text-white"
-                  placeholder="Describe what happened..."
-                  required
+    <div className="min-h-screen flex flex-col items-center justify-center p-6 md:p-10 relative bg-[#0a0a0a]">
+      {/* Ticket Verification Modal */}
+      {showTicketModal && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
+          <div className="bg-black/90 border border-white/10 rounded-xl w-full max-w-md p-6 relative">
+            <button 
+              onClick={() => userInfo && setShowTicketModal(false)} 
+              className="absolute top-4 right-4 text-gray-400 hover:text-white"
+            >
+              <X className="w-5 h-5" />
+            </button>
+            
+            <h2 className="text-xl font-semibold text-white mb-6">Verify Your Ticket</h2>
+            
+            <div className="space-y-4">
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={ticketId}
+                  onChange={(e) => setTicketId(e.target.value)}
+                  placeholder="Enter Ticket ID"
+                  className="flex-1 px-4 py-2 bg-black/40 border border-purple-500/20 rounded-lg text-white"
                 />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium mb-2">Claim Amount</label>
-                  <input 
-                    type="number"
-                    name="amount"
-                    className="w-full bg-blue-500/5 border border-blue-500/20 rounded-lg p-3 text-white"
-                    placeholder="Enter amount"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-2">Date of Incident</label>
-                  <input 
-                    type="date"
-                    name="date"
-                    className="w-full bg-blue-500/5 border border-blue-500/20 rounded-lg p-3 text-white"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="flex gap-4 mt-6">
-                <button 
-                  type="submit"
-                  disabled={isLoading}
-                  className="flex-1 py-2 px-4 rounded-lg bg-blue-500 text-white hover:bg-blue-600 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                <button
+                  onClick={handleTicketVerification}
+                  disabled={isLoading || !ticketId}
+                  className="px-4 py-2 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 transition-colors disabled:opacity-50"
                 >
-                  {isLoading ? (
-                    <RefreshCcw className="w-4 h-4 animate-spin" />
-                  ) : (
-                    <>
-                      <Check className="w-4 h-4" />
-                      Submit Claim
-                    </>
-                  )}
-                </button>
-                <button 
-                  type="button"
-                  onClick={() => setShowNewClaimModal(false)}
-                  className="flex-1 py-2 px-4 rounded-lg bg-red-500/20 text-red-300 hover:bg-red-500/30 transition-colors"
-                >
-                  Cancel
+                  Verify
                 </button>
               </div>
-            </form>
-          </motion.div>
-        </div>
-      )}
 
-      {/* Document Upload Modal */}
-      {showUploadModal && selectedClaim && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="bg-[rgb(20,20,20)] rounded-lg p-6 max-w-4xl w-full border border-blue-500/20"
-          >
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-2xl font-bold">Upload Documents - {selectedClaim.id}</h2>
-              <button 
-                onClick={() => setShowUploadModal(false)}
-                className="text-gray-400 hover:text-white"
-              >
-                <X className="w-6 h-6" />
-              </button>
-            </div>
-
-            <div className="space-y-6">
-              {/* Required Documents List */}
-              <div className="p-4 rounded-lg bg-blue-500/10">
-                <h3 className="text-lg font-semibold mb-4">Required Documents</h3>
-                <div className="space-y-3">
-                  {requiredDocuments[selectedClaim.type].map((doc, index) => (
-                    <div key={index} className="flex items-center justify-between p-3 bg-blue-500/5 rounded">
-                      <div className="flex items-center gap-2">
-                        <File className="w-4 h-4 text-blue-400" />
-                        <span>{doc.name}</span>
-                        {doc.required && (
-                          <span className="text-xs text-red-400">Required</span>
-                        )}
-                      </div>
-                      <div className="flex items-center gap-4">
-                        {uploadProgress[doc.name] ? (
-                          <div className="w-32 h-2 bg-blue-500/20 rounded-full overflow-hidden">
-                            <div 
-                              className="h-full bg-blue-500 transition-all duration-300"
-                              style={{ width: `${uploadProgress[doc.name]}%` }}
-                            />
-                          </div>
-                        ) : (
-                          <label className="cursor-pointer px-3 py-1 rounded bg-blue-500/20 text-blue-300 hover:bg-blue-500/30 flex items-center gap-2">
-                            <Upload className="w-4 h-4" />
-                            Upload
-                            <input 
-                              type="file"
-                              className="hidden"
-                              onChange={(e) => handleFileUpload(selectedClaim.id, doc.name, e.target.files[0])}
-                            />
-                          </label>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Uploaded Documents */}
-              {documents.length > 0 && (
-                <div className="p-4 rounded-lg bg-blue-500/10">
-                  <h3 className="text-lg font-semibold mb-4">Uploaded Documents</h3>
-                  <div className="space-y-3">
-                    {documents.map((doc, index) => (
-                      <div key={index} className="flex items-center justify-between p-3 bg-blue-500/5 rounded">
-                        <div className="flex items-center gap-2">
-                          <FileCheck2 className="w-4 h-4 text-green-400" />
-                          <div>
-                            <p>{doc.name}</p>
-                            <p className="text-sm text-gray-400">
-                              Uploaded on {new Date(doc.uploadDate).toLocaleDateString()}
-                            </p>
-                          </div>
-                        </div>
-                        <button className="p-1 rounded hover:bg-blue-500/20">
-                          <Eye className="w-4 h-4" />
-                        </button>
-                      </div>
-                    ))}
+              {userInfo && (
+                <div className="p-4 rounded-lg bg-purple-500/5 border border-purple-500/20">
+                  <h3 className="text-lg font-semibold text-white mb-2">User Information</h3>
+                  <div className="space-y-2 text-gray-300">
+                    <p>Name: {userInfo.name}</p>
+                    <p>Email: {userInfo.email}</p>
+                    <p>Status: <span className="text-green-400">{userInfo.ticketStatus}</span></p>
+                    <p>Created: {new Date(userInfo.createdAt).toLocaleString()}</p>
                   </div>
+                  <button
+                    onClick={() => setShowTicketModal(false)}
+                    className="mt-4 w-full py-2 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 transition-colors"
+                  >
+                    Continue to Document Verification
+                  </button>
                 </div>
               )}
             </div>
-          </motion.div>
+          </div>
         </div>
       )}
 
-      {/* Main Content */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8 }}
-        className="max-w-7xl mx-auto"
-      >
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-4">
-            <FileCheck2 className="w-8 h-8 text-blue-400" />
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-400 to-blue-600 text-transparent bg-clip-text">
-              My Claims Portal
-            </h1>
+      {/* Purple gradient background */}
+      <div 
+        className="absolute inset-0 opacity-30"
+        style={{
+          background: 'radial-gradient(circle at center, rgba(147,51,234,0.5) 0%, rgba(147,51,234,0.2) 40%, transparent 100%)',
+          filter: 'blur(40px)',
+        }}
+      />
+
+      <div className="w-full max-w-4xl relative z-10">
+        {/* Header */}
+        <div className="flex items-center gap-2 self-center font-medium text-white mb-8">
+          <div className="flex h-8 w-8 items-center justify-center rounded-md bg-purple-600">
+            <FileCheck className="h-5 w-5" />
           </div>
-          <button
-            onClick={handleNewClaim}
-            className="py-2 px-4 rounded-lg bg-blue-500 text-white hover:bg-blue-600 transition-colors flex items-center gap-2"
-          >
-            <Plus className="w-4 h-4" />
-            New Claim
-          </button>
+          <span className="text-2xl">Document Verification System</span>
         </div>
 
-        {/* Claims Grid */}
-        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-          {myClaims.map((claim, index) => (
-            <motion.div
-              key={claim.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.2 * (index + 1) }}
-            >
-              <div className="rounded-lg border border-blue-500/20 bg-blue-500/5 p-6">
-                <div className="mb-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <claim.icon className="w-6 h-6 text-blue-400" />
-                    <span className={`text-sm px-2 py-1 rounded-full ${
-                      claim.status === 'Pending Documents' 
-                        ? 'bg-yellow-500/20 text-yellow-300'
-                        : claim.status === 'Under Review'
-                        ? 'bg-blue-500/20 text-blue-300'
-                        : 'bg-green-500/20 text-green-300'
-                    }`}>
-                      {claim.status}
+        <div className="grid gap-6 md:grid-cols-2">
+          {/* Ticket Verification Section */}
+          <div className="bg-black/40 backdrop-blur-xl border border-white/10 rounded-xl overflow-hidden">
+            <div className="p-6">
+              <h2 className="text-xl font-semibold text-white mb-6">Verify Ticket</h2>
+              
+              <div className="space-y-4">
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={ticketId}
+                    onChange={(e) => setTicketId(e.target.value)}
+                    placeholder="Enter Ticket ID"
+                    className="flex-1 px-4 py-2 bg-black/40 border border-purple-500/20 rounded-lg text-white"
+                  />
+                  <button
+                    onClick={handleTicketVerification}
+                    disabled={isLoading || !ticketId}
+                    className="px-4 py-2 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 transition-colors disabled:opacity-50"
+                  >
+                    Verify
+                  </button>
+                </div>
+
+                {userInfo && (
+                  <div className="p-4 rounded-lg bg-purple-500/5 border border-purple-500/20">
+                    <h3 className="text-lg font-semibold text-white mb-2">User Information</h3>
+                    <div className="space-y-2 text-gray-300">
+                      <p>Name: {userInfo.name}</p>
+                      <p>Email: {userInfo.email}</p>
+                      <p>Status: <span className="text-green-400">{userInfo.ticketStatus}</span></p>
+                      <p>Created: {new Date(userInfo.createdAt).toLocaleString()}</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Upload Section */}
+          <div className="bg-black/40 backdrop-blur-xl border border-white/10 rounded-xl overflow-hidden">
+            <div className="p-6">
+              <h2 className="text-xl font-semibold text-white mb-6">Verify Document</h2>
+              
+              <div className="border-2 border-dashed border-purple-500/20 rounded-lg p-8 text-center">
+                <input
+                  type="file"
+                  onChange={handleFileSelect}
+                  className="hidden"
+                  id="fileInput"
+                  accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                />
+                <label htmlFor="fileInput" className="cursor-pointer">
+                  <div className="flex flex-col items-center space-y-2">
+                    <Upload className="h-12 w-12 text-purple-400" />
+                    <span className="text-gray-300">
+                      Click to upload or drag and drop
+                    </span>
+                    <span className="text-sm text-gray-500">
+                      PDF, DOC, DOCX, JPG, JPEG, PNG
                     </span>
                   </div>
-                  <h3 className="text-xl font-semibold mb-2">{claim.title}</h3>
-                  <p className="text-gray-400">{claim.description}</p>
-                </div>
+                </label>
+              </div>
 
-                <div className="space-y-2 text-sm text-gray-400 mb-6">
-                  <div className="flex justify-between">
-                    <span>Claim ID:</span>
-                    <span className="font-mono">{claim.id}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Policy Number:</span>
-                    <span>{claim.details.policyNumber}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Amount:</span>
-                    <span>{claim.claimAmount}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Documents:</span>
-                    <span className="text-blue-300">{claim.documentsUploaded} / {claim.documentsRequired}</span>
-                  </div>
-                </div>
-
-                <div className="space-y-3">
-                  <button 
-                    onClick={() => {
-                      setSelectedClaim(claim);
-                      setShowUploadModal(true);
-                    }}
-                    className="w-full py-2 px-4 rounded-lg bg-blue-500/20 text-blue-300 hover:bg-blue-500/30 transition-colors flex items-center justify-center gap-2"
+              {selectedFile && (
+                <div className="mt-4">
+                  <p className="text-gray-400">
+                    Selected file: {selectedFile.name}
+                  </p>
+                  <button
+                    onClick={handleVerification}
+                    disabled={isLoading}
+                    className="mt-4 w-full py-2 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 transition-colors"
                   >
-                    <Upload className="w-4 h-4" />
-                    Manage Documents
-                  </button>
-                  
-                  <button className="w-full py-2 px-4 rounded-lg bg-blue-500/20 text-blue-300 hover:bg-blue-500/30 transition-colors flex items-center justify-center gap-2">
-                    <Eye className="w-4 h-4" />
-                    View Details
+                    {isLoading ? 'Processing...' : 'Verify Document'}
                   </button>
                 </div>
-              </div>
-            </motion.div>
-          ))}
-        </div>
+              )}
 
-        {/* Recent Activity Section */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.6 }}
-          className="mt-12"
-        >
-          <div className="rounded-lg border border-blue-500/20 bg-blue-500/5 p-6">
-            <div className="flex items-center gap-2 mb-6">
-              <Activity className="w-5 h-5 text-blue-400" />
-              <h2 className="text-xl font-semibold">Recent Activity</h2>
+              {verificationStatus && (
+                <div className={`mt-4 p-4 rounded-lg backdrop-blur-sm ${
+                  verificationStatus.success 
+                    ? 'bg-green-500/10 border border-green-500/30' 
+                    : 'bg-red-500/10 border border-red-500/30'
+                }`}>
+                  {verificationStatus.success ? (
+                    <div className="flex flex-col gap-2">
+                      <div className="flex items-center gap-2 text-green-400">
+                        <CheckCircle className="w-5 h-5" />
+                        <span>Verification Successful</span>
+                      </div>
+                      <div className="text-sm text-gray-400">
+                        <p>Document Hash: {verificationStatus.documentHash}</p>
+                        <p>Transaction: {verificationStatus.transactionHash}</p>
+                        <p>Timestamp: {new Date(verificationStatus.timestamp).toLocaleString()}</p>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2 text-red-400">
+                      <XCircle className="w-5 h-5" />
+                      <span>{verificationStatus.error}</span>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
-            
-            {isLoading ? (
-              <div className="space-y-4">
-                {[1, 2, 3].map((i) => (
-                  <div key={i} className="h-12 w-full bg-blue-500/20 rounded animate-pulse" />
-                ))}
+          </div>
+
+          {/* Recent Verifications */}
+          <div className="bg-black/40 backdrop-blur-xl border border-white/10 rounded-xl overflow-hidden">
+            <div className="p-6">
+              <div className="flex items-center gap-2 mb-6">
+                <Activity className="w-5 h-5 text-purple-400" />
+                <h2 className="text-xl font-semibold text-white">Recent Verifications</h2>
               </div>
-            ) : recentActivities.length > 0 ? (
-              <div className="divide-y divide-blue-500/20">
-                {recentActivities.map((activity) => (
-                  <div key={activity.id} className="py-4 first:pt-0 last:pb-0">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        {activity.status === 'Success' && <Check className="w-4 h-4 text-green-400" />}
-                        {activity.status === 'Pending' && <Clock className="w-4 h-4 text-yellow-400" />}
-                        <div>
-                          <p className="font-medium">{activity.type}</p>
-                          <p className="text-sm text-gray-400">
-                            Claim ID: <span className="font-mono">{activity.claimId}</span>
-                          </p>
-                          {activity.document && (
-                            <p className="text-sm text-gray-400">
-                              Document: {activity.document}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-sm text-gray-400">{activity.timestamp}</p>
-                        <p className={`text-sm ${
-                          activity.status === 'Success' 
-                            ? 'text-green-400' 
-                            : activity.status === 'Pending'
-                            ? 'text-yellow-400'
-                            : 'text-blue-400'
-                        }`}>
-                          {activity.status}
-                        </p>
-                      </div>
+              
+              <div className="space-y-4">
+                {recentVerifications.map((verification, index) => (
+                  <div 
+                    key={index}
+                    className="p-4 rounded-lg bg-purple-500/5 border border-purple-500/20 backdrop-blur-sm"
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-gray-300">{verification.documentName}</span>
+                      <span className={`px-2 py-1 rounded-full text-sm ${
+                        verification.status === 'Verified' 
+                          ? 'bg-green-500/20 text-green-400'
+                          : 'bg-yellow-500/20 text-yellow-400'
+                      }`}>
+                        {verification.status}
+                      </span>
+                    </div>
+                    <div className="text-sm text-gray-400">
+                      <p>Hash: {verification.hash}</p>
+                      <p>Timestamp: {verification.timestamp}</p>
                     </div>
                   </div>
                 ))}
               </div>
-            ) : (
-              <div className="text-center py-8 text-gray-400">
-                <p>No recent activity to display</p>
+            </div>
+          </div>
+        </div>
+
+        {/* System Status */}
+        <div className="mt-6 bg-black/40 backdrop-blur-xl border border-white/10 rounded-xl overflow-hidden">
+          <div className="p-6">
+            <div className="flex items-center gap-2 mb-6">
+              <Shield className="w-5 h-5 text-purple-400" />
+              <h2 className="text-xl font-semibold text-white">System Status</h2>
+            </div>
+            
+            <div className="grid gap-4 md:grid-cols-3">
+              <div className="p-4 rounded-lg bg-purple-500/5 border border-purple-500/20 backdrop-blur-sm">
+                <p className="text-gray-400 mb-2">Documents Verified</p>
+                <p className="text-2xl font-semibold text-white">1,234</p>
               </div>
-            )}
-          </div>
-        </motion.div>
-
-        {/* Statistics Section */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.8 }}
-          className="mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
-        >
-          <div className="rounded-lg border border-blue-500/20 bg-blue-500/5 p-6">
-            <div className="flex items-center gap-2 mb-4">
-              <FileUp className="w-5 h-5 text-blue-400" />
-              <h3 className="font-semibold">Documents Uploaded</h3>
+              <div className="p-4 rounded-lg bg-purple-500/5 border border-purple-500/20 backdrop-blur-sm">
+                <p className="text-gray-400 mb-2">Average Time</p>
+                <p className="text-2xl font-semibold text-white">2.5s</p>
+              </div>
+              <div className="p-4 rounded-lg bg-purple-500/5 border border-purple-500/20 backdrop-blur-sm">
+                <p className="text-gray-400 mb-2">System Status</p>
+                <p className="text-2xl font-semibold text-green-400">Active</p>
+              </div>
             </div>
-            <p className="text-3xl font-bold">8</p>
-            <p className="text-sm text-gray-400">Total files</p>
           </div>
+        </div>
 
-          <div className="rounded-lg border border-blue-500/20 bg-blue-500/5 p-6">
-            <div className="flex items-center gap-2 mb-4">
-              <Clock className="w-5 h-5 text-yellow-400" />
-              <h3 className="font-semibold">Pending Documents</h3>
-            </div>
-            <p className="text-3xl font-bold">4</p>
-            <p className="text-sm text-gray-400">Awaiting upload</p>
-          </div>
-
-          <div className="rounded-lg border border-blue-500/20 bg-blue-500/5 p-6">
-            <div className="flex items-center gap-2 mb-4">
-              <Shield className="w-5 h-5 text-green-400" />
-              <h3 className="font-semibold">Active Claims</h3>
-            </div>
-            <p className="text-3xl font-bold">2</p>
-            <p className="text-sm text-gray-400">In progress</p>
-          </div>
-
-          <div className="rounded-lg border border-blue-500/20 bg-blue-500/5 p-6">
-            <div className="flex items-center gap-2 mb-4">
-              <Info className="w-5 h-5 text-blue-400" />
-              <h3 className="font-semibold">Total Value</h3>
-            </div>
-            <p className="text-3xl font-bold">$6.3k</p>
-            <p className="text-sm text-gray-400">Claims amount</p>
-          </div>
-        </motion.div>
-      </motion.div>
+        <div className="text-center text-xs text-gray-400 mt-6">
+          Secured by Blockchain Technology • All documents are encrypted and verified
+        </div>
+      </div>
     </div>
   );
 };
 
-export default ClaimsPortal;
-
+export default DocumentVerification;

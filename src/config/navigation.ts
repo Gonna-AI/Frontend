@@ -1,4 +1,4 @@
-import { Home, Settings, User, CreditCard, Bot } from 'lucide-react';
+import { Home, Settings, User, CreditCard, Bot, MessageSquare, FileCheck, Brain } from 'lucide-react';
 
 export const menuItems = [
   {
@@ -8,8 +8,14 @@ export const menuItems = [
     path: '/dashboard'
   },
   {
+    id: 'documents',
+    icon: FileCheck,
+    label: 'Documents',
+    path: '/documents'
+  },
+  {
     id: 'ai-settings',
-    icon: Bot,
+    icon: Brain,
     label: 'AI Settings',
     path: '/ai-settings'
   },

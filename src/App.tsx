@@ -14,6 +14,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import PrivacyPolicy from './components/Legal/PrivacyPolicy';
 import TermsOfService from './components/Legal/TermsOfService';
 import SmartContracts from './pages/SmartContracts';
+import Documents from './pages/Documents';
 // Create a client
 const queryClient = new QueryClient();
 
@@ -164,6 +165,7 @@ function App() {
 
           <Route path="/auth/google/callback" element={<GoogleCallback />} />
           <Route path="/smart-contracts" element={<SmartContracts />} />
+          <Route path="/documents" element={<Documents />} />
         </Routes>
       </BrowserRouter>
     </QueryClientProvider>
