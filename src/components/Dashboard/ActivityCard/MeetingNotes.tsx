@@ -1,5 +1,4 @@
-import React, { useState } from 'react';
-import { FileText, Info } from 'lucide-react';
+import React from 'react';
 import { cn } from '../../../utils/cn';
 import { useTheme } from '../../../hooks/useTheme';
 
@@ -8,62 +7,60 @@ interface MeetingNotesProps {
   conversation: string[];
 }
 
+const formatSummary = (summary: string) => {
+  // Remove markdown asterisks and clean up formatting
+  return summary
+    .replace(/\*\*/g, '') // Remove bold markers
+    .replace(/\*/g, '')   // Remove single asterisks
+    .split('\n')          // Split into lines
+    .map(line => line.trim()) // Trim whitespace
+    .filter(line => line)     // Remove empty lines
+    .join('\n');             // Rejoin with newlines
+};
+
 export default function MeetingNotes({ summary, conversation }: MeetingNotesProps) {
   const { isDark } = useTheme();
-  const [showConversation, setShowConversation] = useState(false);
 
   return (
-    <div className={cn(
-      "p-4 rounded-lg",
-      isDark ? "bg-white/5" : "bg-black/5"
-    )}>
-      <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center space-x-2">
-          <FileText className="w-4 h-4 text-purple-400" />
-          <span className={isDark ? "text-white/60" : "text-black/60"}>
-            Minutes of Meeting
-          </span>
-        </div>
-        <button
-          onClick={() => setShowConversation(!showConversation)}
-          className={cn(
-            "p-2 rounded-lg transition-colors",
-            isDark
-              ? "hover:bg-white/10 text-white/60"
-              : "hover:bg-black/10 text-black/60"
-          )}
-        >
-          <Info className="w-4 h-4" />
-        </button>
+    <div className="space-y-6">
+      {/* Meeting Summary */}
+      <div className="space-y-3">
+        <h3 className={cn(
+          "text-lg font-semibold",
+          isDark ? "text-white" : "text-black"
+        )}>
+          Meeting Summary
+        </h3>
+        <p className={cn(
+          "whitespace-pre-line", // Add whitespace-pre-line for proper line breaks
+          isDark ? "text-white/70" : "text-black/70"
+        )}>
+          {formatSummary(summary)}
+        </p>
       </div>
 
-      {showConversation ? (
-        <div className="space-y-3">
+      {/* Conversation History */}
+      <div className="space-y-3">
+        <h3 className={cn(
+          "text-lg font-semibold",
+          isDark ? "text-white" : "text-black"
+        )}>
+          Conversation History
+        </h3>
+        <div className="space-y-2">
           {conversation.map((message, index) => (
-            <div
+            <p
               key={index}
               className={cn(
-                "p-2 rounded",
-                isDark ? "bg-white/5" : "bg-black/5"
+                "py-2",
+                isDark ? "text-white/70" : "text-black/70"
               )}
             >
-              <p className={cn(
-                "text-sm",
-                isDark ? "text-white/80" : "text-black/80"
-              )}>
-                {message}
-              </p>
-            </div>
+              {message}
+            </p>
           ))}
         </div>
-      ) : (
-        <p className={cn(
-          "text-sm",
-          isDark ? "text-white/80" : "text-black/80"
-        )}>
-          {summary}
-        </p>
-      )}
+      </div>
     </div>
   );
 }
