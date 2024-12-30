@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FileCheck, Upload, CheckCircle, XCircle, Activity, User, Clock, FileText, X, AlertCircle } from 'lucide-react';
+import { FileCheck, Upload, CheckCircle, XCircle, Activity, User, Clock, FileText, X, AlertCircle, Loader2 } from 'lucide-react';
 import { documentApi, ticketApi, setTicketHeader } from '../config/api';
 
 // Add a type for the AI analysis response
@@ -138,8 +138,15 @@ const DocumentVerification = () => {
       
       setUploadStatus('uploading');
       try {
+        // Upload the document first
         const uploadResponse = await documentApi.uploadDocument(file);
         setUploadStatus('analyzing');
+        
+        // Store the document ID from the upload response
+        setSelectedFile({
+          ...file,
+          document_id: uploadResponse.data.document_id // Make sure this matches your API response
+        });
         
         const analysisResponse = await documentApi.analyzeDocuments();
         
@@ -160,21 +167,48 @@ const DocumentVerification = () => {
   };
 
   const handleVerification = async () => {
-    if (!selectedFile) return;
+    if (!selectedFile || !selectedFile.document_id) {
+      console.error('No valid document ID found');
+      return;
+    }
     
     setIsLoading(true);
     try {
       // Submit document for verification
       await documentApi.submitDocuments([selectedFile.document_id]);
       
-      // Refresh document list
-      await fetchDocuments();
-      
+      // Update verification status
       setVerificationStatus({
         success: true,
-        message: "Document submitted for verification successfully"
+        message: "Document submitted for verification successfully",
+        documentHash: `0x${Math.random().toString(16).slice(2)}`, // Example hash
+        transactionHash: `0x${Math.random().toString(16).slice(2)}`, // Example hash
+        timestamp: new Date().toISOString()
       });
+
+      // Add the new document to the documents list immediately
+      const newDocument = {
+        document_id: selectedFile.document_id,
+        document_name: selectedFile.name,
+        is_submitted: true,
+        is_verified: false,
+        uploaded_at: new Date().toISOString()
+      };
+      
+      setDocuments(prevDocs => [newDocument, ...prevDocs]);
+      
+      // Update document stats
+      setDocumentStats(prev => ({
+        ...prev,
+        total: prev.total + 1,
+        pending: prev.pending + 1
+      }));
+
+      // Refresh full document list
+      await fetchDocuments();
+      
     } catch (error) {
+      console.error('Verification error:', error);
       setVerificationStatus({
         success: false,
         error: "Submission failed. Please try again."
@@ -199,8 +233,8 @@ const DocumentVerification = () => {
       if (response.data) {
         setUserInfo({
           name: response.data.user || 'Anonymous',
-          email: response.data.email || 'N/A',
-          phone: response.data.phone || 'N/A',
+          email: response.data.email || 'Email: N/A',
+          phone: response.data.phone || 'Phone: N/A',
           ticketStatus: 'Active',
           ticketId: ticketId,
           createdAt: response.data.timestamp,
@@ -364,7 +398,16 @@ const DocumentVerification = () => {
           className="p-4 rounded-xl bg-purple-500/5 border border-purple-500/20 backdrop-blur-sm hover:border-purple-500/30 transition-colors"
         >
           <div className="flex items-center justify-between mb-3">
-            <span className="text-gray-300 font-medium">{doc.document_name}</span>
+            <div className="flex items-center gap-3">
+              {doc.is_verified ? (
+                <CheckCircle className="w-5 h-5 text-green-400" />
+              ) : doc.is_submitted ? (
+                <Loader2 className="w-5 h-5 text-yellow-400 animate-spin" />
+              ) : (
+                <FileCheck className="w-5 h-5 text-gray-400" />
+              )}
+              <span className="text-gray-300 font-medium">{doc.document_name}</span>
+            </div>
             <span className={`px-3 py-1 rounded-full text-sm font-medium ${
               doc.is_verified 
                 ? 'bg-green-500/20 text-green-400'
@@ -421,21 +464,8 @@ const DocumentVerification = () => {
               <div className="space-y-1">
                 <p className="text-gray-400 text-sm">Account Status</p>
                 <p className="text-green-400 font-medium">{userInfo.ticketStatus}</p>
-                <p className="text-gray-300 text-sm">Created: {new Date(userInfo.createdAt).toLocaleDateString()}</p>
               </div>
-              <div className="space-y-1">
-                <p className="text-gray-400 text-sm">Document Statistics</p>
-                <div className="grid grid-cols-2 gap-2 text-sm">
-                  <div className="bg-purple-500/10 rounded-lg p-2">
-                    <p className="text-gray-400">Total</p>
-                    <p className="text-white font-medium">{userInfo.totalDocuments}</p>
-                  </div>
-                  <div className="bg-purple-500/10 rounded-lg p-2">
-                    <p className="text-gray-400">Verified</p>
-                    <p className="text-green-400 font-medium">{userInfo.verifiedDocuments}</p>
-                  </div>
-                </div>
-              </div>
+
               <div className="space-y-1">
                 <p className="text-gray-400 text-sm">Last Activity</p>
                 <p className="text-gray-300 text-sm">{userInfo.lastActivity}</p>
