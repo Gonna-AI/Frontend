@@ -128,7 +128,7 @@ const AdminDashboard = () => {
 
       <div className="max-w-7xl mx-auto relative z-10">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8 gap-4">
           <div className="flex items-center gap-3">
             <div className="h-10 w-10 bg-purple-600 rounded-lg flex items-center justify-center">
               <Shield className="h-6 w-6" />
@@ -136,7 +136,7 @@ const AdminDashboard = () => {
             <h1 className="text-2xl font-bold">Admin Document Review</h1>
           </div>
           
-          <div className="flex items-center gap-4">
+          <div className="flex items-center justify-between sm:justify-end gap-4">
             <button
               onClick={() => setIsDarkMode(!isDarkMode)}
               className={`p-2 rounded-lg transition-all duration-200 ${
@@ -161,8 +161,8 @@ const AdminDashboard = () => {
 
         {/* Search and Filters */}
         <div className={`${theme.cardBg} backdrop-blur-xl border ${theme.border} rounded-xl p-4 mb-6`}>
-          <div className="flex gap-4 flex-wrap">
-            <div className="flex-1 min-w-[200px]">
+          <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap">
+            <div className="w-full sm:flex-1 sm:min-w-[200px]">
               <div className="relative">
                 <Search className={`absolute left-3 top-1/2 transform -translate-y-1/2 ${theme.secondaryText} h-4 w-4`} />
                 <input
@@ -173,19 +173,21 @@ const AdminDashboard = () => {
               </div>
             </div>
             
-            {['Status', 'Priority', 'Type'].map((filterName) => (
-              <select
-                key={filterName}
-                className={`px-4 py-2 ${theme.selectBg} border ${theme.inputBorder} rounded-lg ${theme.selectText} focus:outline-none focus:border-purple-500/50`}
-              >
-                <option value="all">{filterName}: All</option>
-              </select>
-            ))}
+            <div className="flex flex-wrap gap-2 sm:gap-4">
+              {['Status', 'Priority', 'Type'].map((filterName) => (
+                <select
+                  key={filterName}
+                  className={`flex-1 sm:flex-none px-4 py-2 ${theme.selectBg} border ${theme.inputBorder} rounded-lg ${theme.selectText} focus:outline-none focus:border-purple-500/50`}
+                >
+                  <option value="all">{filterName}: All</option>
+                </select>
+              ))}
+            </div>
           </div>
         </div>
 
         {/* Main Content */}
-        <div className="grid gap-6 lg:grid-cols-3">
+        <div className="flex flex-col lg:grid lg:grid-cols-3 gap-6">
           {/* Documents List */}
           <div className="lg:col-span-2 space-y-4">
             {documents.map((doc) => (
@@ -193,22 +195,22 @@ const AdminDashboard = () => {
                 key={doc.id}
                 className={`${theme.cardBg} backdrop-blur-xl border ${theme.border} rounded-xl p-4`}
               >
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex items-start gap-3">
+                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between mb-4">
+                  <div className="flex items-start gap-3 mb-2 sm:mb-0">
                     <FileCheck className="h-8 w-8 text-purple-400 flex-shrink-0" />
                     <div>
                       <h3 className="font-medium">{doc.title}</h3>
-                      <div className="flex items-center gap-2 text-sm text-gray-400 mt-1">
+                      <div className="flex flex-wrap items-center gap-2 text-sm text-gray-400 mt-1">
                         <span>Ticket: {doc.ticketId}</span>
-                        <span>•</span>
+                        <span className="hidden sm:inline">•</span>
                         <span>{doc.type}</span>
-                        <span>•</span>
+                        <span className="hidden sm:inline">•</span>
                         <span>{doc.size}</span>
                       </div>
                     </div>
                   </div>
                   
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 mt-2 sm:mt-0">
                     <span className={`px-3 py-1 rounded-full text-sm border ${getStatusColor(doc.status)}`}>
                       {doc.status.charAt(0).toUpperCase() + doc.status.slice(1)}
                     </span>
@@ -218,8 +220,8 @@ const AdminDashboard = () => {
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between text-sm text-gray-400">
-                  <div className="flex items-center gap-4">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between text-sm text-gray-400">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mb-2 sm:mb-0">
                     <div className="flex items-center gap-2">
                       <User className="h-4 w-4" />
                       {doc.submittedBy}
@@ -230,18 +232,18 @@ const AdminDashboard = () => {
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center justify-between sm:justify-end gap-2">
                     {doc.status === 'pending' ? (
                       <>
                         <button
                           onClick={() => handleVerify(doc.id)}
-                          className={`px-3 py-1 ${isDarkMode ? 'bg-green-500/20' : 'bg-green-100'} ${isDarkMode ? 'text-green-400' : 'text-green-600'} rounded-lg hover:bg-green-500/30 transition-colors`}
+                          className={`flex-1 sm:flex-none px-3 py-1 ${isDarkMode ? 'bg-green-500/20' : 'bg-green-100'} ${isDarkMode ? 'text-green-400' : 'text-green-600'} rounded-lg hover:bg-green-500/30 transition-colors`}
                         >
                           Verify
                         </button>
                         <button
                           onClick={() => handleReject(doc.id)}
-                          className={`px-3 py-1 ${isDarkMode ? 'bg-red-500/20' : 'bg-red-100'} ${isDarkMode ? 'text-red-400' : 'text-red-600'} rounded-lg hover:bg-red-500/30 transition-colors`}
+                          className={`flex-1 sm:flex-none px-3 py-1 ${isDarkMode ? 'bg-red-500/20' : 'bg-red-100'} ${isDarkMode ? 'text-red-400' : 'text-red-600'} rounded-lg hover:bg-red-500/30 transition-colors`}
                         >
                           Reject
                         </button>
@@ -270,7 +272,7 @@ const AdminDashboard = () => {
           </div>
 
           {/* Statistics and Quick Actions */}
-          <div className="space-y-6">
+          <div className="space-y-6 lg:col-span-1">
             {/* Statistics */}
             <div className={`${theme.cardBg} backdrop-blur-xl border ${theme.border} rounded-xl p-4`}>
               <h2 className="text-lg font-semibold mb-4">Statistics</h2>
@@ -298,12 +300,12 @@ const AdminDashboard = () => {
             {/* Quick Actions */}
             <div className={`${theme.cardBg} backdrop-blur-xl border ${theme.border} rounded-xl p-4`}>
               <h2 className="text-lg font-semibold mb-4">Quick Actions</h2>
-              <div className="space-y-2">
-                <button className={`w-full p-2 ${isDarkMode ? 'bg-purple-500/20' : 'bg-purple-100'} ${isDarkMode ? 'text-purple-300' : 'text-purple-600'} rounded-lg hover:bg-purple-500/30 transition-colors flex items-center gap-2`}>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-2">
+                <button className={`w-full p-2 ${isDarkMode ? 'bg-purple-500/20' : 'bg-purple-100'} ${isDarkMode ? 'text-purple-300' : 'text-purple-600'} rounded-lg hover:bg-purple-500/30 transition-colors flex items-center justify-center gap-2`}>
                   <Download className="h-4 w-4" />
                   Export Reports
                 </button>
-                <button className={`w-full p-2 ${isDarkMode ? 'bg-purple-500/20' : 'bg-purple-100'} ${isDarkMode ? 'text-purple-300' : 'text-purple-600'} rounded-lg hover:bg-purple-500/30 transition-colors flex items-center gap-2`}>
+                <button className={`w-full p-2 ${isDarkMode ? 'bg-purple-500/20' : 'bg-purple-100'} ${isDarkMode ? 'text-purple-300' : 'text-purple-600'} rounded-lg hover:bg-purple-500/30 transition-colors flex items-center justify-center gap-2`}>
                   <History className="h-4 w-4" />
                   View Audit Log
                 </button>
@@ -419,9 +421,7 @@ const AdminDashboard = () => {
                       }}
                       className={`flex-1 py-2 ${isDarkMode ? 'bg-green-500/20 text-green-400' : 'bg-green-100 text-green-600'} rounded-lg hover:${isDarkMode ? 'bg-green-500/30' : 'bg-green-200'} transition-colors flex items-center justify-center gap-2`}
                     >
-                      <CheckCircle className="h-4 w-4" />
-                      Verify Document
-                    </button>
+                      <CheckCircle className="h-4 w-4" />                   </button>
                     <button
                       onClick={() => {
                         handleReject(selectedDocument.id);
@@ -430,7 +430,7 @@ const AdminDashboard = () => {
                       className={`flex-1 py-2 ${isDarkMode ? 'bg-red-500/20 text-red-400' : 'bg-red-100 text-red-600'} rounded-lg hover:${isDarkMode ? 'bg-red-500/30' : 'bg-red-200'} transition-colors flex items-center justify-center gap-2`}
                     >
                       <XCircle className="h-4 w-4" />
-                      Reject Document
+                     
                     </button>
                   </>
                 )}
