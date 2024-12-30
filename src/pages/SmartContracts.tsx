@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FileCheck, Upload, CheckCircle, XCircle, Activity, User, Clock, FileText, X } from 'lucide-react';
+import { FileCheck, Upload, CheckCircle, XCircle, Activity, User, Clock, FileText, X, AlertCircle } from 'lucide-react';
 import { ticketApi } from '../config/api';
 
 const DocumentVerification = () => {
@@ -10,9 +10,12 @@ const DocumentVerification = () => {
   const [userInfo, setUserInfo] = useState(null);
   const [showTicketModal, setShowTicketModal] = useState(true);
   const [showUserDetails, setShowUserDetails] = useState(false);
+  const [aiProcessing, setAiProcessing] = useState(false);
+  const [aiSuggestion, setAiSuggestion] = useState(null);
+  const [showConfirmation, setShowConfirmation] = useState(false);
 
-  // Placeholder recent verifications
-  const recentVerifications = [
+  // State for recent verifications
+  const [recentVerifications, setRecentVerifications] = useState([
     {
       documentName: "Medical_Report_123.pdf",
       status: "Verified",
@@ -25,12 +28,42 @@ const DocumentVerification = () => {
       timestamp: "2024-12-30 14:25",
       hash: "0x5678...9012",
     }
-  ];
+  ]);
 
-  const handleFileSelect = (event) => {
+  const simulateAiProcessing = async (file) => {
+    setAiProcessing(true);
+    try {
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      const suggestion = {
+        documentType: "Medical Report",
+        confidence: 92,
+        sensitive: true,
+        recommendations: [
+          "Contains sensitive medical information",
+          "Properly formatted medical report",
+          "Digital signatures present"
+        ]
+      };
+      
+      setAiSuggestion(suggestion);
+      setShowConfirmation(true);
+    } catch (error) {
+      console.error('AI processing failed:', error);
+    } finally {
+      setAiProcessing(false);
+    }
+  };
+
+  const handleFileSelect = async (event) => {
     const file = event.target.files[0];
-    setSelectedFile(file);
-    setVerificationStatus(null);
+    if (file) {
+      setSelectedFile(file);
+      setVerificationStatus(null);
+      setAiSuggestion(null);
+      setShowConfirmation(false);
+      await simulateAiProcessing(file);
+    }
   };
 
   const handleVerification = async () => {
@@ -39,6 +72,15 @@ const DocumentVerification = () => {
     setIsLoading(true);
     try {
       await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      const newVerification = {
+        documentName: selectedFile.name,
+        status: "Verified",
+        timestamp: new Date().toLocaleString(),
+        hash: "0x" + Math.random().toString(36).substr(2, 40)
+      };
+
+      setRecentVerifications(prev => [newVerification, ...prev]);
       
       setVerificationStatus({
         success: true,
@@ -53,6 +95,8 @@ const DocumentVerification = () => {
       });
     } finally {
       setIsLoading(false);
+      setShowConfirmation(false);
+      setAiSuggestion(null);
     }
   };
 
@@ -86,8 +130,78 @@ const DocumentVerification = () => {
     }
   };
 
+  const handleCancelUpload = () => {
+    setSelectedFile(null);
+    setAiSuggestion(null);
+    setShowConfirmation(false);
+  };
+
   const redirectToChatInterface = () => {
     window.location.href = '/chat';
+  };
+
+  const renderUploadContent = () => {
+    if (aiProcessing) {
+      return (
+        <div className="flex flex-col items-center space-y-3 animate-pulse">
+          <div className="p-4 bg-purple-600/20 rounded-full">
+            <Activity className="h-8 w-8 text-purple-400" />
+          </div>
+          <span className="text-lg text-gray-300">Processing document...</span>
+          <span className="text-sm text-gray-500">AI analyzing content and security</span>
+        </div>
+      );
+    }
+
+    if (aiSuggestion && showConfirmation) {
+      return (
+        <div className="flex flex-col items-center space-y-4">
+          <div className="p-4 bg-purple-600/20 rounded-full">
+            <AlertCircle className="h-8 w-8 text-purple-400" />
+          </div>
+          <div className="text-center space-y-2">
+            <h3 className="text-lg font-medium text-white">AI Analysis Results</h3>
+            <p className="text-gray-400">Document Type: {aiSuggestion.documentType}</p>
+            <p className="text-gray-400">Confidence: {aiSuggestion.confidence}%</p>
+            <div className="space-y-1 mt-3">
+              {aiSuggestion.recommendations.map((rec, index) => (
+                <p key={index} className="text-sm text-gray-500">{rec}</p>
+              ))}
+            </div>
+          </div>
+          <div className="flex gap-3 mt-4">
+            <button
+              onClick={handleVerification}
+              className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+            >
+              Proceed with Upload
+            </button>
+            <button
+              onClick={handleCancelUpload}
+              className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <label htmlFor="fileInput" className="cursor-pointer">
+        <div className="flex flex-col items-center space-y-3">
+          <div className="p-4 bg-purple-600/20 rounded-full">
+            <Upload className="h-8 w-8 text-purple-400" />
+          </div>
+          <span className="text-lg text-gray-300">
+            Click to upload or drag and drop
+          </span>
+          <span className="text-sm text-gray-500">
+            Support for PDF, DOC, DOCX, JPG, JPEG, PNG
+          </span>
+        </div>
+      </label>
+    );
   };
 
   return (
@@ -234,35 +348,8 @@ const DocumentVerification = () => {
                   id="fileInput"
                   accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
                 />
-                <label htmlFor="fileInput" className="cursor-pointer">
-                  <div className="flex flex-col items-center space-y-3">
-                    <div className="p-4 bg-purple-600/20 rounded-full">
-                      <Upload className="h-8 w-8 text-purple-400" />
-                    </div>
-                    <span className="text-lg text-gray-300">
-                      Click to upload or drag and drop
-                    </span>
-                    <span className="text-sm text-gray-500">
-                      Support for PDF, DOC, DOCX, JPG, JPEG, PNG
-                    </span>
-                  </div>
-                </label>
+                {renderUploadContent()}
               </div>
-
-              {selectedFile && (
-                <div className="mt-6">
-                  <p className="text-gray-400">
-                    Selected file: <span className="text-white">{selectedFile.name}</span>
-                  </p>
-                  <button
-                    onClick={handleVerification}
-                    disabled={isLoading}
-                    className="mt-4 w-full py-3 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 transition-colors disabled:opacity-50"
-                  >
-                    {isLoading ? 'Processing...' : 'Verify Document'}
-                  </button>
-                </div>
-              )}
 
               {verificationStatus && (
                 <div className={`mt-6 p-6 rounded-xl backdrop-blur-sm ${
