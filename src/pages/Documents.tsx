@@ -185,6 +185,25 @@ const AdminDashboard = () => {
     }
   };
 
+  // Add download handler
+  const handleDownload = async (ticketId: string) => {
+    try {
+      const response = await adminApi.downloadDocuments(ticketId);
+      
+      // Create download link
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `documents_${ticketId}.zip`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error downloading documents:', error);
+    }
+  };
+
   // Update statistics section
   const renderStatistics = () => (
     <div className={`${theme.cardBg} backdrop-blur-xl border ${theme.border} rounded-xl p-4`}>
@@ -350,14 +369,23 @@ const AdminDashboard = () => {
                         <button
                           onClick={() => handleVerify(doc.ticketId)}
                           className="p-2 bg-green-500/20 text-green-400 rounded-lg hover:bg-green-500/30 transition-colors"
+                          title="Verify All"
                         >
                           <CheckCircle className="h-4 w-4" />
                         </button>
                         <button
                           onClick={() => handleReject(doc.ticketId)}
                           className="p-2 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 transition-colors"
+                          title="Reject All"
                         >
                           <XCircle className="h-4 w-4" />
+                        </button>
+                        <button
+                          onClick={() => handleDownload(doc.ticketId)}
+                          className="p-2 bg-blue-500/20 text-blue-400 rounded-lg hover:bg-blue-500/30 transition-colors"
+                          title="Download All"
+                        >
+                          <Download className="h-4 w-4" />
                         </button>
                       </>
                     )}
