@@ -15,7 +15,8 @@ import {
   Mail,
   Badge,
   FileText,
-  AlertCircle
+  AlertCircle,
+  Copy
 } from 'lucide-react';
 import { ticketApi } from '../../config/api';
 
@@ -45,6 +46,8 @@ const PriorityDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [summary, setSummary] = useState<string | null>(null);
   const [loadingSummary, setLoadingSummary] = useState(false);
+  const [showContactMenu, setShowContactMenu] = useState(false);
+  const [contactMenuPosition, setContactMenuPosition] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
     const fetchPriorityClients = async () => {
@@ -116,6 +119,26 @@ const PriorityDashboard = () => {
     const container = document.getElementById('claims-container');
     if (container) {
       container.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
+  const handleContactClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const rect = e.currentTarget.getBoundingClientRect();
+    setContactMenuPosition({
+      x: rect.left,
+      y: rect.top - 100
+    });
+    setShowContactMenu(true);
+  };
+
+  const copyToClipboard = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setShowContactMenu(false);
+      // You could add a toast notification here
+    } catch (err) {
+      console.error('Failed to copy:', err);
     }
   };
 
@@ -214,6 +237,19 @@ const PriorityDashboard = () => {
       </div>
     );
   };
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (showContactMenu) {
+        setShowContactMenu(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showContactMenu]);
 
   return (
     <div className={cn(
@@ -328,21 +364,23 @@ const PriorityDashboard = () => {
               </div>
 
               <div className="mt-3 flex justify-end gap-2">
-                <button className={cn(
-                  "px-2.5 py-1 text-xs rounded-lg transition-colors duration-200",
-                  isDark 
-                    ? "bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 border border-blue-500/20" 
-                    : "bg-blue-100 text-blue-800 hover:bg-blue-200 border border-blue-200"
-                )}>
-                  Reschedule
-                </button>
-                <button className={cn(
+              <button className={cn(
                   "px-2.5 py-1 text-xs rounded-lg transition-colors duration-200",
                   isDark 
                     ? "bg-green-500/20 text-green-400 hover:bg-green-500/30 border border-green-500/20" 
                     : "bg-green-100 text-green-800 hover:bg-green-200 border border-green-200"
                 )}>
-                  Mark Complete
+                  See details
+                </button>
+                <button 
+                  onClick={() => window.location.href = `/documents?ticketId=${client.ticket_id}`}
+                  className={cn(
+                    "px-2.5 py-1 text-xs rounded-lg transition-colors duration-200",
+                    isDark 
+                      ? "bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 border border-blue-500/20" 
+                      : "bg-blue-100 text-blue-800 hover:bg-blue-200 border border-blue-200"
+                  )}>
+                  Check Documents
                 </button>
               </div>
             </motion.div>
@@ -492,15 +530,10 @@ const PriorityDashboard = () => {
 
               {/* Notes Section */}
               <div className={cn(
-                "p-4 rounded-lg mb-6",
+                "p-4 rounded-lg mb-3",
                 isDark ? "bg-black/20" : "bg-gray-100"
               )}>
-                <h4 className={cn(
-                  "font-medium mb-2",
-                  isDark ? "text-white" : "text-black"
-                )}>
-                  Agent Notes
-                </h4>
+            
                 <p className={cn(
                   "text-sm",
                   isDark ? "text-white/70" : "text-black/70"
@@ -510,10 +543,11 @@ const PriorityDashboard = () => {
               </div>
 
               {/* Action Buttons */}
-              <div className="mt-6 flex flex-col sm:flex-row gap-3 justify-end">
+              <div className="mt-3 flex flex-col sm:flex-row gap-3 justify-end">
                 <motion.button
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
+                  onClick={handleContactClick}
                   className={cn(
                     "px-4 py-2 rounded-lg flex items-center gap-2 transition-colors",
                     isDark 
@@ -524,19 +558,7 @@ const PriorityDashboard = () => {
                   <MessageCircle className="w-4 h-4" />
                   Contact Client
                 </motion.button>
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className={cn(
-                    "px-4 py-2 rounded-lg flex items-center gap-2 transition-colors",
-                    isDark 
-                      ? "bg-green-500/20 text-green-400 hover:bg-green-500/30 border border-green-500/20" 
-                      : "bg-green-100 text-green-800 hover:bg-green-200 border border-green-200"
-                  )}
-                >
-                  <Calendar className="w-4 h-4" />
-                  Schedule Follow-up
-                </motion.button>
+               
               </div>
             </motion.div>
           </motion.div>
@@ -555,6 +577,68 @@ const PriorityDashboard = () => {
       >
         <ChevronUp className="w-4 h-4" />
       </button>
+
+      {/* Add this contact menu popup right before the final closing div */}
+      <AnimatePresence>
+        {showContactMenu && clientDetails && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-40"
+              onClick={() => setShowContactMenu(false)}
+            />
+            <motion.div
+              initial={{ opacity: 0, y: 20, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 20, scale: 0.95 }}
+              transition={{ type: "spring", duration: 0.3 }}
+              style={{
+                position: 'fixed',
+                left: `${contactMenuPosition.x}px`,
+                top: `${contactMenuPosition.y}px`,
+              }}
+              onClick={(e) => e.stopPropagation()}
+              className={cn(
+                "z-50 w-48 rounded-lg shadow-lg p-1",
+                isDark 
+                  ? "bg-black/90 border border-white/10" 
+                  : "bg-white/95 border border-black/10"
+              )}
+            >
+              <div className="flex flex-col">
+                <button
+                  onClick={() => copyToClipboard(clientDetails.phone)}
+                  className={cn(
+                    "w-full px-3 py-2 rounded-lg flex items-center gap-2 text-sm transition-colors",
+                    isDark 
+                      ? "hover:bg-white/10" 
+                      : "hover:bg-black/5"
+                  )}
+                >
+                  <PhoneCall className="w-4 h-4" />
+                  <span className="flex-1 text-left">Copy Phone</span>
+                  <Copy className="w-3 h-3 opacity-50" />
+                </button>
+                <button
+                  onClick={() => copyToClipboard(clientDetails.email)}
+                  className={cn(
+                    "w-full px-3 py-2 rounded-lg flex items-center gap-2 text-sm transition-colors",
+                    isDark 
+                      ? "hover:bg-white/10" 
+                      : "hover:bg-black/5"
+                  )}
+                >
+                  <Mail className="w-4 h-4" />
+                  <span className="flex-1 text-left">Copy Email</span>
+                  <Copy className="w-3 h-3 opacity-50" />
+                </button>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

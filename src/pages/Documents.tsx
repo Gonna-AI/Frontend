@@ -386,6 +386,39 @@ const AdminDashboard = () => {
     }
   };
 
+  // Add this new function after the handleDownload function
+  const handleExportReports = () => {
+    try {
+      // Convert documents data to CSV format
+      const headers = ['Ticket ID', 'Client Name', 'Status', 'Priority', 'Type', 'Submission Date', 'Documents'];
+      const csvData = [
+        headers.join(','),
+        ...documents.map(doc => [
+          doc.ticketId,
+          doc.submittedBy,
+          doc.status,
+          doc.priority,
+          doc.type,
+          new Date(doc.submittedAt).toLocaleString(),
+          doc.documents?.map(d => d.document_name).join(';')
+        ].join(','))
+      ].join('\n');
+
+      // Create and trigger download
+      const blob = new Blob([csvData], { type: 'text/csv;charset=utf-8;' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.setAttribute('href', url);
+      link.setAttribute('download', `documents_report_${new Date().toISOString().split('T')[0]}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error exporting reports:', error);
+    }
+  };
+
   // Update statistics section
   const renderStatistics = () => {
     // Calculate completion percentage
@@ -491,6 +524,34 @@ const AdminDashboard = () => {
           </div>
           
           <div className="flex items-center justify-between sm:justify-end gap-4">
+            {/* Dashboard Link */}
+            <button
+              onClick={() => window.location.href = '/dashboard'}
+              className={`p-2 rounded-lg transition-all duration-200 ${
+                isDarkMode 
+                  ? 'bg-purple-500/20 text-purple-300 hover:bg-purple-500/30 border border-purple-500/30' 
+                  : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'
+              }`}
+              aria-label="Go to Dashboard"
+            >
+              <svg 
+                xmlns="http://www.w3.org/2000/svg" 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke="currentColor" 
+                strokeWidth="2" 
+                strokeLinecap="round" 
+                strokeLinejoin="round" 
+                className="h-5 w-5"
+              >
+                <rect x="3" y="3" width="7" height="7" />
+                <rect x="14" y="3" width="7" height="7" />
+                <rect x="14" y="14" width="7" height="7" />
+                <rect x="3" y="14" width="7" height="7" />
+              </svg>
+            </button>
+
+            {/* Theme Toggle Button */}
             <button
               onClick={() => setIsDarkMode(!isDarkMode)}
               className={`p-2 rounded-lg transition-all duration-200 ${
@@ -507,8 +568,7 @@ const AdminDashboard = () => {
               )}
             </button>
             <div className="flex items-center gap-2 text-sm">
-              <div className="h-2 w-2 bg-green-400 rounded-full"></div>
-              <span>System Active</span>
+              <div className="h-2 w-2 bg-green-400 rounded-full"></div>  
             </div>
           </div>
         </div>
@@ -650,13 +710,12 @@ const AdminDashboard = () => {
             <div className={`${theme.cardBg} backdrop-blur-xl border ${theme.border} rounded-xl p-4`}>
               <h2 className="text-lg font-semibold mb-4">Quick Actions</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-2">
-                <button className={`w-full p-2 ${isDarkMode ? 'bg-purple-500/20' : 'bg-purple-100'} ${isDarkMode ? 'text-purple-300' : 'text-purple-600'} rounded-lg hover:bg-purple-500/30 transition-colors flex items-center justify-center gap-2`}>
+                <button 
+                  onClick={handleExportReports}
+                  className={`w-full p-2 ${isDarkMode ? 'bg-purple-500/20' : 'bg-purple-100'} ${isDarkMode ? 'text-purple-300' : 'text-purple-600'} rounded-lg hover:bg-purple-500/30 transition-colors flex items-center justify-center gap-2`}
+                >
                   <Download className="h-4 w-4" />
                   Export Reports
-                </button>
-                <button className={`w-full p-2 ${isDarkMode ? 'bg-purple-500/20' : 'bg-purple-100'} ${isDarkMode ? 'text-purple-300' : 'text-purple-600'} rounded-lg hover:bg-purple-500/30 transition-colors flex items-center justify-center gap-2`}>
-                  <History className="h-4 w-4" />
-                  View Audit Log
                 </button>
               </div>
             </div>
