@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { cn } from '../utils/cn';
 import { useTheme } from '../hooks/useTheme';
 import { useCalendar } from '../hooks/useCalendar';
 import CalendarHeader from './Calendar/CalendarHeader';
 import MonthNavigator from './Calendar/MonthNavigator';
 import CalendarGrid from './Calendar/CalendarGrid';
+import { Loader2 } from 'lucide-react';
 
 interface DatePickerProps {
   onClose: () => void;
@@ -22,6 +23,16 @@ export default function DatePicker({ onClose }: DatePickerProps) {
     saveDates 
   } = useCalendar();
   const [tempSelectedDates, setTempSelectedDates] = useState<Set<string>>(new Set());
+  const [isCalendarLoading, setIsCalendarLoading] = useState(true);
+
+  // Add useEffect to simulate loading
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsCalendarLoading(false);
+    }, 1000); // 1 second loading state
+
+    return () => clearTimeout(timer);
+  }, []);
 
   // Handle edit toggle
   const handleEditToggle = () => {
@@ -51,7 +62,7 @@ export default function DatePicker({ onClose }: DatePickerProps) {
   };
 
   return (
-    <div className="p-4 md:p-6">
+    <div className="p-4 md:p-6 relative">
       <CalendarHeader
         isEditing={isEditing}
         onEditToggle={handleEditToggle}
@@ -68,6 +79,19 @@ export default function DatePicker({ onClose }: DatePickerProps) {
         isEditing={isEditing}
         onDateSelect={handleDateSelect}
       />
+      
+      {isCalendarLoading && (
+        <div className={cn(
+          "absolute inset-0 flex items-center justify-center",
+          "bg-black/20 backdrop-blur-[1px] rounded-xl",
+          "z-50"
+        )}>
+          <div className="flex items-center gap-2">
+            <Loader2 className="w-5 h-5 animate-spin text-white" />
+            <span className="text-white font-medium">Loading calendar...</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
