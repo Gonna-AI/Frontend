@@ -13,6 +13,7 @@
     "@11labs/client": "^0.0.4",
     "@nomiclabs/hardhat-ethers": "^2.2.3",
     "@nomiclabs/hardhat-waffle": "^2.0.6",
+    "@radix-ui/react-switch": "^1.1.2",
     "@react-three/drei": "^9.102.3",
     "@react-three/fiber": "^8.15.19",
     "@tanstack/react-query": "^5.62.10",

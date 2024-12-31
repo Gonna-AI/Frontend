@@ -11,6 +11,14 @@ export default function AgentProfile() {
   const { isDark } = useTheme();
   const [expandedSection, setExpandedSection] = useState(null);
 
+  const { data: claimsData } = useQuery({
+    queryKey: ['claims'],
+    queryFn: async () => {
+      const response = await api.get('/api/priority');
+      return response.data;
+    },
+  });
+
   const { data: user, isLoading, error } = useQuery({
     queryKey: ['user'],
     queryFn: async () => {
@@ -24,20 +32,20 @@ export default function AgentProfile() {
 
   const stats = [
     {
-      value: '247',
-      label: 'Claims',
+      value: claimsData?.length || '0',
+      label: 'Active Claims',
       icon: FileCheck,
       iconColor: 'text-emerald-400'
     },
     {
-      value: '94%',
-      label: 'Resolution',
+      value: `${calculateResolutionRate(claimsData)}%`,
+      label: 'Resolution Rate',
       icon: Target,
       iconColor: 'text-blue-400'
     },
     {
-      value: '4.8',
-      label: 'Rating',
+      value: calculateAverageUrgency(claimsData),
+      label: 'High Priority',
       icon: Star,
       iconColor: 'text-purple-400'
     }
@@ -71,35 +79,7 @@ export default function AgentProfile() {
               <span className={cn(
                 "font-semibold",
                 isDark ? "text-white" : "text-black"
-              )}>Performance</span>
-            </div>
-            <div className="flex gap-2 w-full sm:w-auto">
-              <button className={cn(
-                "p-2 rounded-xl transition-all flex-1 sm:flex-none",
-                isDark 
-                  ? "bg-black/20 border border-white/10 hover:bg-black/30" 
-                  : "bg-white/10 border border-black/10 hover:bg-white/20",
-                "flex items-center justify-center gap-2"
-              )}>
-                <History size={18} className={isDark ? "text-white/60" : "text-black/60"} />
-                <span className={cn(
-                  "sm:hidden",
-                  isDark ? "text-white/60" : "text-black/60"
-                )}>History</span>
-              </button>
-              <button className={cn(
-                "p-2 rounded-xl transition-all flex-1 sm:flex-none",
-                isDark 
-                  ? "bg-black/20 border border-white/10 hover:bg-black/30" 
-                  : "bg-white/10 border border-black/10 hover:bg-white/20",
-                "flex items-center justify-center gap-2"
-              )}>
-                <Download size={18} className={isDark ? "text-white/60" : "text-black/60"} />
-                <span className={cn(
-                  "sm:hidden",
-                  isDark ? "text-white/60" : "text-black/60"
-                )}>Export</span>
-              </button>
+              )}>Profile</span>
             </div>
           </div>
 
@@ -133,10 +113,6 @@ export default function AgentProfile() {
                     "text-xl sm:text-2xl font-bold mb-1",
                     isDark ? "text-white" : "text-black"
                   )}>{user.name ? user.name : 'No Name'}</h2>
-                  <h3 className={cn(
-                    "text-base sm:text-lg mb-2",
-                    isDark ? "text-white/60" : "text-black/60"
-                  )}>Sr. Claims Agent</h3>
                   <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
                     <div className="flex items-center gap-2">
                       <Mail className="w-4 h-4 text-blue-400" />
@@ -197,24 +173,6 @@ export default function AgentProfile() {
                   isDark ? "text-white" : "text-black"
                 )}>Recent Claims</span>
               </div>
-              <div className="flex gap-2">
-                <button className={cn(
-                  "p-2 rounded-xl transition-all",
-                  isDark 
-                    ? "bg-black/20 border border-white/10 hover:bg-black/30" 
-                    : "bg-white/10 border border-black/10 hover:bg-white/20"
-                )}>
-                  <Filter size={18} className={isDark ? "text-white/60" : "text-black/60"} />
-                </button>
-                <button className={cn(
-                  "p-2 rounded-xl transition-all",
-                  isDark 
-                    ? "bg-black/20 border border-white/10 hover:bg-black/30" 
-                    : "bg-white/10 border border-black/10 hover:bg-white/20"
-                )}>
-                  <ArrowUpDown size={18} className={isDark ? "text-white/60" : "text-black/60"} />
-                </button>
-              </div>
             </div>
 
             {/* Claims Records */}
@@ -224,42 +182,38 @@ export default function AgentProfile() {
                 ? "bg-black/20 border border-white/10" 
                 : "bg-white/10 border border-black/10"
             )}>
-              {[
-                { date: 'Dec 23', claimId: 'CLM-089', status: 'Resolved', priority: 'High' },
-                { date: 'Dec 22', claimId: 'CLM-088', status: 'In Progress', priority: 'Medium' },
-                { date: 'Dec 22', claimId: 'CLM-087', status: 'Pending', priority: 'Low' }
-              ].map((record, index) => (
+              {claimsData?.slice(0, 5).map((claim, index) => (
                 <div key={index} className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
                   <div className="flex items-center gap-3 sm:w-32">
                     <Calendar className={cn(
                       "w-4 h-4",
-                      record.status === 'Resolved' ? "text-emerald-400" :
-                      record.status === 'In Progress' ? "text-yellow-400" : "text-red-400"
+                      claim.urgency === 'high' ? "text-red-400" :
+                      claim.urgency === 'medium' ? "text-yellow-400" : "text-emerald-400"
                     )} />
                     <span className={cn(
                       "text-sm",
                       isDark ? "text-white" : "text-black"
-                    )}>{record.date}</span>
+                    )}>{new Date(claim.last_interaction).toLocaleDateString()}</span>
                   </div>
                   <div className="flex flex-1 items-center justify-between sm:justify-start gap-4">
                     <div className="min-w-[80px]">
                       <div className={cn(
                         "text-xs",
                         isDark ? "text-white/60" : "text-black/60"
-                      )}>Claim ID</div>
+                      )}>Ticket ID</div>
                       <div className={cn(
                         "text-sm",
                         isDark ? "text-white" : "text-black"
-                      )}>{record.claimId}</div>
+                      )}>{claim.ticket_id}</div>
                     </div>
                     <div>
                       <span className={cn(
                         "px-3 py-1 rounded-full text-xs inline-block text-center w-20",
-                        record.status === 'Resolved' ? "bg-emerald-400/20 text-emerald-400" :
-                        record.status === 'In Progress' ? "bg-yellow-400/20 text-yellow-400" :
-                        "bg-red-400/20 text-red-400"
+                        claim.urgency === 'high' ? "bg-red-400/20 text-red-400" :
+                        claim.urgency === 'medium' ? "bg-yellow-400/20 text-yellow-400" :
+                        "bg-emerald-400/20 text-emerald-400"
                       )}>
-                        {record.status}
+                        {claim.urgency.toUpperCase()}
                       </span>
                     </div>
                   </div>
@@ -271,4 +225,16 @@ export default function AgentProfile() {
       </div>
     </div>
   );
+}
+
+function calculateResolutionRate(claims) {
+  if (!claims || claims.length === 0) return '0';
+  const resolved = claims.filter(claim => claim.category && claim.issue).length;
+  return Math.round((resolved / claims.length) * 100);
+}
+
+function calculateAverageUrgency(claims) {
+  if (!claims || claims.length === 0) return '0';
+  const highPriority = claims.filter(claim => claim.urgency === 'high').length;
+  return highPriority;
 }
