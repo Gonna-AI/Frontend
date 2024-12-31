@@ -1,54 +1,74 @@
 import React from 'react';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, Sun, Moon } from 'lucide-react';
 import { useTheme } from '../../../hooks/useTheme';
 import { cn } from '../../../utils/cn';
 import { menuItems } from '../../../config/navigation';
-import ThemeToggle from '../ThemeToggle';
 import { ViewType } from '../../../types/navigation';
 import { useNavigate } from 'react-router-dom';
-
-interface SidebarItemProps {
-  icon: React.ElementType;
-  label: string;
-  isActive: boolean;
-  isExpanded: boolean;
-  onClick: () => void;
-  isDark?: boolean;
-}
 
 // Separate SidebarItem component with enhanced animations
 function SidebarItem({
   icon: Icon,
   label,
   isActive,
-  isExpanded,
   onClick,
   isDark,
-}: SidebarItemProps) {
+}: {
+  icon: React.ElementType;
+  label: string;
+  isActive: boolean;
+  onClick: () => void;
+  isDark: boolean;
+}) {
   return (
-    <button
-      onClick={onClick}
-      className={cn(
-        "w-full px-3 py-2 rounded-lg flex items-center gap-3",
-        "transition-all duration-300 ease-in-out",
-        isActive ? "bg-blue-500/20 text-blue-500" : isDark ? "text-white hover:bg-gray-500/10" : "hover:bg-gray-500/10"
-      )}
-    >
-      <Icon className="w-5 h-5 flex-shrink-0" />
-      <div className="min-w-[180px] overflow-hidden">
-        <span 
-          className={cn(
-            "whitespace-nowrap block transition-all duration-500 ease-in-out",
-            isExpanded 
-              ? "opacity-100 translate-x-0" 
-              : "opacity-0 -translate-x-4",
-            isDark && !isActive && "text-white"
-          )}
-        >
-          {label}
-        </span>
+    <div className="relative group">
+      <button
+        onClick={onClick}
+        className={cn(
+          "w-full h-12 rounded-xl flex items-center justify-center",
+          "transition-all duration-300 ease-in-out",
+          isActive 
+            ? isDark 
+              ? "bg-white/10 text-white" 
+              : "bg-black/10 text-black"
+            : isDark 
+              ? "text-white/80 hover:bg-white/5 hover:text-white"
+              : "text-black/80 hover:bg-black/5 hover:text-black"
+        )}
+      >
+        <Icon className={cn(
+          "w-6 h-6 flex-shrink-0",
+          "transition-transform duration-300",
+          "group-hover:scale-110",
+          "stroke-[1.5]"
+        )} />
+      </button>
+      
+      {/* Custom Tooltip */}
+      <div className={cn(
+        "absolute left-0 transform -translate-x-full -translate-y-1/2 top-1/2",
+        "px-3 py-2 mr-2",
+        "rounded-lg",
+        "text-sm font-medium",
+        "opacity-0 group-hover:opacity-100",
+        "pointer-events-none",
+        "transition-all duration-200",
+        "whitespace-nowrap",
+        isDark
+          ? "bg-black/90 text-white backdrop-blur-sm border border-white/10"
+          : "bg-white/90 text-black backdrop-blur-sm border border-black/10",
+      )}>
+        {label}
+        {/* Tooltip Arrow */}
+        <div className={cn(
+          "absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 rotate-45",
+          "w-2 h-2",
+          isDark
+            ? "bg-black/90 border-r border-t border-white/10"
+            : "bg-white/90 border-r border-t border-black/10"
+        )} />
       </div>
-    </button>
+    </div>
   );
 }
 
@@ -63,54 +83,65 @@ export default function DesktopSidebar({
   onViewChange,
   onSignOut,
 }: DesktopSidebarProps) {
-  const { isDark } = useTheme();
+  const { isDark, toggleTheme } = useTheme();
   const navigate = useNavigate();
 
+  // Combine all items including theme toggle and sign out
+  const allItems = [
+    ...menuItems.map(item => ({
+      id: item.id,
+      icon: item.icon,
+      label: item.label,
+      onClick: () => {
+        navigate(item.path);
+        onViewChange(item.id);
+      },
+      isActive: currentView === item.id,
+    })),
+    {
+      id: 'theme',
+      icon: isDark ? Moon : Sun,
+      label: isDark ? 'Dark Mode' : 'Light Mode',
+      onClick: toggleTheme,
+      isActive: false,
+    },
+    {
+      id: 'signout',
+      icon: ChevronRight,
+      label: 'Sign Out',
+      onClick: onSignOut,
+      isActive: false,
+    },
+  ];
+
   return (
-    <div
+    <aside
       className={cn(
-        "hidden md:flex fixed right-0 top-20 bottom-0 flex-col",
+        "hidden md:flex fixed right-0 top-[76px] bottom-0",
+        "w-20 flex-col",
+        "rounded-tl-2xl",
         "transition-all duration-300 ease-in-out",
         "z-30",
-        "rounded-tl-2xl",
         isDark
-          ? "bg-black/40 backdrop-blur-2xl border-t border-white/10"
-          : "bg-white/40 backdrop-blur-2xl border-t border-black/10"
+          ? "bg-black/40 backdrop-blur-xl border-l border-t border-white/10"
+          : "bg-white/40 backdrop-blur-xl border-l border-t border-black/10"
       )}
-      style={{
-        width: '80px'
-      }}
     >
-      <div className="flex flex-col h-full relative z-10">
-        <div className="flex-1 py-6 space-y-2 px-2">
-          {menuItems.map((item) => (
+      {/* Navigation Items */}
+      <div className="flex-1 py-4 px-3">
+        <div className="space-y-2">
+          {allItems.map((item) => (
             <SidebarItem
               key={item.id}
               icon={item.icon}
-              label=""
-              isActive={currentView === item.id}
-              isExpanded={false}
-              onClick={() => {
-                navigate(item.path);
-                onViewChange(item.id);
-              }}
+              label={item.label}
+              isActive={item.isActive}
+              onClick={item.onClick}
               isDark={isDark}
             />
           ))}
         </div>
-
-        <div className="p-4 space-y-3 border-t border-white/5">
-          <ThemeToggle isExpanded={false} />
-          <SidebarItem
-            icon={ChevronRight}
-            label=""
-            isActive={false}
-            isExpanded={false}
-            onClick={onSignOut}
-            isDark={isDark}
-          />
-        </div>
       </div>
-    </div>
+    </aside>
   );
 }

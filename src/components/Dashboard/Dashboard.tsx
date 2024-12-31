@@ -44,7 +44,7 @@ export default function Dashboard() {
   return (
     <ErrorBoundary FallbackComponent={ErrorFallback}>
       <div className={cn(
-        "h-[calc(100vh-5rem)] overflow-y-auto",
+        "fixed inset-0",
         "p-4 md:p-6 space-y-4 md:space-y-6",
         isDark ? "text-white" : "text-black"
       )}>
