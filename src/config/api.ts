@@ -78,7 +78,13 @@ export const documentApi = {
     return await api.post('/api/documents/blockchain/verify', {
       document_hash: documentHash
     });
-  }
+  },
+  getVerificationStatus: () => 
+    api.get('/api/documents/status', {
+      headers: {
+        'X-Ticket-ID': api.defaults.headers['X-Ticket-ID']
+      }
+    }),
 };
 
 interface CreateTicketData {
