@@ -42,8 +42,7 @@ const AdminDashboard = () => {
   const [showDetails, setShowDetails] = useState(false);
   const [filters, setFilters] = useState({
     status: 'all',
-    priority: 'all',
-    type: 'all'
+    priority: 'all'
   });
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
@@ -69,6 +68,25 @@ const AdminDashboard = () => {
     verifier: string;
     verificationTime: number;
   } | null>(null);
+
+  // Add new state for search
+  const [searchTerm, setSearchTerm] = useState('');
+
+  // Add function to filter documents
+  const filteredDocuments = documents.filter(doc => {
+    // Search filter
+    const searchMatch = searchTerm === '' || 
+      doc.ticketId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      doc.title.toLowerCase().includes(searchTerm.toLowerCase());
+
+    // Status filter
+    const statusMatch = filters.status === 'all' || doc.status === filters.status;
+
+    // Priority filter
+    const priorityMatch = filters.priority === 'all' || doc.priority === filters.priority;
+
+    return searchMatch && statusMatch && priorityMatch;
+  });
 
   // Add useEffect for API data
   useEffect(() => {
@@ -503,21 +521,36 @@ const AdminDashboard = () => {
                 <Search className={`absolute left-3 top-1/2 transform -translate-y-1/2 ${theme.secondaryText} h-4 w-4`} />
                 <input
                   type="text"
-                  placeholder="Search documents, users, or ticket IDs..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder="Search by ticket ID or name..."
                   className={`w-full pl-10 pr-4 py-2 ${theme.searchInput} border ${theme.inputBorder} rounded-lg ${theme.searchText} ${theme.searchPlaceholder} focus:outline-none focus:border-purple-500/50`}
                 />
               </div>
             </div>
             
             <div className="flex flex-wrap gap-2 sm:gap-4">
-              {['Status', 'Priority', 'Type'].map((filterName) => (
-                <select
-                  key={filterName}
-                  className={`flex-1 sm:flex-none px-4 py-2 ${theme.selectBg} border ${theme.inputBorder} rounded-lg ${theme.selectText} focus:outline-none focus:border-purple-500/50`}
-                >
-                  <option value="all">{filterName}: All</option>
-                </select>
-              ))}
+              <select
+                value={filters.status}
+                onChange={(e) => setFilters(prev => ({ ...prev, status: e.target.value }))}
+                className={`flex-1 sm:flex-none px-4 py-2 ${theme.selectBg} border ${theme.inputBorder} rounded-lg ${theme.selectText} focus:outline-none focus:border-purple-500/50`}
+              >
+                <option value="all">Status: All</option>
+                <option value="pending">Pending</option>
+                <option value="verified">Verified</option>
+                <option value="rejected">Rejected</option>
+              </select>
+
+              <select
+                value={filters.priority}
+                onChange={(e) => setFilters(prev => ({ ...prev, priority: e.target.value }))}
+                className={`flex-1 sm:flex-none px-4 py-2 ${theme.selectBg} border ${theme.inputBorder} rounded-lg ${theme.selectText} focus:outline-none focus:border-purple-500/50`}
+              >
+                <option value="all">Priority: All</option>
+                <option value="high">High</option>
+                <option value="medium">Medium</option>
+                <option value="low">Low</option>
+              </select>
             </div>
           </div>
         </div>
@@ -526,7 +559,7 @@ const AdminDashboard = () => {
         <div className="flex flex-col lg:grid lg:grid-cols-3 gap-6">
           {/* Documents List */}
           <div className="lg:col-span-2 space-y-4">
-            {documents.map((doc) => (
+            {filteredDocuments.map((doc) => (
               <div key={doc.id} className={`p-4 rounded-xl ${theme.cardBg} border ${theme.border}`}>
                 <div className="flex items-center justify-between mb-4">
                   <div>
