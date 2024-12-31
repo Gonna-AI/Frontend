@@ -14,14 +14,49 @@ export default function DatePicker({ onClose }: DatePickerProps) {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [isEditing, setIsEditing] = useState(false);
   const { isDark } = useTheme();
-  const { selectedDates, toggleDate } = useCalendar();
+  const { 
+    selectedDates, 
+    toggleDate, 
+    isLoading, 
+    error, 
+    saveDates 
+  } = useCalendar();
+  const [tempSelectedDates, setTempSelectedDates] = useState<Set<string>>(new Set());
+
+  // Handle edit toggle
+  const handleEditToggle = () => {
+    if (isEditing) {
+      // Calculate dates to add and remove
+      const datesToAdd = [...tempSelectedDates].filter(date => !selectedDates.has(date));
+      const datesToRemove = [...selectedDates].filter(date => !tempSelectedDates.has(date));
+
+      saveDates(datesToAdd, datesToRemove);
+      onClose();
+    } else {
+      // Enter editing mode
+      setTempSelectedDates(new Set(selectedDates));
+    }
+    setIsEditing(!isEditing);
+  };
+
+  // Handle temporary date selection during editing
+  const handleDateSelect = (dateStr: string) => {
+    const newTempDates = new Set(tempSelectedDates);
+    if (newTempDates.has(dateStr)) {
+      newTempDates.delete(dateStr);
+    } else {
+      newTempDates.add(dateStr);
+    }
+    setTempSelectedDates(newTempDates);
+  };
 
   return (
     <div className="p-4 md:p-6">
       <CalendarHeader
         isEditing={isEditing}
-        onEditToggle={() => setIsEditing(!isEditing)}
+        onEditToggle={handleEditToggle}
         onClose={onClose}
+        isLoading={isLoading}
       />
       <MonthNavigator
         currentDate={currentDate}
@@ -29,9 +64,9 @@ export default function DatePicker({ onClose }: DatePickerProps) {
       />
       <CalendarGrid
         currentDate={currentDate}
-        selectedDates={selectedDates}
+        selectedDates={isEditing ? tempSelectedDates : selectedDates}
         isEditing={isEditing}
-        onDateSelect={toggleDate}
+        onDateSelect={handleDateSelect}
       />
     </div>
   );
