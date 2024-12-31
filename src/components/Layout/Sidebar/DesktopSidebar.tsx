@@ -5,6 +5,7 @@ import { cn } from '../../../utils/cn';
 import { menuItems } from '../../../config/navigation';
 import { ViewType } from '../../../types/navigation';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 
 // Separate SidebarItem component with enhanced animations
 function SidebarItem({
@@ -149,37 +150,58 @@ export default function DesktopSidebar({
       {/* Sign Out Confirmation Popup */}
       {showSignOutConfirm && (
         <div className={cn(
-          "fixed inset-0 bg-black/50 backdrop-blur-sm z-50",
-          "flex items-center justify-center"
+          "fixed inset-0 z-50",
+          "flex items-center justify-center p-6",
+          isDark ? "bg-black/60" : "bg-black/30",
+          "backdrop-blur-sm"
         )}>
-          <div className={cn(
-            "p-6 rounded-2xl max-w-sm w-full mx-4",
-            "transform transition-all",
-            isDark
-              ? "bg-gray-900 border border-white/10"
-              : "bg-white border border-black/10"
-          )}>
-            <h3 className={cn(
-              "text-lg font-semibold mb-2",
-              isDark ? "text-white" : "text-black"
-            )}>
-              Confirm Sign Out
-            </h3>
-            <p className={cn(
-              "mb-4",
-              isDark ? "text-white/80" : "text-black/80"
-            )}>
-              Are you sure you want to sign out?
-            </p>
-            <div className="flex justify-end space-x-3">
+          {/* Gradient Backdrop */}
+          <div 
+            className="absolute inset-0 opacity-30"
+            style={{
+              background: 'radial-gradient(circle at center, rgba(147,51,234,0.5) 0%, rgba(147,51,234,0.2) 40%, transparent 100%)',
+              filter: 'blur(40px)',
+            }}
+          />
+
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            transition={{ duration: 0.2 }}
+            className={cn(
+              "w-full max-w-sm relative z-10",
+              isDark
+                ? "bg-black/40 backdrop-blur-xl border border-white/10"
+                : "bg-white/60 backdrop-blur-xl border border-black/5",
+              "rounded-xl overflow-hidden"
+            )}
+          >
+            <div className="p-6 text-center">
+              <h2 className={cn(
+                "text-xl font-semibold",
+                isDark ? "text-white" : "text-gray-800"
+              )}>
+                Sign Out
+              </h2>
+              <p className={cn(
+                "text-sm mt-1",
+                isDark ? "text-gray-400" : "text-gray-600"
+              )}>
+                Are you sure you want to sign out?
+              </p>
+            </div>
+
+            <div className="p-6 pt-0 flex gap-3">
               <button
                 onClick={() => setShowSignOutConfirm(false)}
                 className={cn(
-                  "px-4 py-2 rounded-lg",
+                  "flex-1 py-2 px-4 rounded-lg",
+                  "text-sm font-medium",
                   "transition-all duration-200",
                   isDark
-                    ? "text-white/80 hover:text-white hover:bg-white/10"
-                    : "text-black/80 hover:text-black hover:bg-black/10"
+                    ? "bg-gray-800/50 text-white border border-gray-700/50 hover:bg-gray-700/50"
+                    : "bg-white/60 text-gray-800 border border-gray-200 hover:bg-white/80"
                 )}
               >
                 Cancel
@@ -190,17 +212,18 @@ export default function DesktopSidebar({
                   onSignOut();
                 }}
                 className={cn(
-                  "px-4 py-2 rounded-lg",
+                  "flex-1 py-2 px-4 rounded-lg",
+                  "text-sm font-medium",
                   "transition-all duration-200",
                   isDark
-                    ? "bg-red-500 text-white hover:bg-red-600"
-                    : "bg-red-500 text-white hover:bg-red-600"
+                    ? "bg-purple-600/80 text-white backdrop-blur-sm border border-purple-500/50 hover:bg-purple-600"
+                    : "bg-purple-500/80 text-white backdrop-blur-sm border border-purple-400/50 hover:bg-purple-500"
                 )}
               >
                 Sign Out
               </button>
             </div>
-          </div>
+          </motion.div>
         </div>
       )}
     </>
