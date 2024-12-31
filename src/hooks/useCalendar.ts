@@ -5,6 +5,7 @@ interface CalendarState {
   addDate: (date: string) => void;
   removeDate: (date: string) => void;
   toggleDate: (date: string) => void;
+  clearAllDates: () => void;
 }
 
 export const useCalendar = create<CalendarState>((set) => ({
@@ -28,4 +29,5 @@ export const useCalendar = create<CalendarState>((set) => ({
     }
     return { selectedDates: newDates };
   }),
+  clearAllDates: () => set({ selectedDates: new Set() }),
 }));
