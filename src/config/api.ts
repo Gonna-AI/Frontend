@@ -151,7 +151,13 @@ export const adminApi = {
         return await api.get(`/api/blockchain/download/${documentHash}`, {
             responseType: 'blob'
         });
-    }
+    },
+    markBusyDates: (dates: { dates: string[] }) =>
+        api.post('/api/admin/availability', dates),
+    unmarkBusyDates: (dates: { dates: string[] }) =>
+        api.delete('/api/admin/availability', { data: dates }),
+    getBusyDates: () =>
+        api.get('/api/admin/availability'),
 };
 
 export default api; 
