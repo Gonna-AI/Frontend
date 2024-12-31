@@ -341,451 +341,431 @@ export default function AISettings() {
     }
   };
 
+  // Add theme helper function to match Documents page
+  const getThemeColors = () => ({
+    background: isDark ? 'bg-[#0a0a0a]' : 'bg-gray-50',
+    text: isDark ? 'text-white' : 'text-gray-800',
+    cardBg: isDark ? 'bg-black/40' : 'bg-white',
+    border: isDark ? 'border-white/10' : 'border-gray-200',
+    inputBg: isDark ? 'bg-black/40' : 'bg-white',
+    inputBorder: isDark ? 'border-purple-500/20' : 'border-purple-200',
+    secondaryText: isDark ? 'text-gray-400' : 'text-gray-500',
+    statsBg: isDark ? 'bg-purple-500/5' : 'bg-purple-50',
+    statsBorder: isDark ? 'border-purple-500/20' : 'border-purple-100',
+  });
+
+  const theme = getThemeColors();
+
   return (
-    <div className="p-2 sm:p-4 md:p-6 max-w-[95rem] mx-auto">
+    <div className={cn(
+      "min-h-screen transition-colors duration-500 rounded-3xl",
+      isDark ? "bg-gradient-to-b from-gray-900 to-black" : "bg-gradient-to-b from-gray-50 to-white"
+    )}>
+      {/* Purple gradient overlay */}
       <div className={cn(
-        "relative overflow-hidden rounded-xl sm:rounded-3xl min-h-[85vh]",
-        isDark ? "bg-[#1c1c1c]" : "bg-white",
-        "border",
-        isDark ? "border-white/10" : "border-black/10",
-        "p-4 sm:p-6 md:p-8",
-        "transition-colors duration-200"
-      )}>
-        {/* Background Gradients */}
-        <div className="absolute top-0 right-0 w-[35rem] h-[35rem] bg-gradient-to-bl from-blue-500/10 via-purple-500/5 to-transparent blur-3xl pointer-events-none" />
-        <div className="absolute bottom-0 left-0 w-[35rem] h-[35rem] bg-gradient-to-tr from-purple-500/10 to-transparent blur-3xl pointer-events-none" />
+        "fixed top-0 left-0 right-0 h-[40vh] pointer-events-none",
+        isDark ? "bg-gradient-to-b from-purple-500/20 via-blue-500/10 to-transparent"
+             : "bg-gradient-to-b from-blue-900/40 via-purple-200/30 to-transparent"
+      )} />
 
-        <div className="relative z-10 space-y-6">
-          {/* Knowledge Base Section */}
-          <GlassContainer>
-            <div className="flex items-center gap-4 mb-6">
-              <IconContainer 
-                icon={Database} 
-                color={isDark ? "text-blue-400" : "text-blue-600"} 
-              />
-              <h2 className={cn(
-                "text-lg font-semibold",
-                isDark ? "text-white" : "text-black"
-              )}>Knowledge Base</h2>
-            </div>
+      <div className={`min-h-screen ${theme.text} p-6 transition-colors duration-200 relative z-10`}>
+        {/* Header */}
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-3">
+            <span className={`text-2xl font-bold ${theme.text}`}>Assistant Customisation</span>
+          </div>
+        </div>
 
-            {/* Add New Entry Form */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-              <input
-                ref={categoryInputRef}
-                type="text"
-                value={newCategory}
-                onChange={(e) => setNewCategory(e.target.value)}
-                placeholder="Category"
-                className={cn(
-                  "w-full p-4 rounded-xl transition-all",
-                  "focus:outline-none focus:ring-2",
-                  isDark
-                    ? "bg-black/40 border border-white/10 text-white placeholder-white/30 focus:ring-white/20"
-                    : "bg-black/5 border border-black/10 text-black placeholder-black/30 focus:ring-black/20"
-                )}
-              />
-              <input
-                ref={descriptionInputRef}
-                type="text"
-                value={newDescription}
-                onChange={(e) => setNewDescription(e.target.value)}
-                placeholder="Description"
-                className={cn(
-                  "w-full p-4 rounded-xl transition-all",
-                  "focus:outline-none focus:ring-2",
-                  isDark
-                    ? "bg-black/40 border border-white/10 text-white placeholder-white/30 focus:ring-white/20"
-                    : "bg-black/5 border border-black/10 text-black placeholder-black/30 focus:ring-black/20"
-                )}
-              />
-            </div>
-
-            {/* Add Entry Button */}
-            <button
-              onClick={handleAddEntry}
-              className={cn(
-                "w-full p-4 rounded-xl mb-6 transition-colors flex items-center justify-center gap-2",
-                isDark
-                  ? "bg-white/10 hover:bg-white/20 text-white"
-                  : "bg-black/10 hover:bg-black/20 text-black"
-              )}
-            >
-              <Plus className="w-5 h-5" />
-              Add Entry
-            </button>
-
-            {/* Select All and Confirm Selection Buttons */}
-            <div className="flex justify-between items-center mb-4">
-              {showSelectAll && (
-                <button
-                  onClick={handleSelectAllClick}
-                  className={cn(
-                    "p-2 rounded-lg transition-colors flex items-center gap-2",
-                    isDark
-                      ? "bg-white/10 hover:bg-white/20 text-white"
-                      : "bg-black/10 hover:bg-black/20 text-black"
-                  )}
-                >
-                  {allSelected ? <X className="w-5 h-5" /> : <Check className="w-5 h-5" />}
-                  {showSelectAllText && "Select All"}
-                </button>
-              )}
-              {showConfirmSelection && (
-                <button
-                  onClick={handleConfirmSelection}
-                  className={cn(
-                    "p-2 rounded-lg transition-colors flex items-center gap-2",
-                    isDark
-                      ? "bg-white/10 hover:bg-white/20 text-white"
-                      : "bg-black/10 hover:bg-black/20 text-black"
-                  )}
-                >
-                  <Check className="w-5 h-5" />
-                  Confirm Selection
-                </button>
-              )}
-              {showConfirmSelection && (
-                <button
-                  onClick={handleMultipleDelete}
-                  className={cn(
-                    "p-2 rounded-lg transition-colors flex items-center gap-2",
-                    isDark
-                      ? "bg-red-500/20 hover:bg-red-500/30 text-red-300"
-                      : "bg-red-500/10 hover:bg-red-500/20 text-red-600"
-                  )}
-                >
-                  <Trash2 className="w-5 h-5" />
-                  Delete Selected
-                </button>
-              )}
-            </div>
-
-            {/* Knowledge Base Entries */}
-            <div className="space-y-4">
-              {knowledgeBase.map((entry) => (
-                <div
-                  key={entry.id}
-                  className={cn(
-                    "p-4 rounded-xl transition-all",
-                    isDark
-                      ? "bg-black/40 border border-white/10"
-                      : "bg-black/5 border border-black/10"
-                  )}
-                >
-                  <div className="grid grid-cols-1 md:grid-cols-[auto,1fr,auto] gap-4 items-center">
-                    <div 
-                      className={cn(
-                        "w-6 h-6 rounded-md border flex items-center justify-center cursor-pointer",
-                        entry.selected
-                          ? isDark
-                            ? "bg-white border-white"
-                            : "bg-black border-black"
-                          : isDark
-                            ? "border-white/30"
-                            : "border-black/30"
-                      )}
-                      onClick={() => handleCheckboxChange(entry.id)}
-                    >
-                      {entry.selected && (
-                        <Check 
-                          className={cn(
-                            isDark ? "text-black" : "text-white"
-                          )} 
-                          size={16} 
-                        />
-                      )}
-                    </div>
-                    <div className={isDark ? "text-white" : "text-black"}>
-                      {entry.category}
-                    </div>
-                    <div className="md:col-span-2">
-                      {editingId === entry.id ? (
-                        <EditableInput
-                          value={editingValue}
-                          onChange={setEditingValue}
-                          onSave={handleSaveEdit}
-                          isDark={isDark}
-                        />
-                      ) : (
-                        <div className={isDark ? "text-white" : "text-black"}>
-                          {entry.description}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex justify-end mt-4 space-x-2">
-                    {showDeleteWarning === entry.id ? (
-                      <>
-                        <button
-                          onClick={() => confirmDelete(entry.id)}
-                          className={cn(
-                            "p-2 rounded-lg transition-colors",
-                            isDark
-                              ? "bg-red-500/20 hover:bg-red-500/30 text-red-300"
-                              : "bg-red-500/10 hover:bg-red-500/20 text-red-600"
-                          )}
-                        >Confirm
-                        </button>
-                        <button
-                          onClick={cancelDelete}
-                          className={cn(
-                            "p-2 rounded-lg transition-colors",
-                            isDark
-                              ? "bg-white/10 hover:bg-white/20 text-white"
-                              : "bg-black/10 hover:bg-black/20 text-black"
-                          )}
-                        >
-                          Cancel
-                        </button>
-                      </>
-                    ) : (
-                      <>
-                        <button
-                          onClick={() => {
-                            if (editingId === entry.id) {
-                              handleSaveEdit();
-                            } else {
-                              handleStartEdit(entry);
-                            }
-                          }}
-                          className={cn(
-                            "p-2 rounded-lg transition-colors",
-                            isDark
-                              ? "hover:bg-white/10 text-white"
-                              : "hover:bg-black/10 text-black"
-                          )}
-                        >
-                          {editingId === entry.id ? (
-                            <Save className="w-5 h-5" />
-                          ) : (
-                            <Edit2 className="w-5 h-5" />
-                          )}
-                        </button>
-                        <button
-                          onClick={() => handleDeleteEntry(entry.id)}
-                          className={cn(
-                            "p-2 rounded-lg transition-colors",
-                            isDark
-                              ? "hover:bg-white/10 text-white"
-                              : "hover:bg-black/10 text-black"
-                          )}
-                        >
-                          <Trash2 className="w-5 h-5" />
-                        </button>
-                      </>
-                    )}
-                  </div>
+        {/* Main Content Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Knowledge Base Section - Takes up 2 columns */}
+          <div className="lg:col-span-2 space-y-6">
+            <div className={`${theme.cardBg} backdrop-blur-xl border ${theme.border} rounded-3xl p-6`}>
+              <div className="flex items-center gap-4 mb-6">
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isDark ? "bg-black/40" : "bg-black/5"}`}>
+                  <Database className={isDark ? "text-blue-400" : "text-blue-600"} />
                 </div>
-              ))}
-            </div>
-            {showSelectedDialog && (
-              <div 
-                className={cn(
-                  "mt-6 p-4 rounded-xl text-center font-medium transition-opacity duration-300",
-                  isDark
-                    ? "bg-green-500/20 text-green-300"
-                    : "bg-green-500/20 text-green-700"
-                )}
-              >
-                Selected
+                <h2 className="text-lg font-semibold">Knowledge Base</h2>
               </div>
-            )}
-            {showError && (
-              <div 
-                className={cn(
-                  "mt-6 p-4 rounded-xl text-center font-medium transition-opacity duration-300",
-                  isDark
-                    ? "bg-red-500/20 text-red-300"
-                    : "bg-red-500/20 text-red-700"
-                )}
-              >
-                {errorMessage}
-              </div>
-            )}
-            {showMultipleDeleteWarning && (
-              <div 
-                className={cn(
-                  "mt-6 p-4 rounded-xl text-center font-medium transition-opacity duration-300",
-                  isDark
-                    ? "bg-red-500/20 text-red-300"
-                    : "bg-red-500/20 text-red-700"
-                )}
-              >
-                Are you sure you want to delete the selected entries?
-                <div className="mt-4 flex justify-center gap-4">
-                  <button
-                    onClick={confirmMultipleDelete}
-                    className={cn(
-                      "p-2 rounded-lg transition-colors",
-                      isDark
-                        ? "bg-red-500/20 hover:bg-red-500/30 text-red-300"
-                        : "bg-red-500/10 hover:bg-red-500/20 text-red-600"
-                    )}
-                  >
-                    Confirm Delete
-                  </button>
-                  <button
-                    onClick={() => setShowMultipleDeleteWarning(false)}
-                    className={cn(
-                      "p-2 rounded-lg transition-colors",
-                      isDark
-                        ? "bg-white/10 hover:bg-white/20 text-white"
-                        : "bg-black/10 hover:bg-black/20 text-black"
-                    )}
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </div>
-            )}
-          </GlassContainer>
 
-          {/* Personality Settings */}
-          <GlassContainer>
-            <div className="flex items-center gap-4 mb-6">
-              <IconContainer 
-                icon={Bot} 
-                color={isDark ? "text-purple-400" : "text-purple-600"} 
-              />
-              <h2 className={cn(
-                "text-lg font-semibold",
-                isDark ? "text-white" : "text-black"
-              )}>Personality Settings</h2>
-            </div>
-            <div className="space-y-6">
-              <div>
-                <label className={cn(
-                  "block text-sm font-medium mb-3",
-                  isDark ? "text-white/60" : "text-black/60"
-                )}>
-                  AI Name
-                </label>
+              {/* Add Entry Form */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                 <input
-                  ref={aiNameInputRef}
+                  ref={categoryInputRef}
                   type="text"
-                  value={aiName}
-                  onChange={(e) => setAiName(e.target.value)}
-                  className={cn(
-                    "w-full p-4 rounded-xl transition-all",
-                    "focus:outline-none focus:ring-2",
+                  value={newCategory}
+                  onChange={(e) => setNewCategory(e.target.value)}
+                  placeholder="Category"
+                  className={`w-full p-4 rounded-xl transition-all focus:outline-none focus:ring-2 ${
                     isDark
                       ? "bg-black/40 border border-white/10 text-white placeholder-white/30 focus:ring-white/20"
                       : "bg-black/5 border border-black/10 text-black placeholder-black/30 focus:ring-black/20"
-                  )}
-                  placeholder="Enter AI assistant name"
+                  }`}
+                />
+                <input
+                  ref={descriptionInputRef}
+                  type="text"
+                  value={newDescription}
+                  onChange={(e) => setNewDescription(e.target.value)}
+                  placeholder="Description"
+                  className={`w-full p-4 rounded-xl transition-all focus:outline-none focus:ring-2 ${
+                    isDark
+                      ? "bg-black/40 border border-white/10 text-white placeholder-white/30 focus:ring-white/20"
+                      : "bg-black/5 border border-black/10 text-black placeholder-black/30 focus:ring-black/20"
+                  }`}
                 />
               </div>
-              <div>
-                <label className={cn(
-                  "block text-sm font-medium mb-3",
-                  isDark ? "text-white/60" : "text-black/60"
-                )}>
-                  Tone of Voice
-                </label>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                  {['Professional', 'Friendly', 'Casual', 'Formal'].map((option) => (
-                    <button
-                      key={option}
-                      onClick={() => setTone(option)}
-                      className={cn(
-                        "p-3 rounded-xl border text-sm font-medium transition-all",
-                        tone === option 
-                          ? isDark
-                            ? "bg-black/60 border-white/20 text-white"
-                            : "bg-black/10 border-black/20 text-black"
-                          : isDark
-                            ? "bg-black/40 border-white/10 text-white/60 hover:bg-black/50"
-                            : "bg-black/5 border-black/10 text-black/60 hover:bg-black/10"
-                      )}
-                    >
-                      {option}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </GlassContainer>
 
-          {/* Response Settings */}
-          <GlassContainer>
-            <div className="flex items-center gap-4 mb-6">
-              <IconContainer 
-                icon={MessageSquare} 
-                color={isDark ? "text-emerald-400" : "text-emerald-600"} 
-              />
-              <h2 className={cn(
-                "text-lg font-semibold",
-                isDark ? "text-white" : "text-black"
-              )}>Response Settings</h2>
-            </div>
-            <div className="space-y-6">
-              <div>
-                <label className={cn(
-                  "block text-sm font-medium mb-3",
-                  isDark ? "text-white/60" : "text-black/60"
-                )}>
-                  Response Length
-                </label>
-                <div className="flex flex-col sm:flex-row gap-3">
-                  {['Concise', 'Moderate', 'Detailed'].map((option) => (
-                    <button
-                      key={option}
-                      onClick={() => setLength(option)}
-                      className={cn(
-                        "flex-1 p-3 rounded-xl border text-sm font-medium transition-all",
-                        length === option 
-                          ? isDark
-                            ? "bg-black/60 border-white/20 text-white"
-                            : "bg-black/10 border-black/20 text-black"
-                          : isDark
-                            ? "bg-black/40 border-white/10 text-white/60 hover:bg-black/50"
-                            : "bg-black/5 border-black/10 text-black/60 hover:bg-black/10"
-                      )}
-                    >
-                      {option}
-                    </button>
-                  ))}
-                </div>
+              {/* Add Entry Button */}
+              <button
+                onClick={handleAddEntry}
+                className={`w-full p-4 rounded-xl mb-6 transition-colors flex items-center justify-center gap-2 ${
+                  isDark
+                    ? "bg-white/10 hover:bg-white/20 text-white"
+                    : "bg-black/10 hover:bg-black/20 text-black"
+                }`}
+              >
+                <Plus className="w-5 h-5" />
+                Add Entry
+              </button>
+
+              {/* Select All and Confirm Selection Buttons */}
+              <div className="flex justify-between items-center mb-4">
+                {showSelectAll && (
+                  <button
+                    onClick={handleSelectAllClick}
+                    className={`p-2 rounded-lg transition-colors flex items-center gap-2 ${
+                      isDark
+                        ? "bg-white/10 hover:bg-white/20 text-white"
+                        : "bg-black/10 hover:bg-black/20 text-black"
+                    }`}
+                  >
+                    {allSelected ? <X className="w-5 h-5" /> : <Check className="w-5 h-5" />}
+                    {showSelectAllText && "Select All"}
+                  </button>
+                )}
+                {showConfirmSelection && (
+                  <button
+                    onClick={handleConfirmSelection}
+                    className={`p-2 rounded-lg transition-colors flex items-center gap-2 ${
+                      isDark
+                        ? "bg-white/10 hover:bg-white/20 text-white"
+                        : "bg-black/10 hover:bg-black/20 text-black"
+                    }`}
+                  >
+                    <Check className="w-5 h-5" />
+                    Confirm Selection
+                  </button>
+                )}
+                {showConfirmSelection && (
+                  <button
+                    onClick={handleMultipleDelete}
+                    className={`p-2 rounded-lg transition-colors flex items-center gap-2 ${
+                      isDark
+                        ? "bg-red-500/20 hover:bg-red-500/30 text-red-300"
+                        : "bg-red-500/10 hover:bg-red-500/20 text-red-600"
+                    }`}
+                  >
+                    <Trash2 className="w-5 h-5" />
+                    Delete Selected
+                  </button>
+                )}
               </div>
-              <div>
-                <button
-                  onClick={() => setEnableFollowUp(!enableFollowUp)}
-                  className={cn(
-                    "flex items-center gap-2 p-3 rounded-xl border transition-all w-full sm:w-auto",
-                    enableFollowUp
-                      ? isDark
-                        ? "bg-black/60 border-white/20 text-white"
-                        : "bg-black/10 border-black/20 text-black"
-                      : isDark
-                        ? "bg-black/40 border-white/10 text-white/60"
-                        : "bg-black/5 border-black/10 text-black/60"
-                  )}
+
+              {/* Knowledge Base Entries */}
+              <div className="space-y-4">
+                {knowledgeBase.map((entry) => (
+                  <div
+                    key={entry.id}
+                    className={`p-4 rounded-xl transition-all ${
+                      isDark
+                        ? "bg-black/40 border border-white/10"
+                        : "bg-black/5 border border-black/10"
+                    }`}
+                  >
+                    <div className="grid grid-cols-1 md:grid-cols-[auto,1fr,auto] gap-4 items-center">
+                      <div 
+                        className={`w-6 h-6 rounded-md border flex items-center justify-center cursor-pointer ${
+                          entry.selected
+                            ? isDark
+                              ? "bg-white border-white"
+                              : "bg-black border-black"
+                            : isDark
+                              ? "border-white/30"
+                              : "border-black/30"
+                        }`}
+                        onClick={() => handleCheckboxChange(entry.id)}
+                      >
+                        {entry.selected && (
+                          <Check 
+                            className={`${isDark ? "text-black" : "text-white"}`} 
+                            size={16} 
+                          />
+                        )}
+                      </div>
+                      <div className={`${isDark ? "text-white" : "text-black"}`}>
+                        {entry.category}
+                      </div>
+                      <div className="md:col-span-2">
+                        {editingId === entry.id ? (
+                          <EditableInput
+                            value={editingValue}
+                            onChange={setEditingValue}
+                            onSave={handleSaveEdit}
+                            isDark={isDark}
+                          />
+                        ) : (
+                          <div className={`${isDark ? "text-white" : "text-black"}`}>
+                            {entry.description}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex justify-end mt-4 space-x-2">
+                      {showDeleteWarning === entry.id ? (
+                        <>
+                          <button
+                            onClick={() => confirmDelete(entry.id)}
+                            className={`p-2 rounded-lg transition-colors ${
+                              isDark
+                                ? "bg-red-500/20 hover:bg-red-500/30 text-red-300"
+                                : "bg-red-500/10 hover:bg-red-500/20 text-red-600"
+                            }`}
+                          >Confirm
+                          </button>
+                          <button
+                            onClick={cancelDelete}
+                            className={`p-2 rounded-lg transition-colors ${
+                              isDark
+                                ? "bg-white/10 hover:bg-white/20 text-white"
+                                : "bg-black/10 hover:bg-black/20 text-black"
+                            }`}
+                          >
+                            Cancel
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          <button
+                            onClick={() => {
+                              if (editingId === entry.id) {
+                                handleSaveEdit();
+                              } else {
+                                handleStartEdit(entry);
+                              }
+                            }}
+                            className={`p-2 rounded-lg transition-colors ${
+                              isDark
+                                ? "hover:bg-white/10 text-white"
+                                : "hover:bg-black/10 text-black"
+                            }`}
+                          >
+                            {editingId === entry.id ? (
+                              <Save className="w-5 h-5" />
+                            ) : (
+                              <Edit2 className="w-5 h-5" />
+                            )}
+                          </button>
+                          <button
+                            onClick={() => handleDeleteEntry(entry.id)}
+                            className={`p-2 rounded-lg transition-colors ${
+                              isDark
+                                ? "hover:bg-white/10 text-white"
+                                : "hover:bg-black/10 text-black"
+                            }`}
+                          >
+                            <Trash2 className="w-5 h-5" />
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              {showSelectedDialog && (
+                <div 
+                  className={`mt-6 p-4 rounded-xl text-center font-medium transition-opacity duration-300 ${
+                    isDark
+                      ? "bg-green-500/20 text-green-300"
+                      : "bg-green-500/20 text-green-700"
+                  }`}
                 >
-                  <CheckCircle className={cn(
-                    "w-5 h-5",
-                    enableFollowUp 
-                      ? isDark 
-                        ? "text-white" 
-                        : "text-black"
-                      : "opacity-0"
-                  )} />
-                  <span>Enable follow-up questions</span>
-                </button>
+                  Selected
+                </div>
+              )}
+              {showError && (
+                <div 
+                  className={`mt-6 p-4 rounded-xl text-center font-medium transition-opacity duration-300 ${
+                    isDark
+                      ? "bg-red-500/20 text-red-300"
+                      : "bg-red-500/20 text-red-700"
+                  }`}
+                >
+                  {errorMessage}
+                </div>
+              )}
+              {showMultipleDeleteWarning && (
+                <div 
+                  className={`mt-6 p-4 rounded-xl text-center font-medium transition-opacity duration-300 ${
+                    isDark
+                      ? "bg-red-500/20 text-red-300"
+                      : "bg-red-500/20 text-red-700"
+                  }`}
+                >
+                  Are you sure you want to delete the selected entries?
+                  <div className="mt-4 flex justify-center gap-4">
+                    <button
+                      onClick={confirmMultipleDelete}
+                      className={`p-2 rounded-lg transition-colors ${
+                        isDark
+                          ? "bg-red-500/20 hover:bg-red-500/30 text-red-300"
+                          : "bg-red-500/10 hover:bg-red-500/20 text-red-600"
+                      }`}
+                    >
+                      Confirm Delete
+                    </button>
+                    <button
+                      onClick={() => setShowMultipleDeleteWarning(false)}
+                      className={`p-2 rounded-lg transition-colors ${
+                        isDark
+                          ? "bg-white/10 hover:bg-white/20 text-white"
+                          : "bg-black/10 hover:bg-black/20 text-black"
+                      }`}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Settings Panel - Takes up 1 column */}
+          <div className="space-y-6">
+            {/* Personality Settings */}
+            <div className={`${theme.cardBg} backdrop-blur-xl border ${theme.border} rounded-3xl p-6`}>
+              <div className="flex items-center gap-4 mb-6">
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isDark ? "bg-black/40" : "bg-black/5"}`}>
+                  <Bot className={isDark ? "text-purple-400" : "text-purple-600"} />
+                </div>
+                <h2 className="text-lg font-semibold">Personality Settings</h2>
+              </div>
+
+              {/* AI Name Input */}
+              <div className="space-y-4">
+                <div>
+                  <label className={`block text-sm font-medium mb-2 ${theme.secondaryText}`}>
+                    AI Name
+                  </label>
+                  <input
+                    type="text"
+                    value={aiName}
+                    onChange={(e) => setAiName(e.target.value)}
+                    className={`w-full p-4 rounded-xl transition-all focus:outline-none focus:ring-2 ${
+                      isDark
+                        ? "bg-black/40 border border-white/10 text-white placeholder-white/30 focus:ring-white/20"
+                        : "bg-black/5 border border-black/10 text-black placeholder-black/30 focus:ring-black/20"
+                    }`}
+                  />
+                </div>
+
+                {/* Tone Selection */}
+                <div>
+                  <label className={`block text-sm font-medium mb-2 ${theme.secondaryText}`}>
+                    Tone of Voice
+                  </label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {['Professional', 'Friendly', 'Casual', 'Formal'].map((option) => (
+                      <button
+                        key={option}
+                        onClick={() => setTone(option)}
+                        className={`p-3 rounded-xl border text-sm font-medium transition-all ${
+                          tone === option 
+                            ? isDark
+                              ? "bg-black/60 border-white/20 text-white"
+                              : "bg-black/10 border-black/20 text-black"
+                            : isDark
+                              ? "bg-black/40 border-white/10 text-white/60 hover:bg-black/50"
+                              : "bg-black/5 border-black/10 text-black/60 hover:bg-black/10"
+                        }`}
+                      >
+                        {option}
+                      </button>
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
-          </GlassContainer>
 
-          {/* Save Button */}
-          <div className="flex justify-end pt-4">
-            <button 
+            {/* Response Settings */}
+            <div className={`${theme.cardBg} backdrop-blur-xl border ${theme.border} rounded-3xl p-6`}>
+              <div className="flex items-center gap-4 mb-6">
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isDark ? "bg-black/40" : "bg-black/5"}`}>
+                  <MessageSquare className={isDark ? "text-emerald-400" : "text-emerald-600"} />
+                </div>
+                <h2 className="text-lg font-semibold">Response Settings</h2>
+              </div>
+
+              <div className="space-y-6">
+                <div>
+                  <label className={`block text-sm font-medium mb-3 ${theme.secondaryText}`}>
+                    Response Length
+                  </label>
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    {['Concise', 'Moderate', 'Detailed'].map((option) => (
+                      <button
+                        key={option}
+                        onClick={() => setLength(option)}
+                        className={`flex-1 p-3 rounded-xl border text-sm font-medium transition-all ${
+                          length === option 
+                            ? isDark
+                              ? "bg-black/60 border-white/20 text-white"
+                              : "bg-black/10 border-black/20 text-black"
+                            : isDark
+                              ? "bg-black/40 border-white/10 text-white/60 hover:bg-black/50"
+                              : "bg-black/5 border-black/10 text-black/60 hover:bg-black/10"
+                        }`}
+                      >
+                        {option}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <button
+                    onClick={() => setEnableFollowUp(!enableFollowUp)}
+                    className={`flex items-center gap-2 p-3 rounded-xl border transition-all w-full sm:w-auto ${
+                      enableFollowUp
+                        ? isDark
+                          ? "bg-black/60 border-white/20 text-white"
+                          : "bg-black/10 border-black/20 text-black"
+                        : isDark
+                          ? "bg-black/40 border-white/10 text-white/60"
+                          : "bg-black/5 border-black/10 text-black/60"
+                    }`}
+                  >
+                    <CheckCircle className={`w-5 h-5 ${
+                      enableFollowUp 
+                        ? isDark 
+                          ? "text-white" 
+                          : "text-black"
+                        : "opacity-0"
+                    }`} />
+                    <span>Enable follow-up questions</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Save Button */}
+            <button
               onClick={handleSaveSettings}
-              className={cn(
-                "px-6 py-2.5 rounded-xl transition-all font-medium",
-                isDark 
-                  ? "bg-black/40 hover:bg-black/60 text-white border border-white/10" 
-                  : "bg-black/5 hover:bg-black/10 text-black border border-black/10"
-              )}>
+              className={`w-full py-3 px-4 rounded-xl transition-all font-medium ${
+                isDark
+                  ? "bg-purple-500/20 hover:bg-purple-500/30 text-purple-300"
+                  : "bg-purple-100 hover:bg-purple-200 text-purple-600"
+              }`}
+            >
               Save Settings
             </button>
           </div>
