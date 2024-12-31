@@ -3,17 +3,20 @@ import { X, Trash2 } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { useTheme } from '../../hooks/useTheme';
 import { useCalendar } from '../../hooks/useCalendar';
+import { adminApi } from '../../config/api';
 
 interface CalendarHeaderProps {
   isEditing: boolean;
   onEditToggle: () => void;
   onClose: () => void;
+  isLoading: boolean;
 }
 
-export default function CalendarHeader({ isEditing, onEditToggle, onClose }: CalendarHeaderProps) {
+export default function CalendarHeader({ isEditing, onEditToggle, onClose, isLoading }: CalendarHeaderProps) {
   const { isDark } = useTheme();
   const { selectedDates, clearAllDates } = useCalendar();
   const [showWarning, setShowWarning] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   // Function to handle clear all action
   const handleClearAll = () => {
@@ -21,21 +24,18 @@ export default function CalendarHeader({ isEditing, onEditToggle, onClose }: Cal
   };
 
   // Function to confirm and clear all dates
-  const confirmClearAll = () => {
-    clearAllDates();
-    setShowWarning(false);
-
-    // API call to clear dates (commented out for future use)
-    /*
+  const confirmClearAll = async () => {
     try {
-      await api.post('/api/calendar/clear', {
-        // Add any necessary payload
-      });
-    } catch (error) {
-      console.error('Failed to clear dates:', error);
-      // Handle error appropriately
+      // Call unmarkBusyDates with all selected dates
+      await adminApi.unmarkBusyDates({ dates: [...selectedDates] });
+      clearAllDates(); // Clear local state
+      setShowWarning(false);
+      setError(null);
+      onEditToggle();
+    } catch (err) {
+      setError('Failed to clear dates.');
+      console.error(err);
     }
-    */
   };
 
   return (
@@ -48,7 +48,7 @@ export default function CalendarHeader({ isEditing, onEditToggle, onClose }: Cal
           Calendar
         </h2>
         <div className="flex items-center space-x-2">
-          {selectedDates.size > 0 && (
+          {isEditing && selectedDates.size > 0 && (
             <button
               onClick={handleClearAll}
               className={cn(
@@ -64,14 +64,16 @@ export default function CalendarHeader({ isEditing, onEditToggle, onClose }: Cal
           )}
           <button
             onClick={onEditToggle}
+            disabled={isLoading}
             className={cn(
               "px-3 py-1 rounded-lg text-sm transition-all",
               isDark
                 ? "bg-white/10 hover:bg-white/20 text-white"
-                : "bg-black/10 hover:bg-black/20 text-black"
+                : "bg-black/10 hover:bg-black/20 text-black",
+              isLoading && "opacity-50 cursor-not-allowed"
             )}
           >
-            {isEditing ? 'Done' : 'Edit'}
+            {isEditing ? (isLoading ? 'Saving...' : 'Done') : 'Edit'}
           </button>
           <button onClick={onClose}>
             <X className={cn(
