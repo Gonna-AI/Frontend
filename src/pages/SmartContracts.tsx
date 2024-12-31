@@ -342,7 +342,7 @@ const DocumentVerification = () => {
       await fetchDocuments();
       
     } catch (error) {
-      console.error('Blockchain verification error:', error);
+      console.error('Error Uploading on Blockchain :', error);
     } finally {
       setBlockchainProcessing(false);
     }
@@ -516,32 +516,72 @@ const DocumentVerification = () => {
 
   const renderBlockchainBox = () => {
     const [showHashVerification, setShowHashVerification] = useState(false);
+    const [showAIAlert, setShowAIAlert] = useState(true);
+    const [showHashAlert, setShowHashAlert] = useState(true);
 
     return (
       <div className="bg-black/40 backdrop-blur-xl border border-blue-500/20 rounded-xl overflow-hidden shadow-xl mt-6">
-        <div className="p-8">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-semibold text-white">Blockchain Verification</h2>
+        <div className="p-4 sm:p-8">
+          {/* Header - Made responsive */}
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
+            <h2 className="text-xl sm:text-2xl font-semibold text-white">Upload on Blockchain</h2>
             <button
               onClick={() => setShowHashVerification(!showHashVerification)}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-500/20 text-blue-400 rounded-lg hover:bg-blue-500/30 transition-colors"
+              className="flex items-center justify-center gap-2 w-full sm:w-auto px-4 py-2 bg-blue-500/20 text-blue-400 rounded-lg hover:bg-blue-500/30 transition-colors"
             >
               <AlertCircle className="w-4 h-4" />
               <span>Verify Hash</span>
             </button>
           </div>
           
-          {/* Hash Verification Section */}
+          {/* Added Dismissible Alert Messages */}
+          <div className="mb-6 space-y-3">
+            {showAIAlert && (
+              <div className="flex items-start justify-between gap-2 p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
+                <div className="flex items-start gap-2">
+                  <AlertCircle className="w-5 h-5 text-yellow-400 shrink-0 mt-0.5" />
+                  <p className="text-sm text-yellow-200">
+                    Note: AI analysis is not available for blockchain verification. This process only verifies document existence and authenticity.
+                  </p>
+                </div>
+                <button 
+                  onClick={() => setShowAIAlert(false)}
+                  className="shrink-0 text-yellow-400 hover:text-yellow-300 transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            )}
+            
+            {showHashAlert && (
+              <div className="flex items-start justify-between gap-2 p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">
+                <div className="flex items-start gap-2">
+                  <AlertCircle className="w-5 h-5 text-blue-400 shrink-0 mt-0.5" />
+                  <p className="text-sm text-blue-200">
+                    Important: Please save your document hash after verification. You'll need it to verify your document in the future.
+                  </p>
+                </div>
+                <button 
+                  onClick={() => setShowHashAlert(false)}
+                  className="shrink-0 text-blue-400 hover:text-blue-300 transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Hash Verification Section - Made responsive */}
           {showHashVerification && (
-            <div className="mb-8 border border-blue-500/30 rounded-xl p-6 animate-fadeIn">
+            <div className="mb-8 border border-blue-500/30 rounded-xl p-4 sm:p-6 animate-fadeIn">
               <h3 className="text-lg font-medium text-white mb-4">Verify Document Hash</h3>
-              <div className="flex gap-3">
+              <div className="flex flex-col sm:flex-row gap-3">
                 <input
                   type="text"
                   placeholder="Enter document hash to verify"
                   value={documentHash}
                   onChange={(e) => setDocumentHash(e.target.value)}
-                  className="flex-1 px-4 py-3 bg-blue-900/20 border border-blue-500/30 rounded-lg text-white placeholder:text-gray-400 focus:outline-none focus:border-blue-500"
+                  className="w-full flex-1 px-4 py-3 bg-blue-900/20 border border-blue-500/30 rounded-lg text-white placeholder:text-gray-400 focus:outline-none focus:border-blue-500"
                 />
                 <button
                   onClick={async () => {
@@ -557,24 +597,16 @@ const DocumentVerification = () => {
                     }
                   }}
                   disabled={!documentHash || blockchainProcessing}
-                  className="px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full sm:w-auto px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Verify Hash
                 </button>
               </div>
             </div>
           )}
-          
-          {/* File Upload Section */}
-          <div className="border-2 border-dashed border-blue-500/30 rounded-xl p-10 text-center transition-colors hover:border-blue-500/50">
-            <input
-              type="file"
-              onChange={(e) => e.target.files?.[0] && handleBlockchainVerification(e.target.files[0])}
-              className="hidden"
-              id="blockchainInput"
-              accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-            />
-            
+
+          {/* Results Section - Added file input and fixed upload functionality */}
+          <div className="border-2 border-dashed border-blue-500/30 rounded-xl p-4 sm:p-10 text-center transition-colors hover:border-blue-500/50">
             {blockchainProcessing ? (
               <div className="flex flex-col items-center space-y-3">
                 <div className="p-4 bg-blue-600/20 rounded-full">
@@ -597,8 +629,8 @@ const DocumentVerification = () => {
                     Blockchain Verification Results
                   </h3>
                   
-                  <div className="bg-blue-500/5 border border-blue-500/20 rounded-lg p-4 space-y-2">
-                    <p className="text-gray-300">
+                  <div className="bg-blue-500/5 border border-blue-500/20 rounded-lg p-4 space-y-2 overflow-x-auto">
+                    <p className="text-gray-300 break-all">
                       <span className="text-blue-400">Document Hash:</span> {documentHash}
                     </p>
                     <p className="text-gray-300">
@@ -645,7 +677,19 @@ const DocumentVerification = () => {
                 </button>
               </div>
             ) : (
-              <label htmlFor="blockchainInput" className="cursor-pointer">
+              <label htmlFor="blockchainFileInput" className="cursor-pointer">
+                <input
+                  type="file"
+                  id="blockchainFileInput"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      handleBlockchainVerification(file);
+                    }
+                  }}
+                  className="hidden"
+                  accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                />
                 <div className="flex flex-col items-center space-y-3">
                   <div className="p-4 bg-blue-600/20 rounded-full">
                     <Upload className="h-8 w-8 text-blue-400" />
@@ -799,7 +843,7 @@ const DocumentVerification = () => {
           {/* Upload Section */}
           <div className="bg-black/40 backdrop-blur-xl border border-purple-500/20 rounded-xl overflow-hidden shadow-xl">
             <div className="p-8">
-              <h2 className="text-2xl font-semibold text-white mb-6">Verify Document</h2>
+              <h2 className="text-2xl font-semibold text-white mb-6">Upload Document</h2>
               
               <div className="border-2 border-dashed border-purple-500/30 rounded-xl p-10 text-center transition-colors hover:border-purple-500/50">
                 <input
