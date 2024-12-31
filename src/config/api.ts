@@ -130,7 +130,9 @@ export const adminApi = {
     verifyDocument: (documentId: string) => 
         api.post(`/api/admin/documents/${documentId}/verify`),
     rejectDocument: (documentId: string) => 
-        api.post(`/api/admin/documents/${documentId}/reject`)
+        api.post(`/api/admin/documents/${documentId}/reject`),
+    downloadDocuments: (ticketId: string) => 
+        api.get(`/api/documents/download/${ticketId}`, { responseType: 'blob' }),
 };
 
 export default api; 
