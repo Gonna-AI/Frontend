@@ -5,6 +5,9 @@ import { useTheme } from '../../hooks/useTheme';
 import { cn } from '../../utils/cn';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api, { API_BASE_URL } from '../../config/api';
+import { Switch } from '../../components/ui/Switch';
+import { Badge } from '../../components/ui/Badge';
+import { Input } from '../../components/ui/Input';
 
 export default function Settings() {
   const { isDark } = useTheme();
@@ -12,10 +15,19 @@ export default function Settings() {
   const [showTwoFactor, setShowTwoFactor] = useState(false);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
-  const [isSaveDisabled, setIsSaveDisabled] = useState(true);
   const [profilePicture, setProfilePicture] = useState<string | null>(null);
   const [isUpdateDisabled, setIsUpdateDisabled] = useState(true);
   const [updateButtonOutline, setUpdateButtonOutline] = useState('');
+  const [notifications, setNotifications] = useState({
+    email: true,
+    push: false,
+    updates: true,
+    marketing: false
+  });
+  const [apiTokens, setApiTokens] = useState([
+    { name: 'Production API Key', token: 'pk_live_**********************', created: '2024-01-15' },
+    { name: 'Development API Key', token: 'pk_test_**********************', created: '2024-02-01' }
+  ]);
 
   const { data: user, isLoading, error, refetch } = useQuery({
     queryKey: ['user'],
@@ -37,23 +49,8 @@ export default function Settings() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['user'] });
-      setIsSaveDisabled(true);
     },
   });
-
-  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setName(e.target.value);
-    setIsSaveDisabled(false);
-  };
-
-  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setEmail(e.target.value);
-    setIsSaveDisabled(false);
-  };
-
-  const handleSave = () => {
-    updateUserMutation.mutate({ name, email });
-  };
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files[0]) {
@@ -87,18 +84,15 @@ export default function Settings() {
     { icon: Bell, label: 'Notifications', id: 'notifications' },
     { icon: Lock, label: 'Two Factor Auth', id: '2fa' },
     { icon: Database, label: 'API Tokens', id: 'api' },
-    { icon: Users, label: 'Team', id: 'team' },
-    { icon: Boxes, label: 'Apps', id: 'apps' },
-    { icon: HelpCircle, label: 'Help', id: 'help' },
-    { icon: MessageSquare, label: 'Support', id: 'support' },
+    { icon: Users, label: 'Team', id: 'team' }
   ];
 
   const GlassContainer = ({ children, className }: { children: React.ReactNode, className?: string }) => (
     <div className={cn(
-      "rounded-2xl border",
+      "rounded-3xl border shadow-lg",
       isDark 
-        ? "bg-black/20 border-white/10" 
-        : "bg-white/10 border-black/10",
+        ? "bg-black/20 border-white/10 backdrop-blur-xl" 
+        : "bg-white/10 border-black/10 backdrop-blur-xl",
       className
     )}>
       {children}
@@ -112,31 +106,31 @@ export default function Settings() {
           <div className="flex flex-col md:flex-row">
             {/* Sidebar */}
             <div className={cn(
-              "sticky top-0 md:w-20 border-r",
+              "sticky top-0 md:w-24 border-r h-full",
               isDark ? "border-white/10" : "border-black/10"
             )}>
-              <div className="flex md:flex-col md:h-[85vh] p-4 gap-3 items-center">
+              <div className="flex md:flex-col h-full p-4 gap-3 items-center">
                 {/* Settings Icon */}
                 <div className={cn(
-                  "w-10 h-10 rounded-xl flex items-center justify-center mb-6 hidden md:flex",
+                  "w-12 h-12 rounded-xl flex items-center justify-center mb-6 hidden md:flex",
                   isDark 
                     ? "bg-black/20 border border-white/10" 
                     : "bg-white/10 border border-black/10"
                 )}>
                   <SettingsIcon className={cn(
-                    "w-5 h-5",
+                    "w-6 h-6",
                     isDark ? "text-white/70" : "text-black/70"
                   )} />
                 </div>
                 
                 {/* Navigation Icons */}
-                <div className="flex md:flex-col w-full gap-2 overflow-x-auto md:overflow-x-visible md:overflow-y-auto">
+                <div className="flex md:flex-col w-full gap-3">
                   {sidebarItems.map((item) => (
                     <button
                       key={item.id}
                       onClick={() => setActiveTab(item.id)}
                       className={cn(
-                        "flex items-center gap-3 p-2.5 rounded-xl transition-all",
+                        "flex items-center gap-3 p-3 rounded-xl transition-all w-full",
                         "group outline-none",
                         activeTab === item.id
                           ? isDark 
@@ -148,7 +142,7 @@ export default function Settings() {
                       )}
                     >
                       <div className={cn(
-                        "w-9 h-9 rounded-lg flex items-center justify-center",
+                        "w-10 h-10 rounded-lg flex items-center justify-center",
                         activeTab === item.id
                           ? isDark 
                             ? "bg-black/20" 
@@ -239,64 +233,35 @@ export default function Settings() {
                       </div>
                     </GlassContainer>
 
-                    <GlassContainer className="p-6 space-y-4">
+                    <GlassContainer className="p-8 space-y-6">
                       <div>
-                        <label className={cn(
-                          "block text-sm font-medium mb-2",
-                          isDark ? "text-white/60" : "text-black/60"
-                        )}>Name</label>
-                        <input
-                          type="text"
-                          value={name}
-                          onChange={handleNameChange}
-                          className={cn(
-                            "w-full px-4 py-2 rounded-xl transition-colors",
-                            isDark
-                              ? "bg-black/20 border border-white/10 text-white"
-                              : "bg-white/10 border border-black/10 text-black",
-                            "focus:outline-none focus:ring-2",
-                            isDark
-                              ? "focus:ring-white/20"
-                              : "focus:ring-black/20"
-                          )}
-                          placeholder="Enter your name"
-                        />
+                        <h3 className={cn(
+                          "text-2xl font-medium mb-6",
+                          isDark ? "text-white" : "text-black"
+                        )}>Profile Information</h3>
+                        <div className="space-y-6">
+                          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                            <label className={cn(
+                              "block text-base font-medium mb-3",
+                              isDark ? "text-white/60" : "text-black/60"
+                            )}>Name</label>
+                            <p className={cn(
+                              "text-lg break-words",
+                              isDark ? "text-white/90" : "text-black/90"
+                            )}>{name}</p>
+                          </div>
+                          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                            <label className={cn(
+                              "block text-base font-medium mb-3",
+                              isDark ? "text-white/60" : "text-black/60"
+                            )}>Email</label>
+                            <p className={cn(
+                              "text-lg break-words",
+                              isDark ? "text-white/90" : "text-black/90"
+                            )}>{email}</p>
+                          </div>
+                        </div>
                       </div>
-                      <div>
-                        <label className={cn(
-                          "block text-sm font-medium mb-2",
-                          isDark ? "text-white/60" : "text-black/60"
-                        )}>Email</label>
-                        <input
-                          type="email"
-                          value={email}
-                          onChange={handleEmailChange}
-                          className={cn(
-                            "w-full px-4 py-2 rounded-xl transition-colors",
-                            isDark
-                              ? "bg-black/20 border border-white/10 text-white"
-                              : "bg-white/10 border border-black/10 text-black",
-                            "focus:outline-none focus:ring-2",
-                            isDark
-                              ? "focus:ring-white/20"
-                              : "focus:ring-black/20"
-                          )}
-                          placeholder="Enter your email"
-                        />
-                      </div>
-                      <button
-                        onClick={handleSave}
-                        disabled={isSaveDisabled}
-                        className={cn(
-                          "px-4 py-2 rounded-xl transition-colors w-full sm:w-auto",
-                          isDark
-                            ? "bg-black/20 hover:bg-black/30 border border-white/10 text-white"
-                            : "bg-white/10 hover:bg-white/20 border border-black/10 text-black",
-                          !isSaveDisabled && "outline outline-emerald-500"
-                        )}
-                      >
-                        Save
-                      </button>
                     </GlassContainer>
                   </div>
                 </div>
@@ -401,6 +366,115 @@ export default function Settings() {
                           </div>
                         </div>
                       )}
+                    </div>
+                  </GlassContainer>
+                </div>
+              )}
+
+              {activeTab === 'notifications' && (
+                <div className="space-y-6">
+                  <h2 className={cn(
+                    "text-xl font-semibold",
+                    isDark ? "text-white" : "text-black"
+                  )}>Notification Preferences</h2>
+
+                  <GlassContainer className="p-6 space-y-4">
+                    {Object.entries(notifications).map(([key, value]) => (
+                      <div key={key} className="flex items-center justify-between py-2">
+                        <div>
+                          <h3 className={cn(
+                            "text-sm font-medium",
+                            isDark ? "text-white" : "text-black"
+                          )}>{key.charAt(0).toUpperCase() + key.slice(1)} Notifications</h3>
+                          <p className={cn(
+                            "text-sm",
+                            isDark ? "text-white/60" : "text-black/60"
+                          )}>Receive {key} notifications about your account</p>
+                        </div>
+                        <Switch
+                          checked={value}
+                          onCheckedChange={(checked) => 
+                            setNotifications(prev => ({ ...prev, [key]: checked }))
+                          }
+                        />
+                      </div>
+                    ))}
+                  </GlassContainer>
+                </div>
+              )}
+
+              {activeTab === 'api' && (
+                <div className="space-y-6">
+                  <div className="flex items-center justify-between">
+                    <h2 className={cn(
+                      "text-xl font-semibold",
+                      isDark ? "text-white" : "text-black"
+                    )}>API Tokens</h2>
+                    <button className={cn(
+                      "px-4 py-2 rounded-xl transition-colors",
+                      isDark 
+                        ? "bg-black/20 hover:bg-black/30 border border-white/10 text-white" 
+                        : "bg-white/10 hover:bg-white/20 border border-black/10 text-black"
+                    )}>
+                      Generate New Token
+                    </button>
+                  </div>
+
+                  <GlassContainer className="p-6 space-y-4">
+                    {apiTokens.map((token, index) => (
+                      <div key={index} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 py-4">
+                        <div>
+                          <h3 className={cn(
+                            "text-sm font-medium",
+                            isDark ? "text-white" : "text-black"
+                          )}>{token.name}</h3>
+                          <p className={cn(
+                            "text-sm font-mono",
+                            isDark ? "text-white/60" : "text-black/60"
+                          )}>{token.token}</p>
+                          <p className={cn(
+                            "text-xs",
+                            isDark ? "text-white/40" : "text-black/40"
+                          )}>Created: {token.created}</p>
+                        </div>
+                        <button className={cn(
+                          "px-4 py-2 rounded-xl transition-colors text-red-500",
+                          isDark 
+                            ? "bg-red-500/10 hover:bg-red-500/20 border border-red-500/20" 
+                            : "bg-red-500/10 hover:bg-red-500/20 border border-red-500/20"
+                        )}>
+                          Revoke
+                        </button>
+                      </div>
+                    ))}
+                  </GlassContainer>
+                </div>
+              )}
+
+              {activeTab === 'team' && (
+                <div className="space-y-6">
+                  <h2 className={cn(
+                    "text-xl font-semibold",
+                    isDark ? "text-white" : "text-black"
+                  )}>Team Management</h2>
+
+                  <GlassContainer className="p-6">
+                    <div className="space-y-4">
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                        <Input
+                          type="email"
+                          placeholder="Enter team member's email"
+                          className="flex-1"
+                        />
+                        <button className={cn(
+                          "px-4 py-2 rounded-xl transition-colors",
+                          isDark 
+                            ? "bg-black/20 hover:bg-black/30 border border-white/10 text-white" 
+                            : "bg-white/10 hover:bg-white/20 border border-black/10 text-black"
+                        )}>
+                          Invite Member
+                        </button>
+                      </div>
                     </div>
                   </GlassContainer>
                 </div>
