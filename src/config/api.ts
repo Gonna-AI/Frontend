@@ -124,4 +124,13 @@ export const elevenLabsApi = {
   // Add other ElevenLabs-related endpoints
 };
 
+export const adminApi = {
+    getPendingDocuments: () => 
+        api.get('/api/admin/documents'),
+    verifyDocument: (documentId: string) => 
+        api.post(`/api/admin/documents/${documentId}/verify`),
+    rejectDocument: (documentId: string) => 
+        api.post(`/api/admin/documents/${documentId}/reject`)
+};
+
 export default api; 

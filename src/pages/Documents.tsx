@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FileCheck, Search, Filter, CheckCircle, XCircle, AlertCircle, MoreVertical, Download, History, Eye, User, Calendar, Clock, Shield, Sun, Moon } from 'lucide-react';
+import { adminApi } from '../config/api';
 
 // Add type definitions to fix type errors
 interface Document {
@@ -78,6 +79,51 @@ const AdminDashboard = () => {
   });
   const [isDarkMode, setIsDarkMode] = useState(true);
 
+  // Add new state for API data
+  const [apiDocuments, setApiDocuments] = useState([]);
+  const [apiStats, setApiStats] = useState({
+    total_documents: 0,
+    verified_today: 0,
+    pending_review: 0
+  });
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Add useEffect for API data
+  useEffect(() => {
+    fetchDocuments();
+  }, []);
+
+  const fetchDocuments = async () => {
+    try {
+      setIsLoading(true);
+      const response = await adminApi.getPendingDocuments();
+      setApiDocuments(response.data.documents);
+      setApiStats(response.data.statistics);
+      
+      // Convert API documents to match existing format
+      const convertedDocs = response.data.documents.map(doc => ({
+        id: doc.document_id,
+        title: doc.document_name,
+        status: doc.is_verified ? 'verified' : 'pending',
+        priority: doc.priority_level || 'medium',
+        submittedBy: doc.client_name,
+        submittedAt: doc.uploaded_at,
+        ticketId: doc.ticket_id,
+        type: doc.grievance_type || 'Unknown',
+        size: '2.4 MB', // This would need to be added to backend
+        lastReviewed: null,
+        hash: doc.document_hash || '0x0000',
+      }));
+
+      setDocuments(convertedDocs);
+      
+    } catch (error) {
+      console.error('Error fetching documents:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const getThemeColors = () => ({
     background: isDarkMode ? 'bg-[#0a0a0a]' : 'bg-gray-50',
     text: isDarkMode ? 'text-white' : 'text-gray-800',
@@ -120,14 +166,14 @@ const AdminDashboard = () => {
     }
   };
 
-  const handleVerify = (docId: string) => {
-    setDocuments(docs => 
-      docs.map(doc => 
-        doc.id === docId 
-          ? { ...doc, status: 'verified', lastReviewed: new Date().toISOString() }
-          : doc
-      )
-    );
+  // Update handleVerify to use API
+  const handleVerify = async (docId: string) => {
+    try {
+      await adminApi.verifyDocument(docId);
+      await fetchDocuments(); // Refresh the list
+    } catch (error) {
+      console.error('Error verifying document:', error);
+    }
   };
 
   const handleReject = (docId: string) => {
@@ -139,6 +185,32 @@ const AdminDashboard = () => {
       )
     );
   };
+
+  // Update statistics section
+  const renderStatistics = () => (
+    <div className={`${theme.cardBg} backdrop-blur-xl border ${theme.border} rounded-xl p-4`}>
+      <h2 className="text-lg font-semibold mb-4">Statistics</h2>
+      <div className="space-y-4">
+        <div className="grid grid-cols-2 gap-4">
+          <div className={`p-3 ${theme.statsBg} border ${theme.statsBorder} rounded-lg`}>
+            <div className={`text-2xl font-bold ${theme.text}`}>{apiStats.pending_review}</div>
+            <div className={theme.statsText}>Pending Review</div>
+          </div>
+          <div className={`p-3 ${theme.statsBg} border ${theme.statsBorder} rounded-lg`}>
+            <div className={`text-2xl font-bold ${theme.text}`}>{apiStats.verified_today}</div>
+            <div className={theme.statsText}>Verified Today</div>
+          </div>
+        </div>
+        <div className={`p-3 ${theme.statsBg} border ${theme.statsBorder} rounded-lg`}>
+          <div className={theme.statsText}>Review Timeline</div>
+          <div className={`h-2 ${isDarkMode ? 'bg-gray-700' : 'bg-gray-200'} rounded-full overflow-hidden`}>
+            <div className="h-full w-3/4 bg-purple-500 rounded-full"></div>
+          </div>
+          <div className={theme.statsText}>75% Complete</div>
+        </div>
+      </div>
+    </div>
+  );
 
   return (
     <div className={`min-h-screen ${theme.background} ${theme.text} p-6 transition-colors duration-200`}>
@@ -352,28 +424,7 @@ const AdminDashboard = () => {
           {/* Statistics and Quick Actions */}
           <div className="space-y-6 lg:col-span-1">
             {/* Statistics */}
-            <div className={`${theme.cardBg} backdrop-blur-xl border ${theme.border} rounded-xl p-4`}>
-              <h2 className="text-lg font-semibold mb-4">Statistics</h2>
-              <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className={`p-3 ${theme.statsBg} border ${theme.statsBorder} rounded-lg`}>
-                    <div className={`text-2xl font-bold ${theme.text}`}>24</div>
-                    <div className={theme.statsText}>Pending Review</div>
-                  </div>
-                  <div className={`p-3 ${theme.statsBg} border ${theme.statsBorder} rounded-lg`}>
-                    <div className={`text-2xl font-bold ${theme.text}`}>156</div>
-                    <div className={theme.statsText}>Verified Today</div>
-                  </div>
-                </div>
-                <div className={`p-3 ${theme.statsBg} border ${theme.statsBorder} rounded-lg`}>
-                  <div className={theme.statsText}>Review Timeline</div>
-                  <div className={`h-2 ${isDarkMode ? 'bg-gray-700' : 'bg-gray-200'} rounded-full overflow-hidden`}>
-                    <div className="h-full w-3/4 bg-purple-500 rounded-full"></div>
-                  </div>
-                  <div className={theme.statsText}>75% Complete</div>
-                </div>
-              </div>
-            </div>
+            {renderStatistics()}
 
             {/* Quick Actions */}
             <div className={`${theme.cardBg} backdrop-blur-xl border ${theme.border} rounded-xl p-4`}>
