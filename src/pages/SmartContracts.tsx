@@ -334,30 +334,27 @@ const DocumentVerification = () => {
       const formData = new FormData();
       formData.append('file', file);
       
+      // First store the document and get its hash
       const response = await documentApi.processBlockchain(formData);
-      setBlockchainResult(response.data);
-      const documentHash = response.data.document_hash || response.data.hash; // Handle both formats
+      const documentHash = response.data.document_hash;
       setDocumentHash(documentHash);
       
       // Create new document with all necessary fields
       const newDocument = {
-        document_id: documentHash, // Using hash as document ID
+        document_id: documentHash,
         document_name: file.name,
         is_submitted: true,
-        is_verified: false,
+        is_verified: false, // Document starts as unverified
         uploaded_at: new Date().toISOString(),
-        document_hash: documentHash, // Ensure hash is stored
-        blockchain_verified: true, // Set blockchain flag
-        metadata: response.data.metadata || {} // Store any additional metadata
+        document_hash: documentHash,
+        blockchain_verified: false, // Document starts as unverified on blockchain
+        metadata: response.data.metadata || {}
       };
       
-      // Update documents list with the new document at the top
-      // Use functional update to ensure we don't lose existing documents
+      // Update documents list
       setDocuments(prevDocs => {
-        // Check if document already exists
         const existingDocIndex = prevDocs.findIndex(doc => doc.document_hash === documentHash);
         if (existingDocIndex >= 0) {
-          // Update existing document
           const updatedDocs = [...prevDocs];
           updatedDocs[existingDocIndex] = {
             ...updatedDocs[existingDocIndex],
@@ -365,19 +362,21 @@ const DocumentVerification = () => {
           };
           return updatedDocs;
         }
-        // Add new document
         return [newDocument, ...prevDocs];
       });
-      
-      // Update document stats
-      setDocumentStats(prev => ({
-        ...prev,
-        total: prev.total + 1,
-        pending: prev.pending + 1
-      }));
+
+      setBlockchainResult({
+        exists: false,
+        document_hash: documentHash,
+        message: "Document successfully stored. Awaiting verification by admin."
+      });
       
     } catch (error) {
-      console.error('Error Uploading on Blockchain:', error);
+      console.error('Error Uploading Document:', error);
+      setBlockchainResult({
+        exists: false,
+        error: "Failed to store document"
+      });
     } finally {
       setBlockchainProcessing(false);
     }
@@ -657,13 +656,13 @@ const DocumentVerification = () => {
                   {blockchainResult.exists ? (
                     <FileCheck className="h-8 w-8 text-green-400" />
                   ) : (
-                    <XCircle className="h-8 w-8 text-red-400" />
+                    <AlertCircle className="h-8 w-8 text-blue-400" />
                   )}
                 </div>
                 
                 <div className="text-left space-y-3">
                   <h3 className="text-lg font-medium text-white text-center mb-4">
-                    Blockchain Verification Results
+                    Document Storage Results
                   </h3>
                   
                   <div className="bg-blue-500/5 border border-blue-500/20 rounded-lg p-4 space-y-2 overflow-x-auto">
@@ -673,32 +672,16 @@ const DocumentVerification = () => {
                     <p className="text-gray-300">
                       <span className="text-blue-400">Status:</span>{' '}
                       {blockchainResult.exists ? (
-                        <span className="text-green-400">Verified</span>
+                        <span className="text-green-400">Verified on Blockchain</span>
                       ) : (
-                        <span className="text-red-400">Not Found in Blockchain</span>
+                        <span className="text-blue-400">Stored Successfully - Awaiting Verification</span>
                       )}
                     </p>
-                    {blockchainResult.exists && (
-                      <>
-                        <p className="text-gray-300">
-                          <span className="text-blue-400">Transaction Hash:</span>{' '}
-                          {blockchainResult.transaction_hash}
-                        </p>
-                        <p className="text-gray-300">
-                          <span className="text-blue-400">Processed At:</span>{' '}
-                          {new Date(blockchainResult.timestamp).toLocaleString()}
-                        </p>
-                        <p className="text-gray-300">
-                          <span className="text-blue-400">File Type:</span>{' '}
-                          {blockchainResult.metadata.file_type}
-                        </p>
-                        <p className="text-gray-300">
-                          <span className="text-blue-400">Verification Status:</span>{' '}
-                          <span className="text-green-400">
-                            {blockchainResult.metadata.verification_status}
-                          </span>
-                        </p>
-                      </>
+                    {blockchainResult.message && (
+                      <p className="text-gray-300">
+                        <span className="text-blue-400">Message:</span>{' '}
+                        {blockchainResult.message}
+                      </p>
                     )}
                   </div>
                 </div>
