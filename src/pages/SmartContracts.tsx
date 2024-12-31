@@ -160,9 +160,12 @@ const DocumentVerification = () => {
         const uploadResponse = await documentApi.uploadDocument(file);
         setUploadStatus('analyzing');
         
+        // Use the document_id from the upload response
+        const documentId = uploadResponse.data.document_id;
+        
         // Add the document to the list immediately as "Processing"
         const newDocument = {
-          document_id: uploadResponse.data.document_id,
+          document_id: documentId,
           document_name: file.name,
           is_submitted: true,
           is_verified: false,
@@ -175,7 +178,7 @@ const DocumentVerification = () => {
         // Store the document ID from the upload response
         setSelectedFile({
           ...file,
-          document_id: uploadResponse.data.document_id
+          document_id: documentId  // Store the same ID here
         });
         
         const analysisResponse = await documentApi.analyzeDocuments();
@@ -186,6 +189,14 @@ const DocumentVerification = () => {
         setAiSuggestion(parsedAnalysis);
         setShowConfirmation(true);
         setUploadStatus('');
+        
+        // Set verification status with the same document ID
+        setVerificationStatus({
+          success: true,
+          message: "Document submitted for verification successfully",
+          documentId: documentId,  // Use the same ID here
+          timestamp: new Date().toISOString()
+        });
         
         // Fetch updated documents to ensure consistency
         await fetchDocuments();
@@ -208,12 +219,11 @@ const DocumentVerification = () => {
       // Submit document for verification
       await documentApi.submitDocuments([selectedFile.document_id]);
       
-      // Update verification status
+      // Update verification status with simplified information
       setVerificationStatus({
         success: true,
         message: "Document submitted for verification successfully",
-        documentHash: `0x${Math.random().toString(16).slice(2)}`, // Example hash
-        transactionHash: `0x${Math.random().toString(16).slice(2)}`, // Example hash
+        documentId: selectedFile.document_id,
         timestamp: new Date().toISOString()
       });
 
@@ -815,8 +825,7 @@ const DocumentVerification = () => {
                         <span className="font-medium">Verification Successful</span>
                       </div>
                       <div className="space-y-2 text-sm text-gray-400">
-                        <p>Document Hash: <span className="text-gray-300">{verificationStatus.documentHash}</span></p>
-                        <p>Transaction: <span className="text-gray-300">{verificationStatus.transactionHash}</span></p>
+                        <p>Document ID: <span className="text-gray-300">{verificationStatus.documentId}</span></p>
                         <p>Timestamp: <span className="text-gray-300">{new Date(verificationStatus.timestamp).toLocaleString()}</span></p>
                       </div>
                     </div>
