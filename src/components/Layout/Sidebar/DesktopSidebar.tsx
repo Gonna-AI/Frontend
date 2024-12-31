@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { ChevronRight, Sun, Moon } from 'lucide-react';
 import { useTheme } from '../../../hooks/useTheme';
 import { cn } from '../../../utils/cn';
@@ -85,6 +85,7 @@ export default function DesktopSidebar({
 }: DesktopSidebarProps) {
   const { isDark, toggleTheme } = useTheme();
   const navigate = useNavigate();
+  const [showSignOutConfirm, setShowSignOutConfirm] = useState(false);
 
   // Combine all items including theme toggle and sign out
   const allItems = [
@@ -109,39 +110,99 @@ export default function DesktopSidebar({
       id: 'signout',
       icon: ChevronRight,
       label: 'Sign Out',
-      onClick: onSignOut,
+      onClick: () => setShowSignOutConfirm(true),
       isActive: false,
     },
   ];
 
   return (
-    <aside
-      className={cn(
-        "hidden md:flex fixed right-0 top-[76px] bottom-0",
-        "w-20 flex-col",
-        "rounded-tl-2xl",
-        "transition-all duration-300 ease-in-out",
-        "z-30",
-        isDark
-          ? "bg-black/40 backdrop-blur-xl border-l border-t border-white/10"
-          : "bg-white/40 backdrop-blur-xl border-l border-t border-black/10"
-      )}
-    >
-      {/* Navigation Items */}
-      <div className="flex-1 py-4 px-3">
-        <div className="space-y-2">
-          {allItems.map((item) => (
-            <SidebarItem
-              key={item.id}
-              icon={item.icon}
-              label={item.label}
-              isActive={item.isActive}
-              onClick={item.onClick}
-              isDark={isDark}
-            />
-          ))}
+    <>
+      <aside
+        className={cn(
+          "hidden md:flex fixed right-0 top-[76px] bottom-0",
+          "w-20 flex-col",
+          "rounded-tl-2xl",
+          "transition-all duration-300 ease-in-out",
+          "z-30",
+          isDark
+            ? "bg-black/40 backdrop-blur-xl border-l border-t border-white/10"
+            : "bg-white/40 backdrop-blur-xl border-l border-t border-black/10"
+        )}
+      >
+        {/* Navigation Items */}
+        <div className="flex-1 py-4 px-3">
+          <div className="space-y-2">
+            {allItems.map((item) => (
+              <SidebarItem
+                key={item.id}
+                icon={item.icon}
+                label={item.label}
+                isActive={item.isActive}
+                onClick={item.onClick}
+                isDark={isDark}
+              />
+            ))}
+          </div>
         </div>
-      </div>
-    </aside>
+      </aside>
+
+      {/* Sign Out Confirmation Popup */}
+      {showSignOutConfirm && (
+        <div className={cn(
+          "fixed inset-0 bg-black/50 backdrop-blur-sm z-50",
+          "flex items-center justify-center"
+        )}>
+          <div className={cn(
+            "p-6 rounded-2xl max-w-sm w-full mx-4",
+            "transform transition-all",
+            isDark
+              ? "bg-gray-900 border border-white/10"
+              : "bg-white border border-black/10"
+          )}>
+            <h3 className={cn(
+              "text-lg font-semibold mb-2",
+              isDark ? "text-white" : "text-black"
+            )}>
+              Confirm Sign Out
+            </h3>
+            <p className={cn(
+              "mb-4",
+              isDark ? "text-white/80" : "text-black/80"
+            )}>
+              Are you sure you want to sign out?
+            </p>
+            <div className="flex justify-end space-x-3">
+              <button
+                onClick={() => setShowSignOutConfirm(false)}
+                className={cn(
+                  "px-4 py-2 rounded-lg",
+                  "transition-all duration-200",
+                  isDark
+                    ? "text-white/80 hover:text-white hover:bg-white/10"
+                    : "text-black/80 hover:text-black hover:bg-black/10"
+                )}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  setShowSignOutConfirm(false);
+                  onSignOut();
+                }}
+                className={cn(
+                  "px-4 py-2 rounded-lg",
+                  "transition-all duration-200",
+                  isDark
+                    ? "bg-red-500 text-white hover:bg-red-600"
+                    : "bg-red-500 text-white hover:bg-red-600"
+                )}
+              >
+                Sign Out
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
