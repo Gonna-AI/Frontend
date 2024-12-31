@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { FileCheck, Search, Filter, CheckCircle, XCircle, AlertCircle, MoreVertical, Download, History, Eye, User, Calendar, Clock, Shield, Sun, Moon } from 'lucide-react';
-import { adminApi } from '../config/api';
+import { adminApi, API_BASE_URL } from '../config/api';
 
 // Add type definitions to fix type errors
 interface Document {
@@ -22,55 +22,23 @@ interface Document {
   }>;
 }
 
-const AdminDashboard = () => {
-  const [documents, setDocuments] = useState<Document[]>([
-    {
-      id: '1',
-      title: 'Medical Claim Request',
-      status: 'pending',
-      priority: 'high',
-      submittedBy: 'John Doe',
-      submittedAt: '2024-03-15 14:30',
-      ticketId: 'TKT-001',
-      type: 'Medical Claim',
-      size: '2.4 MB',
-      lastReviewed: null,
-      hash: '0x1234...5678',
-      documents: [
-        { name: 'Medical_Claim_2024.pdf', size: '1.2 MB', type: 'PDF' },
-        { name: 'Hospital_Bill.pdf', size: '0.8 MB', type: 'PDF' },
-        { name: 'Insurance_Card.jpg', size: '0.4 MB', type: 'Image' }
-      ]
-    },
-    {
-      id: '2',
-      title: 'Insurance_Policy.docx',
-      status: 'verified',
-      priority: 'medium',
-      submittedBy: 'Jane Smith',
-      submittedAt: '2024-03-14 09:15',
-      ticketId: 'TKT-002',
-      type: 'Insurance',
-      size: '1.8 MB',
-      lastReviewed: '2024-03-14 10:30',
-      hash: '0x5678...9012'
-    },
-    {
-      id: '3',
-      title: 'Hospital_Bills.pdf',
-      status: 'rejected',
-      priority: 'low',
-      submittedBy: 'Mike Johnson',
-      submittedAt: '2024-03-13 16:45',
-      ticketId: 'TKT-003',
-      type: 'Medical Claim',
-      size: '3.1 MB',
-      lastReviewed: '2024-03-13 17:30',
-      hash: '0x9012...3456'
-    }
-  ]);
+// Add a type for grouped documents
+interface GroupedDocument {
+  client_name: string;
+  ticket_id: string;
+  priority_level: string;
+  grievance_type: string;
+  documents: Array<{
+    document_id: string;
+    document_name: string;
+    uploaded_at: string;
+    is_verified: boolean;
+  }>;
+}
 
-  const [selectedDocument, setSelectedDocument] = useState(null);
+const AdminDashboard = () => {
+  const [documents, setDocuments] = useState<Document[]>([]);
+  const [selectedDocument, setSelectedDocument] = useState<any>(null);
   const [showDetails, setShowDetails] = useState(false);
   const [filters, setFilters] = useState({
     status: 'all',
@@ -78,6 +46,7 @@ const AdminDashboard = () => {
     type: 'all'
   });
   const [isDarkMode, setIsDarkMode] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Add new state for API data
   const [apiDocuments, setApiDocuments] = useState([]);
@@ -86,7 +55,6 @@ const AdminDashboard = () => {
     verified_today: 0,
     pending_review: 0
   });
-  const [isLoading, setIsLoading] = useState(true);
 
   // Add useEffect for API data
   useEffect(() => {
@@ -97,25 +65,42 @@ const AdminDashboard = () => {
     try {
       setIsLoading(true);
       const response = await adminApi.getPendingDocuments();
-      setApiDocuments(response.data.documents);
-      setApiStats(response.data.statistics);
       
-      // Convert API documents to match existing format
-      const convertedDocs = response.data.documents.map(doc => ({
-        id: doc.document_id,
-        title: doc.document_name,
-        status: doc.is_verified ? 'verified' : 'pending',
-        priority: doc.priority_level || 'medium',
-        submittedBy: doc.client_name,
-        submittedAt: doc.uploaded_at,
-        ticketId: doc.ticket_id,
-        type: doc.grievance_type || 'Unknown',
-        size: '2.4 MB', // This would need to be added to backend
-        lastReviewed: null,
-        hash: doc.document_hash || '0x0000',
+      // Group documents by client
+      const groupedDocs = response.data.documents.reduce((acc, doc) => {
+        const key = doc.ticket_id;
+        if (!acc[key]) {
+          acc[key] = {
+            client_name: doc.client_name,
+            ticket_id: doc.ticket_id,
+            priority_level: doc.priority_level,
+            grievance_type: doc.grievance_type,
+            documents: []
+          };
+        }
+        acc[key].documents.push({
+          document_id: doc.document_id,
+          document_name: doc.document_name,
+          uploaded_at: doc.uploaded_at,
+          is_verified: doc.is_verified
+        });
+        return acc;
+      }, {});
+
+      const convertedDocs = Object.values(groupedDocs).map(group => ({
+        id: group.ticket_id,
+        title: group.client_name,
+        status: 'pending',
+        priority: group.priority_level.toLowerCase(),
+        submittedBy: group.client_name,
+        submittedAt: group.documents[0].uploaded_at,
+        ticketId: group.ticket_id,
+        type: group.grievance_type,
+        documents: group.documents
       }));
 
       setDocuments(convertedDocs);
+      setApiStats(response.data.statistics);
       
     } catch (error) {
       console.error('Error fetching documents:', error);
@@ -166,24 +151,57 @@ const AdminDashboard = () => {
     }
   };
 
-  // Update handleVerify to use API
-  const handleVerify = async (docId: string) => {
+  // Update handleVerify to handle all documents of a client
+  const handleVerify = async (ticketId: string) => {
     try {
-      await adminApi.verifyDocument(docId);
-      await fetchDocuments(); // Refresh the list
+      const clientDocs = documents.find(d => d.ticketId === ticketId);
+      if (clientDocs && clientDocs.documents) {
+        await Promise.all(
+          clientDocs.documents.map(doc => 
+            adminApi.verifyDocument(doc.document_id)
+          )
+        );
+        await fetchDocuments();
+      }
     } catch (error) {
-      console.error('Error verifying document:', error);
+      console.error('Error verifying documents:', error);
     }
   };
 
-  const handleReject = (docId: string) => {
-    setDocuments(docs => 
-      docs.map(doc => 
-        doc.id === docId 
-          ? { ...doc, status: 'rejected', lastReviewed: new Date().toISOString() }
-          : doc
-      )
-    );
+  // Update handleReject similarly
+  const handleReject = async (ticketId: string) => {
+    try {
+      const clientDocs = documents.find(d => d.ticketId === ticketId);
+      if (clientDocs && clientDocs.documents) {
+        await Promise.all(
+          clientDocs.documents.map(doc => 
+            adminApi.rejectDocument(doc.document_id)
+          )
+        );
+        await fetchDocuments();
+      }
+    } catch (error) {
+      console.error('Error rejecting documents:', error);
+    }
+  };
+
+  // Add download handler
+  const handleDownload = async (ticketId: string) => {
+    try {
+      const response = await adminApi.downloadDocuments(ticketId);
+      
+      // Create download link
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `documents_${ticketId}.zip`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error downloading documents:', error);
+    }
   };
 
   // Update statistics section
@@ -211,6 +229,34 @@ const AdminDashboard = () => {
       </div>
     </div>
   );
+
+  // Update document preview modal
+  const renderDocumentPreview = (doc: any) => {
+    const fileExtension = doc.document_name.split('.').pop()?.toLowerCase();
+    const isImage = ['jpg', 'jpeg', 'png', 'gif'].includes(fileExtension);
+
+    if (isImage) {
+      return (
+        <img 
+          src={`${API_BASE_URL}/api/documents/${doc.document_id}/preview`}
+          alt={doc.document_name}
+          className="max-w-full h-auto rounded-lg"
+          onError={(e: any) => {
+            e.target.onerror = null;
+            e.target.src = ''; // Remove broken image
+            e.target.alt = 'Failed to load image';
+          }}
+        />
+      );
+    }
+
+    return (
+      <div className={`aspect-video ${isDarkMode ? 'bg-black/60' : 'bg-gray-200'} rounded-lg flex flex-col items-center justify-center p-4`}>
+        <FileCheck className={`h-12 w-12 ${theme.secondaryText} mb-2`} />
+        <p className="text-sm text-gray-400">Preview not available for {fileExtension} files</p>
+      </div>
+    );
+  };
 
   return (
     <div className={`min-h-screen ${theme.background} ${theme.text} p-6 transition-colors duration-200`}>
@@ -301,113 +347,78 @@ const AdminDashboard = () => {
           {/* Documents List */}
           <div className="lg:col-span-2 space-y-4">
             {documents.map((doc) => (
-              <div
-                key={doc.id}
-                className={`${theme.cardBg} backdrop-blur-xl border ${theme.border} rounded-xl p-4`}
-              >
-                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between mb-4">
-                  <div className="flex items-start gap-3 mb-2 sm:mb-0">
-                    <div className="flex-shrink-0">
-                      <User className="h-8 w-8 text-purple-400" />
-                    </div>
-                    <div>
-                      <h3 className="font-medium">{doc.submittedBy}</h3>
-                      <div className="flex flex-wrap items-center gap-2 text-sm text-gray-400 mt-1">
-                        <span>Ticket: {doc.ticketId}</span>
-                        <span className="hidden sm:inline">•</span>
-                        <span>{doc.type}</span>
-                      </div>
-                    </div>
+              <div key={doc.id} className={`p-4 rounded-xl ${theme.cardBg} border ${theme.border}`}>
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <h3 className="text-lg font-medium">{doc.submittedBy}</h3>
+                    <p className="text-sm text-gray-400">Ticket: {doc.ticketId}</p>
+                    <p className="text-sm text-gray-400">Type: {doc.type}</p>
                   </div>
-                  
-                  <div className="flex items-center gap-2 mt-2 sm:mt-0">
-                    <span className={`px-3 py-1 rounded-full text-sm border ${getStatusColor(doc.status)}`}>
-                      {doc.status.charAt(0).toUpperCase() + doc.status.slice(1)}
+                  <div className="flex items-center gap-2">
+                    <span className={`px-3 py-1 rounded-full text-sm ${
+                      doc.priority === 'high' 
+                        ? 'bg-red-500/20 text-red-400' 
+                        : doc.priority === 'medium'
+                          ? 'bg-yellow-500/20 text-yellow-400'
+                          : 'bg-green-500/20 text-green-400'
+                    }`}>
+                      {doc.priority}
                     </span>
-                    <span className={`text-sm ${getPriorityColor(doc.priority)}`}>
-                      {doc.priority.charAt(0).toUpperCase() + doc.priority.slice(1)}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between text-sm text-gray-400">
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mb-2 sm:mb-0">
-                    <div className="flex items-center gap-2">
-                      <User className="h-4 w-4" />
-                      {doc.submittedBy}
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Calendar className="h-4 w-4" />
-                      {new Date(doc.submittedAt).toLocaleDateString()}
-                    </div>
-                    <div className="flex items-center gap-2 mt-2 sm:mt-0">
-                      <button
-                        className={`px-3 py-1 ${
-                          isDarkMode ? 'bg-blue-500/20 text-blue-400' : 'bg-blue-100 text-blue-600'
-                        } rounded-lg hover:${
-                          isDarkMode ? 'bg-blue-500/30' : 'bg-blue-200'
-                        } transition-colors text-sm`}
-                      >
-                        Contact Details
-                      </button>
-                      <button
-                        className={`px-3 py-1 ${
-                          isDarkMode ? 'bg-purple-500/20 text-purple-400' : 'bg-purple-100 text-purple-600'
-                        } rounded-lg hover:${
-                          isDarkMode ? 'bg-purple-500/30' : 'bg-purple-200'
-                        } transition-colors text-sm`}
-                      >
-                        Schedule Appointment
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-between sm:justify-end gap-2 mt-2">
-                    <button
-                      onClick={() => {
-                        setSelectedDocument(doc);
-                        setShowDetails(true);
-                      }}
-                      className={`p-2 hover:${isDarkMode ? 'bg-purple-500/20' : 'bg-purple-100'} rounded transition-colors`}
-                      aria-label="Preview document"
-                    >
-                      <Eye className={`h-4 w-4 ${theme.text}`} />
-                    </button>
                     {doc.status === 'pending' && (
                       <>
                         <button
-                          onClick={() => handleVerify(doc.id)}
-                          className={`p-2 ${isDarkMode ? 'bg-green-500/20' : 'bg-green-100'} ${isDarkMode ? 'text-green-400' : 'text-green-600'} rounded-lg hover:${isDarkMode ? 'bg-green-500/30' : 'bg-green-200'} transition-colors`}
-                          aria-label="Verify document"
+                          onClick={() => handleVerify(doc.ticketId)}
+                          className="p-2 bg-green-500/20 text-green-400 rounded-lg hover:bg-green-500/30 transition-colors"
+                          title="Verify All"
                         >
                           <CheckCircle className="h-4 w-4" />
                         </button>
                         <button
-                          onClick={() => handleReject(doc.id)}
-                          className={`p-2 ${isDarkMode ? 'bg-red-500/20' : 'bg-red-100'} ${isDarkMode ? 'text-red-400' : 'text-red-600'} rounded-lg hover:${isDarkMode ? 'bg-red-500/30' : 'bg-red-200'} transition-colors`}
-                          aria-label="Reject document"
+                          onClick={() => handleReject(doc.ticketId)}
+                          className="p-2 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 transition-colors"
+                          title="Reject All"
                         >
                           <XCircle className="h-4 w-4" />
+                        </button>
+                        <button
+                          onClick={() => handleDownload(doc.ticketId)}
+                          className="p-2 bg-blue-500/20 text-blue-400 rounded-lg hover:bg-blue-500/30 transition-colors"
+                          title="Download All"
+                        >
+                          <Download className="h-4 w-4" />
                         </button>
                       </>
                     )}
                   </div>
                 </div>
 
-                {/* Add documents list */}
+                {/* Documents list */}
                 <div className={`mt-4 p-3 ${theme.statsBg} border ${theme.statsBorder} rounded-lg`}>
                   <div className="text-sm font-medium mb-2">Uploaded Documents</div>
                   <div className="space-y-2">
-                    {doc.documents?.map((file, index) => (
-                      <div key={index} className="flex items-center justify-between text-sm">
+                    {doc.documents?.map((file) => (
+                      <div key={file.document_id} className="flex items-center justify-between text-sm">
                         <div className="flex items-center gap-2">
                           <FileCheck className="h-4 w-4 text-purple-400" />
-                          <span>{file.name}</span>
+                          <span>{file.document_name}</span>
                         </div>
-                        <div className="flex items-center gap-2 text-gray-400">
-                          <span>{file.type}</span>
-                          <span>•</span>
-                          <span>{file.size}</span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-gray-400">
+                            {new Date(file.uploaded_at).toLocaleDateString()}
+                          </span>
+                          <button
+                            onClick={() => {
+                              setSelectedDocument({
+                                ...doc,
+                                document_id: file.document_id,
+                                document_name: file.document_name
+                              });
+                              setShowDetails(true);
+                            }}
+                            className={`p-2 hover:${isDarkMode ? 'bg-purple-500/20' : 'bg-purple-100'} rounded transition-colors`}
+                          >
+                            <Eye className={`h-4 w-4 ${theme.text}`} />
+                          </button>
                         </div>
                       </div>
                     ))}
@@ -443,22 +454,9 @@ const AdminDashboard = () => {
       {/* Document Details Modal */}
       {showDetails && selectedDocument && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 md:p-6">
-          <div className={`
-            ${theme.cardBg} 
-            ${isDarkMode ? 'bg-[rgb(10,10,10)]' : 'bg-white/95'}
-            border 
-            ${theme.border} 
-            rounded-xl 
-            w-full 
-            h-[calc(100vh-2rem)] 
-            md:h-[calc(100vh-4rem)] 
-            md:max-h-[900px] 
-            overflow-hidden 
-            flex 
-            flex-col
-          `}>
+          <div className={`${theme.cardBg} border ${theme.border} rounded-xl w-full max-w-4xl overflow-hidden flex flex-col`}>
             <div className={`flex items-center justify-between p-4 md:p-6 border-b ${theme.border}`}>
-              <h2 className="text-xl font-semibold">Document Details</h2>
+              <h2 className="text-xl font-semibold">{selectedDocument.document_name}</h2>
               <button 
                 onClick={() => setShowDetails(false)}
                 className={`${theme.text} hover:${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}
@@ -468,47 +466,55 @@ const AdminDashboard = () => {
             </div>
 
             <div className="flex-1 overflow-y-auto p-4 md:p-6">
-              <div className="h-full md:grid md:grid-cols-2 md:gap-6">
+              <div className="grid md:grid-cols-2 gap-6">
                 {/* Left Column */}
-                <div className="space-y-4 mb-6 md:mb-0">
+                <div className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-1">
                       <label className={`text-sm ${theme.secondaryText}`}>Submission Date</label>
-                      <p className="font-medium">{new Date(selectedDocument.submittedAt).toLocaleString()}</p>
+                      <p className="font-medium">
+                        {new Date(selectedDocument.submittedAt).toLocaleString()}
+                      </p>
+                    </div>
+                    <div className="space-y-1">
+                      <label className={`text-sm ${theme.secondaryText}`}>Status</label>
+                      <p className="font-medium">Pending Review</p>
                     </div>
                   </div>
 
                   {/* Document Preview */}
                   <div className={`${theme.statsBg} border ${theme.statsBorder} rounded-lg p-4`}>
                     <h3 className="text-lg font-medium mb-3">Document Preview</h3>
-                    <div className={`aspect-video ${isDarkMode ? 'bg-black/60' : 'bg-gray-200'} rounded-lg flex items-center justify-center`}>
-                      <FileCheck className={`h-12 w-12 ${theme.secondaryText}`} />
-                    </div>
+                    {renderDocumentPreview(selectedDocument)}
                   </div>
                 </div>
 
                 {/* Right Column */}
                 <div className="space-y-4">
+                  {/* Document Details */}
+                  <div className={`${theme.statsBg} border ${theme.statsBorder} rounded-lg p-4`}>
+                    <h3 className="text-lg font-medium mb-3">Document Details</h3>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between">
+                        <span className={theme.secondaryText}>Client:</span>
+                        <span>{selectedDocument.submittedBy}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className={theme.secondaryText}>Ticket ID:</span>
+                        <span>{selectedDocument.ticketId}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className={theme.secondaryText}>Document Type:</span>
+                        <span>{selectedDocument.type || 'N/A'}</span>
+                      </div>
+                    </div>
+                  </div>
+
                   {/* Review History */}
                   <div className={`${theme.statsBg} border ${theme.statsBorder} rounded-lg p-4`}>
                     <h3 className="text-lg font-medium mb-3">Review History</h3>
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between text-sm">
-                        <div className="flex items-center gap-2">
-                          <History className="h-4 w-4 text-purple-400" />
-                          <span>Initial Submission</span>
-                        </div>
-                        <span className={theme.secondaryText}>{selectedDocument.submittedAt}</span>
-                      </div>
-                      {selectedDocument.lastReviewed && (
-                        <div className="flex items-center justify-between text-sm">
-                          <div className="flex items-center gap-2">
-                            <CheckCircle className="h-4 w-4 text-green-400" />
-                            <span>Document Reviewed</span>
-                          </div>
-                          <span className={theme.secondaryText}>{selectedDocument.lastReviewed}</span>
-                        </div>
-                      )}
+                    <div className="text-sm text-gray-400 text-center py-4">
+                      No review history available
                     </div>
                   </div>
 
@@ -518,15 +524,15 @@ const AdminDashboard = () => {
                     <div className="space-y-2 text-sm">
                       <div className="flex justify-between">
                         <span className={theme.secondaryText}>Document Hash:</span>
-                        <span className="font-mono">{selectedDocument.hash}</span>
+                        <span className="font-mono">N/A</span>
                       </div>
                       <div className="flex justify-between">
                         <span className={theme.secondaryText}>Block Number:</span>
-                        <span className="font-mono">12345678</span>
+                        <span className="font-mono">N/A</span>
                       </div>
                       <div className="flex justify-between">
                         <span className={theme.secondaryText}>Transaction Hash:</span>
-                        <span className="font-mono">0xabcd...efgh</span>
+                        <span className="font-mono">N/A</span>
                       </div>
                     </div>
                   </div>
@@ -534,7 +540,6 @@ const AdminDashboard = () => {
               </div>
             </div>
 
-            {/* Action Buttons - Fixed at bottom */}
             <div className={`border-t ${theme.border} p-4 md:p-6`}>
               <div className="flex gap-3">
                 <button
