@@ -60,6 +60,16 @@ const AdminDashboard = () => {
   // Add new state for tracking verified clients
   const [verifiedClientsToday, setVerifiedClientsToday] = useState(0);
 
+  // Add new state for blockchain info
+  const [blockchainInfo, setBlockchainInfo] = useState<{
+    hash: string;
+    uploader: string;
+    timestamp: number;
+    isVerified: boolean;
+    verifier: string;
+    verificationTime: number;
+  } | null>(null);
+
   // Add useEffect for API data
   useEffect(() => {
     fetchDocuments();
@@ -100,7 +110,10 @@ const AdminDashboard = () => {
         submittedAt: group.documents[0].uploaded_at,
         ticketId: group.ticket_id,
         type: group.grievance_type,
-        documents: group.documents
+        documents: group.documents.map(doc => ({
+          ...doc,
+          document_hash: doc.document_hash
+        }))
       }));
 
       // Count total pending clients
@@ -162,18 +175,122 @@ const AdminDashboard = () => {
     }
   };
 
+  // Add function to fetch blockchain info
+  const fetchBlockchainInfo = async (documentId: string) => {
+    try {
+      // Find the document hash from the selected document
+      const selectedDoc = selectedDocument?.documents?.find(doc => doc.document_id === documentId);
+      if (!selectedDoc?.document_hash) {
+        console.error('No document hash found');
+        return;
+      }
+
+      const response = await adminApi.getBlockchainInfo(selectedDoc.document_hash);
+      setBlockchainInfo(response.data);
+    } catch (error) {
+      console.error('Error fetching blockchain info:', error);
+      setBlockchainInfo(null);
+    }
+  };
+
+  // Update the Blockchain Information section in the document details modal
+  const renderBlockchainInfo = () => (
+    <div className={`${theme.statsBg} border ${theme.statsBorder} rounded-lg p-4`}>
+      <div className="flex items-center justify-between mb-3">
+        <h3 className="text-lg font-medium">Blockchain Details</h3>
+        <button
+          onClick={() => {
+            const docHash = selectedDocument?.documents?.[0]?.document_hash;
+            if (docHash) {
+              fetchBlockchainInfo(docHash);
+            } else {
+              console.error('No document hash available');
+            }
+          }}
+          className="p-2 bg-purple-500/20 text-purple-400 rounded-lg hover:bg-purple-500/30 transition-colors"
+        >
+          <History className="h-4 w-4" />
+        </button>
+      </div>
+      
+      {blockchainInfo ? (
+        <div className="space-y-3 text-sm">
+          <div className="flex justify-between items-start gap-4">
+            <span className={theme.secondaryText}>Document Hash:</span>
+            <span className="font-mono text-right break-all">{blockchainInfo.hash}</span>
+          </div>
+          
+          <div className="flex justify-between items-center">
+            <span className={theme.secondaryText}>Status:</span>
+            <span className={`px-2 py-1 rounded-full text-xs ${
+              blockchainInfo.isVerified
+                ? 'bg-green-500/20 text-green-400'
+                : 'bg-yellow-500/20 text-yellow-400'
+            }`}>
+              {blockchainInfo.isVerified ? 'Verified' : 'Pending Verification'}
+            </span>
+          </div>
+          
+          <div className="flex justify-between items-start gap-4">
+            <span className={theme.secondaryText}>Uploader:</span>
+            <span className="font-mono text-right break-all">{blockchainInfo.uploader}</span>
+          </div>
+          
+          <div className="flex justify-between items-center">
+            <span className={theme.secondaryText}>Upload Time:</span>
+            <span>{new Date(blockchainInfo.timestamp * 1000).toLocaleString()}</span>
+          </div>
+          
+          {blockchainInfo.isVerified && (
+            <>
+              <div className="flex justify-between items-start gap-4">
+                <span className={theme.secondaryText}>Verifier:</span>
+                <span className="font-mono text-right break-all">{blockchainInfo.verifier}</span>
+              </div>
+              
+              <div className="flex justify-between items-center">
+                <span className={theme.secondaryText}>Verification Time:</span>
+                <span>{new Date(blockchainInfo.verificationTime * 1000).toLocaleString()}</span>
+              </div>
+            </>
+          )}
+        </div>
+      ) : (
+        <div className="text-center py-4">
+          <p className={`${theme.secondaryText} text-sm`}>
+            Click the refresh button to load blockchain data
+          </p>
+        </div>
+      )}
+    </div>
+  );
+
   // Update handleVerify to handle statistics
   const handleVerify = async (ticketId: string) => {
     try {
       const clientDocs = documents.find(d => d.ticketId === ticketId);
       if (clientDocs && clientDocs.documents) {
+        // First verify documents normally
         await Promise.all(
           clientDocs.documents.map(doc => 
             adminApi.verifyDocument(doc.document_id)
           )
         );
         
-        // Update statistics and documents immediately
+        // Then verify on blockchain
+        await Promise.all(
+          clientDocs.documents.map(async doc => {
+            const blockchainResponse = await adminApi.verifyBlockchain(doc.document_id);
+            if (blockchainResponse.data.success) {
+              // Refresh blockchain info if the current document is selected
+              if (selectedDocument?.document_id === doc.document_id) {
+                await fetchBlockchainInfo(doc.document_id);
+              }
+            }
+          })
+        );
+        
+        // Update UI and stats
         setApiStats(prev => ({
           ...prev,
           clients_verified_today: prev.clients_verified_today + 1
@@ -572,6 +689,14 @@ const AdminDashboard = () => {
                         <span className={theme.secondaryText}>Document Type:</span>
                         <span>{selectedDocument.type || 'N/A'}</span>
                       </div>
+                      {selectedDocument.documents?.[0]?.document_hash && (
+                        <div className="flex justify-between">
+                          <span className={theme.secondaryText}>Document Hash:</span>
+                          <span className="font-mono text-xs break-all">
+                            {selectedDocument.documents[0].document_hash}
+                          </span>
+                        </div>
+                      )}
                     </div>
                   </div>
 
@@ -584,23 +709,7 @@ const AdminDashboard = () => {
                   </div>
 
                   {/* Blockchain Information */}
-                  <div className={`${theme.statsBg} border ${theme.statsBorder} rounded-lg p-4`}>
-                    <h3 className="text-lg font-medium mb-3">Blockchain Details</h3>
-                    <div className="space-y-2 text-sm">
-                      <div className="flex justify-between">
-                        <span className={theme.secondaryText}>Document Hash:</span>
-                        <span className="font-mono">N/A</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className={theme.secondaryText}>Block Number:</span>
-                        <span className="font-mono">N/A</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className={theme.secondaryText}>Transaction Hash:</span>
-                        <span className="font-mono">N/A</span>
-                      </div>
-                    </div>
-                  </div>
+                  {renderBlockchainInfo()}
                 </div>
               </div>
             </div>

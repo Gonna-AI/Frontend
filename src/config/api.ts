@@ -139,6 +139,19 @@ export const adminApi = {
         api.post(`/api/admin/documents/${documentId}/reject`),
     downloadDocuments: (ticketId: string) => 
         api.get(`/api/documents/download/${ticketId}`, { responseType: 'blob' }),
+    verifyBlockchain: (documentId: string) =>
+        api.post(`/api/admin/documents/${documentId}/verify-blockchain`),
+    getBlockchainInfo: async (documentHash: string) => {
+        return await api.get(`/api/blockchain/document/${documentHash}`);
+    },
+    verifyBlockchain: async (documentId: string) => {
+        return await api.post(`/api/blockchain/verify/${documentId}`);
+    },
+    downloadFromBlockchain: async (documentHash: string) => {
+        return await api.get(`/api/blockchain/download/${documentHash}`, {
+            responseType: 'blob'
+        });
+    }
 };
 
 export default api; 
