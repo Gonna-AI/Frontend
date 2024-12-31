@@ -362,39 +362,35 @@ const AdminDashboard = () => {
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between sm:justify-end gap-2">
-                    {doc.status === 'pending' ? (
-                      <>
-                        <button
-                          onClick={() => handleVerify(doc.id)}
-                          className={`flex-1 sm:flex-none px-3 py-1 ${isDarkMode ? 'bg-green-500/20' : 'bg-green-100'} ${isDarkMode ? 'text-green-400' : 'text-green-600'} rounded-lg hover:bg-green-500/30 transition-colors`}
-                        >
-                          Verify
-                        </button>
-                        <button
-                          onClick={() => handleReject(doc.id)}
-                          className={`flex-1 sm:flex-none px-3 py-1 ${isDarkMode ? 'bg-red-500/20' : 'bg-red-100'} ${isDarkMode ? 'text-red-400' : 'text-red-600'} rounded-lg hover:bg-red-500/30 transition-colors`}
-                        >
-                          Reject
-                        </button>
-                      </>
-                    ) : (
-                      <div className="flex items-center gap-2">
-                        <Clock className="h-4 w-4" />
-                        Reviewed: {new Date(doc.lastReviewed).toLocaleTimeString()}
-                      </div>
-                    )}
-                    
+                  <div className="flex items-center justify-between sm:justify-end gap-2 mt-2">
                     <button
                       onClick={() => {
                         setSelectedDocument(doc);
                         setShowDetails(true);
                       }}
-                      className={`p-1 hover:${isDarkMode ? 'bg-white/10' : 'bg-gray-200'} rounded transition-colors`}
-                      aria-label="View document details"
+                      className={`p-2 hover:${isDarkMode ? 'bg-purple-500/20' : 'bg-purple-100'} rounded transition-colors`}
+                      aria-label="Preview document"
                     >
                       <Eye className={`h-4 w-4 ${theme.text}`} />
                     </button>
+                    {doc.status === 'pending' && (
+                      <>
+                        <button
+                          onClick={() => handleVerify(doc.id)}
+                          className={`p-2 ${isDarkMode ? 'bg-green-500/20' : 'bg-green-100'} ${isDarkMode ? 'text-green-400' : 'text-green-600'} rounded-lg hover:${isDarkMode ? 'bg-green-500/30' : 'bg-green-200'} transition-colors`}
+                          aria-label="Verify document"
+                        >
+                          <CheckCircle className="h-4 w-4" />
+                        </button>
+                        <button
+                          onClick={() => handleReject(doc.id)}
+                          className={`p-2 ${isDarkMode ? 'bg-red-500/20' : 'bg-red-100'} ${isDarkMode ? 'text-red-400' : 'text-red-600'} rounded-lg hover:${isDarkMode ? 'bg-red-500/30' : 'bg-red-200'} transition-colors`}
+                          aria-label="Reject document"
+                        >
+                          <XCircle className="h-4 w-4" />
+                        </button>
+                      </>
+                    )}
                   </div>
                 </div>
 
@@ -541,28 +537,6 @@ const AdminDashboard = () => {
             {/* Action Buttons - Fixed at bottom */}
             <div className={`border-t ${theme.border} p-4 md:p-6`}>
               <div className="flex gap-3">
-                {selectedDocument.status === 'pending' && (
-                  <>
-                    <button
-                      onClick={() => {
-                        handleVerify(selectedDocument.id);
-                        setShowDetails(false);
-                      }}
-                      className={`flex-1 py-2 ${isDarkMode ? 'bg-green-500/20 text-green-400' : 'bg-green-100 text-green-600'} rounded-lg hover:${isDarkMode ? 'bg-green-500/30' : 'bg-green-200'} transition-colors flex items-center justify-center gap-2`}
-                    >
-                      <CheckCircle className="h-4 w-4" />                   </button>
-                    <button
-                      onClick={() => {
-                        handleReject(selectedDocument.id);
-                        setShowDetails(false);
-                      }}
-                      className={`flex-1 py-2 ${isDarkMode ? 'bg-red-500/20 text-red-400' : 'bg-red-100 text-red-600'} rounded-lg hover:${isDarkMode ? 'bg-red-500/30' : 'bg-red-200'} transition-colors flex items-center justify-center gap-2`}
-                    >
-                      <XCircle className="h-4 w-4" />
-                     
-                    </button>
-                  </>
-                )}
                 <button
                   onClick={() => setShowDetails(false)}
                   className={`flex-1 py-2 ${isDarkMode ? 'bg-gray-500/20 text-gray-400' : 'bg-gray-200 text-gray-600'} rounded-lg hover:${isDarkMode ? 'bg-gray-500/30' : 'bg-gray-300'} transition-colors`}
