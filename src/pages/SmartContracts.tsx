@@ -316,33 +316,48 @@ const DocumentVerification = () => {
       
       const response = await documentApi.processBlockchain(formData);
       setBlockchainResult(response.data);
-      setDocumentHash(response.data.document_hash);
+      const documentHash = response.data.document_hash || response.data.hash; // Handle both formats
+      setDocumentHash(documentHash);
       
-      // Add the new document to the documents list immediately
+      // Create new document with all necessary fields
       const newDocument = {
-        document_id: token_urlsafe(16), // You might want to get this from the backend response
+        document_id: documentHash, // Using hash as document ID
         document_name: file.name,
         is_submitted: true,
-        is_verified: true, // Blockchain documents are verified immediately
+        is_verified: false,
         uploaded_at: new Date().toISOString(),
-        document_hash: response.data.document_hash
+        document_hash: documentHash, // Ensure hash is stored
+        blockchain_verified: true, // Set blockchain flag
+        metadata: response.data.metadata || {} // Store any additional metadata
       };
       
       // Update documents list with the new document at the top
-      setDocuments(prevDocs => [newDocument, ...prevDocs]);
+      // Use functional update to ensure we don't lose existing documents
+      setDocuments(prevDocs => {
+        // Check if document already exists
+        const existingDocIndex = prevDocs.findIndex(doc => doc.document_hash === documentHash);
+        if (existingDocIndex >= 0) {
+          // Update existing document
+          const updatedDocs = [...prevDocs];
+          updatedDocs[existingDocIndex] = {
+            ...updatedDocs[existingDocIndex],
+            ...newDocument
+          };
+          return updatedDocs;
+        }
+        // Add new document
+        return [newDocument, ...prevDocs];
+      });
       
       // Update document stats
       setDocumentStats(prev => ({
         ...prev,
         total: prev.total + 1,
-        verified: prev.verified + 1
+        pending: prev.pending + 1
       }));
       
-      // Fetch updated documents to ensure consistency
-      await fetchDocuments();
-      
     } catch (error) {
-      console.error('Error Uploading on Blockchain :', error);
+      console.error('Error Uploading on Blockchain:', error);
     } finally {
       setBlockchainProcessing(false);
     }
@@ -482,32 +497,34 @@ const DocumentVerification = () => {
             <div className="flex items-center gap-3">
               {doc.is_verified ? (
                 <CheckCircle className="w-5 h-5 text-green-400" />
-              ) : doc.is_submitted ? (
-                <Loader2 className="w-5 h-5 text-yellow-400 animate-spin" />
               ) : (
-                <FileCheck className="w-5 h-5 text-gray-400" />
+                <Loader2 className="w-5 h-5 text-yellow-400 animate-spin" />
               )}
               <span className="text-gray-300 font-medium">{doc.document_name}</span>
             </div>
-            <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-              doc.is_verified 
-                ? 'bg-green-500/20 text-green-400'
-                : doc.is_submitted
-                  ? 'bg-yellow-500/20 text-yellow-400'
-                  : 'bg-gray-500/20 text-gray-400'
-            }`}>
-              {doc.is_verified 
-                ? 'Verified' 
-                : doc.is_submitted 
-                  ? 'Processing' 
-                  : 'Not Submitted'}
-            </span>
+            <div className="flex items-center gap-2">
+              {doc.blockchain_verified && (
+                <span className="px-3 py-1 rounded-full text-sm font-medium bg-blue-500/20 text-blue-400 mr-2">
+                  Blockchain
+                </span>
+              )}
+              <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                doc.is_verified 
+                  ? 'bg-green-500/20 text-green-400'
+                  : 'bg-yellow-500/20 text-yellow-400'
+              }`}>
+                {doc.is_verified ? 'Verified' : 'Processing'}
+              </span>
+            </div>
           </div>
           <div className="text-sm space-y-1 text-gray-400">
             <p>Document ID: <span className="text-gray-300">{doc.document_id}</span></p>
             <p>Uploaded: <span className="text-gray-300">
               {new Date(doc.uploaded_at).toLocaleString()}
             </span></p>
+            {(doc.document_hash || doc.blockchain_verified) && (
+              <p>Hash: <span className="text-gray-300">{doc.document_hash}</span></p>
+            )}
           </div>
         </div>
       ))}
