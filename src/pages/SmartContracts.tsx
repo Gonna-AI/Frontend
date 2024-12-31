@@ -47,7 +47,7 @@ interface BlockchainVerification {
 const DocumentVerification = () => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [verificationStatus, setVerificationStatus] = useState(null);
+  const [verificationStatus, setVerificationStatus] = useState('pending');
   const [ticketId, setTicketId] = useState('');
   const [userInfo, setUserInfo] = useState(null);
   const [showTicketModal, setShowTicketModal] = useState(true);
@@ -77,8 +77,7 @@ const DocumentVerification = () => {
   // Add new state for document stats
   const [documentStats, setDocumentStats] = useState({
     total: 0,
-    verified: 0,
-    pending: 0
+    status: 'pending' // can be 'pending', 'verified', or 'rejected'
   });
 
   // Add new state for blockchain verification
@@ -99,8 +98,7 @@ const DocumentVerification = () => {
       
       setDocumentStats({
         total,
-        verified,
-        pending
+        status: pending > 0 ? 'pending' : verified > 0 ? 'verified' : 'rejected'
       });
     } catch (error) {
       console.error('Error fetching documents:', error);
@@ -120,6 +118,28 @@ const DocumentVerification = () => {
       return () => clearInterval(interval);
     }
   }, []); // Empty dependency array
+
+  // Add useEffect to fetch verification status
+  useEffect(() => {
+    const fetchVerificationStatus = async () => {
+      try {
+        const response = await documentApi.getVerificationStatus();
+        setVerificationStatus(response.data.status);
+        
+        // Update document stats with the new status
+        setDocumentStats(prev => ({
+          ...prev,
+          status: response.data.status
+        }));
+      } catch (error) {
+        console.error('Error fetching verification status:', error);
+      }
+    };
+
+    if (userInfo) {
+      fetchVerificationStatus();
+    }
+  }, [userInfo]);
 
   const simulateAiProcessing = async (file) => {
     setAiProcessing(true);
@@ -726,6 +746,27 @@ const DocumentVerification = () => {
     );
   };
 
+  const renderStatusBadge = () => {
+    switch (verificationStatus) {
+      case 'verified':
+        return <p className="text-3xl font-semibold text-green-400">Verified</p>;
+      case 'rejected':
+        return <p className="text-3xl font-semibold text-red-400">Rejected</p>;
+      case 'pending':
+      default:
+        return <p className="text-3xl font-semibold text-yellow-400">Pending Review</p>;
+    }
+  };
+
+  const renderYourDocuments = () => (
+    <div className="p-6 rounded-xl bg-purple-500/5 border border-purple-500/20 backdrop-blur-sm">
+      <p className="text-gray-400 mb-2">Profile Status</p>
+      <div className="flex items-center gap-2">
+        {renderStatusBadge()}
+      </div>
+    </div>
+  );
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-6 md:p-10 relative bg-gradient-to-b from-[#0a0a0a] to-[#1a1a1a]">
       {/* Enhanced gradient background */}
@@ -873,7 +914,7 @@ const DocumentVerification = () => {
                 {renderUploadContent()}
               </div>
 
-              {verificationStatus && (
+              {verificationStatus && verificationStatus.message && (
                 <div className={`mt-6 p-6 rounded-xl backdrop-blur-sm ${
                   verificationStatus.success 
                     ? 'bg-green-500/10 border border-green-500/30' 
@@ -917,7 +958,7 @@ const DocumentVerification = () => {
               </div>
             </div>
 
-            {/* User Statistics */}
+            {/* Your Documents Section */}
             <div className="bg-black/40 backdrop-blur-xl border border-purple-500/20 rounded-xl overflow-hidden shadow-xl">
               <div className="p-8">
                 <div className="flex items-center gap-3 mb-6">
@@ -931,16 +972,7 @@ const DocumentVerification = () => {
                       <p className="text-gray-400 mb-2">Total Documents</p>
                       <p className="text-3xl font-semibold text-white">{documentStats.total}</p>
                     </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="p-6 rounded-xl bg-purple-500/5 border border-purple-500/20 backdrop-blur-sm">
-                        <p className="text-gray-400 mb-2">Verified</p>
-                        <p className="text-3xl font-semibold text-green-400">{documentStats.verified}</p>
-                      </div>
-                      <div className="p-6 rounded-xl bg-purple-500/5 border border-purple-500/20 backdrop-blur-sm">
-                        <p className="text-gray-400 mb-2">Pending</p>
-                        <p className="text-3xl font-semibold text-yellow-400">{documentStats.pending}</p>
-                      </div>
-                    </div>
+                    {renderYourDocuments()}
                     <div className="p-6 rounded-xl bg-purple-500/5 border border-purple-500/20 backdrop-blur-sm">
                       <p className="text-gray-400 mb-2">Last Activity</p>
                       <div className="flex items-center gap-2">

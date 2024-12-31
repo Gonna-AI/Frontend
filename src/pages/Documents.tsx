@@ -53,8 +53,12 @@ const AdminDashboard = () => {
   const [apiStats, setApiStats] = useState({
     total_documents: 0,
     verified_today: 0,
-    pending_review: 0
+    pending_review: 0,
+    clients_verified_today: 0
   });
+
+  // Add new state for tracking verified clients
+  const [verifiedClientsToday, setVerifiedClientsToday] = useState(0);
 
   // Add useEffect for API data
   useEffect(() => {
@@ -99,8 +103,15 @@ const AdminDashboard = () => {
         documents: group.documents
       }));
 
+      // Count total pending clients
+      const totalPendingClients = Object.keys(groupedDocs).length;
+      
       setDocuments(convertedDocs);
-      setApiStats(response.data.statistics);
+      setApiStats({
+        ...response.data.statistics,
+        pending_review: totalPendingClients,
+        clients_verified_today: response.data.statistics.clients_verified_today || 0
+      });
       
     } catch (error) {
       console.error('Error fetching documents:', error);
@@ -151,7 +162,7 @@ const AdminDashboard = () => {
     }
   };
 
-  // Update handleVerify to handle all documents of a client
+  // Update handleVerify to handle statistics
   const handleVerify = async (ticketId: string) => {
     try {
       const clientDocs = documents.find(d => d.ticketId === ticketId);
@@ -161,14 +172,35 @@ const AdminDashboard = () => {
             adminApi.verifyDocument(doc.document_id)
           )
         );
-        await fetchDocuments();
+        
+        // Update statistics and documents immediately
+        setApiStats(prev => ({
+          ...prev,
+          clients_verified_today: prev.clients_verified_today + 1
+        }));
+        
+        setDocuments(prevDocs => 
+          prevDocs.map(doc => 
+            doc.ticketId === ticketId 
+              ? { ...doc, status: 'verified' }
+              : doc
+          )
+        );
+
+        // Emit an event that the client can listen to (optional, using WebSocket)
+        if (socket) {
+          socket.emit('document_status_changed', {
+            ticket_id: ticketId,
+            status: 'verified'
+          });
+        }
       }
     } catch (error) {
       console.error('Error verifying documents:', error);
     }
   };
 
-  // Update handleReject similarly
+  // Update handleReject to handle statistics
   const handleReject = async (ticketId: string) => {
     try {
       const clientDocs = documents.find(d => d.ticketId === ticketId);
@@ -178,7 +210,22 @@ const AdminDashboard = () => {
             adminApi.rejectDocument(doc.document_id)
           )
         );
-        await fetchDocuments();
+        
+        setDocuments(prevDocs => 
+          prevDocs.map(doc => 
+            doc.ticketId === ticketId 
+              ? { ...doc, status: 'rejected' }
+              : doc
+          )
+        );
+
+        // Emit an event that the client can listen to (optional, using WebSocket)
+        if (socket) {
+          socket.emit('document_status_changed', {
+            ticket_id: ticketId,
+            status: 'rejected'
+          });
+        }
       }
     } catch (error) {
       console.error('Error rejecting documents:', error);
@@ -205,30 +252,46 @@ const AdminDashboard = () => {
   };
 
   // Update statistics section
-  const renderStatistics = () => (
-    <div className={`${theme.cardBg} backdrop-blur-xl border ${theme.border} rounded-xl p-4`}>
-      <h2 className="text-lg font-semibold mb-4">Statistics</h2>
-      <div className="space-y-4">
-        <div className="grid grid-cols-2 gap-4">
-          <div className={`p-3 ${theme.statsBg} border ${theme.statsBorder} rounded-lg`}>
-            <div className={`text-2xl font-bold ${theme.text}`}>{apiStats.pending_review}</div>
-            <div className={theme.statsText}>Pending Review</div>
+  const renderStatistics = () => {
+    // Calculate completion percentage
+    const totalClients = apiStats.pending_review + apiStats.clients_verified_today;
+    const completionPercentage = totalClients > 0 
+      ? Math.round((apiStats.clients_verified_today / totalClients) * 100)
+      : 0;
+
+    return (
+      <div className={`${theme.cardBg} backdrop-blur-xl border ${theme.border} rounded-xl p-4`}>
+        <h2 className="text-lg font-semibold mb-4">Statistics</h2>
+        <div className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div className={`p-3 ${theme.statsBg} border ${theme.statsBorder} rounded-lg`}>
+              <div className={`text-2xl font-bold ${theme.text}`}>{apiStats.pending_review}</div>
+              <div className={theme.statsText}>Clients Pending Review</div>
+            </div>
+            <div className={`p-3 ${theme.statsBg} border ${theme.statsBorder} rounded-lg`}>
+              <div className={`text-2xl font-bold ${theme.text}`}>{apiStats.clients_verified_today}</div>
+              <div className={theme.statsText}>Clients Verified</div>
+            </div>
           </div>
           <div className={`p-3 ${theme.statsBg} border ${theme.statsBorder} rounded-lg`}>
-            <div className={`text-2xl font-bold ${theme.text}`}>{apiStats.verified_today}</div>
-            <div className={theme.statsText}>Verified Today</div>
+            <div className={theme.statsText}>Review Progress</div>
+            <div className={`h-2 ${isDarkMode ? 'bg-gray-700' : 'bg-gray-200'} rounded-full overflow-hidden mt-2`}>
+              <div 
+                className="h-full bg-purple-500 rounded-full transition-all duration-500"
+                style={{ width: `${completionPercentage}%` }}
+              ></div>
+            </div>
+            <div className="flex justify-between mt-1">
+              <div className={theme.statsText}>{completionPercentage}% Complete</div>
+              <div className={theme.statsText}>
+                {apiStats.clients_verified_today} / {totalClients} Clients
+              </div>
+            </div>
           </div>
-        </div>
-        <div className={`p-3 ${theme.statsBg} border ${theme.statsBorder} rounded-lg`}>
-          <div className={theme.statsText}>Review Timeline</div>
-          <div className={`h-2 ${isDarkMode ? 'bg-gray-700' : 'bg-gray-200'} rounded-full overflow-hidden`}>
-            <div className="h-full w-3/4 bg-purple-500 rounded-full"></div>
-          </div>
-          <div className={theme.statsText}>75% Complete</div>
         </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   // Update document preview modal
   const renderDocumentPreview = (doc: any) => {
@@ -454,18 +517,20 @@ const AdminDashboard = () => {
       {/* Document Details Modal */}
       {showDetails && selectedDocument && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 md:p-6">
-          <div className={`${theme.cardBg} border ${theme.border} rounded-xl w-full max-w-4xl overflow-hidden flex flex-col`}>
+          <div className={`${theme.cardBg} border ${theme.border} rounded-xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col`}>
+            {/* Header */}
             <div className={`flex items-center justify-between p-4 md:p-6 border-b ${theme.border}`}>
-              <h2 className="text-xl font-semibold">{selectedDocument.document_name}</h2>
+              <h2 className="text-xl font-semibold truncate">{selectedDocument.document_name}</h2>
               <button 
                 onClick={() => setShowDetails(false)}
-                className={`${theme.text} hover:${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}
+                className={`${theme.text} hover:${isDarkMode ? 'text-gray-300' : 'text-gray-600'} flex-shrink-0`}
               >
                 <XCircle className="h-6 w-6" />
               </button>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-4 md:p-6">
+            {/* Scrollable Content */}
+            <div className="flex-1 overflow-y-auto p-4 md:p-6 min-h-0">
               <div className="grid md:grid-cols-2 gap-6">
                 {/* Left Column */}
                 <div className="space-y-4">
@@ -540,7 +605,8 @@ const AdminDashboard = () => {
               </div>
             </div>
 
-            <div className={`border-t ${theme.border} p-4 md:p-6`}>
+            {/* Footer */}
+            <div className={`border-t ${theme.border} p-4 md:p-6 flex-shrink-0`}>
               <div className="flex gap-3">
                 <button
                   onClick={() => setShowDetails(false)}
