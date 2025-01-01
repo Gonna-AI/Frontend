@@ -498,15 +498,15 @@ const PrivacyPolicy = () => {
                 "text-center mt-4",
                 isDark ? "text-white/60" : "text-black/60"
               )}>
-                For privacy-related inquiries, please contact{' '}
+                For privacy-related inquiries, please contact us:  {' '}
                 <a 
-                  href="mailto:privacy@example.com"
+                  href="mailto:contact@clerktree.com"
                   className={cn(
                     "underline hover:no-underline transition-all duration-200",
                     isDark ? "text-purple-400 hover:text-purple-300" : "text-purple-600 hover:text-purple-700"
                   )}
                 >
-                  us
+                  contact@clerktree.com
                 </a>
               </p>
             </div>

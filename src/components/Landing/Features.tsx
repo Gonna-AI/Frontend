@@ -197,7 +197,6 @@ const MagicTweet = ({ tweet, components, className, ...props }) => {
 export default function Features() {
   const [activeFeature, setActiveFeature] = useState(null)
   const [activeTestimonial, setActiveTestimonial] = useState(0)
-  const [showQuoteForm, setShowQuoteForm] = useState(false)
 
   const features = [
     {
@@ -243,10 +242,6 @@ export default function Features() {
     }
   ]
 
-  const handleQuoteFormSubmit = (formData) => {
-    console.log('Form submitted:', formData)
-  }
-
   return (
     <section className="py-24 bg-[rgb(10,10,10)]">
       {/* Curved decoration lines */}
@@ -287,7 +282,7 @@ export default function Features() {
             <div className="flex items-center gap-6">
               <button 
                 className="bg-black text-white px-8 py-3 rounded-full border border-purple-500/30 hover:border-purple-500/60 transition-colors font-mono uppercase text-sm tracking-wider"
-                onClick={() => setShowQuoteForm(true)}
+                onClick={() => window.location.href = '/contact'}
               >
                 GET A CUSTOM QUOTE
               </button>
@@ -467,13 +462,6 @@ export default function Features() {
           </div>
         </div>
       </div>
-      
-      {showQuoteForm && (
-        <QuoteForm 
-          onClose={() => setShowQuoteForm(false)} 
-          onSubmit={handleQuoteFormSubmit}
-        />
-      )}
     </section>
   )
 }

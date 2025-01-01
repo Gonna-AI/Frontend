@@ -181,7 +181,7 @@ const Hero = ({ onGetStarted }: HeroProps) => {
             </button>
 
             <button 
-              onClick={() => navigate('/auth')}
+              onClick={() => navigate('/invite')}
               className="bg-purple-500/20 text-white border border-purple-500/30 hover:bg-purple-500/30 transition-colors duration-200 rounded-[20px] px-8 py-3 text-sm font-medium tracking-wide"
             >
               Get Started

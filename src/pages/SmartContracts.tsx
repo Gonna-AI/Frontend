@@ -976,7 +976,7 @@ const DocumentVerification = () => {
         </div>
 
         <div className="text-center text-sm text-gray-400 mt-8">
-          Secured by Blockchain Technology • All documents are encrypted and verified
+          Clerktree • All documents are encrypted and verified
         </div>
       </div>
     </div>

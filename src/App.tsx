@@ -16,6 +16,7 @@ import TermsOfService from './components/Legal/TermsOfService';
 import SmartContracts from './pages/SmartContracts';
 import Documents from './pages/Documents';
 import Contact from './pages/Contact';
+import InvitePage from './pages/InvitePage';
 // Create a client
 const queryClient = new QueryClient();
 
@@ -129,6 +130,8 @@ function App() {
               <Navigate to="/dashboard" /> : 
               <AuthPage setIsSignedIn={setIsSignedIn} />
           } />
+
+          <Route path="/invite" element={<InvitePage />} />
 
           {/* Protected Routes */}
           <Route path="/dashboard" element={
