@@ -22,7 +22,7 @@ export default function AnalyticsCards({
       icon: Users
     },
     {
-      title: 'AI Conversations',
+      title: 'Total Conversations',
       value: totalConversations.toString(),
       icon: MessageSquare
     },

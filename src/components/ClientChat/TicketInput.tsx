@@ -8,7 +8,7 @@ const cn = (...classes: (string | boolean | undefined)[]) => {
 };
 
 interface TicketInputProps {
-  onSubmit: (code: string) => void;
+  onSubmit: (code: string, agentId: string) => void;
   error?: string;
   isDark: boolean;
 }
@@ -59,6 +59,7 @@ const styles = `
 
 const TicketInput: React.FC<TicketInputProps> = ({ onSubmit, error, isDark }) => {
   const [code, setCode] = useState('');
+  const [agentId, setAgentId] = useState('');
   const [userName, setUserName] = useState('');
   const [mobileNumber, setMobileNumber] = useState('');
   const [email, setEmail] = useState('');
@@ -149,7 +150,7 @@ const TicketInput: React.FC<TicketInputProps> = ({ onSubmit, error, isDark }) =>
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (code.trim()) {
-      onSubmit(code);
+      onSubmit(code, agentId);
     }
   };
 
@@ -367,20 +368,37 @@ const TicketInput: React.FC<TicketInputProps> = ({ onSubmit, error, isDark }) =>
             </span>
           </div>
           
-          <input
-            type="text"
-            value={code}
-            onChange={(e) => setCode(e.target.value)}
-            placeholder="Enter your ticket code"
-            className={cn(
-              "w-full px-4 py-3 rounded-lg",
-              "transition-all duration-300",
-              "focus:outline-none focus:ring-2",
-              isDark
-                ? "bg-black/40 border border-white/10 text-white placeholder-white/30 focus:ring-purple-500/30"
-                : "bg-white/40 border border-black/10 text-black placeholder-black/30 focus:ring-purple-500/30"
-            )}
-          />
+          <div className="space-y-3">
+            <input
+              type="text"
+              value={code}
+              onChange={(e) => setCode(e.target.value)}
+              placeholder="Enter your ticket code"
+              className={cn(
+                "w-full px-4 py-3 rounded-lg",
+                "transition-all duration-300",
+                "focus:outline-none focus:ring-2",
+                isDark
+                  ? "bg-black/40 border border-white/10 text-white placeholder-white/30 focus:ring-purple-500/30"
+                  : "bg-white/40 border border-black/10 text-black placeholder-black/30 focus:ring-purple-500/30"
+              )}
+            />
+
+            <input
+              type="text"
+              value={agentId}
+              onChange={(e) => setAgentId(e.target.value)}
+              placeholder="Enter agent ID (optional)"
+              className={cn(
+                "w-full px-4 py-3 rounded-lg",
+                "transition-all duration-300",
+                "focus:outline-none focus:ring-2",
+                isDark
+                  ? "bg-black/40 border border-white/10 text-white placeholder-white/30 focus:ring-purple-500/30"
+                  : "bg-white/40 border border-black/10 text-black placeholder-black/30 focus:ring-purple-500/30"
+              )}
+            />
+          </div>
           
           {error && (
             <p className="mt-2 text-sm text-red-400 animate-fadeIn">{error}</p>
