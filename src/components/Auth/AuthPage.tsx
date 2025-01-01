@@ -79,7 +79,7 @@ function AuthForm({ className, onGuestLogin, onSuccess, ...props }: AuthFormProp
           <p className="text-sm text-gray-400 mt-1">
             {isLogin 
               ? 'Login with your Apple or Google account' 
-              : 'Sign up to get started with gonna.ai'
+              : 'Sign up to get started with ClerkTree'
             }
           </p>
         </div>
@@ -276,7 +276,7 @@ export default function AuthPage({ setIsSignedIn }: AuthPageProps) {
           <div className="flex h-6 w-6 items-center justify-center rounded-md bg-purple-600">
             <GalleryVerticalEnd className="h-4 w-4" />
           </div>
-          gonna.ai
+          ClerkTree
         </a>
         <AuthForm onSuccess={handleSuccess} onGuestLogin={handleGuestLogin} />
       </motion.div>

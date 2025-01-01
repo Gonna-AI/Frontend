@@ -14,7 +14,7 @@ export default function Logo({ isDark }: LogoProps) {
           ? "bg-gradient-to-r from-emerald-400 via-blue-500 to-purple-600 text-transparent bg-clip-text"
           : "bg-gradient-to-r from-emerald-600 via-blue-600 to-purple-700 text-transparent bg-clip-text"
       )}>
-        gonna.ai
+        ClerkTree
       </h1>
     </div>
   );

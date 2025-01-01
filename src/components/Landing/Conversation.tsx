@@ -115,7 +115,7 @@ const WaitlistWithBeams = () => {
           Join the waitlist
         </h1>
         <p className="mt-4 font-normal text-base text-neutral-300 max-w-lg text-center">
-          Be among the first to experience how gonna.ai is revolutionizing claims processing. Our AI-powered platform is designed to make claims handling smarter, faster, and more human.
+          Be among the first to experience how ClerkTree is revolutionizing claims processing. Our AI-powered platform is designed to make claims handling smarter, faster, and more human.
         </p>
         <div className="mt-8 w-full">
           <WaitlistForm />

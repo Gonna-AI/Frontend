@@ -23,7 +23,7 @@ export default function Logo() {
           ease={20}
         />
       </div>
-      <span className="font-bold text-xl relative z-10">gonna.ai</span>
+      <span className="font-bold text-xl relative z-10">ClerkTree</span>
     </div>
   );
 } 

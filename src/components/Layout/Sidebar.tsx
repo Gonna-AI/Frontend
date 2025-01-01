@@ -89,7 +89,7 @@ export default function Sidebar({ isOpen = false, onClose }: SidebarProps) {
               "md:hidden xl:block",
               isDark ? "text-white" : "text-black"
             )}>
-              gonna.ai
+              ClerkTree
             </span>
           </div>
 

@@ -224,7 +224,7 @@ export default function Features() {
 
   const testimonials = [
     {
-      quote: "Gonna.AI has transformed our claims processing workflow. The efficiency gains are remarkable.",
+      quote: "ClerkTree has transformed our claims processing workflow. The efficiency gains are remarkable.",
       author: "Sarah Chen",
       role: "Operations Director",
       company: "Technical University of Munich"
@@ -236,7 +236,7 @@ export default function Features() {
       company: "Shiv Nadar University"
     },
     {
-      quote: "Customer satisfaction has improved significantly since implementing Gonna.AI's smart scheduling.",
+      quote: "Customer satisfaction has improved significantly since implementing ClerkTree's smart scheduling.",
       author: "Emma Thompson",
       role: "Customer Success Lead",
       company: "Friedrich-Alexander University"
@@ -425,7 +425,7 @@ export default function Features() {
           </div>
         </div>
 
-        {/* Gonna.AI Section */}
+        {/* ClerkTree Section */}
         <div className="flex justify-end mb-12">
           <div className="flex items-center gap-4">
             {/* Glowing dot */}
@@ -434,7 +434,7 @@ export default function Features() {
               <div className="absolute inset-0 animate-ping bg-purple-500 rounded-full opacity-20" />
             </div>
             
-            <div className="text-sm font-mono text-white/60">Gonna.AI</div>
+            <div className="text-sm font-mono text-white/60">ClerkTree</div>
           </div>
         </div>
 

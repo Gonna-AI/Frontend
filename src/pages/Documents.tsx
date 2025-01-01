@@ -509,7 +509,7 @@ const AdminDashboard = () => {
               xmlns="http://www.w3.org/2000/svg" 
               viewBox="0 0 464 468"
               className="w-11 h-11" 
-              aria-label="Gonna.ai Logo"
+              aria-label="ClerkTree Logo"
             >
               <path 
                 fill={isDarkMode ? "white" : "black"}
@@ -518,7 +518,7 @@ const AdminDashboard = () => {
               />
             </svg>
             <div className="flex flex-col">
-              <span className={`text-2xl font-bold ${theme.text}`}>gonna.ai</span>
+              <span className={`text-2xl font-bold ${theme.text}`}>ClerkTree</span>
               <span className={`text-sm ${theme.secondaryText}`}>Admin Document Review</span>
             </div>
           </div>

@@ -8,8 +8,8 @@ const Logo = () => (
   <svg 
     xmlns="http://www.w3.org/2000/svg" 
     viewBox="0 0 464 468"
-    className="w-32 h-32 -ml-4" // Increased size and added negative margin for alignment
-    aria-label="Gonna.ai Logo"
+    className="w-20 h-20 md:w-24 md:h-24 -ml-2" // Reduced size from w-24/h-24 to w-20/h-20
+    aria-label="ClerkTree Logo"
   >
     <defs>
       <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="0%">
@@ -106,14 +106,14 @@ const Hero = ({ onGetStarted }: HeroProps) => {
             className="mb-8 flex items-center justify-center"
           >
             {/* Logo container with adjusted spacing for larger logo */}
-            <div className="flex items-center gap-6">
-              <div className="flex items-center justify-center pt-4">
-                <Logo className="w-24 h-24 md:w-32 md:h-32" />
+            <div className="flex items-center gap-4">
+              <div className="flex items-center justify-center">
+                <Logo className="w-20 h-20 md:w-24 md:h-24" />
               </div>
               
               {/* Logo text gradient */}
               <div className="bg-gradient-to-r from-emerald-400 via-blue-500 to-purple-600 text-transparent bg-clip-text">
-                <h1 className="text-6xl md:text-8xl font-bold tracking-tight">gonna.ai</h1>
+                <h1 className="text-6xl md:text-8xl font-bold tracking-tight">ClerkTree</h1>
               </div>
             </div>
           </motion.div>
@@ -172,7 +172,7 @@ const Hero = ({ onGetStarted }: HeroProps) => {
 
       {/* Bottom Text with Pulsating Dot */}
       <div className="fixed bottom-4 left-4 text-sm font-mono text-white/60 z-50 flex items-center gap-2">
-        <span>Gonna.AI</span>
+        <span>ClerkTree</span>
         <div className="relative flex h-1 w-1">
           <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-500 opacity-75"></span>
           <span className="relative inline-flex rounded-full h-1 w-1 bg-purple-500"></span>
