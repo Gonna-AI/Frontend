@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Ticket, ArrowRight, Copy, RefreshCw, User, Phone, Mail } from 'lucide-react';
+import { Ticket, ArrowRight, Copy, RefreshCw, User, Phone, Mail, UserCog2 } from 'lucide-react';
 import { ticketApi } from '../../config/api';
 
 // Utility function to combine class names
@@ -72,6 +72,7 @@ const TicketInput: React.FC<TicketInputProps> = ({ onSubmit, error, isDark }) =>
   const [mobileError, setMobileError] = useState('');
   const [emailError, setEmailError] = useState('');
   const [contactError, setContactError] = useState('');
+  const [agentIdError, setAgentIdError] = useState('');
 
   const handleGenerateClick = () => {
     setShowNameInput(true);
@@ -79,6 +80,7 @@ const TicketInput: React.FC<TicketInputProps> = ({ onSubmit, error, isDark }) =>
     setMobileError('');
     setEmailError('');
     setContactError('');
+    setAgentIdError('');
   };
 
   const validateMobileNumber = (number: string) => {
@@ -118,6 +120,11 @@ const TicketInput: React.FC<TicketInputProps> = ({ onSubmit, error, isDark }) =>
       hasError = true;
     }
 
+    if (!agentId.trim()) {
+      setAgentIdError('Please enter an agent ID');
+      hasError = true;
+    }
+
     if (hasError) return;
 
     setIsGenerating(true);
@@ -125,7 +132,8 @@ const TicketInput: React.FC<TicketInputProps> = ({ onSubmit, error, isDark }) =>
       const response = await ticketApi.create({
         name: userName,
         mobile: mobileNumber || undefined,
-        email: email || undefined
+        email: email || undefined,
+        agent_id: agentId || undefined
       });
       setGeneratedTicket(response.data.ticket_id);
       setHasGenerated(true);
@@ -280,6 +288,36 @@ const TicketInput: React.FC<TicketInputProps> = ({ onSubmit, error, isDark }) =>
                   <p className="text-sm text-red-400 mt-2">{contactError}</p>
                 )}
 
+                <div>
+                <div className="flex items-center gap-3 mb-2">
+                    <UserCog2 className={cn(
+                      "w-4 h-4",
+                      isDark ? "text-emerald-400" : "text-emerald-600"
+                    )} />
+                    <span className={isDark ? "text-white/60" : "text-black/60"}>
+                      Agent number
+                    </span>
+                  </div>
+                  <input
+                    type="text"
+                    value={agentId}
+                    onChange={(e) => setAgentId(e.target.value)}
+                    placeholder="Enter agent ID (optional)"
+                    className={cn(
+                      "w-full px-4 py-3 rounded-lg",
+                      "transition-all duration-300",
+                      "focus:outline-none focus:ring-2",
+                      isDark
+                        ? "bg-black/40 border border-white/10 text-white placeholder-white/30 focus:ring-purple-500/30"
+                        : "bg-white/40 border border-black/10 text-black placeholder-black/30 focus:ring-purple-500/30"
+                    )}
+                  />
+                </div>
+                
+                {error && (
+                  <p className="mt-2 text-sm text-red-400 animate-fadeIn">{error}</p>
+                )}
+
                 <button
                   type="button"
                   onClick={generateTicket}
@@ -374,21 +412,6 @@ const TicketInput: React.FC<TicketInputProps> = ({ onSubmit, error, isDark }) =>
               value={code}
               onChange={(e) => setCode(e.target.value)}
               placeholder="Enter your ticket code"
-              className={cn(
-                "w-full px-4 py-3 rounded-lg",
-                "transition-all duration-300",
-                "focus:outline-none focus:ring-2",
-                isDark
-                  ? "bg-black/40 border border-white/10 text-white placeholder-white/30 focus:ring-purple-500/30"
-                  : "bg-white/40 border border-black/10 text-black placeholder-black/30 focus:ring-purple-500/30"
-              )}
-            />
-
-            <input
-              type="text"
-              value={agentId}
-              onChange={(e) => setAgentId(e.target.value)}
-              placeholder="Enter agent ID (optional)"
               className={cn(
                 "w-full px-4 py-3 rounded-lg",
                 "transition-all duration-300",
