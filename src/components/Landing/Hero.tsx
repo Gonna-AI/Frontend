@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { LifeBuoy, FileCode2 } from 'lucide-react';
+import { LifeBuoy, FileCode2, Phone } from 'lucide-react';
 import { cn } from '../../utils/cn';
 
 const Logo = () => (
@@ -46,6 +46,26 @@ const Hero = ({ onGetStarted }: HeroProps) => {
     <div className="bg-[rgb(10,10,10)] min-h-screen relative overflow-hidden">
       {/* Support Ticket and Smart Contracts Buttons - Top Right */}
       <div className="absolute top-4 right-4 z-50 flex gap-2">
+        <button 
+          onClick={() => navigate('/contact')}
+          className={cn(
+            "relative group",
+            "md:px-8 md:py-3 p-3 rounded-[20px]",
+            "text-sm font-medium tracking-wide",
+            "transition-all duration-200",
+            "bg-gradient-to-r from-red-500/20 via-red-500/30 to-red-400/20",
+            "hover:from-red-500/30 hover:via-red-500/40 hover:to-red-400/30",
+            "border border-red-500/30",
+            "text-red-300",
+            "overflow-hidden",
+            "flex items-center gap-2"
+          )}
+        >
+          <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-red-500/20 to-red-400/20 blur-xl group-hover:opacity-75 transition-opacity opacity-0" />
+          <Phone className="w-5 h-5 md:w-6 md-6" />
+          <span className="relative z-10 hidden md:inline">Contact Us</span>
+        </button>
+
         <button 
           onClick={() => navigate('/smart-contracts')}
           className={cn(

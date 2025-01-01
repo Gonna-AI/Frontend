@@ -15,6 +15,7 @@ import PrivacyPolicy from './components/Legal/PrivacyPolicy';
 import TermsOfService from './components/Legal/TermsOfService';
 import SmartContracts from './pages/SmartContracts';
 import Documents from './pages/Documents';
+import Contact from './pages/Contact';
 // Create a client
 const queryClient = new QueryClient();
 
@@ -166,6 +167,7 @@ function App() {
           <Route path="/auth/google/callback" element={<GoogleCallback />} />
           <Route path="/smart-contracts" element={<SmartContracts />} />
           <Route path="/documents" element={<Documents />} />
+          <Route path="/contact" element={<Contact />} />
         </Routes>
       </BrowserRouter>
     </QueryClientProvider>
