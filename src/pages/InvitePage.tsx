@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Lock, ChevronRight, Copy, Check, X, AlertCircle } from 'lucide-react';
@@ -10,12 +10,42 @@ const InvitePage = () => {
   const [showError, setShowError] = useState(false);
   const navigate = useNavigate();
 
-  const handleSubmit = async (e) => {
+  useEffect(() => {
+    // Check if user has previously used a valid invite code
+    const hasValidInvite = localStorage.getItem('hasValidInvite');
+    if (hasValidInvite === 'true') {
+      navigate('/auth');
+    }
+  }, [navigate]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (inviteCode === 'DEMO123') {
-      navigate('/auth');
-    } else {
+    try {
+      const response = await fetch('http://localhost:5000/api/auth/validate-invite', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ code: inviteCode }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.valid) {
+        // Store the invite code in session storage for use during registration
+        sessionStorage.setItem('inviteCode', inviteCode);
+        // Store in localStorage that user has used a valid invite code
+        localStorage.setItem('hasValidInvite', 'true');
+        // Force navigation to auth page
+        window.location.href = '/auth';
+      } else {
+        setShowError(true);
+        setInviteCode('');
+        setTimeout(() => setShowError(false), 3000);
+      }
+    } catch (error) {
+      console.error('Error validating invite code:', error);
       setShowError(true);
       setInviteCode('');
       setTimeout(() => setShowError(false), 3000);
