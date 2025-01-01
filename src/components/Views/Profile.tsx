@@ -1,7 +1,5 @@
 import React, { useState } from 'react';
-import { User, Mail, Phone, Calendar, Clock, Download, Grid, AlignLeft, 
-  ArrowUpDown, Filter, Target, CheckCircle, ChevronDown, BarChart3, History, 
-  Star, FileCheck } from 'lucide-react';
+import { User, Mail, Phone, Calendar, Target, BarChart3, Star, FileCheck, UserCog2 } from 'lucide-react';
 import { useTheme } from '../../hooks/useTheme';
 import { cn } from '../../utils/cn';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -98,15 +96,7 @@ export default function AgentProfile() {
                     ? "bg-black/20 border border-white/10" 
                     : "bg-white/10 border border-black/10"
                 )}>
-                  {user.profile_picture ? (
-                    <img 
-                      src={`${API_BASE_URL}${user.profile_picture}`} 
-                      alt="Profile" 
-                      className="w-full h-full object-cover" 
-                    />
-                  ) : (
                     <User className="w-8 sm:w-10 h-8 sm:h-10 text-blue-400" />
-                  )}
                 </div>
                 <div className="flex-1">
                   <h2 className={cn(
@@ -126,7 +116,14 @@ export default function AgentProfile() {
                       <span className={cn(
                         "text-sm",
                         isDark ? "text-white/60" : "text-black/60"
-                      )}>+91 98765 43210</span>
+                      )}>{user.mobile ? user.mobile : 'No Mobile'}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <UserCog2 className="w-4 h-4 text-purple-400" />
+                      <span className={cn(
+                        "text-sm",
+                        isDark ? "text-white/60" : "text-black/60"
+                      )}>{user.agent_id ? user.agent_id : 'No Agent ID'}</span>
                     </div>
                   </div>
                 </div>
