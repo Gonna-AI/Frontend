@@ -247,7 +247,11 @@ export default function AuthPage({ setIsSignedIn }: AuthPageProps) {
   const navigate = useNavigate();
 
   useEffect(() => {
-    navigate('/invite');
+    // Check if user has a valid invite code
+    const inviteCode = sessionStorage.getItem('inviteCode');
+    if (!inviteCode) {
+      navigate('/invite');
+    }
   }, [navigate]);
 
   const handleGuestLogin = () => {
