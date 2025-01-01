@@ -87,7 +87,7 @@ export default function ClientChat() {
             "text-center mt-8 text-sm",
             isDark ? "text-gray-400" : "text-gray-500"
           )}>
-            Need help? Contact our support team
+            Need help? Contact our support team: contact@clerktree.com
           </div>
         </div>
       ) : (

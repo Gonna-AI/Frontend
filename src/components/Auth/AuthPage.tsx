@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { GalleryVerticalEnd } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useNavigate, Link } from 'react-router-dom';
@@ -245,6 +245,10 @@ interface AuthPageProps {
 
 export default function AuthPage({ setIsSignedIn }: AuthPageProps) {
   const navigate = useNavigate();
+
+  useEffect(() => {
+    navigate('/invite');
+  }, [navigate]);
 
   const handleGuestLogin = () => {
     setIsSignedIn(true);
