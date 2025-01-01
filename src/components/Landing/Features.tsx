@@ -1,8 +1,198 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, Suspense } from 'react'
 import { motion } from 'framer-motion'
 import { QuoteForm } from './QuoteForm'
+import { useTweet } from 'react-tweet'
+import { enrichTweet } from 'react-tweet'
+
+// Tweet Components
+const XLogo = ({ className, ...props }) => (
+  <svg
+    viewBox="0 0 24 24"
+    aria-hidden="true"
+    className={`fill-white ${className}`}
+    {...props}
+  >
+    <g>
+      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path>
+    </g>
+  </svg>
+)
+
+const Verified = ({ className, ...props }) => (
+  <svg
+    aria-label="Verified Account"
+    viewBox="0 0 24 24"
+    className={className}
+    {...props}
+  >
+    <g fill="currentColor">
+      <path d="M22.5 12.5c0-1.58-.875-2.95-2.148-3.6.154-.435.238-.905.238-1.4 0-2.21-1.71-3.998-3.818-3.998-.47 0-.92.084-1.336.25C14.818 2.415 13.51 1.5 12 1.5s-2.816.917-3.437 2.25c-.415-.165-.866-.25-1.336-.25-2.11 0-3.818 1.79-3.818 4 0 .494.083.964.237 1.4-1.272.65-2.147 2.018-2.147 3.6 0 1.495.782 2.798 1.942 3.486-.02.17-.032.34-.032.514 0 2.21 1.708 4 3.818 4 .47 0 .92-.086 1.335-.25.62 1.334 1.926 2.25 3.437 2.25 1.512 0 2.818-.916 3.437-2.25.415.163.865.248 1.336.248 2.11 0 3.818-1.79 3.818-4 0-.174-.012-.344-.033-.513 1.158-.687 1.943-1.99 1.943-3.484zm-6.616-3.334l-4.334 6.5c-.145.217-.382.334-.625.334-.143 0-.288-.04-.416-.126l-.115-.094-2.415-2.415c-.293-.293-.293-.768 0-1.06s.768-.294 1.06 0l1.77 1.767 3.825-5.74c.23-.345.696-.436 1.04-.207.346.23.44.696.21 1.04z" />
+    </g>
+  </svg>
+)
+
+const TweetSkeleton = ({ className, ...props }) => (
+  <div
+    className="flex size-full max-h-max min-w-72 flex-col gap-2 rounded-lg border p-4"
+    {...props}
+  >
+    <div className="flex flex-row gap-2">
+      <div className="size-10 shrink-0 rounded-full bg-gray-200" />
+      <div className="h-10 w-full bg-gray-200" />
+    </div>
+    <div className="h-20 w-full bg-gray-200" />
+  </div>
+)
+
+const TweetNotFound = ({ className, ...props }) => (
+  <div
+    className="flex size-full flex-col items-center justify-center gap-2 rounded-lg border p-4"
+    {...props}
+  >
+    <h3>Tweet not found</h3>
+  </div>
+)
+
+const TweetBody = ({ tweet }) => (
+  <div className="break-words leading-normal tracking-tighter">
+    {tweet.entities.map((entity, idx) => {
+      switch (entity.type) {
+        case "url":
+        case "symbol":
+        case "hashtag":
+        case "mention":
+          return (
+            <a
+              key={idx}
+              href={entity.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm font-normal text-blue-400 hover:underline"
+            >
+              {entity.text}
+            </a>
+          );
+        case "text":
+          return (
+            <span
+              key={idx}
+              className="text-sm md:text-base font-normal text-white"
+            >
+              {entity.text}
+            </span>
+          );
+        default:
+          return null;
+      }
+    })}
+  </div>
+);
+
+const TweetMedia = ({ tweet }) => {
+  if (!tweet.photos?.length) return null;
+  
+  return (
+    <div className="mt-2 grid gap-2 grid-cols-1">
+      {tweet.photos.map((photo) => (
+        <img
+          key={photo.url}
+          src={photo.url}
+          alt={tweet.text}
+          className="rounded-lg w-full h-auto object-cover"
+        />
+      ))}
+    </div>
+  );
+};
+
+const ClientTweetCard = ({
+  id,
+  apiUrl,
+  fallback = <TweetSkeleton />,
+  components,
+  fetchOptions,
+  onError,
+  ...props
+}) => {
+  const { data, error, isLoading } = useTweet(id)
+  
+  if (isLoading) return fallback
+  if (error || !data) {
+    const NotFound = components?.TweetNotFound || TweetNotFound
+    return <NotFound error={onError ? onError(error) : error} />
+  }
+
+  return <MagicTweet tweet={data} components={components} {...props} />
+}
+
+const MagicTweet = ({ tweet, components, className, ...props }) => {
+  const enrichedTweet = enrichTweet(tweet);
+
+  // Add reply context
+  const replyToTweetId = "1872881853642035621"; // The tweet being replied to
+  
+  return (
+    <div
+      className="relative flex size-full max-w-xl md:max-w-2xl flex-col gap-2 overflow-hidden rounded-lg border border-purple-500/20 bg-black/40 p-4 md:p-6 backdrop-blur-md"
+      {...props}
+    >
+      {/* Reply indicator */}
+      <div className="flex items-center gap-2 text-gray-400 text-sm mb-2">
+        <div className="w-5 h-5 flex items-center justify-end">
+          <svg viewBox="0 0 24 24" className="w-4 h-4 fill-current">
+            <path d="M14.586 7.586a2 2 0 0 0-2.828 0L7.586 11.758A2 2 0 0 0 7 13.172V17h3.828a2 2 0 0 0 1.414-.586l4.172-4.172a2 2 0 0 0 0-2.828l-1.828-1.828zM19 19H5v-2h14v2z" />
+          </svg>
+        </div>
+        <span>Replying to @greg16676935420</span>
+      </div>
+      <div className="flex flex-row justify-between tracking-tight">
+        <div className="flex items-center space-x-2">
+          <a href={tweet.user.url} target="_blank" rel="noreferrer">
+            <img
+              title={`Profile picture of ${tweet.user.name}`}
+              alt={tweet.user.screen_name}
+              height={48}
+              width={48}
+              src={tweet.user.profile_image_url_https}
+              className="overflow-hidden rounded-full border border-transparent"
+            />
+          </a>
+          <div>
+            <a
+              href={tweet.user.url}
+              target="_blank"
+              rel="noreferrer"
+              className="flex items-center whitespace-nowrap font-semibold text-white"
+            >
+              {tweet.user.name}
+              {tweet.user.verified && (
+                <Verified className="ml-1 inline size-4 text-blue-500" />
+              )}
+            </a>
+            <div className="flex items-center space-x-1">
+              <a
+                href={tweet.user.url}
+                target="_blank"
+                rel="noreferrer"
+                className="text-sm text-gray-400 transition-all duration-75 hover:text-gray-300"
+              >
+                @{tweet.user.screen_name}
+              </a>
+            </div>
+          </div>
+        </div>
+        <a href={tweet.url} target="_blank" rel="noreferrer">
+          <span className="sr-only">Link to tweet</span>
+          <XLogo className="size-5 items-start transition-all ease-in-out hover:scale-105" />
+        </a>
+      </div>
+      <TweetBody tweet={enrichedTweet} />
+      <TweetMedia tweet={enrichedTweet} />
+    </div>
+  )
+}
 
 export default function Features() {
   const [activeFeature, setActiveFeature] = useState(null)
@@ -54,9 +244,8 @@ export default function Features() {
   ]
 
   const handleQuoteFormSubmit = (formData) => {
-    console.log('Form submitted:', formData);
-    // Here you would typically send the form data to your backend
-  };
+    console.log('Form submitted:', formData)
+  }
 
   return (
     <section className="py-24 bg-[rgb(10,10,10)]">
@@ -249,7 +438,7 @@ export default function Features() {
           </div>
         </div>
 
-        {/* Partners Section */}
+        {/* Partners Section with Tweet */}
         <div className="mt-24 text-center">
           <motion.p
             initial={{ opacity: 0, y: 20 }}
@@ -260,8 +449,21 @@ export default function Features() {
           >
             Trusted by leading institutions worldwide
           </motion.p>
-          <div className="flex justify-center items-center space-x-12">
-            {/* Add partner logos here */}
+          
+          <div className="flex flex-col items-center justify-center space-y-8">
+            {/* Tweet Card */}
+            <div className="w-full max-w-xl md:max-w-2xl mx-auto">
+              <Suspense fallback={<TweetSkeleton />}>
+                <ClientTweetCard 
+                  id="1873125052339896610"
+                  className="bg-black/40 backdrop-blur-sm border border-purple-500/20 w-full"
+                />
+              </Suspense>
+            </div>
+            
+            <div className="flex justify-center items-center space-x-12">
+              {/* Add partner logos here */}
+            </div>
           </div>
         </div>
       </div>
