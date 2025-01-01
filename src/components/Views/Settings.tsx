@@ -176,62 +176,6 @@ export default function Settings() {
                   )}>General Settings</h2>
                   
                   <div className="space-y-6">
-                    <GlassContainer className="p-6">
-                      <h3 className={cn(
-                        "text-lg mb-4",
-                        isDark ? "text-white" : "text-black"
-                      )}>Your Photo</h3>
-                      <div className="flex flex-col sm:flex-row items-center gap-4">
-                        <div className={cn(
-                          "w-16 h-16 rounded-xl flex items-center justify-center overflow-hidden",
-                          isDark 
-                            ? "bg-black/20 border border-white/10" 
-                            : "bg-white/10 border border-black/10"
-                        )}>
-                          {profilePicture ? (
-                            <img 
-                              src={profilePicture.startsWith('data') ? profilePicture : `${API_BASE_URL}${profilePicture}`} 
-                              alt="Profile" 
-                              className="w-full h-full object-cover" 
-                            />
-                          ) : (
-                            <User className={cn(
-                              "w-8 h-8",
-                              isDark ? "text-white/70" : "text-black/70"
-                            )} />
-                          )}
-                        </div>
-                        <input
-                          type="file"
-                          id="profile-picture"
-                          accept="image/*"
-                          onChange={handleFileChange}
-                          hidden
-                        />
-                        <label htmlFor="profile-picture" className={cn(
-                          "px-4 py-2 rounded-xl transition-colors w-full sm:w-auto cursor-pointer text-center",
-                          isDark 
-                            ? "bg-black/20 hover:bg-black/30 border border-white/10 text-white" 
-                            : "bg-white/10 hover:bg-white/20 border border-black/10 text-black",
-                          updateButtonOutline
-                        )}>
-                          Update
-                        </label>
-                        <button
-                          onClick={handleUpdatePicture}
-                          disabled={isUpdateDisabled}
-                          className={cn(
-                            "px-4 py-2 rounded-xl transition-colors w-full sm:w-auto",
-                            isDark
-                              ? "bg-black/20 hover:bg-black/30 border border-white/10 text-white"
-                              : "bg-white/10 hover:bg-white/20 border border-black/10 text-black",
-                            !isUpdateDisabled && "outline outline-emerald-500"
-                          )}
-                        >
-                          Save
-                        </button>
-                      </div>
-                    </GlassContainer>
 
                     <GlassContainer className="p-8 space-y-6">
                       <div>
