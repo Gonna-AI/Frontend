@@ -121,7 +121,7 @@ export default function Header({ onMobileMenuClick }: HeaderProps) {
               xmlns="http://www.w3.org/2000/svg" 
               viewBox="0 0 464 468"
               className="w-11 h-11 -ml-1" // Size remains the same
-              aria-label="Gonna.ai Logo"
+              aria-label="ClerkTree Logo"
             >
               <path 
                 fill={isDark ? "white" : "black"} // Solid color based on theme
@@ -132,7 +132,7 @@ export default function Header({ onMobileMenuClick }: HeaderProps) {
               "text-xl md:text-2xl font-bold",
               isDark ? "text-white" : "text-black"
             )}>
-              gonna.ai
+              ClerkTree
             </span>
           </div>
 

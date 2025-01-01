@@ -241,7 +241,7 @@ export default function CallWindow({ isDark, onClose, onStopAI, onFileUpload, ti
                 xmlns="http://www.w3.org/2000/svg" 
                 viewBox="0 0 464 468"
                 className="w-16 h-16"
-                aria-label="Gonna.ai Logo"
+                aria-label="ClerkTree Logo"
               >
                 <path 
                   fill={isDark ? "white" : "black"}
