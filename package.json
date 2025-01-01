@@ -11,6 +11,8 @@
   },
   "dependencies": {
     "@11labs/client": "^0.0.4",
+    "@fastify/formbody": "^8.0.1",
+    "@fastify/websocket": "^11.0.1",
     "@nomiclabs/hardhat-ethers": "^2.2.3",
     "@nomiclabs/hardhat-waffle": "^2.0.6",
     "@radix-ui/react-switch": "^1.1.2",
@@ -29,6 +31,7 @@
     "dotted-map": "^2.2.3",
     "ethereum-waffle": "^4.0.10",
     "ethers": "^5.7.2",
+    "fastify": "^5.2.0",
     "framer-motion": "^11.15.0",
     "hardhat": "^2.22.17",
     "lucide-react": "^0.344.0",
@@ -43,6 +46,7 @@
     "shadcn-ui": "^0.9.4",
     "tailwind-merge": "^2.5.5",
     "three": "^0.162.0",
+    "ws": "^8.18.0",
     "zustand": "^4.5.5"
   },
   "devDependencies": {

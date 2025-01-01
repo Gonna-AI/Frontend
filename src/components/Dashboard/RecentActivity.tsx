@@ -29,6 +29,7 @@ interface Client {
   ticket_id: string;
   category: string;
   issue: string;
+  interaction_type: string; // 'call' | 'chat' | 'email'
 }
 
 interface ClientDetails {
@@ -143,98 +144,23 @@ const PriorityDashboard = () => {
   };
 
   // Detail section components
-  const DetailItem = ({ icon: Icon, label, value }) => {
-    const getValueStyle = () => {
-      // For phone numbers
-      if (/^\+1 \(\d{3}\) \d{3}-\d{3}$/.test(value)) {
-        return isDark 
-          ? "bg-purple-500/20 text-purple-400 border-purple-500/20" 
-          : "bg-purple-100 text-purple-800 border-purple-200";
-      }
-      // For email addresses
-      if (value.includes('@')) {
-        return isDark 
-          ? "bg-blue-500/20 text-blue-400 border-blue-500/20" 
-          : "bg-blue-100 text-blue-800 border-blue-200";
-      }
-      // For policy numbers
-      if (value.startsWith('POL-')) {
-        return isDark 
-          ? "bg-amber-500/20 text-amber-400 border-amber-500/20" 
-          : "bg-amber-100 text-amber-800 border-amber-200";
-      }
-      // For ticket numbers
-      if (value.startsWith('TKT-')) {
-        return isDark 
-          ? "bg-cyan-500/20 text-cyan-400 border-cyan-500/20" 
-          : "bg-cyan-100 text-cyan-800 border-cyan-200";
-      }
-      // For priority status
-      if (['HIGH', 'MEDIUM', 'LOW'].includes(value)) {
-        const priorityColors = {
-          HIGH: isDark ? "bg-red-500/20 text-red-400 border-red-500/20" : "bg-red-100 text-red-800 border-red-200",
-          MEDIUM: isDark ? "bg-yellow-500/20 text-yellow-400 border-yellow-500/20" : "bg-yellow-100 text-yellow-800 border-yellow-200",
-          LOW: isDark ? "bg-green-500/20 text-green-400 border-green-500/20" : "bg-green-100 text-green-800 border-green-200"
-        };
-        return priorityColors[value];
-      }
-      // For grievance type
-      if (label === "Grievance Type") {
-        return isDark 
-          ? "bg-indigo-500/20 text-indigo-400 border-indigo-500/20" 
-          : "bg-indigo-100 text-indigo-800 border-indigo-200";
-      }
-      // Default style
-      return isDark ? "text-white" : "text-black";
-    };
-
-    const isSpecialValue = /^\+1 \(\d{3}\) \d{3}-\d{3}$/.test(value) || 
-                          value.includes('@') || 
-                          value.startsWith('POL-') || 
-                          value.startsWith('TKT-') || 
-                          ['HIGH', 'MEDIUM', 'LOW'].includes(value) ||
-                          label === "Grievance Type";
-
+  const DetailItem = ({ icon: Icon, label, value, type = 'text' }) => {
+    const { isDark } = useTheme();
+    
     return (
-      <div className={cn(
-        "flex items-center gap-3 p-3 rounded-lg transition-all duration-200",
-        isDark 
-          ? "bg-black/20 border border-white/10 hover:bg-black/30" 
-          : "bg-white/10 border border-black/10 hover:bg-white/20"
-      )}>
         <div className={cn(
-          "p-2 rounded-lg",
-          isDark ? "bg-black/30" : "bg-white/20"
+            "flex items-center gap-2 p-3 rounded-lg",
+            isDark ? "bg-black/20" : "bg-gray-100"
         )}>
-          <Icon className={cn(
-            "w-4 h-4",
-            isDark ? "text-white/70" : "text-black/70"
-          )} />
-        </div>
-        <div className="flex flex-col gap-1.5">
-          <p className={cn(
-            "text-xs",
-            isDark ? "text-white/50" : "text-black/50"
-          )}>
-            {label}
-          </p>
-          {isSpecialValue ? (
-            <div className={cn(
-              "px-2.5 py-1 rounded-md text-sm font-medium border transition-colors duration-200 inline-block",
-              getValueStyle()
-            )}>
-              {value}
+            <Icon className={cn(
+                "w-5 h-5",
+                value?.toLowerCase().includes('call') ? "text-green-500" : ""
+            )} />
+            <div>
+                <div className="text-xs opacity-60">{label}</div>
+                <div className="text-sm font-medium">{value}</div>
             </div>
-          ) : (
-            <p className={cn(
-              "font-medium",
-              isDark ? "text-white" : "text-black"
-            )}>
-              {value}
-            </p>
-          )}
         </div>
-      </div>
     );
   };
 
