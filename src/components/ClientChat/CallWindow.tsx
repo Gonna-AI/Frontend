@@ -59,7 +59,7 @@ export default function CallWindow({ isDark, onClose, onStopAI, onFileUpload, ti
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (SpeechRecognition) {
       recognitionRef.current = new SpeechRecognition();
-      recognitionRef.current.continuous = false;
+      recognitionRef.current.continuous = true;
       recognitionRef.current.interimResults = true;
       recognitionRef.current.lang = 'en-US';
 
@@ -77,6 +77,7 @@ export default function CallWindow({ isDark, onClose, onStopAI, onFileUpload, ti
       recognitionRef.current.onerror = (event) => {
         console.error('Speech recognition error:', event.error);
         setAgentStatus('idle');
+        handleMicToggle();
       };
 
       // Start recognition immediately since we're unmuted by default
