@@ -1,4 +1,4 @@
-export const API_BASE_URL = 'http://localhost:5000';
+export const API_BASE_URL = 'https://backend-sq0u.onrender.com/';
 
 // Create an axios instance with default config
 import axios from 'axios';
