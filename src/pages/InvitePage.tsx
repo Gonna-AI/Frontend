@@ -38,7 +38,7 @@ const InvitePage = () => {
         // Store in localStorage that user has used a valid invite code
         localStorage.setItem('hasValidInvite', 'true');
         // Force navigation to auth page
-        window.location.href = '/auth';
+        navigate('/auth');
       } else {
         setShowError(true);
         setInviteCode('');
