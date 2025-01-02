@@ -22,7 +22,7 @@ export default function GoogleCallback() {
         }
 
         const response = await axios.get(
-          `http://localhost:5000/api/auth/google/callback`,
+          `https://backend-sq0u.onrender.com/api/auth/google/callback`,
           { 
             params: { code },
             withCredentials: true 

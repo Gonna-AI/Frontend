@@ -22,7 +22,7 @@ const InvitePage = () => {
     e.preventDefault();
     
     try {
-      const response = await fetch('http://localhost:5000/api/auth/validate-invite', {
+      const response = await fetch('https://backend-sq0u.onrender.com/api/auth/validate-invite', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

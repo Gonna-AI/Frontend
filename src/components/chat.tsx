@@ -28,7 +28,7 @@ const Chat: React.FC = () => {
     setIsTyping(true);
 
     try {
-      const response = await axios.post('http://localhost:5000/api/chat', { message: inputMessage }, {
+      const response = await axios.post('https://backend-sq0u.onrender.com/api/chat', { message: inputMessage }, {
         withCredentials: true
       });
       const aiMessage: Message = { text: response.data.response, isUser: false };
