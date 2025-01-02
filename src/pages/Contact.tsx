@@ -9,14 +9,14 @@ const Contact = () => {
       <div className="fixed inset-0">
         {/* Red Gradient Background */}
         <div 
-          className="absolute top-0 right-0 -translate-y-1/4 translate-x-1/4 w-[800px] h-[800px] opacity-40"
+          className="absolute top-0 right-0 -translate-y-1/4 translate-x-1/4 w-96 md:w-[800px] h-96 md:h-[800px] opacity-40"
           style={{
             background: 'radial-gradient(circle, rgba(239,68,68,0.4) 0%, rgba(239,68,68,0.1) 40%, transparent 100%)',
             filter: 'blur(80px)',
           }}
         />
         <div 
-          className="absolute bottom-0 left-0 translate-y-1/4 -translate-x-1/4 w-[600px] h-[600px] opacity-30"
+          className="absolute bottom-0 left-0 translate-y-1/4 -translate-x-1/4 w-72 md:w-[600px] h-72 md:h-[600px] opacity-30"
           style={{
             background: 'radial-gradient(circle, rgba(185,28,28,0.4) 0%, rgba(185,28,28,0.1) 40%, transparent 100%)',
             filter: 'blur(80px)',
@@ -43,7 +43,7 @@ const Contact = () => {
         transition={{ duration: 0.5 }}
         className="max-w-4xl mx-auto relative z-10"
       >
-        {/* Added Logo SVG and ClerkTree text */}
+        {/* Logo and Company Name */}
         <div className="flex items-center gap-2 mb-4">
           <svg 
             viewBox="0 0 464 468"
@@ -58,7 +58,7 @@ const Contact = () => {
           Enterprise Solutions & Sales
         </h1>
         
-        <div className="grid md:grid-cols-3 gap-12">
+        <div className="grid md:grid-cols-3 gap-8 md:gap-12">
           {/* Contact Information */}
           <motion.div 
             initial={{ opacity: 0, x: -20 }}
@@ -86,7 +86,7 @@ const Contact = () => {
                 className="flex items-center gap-3"
               >
                 <Phone className="w-5 h-5 text-red-400" />
-                <a href="tel:+1234567890" className="hover:text-red-400 transition-colors">
+                <a href="tel:+919650848339" className="hover:text-red-400 transition-colors">
                   +91 (965) 084-8339, +49 160 96893540
                 </a>
               </motion.div>
@@ -106,7 +106,7 @@ const Contact = () => {
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5, delay: 0.4 }}
-            className="md:col-span-2 space-y-6 backdrop-blur-xl bg-white/5 p-8 rounded-2xl border border-red-500/20"
+            className="md:col-span-2 space-y-6 backdrop-blur-xl bg-black/40 md:bg-white/5 p-6 md:p-8 rounded-2xl border border-red-500/20"
           >
             <div className="grid md:grid-cols-2 gap-6">
               <div>
@@ -116,7 +116,7 @@ const Contact = () => {
                 <input
                   type="text"
                   placeholder="Your name"
-                  className="w-full px-4 py-2 bg-transparent backdrop-blur-sm border border-red-500/20 rounded-lg focus:outline-none focus:border-red-500 transition-colors text-white placeholder:text-white/30"
+                  className="w-full px-4 py-2 bg-black/40 md:bg-transparent backdrop-blur-sm border border-red-500/20 rounded-lg focus:outline-none focus:border-red-500 transition-colors text-white placeholder:text-white/30"
                   required
                 />
               </div>
@@ -128,7 +128,7 @@ const Contact = () => {
                 <input
                   type="text"
                   placeholder="Your organization"
-                  className="w-full px-4 py-2 bg-transparent backdrop-blur-sm border border-red-500/20 rounded-lg focus:outline-none focus:border-red-500 transition-colors text-white placeholder:text-white/30"
+                  className="w-full px-4 py-2 bg-black/40 md:bg-transparent backdrop-blur-sm border border-red-500/20 rounded-lg focus:outline-none focus:border-red-500 transition-colors text-white placeholder:text-white/30"
                   required
                 />
               </div>
@@ -140,7 +140,7 @@ const Contact = () => {
                 <input
                   type="email"
                   placeholder="you@company.com"
-                  className="w-full px-4 py-2 bg-transparent backdrop-blur-sm border border-red-500/20 rounded-lg focus:outline-none focus:border-red-500 transition-colors text-white placeholder:text-white/30"
+                  className="w-full px-4 py-2 bg-black/40 md:bg-transparent backdrop-blur-sm border border-red-500/20 rounded-lg focus:outline-none focus:border-red-500 transition-colors text-white placeholder:text-white/30"
                   required
                 />
               </div>
@@ -152,7 +152,7 @@ const Contact = () => {
                 <input
                   type="tel"
                   placeholder="Your contact number"
-                  className="w-full px-4 py-2 bg-transparent backdrop-blur-sm border border-red-500/20 rounded-lg focus:outline-none focus:border-red-500 transition-colors text-white placeholder:text-white/30"
+                  className="w-full px-4 py-2 bg-black/40 md:bg-transparent backdrop-blur-sm border border-red-500/20 rounded-lg focus:outline-none focus:border-red-500 transition-colors text-white placeholder:text-white/30"
                   required
                 />
               </div>
@@ -162,7 +162,7 @@ const Contact = () => {
                   Interest <span className="text-red-500">*</span>
                 </label>
                 <select
-                  className="w-full px-4 py-2 bg-transparent backdrop-blur-sm border border-red-500/20 rounded-lg focus:outline-none focus:border-red-500 transition-colors text-white"
+                  className="w-full px-4 py-2 bg-black/40 md:bg-transparent backdrop-blur-sm border border-red-500/20 rounded-lg focus:outline-none focus:border-red-500 transition-colors text-white"
                   required
                 >
                   <option value="" className="bg-black">Select your interest</option>
@@ -178,7 +178,7 @@ const Contact = () => {
                   Number of Employees <span className="text-red-500">*</span>
                 </label>
                 <select
-                  className="w-full px-4 py-2 bg-transparent backdrop-blur-sm border border-red-500/20 rounded-lg focus:outline-none focus:border-red-500 transition-colors text-white"
+                  className="w-full px-4 py-2 bg-black/40 md:bg-transparent backdrop-blur-sm border border-red-500/20 rounded-lg focus:outline-none focus:border-red-500 transition-colors text-white"
                   required
                 >
                   <option value="" className="bg-black">Select range</option>
@@ -197,7 +197,7 @@ const Contact = () => {
               <textarea
                 rows={4}
                 placeholder="Tell us about your needs and requirements..."
-                className="w-full px-4 py-2 bg-transparent backdrop-blur-sm border border-red-500/20 rounded-lg focus:outline-none focus:border-red-500 transition-colors text-white placeholder:text-white/30"
+                className="w-full px-4 py-2 bg-black/40 md:bg-transparent backdrop-blur-sm border border-red-500/20 rounded-lg focus:outline-none focus:border-red-500 transition-colors text-white placeholder:text-white/30"
                 required
               ></textarea>
             </div>
