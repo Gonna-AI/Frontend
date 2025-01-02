@@ -66,6 +66,7 @@ export default function CallWindow({ isDark, onClose, onStopAI, onFileUpload, ti
       recognitionRef.current.onresult = (event) => {
         const current = event.resultIndex;
         const transcriptText = event.results[current][0].transcript;
+        console.log('Transcript received:', transcriptText);
         setTranscript(transcriptText);
         
         if (event.results[current].isFinal) {
@@ -101,6 +102,7 @@ export default function CallWindow({ isDark, onClose, onStopAI, onFileUpload, ti
   };
 
   const processUserInput = async (input: string) => {
+    console.log('Processing user input:', input);
     setIsProcessing(true);
     setAgentStatus('speaking');
 
@@ -111,6 +113,7 @@ export default function CallWindow({ isDark, onClose, onStopAI, onFileUpload, ti
       });
 
       const aiResponse = response.data.response || response.data.text || '';
+      console.log('AI response:', aiResponse);
       setResponse(aiResponse);
       
       const utterance = new SpeechSynthesisUtterance(aiResponse);
@@ -121,10 +124,12 @@ export default function CallWindow({ isDark, onClose, onStopAI, onFileUpload, ti
       window.speechSynthesis.cancel();
       
       utterance.onstart = () => {
+        console.log('Speech synthesis started');
         setAgentStatus('speaking');
       };
       
       utterance.onend = () => {
+        console.log('Speech synthesis ended');
         setAgentStatus('listening');
         setIsProcessing(false);
         
