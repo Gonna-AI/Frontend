@@ -63,6 +63,12 @@ function App() {
     }
   };
 
+  // Add this function to check if user needs invite page
+  const shouldRedirectToInvite = () => {
+    const hasValidInvite = localStorage.getItem('hasValidInvite');
+    return !hasValidInvite;
+  };
+
   if (isLoading) {
     return <div>Loading...</div>; // Add a proper loading component
   }
@@ -128,10 +134,16 @@ function App() {
           <Route path="/auth" element={
             isSignedIn ? 
               <Navigate to="/dashboard" /> : 
-              <AuthPage setIsSignedIn={setIsSignedIn} />
+              shouldRedirectToInvite() ?
+                <Navigate to="/invite" /> :
+                <AuthPage setIsSignedIn={setIsSignedIn} />
           } />
 
-          <Route path="/invite" element={<InvitePage />} />
+          <Route path="/invite" element={
+            isSignedIn ?
+              <Navigate to="/dashboard" /> :
+              <InvitePage />
+          } />
 
           {/* Protected Routes */}
           <Route path="/dashboard" element={
