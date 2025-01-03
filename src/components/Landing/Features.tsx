@@ -224,8 +224,6 @@ export default function Features() {
   const testimonials = [
     {
       quote: "ClerkTree has transformed our claims processing workflow. The efficiency gains are remarkable.",
-      author: "Sarah Chen",
-      role: "Operations Director",
       company: "Technical University of Munich"
     },
     {
@@ -236,8 +234,6 @@ export default function Features() {
     },
     {
       quote: "Customer satisfaction has improved significantly since implementing ClerkTree's smart scheduling.",
-      author: "Emma Thompson",
-      role: "Customer Success Lead",
       company: "Friedrich-Alexander University"
     }
   ]
@@ -341,10 +337,12 @@ export default function Features() {
               </div>
               <div className="text-gray-400 mt-2 font-mono">
                 {stat.label}
-                <span className="text-xs text-gray-500"> * Metrics based on test environment performance</span>
               </div>
             </div>
           ))}
+        </div>
+        <div className="text-xs text-gray-500 text-center">
+          * Metrics based on test environment performance
         </div>
 
         {/* Testimonials Section */}
