@@ -97,6 +97,22 @@ export default function CallWindow({ isDark, onClose, onStopAI, onFileUpload, ti
     };
   }, [language]);
 
+  // Load available voices
+  useEffect(() => {
+    const loadVoices = () => {
+      window.speechSynthesis.getVoices();
+    };
+    
+    loadVoices();
+    
+    // Some browsers need this event to load voices
+    window.speechSynthesis.onvoiceschanged = loadVoices;
+    
+    return () => {
+      window.speechSynthesis.onvoiceschanged = null;
+    };
+  }, []);
+
   const formatDuration = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
@@ -119,7 +135,19 @@ export default function CallWindow({ isDark, onClose, onStopAI, onFileUpload, ti
       setResponse(aiResponse);
       
       const utterance = new SpeechSynthesisUtterance(aiResponse);
-      utterance.lang = recognitionRef.current?.lang || 'en-US';
+      utterance.lang = language;
+      
+      const voices = window.speechSynthesis.getVoices();
+      const hindiVoice = voices.find(voice => 
+        voice.lang.includes('hi-IN') || 
+        voice.lang.includes('hi') ||
+        voice.name.toLowerCase().includes('hindi')
+      );
+      
+      if (language === 'hi-IN' && hindiVoice) {
+        utterance.voice = hindiVoice;
+      }
+      
       utterance.rate = 1.0;
       utterance.pitch = 1.0;
       
