@@ -1,404 +1,413 @@
 import React, { useState, useEffect, useRef } from 'react';
-import axios from 'axios';
-import { Send, GalleryVerticalEnd, Phone, Upload, FileCode2, MoreVertical } from 'lucide-react';
-import { cn } from '../../utils/cn';
 import { motion, AnimatePresence } from 'framer-motion';
-import CallWindow from './CallWindow';
-import api, { API_BASE_URL, documentApi } from '../../config/api';  // Import the configured api instance
-import { useNavigate } from 'react-router-dom';
+import { Phone, X, Mic, MicOff, ChevronUp, ChevronDown, MoreHorizontal, Upload, Send } from 'lucide-react';
+import { cn } from '../../utils/cn';
+import api from '../../config/api';
 
-interface Message {
-  text: string;
-  isUser: boolean;
-  image?: {
-    name: string;
-    url: string;
-  };
-}
-
-interface ChatInterfaceProps {
-  ticketCode: string;
+interface CallWindowProps {
   isDark: boolean;
+  onClose: () => void;
+  onStopAI: () => void;
+  onFileUpload?: (file: File) => void;
+  ticketCode: string;
 }
 
-export default function ChatInterface({ ticketCode, isDark }: ChatInterfaceProps) {
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [inputMessage, setInputMessage] = useState('');
-  const [isTyping, setIsTyping] = useState(false);
-  const [isCallWindowOpen, setIsCallWindowOpen] = useState(false);
-  const messagesEndRef = useRef<null | HTMLDivElement>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const abortControllerRef = useRef<AbortController | null>(null);
-  const navigate = useNavigate();
+interface SpeechRecognitionInstance extends EventTarget {
+  continuous: boolean;
+  interimResults: boolean;
+  lang: string;
+  start: () => void;
+  stop: () => void;
+  abort: () => void;
+}
+
+declare global {
+  interface Window {
+    SpeechRecognition: new () => SpeechRecognitionInstance;
+    webkitSpeechRecognition: new () => SpeechRecognitionInstance;
+  }
+}
+
+export default function CallWindow({ isDark, onClose, onStopAI, onFileUpload, ticketCode }: CallWindowProps) {
+  const [callDuration, setCallDuration] = useState(0);
+  const [isMuted, setIsMuted] = useState(false);
+  const [transcript, setTranscript] = useState('');
+  const [response, setResponse] = useState('');
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [agentStatus, setAgentStatus] = useState<'idle' | 'speaking' | 'listening'>('idle');
+  const [isExpanded, setIsExpanded] = useState(false);
+  const recognitionRef = useRef<SpeechRecognitionInstance | null>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
-
-  useEffect(scrollToBottom, [messages]);
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, []);
 
   useEffect(() => {
-    setMessages([
-      {
-        text: `Welcome! How can I help you today?`,
-        isUser: false
-      }
-    ]);
-  }, [ticketCode]);
+    const timer = setInterval(() => {
+      setCallDuration((prev) => prev + 1);
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!inputMessage.trim()) return;
+  useEffect(() => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      recognitionRef.current = new SpeechRecognition();
+      recognitionRef.current.continuous = true;
+      recognitionRef.current.interimResults = true;
+      recognitionRef.current.lang = 'en-US';
 
-    const userMessage: Message = { text: inputMessage, isUser: true };
-    setMessages(prev => [...prev, userMessage]);
-    setInputMessage('');
-    setIsTyping(true);
-
-    abortControllerRef.current = new AbortController();
-
-    try {
-      const response = await api.post('/api/chat', 
-        { 
-          message: inputMessage,
-          ticketCode: ticketCode
-        }, 
-        { 
-          signal: abortControllerRef.current.signal
-        }
-      );
-      
-      const aiMessage: Message = { text: response.data.response, isUser: false };
-      setMessages(prev => [...prev, aiMessage]);
-    } catch (error) {
-      if (axios.isCancel(error)) {
-        console.log('Request canceled:', error.message);
-      } else {
-        console.error('Error sending message:', error);
-        const errorMessage: Message = { 
-          text: 'Sorry, I encountered an error. Please try again.',
-          isUser: false 
-        };
-        setMessages(prev => [...prev, errorMessage]);
-      }
-    } finally {
-      setIsTyping(false);
-      abortControllerRef.current = null;
-    }
-  };
-
-  const handleCallButtonClick = () => {
-    setIsCallWindowOpen(true);
-  };
-
-  const handleStopAI = () => {
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
-      setIsTyping(false);
-    }
-    setMessages(prev => [...prev, { text: "AI response stopped. You can ask another question.", isUser: false }]);
-  };
-
-  const validateImageFile = (file: File) => {
-    const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
-    if (!validTypes.includes(file.type)) {
-      throw new Error('Please upload only image files (JPEG, PNG, GIF, or WebP)');
-    }
-    if (file.size > 10 * 1024 * 1024) {
-      throw new Error('Image size should be less than 10MB');
-    }
-  };
-
-  const handleImageUpload = async (file: File) => {
-    try {
-      validateImageFile(file);
-      
-      const userMessage: Message = {
-        text: `Uploaded image: ${file.name}`,
-        isUser: true,
-        image: {
-          name: file.name,
-          url: URL.createObjectURL(file)
+      recognitionRef.current.onresult = (event) => {
+        const current = event.resultIndex;
+        const transcriptText = event.results[current][0].transcript;
+        console.log('Transcript received:', transcriptText);
+        setTranscript(transcriptText);
+        
+        if (event.results[current].isFinal) {
+          processUserInput(transcriptText);
         }
       };
-      setMessages(prev => [...prev, userMessage]);
-      setIsTyping(true);
 
-      const response = await documentApi.analyzeDocument(file);
-      
-      const aiMessage: Message = { text: response.data.analysis, isUser: false };
-      setMessages(prev => [...prev, aiMessage]);
-
-      if (response.data.audio_url) {
-        const audio = new Audio(`${API_BASE_URL}${response.data.audio_url}`);
-        audio.play();
-      }
-    } catch (error) {
-      console.error('Error uploading image:', error);
-      const errorMessage: Message = {
-        text: error instanceof Error ? error.message : 'Sorry, I encountered an error uploading the image.',
-        isUser: false
+      recognitionRef.current.onerror = (event) => {
+        console.error('Speech recognition error:', event.error);
+        setAgentStatus('idle');
+        handleMicToggle();
       };
-      setMessages(prev => [...prev, errorMessage]);
-    } finally {
-      setIsTyping(false);
+
+      try {
+        recognitionRef.current.start();
+        setAgentStatus('listening');
+      } catch (error) {
+        console.error('Error starting initial recognition:', error);
+      }
+    }
+
+    return () => {
+      if (recognitionRef.current) {
+        recognitionRef.current.abort();
+      }
+    };
+  }, []);
+
+  const formatDuration = (seconds: number) => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+  };
+
+  const processUserInput = async (input: string) => {
+    console.log('Processing user input:', input);
+    setIsProcessing(true);
+    setAgentStatus('speaking');
+
+    try {
+      const response = await api.post('/api/chat', {
+        message: input,
+        ticketCode: ticketCode
+      });
+
+      const aiResponse = response.data.response || response.data.text || '';
+      console.log('AI response:', aiResponse);
+      setResponse(aiResponse);
+      
+      const utterance = new SpeechSynthesisUtterance(aiResponse);
+      utterance.lang = recognitionRef.current?.lang || 'en-US';
+      utterance.rate = 1.0;
+      utterance.pitch = 1.0;
+      
+      window.speechSynthesis.cancel();
+      
+      utterance.onstart = () => {
+        console.log('Speech synthesis started');
+        setAgentStatus('speaking');
+      };
+      
+      utterance.onend = () => {
+        console.log('Speech synthesis ended');
+        setAgentStatus('listening');
+        setIsProcessing(false);
+        
+        if (!isMuted && recognitionRef.current) {
+          setTimeout(() => {
+            recognitionRef.current?.start();
+          }, 100);
+        }
+      };
+
+      utterance.onerror = (event) => {
+        console.error('Speech synthesis error:', event);
+        setAgentStatus('idle');
+        setIsProcessing(false);
+      };
+
+      setTimeout(() => {
+        window.speechSynthesis.speak(utterance);
+      }, 100);
+
+    } catch (error) {
+      console.error('Error processing input:', error);
+      setAgentStatus('idle');
+      setIsProcessing(false);
+      setResponse('Sorry, I encountered an error. Please try again.');
     }
   };
 
-  const handleFileButtonClick = () => {
-    fileInputRef.current?.click();
+  const handleMicToggle = () => {
+    if (!recognitionRef.current) return;
+
+    if (isMuted) {
+      try {
+        recognitionRef.current.start();
+        setAgentStatus('listening');
+      } catch (error) {
+        console.error('Error starting recognition:', error);
+      }
+    } else {
+      try {
+        recognitionRef.current.stop();
+        setAgentStatus('idle');
+      } catch (error) {
+        console.error('Error stopping recognition:', error);
+      }
+    }
+    setIsMuted(!isMuted);
   };
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      handleImageUpload(file);
-      event.target.value = '';
+  const handleClose = () => {
+    window.speechSynthesis.cancel();
+    
+    if (recognitionRef.current) {
+      recognitionRef.current.stop();
+      recognitionRef.current.abort();
     }
+    
+    setIsMuted(true);
+    setAgentStatus('idle');
+    setIsProcessing(false);
+    
+    onClose();
   };
 
   return (
-    <div className="flex flex-col h-full relative">
-      {/* Header */}
-      <div className={cn(
-        "flex items-center justify-between px-6 py-4 border-b",
-        isDark 
-          ? "bg-black/20 border-white/10" 
-          : "bg-white/10 border-black/10"
-      )}>
-        <div className="flex items-center gap-4">
-          <div className={cn(
-            "flex h-10 w-10 items-center justify-center rounded-lg",
-            isDark 
-              ? "bg-black/20 border border-white/10" 
-              : "bg-white/10 border border-black/10"
-          )}>
-            <GalleryVerticalEnd className={cn(
-              "h-6 w-6",
-              isDark ? "text-purple-400" : "text-purple-600"
-            )} />
+    <>
+      <div
+        className="fixed inset-0 z-50 bg-black/20 backdrop-blur-sm"
+        onClick={handleClose}
+      />
+      <motion.div
+        initial={{ y: '100%' }}
+        animate={{ y: 0 }}
+        exit={{ y: '100%' }}
+        transition={{ type: 'spring', damping: 20, stiffness: 300 }}
+        className={cn(
+          "fixed bottom-0 inset-x-0 z-50 flex flex-col items-center w-full",
+          "h-[80vh] md:h-[80vh]",
+          "max-w-2xl mx-auto",
+          isDark 
+            ? "bg-black/20 border-t border-white/10 backdrop-blur-md" 
+            : "bg-white/10 border-t border-black/10 backdrop-blur-md",
+          "rounded-t-xl md:rounded-t-3xl"
+        )}
+      >
+        {/* Gradient backgrounds */}
+        <div className="absolute top-0 right-0 w-full md:w-[35rem] h-[35rem] bg-gradient-to-bl from-blue-500/10 via-purple-500/5 to-transparent blur-3xl pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-full md:w-[35rem] h-[35rem] bg-gradient-to-tr from-purple-500/10 to-transparent blur-3xl pointer-events-none" />
+
+        {/* Mobile header with expand/collapse */}
+        <div className="flex flex-col w-full relative z-10">
+          <div className="flex justify-between items-center p-4">
+            <button
+              onClick={handleClose}
+              className={cn(
+                "p-2 rounded-xl transition-colors",
+                isDark 
+                  ? "bg-black/20 border border-white/10 text-white hover:bg-black/30" 
+                  : "bg-white/10 border border-black/10 text-black hover:bg-white/20"
+              )}
+            >
+              <X className="w-5 h-5" />
+            </button>
+            <button
+              onClick={() => setIsExpanded(!isExpanded)}
+              className={cn(
+                "p-2 rounded-xl transition-colors md:hidden",
+                isDark 
+                  ? "text-white/60" 
+                  : "text-black/60"
+              )}
+            >
+              {isExpanded ? <ChevronDown className="w-5 h-5" /> : <ChevronUp className="w-5 h-5" />}
+            </button>
           </div>
-          <div>
-            <h1 className={cn(
-              "text-xl font-semibold",
+
+          {/* AI Info Section - Always visible on mobile */}
+          <div className="flex flex-col items-center justify-center p-4">
+            <div className={cn(
+              "w-16 h-16 md:w-20 md:h-20 rounded-xl flex items-center justify-center mb-4",
+              isDark 
+                ? "bg-black/20 border border-white/10" 
+                : "bg-white/10 border border-black/10"
+            )}>
+              <svg 
+                xmlns="http://www.w3.org/2000/svg" 
+                viewBox="0 0 464 468"
+                className="w-12 h-12 md:w-16 md:h-16"
+                aria-label="ClerkTree Logo"
+              >
+                <path 
+                  fill={isDark ? "white" : "black"}
+                  d="M275.9 63.5c37.7 5.3 76.6 24.1 103.7 50.2 30 28.8 41.8 57.6 35.8 87.1-6.1 30.1-33.6 52.9-70.6 58.3-6 0.9-18.3 1-44.9 0.6l-36.6-0.7-0.5 17.8c-0.3 9.7-0.4 17.8-0.4 17.9 0.1 0.1 19.1 0.3 42.2 0.4 23.2 0 42.7 0.5 43.5 1 1.2 0.7 1.1 2.2-0.8 9.4-6 23-20.5 42.1-41.8 55-7.3 4.3-26.7 11.9-36 14.1-9 2-34 2-44.5 0-41.3-7.9-74.2-38-82.9-75.7-8.1-35.7 2.2-71.5 27.5-94.7 16.1-14.9 35.5-22.4 63.7-24.7l7.7-0.7v-34.1l-11.7 0.7c-22.2 1.3-37 5.3-56.4 15.2-28.7 14.6-49.7 39.3-59.9 70.2-9.6 29.3-9.3 62.6 0.8 91.4 3.3 9.2 12.2 25.6 18.3 33.8 11.3 14.9 30.6 30.8 48.7 39.9 19.9 10 49.2 15.9 73.2 14.7 26.5-1.3 52.5-9.6 74.2-23.9 26.9-17.6 47.2-47.9 53.3-79.7 1-5.2 2.3-10.1 2.8-10.8 0.8-0.9 6.9-1.2 27.1-1l26.1 0.3 0.3 3.8c1.2 14.6-10.9 52.1-23.9 74-17.8 30-43.2 54-75.9 71.5-20.9 11.2-38.3 16.5-67.2 20.7-27.6 3.9-47.9 3.1-75.8-3.1-36.9-8.3-67.8-25.6-97.1-54.6-23.6-23.2-44.8-61.9-51.7-93.8-5.1-23.7-5.5-28.1-4.9-48.8 1.7-63.2 23.4-111.8 67.7-152 28-25.4 60.4-41.3 99-48.8 18.5-3.6 46.1-4 67.9-0.9zm16.4 92.6c-6.3 2.4-12.8 8.5-15.4 14.5-2.6 6.1-2.6 18.3 0 23.9 5 11 20.2 17.7 32.3 14.1 11.9-3.4 19.8-14.3 19.8-27.1-0.1-19.9-18.2-32.5-36.7-25.4z"
+                />
+              </svg>
+            </div>
+
+            <h2 className={cn(
+              "text-lg md:text-xl font-semibold mb-2",
               isDark ? "text-white" : "text-black"
             )}>
-              Clerk Tree Support
-            </h1>
+              AI Assistant
+            </h2>
+            
             <p className={cn(
-              "text-sm",
+              "text-sm md:text-base",
               isDark ? "text-white/60" : "text-black/60"
             )}>
-              Ticket: {ticketCode}
+              {formatDuration(callDuration)}
+            </p>
+            <p className={cn(
+              "text-xs md:text-sm",
+              isDark ? "text-white/40" : "text-black/40"
+            )}>
+              Status: {agentStatus}
             </p>
           </div>
         </div>
-      </div>
 
-      {/* Messages */}
-      <div className={cn(
-        "flex-1 overflow-y-auto p-6 space-y-6",
-        isDark 
-          ? "bg-black/20" 
-          : "bg-white/10"
-      )}>
-        {messages.map((message, index) => (
-          <div
-            key={index}
-            className={cn(
-              "flex",
-              message.isUser ? "justify-end" : "justify-start"
-            )}
-          >
-            <div className={cn(
-              "max-w-3xl px-6 py-4 rounded-xl text-base md:text-lg whitespace-pre-line",
-              message.isUser
-                ? isDark
-                  ? "bg-black/20 border border-white/10 text-white"
-                  : "bg-white/10 border border-black/10 text-black"
-                : isDark
-                  ? "bg-black/20 border border-white/10 text-white"
-                  : "bg-white/10 border border-black/10 text-black"
-            )}>
-              {message.text}
-              {message.image && (
-                <div className="mt-2">
-                  <img 
-                    src={message.image.url} 
-                    alt={message.image.name}
-                    className="max-w-full rounded-lg max-h-64 object-contain"
-                  />
+        {/* Expandable transcript section */}
+        <AnimatePresence>
+          {isExpanded && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="w-full flex-1 overflow-y-auto px-4"
+            >
+              <div className="space-y-4 py-4">
+                <h3 className={cn(
+                  "text-sm font-medium",
+                  isDark ? "text-white/60" : "text-black/60"
+                )}>
+                  Transcription
+                </h3>
+                
+                {transcript && (
                   <div className={cn(
-                    "mt-1 text-sm",
-                    isDark ? "text-white/60" : "text-black/60"
+                    "p-3 rounded-lg text-sm",
+                    isDark ? "bg-black/20 text-white/60" : "bg-white/10 text-black/60"
                   )}>
-                    {message.image.name}
+                    <span className="font-medium">You:</span> {transcript}
                   </div>
-                </div>
-              )}
-            </div>
-          </div>
-        ))}
-        {isTyping && (
-          <div className="flex justify-start">
-            <div className={cn(
-              "px-6 py-4 rounded-xl text-base md:text-lg",
-              isDark
-                ? "bg-black/20 border border-white/10 text-white"
-                : "bg-white/10 border border-black/10 text-black"
-            )}>
-              Typing...
-            </div>
-          </div>
-        )}
-        <div ref={messagesEndRef} />
-      </div>
+                )}
+                
+                {response && (
+                  <div className={cn(
+                    "p-3 rounded-lg text-sm",
+                    isDark ? "bg-black/20 text-white/60" : "bg-white/10 text-black/60"
+                  )}>
+                    <span className="font-medium">Assistant:</span> {response}
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
-      {/* Input Form */}
-      <div className={cn(
-        "border-t p-2 md:p-6",
-        isDark 
-          ? "bg-black/20 border-white/10" 
-          : "bg-white/10 border-black/10"
-      )}>
-        <form 
-          onSubmit={handleSubmit}
-          className="max-w-6xl mx-auto flex gap-2 md:gap-4 relative"
-        >
-          <input
-            type="text"
-            value={inputMessage}
-            onChange={(e) => setInputMessage(e.target.value)}
-            placeholder="Type your message..."
-            className={cn(
-              "flex-1 px-3 py-2 md:px-6 md:py-4 rounded-xl text-sm md:text-lg",
-              "focus:ring-2 focus:ring-purple-500/30 focus:outline-none",
-              isDark 
-                ? "bg-black/20 border border-white/10 text-white placeholder-white/40" 
-                : "bg-white/10 border border-black/10 text-black placeholder-black/40"
-            )}
-          />
-
-          {/* Mobile menu button */}
+        {/* Control buttons - Fixed at bottom */}
+        <div className="relative z-10 w-full p-4 flex justify-center items-center gap-2 mt-auto">
+          {/* Menu toggle button */}
           <button
-            type="button"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             className={cn(
-              "md:hidden px-3 py-2 rounded-xl transition-colors flex items-center justify-center",
+              "p-4 rounded-xl transition-colors",
               isDark
-                ? "bg-black/20 border border-white/10 text-white hover:bg-black/30"
-                : "bg-white/10 border border-black/10 text-black hover:bg-white/20"
+                ? "bg-gray-500/20 border border-gray-500/30 text-gray-400 hover:bg-gray-500/30"
+                : "bg-gray-500/10 border border-gray-500/20 text-gray-600 hover:bg-gray-500/20"
             )}
           >
-            <MoreVertical className="w-5 h-5" />
+            <MoreHorizontal className="w-5 h-5" />
           </button>
 
-          {/* Mobile expandable menu */}
-          {isMenuOpen && (
-            <div className="absolute bottom-full right-0 mb-2 p-2 rounded-xl flex flex-col gap-2 md:hidden
-              bg-black/90 border border-white/10">
-              <div className="flex flex-col gap-2">
+          {/* Expandable menu */}
+          <AnimatePresence>
+            {isMenuOpen && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                className={cn(
+                  "absolute bottom-full mb-2 p-2 rounded-lg flex gap-2",
+                  isDark
+                    ? "bg-black/40 border border-white/10"
+                    : "bg-white/40 border border-black/10"
+                )}
+              >
+                {onFileUpload && (
+                  <button
+                    onClick={() => {
+                      const input = document.createElement('input');
+                      input.type = 'file';
+                      input.onchange = (e) => {
+                        const file = (e.target as HTMLInputElement).files?.[0];
+                        if (file) onFileUpload(file);
+                      };
+                      input.click();
+                    }}
+                    className={cn(
+                      "p-3 rounded-xl transition-colors",
+                      isDark
+                        ? "bg-purple-500/20 border border-purple-500/30 text-purple-400 hover:bg-purple-500/30"
+                        : "bg-purple-500/10 border border-purple-500/20 text-purple-600 hover:bg-purple-500/20"
+                    )}
+                  >
+                    <Upload className="w-5 h-5" />
+                  </button>
+                )}
+                
                 <button
-                  type="button"
-                  onClick={handleFileButtonClick}
-                  className="p-2 rounded-lg hover:bg-white/10 text-white"
+                  onClick={handleMicToggle}
+                  disabled={isProcessing}
+                  className={cn(
+                    "p-3 rounded-xl transition-colors",
+                    isDark
+                      ? "bg-blue-500/20 border border-blue-500/30 text-blue-400 hover:bg-blue-500/30"
+                      : "bg-blue-500/10 border border-blue-500/20 text-blue-600 hover:bg-blue-500/20",
+                    isProcessing && "opacity-50 cursor-not-allowed"
+                  )}
                 >
-                  <Upload className="w-5 h-5" />
+                  {isMuted ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
                 </button>
-                <button
-                  type="button"
-                  onClick={handleCallButtonClick}
-                  className="p-2 rounded-lg hover:bg-white/10 text-white"
-                >
-                  <Phone className="w-5 h-5" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => navigate('/smart-contracts')}
-                  className="p-2 rounded-lg hover:bg-white/10 text-white"
-                >
-                  <FileCode2 className="w-5 h-5" />
-                </button>
-              </div>
-            </div>
-          )}
+              </motion.div>
+            )}
+          </AnimatePresence>
 
-          {/* Desktop buttons - hidden on mobile */}
-          <div className="hidden md:flex gap-4">
-            <button
-              type="button"
-              onClick={handleFileButtonClick}
-              className={cn(
-                "px-4 py-4 rounded-xl transition-colors flex items-center justify-center",
-                isDark
-                  ? "bg-black/20 border border-white/10 text-white hover:bg-black/30"
-                  : "bg-white/10 border border-black/10 text-black hover:bg-white/20"
-              )}
-            >
-              <Upload className="w-6 h-6" />
-            </button>
-            <button
-              type="button"
-              onClick={handleCallButtonClick}
-              className={cn(
-                "px-4 py-4 rounded-xl transition-colors flex items-center justify-center",
-                isDark
-                  ? "bg-black/20 border border-white/10 text-white hover:bg-black/30"
-                  : "bg-white/10 border border-black/10 text-black hover:bg-white/20"
-              )}
-            >
-              <Phone className="w-6 h-6" />
-            </button>
-            <button
-              type="button"
-              onClick={() => navigate('/smart-contracts')}
-              className={cn(
-                "px-4 py-4 rounded-xl transition-colors flex items-center justify-center",
-                "bg-gradient-to-r from-blue-500/20 via-blue-500/30 to-blue-400/20",
-                "hover:from-blue-500/30 hover:via-blue-500/40 hover:to-blue-400/30",
-                "border border-blue-500/30",
-                "text-blue-300"
-              )}
-            >
-              <FileCode2 className="w-6 h-6" />
-            </button>
-          </div>
-
+          {/* End call button - Always visible */}
           <button
-            type="submit"
-            disabled={isTyping}
+            onClick={handleClose}
             className={cn(
-              "px-3 py-2 md:px-8 md:py-4 rounded-xl transition-colors flex items-center justify-center",
+              "p-4 rounded-xl transition-colors",
               isDark
-                ? "bg-black/20 border border-white/10 text-white hover:bg-black/30 disabled:opacity-50"
-                : "bg-white/10 border border-black/10 text-black hover:bg-white/20 disabled:opacity-50"
+                ? "bg-red-500/20 border border-red-500/30 text-red-400 hover:bg-red-500/30"
+                : "bg-red-500/10 border border-red-500/20 text-red-600 hover:bg-red-500/20"
             )}
           >
-            <Send className="w-5 h-5 md:w-6 md:h-6" />
+            <Phone className="w-5 h-5" />
           </button>
-        </form>
-        <input
-          type="file"
-          ref={fileInputRef}
-          onChange={handleFileChange}
-          className="hidden"
-          accept="image/jpeg,image/png,image/gif,image/webp"
-        />
-      </div>
-
-      {/* Call Window */}
-      <AnimatePresence>
-        {isCallWindowOpen && (
-          <CallWindow
-            isDark={isDark}
-            onClose={() => setIsCallWindowOpen(false)}
-            onStopAI={handleStopAI}
-            onFileUpload={handleImageUpload}
-            ticketCode={ticketCode}
-          />
-        )}
-      </AnimatePresence>
-    </div>
+        </div>
+      </motion.div>
+    </>
   );
 }
