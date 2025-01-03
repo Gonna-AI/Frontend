@@ -123,7 +123,7 @@ const Hero = ({ onGetStarted }: HeroProps) => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
-            className="mb-8 flex items-center justify-center"
+            className="mb-16"
           >
             {/* Logo container with adjusted spacing for larger logo */}
             <div className="flex items-center gap-4">
@@ -139,7 +139,7 @@ const Hero = ({ onGetStarted }: HeroProps) => {
           </motion.div>
 
           <motion.div 
-            className="max-w-4xl mx-auto mb-8"
+            className="max-w-4xl mx-auto mb-16"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
@@ -158,7 +158,7 @@ const Hero = ({ onGetStarted }: HeroProps) => {
           </motion.div>
 
           <motion.p 
-            className="text-xl md:text-2xl text-white/70 max-w-3xl mx-auto leading-relaxed mb-12"
+            className="text-xl md:text-2xl text-white/70 max-w-3xl mx-auto leading-relaxed mb-20"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.4 }}
@@ -171,7 +171,7 @@ const Hero = ({ onGetStarted }: HeroProps) => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.6 }}
-            className="flex flex-col sm:flex-row items-center justify-center gap-4"
+            className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-24"
           >
 
             <button 
