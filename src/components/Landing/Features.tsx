@@ -341,7 +341,7 @@ export default function Features() {
             </div>
           ))}
         </div>
-        <div className="text-xs text-gray-500 text-center mt-2">
+        <div className="text-xs text-gray-500 text-center mt-4">
           * Metrics based on test environment performance
         </div>
 

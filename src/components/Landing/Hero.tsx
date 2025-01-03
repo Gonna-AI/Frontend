@@ -173,12 +173,6 @@ const Hero = ({ onGetStarted }: HeroProps) => {
             transition={{ duration: 0.8, delay: 0.6 }}
             className="flex flex-col sm:flex-row items-center justify-center gap-4"
           >
-            <button 
-              onClick={scrollToWaitlist}
-              className="bg-[rgb(10,10,10)] text-white/80 border border-purple-500/20 hover:border-purple-500/40 transition-colors duration-200 rounded-[20px] px-8 py-3 text-sm font-medium tracking-wide"
-            >
-              Request a demo
-            </button>
 
             <button 
               onClick={() => navigate('/invite')}
