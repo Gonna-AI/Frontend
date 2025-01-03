@@ -70,17 +70,37 @@ export default function CallWindow({ isDark, onClose, onStopAI, onFileUpload, ti
         }
       };
 
-      recognitionRef.current.onerror = (event) => {
-        console.error('Speech recognition error:', event.error);
-        setAgentStatus('idle');
+      recognitionRef.current.onend = () => {
+        console.log('Speech recognition ended');
+        if (!isMuted && recognitionRef.current) {
+          try {
+            recognitionRef.current.start();
+            setAgentStatus('listening');
+          } catch (error) {
+            console.error('Error restarting recognition:', error);
+            setAgentStatus('idle');
+          }
+        }
       };
 
-      try {
-        recognitionRef.current.start();
-        setAgentStatus('listening');
-      } catch (error) {
-        console.error('Error starting initial recognition:', error);
-      }
+      recognitionRef.current.onerror = (event) => {
+        console.error('Speech recognition error:', event.error);
+        if (event.error !== 'no-speech') {
+          setAgentStatus('idle');
+        }
+      };
+
+      const startRecognition = async () => {
+        try {
+          await recognitionRef.current?.start();
+          setAgentStatus('listening');
+        } catch (error) {
+          console.error('Error starting initial recognition:', error);
+          setAgentStatus('idle');
+        }
+      };
+
+      startRecognition();
     }
 
     return () => {
@@ -88,7 +108,7 @@ export default function CallWindow({ isDark, onClose, onStopAI, onFileUpload, ti
         recognitionRef.current.abort();
       }
     };
-  }, []);
+  }, [isMuted]);
 
   const formatDuration = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
