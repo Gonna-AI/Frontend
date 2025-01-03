@@ -35,7 +35,6 @@ export default function CallWindow({ isDark, onClose, onStopAI, onFileUpload, ti
   const [response, setResponse] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [agentStatus, setAgentStatus] = useState<'idle' | 'speaking' | 'listening'>('idle');
-  const [isExpanded, setIsExpanded] = useState(false);
   const recognitionRef = useRef<SpeechRecognitionInstance | null>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -232,17 +231,6 @@ export default function CallWindow({ isDark, onClose, onStopAI, onFileUpload, ti
             >
               <X className="w-4 h-4 md:w-5 md:h-5" />
             </button>
-            <button
-              onClick={() => setIsExpanded(!isExpanded)}
-              className={cn(
-                "p-2 rounded-xl transition-colors md:hidden",
-                isDark 
-                  ? "text-white/60" 
-                  : "text-black/60"
-              )}
-            >
-              {isExpanded ? <ChevronDown className="w-5 h-5" /> : <ChevronUp className="w-5 h-5" />}
-            </button>
           </div>
 
           {/* AI Info Section - Always visible on mobile */}
@@ -288,44 +276,35 @@ export default function CallWindow({ isDark, onClose, onStopAI, onFileUpload, ti
           </div>
         </div>
 
-        {/* Expandable transcript section */}
-        <AnimatePresence>
-          {isExpanded && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              className="w-full flex-1 overflow-y-auto px-4"
-            >
-              <div className="space-y-4 py-4">
-                <h3 className={cn(
-                  "text-sm font-medium",
-                  isDark ? "text-white/60" : "text-black/60"
-                )}>
-                  Transcription
-                </h3>
-                
-                {transcript && (
-                  <div className={cn(
-                    "p-3 rounded-lg text-sm",
-                    isDark ? "bg-black/20 text-white/60" : "bg-white/10 text-black/60"
-                  )}>
-                    <span className="font-medium">You:</span> {transcript}
-                  </div>
-                )}
-                
-                {response && (
-                  <div className={cn(
-                    "p-3 rounded-lg text-sm",
-                    isDark ? "bg-black/20 text-white/60" : "bg-white/10 text-black/60"
-                  )}>
-                    <span className="font-medium">Assistant:</span> {response}
-                  </div>
-                )}
+        {/* Always show transcript section - Remove AnimatePresence and conditional rendering */}
+        <div className="w-full flex-1 overflow-y-auto px-4">
+          <div className="space-y-4 py-4">
+            <h3 className={cn(
+              "text-sm font-medium",
+              isDark ? "text-white/60" : "text-black/60"
+            )}>
+              Transcription
+            </h3>
+            
+            {transcript && (
+              <div className={cn(
+                "p-3 rounded-lg text-sm",
+                isDark ? "bg-black/20 text-white/60" : "bg-white/10 text-black/60"
+              )}>
+                <span className="font-medium">You:</span> {transcript}
               </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+            )}
+            
+            {response && (
+              <div className={cn(
+                "p-3 rounded-lg text-sm",
+                isDark ? "bg-black/20 text-white/60" : "bg-white/10 text-black/60"
+              )}>
+                <span className="font-medium">Assistant:</span> {response}
+              </div>
+            )}
+          </div>
+        </div>
 
         {/* Control buttons - Fixed at bottom with reduced size */}
         <div className="relative z-10 w-full p-2 md:p-4 flex justify-center items-center gap-2 mt-auto">
