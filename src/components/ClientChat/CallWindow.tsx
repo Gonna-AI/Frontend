@@ -126,32 +126,67 @@ export default function CallWindow({ isDark, onClose, onStopAI, onFileUpload, ti
         recognitionRef.current.stop();
       }
 
+      window.speechSynthesis.cancel();
+
       const response = await api.post('/api/chat', {
         message: input,
-        ticketCode: ticketCode
+        ticketCode: ticketCode,
+        context: {
+          transcription: transcript,
+          isListening: !isMuted
+        }
       });
 
-      const aiResponse = response.data.response || response.data.text || '';
+      const aiResponse = response.data.text || response.data.response || '';
       console.log('AI response:', aiResponse);
       setResponse(aiResponse);
       
-      const utterance = new SpeechSynthesisUtterance(aiResponse);
-      utterance.lang = recognitionRef.current?.lang || 'en-US';
-      utterance.rate = 1.0;
-      utterance.pitch = 1.0;
-      
-      window.speechSynthesis.cancel();
-      
-      utterance.onstart = () => {
-        console.log('Speech synthesis started');
-        setAgentStatus('speaking');
-      };
-      
-      utterance.onend = () => {
-        console.log('Speech synthesis ended');
+      if (aiResponse) {
+        const utterance = new SpeechSynthesisUtterance(aiResponse);
+        utterance.lang = 'en-US';
+        utterance.rate = 1.0;
+        utterance.pitch = 1.0;
+        
+        utterance.onstart = () => {
+          console.log('Speech synthesis started');
+          setAgentStatus('speaking');
+        };
+        
+        utterance.onend = () => {
+          console.log('Speech synthesis ended');
+          if (!isMuted && recognitionRef.current) {
+            try {
+              recognitionRef.current.start();
+              setAgentStatus('listening');
+            } catch (error) {
+              console.error('Error restarting recognition after speech:', error);
+              setAgentStatus('idle');
+            }
+          } else {
+            setAgentStatus('idle');
+          }
+          setIsProcessing(false);
+        };
+
+        utterance.onerror = (event) => {
+          console.error('Speech synthesis error:', event);
+          setAgentStatus('idle');
+          setIsProcessing(false);
+          if (!isMuted && recognitionRef.current) {
+            try {
+              recognitionRef.current.start();
+            } catch (error) {
+              console.error('Error restarting recognition after error:', error);
+            }
+          }
+        };
+
+        setTimeout(() => {
+          window.speechSynthesis.speak(utterance);
+        }, 100);
+      } else {
         setAgentStatus('listening');
         setIsProcessing(false);
-        
         if (!isMuted && recognitionRef.current) {
           try {
             recognitionRef.current.start();
@@ -159,17 +194,7 @@ export default function CallWindow({ isDark, onClose, onStopAI, onFileUpload, ti
             console.error('Error restarting recognition:', error);
           }
         }
-      };
-
-      utterance.onerror = (event) => {
-        console.error('Speech synthesis error:', event);
-        setAgentStatus('idle');
-        setIsProcessing(false);
-      };
-
-      setTimeout(() => {
-        window.speechSynthesis.speak(utterance);
-      }, 100);
+      }
 
     } catch (error) {
       console.error('Error processing input:', error);
