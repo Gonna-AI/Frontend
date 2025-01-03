@@ -36,7 +36,6 @@ export default function CallWindow({ isDark, onClose, onStopAI, onFileUpload, ti
   const [isProcessing, setIsProcessing] = useState(false);
   const [agentStatus, setAgentStatus] = useState<'idle' | 'speaking' | 'listening'>('idle');
   const recognitionRef = useRef<SpeechRecognitionInstance | null>(null);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   useEffect(() => {
     document.body.style.overflow = 'hidden';
@@ -306,88 +305,57 @@ export default function CallWindow({ isDark, onClose, onStopAI, onFileUpload, ti
           </div>
         </div>
 
-        {/* Control buttons - Fixed at bottom with reduced size */}
-        <div className="relative z-10 w-full p-2 md:p-4 flex justify-center items-center gap-2 mt-auto">
-          {/* Menu toggle button */}
+        {/* Control buttons - Updated layout */}
+        <div className="relative z-10 w-full p-4 flex justify-center items-center gap-3 mt-auto">
+          {onFileUpload && (
+            <button
+              onClick={() => {
+                const input = document.createElement('input');
+                input.type = 'file';
+                input.onchange = (e) => {
+                  const file = (e.target as HTMLInputElement).files?.[0];
+                  if (file) onFileUpload(file);
+                };
+                input.click();
+              }}
+              className={cn(
+                "p-3 md:p-4 rounded-lg transition-colors",
+                isDark
+                  ? "bg-purple-500/20 border border-purple-500/30 text-purple-400 hover:bg-purple-500/30"
+                  : "bg-purple-500/10 border border-purple-500/20 text-purple-600 hover:bg-purple-500/20"
+              )}
+            >
+              <Upload className="w-5 h-5 md:w-6 md:h-6" />
+            </button>
+          )}
+          
           <button
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            onClick={handleMicToggle}
+            disabled={isProcessing}
             className={cn(
-              "p-2 md:p-3 rounded-lg transition-colors",
+              "p-3 md:p-4 rounded-lg transition-colors",
               isDark
-                ? "bg-gray-500/20 border border-gray-500/30 text-gray-400 hover:bg-gray-500/30"
-                : "bg-gray-500/10 border border-gray-500/20 text-gray-600 hover:bg-gray-500/20"
+                ? "bg-blue-500/20 border border-blue-500/30 text-blue-400 hover:bg-blue-500/30"
+                : "bg-blue-500/10 border border-blue-500/20 text-blue-600 hover:bg-blue-500/20",
+              isProcessing && "opacity-50 cursor-not-allowed"
             )}
           >
-            <MoreHorizontal className="w-4 h-4 md:w-5 md:h-5" />
+            {isMuted ? 
+              <MicOff className="w-5 h-5 md:w-6 md:h-6" /> : 
+              <Mic className="w-5 h-5 md:w-6 md:h-6" />
+            }
           </button>
 
-          {/* Expandable menu - Positioned above with smaller buttons */}
-          <AnimatePresence>
-            {isMenuOpen && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                className={cn(
-                  "absolute bottom-full mb-2 p-1.5 rounded-lg flex gap-1.5",
-                  isDark
-                    ? "bg-black/40 border border-white/10"
-                    : "bg-white/40 border border-black/10"
-                )}
-              >
-                {onFileUpload && (
-                  <button
-                    onClick={() => {
-                      const input = document.createElement('input');
-                      input.type = 'file';
-                      input.onchange = (e) => {
-                        const file = (e.target as HTMLInputElement).files?.[0];
-                        if (file) onFileUpload(file);
-                      };
-                      input.click();
-                    }}
-                    className={cn(
-                      "p-2 md:p-3 rounded-lg transition-colors",
-                      isDark
-                        ? "bg-purple-500/20 border border-purple-500/30 text-purple-400 hover:bg-purple-500/30"
-                        : "bg-purple-500/10 border border-purple-500/20 text-purple-600 hover:bg-purple-500/20"
-                    )}
-                  >
-                    <Upload className="w-4 h-4 md:w-5 md:h-5" />
-                  </button>
-                )}
-                
-                <button
-                  onClick={handleMicToggle}
-                  disabled={isProcessing}
-                  className={cn(
-                    "p-2 md:p-3 rounded-lg transition-colors",
-                    isDark
-                      ? "bg-blue-500/20 border border-blue-500/30 text-blue-400 hover:bg-blue-500/30"
-                      : "bg-blue-500/10 border border-blue-500/20 text-blue-600 hover:bg-blue-500/20",
-                    isProcessing && "opacity-50 cursor-not-allowed"
-                  )}
-                >
-                  {isMuted ? 
-                    <MicOff className="w-4 h-4 md:w-5 md:h-5" /> : 
-                    <Mic className="w-4 h-4 md:w-5 md:h-5" />
-                  }
-                </button>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          {/* End call button - Always visible */}
           <button
             onClick={handleClose}
             className={cn(
-              "p-2 md:p-3 rounded-lg transition-colors",
+              "p-3 md:p-4 rounded-lg transition-colors",
               isDark
                 ? "bg-red-500/20 border border-red-500/30 text-red-400 hover:bg-red-500/30"
                 : "bg-red-500/10 border border-red-500/20 text-red-600 hover:bg-red-500/20"
             )}
           >
-            <Phone className="w-4 h-4 md:w-5 md:h-5" />
+            <Phone className="w-5 h-5 md:w-6 md:h-6" />
           </button>
         </div>
       </motion.div>
