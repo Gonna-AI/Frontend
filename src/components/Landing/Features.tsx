@@ -322,7 +322,7 @@ export default function Features() {
         </div>
 
         {/* Stats Section */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-32">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
           {[
             { value: '3.8s', label: 'Processing Speed' },
             { value: '12K', label: 'Test Claims Processed' },
@@ -341,7 +341,7 @@ export default function Features() {
             </div>
           ))}
         </div>
-        <div className="text-xs text-gray-500 text-center">
+        <div className="text-xs text-gray-500 text-center mt-2">
           * Metrics based on test environment performance
         </div>
 
