@@ -37,6 +37,7 @@ export default function CallWindow({ isDark, onClose, onStopAI, onFileUpload, ti
   const [isProcessing, setIsProcessing] = useState(false);
   const [agentStatus, setAgentStatus] = useState<'idle' | 'speaking' | 'listening'>('idle');
   const recognitionRef = useRef<SpeechRecognitionInstance | null>(null);
+  const [language, setLanguage] = useState<'en-US' | 'hi-IN'>('en-US');
 
   // Prevent body scroll when modal is open
   useEffect(() => {
@@ -61,7 +62,7 @@ export default function CallWindow({ isDark, onClose, onStopAI, onFileUpload, ti
       recognitionRef.current = new SpeechRecognition();
       recognitionRef.current.continuous = true;
       recognitionRef.current.interimResults = true;
-      recognitionRef.current.lang = 'en-US';
+      recognitionRef.current.lang = language;
 
       recognitionRef.current.onresult = (event) => {
         const current = event.resultIndex;
@@ -94,7 +95,7 @@ export default function CallWindow({ isDark, onClose, onStopAI, onFileUpload, ti
         recognitionRef.current.abort();
       }
     };
-  }, []);
+  }, [language]);
 
   const formatDuration = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
@@ -193,6 +194,10 @@ export default function CallWindow({ isDark, onClose, onStopAI, onFileUpload, ti
     setIsProcessing(false);
     
     onClose();
+  };
+
+  const handleLanguageToggle = () => {
+    setLanguage((prev) => (prev === 'en-US' ? 'hi-IN' : 'en-US'));
   };
 
   return (
@@ -323,6 +328,18 @@ export default function CallWindow({ isDark, onClose, onStopAI, onFileUpload, ti
             {isMuted ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
           </button>
           
+          <button
+            onClick={handleLanguageToggle}
+            className={cn(
+              "p-4 rounded-xl transition-colors",
+              isDark
+                ? "bg-yellow-500/20 border border-yellow-500/30 text-yellow-400 hover:bg-yellow-500/30"
+                : "bg-yellow-500/10 border border-yellow-500/20 text-yellow-600 hover:bg-yellow-500/20"
+            )}
+          >
+            {language === 'en-US' ? 'Switch to Hindi' : 'Switch to English'}
+          </button>
+
           <button
             onClick={handleClose}
             className={cn(
