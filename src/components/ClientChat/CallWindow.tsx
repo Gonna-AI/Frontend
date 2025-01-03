@@ -30,11 +30,11 @@ declare global {
 
 export default function CallWindow({ isDark, onClose, onStopAI, onFileUpload, ticketCode }: CallWindowProps) {
   const [callDuration, setCallDuration] = useState(0);
-  const [isMuted, setIsMuted] = useState(true);
+  const [isMuted, setIsMuted] = useState(false);
   const [transcript, setTranscript] = useState('');
   const [response, setResponse] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
-  const [agentStatus, setAgentStatus] = useState<'idle' | 'speaking' | 'listening'>('idle');
+  const [agentStatus, setAgentStatus] = useState<'idle' | 'speaking' | 'listening'>('listening');
   const recognitionRef = useRef<SpeechRecognitionInstance | null>(null);
 
   useEffect(() => {
@@ -73,12 +73,11 @@ export default function CallWindow({ isDark, onClose, onStopAI, onFileUpload, ti
       recognitionRef.current.onerror = (event) => {
         console.error('Speech recognition error:', event.error);
         setAgentStatus('idle');
-        handleMicToggle();
       };
 
       try {
         recognitionRef.current.start();
-        setAgentStatus('idle');
+        setAgentStatus('listening');
       } catch (error) {
         console.error('Error starting initial recognition:', error);
       }
