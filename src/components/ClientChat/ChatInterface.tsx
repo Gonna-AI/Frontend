@@ -184,7 +184,7 @@ export default function ChatInterface({ ticketCode, isDark }: ChatInterfaceProps
               "text-xl font-semibold",
               isDark ? "text-white" : "text-black"
             )}>
-              ClerkTree Support
+              Clerk Tree Support
             </h1>
             <p className={cn(
               "text-sm",
