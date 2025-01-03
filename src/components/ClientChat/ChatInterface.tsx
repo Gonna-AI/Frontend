@@ -298,27 +298,29 @@ export default function ChatInterface({ ticketCode, isDark }: ChatInterfaceProps
           {isMenuOpen && (
             <div className="absolute bottom-full right-0 mb-2 p-2 rounded-xl flex flex-col gap-2 md:hidden
               bg-black/90 border border-white/10">
-              <button
-                type="button"
-                onClick={handleFileButtonClick}
-                className="p-2 rounded-lg hover:bg-white/10 text-white"
-              >
-                <Upload className="w-5 h-5" />
-              </button>
-              <button
-                type="button"
-                onClick={handleCallButtonClick}
-                className="p-2 rounded-lg hover:bg-white/10 text-white"
-              >
-                <Phone className="w-5 h-5" />
-              </button>
-              <button
-                type="button"
-                onClick={() => navigate('/smart-contracts')}
-                className="p-2 rounded-lg hover:bg-white/10 text-white"
-              >
-                <FileCode2 className="w-5 h-5" />
-              </button>
+              <div className="flex flex-col gap-2">
+                <button
+                  type="button"
+                  onClick={handleFileButtonClick}
+                  className="p-2 rounded-lg hover:bg-white/10 text-white"
+                >
+                  <Upload className="w-5 h-5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={handleCallButtonClick}
+                  className="p-2 rounded-lg hover:bg-white/10 text-white"
+                >
+                  <Phone className="w-5 h-5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => navigate('/smart-contracts')}
+                  className="p-2 rounded-lg hover:bg-white/10 text-white"
+                >
+                  <FileCode2 className="w-5 h-5" />
+                </button>
+              </div>
             </div>
           )}
 
