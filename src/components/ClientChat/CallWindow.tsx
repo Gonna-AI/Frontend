@@ -148,9 +148,7 @@ export default function CallWindow({ isDark, onClose, onStopAI, onFileUpload, ti
         setIsProcessing(false);
       };
 
-      setTimeout(() => {
-        window.speechSynthesis.speak(utterance);
-      }, 100);
+      window.speechSynthesis.speak(utterance);
 
     } catch (error) {
       console.error('Error processing input:', error);
