@@ -205,12 +205,13 @@ export default function CallWindow({ isDark, onClose, onStopAI, onFileUpload, ti
         transition={{ type: 'spring', damping: 20, stiffness: 300 }}
         className={cn(
           "fixed bottom-0 inset-x-0 z-50 flex flex-col items-center w-full",
-          "h-[80vh] md:h-[80vh]",
-          "max-w-2xl mx-auto",
+          "h-[70vh] md:h-[80vh]",
+          "max-w-md mx-auto",
           isDark 
             ? "bg-black/20 border-t border-white/10 backdrop-blur-md" 
             : "bg-white/10 border-t border-black/10 backdrop-blur-md",
-          "rounded-t-xl md:rounded-t-3xl"
+          "rounded-t-xl md:rounded-t-3xl",
+          "overflow-hidden"
         )}
       >
         {/* Gradient backgrounds */}
@@ -219,17 +220,17 @@ export default function CallWindow({ isDark, onClose, onStopAI, onFileUpload, ti
 
         {/* Mobile header with expand/collapse */}
         <div className="flex flex-col w-full relative z-10">
-          <div className="flex justify-between items-center p-4">
+          <div className="flex justify-between items-center p-2 md:p-4">
             <button
               onClick={handleClose}
               className={cn(
-                "p-2 rounded-xl transition-colors",
+                "p-1.5 md:p-2 rounded-lg transition-colors",
                 isDark 
                   ? "bg-black/20 border border-white/10 text-white hover:bg-black/30" 
                   : "bg-white/10 border border-black/10 text-black hover:bg-white/20"
               )}
             >
-              <X className="w-5 h-5" />
+              <X className="w-4 h-4 md:w-5 md:h-5" />
             </button>
             <button
               onClick={() => setIsExpanded(!isExpanded)}
@@ -326,22 +327,22 @@ export default function CallWindow({ isDark, onClose, onStopAI, onFileUpload, ti
           )}
         </AnimatePresence>
 
-        {/* Control buttons - Fixed at bottom */}
-        <div className="relative z-10 w-full p-4 flex justify-center items-center gap-2 mt-auto">
+        {/* Control buttons - Fixed at bottom with reduced size */}
+        <div className="relative z-10 w-full p-2 md:p-4 flex justify-center items-center gap-2 mt-auto">
           {/* Menu toggle button */}
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             className={cn(
-              "p-4 rounded-xl transition-colors",
+              "p-2 md:p-3 rounded-lg transition-colors",
               isDark
                 ? "bg-gray-500/20 border border-gray-500/30 text-gray-400 hover:bg-gray-500/30"
                 : "bg-gray-500/10 border border-gray-500/20 text-gray-600 hover:bg-gray-500/20"
             )}
           >
-            <MoreHorizontal className="w-5 h-5" />
+            <MoreHorizontal className="w-4 h-4 md:w-5 md:h-5" />
           </button>
 
-          {/* Expandable menu */}
+          {/* Expandable menu - Positioned above with smaller buttons */}
           <AnimatePresence>
             {isMenuOpen && (
               <motion.div
@@ -349,7 +350,7 @@ export default function CallWindow({ isDark, onClose, onStopAI, onFileUpload, ti
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
                 className={cn(
-                  "absolute bottom-full mb-2 p-2 rounded-lg flex gap-2",
+                  "absolute bottom-full mb-2 p-1.5 rounded-lg flex gap-1.5",
                   isDark
                     ? "bg-black/40 border border-white/10"
                     : "bg-white/40 border border-black/10"
@@ -367,13 +368,13 @@ export default function CallWindow({ isDark, onClose, onStopAI, onFileUpload, ti
                       input.click();
                     }}
                     className={cn(
-                      "p-3 rounded-xl transition-colors",
+                      "p-2 md:p-3 rounded-lg transition-colors",
                       isDark
                         ? "bg-purple-500/20 border border-purple-500/30 text-purple-400 hover:bg-purple-500/30"
                         : "bg-purple-500/10 border border-purple-500/20 text-purple-600 hover:bg-purple-500/20"
                     )}
                   >
-                    <Upload className="w-5 h-5" />
+                    <Upload className="w-4 h-4 md:w-5 md:h-5" />
                   </button>
                 )}
                 
@@ -381,14 +382,17 @@ export default function CallWindow({ isDark, onClose, onStopAI, onFileUpload, ti
                   onClick={handleMicToggle}
                   disabled={isProcessing}
                   className={cn(
-                    "p-3 rounded-xl transition-colors",
+                    "p-2 md:p-3 rounded-lg transition-colors",
                     isDark
                       ? "bg-blue-500/20 border border-blue-500/30 text-blue-400 hover:bg-blue-500/30"
                       : "bg-blue-500/10 border border-blue-500/20 text-blue-600 hover:bg-blue-500/20",
                     isProcessing && "opacity-50 cursor-not-allowed"
                   )}
                 >
-                  {isMuted ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
+                  {isMuted ? 
+                    <MicOff className="w-4 h-4 md:w-5 md:h-5" /> : 
+                    <Mic className="w-4 h-4 md:w-5 md:h-5" />
+                  }
                 </button>
               </motion.div>
             )}
@@ -398,13 +402,13 @@ export default function CallWindow({ isDark, onClose, onStopAI, onFileUpload, ti
           <button
             onClick={handleClose}
             className={cn(
-              "p-4 rounded-xl transition-colors",
+              "p-2 md:p-3 rounded-lg transition-colors",
               isDark
                 ? "bg-red-500/20 border border-red-500/30 text-red-400 hover:bg-red-500/30"
                 : "bg-red-500/10 border border-red-500/20 text-red-600 hover:bg-red-500/20"
             )}
           >
-            <Phone className="w-5 h-5" />
+            <Phone className="w-4 h-4 md:w-5 md:h-5" />
           </button>
         </div>
       </motion.div>
