@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Phone, X, Mic, MicOff } from 'lucide-react';
+import { Phone, X, Mic, MicOff, ChevronUp, ChevronDown, MoreHorizontal, Upload, Send } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import api from '../../config/api';
 
@@ -12,7 +12,6 @@ interface CallWindowProps {
   ticketCode: string;
 }
 
-// Speech recognition interface
 interface SpeechRecognitionInstance extends EventTarget {
   continuous: boolean;
   interimResults: boolean;
@@ -36,9 +35,10 @@ export default function CallWindow({ isDark, onClose, onStopAI, onFileUpload, ti
   const [response, setResponse] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [agentStatus, setAgentStatus] = useState<'idle' | 'speaking' | 'listening'>('idle');
+  const [isExpanded, setIsExpanded] = useState(false);
   const recognitionRef = useRef<SpeechRecognitionInstance | null>(null);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  // Prevent body scroll when modal is open
   useEffect(() => {
     document.body.style.overflow = 'hidden';
     return () => {
@@ -46,7 +46,6 @@ export default function CallWindow({ isDark, onClose, onStopAI, onFileUpload, ti
     };
   }, []);
 
-  // Initialize timer
   useEffect(() => {
     const timer = setInterval(() => {
       setCallDuration((prev) => prev + 1);
@@ -54,7 +53,6 @@ export default function CallWindow({ isDark, onClose, onStopAI, onFileUpload, ti
     return () => clearInterval(timer);
   }, []);
 
-  // Initialize speech recognition
   useEffect(() => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (SpeechRecognition) {
@@ -80,7 +78,6 @@ export default function CallWindow({ isDark, onClose, onStopAI, onFileUpload, ti
         handleMicToggle();
       };
 
-      // Start recognition immediately since we're unmuted by default
       try {
         recognitionRef.current.start();
         setAgentStatus('listening');
@@ -207,38 +204,51 @@ export default function CallWindow({ isDark, onClose, onStopAI, onFileUpload, ti
         exit={{ y: '100%' }}
         transition={{ type: 'spring', damping: 20, stiffness: 300 }}
         className={cn(
-          "fixed bottom-0 inset-x-0 z-50 flex flex-col items-center h-[80vh] relative overflow-hidden rounded-t-3xl",
+          "fixed bottom-0 inset-x-0 z-50 flex flex-col items-center w-full",
+          "h-[70vh] md:h-[80vh]",
+          "max-w-md mx-auto",
           isDark 
             ? "bg-black/20 border-t border-white/10 backdrop-blur-md" 
-            : "bg-white/10 border-t border-black/10 backdrop-blur-md"
+            : "bg-white/10 border-t border-black/10 backdrop-blur-md",
+          "rounded-t-xl md:rounded-t-3xl",
+          "overflow-hidden"
         )}
       >
         {/* Gradient backgrounds */}
-        <div className="absolute top-0 right-0 w-[35rem] h-[35rem] bg-gradient-to-bl from-blue-500/10 via-purple-500/5 to-transparent blur-3xl pointer-events-none" />
-        <div className="absolute bottom-0 left-0 w-[35rem] h-[35rem] bg-gradient-to-tr from-purple-500/10 to-transparent blur-3xl pointer-events-none" />
+        <div className="absolute top-0 right-0 w-full md:w-[35rem] h-[35rem] bg-gradient-to-bl from-blue-500/10 via-purple-500/5 to-transparent blur-3xl pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-full md:w-[35rem] h-[35rem] bg-gradient-to-tr from-purple-500/10 to-transparent blur-3xl pointer-events-none" />
 
-        {/* Header */}
-        <div className="flex justify-between w-full relative z-10 p-4">
-          <button
-            onClick={handleClose}
-            className={cn(
-              "p-2 rounded-xl transition-colors",
-              isDark 
-                ? "bg-black/20 border border-white/10 text-white hover:bg-black/30" 
-                : "bg-white/10 border border-black/10 text-black hover:bg-white/20"
-            )}
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
+        {/* Mobile header with expand/collapse */}
+        <div className="flex flex-col w-full relative z-10">
+          <div className="flex justify-between items-center p-2 md:p-4">
+            <button
+              onClick={handleClose}
+              className={cn(
+                "p-1.5 md:p-2 rounded-lg transition-colors",
+                isDark 
+                  ? "bg-black/20 border border-white/10 text-white hover:bg-black/30" 
+                  : "bg-white/10 border border-black/10 text-black hover:bg-white/20"
+              )}
+            >
+              <X className="w-4 h-4 md:w-5 md:h-5" />
+            </button>
+            <button
+              onClick={() => setIsExpanded(!isExpanded)}
+              className={cn(
+                "p-2 rounded-xl transition-colors md:hidden",
+                isDark 
+                  ? "text-white/60" 
+                  : "text-black/60"
+              )}
+            >
+              {isExpanded ? <ChevronDown className="w-5 h-5" /> : <ChevronUp className="w-5 h-5" />}
+            </button>
+          </div>
 
-        {/* Main content area with two columns */}
-        <div className="flex-1 w-full flex gap-4 px-6 overflow-hidden">
-          {/* Left column - AI Avatar and Status */}
-          <div className="w-1/2 flex flex-col items-center justify-center">
-            {/* AI Logo */}
+          {/* AI Info Section - Always visible on mobile */}
+          <div className="flex flex-col items-center justify-center p-4">
             <div className={cn(
-              "w-20 h-20 rounded-xl flex items-center justify-center mb-4",
+              "w-16 h-16 md:w-20 md:h-20 rounded-xl flex items-center justify-center mb-4",
               isDark 
                 ? "bg-black/20 border border-white/10" 
                 : "bg-white/10 border border-black/10"
@@ -246,7 +256,7 @@ export default function CallWindow({ isDark, onClose, onStopAI, onFileUpload, ti
               <svg 
                 xmlns="http://www.w3.org/2000/svg" 
                 viewBox="0 0 464 468"
-                className="w-16 h-16"
+                className="w-12 h-12 md:w-16 md:h-16"
                 aria-label="ClerkTree Logo"
               >
                 <path 
@@ -256,83 +266,149 @@ export default function CallWindow({ isDark, onClose, onStopAI, onFileUpload, ti
               </svg>
             </div>
 
-            {/* Title and Status */}
             <h2 className={cn(
-              "text-xl font-semibold mb-2",
+              "text-lg md:text-xl font-semibold mb-2",
               isDark ? "text-white" : "text-black"
             )}>
               AI Assistant
             </h2>
             
             <p className={cn(
-              "text-base",
+              "text-sm md:text-base",
               isDark ? "text-white/60" : "text-black/60"
             )}>
               {formatDuration(callDuration)}
             </p>
             <p className={cn(
-              "text-sm",
+              "text-xs md:text-sm",
               isDark ? "text-white/40" : "text-black/40"
             )}>
               Status: {agentStatus}
             </p>
           </div>
-
-          {/* Right column - Transcripts */}
-          <div className="w-1/2 flex flex-col gap-4 overflow-y-auto py-4">
-            <h3 className={cn(
-              "text-sm font-medium",
-              isDark ? "text-white/60" : "text-black/60"
-            )}>
-              Transcription
-            </h3>
-            
-            {transcript && (
-              <div className={cn(
-                "p-3 rounded-lg text-sm",
-                isDark ? "bg-black/20 text-white/60" : "bg-white/10 text-black/60"
-              )}>
-                <span className="font-medium">You:</span> {transcript}
-              </div>
-            )}
-            
-            {response && (
-              <div className={cn(
-                "p-3 rounded-lg text-sm",
-                isDark ? "bg-black/20 text-white/60" : "bg-white/10 text-black/60"
-              )}>
-                <span className="font-medium">Assistant:</span> {response}
-              </div>
-            )}
-          </div>
         </div>
 
-        {/* Control buttons */}
-        <div className="relative z-10 p-4 w-full flex justify-center gap-4">
+        {/* Expandable transcript section */}
+        <AnimatePresence>
+          {isExpanded && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="w-full flex-1 overflow-y-auto px-4"
+            >
+              <div className="space-y-4 py-4">
+                <h3 className={cn(
+                  "text-sm font-medium",
+                  isDark ? "text-white/60" : "text-black/60"
+                )}>
+                  Transcription
+                </h3>
+                
+                {transcript && (
+                  <div className={cn(
+                    "p-3 rounded-lg text-sm",
+                    isDark ? "bg-black/20 text-white/60" : "bg-white/10 text-black/60"
+                  )}>
+                    <span className="font-medium">You:</span> {transcript}
+                  </div>
+                )}
+                
+                {response && (
+                  <div className={cn(
+                    "p-3 rounded-lg text-sm",
+                    isDark ? "bg-black/20 text-white/60" : "bg-white/10 text-black/60"
+                  )}>
+                    <span className="font-medium">Assistant:</span> {response}
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Control buttons - Fixed at bottom with reduced size */}
+        <div className="relative z-10 w-full p-2 md:p-4 flex justify-center items-center gap-2 mt-auto">
+          {/* Menu toggle button */}
           <button
-            onClick={handleMicToggle}
-            disabled={isProcessing}
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
             className={cn(
-              "p-4 rounded-xl transition-colors",
+              "p-2 md:p-3 rounded-lg transition-colors",
               isDark
-                ? "bg-blue-500/20 border border-blue-500/30 text-blue-400 hover:bg-blue-500/30"
-                : "bg-blue-500/10 border border-blue-500/20 text-blue-600 hover:bg-blue-500/20",
-              isProcessing && "opacity-50 cursor-not-allowed"
+                ? "bg-gray-500/20 border border-gray-500/30 text-gray-400 hover:bg-gray-500/30"
+                : "bg-gray-500/10 border border-gray-500/20 text-gray-600 hover:bg-gray-500/20"
             )}
           >
-            {isMuted ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
+            <MoreHorizontal className="w-4 h-4 md:w-5 md:h-5" />
           </button>
-          
+
+          {/* Expandable menu - Positioned above with smaller buttons */}
+          <AnimatePresence>
+            {isMenuOpen && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                className={cn(
+                  "absolute bottom-full mb-2 p-1.5 rounded-lg flex gap-1.5",
+                  isDark
+                    ? "bg-black/40 border border-white/10"
+                    : "bg-white/40 border border-black/10"
+                )}
+              >
+                {onFileUpload && (
+                  <button
+                    onClick={() => {
+                      const input = document.createElement('input');
+                      input.type = 'file';
+                      input.onchange = (e) => {
+                        const file = (e.target as HTMLInputElement).files?.[0];
+                        if (file) onFileUpload(file);
+                      };
+                      input.click();
+                    }}
+                    className={cn(
+                      "p-2 md:p-3 rounded-lg transition-colors",
+                      isDark
+                        ? "bg-purple-500/20 border border-purple-500/30 text-purple-400 hover:bg-purple-500/30"
+                        : "bg-purple-500/10 border border-purple-500/20 text-purple-600 hover:bg-purple-500/20"
+                    )}
+                  >
+                    <Upload className="w-4 h-4 md:w-5 md:h-5" />
+                  </button>
+                )}
+                
+                <button
+                  onClick={handleMicToggle}
+                  disabled={isProcessing}
+                  className={cn(
+                    "p-2 md:p-3 rounded-lg transition-colors",
+                    isDark
+                      ? "bg-blue-500/20 border border-blue-500/30 text-blue-400 hover:bg-blue-500/30"
+                      : "bg-blue-500/10 border border-blue-500/20 text-blue-600 hover:bg-blue-500/20",
+                    isProcessing && "opacity-50 cursor-not-allowed"
+                  )}
+                >
+                  {isMuted ? 
+                    <MicOff className="w-4 h-4 md:w-5 md:h-5" /> : 
+                    <Mic className="w-4 h-4 md:w-5 md:h-5" />
+                  }
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* End call button - Always visible */}
           <button
             onClick={handleClose}
             className={cn(
-              "p-4 rounded-xl transition-colors",
+              "p-2 md:p-3 rounded-lg transition-colors",
               isDark
                 ? "bg-red-500/20 border border-red-500/30 text-red-400 hover:bg-red-500/30"
                 : "bg-red-500/10 border border-red-500/20 text-red-600 hover:bg-red-500/20"
             )}
           >
-            <Phone className="w-5 h-5" />
+            <Phone className="w-4 h-4 md:w-5 md:h-5" />
           </button>
         </div>
       </motion.div>
