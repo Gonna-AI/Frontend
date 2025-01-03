@@ -328,9 +328,9 @@ export default function Features() {
         {/* Stats Section */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-32">
           {[
-            { value: '192K', label: 'Claims Processed' },
-            { value: '34+', label: 'Unique Integrations' },
-            { value: '99.9%', label: 'Processing Accuracy' }
+            { value: '3.8s', label: 'Processing Speed' },
+            { value: '12K', label: 'Test Claims Processed' },
+            { value: '92%', label: 'Auto-classification Rate' }
           ].map((stat, index) => (
             <div
               key={index}
@@ -341,6 +341,7 @@ export default function Features() {
               </div>
               <div className="text-gray-400 mt-2 font-mono">
                 {stat.label}
+                <span className="text-xs text-gray-500"> * Metrics based on test environment performance</span>
               </div>
             </div>
           ))}
