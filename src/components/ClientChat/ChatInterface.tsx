@@ -19,9 +19,10 @@ interface Message {
 interface ChatInterfaceProps {
   ticketCode: string;
   isDark: boolean;
+  onLogout?: () => void;
 }
 
-export default function ChatInterface({ ticketCode, isDark }: ChatInterfaceProps) {
+export default function ChatInterface({ ticketCode, isDark, onLogout }: ChatInterfaceProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputMessage, setInputMessage] = useState('');
   const [isTyping, setIsTyping] = useState(false);
@@ -194,6 +195,21 @@ export default function ChatInterface({ ticketCode, isDark }: ChatInterfaceProps
             </p>
           </div>
         </div>
+        
+        {/* Add logout button */}
+        {onLogout && (
+          <button
+            onClick={onLogout}
+            className={cn(
+              "px-4 py-2 rounded-lg transition-colors",
+              isDark
+                ? "bg-red-500/20 border border-red-500/30 text-red-400 hover:bg-red-500/30"
+                : "bg-red-500/10 border border-red-500/20 text-red-600 hover:bg-red-500/20"
+            )}
+          >
+            Logout
+          </button>
+        )}
       </div>
 
       {/* Messages */}
