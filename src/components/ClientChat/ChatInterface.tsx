@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-import { Send, GalleryVerticalEnd, Phone, Upload, FileCode2 } from 'lucide-react';
+import { Send, GalleryVerticalEnd, Phone, Upload, FileCode2, MoreVertical } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { motion, AnimatePresence } from 'framer-motion';
 import CallWindow from './CallWindow';
@@ -30,6 +30,7 @@ export default function ChatInterface({ ticketCode, isDark }: ChatInterfaceProps
   const fileInputRef = useRef<HTMLInputElement>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
   const navigate = useNavigate();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -183,7 +184,7 @@ export default function ChatInterface({ ticketCode, isDark }: ChatInterfaceProps
               "text-xl font-semibold",
               isDark ? "text-white" : "text-black"
             )}>
-              Gonna Support
+              Clerk Tree Support
             </h1>
             <p className={cn(
               "text-sm",
@@ -256,14 +257,14 @@ export default function ChatInterface({ ticketCode, isDark }: ChatInterfaceProps
 
       {/* Input Form */}
       <div className={cn(
-        "border-t p-4 md:p-6",
+        "border-t p-2 md:p-6",
         isDark 
           ? "bg-black/20 border-white/10" 
           : "bg-white/10 border-black/10"
       )}>
         <form 
           onSubmit={handleSubmit}
-          className="max-w-6xl mx-auto flex gap-4"
+          className="max-w-6xl mx-auto flex gap-2 md:gap-4 relative"
         >
           <input
             type="text"
@@ -271,61 +272,108 @@ export default function ChatInterface({ ticketCode, isDark }: ChatInterfaceProps
             onChange={(e) => setInputMessage(e.target.value)}
             placeholder="Type your message..."
             className={cn(
-              "flex-1 px-6 py-4 rounded-xl text-base md:text-lg",
+              "flex-1 px-3 py-2 md:px-6 md:py-4 rounded-xl text-sm md:text-lg",
               "focus:ring-2 focus:ring-purple-500/30 focus:outline-none",
               isDark 
                 ? "bg-black/20 border border-white/10 text-white placeholder-white/40" 
                 : "bg-white/10 border border-black/10 text-black placeholder-black/40"
             )}
           />
+
+          {/* Mobile menu button */}
           <button
             type="button"
-            onClick={handleFileButtonClick}
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
             className={cn(
-              "px-4 py-4 rounded-xl transition-colors flex items-center justify-center",
+              "md:hidden px-3 py-2 rounded-xl transition-colors flex items-center justify-center",
               isDark
                 ? "bg-black/20 border border-white/10 text-white hover:bg-black/30"
                 : "bg-white/10 border border-black/10 text-black hover:bg-white/20"
             )}
           >
-            <Upload className="w-6 h-6" />
+            <MoreVertical className="w-5 h-5" />
           </button>
-          <button
-            type="button"
-            onClick={handleCallButtonClick}
-            className={cn(
-              "px-4 py-4 rounded-xl transition-colors flex items-center justify-center",
-              isDark
-                ? "bg-black/20 border border-white/10 text-white hover:bg-black/30"
-                : "bg-white/10 border border-black/10 text-black hover:bg-white/20"
-            )}
-          >
-            <Phone className="w-6 h-6" />
-          </button>
-          <button
-            type="button"
-            onClick={() => navigate('/smart-contracts')}
-            className={cn(
-              "px-4 py-4 rounded-xl transition-colors flex items-center justify-center",
-              "bg-gradient-to-r from-blue-500/20 via-blue-500/30 to-blue-400/20",
-              "hover:from-blue-500/30 hover:via-blue-500/40 hover:to-blue-400/30",
-              "border border-blue-500/30",
-              "text-blue-300"
-            )}
-          >
-            <FileCode2 className="w-6 h-6" />
-          </button>
+
+          {/* Mobile expandable menu */}
+          {isMenuOpen && (
+            <div className="absolute bottom-full right-0 mb-2 p-2 rounded-xl flex flex-col gap-2 md:hidden
+              bg-black/90 border border-white/10">
+              <button
+                type="button"
+                onClick={handleFileButtonClick}
+                className="p-2 rounded-lg hover:bg-white/10 text-white"
+              >
+                <Upload className="w-5 h-5" />
+              </button>
+              <button
+                type="button"
+                onClick={handleCallButtonClick}
+                className="p-2 rounded-lg hover:bg-white/10 text-white"
+              >
+                <Phone className="w-5 h-5" />
+              </button>
+              <button
+                type="button"
+                onClick={() => navigate('/smart-contracts')}
+                className="p-2 rounded-lg hover:bg-white/10 text-white"
+              >
+                <FileCode2 className="w-5 h-5" />
+              </button>
+            </div>
+          )}
+
+          {/* Desktop buttons - hidden on mobile */}
+          <div className="hidden md:flex gap-4">
+            <button
+              type="button"
+              onClick={handleFileButtonClick}
+              className={cn(
+                "px-4 py-4 rounded-xl transition-colors flex items-center justify-center",
+                isDark
+                  ? "bg-black/20 border border-white/10 text-white hover:bg-black/30"
+                  : "bg-white/10 border border-black/10 text-black hover:bg-white/20"
+              )}
+            >
+              <Upload className="w-6 h-6" />
+            </button>
+            <button
+              type="button"
+              onClick={handleCallButtonClick}
+              className={cn(
+                "px-4 py-4 rounded-xl transition-colors flex items-center justify-center",
+                isDark
+                  ? "bg-black/20 border border-white/10 text-white hover:bg-black/30"
+                  : "bg-white/10 border border-black/10 text-black hover:bg-white/20"
+              )}
+            >
+              <Phone className="w-6 h-6" />
+            </button>
+            <button
+              type="button"
+              onClick={() => navigate('/smart-contracts')}
+              className={cn(
+                "px-4 py-4 rounded-xl transition-colors flex items-center justify-center",
+                "bg-gradient-to-r from-blue-500/20 via-blue-500/30 to-blue-400/20",
+                "hover:from-blue-500/30 hover:via-blue-500/40 hover:to-blue-400/30",
+                "border border-blue-500/30",
+                "text-blue-300"
+              )}
+            >
+              <FileCode2 className="w-6 h-6" />
+            </button>
+          </div>
+
           <button
             type="submit"
             disabled={isTyping}
             className={cn(
-              "px-8 py-4 rounded-xl transition-colors flex items-center justify-center",
+              "px-3 py-2 md:px-8 md:py-4 rounded-xl transition-colors flex items-center justify-center",
               isDark
                 ? "bg-black/20 border border-white/10 text-white hover:bg-black/30 disabled:opacity-50"
                 : "bg-white/10 border border-black/10 text-black hover:bg-white/20 disabled:opacity-50"
             )}
           >
-            <Send className="w-6 h-6" />
+            <Send className="w-5 h-5 md:w-6 md:h-6" />
           </button>
         </form>
         <input
