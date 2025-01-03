@@ -30,7 +30,7 @@ declare global {
 
 export default function CallWindow({ isDark, onClose, onStopAI, onFileUpload, ticketCode }: CallWindowProps) {
   const [callDuration, setCallDuration] = useState(0);
-  const [isMuted, setIsMuted] = useState(false);
+  const [isMuted, setIsMuted] = useState(true);
   const [transcript, setTranscript] = useState('');
   const [response, setResponse] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
@@ -78,7 +78,7 @@ export default function CallWindow({ isDark, onClose, onStopAI, onFileUpload, ti
 
       try {
         recognitionRef.current.start();
-        setAgentStatus('listening');
+        setAgentStatus('idle');
       } catch (error) {
         console.error('Error starting initial recognition:', error);
       }
@@ -157,19 +157,19 @@ export default function CallWindow({ isDark, onClose, onStopAI, onFileUpload, ti
   const handleMicToggle = () => {
     if (!recognitionRef.current) return;
 
-    if (isMuted) {
-      try {
-        recognitionRef.current.start();
-        setAgentStatus('listening');
-      } catch (error) {
-        console.error('Error starting recognition:', error);
-      }
-    } else {
+    if (!isMuted) {
       try {
         recognitionRef.current.stop();
         setAgentStatus('idle');
       } catch (error) {
         console.error('Error stopping recognition:', error);
+      }
+    } else {
+      try {
+        recognitionRef.current.start();
+        setAgentStatus('listening');
+      } catch (error) {
+        console.error('Error starting recognition:', error);
       }
     }
     setIsMuted(!isMuted);
