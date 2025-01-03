@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { cn } from '../../utils/cn';
 import Logo from './Logo';
 import TicketInput from './TicketInput';
@@ -7,13 +7,30 @@ import ThemeToggle from './ThemeToggle';
 import { ticketApi, setTicketHeader } from '../../config/api';
 
 export default function ClientChat() {
-  const [isVerified, setIsVerified] = useState(false);
-  const [ticketCode, setTicketCode] = useState('');
+  const [isVerified, setIsVerified] = useState(() => {
+    // Initialize from localStorage
+    const savedVerification = localStorage.getItem('ticketVerification');
+    return savedVerification === 'true';
+  });
+  
+  const [ticketCode, setTicketCode] = useState(() => {
+    // Initialize from localStorage
+    return localStorage.getItem('ticketCode') || '';
+  });
+  
   const [error, setError] = useState('');
   const [isDark, setIsDark] = useState(() => {
     const saved = localStorage.getItem('clientChatTheme');
     return saved ? saved === 'dark' : true;
   });
+
+  useEffect(() => {
+    // If there's a saved ticket, restore the API header
+    const savedTicket = localStorage.getItem('ticketCode');
+    if (savedTicket) {
+      setTicketHeader(savedTicket);
+    }
+  }, []);
 
   const toggleTheme = () => {
     const newTheme = !isDark;
@@ -26,9 +43,12 @@ export default function ClientChat() {
     try {
       const response = await ticketApi.validate(code);
       if (response.data.valid) {
-        setTicketHeader(code); // Set the ticket header for future requests
+        setTicketHeader(code);
         setIsVerified(true);
         setTicketCode(code);
+        // Save to localStorage
+        localStorage.setItem('ticketVerification', 'true');
+        localStorage.setItem('ticketCode', code);
       } else {
         setError('Invalid ticket code');
       }
@@ -36,6 +56,15 @@ export default function ClientChat() {
       console.error('Ticket validation failed:', err);
       setError('Failed to validate ticket');
     }
+  };
+
+  const handleLogout = () => {
+    setIsVerified(false);
+    setTicketCode('');
+    // Clear localStorage
+    localStorage.removeItem('ticketVerification');
+    localStorage.removeItem('ticketCode');
+    setTicketHeader(''); // Clear the API header
   };
 
   return (
@@ -93,7 +122,11 @@ export default function ClientChat() {
       ) : (
         // Chat Interface - Full Width on Desktop
         <div className="h-screen flex flex-col">
-          <ChatInterface ticketCode={ticketCode} isDark={isDark} />
+          <ChatInterface 
+            ticketCode={ticketCode} 
+            isDark={isDark} 
+            onLogout={handleLogout}
+          />
         </div>
       )}
     </div>
