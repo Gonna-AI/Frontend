@@ -1,8 +1,60 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Mail, Phone, MapPin } from 'lucide-react';
 
 const Contact = () => {
+  const [formData, setFormData] = useState({
+    fullName: '',
+    companyName: '',
+    email: '',
+    phone: '',
+    interest: '',
+    employeeCount: '',
+    message: ''
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    
+    try {
+      const response = await fetch('/api/contact/submit', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (!response.ok) throw new Error('Submission failed');
+      
+      setSubmitStatus('success');
+      setFormData({
+        fullName: '',
+        companyName: '',
+        email: '',
+        phone: '',
+        interest: '',
+        employeeCount: '',
+        message: ''
+      });
+    } catch (error) {
+      setSubmitStatus('error');
+    } finally {
+      setIsSubmitting(false);
+      setTimeout(() => setSubmitStatus('idle'), 5000);
+    }
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    setFormData(prev => ({
+      ...prev,
+      [e.target.name]: e.target.value
+    }));
+  };
+
   return (
     <div className="min-h-screen bg-black text-white/90 py-16 px-4 relative overflow-hidden">
       {/* Glassy Background Elements */}
@@ -107,6 +159,7 @@ const Contact = () => {
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5, delay: 0.4 }}
             className="md:col-span-2 space-y-6 backdrop-blur-xl bg-black/40 md:bg-white/5 p-6 md:p-8 rounded-2xl border border-red-500/20"
+            onSubmit={handleSubmit}
           >
             <div className="grid md:grid-cols-2 gap-6">
               <div>
@@ -114,6 +167,9 @@ const Contact = () => {
                   Full Name <span className="text-red-500">*</span>
                 </label>
                 <input
+                  name="fullName"
+                  value={formData.fullName}
+                  onChange={handleChange}
                   type="text"
                   placeholder="Your name"
                   className="w-full px-4 py-2 bg-black/40 md:bg-transparent backdrop-blur-sm border border-red-500/20 rounded-lg focus:outline-none focus:border-red-500 transition-colors text-white placeholder:text-white/30"
@@ -126,6 +182,9 @@ const Contact = () => {
                   Company Name <span className="text-red-500">*</span>
                 </label>
                 <input
+                  name="companyName"
+                  value={formData.companyName}
+                  onChange={handleChange}
                   type="text"
                   placeholder="Your organization"
                   className="w-full px-4 py-2 bg-black/40 md:bg-transparent backdrop-blur-sm border border-red-500/20 rounded-lg focus:outline-none focus:border-red-500 transition-colors text-white placeholder:text-white/30"
@@ -138,6 +197,9 @@ const Contact = () => {
                   Business Email <span className="text-red-500">*</span>
                 </label>
                 <input
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
                   type="email"
                   placeholder="you@company.com"
                   className="w-full px-4 py-2 bg-black/40 md:bg-transparent backdrop-blur-sm border border-red-500/20 rounded-lg focus:outline-none focus:border-red-500 transition-colors text-white placeholder:text-white/30"
@@ -150,6 +212,9 @@ const Contact = () => {
                   Phone Number <span className="text-red-500">*</span>
                 </label>
                 <input
+                  name="phone"
+                  value={formData.phone}
+                  onChange={handleChange}
                   type="tel"
                   placeholder="Your contact number"
                   className="w-full px-4 py-2 bg-black/40 md:bg-transparent backdrop-blur-sm border border-red-500/20 rounded-lg focus:outline-none focus:border-red-500 transition-colors text-white placeholder:text-white/30"
@@ -162,6 +227,9 @@ const Contact = () => {
                   Interest <span className="text-red-500">*</span>
                 </label>
                 <select
+                  name="interest"
+                  value={formData.interest}
+                  onChange={handleChange}
                   className="w-full px-4 py-2 bg-black/40 md:bg-transparent backdrop-blur-sm border border-red-500/20 rounded-lg focus:outline-none focus:border-red-500 transition-colors text-white"
                   required
                 >
@@ -178,6 +246,9 @@ const Contact = () => {
                   Number of Employees <span className="text-red-500">*</span>
                 </label>
                 <select
+                  name="employeeCount"
+                  value={formData.employeeCount}
+                  onChange={handleChange}
                   className="w-full px-4 py-2 bg-black/40 md:bg-transparent backdrop-blur-sm border border-red-500/20 rounded-lg focus:outline-none focus:border-red-500 transition-colors text-white"
                   required
                 >
@@ -195,6 +266,9 @@ const Contact = () => {
                 Message <span className="text-red-500">*</span>
               </label>
               <textarea
+                name="message"
+                value={formData.message}
+                onChange={handleChange}
                 rows={4}
                 placeholder="Tell us about your needs and requirements..."
                 className="w-full px-4 py-2 bg-black/40 md:bg-transparent backdrop-blur-sm border border-red-500/20 rounded-lg focus:outline-none focus:border-red-500 transition-colors text-white placeholder:text-white/30"
@@ -202,13 +276,25 @@ const Contact = () => {
               ></textarea>
             </div>
 
+            {submitStatus === 'success' && (
+              <div className="text-green-500 mt-4">
+                Thank you for your message. We'll be in touch soon!
+              </div>
+            )}
+            {submitStatus === 'error' && (
+              <div className="text-red-500 mt-4">
+                Something went wrong. Please try again later.
+              </div>
+            )}
+
             <motion.button
+              disabled={isSubmitting}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               type="submit"
               className="w-full bg-gradient-to-r from-red-500 to-red-600 text-white py-3 px-4 rounded-lg hover:from-red-600 hover:to-red-700 transition-all duration-300 backdrop-blur-sm"
             >
-              Request Information
+              {isSubmitting ? 'Sending...' : 'Request Information'}
             </motion.button>
           </motion.form>
         </div>
