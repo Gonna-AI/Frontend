@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Mail, Phone, MapPin } from 'lucide-react';
+import api from '../config/api';
 
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -20,15 +21,9 @@ const Contact = () => {
     setIsSubmitting(true);
     
     try {
-      const response = await fetch('/api/contact/submit', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
+      const response = await api.post('/api/contact/submit', formData);
 
-      if (!response.ok) throw new Error('Submission failed');
+      if (response.status !== 200) throw new Error('Submission failed');
       
       setSubmitStatus('success');
       setFormData({
@@ -41,6 +36,7 @@ const Contact = () => {
         message: ''
       });
     } catch (error) {
+      console.error("Submission error:", error);
       setSubmitStatus('error');
     } finally {
       setIsSubmitting(false);
