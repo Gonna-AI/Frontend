@@ -17,6 +17,7 @@ import SmartContracts from './pages/SmartContracts';
 import Documents from './pages/Documents';
 import Contact from './pages/Contact';
 import InvitePage from './pages/InvitePage';
+import { PrivateRoute } from './components/Auth/PrivateRoute';
 // Create a client
 const queryClient = new QueryClient();
 
@@ -147,9 +148,9 @@ function App() {
 
           {/* Protected Routes */}
           <Route path="/dashboard" element={
-            <ProtectedRoute>
+            <PrivateRoute>
               <Dashboard />
-            </ProtectedRoute>
+            </PrivateRoute>
           } />
           {/* Chat route - accessible without auth */}
           <Route path="/chat" element={<ClientChat />} />

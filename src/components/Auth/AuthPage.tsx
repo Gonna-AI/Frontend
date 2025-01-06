@@ -25,8 +25,9 @@ function AuthForm({ className, onGuestLogin, onSuccess, ...props }: AuthFormProp
     setError('');
 
     try {
+      let response;
       if (isLogin) {
-        await auth.login({
+        response = await auth.login({
           email: formData.email,
           password: formData.password
         });
@@ -35,12 +36,17 @@ function AuthForm({ className, onGuestLogin, onSuccess, ...props }: AuthFormProp
           setError('Passwords do not match');
           return;
         }
-        await auth.signup({
+        response = await auth.signup({
           email: formData.email,
           password: formData.password,
           name: formData.name
         });
       }
+      
+      // Store auth state
+      localStorage.setItem('isAuthenticated', 'true');
+      localStorage.setItem('user', JSON.stringify(response.data));
+      
       onSuccess?.();
     } catch (error: any) {
       setError(error.response?.data?.error || 'An error occurred');

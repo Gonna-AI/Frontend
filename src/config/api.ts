@@ -11,6 +11,18 @@ const api = axios.create({
   withCredentials: true, // Important for cookies/sessions
 });
 
+// Add an interceptor to handle 401 responses
+api.interceptors.response.use(
+    (response) => response,
+    (error) => {
+        if (error.response?.status === 401) {
+            // Redirect to login page if unauthorized
+            window.location.href = '/invite';
+        }
+        return Promise.reject(error);
+    }
+);
+
 // Notification API endpoints
 export const notificationsApi = {
   getAll: () => api.get('/api/notifications'),
