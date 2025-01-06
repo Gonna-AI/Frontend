@@ -180,13 +180,7 @@ function AuthForm({ className, onGuestLogin, onSuccess, ...props }: AuthFormProp
                       </svg>
                       Login with Google
                     </button>
-                    <button
-                      type="button"
-                      onClick={onGuestLogin}
-                      className="w-full py-2 px-4 bg-emerald-600/20 text-emerald-400 border border-emerald-500/30 rounded-lg hover:bg-emerald-600/30 transition-colors flex items-center justify-center gap-2"
-                    >
-                      Try as Guest
-                    </button>
+
                   </div>
 
                   <div className="relative text-center text-sm">
