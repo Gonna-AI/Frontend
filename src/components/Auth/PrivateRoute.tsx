@@ -15,6 +15,7 @@ export const PrivateRoute = ({ children }: PrivateRouteProps) => {
                 await api.get('/api/auth/check-session');
                 setIsAuthenticated(true);
             } catch (error) {
+                console.error('Authentication check failed:', error);
                 setIsAuthenticated(false);
             }
         };
