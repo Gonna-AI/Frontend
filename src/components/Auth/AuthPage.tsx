@@ -247,11 +247,18 @@ export default function AuthPage({ setIsSignedIn }: AuthPageProps) {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Check if user has a valid invite code
-    const inviteCode = sessionStorage.getItem('inviteCode');
-    if (!inviteCode) {
-      navigate('/invite');
-    }
+    const checkAuth = async () => {
+      try {
+        const response = await auth.checkAuth();
+        if (response.isAuthenticated) {
+          navigate('/dashboard');
+        }
+      } catch (error) {
+        console.error('Error checking authentication:', error);
+      }
+    };
+
+    checkAuth();
   }, [navigate]);
 
   const handleGuestLogin = () => {
