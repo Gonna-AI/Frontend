@@ -36,12 +36,12 @@ export const auth = {
   },
 
   async checkAuth() {
-    try {
+    //try {
       const response = await axios.get(`${API_URL}/auth/user`, config);
       return response.data;
-    } catch (error) {
-      return { isAuthenticated: false };
-    }
+    //} catch (error) {
+    //  return { isAuthenticated: false };
+    //}
   },
 
   async googleLogin() {
