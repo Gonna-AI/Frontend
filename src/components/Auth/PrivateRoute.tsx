@@ -1,6 +1,6 @@
 import { Navigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import api from '../config/api';
+import api from '../../config/api';
 
 interface PrivateRouteProps {
     children: React.ReactNode;
