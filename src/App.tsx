@@ -149,7 +149,9 @@ function App() {
           {/* Protected Routes */}
           <Route path="/dashboard" element={
             <PrivateRoute>
-              <Dashboard />
+              <AuthenticatedLayout>
+                <Dashboard />
+              </AuthenticatedLayout>
             </PrivateRoute>
           } />
           {/* Chat route - accessible without auth */}
