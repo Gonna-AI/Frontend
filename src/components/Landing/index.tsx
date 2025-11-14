@@ -1,4 +1,3 @@
-import React from 'react';
 import { useTheme } from '../../hooks/useTheme';
 import { useMouseGradient } from '../../hooks/useMouseGradient';
 import Hero from './Hero';
@@ -7,11 +6,7 @@ import Metrics from './Metrics';
 import Conversation from './Conversation';
 import ThreeBackground from './ThreeBackground';
 
-interface LandingProps {
-  onGetStarted: () => void;
-}
-
-export default function Landing({ onGetStarted }: LandingProps) {
+export default function Landing() {
   const { isDark } = useTheme();
   const { gradientStyle } = useMouseGradient();
 
@@ -23,7 +18,7 @@ export default function Landing({ onGetStarted }: LandingProps) {
         style={gradientStyle} 
       />
       <div className="relative z-10">
-        <Hero onGetStarted={onGetStarted} />
+        <Hero />
         <Features />
         <Metrics />
         <Conversation />
