@@ -100,42 +100,59 @@ const Contact = () => {
         <div className="max-w-5xl mx-auto pt-16">
           
           {/* Header */}
-          <div className="text-center mb-12">
-            <div className="bg-gradient-to-r from-red-400 via-red-500 to-red-600 text-transparent bg-clip-text">
-              <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-4">Contact Us</h1>
+          <div className="text-center mb-16">
+            <div className="inline-block mb-4">
+              <span className="px-4 py-2 rounded-full bg-red-500/10 border border-red-500/20 text-red-400 text-sm font-medium">
+                Contact Us
+              </span>
             </div>
-            <p className="text-lg md:text-xl text-white/70 leading-relaxed max-w-3xl mx-auto">
-              Get in touch with our team for enterprise solutions and support.
+            <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-6">
+              <span className="bg-gradient-to-r from-white via-white/95 to-white/90 text-transparent bg-clip-text">
+                Let's Talk About
+              </span>
+              <br />
+              <span className="bg-gradient-to-r from-red-400 via-rose-400 to-red-600 text-transparent bg-clip-text">
+                Your Business
+              </span>
+            </h1>
+            <p className="text-lg md:text-xl text-white/60 leading-relaxed max-w-3xl mx-auto">
+              Get in touch with our team for enterprise solutions and support
             </p>
           </div>
 
           {/* Contact Info Cards */}
-          <div className="grid md:grid-cols-3 gap-6 mb-12">
-            <div className="rounded-2xl border border-red-500/20 bg-white/5 p-6 backdrop-blur-sm text-center">
-              <Mail className="w-8 h-8 text-red-400 mx-auto mb-3" />
-              <h3 className="font-semibold mb-2 text-white">Email</h3>
-              <a href="mailto:contact@clerktree.com" className="text-white/70 hover:text-red-400 transition-colors text-sm">
+          <div className="grid md:grid-cols-3 gap-6 mb-16">
+            <div className="group rounded-2xl border border-white/10 bg-gradient-to-br from-white/[0.02] via-white/[0.01] to-transparent backdrop-blur-sm p-6 hover:border-red-500/30 transition-all duration-300 text-center">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-red-500/10 to-rose-500/10 border border-red-500/20 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
+                <Mail className="w-6 h-6 text-red-400" />
+              </div>
+              <h3 className="font-semibold mb-2 text-white/90">Email</h3>
+              <a href="mailto:contact@clerktree.com" className="text-white/60 hover:text-red-400 transition-colors text-sm">
                 contact@clerktree.com
               </a>
             </div>
-            <div className="rounded-2xl border border-red-500/20 bg-white/5 p-6 backdrop-blur-sm text-center">
-              <Phone className="w-8 h-8 text-red-400 mx-auto mb-3" />
-              <h3 className="font-semibold mb-2 text-white">Phone</h3>
-              <a href="tel:+919650848339" className="text-white/70 hover:text-red-400 transition-colors text-sm block">
+            <div className="group rounded-2xl border border-white/10 bg-gradient-to-br from-white/[0.02] via-white/[0.01] to-transparent backdrop-blur-sm p-6 hover:border-red-500/30 transition-all duration-300 text-center">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-red-500/10 to-rose-500/10 border border-red-500/20 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
+                <Phone className="w-6 h-6 text-red-400" />
+              </div>
+              <h3 className="font-semibold mb-2 text-white/90">Phone</h3>
+              <a href="tel:+919650848339" className="text-white/60 hover:text-red-400 transition-colors text-sm block">
                 +91 (965) 084-8339<br />+49 160 96893540
               </a>
             </div>
-            <div className="rounded-2xl border border-red-500/20 bg-white/5 p-6 backdrop-blur-sm text-center">
-              <MapPin className="w-8 h-8 text-red-400 mx-auto mb-3" />
-              <h3 className="font-semibold mb-2 text-white">Location</h3>
-              <p className="text-white/70 text-sm">
+            <div className="group rounded-2xl border border-white/10 bg-gradient-to-br from-white/[0.02] via-white/[0.01] to-transparent backdrop-blur-sm p-6 hover:border-red-500/30 transition-all duration-300 text-center">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-red-500/10 to-rose-500/10 border border-red-500/20 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
+                <MapPin className="w-6 h-6 text-red-400" />
+              </div>
+              <h3 className="font-semibold mb-2 text-white/90">Location</h3>
+              <p className="text-white/60 text-sm">
                 Mallersdorfer Str. 10<br />94315 Straubing, Germany
               </p>
             </div>
           </div>
 
           {/* Contact Form */}
-          <div className="rounded-2xl border border-red-500/20 bg-white/5 p-8 backdrop-blur-sm">
+          <div className="rounded-2xl border border-red-500/20 bg-gradient-to-br from-white/[0.02] via-white/[0.01] to-transparent backdrop-blur-sm p-8 md:p-12">
             <h2 className="text-2xl md:text-3xl font-bold mb-2 bg-gradient-to-r from-red-400 to-red-600 text-transparent bg-clip-text">
               Send us a Message
             </h2>

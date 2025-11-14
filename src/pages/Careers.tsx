@@ -103,37 +103,48 @@ export default function Careers() {
         <div className="max-w-5xl mx-auto pt-16">
 
           {/* Header */}
-          <div className="text-center mb-12">
-            <div className="bg-gradient-to-r from-emerald-400 via-emerald-500 to-emerald-600 text-transparent bg-clip-text">
-              <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-4">Careers</h1>
+          <div className="text-center mb-16">
+            <div className="inline-block mb-4">
+              <span className="px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm font-medium">
+                Careers
+              </span>
             </div>
-            <p className="text-lg md:text-xl text-white/70 leading-relaxed max-w-3xl mx-auto">
-              Join us!
+            <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-6">
+              <span className="bg-gradient-to-r from-white via-white/95 to-white/90 text-transparent bg-clip-text">
+                Join the
+              </span>
+              <br />
+              <span className="bg-gradient-to-r from-emerald-400 via-teal-400 to-emerald-600 text-transparent bg-clip-text">
+                ClerkTree Team
+              </span>
+            </h1>
+            <p className="text-lg md:text-xl text-white/60 leading-relaxed max-w-3xl mx-auto">
+              Help us revolutionize operations with AI-powered automation
             </p>
           </div>
 
           {/* LinkedIn Link */}
-          <div className="mb-8 text-center">
+          <div className="mb-12 text-center">
             <a
               href="https://www.linkedin.com/company/clerktree/jobs"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-8 py-4 rounded-xl bg-gradient-to-r from-emerald-500/20 to-emerald-600/20 border border-emerald-500/30 text-emerald-400 hover:from-emerald-500/30 hover:to-emerald-600/30 hover:text-emerald-300 transition-all duration-200 font-medium text-lg"
+              className="inline-flex items-center gap-3 px-8 py-4 rounded-xl bg-gradient-to-br from-emerald-500/10 to-teal-500/10 border border-emerald-500/20 backdrop-blur-sm text-emerald-400 hover:from-emerald-500/20 hover:to-teal-500/20 hover:border-emerald-500/40 hover:text-emerald-300 transition-all duration-300 font-medium text-lg group"
             >
               <span>Check for new jobs on LinkedIn</span>
-              <ExternalLink className="w-5 h-5" />
+              <ExternalLink className="w-5 h-5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
             </a>
           </div>
 
           {/* OR Divider */}
-          <div className="flex items-center justify-center gap-4 mb-8">
-            <div className="h-px bg-white/10 flex-1 max-w-xs"></div>
-            <span className="text-white/40 text-lg font-medium">OR</span>
-            <div className="h-px bg-white/10 flex-1 max-w-xs"></div>
+          <div className="flex items-center justify-center gap-6 mb-12">
+            <div className="h-px bg-gradient-to-r from-transparent via-white/20 to-transparent flex-1 max-w-xs"></div>
+            <span className="text-white/40 text-base font-medium tracking-wider">OR</span>
+            <div className="h-px bg-gradient-to-r from-transparent via-white/20 to-transparent flex-1 max-w-xs"></div>
           </div>
 
           {/* CV Submission Form */}
-          <div className="rounded-2xl border border-emerald-500/20 bg-white/5 p-8 backdrop-blur-sm">
+          <div className="rounded-2xl border border-emerald-500/20 bg-gradient-to-br from-white/[0.02] via-white/[0.01] to-transparent backdrop-blur-sm p-8 md:p-12">
             <h2 className="text-2xl md:text-3xl font-bold mb-2 bg-gradient-to-r from-emerald-400 to-emerald-600 text-transparent bg-clip-text">
               Submit Your Résumé
             </h2>
