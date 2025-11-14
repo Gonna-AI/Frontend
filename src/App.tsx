@@ -18,6 +18,7 @@ import Documents from './pages/Documents';
 import Contact from './pages/Contact';
 import InvitePage from './pages/InvitePage';
 import { PrivateRoute } from './components/Auth/PrivateRoute';
+import LoadingScreen from './components/LoadingScreen';
 // Create a client
 const queryClient = new QueryClient();
 
@@ -71,7 +72,7 @@ function App() {
   };
 
   if (isLoading) {
-    return <div>Loading...</div>; // Add a proper loading component
+    return <LoadingScreen />;
   }
 
   // Protected Route wrapper
