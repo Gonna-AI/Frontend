@@ -13,6 +13,7 @@ import ClientChat from './components/ClientChat';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import PrivacyPolicy from './components/Legal/PrivacyPolicy';
 import TermsOfService from './components/Legal/TermsOfService';
+import Security from './components/Legal/Security';
 import SmartContracts from './pages/SmartContracts';
 import Documents from './pages/Documents';
 import Contact from './pages/Contact';
@@ -187,7 +188,8 @@ function App() {
           } />
           
           <Route path="/terms-of-service" element={<TermsOfService />} />
-          <Route path="privacy-policy" element={<PrivacyPolicy/>} />
+          <Route path="/privacy-policy" element={<PrivacyPolicy/>} />
+          <Route path="/security" element={<Security />} />
           {/* Catch all route */}
           <Route path="*" element={<Navigate to="/" />} />
 

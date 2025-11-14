@@ -5,6 +5,7 @@ import Features from './Features';
 import Metrics from './Metrics';
 import Conversation from './Conversation';
 import FAQSection from './FAQSection';
+import Footer from './Footer';
 import ThreeBackground from './ThreeBackground';
 
 export default function Landing() {
@@ -24,6 +25,7 @@ export default function Landing() {
         <Metrics />
         <Conversation />
         <FAQSection />
+        <Footer />
       </div>
     </div>
   );
