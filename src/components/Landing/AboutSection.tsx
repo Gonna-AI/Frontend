@@ -7,9 +7,9 @@ export default function AboutSection() {
   const industries = [
     { icon: Shield, name: 'Insurance', color: 'from-blue-400 to-cyan-500' },
     { icon: Building2, name: 'BFSI', color: 'from-emerald-400 to-teal-500' },
-    { icon: Users, name: 'BPO', color: 'from-purple-400 to-pink-500' },
-    { icon: TrendingUp, name: 'Operations', color: 'from-orange-400 to-red-500' },
-    { icon: FileText, name: 'Document Processing', color: 'from-violet-400 to-purple-500' },
+    { icon: Users, name: 'BPO & Contact Centers', color: 'from-purple-400 to-pink-500' },
+    { icon: TrendingUp, name: 'Healthcare', color: 'from-orange-400 to-red-500' },
+    { icon: FileText, name: 'Logistics & Supply Chain', color: 'from-violet-400 to-purple-500' },
   ];
 
   return (
@@ -126,9 +126,6 @@ export default function AboutSection() {
         <div className="mb-20">
           <div className="text-center mb-12">
             <h3 className="text-3xl md:text-4xl font-bold mb-4 text-white/90">Industries We Serve</h3>
-            <p className="text-lg text-white/60 max-w-3xl mx-auto">
-              Trusted by leading organizations across multiple sectors to transform their operations
-            </p>
           </div>
           <div className="flex flex-wrap justify-center gap-4 max-w-4xl mx-auto">
             {industries.map((industry, index) => {

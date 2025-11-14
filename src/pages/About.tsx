@@ -150,9 +150,6 @@ export default function About() {
           <div className="mb-20">
             <div className="text-center mb-12">
               <h2 className="text-3xl md:text-4xl font-bold mb-4 text-white/90">Industries We Serve</h2>
-              <p className="text-lg text-white/60 max-w-3xl mx-auto">
-                Trusted by leading organizations across multiple sectors to transform their operations
-              </p>
             </div>
             <div className="flex flex-wrap justify-center gap-4 max-w-4xl mx-auto">
               {industries.map((industry, index) => {
