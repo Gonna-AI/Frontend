@@ -1,6 +1,7 @@
 import { Navigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import api from '../../config/api';
+import LoadingScreen from '../LoadingScreen';
 
 interface PrivateRouteProps {
     children: React.ReactNode;
@@ -24,7 +25,7 @@ export const PrivateRoute = ({ children }: PrivateRouteProps) => {
     }, []);
 
     if (isAuthenticated === null) {
-        return <div>Loading...</div>; // Or your loading component
+        return <LoadingScreen />;
     }
 
     return isAuthenticated ? <>{children}</> : <Navigate to="/invite" />;
