@@ -1,4 +1,3 @@
-import React from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { LifeBuoy, FileCode2, Phone } from 'lucide-react';
@@ -25,22 +24,8 @@ const Logo = () => (
   </svg>
 );
 
-interface HeroProps {
-  onGetStarted: () => void;
-}
-
-const Hero = ({ onGetStarted }: HeroProps) => {
+const Hero = () => {
   const navigate = useNavigate();
-
-  const scrollToWaitlist = () => {
-    const waitlistSection = document.getElementById('waitlist-section');
-    if (waitlistSection) {
-      waitlistSection.scrollIntoView({ 
-        behavior: 'smooth',
-        block: 'start'
-      });
-    }
-  };
 
   return (
     <div className="bg-[rgb(10,10,10)] min-h-screen relative overflow-hidden">
@@ -128,7 +113,7 @@ const Hero = ({ onGetStarted }: HeroProps) => {
             {/* Logo container with adjusted spacing for larger logo */}
             <div className="flex items-center gap-4">
               <div className="flex items-center justify-center">
-                <Logo className="w-20 h-20 md:w-24 md:h-24" />
+                <Logo />
               </div>
               
               {/* Logo text gradient */}
@@ -173,13 +158,38 @@ const Hero = ({ onGetStarted }: HeroProps) => {
             transition={{ duration: 0.8, delay: 0.6 }}
             className="flex flex-col sm:flex-row items-center justify-center gap-4"
           >
-
+            <button 
+              onClick={() => navigate('/contact')}
+              className={cn(
+                "relative group",
+                "px-8 py-4 rounded-[20px]",
+                "text-base font-semibold tracking-wide",
+                "transition-all duration-300",
+                "bg-gradient-to-r from-emerald-500/20 via-blue-500/20 to-purple-600/20",
+                "backdrop-blur-sm",
+                "border-2 border-emerald-500/30",
+                "hover:bg-gradient-to-r hover:from-emerald-500/30 hover:via-blue-500/30 hover:to-purple-600/30",
+                "hover:border-emerald-500/50",
+                "text-white"
+              )}
+            >
+              <span className="relative z-10">Book Demo</span>
+            </button>
 
             <button 
-              onClick={() => navigate('/invite')}
-              className="bg-purple-500/20 text-white border border-purple-500/30 hover:bg-purple-500/30 transition-colors duration-200 rounded-[20px] px-8 py-3 text-sm font-medium tracking-wide"
+              onClick={() => navigate('/solutions')}
+              className={cn(
+                "relative group",
+                "px-8 py-4 rounded-[20px]",
+                "text-base font-semibold tracking-wide",
+                "transition-all duration-300",
+                "bg-white/10 backdrop-blur-sm",
+                "border-2 border-white/20",
+                "hover:bg-white/20 hover:border-white/30",
+                "text-white"
+              )}
             >
-              Get Started
+              <span className="relative z-10">See Solutions</span>
             </button>
           </motion.div>
         </div>
