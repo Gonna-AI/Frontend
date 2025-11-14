@@ -161,15 +161,15 @@ const Hero = () => {
             <button 
               onClick={() => navigate('/contact')}
               className={cn(
-                "relative group",
+                "relative group overflow-hidden",
                 "px-8 py-4 rounded-[20px]",
                 "text-base font-semibold tracking-wide",
                 "transition-all duration-300",
-                "bg-gradient-to-r from-emerald-500/20 via-blue-500/20 to-purple-600/20",
+                "bg-gradient-to-r from-purple-500/20 via-pink-500/20 to-purple-600/20",
                 "backdrop-blur-sm",
-                "border-2 border-emerald-500/30",
-                "hover:bg-gradient-to-r hover:from-emerald-500/30 hover:via-blue-500/30 hover:to-purple-600/30",
-                "hover:border-emerald-500/50",
+                "border-2 border-purple-500/30",
+                "hover:bg-gradient-to-r hover:from-purple-500/30 hover:via-pink-500/30 hover:to-purple-600/30",
+                "hover:border-purple-500/50",
                 "text-white"
               )}
             >
