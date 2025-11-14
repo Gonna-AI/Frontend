@@ -1,6 +1,5 @@
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { LifeBuoy, FileCode2, Phone } from 'lucide-react';
 import { cn } from '../../utils/cn';
 
 const Logo = () => (
@@ -28,81 +27,9 @@ const Hero = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="bg-[rgb(10,10,10)] min-h-screen relative overflow-hidden">
-      {/* Top Right Quick Links */}
-      <div className="absolute top-4 right-4 z-50 flex gap-2">
-        <button 
-          onClick={() => navigate('/contact')}
-          className={cn(
-            "relative group",
-            "md:px-8 md:py-3 p-3 rounded-[20px]",
-            "text-sm font-medium tracking-wide",
-            "transition-all duration-200",
-            "bg-gradient-to-r from-red-500/20 via-red-500/30 to-red-400/20",
-            "hover:from-red-500/30 hover:via-red-500/40 hover:to-red-400/30",
-            "border border-red-500/30",
-            "text-red-300",
-            "overflow-hidden",
-            "flex items-center gap-2"
-          )}
-        >
-          <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-red-500/20 to-red-400/20 blur-xl group-hover:opacity-75 transition-opacity opacity-0" />
-          <Phone className="w-5 h-5 md:w-6 md-6" />
-          <span className="relative z-10 hidden md:inline">Contact Us</span>
-        </button>
-
-        <button 
-          onClick={() => navigate('/about')}
-          className={cn(
-            "relative group",
-            "md:px-8 md:py-3 p-3 rounded-[20px]",
-            "text-sm font-medium tracking-wide",
-            "transition-all duration-200",
-            "bg-gradient-to-r from-blue-500/20 via-blue-500/30 to-blue-400/20",
-            "hover:from-blue-500/30 hover:via-blue-500/40 hover:to-blue-400/30",
-            "border border-blue-500/30",
-            "text-blue-300",
-            "overflow-hidden",
-            "flex items-center gap-2"
-          )}
-        >
-          <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-blue-500/20 to-blue-400/20 blur-xl group-hover:opacity-75 transition-opacity opacity-0" />
-          <FileCode2 className="w-5 h-5 md:w-6 md-6" />
-          <span className="relative z-10 hidden md:inline">About</span>
-        </button>
-
-        <button 
-          onClick={() => navigate('/careers')}
-          className={cn(
-            "relative group",
-            "md:px-8 md:py-3 p-3 rounded-[20px]",
-            "text-sm font-medium tracking-wide",
-            "transition-all duration-200",
-            "bg-gradient-to-r from-emerald-500/20 via-emerald-500/30 to-emerald-400/20",
-            "hover:from-emerald-500/30 hover:via-emerald-500/40 hover:to-emerald-400/30",
-            "border border-emerald-500/30",
-            "text-emerald-300",
-            "overflow-hidden",
-            "flex items-center gap-2"
-          )}
-        >
-          <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-emerald-500/20 to-emerald-400/20 blur-xl group-hover:opacity-75 transition-opacity opacity-0" />
-          <LifeBuoy className="w-5 h-5 md:w-6 md-6" />
-          <span className="relative z-10 hidden md:inline">Careers</span>
-        </button>
-      </div>
-
+    <div className="min-h-screen relative overflow-hidden">
       {/* Main Content */}
       <div className="flex items-center justify-center min-h-screen">
-        {/* Gradient Spotlight */}
-        <div 
-          className="absolute top-0 right-0 -translate-y-1/4 translate-x-1/4 w-[800px] h-[800px] opacity-[0.25] rounded-full"
-          style={{
-            background: 'radial-gradient(circle, rgba(147,51,234,0.8) 0%, rgba(147,51,234,0.3) 40%, transparent 100%)',
-            filter: 'blur(40px)',
-          }}
-        />
-
         <div className="max-w-7xl mx-auto text-center px-6 relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 20 }}

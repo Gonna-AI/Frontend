@@ -48,12 +48,7 @@ export default function Footer() {
   };
 
   return (
-    <footer className="w-full bg-neutral-950 border-t border-neutral-800 relative overflow-hidden">
-      {/* Background Effects */}
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute bottom-0 left-0 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 right-0 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl" />
-      </div>
+    <footer className="w-full border-t border-neutral-800/50 relative overflow-hidden">
 
       <div className="relative z-10 max-w-7xl mx-auto px-6 py-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
