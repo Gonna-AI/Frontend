@@ -110,11 +110,7 @@ export default function HorizontalScroll() {
   };
 
   return (
-    <div className="min-h-screen bg-[rgb(10,10,10)] py-20 relative overflow-hidden">
-      {/* Ambient Gradients */}
-      <div className="absolute left-1/4 top-1/2 -translate-y-1/2 w-[1200px] h-[600px] bg-purple-900/20 rounded-full blur-3xl" />
-      <div className="absolute right-1/4 top-1/2 -translate-y-1/2 w-[900px] h-[500px] bg-purple-800/15 rounded-full blur-3xl" />
-      <div className="absolute left-1/3 top-1/2 -translate-y-1/2 w-[700px] h-[400px] bg-indigo-900/10 rounded-full blur-3xl" />
+    <div className="min-h-screen py-20 relative overflow-hidden">
 
       <style jsx global>{`
         @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap');

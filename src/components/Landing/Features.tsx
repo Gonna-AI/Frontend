@@ -239,7 +239,7 @@ export default function Features() {
   ]
 
   return (
-    <section className="py-24 bg-[rgb(10,10,10)]">
+    <section className="py-24 relative">
       {/* Curved decoration lines */}
       <div className="absolute inset-0 overflow-hidden">
         <svg className="w-full h-full opacity-20" viewBox="0 0 1000 1000" preserveAspectRatio="none">

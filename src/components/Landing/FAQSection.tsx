@@ -22,7 +22,7 @@ export default function FAQSection() {
   ];
 
   return (
-    <div className="w-full rounded-md bg-neutral-950 relative py-24 px-6 antialiased">
+    <div className="w-full rounded-md relative py-24 px-6 antialiased">
       <div className="max-w-6xl mx-auto relative z-10">
         
         {/* Header */}
