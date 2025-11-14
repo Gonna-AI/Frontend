@@ -20,6 +20,7 @@ import InvitePage from './pages/InvitePage';
 import About from './pages/About';
 import Careers from './pages/Careers';
 import Solutions from './pages/Solutions';
+import FAQ from './pages/FAQ';
 import { PrivateRoute } from './components/Auth/PrivateRoute';
 import LoadingScreen from './components/LoadingScreen';
 // Create a client
@@ -168,6 +169,7 @@ function App() {
           <Route path="/about" element={<About />} />
           <Route path="/careers" element={<Careers />} />
           <Route path="/solutions" element={<Solutions />} />
+          <Route path="/faq" element={<FAQ />} />
           <Route path="/profile" element={
             <ProtectedRoute>
               <Profile />
