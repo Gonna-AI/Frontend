@@ -1,7 +1,6 @@
-import React, { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { cn } from "../../utils/cn";
-import WaitlistForm from "./WaitlistForm";
 
 // Optimized BackgroundBeams with reduced paths for mobile
 const BackgroundBeams = ({ className }: { className?: string }) => {
@@ -111,7 +110,7 @@ const WaitlistWithBeams = () => {
   return (
     <div id="waitlist-section" className="h-[40rem] w-full rounded-md bg-neutral-950 relative flex flex-col items-center justify-center antialiased">
       <div className="max-w-2xl mx-auto p-4 relative z-10 flex flex-col items-center">
-        <h1 className="text-4xl md:text-7xl font-bold text-center bg-clip-text text-transparent bg-gradient-to-b from-neutral-50 to-neutral-400 bg-opacity-50">
+        <h1 className="text-4xl md:text-7xl font-bold text-center bg-clip-text text-transparent bg-gradient-to-b from-neutral-50 to-neutral-400 bg-opacity-50 pb-2">
           Smart Calls, Smarter Agents.
         </h1>
       </div>
