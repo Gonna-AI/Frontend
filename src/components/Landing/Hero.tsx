@@ -44,7 +44,7 @@ const Hero = ({ onGetStarted }: HeroProps) => {
 
   return (
     <div className="bg-[rgb(10,10,10)] min-h-screen relative overflow-hidden">
-      {/* Support Ticket and Smart Contracts Buttons - Top Right */}
+      {/* Top Right Quick Links */}
       <div className="absolute top-4 right-4 z-50 flex gap-2">
         <button 
           onClick={() => navigate('/contact')}
@@ -67,7 +67,7 @@ const Hero = ({ onGetStarted }: HeroProps) => {
         </button>
 
         <button 
-          onClick={() => navigate('/smart-contracts')}
+          onClick={() => navigate('/about')}
           className={cn(
             "relative group",
             "md:px-8 md:py-3 p-3 rounded-[20px]",
@@ -83,11 +83,11 @@ const Hero = ({ onGetStarted }: HeroProps) => {
         >
           <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-blue-500/20 to-blue-400/20 blur-xl group-hover:opacity-75 transition-opacity opacity-0" />
           <FileCode2 className="w-5 h-5 md:w-6 md-6" />
-          <span className="relative z-10 hidden md:inline">Smart Contracts</span>
+          <span className="relative z-10 hidden md:inline">About</span>
         </button>
 
         <button 
-          onClick={() => navigate('/chat')}
+          onClick={() => navigate('/careers')}
           className={cn(
             "relative group",
             "md:px-8 md:py-3 p-3 rounded-[20px]",
@@ -103,7 +103,7 @@ const Hero = ({ onGetStarted }: HeroProps) => {
         >
           <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-emerald-500/20 to-emerald-400/20 blur-xl group-hover:opacity-75 transition-opacity opacity-0" />
           <LifeBuoy className="w-5 h-5 md:w-6 md-6" />
-          <span className="relative z-10 hidden md:inline">Support Ticket</span>
+          <span className="relative z-10 hidden md:inline">Careers</span>
         </button>
       </div>
 
