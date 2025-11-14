@@ -17,6 +17,8 @@ import SmartContracts from './pages/SmartContracts';
 import Documents from './pages/Documents';
 import Contact from './pages/Contact';
 import InvitePage from './pages/InvitePage';
+import About from './pages/About';
+import Careers from './pages/Careers';
 import { PrivateRoute } from './components/Auth/PrivateRoute';
 import LoadingScreen from './components/LoadingScreen';
 // Create a client
@@ -162,6 +164,8 @@ function App() {
               <AISettings />
             </ProtectedRoute>
           } />
+          <Route path="/about" element={<About />} />
+          <Route path="/careers" element={<Careers />} />
           <Route path="/profile" element={
             <ProtectedRoute>
               <Profile />
