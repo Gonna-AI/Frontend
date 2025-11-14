@@ -2,8 +2,8 @@ import { useTheme } from '../../hooks/useTheme';
 import { useMouseGradient } from '../../hooks/useMouseGradient';
 import Hero from './Hero';
 import AboutSection from './AboutSection';
-import Features from './Features';
 import Metrics from './Metrics';
+import Features from './Features';
 import Conversation from './Conversation';
 import FAQSection from './FAQSection';
 import Footer from './Footer';
@@ -51,8 +51,8 @@ export default function Landing() {
       <div className="relative z-10">
         <Hero />
         <AboutSection />
-        <Features />
         <Metrics />
+        <Features />
         <Conversation />
         <FAQSection />
         <Footer />
