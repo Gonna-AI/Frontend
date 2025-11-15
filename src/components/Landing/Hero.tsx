@@ -89,6 +89,7 @@ const Hero = () => {
               onClick={() => navigate('/contact')}
               className={cn(
                 "relative group overflow-hidden",
+                "w-full sm:w-auto",
                 "px-8 py-4 rounded-[20px]",
                 "text-base font-semibold tracking-wide",
                 "transition-all duration-300",
@@ -107,6 +108,7 @@ const Hero = () => {
               onClick={() => navigate('/solutions')}
               className={cn(
                 "relative group",
+                "w-full sm:w-auto",
                 "px-8 py-4 rounded-[20px]",
                 "text-base font-semibold tracking-wide",
                 "transition-all duration-300",
