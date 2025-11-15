@@ -110,7 +110,7 @@ export default function HorizontalScroll() {
   };
 
   return (
-    <div className="min-h-screen py-20 relative overflow-hidden">
+    <div className="min-h-screen py-20 relative overflow-hidden bg-[rgb(10,10,10)]">
 
       <style jsx global>{`
         @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap');
