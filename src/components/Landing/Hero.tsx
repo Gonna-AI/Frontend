@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import { useState, useEffect, useRef } from 'react';
 import { cn } from '../../utils/cn';
 
 const Logo = () => (
@@ -18,17 +19,39 @@ const Logo = () => (
 
 const Hero = () => {
   const navigate = useNavigate();
+  const heroRef = useRef<HTMLDivElement>(null);
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (heroRef.current) {
+        const heroBottom = heroRef.current.offsetTop + heroRef.current.offsetHeight;
+        setIsScrolled(window.scrollY > heroBottom - window.innerHeight / 2);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    handleScroll(); // Check initial state
+
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   return (
-    <div className="min-h-screen relative overflow-hidden">
+    <>
+      <div ref={heroRef} className="min-h-screen relative bg-[rgb(10,10,10)]">
       {/* Main Content */}
       <div className="flex items-center justify-center min-h-screen">
         <div className="max-w-7xl mx-auto text-center px-6 relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
+            animate={{ 
+              opacity: isScrolled ? 0 : 1,
+              y: isScrolled ? -20 : 0,
+              scale: isScrolled ? 0.9 : 1,
+            }}
+            transition={{ duration: 0.5, ease: 'easeInOut' }}
             className="mb-8 flex items-center justify-center"
+            style={{ pointerEvents: isScrolled ? 'none' : 'auto' }}
           >
             {/* Logo container with adjusted spacing for larger logo */}
             <div className="flex items-center gap-4">
@@ -134,7 +157,8 @@ const Hero = () => {
           </svg>
         </div>
       </div>
-    </div>
+      </div>
+    </>
   );
 };
 

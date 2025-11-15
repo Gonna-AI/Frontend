@@ -48,7 +48,7 @@ export default function Footer() {
   };
 
   return (
-    <footer className="w-full border-t border-neutral-800/50 relative overflow-hidden">
+    <footer className="w-full border-t border-neutral-800/50 relative overflow-hidden bg-[rgb(10,10,10)]">
 
       <div className="relative z-10 max-w-7xl mx-auto px-6 py-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
