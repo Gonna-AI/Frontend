@@ -1,6 +1,7 @@
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '../../utils/cn';
+import { useDeviceDetection } from '../../hooks/useDeviceDetection';
 
 const Logo = () => (
   <svg 
@@ -18,6 +19,17 @@ const Logo = () => (
 
 const Hero = () => {
   const navigate = useNavigate();
+  const prefersReducedMotion = useReducedMotion();
+  const { isMobile } = useDeviceDetection();
+
+  // Simplified animation config for mobile/reduced motion
+  const animationConfig = prefersReducedMotion || isMobile 
+    ? { opacity: 1, y: 0 } 
+    : { opacity: 0, y: 20 };
+  
+  const transitionConfig = prefersReducedMotion || isMobile
+    ? { duration: 0 }
+    : { duration: 0.6, delay: 0.2 };
 
   return (
     <>
@@ -39,9 +51,9 @@ const Hero = () => {
 
           <motion.div 
             className="max-w-4xl mx-auto mb-8"
-            initial={{ opacity: 0, y: 20 }}
+            initial={animationConfig}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
+            transition={transitionConfig}
           >
             <h2 className="text-5xl md:text-7xl font-bold mb-8">
               <span className="bg-gradient-to-r from-indigo-400 via-purple-400 to-indigo-600 text-transparent bg-clip-text">
@@ -56,18 +68,18 @@ const Hero = () => {
 
           <motion.p 
             className="text-xl md:text-2xl text-white/70 max-w-3xl mx-auto leading-relaxed mb-12"
-            initial={{ opacity: 0, y: 20 }}
+            initial={animationConfig}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.4 }}
+            transition={prefersReducedMotion || isMobile ? { duration: 0 } : { duration: 0.6, delay: 0.3 }}
           >
             Transform your claims processing workflow with AI-driven automation,
             intelligent callback scheduling, and real-time sentiment analysis
           </motion.p>
 
           <motion.div 
-            initial={{ opacity: 0, y: 20 }}
+            initial={animationConfig}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.6 }}
+            transition={prefersReducedMotion || isMobile ? { duration: 0 } : { duration: 0.6, delay: 0.4 }}
             className="flex flex-col sm:flex-row items-center justify-center gap-4"
           >
             <button 
@@ -77,9 +89,9 @@ const Hero = () => {
                 "w-full sm:w-auto",
                 "px-8 py-4 rounded-[20px]",
                 "text-base font-semibold tracking-wide",
-                "transition-all duration-300",
+                "transition-all duration-200",
                 "bg-gradient-to-r from-purple-500/20 via-pink-500/20 to-purple-600/20",
-                "backdrop-blur-sm",
+                isMobile ? "" : "backdrop-blur-sm",
                 "border-2 border-purple-500/30",
                 "hover:bg-gradient-to-r hover:from-purple-500/30 hover:via-pink-500/30 hover:to-purple-600/30",
                 "hover:border-purple-500/50",
@@ -96,8 +108,9 @@ const Hero = () => {
                 "w-full sm:w-auto",
                 "px-8 py-4 rounded-[20px]",
                 "text-base font-semibold tracking-wide",
-                "transition-all duration-300",
-                "bg-white/10 backdrop-blur-sm",
+                "transition-all duration-200",
+                "bg-white/10",
+                isMobile ? "" : "backdrop-blur-sm",
                 "border-2 border-white/20",
                 "hover:bg-white/20 hover:border-white/30",
                 "text-white"

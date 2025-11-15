@@ -31,6 +31,13 @@
   animation-delay: 4s;
 }
 
+/* Disable blob animation on mobile for better performance */
+@media (max-width: 768px) {
+  .animate-blob {
+    animation: none;
+  }
+}
+
 .custom-scrollbar {
   scrollbar-width: thin;
   scrollbar-color: rgba(155, 155, 155, 0.5) transparent;

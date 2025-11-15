@@ -1,11 +1,16 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 import { Shield, Lock, ShieldCheck, Mail, Phone, MapPin } from 'lucide-react';
+import { useDeviceDetection } from '../../hooks/useDeviceDetection';
 
 export default function Footer() {
   const navigate = useNavigate();
   const currentYear = new Date().getFullYear();
+  const prefersReducedMotion = useReducedMotion();
+  const { isMobile } = useDeviceDetection();
+  
+  const shouldReduceMotion = prefersReducedMotion || isMobile;
 
   const footerLinks = {
     product: [
@@ -54,10 +59,10 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
           {/* Company Info */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={shouldReduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
+            transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.4 }}
           >
             <div className="flex items-center gap-3 mb-4">
               <svg 
@@ -98,7 +103,7 @@ export default function Footer() {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.6, delay: 0.1 }}
+            transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.4, delay: 0.05 }}
           >
             <h4 className="text-neutral-200 font-semibold mb-4">Product</h4>
             <ul className="space-y-3">
@@ -120,7 +125,7 @@ export default function Footer() {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.6, delay: 0.2 }}
+            transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.4, delay: 0.1 }}
           >
             <h4 className="text-neutral-200 font-semibold mb-4">Company</h4>
             <ul className="space-y-3">
@@ -142,7 +147,7 @@ export default function Footer() {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.6, delay: 0.3 }}
+            transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.4, delay: 0.15 }}
           >
             <h4 className="text-neutral-200 font-semibold mb-4">Legal & Contact</h4>
             <ul className="space-y-3 mb-6">
@@ -192,7 +197,7 @@ export default function Footer() {
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.6, delay: 0.4 }}
+          transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.4, delay: 0.2 }}
           className="pt-8 border-t border-neutral-800"
         >
           <div className="flex flex-col md:flex-row justify-center items-center">

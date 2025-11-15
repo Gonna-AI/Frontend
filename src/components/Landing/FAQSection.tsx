@@ -1,10 +1,15 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { HelpCircle, ArrowRight } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
+import { useDeviceDetection } from '../../hooks/useDeviceDetection';
 
 export default function FAQSection() {
   const navigate = useNavigate();
+  const prefersReducedMotion = useReducedMotion();
+  const { isMobile } = useDeviceDetection();
+  
+  const shouldReduceMotion = prefersReducedMotion || isMobile;
 
   const quickFAQs = [
     {
@@ -28,10 +33,10 @@ export default function FAQSection() {
         {/* Header */}
         <div className="text-center mb-16">
           <motion.h2
-            initial={{ opacity: 0, y: 20 }}
+            initial={shouldReduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
+            transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.4 }}
             className="text-4xl md:text-7xl font-bold text-center mb-6 pb-2"
           >
             <span className="bg-gradient-to-b from-neutral-50 to-neutral-400 bg-clip-text text-transparent">
@@ -44,10 +49,10 @@ export default function FAQSection() {
           </motion.h2>
           
           <motion.p
-            initial={{ opacity: 0, y: 20 }}
+            initial={shouldReduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.6, delay: 0.2 }}
+            transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.4, delay: 0.1 }}
             className="text-lg text-neutral-400 max-w-2xl mx-auto"
           >
             Quick answers to common questions about ClerkTree
@@ -59,11 +64,11 @@ export default function FAQSection() {
           {quickFAQs.map((faq, index) => (
             <motion.div
               key={index}
-              initial={{ opacity: 0, y: 20 }}
+              initial={shouldReduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: 0.1 * index }}
-              className="group rounded-2xl border border-neutral-800 bg-neutral-900/50 backdrop-blur-sm p-6 hover:border-neutral-700 transition-all duration-300"
+              transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.4, delay: 0.05 * index }}
+              className={`group rounded-2xl border border-neutral-800 bg-neutral-900/50 ${isMobile ? '' : 'backdrop-blur-sm'} p-6 hover:border-neutral-700 transition-all duration-200`}
             >
               <h3 className="font-semibold text-neutral-200 mb-3 group-hover:text-white transition-colors">
                 {faq.question}
@@ -77,15 +82,15 @@ export default function FAQSection() {
 
         {/* CTA Button */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={shouldReduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.6, delay: 0.4 }}
+          transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.4, delay: 0.2 }}
           className="text-center"
         >
           <button
             onClick={() => navigate('/faq')}
-            className="group inline-flex items-center gap-3 px-8 py-4 rounded-xl bg-gradient-to-r from-neutral-800 to-neutral-900 border-2 border-neutral-700 text-white font-semibold hover:from-neutral-700 hover:to-neutral-800 hover:border-neutral-600 transition-all duration-300 backdrop-blur-sm"
+            className={`group inline-flex items-center gap-3 px-8 py-4 rounded-xl bg-gradient-to-r from-neutral-800 to-neutral-900 border-2 border-neutral-700 text-white font-semibold hover:from-neutral-700 hover:to-neutral-800 hover:border-neutral-600 transition-all duration-200 ${isMobile ? '' : 'backdrop-blur-sm'}`}
           >
             <span>See All FAQs</span>
             <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />

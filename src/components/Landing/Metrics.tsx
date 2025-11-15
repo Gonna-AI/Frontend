@@ -1,12 +1,21 @@
 import React from 'react';
 import { ChevronLeft, ChevronRight, Phone, Clock, Database, MessageSquare } from 'lucide-react';
+import { useDeviceDetection } from '../../hooks/useDeviceDetection';
 
-const Card = ({ type, title, image, hasAction }) => {
+interface CardProps {
+  type: string;
+  title?: string;
+  image?: string;
+  hasAction?: boolean;
+  isMobile: boolean;
+}
+
+const Card = ({ type, title, image, hasAction, isMobile }: CardProps) => {
   const renderContent = () => {
     switch (type) {
       case 'analytics':
         return (
-          <div className="h-full w-full bg-black/80 backdrop-blur-md rounded-3xl p-8 border border-gray-800">
+          <div className={`h-full w-full bg-black/80 ${isMobile ? '' : 'backdrop-blur-md'} rounded-3xl p-8 border border-gray-800`}>
             <h2 className="text-white text-5xl font-display mt-36">AI ANALYTICS</h2>
             <p className="text-gray-300 mt-4">Real-time sentiment analysis and call metrics</p>
           </div>
@@ -14,11 +23,11 @@ const Card = ({ type, title, image, hasAction }) => {
       
       case 'sections':
         return (
-          <div className="h-full w-full bg-black/80 backdrop-blur-md rounded-3xl p-6 text-white relative border border-gray-800">
+          <div className={`h-full w-full bg-black/80 ${isMobile ? '' : 'backdrop-blur-md'} rounded-3xl p-6 text-white relative border border-gray-800`}>
             <h2 className="text-4xl font-display mb-4">CLAIM CATEGORIES</h2>
             <div className="flex flex-wrap gap-2">
               {['Health Insurance', 'Auto Claims', 'Property Damage', 'Life Insurance', 'Workers Comp', 'Liability', 'Emergency', 'Routine', 'Appeals', 'Documentation', 'Follow-ups'].map((item, i) => (
-                <span key={i} className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 text-white rounded-full px-3 py-1 text-sm whitespace-nowrap">
+                <span key={i} className={`bg-gray-800/50 ${isMobile ? '' : 'backdrop-blur-sm'} border border-gray-700 text-white rounded-full px-3 py-1 text-sm whitespace-nowrap`}>
                   {item}
                 </span>
               ))}
@@ -37,7 +46,7 @@ const Card = ({ type, title, image, hasAction }) => {
               alt={title}
               className="absolute inset-0 w-full h-full object-cover"
             />
-            <div className="absolute inset-0 bg-black/70 p-8 flex flex-col justify-between backdrop-blur-md">
+            <div className={`absolute inset-0 bg-black/70 p-8 flex flex-col justify-between ${isMobile ? '' : 'backdrop-blur-md'}`}>
               <div className="flex justify-between items-start">
                 <h2 className="text-4xl font-display text-white">{title}</h2>
                 {hasAction && (
@@ -62,7 +71,7 @@ const Card = ({ type, title, image, hasAction }) => {
       
       case 'efficiency':
         return (
-          <div className="h-full w-full bg-black/80 backdrop-blur-md rounded-3xl p-8 text-white relative border border-gray-800">
+          <div className={`h-full w-full bg-black/80 ${isMobile ? '' : 'backdrop-blur-md'} rounded-3xl p-8 text-white relative border border-gray-800`}>
             <div className="absolute right-8 top-8">
               <div className="flex items-center gap-4">
                 <Clock className="w-6 h-6 text-purple-300" />
@@ -83,13 +92,19 @@ const Card = ({ type, title, image, hasAction }) => {
   );
 };
 
-const ScrollButton = ({ direction, onClick }) => {
+interface ScrollButtonProps {
+  direction: 'left' | 'right';
+  onClick: () => void;
+  isMobile: boolean;
+}
+
+const ScrollButton = ({ direction, onClick, isMobile }: ScrollButtonProps) => {
   const Icon = direction === 'left' ? ChevronLeft : ChevronRight;
   return (
     <button
       onClick={onClick}
       className={`absolute top-1/2 -translate-y-1/2 z-10 w-8 h-8 flex items-center justify-center
-                  rounded-full transition-all bg-purple-500/20 hover:bg-purple-500/30 backdrop-blur-sm
+                  rounded-full transition-all bg-purple-500/20 hover:bg-purple-500/30 ${isMobile ? '' : 'backdrop-blur-sm'}
                   border border-purple-500/30 text-white`}
       style={{ [direction]: '-24px' }}
     >
@@ -99,9 +114,10 @@ const ScrollButton = ({ direction, onClick }) => {
 };
 
 export default function HorizontalScroll() {
-  const containerRef = React.useRef(null);
+  const containerRef = React.useRef<HTMLDivElement>(null);
+  const { isMobile } = useDeviceDetection();
   
-  const scroll = (direction) => {
+  const scroll = (direction: 'left' | 'right') => {
     const container = containerRef.current;
     if (container) {
       const scrollAmount = direction === 'left' ? -400 : 400;
@@ -112,7 +128,7 @@ export default function HorizontalScroll() {
   return (
     <div className="min-h-screen py-20 relative overflow-hidden bg-[rgb(10,10,10)]">
 
-      <style jsx global>{`
+      <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap');
         
         .font-display {
@@ -135,32 +151,34 @@ export default function HorizontalScroll() {
           </h1>
         </div>
 
-        <div className="relative bg-black/50 backdrop-blur-lg rounded-3xl p-8 border border-gray-800">
+        <div className={`relative bg-black/50 ${isMobile ? '' : 'backdrop-blur-lg'} rounded-3xl p-8 border border-gray-800`}>
           <div 
             ref={containerRef}
             className="flex overflow-x-auto hide-scrollbar gap-6 pb-6"
           >
-            <Card type="analytics" />
+            <Card type="analytics" isMobile={isMobile} />
             <Card 
               type="callbacks"
               title="SMART CALLBACKS"
               hasAction={true}
+              isMobile={isMobile}
             />
-            <Card type="sections" />
+            <Card type="sections" isMobile={isMobile} />
             <Card 
               type="knowledge"
               title="KNOWLEDGE BASE"
               hasAction={true}
+              isMobile={isMobile}
             />
-            <Card type="efficiency" />
+            <Card type="efficiency" isMobile={isMobile} />
           </div>
           
           <div className="absolute bottom-8 right-8">
             <div className="flex items-center">
               <div className="relative right-10">
-                <ScrollButton direction="left" onClick={() => scroll('left')} />
+                <ScrollButton direction="left" onClick={() => scroll('left')} isMobile={isMobile} />
               </div>
-              <ScrollButton direction="right" onClick={() => scroll('right')} />
+              <ScrollButton direction="right" onClick={() => scroll('right')} isMobile={isMobile} />
             </div>
           </div>
         </div>
