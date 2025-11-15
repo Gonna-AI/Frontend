@@ -122,7 +122,7 @@ export default function Features() {
               key={index}
               className="bg-black/40 backdrop-blur-sm border border-white/5 rounded-2xl p-8"
             >
-              <div className="text-4xl font-bold bg-gradient-to-r from-purple-400 to-indigo-400 bg-clip-text text-transparent">
+              <div className="text-4xl font-bold bg-gradient-to-r from-indigo-400 via-purple-400 to-indigo-600 bg-clip-text text-transparent">
                 {stat.value}
               </div>
               <div className="text-gray-400 mt-2 font-mono">

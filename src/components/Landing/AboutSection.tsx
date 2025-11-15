@@ -28,7 +28,7 @@ export default function AboutSection() {
               Building the Future of
             </span>
             <br />
-            <span className="bg-gradient-to-r from-blue-400 via-cyan-400 to-blue-600 text-transparent bg-clip-text">
+            <span className="bg-gradient-to-r from-indigo-400 via-purple-400 to-indigo-600 text-transparent bg-clip-text">
               Operations Intelligence
             </span>
           </h2>
@@ -39,10 +39,10 @@ export default function AboutSection() {
           <div className="rounded-2xl border border-blue-500/20 bg-gradient-to-br from-white/[0.02] via-white/[0.01] to-transparent backdrop-blur-sm p-8 md:p-12">
             <h3 className="text-3xl md:text-4xl font-bold text-white/90 mb-4">Why We Built ClerkTree</h3>
             <p className="text-lg text-white/60 leading-relaxed">
-              Growing operations teams face a common challenge: <span className="text-blue-400 font-semibold">fragmented workflows</span> that slow them down. Document processing scattered across multiple tools, manual data entry consuming valuable time, and disconnected systems creating bottlenecks.
+              Growing operations teams face a common challenge: <span className="bg-gradient-to-r from-indigo-400 via-purple-400 to-indigo-600 bg-clip-text text-transparent font-semibold">fragmented workflows</span> that slow them down. Document processing scattered across multiple tools, manual data entry consuming valuable time, and disconnected systems creating bottlenecks.
             </p>
             <p className="text-lg text-white/60 leading-relaxed mt-4">
-              We built ClerkTree to solve this. Our platform unifies AI-powered automation with human expertise, creating a seamless workflow that <span className="text-blue-400 font-semibold">reduces turnaround time by 40%</span> while maintaining the accuracy and judgment that only humans can provide.
+              We built ClerkTree to solve this. Our platform unifies AI-powered automation with human expertise, creating a seamless workflow that <span className="bg-gradient-to-r from-indigo-400 via-purple-400 to-indigo-600 bg-clip-text text-transparent font-semibold">reduces turnaround time by 40%</span> while maintaining the accuracy and judgment that only humans can provide.
             </p>
           </div>
         </div>
@@ -51,7 +51,7 @@ export default function AboutSection() {
         <div className="grid md:grid-cols-2 gap-6 mb-20">
           <div className="rounded-2xl border border-white/5 bg-gradient-to-br from-white/[0.02] via-white/[0.01] to-transparent backdrop-blur-sm p-8">
             <div className="flex items-center gap-3 mb-4">
-              <Target className="w-8 h-8 bg-gradient-to-r from-blue-400 to-cyan-500 text-transparent bg-clip-text" strokeWidth={1.5} />
+              <Target className="w-8 h-8 bg-gradient-to-r from-indigo-400 via-purple-400 to-indigo-600 text-transparent bg-clip-text" strokeWidth={1.5} />
               <h3 className="text-2xl font-bold text-white/90">Our Mission</h3>
             </div>
             <p className="text-white/60 leading-relaxed">
@@ -61,7 +61,7 @@ export default function AboutSection() {
 
           <div className="rounded-2xl border border-white/5 bg-gradient-to-br from-white/[0.02] via-white/[0.01] to-transparent backdrop-blur-sm p-8">
             <div className="flex items-center gap-3 mb-4">
-              <Lightbulb className="w-8 h-8 bg-gradient-to-r from-cyan-400 to-blue-500 text-transparent bg-clip-text" strokeWidth={1.5} />
+              <Lightbulb className="w-8 h-8 bg-gradient-to-r from-indigo-400 via-purple-400 to-indigo-600 text-transparent bg-clip-text" strokeWidth={1.5} />
               <h3 className="text-2xl font-bold text-white/90">Our Vision</h3>
             </div>
             <p className="text-white/60 leading-relaxed">
@@ -74,7 +74,7 @@ export default function AboutSection() {
         <div className="mb-20">
           <div className="rounded-2xl border border-blue-500/20 bg-gradient-to-br from-blue-500/5 to-cyan-500/5 backdrop-blur-sm p-8 md:p-12">
             <h3 className="text-3xl md:text-4xl font-bold mb-6">
-              <span className="bg-gradient-to-r from-blue-400 to-cyan-400 text-transparent bg-clip-text">
+              <span className="bg-gradient-to-r from-indigo-400 via-purple-400 to-indigo-600 text-transparent bg-clip-text">
                 The Hybrid Human+AI Approach
               </span>
             </h3>
@@ -123,7 +123,7 @@ export default function AboutSection() {
 
         {/* CTA */}
         <div className="text-center py-16 rounded-2xl border border-blue-500/20 bg-gradient-to-br from-blue-500/5 to-cyan-500/5 backdrop-blur-sm">
-          <h3 className="text-3xl md:text-4xl font-bold mb-4 bg-gradient-to-r from-blue-400 to-cyan-400 text-transparent bg-clip-text">
+          <h3 className="text-3xl md:text-4xl font-bold mb-4 bg-gradient-to-r from-indigo-400 via-purple-400 to-indigo-600 text-transparent bg-clip-text">
             Join Us on This Journey
           </h3>
           <p className="text-white/60 mb-8 max-w-2xl mx-auto">
