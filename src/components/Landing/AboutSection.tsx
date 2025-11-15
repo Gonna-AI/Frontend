@@ -1,8 +1,10 @@
 import { useNavigate } from 'react-router-dom';
 import { Target, Lightbulb, Users, Building2, Shield, FileText, TrendingUp } from 'lucide-react';
+import { useDeviceDetection } from '../../hooks/useDeviceDetection';
 
 export default function AboutSection() {
   const navigate = useNavigate();
+  const { isMobile } = useDeviceDetection();
 
   const industries = [
     { icon: Shield, name: 'Insurance', color: 'from-blue-400 to-cyan-500' },
@@ -36,7 +38,7 @@ export default function AboutSection() {
 
         {/* Why We Built ClerkTree */}
         <div className="mb-20">
-          <div className="rounded-2xl border border-blue-500/20 bg-gradient-to-br from-white/[0.02] via-white/[0.01] to-transparent backdrop-blur-sm p-6 sm:p-8 md:p-12">
+          <div className="rounded-2xl border border-blue-500/20 bg-gradient-to-br from-white/[0.02] via-white/[0.01] to-transparent p-6 sm:p-8 md:p-12">
             <h3 className="text-3xl md:text-4xl font-bold text-white/90 mb-4">Why We Built ClerkTree</h3>
             <p className="text-lg text-white/60 leading-relaxed">
               Growing operations teams face a common challenge: <span className="bg-gradient-to-r from-indigo-400 via-purple-400 to-indigo-600 bg-clip-text text-transparent font-semibold">fragmented workflows</span> that slow them down. Document processing scattered across multiple tools, manual data entry consuming valuable time, and disconnected systems creating bottlenecks.
@@ -49,7 +51,7 @@ export default function AboutSection() {
 
         {/* Mission & Vision */}
         <div className="grid md:grid-cols-2 gap-4 sm:gap-6 mb-20">
-          <div className="rounded-2xl border border-white/5 bg-gradient-to-br from-white/[0.02] via-white/[0.01] to-transparent backdrop-blur-sm p-6 sm:p-8">
+          <div className={`rounded-2xl border border-white/5 bg-gradient-to-br from-white/[0.02] via-white/[0.01] to-transparent ${isMobile ? '' : 'backdrop-blur-sm'} p-6 sm:p-8`}>
             <div className="flex items-center gap-3 mb-4">
               <Target className="w-8 h-8 bg-gradient-to-r from-indigo-400 via-purple-400 to-indigo-600 text-transparent bg-clip-text" strokeWidth={1.5} />
               <h3 className="text-2xl font-bold text-white/90">Our Mission</h3>
@@ -59,7 +61,7 @@ export default function AboutSection() {
             </p>
           </div>
 
-          <div className="rounded-2xl border border-white/5 bg-gradient-to-br from-white/[0.02] via-white/[0.01] to-transparent backdrop-blur-sm p-6 sm:p-8">
+          <div className={`rounded-2xl border border-white/5 bg-gradient-to-br from-white/[0.02] via-white/[0.01] to-transparent ${isMobile ? '' : 'backdrop-blur-sm'} p-6 sm:p-8`}>
             <div className="flex items-center gap-3 mb-4">
               <Lightbulb className="w-8 h-8 bg-gradient-to-r from-indigo-400 via-purple-400 to-indigo-600 text-transparent bg-clip-text" strokeWidth={1.5} />
               <h3 className="text-2xl font-bold text-white/90">Our Vision</h3>
@@ -72,7 +74,7 @@ export default function AboutSection() {
 
         {/* Hybrid Human+AI Approach */}
         <div className="mb-20">
-          <div className="rounded-2xl border border-blue-500/20 bg-gradient-to-br from-blue-500/5 to-cyan-500/5 backdrop-blur-sm p-6 sm:p-8 md:p-12">
+          <div className={`rounded-2xl border border-blue-500/20 bg-gradient-to-br from-blue-500/5 to-cyan-500/5 ${isMobile ? '' : 'backdrop-blur-sm'} p-6 sm:p-8 md:p-12`}>
             <h3 className="text-3xl md:text-4xl font-bold mb-6">
               <span className="bg-gradient-to-r from-indigo-400 via-purple-400 to-indigo-600 text-transparent bg-clip-text">
                 The Hybrid Human+AI Approach
@@ -109,7 +111,7 @@ export default function AboutSection() {
               return (
                 <div 
                   key={index}
-                  className="group flex items-center gap-3 px-6 py-4 rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm hover:border-indigo-500/30 hover:bg-white/10 transition-all duration-300"
+                  className={`group flex items-center gap-3 px-6 py-4 rounded-xl border border-white/10 bg-white/5 ${isMobile ? '' : 'backdrop-blur-sm'} hover:border-indigo-500/30 hover:bg-white/10 transition-all duration-200`}
                 >
                   <Icon className={`w-6 h-6 text-indigo-400 group-hover:scale-110 transition-transform duration-300`} strokeWidth={1.5} />
                   <span className="font-medium text-white/80 group-hover:text-white/95 transition-colors">
@@ -122,7 +124,7 @@ export default function AboutSection() {
         </div>
 
         {/* CTA */}
-        <div className="text-center py-12 sm:py-16 px-4 sm:px-6 rounded-2xl border border-blue-500/20 bg-gradient-to-br from-blue-500/5 to-cyan-500/5 backdrop-blur-sm">
+        <div className={`text-center py-12 sm:py-16 px-4 sm:px-6 rounded-2xl border border-blue-500/20 bg-gradient-to-br from-blue-500/5 to-cyan-500/5 ${isMobile ? '' : 'backdrop-blur-sm'}`}>
           <h3 className="text-3xl md:text-4xl font-bold mb-4 bg-gradient-to-r from-indigo-400 via-purple-400 to-indigo-600 text-transparent bg-clip-text">
             Join Us on This Journey
           </h3>

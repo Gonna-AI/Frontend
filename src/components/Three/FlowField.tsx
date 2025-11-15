@@ -6,7 +6,9 @@ import * as THREE from 'three';
 export default function FlowField() {
   const points = useRef();
   
-  const count = 5000;
+  // Reduce particle count for better performance
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+  const count = isMobile ? 1000 : 3000; // Reduced from 5000
   const sep = 3;
   
   const positions = useMemo(() => {
@@ -27,16 +29,18 @@ export default function FlowField() {
 
   useFrame((state) => {
     const time = state.clock.getElapsedTime();
+    const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+    const speed = isMobile ? 0.05 : 0.1; // Slower animation on mobile
     
     for (let i = 0; i < count; i++) {
       const x = points.current.geometry.attributes.position.array[i * 3];
       const y = points.current.geometry.attributes.position.array[i * 3 + 1];
       const z = points.current.geometry.attributes.position.array[i * 3 + 2];
 
-      // Flow field animation
-      points.current.geometry.attributes.position.array[i * 3] += Math.sin(y * 0.1 + time * 0.1) * 0.1;
-      points.current.geometry.attributes.position.array[i * 3 + 1] += Math.cos(x * 0.1 + time * 0.1) * 0.1;
-      points.current.geometry.attributes.position.array[i * 3 + 2] += Math.sin(time * 0.1) * 0.1;
+      // Flow field animation - reduced intensity
+      points.current.geometry.attributes.position.array[i * 3] += Math.sin(y * 0.1 + time * 0.1) * speed;
+      points.current.geometry.attributes.position.array[i * 3 + 1] += Math.cos(x * 0.1 + time * 0.1) * speed;
+      points.current.geometry.attributes.position.array[i * 3 + 2] += Math.sin(time * 0.1) * speed;
 
       // Keep particles within bounds
       if (Math.abs(x) > 50) points.current.geometry.attributes.position.array[i * 3] *= -0.95;

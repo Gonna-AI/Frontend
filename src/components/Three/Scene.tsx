@@ -2,8 +2,16 @@ import React, { Suspense } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Preload } from '@react-three/drei';
 import FlowField from './FlowField';
+import { useDeviceDetection } from '../../hooks/useDeviceDetection';
 
 export default function Scene() {
+  const { isLowEnd } = useDeviceDetection();
+
+  // Don't render Three.js on low-end devices
+  if (isLowEnd) {
+    return null;
+  }
+
   return (
     <Canvas
       camera={{ position: [0, 0, 50], fov: 75 }}
@@ -15,7 +23,8 @@ export default function Scene() {
         height: '100vh',
         pointerEvents: 'none',
       }}
-      dpr={[1, 2]}
+      dpr={[1, 1.5]} // Reduced from [1, 2] for better performance
+      performance={{ min: 0.5 }} // Lower performance threshold
     >
       <Suspense fallback={null}>
         <ambientLight intensity={0.5} />
@@ -28,7 +37,7 @@ export default function Scene() {
         enablePan={false}
         enableRotate={false}
         autoRotate
-        autoRotateSpeed={0.5}
+        autoRotateSpeed={0.3} // Reduced from 0.5
       />
     </Canvas>
   );

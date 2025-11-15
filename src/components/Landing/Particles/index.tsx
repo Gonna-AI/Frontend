@@ -32,8 +32,12 @@ export function Particles({
   const mousePosition = useMousePosition();
   const mouse = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
   const canvasSize = useRef<{ w: number; h: number }>({ w: 0, h: 0 });
-  const dpr = typeof window !== "undefined" ? window.devicePixelRatio : 1;
+  const dpr = typeof window !== "undefined" ? Math.min(window.devicePixelRatio, 1.5) : 1; // Cap DPR for performance
   const rgb = useMemo(() => hexToRgb(color), [color]);
+  
+  // Reduce quantity on mobile devices
+  const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+  const adjustedQuantity = isMobile ? Math.floor(quantity * 0.4) : quantity; // 60% reduction on mobile
 
   useEffect(() => {
     if (canvasRef.current) {
@@ -113,7 +117,7 @@ export function Particles({
 
   const drawParticles = () => {
     clearContext();
-    const particleCount = quantity;
+    const particleCount = adjustedQuantity;
     for (let i = 0; i < particleCount; i++) {
       const circle = createCircle(canvasSize.current.w, canvasSize.current.h, size);
       drawCircle(circle);
@@ -122,7 +126,17 @@ export function Particles({
 
   const animate = () => {
     clearContext();
+    const frameSkip = isMobile ? 2 : 1; // Skip frames on mobile for better performance
+    let frameCount = 0;
+    
     circles.current.forEach((circle: Circle, i: number) => {
+      frameCount++;
+      if (isMobile && frameCount % frameSkip !== 0) {
+        // Skip some circles on mobile
+        drawCircle(circle, true);
+        return;
+      }
+      
       const edge = [
         circle.x + circle.translateX - circle.size,
         canvasSize.current.w - circle.x - circle.translateX - circle.size,
@@ -134,7 +148,7 @@ export function Particles({
         remapValue(closestEdge, 0, 20, 0, 1).toFixed(2),
       );
       if (remapClosestEdge > 1) {
-        circle.alpha += 0.02;
+        circle.alpha += isMobile ? 0.01 : 0.02; // Slower alpha change on mobile
         if (circle.alpha > circle.targetAlpha) {
           circle.alpha = circle.targetAlpha;
         }
