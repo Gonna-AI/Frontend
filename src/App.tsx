@@ -23,7 +23,6 @@ import Careers from './pages/Careers';
 import Solutions from './pages/Solutions';
 import FAQ from './pages/FAQ';
 import { PrivateRoute } from './components/Auth/PrivateRoute';
-import LoadingScreen from './components/LoadingScreen';
 import ScrollToTop from './components/ScrollToTop';
 // Create a client
 const queryClient = new QueryClient();
@@ -31,11 +30,11 @@ const queryClient = new QueryClient();
 function App() {
   const { isDark } = useTheme();
   const [isSignedIn, setIsSignedIn] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
 
   useEffect(() => {
+    // Check auth status in background without blocking render
     checkAuthStatus();
     
     // Listen for auth state changes
@@ -56,8 +55,6 @@ function App() {
       setIsSignedIn(response.isAuthenticated);
     } catch (error) {
       setIsSignedIn(false);
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -76,10 +73,6 @@ function App() {
     const hasValidInvite = localStorage.getItem('hasValidInvite');
     return !hasValidInvite;
   };
-
-  if (isLoading) {
-    return <LoadingScreen />;
-  }
 
   // Protected Route wrapper
   const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
