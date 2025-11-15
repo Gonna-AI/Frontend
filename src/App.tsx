@@ -24,6 +24,7 @@ import Solutions from './pages/Solutions';
 import FAQ from './pages/FAQ';
 import { PrivateRoute } from './components/Auth/PrivateRoute';
 import LoadingScreen from './components/LoadingScreen';
+import ScrollToTop from './components/ScrollToTop';
 // Create a client
 const queryClient = new QueryClient();
 
@@ -130,6 +131,7 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
+        <ScrollToTop />
         <Routes>
           {/* Public Routes */}
           <Route path="/" element={
