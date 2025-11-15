@@ -53,8 +53,8 @@ export default function Landing() {
         <AboutSection />
         <Metrics />
         <Features />
-        <Conversation />
         <FAQSection />
+        <Conversation />
         <Footer />
       </div>
     </div>
