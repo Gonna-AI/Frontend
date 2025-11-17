@@ -35,7 +35,7 @@ const Hero = () => {
     <>
       <div className="min-h-screen relative bg-[rgb(10,10,10)]">
       {/* Main Content */}
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex items-center justify-center min-h-screen pt-20">
         <div className="max-w-7xl mx-auto text-center px-6 relative z-10">
           <div className="mb-8 flex items-center justify-center">
             {/* Logo container with adjusted spacing for larger logo */}
