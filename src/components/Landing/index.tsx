@@ -67,7 +67,7 @@ export default function Landing() {
             <button
               type="button"
               onClick={() => navigate('/blog')}
-              className="hidden md:block ml-8 font-medium leading-none backdrop-blur-sm self-center"
+              className="hidden md:block ml-8 font-medium leading-none self-center bg-transparent border-none outline-none"
               style={{
                 fontSize: '16px',
                 fontFamily: 'Urbanist, sans-serif',
@@ -82,7 +82,7 @@ export default function Landing() {
             <button
               type="button"
               onClick={handleAboutClick}
-              className="hidden md:block ml-8 font-medium leading-none backdrop-blur-sm self-center"
+              className="hidden md:block ml-8 font-medium leading-none self-center bg-transparent border-none outline-none"
               style={{
                 fontSize: '16px',
                 fontFamily: 'Urbanist, sans-serif',
