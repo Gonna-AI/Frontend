@@ -1,5 +1,5 @@
 import React from 'react';
-import { ChevronLeft, ChevronRight, Phone, Clock, Database, MessageSquare } from 'lucide-react';
+import { Phone, Clock, Database, MessageSquare } from 'lucide-react';
 import { useDeviceDetection } from '../../hooks/useDeviceDetection';
 
 interface CardProps {
@@ -92,38 +92,9 @@ const Card = ({ type, title, image, hasAction, isMobile }: CardProps) => {
   );
 };
 
-interface ScrollButtonProps {
-  direction: 'left' | 'right';
-  onClick: () => void;
-  isMobile: boolean;
-}
-
-const ScrollButton = ({ direction, onClick, isMobile }: ScrollButtonProps) => {
-  const Icon = direction === 'left' ? ChevronLeft : ChevronRight;
-  return (
-    <button
-      onClick={onClick}
-      className={`absolute top-1/2 -translate-y-1/2 z-10 w-8 h-8 flex items-center justify-center
-                  rounded-full transition-all bg-purple-500/20 hover:bg-purple-500/30 ${isMobile ? '' : 'backdrop-blur-sm'}
-                  border border-purple-500/30 text-white`}
-      style={{ [direction]: '-24px' }}
-    >
-      <Icon size={16} />
-    </button>
-  );
-};
-
 export default function HorizontalScroll() {
   const containerRef = React.useRef<HTMLDivElement>(null);
   const { isMobile } = useDeviceDetection();
-  
-  const scroll = (direction: 'left' | 'right') => {
-    const container = containerRef.current;
-    if (container) {
-      const scrollAmount = direction === 'left' ? -400 : 400;
-      container.scrollBy({ left: scrollAmount, behavior: 'smooth' });
-    }
-  };
 
   return (
     <div className="min-h-screen py-20 relative overflow-hidden bg-[rgb(10,10,10)]">
@@ -171,15 +142,6 @@ export default function HorizontalScroll() {
               isMobile={isMobile}
             />
             <Card type="efficiency" isMobile={isMobile} />
-          </div>
-          
-          <div className="absolute bottom-8 right-8">
-            <div className="flex items-center">
-              <div className="relative right-10">
-                <ScrollButton direction="left" onClick={() => scroll('left')} isMobile={isMobile} />
-              </div>
-              <ScrollButton direction="right" onClick={() => scroll('right')} isMobile={isMobile} />
-            </div>
           </div>
         </div>
 
