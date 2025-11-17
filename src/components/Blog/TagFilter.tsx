@@ -34,19 +34,19 @@ export function TagFilter({ tags, selectedTag, tagCounts }: TagFilterProps) {
         <button
           key={tag}
           onClick={() => handleTagClick(tag)}
-          className={`h-8 flex items-center px-1 pl-3 rounded-lg cursor-pointer border text-sm transition-colors ${
+          className={`h-8 flex items-center px-1 pl-3 rounded-xl cursor-pointer border text-sm transition-all duration-300 backdrop-blur-sm ${
             selectedTag === tag
-              ? "border-blue-500 bg-blue-500/20 text-blue-400"
-              : "border-transparent hover:bg-white/5 text-white/60 hover:text-white"
+              ? "border-blue-500 bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 hover:border-blue-400"
+              : "border-white/10 bg-white/5 hover:bg-white/10 hover:border-white/20 text-white/60 hover:text-white"
           }`}
         >
           <span>{tag}</span>
           {tagCounts?.[tag] && (
             <span
-              className={`ml-2 text-xs border rounded-md h-6 min-w-6 font-medium flex items-center justify-center ${
+              className={`ml-2 text-xs border rounded-lg h-6 min-w-6 font-medium flex items-center justify-center backdrop-blur-sm transition-all duration-300 ${
                 selectedTag === tag
-                  ? "border-blue-500/40 bg-[rgb(10,10,10)] text-blue-400"
-                  : "border-transparent text-white/60"
+                  ? "border-blue-500/40 bg-blue-500/10 text-blue-400"
+                  : "border-white/10 bg-white/5 text-white/60"
               }`}
             >
               {tagCounts[tag]}
@@ -59,12 +59,12 @@ export function TagFilter({ tags, selectedTag, tagCounts }: TagFilterProps) {
 
   const MobileTagFilter = () => (
     <Drawer>
-      <DrawerTrigger className="md:hidden w-full flex items-center justify-between px-4 py-2 border border-transparent rounded-lg hover:bg-white/5 transition-colors text-white/60">
+      <DrawerTrigger className="md:hidden w-full flex items-center justify-between px-4 py-2 border border-white/10 rounded-xl backdrop-blur-sm bg-white/5 hover:bg-white/10 hover:border-white/20 transition-all duration-300 text-white/60">
         <span className="capitalize text-sm font-medium">{selectedTag}</span>
         <ChevronDown className="h-4 w-4" />
       </DrawerTrigger>
 
-      <DrawerContent className="md:hidden bg-[rgb(10,10,10)] border-transparent">
+      <DrawerContent className="md:hidden bg-[rgb(10,10,10)]/95 backdrop-blur-md border-transparent rounded-t-2xl">
         <DrawerHeader>
           <h3 className="font-semibold text-sm text-white">Select Category</h3>
         </DrawerHeader>
@@ -87,7 +87,7 @@ export function TagFilter({ tags, selectedTag, tagCounts }: TagFilterProps) {
                   {tag}
                 </span>
                 {tagCounts?.[tag] && (
-                  <span className="flex-shrink-0 ml-2 border border-transparent rounded-md h-6 min-w-6 flex items-center justify-center text-white/60">
+                  <span className="flex-shrink-0 ml-2 border border-white/10 rounded-lg backdrop-blur-sm bg-white/5 h-6 min-w-6 flex items-center justify-center text-white/60">
                     {tagCounts[tag]}
                   </span>
                 )}

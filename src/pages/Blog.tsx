@@ -86,7 +86,7 @@ function BlogContent() {
 
       <div className="relative z-10 py-12 px-6 pt-24">
         <div className="max-w-7xl mx-auto w-full">
-          <div className="p-6 border-b border-transparent flex flex-col gap-6 min-h-[250px] justify-center">
+          <div className="p-6 rounded-2xl backdrop-blur-sm bg-white/5 border border-white/10 flex flex-col gap-6 min-h-[250px] justify-center">
             <div className="flex flex-col gap-2">
               <h1 className="font-medium text-4xl md:text-5xl tracking-tighter text-white">
                 Blog
@@ -107,26 +107,28 @@ function BlogContent() {
           </div>
         </div>
 
-        <div className="max-w-7xl mx-auto w-full px-6 lg:px-0 mt-8">
-          <Suspense fallback={<div className="text-white">Loading articles...</div>}>
+        <div className="max-w-7xl mx-auto w-full mt-8">
+          <Suspense fallback={<div className="text-white px-6">Loading articles...</div>}>
             <div
-              className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 relative overflow-hidden border-x border-transparent ${
-                filteredBlogs.length < 4 ? "border-b border-transparent" : "border-b-0"
-              }`}
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 relative auto-rows-fr px-6 lg:px-0"
             >
               {filteredBlogs.map((blog) => {
                 const formattedDate = formatDate(blog.date);
 
                 return (
-                  <BlogCard
+                  <div 
                     key={blog.slug}
-                    url={`/blog/${blog.slug}`}
-                    title={blog.title}
-                    description={blog.description}
-                    date={formattedDate}
-                    thumbnail={blog.thumbnail}
-                    showRightBorder={filteredBlogs.length < 3}
-                  />
+                    className="w-[calc(100%+3rem)] -mx-6 md:w-auto md:mx-0 rounded-2xl backdrop-blur-sm bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all duration-300 md:bg-transparent md:border-transparent md:backdrop-blur-none md:rounded-none md:hover:bg-transparent md:hover:border-transparent"
+                  >
+                    <BlogCard
+                      url={`/blog/${blog.slug}`}
+                      title={blog.title}
+                      description={blog.description}
+                      date={formattedDate}
+                      thumbnail={blog.thumbnail}
+                      showRightBorder={filteredBlogs.length < 3}
+                    />
+                  </div>
                 );
               })}
             </div>
