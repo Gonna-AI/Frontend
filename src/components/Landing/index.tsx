@@ -8,7 +8,6 @@ import Footer from './Footer';
 import { useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { Menu, X } from 'lucide-react';
-import { Globe } from '../ui/globe';
 
 export default function Landing() {
   const navigate = useNavigate();
@@ -139,33 +138,6 @@ export default function Landing() {
       <div className="relative z-10">
         <Hero />
         
-        {/* Globe Section */}
-        <div className="py-20 relative">
-          <div className="max-w-7xl mx-auto px-6">
-            <div className={`relative ${isMobile ? 'bg-black/20' : 'bg-black/10 backdrop-blur-2xl'} rounded-3xl p-8 border border-white/10 shadow-lg overflow-hidden min-h-[600px]`}>
-              <div 
-                className="absolute inset-0 opacity-30" 
-                style={{ 
-                  transform: isMobile 
-                    ? 'scale(1.3) translateY(15%)' 
-                    : 'scale(1.5) translateY(25%)', 
-                  transformOrigin: 'center center' 
-                }}
-              >
-                <Globe className="w-full h-full" />
-              </div>
-              <div className="relative z-10">
-                <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
-                  Global Reach, Local Impact
-                </h2>
-                <p className="text-lg text-gray-400 max-w-2xl">
-                  Serving clients worldwide with AI-powered solutions that adapt to your local needs and regulations.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-
         <div id="about-section">
           <AboutSection />
         </div>
