@@ -158,7 +158,7 @@ export const adminApi = {
     getBlockchainInfo: async (documentHash: string) => {
         return await api.get(`/api/blockchain/document/${documentHash}`);
     },
-    verifyBlockchain: async (documentId: string) => {
+    verifyBlockchainByHash: async (documentId: string) => {
         return await api.post(`/api/blockchain/verify/${documentId}`);
     },
     downloadFromBlockchain: async (documentHash: string) => {

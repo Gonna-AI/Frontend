@@ -1,6 +1,22 @@
 import React from 'react';
 import { Phone, Clock, Database, MessageSquare } from 'lucide-react';
-import { useDeviceDetection } from '../../hooks/useDeviceDetection';
+import { Globe } from '../ui/globe';
+
+const useDeviceDetection = () => {
+  const [isMobile, setIsMobile] = React.useState(false);
+
+  React.useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  return { isMobile };
+};
 
 interface CardProps {
   type: string;
@@ -15,19 +31,19 @@ const Card = ({ type, title, image, hasAction, isMobile }: CardProps) => {
     switch (type) {
       case 'analytics':
         return (
-          <div className={`h-full w-full bg-black/80 ${isMobile ? '' : 'backdrop-blur-md'} rounded-3xl p-8 border border-gray-800`}>
+          <div className={`h-full w-full ${isMobile ? 'bg-black/20' : 'bg-black/10 backdrop-blur-2xl'} rounded-3xl p-8 border border-white/10`}>
             <h2 className="text-white text-5xl font-display mt-36">AI ANALYTICS</h2>
-            <p className="text-gray-300 mt-4">Real-time sentiment analysis and call metrics</p>
+            <p className="text-gray-400 mt-4">Real-time sentiment analysis and call metrics</p>
           </div>
         );
       
       case 'sections':
         return (
-          <div className={`h-full w-full bg-black/80 ${isMobile ? '' : 'backdrop-blur-md'} rounded-3xl p-6 text-white relative border border-gray-800`}>
+          <div className={`h-full w-full ${isMobile ? 'bg-black/20' : 'bg-black/10 backdrop-blur-2xl'} rounded-3xl p-6 text-white relative border border-white/10`}>
             <h2 className="text-4xl font-display mb-4">CLAIM CATEGORIES</h2>
             <div className="flex flex-wrap gap-2">
               {['Health Insurance', 'Auto Claims', 'Property Damage', 'Life Insurance', 'Workers Comp', 'Liability', 'Emergency', 'Routine', 'Appeals', 'Documentation', 'Follow-ups'].map((item, i) => (
-                <span key={i} className={`bg-gray-800/50 ${isMobile ? '' : 'backdrop-blur-sm'} border border-gray-700 text-white rounded-full px-3 py-1 text-sm whitespace-nowrap`}>
+                <span key={i} className={`${isMobile ? 'bg-black/30' : 'bg-black/20 backdrop-blur-sm'} border border-white/10 text-white rounded-full px-3 py-1 text-sm whitespace-nowrap`}>
                   {item}
                 </span>
               ))}
@@ -38,7 +54,7 @@ const Card = ({ type, title, image, hasAction, isMobile }: CardProps) => {
       case 'callbacks':
       case 'knowledge':
         return (
-          <div className="relative h-full w-full rounded-3xl overflow-hidden border border-gray-800">
+          <div className="relative h-full w-full rounded-3xl overflow-hidden border border-white/10">
             <img 
               src={type === 'callbacks' ? 
                 "https://images.unsplash.com/photo-1521791136064-7986c2920216" : 
@@ -46,21 +62,21 @@ const Card = ({ type, title, image, hasAction, isMobile }: CardProps) => {
               alt={title}
               className="absolute inset-0 w-full h-full object-cover"
             />
-            <div className={`absolute inset-0 bg-black/70 p-8 flex flex-col justify-between ${isMobile ? '' : 'backdrop-blur-md'}`}>
+            <div className={`absolute inset-0 ${isMobile ? 'bg-black/50' : 'bg-black/30 backdrop-blur-2xl'} p-8 flex flex-col justify-between`}>
               <div className="flex justify-between items-start">
                 <h2 className="text-4xl font-display text-white">{title}</h2>
                 {hasAction && (
                   <div className="flex gap-3">
                     {type === 'callbacks' ? (
-                      <Phone className="w-6 h-6 text-purple-300" />
+                      <Phone className="w-6 h-6 text-purple-400" />
                     ) : (
-                      <Database className="w-6 h-6 text-purple-300" />
+                      <Database className="w-6 h-6 text-purple-400" />
                     )}
-                    <MessageSquare className="w-6 h-6 text-purple-300" />
+                    <MessageSquare className="w-6 h-6 text-purple-400" />
                   </div>
                 )}
               </div>
-              <p className="text-gray-300 mt-4">
+              <p className="text-gray-400 mt-4">
                 {type === 'callbacks' ? 
                   'AI-powered scheduling system for priority-based follow-ups' :
                   'Smart knowledge base with instant solution suggestions'}
@@ -71,13 +87,13 @@ const Card = ({ type, title, image, hasAction, isMobile }: CardProps) => {
       
       case 'efficiency':
         return (
-          <div className={`h-full w-full bg-black/80 ${isMobile ? '' : 'backdrop-blur-md'} rounded-3xl p-8 text-white relative border border-gray-800`}>
+          <div className={`h-full w-full ${isMobile ? 'bg-black/20' : 'bg-black/10 backdrop-blur-2xl'} rounded-3xl p-8 text-white relative border border-white/10`}>
             <div className="absolute right-8 top-8">
               <div className="flex items-center gap-4">
-                <Clock className="w-6 h-6 text-purple-300" />
+                <Clock className="w-6 h-6 text-purple-400" />
               </div>
             </div>
-            <p className="mt-36 text-lg">
+            <p className="mt-36 text-lg text-gray-400">
               Automated workflow optimization and performance tracking
             </p>
           </div>
@@ -122,7 +138,7 @@ export default function HorizontalScroll() {
           </h1>
         </div>
 
-        <div className={`relative bg-black/50 ${isMobile ? '' : 'backdrop-blur-lg'} rounded-3xl p-8 border border-gray-800`}>
+        <div className={`relative ${isMobile ? 'bg-black/20' : 'bg-black/10 backdrop-blur-2xl'} rounded-3xl p-8 border border-white/10 shadow-lg`}>
           <div 
             ref={containerRef}
             className="flex overflow-x-auto hide-scrollbar gap-6 pb-6"
@@ -145,7 +161,24 @@ export default function HorizontalScroll() {
           </div>
         </div>
 
-        <div className="mt-8 text-lg text-gray-300 max-w-2xl">
+        {/* Globe Section */}
+        <div className="mt-12 relative">
+          <div className={`relative ${isMobile ? 'bg-black/20' : 'bg-black/10 backdrop-blur-2xl'} rounded-3xl p-8 border border-white/10 shadow-lg overflow-hidden min-h-[600px]`}>
+            <div className="absolute inset-0 opacity-30" style={{ transform: 'scale(2.5) translateY(25%)', transformOrigin: 'center center' }}>
+              <Globe className="w-full h-full" />
+            </div>
+            <div className="relative z-10">
+              <h2 className="text-4xl md:text-5xl font-display text-white mb-4">
+                Global Reach, Local Impact
+              </h2>
+              <p className="text-lg text-gray-400 max-w-2xl">
+                Serving clients worldwide with AI-powered solutions that adapt to your local needs and regulations.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-8 text-lg text-gray-400 max-w-2xl">
           AI-powered workflow optimization for enhanced claims processing efficiency and customer satisfaction.
         </div>
       </div>
