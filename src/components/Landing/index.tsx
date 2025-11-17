@@ -87,7 +87,7 @@ export default function Landing() {
         </div>
       </header>
 
-      {/* Mobile Menu Overlay */}
+      {/* Mobile Menu Floating Bar */}
       {isMobileMenuOpen && (
         <>
           {/* Backdrop */}
@@ -95,28 +95,34 @@ export default function Landing() {
             className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 md:hidden"
             onClick={() => setIsMobileMenuOpen(false)}
           />
-          {/* Menu Panel */}
-          <div className="fixed top-[73px] right-0 bottom-0 w-64 bg-[rgb(10,10,10)]/95 backdrop-blur-md border-l border-white/10 z-40 md:hidden">
-            <nav className="flex flex-col p-6 gap-4">
-              <button
-                onClick={handleAboutClick}
-                className="text-left text-white/80 hover:text-white transition-colors text-base font-medium py-2"
-              >
-                About
-              </button>
-              <button
-                onClick={handleContactClick}
-                className="text-left text-white/80 hover:text-white transition-colors text-base font-medium py-2"
-              >
-                Contact Us
-              </button>
-              <button
-                onClick={handleSolutionsClick}
-                className="text-left text-white/80 hover:text-white transition-colors text-base font-medium py-2"
-              >
-                Solutions
-              </button>
-            </nav>
+          {/* Floating Bar Below Header */}
+          <div className="fixed top-[73px] left-0 right-0 z-40 md:hidden px-4 pt-4">
+            <div className="max-w-7xl mx-auto">
+              <div className="backdrop-blur-md bg-[rgb(10,10,10)]/80 border border-white/10 rounded-2xl shadow-lg">
+                <nav className="flex flex-col items-center justify-center gap-4 p-6">
+                  <button
+                    onClick={handleAboutClick}
+                    className="text-white/80 hover:text-white transition-colors text-base font-medium px-4 py-2 w-full text-center"
+                  >
+                    About
+                  </button>
+                  <div className="h-px w-3/4 bg-white/10" />
+                  <button
+                    onClick={handleContactClick}
+                    className="text-white/80 hover:text-white transition-colors text-base font-medium px-4 py-2 w-full text-center"
+                  >
+                    Contact Us
+                  </button>
+                  <div className="h-px w-3/4 bg-white/10" />
+                  <button
+                    onClick={handleSolutionsClick}
+                    className="text-white/80 hover:text-white transition-colors text-base font-medium px-4 py-2 w-full text-center"
+                  >
+                    Solutions
+                  </button>
+                </nav>
+              </div>
+            </div>
           </div>
         </>
       )}
