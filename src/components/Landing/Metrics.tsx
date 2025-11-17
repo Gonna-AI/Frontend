@@ -47,7 +47,7 @@ export default function HorizontalScroll() {
               className="absolute inset-0 opacity-30" 
               style={{ 
                 transform: isMobile 
-                  ? 'scale(1.0) translateY(15%)' 
+                  ? 'scale(1.3) translateY(15%)' 
                   : 'scale(1.5) translateY(25%)', 
                 transformOrigin: 'center center' 
               }}
