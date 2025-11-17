@@ -1,0 +1,17 @@
+{
+  "name": "ClerkTree",
+  "short_name": "ClerkTree",
+  "description": "AI-powered workflow automation for claims and back-office operations",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ],
+  "theme_color": "#000000",
+  "background_color": "#000000",
+  "display": "standalone",
+  "start_url": "/"
+}
+
