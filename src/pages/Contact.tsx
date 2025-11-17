@@ -74,7 +74,7 @@ const Contact = () => {
 
       {/* Glassy Header with Logo */}
       <header className="fixed top-0 left-0 right-0 z-50 w-full py-3 px-4 sm:px-6 backdrop-blur-md bg-[rgb(10,10,10)]/80 border-b border-white/10">
-        <div className="max-w-7xl mx-auto">
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
           <button
             type="button"
             onClick={() => navigate('/')}
@@ -91,6 +91,12 @@ const Contact = () => {
               ClerkTree
             </span>
           </button>
+          {/* Mobile Pill */}
+          <div className="md:hidden">
+            <span className="px-3 py-1.5 rounded-full bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-medium whitespace-nowrap">
+              Contact Us
+            </span>
+          </div>
         </div>
       </header>
 
@@ -99,11 +105,6 @@ const Contact = () => {
           
           {/* Header */}
           <div className="text-center mb-16">
-            <div className="inline-block mb-4">
-              <span className="px-4 py-2 rounded-full bg-red-500/10 border border-red-500/20 text-red-400 text-sm font-medium">
-                Contact Us
-              </span>
-            </div>
             <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-6">
               <span className="bg-gradient-to-r from-white via-white/95 to-white/90 text-transparent bg-clip-text">
                 Let's Talk About
