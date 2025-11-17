@@ -36,7 +36,7 @@ export function TagFilter({ tags, selectedTag, tagCounts }: TagFilterProps) {
           onClick={() => handleTagClick(tag)}
           className={`h-8 flex items-center px-1 pl-3 rounded-xl cursor-pointer border text-sm transition-all duration-300 backdrop-blur-sm ${
             selectedTag === tag
-              ? "border-blue-500 bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 hover:border-blue-400"
+              ? "border-purple-500/30 bg-gradient-to-r from-purple-500/20 via-pink-500/20 to-purple-600/20 text-white hover:from-purple-500/30 hover:via-pink-500/30 hover:to-purple-600/30 hover:border-purple-500/50"
               : "border-white/10 bg-white/5 hover:bg-white/10 hover:border-white/20 text-white/60 hover:text-white"
           }`}
         >
@@ -45,7 +45,7 @@ export function TagFilter({ tags, selectedTag, tagCounts }: TagFilterProps) {
             <span
               className={`ml-2 text-xs border rounded-lg h-6 min-w-6 font-medium flex items-center justify-center backdrop-blur-sm transition-all duration-300 ${
                 selectedTag === tag
-                  ? "border-blue-500/40 bg-blue-500/10 text-blue-400"
+                  ? "border-purple-500/40 bg-purple-500/10 text-white"
                   : "border-white/10 bg-white/5 text-white/60"
               }`}
             >
@@ -80,14 +80,18 @@ export function TagFilter({ tags, selectedTag, tagCounts }: TagFilterProps) {
                 <span
                   className={`w-full flex items-center justify-between font-medium cursor-pointer text-sm transition-colors ${
                     selectedTag === tag
-                      ? "underline underline-offset-4 text-blue-400"
+                      ? "underline underline-offset-4 bg-gradient-to-r from-purple-400 via-pink-400 to-purple-600 bg-clip-text text-transparent"
                       : "text-white/60"
                   }`}
                 >
                   {tag}
                 </span>
                 {tagCounts?.[tag] && (
-                  <span className="flex-shrink-0 ml-2 border border-white/10 rounded-lg backdrop-blur-sm bg-white/5 h-6 min-w-6 flex items-center justify-center text-white/60">
+                  <span className={`flex-shrink-0 ml-2 border rounded-lg backdrop-blur-sm h-6 min-w-6 flex items-center justify-center transition-all duration-300 ${
+                    selectedTag === tag
+                      ? "border-purple-500/40 bg-purple-500/10 bg-gradient-to-r from-purple-500/20 via-pink-500/20 to-purple-600/20 text-white"
+                      : "border-white/10 bg-white/5 text-white/60"
+                  }`}>
                     {tagCounts[tag]}
                   </span>
                 )}

@@ -100,7 +100,7 @@ const Contact = () => {
         </div>
       </header>
 
-      <div className="relative z-10 py-12 px-6 pt-24">
+      <div className="relative z-10 py-12 px-6 pt-32 md:pt-36">
         <div className="max-w-5xl mx-auto">
           
           {/* Header */}

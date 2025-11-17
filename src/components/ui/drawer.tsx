@@ -1,4 +1,5 @@
 import React, { useState, useEffect, createContext, useContext } from "react";
+import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
 import { cn } from "../../utils/cn";
@@ -69,8 +70,16 @@ interface DrawerContentProps {
 
 export function DrawerContent({ children, className }: DrawerContentProps) {
     const { isOpen, setIsOpen } = useDrawer();
+    const [mounted, setMounted] = useState(false);
 
-    return (
+    useEffect(() => {
+        setMounted(true);
+        return () => setMounted(false);
+    }, []);
+
+    if (!mounted) return null;
+
+    const drawerContent = (
         <AnimatePresence mode="wait">
             {isOpen && (
                 <>
@@ -79,7 +88,7 @@ export function DrawerContent({ children, className }: DrawerContentProps) {
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         transition={{ duration: 0.2, ease: "easeOut" }}
-                        className="fixed inset-0 bg-black/50 z-50"
+                        className="fixed inset-0 bg-black/50 z-[100]"
                         onClick={() => setIsOpen(false)}
                     />
 
@@ -92,9 +101,13 @@ export function DrawerContent({ children, className }: DrawerContentProps) {
                             ease: [0.16, 1, 0.3, 1]
                         }}
                         className={cn(
-                            "fixed bottom-3 left-0 right-0 bg-[rgb(10,10,10)]/95 backdrop-blur-md border-t border-transparent rounded-t-2xl z-50 max-h-[70vh] overflow-hidden w-[95%] mx-auto flex flex-col",
+                            "fixed bottom-0 left-0 right-0 bg-[rgb(10,10,10)]/95 backdrop-blur-md border-t border-transparent rounded-t-2xl z-[100] w-full flex flex-col shadow-2xl",
                             className
                         )}
+                        style={{
+                            maxHeight: '85vh',
+                            top: 'auto',
+                        }}
                     >
                         {children}
                     </motion.div>
@@ -102,6 +115,8 @@ export function DrawerContent({ children, className }: DrawerContentProps) {
             )}
         </AnimatePresence>
     );
+
+    return createPortal(drawerContent, document.body);
 }
 
 interface DrawerHeaderProps {
@@ -114,14 +129,14 @@ export function DrawerHeader({ children, className, showCloseButton = true }: Dr
     const { setIsOpen } = useDrawer();
 
     return (
-        <div className={cn("flex items-center justify-between p-4 border-b border-transparent", className)}>
+        <div className={cn("flex items-center justify-between p-4 border-b border-transparent flex-shrink-0", className)}>
             <div className="flex-1">{children}</div>
             {showCloseButton && (
                 <motion.button
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => setIsOpen(false)}
-                    className="text-white/60 hover:text-white transition-colors ml-4"
+                    className="text-white/60 hover:text-white transition-colors ml-4 flex-shrink-0"
                 >
                     <X size={20} />
                 </motion.button>
@@ -137,7 +152,7 @@ interface DrawerBodyProps {
 
 export function DrawerBody({ children, className }: DrawerBodyProps) {
     return (
-        <div className={cn("p-4 overflow-y-auto flex-1", className)}>
+        <div className={cn("p-4 overflow-y-auto flex-1 min-h-0", className)}>
             {children}
         </div>
     );
