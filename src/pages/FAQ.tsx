@@ -125,7 +125,7 @@ export default function FAQ() {
         </div>
       </header>
       
-      <div className="relative z-10 py-12 px-6 pt-24">
+      <div className="relative z-10 py-12 px-6 pt-32 md:pt-36">
         <div className="max-w-4xl mx-auto">
           
           {/* Header */}
