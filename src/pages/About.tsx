@@ -61,7 +61,7 @@ export default function About() {
           
           {/* Header */}
           <div className="text-center mb-20">
-            <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-6">
+            <h1 className="text-5xl md:text-7xl font-bold tracking-tight">
               <span className="bg-gradient-to-r from-white via-white/95 to-white/90 text-transparent bg-clip-text">
                 Building the Future of
               </span>
