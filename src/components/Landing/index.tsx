@@ -62,6 +62,7 @@ export default function Landing() {
               >
                 About
               </button>
+              <div className="h-4 w-px bg-white/20" />
               <button
                 onClick={handleContactClick}
                 className="text-white/80 hover:text-white transition-colors text-sm md:text-base font-medium px-3 py-1"
