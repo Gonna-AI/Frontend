@@ -24,14 +24,11 @@ export default function Landing() {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  const handleAboutClick = () => {
+  const handleAboutClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     setIsMobileMenuOpen(false);
-    const aboutSection = document.getElementById('about-section');
-    if (aboutSection) {
-      aboutSection.scrollIntoView({ behavior: 'smooth' });
-    } else {
       navigate('/about');
-    }
   };
 
   const handleContactClick = () => {
