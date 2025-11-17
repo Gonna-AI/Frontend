@@ -22,6 +22,8 @@ import About from './pages/About';
 import Careers from './pages/Careers';
 import Solutions from './pages/Solutions';
 import FAQ from './pages/FAQ';
+import Blog from './pages/Blog';
+import BlogPost from './pages/BlogPost';
 import { PrivateRoute } from './components/Auth/PrivateRoute';
 import ScrollToTop from './components/ScrollToTop';
 // Create a client
@@ -166,6 +168,8 @@ function App() {
           <Route path="/careers" element={<Careers />} />
           <Route path="/solutions" element={<Solutions />} />
           <Route path="/faq" element={<FAQ />} />
+          <Route path="/blog" element={<Blog />} />
+          <Route path="/blog/:slug" element={<BlogPost />} />
           <Route path="/profile" element={
             <ProtectedRoute>
               <Profile />
