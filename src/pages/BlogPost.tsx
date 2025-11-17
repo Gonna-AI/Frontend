@@ -93,7 +93,7 @@ export default function BlogPost() {
               <div className="flex flex-wrap items-center gap-3 gap-y-5 text-sm text-white/60">
                 <button
                   onClick={() => navigate('/blog')}
-                  className="h-6 w-6 flex items-center justify-center border border-transparent rounded hover:bg-white/5 transition-colors text-white/60 hover:text-white"
+                  className="h-8 w-8 flex items-center justify-center border border-transparent rounded-xl backdrop-blur-sm bg-white/5 hover:bg-white/10 hover:border-white/20 transition-all duration-300 text-white/60 hover:text-white"
                 >
                   <ArrowLeft className="w-4 h-4" />
                   <span className="sr-only">Back to all articles</span>
@@ -103,7 +103,7 @@ export default function BlogPost() {
                     {post.tags.map((tag: string) => (
                       <span
                         key={tag}
-                        className="h-6 w-fit px-3 text-sm font-medium bg-white/5 text-white/60 rounded-md border border-transparent flex items-center justify-center"
+                        className="h-6 w-fit px-3 text-sm font-medium backdrop-blur-sm bg-white/5 text-white/60 rounded-xl border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all duration-300 flex items-center justify-center"
                       >
                         {tag}
                       </span>
@@ -136,15 +136,15 @@ export default function BlogPost() {
             <div className="absolute max-w-7xl mx-auto left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] lg:w-full h-full border-x border-transparent p-0 pointer-events-none" />
             <main className="w-full p-0 overflow-hidden">
               {post.thumbnail && (
-                <div className="relative w-full h-[500px] overflow-hidden object-cover border border-transparent">
+                <div className="relative w-full h-[500px] overflow-hidden object-cover rounded-2xl mb-6">
                   <img
                     src={post.thumbnail}
                     alt={post.title}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover rounded-2xl"
                   />
                 </div>
               )}
-              <div className="p-6 lg:p-10">
+              <div className="p-6 lg:p-10 rounded-2xl backdrop-blur-sm bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all duration-300">
                 <div className="prose prose-invert max-w-none prose-headings:scroll-mt-8 prose-headings:font-semibold prose-a:no-underline prose-headings:tracking-tight prose-headings:text-balance prose-p:tracking-tight prose-p:text-balance prose-lg prose-headings:text-white prose-p:text-white/80 prose-li:text-white/80 prose-strong:text-white">
                   {post.content ? (
                     <div className="whitespace-pre-wrap text-white/80">{post.content}</div>
@@ -163,7 +163,7 @@ export default function BlogPost() {
               </div>
               
               {relatedPosts.length > 0 && (
-                <div className="mt-10 p-6 lg:p-10 border-t border-transparent">
+                <div className="mt-10 p-6 lg:p-10 rounded-2xl backdrop-blur-sm bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all duration-300">
                   <h2 className="text-2xl font-semibold mb-6 text-white">Related Articles</h2>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {relatedPosts.map((relatedPost) => {
