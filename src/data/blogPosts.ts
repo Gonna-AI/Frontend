@@ -22,7 +22,7 @@ export const blogPosts: BlogPost[] = [
     featured: true,
     readTime: "8 min read",
     author: "arghya",
-    thumbnail: "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=1200&h=630&fit=crop&q=80",
+    thumbnail: "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=1200&h=630&fit=crop&q=80",
     content: `
 
 
