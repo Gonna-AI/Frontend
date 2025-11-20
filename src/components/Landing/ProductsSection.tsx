@@ -11,16 +11,29 @@ export default function ProductsSection() {
         <div className="relative py-24 px-4 sm:px-6 bg-transparent overflow-hidden">
             {/* Background Gradients - Dynamic based on active product */}
             <div
-                className="absolute inset-0 pointer-events-none transition-colors duration-700"
+                className="absolute inset-0 pointer-events-none"
                 style={{
                     maskImage: 'linear-gradient(to bottom, transparent, black 25%, black 75%, transparent)',
                     WebkitMaskImage: 'linear-gradient(to bottom, transparent, black 25%, black 75%, transparent)'
                 }}
             >
-                <div className={`absolute top-0 left-1/4 w-96 h-96 rounded-full blur-[100px] transition-colors duration-700 ${activeProduct === 'arbor' ? 'bg-emerald-500/10' : 'bg-indigo-500/10'
-                    }`} />
-                <div className={`absolute bottom-0 right-1/4 w-96 h-96 rounded-full blur-[100px] transition-colors duration-700 ${activeProduct === 'arbor' ? 'bg-teal-500/10' : 'bg-violet-500/10'
-                    }`} />
+                <div
+                    className={`absolute top-0 left-1/4 w-96 h-96 transition-opacity duration-700 ${activeProduct === 'arbor' ? 'opacity-100' : 'opacity-0'}`}
+                    style={{ background: 'radial-gradient(circle, rgba(16, 185, 129, 0.15) 0%, transparent 70%)' }}
+                />
+                <div
+                    className={`absolute top-0 left-1/4 w-96 h-96 transition-opacity duration-700 ${activeProduct === 'juris' ? 'opacity-100' : 'opacity-0'}`}
+                    style={{ background: 'radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, transparent 70%)' }}
+                />
+
+                <div
+                    className={`absolute bottom-0 right-1/4 w-96 h-96 transition-opacity duration-700 ${activeProduct === 'arbor' ? 'opacity-100' : 'opacity-0'}`}
+                    style={{ background: 'radial-gradient(circle, rgba(20, 184, 166, 0.15) 0%, transparent 70%)' }}
+                />
+                <div
+                    className={`absolute bottom-0 right-1/4 w-96 h-96 transition-opacity duration-700 ${activeProduct === 'juris' ? 'opacity-100' : 'opacity-0'}`}
+                    style={{ background: 'radial-gradient(circle, rgba(139, 92, 246, 0.15) 0%, transparent 70%)' }}
+                />
             </div>
 
             <div className="max-w-6xl mx-auto relative z-10">
@@ -78,7 +91,7 @@ export default function ProductsSection() {
                             </div>
 
                             <div className="grid md:grid-cols-2 gap-8">
-                                <div className="group relative overflow-hidden rounded-[2.5rem] bg-gradient-to-b from-white/[0.05] to-transparent p-10 ring-1 ring-white/5 backdrop-blur-md transition-all duration-500 hover:scale-[1.01] hover:from-white/[0.08] hover:ring-white/10 hover:shadow-2xl hover:shadow-emerald-500/10">
+                                <div className="group relative overflow-hidden rounded-[2.5rem] bg-gradient-to-b from-white/[0.05] to-transparent p-10 ring-1 ring-white/5 transition-all duration-500 hover:scale-[1.01] hover:from-white/[0.08] hover:ring-white/10 hover:shadow-2xl hover:shadow-emerald-500/10">
                                     <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
                                     <div className="relative z-10">
                                         <div className="flex items-center gap-4 mb-8">
@@ -107,7 +120,7 @@ export default function ProductsSection() {
                                     </div>
                                 </div>
 
-                                <div className="group relative overflow-hidden rounded-[2.5rem] bg-gradient-to-b from-white/[0.05] to-transparent p-10 ring-1 ring-white/5 backdrop-blur-md transition-all duration-500 hover:scale-[1.01] hover:from-white/[0.08] hover:ring-white/10 hover:shadow-2xl hover:shadow-teal-500/10">
+                                <div className="group relative overflow-hidden rounded-[2.5rem] bg-gradient-to-b from-white/[0.05] to-transparent p-10 ring-1 ring-white/5 transition-all duration-500 hover:scale-[1.01] hover:from-white/[0.08] hover:ring-white/10 hover:shadow-2xl hover:shadow-teal-500/10">
                                     <div className="absolute inset-0 bg-gradient-to-br from-teal-500/10 via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
                                     <div className="relative z-10">
                                         <div className="flex items-center gap-4 mb-8">
@@ -158,7 +171,7 @@ export default function ProductsSection() {
                             </div>
 
                             <div className="grid md:grid-cols-2 gap-8">
-                                <div className="group relative overflow-hidden rounded-[2.5rem] bg-gradient-to-b from-white/[0.05] to-transparent p-10 ring-1 ring-white/5 backdrop-blur-md transition-all duration-500 hover:scale-[1.01] hover:from-white/[0.08] hover:ring-white/10 hover:shadow-2xl hover:shadow-indigo-500/10">
+                                <div className="group relative overflow-hidden rounded-[2.5rem] bg-gradient-to-b from-white/[0.05] to-transparent p-10 ring-1 ring-white/5 transition-all duration-500 hover:scale-[1.01] hover:from-white/[0.08] hover:ring-white/10 hover:shadow-2xl hover:shadow-indigo-500/10">
                                     <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
                                     <div className="relative z-10">
                                         <div className="flex items-center gap-4 mb-8">
@@ -187,7 +200,7 @@ export default function ProductsSection() {
                                     </div>
                                 </div>
 
-                                <div className="group relative overflow-hidden rounded-[2.5rem] bg-gradient-to-b from-white/[0.05] to-transparent p-10 ring-1 ring-white/5 backdrop-blur-md transition-all duration-500 hover:scale-[1.01] hover:from-white/[0.08] hover:ring-white/10 hover:shadow-2xl hover:shadow-violet-500/10">
+                                <div className="group relative overflow-hidden rounded-[2.5rem] bg-gradient-to-b from-white/[0.05] to-transparent p-10 ring-1 ring-white/5 transition-all duration-500 hover:scale-[1.01] hover:from-white/[0.08] hover:ring-white/10 hover:shadow-2xl hover:shadow-violet-500/10">
                                     <div className="absolute inset-0 bg-gradient-to-br from-violet-500/10 via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
                                     <div className="relative z-10">
                                         <div className="flex items-center gap-4 mb-8">
