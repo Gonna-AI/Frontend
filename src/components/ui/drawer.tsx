@@ -101,12 +101,14 @@ export function DrawerContent({ children, className }: DrawerContentProps) {
                             ease: [0.16, 1, 0.3, 1]
                         }}
                         className={cn(
-                            "fixed bottom-0 left-0 right-0 bg-[rgb(10,10,10)]/95 backdrop-blur-md border-t border-transparent rounded-t-2xl z-[100] w-full flex flex-col shadow-2xl",
+                            "fixed bottom-3 left-3 right-3 backdrop-blur-2xl border border-white/30 rounded-3xl z-[100] flex flex-col",
                             className
                         )}
                         style={{
                             maxHeight: '85vh',
                             top: 'auto',
+                            background: 'rgba(10, 10, 10, 0.3)',
+                            boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.5), inset 0 1px 1px 0 rgba(255, 255, 255, 0.2), inset 0 -1px 1px 0 rgba(255, 255, 255, 0.05)',
                         }}
                     >
                         {children}
