@@ -1,34 +1,26 @@
 import Hero from './Hero';
 import AboutSection from './AboutSection';
+import ProductsSection from './ProductsSection';
 import Metrics from './Metrics';
 import Features from './Features';
 import Conversation from './Conversation';
 import FAQSection from './FAQSection';
 import Footer from './Footer';
 import { useNavigate } from 'react-router-dom';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Menu, X } from 'lucide-react';
 
 export default function Landing() {
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
 
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-    
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
+
 
   const handleAboutClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     setIsMobileMenuOpen(false);
-      navigate('/about');
+    navigate('/about');
   };
 
   const handleContactClick = () => {
@@ -173,10 +165,11 @@ export default function Landing() {
 
       <div className="relative z-10">
         <Hero />
-        
+
         <div id="about-section">
           <AboutSection />
         </div>
+        <ProductsSection />
         <Metrics />
         <Features />
         <FAQSection />
