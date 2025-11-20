@@ -17,7 +17,7 @@ function BlogContent() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const selectedTag = searchParams.get("tag") || "All";
-  
+
   const allBlogs = getAllBlogPosts();
   const filteredBlogs = getBlogPostsByTag(selectedTag);
   const allTags = ["All", ...getAllTags()];
@@ -37,14 +37,14 @@ function BlogContent() {
     <div className="bg-[rgb(10,10,10)] min-h-screen relative overflow-x-hidden">
       {/* Blue theme background accents */}
       <div className="fixed inset-0 bg-[rgb(10,10,10)] -z-10">
-        <div 
+        <div
           className="absolute top-0 right-0 -translate-y-1/4 translate-x-1/4 w-96 md:w-[800px] h-96 md:h-[800px] opacity-40"
           style={{
             background: 'radial-gradient(circle, rgba(59,130,246,0.6) 0%, rgba(59,130,246,0.25) 40%, transparent 100%)',
             filter: 'blur(80px)',
           }}
         />
-        <div 
+        <div
           className="absolute bottom-0 left-0 translate-y-1/4 -translate-x-1/4 w-72 md:w-[600px] h-72 md:h-[600px] opacity-30"
           style={{
             background: 'radial-gradient(circle, rgba(29,78,216,0.5) 0%, rgba(29,78,216,0.2) 40%, transparent 100%)',
@@ -54,7 +54,7 @@ function BlogContent() {
       </div>
 
       {/* Glassy Header with Logo */}
-      <header className="fixed top-0 left-0 right-0 z-50 w-full py-3 px-4 sm:px-6 backdrop-blur-md bg-[rgb(10,10,10)]/80 border-b border-transparent">
+      <header className="fixed top-0 left-0 right-0 z-50 w-full py-3 px-4 sm:px-6 backdrop-blur-md bg-[rgb(10,10,10)]/80 border-b border-white/10">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <button
             type="button"
@@ -116,7 +116,7 @@ function BlogContent() {
                 const formattedDate = formatDate(blog.date);
 
                 return (
-                  <div 
+                  <div
                     key={blog.slug}
                     className="w-[calc(100%+3rem)] -mx-6 md:w-auto md:mx-0 rounded-2xl backdrop-blur-sm bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all duration-300 md:bg-transparent md:border-transparent md:backdrop-blur-none md:rounded-none md:hover:bg-transparent md:hover:border-transparent"
                   >
