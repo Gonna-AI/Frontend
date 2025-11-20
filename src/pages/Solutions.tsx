@@ -1,10 +1,8 @@
-import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Zap, Brain, FileCheck, Clock, BarChart3, Shield, ArrowRight } from 'lucide-react';
 
 export default function Solutions() {
   const navigate = useNavigate();
-  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
   const solutions = [
     {
@@ -14,7 +12,8 @@ export default function Solutions() {
       features: ['OCR & Data Extraction', 'Document Classification', 'Auto-validation'],
       gradient: 'from-emerald-500/10 to-teal-500/10',
       iconGradient: 'from-emerald-400 to-teal-500',
-      borderColor: 'emerald-500/30'
+      borderColor: 'emerald-500/30',
+      color: 'emerald'
     },
     {
       icon: Zap,
@@ -23,7 +22,8 @@ export default function Solutions() {
       features: ['Smart Task Routing', 'Automated Approvals', 'Process Optimization'],
       gradient: 'from-blue-500/10 to-indigo-500/10',
       iconGradient: 'from-blue-400 to-indigo-500',
-      borderColor: 'blue-500/30'
+      borderColor: 'blue-500/30',
+      color: 'blue'
     },
     {
       icon: FileCheck,
@@ -32,7 +32,8 @@ export default function Solutions() {
       features: ['Urgency Detection', 'Complexity Analysis', 'Priority Scoring'],
       gradient: 'from-purple-500/10 to-pink-500/10',
       iconGradient: 'from-purple-400 to-pink-500',
-      borderColor: 'purple-500/30'
+      borderColor: 'purple-500/30',
+      color: 'purple'
     },
     {
       icon: Clock,
@@ -41,7 +42,8 @@ export default function Solutions() {
       features: ['Live Status Updates', 'Automated Notifications', 'Full Audit Trail'],
       gradient: 'from-orange-500/10 to-red-500/10',
       iconGradient: 'from-orange-400 to-red-500',
-      borderColor: 'orange-500/30'
+      borderColor: 'orange-500/30',
+      color: 'orange'
     },
     {
       icon: BarChart3,
@@ -50,7 +52,8 @@ export default function Solutions() {
       features: ['Custom Dashboards', 'Predictive Analytics', 'Performance Metrics'],
       gradient: 'from-cyan-500/10 to-blue-500/10',
       iconGradient: 'from-cyan-400 to-blue-500',
-      borderColor: 'cyan-500/30'
+      borderColor: 'cyan-500/30',
+      color: 'cyan'
     },
     {
       icon: Shield,
@@ -59,7 +62,8 @@ export default function Solutions() {
       features: ['Data Encryption', 'Compliance Monitoring', 'Access Controls'],
       gradient: 'from-violet-500/10 to-purple-500/10',
       iconGradient: 'from-violet-400 to-purple-500',
-      borderColor: 'violet-500/30'
+      borderColor: 'violet-500/30',
+      color: 'violet'
     }
   ];
 
@@ -67,14 +71,14 @@ export default function Solutions() {
     <div className="bg-[rgb(10,10,10)] min-h-screen relative overflow-x-hidden">
       {/* Purple theme background accents */}
       <div className="fixed inset-0 bg-[rgb(10,10,10)] -z-10">
-        <div 
+        <div
           className="absolute top-0 right-0 -translate-y-1/4 translate-x-1/4 w-96 md:w-[800px] h-96 md:h-[800px] opacity-40"
           style={{
             background: 'radial-gradient(circle, rgba(147,51,234,0.6) 0%, rgba(147,51,234,0.25) 40%, transparent 100%)',
             filter: 'blur(80px)',
           }}
         />
-        <div 
+        <div
           className="absolute bottom-0 left-0 translate-y-1/4 -translate-x-1/4 w-72 md:w-[600px] h-72 md:h-[600px] opacity-30"
           style={{
             background: 'radial-gradient(circle, rgba(109,40,217,0.5) 0%, rgba(109,40,217,0.2) 40%, transparent 100%)',
@@ -92,7 +96,7 @@ export default function Solutions() {
             className="flex items-center gap-2 group"
             aria-label="Go to home"
           >
-            <svg 
+            <svg
               viewBox="0 0 464 468"
               className="w-9 h-9 md:w-11 md:h-11"
             >
@@ -113,7 +117,7 @@ export default function Solutions() {
 
       <div className="relative z-10 py-12 px-6 pt-32 md:pt-36">
         <div className="max-w-7xl mx-auto">
-          
+
           {/* Header */}
           <div className="text-center mb-20">
             <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-6">
@@ -134,55 +138,45 @@ export default function Solutions() {
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-20">
             {solutions.map((solution, index) => {
               const Icon = solution.icon;
-              
+              const styles = {
+                emerald: { bg: 'bg-emerald-500/10', text: 'text-emerald-400', shadow: 'hover:shadow-emerald-500/10', from: 'from-emerald-500/10', dot: 'bg-emerald-400' },
+                blue: { bg: 'bg-blue-500/10', text: 'text-blue-400', shadow: 'hover:shadow-blue-500/10', from: 'from-blue-500/10', dot: 'bg-blue-400' },
+                purple: { bg: 'bg-purple-500/10', text: 'text-purple-400', shadow: 'hover:shadow-purple-500/10', from: 'from-purple-500/10', dot: 'bg-purple-400' },
+                orange: { bg: 'bg-orange-500/10', text: 'text-orange-400', shadow: 'hover:shadow-orange-500/10', from: 'from-orange-500/10', dot: 'bg-orange-400' },
+                cyan: { bg: 'bg-cyan-500/10', text: 'text-cyan-400', shadow: 'hover:shadow-cyan-500/10', from: 'from-cyan-500/10', dot: 'bg-cyan-400' },
+                violet: { bg: 'bg-violet-500/10', text: 'text-violet-400', shadow: 'hover:shadow-violet-500/10', from: 'from-violet-500/10', dot: 'bg-violet-400' }
+              }[solution.color as string] || { bg: 'bg-white/10', text: 'text-white', shadow: 'hover:shadow-white/10', from: 'from-white/10', dot: 'bg-white' };
+
               return (
-                <div 
+                <div
                   key={index}
-                  onMouseEnter={() => setHoveredIndex(index)}
-                  onMouseLeave={() => setHoveredIndex(null)}
-                  className={`group relative rounded-2xl backdrop-blur-sm transition-all duration-500 cursor-pointer ${
-                    hoveredIndex === index 
-                      ? `border border-${solution.borderColor.split('/')[0]}/40 bg-gradient-to-br ${solution.gradient} shadow-lg` 
-                      : 'border border-white/5 bg-gradient-to-br from-white/[0.02] via-white/[0.01] to-transparent'
-                  }`}
                   onClick={() => navigate('/contact')}
+                  className={`group relative overflow-hidden rounded-[2.5rem] bg-gradient-to-b from-white/[0.05] to-transparent p-10 ring-1 ring-white/5 backdrop-blur-md transition-all duration-500 hover:scale-[1.01] hover:from-white/[0.08] hover:ring-white/10 hover:shadow-2xl ${styles.shadow} cursor-pointer`}
                 >
-                  {/* Glow effect on hover */}
-                  <div 
-                    className={`absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-30 transition-opacity duration-500 blur-3xl -z-10 bg-gradient-to-br ${solution.iconGradient}`}
-                  />
-                  
-                  {/* Multi-layer gradient overlay */}
-                  <div className={`absolute inset-0 rounded-2xl bg-gradient-to-br ${solution.iconGradient} opacity-0 group-hover:opacity-5 transition-opacity duration-500`} />
-                  <div className={`absolute inset-0 rounded-2xl bg-gradient-to-tl from-white/[0.02] to-transparent opacity-30`} />
-                  
-                  <div className="relative z-10 p-8 space-y-6 h-full flex flex-col">
-                    {/* Icon */}
-                    <div className={`w-14 h-14 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-500`}>
-                      <Icon className={`w-10 h-10 bg-gradient-to-br ${solution.iconGradient} text-transparent bg-clip-text drop-shadow-lg`} strokeWidth={1.5} />
+                  <div className={`absolute inset-0 bg-gradient-to-br ${styles.from} via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100`} />
+
+                  <div className="relative z-10 flex flex-col h-full">
+                    <div className="flex items-center gap-4 mb-8">
+                      <div className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl ${styles.bg}`}>
+                        <Icon className={`w-7 h-7 ${styles.text}`} />
+                      </div>
+                      <h3 className="text-2xl font-semibold text-white leading-tight">
+                        {solution.title}
+                      </h3>
                     </div>
-                    
-                    {/* Title */}
-                    <h3 className="text-xl md:text-2xl font-bold text-white/90 group-hover:text-white transition-colors">
-                      {solution.title}
-                    </h3>
-                    
-                    {/* Description */}
-                    <p className="text-sm text-white/50 leading-relaxed group-hover:text-white/70 transition-colors flex-grow">
+
+                    <p className="text-lg text-white/60 leading-relaxed mb-8 flex-grow">
                       {solution.description}
                     </p>
-                    
-                    {/* Features */}
-                    <div className="space-y-2.5 pt-4 border-t border-white/5 group-hover:border-white/10 transition-colors">
+
+                    <ul className="space-y-4 mt-auto">
                       {solution.features.map((feature, idx) => (
-                        <div key={idx} className="flex items-center gap-2.5">
-                          <div className={`w-1.5 h-1.5 rounded-full bg-gradient-to-r ${solution.iconGradient} group-hover:scale-125 transition-transform`} />
-                          <span className="text-xs text-white/50 group-hover:text-white/80 transition-colors font-medium">
-                            {feature}
-                          </span>
+                        <div key={idx} className="flex items-start gap-3 text-white/60">
+                          <div className={`mt-2 h-1.5 w-1.5 rounded-full ${styles.dot}`} />
+                          <span className="text-base">{feature}</span>
                         </div>
                       ))}
-                    </div>
+                    </ul>
                   </div>
                 </div>
               );
@@ -190,18 +184,18 @@ export default function Solutions() {
           </div>
 
           {/* CTA Section */}
-          <div className="relative rounded-3xl border border-purple-500/20 bg-gradient-to-br from-purple-500/5 to-pink-500/5 backdrop-blur-sm overflow-hidden">
+          <div className="relative rounded-[2.5rem] bg-gradient-to-br from-purple-500/5 to-pink-500/5 ring-1 ring-purple-500/20 backdrop-blur-md overflow-hidden">
             {/* Decorative gradient blob */}
             <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-full blur-3xl -z-10" />
             <div className="absolute bottom-0 left-0 w-96 h-96 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-full blur-3xl -z-10" />
-            
+
             <div className="relative z-10 text-center py-16 px-8">
               <div className="inline-block mb-4">
                 <span className="px-4 py-2 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-400 text-sm font-medium">
                   Start Your Journey
                 </span>
               </div>
-              
+
               <h2 className="text-4xl md:text-5xl font-bold mb-6">
                 <span className="bg-gradient-to-r from-white to-white/90 text-transparent bg-clip-text">
                   Ready to Transform
@@ -211,11 +205,11 @@ export default function Solutions() {
                   Your Operations?
                 </span>
               </h2>
-              
+
               <p className="text-lg text-white/60 mb-10 max-w-2xl mx-auto leading-relaxed">
                 Schedule a personalized demo to see how our AI-powered solutions can reduce turnaround time by <span className="text-purple-400 font-semibold">40%</span> and dramatically improve accuracy.
               </p>
-              
+
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                 <button
                   onClick={() => navigate('/contact')}
@@ -224,7 +218,7 @@ export default function Solutions() {
                   <span>Book a Demo</span>
                   <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                 </button>
-                
+
                 <button
                   onClick={() => navigate('/contact')}
                   className="w-full sm:w-auto px-8 py-4 rounded-xl bg-white/5 border-2 border-white/10 text-white font-semibold hover:bg-white/10 hover:border-white/20 transition-all duration-300"
