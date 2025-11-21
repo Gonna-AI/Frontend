@@ -20,12 +20,12 @@ const Contact = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
+
     try {
       const response = await api.post('/api/contact/submit', formData);
 
       if (response.status !== 200) throw new Error('Submission failed');
-      
+
       setSubmitStatus('success');
       setFormData({
         fullName: '',
@@ -56,14 +56,14 @@ const Contact = () => {
     <div className="bg-[rgb(10,10,10)] min-h-screen relative overflow-x-hidden">
       {/* Red theme background accents */}
       <div className="fixed inset-0 bg-[rgb(10,10,10)] -z-10">
-        <div 
+        <div
           className="absolute top-0 right-0 -translate-y-1/4 translate-x-1/4 w-96 md:w-[800px] h-96 md:h-[800px] opacity-40"
           style={{
             background: 'radial-gradient(circle, rgba(239,68,68,0.6) 0%, rgba(239,68,68,0.25) 40%, transparent 100%)',
             filter: 'blur(80px)',
           }}
         />
-        <div 
+        <div
           className="absolute bottom-0 left-0 translate-y-1/4 -translate-x-1/4 w-72 md:w-[600px] h-72 md:h-[600px] opacity-30"
           style={{
             background: 'radial-gradient(circle, rgba(185,28,28,0.5) 0%, rgba(185,28,28,0.2) 40%, transparent 100%)',
@@ -81,7 +81,7 @@ const Contact = () => {
             className="flex items-center gap-2 group"
             aria-label="Go to home"
           >
-            <svg 
+            <svg
               viewBox="0 0 464 468"
               className="w-9 h-9 md:w-11 md:h-11"
             >
@@ -102,7 +102,7 @@ const Contact = () => {
 
       <div className="relative z-10 py-12 px-6 pt-32 md:pt-36">
         <div className="max-w-5xl mx-auto">
-          
+
           {/* Header */}
           <div className="text-center mb-16">
             <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-6">
@@ -120,30 +120,30 @@ const Contact = () => {
           </div>
 
           {/* Contact Info Cards */}
-          <div className="grid md:grid-cols-3 gap-6 mb-16">
-            <div className="group rounded-2xl border border-white/10 bg-gradient-to-br from-white/[0.02] via-white/[0.01] to-transparent backdrop-blur-sm p-6 hover:border-red-500/30 transition-all duration-300 text-center">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-red-500/10 to-rose-500/10 border border-red-500/20 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
+          <div className="grid md:grid-cols-3 gap-6 mb-16 max-w-4xl mx-auto">
+            <div className="group rounded-3xl border border-white/10 bg-white/[0.02] backdrop-blur-xl p-6 hover:border-red-500/30 hover:bg-white/[0.04] transition-all duration-300 text-center">
+              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-red-500/10 to-rose-500/10 border border-red-500/20 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
                 <Mail className="w-6 h-6 text-red-400" />
               </div>
-              <h3 className="font-semibold mb-2 text-white/90">Email</h3>
+              <h3 className="font-semibold mb-2 text-white/90 text-lg">Email</h3>
               <a href="mailto:contact@clerktree.com" className="text-white/60 hover:text-red-400 transition-colors text-sm">
                 contact@clerktree.com
               </a>
             </div>
-            <div className="group rounded-2xl border border-white/10 bg-gradient-to-br from-white/[0.02] via-white/[0.01] to-transparent backdrop-blur-sm p-6 hover:border-red-500/30 transition-all duration-300 text-center">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-red-500/10 to-rose-500/10 border border-red-500/20 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
+            <div className="group rounded-3xl border border-white/10 bg-white/[0.02] backdrop-blur-xl p-6 hover:border-red-500/30 hover:bg-white/[0.04] transition-all duration-300 text-center">
+              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-red-500/10 to-rose-500/10 border border-red-500/20 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
                 <Phone className="w-6 h-6 text-red-400" />
               </div>
-              <h3 className="font-semibold mb-2 text-white/90">Phone</h3>
+              <h3 className="font-semibold mb-2 text-white/90 text-lg">Phone</h3>
               <a href="tel:+919650848339" className="text-white/60 hover:text-red-400 transition-colors text-sm block">
                 +91 (965) 084-8339<br />+49 160 96893540
               </a>
             </div>
-            <div className="group rounded-2xl border border-white/10 bg-gradient-to-br from-white/[0.02] via-white/[0.01] to-transparent backdrop-blur-sm p-6 hover:border-red-500/30 transition-all duration-300 text-center">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-red-500/10 to-rose-500/10 border border-red-500/20 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
+            <div className="group rounded-3xl border border-white/10 bg-white/[0.02] backdrop-blur-xl p-6 hover:border-red-500/30 hover:bg-white/[0.04] transition-all duration-300 text-center">
+              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-red-500/10 to-rose-500/10 border border-red-500/20 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
                 <MapPin className="w-6 h-6 text-red-400" />
               </div>
-              <h3 className="font-semibold mb-2 text-white/90">Location</h3>
+              <h3 className="font-semibold mb-2 text-white/90 text-lg">Location</h3>
               <p className="text-white/60 text-sm">
                 Mallersdorfer Str. 10<br />94315 Straubing, Germany
               </p>
@@ -151,26 +151,33 @@ const Contact = () => {
           </div>
 
           {/* Contact Form */}
-          <div className="rounded-2xl border border-red-500/20 bg-gradient-to-br from-white/[0.02] via-white/[0.01] to-transparent backdrop-blur-sm p-8 md:p-12">
-            <h2 className="text-2xl md:text-3xl font-bold mb-2 bg-gradient-to-r from-red-400 to-red-600 text-transparent bg-clip-text">
-              Send us a Message
-            </h2>
-            <p className="text-white/60 mb-8">
-              Fill out the form below and we'll get back to you within 1-2 business days.
-            </p>
+          <div className="max-w-3xl mx-auto rounded-3xl border border-white/10 bg-white/[0.02] backdrop-blur-xl p-8 md:p-12 shadow-2xl shadow-black/50 relative overflow-hidden">
+            {/* Decorative gradient glow */}
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-1 bg-gradient-to-r from-transparent via-red-500/50 to-transparent" />
+
+            <div className="text-center mb-10">
+              <h2 className="text-3xl md:text-4xl font-bold mb-4 bg-gradient-to-r from-white via-white/90 to-white/70 text-transparent bg-clip-text">
+                Send us a Message
+              </h2>
+              <p className="text-white/50 text-lg max-w-lg mx-auto">
+                Fill out the form below and we'll get back to you within 1-2 business days.
+              </p>
+            </div>
 
             {submitStatus === 'success' ? (
-              <div className="text-center py-12">
-                <CheckCircle2 className="w-16 h-16 text-red-500 mx-auto mb-4" />
-                <h3 className="text-2xl font-semibold text-white mb-2">Message Sent!</h3>
-                <p className="text-white/70">Thank you for contacting us. We'll be in touch soon!</p>
+              <div className="text-center py-16 animate-in fade-in zoom-in duration-500">
+                <div className="w-20 h-20 bg-green-500/10 rounded-full flex items-center justify-center mx-auto mb-6 border border-green-500/20">
+                  <CheckCircle2 className="w-10 h-10 text-green-500" />
+                </div>
+                <h3 className="text-2xl font-bold text-white mb-3">Message Sent!</h3>
+                <p className="text-white/60">Thank you for contacting us. We'll be in touch soon!</p>
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-6">
                 {/* Full Name and Company Name */}
                 <div className="grid md:grid-cols-2 gap-6">
-                  <div>
-                    <label htmlFor="fullName" className="block text-sm font-medium text-white/80 mb-2">
+                  <div className="space-y-2">
+                    <label htmlFor="fullName" className="text-sm font-medium text-white/70 ml-1">
                       Full Name <span className="text-red-500">*</span>
                     </label>
                     <input
@@ -180,12 +187,12 @@ const Contact = () => {
                       required
                       value={formData.fullName}
                       onChange={handleChange}
-                      className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white placeholder-white/40 focus:outline-none focus:border-red-500/50 focus:ring-2 focus:ring-red-500/20 transition-all"
+                      className="w-full px-5 py-3.5 rounded-xl bg-white/[0.03] border border-white/10 text-white placeholder-white/20 focus:outline-none focus:border-red-500/50 focus:bg-white/[0.05] focus:ring-4 focus:ring-red-500/10 transition-all duration-300"
                       placeholder="John Doe"
                     />
                   </div>
-                  <div>
-                    <label htmlFor="companyName" className="block text-sm font-medium text-white/80 mb-2">
+                  <div className="space-y-2">
+                    <label htmlFor="companyName" className="text-sm font-medium text-white/70 ml-1">
                       Company Name <span className="text-red-500">*</span>
                     </label>
                     <input
@@ -195,7 +202,7 @@ const Contact = () => {
                       required
                       value={formData.companyName}
                       onChange={handleChange}
-                      className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white placeholder-white/40 focus:outline-none focus:border-red-500/50 focus:ring-2 focus:ring-red-500/20 transition-all"
+                      className="w-full px-5 py-3.5 rounded-xl bg-white/[0.03] border border-white/10 text-white placeholder-white/20 focus:outline-none focus:border-red-500/50 focus:bg-white/[0.05] focus:ring-4 focus:ring-red-500/10 transition-all duration-300"
                       placeholder="Your Company"
                     />
                   </div>
@@ -203,8 +210,8 @@ const Contact = () => {
 
                 {/* Email and Phone */}
                 <div className="grid md:grid-cols-2 gap-6">
-                  <div>
-                    <label htmlFor="email" className="block text-sm font-medium text-white/80 mb-2">
+                  <div className="space-y-2">
+                    <label htmlFor="email" className="text-sm font-medium text-white/70 ml-1">
                       Business Email <span className="text-red-500">*</span>
                     </label>
                     <input
@@ -214,12 +221,12 @@ const Contact = () => {
                       required
                       value={formData.email}
                       onChange={handleChange}
-                      className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white placeholder-white/40 focus:outline-none focus:border-red-500/50 focus:ring-2 focus:ring-red-500/20 transition-all"
+                      className="w-full px-5 py-3.5 rounded-xl bg-white/[0.03] border border-white/10 text-white placeholder-white/20 focus:outline-none focus:border-red-500/50 focus:bg-white/[0.05] focus:ring-4 focus:ring-red-500/10 transition-all duration-300"
                       placeholder="you@company.com"
                     />
                   </div>
-                  <div>
-                    <label htmlFor="phone" className="block text-sm font-medium text-white/80 mb-2">
+                  <div className="space-y-2">
+                    <label htmlFor="phone" className="text-sm font-medium text-white/70 ml-1">
                       Phone Number <span className="text-red-500">*</span>
                     </label>
                     <input
@@ -229,7 +236,7 @@ const Contact = () => {
                       required
                       value={formData.phone}
                       onChange={handleChange}
-                      className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white placeholder-white/40 focus:outline-none focus:border-red-500/50 focus:ring-2 focus:ring-red-500/20 transition-all"
+                      className="w-full px-5 py-3.5 rounded-xl bg-white/[0.03] border border-white/10 text-white placeholder-white/20 focus:outline-none focus:border-red-500/50 focus:bg-white/[0.05] focus:ring-4 focus:ring-red-500/10 transition-all duration-300"
                       placeholder="+1 (555) 000-0000"
                     />
                   </div>
@@ -237,65 +244,79 @@ const Contact = () => {
 
                 {/* Interest and Employee Count */}
                 <div className="grid md:grid-cols-2 gap-6">
-                  <div>
-                    <label htmlFor="interest" className="block text-sm font-medium text-white/80 mb-2">
+                  <div className="space-y-2">
+                    <label htmlFor="interest" className="text-sm font-medium text-white/70 ml-1">
                       Interest <span className="text-red-500">*</span>
                     </label>
-                    <select
-                      id="interest"
-                      name="interest"
-                      required
-                      value={formData.interest}
-                      onChange={handleChange}
-                      className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white focus:outline-none focus:border-red-500/50 focus:ring-2 focus:ring-red-500/20 transition-all"
-                    >
-                      <option value="" className="bg-gray-900">Select your interest...</option>
-                      <option value="enterprise" className="bg-gray-900">Enterprise License</option>
-                      <option value="bulk" className="bg-gray-900">Bulk Purchase</option>
-                      <option value="custom" className="bg-gray-900">Custom Solution</option>
-                      <option value="other" className="bg-gray-900">Other</option>
-                    </select>
+                    <div className="relative">
+                      <select
+                        id="interest"
+                        name="interest"
+                        required
+                        value={formData.interest}
+                        onChange={handleChange}
+                        className="w-full px-5 py-3.5 rounded-xl bg-white/[0.03] border border-white/10 text-white focus:outline-none focus:border-red-500/50 focus:bg-white/[0.05] focus:ring-4 focus:ring-red-500/10 transition-all duration-300 appearance-none"
+                      >
+                        <option value="" className="bg-neutral-900">Select your interest...</option>
+                        <option value="enterprise" className="bg-neutral-900">Enterprise License</option>
+                        <option value="bulk" className="bg-neutral-900">Bulk Purchase</option>
+                        <option value="custom" className="bg-neutral-900">Custom Solution</option>
+                        <option value="other" className="bg-neutral-900">Other</option>
+                      </select>
+                      <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-white/30">
+                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M2.5 4.5L6 8L9.5 4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <label htmlFor="employeeCount" className="block text-sm font-medium text-white/80 mb-2">
+                  <div className="space-y-2">
+                    <label htmlFor="employeeCount" className="text-sm font-medium text-white/70 ml-1">
                       Number of Employees <span className="text-red-500">*</span>
                     </label>
-                    <select
-                      id="employeeCount"
-                      name="employeeCount"
-                      required
-                      value={formData.employeeCount}
-                      onChange={handleChange}
-                      className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white focus:outline-none focus:border-red-500/50 focus:ring-2 focus:ring-red-500/20 transition-all"
-                    >
-                      <option value="" className="bg-gray-900">Select range...</option>
-                      <option value="1-10" className="bg-gray-900">1-10</option>
-                      <option value="11-50" className="bg-gray-900">11-50</option>
-                      <option value="51-200" className="bg-gray-900">51-200</option>
-                      <option value="201+" className="bg-gray-900">201+</option>
-                    </select>
+                    <div className="relative">
+                      <select
+                        id="employeeCount"
+                        name="employeeCount"
+                        required
+                        value={formData.employeeCount}
+                        onChange={handleChange}
+                        className="w-full px-5 py-3.5 rounded-xl bg-white/[0.03] border border-white/10 text-white focus:outline-none focus:border-red-500/50 focus:bg-white/[0.05] focus:ring-4 focus:ring-red-500/10 transition-all duration-300 appearance-none"
+                      >
+                        <option value="" className="bg-neutral-900">Select range...</option>
+                        <option value="1-10" className="bg-neutral-900">1-10</option>
+                        <option value="11-50" className="bg-neutral-900">11-50</option>
+                        <option value="51-200" className="bg-neutral-900">51-200</option>
+                        <option value="201+" className="bg-neutral-900">201+</option>
+                      </select>
+                      <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-white/30">
+                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M2.5 4.5L6 8L9.5 4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
                 {/* Message */}
-                <div>
-                  <label htmlFor="message" className="block text-sm font-medium text-white/80 mb-2">
+                <div className="space-y-2">
+                  <label htmlFor="message" className="text-sm font-medium text-white/70 ml-1">
                     Message <span className="text-red-500">*</span>
                   </label>
                   <textarea
                     id="message"
                     name="message"
                     required
-                    rows={6}
+                    rows={5}
                     value={formData.message}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white placeholder-white/40 focus:outline-none focus:border-red-500/50 focus:ring-2 focus:ring-red-500/20 transition-all resize-none"
+                    className="w-full px-5 py-3.5 rounded-xl bg-white/[0.03] border border-white/10 text-white placeholder-white/20 focus:outline-none focus:border-red-500/50 focus:bg-white/[0.05] focus:ring-4 focus:ring-red-500/10 transition-all duration-300 resize-none"
                     placeholder="Tell us about your needs and requirements..."
                   />
                 </div>
 
                 {submitStatus === 'error' && (
-                  <div className="text-red-500 text-center">
+                  <div className="p-4 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-center text-sm">
                     Something went wrong. Please try again later.
                   </div>
                 )}
@@ -305,9 +326,17 @@ const Contact = () => {
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="w-full px-8 py-4 rounded-xl bg-gradient-to-r from-red-500 to-red-600 text-white font-semibold hover:from-red-600 hover:to-red-700 focus:outline-none focus:ring-2 focus:ring-red-500/50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg shadow-red-500/25"
+                    className="w-full px-8 py-4 rounded-xl bg-gradient-to-r from-red-600 to-red-500 text-white font-bold text-lg hover:from-red-500 hover:to-red-400 focus:outline-none focus:ring-4 focus:ring-red-500/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 shadow-lg shadow-red-600/20 hover:shadow-red-500/40 hover:scale-[1.02] active:scale-[0.98]"
                   >
-                    {isSubmitting ? 'Sending...' : 'Send Message'}
+                    {isSubmitting ? (
+                      <span className="flex items-center justify-center gap-2">
+                        <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Sending...
+                      </span>
+                    ) : 'Send Message'}
                   </button>
                 </div>
               </form>
