@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Mail, Phone, MapPin, CheckCircle2 } from 'lucide-react';
+import { Mail, Phone, MapPin, CheckCircle2, Send } from 'lucide-react';
 import api from '../config/api';
 import { useNavigate } from 'react-router-dom';
 
@@ -299,24 +299,29 @@ const Contact = () => {
                 </div>
 
                 {/* Message */}
+                {/* Message */}
                 <div className="space-y-2">
                   <label htmlFor="message" className="text-sm font-medium text-white/70 ml-1">
                     Message <span className="text-red-500">*</span>
                   </label>
-                  <textarea
-                    id="message"
-                    name="message"
-                    required
-                    rows={5}
-                    value={formData.message}
-                    onChange={handleChange}
-                    className="w-full px-5 py-3.5 rounded-xl bg-white/[0.03] border border-white/10 text-white placeholder-white/20 focus:outline-none focus:border-red-500/50 focus:bg-white/[0.05] focus:ring-4 focus:ring-red-500/10 transition-all duration-300 resize-none"
-                    placeholder="Tell us about your needs and requirements..."
-                  />
+                  <div className="relative group">
+                    <textarea
+                      id="message"
+                      name="message"
+                      required
+                      rows={5}
+                      value={formData.message}
+                      onChange={handleChange}
+                      className="peer w-full px-5 py-4 rounded-xl bg-white/[0.03] border border-white/10 text-white placeholder-white/20 focus:outline-none focus:bg-white/[0.05] transition-all duration-300 resize-none text-base leading-relaxed"
+                      placeholder="Tell us about your needs and requirements..."
+                    />
+                    {/* Animated Border Gradient on Focus */}
+                    <div className="absolute inset-0 rounded-xl border border-red-500/50 opacity-0 peer-focus:opacity-100 transition-opacity duration-300 pointer-events-none shadow-[0_0_20px_rgba(239,68,68,0.15)]" />
+                  </div>
                 </div>
 
                 {submitStatus === 'error' && (
-                  <div className="p-4 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-center text-sm">
+                  <div className="p-4 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-center text-sm animate-in fade-in slide-in-from-top-2">
                     Something went wrong. Please try again later.
                   </div>
                 )}
@@ -326,17 +331,28 @@ const Contact = () => {
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="w-full px-8 py-4 rounded-xl bg-gradient-to-r from-red-600 to-red-500 text-white font-bold text-lg hover:from-red-500 hover:to-red-400 focus:outline-none focus:ring-4 focus:ring-red-500/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 shadow-lg shadow-red-600/20 hover:shadow-red-500/40 hover:scale-[1.02] active:scale-[0.98]"
+                    className="group relative w-full overflow-hidden rounded-xl bg-gradient-to-r from-red-600 to-red-500 p-[1px] focus:outline-none focus:ring-4 focus:ring-red-500/20 disabled:opacity-50 disabled:cursor-not-allowed shadow-xl shadow-red-600/10 transition-all duration-300 hover:shadow-red-500/30 hover:scale-[1.01] active:scale-[0.99]"
                   >
-                    {isSubmitting ? (
-                      <span className="flex items-center justify-center gap-2">
-                        <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        Sending...
-                      </span>
-                    ) : 'Send Message'}
+                    <div className="relative h-full w-full rounded-xl bg-gradient-to-r from-red-600 to-red-500 px-8 py-4 transition-all duration-300 group-hover:bg-opacity-0">
+                      <div className="absolute inset-0 bg-gradient-to-r from-red-500 to-rose-500 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+
+                      <div className="relative flex items-center justify-center gap-3 text-white font-bold text-lg">
+                        {isSubmitting ? (
+                          <>
+                            <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            <span>Sending...</span>
+                          </>
+                        ) : (
+                          <>
+                            <span className="tracking-wide">Send Message</span>
+                            <Send className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1 group-hover:-translate-y-1" />
+                          </>
+                        )}
+                      </div>
+                    </div>
                   </button>
                 </div>
               </form>
