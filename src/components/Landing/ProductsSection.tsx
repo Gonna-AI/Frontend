@@ -118,15 +118,20 @@ const ArborContent = memo(({ isLowEnd, prefersReducedMotion }: { isLowEnd: boole
 
             {/* Try Arbor Button */}
             <div className="flex justify-center mt-12">
-                <a
-                    href="/arbor"
-                    className="group relative px-8 py-4 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-semibold rounded-2xl transition-all duration-300 hover:shadow-lg hover:shadow-emerald-500/25 hover:scale-[1.02] flex items-center gap-2"
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.6, delay: 0.4 }}
                 >
-                    <span>Try Arbor</span>
-                    <svg className="w-5 h-5 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                    </svg>
-                </a>
+                    <Link
+                        to="/arbor"
+                        className="inline-flex items-center gap-2 px-8 py-4 bg-emerald-900/40 hover:bg-emerald-800/50 backdrop-blur-md border border-emerald-600/30 hover:border-emerald-500/50 text-emerald-100 font-medium rounded-2xl transition-all duration-300 hover:shadow-lg hover:shadow-emerald-900/30 group"
+                    >
+                        <span>Try Arbor</span>
+                        <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                    </Link>
+                </motion.div>
             </div>
         </motion.div>
     );
