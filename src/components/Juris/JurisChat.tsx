@@ -16,10 +16,17 @@ interface JurisChatProps {
 }
 
 // Sample cases for quick access
-const SAMPLE_CASES = [
-    { query: "Contract fraud and misrepresentation", icon: "⚖️" },
-    { query: "Property rights and land disputes", icon: "🏛️" },
-    { query: "Constitutional validity of amendments", icon: "📜" }
+// Sample cases for quick access
+const NORMAL_SAMPLES = [
+    { query: "I accidentally hit a pedestrian at night while driving home, what are the legal consequences?", icon: "🚗" },
+    { query: "My landlord is refusing to return my security deposit after I moved out, claiming damages I didn't cause.", icon: "🏠" },
+    { query: "I bought a defective laptop online and the seller refuses to refund or replace it.", icon: "💻" }
+];
+
+const DEEP_SAMPLES = [
+    { query: "I am representing a client accused in a dowry death case under Section 304B. I need a comprehensive analysis of recent Supreme Court judgments regarding the presumption of guilt and rebuttal standards, specifically focusing on the 'soon before death' interpretation.", icon: "⚖️" },
+    { query: "Analyze the constitutional validity of the latest IT Rules amendment regarding intermediary liability, focusing on freedom of speech implications under Article 19(1)(a) and recent High Court precedents on safe harbor provisions.", icon: "📜" },
+    { query: "Prepare a detailed legal strategy for a corporate insolvency resolution process where the operational creditor's claim is disputed. Cite relevant NCLT and NCLAT rulings on 'pre-existing dispute' under the IBC code.", icon: "🏢" }
 ];
 
 export default function JurisChat({
@@ -84,14 +91,6 @@ export default function JurisChat({
         <>
             {/* Messages Container */}
             <div className="flex-1 overflow-y-auto space-y-4 px-1 custom-scrollbar mb-4">
-                {/* Deep Search Reasoning Timeline */}
-                {showReasoning && pendingQuery && (
-                    <DeepSearchReasoning
-                        query={pendingQuery}
-                        onComplete={onReasoningComplete}
-                    />
-                )}
-
                 {/* Case Connection View */}
                 {showCaseConnection && selectedCase && (
                     <div className="mb-6 p-6 bg-gradient-to-br from-purple-900/30 to-violet-900/30 border border-purple-500/30 rounded-2xl backdrop-blur-sm">
@@ -148,68 +147,74 @@ export default function JurisChat({
                                 {config.description}
                             </p>
                             <p className="text-xs text-white/40">{config.detail}</p>
-                            <div className="pt-4 text-xs text-white/40">
-                                <p>92% Precision@5 · 5000+ Cases · AI-Powered Analysis</p>
-                            </div>
                         </div>
                     </div>
                 ) : (
                     messages.map((message, idx) => (
-                        <div
-                            key={idx}
-                            className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
-                        >
+                        <div key={idx}>
                             <div
-                                className={`max-w-[90%] sm:max-w-[80%] p-4 rounded-2xl backdrop-blur-sm ${message.role === 'user'
-                                    ? 'bg-gradient-to-br from-purple-500/20 to-violet-500/20 border border-purple-500/30'
-                                    : 'bg-white/5 border border-white/10'
-                                    }`}
+                                className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
                             >
-                                <p className="text-white/90 text-sm leading-relaxed whitespace-pre-wrap break-words">
-                                    {message.content}
-                                </p>
+                                <div
+                                    className={`max-w-[90%] sm:max-w-[80%] p-4 rounded-2xl backdrop-blur-sm ${message.role === 'user'
+                                        ? 'bg-gradient-to-br from-purple-500/20 to-violet-500/20 border border-purple-500/30'
+                                        : 'bg-white/5 border border-white/10'
+                                        }`}
+                                >
+                                    <p className="text-white/90 text-sm leading-relaxed whitespace-pre-wrap break-words">
+                                        {message.content}
+                                    </p>
 
-                                {/* Case Results */}
-                                {message.caseResults && message.caseResults.length > 0 && (
-                                    <div className="mt-4 space-y-3">
-                                        <div className="flex items-center justify-between mb-3">
-                                            <span className="text-xs font-semibold text-purple-300 uppercase tracking-wide">
-                                                Found {message.caseResults.length} Similar Cases
-                                            </span>
+                                    {/* Case Results */}
+                                    {message.caseResults && message.caseResults.length > 0 && (
+                                        <div className="mt-4 space-y-3">
+                                            <div className="flex items-center justify-between mb-3">
+                                                <span className="text-xs font-semibold text-purple-300 uppercase tracking-wide">
+                                                    Found {message.caseResults.length} Similar Cases
+                                                </span>
+                                            </div>
+
+                                            <div className="grid gap-3">
+                                                {message.caseResults.map((caseData) => (
+                                                    <JurisCaseCard
+                                                        key={caseData.id}
+                                                        caseData={caseData}
+                                                        onClick={() => handleCaseClick(caseData)}
+                                                    />
+                                                ))}
+                                            </div>
                                         </div>
+                                    )}
 
-                                        <div className="grid gap-3">
-                                            {message.caseResults.map((caseData) => (
-                                                <JurisCaseCard
-                                                    key={caseData.id}
-                                                    caseData={caseData}
-                                                    onClick={() => handleCaseClick(caseData)}
-                                                />
-                                            ))}
-                                        </div>
-                                    </div>
-                                )}
-
-                                {/* Analysis */}
-                                {message.analysis && (
-                                    <div className="mt-4 p-4 bg-purple-500/5 border border-purple-500/10 rounded-xl">
-                                        <h4 className="text-sm font-semibold text-purple-300 mb-2">AI Analysis</h4>
-                                        <div className="space-y-2 text-xs text-white/70">
-                                            <p><strong className="text-purple-200">Summary:</strong> {message.analysis.similaritySummary}</p>
-                                            <div>
-                                                <strong className="text-purple-200">Key Concepts:</strong>
-                                                <div className="flex flex-wrap gap-1 mt-1">
-                                                    {message.analysis.keyLegalConcepts.map((concept, i) => (
-                                                        <span key={i} className="px-2 py-0.5 bg-purple-500/10 border border-purple-500/20 rounded text-purple-200">
-                                                            {concept}
-                                                        </span>
-                                                    ))}
+                                    {/* Analysis */}
+                                    {message.analysis && (
+                                        <div className="mt-4 p-4 bg-purple-500/5 border border-purple-500/10 rounded-xl">
+                                            <h4 className="text-sm font-semibold text-purple-300 mb-2">AI Analysis</h4>
+                                            <div className="space-y-2 text-xs text-white/70">
+                                                <p><strong className="text-purple-200">Summary:</strong> {message.analysis.similaritySummary}</p>
+                                                <div>
+                                                    <strong className="text-purple-200">Key Concepts:</strong>
+                                                    <div className="flex flex-wrap gap-1 mt-1">
+                                                        {message.analysis.keyLegalConcepts.map((concept, i) => (
+                                                            <span key={i} className="px-2 py-0.5 bg-purple-500/10 border border-purple-500/20 rounded text-purple-200">
+                                                                {concept}
+                                                            </span>
+                                                        ))}
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
-                                )}
+                                    )}
+                                </div>
                             </div>
+
+                            {/* Deep Search Reasoning Timeline - Show after user message */}
+                            {message.role === 'user' && showReasoning && pendingQuery && idx === messages.length - 1 && (
+                                <DeepSearchReasoning
+                                    query={pendingQuery}
+                                    onComplete={onReasoningComplete}
+                                />
+                            )}
                         </div>
                     ))
                 )}
@@ -223,15 +228,15 @@ export default function JurisChat({
                         <div className="mb-3 sm:mb-4">
                             <p className="text-xs text-white/40 mb-2 text-center">Try these examples:</p>
                             <div className="flex flex-wrap justify-center gap-1.5 sm:gap-2">
-                                {SAMPLE_CASES.map((sample, idx) => (
+                                {(mode === 'deep_research' ? DEEP_SAMPLES : NORMAL_SAMPLES).map((sample, idx) => (
                                     <button
                                         key={idx}
                                         onClick={() => handleSampleCaseClick(sample.query)}
-                                        className="px-3 sm:px-4 py-1.5 sm:py-2 bg-white/5 hover:bg-purple-500/10 border border-white/10 hover:border-purple-500/30 rounded-lg sm:rounded-xl text-xs text-white/70 hover:text-purple-300 transition-all duration-300 backdrop-blur-sm group"
+                                        className="px-3 sm:px-4 py-1.5 sm:py-2 bg-white/5 hover:bg-purple-500/10 border border-white/10 hover:border-purple-500/30 rounded-lg sm:rounded-xl text-xs text-white/70 hover:text-purple-300 transition-all duration-300 backdrop-blur-sm group max-w-[90%] sm:max-w-none text-left sm:text-center"
                                     >
                                         <span className="mr-1 sm:mr-2">{sample.icon}</span>
-                                        <span className="hidden sm:inline">{sample.query}</span>
-                                        <span className="sm:hidden">{sample.query.length > 20 ? sample.query.substring(0, 20) + '...' : sample.query}</span>
+                                        <span className="hidden sm:inline">{sample.query.length > 60 ? sample.query.substring(0, 60) + '...' : sample.query}</span>
+                                        <span className="sm:hidden">{sample.query.length > 30 ? sample.query.substring(0, 30) + '...' : sample.query}</span>
                                     </button>
                                 ))}
                             </div>
@@ -240,25 +245,27 @@ export default function JurisChat({
 
                     {/* Input Form with Mode Toggle Inside */}
                     <form onSubmit={handleSubmit} className="relative">
-                        <div className="flex gap-0 items-center bg-white/5 border border-white/10 rounded-xl sm:rounded-2xl hover:border-white/20 transition-all backdrop-blur-sm overflow-hidden">
+                        <div className={`flex gap-0 items-center bg-white/5 border border-white/10 rounded-xl sm:rounded-2xl transition-all backdrop-blur-sm overflow-hidden ${messages.length > 0 ? 'opacity-50 cursor-not-allowed' : 'hover:border-white/20'}`}>
                             <input
                                 type="text"
                                 name="message"
-                                placeholder={config.placeholder}
-                                className="flex-1 px-3 sm:px-6 py-3 sm:py-4 text-sm sm:text-base bg-transparent text-white placeholder-white/40 focus:outline-none"
+                                placeholder={messages.length > 0 ? "Clear chat to start a new search..." : config.placeholder}
+                                className="flex-1 px-3 sm:px-6 py-3 sm:py-4 text-sm sm:text-base bg-transparent text-white placeholder-white/40 focus:outline-none disabled:cursor-not-allowed"
                                 autoComplete="off"
+                                disabled={messages.length > 0}
                             />
 
                             {/* Mode Toggle Inside Input */}
                             <div className="flex items-center gap-1.5 sm:gap-2 pr-2 sm:pr-3">
-                                <div className="p-0.5 sm:p-1 rounded-lg sm:rounded-xl bg-white/5 border border-white/10 inline-flex">
+                                <div className={`p-0.5 sm:p-1 rounded-lg sm:rounded-xl bg-white/5 border border-white/10 inline-flex ${messages.length > 0 ? 'opacity-50' : ''}`}>
                                     <button
                                         type="button"
-                                        onClick={() => handleModeChange('normal')}
+                                        onClick={() => !messages.length && handleModeChange('normal')}
+                                        disabled={messages.length > 0}
                                         className={`px-2 sm:px-3 py-1.5 rounded-md sm:rounded-lg text-xs font-medium transition-all duration-200 flex items-center gap-1.5 ${mode === 'normal'
                                             ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
                                             : 'text-white/50 hover:text-white/70'
-                                            }`}
+                                            } ${messages.length > 0 ? 'cursor-not-allowed' : ''}`}
                                         title="Normal Search"
                                     >
                                         <Search className="w-3.5 h-3.5 sm:w-3 sm:h-3" />
@@ -266,11 +273,12 @@ export default function JurisChat({
                                     </button>
                                     <button
                                         type="button"
-                                        onClick={() => handleModeChange('deep_research')}
+                                        onClick={() => !messages.length && handleModeChange('deep_research')}
+                                        disabled={messages.length > 0}
                                         className={`px-2 sm:px-3 py-1.5 rounded-md sm:rounded-lg text-xs font-medium transition-all duration-200 flex items-center gap-1.5 ${mode === 'deep_research'
                                             ? 'bg-violet-500/20 text-violet-300 border border-violet-500/30'
                                             : 'text-white/50 hover:text-white/70'
-                                            }`}
+                                            } ${messages.length > 0 ? 'cursor-not-allowed' : ''}`}
                                         title="Deep Search"
                                     >
                                         <Brain className="w-3.5 h-3.5 sm:w-3 sm:h-3" />
@@ -280,7 +288,8 @@ export default function JurisChat({
 
                                 <button
                                     type="submit"
-                                    className="p-2 sm:p-2.5 bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/30 hover:border-purple-500/50 rounded-lg sm:rounded-xl text-purple-300 hover:text-purple-200 transition-all duration-300"
+                                    disabled={messages.length > 0}
+                                    className={`p-2 sm:p-2.5 bg-purple-500/20 border border-purple-500/30 rounded-lg sm:rounded-xl text-purple-300 transition-all duration-300 ${messages.length > 0 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-purple-500/30 hover:border-purple-500/50 hover:text-purple-200'}`}
                                 >
                                     <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />

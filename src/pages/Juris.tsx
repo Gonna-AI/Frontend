@@ -1,9 +1,8 @@
 import { useState } from 'react';
-import { JurisMessage, SearchMode, SystemMetrics, CaseResult } from '../types/juris';
+import { JurisMessage, SearchMode, CaseResult } from '../types/juris';
 import JurisChat from '../components/Juris/JurisChat';
-import JurisDashboard from '../components/Juris/JurisDashboard';
-import { Settings } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { MOCK_RESPONSES } from '../data/mockJurisData';
 
 // Sample mockup data
 const SAMPLE_CASES: CaseResult[] = [
@@ -58,25 +57,8 @@ const SAMPLE_CASES: CaseResult[] = [
 export default function Juris() {
     const [searchMode, setSearchMode] = useState<SearchMode>('normal');
     const [messages, setMessages] = useState<JurisMessage[]>([]);
-    const [showDashboard, setShowDashboard] = useState(false);
     const [showReasoning, setShowReasoning] = useState(false);
     const [pendingQuery, setPendingQuery] = useState('');
-
-    const [metrics] = useState<SystemMetrics>({
-        totalCases: 5247,
-        precisionAt5: 0.92,
-        avgResponseTime: 11.4,
-        vectorStoreStatus: 'Active',
-        graphDbStatus: 'Active',
-        lastIndexed: '2 hours ago',
-        entityCounts: {
-            cases: 5247,
-            judges: 342,
-            courts: 87,
-            statutes: 1453,
-            sections: 8921
-        }
-    });
 
     const handleSendMessage = (message: string) => {
         // Add user message
@@ -107,33 +89,63 @@ export default function Juris() {
     const showResults = (query: string) => {
         // Simulate AI response with case results
         setTimeout(() => {
-            const modeText = searchMode === 'normal' ? 'fast semantic search' : 'deep research with comprehensive citation analysis';
+            const isDeep = searchMode === 'deep_research';
+
+            // Check if we have a mock response for this query
+            const mockResponse = MOCK_RESPONSES[query];
+
+            let content = '';
+            let results = SAMPLE_CASES; // Fallback
+            let analysis = { // Fallback analysis
+                caseId: SAMPLE_CASES[0].id,
+                similaritySummary: 'The query matches cases involving constitutional validity of land tenure legislation and fundamental rights. The legal reasoning patterns show 94% semantic similarity.',
+                keyLegalConcepts: ['Constitutional Law', 'Property Rights', 'Article 31A', 'Land Reforms', 'Fundamental Rights'],
+                precedentAnalysis: [
+                    'Both cases cite foundational property rights jurisprudence',
+                    'Strong precedential link through Article 31A interpretation',
+                    'Similar factual patterns in agrarian reform context'
+                ],
+                rhetoricalRoles: {
+                    facts: 28,
+                    arguments: 45,
+                    precedents: 12,
+                    reasoning: 67,
+                    ruling: 15
+                },
+                citationNetwork: {
+                    directCitations: 8,
+                    indirectCitations: 23
+                }
+            };
+
+            if (mockResponse) {
+                content = mockResponse.content;
+                results = mockResponse.cases;
+                analysis = mockResponse.analysis;
+            } else {
+                // Default/Fallback logic if query doesn't match specific mocks
+                if (isDeep) {
+                    content = `Based on your detailed query, I have conducted a comprehensive analysis of the relevant legal precedents and statutory provisions. 
+
+The search has identified ${results.length} highly significant cases that directly address the legal issues you've raised. The analysis suggests a strong precedential trend favoring the interpretation of specific statutory clauses in line with recent Supreme Court judgments.
+
+Key findings include:
+1. A consistent judicial approach towards protecting fundamental rights in similar contexts.
+2. Divergent views in High Court rulings which have been settled by the Apex Court.
+3. Specific reliance on procedural adherence as a critical factor in case outcomes.
+
+Below are the most relevant cases with detailed citation networks and reasoning patterns for your review.`;
+                } else {
+                    content = `I found ${results.length} relevant cases for your situation. These cases cover similar scenarios and can help you understand the potential legal outcomes.`;
+                }
+            }
+
             const aiMessage: JurisMessage = {
                 role: 'assistant',
-                content: `Found ${SAMPLE_CASES.length} highly relevant cases using ${modeText}. The cases show strong similarity based on legal concepts, precedent citations, and factual patterns.`,
+                content: content,
                 timestamp: new Date().toISOString(),
-                caseResults: SAMPLE_CASES,
-                analysis: {
-                    caseId: SAMPLE_CASES[0].id,
-                    similaritySummary: 'The query matches cases involving constitutional validity of land tenure legislation and fundamental rights. The legal reasoning patterns show 94% semantic similarity.',
-                    keyLegalConcepts: ['Constitutional Law', 'Property Rights', 'Article 31A', 'Land Reforms', 'Fundamental Rights'],
-                    precedentAnalysis: [
-                        'Both cases cite foundational property rights jurisprudence',
-                        'Strong precedential link through Article 31A interpretation',
-                        'Similar factual patterns in agrarian reform context'
-                    ],
-                    rhetoricalRoles: {
-                        facts: 28,
-                        arguments: 45,
-                        precedents: 12,
-                        reasoning: 67,
-                        ruling: 15
-                    },
-                    citationNetwork: {
-                        directCitations: 8,
-                        indirectCitations: 23
-                    }
-                }
+                caseResults: results,
+                analysis: analysis
             };
             setMessages(prev => [...prev, aiMessage]);
         }, 1500);
@@ -141,10 +153,6 @@ export default function Juris() {
 
     const handleClearChat = () => {
         setMessages([]);
-    };
-
-    const handleRefresh = () => {
-        console.log('Refreshing metrics...');
     };
 
     return (
@@ -156,7 +164,7 @@ export default function Juris() {
             </div>
 
             {/* Header */}
-            <div className="relative border-b border-white/10 bg-black/20 backdrop-blur-sm">
+            <div className="sticky top-0 z-50 border-b border-white/10 bg-black/20 backdrop-blur-sm">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4">
                     <div className="flex items-center justify-between gap-3 sm:gap-4">
                         <div className="flex items-center gap-3 sm:gap-4">
@@ -173,39 +181,22 @@ export default function Juris() {
                                 Juris
                             </h1>
                         </div>
-
-                        <button
-                            onClick={() => setShowDashboard(!showDashboard)}
-                            className={`p-2 sm:p-2.5 rounded-xl transition-all duration-300 ${showDashboard
-                                ? 'bg-purple-500/20 border border-purple-500/30 text-purple-400'
-                                : 'bg-white/5 hover:bg-white/10 border border-white/10 hover:border-purple-500/30 text-white/70 hover:text-white'
-                                }`}
-                        >
-                            <Settings className="w-5 h-5 sm:w-6 sm:h-6" />
-                        </button>
                     </div>
                 </div>
             </div>
 
             {/* Content */}
             <div className="relative max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-6 pb-[180px] sm:pb-[200px]">
-                {showDashboard ? (
-                    <JurisDashboard
-                        metrics={metrics}
-                        onRefresh={handleRefresh}
-                    />
-                ) : (
-                    <JurisChat
-                        mode={searchMode}
-                        messages={messages}
-                        onSendMessage={handleSendMessage}
-                        onClearChat={handleClearChat}
-                        onModeChange={setSearchMode}
-                        showReasoning={showReasoning}
-                        pendingQuery={pendingQuery}
-                        onReasoningComplete={handleReasoningComplete}
-                    />
-                )}
+                <JurisChat
+                    mode={searchMode}
+                    messages={messages}
+                    onSendMessage={handleSendMessage}
+                    onClearChat={handleClearChat}
+                    onModeChange={setSearchMode}
+                    showReasoning={showReasoning}
+                    pendingQuery={pendingQuery}
+                    onReasoningComplete={handleReasoningComplete}
+                />
             </div>
         </div>
     );
