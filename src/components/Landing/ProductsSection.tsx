@@ -191,6 +191,24 @@ const JurisContent = memo(({ isLowEnd, prefersReducedMotion }: { isLowEnd: boole
                     isLowEnd={isLowEnd}
                 />
             </div>
+
+            {/* Try Juris Button */}
+            <div className="flex justify-center mt-12">
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.6, delay: 0.4 }}
+                >
+                    <Link
+                        to="/juris"
+                        className="inline-flex items-center gap-2 px-8 py-4 bg-purple-900/40 hover:bg-purple-800/50 backdrop-blur-md border border-purple-600/30 hover:border-purple-500/50 text-purple-100 font-medium rounded-2xl transition-all duration-300 hover:shadow-lg hover:shadow-purple-900/30 group"
+                    >
+                        <span>Try Juris</span>
+                        <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                    </Link>
+                </motion.div>
+            </div>
         </motion.div>
     );
 });
