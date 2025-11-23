@@ -149,6 +149,43 @@ export default function KnowledgeGraph({ caseData }: KnowledgeGraphProps) {
         }
     };
 
+    // Touch handlers for mobile support
+    const handleTouchStart = (node: Node, e: React.TouchEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        draggedNodeRef.current = node;
+
+        if (simulationRef.current) {
+            simulationRef.current.alphaTarget(0.3).restart();
+        }
+    };
+
+    const handleTouchMove = (e: React.TouchEvent) => {
+        if (!draggedNodeRef.current || !svgRef.current || !simulationRef.current) return;
+
+        const rect = svgRef.current.getBoundingClientRect();
+        const touch = e.touches[0];
+        const x = touch.clientX - rect.left;
+        const y = touch.clientY - rect.top;
+
+        draggedNodeRef.current.fx = x;
+        draggedNodeRef.current.fy = y;
+
+        simulationRef.current.alpha(0.3).restart();
+    };
+
+    const handleTouchEnd = () => {
+        if (draggedNodeRef.current) {
+            draggedNodeRef.current.fx = null;
+            draggedNodeRef.current.fy = null;
+            draggedNodeRef.current = null;
+        }
+
+        if (simulationRef.current) {
+            simulationRef.current.alphaTarget(0);
+        }
+    };
+
     const getNodeColor = (type: string) => {
         switch (type) {
             case 'case': return { bg: '#7c3aed', border: '#a78bfa', text: '#fff' };
@@ -176,10 +213,12 @@ export default function KnowledgeGraph({ caseData }: KnowledgeGraphProps) {
         <div className="relative w-full h-[500px] bg-gradient-to-br from-purple-950/20 to-violet-950/20 rounded-2xl border border-purple-500/20 overflow-hidden mt-3">
             <svg
                 ref={svgRef}
-                className="w-full h-full"
+                className="w-full h-full touch-none"
                 onMouseMove={handleMouseMove}
                 onMouseUp={handleMouseUp}
                 onMouseLeave={handleMouseUp}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={handleTouchEnd}
                 width={width}
                 height={height}
                 viewBox={`0 0 ${width} ${height}`}
@@ -223,6 +262,7 @@ export default function KnowledgeGraph({ caseData }: KnowledgeGraphProps) {
                             key={node.id}
                             transform={`translate(${node.x}, ${node.y})`}
                             onMouseDown={(e) => handleMouseDown(node, e)}
+                            onTouchStart={(e) => handleTouchStart(node, e)}
                             style={{ cursor: 'grab' }}
                             className={draggedNodeRef.current?.id === node.id ? 'cursor-grabbing' : ''}
                         >

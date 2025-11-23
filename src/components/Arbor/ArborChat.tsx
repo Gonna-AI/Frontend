@@ -1,5 +1,6 @@
 import { ArborMessage } from '../../types/arbor';
 import { useState } from 'react';
+import { Send } from 'lucide-react';
 
 type ChatMode = 'ask' | 'tell' | 'docsearch';
 
@@ -76,8 +77,8 @@ export default function ArborChat({ mode, messages, onSendMessage, onClearChat, 
                         >
                             <div
                                 className={`max-w-[90%] sm:max-w-[80%] p-3 sm:p-4 rounded-xl sm:rounded-2xl backdrop-blur-sm ${message.role === 'user'
-                                        ? 'bg-gradient-to-br from-emerald-500/20 to-teal-500/20 border border-emerald-500/30'
-                                        : 'bg-white/5 border border-white/10'
+                                    ? 'bg-gradient-to-br from-emerald-500/20 to-teal-500/20 border border-emerald-500/30'
+                                    : 'bg-white/5 border border-white/10'
                                     }`}
                             >
                                 <div>
@@ -112,18 +113,18 @@ export default function ArborChat({ mode, messages, onSendMessage, onClearChat, 
                         <div className="p-1.5 rounded-full bg-white/5 border border-white/10 backdrop-blur-sm inline-flex relative">
                             <div
                                 className={`absolute top-1.5 bottom-1.5 left-1.5 w-16 sm:w-20 rounded-full transition-all duration-300 ${getActiveColor()} ${mode === 'ask'
-                                        ? 'translate-x-0'
-                                        : mode === 'tell'
-                                            ? 'translate-x-[calc(100%+0rem)]'
-                                            : 'translate-x-[calc(200%+0rem)]'
+                                    ? 'translate-x-0'
+                                    : mode === 'tell'
+                                        ? 'translate-x-[calc(100%+0rem)]'
+                                        : 'translate-x-[calc(200%+0rem)]'
                                     }`}
                             />
 
                             <button
                                 onClick={() => onModeChange('ask')}
                                 className={`relative w-16 sm:w-20 py-2 sm:py-2.5 rounded-full text-xs sm:text-sm font-medium transition-colors duration-200 z-10 ${mode === 'ask'
-                                        ? 'text-blue-400 drop-shadow-[0_0_8px_rgba(96,165,250,0.5)]'
-                                        : 'text-white/60 hover:text-white/80'
+                                    ? 'text-blue-400 drop-shadow-[0_0_8px_rgba(96,165,250,0.5)]'
+                                    : 'text-white/60 hover:text-white/80'
                                     }`}
                             >
                                 Ask
@@ -131,8 +132,8 @@ export default function ArborChat({ mode, messages, onSendMessage, onClearChat, 
                             <button
                                 onClick={() => onModeChange('tell')}
                                 className={`relative w-16 sm:w-20 py-2 sm:py-2.5 rounded-full text-xs sm:text-sm font-medium transition-colors duration-200 z-10 ${mode === 'tell'
-                                        ? 'text-purple-400 drop-shadow-[0_0_8px_rgba(192,132,252,0.5)]'
-                                        : 'text-white/60 hover:text-white/80'
+                                    ? 'text-purple-400 drop-shadow-[0_0_8px_rgba(192,132,252,0.5)]'
+                                    : 'text-white/60 hover:text-white/80'
                                     }`}
                             >
                                 Tell
@@ -140,8 +141,8 @@ export default function ArborChat({ mode, messages, onSendMessage, onClearChat, 
                             <button
                                 onClick={() => onModeChange('docsearch')}
                                 className={`relative w-16 sm:w-20 py-2 sm:py-2.5 rounded-full text-xs sm:text-sm font-medium transition-colors duration-200 z-10 ${mode === 'docsearch'
-                                        ? 'text-emerald-400 drop-shadow-[0_0_8px_rgba(52,211,153,0.5)]'
-                                        : 'text-white/60 hover:text-white/80'
+                                    ? 'text-emerald-400 drop-shadow-[0_0_8px_rgba(52,211,153,0.5)]'
+                                    : 'text-white/60 hover:text-white/80'
                                     }`}
                             >
                                 Search
@@ -164,8 +165,8 @@ export default function ArborChat({ mode, messages, onSendMessage, onClearChat, 
                                         type="button"
                                         onClick={() => setShowFilters(!showFilters)}
                                         className={`px-3 py-1.5 text-xs sm:text-sm border rounded-lg transition-all ${showFilters
-                                                ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
-                                                : 'bg-white/5 hover:bg-white/10 border-white/10 hover:border-emerald-500/30 text-white/70 hover:text-white'
+                                            ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
+                                            : 'bg-white/5 hover:bg-white/10 border-white/10 hover:border-emerald-500/30 text-white/70 hover:text-white'
                                             }`}
                                     >
                                         Filters
@@ -190,8 +191,8 @@ export default function ArborChat({ mode, messages, onSendMessage, onClearChat, 
                                                 key={type}
                                                 type="button"
                                                 className={`px-3 py-1.5 text-xs rounded-lg transition-all ${type === 'All'
-                                                        ? 'bg-emerald-500/20 border border-emerald-500/30 text-emerald-400'
-                                                        : 'bg-white/5 border border-white/10 text-white/70 hover:bg-white/10 hover:text-white'
+                                                    ? 'bg-emerald-500/20 border border-emerald-500/30 text-emerald-400'
+                                                    : 'bg-white/5 border border-white/10 text-white/70 hover:bg-white/10 hover:text-white'
                                                     }`}
                                             >
                                                 {type}
@@ -229,9 +230,10 @@ export default function ArborChat({ mode, messages, onSendMessage, onClearChat, 
                             />
                             <button
                                 type="submit"
-                                className="px-6 sm:px-8 py-3 sm:py-4 text-sm sm:text-base bg-emerald-900/40 hover:bg-emerald-800/50 backdrop-blur-md border border-emerald-600/30 hover:border-emerald-500/50 text-emerald-100 font-medium rounded-xl sm:rounded-2xl transition-all duration-300 hover:shadow-lg hover:shadow-emerald-900/30"
+                                className="px-4 sm:px-8 py-3 sm:py-4 text-sm sm:text-base bg-emerald-900/40 hover:bg-emerald-800/50 backdrop-blur-md border border-emerald-600/30 hover:border-emerald-500/50 text-emerald-100 font-medium rounded-xl sm:rounded-2xl transition-all duration-300 hover:shadow-lg hover:shadow-emerald-900/30 flex items-center justify-center"
                             >
-                                Send
+                                <span className="hidden sm:inline">Send</span>
+                                <Send className="w-5 h-5 sm:hidden" />
                             </button>
                             {messages.length > 0 && (
                                 <button

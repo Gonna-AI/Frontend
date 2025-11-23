@@ -16,11 +16,11 @@ interface DeepSearchReasoningProps {
 
 export default function DeepSearchReasoning({ query, onComplete }: DeepSearchReasoningProps) {
     const [steps, setSteps] = useState<ReasoningStep[]>([
-        { id: 'search', label: 'Semantic Search', status: 'pending', detail: 'Finding relevant cases' },
-        { id: 'collect', label: 'Collecting Cases', status: 'pending', count: 0 },
-        { id: 'graph', label: 'Graph Analysis', status: 'pending', detail: 'Analyzing citation networks' },
-        { id: 'precedents', label: 'Precedent Chain', status: 'pending', detail: 'Mapping legal precedents' },
-        { id: 'synthesis', label: 'Synthesizing', status: 'pending', detail: 'Found 2 relevant cases' }
+        { id: 'search', label: 'Semantic Search', status: 'pending', detail: 'Searching through the legal database using AI embeddings...' },
+        { id: 'collect', label: 'Collecting Cases', status: 'pending', count: 0, detail: 'Scanning cases to find relevant matches...' },
+        { id: 'graph', label: 'Graph Analysis', status: 'pending', detail: 'Analyzing citation networks to find connected cases...' },
+        { id: 'precedents', label: 'Precedent Chain', status: 'pending', detail: 'Mapping legal precedent relationships and hierarchies...' },
+        { id: 'synthesis', label: 'Synthesizing Results', status: 'pending', detail: 'Ranking and filtering the most relevant cases...' }
     ]);
     const [elapsedTime, setElapsedTime] = useState(0);
 
@@ -42,42 +42,78 @@ export default function DeepSearchReasoning({ query, onComplete }: DeepSearchRea
             await new Promise(resolve => setTimeout(resolve, getRandomDelay()));
             setSteps(prev => prev.map(s => s.id === 'search' ? { ...s, status: 'complete' } : s));
 
-            // Step 2: Collecting Cases (Slow increase)
-            setSteps(prev => prev.map(s => s.id === 'collect' ? { ...s, status: 'processing', count: 0 } : s));
+            // Step 2: Collecting Cases (Realistic variable speed)
+            setSteps(prev => prev.map(s => s.id === 'collect' ? { ...s, status: 'processing', count: 0, detail: 'Starting case collection...' } : s));
 
-            const targetCount = 150; // Search through many cases
-            const duration = 5000; // Take 5 seconds
-            const interval = 100;
-            const steps_count = duration / interval;
+            const targetCount = 13; // Max 13 cases
+            let currentCount = 0;
 
-            for (let i = 0; i <= steps_count; i++) {
-                await new Promise(resolve => setTimeout(resolve, interval));
-                setSteps(prev => prev.map(s => {
-                    if (s.id === 'collect') {
-                        // Logarithmic-like increase that slows down
-                        const progress = i / steps_count;
-                        const currentCount = Math.floor(targetCount * progress);
-                        return { ...s, count: currentCount };
-                    }
-                    return s;
-                }));
+            // Fast count 1-3 (300ms each)
+            for (let i = 1; i <= 3; i++) {
+                await new Promise(resolve => setTimeout(resolve, 300));
+                currentCount = i;
+                setSteps(prev => prev.map(s => s.id === 'collect' ? {
+                    ...s,
+                    count: currentCount,
+                    detail: `Initiating semantic search across the database...`
+                } : s));
             }
-            setSteps(prev => prev.map(s => s.id === 'collect' ? { ...s, status: 'complete', count: 150 } : s));
+
+            // Slow count 4-5 (1000ms each)
+            for (let i = 4; i <= 5; i++) {
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                currentCount = i;
+                setSteps(prev => prev.map(s => s.id === 'collect' ? {
+                    ...s,
+                    count: currentCount,
+                    detail: `Found ${currentCount} potential matches, analyzing relevance...`
+                } : s));
+            }
+
+            // Medium-slow count 6-10 (600ms each)
+            for (let i = 6; i <= 10; i++) {
+                await new Promise(resolve => setTimeout(resolve, 600));
+                currentCount = i;
+                setSteps(prev => prev.map(s => s.id === 'collect' ? {
+                    ...s,
+                    count: currentCount,
+                    detail: `Collected ${currentCount} cases, filtering by jurisdiction...`
+                } : s));
+            }
+
+            // Final slow count 11-13 (800ms each)
+            for (let i = 11; i <= 13; i++) {
+                await new Promise(resolve => setTimeout(resolve, 800));
+                currentCount = i;
+                setSteps(prev => prev.map(s => s.id === 'collect' ? {
+                    ...s,
+                    count: currentCount,
+                    detail: `Reviewing ${currentCount} cases for citation strength...`
+                } : s));
+            }
+
+            setSteps(prev => prev.map(s => s.id === 'collect' ? { ...s, status: 'complete', count: 13, detail: 'Successfully collected 13 relevant cases' } : s));
 
             // Step 3: Graph Analysis
-            setSteps(prev => prev.map(s => s.id === 'graph' ? { ...s, status: 'processing' } : s));
-            await new Promise(resolve => setTimeout(resolve, getRandomDelay()));
-            setSteps(prev => prev.map(s => s.id === 'graph' ? { ...s, status: 'complete' } : s));
+            setSteps(prev => prev.map(s => s.id === 'graph' ? { ...s, status: 'processing', detail: 'Building citation graph from collected cases...' } : s));
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            setSteps(prev => prev.map(s => s.id === 'graph' ? { ...s, detail: 'Identifying central nodes and influential cases...' } : s));
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            setSteps(prev => prev.map(s => s.id === 'graph' ? { ...s, status: 'complete', detail: 'Citation network analysis complete' } : s));
 
             // Step 4: Precedent Chain
-            setSteps(prev => prev.map(s => s.id === 'precedents' ? { ...s, status: 'processing' } : s));
-            await new Promise(resolve => setTimeout(resolve, getRandomDelay()));
-            setSteps(prev => prev.map(s => s.id === 'precedents' ? { ...s, status: 'complete' } : s));
+            setSteps(prev => prev.map(s => s.id === 'precedents' ? { ...s, status: 'processing', detail: 'Tracing precedent chains through case citations...' } : s));
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            setSteps(prev => prev.map(s => s.id === 'precedents' ? { ...s, detail: 'Evaluating precedent strength and relevance...' } : s));
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            setSteps(prev => prev.map(s => s.id === 'precedents' ? { ...s, status: 'complete', detail: 'Precedent mapping completed successfully' } : s));
 
             // Step 5: Synthesizing
-            setSteps(prev => prev.map(s => s.id === 'synthesis' ? { ...s, status: 'processing' } : s));
-            await new Promise(resolve => setTimeout(resolve, 2000));
-            setSteps(prev => prev.map(s => s.id === 'synthesis' ? { ...s, status: 'complete' } : s));
+            setSteps(prev => prev.map(s => s.id === 'synthesis' ? { ...s, status: 'processing', detail: 'Synthesizing findings from all analysis layers...' } : s));
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            setSteps(prev => prev.map(s => s.id === 'synthesis' ? { ...s, detail: 'Ranking cases by relevance and precedent strength...' } : s));
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            setSteps(prev => prev.map(s => s.id === 'synthesis' ? { ...s, status: 'complete', detail: 'Analysis complete - found 2 highly relevant cases' } : s));
 
             // Complete
             await new Promise(resolve => setTimeout(resolve, 500));
@@ -101,55 +137,58 @@ export default function DeepSearchReasoning({ query, onComplete }: DeepSearchRea
             </div>
 
             {/* Vertical Timeline */}
-            <div className="relative border-l border-white/10 ml-3 pl-6 space-y-6">
-                {steps.map((step, idx) => (
-                    <div key={step.id} className="relative group">
-                        {/* Dot Indicator */}
-                        <div className={`absolute -left-[1.6rem] top-0.5 w-3.5 h-3.5 rounded-full border-2 transition-all duration-500 z-10 bg-[#0a0a0a] ${step.status === 'complete'
+            <div className="relative ml-2">
+                {/* Continuous Vertical Line - Centered on the dots */}
+                <div className="absolute left-[0.4375rem] top-[7px] bottom-[7px] w-0.5 bg-white/10 -translate-x-1/2" />
+
+                <div className="space-y-6">
+                    {steps.map((step, idx) => (
+                        <div key={step.id} className="relative flex gap-4">
+                            {/* Dot Indicator */}
+                            <div className={`relative z-10 flex-none w-3.5 h-3.5 rounded-full border-2 transition-all duration-500 bg-[#0a0a0a] ${step.status === 'complete'
                                 ? 'border-violet-500 shadow-[0_0_10px_rgba(139,92,246,0.5)]'
                                 : step.status === 'processing'
                                     ? 'border-violet-400/50 animate-pulse'
                                     : 'border-white/10'
-                            }`}>
-                            {step.status === 'complete' && (
-                                <div className="absolute inset-0 flex items-center justify-center">
-                                    <div className="w-1.5 h-1.5 bg-violet-500 rounded-full" />
-                                </div>
-                            )}
-                            {step.status === 'processing' && (
-                                <div className="absolute inset-0 flex items-center justify-center">
-                                    <div className="w-1.5 h-1.5 bg-violet-400 rounded-full animate-ping opacity-75" />
-                                </div>
-                            )}
-                        </div>
-
-                        {/* Content */}
-                        <div className={`transition-all duration-500 ${step.status === 'pending' ? 'opacity-30 blur-[1px]' : 'opacity-100'
-                            }`}>
-                            <div className="flex items-center gap-3">
-                                <span className={`text-sm font-medium ${step.status === 'processing' ? 'text-violet-300' : 'text-white/80'
-                                    }`}>
-                                    {step.label}
-                                </span>
-                                {step.count !== undefined && step.status !== 'pending' && (
-                                    <span className="text-xs font-mono text-violet-400 bg-violet-500/10 px-1.5 py-0.5 rounded">
-                                        {step.count}
-                                    </span>
+                                }`}>
+                                {step.status === 'complete' && (
+                                    <div className="absolute inset-0 flex items-center justify-center">
+                                        <div className="w-1.5 h-1.5 bg-violet-500 rounded-full" />
+                                    </div>
+                                )}
+                                {step.status === 'processing' && (
+                                    <div className="absolute inset-0 flex items-center justify-center">
+                                        <div className="w-1.5 h-1.5 bg-violet-400 rounded-full animate-ping opacity-75" />
+                                    </div>
                                 )}
                             </div>
 
-                            {/* Detail Text */}
-                            <div className={`overflow-hidden transition-all duration-500 ${step.status === 'processing' || step.status === 'complete' ? 'max-h-8 mt-1 opacity-100' : 'max-h-0 opacity-0'
+                            {/* Content */}
+                            <div className={`transition-all duration-500 -mt-1 ${step.status === 'pending' ? 'opacity-30 blur-[1px]' : 'opacity-100'
                                 }`}>
-                                <p className="text-xs text-white/50">
-                                    {step.status === 'complete' && step.id === 'synthesis'
-                                        ? 'Found 2 relevant cases'
-                                        : step.detail}
-                                </p>
+                                <div className="flex items-center gap-3">
+                                    <span className={`text-sm font-medium ${step.status === 'processing' ? 'text-violet-300' : 'text-white/80'
+                                        }`}>
+                                        {step.label}
+                                    </span>
+                                    {step.count !== undefined && step.status !== 'pending' && (
+                                        <span className="text-xs font-mono text-violet-400 bg-violet-500/10 px-1.5 py-0.5 rounded">
+                                            {step.count}
+                                        </span>
+                                    )}
+                                </div>
+
+                                {/* Detail Text - Always show when processing or complete */}
+                                <div className={`overflow-hidden transition-all duration-300 ${step.status === 'processing' || step.status === 'complete' ? 'max-h-12 mt-1.5 opacity-100' : 'max-h-0 opacity-0'
+                                    }`}>
+                                    <p className="text-xs text-white/50 leading-relaxed">
+                                        {step.detail}
+                                    </p>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                ))}
+                    ))}
+                </div>
             </div>
         </div>
     );
