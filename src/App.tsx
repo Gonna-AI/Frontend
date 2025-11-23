@@ -24,6 +24,7 @@ import Solutions from './pages/Solutions';
 import FAQ from './pages/FAQ';
 import Blog from './pages/Blog';
 import BlogPost from './pages/BlogPost';
+import Arbor from './pages/Arbor';
 import { PrivateRoute } from './components/Auth/PrivateRoute';
 import ScrollToTop from './components/ScrollToTop';
 // Create a client
@@ -38,7 +39,7 @@ function App() {
   useEffect(() => {
     // Check auth status in background without blocking render
     checkAuthStatus();
-    
+
     // Listen for auth state changes
     const handleAuthStateChange = (event: CustomEvent) => {
       setIsSignedIn(event.detail.isAuthenticated);
@@ -91,13 +92,13 @@ function App() {
         <div className={cn(
           "fixed top-0 left-0 right-0 h-[40vh] pointer-events-none",
           isDark ? "bg-gradient-to-b from-purple-500/20 via-blue-500/10 to-transparent"
-               : "bg-gradient-to-b from-blue-900/40 via-purple-200/30 to-transparent"
+            : "bg-gradient-to-b from-blue-900/40 via-purple-200/30 to-transparent"
         )} />
 
         <div className="fixed top-0 left-0 right-0 z-50">
           <Header onMobileMenuClick={() => setIsMobileMenuOpen(true)} />
         </div>
-        
+
         <div className="flex pt-16 md:pt-20 fixed inset-0">
           <main className={cn(
             "relative flex-1 overflow-y-auto",
@@ -110,8 +111,8 @@ function App() {
               {children}
             </div>
           </main>
-          
-          <Sidebar 
+
+          <Sidebar
             currentPath={window.location.pathname}
             onSignOut={handleSignOut}
             isOpen={isMobileMenuOpen}
@@ -130,14 +131,14 @@ function App() {
         <Routes>
           {/* Public Routes */}
           <Route path="/" element={
-            isSignedIn ? 
-              <Navigate to="/dashboard" /> : 
+            isSignedIn ?
+              <Navigate to="/dashboard" /> :
               <Landing />
           } />
-          
+
           <Route path="/auth" element={
-            isSignedIn ? 
-              <Navigate to="/dashboard" /> : 
+            isSignedIn ?
+              <Navigate to="/dashboard" /> :
               shouldRedirectToInvite() ?
                 <Navigate to="/invite" /> :
                 <AuthPage setIsSignedIn={setIsSignedIn} />
@@ -170,6 +171,7 @@ function App() {
           <Route path="/faq" element={<FAQ />} />
           <Route path="/blog" element={<Blog />} />
           <Route path="/blog/:slug" element={<BlogPost />} />
+          <Route path="/arbor" element={<Arbor />} />
           <Route path="/profile" element={
             <ProtectedRoute>
               <Profile />
@@ -185,9 +187,9 @@ function App() {
               <Settings />
             </ProtectedRoute>
           } />
-          
+
           <Route path="/terms-of-service" element={<TermsOfService />} />
-          <Route path="/privacy-policy" element={<PrivacyPolicy/>} />
+          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           <Route path="/security" element={<Security />} />
           {/* Catch all route */}
           <Route path="*" element={<Navigate to="/" />} />

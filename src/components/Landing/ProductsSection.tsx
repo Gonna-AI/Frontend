@@ -6,15 +6,15 @@ import { useDeviceDetection } from '../../hooks/useDeviceDetection';
 type ProductType = 'arbor' | 'juris';
 
 // Memoized card component to prevent unnecessary re-renders
-const ProductCard = memo(({ 
-    icon: Icon, 
-    title, 
-    description, 
-    features, 
+const ProductCard = memo(({
+    icon: Icon,
+    title,
+    description,
+    features,
     colorClass,
     iconColor,
     hoverColor,
-    isLowEnd 
+    isLowEnd
 }: {
     icon: React.ElementType;
     title: string;
@@ -25,12 +25,12 @@ const ProductCard = memo(({
     hoverColor: string;
     isLowEnd: boolean;
 }) => {
-    const hoverClasses = isLowEnd 
-        ? 'hover:ring-white/10' 
+    const hoverClasses = isLowEnd
+        ? 'hover:ring-white/10'
         : 'hover:scale-[1.01] hover:from-white/[0.08] hover:ring-white/10 hover:shadow-2xl';
-    
+
     return (
-        <div 
+        <div
             className={`group relative overflow-hidden rounded-[2.5rem] bg-gradient-to-b from-white/[0.05] to-transparent p-10 ring-1 ring-white/5 transition-all duration-300 ${hoverClasses} ${hoverColor}`}
             style={{ willChange: isLowEnd ? 'auto' : 'transform' }}
         >
@@ -115,6 +115,19 @@ const ArborContent = memo(({ isLowEnd, prefersReducedMotion }: { isLowEnd: boole
                     isLowEnd={isLowEnd}
                 />
             </div>
+
+            {/* Try Arbor Button */}
+            <div className="flex justify-center mt-12">
+                <a
+                    href="/arbor"
+                    className="group relative px-8 py-4 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-semibold rounded-2xl transition-all duration-300 hover:shadow-lg hover:shadow-emerald-500/25 hover:scale-[1.02] flex items-center gap-2"
+                >
+                    <span>Try Arbor</span>
+                    <svg className="w-5 h-5 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                </a>
+            </div>
         </motion.div>
     );
 });
@@ -182,7 +195,7 @@ export default function ProductsSection() {
     const [activeProduct, setActiveProduct] = useState<ProductType>('arbor');
     const { isLowEnd } = useDeviceDetection();
     const prefersReducedMotion = useReducedMotion();
-    
+
     // Debounce toggle to prevent rapid clicking issues
     const handleToggle = useCallback((product: ProductType) => {
         if (activeProduct === product) return;
@@ -212,7 +225,7 @@ export default function ProductsSection() {
                 </div>
             );
         }
-        
+
         // Full gradients for high-end devices
         return (
             <div
