@@ -1,7 +1,8 @@
 import { useState, useMemo, useCallback, memo } from 'react';
-import { Bot, Workflow, Database, Calendar, FileText, Zap, Scale, Scroll, Gavel, Shield, Search, Brain } from 'lucide-react';
+import { Bot, Workflow, Database, Calendar, FileText, Zap, Scale, Scroll, Gavel, Shield, Search, Brain, ArrowRight } from 'lucide-react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { useDeviceDetection } from '../../hooks/useDeviceDetection';
+import { Link } from 'react-router-dom';
 
 type ProductType = 'arbor' | 'juris';
 
