@@ -6,6 +6,7 @@ interface ArborSearchProps {
     isIndexed: boolean;
     onIndexDocuments: () => void;
     documentCount: number;
+    onBack?: () => void;
 }
 
 const mockSearchResults: SearchResult[] = [
@@ -84,18 +85,18 @@ export default function ArborSearch({ isIndexed, onIndexDocuments, documentCount
     if (!isIndexed) {
         return (
             <div className="flex items-center justify-center h-full">
-                <div className="text-center space-y-6 max-w-2xl">
-                    <div className="w-20 h-20 mx-auto bg-gradient-to-br from-emerald-500/20 to-teal-500/20 rounded-3xl flex items-center justify-center border border-emerald-500/30">
-                        <Search className="w-10 h-10 text-emerald-400" />
+                <div className="text-center space-y-4 sm:space-y-6 max-w-2xl px-4">
+                    <div className="w-16 h-16 sm:w-20 sm:h-20 mx-auto bg-gradient-to-br from-emerald-500/20 to-teal-500/20 rounded-2xl sm:rounded-3xl flex items-center justify-center border border-emerald-500/30">
+                        <Search className="w-8 h-8 sm:w-10 sm:h-10 text-emerald-400" />
                     </div>
-                    <h3 className="text-3xl font-bold text-white">Index Your Documents</h3>
-                    <p className="text-white/60 text-lg leading-relaxed">
+                    <h3 className="text-2xl sm:text-3xl font-bold text-white">Index Your Documents</h3>
+                    <p className="text-white/60 text-sm sm:text-lg leading-relaxed">
                         Click "Index Documents" to enable advanced hybrid search with 65% BM25 keyword matching and 35% AI semantic understanding
                     </p>
 
-                    <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-8 space-y-4">
-                        <h4 className="text-xl font-semibold text-emerald-400 mb-4">Features</h4>
-                        <ul className="text-left space-y-3 text-white/70">
+                    <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl sm:rounded-2xl p-6 sm:p-8 space-y-3 sm:space-y-4">
+                        <h4 className="text-lg sm:text-xl font-semibold text-emerald-400 mb-3 sm:mb-4">Features</h4>
+                        <ul className="text-left space-y-2 sm:space-y-3 text-white/70 text-xs sm:text-base">
                             <li className="flex items-start gap-3">
                                 <Sparkles className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
                                 <span>65/35 BM25/Semantic Hybrid Search</span>
@@ -203,7 +204,7 @@ export default function ArborSearch({ isIndexed, onIndexDocuments, documentCount
 
             {/* Results */}
             {results.length > 0 && (
-                <div className="space-y-4">
+                <div className="space-y-3 sm:space-y-4">
                     <div className="flex items-center justify-between">
                         <h3 className="text-lg font-semibold text-white">
                             Found {results.length} result{results.length !== 1 ? 's' : ''}

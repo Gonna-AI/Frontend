@@ -55,21 +55,22 @@ export default function ArborDashboard({ stats, onRefresh }: ArborDashboardProps
     };
 
     return (
-        <div className="space-y-8">
+        <div className="space-y-6 sm:space-y-8">
             {/* Overview Stats */}
             <div>
-                <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-2xl font-bold text-white">System Overview</h2>
+                <div className="flex items-center justify-between mb-4 sm:mb-6">
+                    <h2 className="text-xl sm:text-2xl font-bold text-white">System Overview</h2>
                     <button
                         onClick={onRefresh}
-                        className="px-6 py-3 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-emerald-500/30 text-white/70 hover:text-white font-medium rounded-xl transition-all duration-300 flex items-center gap-2"
+                        className="px-3 sm:px-6 py-2 sm:py-3 text-xs sm:text-base bg-white/5 hover:bg-white/10 border border-white/10 hover:border-emerald-500/30 text-white/70 hover:text-white font-medium rounded-lg sm:rounded-xl transition-all duration-300 flex items-center gap-1.5 sm:gap-2"
                     >
-                        <Activity className="w-4 h-4" />
-                        <span>Refresh Data</span>
+                        <Activity className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                        <span className="hidden sm:inline">Refresh Data</span>
+                        <span className="sm:hidden">Refresh</span>
                     </button>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
                     <StatCard
                         icon={FileText}
                         label="Total Documents"
@@ -103,8 +104,8 @@ export default function ArborDashboard({ stats, onRefresh }: ArborDashboardProps
             {/* Document Breakdown */}
             {stats.by_type && Object.keys(stats.by_type).length > 0 && (
                 <div>
-                    <h3 className="text-xl font-bold text-white mb-4">Documents by Type</h3>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <h3 className="text-lg sm:text-xl font-bold text-white mb-3 sm:mb-4">Documents by Type</h3>
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
                         {Object.entries(stats.by_type).map(([type, count]) => (
                             <div
                                 key={type}
@@ -121,8 +122,8 @@ export default function ArborDashboard({ stats, onRefresh }: ArborDashboardProps
             {/* Urgency Levels */}
             {stats.by_urgency && (
                 <div>
-                    <h3 className="text-xl font-bold text-white mb-4">Documents by Urgency</h3>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <h3 className="text-lg sm:text-xl font-bold text-white mb-3 sm:mb-4">Documents by Urgency</h3>
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
                         <div className="p-4 bg-red-500/10 border border-red-500/30 rounded-xl text-center hover:bg-red-500/20 transition-all duration-300">
                             <div className="flex items-center justify-center gap-2 mb-2">
                                 <AlertCircle className="w-5 h-5 text-red-400" />
@@ -163,8 +164,8 @@ export default function ArborDashboard({ stats, onRefresh }: ArborDashboardProps
 
             {/* Additional Metrics */}
             <div>
-                <h3 className="text-xl font-bold text-white mb-4">Document Metadata</h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <h3 className="text-lg sm:text-xl font-bold text-white mb-3 sm:mb-4">Document Metadata</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
                     <div className="p-5 bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl">
                         <div className="flex items-center gap-3">
                             <div className="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center">
