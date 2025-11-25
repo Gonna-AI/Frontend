@@ -152,17 +152,6 @@ const JurisContent = memo(({ isLowEnd, prefersReducedMotion }: { isLowEnd: boole
 
     return (
         <motion.div key="juris" {...animationConfig}>
-            <div className="text-center mb-16">
-                <h2 className="text-4xl md:text-6xl font-bold tracking-tight mb-6">
-                    <span className="bg-gradient-to-r from-indigo-400 via-violet-400 to-indigo-600 text-transparent bg-clip-text">
-                        Juris
-                    </span>
-                </h2>
-                <p className="text-lg text-white/60 max-w-2xl mx-auto">
-                    The Future of Legal Intelligence. Automated analysis, research, and drafting for modern legal teams.
-                </p>
-            </div>
-
             {/* Video Section */}
             <div className="relative max-w-5xl mx-auto mb-12">
                 {/* Spotlight Effect */}
