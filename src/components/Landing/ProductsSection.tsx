@@ -1,5 +1,5 @@
 import { useState, useMemo, useCallback, memo } from 'react';
-import { Bot, Workflow, Database, Calendar, FileText, Zap, Scale, Scroll, Gavel, Shield, Search, Brain, ArrowRight } from 'lucide-react';
+import { Bot, Workflow, Database, Calendar, FileText, Zap, ArrowRight, Volume2, VolumeX } from 'lucide-react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { useDeviceDetection } from '../../hooks/useDeviceDetection';
 import { Link } from 'react-router-dom';
@@ -141,6 +141,8 @@ const ArborContent = memo(({ isLowEnd, prefersReducedMotion }: { isLowEnd: boole
 ArborContent.displayName = 'ArborContent';
 
 const JurisContent = memo(({ isLowEnd, prefersReducedMotion }: { isLowEnd: boolean; prefersReducedMotion: boolean }) => {
+    const [isMuted, setIsMuted] = useState(true);
+
     const animationConfig = useMemo(() => ({
         initial: prefersReducedMotion || isLowEnd ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 },
         animate: { opacity: 1, y: 0 },
@@ -161,35 +163,48 @@ const JurisContent = memo(({ isLowEnd, prefersReducedMotion }: { isLowEnd: boole
                 </p>
             </div>
 
-            <div className="grid md:grid-cols-2 gap-8">
-                <ProductCard
-                    icon={Scale}
-                    title="Legal Analysis Engine"
-                    description="Accelerate contract review and due diligence with our advanced legal analysis engine. Identify risks, extract key terms, and ensure compliance in seconds, not hours."
-                    features={[
-                        { icon: Search, text: 'Automated contract review & risk detection' },
-                        { icon: Shield, text: 'Compliance monitoring & alerts' },
-                        { icon: FileText, text: 'Key term extraction & summarization' }
-                    ]}
-                    colorClass="bg-indigo-500/10"
-                    iconColor="text-indigo-400"
-                    hoverColor="hover:shadow-indigo-500/10"
-                    isLowEnd={isLowEnd}
-                />
-                <ProductCard
-                    icon={Gavel}
-                    title="Case Law Research"
-                    description="Navigate complex case law with confidence. Our semantic search engine understands legal concepts, helping you find relevant precedents and build stronger arguments faster."
-                    features={[
-                        { icon: Brain, text: 'Semantic case law search' },
-                        { icon: Scroll, text: 'Automated legal drafting assistance' },
-                        { icon: Database, text: 'Citation checking & validation' }
-                    ]}
-                    colorClass="bg-violet-500/10"
-                    iconColor="text-violet-400"
-                    hoverColor="hover:shadow-violet-500/10"
-                    isLowEnd={isLowEnd}
-                />
+            {/* Video Section */}
+            <div className="relative max-w-5xl mx-auto mb-12">
+                {/* Spotlight Effect */}
+                <div className="absolute inset-0 -z-10 rounded-[2.5rem] overflow-hidden">
+                    {/* Main spotlight glow */}
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-gradient-radial from-indigo-500/30 via-violet-500/20 to-transparent blur-3xl opacity-60" />
+                    {/* Secondary glow for depth */}
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[100%] h-[100%] bg-gradient-radial from-purple-500/40 via-indigo-500/20 to-transparent blur-2xl" />
+                    {/* Edge highlights */}
+                    <div className="absolute top-0 left-0 right-0 h-1/3 bg-gradient-to-b from-violet-500/10 to-transparent" />
+                    <div className="absolute bottom-0 left-0 right-0 h-1/3 bg-gradient-to-t from-indigo-500/10 to-transparent" />
+                </div>
+
+                {/* Video Container */}
+                <div className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-white/[0.08] via-white/[0.03] to-transparent ring-2 ring-purple-500/20 shadow-[0_0_80px_rgba(139,92,246,0.3)] backdrop-blur-sm">
+                    {/* Inner glow */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 via-transparent to-violet-500/5 pointer-events-none" />
+
+                    <video
+                        autoPlay
+                        loop
+                        muted={isMuted}
+                        playsInline
+                        className="w-full h-auto relative z-10 rounded-[2.5rem]"
+                        src="https://xlzwfkgurrrspcdyqele.supabase.co/storage/v1/object/public/buck/1764097403076800.MP4"
+                    >
+                        Your browser does not support the video tag.
+                    </video>
+
+                    {/* Mute/Unmute Button */}
+                    <button
+                        onClick={() => setIsMuted(!isMuted)}
+                        className="absolute bottom-6 right-6 z-20 p-3.5 bg-black/50 hover:bg-black/70 backdrop-blur-md border border-purple-500/30 hover:border-purple-400/50 rounded-xl transition-all duration-300 group shadow-lg shadow-purple-900/20 hover:shadow-purple-500/30"
+                        aria-label={isMuted ? "Unmute video" : "Mute video"}
+                    >
+                        {isMuted ? (
+                            <VolumeX className="w-6 h-6 text-purple-200 group-hover:text-purple-100" />
+                        ) : (
+                            <Volume2 className="w-6 h-6 text-purple-200 group-hover:text-purple-100" />
+                        )}
+                    </button>
+                </div>
             </div>
 
             {/* Try Juris Button */}
