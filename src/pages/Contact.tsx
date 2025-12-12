@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Mail, Phone, MapPin, CheckCircle2, Send } from 'lucide-react';
-import api from '../config/api';
+import { supabase } from '../config/supabase';
 import { useNavigate } from 'react-router-dom';
 
 const Contact = () => {
@@ -22,9 +22,21 @@ const Contact = () => {
     setIsSubmitting(true);
 
     try {
-      const response = await api.post('/api/contact/submit', formData);
+      const { error } = await supabase
+        .from('contacts')
+        .insert([
+          {
+            full_name: formData.fullName,
+            company_name: formData.companyName,
+            email: formData.email,
+            phone: formData.phone,
+            interest: formData.interest,
+            employee_count: formData.employeeCount,
+            message: formData.message,
+          }
+        ]);
 
-      if (response.status !== 200) throw new Error('Submission failed');
+      if (error) throw error;
 
       setSubmitStatus('success');
       setFormData({
