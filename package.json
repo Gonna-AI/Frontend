@@ -19,6 +19,7 @@
     "@radix-ui/react-switch": "^1.1.2",
     "@react-three/drei": "^9.102.3",
     "@react-three/fiber": "^8.15.19",
+    "@supabase/supabase-js": "^2.87.1",
     "@tanstack/react-query": "^5.62.10",
     "@tsparticles/engine": "^3.7.1",
     "@tsparticles/react": "^3.0.0",
