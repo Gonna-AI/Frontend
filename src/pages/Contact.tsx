@@ -22,6 +22,7 @@ const Contact = () => {
     setIsSubmitting(true);
 
     try {
+      console.log('Starting Supabase submission...', formData);
       const { error } = await supabase
         .from('contacts')
         .insert([
@@ -36,7 +37,12 @@ const Contact = () => {
           }
         ]);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase error:', error);
+        throw error;
+      }
+
+      console.log('Supabase submission successful!');
 
       setSubmitStatus('success');
       setFormData({
