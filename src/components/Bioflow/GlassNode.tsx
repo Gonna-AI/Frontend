@@ -34,11 +34,14 @@ const GlassNode = ({ data, selected }: NodeProps<NodeData>) => {
 
     return (
         <div className={`
-      relative group w-[320px] rounded-xl backdrop-blur-xl transition-all duration-300
-      border ${isProcessing ? 'border-yellow-400/50' : selected ? 'border-indigo-400/60' : scheme.base}
-      bg-[#0a0a0a]/90
-      hover:shadow-[0_0_30px_-5px_rgba(99,102,241,0.3)]
-      ${selected ? 'shadow-[0_0_25px_-5px_rgba(99,102,241,0.4)]' : ''}
+      relative group w-[320px] rounded-xl transition-all duration-300
+      /* Mobile: Solid background, no blur, simple border */
+      bg-[#0a0a0a] border ${isProcessing ? 'border-yellow-400/50' : selected ? 'border-indigo-400' : scheme.base}
+      
+      /* Desktop: Glassmorphism, blur, sophisticated hover effects */
+      md:backdrop-blur-xl md:bg-[#0a0a0a]/90
+      md:hover:shadow-[0_0_30px_-5px_rgba(99,102,241,0.3)]
+      ${selected ? 'shadow-lg md:shadow-[0_0_25px_-5px_rgba(99,102,241,0.4)]' : ''}
     `}>
             {/* Header Bar */}
             <div className="flex items-center justify-between px-3 py-2 border-b border-white/5 bg-white/[0.02] rounded-t-xl">
