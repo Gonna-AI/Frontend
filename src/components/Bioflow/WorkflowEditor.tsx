@@ -179,12 +179,14 @@ const WorkflowEditorCore = ({ selectedUseCase, onUseCaseChange, showInspector = 
                         markerEnd: { type: MarkerType.ArrowClosed, color: '#6366f1' },
                     }}
                 >
-                    <Background
-                        color="#6366f1"
-                        gap={25}
-                        size={1}
-                        className="opacity-[0.06]"
-                    />
+                    {!isMobile && (
+                        <Background
+                            color="#6366f1"
+                            gap={25}
+                            size={1}
+                            className="opacity-[0.06]"
+                        />
+                    )}
                     <Controls
                         showInteractive={false}
                         className="!bg-[#0a0a0a]/80 !border-white/10 !backdrop-blur-md [&>button]:!fill-slate-400 hover:[&>button]:!fill-white !rounded-xl !left-auto !right-2 !bottom-2"
