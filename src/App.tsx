@@ -26,6 +26,7 @@ import Blog from './pages/Blog';
 import BlogPost from './pages/BlogPost';
 import Arbor from './pages/Arbor';
 import Juris from './pages/Juris';
+import Bioflow from './pages/Bioflow';
 import { PrivateRoute } from './components/Auth/PrivateRoute';
 import ScrollToTop from './components/ScrollToTop';
 // Create a client
@@ -174,6 +175,7 @@ function App() {
           <Route path="/blog/:slug" element={<BlogPost />} />
           <Route path="/arbor" element={<Arbor />} />
           <Route path="/juris" element={<Juris />} />
+          <Route path="/bioflow" element={<Bioflow />} />
           <Route path="/profile" element={
             <ProtectedRoute>
               <Profile />
