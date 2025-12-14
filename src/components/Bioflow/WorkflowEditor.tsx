@@ -71,15 +71,21 @@ const WorkflowEditorCore = ({ selectedUseCase, onUseCaseChange, showInspector = 
                 logs: []
             }
         })));
-        setEdges(useCase.edges.map(e => ({ ...e, animated: true, style: { ...e.style, opacity: 1 } })));
-    }, [useCase, setNodes, setEdges]);
+        // Disable animated edges on mobile for better performance
+        setEdges(useCase.edges.map(e => ({
+            ...e,
+            animated: !isMobile,
+            style: { ...e.style, opacity: 1 }
+        })));
+    }, [useCase, setNodes, setEdges, isMobile]);
 
     const switchUseCase = (id: UseCaseId) => {
         setIsRunning(false);
         setSelectedNodeId(null);
         const newUseCase = USE_CASES[id];
         setNodes(newUseCase.nodes);
-        setEdges(newUseCase.edges);
+        // Disable animated edges on mobile for better performance
+        setEdges(newUseCase.edges.map(e => ({ ...e, animated: !isMobile })));
         onUseCaseChange(id);
     };
 
@@ -145,11 +151,13 @@ const WorkflowEditorCore = ({ selectedUseCase, onUseCaseChange, showInspector = 
     return (
         <div className="flex w-full h-full bg-transparent relative overflow-hidden rounded-2xl border border-white/10">
 
-            {/* Background Ambience */}
-            <div className="absolute inset-0 pointer-events-none overflow-hidden">
-                <div className="absolute top-[-10%] left-[-10%] w-[300px] md:w-[500px] h-[300px] md:h-[500px] rounded-full bg-indigo-500/10 blur-[80px] md:blur-[100px]" />
-                <div className="absolute bottom-[-10%] right-[-10%] w-[400px] md:w-[600px] h-[400px] md:h-[600px] rounded-full bg-purple-500/10 blur-[80px] md:blur-[100px]" />
-            </div>
+            {/* Background Ambience - Only on desktop for performance */}
+            {!isMobile && (
+                <div className="absolute inset-0 pointer-events-none overflow-hidden">
+                    <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] rounded-full bg-indigo-500/10 blur-[100px]" />
+                    <div className="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] rounded-full bg-purple-500/10 blur-[100px]" />
+                </div>
+            )}
 
             {/* Canvas */}
             <div className="flex-1 relative h-full z-10">

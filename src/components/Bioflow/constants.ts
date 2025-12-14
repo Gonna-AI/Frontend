@@ -112,16 +112,16 @@ export const DOCTOR_EDGES: AppEdge[] = [
     { id: 'e3', source: 'analyze', target: 'check-patient', type: 'smoothstep', animated: true, style: { stroke: '#6366f1', strokeWidth: 1.5 } },
     { id: 'e4', source: 'check-calendar', target: 'schedule', type: 'smoothstep', animated: true, style: { stroke: '#6366f1', strokeWidth: 1.5 } },
     { id: 'e5', source: 'check-patient', target: 'schedule', type: 'smoothstep', animated: true, style: { stroke: '#6366f1', strokeWidth: 1.5 } },
-    { id: 'e6', source: 'schedule', target: 'notify', type: 'smoothstep', animated: true, label: '✓ Confirmed', style: { stroke: '#6366f1', strokeWidth: 1.5 } },
+    { id: 'e6', source: 'schedule', target: 'notify', type: 'smoothstep', animated: true, label: 'Confirmed', style: { stroke: '#6366f1', strokeWidth: 1.5 } },
 ];
 
 export const DOCTOR_LOGS: Record<string, string[]> = {
-    'start': ['📧 New appointment request received', '📋 Extracting patient information', '✅ Request parsed successfully'],
-    'analyze': ['🤖 Analyzing request with AI', '📅 Preferred time: Tomorrow morning', '🏥 Type: General checkup'],
-    'check-calendar': ['📆 Checking Dr. Smith\'s calendar', '🔍 Finding available slots', '✅ Found 3 available times'],
-    'check-patient': ['👤 Looking up patient records', '📊 Previous visit history found', '✅ Patient verified'],
-    'schedule': ['🎯 Selecting optimal time slot', '📝 Creating appointment entry', '✅ Appointment scheduled for 9:00 AM'],
-    'notify': ['📧 Sending confirmation email', '📱 Sending SMS reminder', '✅ Patient notified'],
+    'start': ['New appointment request received', 'Extracting patient information', 'Request parsed successfully'],
+    'analyze': ['Analyzing request with AI', 'Preferred time: Tomorrow morning', 'Type: General checkup'],
+    'check-calendar': ['Checking Dr. Smith\'s calendar', 'Finding available slots', 'Found 3 available times'],
+    'check-patient': ['Looking up patient records', 'Previous visit history found', 'Patient verified'],
+    'schedule': ['Selecting optimal time slot', 'Creating appointment entry', 'Scheduled for 9:00 AM'],
+    'notify': ['Sending confirmation email', 'Sending SMS reminder', 'Patient notified'],
 };
 
 export const DOCTOR_TRACE = [
@@ -261,18 +261,18 @@ export const RESTAURANT_EDGES: AppEdge[] = [
     { id: 'e4', source: 'check-tables', target: 'recommend', type: 'smoothstep', animated: true, style: { stroke: '#f59e0b', strokeWidth: 1.5 } },
     { id: 'e5', source: 'check-vip', target: 'recommend', type: 'smoothstep', animated: true, style: { stroke: '#f59e0b', strokeWidth: 1.5 } },
     { id: 'e6', source: 'check-special', target: 'recommend', type: 'smoothstep', animated: true, style: { stroke: '#f59e0b', strokeWidth: 1.5 } },
-    { id: 'e7', source: 'recommend', target: 'confirm', type: 'smoothstep', animated: true, label: '🍽️ Booked', style: { stroke: '#f59e0b', strokeWidth: 1.5 } },
+    { id: 'e7', source: 'recommend', target: 'confirm', type: 'smoothstep', animated: true, label: 'Booked', style: { stroke: '#f59e0b', strokeWidth: 1.5 } },
     { id: 'e8', source: 'recommend', target: 'add-note', type: 'smoothstep', animated: true, style: { stroke: '#f59e0b', strokeWidth: 1.5 } },
 ];
 
 export const RESTAURANT_LOGS: Record<string, string[]> = {
-    'start': ['🍽️ New reservation request', '👥 Party of 4 on Friday', '✅ Request received'],
-    'check-tables': ['🪑 Checking available tables', '🔍 Filtering for 4+ seating', '✅ 2 outdoor options found'],
-    'check-vip': ['⭐ Checking loyalty status', '🏆 Gold member detected!', '✅ VIP perks unlocked'],
-    'check-special': ['📋 Checking Friday specials', '🎷 Live Jazz Night confirmed', '🦞 Seafood special available'],
-    'recommend': ['🎯 Analyzing all options', '⭐ Patio #3 is perfect for VIP', '✅ Premium experience ready'],
-    'confirm': ['📧 Sending VIP confirmation', '🎁 Including special welcome', '✅ Guest notified'],
-    'add-note': ['👨‍🍳 Alerting kitchen', '⚠️ VIP treatment flagged', '✅ Chef acknowledged'],
+    'start': ['New reservation request', 'Party of 4 on Friday', 'Request received'],
+    'check-tables': ['Checking available tables', 'Filtering for 4+ seating', '2 outdoor options found'],
+    'check-vip': ['Checking loyalty status', 'Gold member detected', 'VIP perks unlocked'],
+    'check-special': ['Checking Friday specials', 'Live Jazz Night confirmed', 'Seafood special available'],
+    'recommend': ['Analyzing all options', 'Patio #3 is perfect for VIP', 'Premium experience ready'],
+    'confirm': ['Sending VIP confirmation', 'Including special welcome', 'Guest notified'],
+    'add-note': ['Alerting kitchen', 'VIP treatment flagged', 'Chef acknowledged'],
 };
 
 export const RESTAURANT_TRACE = [
@@ -409,19 +409,19 @@ export const LEGAL_EDGES: AppEdge[] = [
     { id: 'e2', source: 'classify', target: 'research', type: 'smoothstep', animated: true, style: { stroke: '#10b981', strokeWidth: 1.5 } },
     { id: 'e3', source: 'research', target: 'match-lawyer', type: 'smoothstep', animated: true, style: { stroke: '#10b981', strokeWidth: 1.5 } },
     { id: 'e4', source: 'match-lawyer', target: 'review', type: 'smoothstep', animated: true, style: { stroke: '#10b981', strokeWidth: 1.5 } },
-    { id: 'e5-loop', source: 'review', target: 'research', type: 'smoothstep', animated: false, label: '↩ More info', style: { stroke: '#64748b', strokeWidth: 1, strokeDasharray: '5,5' } },
-    { id: 'e6', source: 'review', target: 'schedule-call', type: 'smoothstep', animated: true, label: '✓ Approved', style: { stroke: '#10b981', strokeWidth: 1.5 } },
+    { id: 'e5-loop', source: 'review', target: 'research', type: 'smoothstep', animated: false, label: 'More info', style: { stroke: '#64748b', strokeWidth: 1, strokeDasharray: '5,5' } },
+    { id: 'e6', source: 'review', target: 'schedule-call', type: 'smoothstep', animated: true, label: 'Approved', style: { stroke: '#10b981', strokeWidth: 1.5 } },
     { id: 'e7', source: 'review', target: 'send-docs', type: 'smoothstep', animated: true, style: { stroke: '#10b981', strokeWidth: 1.5 } },
 ];
 
 export const LEGAL_LOGS: Record<string, string[]> = {
-    'start': ['📋 New legal inquiry received', '📝 Contract review request', '✅ Case details captured'],
-    'classify': ['🤖 Analyzing case type', '⚖️ Category: Employment Law', '📊 Urgency: Standard'],
-    'research': ['📚 Searching legal database', '🔍 Finding relevant precedents', '✅ 5 relevant cases found'],
-    'match-lawyer': ['👔 Matching with specialists', '⭐ Found: Ms. Sarah Chen', '✅ 10+ years experience'],
-    'review': ['👩‍⚖️ Lawyer reviewing case', '📋 Checking availability', '✅ Case accepted'],
-    'schedule-call': ['📅 Checking calendar', '📞 Booking consultation', '✅ Call set for Thursday 2PM'],
-    'send-docs': ['📎 Preparing documents', '🔒 Secure file sharing', '✅ Client & lawyer notified'],
+    'start': ['New legal inquiry received', 'Contract review request', 'Case details captured'],
+    'classify': ['Analyzing case type', 'Category: Employment Law', 'Urgency: Standard'],
+    'research': ['Searching legal database', 'Finding relevant precedents', '5 relevant cases found'],
+    'match-lawyer': ['Matching with specialists', 'Found: Ms. Sarah Chen', '10+ years experience'],
+    'review': ['Lawyer reviewing case', 'Checking availability', 'Case accepted'],
+    'schedule-call': ['Checking calendar', 'Booking consultation', 'Call set for Thursday 2PM'],
+    'send-docs': ['Preparing documents', 'Secure file sharing', 'Client & lawyer notified'],
 };
 
 export const LEGAL_TRACE = [
