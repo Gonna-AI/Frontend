@@ -3,6 +3,7 @@ import { Bot, Workflow, Database, Calendar, FileText, Zap, ArrowRight, Volume2, 
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { useDeviceDetection } from '../../hooks/useDeviceDetection';
 import { Link } from 'react-router-dom';
+import WorkflowEditor from '../Bioflow/WorkflowEditor';
 
 type ProductType = 'arbor' | 'juris';
 
@@ -75,50 +76,43 @@ const ArborContent = memo(({ isLowEnd, prefersReducedMotion }: { isLowEnd: boole
 
     return (
         <motion.div key="arbor" {...animationConfig}>
-            <div className="text-center mb-16">
-                <h2 className="text-4xl md:text-6xl font-bold tracking-tight mb-6">
+            <div className="text-center mb-10">
+                <h2 className="text-4xl md:text-6xl font-bold tracking-tight mb-4">
                     <span className="bg-gradient-to-r from-emerald-400 via-teal-400 to-emerald-600 text-transparent bg-clip-text">
                         Arbor
                     </span>
                 </h2>
                 <p className="text-lg text-white/60 max-w-2xl mx-auto">
-                    The next generation AI operations agent that unifies your business intelligence.
+                    See how AI automates your business workflows in real-time
                 </p>
             </div>
 
-            <div className="grid md:grid-cols-2 gap-8">
-                <ProductCard
-                    icon={Database}
-                    title="Intelligent Operations Agent"
-                    description="Built on LangChain, Arbor integrates seamlessly with your existing ecosystem. It combines the power of DeepSeek-7B RAG with MiniLM semantic search to turn your Google Drive into an interactive knowledge base."
-                    features={[
-                        { icon: FileText, text: 'Google Drive knowledge integration' },
-                        { icon: Zap, text: 'DeepSeek-7B RAG & MiniLM search' },
-                        { icon: Calendar, text: 'Calendar-powered scheduling & briefs' }
-                    ]}
-                    colorClass="bg-emerald-500/10"
-                    iconColor="text-emerald-400"
-                    hoverColor="hover:shadow-emerald-500/10"
-                    isLowEnd={isLowEnd}
-                />
-                <ProductCard
-                    icon={Workflow}
-                    title="Enterprise Automation"
-                    description="Engineered for scale, Arbor handles the heavy lifting of enterprise operations. From document ingestion to workflow orchestration, it creates a unified business intelligence layer."
-                    features={[
-                        { icon: Bot, text: 'Bilingual QA & Async pipelines' },
-                        { icon: FileText, text: 'Document ingestion & Vector indexing' },
-                        { icon: Workflow, text: 'Email automation & Orchestration' }
-                    ]}
-                    colorClass="bg-teal-500/10"
-                    iconColor="text-teal-400"
-                    hoverColor="hover:shadow-teal-500/10"
-                    isLowEnd={isLowEnd}
-                />
+            {/* Workflow Editor Container */}
+            <div className="relative rounded-[2rem] overflow-hidden bg-gradient-to-b from-white/[0.03] to-transparent ring-1 ring-white/10 shadow-2xl">
+                {/* Ambient glow */}
+                <div className="absolute inset-0 pointer-events-none">
+                    <div className="absolute top-0 left-1/4 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl" />
+                    <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-teal-500/10 rounded-full blur-3xl" />
+                </div>
+
+                {/* Workflow Editor */}
+                <div className="relative h-[500px] md:h-[600px]">
+                    <WorkflowEditor initialUseCase="doctor" showInspector={true} />
+                </div>
+
+                {/* Bottom info bar */}
+                <div className="relative border-t border-white/5 bg-black/20 px-6 py-3 flex items-center justify-between">
+                    <p className="text-xs text-slate-500">
+                        Click <span className="text-emerald-400 font-medium">Run Demo</span> to see the workflow in action
+                    </p>
+                    <p className="text-xs text-slate-600 hidden sm:block">
+                        Scroll to pan • Click nodes for details
+                    </p>
+                </div>
             </div>
 
             {/* Try Arbor Button */}
-            <div className="flex justify-center mt-12">
+            <div className="flex justify-center mt-10">
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
