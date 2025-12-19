@@ -1,8 +1,14 @@
 /**
  * AI Service Layer - Smart Conversation Handler
  * 
- * This service provides AI operations with a smart mock fallback
- * that properly tracks conversation state and extracts information.
+ * Priority chain:
+ * 1. Gemini API (cloud, most capable)
+ * 2. Hermes 2 Pro via Ollama (local, function calling)
+ * 3. Smart Mock (fallback, always available)
+ * 
+ * For 8GB M3 Mac:
+ * - Install Ollama: https://ollama.com/download
+ * - Run: ollama run adrienbrault/nous-hermes2pro:Q4_K_M
  */
 
 import { 
@@ -21,10 +27,12 @@ import {
   AIAnalysisResult,
   CallSummaryResult 
 } from './geminiService';
+import { localLLMService, LocalLLMResponse } from './localLLMService';
 
 // Configuration for AI operations
 interface AIConfig {
   useGemini: boolean;
+  useLocalLLM: boolean;
   fallbackToMock: boolean;
 }
 
@@ -49,6 +57,7 @@ export interface AIResponse {
   suggestedCategory?: CallCategory;
   suggestedPriority?: PriorityLevel;
   confidence: number;
+  source?: 'gemini' | 'local-llm' | 'mock';
 }
 
 export interface SummaryResponse {
@@ -76,10 +85,12 @@ export interface PriorityPrediction {
 class AIService {
   private config: AIConfig = {
     useGemini: true,
+    useLocalLLM: true,
     fallbackToMock: true,
   };
   private knowledgeBase: KnowledgeBaseConfig | null = null;
   private geminiAvailable: boolean | null = null;
+  private localLLMAvailable: boolean | null = null;
   private conversationState: ConversationState = this.resetConversationState();
 
   private resetConversationState(): ConversationState {
@@ -106,12 +117,31 @@ class AIService {
 
   /**
    * Initialize the AI service
+   * Parallelizes availability checks for faster startup
    */
-  async initialize(): Promise<boolean> {
-    // Test Gemini connection
-    this.geminiAvailable = await testGeminiConnection();
-    console.log('Gemini API available:', this.geminiAvailable);
-    return this.geminiAvailable;
+  async initialize(): Promise<void> {
+    console.log('🔄 Initializing AI services...');
+    
+    // Run both checks in parallel for faster startup
+    const [geminiResult, localResult] = await Promise.all([
+      testGeminiConnection().catch(() => false),
+      localLLMService.initialize().catch(() => false)
+    ]);
+    
+    this.geminiAvailable = geminiResult;
+    this.localLLMAvailable = localResult;
+
+    console.log('☁️ Gemini API available:', this.geminiAvailable);
+    if (this.localLLMAvailable) {
+      console.log('🖥️ Local LLM available:', localLLMService.getModelName());
+    }
+
+    // Log the active chain
+    const chain = [];
+    if (this.geminiAvailable) chain.push('Gemini');
+    if (this.localLLMAvailable) chain.push('Hermes-2-Pro');
+    chain.push('Smart Mock');
+    console.log('🔗 AI Chain:', chain.join(' → '));
   }
 
   /**
@@ -126,11 +156,22 @@ class AIService {
    */
   setKnowledgeBase(kb: KnowledgeBaseConfig) {
     this.knowledgeBase = kb;
-    console.log('Knowledge base updated:', kb.persona);
+    console.log('📚 Knowledge base updated:', kb.persona);
   }
 
   /**
-   * Generate a response to user input using Gemini or smart mock
+   * Get current AI status
+   */
+  getStatus(): { gemini: boolean; localLLM: boolean; localLLMModel?: string } {
+    return {
+      gemini: this.geminiAvailable === true,
+      localLLM: this.localLLMAvailable === true,
+      localLLMModel: this.localLLMAvailable ? localLLMService.getModelName() : undefined,
+    };
+  }
+
+  /**
+   * Generate a response to user input using the AI chain
    */
   async generateResponse(
     userMessage: string,
@@ -140,14 +181,14 @@ class AIService {
     const kb = this.knowledgeBase;
     
     if (!kb) {
-      console.warn('Knowledge base not set, using default responses');
+      console.warn('Knowledge base not set, using smart mock');
       return this.smartMockResponse(userMessage, conversationHistory, extractedFields);
     }
 
-    // Try Gemini first
-    if (this.config.useGemini && (this.geminiAvailable !== false)) {
+    // Step 1: Try Gemini first (cloud)
+    if (this.config.useGemini && this.geminiAvailable !== false) {
       try {
-        console.log('Calling Gemini API for response...');
+        console.log('🌐 Calling Gemini API...');
         const result: AIAnalysisResult = await generateCallResponse(
           userMessage,
           conversationHistory,
@@ -160,7 +201,8 @@ class AIService {
           text: result.response,
           extractedFields: result.extractedFields,
           suggestedPriority: result.suggestedPriority,
-          confidence: 0.9,
+          confidence: 0.95,
+          source: 'gemini',
         };
 
         // Map suggested category
@@ -174,22 +216,62 @@ class AIService {
           }
         }
 
-        console.log('Gemini response received:', response.text.substring(0, 50) + '...');
+        console.log('✅ Gemini response received');
         return response;
 
       } catch (error) {
-        console.error('Gemini API error:', error);
+        console.error('❌ Gemini API error:', error);
         this.geminiAvailable = false; // Mark as unavailable to avoid repeated failures
-        if (this.config.fallbackToMock) {
-          console.log('Falling back to smart mock response');
-          return this.smartMockResponse(userMessage, conversationHistory, extractedFields);
-        }
-        throw error;
       }
     }
 
-    // Use smart mock response
-    return this.smartMockResponse(userMessage, conversationHistory, extractedFields);
+    // Step 2: Try Local LLM (Hermes 2 Pro via Ollama)
+    if (this.config.useLocalLLM && this.localLLMAvailable !== false) {
+      try {
+        console.log('🖥️ Calling Local LLM (Hermes 2 Pro)...');
+        const result: LocalLLMResponse = await localLLMService.generateResponse(
+          userMessage,
+          conversationHistory,
+          kb,
+          extractedFields
+        );
+
+        // Convert to our format
+        const response: AIResponse = {
+          text: result.response,
+          extractedFields: result.extractedFields,
+          suggestedPriority: result.suggestedPriority,
+          confidence: 0.88,
+          source: 'local-llm',
+        };
+
+        // Map suggested category
+        if (result.suggestedCategory) {
+          const matchedCategory = kb.categories.find(
+            c => c.id === result.suggestedCategory?.id || 
+                 c.name.toLowerCase() === result.suggestedCategory?.name.toLowerCase()
+          );
+          if (matchedCategory) {
+            response.suggestedCategory = matchedCategory;
+          }
+        }
+
+        console.log('✅ Local LLM response received');
+        return response;
+
+      } catch (error) {
+        console.error('❌ Local LLM error:', error);
+        this.localLLMAvailable = false; // Mark as unavailable
+      }
+    }
+
+    // Step 3: Fallback to smart mock
+    if (this.config.fallbackToMock) {
+      console.log('🤖 Using smart mock response');
+      return this.smartMockResponse(userMessage, conversationHistory, extractedFields);
+    }
+
+    throw new Error('No AI provider available');
   }
 
   /**
@@ -207,9 +289,10 @@ class AIService {
       return this.mockGenerateSummary(messages, extractedFields, category, priority);
     }
 
+    // Step 1: Try Gemini
     if (this.config.useGemini && this.geminiAvailable) {
       try {
-        console.log('Calling Gemini API for summary...');
+        console.log('🌐 Calling Gemini for summary...');
         const result: CallSummaryResult = await summarizeCall(messages, kb, extractedFields);
 
         const tags: string[] = [];
@@ -237,14 +320,42 @@ class AIService {
         };
 
       } catch (error) {
-        console.error('Gemini summary error:', error);
-        if (this.config.fallbackToMock) {
-          return this.mockGenerateSummary(messages, extractedFields, category, priority);
-        }
-        throw error;
+        console.error('❌ Gemini summary error:', error);
       }
     }
 
+    // Step 2: Try Local LLM
+    if (this.config.useLocalLLM && this.localLLMAvailable) {
+      try {
+        console.log('🖥️ Calling Local LLM for summary...');
+        const result = await localLLMService.summarizeCall(
+          messages,
+          extractedFields,
+          category,
+          priority
+        );
+
+        const tags: string[] = [];
+        if (category) tags.push(category.id);
+        if (result.followUpRequired) tags.push('follow-up');
+
+        return {
+          summary: {
+            mainPoints: result.mainPoints,
+            sentiment: result.sentiment,
+            actionItems: [],
+            followUpRequired: result.followUpRequired,
+            notes: result.notes,
+          },
+          tags,
+        };
+
+      } catch (error) {
+        console.error('❌ Local LLM summary error:', error);
+      }
+    }
+
+    // Step 3: Fallback to mock
     return this.mockGenerateSummary(messages, extractedFields, category, priority);
   }
 
@@ -253,7 +364,7 @@ class AIService {
    */
   private async smartMockResponse(
     userMessage: string,
-    conversationHistory: CallMessage[],
+    _conversationHistory: CallMessage[],
     existingFields: ExtractedField[]
   ): Promise<AIResponse> {
     await this.delay(300 + Math.random() * 400);
@@ -285,7 +396,7 @@ class AIService {
     // Extract name from various patterns
     const namePatterns = [
       /(?:my name is|i'm|i am|this is|call me)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)/i,
-      /^([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)$/i, // Just a name by itself
+      /^([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)$/i,
       /^hi,?\s*(?:i'm|this is)\s+([A-Z][a-z]+)/i,
     ];
     
@@ -293,7 +404,6 @@ class AIService {
       const match = userMessage.match(pattern);
       if (match && !state.hasName) {
         const extractedName = match[1].trim();
-        // Validate it's a reasonable name (not common words)
         const commonWords = ['hello', 'hi', 'hey', 'yes', 'no', 'okay', 'sure', 'thanks', 'thank'];
         if (!commonWords.includes(extractedName.toLowerCase()) && extractedName.length > 1) {
           state.hasName = true;
@@ -353,7 +463,6 @@ class AIService {
 
     // Extract purpose from the message
     if (!state.hasPurpose && state.turnCount > 1) {
-      // Look for purpose indicators
       const purposePatterns = [
         /(?:i need|i want|i'm calling about|i'm looking for|i have a|can you help with)\s+(.+?)(?:\.|$)/i,
         /(?:problem with|issue with|question about|interested in)\s+(.+?)(?:\.|$)/i,
@@ -375,7 +484,6 @@ class AIService {
         }
       }
       
-      // If we have a category but no explicit purpose, use the message as purpose
       if (!state.hasPurpose && state.detectedCategory && userMessage.length > 10) {
         state.hasPurpose = true;
         state.purpose = userMessage.substring(0, 100);
@@ -393,17 +501,14 @@ class AIService {
     const callerName = state.callerName;
     const namePrefix = callerName ? `${callerName}, ` : '';
 
-    // Check for goodbye/end signals
     const endSignals = ['bye', 'goodbye', 'that\'s all', 'that is all', 'nothing else', 
                         'no thanks', 'thank you', 'thanks', 'that\'s it', 'all set', 'i\'m good'];
     const isEndingCall = endSignals.some(signal => lowerMessage.includes(signal));
 
-    // Check for greetings
     const greetings = ['hello', 'hi', 'hey', 'good morning', 'good afternoon', 'good evening'];
     const isGreeting = greetings.some(g => lowerMessage.startsWith(g));
 
     if (isEndingCall && state.turnCount > 2) {
-      // User wants to end the call
       state.isWrappingUp = true;
       const closingResponses = [
         `${namePrefix}Thank you for calling ClerkTree today! Is there anything else I can help you with before we end the call?`,
@@ -415,7 +520,6 @@ class AIService {
         : closingResponses[0];
       state.hasAskedAnythingElse = true;
     } else if (isGreeting && state.turnCount <= 2) {
-      // Responding to greeting - ask for name if we don't have it
       if (!state.hasName) {
         response = "Hello! Thank you for calling ClerkTree. May I have your name please?";
       } else {
@@ -423,13 +527,10 @@ class AIService {
       }
       state.hasGreeted = true;
     } else if (!state.hasName && state.turnCount <= 3) {
-      // We need the caller's name first
       response = "Before we continue, may I have your name please?";
     } else if (state.hasName && !state.hasPurpose && state.turnCount <= 4) {
-      // We have name but need purpose
       response = `${namePrefix}how may I assist you today? What brings you to ClerkTree?`;
     } else if (state.hasPurpose && !state.hasAskedAnythingElse && state.turnCount >= 4) {
-      // We have both name and purpose, provide help then ask if anything else
       const helpResponses = [
         `${namePrefix}I understand you're reaching out about ${state.purpose}. I've noted that down and we'll make sure to address this for you. Is there anything else you'd like to add?`,
         `Thank you for explaining that${callerName ? `, ${callerName}` : ''}. I've captured the details about ${state.purpose}. Our team will follow up on this. Is there anything else I can help with?`,
@@ -438,11 +539,10 @@ class AIService {
       response = helpResponses[Math.floor(Math.random() * helpResponses.length)];
       state.hasAskedAnythingElse = true;
     } else {
-      // Continue conversation naturally based on what they said
       if (lowerMessage.includes('yes') || lowerMessage.includes('actually') || 
           lowerMessage.includes('also') || lowerMessage.includes('one more')) {
         response = `${namePrefix}of course! Please go ahead, I'm listening.`;
-        state.hasAskedAnythingElse = false; // They have more to say
+        state.hasAskedAnythingElse = false;
       } else if (lowerMessage.includes('no') && state.hasAskedAnythingElse) {
         response = `${namePrefix}Perfect! Thank you for calling ClerkTree today. If you have any questions in the future, don't hesitate to reach out. Have a great day!`;
         state.isWrappingUp = true;
@@ -455,7 +555,6 @@ class AIService {
       } else if (state.detectedCategory === 'support') {
         response = `${namePrefix}I'm sorry you're experiencing this issue. Let me help you troubleshoot. Can you describe what's happening in more detail?`;
       } else if (userMessage.length > 5) {
-        // Generic but varied responses for other messages
         const contextualResponses = [
           `${namePrefix}I see. That's helpful information. Let me make a note of that. Is there anything specific you'd like us to do about this?`,
           `Thank you for sharing that${callerName ? `, ${callerName}` : ''}. I want to make sure I understand correctly - could you elaborate a bit more?`,
@@ -464,7 +563,6 @@ class AIService {
         ];
         response = contextualResponses[state.turnCount % contextualResponses.length];
       } else {
-        // Very short response - ask for clarification
         response = `${namePrefix}could you tell me more about that?`;
       }
     }
@@ -475,6 +573,7 @@ class AIService {
       suggestedCategory,
       suggestedPriority,
       confidence: 0.85,
+      source: 'mock',
     };
   }
 
@@ -494,7 +593,6 @@ class AIService {
     const tags: string[] = [];
     const actionItems: ActionItem[] = [];
 
-    // Get caller name and purpose from extracted fields
     const callerName = extractedFields.find(f => f.id === 'name')?.value;
     const purpose = extractedFields.find(f => f.id === 'purpose')?.value;
 
@@ -505,14 +603,12 @@ class AIService {
       mainPoints.push(`Purpose: ${purpose}`);
     }
 
-    // Add key message snippets
     userMessages.slice(0, 3).forEach((msg) => {
       if (msg.text.length > 15) {
         mainPoints.push(msg.text.substring(0, 80) + (msg.text.length > 80 ? '...' : ''));
       }
     });
 
-    // Add any other extracted fields
     extractedFields.forEach(field => {
       if (field.id !== 'name' && field.id !== 'purpose' && field.value) {
         mainPoints.push(`${field.label}: ${field.value}`);
@@ -525,7 +621,6 @@ class AIService {
       tags.push('follow-up-needed');
     }
 
-    // Detect sentiment from messages
     const allText = messages.map(m => m.text).join(' ').toLowerCase();
     let sentiment: 'positive' | 'neutral' | 'negative' = 'neutral';
     
@@ -538,7 +633,6 @@ class AIService {
     if (positiveCount > negativeCount) sentiment = 'positive';
     else if (negativeCount > positiveCount) sentiment = 'negative';
 
-    // Generate action items based on context
     if (priority === 'critical' || priority === 'high') {
       actionItems.push({
         id: `action-${Date.now()}-1`,
@@ -561,7 +655,6 @@ class AIService {
       });
     }
 
-    // Generate notes
     let notes = '';
     if (callerName) {
       notes += `Call from ${callerName}. `;
@@ -636,7 +729,7 @@ class AIService {
    */
   async predictPriority(
     messages: CallMessage[],
-    priorityRules: string[]
+    _priorityRules: string[]
   ): Promise<PriorityPrediction> {
     await this.delay(150);
 

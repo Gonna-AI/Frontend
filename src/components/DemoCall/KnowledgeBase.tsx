@@ -21,13 +21,15 @@ import {
   Check,
   Zap,
   Cloud,
-  CloudOff
+  CloudOff,
+  Monitor
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { useDemoCall, ContextField, CallCategory } from '../../contexts/DemoCallContext';
 import VoiceSelector from './VoiceSelector';
 import { aiService } from '../../services/aiService';
 import { testGeminiConnection } from '../../services/geminiService';
+import { localLLMService } from '../../services/localLLMService';
 
 interface KnowledgeBaseProps {
   isDark?: boolean;
@@ -69,6 +71,8 @@ export default function KnowledgeBase({ isDark = true }: KnowledgeBaseProps) {
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [geminiConnected, setGeminiConnected] = useState<boolean | null>(null);
+  const [localLLMConnected, setLocalLLMConnected] = useState<boolean | null>(null);
+  const [localLLMModel, setLocalLLMModel] = useState<string | null>(null);
   const [isTestingConnection, setIsTestingConnection] = useState(false);
 
   // Update AI service when knowledge base changes
@@ -76,7 +80,7 @@ export default function KnowledgeBase({ isDark = true }: KnowledgeBaseProps) {
     aiService.setKnowledgeBase(knowledgeBase);
   }, [knowledgeBase]);
 
-  // Test Gemini connection on mount
+  // Test Gemini and Local LLM connection on mount
   useEffect(() => {
     testConnection();
   }, []);
@@ -84,10 +88,19 @@ export default function KnowledgeBase({ isDark = true }: KnowledgeBaseProps) {
   const testConnection = async () => {
     setIsTestingConnection(true);
     try {
-      const connected = await testGeminiConnection();
-      setGeminiConnected(connected);
+      // Test Gemini
+      const gemini = await testGeminiConnection();
+      setGeminiConnected(gemini);
+      
+      // Test Local LLM (Ollama)
+      const localAvailable = await localLLMService.initialize();
+      setLocalLLMConnected(localAvailable);
+      if (localAvailable) {
+        setLocalLLMModel(localLLMService.getModelName());
+      }
     } catch (error) {
       setGeminiConnected(false);
+      setLocalLLMConnected(false);
     }
     setIsTestingConnection(false);
   };
@@ -234,30 +247,50 @@ export default function KnowledgeBase({ isDark = true }: KnowledgeBaseProps) {
               )}>
                 Configure AI behavior
               </p>
-              {/* Gemini Status */}
-              <button 
-                onClick={testConnection}
-                disabled={isTestingConnection}
-                className={cn(
-                  "flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] transition-colors",
-                  isTestingConnection
-                    ? isDark ? "bg-white/10 text-white/50" : "bg-black/10 text-black/50"
-                    : geminiConnected
-                      ? isDark ? "bg-green-500/20 text-green-400" : "bg-green-500/10 text-green-600"
-                      : isDark ? "bg-red-500/20 text-red-400" : "bg-red-500/10 text-red-600"
-                )}
-              >
-                {isTestingConnection ? (
-                  <Loader2 className="w-2.5 h-2.5 animate-spin" />
-                ) : geminiConnected ? (
-                  <Cloud className="w-2.5 h-2.5" />
-                ) : (
-                  <CloudOff className="w-2.5 h-2.5" />
-                )}
-                <span className="hidden sm:inline">
-                  {isTestingConnection ? 'Testing...' : geminiConnected ? 'Gemini' : 'Offline'}
-                </span>
-              </button>
+              {/* AI Status Badges */}
+              <div className="flex items-center gap-1">
+                {/* Gemini Status */}
+                <button 
+                  onClick={testConnection}
+                  disabled={isTestingConnection}
+                  title={geminiConnected ? 'Gemini Cloud Connected' : 'Gemini Offline'}
+                  className={cn(
+                    "flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] transition-colors",
+                    isTestingConnection
+                      ? isDark ? "bg-white/10 text-white/50" : "bg-black/10 text-black/50"
+                      : geminiConnected
+                        ? isDark ? "bg-green-500/20 text-green-400" : "bg-green-500/10 text-green-600"
+                        : isDark ? "bg-red-500/20 text-red-400" : "bg-red-500/10 text-red-600"
+                  )}
+                >
+                  {isTestingConnection ? (
+                    <Loader2 className="w-2.5 h-2.5 animate-spin" />
+                  ) : geminiConnected ? (
+                    <Cloud className="w-2.5 h-2.5" />
+                  ) : (
+                    <CloudOff className="w-2.5 h-2.5" />
+                  )}
+                  <span className="hidden sm:inline">
+                    {geminiConnected ? 'Gemini' : 'Cloud'}
+                  </span>
+                </button>
+
+                {/* Local LLM Status */}
+                <div 
+                  title={localLLMConnected ? `Local: ${localLLMModel}` : 'Ollama not running'}
+                  className={cn(
+                    "flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px]",
+                    localLLMConnected
+                      ? isDark ? "bg-blue-500/20 text-blue-400" : "bg-blue-500/10 text-blue-600"
+                      : isDark ? "bg-white/10 text-white/30" : "bg-black/10 text-black/30"
+                  )}
+                >
+                  <Monitor className="w-2.5 h-2.5" />
+                  <span className="hidden sm:inline">
+                    {localLLMConnected ? 'Local' : 'Local'}
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -1027,7 +1060,7 @@ export default function KnowledgeBase({ isDark = true }: KnowledgeBaseProps) {
         <div className="flex items-center justify-center gap-2">
           <Zap className={cn(
             "w-3 h-3",
-            geminiConnected 
+            geminiConnected || localLLMConnected
               ? isDark ? "text-green-400" : "text-green-600"
               : isDark ? "text-yellow-400" : "text-yellow-600"
           )} />
@@ -1036,8 +1069,10 @@ export default function KnowledgeBase({ isDark = true }: KnowledgeBaseProps) {
             isDark ? "text-white/40" : "text-black/40"
           )}>
             {geminiConnected 
-              ? 'Connected to Gemini 2.0 Flash • Changes apply to next call'
-              : 'Using fallback AI • Connect to Gemini for full features'
+              ? `Gemini → ${localLLMConnected ? 'Hermes-2-Pro →' : ''} Mock • Changes apply to next call`
+              : localLLMConnected
+                ? `Hermes-2-Pro (Local) → Mock • Install Ollama for local AI`
+                : 'Using Smart Mock • Install Ollama for local AI fallback'
             }
           </p>
         </div>
