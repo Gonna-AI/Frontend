@@ -378,7 +378,17 @@ ${config.customInstructions.length > 0 ? 'INSTRUCTIONS:\n' + config.customInstru
       });
 
       if (!response.ok) {
-        throw new Error(`Ollama error: ${response.status}`);
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+        const errorMsg = errorData.error || `Ollama error: ${response.status}`;
+        console.error(`❌ Ollama API error (${response.status}):`, errorMsg);
+        
+        // Handle memory errors gracefully
+        if (errorMsg.includes('memory') || errorMsg.includes('system memory')) {
+          console.error('💡 Railway container may not have enough RAM for this model');
+          console.error('💡 Consider upgrading Railway plan or using a smaller model');
+        }
+        
+        throw new Error(`Ollama error: ${response.status} - ${errorMsg}`);
       }
 
       const data = await response.json();
