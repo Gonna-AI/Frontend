@@ -521,10 +521,12 @@ ALREADY EXTRACTED INFORMATION:
 ${existingInfo || 'None yet'}
 
 The call has ended. Please:
-1. Use summarize_call to create a comprehensive summary
-2. Use categorize_call to finalize the category
-3. Use set_priority to finalize the priority level
-4. Use extract_call_info if there's any additional information to extract
+1. Use extract_call_info FIRST to extract the caller's name and any missing information (this is critical!)
+2. Use summarize_call to create a comprehensive summary
+3. Use categorize_call to finalize the category
+4. Use set_priority to finalize the priority level
+
+IMPORTANT: If the caller's name was mentioned in the conversation but not yet extracted, you MUST extract it using extract_call_info. The caller name is essential for the call history.
 
 Provide a complete analysis of this call.`;
 
@@ -542,14 +544,28 @@ Provide a complete analysis of this call.`;
       followUpRequired: false
     };
 
-    // Process function calls
+    // Process function calls - extract_call_info first to get caller name
+    let extractedCallerName: string | null = null;
+    
     for (const fc of functionCalls) {
       switch (fc.name) {
+        case 'extract_call_info':
+          // Extract caller name if provided
+          if (fc.args.callerName) {
+            extractedCallerName = fc.args.callerName as string;
+            console.log('✅ Gemini extracted caller name in summary:', extractedCallerName);
+          }
+          break;
+          
         case 'summarize_call':
           result.summary = (fc.args.summary as string) || '';
           result.mainPoints = (fc.args.mainPoints as string[]) || [];
           result.sentiment = (fc.args.sentiment as 'positive' | 'neutral' | 'negative') || 'neutral';
           result.notes = (fc.args.notes as string) || '';
+          // Include caller name in notes if extracted
+          if (extractedCallerName && !result.notes.toLowerCase().includes(extractedCallerName.toLowerCase())) {
+            result.notes = `Caller: ${extractedCallerName}. ${result.notes}`.trim();
+          }
           if (fc.args.actionItems) {
             result.actionItems = (fc.args.actionItems as Array<{task: string; priority: string}>) || [];
           }

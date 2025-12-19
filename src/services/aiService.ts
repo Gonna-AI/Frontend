@@ -63,6 +63,7 @@ export interface AIResponse {
 export interface SummaryResponse {
   summary: CallSummary;
   tags: string[];
+  callerName?: string; // Caller name extracted during summary
 }
 
 export interface FieldExtractionResponse {
@@ -134,6 +135,10 @@ class AIService {
     console.log('☁️ Gemini API available:', this.geminiAvailable);
     if (this.localLLMAvailable) {
       console.log('🖥️ Local LLM available:', localLLMService.getModelName());
+    } else {
+      const ollamaUrl = import.meta.env.VITE_OLLAMA_URL || 'http://localhost:11434';
+      console.log(`⚠️ Local LLM not available. Check: ${ollamaUrl}`);
+      console.log('💡 For Railway deployment, set VITE_OLLAMA_URL in Netlify environment variables');
     }
 
     // Log the active chain
@@ -142,6 +147,13 @@ class AIService {
     if (this.localLLMAvailable) chain.push('Hermes-2-Pro');
     chain.push('Smart Mock');
     console.log('🔗 AI Chain:', chain.join(' → '));
+    
+    if (!this.geminiAvailable && !this.localLLMAvailable) {
+      console.warn('⚠️ WARNING: Both Gemini and Local LLM are unavailable. Using Smart Mock fallback only.');
+      console.warn('💡 To fix:');
+      console.warn('   1. Check VITE_GEMINI_API_KEY is set');
+      console.warn('   2. Check VITE_OLLAMA_URL points to your Railway deployment');
+    }
   }
 
   /**
@@ -189,6 +201,8 @@ class AIService {
     if (this.config.useGemini && this.geminiAvailable !== false) {
       try {
         console.log('🌐 Calling Gemini API...');
+        console.log('   Gemini Available:', this.geminiAvailable);
+        console.log('   API Key Set:', !!import.meta.env.VITE_GEMINI_API_KEY);
         const result: AIAnalysisResult = await generateCallResponse(
           userMessage,
           conversationHistory,
@@ -229,6 +243,8 @@ class AIService {
     if (this.config.useLocalLLM && this.localLLMAvailable !== false) {
       try {
         console.log('🖥️ Calling Local LLM (Hermes 2 Pro)...');
+        console.log('   Local LLM Available:', this.localLLMAvailable);
+        console.log('   Ollama URL:', import.meta.env.VITE_OLLAMA_URL || 'NOT SET');
         const result: LocalLLMResponse = await localLLMService.generateResponse(
           userMessage,
           conversationHistory,
@@ -308,6 +324,15 @@ class AIService {
           completed: false,
         }));
 
+        // Extract caller name from notes if present
+        let callerName: string | undefined;
+        if (result.notes) {
+          const nameMatch = result.notes.match(/(?:caller|from|name is|named):\s*([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)/i);
+          if (nameMatch?.[1]) {
+            callerName = nameMatch[1];
+          }
+        }
+
         return {
           summary: {
             mainPoints: result.mainPoints,
@@ -317,6 +342,7 @@ class AIService {
             notes: result.notes,
           },
           tags,
+          callerName,
         };
 
       } catch (error) {
@@ -339,15 +365,22 @@ class AIService {
         if (category) tags.push(category.id);
         if (result.followUpRequired) tags.push('follow-up');
 
+        // Include caller name in notes if extracted
+        let notes = result.notes;
+        if (result.callerName && !notes.toLowerCase().includes(result.callerName.toLowerCase())) {
+          notes = `Caller: ${result.callerName}. ${notes}`.trim();
+        }
+
         return {
           summary: {
             mainPoints: result.mainPoints,
             sentiment: result.sentiment,
             actionItems: [],
             followUpRequired: result.followUpRequired,
-            notes: result.notes,
+            notes,
           },
           tags,
+          callerName: result.callerName, // Pass caller name back
         };
 
       } catch (error) {

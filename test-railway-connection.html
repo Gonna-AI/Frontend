@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Railway Connection Test</title>
+    <style>
+        body { font-family: monospace; padding: 20px; background: #1a1a1a; color: #0f0; }
+        .test { margin: 10px 0; padding: 10px; background: #2a2a2a; border-radius: 5px; }
+        .success { color: #0f0; }
+        .error { color: #f00; }
+        .warning { color: #ff0; }
+        pre { background: #000; padding: 10px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Railway Connection Diagnostic</h1>
+    <div id="results"></div>
+    <script type="module">
+        const results = document.getElementById('results');
+        
+        function addResult(title, content, type = 'info') {
+            const div = document.createElement('div');
+            div.className = `test ${type}`;
+            div.innerHTML = `<strong>${title}</strong><pre>${content}</pre>`;
+            results.appendChild(div);
+        }
+        
+        // Check environment variables
+        const ollamaUrl = import.meta.env.VITE_OLLAMA_URL || 'NOT SET';
+        const ttsUrl = import.meta.env.VITE_TTS_API_URL || 'NOT SET';
+        const geminiKey = import.meta.env.VITE_GEMINI_API_KEY ? 'SET (hidden)' : 'NOT SET';
+        
+        addResult('Environment Variables', `
+VITE_OLLAMA_URL: ${ollamaUrl}
+VITE_TTS_API_URL: ${ttsUrl}
+VITE_GEMINI_API_KEY: ${geminiKey}
+        `, ollamaUrl === 'NOT SET' ? 'error' : 'success');
+        
+        // Test Ollama connection
+        if (ollamaUrl !== 'NOT SET') {
+            addResult('Testing Ollama Connection', `Testing: ${ollamaUrl}/api/tags`, 'info');
+            
+            fetch(`${ollamaUrl}/api/tags`, {
+                method: 'GET',
+                headers: { 'Content-Type': 'application/json' },
+                signal: AbortSignal.timeout(10000)
+            })
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                }
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            })
+            .then(data => {
+                const models = data.models || [];
+                const hermesModel = models.find(m => 
+                    m.name.includes('hermes2pro') || 
+                    m.name.includes('nous-hermes')
+                );
+                
+                if (hermesModel) {
+                    addResult('✅ Ollama Connection SUCCESS', `
+Status: Connected
+Model Found: ${hermesModel.name}
+Total Models: ${models.length}
+                    `, 'success');
+                } else {
+                    addResult('⚠️ Ollama Connected but Model Not Found', `
+Status: Connected
+Total Models: ${models.length}
+Models: ${models.map(m => m.name).join(', ') || 'None'}
+                    `, 'warning');
+                }
+            })
+            .catch(error => {
+                addResult('❌ Ollama Connection FAILED', `
+Error: ${error.message}
+URL: ${ollamaUrl}
+Possible Issues:
+- URL is incorrect
+- Service is down
+- CORS issue
+- Network timeout
+                `, 'error');
+            });
+        } else {
+            addResult('❌ Ollama URL Not Set', 'VITE_OLLAMA_URL environment variable is not set in Netlify', 'error');
+        }
+        
+        // Test TTS connection
+        if (ttsUrl !== 'NOT SET') {
+            addResult('Testing TTS Connection', `Testing: ${ttsUrl}/health`, 'info');
+            
+            fetch(`${ttsUrl}/health`, {
+                method: 'GET',
+                headers: { 'Content-Type': 'application/json' },
+                signal: AbortSignal.timeout(10000)
+            })
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                }
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            })
+            .then(data => {
+                addResult('✅ TTS Connection SUCCESS', `
+Status: Connected
+Response: ${JSON.stringify(data, null, 2)}
+                `, 'success');
+            })
+            .catch(error => {
+                addResult('❌ TTS Connection FAILED', `
+Error: ${error.message}
+URL: ${ttsUrl}
+Possible Issues:
+- URL is incorrect
+- Service is down
+- CORS issue
+- Network timeout
+                `, 'error');
+            });
+        } else {
+            addResult('❌ TTS URL Not Set', 'VITE_TTS_API_URL environment variable is not set in Netlify', 'error');
+        }
+        
+        // Test Gemini
+        if (geminiKey !== 'NOT SET') {
+            addResult('✅ Gemini API Key Set', 'Key is configured (testing connection would require API call)', 'success');
+        } else {
+            addResult('❌ Gemini API Key Not Set', 'VITE_GEMINI_API_KEY environment variable is not set in Netlify', 'error');
+        }
+    </script>
+</body>
+</html>
+
