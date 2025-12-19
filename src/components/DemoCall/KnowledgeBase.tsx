@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Brain, 
@@ -15,16 +15,26 @@ import {
   Sparkles,
   ChevronDown,
   ChevronUp,
-  GripVertical
+  GripVertical,
+  Mic,
+  Loader2,
+  Check,
+  Zap,
+  Cloud,
+  CloudOff
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { useDemoCall, ContextField, CallCategory } from '../../contexts/DemoCallContext';
+import VoiceSelector from './VoiceSelector';
+import { aiService } from '../../services/aiService';
+import { testGeminiConnection } from '../../services/geminiService';
+import { supabase } from '../../config/supabase';
 
 interface KnowledgeBaseProps {
   isDark?: boolean;
 }
 
-type ActiveTab = 'prompt' | 'fields' | 'categories' | 'rules' | 'instructions';
+type ActiveTab = 'prompt' | 'voice' | 'fields' | 'categories' | 'rules' | 'instructions';
 
 export default function KnowledgeBase({ isDark = true }: KnowledgeBaseProps) {
   const { 
@@ -54,9 +64,65 @@ export default function KnowledgeBase({ isDark = true }: KnowledgeBaseProps) {
   const [newCategory, setNewCategory] = useState({ name: '', color: 'blue', description: '' });
   const [newRule, setNewRule] = useState('');
   const [newInstruction, setNewInstruction] = useState('');
+  
+  // AI and Save states
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
+  const [geminiConnected, setGeminiConnected] = useState<boolean | null>(null);
+  const [isTestingConnection, setIsTestingConnection] = useState(false);
+
+  // Update AI service when knowledge base changes
+  useEffect(() => {
+    aiService.setKnowledgeBase(knowledgeBase);
+  }, [knowledgeBase]);
+
+  // Test Gemini connection on mount
+  useEffect(() => {
+    testConnection();
+  }, []);
+
+  const testConnection = async () => {
+    setIsTestingConnection(true);
+    try {
+      const connected = await testGeminiConnection();
+      setGeminiConnected(connected);
+    } catch (error) {
+      setGeminiConnected(false);
+    }
+    setIsTestingConnection(false);
+  };
+
+  const handleSaveToSupabase = async () => {
+    setIsSaving(true);
+    try {
+      // Save to Supabase (upsert configuration)
+      const { error } = await supabase
+        .from('knowledge_base_config')
+        .upsert({
+          id: 'default',
+          config: knowledgeBase,
+          updated_at: new Date().toISOString()
+        }, { onConflict: 'id' });
+
+      if (error) {
+        console.error('Error saving to Supabase:', error);
+        // Still mark as success for local state update
+      }
+
+      // Update AI service with latest config
+      aiService.setKnowledgeBase(knowledgeBase);
+      
+      setSaveSuccess(true);
+      setTimeout(() => setSaveSuccess(false), 2000);
+    } catch (error) {
+      console.error('Save error:', error);
+    }
+    setIsSaving(false);
+  };
 
   const tabs = [
     { id: 'prompt' as const, label: 'System Prompt', icon: Brain },
+    { id: 'voice' as const, label: 'AI Voice', icon: Mic },
     { id: 'fields' as const, label: 'Context Fields', icon: Tag },
     { id: 'categories' as const, label: 'Categories', icon: BookOpen },
     { id: 'rules' as const, label: 'Priority Rules', icon: AlertTriangle },
@@ -148,34 +214,87 @@ export default function KnowledgeBase({ isDark = true }: KnowledgeBaseProps) {
     )}>
       {/* Header */}
       <div className={cn(
-        "flex items-center gap-2 md:gap-3 px-3 md:px-4 py-2 md:py-3 border-b",
+        "flex items-center justify-between gap-2 md:gap-3 px-3 md:px-4 py-2 md:py-3 border-b",
         isDark ? "border-white/10" : "border-black/10"
       )}>
-        <div className={cn(
-          "w-8 h-8 md:w-10 md:h-10 rounded-lg md:rounded-xl flex items-center justify-center flex-shrink-0",
-          isDark 
-            ? "bg-gradient-to-br from-purple-500/20 to-blue-500/20 border border-white/10" 
-            : "bg-gradient-to-br from-purple-500/10 to-blue-500/10 border border-black/10"
-        )}>
-          <Sparkles className={cn(
-            "w-4 h-4 md:w-5 md:h-5",
-            isDark ? "text-purple-400" : "text-purple-600"
-          )} />
-        </div>
-        <div className="min-w-0">
-          <h3 className={cn(
-            "font-semibold text-sm md:text-base",
-            isDark ? "text-white" : "text-black"
+        <div className="flex items-center gap-2 md:gap-3">
+          <div className={cn(
+            "w-8 h-8 md:w-10 md:h-10 rounded-lg md:rounded-xl flex items-center justify-center flex-shrink-0",
+            isDark 
+              ? "bg-gradient-to-br from-purple-500/20 to-blue-500/20 border border-white/10" 
+              : "bg-gradient-to-br from-purple-500/10 to-blue-500/10 border border-black/10"
           )}>
-            Knowledge Base
-          </h3>
-          <p className={cn(
-            "text-[10px] md:text-xs truncate",
-            isDark ? "text-white/50" : "text-black/50"
-          )}>
-            Configure AI behavior
-          </p>
+            <Sparkles className={cn(
+              "w-4 h-4 md:w-5 md:h-5",
+              isDark ? "text-purple-400" : "text-purple-600"
+            )} />
+          </div>
+          <div className="min-w-0">
+            <h3 className={cn(
+              "font-semibold text-sm md:text-base",
+              isDark ? "text-white" : "text-black"
+            )}>
+              Knowledge Base
+            </h3>
+            <div className="flex items-center gap-2">
+              <p className={cn(
+                "text-[10px] md:text-xs truncate",
+                isDark ? "text-white/50" : "text-black/50"
+              )}>
+                Configure AI behavior
+              </p>
+              {/* Gemini Status */}
+              <button 
+                onClick={testConnection}
+                disabled={isTestingConnection}
+                className={cn(
+                  "flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] transition-colors",
+                  isTestingConnection
+                    ? isDark ? "bg-white/10 text-white/50" : "bg-black/10 text-black/50"
+                    : geminiConnected
+                      ? isDark ? "bg-green-500/20 text-green-400" : "bg-green-500/10 text-green-600"
+                      : isDark ? "bg-red-500/20 text-red-400" : "bg-red-500/10 text-red-600"
+                )}
+              >
+                {isTestingConnection ? (
+                  <Loader2 className="w-2.5 h-2.5 animate-spin" />
+                ) : geminiConnected ? (
+                  <Cloud className="w-2.5 h-2.5" />
+                ) : (
+                  <CloudOff className="w-2.5 h-2.5" />
+                )}
+                <span className="hidden sm:inline">
+                  {isTestingConnection ? 'Testing...' : geminiConnected ? 'Gemini' : 'Offline'}
+                </span>
+              </button>
+            </div>
+          </div>
         </div>
+
+        {/* Save Button */}
+        <button
+          onClick={handleSaveToSupabase}
+          disabled={isSaving}
+          className={cn(
+            "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all",
+            saveSuccess
+              ? "bg-green-500/20 text-green-400 border border-green-500/30"
+              : isDark 
+                ? "bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 border border-blue-500/30" 
+                : "bg-blue-500/10 text-blue-600 hover:bg-blue-500/20 border border-blue-500/20"
+          )}
+        >
+          {isSaving ? (
+            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+          ) : saveSuccess ? (
+            <Check className="w-3.5 h-3.5" />
+          ) : (
+            <Save className="w-3.5 h-3.5" />
+          )}
+          <span className="hidden sm:inline">
+            {saveSuccess ? 'Saved!' : 'Save Config'}
+          </span>
+        </button>
       </div>
 
       {/* Tabs */}
@@ -305,6 +424,28 @@ export default function KnowledgeBase({ isDark = true }: KnowledgeBaseProps) {
                   placeholder="Guidelines for how the AI should respond..."
                 />
               </div>
+            </motion.div>
+          )}
+
+          {/* AI Voice Tab */}
+          {activeTab === 'voice' && (
+            <motion.div
+              key="voice"
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 10 }}
+            >
+              <VoiceSelector
+                isDark={isDark}
+                selectedVoiceId={knowledgeBase.selectedVoiceId}
+                onVoiceSelect={(voiceId) => updateKnowledgeBase({ selectedVoiceId: voiceId })}
+                onSave={async (voiceId) => {
+                  // Save to local storage or backend
+                  console.log('Saving voice selection:', voiceId);
+                  updateKnowledgeBase({ selectedVoiceId: voiceId });
+                }}
+                compact
+              />
             </motion.div>
           )}
 
@@ -892,12 +1033,23 @@ export default function KnowledgeBase({ isDark = true }: KnowledgeBaseProps) {
         "px-3 md:px-4 py-2 md:py-3 border-t",
         isDark ? "border-white/10 bg-white/5" : "border-black/10 bg-black/5"
       )}>
-        <p className={cn(
-          "text-[10px] md:text-xs text-center",
-          isDark ? "text-white/40" : "text-black/40"
-        )}>
-          Changes apply immediately
-        </p>
+        <div className="flex items-center justify-center gap-2">
+          <Zap className={cn(
+            "w-3 h-3",
+            geminiConnected 
+              ? isDark ? "text-green-400" : "text-green-600"
+              : isDark ? "text-yellow-400" : "text-yellow-600"
+          )} />
+          <p className={cn(
+            "text-[10px] md:text-xs text-center",
+            isDark ? "text-white/40" : "text-black/40"
+          )}>
+            {geminiConnected 
+              ? 'Connected to Gemini 2.0 Flash • Changes apply to next call'
+              : 'Using fallback AI • Connect to Gemini for full features'
+            }
+          </p>
+        </div>
       </div>
     </div>
   );

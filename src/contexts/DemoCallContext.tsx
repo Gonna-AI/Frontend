@@ -83,6 +83,7 @@ export interface KnowledgeBaseConfig {
   priorityRules: string[];
   customInstructions: string[];
   responseGuidelines: string;
+  selectedVoiceId: string; // Selected AI voice
 }
 
 interface DemoCallContextType {
@@ -173,6 +174,8 @@ Always be empathetic, clear, and efficient in your communication.`,
 - Acknowledge concerns before providing solutions
 - Avoid technical jargon unless the caller uses it
 - Offer alternatives when the primary solution isn't available`,
+  
+  selectedVoiceId: 'af_nova', // Default voice
 };
 
 // Demo call history with varied data
