@@ -446,34 +446,61 @@ export function DemoCallProvider({ children }: { children: ReactNode }) {
 
   // Helper to find caller name from various sources
   const findCallerName = (call: CallSession): string => {
-    // First try extracted fields
+    // First try extracted fields (most reliable)
     const nameField = call.extractedFields.find(f => 
       f.id === 'name' || 
       f.label.toLowerCase().includes('name') ||
       f.label.toLowerCase().includes('caller')
     );
-    if (nameField?.value) return nameField.value;
+    if (nameField?.value && nameField.value.trim() && nameField.value !== 'Unknown Caller') {
+      console.log('✅ Found caller name from extracted fields:', nameField.value);
+      return nameField.value.trim();
+    }
     
     // Try to find name in messages where user introduced themselves
     const userMessages = call.messages.filter(m => m.speaker === 'user');
     for (const msg of userMessages) {
-      // Common patterns: "My name is X", "I'm X", "This is X", "I am X"
+      // Common patterns: "My name is X", "I'm X", "This is X", "I am X", "Hi, I'm X", "Hello, this is X"
       const patterns = [
-        /my name is\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)/i,
-        /i'?m\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)/i,
-        /this is\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)/i,
-        /i am\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)/i,
-        /call me\s+([A-Z][a-z]+)/i
+        /(?:my name is|i'?m|this is|i am|call me|hi,?\s*i'?m|hello,?\s*this is)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)/i,
+        /^([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)\s+(?:here|calling|speaking)/i,
+        /(?:hi|hello),?\s*([A-Z][a-z]+)/i,
       ];
       
       for (const pattern of patterns) {
         const match = msg.text.match(pattern);
         if (match?.[1]) {
-          return match[1];
+          const name = match[1].trim();
+          // Filter out common false positives
+          const commonWords = ['hello', 'hi', 'hey', 'yes', 'no', 'okay', 'sure', 'thanks', 'thank', 'you', 'the', 'a', 'an'];
+          if (!commonWords.includes(name.toLowerCase()) && name.length > 1) {
+            console.log('✅ Found caller name from message pattern:', name);
+            return name;
+          }
         }
       }
     }
     
+    // Try agent messages that might reference the caller's name
+    const agentMessages = call.messages.filter(m => m.speaker === 'agent');
+    for (const msg of agentMessages) {
+      const patterns = [
+        /(?:hi|hello),?\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)/i,
+        /(?:thanks|thank you),?\s+([A-Z][a-z]+)/i,
+      ];
+      for (const pattern of patterns) {
+        const match = msg.text.match(pattern);
+        if (match?.[1]) {
+          const name = match[1].trim();
+          if (name.length > 1) {
+            console.log('✅ Found caller name from agent message:', name);
+            return name;
+          }
+        }
+      }
+    }
+    
+    console.log('⚠️ Could not find caller name, using "Unknown Caller"');
     return 'Unknown Caller';
   };
 
@@ -487,8 +514,8 @@ export function DemoCallProvider({ children }: { children: ReactNode }) {
       
       const duration = Math.floor((endedCall.endTime!.getTime() - endedCall.startTime.getTime()) / 1000);
       
-      // Get caller name from various sources
-      const callerName = findCallerName(endedCall);
+      // Get initial caller name from various sources
+      let callerName = findCallerName(endedCall);
       
       // Default summary while we wait for AI
       let summary: CallSummary = {
@@ -516,6 +543,38 @@ export function DemoCallProvider({ children }: { children: ReactNode }) {
           summary = summaryResponse.summary;
           tags = summaryResponse.tags;
           
+          // Use caller name from summary if provided
+          if (summaryResponse.callerName && callerName === 'Unknown Caller') {
+            callerName = summaryResponse.callerName;
+            console.log('✅ Using caller name from AI summary:', callerName);
+          }
+          
+          // Try to extract name from summary notes if not found yet
+          if (callerName === 'Unknown Caller' && summary.notes) {
+            const nameMatch = summary.notes.match(/(?:caller|from|name is|named)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)/i);
+            if (nameMatch?.[1]) {
+              callerName = nameMatch[1];
+              console.log('✅ Extracted caller name from summary notes:', callerName);
+            }
+          }
+          
+          // Also check if summary extracted any new fields
+          if (summary.notes && callerName === 'Unknown Caller') {
+            // Look for name patterns in notes
+            const patterns = [
+              /(?:caller|from|name is|named)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)/i,
+              /([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)\s+(?:called|calling|contacted)/i,
+            ];
+            for (const pattern of patterns) {
+              const match = summary.notes.match(pattern);
+              if (match?.[1]) {
+                callerName = match[1];
+                console.log('✅ Extracted caller name from notes pattern:', callerName);
+                break;
+              }
+            }
+          }
+          
           // Update priority if higher than current
           const priorityOrder: PriorityLevel[] = ['low', 'medium', 'high', 'critical'];
           const currentIdx = priorityOrder.indexOf(finalPriority);
@@ -535,6 +594,11 @@ export function DemoCallProvider({ children }: { children: ReactNode }) {
           followUpRequired: endedCall.priority === 'high' || endedCall.priority === 'critical',
           notes: `Call from ${callerName}. ${purposeField ? `Regarding: ${purposeField.value}` : ''}`.trim(),
         };
+      }
+      
+      // Final check: if still unknown, try one more time with all messages
+      if (callerName === 'Unknown Caller') {
+        callerName = findCallerName(endedCall);
       }
       
       const historyItem: CallHistoryItem = {

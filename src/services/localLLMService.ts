@@ -182,19 +182,35 @@ class LocalLLMService {
    */
   async checkAvailability(): Promise<boolean> {
     try {
+      // Log the actual URL being used
+      console.log(`🔍 Checking Ollama availability...`);
+      console.log(`   URL: ${OLLAMA_URL}`);
+      console.log(`   Model: ${OLLAMA_MODEL}`);
+      console.log(`   Env Var: ${import.meta.env.VITE_OLLAMA_URL || 'NOT SET (using default)'}`);
+      
       // Check Ollama is running
       const response = await fetch(`${OLLAMA_URL}/api/tags`, {
         method: 'GET',
-        signal: AbortSignal.timeout(3000),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        signal: AbortSignal.timeout(10000), // Increased timeout for Railway
       });
       
+      console.log(`   Response Status: ${response.status} ${response.statusText}`);
+      
       if (!response.ok) {
+        const errorText = await response.text().catch(() => 'Unknown error');
+        console.error(`❌ Ollama not available: HTTP ${response.status} at ${OLLAMA_URL}`);
+        console.error(`   Error: ${errorText}`);
         this.isAvailable = false;
         return false;
       }
 
       const data = await response.json();
       const models = data.models || [];
+      
+      console.log(`   Found ${models.length} model(s):`, models.map((m: { name: string }) => m.name).join(', ') || 'None');
       
       // Check if Hermes model is available
       const hermesModel = models.find((m: { name: string }) => 
@@ -223,13 +239,30 @@ class LocalLLMService {
       }
 
       // No suitable model found
-      console.log('⚠️ Ollama running but no suitable model found. Run:');
-      console.log('   ollama run adrienbrault/nous-hermes2pro:Q4_K_M');
+      console.log('⚠️ Ollama running but no suitable model found.');
+      console.log('   Expected model:', OLLAMA_MODEL);
+      console.log('   Available models:', models.map((m: { name: string }) => m.name).join(', ') || 'None');
+      console.log('   💡 Run on Railway: ollama run adrienbrault/nous-hermes2pro:Q4_K_M');
       this.isAvailable = false;
       return false;
 
     } catch (e) {
-      console.log('⚠️ Ollama not available. Install from https://ollama.com');
+      const errorMsg = e instanceof Error ? e.message : String(e);
+      console.error(`❌ Ollama connection failed at ${OLLAMA_URL}`);
+      console.error(`   Error: ${errorMsg}`);
+      console.error(`   Error Type: ${e instanceof Error ? e.constructor.name : typeof e}`);
+      
+      if (errorMsg.includes('Failed to fetch') || errorMsg.includes('NetworkError')) {
+        console.error('   💡 This is likely a CORS or network issue.');
+        console.error('   💡 Check if Railway service is running and publicly accessible.');
+        console.error('   💡 Verify the URL in Netlify environment variables matches your Railway deployment.');
+      } else if (errorMsg.includes('timeout')) {
+        console.error('   💡 Connection timed out. Railway service might be slow or down.');
+      } else {
+        console.error('   💡 Make sure VITE_OLLAMA_URL is set correctly in Netlify environment variables.');
+        console.error('   💡 Current value:', import.meta.env.VITE_OLLAMA_URL || 'NOT SET');
+      }
+      
       this.isAvailable = false;
       return false;
     }
@@ -475,7 +508,7 @@ ${config.customInstructions.length > 0 ? 'INSTRUCTIONS:\n' + config.customInstru
     const extractedText = extractedFields.map(f => `${f.label}: ${f.value}`).join(', ');
     const callerName = extractedFields.find(f => f.id === 'name')?.value;
 
-    const prompt = `Summarize this call transcript.
+    const prompt = `Summarize this call transcript. IMPORTANT: First extract the caller's name if mentioned but not yet extracted.
 
 TRANSCRIPT:
 ${transcript}
@@ -484,7 +517,7 @@ EXTRACTED INFO: ${extractedText || 'None'}
 ${category ? `CATEGORY: ${category.name}` : ''}
 ${priority ? `PRIORITY: ${priority}` : ''}
 
-Provide a concise summary with key points.`;
+If the caller's name was mentioned in the conversation, extract it using extract_caller_info FIRST, then provide a concise summary with key points.`;
 
     try {
       const response = await fetch(`${OLLAMA_URL}/api/chat`, {
@@ -517,19 +550,33 @@ Provide a concise summary with key points.`;
 
       const data = await response.json();
       
-      // Check for tool call
+      // Check for tool calls - look for extract_caller_info first
       const toolCalls = data.message?.tool_calls || [];
+      const extractCall = toolCalls.find((tc: OllamaToolCall) => tc.function.name === 'extract_caller_info');
       const summaryCall = toolCalls.find((tc: OllamaToolCall) => tc.function.name === 'summarize_call');
+      
+      // Extract caller name if found
+      let extractedName = callerName;
+      if (extractCall?.function.arguments?.callerName) {
+        extractedName = extractCall.function.arguments.callerName as string;
+        console.log('✅ Local LLM extracted caller name in summary:', extractedName);
+      }
       
       if (summaryCall?.function.arguments) {
         const args = summaryCall.function.arguments;
+        const notes = (args.notes as string) || '';
+        // Include caller name in notes if extracted
+        const finalNotes = extractedName && !notes.toLowerCase().includes(extractedName.toLowerCase())
+          ? `Caller: ${extractedName}. ${notes}`.trim()
+          : notes;
+        
         return {
           summary: (args.summary as string) || 'Call completed',
           mainPoints: (args.mainPoints as string[]) || ['Call completed'],
           sentiment: (args.sentiment as 'positive' | 'neutral' | 'negative') || 'neutral',
           followUpRequired: (args.followUpRequired as boolean) || priority === 'high' || priority === 'critical',
-          notes: (args.notes as string) || '',
-          callerName
+          notes: finalNotes,
+          callerName: extractedName || callerName
         };
       }
 
