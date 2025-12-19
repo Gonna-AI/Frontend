@@ -238,11 +238,37 @@ class LocalLLMService {
         return true;
       }
 
-      // No suitable model found
-      console.log('⚠️ Ollama running but no suitable model found.');
+      // No suitable model found in tags, but try to use the model anyway
+      // Sometimes /api/tags doesn't show models immediately after pull
+      // We'll try to use the model directly and see if it works
+      console.log('⚠️ Model not found in /api/tags, but trying anyway...');
       console.log('   Expected model:', OLLAMA_MODEL);
       console.log('   Available models:', models.map((m: { name: string }) => m.name).join(', ') || 'None');
-      console.log('   💡 Run on Railway: ollama run adrienbrault/nous-hermes2pro:Q4_K_M');
+      
+      // Try a simple test to see if the model is actually available
+      try {
+        const testResponse = await fetch(`${OLLAMA_URL}/api/generate`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            model: OLLAMA_MODEL,
+            prompt: 'test',
+            stream: false,
+          }),
+          signal: AbortSignal.timeout(5000),
+        });
+        
+        if (testResponse.ok) {
+          console.log('✅ Model is available (test successful)');
+          this.modelName = OLLAMA_MODEL;
+          this.isAvailable = true;
+          return true;
+        }
+      } catch (e) {
+        console.log('   Model test failed, model may not be ready yet');
+      }
+      
+      console.log('   💡 Run on Railway: ollama pull adrienbrault/nous-hermes2pro:Q4_K_M');
       this.isAvailable = false;
       return false;
 
