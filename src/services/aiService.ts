@@ -1,8 +1,8 @@
 /**
- * AI Service Layer - Integrated with Gemini API
+ * AI Service Layer - Smart Conversation Handler
  * 
- * This service provides AI operations using Google's Gemini 2.0 Flash Lite model.
- * Includes function calling for summarization, categorization, and priority tagging.
+ * This service provides AI operations with a smart mock fallback
+ * that properly tracks conversation state and extracts information.
  */
 
 import { 
@@ -26,6 +26,20 @@ import {
 interface AIConfig {
   useGemini: boolean;
   fallbackToMock: boolean;
+}
+
+// Conversation state tracking
+interface ConversationState {
+  hasGreeted: boolean;
+  hasName: boolean;
+  callerName: string | null;
+  hasPurpose: boolean;
+  purpose: string | null;
+  hasAskedAnythingElse: boolean;
+  turnCount: number;
+  detectedUrgency: PriorityLevel | null;
+  detectedCategory: string | null;
+  isWrappingUp: boolean;
 }
 
 // Response types for AI operations
@@ -66,6 +80,29 @@ class AIService {
   };
   private knowledgeBase: KnowledgeBaseConfig | null = null;
   private geminiAvailable: boolean | null = null;
+  private conversationState: ConversationState = this.resetConversationState();
+
+  private resetConversationState(): ConversationState {
+    return {
+      hasGreeted: false,
+      hasName: false,
+      callerName: null,
+      hasPurpose: false,
+      purpose: null,
+      hasAskedAnythingElse: false,
+      turnCount: 0,
+      detectedUrgency: null,
+      detectedCategory: null,
+      isWrappingUp: false,
+    };
+  }
+
+  /**
+   * Reset conversation state for new call
+   */
+  resetState() {
+    this.conversationState = this.resetConversationState();
+  }
 
   /**
    * Initialize the AI service
@@ -93,7 +130,7 @@ class AIService {
   }
 
   /**
-   * Generate a response to user input using Gemini
+   * Generate a response to user input using Gemini or smart mock
    */
   async generateResponse(
     userMessage: string,
@@ -104,7 +141,7 @@ class AIService {
     
     if (!kb) {
       console.warn('Knowledge base not set, using default responses');
-      return this.mockGenerateResponse(userMessage, conversationHistory, extractedFields);
+      return this.smartMockResponse(userMessage, conversationHistory, extractedFields);
     }
 
     // Try Gemini first
@@ -114,7 +151,8 @@ class AIService {
         const result: AIAnalysisResult = await generateCallResponse(
           userMessage,
           conversationHistory,
-          kb
+          kb,
+          extractedFields
         );
 
         // Convert Gemini response to our format
@@ -141,20 +179,21 @@ class AIService {
 
       } catch (error) {
         console.error('Gemini API error:', error);
+        this.geminiAvailable = false; // Mark as unavailable to avoid repeated failures
         if (this.config.fallbackToMock) {
-          console.log('Falling back to mock response');
-          return this.mockGenerateResponse(userMessage, conversationHistory, extractedFields);
+          console.log('Falling back to smart mock response');
+          return this.smartMockResponse(userMessage, conversationHistory, extractedFields);
         }
         throw error;
       }
     }
 
-    // Use mock response
-    return this.mockGenerateResponse(userMessage, conversationHistory, extractedFields);
+    // Use smart mock response
+    return this.smartMockResponse(userMessage, conversationHistory, extractedFields);
   }
 
   /**
-   * Generate call summary using Gemini
+   * Generate call summary
    */
   async generateSummary(
     messages: CallMessage[],
@@ -168,7 +207,7 @@ class AIService {
       return this.mockGenerateSummary(messages, extractedFields, category, priority);
     }
 
-    if (this.config.useGemini && (this.geminiAvailable !== false)) {
+    if (this.config.useGemini && this.geminiAvailable) {
       try {
         console.log('Calling Gemini API for summary...');
         const result: CallSummaryResult = await summarizeCall(messages, kb, extractedFields);
@@ -210,75 +249,224 @@ class AIService {
   }
 
   /**
-   * Mock response generator (fallback)
+   * Smart mock response generator with conversation state tracking
    */
-  private async mockGenerateResponse(
+  private async smartMockResponse(
     userMessage: string,
     conversationHistory: CallMessage[],
-    extractedFields: ExtractedField[]
+    existingFields: ExtractedField[]
   ): Promise<AIResponse> {
     await this.delay(300 + Math.random() * 400);
 
     const kb = this.knowledgeBase;
-    const lowerMessage = userMessage.toLowerCase();
-
+    const lowerMessage = userMessage.toLowerCase().trim();
+    const state = this.conversationState;
+    
+    // Update state from existing fields
+    const nameField = existingFields.find(f => f.id === 'name');
+    const purposeField = existingFields.find(f => f.id === 'purpose');
+    
+    if (nameField?.value) {
+      state.hasName = true;
+      state.callerName = nameField.value;
+    }
+    if (purposeField?.value) {
+      state.hasPurpose = true;
+      state.purpose = purposeField.value;
+    }
+    
+    state.turnCount++;
+    
     let response = '';
     const newFields: ExtractedField[] = [];
     let suggestedPriority: PriorityLevel | undefined;
     let suggestedCategory: CallCategory | undefined;
 
-    // Extract name if mentioned
-    const nameMatch = userMessage.match(/(?:my name is|i'm|i am|this is)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)/i);
-    if (nameMatch && !extractedFields.find(f => f.id === 'name')) {
-      newFields.push({
-        id: 'name',
-        label: 'Caller Name',
-        value: nameMatch[1],
-        confidence: 0.95,
-        extractedAt: new Date(),
-      });
-      response = `Nice to meet you, ${nameMatch[1]}! How can I assist you today?`;
+    // Extract name from various patterns
+    const namePatterns = [
+      /(?:my name is|i'm|i am|this is|call me)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)/i,
+      /^([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)$/i, // Just a name by itself
+      /^hi,?\s*(?:i'm|this is)\s+([A-Z][a-z]+)/i,
+    ];
+    
+    for (const pattern of namePatterns) {
+      const match = userMessage.match(pattern);
+      if (match && !state.hasName) {
+        const extractedName = match[1].trim();
+        // Validate it's a reasonable name (not common words)
+        const commonWords = ['hello', 'hi', 'hey', 'yes', 'no', 'okay', 'sure', 'thanks', 'thank'];
+        if (!commonWords.includes(extractedName.toLowerCase()) && extractedName.length > 1) {
+          state.hasName = true;
+          state.callerName = extractedName;
+          newFields.push({
+            id: 'name',
+            label: 'Caller Name',
+            value: extractedName,
+            confidence: 0.95,
+            extractedAt: new Date(),
+          });
+        }
+      }
     }
-    else if (conversationHistory.length <= 1 && (lowerMessage.includes('hello') || lowerMessage.includes('hi'))) {
-      response = kb?.greeting || "Hello! Thank you for calling. How may I assist you today?";
-    }
-    else if (lowerMessage.includes('urgent') || lowerMessage.includes('emergency')) {
-      suggestedPriority = lowerMessage.includes('emergency') ? 'critical' : 'high';
+
+    // Detect urgency keywords
+    if (lowerMessage.includes('urgent') || lowerMessage.includes('emergency') || 
+        lowerMessage.includes('asap') || lowerMessage.includes('immediately') ||
+        lowerMessage.includes('critical') || lowerMessage.includes('right now')) {
+      state.detectedUrgency = lowerMessage.includes('emergency') ? 'critical' : 'high';
+      suggestedPriority = state.detectedUrgency;
       newFields.push({
         id: 'urgency',
         label: 'Urgency Level',
-        value: suggestedPriority === 'critical' ? 'Emergency' : 'Very Urgent',
+        value: state.detectedUrgency === 'critical' ? 'Emergency' : 'Urgent',
         confidence: 0.92,
         extractedAt: new Date(),
       });
-      response = "I understand this is urgent. Let me prioritize your request. Can you tell me more?";
     }
-    else if (lowerMessage.includes('help') || lowerMessage.includes('issue') || lowerMessage.includes('problem')) {
-      suggestedCategory = kb?.categories.find(c => c.id === 'support');
-      newFields.push({
-        id: 'purpose',
-        label: 'Call Purpose',
-        value: 'Technical Support Request',
-        confidence: 0.88,
-        extractedAt: new Date(),
-      });
-      response = "I'm sorry to hear you're experiencing issues. Could you describe the problem in more detail?";
+
+    // Detect category from keywords
+    if (!state.detectedCategory) {
+      if (lowerMessage.includes('appointment') || lowerMessage.includes('schedule') || 
+          lowerMessage.includes('book') || lowerMessage.includes('meeting')) {
+        state.detectedCategory = 'appointment';
+        suggestedCategory = kb?.categories.find(c => c.id === 'appointment');
+      } else if (lowerMessage.includes('complaint') || lowerMessage.includes('frustrated') ||
+                 lowerMessage.includes('angry') || lowerMessage.includes('terrible')) {
+        state.detectedCategory = 'complaint';
+        suggestedCategory = kb?.categories.find(c => c.id === 'complaint');
+        suggestedPriority = suggestedPriority || 'high';
+      } else if (lowerMessage.includes('help') || lowerMessage.includes('issue') ||
+                 lowerMessage.includes('problem') || lowerMessage.includes('not working') ||
+                 lowerMessage.includes('broken') || lowerMessage.includes('error')) {
+        state.detectedCategory = 'support';
+        suggestedCategory = kb?.categories.find(c => c.id === 'support');
+      } else if (lowerMessage.includes('price') || lowerMessage.includes('cost') ||
+                 lowerMessage.includes('pricing') || lowerMessage.includes('quote')) {
+        state.detectedCategory = 'sales';
+        suggestedCategory = kb?.categories.find(c => c.id === 'sales');
+      } else if (lowerMessage.includes('feedback') || lowerMessage.includes('suggestion') ||
+                 lowerMessage.includes('improve')) {
+        state.detectedCategory = 'feedback';
+        suggestedCategory = kb?.categories.find(c => c.id === 'feedback');
+      }
     }
-    else if (lowerMessage.includes('appointment') || lowerMessage.includes('schedule')) {
-      suggestedCategory = kb?.categories.find(c => c.id === 'appointment');
-      response = "I'd be happy to help you schedule an appointment. What date and time works for you?";
-    }
-    else if (lowerMessage.includes('bye') || lowerMessage.includes('thank')) {
-      response = "Thank you for calling ClerkTree! Is there anything else I can help you with?";
-    }
-    else {
-      const responses = [
-        "I understand. Could you tell me more about that?",
-        "Thank you for sharing that. How can I best assist you?",
-        "I see. Let me make sure I understand - could you elaborate?",
-        "Got it. Is there anything specific you'd like help with?",
+
+    // Extract purpose from the message
+    if (!state.hasPurpose && state.turnCount > 1) {
+      // Look for purpose indicators
+      const purposePatterns = [
+        /(?:i need|i want|i'm calling about|i'm looking for|i have a|can you help with)\s+(.+?)(?:\.|$)/i,
+        /(?:problem with|issue with|question about|interested in)\s+(.+?)(?:\.|$)/i,
       ];
-      response = responses[Math.floor(Math.random() * responses.length)];
+      
+      for (const pattern of purposePatterns) {
+        const match = userMessage.match(pattern);
+        if (match) {
+          state.hasPurpose = true;
+          state.purpose = match[1].trim();
+          newFields.push({
+            id: 'purpose',
+            label: 'Call Purpose',
+            value: state.purpose,
+            confidence: 0.85,
+            extractedAt: new Date(),
+          });
+          break;
+        }
+      }
+      
+      // If we have a category but no explicit purpose, use the message as purpose
+      if (!state.hasPurpose && state.detectedCategory && userMessage.length > 10) {
+        state.hasPurpose = true;
+        state.purpose = userMessage.substring(0, 100);
+        newFields.push({
+          id: 'purpose',
+          label: 'Call Purpose',
+          value: state.purpose,
+          confidence: 0.75,
+          extractedAt: new Date(),
+        });
+      }
+    }
+
+    // Generate contextual response based on conversation state
+    const callerName = state.callerName;
+    const namePrefix = callerName ? `${callerName}, ` : '';
+
+    // Check for goodbye/end signals
+    const endSignals = ['bye', 'goodbye', 'that\'s all', 'that is all', 'nothing else', 
+                        'no thanks', 'thank you', 'thanks', 'that\'s it', 'all set', 'i\'m good'];
+    const isEndingCall = endSignals.some(signal => lowerMessage.includes(signal));
+
+    // Check for greetings
+    const greetings = ['hello', 'hi', 'hey', 'good morning', 'good afternoon', 'good evening'];
+    const isGreeting = greetings.some(g => lowerMessage.startsWith(g));
+
+    if (isEndingCall && state.turnCount > 2) {
+      // User wants to end the call
+      state.isWrappingUp = true;
+      const closingResponses = [
+        `${namePrefix}Thank you for calling ClerkTree today! Is there anything else I can help you with before we end the call?`,
+        `Great talking with you${callerName ? `, ${callerName}` : ''}! If you need any further assistance, don't hesitate to call back. Have a wonderful day!`,
+        `${namePrefix}I'm glad I could assist you today. Feel free to reach out if you have any more questions. Take care!`,
+      ];
+      response = state.hasAskedAnythingElse 
+        ? closingResponses[1] 
+        : closingResponses[0];
+      state.hasAskedAnythingElse = true;
+    } else if (isGreeting && state.turnCount <= 2) {
+      // Responding to greeting - ask for name if we don't have it
+      if (!state.hasName) {
+        response = "Hello! Thank you for calling ClerkTree. May I have your name please?";
+      } else {
+        response = `Hello ${callerName}! How can I help you today?`;
+      }
+      state.hasGreeted = true;
+    } else if (!state.hasName && state.turnCount <= 3) {
+      // We need the caller's name first
+      response = "Before we continue, may I have your name please?";
+    } else if (state.hasName && !state.hasPurpose && state.turnCount <= 4) {
+      // We have name but need purpose
+      response = `${namePrefix}how may I assist you today? What brings you to ClerkTree?`;
+    } else if (state.hasPurpose && !state.hasAskedAnythingElse && state.turnCount >= 4) {
+      // We have both name and purpose, provide help then ask if anything else
+      const helpResponses = [
+        `${namePrefix}I understand you're reaching out about ${state.purpose}. I've noted that down and we'll make sure to address this for you. Is there anything else you'd like to add?`,
+        `Thank you for explaining that${callerName ? `, ${callerName}` : ''}. I've captured the details about ${state.purpose}. Our team will follow up on this. Is there anything else I can help with?`,
+        `${namePrefix}I've documented your concern regarding ${state.purpose}. We take this seriously and will ensure it's addressed. Is there any other information you'd like to share?`,
+      ];
+      response = helpResponses[Math.floor(Math.random() * helpResponses.length)];
+      state.hasAskedAnythingElse = true;
+    } else {
+      // Continue conversation naturally based on what they said
+      if (lowerMessage.includes('yes') || lowerMessage.includes('actually') || 
+          lowerMessage.includes('also') || lowerMessage.includes('one more')) {
+        response = `${namePrefix}of course! Please go ahead, I'm listening.`;
+        state.hasAskedAnythingElse = false; // They have more to say
+      } else if (lowerMessage.includes('no') && state.hasAskedAnythingElse) {
+        response = `${namePrefix}Perfect! Thank you for calling ClerkTree today. If you have any questions in the future, don't hesitate to reach out. Have a great day!`;
+        state.isWrappingUp = true;
+      } else if (state.detectedUrgency === 'critical' || state.detectedUrgency === 'high') {
+        response = `${namePrefix}I understand this is urgent. I'm marking this as a high priority and our team will address this immediately. Can you provide any additional details that might help us resolve this faster?`;
+      } else if (state.detectedCategory === 'appointment') {
+        response = `${namePrefix}I'd be happy to help you with scheduling. What date and time works best for you?`;
+      } else if (state.detectedCategory === 'complaint') {
+        response = `${namePrefix}I sincerely apologize for any inconvenience you've experienced. Your feedback is important to us. Can you tell me more about what happened so we can make it right?`;
+      } else if (state.detectedCategory === 'support') {
+        response = `${namePrefix}I'm sorry you're experiencing this issue. Let me help you troubleshoot. Can you describe what's happening in more detail?`;
+      } else if (userMessage.length > 5) {
+        // Generic but varied responses for other messages
+        const contextualResponses = [
+          `${namePrefix}I see. That's helpful information. Let me make a note of that. Is there anything specific you'd like us to do about this?`,
+          `Thank you for sharing that${callerName ? `, ${callerName}` : ''}. I want to make sure I understand correctly - could you elaborate a bit more?`,
+          `${namePrefix}Got it. I'm documenting this for our records. What outcome are you hoping for?`,
+          `${namePrefix}I appreciate you explaining that. Is there a preferred way you'd like us to follow up with you?`,
+        ];
+        response = contextualResponses[state.turnCount % contextualResponses.length];
+      } else {
+        // Very short response - ask for clarification
+        response = `${namePrefix}could you tell me more about that?`;
+      }
     }
 
     return {
@@ -291,7 +479,7 @@ class AIService {
   }
 
   /**
-   * Mock summary generator (fallback)
+   * Mock summary generator
    */
   private async mockGenerateSummary(
     messages: CallMessage[],
@@ -306,35 +494,89 @@ class AIService {
     const tags: string[] = [];
     const actionItems: ActionItem[] = [];
 
-    userMessages.forEach((msg, index) => {
-      if (msg.text.length > 20 && index < 5) {
-        mainPoints.push(msg.text.substring(0, 100) + (msg.text.length > 100 ? '...' : ''));
+    // Get caller name and purpose from extracted fields
+    const callerName = extractedFields.find(f => f.id === 'name')?.value;
+    const purpose = extractedFields.find(f => f.id === 'purpose')?.value;
+
+    if (callerName) {
+      mainPoints.push(`Caller: ${callerName}`);
+    }
+    if (purpose) {
+      mainPoints.push(`Purpose: ${purpose}`);
+    }
+
+    // Add key message snippets
+    userMessages.slice(0, 3).forEach((msg) => {
+      if (msg.text.length > 15) {
+        mainPoints.push(msg.text.substring(0, 80) + (msg.text.length > 80 ? '...' : ''));
       }
     });
 
+    // Add any other extracted fields
     extractedFields.forEach(field => {
-      if (field.value) {
+      if (field.id !== 'name' && field.id !== 'purpose' && field.value) {
         mainPoints.push(`${field.label}: ${field.value}`);
       }
     });
 
     if (category) tags.push(category.id);
-    if (priority === 'critical' || priority === 'high') tags.push('follow-up-needed');
-
-    const allText = messages.map(m => m.text).join(' ').toLowerCase();
-    let sentiment: 'positive' | 'neutral' | 'negative' = 'neutral';
-    if (allText.includes('thank') || allText.includes('great')) {
-      sentiment = 'positive';
-    } else if (allText.includes('frustrated') || allText.includes('angry')) {
-      sentiment = 'negative';
+    if (priority === 'critical' || priority === 'high') {
+      tags.push('priority');
+      tags.push('follow-up-needed');
     }
 
+    // Detect sentiment from messages
+    const allText = messages.map(m => m.text).join(' ').toLowerCase();
+    let sentiment: 'positive' | 'neutral' | 'negative' = 'neutral';
+    
+    const positiveWords = ['thank', 'great', 'awesome', 'excellent', 'appreciate', 'helpful', 'wonderful'];
+    const negativeWords = ['frustrated', 'angry', 'terrible', 'awful', 'disappointed', 'upset', 'worst'];
+    
+    const positiveCount = positiveWords.filter(w => allText.includes(w)).length;
+    const negativeCount = negativeWords.filter(w => allText.includes(w)).length;
+    
+    if (positiveCount > negativeCount) sentiment = 'positive';
+    else if (negativeCount > positiveCount) sentiment = 'negative';
+
+    // Generate action items based on context
     if (priority === 'critical' || priority === 'high') {
       actionItems.push({
-        id: `action-${Date.now()}`,
-        text: 'Follow up with caller',
+        id: `action-${Date.now()}-1`,
+        text: 'Follow up with caller urgently',
         completed: false,
       });
+    }
+    if (purpose?.toLowerCase().includes('appointment') || purpose?.toLowerCase().includes('schedule')) {
+      actionItems.push({
+        id: `action-${Date.now()}-2`,
+        text: 'Schedule appointment as requested',
+        completed: false,
+      });
+    }
+    if (category?.id === 'support') {
+      actionItems.push({
+        id: `action-${Date.now()}-3`,
+        text: 'Create support ticket for issue resolution',
+        completed: false,
+      });
+    }
+
+    // Generate notes
+    let notes = '';
+    if (callerName) {
+      notes += `Call from ${callerName}. `;
+    }
+    if (purpose) {
+      notes += `Regarding: ${purpose}. `;
+    }
+    if (category) {
+      notes += `Categorized as ${category.name}. `;
+    }
+    if (priority && priority !== 'medium') {
+      notes += `Priority: ${priority}. `;
+    }
+    if (!notes) {
+      notes = 'Call completed successfully.';
     }
 
     return {
@@ -343,7 +585,7 @@ class AIService {
         sentiment,
         actionItems,
         followUpRequired: priority === 'critical' || priority === 'high',
-        notes: 'Summary auto-generated.',
+        notes,
       },
       tags,
     };

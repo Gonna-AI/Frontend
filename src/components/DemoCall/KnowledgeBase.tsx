@@ -28,7 +28,6 @@ import { useDemoCall, ContextField, CallCategory } from '../../contexts/DemoCall
 import VoiceSelector from './VoiceSelector';
 import { aiService } from '../../services/aiService';
 import { testGeminiConnection } from '../../services/geminiService';
-import { supabase } from '../../config/supabase';
 
 interface KnowledgeBaseProps {
   isDark?: boolean;
@@ -39,7 +38,8 @@ type ActiveTab = 'prompt' | 'voice' | 'fields' | 'categories' | 'rules' | 'instr
 export default function KnowledgeBase({ isDark = true }: KnowledgeBaseProps) {
   const { 
     knowledgeBase, 
-    updateKnowledgeBase, 
+    updateKnowledgeBase,
+    saveKnowledgeBase,
     addContextField, 
     updateContextField, 
     removeContextField,
@@ -95,25 +95,16 @@ export default function KnowledgeBase({ isDark = true }: KnowledgeBaseProps) {
   const handleSaveToSupabase = async () => {
     setIsSaving(true);
     try {
-      // Save to Supabase (upsert configuration)
-      const { error } = await supabase
-        .from('knowledge_base_config')
-        .upsert({
-          id: 'default',
-          config: knowledgeBase,
-          updated_at: new Date().toISOString()
-        }, { onConflict: 'id' });
+      // Use the context's save method which handles both Supabase and localStorage
+      const success = await saveKnowledgeBase();
 
-      if (error) {
-        console.error('Error saving to Supabase:', error);
-        // Still mark as success for local state update
+      if (success) {
+        // Update AI service with latest config
+        aiService.setKnowledgeBase(knowledgeBase);
+        
+        setSaveSuccess(true);
+        setTimeout(() => setSaveSuccess(false), 2000);
       }
-
-      // Update AI service with latest config
-      aiService.setKnowledgeBase(knowledgeBase);
-      
-      setSaveSuccess(true);
-      setTimeout(() => setSaveSuccess(false), 2000);
     } catch (error) {
       console.error('Save error:', error);
     }
