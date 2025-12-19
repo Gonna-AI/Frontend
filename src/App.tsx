@@ -27,6 +27,8 @@ import BlogPost from './pages/BlogPost';
 import Arbor from './pages/Arbor';
 import Juris from './pages/Juris';
 import Bioflow from './pages/Bioflow';
+import DemoDashboard from './pages/DemoDashboard';
+import UserCall from './pages/UserCall';
 import { PrivateRoute } from './components/Auth/PrivateRoute';
 import ScrollToTop from './components/ScrollToTop';
 // Create a client
@@ -162,6 +164,10 @@ function App() {
           } />
           {/* Chat route - accessible without auth */}
           <Route path="/chat" element={<ClientChat />} />
+          
+          {/* Demo Call Agent Pages - Public for testing */}
+          <Route path="/demo-dashboard" element={<DemoDashboard />} />
+          <Route path="/user" element={<UserCall />} />
           <Route path="/ai-settings" element={
             <ProtectedRoute>
               <AISettings />
