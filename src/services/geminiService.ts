@@ -362,25 +362,46 @@ export interface CallSummaryResult {
 export async function generateCallResponse(
   userMessage: string,
   conversationHistory: CallMessage[],
-  knowledgeBase: KnowledgeBaseConfig
+  knowledgeBase: KnowledgeBaseConfig,
+  existingExtractedFields?: ExtractedField[]
 ): Promise<AIAnalysisResult> {
   const systemPrompt = buildSystemPrompt(knowledgeBase);
   const conversationContext = formatMessagesForGemini(conversationHistory);
   
+  // Format already extracted information so AI knows what it has
+  const extractedInfo = existingExtractedFields && existingExtractedFields.length > 0
+    ? existingExtractedFields.map(f => `- ${f.label}: ${f.value}`).join('\n')
+    : 'None yet';
+  
+  // Determine if this is the first message or a continuation
+  const isFirstMessage = conversationHistory.length === 0;
+  const callerNameKnown = existingExtractedFields?.some(f => f.id === 'name' || f.label.toLowerCase().includes('name'));
+  
   const prompt = `
 CONVERSATION SO FAR:
-${conversationContext}
+${conversationContext || '(This is the start of the call)'}
+
+ALREADY EXTRACTED INFORMATION:
+${extractedInfo}
 
 LATEST MESSAGE FROM CALLER:
 "${userMessage}"
 
+IMPORTANT RULES:
+${isFirstMessage ? '- This is the START of the call. You may use your greeting.' : '- This is NOT the first message. DO NOT repeat your greeting.'}
+${callerNameKnown ? '- The caller\'s name is ALREADY KNOWN. DO NOT ask for their name again.' : '- If you don\'t have the caller\'s name yet, you may ask for it naturally.'}
+- DO NOT say "Hello" or "How can I help you" repeatedly if the conversation has already started.
+- Continue the conversation naturally based on what has been discussed.
+- If the caller just provided their name, acknowledge it and move on to help them.
+- Reference information you already know about the caller when appropriate.
+
 Analyze this message and:
-1. Generate an appropriate response using generate_response
-2. Extract any relevant information using extract_call_info
+1. Generate an appropriate, contextual response using generate_response
+2. Extract any NEW information using extract_call_info (skip fields already extracted)
 3. If you can determine the category, use categorize_call
 4. If urgency indicators are present, use set_priority
 
-Respond naturally as the AI agent would.`;
+Respond naturally as a helpful AI agent continuing an existing conversation.`;
 
   try {
     const response = await callGeminiAPI(prompt, systemPrompt, true);

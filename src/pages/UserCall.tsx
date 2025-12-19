@@ -11,12 +11,12 @@ import {
   User, 
   Bot,
   Tag,
-  AlertTriangle,
   CheckCircle
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '../utils/cn';
 import { aiService } from '../services/aiService';
+import { ttsService, KokoroVoiceId } from '../services/ttsService';
 import { 
   DemoCallProvider, 
   useDemoCall, 
@@ -181,22 +181,15 @@ function UserCallContent() {
   const speakText = useCallback((text: string): Promise<void> => {
     if (!isSpeakerOn) return Promise.resolve();
     
-    return new Promise<void>((resolve) => {
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = language;
-      utterance.rate = 1.0;
-      utterance.pitch = 1.0;
-
-      const voices = window.speechSynthesis.getVoices();
-      if (language === 'hi-IN') {
-        const hindiVoice = voices.find(v => v.lang.includes('hi'));
-        if (hindiVoice) utterance.voice = hindiVoice;
-      }
-
-      utterance.onstart = () => setAgentStatus('speaking');
-      utterance.onend = () => {
+    // Get the selected voice from knowledge base
+    const selectedVoice = (knowledgeBase.selectedVoiceId || 'af_nova') as KokoroVoiceId;
+    
+    return ttsService.speak(text, {
+      voice: selectedVoice,
+      speed: 1.0,
+      onStart: () => setAgentStatus('speaking'),
+      onEnd: () => {
         setAgentStatus('listening');
-        resolve();
         if (!isMuted && recognitionRef.current) {
           try {
             recognitionRef.current.start();
@@ -204,16 +197,13 @@ function UserCallContent() {
             console.error('Error starting recognition after speech:', e);
           }
         }
-      };
-      utterance.onerror = () => {
+      },
+      onError: (error) => {
+        console.error('TTS error:', error);
         setAgentStatus('listening');
-        resolve();
-      };
-
-      window.speechSynthesis.cancel();
-      window.speechSynthesis.speak(utterance);
+      }
     });
-  }, [language, isSpeakerOn, isMuted]);
+  }, [knowledgeBase.selectedVoiceId, isSpeakerOn, isMuted]);
 
   const handleUserInput = useCallback(async (text: string) => {
     if (!text.trim()) return;
@@ -259,6 +249,9 @@ function UserCallContent() {
   }, [messages, extractedFields, addMessage, updateExtractedField, setCallPriority, setCallCategory, speakText]);
 
   const handleStartCall = useCallback(async () => {
+    // Reset AI conversation state for new call
+    aiService.resetState();
+    
     startCall();
     setAgentStatus('speaking');
     
@@ -267,14 +260,15 @@ function UserCallContent() {
     await speakText(greeting);
   }, [startCall, knowledgeBase.greeting, addMessage, speakText]);
 
-  const handleEndCall = useCallback(() => {
-    window.speechSynthesis.cancel();
+  const handleEndCall = useCallback(async () => {
+    ttsService.stop();
     if (recognitionRef.current) {
       recognitionRef.current.abort();
     }
-    endCall();
     setAgentStatus('idle');
     setCurrentTranscript('');
+    // Wait for AI summary to be generated before ending
+    await endCall();
   }, [endCall]);
 
   const toggleMute = useCallback(() => {

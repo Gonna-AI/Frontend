@@ -1,4 +1,6 @@
-import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
+import { createContext, useContext, useState, useCallback, useEffect, ReactNode } from 'react';
+import { supabase } from '../config/supabase';
+import { aiService } from '../services/aiService';
 
 // Types for dynamic context extraction
 export interface ExtractedField {
@@ -90,6 +92,8 @@ interface DemoCallContextType {
   // Knowledge Base configuration
   knowledgeBase: KnowledgeBaseConfig;
   updateKnowledgeBase: (config: Partial<KnowledgeBaseConfig>) => void;
+  saveKnowledgeBase: () => Promise<boolean>;
+  loadKnowledgeBase: () => Promise<void>;
   addContextField: (field: ContextField) => void;
   updateContextField: (id: string, field: Partial<ContextField>) => void;
   removeContextField: (id: string) => void;
@@ -99,7 +103,7 @@ interface DemoCallContextType {
   // Current call session
   currentCall: CallSession | null;
   startCall: () => void;
-  endCall: () => void;
+  endCall: () => Promise<void>;
   addMessage: (speaker: 'user' | 'agent', text: string) => void;
   updateExtractedField: (field: ExtractedField) => void;
   setCallPriority: (priority: PriorityLevel) => void;
@@ -107,6 +111,7 @@ interface DemoCallContextType {
   
   // Call history
   callHistory: CallHistoryItem[];
+  addToCallHistory: (item: CallHistoryItem) => void;
   getCallsByPriority: (priority: PriorityLevel) => CallHistoryItem[];
   getCallsByCategory: (categoryId: string) => CallHistoryItem[];
   
@@ -118,9 +123,16 @@ interface DemoCallContextType {
     avgDuration: number;
     followUpRequired: number;
   };
+  
+  // Loading state
+  isLoading: boolean;
 }
 
 const DemoCallContext = createContext<DemoCallContextType | undefined>(undefined);
+
+// Storage keys
+const KNOWLEDGE_BASE_KEY = 'clerktree_knowledge_base';
+const CALL_HISTORY_KEY = 'clerktree_call_history';
 
 // Default Knowledge Base configuration
 const defaultKnowledgeBase: KnowledgeBaseConfig = {
@@ -178,132 +190,210 @@ Always be empathetic, clear, and efficient in your communication.`,
   selectedVoiceId: 'af_nova', // Default voice
 };
 
-// Demo call history with varied data
-const demoCallHistory: CallHistoryItem[] = [
-  {
-    id: 'history-1',
-    callerName: 'Sarah Johnson',
-    date: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 hours ago
-    duration: 245,
-    priority: 'high',
-    category: { id: 'support', name: 'Support Request', color: 'orange', description: '' },
-    tags: ['technical-issue', 'follow-up-needed'],
-    extractedFields: [
-      { id: 'name', label: 'Caller Name', value: 'Sarah Johnson', confidence: 0.98, extractedAt: new Date() },
-      { id: 'purpose', label: 'Call Purpose', value: 'Account access issues', confidence: 0.95, extractedAt: new Date() },
-    ],
-    summary: {
-      mainPoints: [
-        'Unable to access account for 2 days',
-        'Reset password didn\'t work',
-        'Needs access for urgent project deadline',
-      ],
-      sentiment: 'negative',
-      actionItems: [
-        { id: 'a1', text: 'Reset account credentials manually', completed: false },
-        { id: 'a2', text: 'Call back to confirm access restored', completed: false },
-      ],
-      followUpRequired: true,
-      notes: 'Customer was frustrated but understood we would help. Urgent - project deadline tomorrow.',
-    },
-    messages: [
-      { id: 'm1', speaker: 'agent', text: 'Hello! Thank you for calling ClerkTree. How may I assist you today?', timestamp: new Date() },
-      { id: 'm2', speaker: 'user', text: 'Hi, I\'ve been locked out of my account for two days now.', timestamp: new Date() },
-      { id: 'm3', speaker: 'agent', text: 'I\'m sorry to hear that. Let me help you regain access. Can I have your name please?', timestamp: new Date() },
-    ],
-  },
-  {
-    id: 'history-2',
-    callerName: 'Michael Chen',
-    date: new Date(Date.now() - 5 * 60 * 60 * 1000), // 5 hours ago
-    duration: 180,
-    priority: 'medium',
-    category: { id: 'appointment', name: 'Appointment', color: 'green', description: '' },
-    tags: ['scheduling', 'new-customer'],
-    extractedFields: [
-      { id: 'name', label: 'Caller Name', value: 'Michael Chen', confidence: 0.99, extractedAt: new Date() },
-      { id: 'purpose', label: 'Call Purpose', value: 'Schedule consultation', confidence: 0.92, extractedAt: new Date() },
-    ],
-    summary: {
-      mainPoints: [
-        'New customer interested in services',
-        'Wants to schedule initial consultation',
-        'Available next week afternoons',
-      ],
-      sentiment: 'positive',
-      actionItems: [
-        { id: 'a3', text: 'Schedule consultation for Tuesday 2pm', completed: true },
-        { id: 'a4', text: 'Send confirmation email', completed: true },
-      ],
-      followUpRequired: false,
-      notes: 'Enthusiastic new prospect. Scheduled for Tuesday.',
-    },
-    messages: [],
-  },
-  {
-    id: 'history-3',
-    callerName: 'Anonymous',
-    date: new Date(Date.now() - 24 * 60 * 60 * 1000), // Yesterday
-    duration: 95,
-    priority: 'low',
-    category: { id: 'inquiry', name: 'General Inquiry', color: 'blue', description: '' },
-    tags: ['pricing', 'quick-call'],
-    extractedFields: [
-      { id: 'purpose', label: 'Call Purpose', value: 'Pricing information', confidence: 0.88, extractedAt: new Date() },
-    ],
-    summary: {
-      mainPoints: [
-        'Asked about pricing tiers',
-        'Comparing with competitors',
-        'May call back later',
-      ],
-      sentiment: 'neutral',
-      actionItems: [],
-      followUpRequired: false,
-      notes: 'Quick inquiry about pricing. No commitment.',
-    },
-    messages: [],
-  },
-  {
-    id: 'history-4',
-    callerName: 'Dr. Emily Watson',
-    date: new Date(Date.now() - 1 * 60 * 60 * 1000), // 1 hour ago
-    duration: 420,
-    priority: 'critical',
-    category: { id: 'complaint', name: 'Complaint', color: 'red', description: '' },
-    tags: ['escalation', 'service-issue', 'vip'],
-    extractedFields: [
-      { id: 'name', label: 'Caller Name', value: 'Dr. Emily Watson', confidence: 0.99, extractedAt: new Date() },
-      { id: 'purpose', label: 'Call Purpose', value: 'Service outage affecting patients', confidence: 0.97, extractedAt: new Date() },
-    ],
-    summary: {
-      mainPoints: [
-        'Critical service outage affecting medical practice',
-        'Patients cannot access records',
-        'Impacting patient care',
-        'Requesting immediate escalation',
-      ],
-      sentiment: 'negative',
-      actionItems: [
-        { id: 'a5', text: 'Escalate to engineering team immediately', completed: true },
-        { id: 'a6', text: 'Provide hourly updates to Dr. Watson', completed: false },
-        { id: 'a7', text: 'Document incident for post-mortem', completed: false },
-      ],
-      followUpRequired: true,
-      notes: 'CRITICAL: Medical practice affected. Engineering team notified. CEO should be informed.',
-    },
-    messages: [],
-  },
-];
+// Helper to serialize dates for storage
+function serializeCallHistory(history: CallHistoryItem[]): string {
+  return JSON.stringify(history.map(item => ({
+    ...item,
+    date: item.date.toISOString(),
+    messages: item.messages.map(m => ({
+      ...m,
+      timestamp: m.timestamp.toISOString()
+    })),
+    extractedFields: item.extractedFields.map(f => ({
+      ...f,
+      extractedAt: f.extractedAt.toISOString()
+    }))
+  })));
+}
+
+// Types for serialized data (with string dates)
+interface SerializedCallMessage {
+  id: string;
+  speaker: 'user' | 'agent';
+  text: string;
+  timestamp: string;
+}
+
+interface SerializedExtractedField {
+  id: string;
+  label: string;
+  value: string;
+  confidence: number;
+  extractedAt: string;
+}
+
+interface SerializedCallHistoryItem {
+  id: string;
+  callerName: string;
+  date: string;
+  duration: number;
+  messages: SerializedCallMessage[];
+  extractedFields: SerializedExtractedField[];
+  category?: CallCategory;
+  priority: PriorityLevel;
+  summary: CallSummary;
+  tags: string[];
+}
+
+// Helper to deserialize dates from storage
+function deserializeCallHistory(data: string): CallHistoryItem[] {
+  try {
+    const parsed = JSON.parse(data) as SerializedCallHistoryItem[];
+    return parsed.map((item) => ({
+      ...item,
+      date: new Date(item.date),
+      messages: item.messages.map((m) => ({
+        ...m,
+        timestamp: new Date(m.timestamp)
+      })),
+      extractedFields: item.extractedFields.map((f) => ({
+        ...f,
+        extractedAt: new Date(f.extractedAt)
+      }))
+    }));
+  } catch {
+    return [];
+  }
+}
 
 export function DemoCallProvider({ children }: { children: ReactNode }) {
   const [knowledgeBase, setKnowledgeBase] = useState<KnowledgeBaseConfig>(defaultKnowledgeBase);
   const [currentCall, setCurrentCall] = useState<CallSession | null>(null);
-  const [callHistory, setCallHistory] = useState<CallHistoryItem[]>(demoCallHistory);
+  const [callHistory, setCallHistory] = useState<CallHistoryItem[]>([]); // Start with empty - real data only
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Load knowledge base and call history on mount
+  useEffect(() => {
+    const loadData = async () => {
+      setIsLoading(true);
+      
+      // Try to load from Supabase first, fallback to localStorage
+      try {
+        // Load knowledge base
+        const { data: kbData, error: kbError } = await supabase
+          .from('knowledge_base_config')
+          .select('*')
+          .single();
+        
+        if (!kbError && kbData?.config) {
+          setKnowledgeBase(kbData.config as KnowledgeBaseConfig);
+        } else {
+          // Fallback to localStorage
+          const localKB = localStorage.getItem(KNOWLEDGE_BASE_KEY);
+          if (localKB) {
+            setKnowledgeBase(JSON.parse(localKB));
+          }
+        }
+
+        // Load call history
+        const { data: historyData, error: historyError } = await supabase
+          .from('call_history')
+          .select('*')
+          .order('date', { ascending: false });
+        
+        if (!historyError && historyData && historyData.length > 0) {
+          const formattedHistory = (historyData as SerializedCallHistoryItem[]).map((item) => ({
+            ...item,
+            date: new Date(item.date),
+            messages: (item.messages || []).map((m) => ({
+              ...m,
+              timestamp: new Date(m.timestamp)
+            })),
+            extractedFields: (item.extractedFields || []).map((f) => ({
+              ...f,
+              extractedAt: new Date(f.extractedAt)
+            }))
+          })) as CallHistoryItem[];
+          setCallHistory(formattedHistory);
+        } else {
+          // Fallback to localStorage
+          const localHistory = localStorage.getItem(CALL_HISTORY_KEY);
+          if (localHistory) {
+            setCallHistory(deserializeCallHistory(localHistory));
+          }
+        }
+      } catch (error) {
+        console.error('Error loading data:', error);
+        // Fallback to localStorage
+        const localKB = localStorage.getItem(KNOWLEDGE_BASE_KEY);
+        if (localKB) {
+          try {
+            setKnowledgeBase(JSON.parse(localKB));
+          } catch (e) {
+            console.error('Error parsing local KB:', e);
+          }
+        }
+        const localHistory = localStorage.getItem(CALL_HISTORY_KEY);
+        if (localHistory) {
+          setCallHistory(deserializeCallHistory(localHistory));
+        }
+      }
+      
+      setIsLoading(false);
+    };
+
+    loadData();
+  }, []);
+
+  // Save call history to localStorage whenever it changes (as backup)
+  useEffect(() => {
+    if (callHistory.length > 0) {
+      localStorage.setItem(CALL_HISTORY_KEY, serializeCallHistory(callHistory));
+    }
+  }, [callHistory]);
 
   // Knowledge Base updates
   const updateKnowledgeBase = useCallback((config: Partial<KnowledgeBaseConfig>) => {
-    setKnowledgeBase(prev => ({ ...prev, ...config }));
+    setKnowledgeBase(prev => {
+      const updated = { ...prev, ...config };
+      // Also save to localStorage immediately for backup
+      localStorage.setItem(KNOWLEDGE_BASE_KEY, JSON.stringify(updated));
+      return updated;
+    });
+  }, []);
+
+  // Save knowledge base to Supabase
+  const saveKnowledgeBase = useCallback(async (): Promise<boolean> => {
+    try {
+      // Save to localStorage first (always works)
+      localStorage.setItem(KNOWLEDGE_BASE_KEY, JSON.stringify(knowledgeBase));
+      
+      // Try to save to Supabase
+      const { error } = await supabase
+        .from('knowledge_base_config')
+        .upsert({
+          id: 'default',
+          config: knowledgeBase,
+          updated_at: new Date().toISOString()
+        });
+      
+      if (error) {
+        console.warn('Supabase save failed, using localStorage:', error);
+        // localStorage save already done, so still return true
+      }
+      
+      return true;
+    } catch (error) {
+      console.error('Error saving knowledge base:', error);
+      // localStorage save already done
+      return true;
+    }
+  }, [knowledgeBase]);
+
+  // Load knowledge base from Supabase
+  const loadKnowledgeBase = useCallback(async (): Promise<void> => {
+    try {
+      const { data, error } = await supabase
+        .from('knowledge_base_config')
+        .select('*')
+        .single();
+      
+      if (!error && data?.config) {
+        setKnowledgeBase(data.config as KnowledgeBaseConfig);
+      }
+    } catch (error) {
+      console.error('Error loading knowledge base:', error);
+    }
   }, []);
 
   const addContextField = useCallback((field: ContextField) => {
@@ -354,7 +444,40 @@ export function DemoCallProvider({ children }: { children: ReactNode }) {
     setCurrentCall(newCall);
   }, []);
 
-  const endCall = useCallback(() => {
+  // Helper to find caller name from various sources
+  const findCallerName = (call: CallSession): string => {
+    // First try extracted fields
+    const nameField = call.extractedFields.find(f => 
+      f.id === 'name' || 
+      f.label.toLowerCase().includes('name') ||
+      f.label.toLowerCase().includes('caller')
+    );
+    if (nameField?.value) return nameField.value;
+    
+    // Try to find name in messages where user introduced themselves
+    const userMessages = call.messages.filter(m => m.speaker === 'user');
+    for (const msg of userMessages) {
+      // Common patterns: "My name is X", "I'm X", "This is X", "I am X"
+      const patterns = [
+        /my name is\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)/i,
+        /i'?m\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)/i,
+        /this is\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)/i,
+        /i am\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)/i,
+        /call me\s+([A-Z][a-z]+)/i
+      ];
+      
+      for (const pattern of patterns) {
+        const match = msg.text.match(pattern);
+        if (match?.[1]) {
+          return match[1];
+        }
+      }
+    }
+    
+    return 'Unknown Caller';
+  };
+
+  const endCall = useCallback(async () => {
     if (currentCall) {
       const endedCall: CallSession = {
         ...currentCall,
@@ -362,33 +485,105 @@ export function DemoCallProvider({ children }: { children: ReactNode }) {
         status: 'ended',
       };
       
-      // Generate summary (placeholder - will be AI-generated)
-      const callerNameField = endedCall.extractedFields.find(f => f.id === 'name');
-      const purposeField = endedCall.extractedFields.find(f => f.id === 'purpose');
+      const duration = Math.floor((endedCall.endTime!.getTime() - endedCall.startTime.getTime()) / 1000);
       
-      const historyItem: CallHistoryItem = {
-        id: `history-${Date.now()}`,
-        callerName: callerNameField?.value || 'Unknown Caller',
-        date: endedCall.startTime,
-        duration: Math.floor((endedCall.endTime!.getTime() - endedCall.startTime.getTime()) / 1000),
-        messages: endedCall.messages,
-        extractedFields: endedCall.extractedFields,
-        category: endedCall.category,
-        priority: endedCall.priority,
-        tags: [],
-        summary: {
+      // Get caller name from various sources
+      const callerName = findCallerName(endedCall);
+      
+      // Default summary while we wait for AI
+      let summary: CallSummary = {
+        mainPoints: ['Call completed'],
+        sentiment: 'neutral',
+        actionItems: [],
+        followUpRequired: endedCall.priority === 'high' || endedCall.priority === 'critical',
+        notes: 'Processing call summary...',
+      };
+      
+      let finalCategory = endedCall.category;
+      let finalPriority = endedCall.priority;
+      let tags: string[] = [];
+
+      // Try to get AI summary using aiService (which has smart mock fallback)
+      try {
+        if (endedCall.messages.length > 0) {
+          const summaryResponse = await aiService.generateSummary(
+            endedCall.messages,
+            endedCall.extractedFields,
+            endedCall.category,
+            endedCall.priority
+          );
+          
+          summary = summaryResponse.summary;
+          tags = summaryResponse.tags;
+          
+          // Update priority if higher than current
+          const priorityOrder: PriorityLevel[] = ['low', 'medium', 'high', 'critical'];
+          const currentIdx = priorityOrder.indexOf(finalPriority);
+          const suggestedIdx = priorityOrder.indexOf(endedCall.priority);
+          if (suggestedIdx > currentIdx) {
+            finalPriority = endedCall.priority;
+          }
+        }
+      } catch (error) {
+        console.error('Error generating AI summary:', error);
+        // Create a basic summary from extracted fields
+        const purposeField = endedCall.extractedFields.find(f => f.id === 'purpose');
+        summary = {
           mainPoints: purposeField ? [purposeField.value] : ['Call completed'],
           sentiment: 'neutral',
           actionItems: [],
           followUpRequired: endedCall.priority === 'high' || endedCall.priority === 'critical',
-          notes: 'Call summary will be generated by AI.',
-        },
+          notes: `Call from ${callerName}. ${purposeField ? `Regarding: ${purposeField.value}` : ''}`.trim(),
+        };
+      }
+      
+      const historyItem: CallHistoryItem = {
+        id: `history-${Date.now()}`,
+        callerName,
+        date: endedCall.startTime,
+        duration,
+        messages: endedCall.messages,
+        extractedFields: endedCall.extractedFields,
+        category: finalCategory,
+        priority: finalPriority,
+        tags,
+        summary,
       };
       
+      // Add to local state
       setCallHistory(prev => [historyItem, ...prev]);
+      
+      // Try to save to Supabase
+      try {
+        const { error } = await supabase.from('call_history').insert({
+          id: historyItem.id,
+          callerName: historyItem.callerName,
+          date: historyItem.date.toISOString(),
+          duration: historyItem.duration,
+          messages: historyItem.messages.map(m => ({
+            ...m,
+            timestamp: m.timestamp.toISOString()
+          })),
+          extractedFields: historyItem.extractedFields.map(f => ({
+            ...f,
+            extractedAt: f.extractedAt.toISOString()
+          })),
+          category: historyItem.category,
+          priority: historyItem.priority,
+          tags: historyItem.tags,
+          summary: historyItem.summary
+        });
+        
+        if (error) {
+          console.warn('Failed to save call to Supabase:', error);
+        }
+      } catch (error) {
+        console.error('Error saving call to Supabase:', error);
+      }
+      
       setCurrentCall(null);
     }
-  }, [currentCall]);
+  }, [currentCall, knowledgeBase]);
 
   const addMessage = useCallback((speaker: 'user' | 'agent', text: string) => {
     if (currentCall) {
@@ -432,6 +627,10 @@ export function DemoCallProvider({ children }: { children: ReactNode }) {
     }
   }, [currentCall]);
 
+  const addToCallHistory = useCallback((item: CallHistoryItem) => {
+    setCallHistory(prev => [item, ...prev]);
+  }, []);
+
   // Query helpers
   const getCallsByPriority = useCallback((priority: PriorityLevel) => {
     return callHistory.filter(c => c.priority === priority);
@@ -474,6 +673,8 @@ export function DemoCallProvider({ children }: { children: ReactNode }) {
   const value: DemoCallContextType = {
     knowledgeBase,
     updateKnowledgeBase,
+    saveKnowledgeBase,
+    loadKnowledgeBase,
     addContextField,
     updateContextField,
     removeContextField,
@@ -487,9 +688,11 @@ export function DemoCallProvider({ children }: { children: ReactNode }) {
     setCallPriority,
     setCallCategory,
     callHistory,
+    addToCallHistory,
     getCallsByPriority,
     getCallsByCategory,
     getAnalytics,
+    isLoading,
   };
 
   return (
