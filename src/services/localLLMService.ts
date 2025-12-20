@@ -3,7 +3,7 @@
  * 
  * Provides AI using local service via cloudflare tunnel
  * 
- * API: https://packs-measures-down-dakota.trycloudflare.com/completion
+ * API: https://powered-lat-journalism-expressed.trycloudflare.com/completion
  * Uses simple prompt-based completion endpoint
  */
 
@@ -25,7 +25,7 @@ const getCleanURL = (url: string) => {
   cleaned = cleaned.replace(/\/+$/, '');
   return cleaned;
 };
-const LLM_URL = getCleanURL(import.meta.env.VITE_OLLAMA_URL || 'https://pregnant-operational-centers-feels.trycloudflare.com');
+const LLM_URL = getCleanURL('https://powered-lat-journalism-expressed.trycloudflare.com');
 
 // Number of tokens to generate per response - increased for reasoning models
 const N_PREDICT = 2048;
