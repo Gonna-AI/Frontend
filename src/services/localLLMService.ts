@@ -1,15 +1,11 @@
 /**
  * Local LLM Service for ClerkTree
  * 
- * Provides fallback AI using Qwen3 0.6B
- * Runs locally via Ollama on Mac M3
+ * Provides fallback AI using local Ollama service
+ * Running on another laptop via cloudflare tunnel
  * 
- * Model: qwen3:0.6b
- * RAM Usage: Optimized for Railway's 1GB RAM limit
- * 
- * Setup:
- * 1. Install Ollama: https://ollama.com/download
- * 2. Run: ollama run qwen3:0.6b
+ * API: https://packs-measures-down-dakota.trycloudflare.com/completion
+ * Uses simple prompt-based completion endpoint
  */
 
 import { 
@@ -20,8 +16,8 @@ import {
   KnowledgeBaseConfig 
 } from '../contexts/DemoCallContext';
 
-// Configuration - optimized for Railway's 1GB RAM limit
-const OLLAMA_URL = import.meta.env.VITE_OLLAMA_URL || 'http://localhost:11434';
+// Configuration - using local Ollama service via cloudflare tunnel
+const OLLAMA_URL = import.meta.env.VITE_OLLAMA_URL || 'https://packs-measures-down-dakota.trycloudflare.com';
 const OLLAMA_MODEL = import.meta.env.VITE_OLLAMA_MODEL || 'qwen3:0.6b';
 
 // Context limit - reduced for 8GB RAM (saves ~300MB vs 4096)
@@ -178,97 +174,43 @@ class LocalLLMService {
   private modelName: string = OLLAMA_MODEL;
 
   /**
-   * Check if Ollama is running and the model is available
+   * Check if Ollama service is running and available
    */
   async checkAvailability(): Promise<boolean> {
     try {
       // Log the actual URL being used
       console.log(`🔍 Checking Ollama availability...`);
       console.log(`   URL: ${OLLAMA_URL}`);
-      console.log(`   Model: ${OLLAMA_MODEL}`);
       console.log(`   Env Var: ${import.meta.env.VITE_OLLAMA_URL || 'NOT SET (using default)'}`);
       
-      // Check Ollama is running
-      const response = await fetch(`${OLLAMA_URL}/api/tags`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        signal: AbortSignal.timeout(10000), // Increased timeout for Railway
+      // Test the /completion endpoint with a simple prompt
+      const testResponse = await fetch(`${OLLAMA_URL}/completion`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          prompt: 'test',
+          n_predict: 10,
+        }),
+        signal: AbortSignal.timeout(10000),
       });
       
-      console.log(`   Response Status: ${response.status} ${response.statusText}`);
+      console.log(`   Response Status: ${testResponse.status} ${testResponse.statusText}`);
       
-      if (!response.ok) {
-        const errorText = await response.text().catch(() => 'Unknown error');
-        console.error(`❌ Ollama not available: HTTP ${response.status} at ${OLLAMA_URL}`);
+      if (!testResponse.ok) {
+        const errorText = await testResponse.text().catch(() => 'Unknown error');
+        console.error(`❌ Ollama not available: HTTP ${testResponse.status} at ${OLLAMA_URL}`);
         console.error(`   Error: ${errorText}`);
         this.isAvailable = false;
         return false;
       }
 
-      const data = await response.json();
-      const models = data.models || [];
-      
-      console.log(`   Found ${models.length} model(s):`, models.map((m: { name: string }) => m.name).join(', ') || 'None');
-      
-      // Check if Qwen3 model is available
-      const qwenModel = models.find((m: { name: string }) => 
-        m.name.includes('qwen3') || 
-        m.name.includes('qwen') ||
-        m.name === OLLAMA_MODEL
-      );
-      
-      if (qwenModel) {
-        this.modelName = qwenModel.name;
+      const testData = await testResponse.json();
+      if (testData.content !== undefined) {
         this.isAvailable = true;
-        console.log(`✅ Local LLM available: ${this.modelName}`);
+        console.log(`✅ Local LLM service available at ${OLLAMA_URL}`);
         return true;
       }
-
-      // Check for any Llama-based model as fallback
-      const llamaModel = models.find((m: { name: string }) => 
-        m.name.includes('llama')
-      );
       
-      if (llamaModel) {
-        this.modelName = llamaModel.name;
-        this.isAvailable = true;
-        console.log(`✅ Local LLM available (fallback): ${this.modelName}`);
-        return true;
-      }
-
-      // No suitable model found in tags, but try to use the model anyway
-      // Sometimes /api/tags doesn't show models immediately after pull
-      // We'll try to use the model directly and see if it works
-      console.log('⚠️ Model not found in /api/tags, but trying anyway...');
-      console.log('   Expected model:', OLLAMA_MODEL);
-      console.log('   Available models:', models.map((m: { name: string }) => m.name).join(', ') || 'None');
-      
-      // Try a simple test to see if the model is actually available
-      try {
-        const testResponse = await fetch(`${OLLAMA_URL}/api/generate`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            model: OLLAMA_MODEL,
-            prompt: 'test',
-            stream: false,
-          }),
-          signal: AbortSignal.timeout(5000),
-        });
-        
-        if (testResponse.ok) {
-          console.log('✅ Model is available (test successful)');
-          this.modelName = OLLAMA_MODEL;
-          this.isAvailable = true;
-          return true;
-        }
-      } catch (e) {
-        console.log('   Model test failed, model may not be ready yet');
-      }
-      
-      console.log('   💡 Run on Railway: ollama pull qwen3:0.6b');
       this.isAvailable = false;
       return false;
 
@@ -280,10 +222,10 @@ class LocalLLMService {
       
       if (errorMsg.includes('Failed to fetch') || errorMsg.includes('NetworkError')) {
         console.error('   💡 This is likely a CORS or network issue.');
-        console.error('   💡 Check if Railway service is running and publicly accessible.');
-        console.error('   💡 Verify the URL in Netlify environment variables matches your Railway deployment.');
+        console.error('   💡 Check if the local Ollama service is running and accessible.');
+        console.error('   💡 Verify the URL in Netlify environment variables matches your cloudflare tunnel URL.');
       } else if (errorMsg.includes('timeout')) {
-        console.error('   💡 Connection timed out. Railway service might be slow or down.');
+        console.error('   💡 Connection timed out. Service might be slow or down.');
       } else {
         console.error('   💡 Make sure VITE_OLLAMA_URL is set correctly in Netlify environment variables.');
         console.error('   💡 Current value:', import.meta.env.VITE_OLLAMA_URL || 'NOT SET');
@@ -346,53 +288,44 @@ ${config.customInstructions.length > 0 ? 'INSTRUCTIONS:\n' + config.customInstru
     
     // Format conversation history (limit to recent messages to save context)
     const recentHistory = conversationHistory.slice(-10);
-    const messages: OllamaMessage[] = [
-      { role: 'system', content: systemPrompt },
-      ...recentHistory.map(m => ({
-        role: (m.speaker === 'agent' ? 'assistant' : 'user') as 'assistant' | 'user',
-        content: m.text
-      })),
-      { role: 'user', content: userMessage }
-    ];
+    
+    // Build prompt string from conversation history
+    let prompt = systemPrompt + '\n\n';
+    
+    // Add conversation history
+    for (const msg of recentHistory) {
+      const role = msg.speaker === 'agent' ? 'Assistant' : 'User';
+      prompt += `${role}: ${msg.text}\n`;
+    }
+    
+    // Add current user message
+    prompt += `User: ${userMessage}\nAssistant:`;
 
     try {
-      const response = await fetch(`${OLLAMA_URL}/api/chat`, {
+      const response = await fetch(`${OLLAMA_URL}/completion`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          model: this.modelName,
-          messages,
-          tools: OLLAMA_TOOLS,
-          stream: false,
-          keep_alive: KEEP_ALIVE, // Keep model in RAM to avoid wake-up lag
-          options: {
-            temperature: 0.7,
-            num_predict: 256,      // Shorter outputs = faster response
-            num_ctx: MAX_CONTEXT,  // 2048 context saves ~300MB RAM
-            num_thread: 8,         // Force all M3 cores (4 perf + 4 efficiency)
-            mirostat: 0,           // Disable complex sampling for speed
-            low_vram: true,        // Aggressive memory management
-          }
+          prompt: prompt,
+          n_predict: 256, // Number of tokens to predict
         }),
-        signal: AbortSignal.timeout(30000),
+        signal: AbortSignal.timeout(60000), // 60 second timeout
       });
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
         const errorMsg = errorData.error || `Ollama error: ${response.status}`;
         console.error(`❌ Ollama API error (${response.status}):`, errorMsg);
-        
-        // Handle memory errors gracefully
-        if (errorMsg.includes('memory') || errorMsg.includes('system memory')) {
-          console.error('💡 Railway container may not have enough RAM for this model');
-          console.error('💡 Consider upgrading Railway plan or using a smaller model');
-        }
-        
         throw new Error(`Ollama error: ${response.status} - ${errorMsg}`);
       }
 
       const data = await response.json();
-      return this.parseOllamaResponse(data, knowledgeBase, existingFields);
+      
+      // Simple response format - just return the content
+      return {
+        response: data.content || '',
+        extractedFields: existingFields, // Keep existing fields
+      };
 
     } catch (error) {
       console.error('Local LLM error:', error);
@@ -556,28 +489,14 @@ ${priority ? `PRIORITY: ${priority}` : ''}
 If the caller's name was mentioned in the conversation, extract it using extract_caller_info FIRST, then provide a concise summary with key points.`;
 
     try {
-      const response = await fetch(`${OLLAMA_URL}/api/chat`, {
+      const response = await fetch(`${OLLAMA_URL}/completion`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          model: this.modelName,
-          messages: [
-            { role: 'system', content: 'You are a call analysis assistant. Be concise.' },
-            { role: 'user', content: prompt }
-          ],
-          tools: [OLLAMA_TOOLS[3]], // Only summarize_call tool
-          stream: false,
-          keep_alive: KEEP_ALIVE,
-          options: {
-            temperature: 0.3,     // Low temp for accurate summarization
-            num_predict: 256,     // Faster response
-            num_ctx: MAX_CONTEXT,
-            num_thread: 8,
-            mirostat: 0,
-            low_vram: true,
-          }
+          prompt: prompt,
+          n_predict: 256, // Number of tokens to predict
         }),
-        signal: AbortSignal.timeout(30000),
+        signal: AbortSignal.timeout(60000),
       });
 
       if (!response.ok) {
@@ -586,45 +505,19 @@ If the caller's name was mentioned in the conversation, extract it using extract
 
       const data = await response.json();
       
-      // Check for tool calls - look for extract_caller_info first
-      const toolCalls = data.message?.tool_calls || [];
-      const extractCall = toolCalls.find((tc: OllamaToolCall) => tc.function.name === 'extract_caller_info');
-      const summaryCall = toolCalls.find((tc: OllamaToolCall) => tc.function.name === 'summarize_call');
+      // Simple text response - parse basic summary from content
+      const textResponse = data.content || '';
       
-      // Extract caller name if found
-      let extractedName = callerName;
-      if (extractCall?.function.arguments?.callerName) {
-        extractedName = extractCall.function.arguments.callerName as string;
-        console.log('✅ Local LLM extracted caller name in summary:', extractedName);
-      }
+      // Try to extract a simple summary (first sentence or first 200 chars)
+      const summary = textResponse.split('.')[0] || textResponse.slice(0, 200) || 'Call completed';
       
-      if (summaryCall?.function.arguments) {
-        const args = summaryCall.function.arguments;
-        const notes = (args.notes as string) || '';
-        // Include caller name in notes if extracted
-        const finalNotes = extractedName && !notes.toLowerCase().includes(extractedName.toLowerCase())
-          ? `Caller: ${extractedName}. ${notes}`.trim()
-          : notes;
-        
-        return {
-          summary: (args.summary as string) || 'Call completed',
-          mainPoints: (args.mainPoints as string[]) || ['Call completed'],
-          sentiment: (args.sentiment as 'positive' | 'neutral' | 'negative') || 'neutral',
-          followUpRequired: (args.followUpRequired as boolean) || priority === 'high' || priority === 'critical',
-          notes: finalNotes,
-          callerName: extractedName || callerName
-        };
-      }
-
-      // Parse from text response if no tool call
-      const textResponse = data.message?.content || '';
       return {
-        summary: textResponse.slice(0, 200) || 'Call completed',
-        mainPoints: ['Call completed'],
-        sentiment: 'neutral',
+        summary: summary,
+        mainPoints: [textResponse.slice(0, 100) || 'Call completed'],
+        sentiment: 'neutral', // Can't detect sentiment from simple API
         followUpRequired: priority === 'high' || priority === 'critical',
         notes: textResponse,
-        callerName
+        callerName: callerName
       };
 
     } catch (error) {
