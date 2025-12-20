@@ -62,7 +62,7 @@ class LocalLLMService {
           prompt: 'test',
           n_predict: 10,
         }),
-        signal: AbortSignal.timeout(10000),
+        signal: AbortSignal.timeout(30000), // 30 second timeout for availability check
       });
 
       console.log(`   Response Status: ${testResponse.status} ${testResponse.statusText}`);
@@ -308,7 +308,7 @@ ${config.customInstructions.length > 0 ? 'INSTRUCTIONS:\n' + config.customInstru
           prompt: prompt,
           n_predict: N_PREDICT,
         }),
-        signal: AbortSignal.timeout(60000), // 60 second timeout
+        signal: AbortSignal.timeout(300000), // 5 minute timeout (reasoning models can be slow)
       });
 
       if (!response.ok) {
@@ -388,7 +388,7 @@ If the caller's name was mentioned in the conversation, extract it using extract
           prompt: prompt,
           n_predict: N_PREDICT,
         }),
-        signal: AbortSignal.timeout(60000),
+        signal: AbortSignal.timeout(300000), // 5 minute timeout
       });
 
       if (!response.ok) {
