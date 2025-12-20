@@ -26,7 +26,7 @@ const getCleanURL = (url: string) => {
   cleaned = cleaned.replace(/\/+$/, '');
   return cleaned;
 };
-const LLM_URL = getCleanURL(import.meta.env.VITE_OLLAMA_URL || 'https://powered-lat-journalism-expressed.trycloudflare.com');
+const LLM_URL = getCleanURL(import.meta.env.VITE_OLLAMA_URL || 'https://continually-placed-tire-sig.trycloudflare.com');
 
 // Number of tokens to generate per response
 const N_PREDICT = 1024; // Reduced for faster responses
@@ -283,28 +283,27 @@ class LocalLLMService {
 
   /**
    * Build system prompt for the AI
+   * NOTE: Kept VERY simple for small models like Qwen3-0.6B
    */
   private buildSystemPrompt(config: KnowledgeBaseConfig, existingFields: ExtractedField[]): string {
-    const categoryList = config.categories.map(c => `- ${c.id}: ${c.name}`).join('\n');
     const extractedInfo = existingFields.length > 0
       ? existingFields.map(f => `${f.label}: ${f.value}`).join(', ')
-      : 'None';
+      : '';
 
-    // Keep prompt concise for lower context usage
-    return `You are ${config.persona || 'an AI assistant'}. ${config.systemPrompt}
+    // VERY simple prompt for small models
+    let prompt = `You are a helpful AI assistant.`;
 
-CATEGORIES:
-${categoryList}
+    if (config.persona && config.persona !== 'Professional, empathetic, and efficient AI assistant') {
+      prompt += ` ${config.persona}.`;
+    }
 
-KNOWN INFO: ${extractedInfo}
+    if (extractedInfo) {
+      prompt += ` Known info: ${extractedInfo}.`;
+    }
 
-RULES:
-- If caller introduced themselves, use their name naturally
-- Don't ask for info you already have
-- Be helpful and conversational
-- Respond naturally based on the conversation context
+    prompt += ` Respond helpfully and naturally.`;
 
-${config.customInstructions.length > 0 ? 'INSTRUCTIONS:\n' + config.customInstructions.join('\n') : ''}`;
+    return prompt;
   }
 
   /**
@@ -322,27 +321,27 @@ ${config.customInstructions.length > 0 ? 'INSTRUCTIONS:\n' + config.customInstru
 
     const systemPrompt = this.buildSystemPrompt(knowledgeBase, existingFields);
 
-    // Format conversation history (limit to last 6 messages for context)
-    const recentHistory = conversationHistory.slice(-6);
+    // For small models (0.6B), use VERY simple prompt format
+    // Only include last 2 messages to keep context minimal
+    const recentHistory = conversationHistory.slice(-2);
 
-    // Build a cleaner prompt with explicit structure
-    // Using ### markers for clear section boundaries
-    let prompt = `### System:\n${systemPrompt}\n\n### Conversation:\n`;
+    // Build a simple chat-style prompt - works better for small models
+    let prompt = `${systemPrompt}\n\n`;
 
-    // Add conversation history with clean formatting
+    // Add minimal conversation history
     for (const msg of recentHistory) {
-      const role = msg.speaker === 'agent' ? 'Assistant' : 'Human';
-      // Clean agent responses to prevent artifacts from being fed back
+      const role = msg.speaker === 'agent' ? 'AI' : 'User';
       const cleanedText = msg.speaker === 'agent' ? this.cleanFinalAnswer(msg.text) : msg.text;
-      if (cleanedText.trim()) {
+      if (cleanedText.trim() && cleanedText.length < 200) { // Skip long messages for small models
         prompt += `${role}: ${cleanedText}\n`;
       }
     }
 
-    // Add current user message with clear instruction for the model
-    prompt += `Human: ${userMessage}\n\n### Response:\nAssistant:`;
+    // Simple format: just User/AI
+    prompt += `User: ${userMessage}\nAI:`;
 
     console.log('📝 Prompt length:', prompt.length, 'chars');
+    console.log('📝 Prompt preview:', prompt.substring(0, 200) + '...');
 
     try {
       const response = await fetch(`${LLM_URL}/completion`, {
@@ -351,10 +350,12 @@ ${config.customInstructions.length > 0 ? 'INSTRUCTIONS:\n' + config.customInstru
         body: JSON.stringify({
           prompt: prompt,
           n_predict: N_PREDICT,
-          // Stop sequences to prevent runaway generation
-          stop: ['\n### ', '\nHuman:', '\nUser:', '\n\nHuman:', '\n\nUser:', '### System:', '### Conversation:'],
-          // Temperature for more focused responses
-          temperature: 0.7,
+          // Stop sequences for simple format
+          stop: ['\nUser:', '\n\nUser:', '\nHuman:', '\n\n\n'],
+          // Higher temperature for small models can help
+          temperature: 0.8,
+          // Repetition penalty to avoid loops
+          repeat_penalty: 1.1,
         }),
         signal: AbortSignal.timeout(REQUEST_TIMEOUT),
       });
