@@ -215,7 +215,15 @@ export default function UnifiedChatInterface({ isDark = true }: UnifiedChatInter
                 setCallCategory(response.suggestedCategory);
             }
 
-            addMessage('agent', response.text);
+            // Validate response before adding to chat
+            const responseText = response.text?.trim();
+            if (!responseText) {
+                console.error('❌ Empty response text received:', response);
+                throw new Error('Received empty response from AI');
+            }
+
+            console.log('✅ Adding agent message:', responseText.substring(0, 100) + '...');
+            addMessage('agent', responseText);
 
             // Store reasoning
             if (response.reasoning) {
