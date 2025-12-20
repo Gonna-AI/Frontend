@@ -305,7 +305,7 @@ ${config.customInstructions.length > 0 ? 'INSTRUCTIONS:\n' + config.customInstru
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           prompt: prompt,
-          n_predict: 256, // Number of tokens to predict
+          n_predict: N_PREDICT,
         }),
         signal: AbortSignal.timeout(60000), // 60 second timeout
       });
