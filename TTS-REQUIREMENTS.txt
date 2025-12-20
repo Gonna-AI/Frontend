@@ -1,0 +1,16 @@
+# Requirements file for TTS Service
+# Add these dependencies to your TTS service's requirements.txt file
+
+# Kokoro TTS - High quality text-to-speech
+kokoro-onnx>=1.0.0
+
+# Audio file handling
+soundfile>=0.12.0
+
+# Web framework (if not already included)
+flask>=2.0.0
+flask-cors>=3.0.0
+
+# Other common dependencies (adjust based on your service)
+# numpy>=1.21.0
+# onnxruntime>=1.10.0
