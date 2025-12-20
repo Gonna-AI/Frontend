@@ -7,21 +7,21 @@
  * 3. Smart Mock (fallback, always available)
  */
 
-import { 
-  KnowledgeBaseConfig, 
-  ExtractedField, 
-  CallCategory, 
+import {
+  KnowledgeBaseConfig,
+  ExtractedField,
+  CallCategory,
   PriorityLevel,
   CallMessage,
   CallSummary,
-  ActionItem 
+  ActionItem
 } from '../contexts/DemoCallContext';
-import { 
-  generateCallResponse, 
-  summarizeCall, 
+import {
+  generateCallResponse,
+  summarizeCall,
   testGeminiConnection,
   AIAnalysisResult,
-  CallSummaryResult 
+  CallSummaryResult
 } from './geminiService';
 import { localLLMService, LocalLLMResponse } from './localLLMService';
 
@@ -49,6 +49,7 @@ interface ConversationState {
 // Response types for AI operations
 export interface AIResponse {
   text: string;
+  reasoning?: string; // Model's thinking process (display in chat, don't speak in voice)
   extractedFields?: ExtractedField[];
   suggestedCategory?: CallCategory;
   suggestedPriority?: PriorityLevel;
@@ -118,13 +119,13 @@ class AIService {
    */
   async initialize(): Promise<void> {
     console.log('🔄 Initializing AI services...');
-    
+
     // Run both checks in parallel for faster startup
     const [geminiResult, localResult] = await Promise.all([
       testGeminiConnection().catch(() => false),
       localLLMService.initialize().catch(() => false)
     ]);
-    
+
     this.geminiAvailable = geminiResult;
     this.localLLMAvailable = localResult;
 
@@ -143,7 +144,7 @@ class AIService {
     if (this.localLLMAvailable) chain.push('Local LLM');
     chain.push('Smart Mock');
     console.log('🔗 AI Chain:', chain.join(' → '));
-    
+
     if (!this.geminiAvailable && !this.localLLMAvailable) {
       console.warn('⚠️ WARNING: Both Gemini and Local LLM are unavailable. Using Smart Mock fallback only.');
       console.warn('💡 To fix:');
@@ -187,7 +188,7 @@ class AIService {
     extractedFields: ExtractedField[]
   ): Promise<AIResponse> {
     const kb = this.knowledgeBase;
-    
+
     if (!kb) {
       console.warn('Knowledge base not set, using smart mock');
       return this.smartMockResponse(userMessage, conversationHistory, extractedFields);
@@ -218,8 +219,8 @@ class AIService {
         // Map suggested category
         if (result.suggestedCategory) {
           const matchedCategory = kb.categories.find(
-            c => c.id === result.suggestedCategory?.id || 
-                 c.name.toLowerCase() === result.suggestedCategory?.name.toLowerCase()
+            c => c.id === result.suggestedCategory?.id ||
+              c.name.toLowerCase() === result.suggestedCategory?.name.toLowerCase()
           );
           if (matchedCategory) {
             response.suggestedCategory = matchedCategory;
@@ -235,7 +236,7 @@ class AIService {
       }
     }
 
-      // Step 2: Try Local LLM
+    // Step 2: Try Local LLM
     if (this.config.useLocalLLM && this.localLLMAvailable !== false) {
       try {
         console.log('🖥️ Calling Local LLM...');
@@ -251,6 +252,7 @@ class AIService {
         // Convert to our format
         const response: AIResponse = {
           text: result.response,
+          reasoning: result.reasoning, // Pass through reasoning for display
           extractedFields: result.extractedFields,
           suggestedPriority: result.suggestedPriority,
           confidence: 0.88,
@@ -260,8 +262,8 @@ class AIService {
         // Map suggested category
         if (result.suggestedCategory) {
           const matchedCategory = kb.categories.find(
-            c => c.id === result.suggestedCategory?.id || 
-                 c.name.toLowerCase() === result.suggestedCategory?.name.toLowerCase()
+            c => c.id === result.suggestedCategory?.id ||
+              c.name.toLowerCase() === result.suggestedCategory?.name.toLowerCase()
           );
           if (matchedCategory) {
             response.suggestedCategory = matchedCategory;
@@ -292,7 +294,7 @@ class AIService {
     priority?: PriorityLevel
   ): Promise<SummaryResponse> {
     const kb = this.knowledgeBase;
-    
+
     if (!kb) {
       return this.mockGenerateSummary(messages, extractedFields, category, priority);
     }
@@ -443,13 +445,13 @@ class AIService {
 
     const allText = messages.map(m => m.text).join(' ').toLowerCase();
     let sentiment: 'positive' | 'neutral' | 'negative' = 'neutral';
-    
+
     const positiveWords = ['thank', 'great', 'awesome', 'excellent', 'appreciate', 'helpful', 'wonderful'];
     const negativeWords = ['frustrated', 'angry', 'terrible', 'awful', 'disappointed', 'upset', 'worst'];
-    
+
     const positiveCount = positiveWords.filter(w => allText.includes(w)).length;
     const negativeCount = negativeWords.filter(w => allText.includes(w)).length;
-    
+
     if (positiveCount > negativeCount) sentiment = 'positive';
     else if (negativeCount > positiveCount) sentiment = 'negative';
 

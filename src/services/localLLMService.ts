@@ -7,12 +7,12 @@
  * Uses simple prompt-based completion endpoint
  */
 
-import { 
-  CallMessage, 
-  ExtractedField, 
-  CallCategory, 
-  PriorityLevel, 
-  KnowledgeBaseConfig 
+import {
+  CallMessage,
+  ExtractedField,
+  CallCategory,
+  PriorityLevel,
+  KnowledgeBaseConfig
 } from '../contexts/DemoCallContext';
 
 // Configuration - using local service via cloudflare tunnel
@@ -27,8 +27,8 @@ const getCleanURL = (url: string) => {
 };
 const LLM_URL = getCleanURL(import.meta.env.VITE_OLLAMA_URL || 'https://pregnant-operational-centers-feels.trycloudflare.com');
 
-// Number of tokens to generate per response
-const N_PREDICT = 256;
+// Number of tokens to generate per response - increased for reasoning models
+const N_PREDICT = 2048;
 
 // Tool definitions (for reference, not used with simple API)
 const OLLAMA_TOOLS = [
@@ -45,7 +45,7 @@ const OLLAMA_TOOLS = [
             description: 'The full name of the caller if mentioned'
           },
           contactInfo: {
-            type: 'string', 
+            type: 'string',
             description: 'Phone number or email if provided'
           },
           callPurpose: {
@@ -69,17 +69,17 @@ const OLLAMA_TOOLS = [
       parameters: {
         type: 'object',
         properties: {
-          categoryId: { 
-            type: 'string', 
-            description: 'The category ID (e.g., support, sales, billing)' 
+          categoryId: {
+            type: 'string',
+            description: 'The category ID (e.g., support, sales, billing)'
           },
-          categoryName: { 
-            type: 'string', 
-            description: 'Human-readable category name' 
+          categoryName: {
+            type: 'string',
+            description: 'Human-readable category name'
           },
-          confidence: { 
-            type: 'number', 
-            description: 'Confidence score between 0 and 1' 
+          confidence: {
+            type: 'number',
+            description: 'Confidence score between 0 and 1'
           }
         },
         required: ['categoryId', 'categoryName']
@@ -99,13 +99,13 @@ const OLLAMA_TOOLS = [
             enum: ['low', 'medium', 'high', 'critical'],
             description: 'Priority level for the call'
           },
-          reasoning: { 
-            type: 'string', 
-            description: 'Brief explanation for the priority' 
+          reasoning: {
+            type: 'string',
+            description: 'Brief explanation for the priority'
           },
-          followUpRequired: { 
-            type: 'boolean', 
-            description: 'Whether follow-up action is needed' 
+          followUpRequired: {
+            type: 'boolean',
+            description: 'Whether follow-up action is needed'
           }
         },
         required: ['priority', 'followUpRequired']
@@ -120,25 +120,25 @@ const OLLAMA_TOOLS = [
       parameters: {
         type: 'object',
         properties: {
-          summary: { 
-            type: 'string', 
-            description: 'Brief 1-2 sentence overall summary' 
+          summary: {
+            type: 'string',
+            description: 'Brief 1-2 sentence overall summary'
           },
-          mainPoints: { 
-            type: 'array', 
-            items: { type: 'string' }, 
-            description: 'Array of key discussion points' 
+          mainPoints: {
+            type: 'array',
+            items: { type: 'string' },
+            description: 'Array of key discussion points'
           },
-          sentiment: { 
-            type: 'string', 
+          sentiment: {
+            type: 'string',
             enum: ['positive', 'neutral', 'negative'],
             description: 'Overall caller sentiment'
           },
-          followUpRequired: { 
+          followUpRequired: {
             type: 'boolean',
             description: 'Whether follow-up is needed'
           },
-          notes: { 
+          notes: {
             type: 'string',
             description: 'Additional notes or context'
           }
@@ -152,6 +152,7 @@ const OLLAMA_TOOLS = [
 // Types
 export interface LocalLLMResponse {
   response: string;
+  reasoning?: string; // Extracted reasoning/thinking from the model (for display, not spoken)
   extractedFields?: ExtractedField[];
   suggestedCategory?: { id: string; name: string; confidence: number };
   suggestedPriority?: PriorityLevel;
@@ -182,7 +183,7 @@ class LocalLLMService {
       console.log(`🔍 Checking Local LLM availability...`);
       console.log(`   URL: ${LLM_URL}`);
       console.log(`   Env Var: ${import.meta.env.VITE_OLLAMA_URL || 'NOT SET (using default)'}`);
-      
+
       // Test the /completion endpoint with a simple prompt
       const testResponse = await fetch(`${LLM_URL}/completion`, {
         method: 'POST',
@@ -193,9 +194,9 @@ class LocalLLMService {
         }),
         signal: AbortSignal.timeout(10000),
       });
-      
+
       console.log(`   Response Status: ${testResponse.status} ${testResponse.statusText}`);
-      
+
       if (!testResponse.ok) {
         const errorText = await testResponse.text().catch(() => 'Unknown error');
         console.error(`❌ Local LLM service not available: HTTP ${testResponse.status} at ${LLM_URL}`);
@@ -210,7 +211,7 @@ class LocalLLMService {
         console.log(`✅ Local LLM service available at ${LLM_URL}`);
         return true;
       }
-      
+
       this.isAvailable = false;
       return false;
 
@@ -219,7 +220,7 @@ class LocalLLMService {
       console.error(`❌ Local LLM connection failed at ${LLM_URL}`);
       console.error(`   Error: ${errorMsg}`);
       console.error(`   Error Type: ${e instanceof Error ? e.constructor.name : typeof e}`);
-      
+
       if (errorMsg.includes('Failed to fetch') || errorMsg.includes('NetworkError')) {
         console.error('   💡 This is likely a CORS or network issue.');
         console.error('   💡 Check if the local service is running and accessible via cloudflare tunnel.');
@@ -230,7 +231,7 @@ class LocalLLMService {
         console.error('   💡 Make sure VITE_OLLAMA_URL is set correctly in Netlify environment variables.');
         console.error('   💡 Current value:', import.meta.env.VITE_OLLAMA_URL || 'NOT SET');
       }
-      
+
       this.isAvailable = false;
       return false;
     }
@@ -244,27 +245,90 @@ class LocalLLMService {
   }
 
   /**
-   * Clean response text by removing template artifacts and extracting final answer from reasoning
+   * Parse response from reasoning model - separates thinking/reasoning from final answer
+   * Returns both the reasoning (for display) and the clean response (for speech)
    */
-  private cleanResponse(text: string): string {
+  private parseReasoningResponse(text: string): { reasoning: string; answer: string } {
+    if (!text) return { reasoning: '', answer: '' };
+
+    let reasoning = '';
+    let answer = text;
+
+    // Common reasoning tag patterns used by different models
+    // DeepSeek R1, Qwen QwQ, etc. use <think>...</think>
+    // Some models use <thinking>, <reasoning>, <thought>
+    const reasoningPatterns = [
+      /<think>([\s\S]*?)<\/think>/gi,
+      /<thinking>([\s\S]*?)<\/thinking>/gi,
+      /<reasoning>([\s\S]*?)<\/reasoning>/gi,
+      /<thought>([\s\S]*?)<\/thought>/gi,
+      /<internal_monologue>([\s\S]*?)<\/internal_monologue>/gi,
+    ];
+
+    // Extract all reasoning blocks
+    for (const pattern of reasoningPatterns) {
+      let match;
+      while ((match = pattern.exec(text)) !== null) {
+        if (match[1]) {
+          reasoning += (reasoning ? '\n\n' : '') + match[1].trim();
+        }
+      }
+      // Remove reasoning from answer
+      answer = answer.replace(pattern, '');
+    }
+
+    // Also handle unclosed tags (model got cutoff mid-reasoning)
+    const unclosedPatterns = [
+      /<think>([\s\S]*)$/i,
+      /<thinking>([\s\S]*)$/i,
+      /<reasoning>([\s\S]*)$/i,
+    ];
+
+    for (const pattern of unclosedPatterns) {
+      const match = answer.match(pattern);
+      if (match && match[1]) {
+        reasoning += (reasoning ? '\n\n' : '') + match[1].trim() + ' [truncated]';
+        answer = answer.replace(pattern, '');
+      }
+    }
+
+    // Try to extract final answer from markers if present
+    const finalAnswerPatterns = [
+      /<answer>([\s\S]*?)<\/answer>/i,
+      /<response>([\s\S]*?)<\/response>/i,
+      /<output>([\s\S]*?)<\/output>/i,
+      /<final>([\s\S]*?)<\/final>/i,
+    ];
+
+    for (const pattern of finalAnswerPatterns) {
+      const match = answer.match(pattern);
+      if (match && match[1]) {
+        answer = match[1].trim();
+        break;
+      }
+    }
+
+    // Clean up the answer
+    answer = this.cleanFinalAnswer(answer);
+
+    // Clean up reasoning for display
+    reasoning = reasoning
+      .replace(/^\s*\n+/g, '')
+      .replace(/\n{3,}/g, '\n\n')
+      .trim();
+
+    return { reasoning, answer };
+  }
+
+  /**
+   * Clean the final answer - remove template artifacts and formatting issues
+   */
+  private cleanFinalAnswer(text: string): string {
     if (!text) return '';
-    
+
     let cleaned = text;
-    
-    // First, try to extract final answer from XML tags (reasoning models often use <final> tags)
-    const finalTagMatch = cleaned.match(/<final[^>]*>(.*?)<\/final>/is);
-    if (finalTagMatch && finalTagMatch[1]) {
-      cleaned = finalTagMatch[1].trim();
-    }
-    
-    // Try to extract from JSON structure if present
-    const jsonMatch = cleaned.match(/"final_answer"\s*:\s*"([^"]+)"/i) || 
-                     cleaned.match(/"final_answer"\s*:\s*'([^']+)'/i);
-    if (jsonMatch && jsonMatch[1]) {
-      cleaned = jsonMatch[1].trim();
-    }
-    
-    // Remove template placeholders (with variations)
+
+    // Remove template placeholders
     cleaned = cleaned
       .replace(/\[Write assistant's response here\]/gi, '')
       .replace(/\[Your response here\]/gi, '')
@@ -272,108 +336,39 @@ class LocalLLMService {
       .replace(/\[To be\s*$/gi, '')
       .replace(/\[.*response.*\]/gi, '')
       .replace(/\[.*to be.*\]/gi, '');
-    
-    // Remove XML reasoning tags if present (<thought>, <reasoning>, etc.)
-    cleaned = cleaned.replace(/<thought[^>]*>.*?<\/thought>/gis, '');
-    cleaned = cleaned.replace(/<reasoning[^>]*>.*?<\/reasoning>/gis, '');
-    cleaned = cleaned.replace(/<thinking[^>]*>.*?<\/thinking>/gis, '');
-    
-    // Remove "Response:" label and following newlines (anywhere in text)
-    cleaned = cleaned.replace(/Response:\s*/gim, '');
-    
-    // Remove "Test instruction X" lines
+
+    // Remove any remaining XML-like tags
+    cleaned = cleaned.replace(/<[^>]+>/g, '');
+
+    // Remove "Response:" or "Answer:" prefixes
+    cleaned = cleaned.replace(/^(?:Response|Answer|Output):\s*/i, '');
+
+    // Remove test patterns
     cleaned = cleaned.replace(/Test instruction \d+.*$/gim, '');
-    
-    // Remove lines that are instructions about test mode or templates
-    cleaned = cleaned.replace(/If the user says "test me",.*$/gim, '');
-    cleaned = cleaned.replace(/You need to (use|respond|fill).*$/gim, '');
-    cleaned = cleaned.replace(/You don't have to.*$/gim, '');
-    cleaned = cleaned.replace(/but you don't have to.*$/gim, '');
-    
-    // Remove lines that repeat conversation patterns or test patterns
-    cleaned = cleaned.replace(/Assistant's response to user \d+.*$/gim, '');
     cleaned = cleaned.replace(/^User \d+:.*$/gim, '');
     cleaned = cleaned.replace(/^Assistant \d+:.*$/gim, '');
-    
-    // Remove test conversation templates
-    cleaned = cleaned.replace(/Now, the conversation is:.*$/gim, '');
-    cleaned = cleaned.replace(/The conversation is:.*$/gim, '');
-    
-    // Remove repetitive dream references (seems to be a model quirk)
-    cleaned = cleaned.replace(/\b(not\s+)?in\s+my\s+dream\b/gi, '');
-    
-    // Extract final answer from reasoning model output
-    // Look for markers like "Final answer:", "Therefore:", "So:", "Answer:", "In conclusion:", etc.
-    const finalAnswerPatterns = [
-      /(?:Final answer|Therefore|So|Answer|In conclusion|To conclude|Thus|Hence|As a result)[:：]\s*(.+)/is,
-      /(?:Final answer|Therefore|So|Answer|In conclusion)[:：]\s*(.+)/is,
-    ];
-    
-    for (const pattern of finalAnswerPatterns) {
-      const match = cleaned.match(pattern);
-      if (match && match[1]) {
-        cleaned = match[1].trim();
-        break;
-      }
-    }
-    
-    // Split into lines and identify reasoning vs final answer
-    const lines = cleaned.split('\n').map(line => line.trim()).filter(line => line);
-    
-    // If we have multiple paragraphs, try to find the final answer
-    // Reasoning models often structure: reasoning steps... then final answer at the end
-    if (lines.length > 3) {
-      // Look for transition words that indicate final answer
-      const finalAnswerIndicators = [
-        'therefore', 'so', 'thus', 'hence', 'consequently', 
-        'final answer', 'answer:', 'conclusion', 'in summary'
-      ];
-      
-      // Find the last significant paragraph that doesn't look like reasoning
-      let finalAnswerStart = -1;
-      for (let i = lines.length - 1; i >= 0; i--) {
-        const lowerLine = lines[i].toLowerCase();
-        // Check if this line starts with a final answer indicator
-        if (finalAnswerIndicators.some(indicator => lowerLine.startsWith(indicator))) {
-          finalAnswerStart = i;
-          break;
-        }
-        // If we find a line that's a complete sentence and doesn't look like reasoning, it might be the answer
-        if (i >= lines.length - 2 && lines[i].length > 20 && !lowerLine.includes('step') && !lowerLine.includes('think')) {
-          finalAnswerStart = i;
-          break;
-        }
-      }
-      
-      // If we found a final answer section, extract from there
-      if (finalAnswerStart >= 0 && finalAnswerStart < lines.length - 1) {
-        cleaned = lines.slice(finalAnswerStart).join(' ').replace(/^(?:Final answer|Therefore|So|Answer|In conclusion)[:：]\s*/i, '').trim();
-      } else {
-        // Otherwise, take the last 1-2 paragraphs as the answer
-        cleaned = lines.slice(Math.max(0, lines.length - 2)).join(' ').trim();
-      }
-    } else {
-      // For shorter responses, filter out reasoning-like lines
-      cleaned = lines.filter(line => {
-        const lower = line.toLowerCase();
-        // Filter out lines that look like reasoning steps
-        if (/^(step \d+|first|second|third|next|then|also|additionally|furthermore|moreover)[:：]?/i.test(lower)) {
-          return false;
-        }
-        if (/^(let me|i need to|i should|i will|thinking|considering|analyzing)/i.test(lower)) {
-          return false;
-        }
-        return true;
-      }).join(' ').trim();
-    }
-    
-    // Final cleanup: remove any remaining template-like content
+
+    // Clean up whitespace
     cleaned = cleaned
-      .replace(/^\[.*\]$/gim, '')
-      .replace(/^(Response|Test|Instruction|User \d+|Assistant \d+):/i, '')
+      .replace(/^\s*\n+/g, '')
       .replace(/\n{3,}/g, '\n\n')
       .trim();
-    
+
+    // If answer is empty but we have text, try to extract last meaningful sentence
+    if (!cleaned && text.trim()) {
+      const lines = text.split('\n').filter(l => l.trim());
+      if (lines.length > 0) {
+        // Get the last non-empty line that looks like a response
+        for (let i = lines.length - 1; i >= 0; i--) {
+          const line = lines[i].trim();
+          if (line.length > 10 && !line.startsWith('<') && !line.includes('[')) {
+            cleaned = line;
+            break;
+          }
+        }
+      }
+    }
+
     return cleaned;
   }
 
@@ -417,21 +412,21 @@ ${config.customInstructions.length > 0 ? 'INSTRUCTIONS:\n' + config.customInstru
     }
 
     const systemPrompt = this.buildSystemPrompt(knowledgeBase, existingFields);
-    
+
     // Format conversation history (limit to recent messages to save context)
     const recentHistory = conversationHistory.slice(-10);
-    
+
     // Build prompt string from conversation history
     let prompt = systemPrompt + '\n\n';
-    
+
     // Add conversation history (clean each message first)
     for (const msg of recentHistory) {
       const role = msg.speaker === 'agent' ? 'Assistant' : 'User';
       // Clean agent responses to prevent template artifacts from being fed back
-      const cleanedText = msg.speaker === 'agent' ? this.cleanResponse(msg.text) : msg.text;
+      const cleanedText = msg.speaker === 'agent' ? this.cleanFinalAnswer(msg.text) : msg.text;
       prompt += `${role}: ${cleanedText}\n`;
     }
-    
+
     // Add current user message
     prompt += `User: ${userMessage}\nAssistant:`;
 
@@ -454,13 +449,17 @@ ${config.customInstructions.length > 0 ? 'INSTRUCTIONS:\n' + config.customInstru
       }
 
       const data = await response.json();
-      
-      // Clean the response - remove template artifacts and labels
+
+      // Parse the response - separate reasoning from final answer
       const rawResponse = data.content || '';
-      const cleanedResponse = this.cleanResponse(rawResponse) || rawResponse;
-      
+      const { reasoning, answer } = this.parseReasoningResponse(rawResponse);
+
+      console.log('🧠 Reasoning extracted:', reasoning ? `${reasoning.length} chars` : 'none');
+      console.log('💬 Final answer:', answer ? `${answer.length} chars` : 'none');
+
       return {
-        response: cleanedResponse,
+        response: answer || rawResponse,
+        reasoning: reasoning || undefined,
         extractedFields: existingFields, // Keep existing fields
       };
 
@@ -489,7 +488,7 @@ ${config.customInstructions.length > 0 ? 'INSTRUCTIONS:\n' + config.customInstru
 
     for (const tc of toolCalls) {
       const args = tc.function.arguments;
-      
+
       switch (tc.function.name) {
         case 'extract_caller_info':
           if (args.callerName) {
@@ -525,11 +524,11 @@ ${config.customInstructions.length > 0 ? 'INSTRUCTIONS:\n' + config.customInstru
             result.suggestedPriority = args.urgencyLevel as PriorityLevel;
           }
           break;
-          
+
         case 'categorize_call':
           const matchedCategory = knowledgeBase.categories.find(
-            c => c.id === args.categoryId || 
-                 c.name.toLowerCase() === (args.categoryName as string)?.toLowerCase()
+            c => c.id === args.categoryId ||
+              c.name.toLowerCase() === (args.categoryName as string)?.toLowerCase()
           );
           if (matchedCategory) {
             result.suggestedCategory = {
@@ -545,7 +544,7 @@ ${config.customInstructions.length > 0 ? 'INSTRUCTIONS:\n' + config.customInstru
             };
           }
           break;
-          
+
         case 'set_priority':
           if (args.priority) {
             result.suggestedPriority = args.priority as PriorityLevel;
@@ -560,7 +559,7 @@ ${config.customInstructions.length > 0 ? 'INSTRUCTIONS:\n' + config.customInstru
       // Check what we know (newly extracted + existing)
       const knownName = extractedName || existingFields.find(f => f.id === 'name')?.value;
       const knownPurpose = extractedPurpose || existingFields.find(f => f.id === 'purpose')?.value;
-      
+
       if (extractedName && extractedPurpose) {
         // Just extracted both - confirm them
         result.response = `I've noted your name as ${extractedName} and that you're calling about ${extractedPurpose}. How can I assist you further?`;
@@ -606,7 +605,7 @@ ${config.customInstructions.length > 0 ? 'INSTRUCTIONS:\n' + config.customInstru
     }
 
     // Format transcript concisely
-    const transcript = messages.slice(-20).map(m => 
+    const transcript = messages.slice(-20).map(m =>
       `${m.speaker === 'agent' ? 'AI' : 'Caller'}: ${m.text}`
     ).join('\n');
 
@@ -640,14 +639,15 @@ If the caller's name was mentioned in the conversation, extract it using extract
       }
 
       const data = await response.json();
-      
-      // Clean the response - remove template artifacts and labels
+
+      // Parse the response - separate reasoning from final answer
       const rawResponse = data.content || '';
-      const textResponse = this.cleanResponse(rawResponse) || rawResponse;
-      
+      const { answer: textResponse } = this.parseReasoningResponse(rawResponse);
+      const finalText = textResponse || rawResponse;
+
       // Try to extract a simple summary (first sentence or first 200 chars)
-      const summary = textResponse.split('.')[0] || textResponse.slice(0, 200) || 'Call completed';
-      
+      const summary = finalText.split('.')[0] || finalText.slice(0, 200) || 'Call completed';
+
       return {
         summary: summary,
         mainPoints: [textResponse.slice(0, 100) || 'Call completed'],
