@@ -1,15 +1,15 @@
 /**
  * Local LLM Service for ClerkTree
  * 
- * Provides fallback AI using Hermes 2 Pro - Llama 3 8B (Q4_K_M)
+ * Provides fallback AI using Qwen3 0.6B
  * Runs locally via Ollama on Mac M3
  * 
- * Model: adrienbrault/nous-hermes2pro:Q4_K_M
- * RAM Usage: ~4.9 GB (optimized for 8GB M3)
+ * Model: qwen3:0.6b
+ * RAM Usage: Optimized for Railway's 1GB RAM limit
  * 
  * Setup:
  * 1. Install Ollama: https://ollama.com/download
- * 2. Run: ollama run adrienbrault/nous-hermes2pro:Q4_K_M
+ * 2. Run: ollama run qwen3:0.6b
  */
 
 import { 
@@ -20,9 +20,9 @@ import {
   KnowledgeBaseConfig 
 } from '../contexts/DemoCallContext';
 
-// Configuration - optimized for 8GB M3 Mac
+// Configuration - optimized for Railway's 1GB RAM limit
 const OLLAMA_URL = import.meta.env.VITE_OLLAMA_URL || 'http://localhost:11434';
-const OLLAMA_MODEL = import.meta.env.VITE_OLLAMA_MODEL || 'adrienbrault/nous-hermes2pro:Q4_K_M';
+const OLLAMA_MODEL = import.meta.env.VITE_OLLAMA_MODEL || 'qwen3:0.6b';
 
 // Context limit - reduced for 8GB RAM (saves ~300MB vs 4096)
 const MAX_CONTEXT = 2048;
@@ -33,7 +33,7 @@ const KEEP_ALIVE = "5m";
 // Enable streaming for instant character-by-character responses
 const USE_STREAMING = true;
 
-// Ollama-native tools format for Hermes 2 Pro
+// Ollama-native tools format for Qwen3 0.6B
 const OLLAMA_TOOLS = [
   {
     type: 'function',
@@ -212,15 +212,15 @@ class LocalLLMService {
       
       console.log(`   Found ${models.length} model(s):`, models.map((m: { name: string }) => m.name).join(', ') || 'None');
       
-      // Check if Hermes model is available
-      const hermesModel = models.find((m: { name: string }) => 
-        m.name.includes('hermes2pro') || 
-        m.name.includes('nous-hermes') ||
+      // Check if Qwen3 model is available
+      const qwenModel = models.find((m: { name: string }) => 
+        m.name.includes('qwen3') || 
+        m.name.includes('qwen') ||
         m.name === OLLAMA_MODEL
       );
       
-      if (hermesModel) {
-        this.modelName = hermesModel.name;
+      if (qwenModel) {
+        this.modelName = qwenModel.name;
         this.isAvailable = true;
         console.log(`✅ Local LLM available: ${this.modelName}`);
         return true;
@@ -268,7 +268,7 @@ class LocalLLMService {
         console.log('   Model test failed, model may not be ready yet');
       }
       
-      console.log('   💡 Run on Railway: ollama pull adrienbrault/nous-hermes2pro:Q4_K_M');
+      console.log('   💡 Run on Railway: ollama pull qwen3:0.6b');
       this.isAvailable = false;
       return false;
 
@@ -302,7 +302,7 @@ class LocalLLMService {
   }
 
   /**
-   * Build system prompt optimized for Hermes 2 Pro
+   * Build system prompt optimized for Qwen3 0.6B
    */
   private buildSystemPrompt(config: KnowledgeBaseConfig, existingFields: ExtractedField[]): string {
     const categoryList = config.categories.map(c => `- ${c.id}: ${c.name}`).join('\n');
@@ -654,7 +654,7 @@ export const localLLMService = new LocalLLMService();
 // Initialize on import
 localLLMService.initialize().catch(() => {
   console.log('💡 To enable local AI fallback, install Ollama and run:');
-  console.log('   ollama run adrienbrault/nous-hermes2pro:Q4_K_M');
+  console.log('   ollama run qwen3:0.6b');
 });
 
 export default localLLMService;
