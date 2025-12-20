@@ -3,12 +3,8 @@
  * 
  * Priority chain:
  * 1. Gemini API (cloud, most capable)
- * 2. Qwen3 0.6B via Ollama (local, function calling)
+ * 2. Local LLM via cloudflare tunnel (local service)
  * 3. Smart Mock (fallback, always available)
- * 
- * For Railway deployment:
- * - Uses qwen3:0.6b model (optimized for 1GB RAM limit)
- * - Model is pulled automatically on Railway service
  */
 
 import { 
@@ -134,17 +130,17 @@ class AIService {
 
     console.log('☁️ Gemini API available:', this.geminiAvailable);
     if (this.localLLMAvailable) {
-      console.log('🖥️ Local LLM available:', localLLMService.getModelName());
+      console.log('🖥️ Local LLM available:', localLLMService.getServiceUrl());
     } else {
-      const ollamaUrl = import.meta.env.VITE_OLLAMA_URL || 'http://localhost:11434';
-      console.log(`⚠️ Local LLM not available. Check: ${ollamaUrl}`);
-      console.log('💡 For Railway deployment, set VITE_OLLAMA_URL in Netlify environment variables');
+      const llmUrl = import.meta.env.VITE_OLLAMA_URL || 'https://packs-measures-down-dakota.trycloudflare.com';
+      console.log(`⚠️ Local LLM not available. Check: ${llmUrl}`);
+      console.log('💡 Make sure your cloudflare tunnel is running and accessible');
     }
 
     // Log the active chain
     const chain = [];
     if (this.geminiAvailable) chain.push('Gemini');
-    if (this.localLLMAvailable) chain.push('Qwen3 (Local)');
+    if (this.localLLMAvailable) chain.push('Local LLM');
     chain.push('Smart Mock');
     console.log('🔗 AI Chain:', chain.join(' → '));
     
@@ -152,7 +148,7 @@ class AIService {
       console.warn('⚠️ WARNING: Both Gemini and Local LLM are unavailable. Using Smart Mock fallback only.');
       console.warn('💡 To fix:');
       console.warn('   1. Check VITE_GEMINI_API_KEY is set');
-      console.warn('   2. Check VITE_OLLAMA_URL points to your Railway deployment');
+      console.warn('   2. Check VITE_OLLAMA_URL points to your cloudflare tunnel URL');
     }
   }
 
@@ -178,7 +174,7 @@ class AIService {
     return {
       gemini: this.geminiAvailable === true,
       localLLM: this.localLLMAvailable === true,
-      localLLMModel: this.localLLMAvailable ? localLLMService.getModelName() : undefined,
+      localLLMModel: this.localLLMAvailable ? localLLMService.getServiceUrl() : undefined,
     };
   }
 
@@ -239,10 +235,10 @@ class AIService {
       }
     }
 
-    // Step 2: Try Local LLM (Qwen3 via Ollama)
+      // Step 2: Try Local LLM
     if (this.config.useLocalLLM && this.localLLMAvailable !== false) {
       try {
-        console.log('🖥️ Calling Local LLM (Qwen3)...');
+        console.log('🖥️ Calling Local LLM...');
         console.log('   Local LLM Available:', this.localLLMAvailable);
         console.log('   Ollama URL:', import.meta.env.VITE_OLLAMA_URL || 'NOT SET');
         const result: LocalLLMResponse = await localLLMService.generateResponse(
