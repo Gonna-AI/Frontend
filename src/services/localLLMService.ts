@@ -1,10 +1,11 @@
 /**
  * Local LLM Service for ClerkTree
  * 
- * Provides AI using local service via cloudflare tunnel
+ * Provides AI using Ollama via Cloudflare tunnel
+ * Default: https://powered-lat-journalism-expressed.trycloudflare.com
+ * Override with VITE_OLLAMA_URL in .env if needed
  * 
- * API: https://powered-lat-journalism-expressed.trycloudflare.com/completion
- * Uses simple prompt-based completion endpoint
+ * Uses /completion endpoint with prompt-based requests
  */
 
 import {
@@ -25,7 +26,7 @@ const getCleanURL = (url: string) => {
   cleaned = cleaned.replace(/\/+$/, '');
   return cleaned;
 };
-const LLM_URL = getCleanURL('https://powered-lat-journalism-expressed.trycloudflare.com');
+const LLM_URL = getCleanURL(import.meta.env.VITE_OLLAMA_URL || 'https://powered-lat-journalism-expressed.trycloudflare.com');
 
 // Number of tokens to generate per response - increased for reasoning models
 const N_PREDICT = 2048;
