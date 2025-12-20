@@ -256,12 +256,9 @@ function UserCallContent() {
     aiService.resetState();
     
     startCall();
-    setAgentStatus('speaking');
-    
-    const greeting = knowledgeBase.greeting;
-    addMessage('agent', greeting);
-    await speakText(greeting);
-  }, [startCall, knowledgeBase.greeting, addMessage, speakText]);
+    setAgentStatus('listening');
+    // Don't send automatic greeting - wait for user to speak first, then AI responds
+  }, [startCall]);
 
   const handleEndCall = useCallback(async () => {
     ttsService.stop();

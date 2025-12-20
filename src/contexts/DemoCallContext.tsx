@@ -147,7 +147,7 @@ Always be empathetic, clear, and efficient in your communication.`,
   
   persona: 'Professional, empathetic, and efficient AI assistant',
   
-  greeting: "Hello! Thank you for calling ClerkTree. How may I assist you today?",
+  greeting: "",
   
   contextFields: [
     { id: 'name', name: 'Caller Name', description: 'Full name of the caller', required: true, type: 'text' },
