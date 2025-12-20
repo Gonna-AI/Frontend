@@ -28,8 +28,11 @@ const getCleanURL = (url: string) => {
 };
 const LLM_URL = getCleanURL(import.meta.env.VITE_OLLAMA_URL || 'https://powered-lat-journalism-expressed.trycloudflare.com');
 
-// Number of tokens to generate per response - increased for reasoning models
-const N_PREDICT = 2048;
+// Number of tokens to generate per response
+const N_PREDICT = 1024; // Reduced for faster responses
+
+// Timeout in milliseconds - reduced for better UX
+const REQUEST_TIMEOUT = 120000; // 2 minutes instead of 5
 
 // Types
 export interface LocalLLMResponse {
@@ -192,51 +195,41 @@ class LocalLLMService {
 
   /**
    * Clean the final answer - remove template artifacts and formatting issues
+   * IMPORTANT: Be conservative to avoid stripping legitimate content
    */
   private cleanFinalAnswer(text: string): string {
     if (!text) return '';
 
     let cleaned = text;
 
-    // Remove template placeholders
+    // Remove only specific template placeholders (be conservative)
     cleaned = cleaned
       .replace(/\[Write assistant's response here\]/gi, '')
       .replace(/\[Your response here\]/gi, '')
-      .replace(/\[To be filled\]/gi, '')
-      .replace(/\[To be\s*$/gi, '')
-      .replace(/\[.*response.*\]/gi, '')
-      .replace(/\[.*to be.*\]/gi, '');
+      .replace(/\[To be filled\]/gi, '');
 
-    // Remove any remaining XML-like tags
-    cleaned = cleaned.replace(/<[^>]+>/g, '');
+    // Remove only known reasoning/thinking tags, NOT all XML-like content
+    // This preserves legitimate content like <b>, numbers like <100, etc.
+    const tagsToRemove = ['think', 'thinking', 'reasoning', 'thought', 'internal_monologue', 'answer', 'response', 'output', 'final'];
+    for (const tag of tagsToRemove) {
+      cleaned = cleaned.replace(new RegExp(`<${tag}>[\\s\\S]*?</${tag}>`, 'gi'), '');
+      cleaned = cleaned.replace(new RegExp(`<${tag}>`, 'gi'), '');
+      cleaned = cleaned.replace(new RegExp(`</${tag}>`, 'gi'), '');
+    }
 
-    // Remove "Response:" or "Answer:" prefixes
+    // Remove "Response:" or "Answer:" prefixes only at the very start
     cleaned = cleaned.replace(/^(?:Response|Answer|Output):\s*/i, '');
 
-    // Remove test patterns
-    cleaned = cleaned.replace(/Test instruction \d+.*$/gim, '');
-    cleaned = cleaned.replace(/^User \d+:.*$/gim, '');
-    cleaned = cleaned.replace(/^Assistant \d+:.*$/gim, '');
-
-    // Clean up whitespace
+    // Clean up excessive whitespace
     cleaned = cleaned
       .replace(/^\s*\n+/g, '')
       .replace(/\n{3,}/g, '\n\n')
       .trim();
 
-    // If answer is empty but we have text, try to extract last meaningful sentence
+    // SAFETY: If cleaning resulted in empty but original had content, use original
     if (!cleaned && text.trim()) {
-      const lines = text.split('\n').filter(l => l.trim());
-      if (lines.length > 0) {
-        // Get the last non-empty line that looks like a response
-        for (let i = lines.length - 1; i >= 0; i--) {
-          const line = lines[i].trim();
-          if (line.length > 10 && !line.startsWith('<') && !line.includes('[')) {
-            cleaned = line;
-            break;
-          }
-        }
-      }
+      console.warn('⚠️ cleanFinalAnswer stripped all content, using original text');
+      cleaned = text.trim();
     }
 
     return cleaned;
@@ -308,7 +301,7 @@ ${config.customInstructions.length > 0 ? 'INSTRUCTIONS:\n' + config.customInstru
           prompt: prompt,
           n_predict: N_PREDICT,
         }),
-        signal: AbortSignal.timeout(300000), // 5 minute timeout (reasoning models can be slow)
+        signal: AbortSignal.timeout(REQUEST_TIMEOUT),
       });
 
       if (!response.ok) {
@@ -322,15 +315,30 @@ ${config.customInstructions.length > 0 ? 'INSTRUCTIONS:\n' + config.customInstru
 
       // Parse the response - separate reasoning from final answer
       const rawResponse = data.content || '';
+
+      console.log('📥 Raw response length:', rawResponse.length, 'chars');
+
       const { reasoning, answer } = this.parseReasoningResponse(rawResponse);
 
       console.log('🧠 Reasoning extracted:', reasoning ? `${reasoning.length} chars` : 'none');
       console.log('💬 Final answer:', answer ? `${answer.length} chars` : 'none');
 
+      // Use answer if available, otherwise fall back to raw response
+      const finalResponse = answer || rawResponse;
+
+      // Debug: Log first 200 chars of the response
+      console.log('📤 Sending response (first 200 chars):', finalResponse.substring(0, 200));
+
+      if (!finalResponse || !finalResponse.trim()) {
+        console.error('❌ Empty response after parsing!');
+        console.error('   Raw response was:', rawResponse.substring(0, 500));
+        throw new Error('Received empty response from LLM');
+      }
+
       return {
-        response: answer || rawResponse,
+        response: finalResponse,
         reasoning: reasoning || undefined,
-        extractedFields: existingFields, // Keep existing fields
+        extractedFields: existingFields,
       };
 
     } catch (error) {
@@ -388,7 +396,7 @@ If the caller's name was mentioned in the conversation, extract it using extract
           prompt: prompt,
           n_predict: N_PREDICT,
         }),
-        signal: AbortSignal.timeout(300000), // 5 minute timeout
+        signal: AbortSignal.timeout(REQUEST_TIMEOUT),
       });
 
       if (!response.ok) {
