@@ -277,13 +277,9 @@ class AIService {
       }
     }
 
-    // Step 3: Fallback to smart mock
-    if (this.config.fallbackToMock) {
-      console.log('🤖 Using smart mock response');
-      return this.smartMockResponse(userMessage, conversationHistory, extractedFields);
-    }
-
-    throw new Error('No AI provider available');
+    // Step 3: No fallback - model must be available
+    console.error('❌ No AI model available - cloudflare model must be accessible');
+    throw new Error('AI model unavailable - ensure cloudflare tunnel is running and accessible');
   }
 
   /**
@@ -537,73 +533,9 @@ class AIService {
     const greetings = ['hello', 'hi', 'hey', 'good morning', 'good afternoon', 'good evening'];
     const isGreeting = greetings.some(g => lowerMessage.startsWith(g));
 
-    if (isEndingCall && state.turnCount > 2) {
-      state.isWrappingUp = true;
-      const closingResponses = [
-        `${namePrefix}Thank you for calling ClerkTree today! Is there anything else I can help you with before we end the call?`,
-        `Great talking with you${callerName ? `, ${callerName}` : ''}! If you need any further assistance, don't hesitate to call back. Have a wonderful day!`,
-        `${namePrefix}I'm glad I could assist you today. Feel free to reach out if you have any more questions. Take care!`,
-      ];
-      response = state.hasAskedAnythingElse 
-        ? closingResponses[1] 
-        : closingResponses[0];
-      state.hasAskedAnythingElse = true;
-    } else if (isGreeting && state.turnCount <= 2) {
-      if (!state.hasName) {
-        response = "Hello! Thank you for calling ClerkTree. May I have your name please?";
-      } else {
-        response = `Hello ${callerName}! How can I help you today?`;
-      }
-      state.hasGreeted = true;
-    } else if (!state.hasName && state.turnCount <= 3) {
-      response = "Before we continue, may I have your name please?";
-    } else if (state.hasName && !state.hasPurpose && state.turnCount <= 4) {
-      response = `${namePrefix}how may I assist you today? What brings you to ClerkTree?`;
-    } else if (state.hasPurpose && !state.hasAskedAnythingElse && state.turnCount >= 4) {
-      const helpResponses = [
-        `${namePrefix}I understand you're reaching out about ${state.purpose}. I've noted that down and we'll make sure to address this for you. Is there anything else you'd like to add?`,
-        `Thank you for explaining that${callerName ? `, ${callerName}` : ''}. I've captured the details about ${state.purpose}. Our team will follow up on this. Is there anything else I can help with?`,
-        `${namePrefix}I've documented your concern regarding ${state.purpose}. We take this seriously and will ensure it's addressed. Is there any other information you'd like to share?`,
-      ];
-      response = helpResponses[Math.floor(Math.random() * helpResponses.length)];
-      state.hasAskedAnythingElse = true;
-    } else {
-      if (lowerMessage.includes('yes') || lowerMessage.includes('actually') || 
-          lowerMessage.includes('also') || lowerMessage.includes('one more')) {
-        response = `${namePrefix}of course! Please go ahead, I'm listening.`;
-        state.hasAskedAnythingElse = false;
-      } else if (lowerMessage.includes('no') && state.hasAskedAnythingElse) {
-        response = `${namePrefix}Perfect! Thank you for calling ClerkTree today. If you have any questions in the future, don't hesitate to reach out. Have a great day!`;
-        state.isWrappingUp = true;
-      } else if (state.detectedUrgency === 'critical' || state.detectedUrgency === 'high') {
-        response = `${namePrefix}I understand this is urgent. I'm marking this as a high priority and our team will address this immediately. Can you provide any additional details that might help us resolve this faster?`;
-      } else if (state.detectedCategory === 'appointment') {
-        response = `${namePrefix}I'd be happy to help you with scheduling. What date and time works best for you?`;
-      } else if (state.detectedCategory === 'complaint') {
-        response = `${namePrefix}I sincerely apologize for any inconvenience you've experienced. Your feedback is important to us. Can you tell me more about what happened so we can make it right?`;
-      } else if (state.detectedCategory === 'support') {
-        response = `${namePrefix}I'm sorry you're experiencing this issue. Let me help you troubleshoot. Can you describe what's happening in more detail?`;
-      } else if (userMessage.length > 5) {
-        const contextualResponses = [
-          `${namePrefix}I see. That's helpful information. Let me make a note of that. Is there anything specific you'd like us to do about this?`,
-          `Thank you for sharing that${callerName ? `, ${callerName}` : ''}. I want to make sure I understand correctly - could you elaborate a bit more?`,
-          `${namePrefix}Got it. I'm documenting this for our records. What outcome are you hoping for?`,
-          `${namePrefix}I appreciate you explaining that. Is there a preferred way you'd like us to follow up with you?`,
-        ];
-        response = contextualResponses[state.turnCount % contextualResponses.length];
-      } else {
-        response = `${namePrefix}could you tell me more about that?`;
-      }
-    }
-
-    return {
-      text: response,
-      extractedFields: newFields.length > 0 ? newFields : undefined,
-      suggestedCategory,
-      suggestedPriority,
-      confidence: 0.85,
-      source: 'mock',
-    };
+    // All responses should come from the AI model, not hardcoded
+    // Mock fallback should not be used - model must be available
+    throw new Error('AI model unavailable - all responses must be generated by the cloudflare model');
   }
 
   /**

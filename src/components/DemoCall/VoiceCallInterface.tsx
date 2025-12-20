@@ -240,14 +240,9 @@ export default function VoiceCallInterface({
     aiService.resetState();
     
     startCall();
-    setAgentStatus('speaking');
-    
-    // Initial greeting from knowledge base
-    const greeting = knowledgeBase.greeting;
-    addMessage('agent', greeting);
-    onTranscript?.(greeting, 'agent');
-    await speakText(greeting);
-  }, [startCall, addMessage, onTranscript, speakText, knowledgeBase.greeting]);
+    setAgentStatus('listening');
+    // Don't send automatic greeting - wait for user to speak first, then AI responds
+  }, [startCall]);
 
   const handleEndCall = useCallback(async () => {
     ttsService.stop();

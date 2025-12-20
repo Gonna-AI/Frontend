@@ -51,13 +51,9 @@ export default function TextChatInterface({
   // Start a new chat
   const handleStartChat = useCallback(async () => {
     startCall();
-    setIsProcessing(true);
-    
-    const greeting = knowledgeBase.greeting;
-    addMessage('agent', greeting);
-    
     setIsProcessing(false);
-  }, [startCall, knowledgeBase.greeting, addMessage]);
+    // Don't send automatic greeting - let user send first message and AI responds naturally
+  }, [startCall]);
 
   // Handle user input and get AI response
   const handleSendMessage = useCallback(async (text: string) => {

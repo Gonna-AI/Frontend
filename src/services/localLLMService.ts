@@ -244,9 +244,7 @@ class LocalLLMService {
       : 'None';
 
     // Keep prompt concise for lower context usage
-    return `You are ${config.persona || 'an AI call agent'}. ${config.systemPrompt}
-
-GREETING: "${config.greeting}"
+    return `You are ${config.persona || 'an AI assistant'}. ${config.systemPrompt}
 
 CATEGORIES:
 ${categoryList}
@@ -257,7 +255,7 @@ RULES:
 - If caller introduced themselves, use their name naturally
 - Don't ask for info you already have
 - Be helpful and conversational
-- Use tools to extract info and categorize calls
+- Respond naturally based on the conversation context
 
 ${config.customInstructions.length > 0 ? 'INSTRUCTIONS:\n' + config.customInstructions.join('\n') : ''}`;
   }
