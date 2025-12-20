@@ -1069,9 +1069,9 @@ export default function KnowledgeBase({ isDark = true }: KnowledgeBaseProps) {
             isDark ? "text-white/40" : "text-black/40"
           )}>
             {geminiConnected 
-              ? `Gemini → ${localLLMConnected ? 'Hermes-2-Pro →' : ''} Mock • Changes apply to next call`
+              ? `Gemini → ${localLLMConnected ? 'Qwen3 (Local) →' : ''} Mock • Changes apply to next call`
               : localLLMConnected
-                ? `Hermes-2-Pro (Local) → Mock • Install Ollama for local AI`
+                ? `Qwen3 (Local) → Mock • Install Ollama for local AI`
                 : 'Using Smart Mock • Install Ollama for local AI fallback'
             }
           </p>

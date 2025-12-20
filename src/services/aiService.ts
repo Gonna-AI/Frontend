@@ -3,12 +3,12 @@
  * 
  * Priority chain:
  * 1. Gemini API (cloud, most capable)
- * 2. Hermes 2 Pro via Ollama (local, function calling)
+ * 2. Qwen3 0.6B via Ollama (local, function calling)
  * 3. Smart Mock (fallback, always available)
  * 
- * For 8GB M3 Mac:
- * - Install Ollama: https://ollama.com/download
- * - Run: ollama run adrienbrault/nous-hermes2pro:Q4_K_M
+ * For Railway deployment:
+ * - Uses qwen3:0.6b model (optimized for 1GB RAM limit)
+ * - Model is pulled automatically on Railway service
  */
 
 import { 
@@ -144,7 +144,7 @@ class AIService {
     // Log the active chain
     const chain = [];
     if (this.geminiAvailable) chain.push('Gemini');
-    if (this.localLLMAvailable) chain.push('Hermes-2-Pro');
+    if (this.localLLMAvailable) chain.push('Qwen3 (Local)');
     chain.push('Smart Mock');
     console.log('🔗 AI Chain:', chain.join(' → '));
     
@@ -239,10 +239,10 @@ class AIService {
       }
     }
 
-    // Step 2: Try Local LLM (Hermes 2 Pro via Ollama)
+    // Step 2: Try Local LLM (Qwen3 via Ollama)
     if (this.config.useLocalLLM && this.localLLMAvailable !== false) {
       try {
-        console.log('🖥️ Calling Local LLM (Hermes 2 Pro)...');
+        console.log('🖥️ Calling Local LLM (Qwen3)...');
         console.log('   Local LLM Available:', this.localLLMAvailable);
         console.log('   Ollama URL:', import.meta.env.VITE_OLLAMA_URL || 'NOT SET');
         const result: LocalLLMResponse = await localLLMService.generateResponse(
