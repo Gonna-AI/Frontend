@@ -300,7 +300,7 @@ ${config.customInstructions.length > 0 ? 'INSTRUCTIONS:\n' + config.customInstru
     prompt += `User: ${userMessage}\nAssistant:`;
 
     try {
-      const response = await fetch(`${OLLAMA_URL}/completion`, {
+      const response = await fetch(`${LLM_URL}/completion`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
