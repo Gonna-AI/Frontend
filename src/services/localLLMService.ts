@@ -244,12 +244,25 @@ class LocalLLMService {
   }
 
   /**
-   * Clean response text by removing template artifacts
+   * Clean response text by removing template artifacts and extracting final answer from reasoning
    */
   private cleanResponse(text: string): string {
     if (!text) return '';
     
     let cleaned = text;
+    
+    // First, try to extract final answer from XML tags (reasoning models often use <final> tags)
+    const finalTagMatch = cleaned.match(/<final[^>]*>(.*?)<\/final>/is);
+    if (finalTagMatch && finalTagMatch[1]) {
+      cleaned = finalTagMatch[1].trim();
+    }
+    
+    // Try to extract from JSON structure if present
+    const jsonMatch = cleaned.match(/"final_answer"\s*:\s*"([^"]+)"/i) || 
+                     cleaned.match(/"final_answer"\s*:\s*'([^']+)'/i);
+    if (jsonMatch && jsonMatch[1]) {
+      cleaned = jsonMatch[1].trim();
+    }
     
     // Remove template placeholders (with variations)
     cleaned = cleaned
@@ -259,6 +272,11 @@ class LocalLLMService {
       .replace(/\[To be\s*$/gi, '')
       .replace(/\[.*response.*\]/gi, '')
       .replace(/\[.*to be.*\]/gi, '');
+    
+    // Remove XML reasoning tags if present (<thought>, <reasoning>, etc.)
+    cleaned = cleaned.replace(/<thought[^>]*>.*?<\/thought>/gis, '');
+    cleaned = cleaned.replace(/<reasoning[^>]*>.*?<\/reasoning>/gis, '');
+    cleaned = cleaned.replace(/<thinking[^>]*>.*?<\/thinking>/gis, '');
     
     // Remove "Response:" label and following newlines (anywhere in text)
     cleaned = cleaned.replace(/Response:\s*/gim, '');
@@ -284,18 +302,77 @@ class LocalLLMService {
     // Remove repetitive dream references (seems to be a model quirk)
     cleaned = cleaned.replace(/\b(not\s+)?in\s+my\s+dream\b/gi, '');
     
-    // Split into lines and filter out empty/whitespace-only lines
-    const lines = cleaned.split('\n').filter(line => {
-      const trimmed = line.trim();
-      // Filter out template-like lines
-      if (!trimmed) return false;
-      if (/^\[.*\]$/.test(trimmed)) return false;
-      if (/^(Response|Test|Instruction|User \d+|Assistant \d+):/i.test(trimmed)) return false;
-      return true;
-    });
+    // Extract final answer from reasoning model output
+    // Look for markers like "Final answer:", "Therefore:", "So:", "Answer:", "In conclusion:", etc.
+    const finalAnswerPatterns = [
+      /(?:Final answer|Therefore|So|Answer|In conclusion|To conclude|Thus|Hence|As a result)[:：]\s*(.+)/is,
+      /(?:Final answer|Therefore|So|Answer|In conclusion)[:：]\s*(.+)/is,
+    ];
     
-    // Join and clean up extra whitespace
-    cleaned = lines.join('\n').replace(/\n{3,}/g, '\n\n').trim();
+    for (const pattern of finalAnswerPatterns) {
+      const match = cleaned.match(pattern);
+      if (match && match[1]) {
+        cleaned = match[1].trim();
+        break;
+      }
+    }
+    
+    // Split into lines and identify reasoning vs final answer
+    const lines = cleaned.split('\n').map(line => line.trim()).filter(line => line);
+    
+    // If we have multiple paragraphs, try to find the final answer
+    // Reasoning models often structure: reasoning steps... then final answer at the end
+    if (lines.length > 3) {
+      // Look for transition words that indicate final answer
+      const finalAnswerIndicators = [
+        'therefore', 'so', 'thus', 'hence', 'consequently', 
+        'final answer', 'answer:', 'conclusion', 'in summary'
+      ];
+      
+      // Find the last significant paragraph that doesn't look like reasoning
+      let finalAnswerStart = -1;
+      for (let i = lines.length - 1; i >= 0; i--) {
+        const lowerLine = lines[i].toLowerCase();
+        // Check if this line starts with a final answer indicator
+        if (finalAnswerIndicators.some(indicator => lowerLine.startsWith(indicator))) {
+          finalAnswerStart = i;
+          break;
+        }
+        // If we find a line that's a complete sentence and doesn't look like reasoning, it might be the answer
+        if (i >= lines.length - 2 && lines[i].length > 20 && !lowerLine.includes('step') && !lowerLine.includes('think')) {
+          finalAnswerStart = i;
+          break;
+        }
+      }
+      
+      // If we found a final answer section, extract from there
+      if (finalAnswerStart >= 0 && finalAnswerStart < lines.length - 1) {
+        cleaned = lines.slice(finalAnswerStart).join(' ').replace(/^(?:Final answer|Therefore|So|Answer|In conclusion)[:：]\s*/i, '').trim();
+      } else {
+        // Otherwise, take the last 1-2 paragraphs as the answer
+        cleaned = lines.slice(Math.max(0, lines.length - 2)).join(' ').trim();
+      }
+    } else {
+      // For shorter responses, filter out reasoning-like lines
+      cleaned = lines.filter(line => {
+        const lower = line.toLowerCase();
+        // Filter out lines that look like reasoning steps
+        if (/^(step \d+|first|second|third|next|then|also|additionally|furthermore|moreover)[:：]?/i.test(lower)) {
+          return false;
+        }
+        if (/^(let me|i need to|i should|i will|thinking|considering|analyzing)/i.test(lower)) {
+          return false;
+        }
+        return true;
+      }).join(' ').trim();
+    }
+    
+    // Final cleanup: remove any remaining template-like content
+    cleaned = cleaned
+      .replace(/^\[.*\]$/gim, '')
+      .replace(/^(Response|Test|Instruction|User \d+|Assistant \d+):/i, '')
+      .replace(/\n{3,}/g, '\n\n')
+      .trim();
     
     return cleaned;
   }
