@@ -50,12 +50,11 @@ export default function UnifiedChatInterface({ isDark = true }: UnifiedChatInter
     const [isSpeakerOn, setIsSpeakerOn] = useState(true);
     const [currentTranscript, setCurrentTranscript] = useState('');
     const [agentStatus, setAgentStatus] = useState<'idle' | 'speaking' | 'listening' | 'processing'>('idle');
-    const [callDuration, setCallDuration] = useState(0);
 
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
     const recognitionRef = useRef<SpeechRecognitionInstance | null>(null);
-    const timerRef = useRef<NodeJS.Timeout | null>(null);
+    // Removed unused timerRef
 
     const messages = currentCall?.messages || [];
     const extractedFields = currentCall?.extractedFields || [];
@@ -71,21 +70,6 @@ export default function UnifiedChatInterface({ isDark = true }: UnifiedChatInter
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [messages]);
 
-    // Call timer
-    useEffect(() => {
-        if (isVoiceMode && isActive) {
-            timerRef.current = setInterval(() => {
-                setCallDuration(prev => prev + 1);
-            }, 1000);
-        } else {
-            if (timerRef.current) clearInterval(timerRef.current);
-            if (!isVoiceMode) setCallDuration(0);
-        }
-        return () => {
-            if (timerRef.current) clearInterval(timerRef.current);
-        };
-    }, [isVoiceMode, isActive]);
-
     // Initialize speech recognition
     useEffect(() => {
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -95,7 +79,8 @@ export default function UnifiedChatInterface({ isDark = true }: UnifiedChatInter
             recognitionRef.current.interimResults = true;
             recognitionRef.current.lang = 'en-US';
 
-            recognitionRef.current.onresult = (event: SpeechRecognitionEvent) => {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            recognitionRef.current.onresult = (event: any) => {
                 const current = event.resultIndex;
                 const transcriptText = event.results[current][0].transcript;
                 setCurrentTranscript(transcriptText);
@@ -105,7 +90,8 @@ export default function UnifiedChatInterface({ isDark = true }: UnifiedChatInter
                 }
             };
 
-            recognitionRef.current.onerror = (event: SpeechRecognitionErrorEvent) => {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            recognitionRef.current.onerror = (event: any) => {
                 console.error('Speech recognition error:', event.error);
                 if (event.error !== 'aborted') {
                     setAgentStatus('idle');
@@ -129,12 +115,6 @@ export default function UnifiedChatInterface({ isDark = true }: UnifiedChatInter
             }
         };
     }, [isActive, isVoiceMode, isMuted, agentStatus]);
-
-    const formatDuration = (seconds: number) => {
-        const mins = Math.floor(seconds / 60);
-        const secs = seconds % 60;
-        return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-    };
 
     const toggleReasoning = useCallback((messageIndex: number) => {
         setExpandedReasonings(prev => {
@@ -279,7 +259,6 @@ export default function UnifiedChatInterface({ isDark = true }: UnifiedChatInter
         setAgentStatus('idle');
         setCurrentTranscript('');
         await endCall();
-        setCallDuration(0);
     }, [endCall]);
 
     const toggleMute = useCallback(() => {
@@ -306,86 +285,32 @@ export default function UnifiedChatInterface({ isDark = true }: UnifiedChatInter
 
     return (
         <div className={cn(
-            "flex flex-col h-[600px] md:h-[700px] rounded-2xl overflow-hidden",
+            "flex flex-col h-full w-full",
             isDark
-                ? "bg-gradient-to-b from-[#1a1a2e] to-[#16162a] border border-white/10"
-                : "bg-white border border-gray-200 shadow-xl"
+                ? "bg-transparent"
+                : "bg-white"
         )}>
-            {/* Header */}
-            <div className={cn(
-                "flex items-center justify-between px-4 py-3 border-b",
-                isDark ? "border-white/10 bg-white/5" : "border-gray-100 bg-gray-50"
-            )}>
-                <div className="flex items-center gap-3">
-                    <div className={cn(
-                        "w-10 h-10 rounded-xl flex items-center justify-center",
-                        isDark
-                            ? "bg-gradient-to-br from-blue-500/30 to-purple-500/30"
-                            : "bg-gradient-to-br from-blue-500/20 to-purple-500/20"
-                    )}>
-                        <Sparkles className={cn("w-5 h-5", isDark ? "text-blue-400" : "text-blue-600")} />
-                    </div>
-                    <div>
-                        <h2 className={cn(
-                            "font-semibold",
-                            isDark ? "text-white" : "text-gray-900"
-                        )}>
-                            ClerkTree AI
-                        </h2>
-                        <p className={cn(
-                            "text-xs",
-                            isDark ? "text-white/50" : "text-gray-500"
-                        )}>
-                            {isVoiceMode
-                                ? `Voice call • ${formatDuration(callDuration)}`
-                                : isActive ? 'Active conversation' : 'Ready to help'}
-                        </p>
-                    </div>
-                </div>
-
-                {/* Voice Call Active Indicator */}
-                {isVoiceMode && (
-                    <div className="flex items-center gap-2">
-                        <span className={cn(
-                            "text-xs px-2.5 py-1 rounded-full font-medium flex items-center gap-1.5",
-                            agentStatus === 'speaking' && "bg-blue-500/20 text-blue-400",
-                            agentStatus === 'listening' && "bg-green-500/20 text-green-400",
-                            agentStatus === 'processing' && "bg-yellow-500/20 text-yellow-400",
-                            agentStatus === 'idle' && (isDark ? "bg-white/10 text-white/60" : "bg-gray-100 text-gray-600"),
-                        )}>
-                            <span className={cn(
-                                "w-1.5 h-1.5 rounded-full",
-                                agentStatus === 'speaking' && "bg-blue-400 animate-pulse",
-                                agentStatus === 'listening' && "bg-green-400 animate-pulse",
-                                agentStatus === 'processing' && "bg-yellow-400 animate-pulse",
-                            )} />
-                            {agentStatus}
-                        </span>
-                    </div>
-                )}
-            </div>
-
             {/* Messages Area */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-4">
+            <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-6">
                 {messages.length === 0 ? (
                     <div className="h-full flex flex-col items-center justify-center text-center px-4">
                         <div className={cn(
-                            "w-16 h-16 rounded-2xl flex items-center justify-center mb-4",
+                            "w-20 h-20 rounded-3xl flex items-center justify-center mb-6",
                             isDark
-                                ? "bg-gradient-to-br from-blue-500/20 to-purple-500/20"
+                                ? "bg-gradient-to-br from-blue-500/20 to-purple-500/20 shadow-lg shadow-blue-500/5"
                                 : "bg-gradient-to-br from-blue-500/10 to-purple-500/10"
                         )}>
-                            <Sparkles className={cn("w-8 h-8", isDark ? "text-blue-400" : "text-blue-600")} />
+                            <Sparkles className={cn("w-10 h-10", isDark ? "text-blue-400" : "text-blue-600")} />
                         </div>
                         <h3 className={cn(
-                            "text-lg font-semibold mb-2",
+                            "text-2xl font-semibold mb-3 tracking-tight",
                             isDark ? "text-white" : "text-gray-900"
                         )}>
                             How can I help you today?
                         </h3>
                         <p className={cn(
-                            "text-sm max-w-sm",
-                            isDark ? "text-white/50" : "text-gray-500"
+                            "text-base max-w-sm leading-relaxed",
+                            isDark ? "text-white/40" : "text-gray-500"
                         )}>
                             Type a message or start a voice call to begin your conversation
                         </p>
@@ -402,33 +327,33 @@ export default function UnifiedChatInterface({ isDark = true }: UnifiedChatInter
                                     key={index}
                                     initial={{ opacity: 0, y: 10 }}
                                     animate={{ opacity: 1, y: 0 }}
-                                    className={cn("flex gap-3", isUser ? "justify-end" : "justify-start")}
+                                    className={cn("flex gap-4", isUser ? "justify-end" : "justify-start")}
                                 >
                                     {/* AI Avatar */}
                                     {!isUser && (
                                         <div className={cn(
-                                            "w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0",
+                                            "w-9 h-9 rounded-2xl flex items-center justify-center flex-shrink-0 mt-1",
                                             isDark ? "bg-blue-500/20" : "bg-blue-100"
                                         )}>
-                                            <Sparkles className={cn("w-4 h-4", isDark ? "text-blue-400" : "text-blue-600")} />
+                                            <Sparkles className={cn("w-5 h-5", isDark ? "text-blue-400" : "text-blue-600")} />
                                         </div>
                                     )}
 
-                                    <div className={cn("flex flex-col gap-2", isUser ? "items-end" : "items-start", "max-w-[80%]")}>
+                                    <div className={cn("flex flex-col gap-2", isUser ? "items-end" : "items-start", "max-w-[85%]")}>
                                         {/* Reasoning Panel */}
                                         {!isUser && reasoning && (
                                             <motion.div
                                                 initial={{ opacity: 0, height: 0 }}
                                                 animate={{ opacity: 1, height: 'auto' }}
                                                 className={cn(
-                                                    "w-full rounded-lg overflow-hidden",
+                                                    "w-full rounded-2xl overflow-hidden mb-1",
                                                     isDark ? "bg-purple-500/10 border border-purple-500/20" : "bg-purple-50 border border-purple-200"
                                                 )}
                                             >
                                                 <button
                                                     onClick={() => toggleReasoning(index)}
                                                     className={cn(
-                                                        "w-full flex items-center gap-2 px-3 py-2 text-xs font-medium transition-colors",
+                                                        "w-full flex items-center gap-2 px-4 py-2.5 text-xs font-medium transition-colors",
                                                         isDark ? "text-purple-300 hover:bg-purple-500/20" : "text-purple-700 hover:bg-purple-100"
                                                     )}
                                                 >
@@ -451,7 +376,7 @@ export default function UnifiedChatInterface({ isDark = true }: UnifiedChatInter
                                                             className="overflow-hidden"
                                                         >
                                                             <div className={cn(
-                                                                "px-3 py-2 text-xs whitespace-pre-wrap border-t max-h-40 overflow-y-auto",
+                                                                "px-4 py-3 text-xs whitespace-pre-wrap border-t max-h-60 overflow-y-auto leading-relaxed",
                                                                 isDark ? "text-purple-200/70 border-purple-500/20" : "text-purple-700/70 border-purple-200"
                                                             )}>
                                                                 {reasoning.reasoning}
@@ -464,24 +389,24 @@ export default function UnifiedChatInterface({ isDark = true }: UnifiedChatInter
 
                                         {/* Message Bubble */}
                                         <div className={cn(
-                                            "rounded-2xl px-4 py-2.5",
+                                            "rounded-[20px] px-5 py-3 shadow-sm",
                                             isUser
-                                                ? "bg-gradient-to-r from-blue-600 to-blue-500 text-white"
+                                                ? "bg-gradient-to-r from-blue-600 to-blue-500 text-white rounded-br-none"
                                                 : isDark
-                                                    ? "bg-white/10 text-white border border-white/10"
-                                                    : "bg-gray-100 text-gray-900"
+                                                    ? "bg-[#1E1E2E] text-white/90 border border-white/5 rounded-bl-none"
+                                                    : "bg-white text-gray-900 shadow-sm border border-gray-100 rounded-bl-none"
                                         )}>
-                                            <p className="text-sm whitespace-pre-wrap">{message.text}</p>
+                                            <p className="text-[15px] leading-relaxed whitespace-pre-wrap">{message.text}</p>
                                         </div>
                                     </div>
 
                                     {/* User Avatar */}
                                     {isUser && (
                                         <div className={cn(
-                                            "w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0",
+                                            "w-9 h-9 rounded-2xl flex items-center justify-center flex-shrink-0 mt-1",
                                             "bg-gradient-to-br from-blue-500 to-purple-500"
                                         )}>
-                                            <span className="text-white text-xs font-medium">You</span>
+                                            <span className="text-white text-[10px] font-bold tracking-wider">YOU</span>
                                         </div>
                                     )}
                                 </motion.div>
@@ -495,17 +420,17 @@ export default function UnifiedChatInterface({ isDark = true }: UnifiedChatInter
                     <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
-                        className="flex gap-3"
+                        className="flex gap-4"
                     >
                         <div className={cn(
-                            "w-8 h-8 rounded-lg flex items-center justify-center",
+                            "w-9 h-9 rounded-2xl flex items-center justify-center mt-1",
                             isDark ? "bg-blue-500/20" : "bg-blue-100"
                         )}>
-                            <Sparkles className={cn("w-4 h-4", isDark ? "text-blue-400" : "text-blue-600")} />
+                            <Sparkles className={cn("w-5 h-5", isDark ? "text-blue-400" : "text-blue-600")} />
                         </div>
                         <div className={cn(
-                            "px-4 py-2.5 rounded-2xl",
-                            isDark ? "bg-white/10 border border-white/10" : "bg-gray-100"
+                            "px-5 py-4 rounded-[20px] rounded-bl-none",
+                            isDark ? "bg-[#1E1E2E] border border-white/5" : "bg-white shadow-sm border border-gray-100"
                         )}>
                             <div className="flex gap-1.5">
                                 <span className={cn("w-2 h-2 rounded-full animate-bounce", isDark ? "bg-white/60" : "bg-gray-400")} style={{ animationDelay: '0ms' }} />
@@ -522,34 +447,33 @@ export default function UnifiedChatInterface({ isDark = true }: UnifiedChatInter
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         className={cn(
-                            "flex gap-3 justify-end"
+                            "flex gap-4 justify-end"
                         )}
                     >
                         <div className={cn(
-                            "rounded-2xl px-4 py-2.5 max-w-[80%]",
-                            isDark ? "bg-blue-500/20 text-blue-200 border border-blue-500/30" : "bg-blue-50 text-blue-700 border border-blue-200"
+                            "rounded-[20px] rounded-br-none px-5 py-3 max-w-[85%]",
+                            isDark ? "bg-blue-500/10 text-blue-200 border border-blue-500/20" : "bg-blue-50 text-blue-700 border border-blue-200"
                         )}>
-                            <p className="text-xs opacity-60 mb-1">Listening...</p>
-                            <p className="text-sm">{currentTranscript}</p>
+                            <p className="text-xs opacity-60 mb-1 uppercase tracking-wider font-semibold">Listening...</p>
+                            <p className="text-[15px]">{currentTranscript}</p>
                         </div>
                         <div className={cn(
-                            "w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0",
+                            "w-9 h-9 rounded-2xl flex items-center justify-center flex-shrink-0 mt-1",
                             "bg-gradient-to-br from-blue-500 to-purple-500"
                         )}>
-                            <span className="text-white text-xs font-medium">You</span>
+                            <span className="text-white text-[10px] font-bold tracking-wider">YOU</span>
                         </div>
                     </motion.div>
                 )}
 
-                <div ref={messagesEndRef} />
+                <div ref={messagesEndRef} className="h-4" />
             </div>
 
             {/* Input Area */}
             <div className={cn(
-                "p-4 border-t",
-                isDark ? "border-white/10 bg-black/20" : "border-gray-100 bg-gray-50"
+                "p-4 md:p-6 pb-6 md:pb-8", // Removed border-t
             )}>
-                <form onSubmit={handleSubmit} className="flex items-center gap-2">
+                <form onSubmit={handleSubmit} className="flex items-center gap-3">
                     {/* Voice Controls (shown when in voice mode) */}
                     {isVoiceMode && (
                         <>
@@ -557,69 +481,75 @@ export default function UnifiedChatInterface({ isDark = true }: UnifiedChatInter
                                 type="button"
                                 onClick={toggleMute}
                                 className={cn(
-                                    "p-3 rounded-xl transition-all",
+                                    "p-4 rounded-full transition-all hover:scale-105 active:scale-95",
                                     isMuted
                                         ? isDark
-                                            ? "bg-red-500/20 text-red-400 hover:bg-red-500/30"
-                                            : "bg-red-100 text-red-600 hover:bg-red-200"
+                                            ? "bg-red-500/20 text-red-400 shadow-lg shadow-red-500/10"
+                                            : "bg-red-100 text-red-600 shadow-sm"
                                         : isDark
-                                            ? "bg-blue-500/20 text-blue-400 hover:bg-blue-500/30"
-                                            : "bg-blue-100 text-blue-600 hover:bg-blue-200"
+                                            ? "bg-blue-500/20 text-blue-400 shadow-lg shadow-blue-500/10"
+                                            : "bg-blue-100 text-blue-600 shadow-sm"
                                 )}
                             >
-                                {isMuted ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
+                                {isMuted ? <MicOff className="w-6 h-6" /> : <Mic className="w-6 h-6" />}
                             </button>
 
                             <button
                                 type="button"
                                 onClick={() => setIsSpeakerOn(!isSpeakerOn)}
                                 className={cn(
-                                    "p-3 rounded-xl transition-all",
+                                    "p-4 rounded-full transition-all hover:scale-105 active:scale-95",
                                     isSpeakerOn
                                         ? isDark
-                                            ? "bg-green-500/20 text-green-400 hover:bg-green-500/30"
-                                            : "bg-green-100 text-green-600 hover:bg-green-200"
+                                            ? "bg-green-500/20 text-green-400 shadow-lg shadow-green-500/10"
+                                            : "bg-green-100 text-green-600 shadow-sm"
                                         : isDark
-                                            ? "bg-gray-500/20 text-gray-400 hover:bg-gray-500/30"
-                                            : "bg-gray-200 text-gray-600 hover:bg-gray-300"
+                                            ? "bg-gray-500/20 text-gray-400"
+                                            : "bg-gray-200 text-gray-600"
                                 )}
                             >
-                                {isSpeakerOn ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}
+                                {isSpeakerOn ? <Volume2 className="w-6 h-6" /> : <VolumeX className="w-6 h-6" />}
                             </button>
                         </>
                     )}
 
                     {/* Text Input */}
-                    <div className="relative flex-1">
-                        <input
-                            ref={inputRef}
-                            type="text"
-                            value={inputMessage}
-                            onChange={(e) => setInputMessage(e.target.value)}
-                            placeholder={isVoiceMode ? "Or type a message..." : "Type your message..."}
-                            disabled={isProcessing}
-                            className={cn(
-                                "w-full px-4 py-3 pr-12 rounded-xl border focus:outline-none focus:ring-2 transition-all",
-                                isDark
-                                    ? "bg-white/5 border-white/10 text-white placeholder-white/40 focus:ring-blue-500/50 focus:border-blue-500/50"
-                                    : "bg-white border-gray-200 text-gray-900 placeholder-gray-400 focus:ring-blue-500 focus:border-blue-500",
-                                isProcessing && "opacity-50 cursor-not-allowed"
-                            )}
-                        />
-                        <button
-                            type="submit"
-                            disabled={isProcessing || !inputMessage.trim()}
-                            className={cn(
-                                "absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-lg transition-all",
-                                inputMessage.trim() && !isProcessing
-                                    ? "bg-blue-500 text-white hover:bg-blue-600"
-                                    : isDark
-                                        ? "bg-white/10 text-white/30"
-                                        : "bg-gray-100 text-gray-400"
-                            )}
-                        >
-                            <Send className="w-4 h-4" />
-                        </button>
+                    <div className="relative flex-1 group">
+                        <div className={cn(
+                            "absolute -inset-0.5 rounded-full opacity-0 group-focus-within:opacity-100 transition duration-500 blur-md",
+                            isDark ? "bg-gradient-to-r from-blue-500/30 to-purple-500/30" : "bg-gradient-to-r from-blue-500/20 to-purple-500/20"
+                        )} />
+                        <div className="relative flex items-center">
+                            <input
+                                ref={inputRef}
+                                type="text"
+                                value={inputMessage}
+                                onChange={(e) => setInputMessage(e.target.value)}
+                                placeholder={isVoiceMode ? "Or type a message to respond..." : "Type your message..."}
+                                disabled={isProcessing}
+                                className={cn(
+                                    "w-full pl-6 pr-14 py-4 rounded-full border-none focus:outline-none focus:ring-0 transition-all shadow-lg text-[15px]",
+                                    isDark
+                                        ? "bg-[#1E1E2E] text-white placeholder-white/40"
+                                        : "bg-white text-gray-900 placeholder-gray-400 shadow-gray-200/50",
+                                    isProcessing && "opacity-50 cursor-not-allowed"
+                                )}
+                            />
+                            <button
+                                type="submit"
+                                disabled={isProcessing || !inputMessage.trim()}
+                                className={cn(
+                                    "absolute right-2 p-2.5 rounded-full transition-all hover:scale-105 active:scale-95",
+                                    inputMessage.trim() && !isProcessing
+                                        ? "bg-blue-500 text-white shadow-lg shadow-blue-500/25"
+                                        : isDark
+                                            ? "bg-white/5 text-white/20"
+                                            : "bg-gray-100 text-gray-300"
+                                )}
+                            >
+                                <Send className="w-5 h-5 ml-0.5" />
+                            </button>
+                        </div>
                     </div>
 
                     {/* Call Button */}
@@ -627,26 +557,20 @@ export default function UnifiedChatInterface({ isDark = true }: UnifiedChatInter
                         type="button"
                         onClick={isVoiceMode ? endVoiceCall : startVoiceCall}
                         className={cn(
-                            "p-3 rounded-xl transition-all flex items-center gap-2",
+                            "p-4 rounded-full transition-all hover:scale-105 active:scale-95 shadow-lg",
                             isVoiceMode
                                 ? isDark
-                                    ? "bg-red-500/20 text-red-400 hover:bg-red-500/30 border border-red-500/30"
-                                    : "bg-red-100 text-red-600 hover:bg-red-200 border border-red-200"
+                                    ? "bg-red-500 text-white shadow-red-500/20"
+                                    : "bg-red-500 text-white shadow-red-500/30"
                                 : isDark
-                                    ? "bg-green-500/20 text-green-400 hover:bg-green-500/30 border border-green-500/30"
-                                    : "bg-green-100 text-green-600 hover:bg-green-200 border border-green-200"
+                                    ? "bg-green-500 text-white shadow-green-500/20"
+                                    : "bg-green-600 text-white shadow-green-600/30"
                         )}
                     >
                         {isVoiceMode ? (
-                            <>
-                                <PhoneOff className="w-5 h-5" />
-                                <span className="hidden sm:inline text-sm font-medium">End Call</span>
-                            </>
+                            <PhoneOff className="w-6 h-6" />
                         ) : (
-                            <>
-                                <Phone className="w-5 h-5" />
-                                <span className="hidden sm:inline text-sm font-medium">Call</span>
-                            </>
+                            <Phone className="w-6 h-6" />
                         )}
                     </button>
                 </form>
