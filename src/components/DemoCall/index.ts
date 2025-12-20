@@ -1,5 +1,6 @@
 export { default as VoiceCallInterface } from './VoiceCallInterface';
 export { default as TextChatInterface } from './TextChatInterface';
+export { default as UnifiedChatInterface } from './UnifiedChatInterface';
 export { default as LiveCallMonitor } from './LiveCallMonitor';
 export { default as KnowledgeBase } from './KnowledgeBase';
 export { default as CallHistoryList } from './CallHistoryList';
