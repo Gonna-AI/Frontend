@@ -275,7 +275,22 @@ class AIService {
 
       } catch (error) {
         console.error('❌ Local LLM error:', error);
-        this.localLLMAvailable = false; // Mark as unavailable
+        // Only mark as unavailable for connection errors, not timeouts or aborts
+        if (error instanceof Error) {
+          const isTimeoutOrAbort = error.name === 'AbortError' ||
+            error.name === 'TimeoutError' ||
+            error.message.includes('timeout') ||
+            error.message.includes('aborted');
+          if (!isTimeoutOrAbort) {
+            this.localLLMAvailable = false; // Only mark unavailable for actual connection failures
+          } else {
+            console.warn('⏱️ LLM request timed out - model may still be processing');
+            // Provide a helpful timeout message
+            throw new Error('The AI is taking longer than expected. Please try again - your request may have been too complex.');
+          }
+        }
+        // Re-throw other errors
+        throw error;
       }
     }
 

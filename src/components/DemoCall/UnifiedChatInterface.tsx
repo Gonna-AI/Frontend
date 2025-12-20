@@ -11,7 +11,7 @@ import {
     ChevronDown,
     ChevronRight,
     Brain,
-    Sparkles
+    User
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { aiService } from '../../services/aiService';
@@ -25,6 +25,16 @@ type SpeechRecognitionInstance = any;
 interface UnifiedChatInterfaceProps {
     isDark?: boolean;
 }
+
+// Company Logo component for AI avatar
+const ClerkTreeLogo = ({ className, isDark = true }: { className?: string; isDark?: boolean }) => (
+    <svg viewBox="0 0 464 468" className={className}>
+        <path
+            fill={isDark ? "currentColor" : "currentColor"}
+            d="M275.9 63.5c37.7 5.3 76.6 24.1 103.7 50.2 30 28.8 41.8 57.6 35.8 87.1-6.1 30.1-33.6 52.9-70.6 58.3-6 0.9-18.3 1-44.9 0.6l-36.6-0.7-0.5 17.8c-0.3 9.7-0.4 17.8-0.4 17.9 0.1 0.1 19.1 0.3 42.2 0.4 23.2 0 42.7 0.5 43.5 1 1.2 0.7 1.1 2.2-0.8 9.4-6 23-20.5 42.1-41.8 55-7.3 4.3-26.7 11.9-36 14.1-9 2-34 2-44.5 0-41.3-7.9-74.2-38-82.9-75.7-8.1-35.7 2.2-71.5 27.5-94.7 16.1-14.9 35.5-22.4 63.7-24.7l7.7-0.7v-34.1l-11.7 0.7c-22.2 1.3-37 5.3-56.4 15.2-28.7 14.6-49.7 39.3-59.9 70.2-9.6 29.3-9.3 62.6 0.8 91.4 3.3 9.2 12.2 25.6 18.3 33.8 11.3 14.9 30.6 30.8 48.7 39.9 19.9 10 49.2 15.9 73.2 14.7 26.5-1.3 52.5-9.6 74.2-23.9 26.9-17.6 47.2-47.9 53.3-79.7 1-5.2 2.3-10.1 2.8-10.8 0.8-0.9 6.9-1.2 27.1-1l26.1 0.3 0.3 3.8c1.2 14.6-10.9 52.1-23.9 74-17.8 30-43.2 54-75.9 71.5-20.9 11.2-38.3 16.5-67.2 20.7-27.6 3.9-47.9 3.1-75.8-3.1-36.9-8.3-67.8-25.6-97.1-54.6-23.6-23.2-44.8-61.9-51.7-93.8-5.1-23.7-5.5-28.1-4.9-48.8 1.7-63.2 23.4-111.8 67.7-152 28-25.4 60.4-41.3 99-48.8 18.5-3.6 46.1-4 67.9-0.9zm16.4 92.6c-6.3 2.4-12.8 8.5-15.4 14.5-2.6 6.1-2.6 18.3 0 23.9 5 11 20.2 17.7 32.3 14.1 11.9-3.4 19.8-14.3 19.8-27.1-0.1-19.9-18.2-32.5-36.7-25.4z"
+        />
+    </svg>
+);
 
 export default function UnifiedChatInterface({ isDark = true }: UnifiedChatInterfaceProps) {
     const {
@@ -54,11 +64,19 @@ export default function UnifiedChatInterface({ isDark = true }: UnifiedChatInter
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
     const recognitionRef = useRef<SpeechRecognitionInstance | null>(null);
-    // Removed unused timerRef
+    const pendingMessageRef = useRef<string | null>(null);
 
     const messages = currentCall?.messages || [];
     const extractedFields = currentCall?.extractedFields || [];
     const isActive = currentCall?.status === 'active';
+
+    // Handle pending message when call becomes active
+    useEffect(() => {
+        if (isActive && pendingMessageRef.current) {
+            addMessage('user', pendingMessageRef.current);
+            pendingMessageRef.current = null;
+        }
+    }, [isActive, addMessage]);
 
     // Initialize AI service
     useEffect(() => {
@@ -157,13 +175,17 @@ export default function UnifiedChatInterface({ isDark = true }: UnifiedChatInter
     const handleSendMessage = useCallback(async (text: string, fromVoice = false) => {
         if (!text.trim() || isProcessing) return;
 
-        // Start call if not active
+        // Start call if not active - store message as pending
         if (!isActive) {
             aiService.resetState();
+            pendingMessageRef.current = text;
             startCall();
+            // The useEffect will add the message when call becomes active
+        } else {
+            // Call is already active, add message directly
+            addMessage('user', text);
         }
 
-        addMessage('user', text);
         setInputMessage('');
         setCurrentTranscript('');
         setIsProcessing(true);
@@ -329,7 +351,7 @@ export default function UnifiedChatInterface({ isDark = true }: UnifiedChatInter
                                     ? "bg-gradient-to-br from-blue-500/20 to-purple-500/20 border border-white/10 shadow-xl shadow-blue-500/10"
                                     : "bg-gradient-to-br from-blue-500/15 to-purple-500/15 border border-black/5"
                             )}>
-                                <Sparkles className={cn("w-10 h-10", isDark ? "text-blue-400" : "text-blue-600")} />
+                                <ClerkTreeLogo className={cn("w-10 h-10", isDark ? "text-blue-400" : "text-blue-600")} isDark={isDark} />
                             </div>
                             <h3 className={cn(
                                 "text-2xl font-semibold mb-3 tracking-tight",
@@ -368,7 +390,7 @@ export default function UnifiedChatInterface({ isDark = true }: UnifiedChatInter
                                                 ? "bg-blue-500/10 border-blue-500/20 shadow-lg shadow-blue-500/5"
                                                 : "bg-blue-100/80 border-blue-200/50"
                                         )}>
-                                            <Sparkles className={cn("w-5 h-5", isDark ? "text-blue-400" : "text-blue-600")} />
+                                            <ClerkTreeLogo className={cn("w-5 h-5", isDark ? "text-blue-400" : "text-blue-600")} isDark={isDark} />
                                         </div>
                                     )}
 
@@ -440,14 +462,16 @@ export default function UnifiedChatInterface({ isDark = true }: UnifiedChatInter
                                         </div>
                                     </div>
 
-                                    {/* User Avatar - Glassmorphic */}
+                                    {/* User Avatar - Simple */}
                                     {isUser && (
                                         <div className={cn(
                                             "w-9 h-9 rounded-2xl flex items-center justify-center flex-shrink-0 mt-1",
-                                            "bg-gradient-to-br from-blue-500/90 to-purple-500/90",
-                                            "border border-white/20 shadow-lg shadow-purple-500/20"
+                                            "backdrop-blur-xl border",
+                                            isDark
+                                                ? "bg-white/[0.08] border-white/10"
+                                                : "bg-gray-100 border-gray-200/50"
                                         )}>
-                                            <span className="text-white text-[10px] font-bold tracking-wider">YOU</span>
+                                            <User className={cn("w-4.5 h-4.5", isDark ? "text-white/70" : "text-gray-600")} />
                                         </div>
                                     )}
                                 </motion.div>
@@ -470,7 +494,7 @@ export default function UnifiedChatInterface({ isDark = true }: UnifiedChatInter
                                 ? "bg-blue-500/10 border-blue-500/20 shadow-lg shadow-blue-500/5"
                                 : "bg-blue-100/80 border-blue-200/50"
                         )}>
-                            <Sparkles className={cn("w-5 h-5 animate-pulse", isDark ? "text-blue-400" : "text-blue-600")} />
+                            <ClerkTreeLogo className={cn("w-5 h-5 animate-pulse", isDark ? "text-blue-400" : "text-blue-600")} isDark={isDark} />
                         </div>
                         <div className={cn(
                             "px-5 py-4 rounded-[20px] rounded-bl-none",
@@ -509,10 +533,12 @@ export default function UnifiedChatInterface({ isDark = true }: UnifiedChatInter
                         </div>
                         <div className={cn(
                             "w-9 h-9 rounded-2xl flex items-center justify-center flex-shrink-0 mt-1",
-                            "bg-gradient-to-br from-blue-500/90 to-purple-500/90",
-                            "border border-white/20 shadow-lg shadow-purple-500/20"
+                            "backdrop-blur-xl border",
+                            isDark
+                                ? "bg-white/[0.08] border-white/10"
+                                : "bg-gray-100 border-gray-200/50"
                         )}>
-                            <span className="text-white text-[10px] font-bold tracking-wider">YOU</span>
+                            <User className={cn("w-4.5 h-4.5", isDark ? "text-white/70" : "text-gray-600")} />
                         </div>
                     </motion.div>
                 )}
@@ -524,9 +550,9 @@ export default function UnifiedChatInterface({ isDark = true }: UnifiedChatInter
             <div className={cn(
                 "p-4 md:p-6 pb-6 md:pb-8",
             )}>
-                {/* Glassmorphic Input Container */}
+                {/* Glassmorphic Input Container - symmetrical corners with inner input */}
                 <div className={cn(
-                    "p-2 rounded-[28px]",
+                    "p-2 rounded-3xl",
                     "backdrop-blur-2xl",
                     isDark
                         ? "bg-white/[0.03] border border-white/[0.08] shadow-2xl"
@@ -579,15 +605,8 @@ export default function UnifiedChatInterface({ isDark = true }: UnifiedChatInter
                             </>
                         )}
 
-                        {/* Text Input - Premium Glass Effect */}
-                        <div className="relative flex-1 group">
-                            {/* Focus glow effect */}
-                            <div className={cn(
-                                "absolute -inset-1 rounded-full opacity-0 group-focus-within:opacity-100 transition-all duration-500 blur-xl",
-                                isDark
-                                    ? "bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-blue-500/20"
-                                    : "bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-blue-500/10"
-                            )} />
+                        {/* Text Input - Precision Glass Effect */}
+                        <div className="relative flex-1">
                             <div className="relative flex items-center">
                                 <input
                                     ref={inputRef}
@@ -597,14 +616,24 @@ export default function UnifiedChatInterface({ isDark = true }: UnifiedChatInter
                                     placeholder={isVoiceMode ? "Or type a message..." : "Type your message..."}
                                     disabled={isProcessing}
                                     className={cn(
-                                        "w-full pl-5 pr-14 py-3.5 rounded-full text-[15px]",
+                                        "w-full pl-5 pr-14 py-3.5 rounded-[20px] text-[15px]",
                                         "backdrop-blur-xl",
-                                        "border border-transparent",
-                                        "transition-all duration-300",
-                                        "focus:outline-none focus:ring-0",
+                                        "transition-all duration-300 ease-out",
+                                        "focus:outline-none",
                                         isDark
-                                            ? "bg-white/[0.05] text-white placeholder-white/30 focus:bg-white/[0.08] focus:border-white/10"
-                                            : "bg-black/[0.03] text-gray-900 placeholder-gray-400 focus:bg-black/[0.05] focus:border-black/5",
+                                            ? [
+                                                "bg-white/[0.04] text-white placeholder-white/30",
+                                                "border border-white/[0.06]",
+                                                // Inner glow border effect on focus - not a fill
+                                                "focus:border-white/20",
+                                                "focus:shadow-[inset_0_0_0_1px_rgba(255,255,255,0.1),0_0_20px_rgba(59,130,246,0.1)]"
+                                            ]
+                                            : [
+                                                "bg-black/[0.02] text-gray-900 placeholder-gray-400",
+                                                "border border-black/[0.04]",
+                                                "focus:border-black/10",
+                                                "focus:shadow-[inset_0_0_0_1px_rgba(0,0,0,0.05),0_0_20px_rgba(59,130,246,0.05)]"
+                                            ],
                                         isProcessing && "opacity-50 cursor-not-allowed"
                                     )}
                                 />
@@ -612,7 +641,7 @@ export default function UnifiedChatInterface({ isDark = true }: UnifiedChatInter
                                     type="submit"
                                     disabled={isProcessing || !inputMessage.trim()}
                                     className={cn(
-                                        "absolute right-1.5 p-2.5 rounded-full",
+                                        "absolute right-1.5 p-2.5 rounded-[14px]",
                                         "transition-all duration-300",
                                         "focus:outline-none focus:ring-2 focus:ring-offset-2",
                                         inputMessage.trim() && !isProcessing
