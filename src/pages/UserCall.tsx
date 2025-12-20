@@ -11,7 +11,8 @@ import {
   User, 
   Bot,
   Tag,
-  CheckCircle
+  CheckCircle,
+  MessageSquare
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '../utils/cn';
@@ -24,6 +25,7 @@ import {
   ExtractedField,
   PriorityLevel 
 } from '../contexts/DemoCallContext';
+import { TextChatInterface } from '../components/DemoCall';
 
 // Speech recognition interface
 interface SpeechRecognitionInstance extends EventTarget {
@@ -89,6 +91,7 @@ function UserCallContent() {
   const [currentTranscript, setCurrentTranscript] = useState('');
   const [agentStatus, setAgentStatus] = useState<'idle' | 'speaking' | 'listening' | 'processing'>('idle');
   const [language, setLanguage] = useState<'en-US' | 'hi-IN'>('en-US');
+  const [activeMode, setActiveMode] = useState<'call' | 'chat'>('call');
   
   const recognitionRef = useRef<SpeechRecognitionInstance | null>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
@@ -369,8 +372,47 @@ function UserCallContent() {
       {/* Main content */}
       <main className="relative z-10 flex-1 flex flex-col items-center justify-center px-3 md:px-4 py-4 md:py-8">
         <div className="w-full max-w-2xl">
+          {/* Mode selector tabs */}
+          <div className="flex gap-2 mb-4">
+            <button
+              onClick={() => setActiveMode('call')}
+              className={cn(
+                "flex-1 px-4 py-2 rounded-lg font-medium transition-all",
+                activeMode === 'call'
+                  ? isDark
+                    ? "bg-blue-500 text-white"
+                    : "bg-blue-600 text-white"
+                  : isDark
+                    ? "bg-white/10 text-white/70 hover:bg-white/20"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+              )}
+            >
+              📞 Voice Call
+            </button>
+            <button
+              onClick={() => setActiveMode('chat')}
+              className={cn(
+                "flex-1 px-4 py-2 rounded-lg font-medium transition-all",
+                activeMode === 'chat'
+                  ? isDark
+                    ? "bg-blue-500 text-white"
+                    : "bg-blue-600 text-white"
+                  : isDark
+                    ? "bg-white/10 text-white/70 hover:bg-white/20"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+              )}
+            >
+              💬 Text Chat
+            </button>
+          </div>
+
           {/* Call interface */}
+          {activeMode === 'call' && (
           <motion.div
+            key="call"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className={cn(
@@ -657,21 +699,34 @@ function UserCallContent() {
                 </button>
               )}
             </div>
-          </motion.div>
 
-          {/* Help text */}
-          {!isInCall && (
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.3 }}
-              className={cn(
-                "text-center mt-4 md:mt-6 text-xs md:text-sm px-4",
-                isDark ? "text-white/40" : "text-black/40"
-              )}
+            {/* Help text for call mode */}
+            {!isInCall && (
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.3 }}
+                className={cn(
+                  "text-center mt-4 md:mt-6 text-xs md:text-sm px-4 pb-4 md:pb-6",
+                  isDark ? "text-white/40" : "text-black/40"
+                )}
+              >
+                Press the call button to start a conversation
+              </motion.p>
+            )}
+          </motion.div>
+          )}
+
+          {/* Chat interface */}
+          {activeMode === 'chat' && (
+            <motion.div
+              key="chat"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
             >
-              Press the call button to start a conversation
-            </motion.p>
+              <TextChatInterface isDark={isDark} />
+            </motion.div>
           )}
         </div>
       </main>
