@@ -16,7 +16,16 @@ import {
 } from '../contexts/DemoCallContext';
 
 // Configuration - using local service via cloudflare tunnel
-const LLM_URL = import.meta.env.VITE_OLLAMA_URL || 'https://packs-measures-down-dakota.trycloudflare.com';
+// Clean URL: remove trailing slashes, extra spaces, and any trailing text like "check with this"
+const getCleanURL = (url: string) => {
+  if (!url) return '';
+  // Remove any text after the URL (like " check with this")
+  let cleaned = url.trim().split(/\s+/)[0];
+  // Remove trailing slashes
+  cleaned = cleaned.replace(/\/+$/, '');
+  return cleaned;
+};
+const LLM_URL = getCleanURL(import.meta.env.VITE_OLLAMA_URL || 'https://pregnant-operational-centers-feels.trycloudflare.com');
 
 // Number of tokens to generate per response
 const N_PREDICT = 256;
