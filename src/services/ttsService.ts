@@ -143,6 +143,9 @@ class TTSService {
     }
   ): Promise<void> {
     return new Promise(async (resolve, reject) => {
+      const abortController = new AbortController();
+      const timeoutId = setTimeout(() => abortController.abort(), 120000); // 120 second timeout
+      
       try {
         // Call TTS API
         const response = await fetch(`${TTS_API_URL}/speak`, {
@@ -155,8 +158,10 @@ class TTSService {
             voice,
             speed,
           }),
-          signal: AbortSignal.timeout(30000), // 30 second timeout
+          signal: abortController.signal,
         });
+        
+        clearTimeout(timeoutId);
 
         if (!response.ok) {
           const error = await response.json();
@@ -193,8 +198,16 @@ class TTSService {
         await this.currentAudio.play();
 
       } catch (error) {
-        options?.onError?.(error as Error);
-        reject(error);
+        clearTimeout(timeoutId);
+        // Check if it's an abort error
+        if (error instanceof Error && error.name === 'AbortError') {
+          const abortError = new Error('TTS request timed out or was aborted');
+          options?.onError?.(abortError);
+          reject(abortError);
+        } else {
+          options?.onError?.(error as Error);
+          reject(error);
+        }
       }
     });
   }
