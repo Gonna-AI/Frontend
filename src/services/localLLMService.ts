@@ -244,6 +244,23 @@ class LocalLLMService {
   }
 
   /**
+   * Clean response text by removing template artifacts
+   */
+  private cleanResponse(text: string): string {
+    if (!text) return '';
+    
+    return text
+      // Remove "[Write assistant's response here]"
+      .replace(/\[Write assistant's response here\]/gi, '')
+      // Remove "Response:" label and following newlines
+      .replace(/^Response:\s*/gim, '')
+      // Remove "Test instruction X" lines
+      .replace(/^Test instruction \d+\s*$/gim, '')
+      // Remove any leading/trailing whitespace
+      .trim();
+  }
+
+  /**
    * Build system prompt for the AI
    */
   private buildSystemPrompt(config: KnowledgeBaseConfig, existingFields: ExtractedField[]): string {
@@ -319,9 +336,12 @@ ${config.customInstructions.length > 0 ? 'INSTRUCTIONS:\n' + config.customInstru
 
       const data = await response.json();
       
-      // Simple response format - just return the content
+      // Clean the response - remove template artifacts and labels
+      const rawResponse = data.content || '';
+      const cleanedResponse = this.cleanResponse(rawResponse) || rawResponse;
+      
       return {
-        response: data.content || '',
+        response: cleanedResponse,
         extractedFields: existingFields, // Keep existing fields
       };
 
@@ -502,8 +522,9 @@ If the caller's name was mentioned in the conversation, extract it using extract
 
       const data = await response.json();
       
-      // Simple text response - parse basic summary from content
-      const textResponse = data.content || '';
+      // Clean the response - remove template artifacts and labels
+      const rawResponse = data.content || '';
+      const textResponse = this.cleanResponse(rawResponse) || rawResponse;
       
       // Try to extract a simple summary (first sentence or first 200 chars)
       const summary = textResponse.split('.')[0] || textResponse.slice(0, 200) || 'Call completed';
