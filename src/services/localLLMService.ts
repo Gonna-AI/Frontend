@@ -249,15 +249,55 @@ class LocalLLMService {
   private cleanResponse(text: string): string {
     if (!text) return '';
     
-    return text
-      // Remove "[Write assistant's response here]"
+    let cleaned = text;
+    
+    // Remove template placeholders (with variations)
+    cleaned = cleaned
       .replace(/\[Write assistant's response here\]/gi, '')
-      // Remove "Response:" label and following newlines
-      .replace(/^Response:\s*/gim, '')
-      // Remove "Test instruction X" lines
-      .replace(/^Test instruction \d+\s*$/gim, '')
-      // Remove any leading/trailing whitespace
-      .trim();
+      .replace(/\[Your response here\]/gi, '')
+      .replace(/\[To be filled\]/gi, '')
+      .replace(/\[To be\s*$/gi, '')
+      .replace(/\[.*response.*\]/gi, '')
+      .replace(/\[.*to be.*\]/gi, '');
+    
+    // Remove "Response:" label and following newlines (anywhere in text)
+    cleaned = cleaned.replace(/Response:\s*/gim, '');
+    
+    // Remove "Test instruction X" lines
+    cleaned = cleaned.replace(/Test instruction \d+.*$/gim, '');
+    
+    // Remove lines that are instructions about test mode or templates
+    cleaned = cleaned.replace(/If the user says "test me",.*$/gim, '');
+    cleaned = cleaned.replace(/You need to (use|respond|fill).*$/gim, '');
+    cleaned = cleaned.replace(/You don't have to.*$/gim, '');
+    cleaned = cleaned.replace(/but you don't have to.*$/gim, '');
+    
+    // Remove lines that repeat conversation patterns or test patterns
+    cleaned = cleaned.replace(/Assistant's response to user \d+.*$/gim, '');
+    cleaned = cleaned.replace(/^User \d+:.*$/gim, '');
+    cleaned = cleaned.replace(/^Assistant \d+:.*$/gim, '');
+    
+    // Remove test conversation templates
+    cleaned = cleaned.replace(/Now, the conversation is:.*$/gim, '');
+    cleaned = cleaned.replace(/The conversation is:.*$/gim, '');
+    
+    // Remove repetitive dream references (seems to be a model quirk)
+    cleaned = cleaned.replace(/\b(not\s+)?in\s+my\s+dream\b/gi, '');
+    
+    // Split into lines and filter out empty/whitespace-only lines
+    const lines = cleaned.split('\n').filter(line => {
+      const trimmed = line.trim();
+      // Filter out template-like lines
+      if (!trimmed) return false;
+      if (/^\[.*\]$/.test(trimmed)) return false;
+      if (/^(Response|Test|Instruction|User \d+|Assistant \d+):/i.test(trimmed)) return false;
+      return true;
+    });
+    
+    // Join and clean up extra whitespace
+    cleaned = lines.join('\n').replace(/\n{3,}/g, '\n\n').trim();
+    
+    return cleaned;
   }
 
   /**
@@ -307,10 +347,12 @@ ${config.customInstructions.length > 0 ? 'INSTRUCTIONS:\n' + config.customInstru
     // Build prompt string from conversation history
     let prompt = systemPrompt + '\n\n';
     
-    // Add conversation history
+    // Add conversation history (clean each message first)
     for (const msg of recentHistory) {
       const role = msg.speaker === 'agent' ? 'Assistant' : 'User';
-      prompt += `${role}: ${msg.text}\n`;
+      // Clean agent responses to prevent template artifacts from being fed back
+      const cleanedText = msg.speaker === 'agent' ? this.cleanResponse(msg.text) : msg.text;
+      prompt += `${role}: ${cleanedText}\n`;
     }
     
     // Add current user message
