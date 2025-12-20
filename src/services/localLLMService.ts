@@ -127,6 +127,36 @@ class LocalLLMService {
     let reasoning = '';
     let answer = text;
 
+    // FIRST: Check if the response is garbage (model confusion indicators)
+    const garbageIndicators = [
+      /Test instruction \d+/i,
+      /User:\s*I am a robot/i,
+      /^(?:User|Human|Assistant):\s*\n+(?:User|Human|Assistant):/m,
+      /(?:User|Human):\s*[\s\S]*?(?:User|Human):\s*[\s\S]*?(?:User|Human):/i, // Multiple User: markers
+    ];
+
+    const isGarbage = garbageIndicators.some(pattern => pattern.test(text));
+    if (isGarbage) {
+      console.warn('⚠️ Detected garbage output from model, attempting to extract usable content');
+      // Try to find ANY sentence that looks like a real response
+      const sentences = text.match(/[A-Z][^.!?]*[.!?]/g) || [];
+      const validSentence = sentences.find(s =>
+        s.length > 30 &&
+        !s.includes('Test instruction') &&
+        !s.includes('I am a robot') &&
+        !s.startsWith('User:') &&
+        !s.startsWith('Human:')
+      );
+      if (validSentence) {
+        return { reasoning: '', answer: validSentence.trim() };
+      }
+      // If no valid sentence found, return a fallback
+      return {
+        reasoning: '',
+        answer: "I apologize, but I'm having trouble generating a proper response. Could you please rephrase your question?"
+      };
+    }
+
     // Common reasoning tag patterns used by different models
     // DeepSeek R1, Qwen QwQ, etc. use <think>...</think>
     // Some models use <thinking>, <reasoning>, <thought>
@@ -220,6 +250,16 @@ class LocalLLMService {
     // Remove "Response:" or "Answer:" prefixes only at the very start
     cleaned = cleaned.replace(/^(?:Response|Answer|Output):\s*/i, '');
 
+    // IMPORTANT: Remove garbage patterns that indicate model confusion
+    // "Test instruction X" patterns
+    cleaned = cleaned.replace(/Test instruction \d+[\s\S]*?(?=(?:Test instruction|\n\n|$))/gi, '');
+    // "User: I am a robot" type patterns (model echoing training data)
+    cleaned = cleaned.replace(/^User:\s*I am a robot[\s\S]*/gim, '');
+    // Remove any lines that look like training data markers
+    cleaned = cleaned.replace(/^(?:User|Human|Assistant):\s*$/gim, '');
+    // Remove consecutive role markers without content
+    cleaned = cleaned.replace(/(?:Human|User|Assistant):\s*\n+(?:Human|User|Assistant):/gi, '');
+
     // Clean up excessive whitespace
     cleaned = cleaned
       .replace(/^\s*\n+/g, '')
@@ -229,7 +269,13 @@ class LocalLLMService {
     // SAFETY: If cleaning resulted in empty but original had content, use original
     if (!cleaned && text.trim()) {
       console.warn('⚠️ cleanFinalAnswer stripped all content, using original text');
-      cleaned = text.trim();
+      // As a last resort, try to extract just the first sentence
+      const firstSentence = text.match(/[^.!?]*[.!?]/);
+      if (firstSentence && firstSentence[0].length > 20) {
+        cleaned = firstSentence[0].trim();
+      } else {
+        cleaned = text.substring(0, 500).trim(); // Cap at 500 chars for safety
+      }
     }
 
     return cleaned;
@@ -276,22 +322,27 @@ ${config.customInstructions.length > 0 ? 'INSTRUCTIONS:\n' + config.customInstru
 
     const systemPrompt = this.buildSystemPrompt(knowledgeBase, existingFields);
 
-    // Format conversation history (limit to recent messages to save context)
-    const recentHistory = conversationHistory.slice(-10);
+    // Format conversation history (limit to last 6 messages for context)
+    const recentHistory = conversationHistory.slice(-6);
 
-    // Build prompt string from conversation history
-    let prompt = systemPrompt + '\n\n';
+    // Build a cleaner prompt with explicit structure
+    // Using ### markers for clear section boundaries
+    let prompt = `### System:\n${systemPrompt}\n\n### Conversation:\n`;
 
-    // Add conversation history (clean each message first)
+    // Add conversation history with clean formatting
     for (const msg of recentHistory) {
-      const role = msg.speaker === 'agent' ? 'Assistant' : 'User';
-      // Clean agent responses to prevent template artifacts from being fed back
+      const role = msg.speaker === 'agent' ? 'Assistant' : 'Human';
+      // Clean agent responses to prevent artifacts from being fed back
       const cleanedText = msg.speaker === 'agent' ? this.cleanFinalAnswer(msg.text) : msg.text;
-      prompt += `${role}: ${cleanedText}\n`;
+      if (cleanedText.trim()) {
+        prompt += `${role}: ${cleanedText}\n`;
+      }
     }
 
-    // Add current user message
-    prompt += `User: ${userMessage}\nAssistant:`;
+    // Add current user message with clear instruction for the model
+    prompt += `Human: ${userMessage}\n\n### Response:\nAssistant:`;
+
+    console.log('📝 Prompt length:', prompt.length, 'chars');
 
     try {
       const response = await fetch(`${LLM_URL}/completion`, {
@@ -300,6 +351,10 @@ ${config.customInstructions.length > 0 ? 'INSTRUCTIONS:\n' + config.customInstru
         body: JSON.stringify({
           prompt: prompt,
           n_predict: N_PREDICT,
+          // Stop sequences to prevent runaway generation
+          stop: ['\n### ', '\nHuman:', '\nUser:', '\n\nHuman:', '\n\nUser:', '### System:', '### Conversation:'],
+          // Temperature for more focused responses
+          temperature: 0.7,
         }),
         signal: AbortSignal.timeout(REQUEST_TIMEOUT),
       });
