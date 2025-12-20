@@ -1,36 +1,35 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MessageSquare, Send, Bot, User } from 'lucide-react';
+import { MessageSquare, Send, Bot, User, ChevronDown, ChevronRight, Brain } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { aiService } from '../../services/aiService';
-import { 
-  useDemoCall, 
-  CallMessage, 
-  ExtractedField
-} from '../../contexts/DemoCallContext';
+import { useDemoCall } from '../../contexts/DemoCallContext';
 
 interface TextChatInterfaceProps {
   isDark?: boolean;
   compact?: boolean;
 }
 
-export default function TextChatInterface({ 
-  isDark = true, 
-  compact = false 
+export default function TextChatInterface({
+  isDark = true,
+  compact = false
 }: TextChatInterfaceProps) {
-  const { 
-    currentCall, 
-    startCall, 
-    endCall, 
-    addMessage, 
+  const {
+    currentCall,
+    startCall,
+    endCall,
+    addMessage,
     knowledgeBase,
     updateExtractedField,
     setCallPriority,
     setCallCategory
   } = useDemoCall();
-  
+
   const [inputMessage, setInputMessage] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
+  const [processingStartTime, setProcessingStartTime] = useState<number | null>(null);
+  const [messageReasonings, setMessageReasonings] = useState<Map<number, { reasoning: string; thinkingTime: number }>>(new Map());
+  const [expandedReasonings, setExpandedReasonings] = useState<Set<number>>(new Set());
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -52,17 +51,33 @@ export default function TextChatInterface({
   const handleStartChat = useCallback(async () => {
     startCall();
     setIsProcessing(false);
+    setMessageReasonings(new Map());
+    setExpandedReasonings(new Set());
     // Don't send automatic greeting - let user send first message and AI responds naturally
   }, [startCall]);
+
+  // Toggle reasoning panel for a specific message
+  const toggleReasoning = useCallback((messageIndex: number) => {
+    setExpandedReasonings(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(messageIndex)) {
+        newSet.delete(messageIndex);
+      } else {
+        newSet.add(messageIndex);
+      }
+      return newSet;
+    });
+  }, []);
 
   // Handle user input and get AI response
   const handleSendMessage = useCallback(async (text: string) => {
     if (!text.trim() || isProcessing) return;
-    
+
     // Add user message
     addMessage('user', text);
     setInputMessage('');
     setIsProcessing(true);
+    setProcessingStartTime(Date.now());
 
     try {
       // Use the same AI service as voice call
@@ -71,6 +86,9 @@ export default function TextChatInterface({
         messages,
         extractedFields
       );
+
+      // Calculate thinking time
+      const thinkingTime = processingStartTime ? Math.round((Date.now() - processingStartTime) / 1000) : 0;
 
       // Update extracted fields if any
       if (response.extractedFields) {
@@ -92,15 +110,26 @@ export default function TextChatInterface({
       // Add AI response message
       addMessage('agent', response.text);
 
+      // Store reasoning for this message if present
+      if (response.reasoning) {
+        const newMessageIndex = messages.length + 1; // +1 for user message, this will be the agent message index
+        setMessageReasonings(prev => {
+          const newMap = new Map(prev);
+          newMap.set(newMessageIndex, { reasoning: response.reasoning!, thinkingTime });
+          return newMap;
+        });
+      }
+
     } catch (error) {
       console.error('Error getting AI response:', error);
       addMessage('agent', 'Sorry, I encountered an error. Please try again.');
     } finally {
       setIsProcessing(false);
+      setProcessingStartTime(null);
       // Focus input after response
       setTimeout(() => inputRef.current?.focus(), 100);
     }
-  }, [messages, extractedFields, addMessage, updateExtractedField, setCallPriority, setCallCategory, isProcessing]);
+  }, [messages, extractedFields, addMessage, updateExtractedField, setCallPriority, setCallCategory, isProcessing, processingStartTime]);
 
   // Handle form submit
   const handleSubmit = useCallback((e: React.FormEvent) => {
@@ -118,8 +147,8 @@ export default function TextChatInterface({
     return (
       <div className={cn(
         "flex flex-col items-center justify-center p-6 md:p-8 rounded-2xl md:rounded-3xl",
-        isDark 
-          ? "bg-black/20 border border-white/10 backdrop-blur-md" 
+        isDark
+          ? "bg-black/20 border border-white/10 backdrop-blur-md"
           : "bg-white/80 border border-black/10 backdrop-blur-md"
       )}>
         <motion.div
@@ -162,8 +191,8 @@ export default function TextChatInterface({
   return (
     <div className={cn(
       "flex flex-col rounded-2xl md:rounded-3xl overflow-hidden",
-      isDark 
-        ? "bg-black/20 border border-white/10 backdrop-blur-md" 
+      isDark
+        ? "bg-black/20 border border-white/10 backdrop-blur-md"
         : "bg-white/80 border border-black/10 backdrop-blur-md",
       compact ? "h-[500px]" : "h-[600px] md:h-[700px]"
     )}>
@@ -210,57 +239,112 @@ export default function TextChatInterface({
       {/* Messages area */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         <AnimatePresence>
-          {messages.map((message, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className={cn(
-                "flex gap-3",
-                message.speaker === 'user' ? "justify-end" : "justify-start"
-              )}
-            >
-              {message.speaker === 'agent' && (
-                <div className={cn(
-                  "w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0",
-                  isDark ? "bg-blue-500/20" : "bg-blue-100"
-                )}>
-                  <Bot className={cn(
-                    "w-4 h-4",
-                    isDark ? "text-blue-400" : "text-blue-600"
-                  )} />
-                </div>
-              )}
-              
-              <div className={cn(
-                "max-w-[80%] md:max-w-[70%] rounded-lg px-4 py-2",
-                message.speaker === 'user'
-                  ? isDark
-                    ? "bg-blue-500 text-white"
-                    : "bg-blue-600 text-white"
-                  : isDark
-                    ? "bg-white/10 text-white border border-white/10"
-                    : "bg-gray-100 text-gray-900 border border-gray-200"
-              )}>
-                <p className="text-sm md:text-base whitespace-pre-wrap break-words">
-                  {message.text}
-                </p>
-              </div>
+          {messages.map((message, index) => {
+            const reasoning = messageReasonings.get(index);
+            const isExpanded = expandedReasonings.has(index);
 
-              {message.speaker === 'user' && (
-                <div className={cn(
-                  "w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0",
-                  isDark ? "bg-gray-500/20" : "bg-gray-200"
-                )}>
-                  <User className={cn(
-                    "w-4 h-4",
-                    isDark ? "text-gray-400" : "text-gray-600"
-                  )} />
+            return (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className={cn(
+                  "flex gap-3",
+                  message.speaker === 'user' ? "justify-end" : "justify-start"
+                )}
+              >
+                {message.speaker === 'agent' && (
+                  <div className={cn(
+                    "w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0",
+                    isDark ? "bg-blue-500/20" : "bg-blue-100"
+                  )}>
+                    <Bot className={cn(
+                      "w-4 h-4",
+                      isDark ? "text-blue-400" : "text-blue-600"
+                    )} />
+                  </div>
+                )}
+
+                <div className="flex flex-col gap-2 max-w-[80%] md:max-w-[70%]">
+                  {/* Reasoning panel - only for agent messages with reasoning */}
+                  {message.speaker === 'agent' && reasoning && (
+                    <div className={cn(
+                      "rounded-lg overflow-hidden",
+                      isDark ? "bg-purple-500/10 border border-purple-500/20" : "bg-purple-50 border border-purple-200"
+                    )}>
+                      <button
+                        onClick={() => toggleReasoning(index)}
+                        className={cn(
+                          "w-full flex items-center gap-2 px-3 py-2 text-xs font-medium transition-colors",
+                          isDark
+                            ? "text-purple-300 hover:bg-purple-500/20"
+                            : "text-purple-700 hover:bg-purple-100"
+                        )}
+                      >
+                        <Brain className="w-3 h-3" />
+                        <span>Thought for {reasoning.thinkingTime}s</span>
+                        {isExpanded ? (
+                          <ChevronDown className="w-3 h-3 ml-auto" />
+                        ) : (
+                          <ChevronRight className="w-3 h-3 ml-auto" />
+                        )}
+                      </button>
+
+                      <AnimatePresence>
+                        {isExpanded && (
+                          <motion.div
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: 'auto', opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            transition={{ duration: 0.2 }}
+                            className="overflow-hidden"
+                          >
+                            <div className={cn(
+                              "px-3 py-2 text-xs whitespace-pre-wrap border-t max-h-48 overflow-y-auto",
+                              isDark
+                                ? "text-purple-200/80 border-purple-500/20"
+                                : "text-purple-800/80 border-purple-200"
+                            )}>
+                              {reasoning.reasoning}
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  )}
+
+                  {/* Message bubble */}
+                  <div className={cn(
+                    "rounded-lg px-4 py-2",
+                    message.speaker === 'user'
+                      ? isDark
+                        ? "bg-blue-500 text-white"
+                        : "bg-blue-600 text-white"
+                      : isDark
+                        ? "bg-white/10 text-white border border-white/10"
+                        : "bg-gray-100 text-gray-900 border border-gray-200"
+                  )}>
+                    <p className="text-sm md:text-base whitespace-pre-wrap break-words">
+                      {message.text}
+                    </p>
+                  </div>
                 </div>
-              )}
-            </motion.div>
-          ))}
+
+                {message.speaker === 'user' && (
+                  <div className={cn(
+                    "w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0",
+                    isDark ? "bg-gray-500/20" : "bg-gray-200"
+                  )}>
+                    <User className={cn(
+                      "w-4 h-4",
+                      isDark ? "text-gray-400" : "text-gray-600"
+                    )} />
+                  </div>
+                )}
+              </motion.div>
+            )
+          })}
         </AnimatePresence>
 
         {isProcessing && (
@@ -280,8 +364,8 @@ export default function TextChatInterface({
             </div>
             <div className={cn(
               "px-4 py-2 rounded-lg",
-              isDark 
-                ? "bg-white/10 text-white border border-white/10" 
+              isDark
+                ? "bg-white/10 text-white border border-white/10"
                 : "bg-gray-100 text-gray-900 border border-gray-200"
             )}>
               <div className="flex gap-1">
@@ -297,7 +381,7 @@ export default function TextChatInterface({
       </div>
 
       {/* Input area */}
-      <form 
+      <form
         onSubmit={handleSubmit}
         className={cn(
           "p-4 border-t",
