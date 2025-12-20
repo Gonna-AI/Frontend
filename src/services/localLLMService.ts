@@ -1,8 +1,7 @@
 /**
  * Local LLM Service for ClerkTree
  * 
- * Provides fallback AI using local Ollama service
- * Running on another laptop via cloudflare tunnel
+ * Provides AI using local service via cloudflare tunnel
  * 
  * API: https://packs-measures-down-dakota.trycloudflare.com/completion
  * Uses simple prompt-based completion endpoint
@@ -16,20 +15,13 @@ import {
   KnowledgeBaseConfig 
 } from '../contexts/DemoCallContext';
 
-// Configuration - using local Ollama service via cloudflare tunnel
-const OLLAMA_URL = import.meta.env.VITE_OLLAMA_URL || 'https://packs-measures-down-dakota.trycloudflare.com';
-const OLLAMA_MODEL = import.meta.env.VITE_OLLAMA_MODEL || 'qwen3:0.6b';
+// Configuration - using local service via cloudflare tunnel
+const LLM_URL = import.meta.env.VITE_OLLAMA_URL || 'https://packs-measures-down-dakota.trycloudflare.com';
 
-// Context limit - reduced for 8GB RAM (saves ~300MB vs 4096)
-const MAX_CONTEXT = 2048;
+// Number of tokens to generate per response
+const N_PREDICT = 256;
 
-// Keep model loaded to avoid wake-up lag ("5m" = 5 minutes, "-1" = forever)
-const KEEP_ALIVE = "5m";
-
-// Enable streaming for instant character-by-character responses
-const USE_STREAMING = true;
-
-// Ollama-native tools format for Qwen3 0.6B
+// Tool definitions (for reference, not used with simple API)
 const OLLAMA_TOOLS = [
   {
     type: 'function',
@@ -171,20 +163,19 @@ interface OllamaToolCall {
 
 class LocalLLMService {
   private isAvailable: boolean | null = null;
-  private modelName: string = OLLAMA_MODEL;
 
   /**
-   * Check if Ollama service is running and available
+   * Check if Local LLM service is running and available
    */
   async checkAvailability(): Promise<boolean> {
     try {
       // Log the actual URL being used
-      console.log(`🔍 Checking Ollama availability...`);
-      console.log(`   URL: ${OLLAMA_URL}`);
+      console.log(`🔍 Checking Local LLM availability...`);
+      console.log(`   URL: ${LLM_URL}`);
       console.log(`   Env Var: ${import.meta.env.VITE_OLLAMA_URL || 'NOT SET (using default)'}`);
       
       // Test the /completion endpoint with a simple prompt
-      const testResponse = await fetch(`${OLLAMA_URL}/completion`, {
+      const testResponse = await fetch(`${LLM_URL}/completion`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -198,7 +189,7 @@ class LocalLLMService {
       
       if (!testResponse.ok) {
         const errorText = await testResponse.text().catch(() => 'Unknown error');
-        console.error(`❌ Ollama not available: HTTP ${testResponse.status} at ${OLLAMA_URL}`);
+        console.error(`❌ Local LLM service not available: HTTP ${testResponse.status} at ${LLM_URL}`);
         console.error(`   Error: ${errorText}`);
         this.isAvailable = false;
         return false;
@@ -207,7 +198,7 @@ class LocalLLMService {
       const testData = await testResponse.json();
       if (testData.content !== undefined) {
         this.isAvailable = true;
-        console.log(`✅ Local LLM service available at ${OLLAMA_URL}`);
+        console.log(`✅ Local LLM service available at ${LLM_URL}`);
         return true;
       }
       
@@ -216,13 +207,13 @@ class LocalLLMService {
 
     } catch (e) {
       const errorMsg = e instanceof Error ? e.message : String(e);
-      console.error(`❌ Ollama connection failed at ${OLLAMA_URL}`);
+      console.error(`❌ Local LLM connection failed at ${LLM_URL}`);
       console.error(`   Error: ${errorMsg}`);
       console.error(`   Error Type: ${e instanceof Error ? e.constructor.name : typeof e}`);
       
       if (errorMsg.includes('Failed to fetch') || errorMsg.includes('NetworkError')) {
         console.error('   💡 This is likely a CORS or network issue.');
-        console.error('   💡 Check if the local Ollama service is running and accessible.');
+        console.error('   💡 Check if the local service is running and accessible via cloudflare tunnel.');
         console.error('   💡 Verify the URL in Netlify environment variables matches your cloudflare tunnel URL.');
       } else if (errorMsg.includes('timeout')) {
         console.error('   💡 Connection timed out. Service might be slow or down.');
@@ -244,7 +235,7 @@ class LocalLLMService {
   }
 
   /**
-   * Build system prompt optimized for Qwen3 0.6B
+   * Build system prompt for the AI
    */
   private buildSystemPrompt(config: KnowledgeBaseConfig, existingFields: ExtractedField[]): string {
     const categoryList = config.categories.map(c => `- ${c.id}: ${c.name}`).join('\n');
@@ -272,7 +263,7 @@ ${config.customInstructions.length > 0 ? 'INSTRUCTIONS:\n' + config.customInstru
   }
 
   /**
-   * Generate response using Ollama with native tool calling
+   * Generate response using Local LLM service
    */
   async generateResponse(
     userMessage: string,
@@ -314,9 +305,9 @@ ${config.customInstructions.length > 0 ? 'INSTRUCTIONS:\n' + config.customInstru
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
-        const errorMsg = errorData.error || `Ollama error: ${response.status}`;
-        console.error(`❌ Ollama API error (${response.status}):`, errorMsg);
-        throw new Error(`Ollama error: ${response.status} - ${errorMsg}`);
+        const errorMsg = errorData.error || `Local LLM error: ${response.status}`;
+        console.error(`❌ Local LLM API error (${response.status}):`, errorMsg);
+        throw new Error(`Local LLM error: ${response.status} - ${errorMsg}`);
       }
 
       const data = await response.json();
@@ -334,8 +325,7 @@ ${config.customInstructions.length > 0 ? 'INSTRUCTIONS:\n' + config.customInstru
   }
 
   /**
-   * Parse Ollama response with tool calls
-   * Handles empty tool call edge cases with smarter confirmation responses
+   * Parse Local LLM response (unused with simple API, kept for compatibility)
    */
   private parseOllamaResponse(
     data: { message?: { content?: string; tool_calls?: OllamaToolCall[] } },
@@ -489,18 +479,18 @@ ${priority ? `PRIORITY: ${priority}` : ''}
 If the caller's name was mentioned in the conversation, extract it using extract_caller_info FIRST, then provide a concise summary with key points.`;
 
     try {
-      const response = await fetch(`${OLLAMA_URL}/completion`, {
+      const response = await fetch(`${LLM_URL}/completion`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           prompt: prompt,
-          n_predict: 256, // Number of tokens to predict
+          n_predict: N_PREDICT,
         }),
         signal: AbortSignal.timeout(60000),
       });
 
       if (!response.ok) {
-        throw new Error(`Ollama error: ${response.status}`);
+        throw new Error(`Local LLM error: ${response.status}`);
       }
 
       const data = await response.json();
@@ -534,10 +524,10 @@ If the caller's name was mentioned in the conversation, extract it using extract
   }
 
   /**
-   * Get the model name being used
+   * Get the service URL being used
    */
-  getModelName(): string {
-    return this.modelName;
+  getServiceUrl(): string {
+    return LLM_URL;
   }
 }
 
@@ -546,8 +536,7 @@ export const localLLMService = new LocalLLMService();
 
 // Initialize on import
 localLLMService.initialize().catch(() => {
-  console.log('💡 To enable local AI fallback, install Ollama and run:');
-  console.log('   ollama run qwen3:0.6b');
+  console.log('💡 To enable local AI, make sure your cloudflare tunnel is running.');
 });
 
 export default localLLMService;

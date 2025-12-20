@@ -96,7 +96,7 @@ export default function KnowledgeBase({ isDark = true }: KnowledgeBaseProps) {
       const localAvailable = await localLLMService.initialize();
       setLocalLLMConnected(localAvailable);
       if (localAvailable) {
-        setLocalLLMModel(localLLMService.getModelName());
+        setLocalLLMModel(localLLMService.getServiceUrl());
       }
     } catch (error) {
       setGeminiConnected(false);
@@ -1069,9 +1069,9 @@ export default function KnowledgeBase({ isDark = true }: KnowledgeBaseProps) {
             isDark ? "text-white/40" : "text-black/40"
           )}>
             {geminiConnected 
-              ? `Gemini → ${localLLMConnected ? 'Qwen3 (Local) →' : ''} Mock • Changes apply to next call`
+              ? `Gemini → ${localLLMConnected ? 'Local LLM →' : ''} Mock • Changes apply to next call`
               : localLLMConnected
-                ? `Qwen3 (Local) → Mock • Install Ollama for local AI`
+                ? `Local LLM → Mock • Check cloudflare tunnel is running`
                 : 'Using Smart Mock • Install Ollama for local AI fallback'
             }
           </p>
