@@ -616,6 +616,7 @@ RESPONSE INSTRUCTIONS:
 
   /**
    * Generate call summary using local LLM
+   * Uses OpenAI-compatible chat completions endpoint for better reliability
    */
   async summarizeCall(
     messages: CallMessage[],
@@ -634,34 +635,78 @@ RESPONSE INSTRUCTIONS:
       throw new Error('Local LLM not available');
     }
 
-    // Format transcript concisely
-    const transcript = messages.slice(-20).map(m =>
-      `${m.speaker === 'agent' ? 'AI' : 'Caller'}: ${m.text}`
+    // Use longer timeout for summary generation (3 minutes)
+    const SUMMARY_TIMEOUT = 180000;
+
+    // Format transcript concisely - limit to last 10 messages for faster processing
+    const recentMessages = messages.slice(-10);
+    const transcript = recentMessages.map(m =>
+      `${m.speaker === 'agent' ? 'AI' : 'Caller'}: ${m.text.slice(0, 200)}`
     ).join('\n');
 
     const extractedText = extractedFields.map(f => `${f.label}: ${f.value}`).join(', ');
-    const callerName = extractedFields.find(f => f.id === 'name')?.value;
 
-    const prompt = `Summarize this call transcript. IMPORTANT: First extract the caller's name if mentioned but not yet extracted.
+    // Try to find caller name from extracted fields first
+    let callerName = extractedFields.find(f => f.id === 'name')?.value;
 
-TRANSCRIPT:
+    // If no name in fields, try to extract from messages
+    if (!callerName) {
+      for (const msg of messages) {
+        if (msg.speaker === 'user') {
+          // Look for name patterns
+          const patterns = [
+            /(?:my name is|i'?m|this is|i am)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)/i,
+            /^([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)\s+(?:here|calling|speaking)/i,
+          ];
+          for (const pattern of patterns) {
+            const match = msg.text.match(pattern);
+            if (match?.[1] && match[1].length > 2) {
+              callerName = match[1].trim();
+              break;
+            }
+          }
+          if (callerName) break;
+        }
+      }
+    }
+
+    // Build system prompt for summarization
+    const systemPrompt = `You are a call summarization assistant. Analyze the conversation and provide:
+1. A brief one-sentence summary
+2. Key points (2-3 bullet points)
+3. Sentiment (positive, neutral, or negative)
+4. Whether follow-up is needed
+
+Be concise. Respond in this JSON format:
+{"summary": "...", "mainPoints": ["...", "..."], "sentiment": "neutral", "followUpRequired": false, "notes": "..."}`;
+
+    const userPrompt = `Summarize this conversation:
+
 ${transcript}
 
-EXTRACTED INFO: ${extractedText || 'None'}
-${category ? `CATEGORY: ${category.name}` : ''}
-${priority ? `PRIORITY: ${priority}` : ''}
+${callerName ? `Caller Name: ${callerName}` : 'Caller name: Unknown'}
+${extractedText ? `Extracted Info: ${extractedText}` : ''}
+${category ? `Category: ${category.name}` : ''}
+${priority ? `Priority: ${priority}` : ''}
 
-If the caller's name was mentioned in the conversation, extract it using extract_caller_info FIRST, then provide a concise summary with key points.`;
+Respond with a brief JSON summary.`;
 
     try {
-      const response = await fetch(`${LLM_URL}/completion`, {
+      console.log('📝 Generating summary with chat completions API...');
+
+      const response = await fetch(`${LLM_URL}/v1/chat/completions`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          prompt: prompt,
-          n_predict: N_PREDICT,
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: userPrompt }
+          ],
+          max_tokens: 512, // Keep response short for speed
+          temperature: 0.3, // Lower temperature for more consistent output
+          stream: false
         }),
-        signal: AbortSignal.timeout(REQUEST_TIMEOUT),
+        signal: AbortSignal.timeout(SUMMARY_TIMEOUT),
       });
 
       if (!response.ok) {
@@ -669,27 +714,66 @@ If the caller's name was mentioned in the conversation, extract it using extract
       }
 
       const data = await response.json();
+      const rawResponse = data.choices?.[0]?.message?.content || data.content || '';
+
+      console.log('📝 Summary raw response:', rawResponse.slice(0, 200));
 
       // Parse the response - separate reasoning from final answer
-      const rawResponse = data.content || '';
       const { answer: textResponse } = this.parseReasoningResponse(rawResponse);
       const finalText = textResponse || rawResponse;
 
-      // Try to extract a simple summary (first sentence or first 200 chars)
+      // Try to parse as JSON first
+      let parsedSummary = null;
+      try {
+        // Look for JSON in the response
+        const jsonMatch = finalText.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          parsedSummary = JSON.parse(jsonMatch[0]);
+        }
+      } catch {
+        console.log('Could not parse summary as JSON, using text fallback');
+      }
+
+      if (parsedSummary) {
+        return {
+          summary: parsedSummary.summary || 'Call completed',
+          mainPoints: Array.isArray(parsedSummary.mainPoints) ? parsedSummary.mainPoints : [parsedSummary.summary || 'Call completed'],
+          sentiment: ['positive', 'neutral', 'negative'].includes(parsedSummary.sentiment) ? parsedSummary.sentiment : 'neutral',
+          followUpRequired: parsedSummary.followUpRequired === true || priority === 'high' || priority === 'critical',
+          notes: parsedSummary.notes || finalText,
+          callerName: callerName
+        };
+      }
+
+      // Fallback: extract summary from text
       const summary = finalText.split('.')[0] || finalText.slice(0, 200) || 'Call completed';
 
       return {
         summary: summary,
-        mainPoints: [textResponse.slice(0, 100) || 'Call completed'],
-        sentiment: 'neutral', // Can't detect sentiment from simple API
+        mainPoints: [summary],
+        sentiment: 'neutral',
         followUpRequired: priority === 'high' || priority === 'critical',
-        notes: textResponse,
+        notes: finalText,
         callerName: callerName
       };
 
     } catch (error) {
       console.error('Local LLM summary error:', error);
-      throw error;
+
+      // Return a basic summary on error instead of throwing
+      // This ensures the call still saves with at least basic info
+      const basicSummary = messages.length > 0
+        ? `Conversation with ${messages.filter(m => m.speaker === 'user').length} user messages`
+        : 'Call completed';
+
+      return {
+        summary: basicSummary,
+        mainPoints: [basicSummary],
+        sentiment: 'neutral',
+        followUpRequired: priority === 'high' || priority === 'critical',
+        notes: `Summary generation failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        callerName: callerName
+      };
     }
   }
 
