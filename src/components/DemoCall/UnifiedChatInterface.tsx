@@ -294,7 +294,15 @@ export default function UnifiedChatInterface({ isDark = true }: UnifiedChatInter
     // End text chat and save to history
     const endTextChat = useCallback(async () => {
         setAgentStatus('idle');
+        setInputMessage('');
+        setCurrentTranscript('');
+        setMessageReasonings(new Map());
+        setExpandedReasonings(new Set());
+        pendingMessageRef.current = null;
+        aiService.resetState(); // Clear AI conversation context
         await endCall();
+        // Force focus back to input after ending
+        setTimeout(() => inputRef.current?.focus(), 100);
     }, [endCall]);
 
     const toggleMute = useCallback(() => {

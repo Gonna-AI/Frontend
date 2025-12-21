@@ -297,92 +297,34 @@ class LocalLLMService {
 
   /**
    * Build system prompt for the AI
-   * Instructs the model to naturally extract information and include metadata in response
+   * OPTIMIZED FOR SMALL MODELS (phi3-mini, etc.)
+   * Keep it SHORT and SIMPLE - small models get confused by complex prompts
    */
   private buildSystemPrompt(config: KnowledgeBaseConfig, existingFields: ExtractedField[]): string {
-    const extractedInfo = existingFields.length > 0
-      ? existingFields.map(f => `${f.label}: ${f.value}`).join(', ')
+    // For small models: SIMPLE IS BETTER
+    // Don't include complex instructions or templates - they get echoed
+
+    const knownInfo = existingFields.length > 0
+      ? `\nYou already know: ${existingFields.map(f => `${f.label}=${f.value}`).join(', ')}`
       : '';
 
-    // Build comprehensive prompt from Knowledge Base
-    let prompt = '';
+    // Ultra-simple prompt for small models
+    const prompt = `You are a friendly receptionist for ClerkTree company. Have a natural conversation.
 
-    // 1. Use the custom system prompt if provided
-    if (config.systemPrompt && config.systemPrompt.trim()) {
-      prompt += config.systemPrompt.trim();
-    } else {
-      prompt += 'You are a helpful AI call assistant.';
-    }
+RULES:
+- Give SHORT, direct responses (1-3 sentences max)
+- Be helpful and friendly
+- Ask for caller's name if you don't know it
+- Ask what they need help with
+- Do NOT output templates or placeholders
+- Do NOT say things in parentheses like "(if user...)"
+${knownInfo}
 
-    // 2. Add persona/character
-    if (config.persona && config.persona.trim() &&
-      config.persona !== 'Professional, empathetic, and efficient AI assistant') {
-      const lowerPersona = config.persona.toLowerCase();
-      const isValidPersona = !lowerPersona.startsWith("i'm ") &&
-        !lowerPersona.startsWith("i am ") &&
-        !lowerPersona.includes("can you") &&
-        !lowerPersona.includes("please help");
-      if (isValidPersona) {
-        prompt += `\n\nYour personality: ${config.persona}`;
-      }
-    }
-
-    // 3. Add custom instructions
-    if (config.customInstructions && config.customInstructions.length > 0) {
-      prompt += '\n\nInstructions:\n';
-      config.customInstructions.forEach((instruction, i) => {
-        prompt += `${i + 1}. ${instruction}\n`;
-      });
-    }
-
-    // 4. Add response guidelines
-    if (config.responseGuidelines && config.responseGuidelines.trim()) {
-      prompt += `\n\n${config.responseGuidelines}`;
-    }
-
-    // 5. Define context fields to extract (for name, contact, purpose, etc.)
-    if (config.contextFields && config.contextFields.length > 0) {
-      prompt += '\n\nDuring the conversation, naturally gather the following information when the caller provides it:';
-      config.contextFields.forEach(field => {
-        const required = field.required ? ' (important)' : '';
-        prompt += `\n- ${field.name}: ${field.description}${required}`;
-      });
-    }
-
-    // 6. Add categories for classification
-    if (config.categories && config.categories.length > 0) {
-      prompt += '\n\nCall categories: ';
-      prompt += config.categories.map(c => `${c.name} (${c.description})`).join(', ');
-    }
-
-    // 7. Add priority rules
-    if (config.priorityRules && config.priorityRules.length > 0) {
-      prompt += '\n\nPriority assessment:';
-      config.priorityRules.forEach(rule => {
-        prompt += `\n- ${rule}`;
-      });
-    }
-
-    // 8. Add already extracted information
-    if (extractedInfo) {
-      prompt += `\n\nInformation already gathered from caller: ${extractedInfo}`;
-    }
-
-    // 9. Add greeting if this might be the start of a conversation
-    if (config.greeting && config.greeting.trim() && existingFields.length === 0) {
-      prompt += `\n\nFor first message, greet with: "${config.greeting}"`;
-    }
-
-    // 10. IMPORTANT: Instruct model to include extracted metadata as JSON
-    // Simplified for smaller models
-    prompt += `\n\n---
-RESPONSE INSTRUCTIONS:
-1. Respond naturally to the user first.
-2. If you detected any new info (name, purpose, contact), append it at the end in this format:
+When you learn someone's name or what they need, add at the end:
 \`\`\`json
-{"extracted": {"name": "...", "purpose": "..."}}
+{"extracted":{"name":"their name","purpose":"what they need"}}
 \`\`\`
-`;
+Only add this JSON if you learned new info.`;
 
     return prompt;
   }
