@@ -260,22 +260,17 @@ class LocalLLMService {
     cleaned = cleaned.replace(/^(?:I am|I'm|You are|You're)\s+(?:a\s+)?(?:helpful\s+)?(?:AI|assistant|helper|bot)[^.]*\./i, '');
 
     // IMPORTANT: Remove garbage patterns that indicate model confusion
-    // "Test instruction X" patterns
-    cleaned = cleaned.replace(/Test instruction \d+[\s\S]*?(?=(?:Test instruction|\n\n|$))/gi, '');
-    // "User: I am a robot" type patterns (model echoing training data)
-    cleaned = cleaned.replace(/^User:\s*I am a robot[\s\S]*/gim, '');
-    // Remove any lines that look like training data markers
-    cleaned = cleaned.replace(/^(?:User|Human|Assistant):\s*$/gim, '');
-    // Remove consecutive role markers without content
-    cleaned = cleaned.replace(/(?:Human|User|Assistant):\s*\n+(?:Human|User|Assistant):/gi, '');
 
-    // Clean up excessive whitespace
-    cleaned = cleaned
-      .replace(/^\s*\n+/g, '')
-      .replace(/\n{3,}/g, '\n\n')
-      .trim();
+    // Training data markers like BEGININPUT, ENDINPUT, BEGINCONTEXT, etc.
+    cleaned = cleaned.replace(/BEGININPUT\*?[\s\S]*?\*?ENDINPUT\*?/gi, '');
+    cleaned = cleaned.replace(/BEGINCONTEXT[\s\S]*?ENDCONTEXT/gi, '');
+    cleaned = cleaned.replace(/BEGININPUT\s*/gi, '');
+    cleaned = cleaned.replace(/\s*ENDINPUT/gi, '');
+    cleaned = cleaned.replace(/BEGINCONTEXT\s*/gi, '');
+    cleaned = cleaned.replace(/\s*ENDCONTEXT/gi, '');
 
-    // SAFETY: If cleaning resulted in empty but original had content, use original
+    // Remove special tokens that models use internally
+    // Match patterns like <|assistant|>, 
     if (!cleaned && text.trim()) {
       console.warn('⚠️ cleanFinalAnswer stripped all content, using original text');
       // As a last resort, try to extract just the first sentence
@@ -336,6 +331,7 @@ class LocalLLMService {
 
   /**
    * Generate response using Local LLM service
+   * Uses OpenAI-compatible /v1/chat/completions API with proper JSON structure
    */
   async generateResponse(
     userMessage: string,
@@ -349,41 +345,54 @@ class LocalLLMService {
 
     const systemPrompt = this.buildSystemPrompt(knowledgeBase, existingFields);
 
-    // For small models (0.6B), use VERY simple prompt format
-    // Only include last 2 messages to keep context minimal
-    const recentHistory = conversationHistory.slice(-2);
+    // Build messages array in OpenAI chat format
+    // Only include last 4 messages to keep context minimal for small models
+    const recentHistory = conversationHistory.slice(-4);
 
-    // Build a simple chat-style prompt - works better for small models
-    let prompt = `${systemPrompt}\n\n`;
+    interface ChatMessage {
+      role: 'system' | 'user' | 'assistant';
+      content: string;
+    }
 
-    // Add minimal conversation history
+    const messages: ChatMessage[] = [
+      {
+        role: 'system',
+        content: systemPrompt
+      }
+    ];
+
+    // Add conversation history
     for (const msg of recentHistory) {
-      const role = msg.speaker === 'agent' ? 'AI' : 'User';
+      const role = msg.speaker === 'agent' ? 'assistant' : 'user';
       const cleanedText = msg.speaker === 'agent' ? this.cleanFinalAnswer(msg.text) : msg.text;
-      if (cleanedText.trim() && cleanedText.length < 200) { // Skip long messages for small models
-        prompt += `${role}: ${cleanedText}\n`;
+      if (cleanedText.trim() && cleanedText.length < 500) {
+        messages.push({
+          role: role as 'user' | 'assistant',
+          content: cleanedText
+        });
       }
     }
 
-    // Simple format: just User/AI
-    prompt += `User: ${userMessage}\nAI:`;
+    // Add the current user message
+    messages.push({
+      role: 'user',
+      content: userMessage
+    });
 
-    console.log('📝 Prompt length:', prompt.length, 'chars');
-    console.log('📝 Prompt preview:', prompt.substring(0, 200) + '...');
+    console.log('📝 Chat messages:', messages.length);
+    console.log('📝 System prompt:', systemPrompt.substring(0, 100) + '...');
+    console.log('📝 User message:', userMessage);
 
     try {
-      const response = await fetch(`${LLM_URL}/completion`, {
+      // Use OpenAI-compatible chat completions endpoint
+      const response = await fetch(`${LLM_URL}/v1/chat/completions`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          prompt: prompt,
-          n_predict: N_PREDICT,
-          // Stop sequences for simple format - including Persona to prevent echo
-          stop: ['\nUser:', '\n\nUser:', '\nHuman:', '\n\n\n', '\nPersona:', 'Persona:'],
-          // Higher temperature for small models can help
-          temperature: 0.8,
-          // Repetition penalty to avoid loops
-          repeat_penalty: 1.1,
+          messages: messages,
+          max_tokens: N_PREDICT,
+          temperature: 0.7,
+          stream: false
         }),
         signal: AbortSignal.timeout(REQUEST_TIMEOUT),
       });
@@ -397,8 +406,9 @@ class LocalLLMService {
 
       const data = await response.json();
 
-      // Parse the response - separate reasoning from final answer
-      const rawResponse = data.content || '';
+      // Extract response from OpenAI-compatible format
+      // Response is in data.choices[0].message.content
+      const rawResponse = data.choices?.[0]?.message?.content || data.content || '';
 
       console.log('📥 Raw response length:', rawResponse.length, 'chars');
 
@@ -430,7 +440,6 @@ class LocalLLMService {
       throw error;
     }
   }
-
 
 
   /**
