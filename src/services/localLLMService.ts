@@ -375,22 +375,15 @@ class LocalLLMService {
 
     // 10. IMPORTANT: Instruct model to include extracted metadata as JSON
     prompt += `\n\n---
-IMPORTANT: After your natural response, if you detected or extracted any information from the user's message, include a JSON block at the very end like this:
+RESPONSE FORMAT:
+1. First write your natural conversational response to help the caller
+2. Then at the END only, add any extracted info as a JSON code block:
 
 \`\`\`json
-{
-  "extracted": {
-    "name": "caller's name if mentioned",
-    "purpose": "reason for calling if clear",
-    "contact": "phone/email if provided"
-  },
-  "priority": "critical|high|medium|low based on urgency",
-  "category": "category id that best matches"
-}
+{"extracted":{"name":"...","purpose":"..."},"priority":"low|medium|high|critical","category":"..."}
 \`\`\`
 
-Only include fields that were actually detected. If nothing was extracted, skip the JSON block entirely.
-Your natural conversational response comes FIRST, then the JSON if applicable.`;
+Only include fields you actually detected. Natural response MUST come first!`;
 
     return prompt;
   }
