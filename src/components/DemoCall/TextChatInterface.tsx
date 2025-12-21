@@ -49,7 +49,7 @@ export default function TextChatInterface({
 
   // Start a new chat
   const handleStartChat = useCallback(async () => {
-    startCall();
+    startCall('text');
     setIsProcessing(false);
     setMessageReasonings(new Map());
     setExpandedReasonings(new Set());
