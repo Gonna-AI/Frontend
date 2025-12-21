@@ -221,7 +221,7 @@ function DemoDashboardContent() {
   const navigate = useNavigate();
   const [isDark] = useState(true);
   const [activeTab, setActiveTab] = useState<'monitor' | 'knowledge' | 'history'>('monitor');
-  const { getAnalytics, currentCall, getCurrentUserId, switchSession, knowledgeBase, saveKnowledgeBase } = useDemoCall();
+  const { getAnalytics, currentCall, getCurrentUserId, switchSession, knowledgeBase, saveKnowledgeBase, globalActiveSessions } = useDemoCall();
 
   const analytics = getAnalytics();
 
@@ -311,34 +311,41 @@ function DemoDashboardContent() {
               />
             </div>
 
-            {/* Call Status Indicator - Shows active session type */}
-            {currentCall?.status === 'active' && (
-              <div className={cn(
-                "flex items-center gap-1.5 px-2 md:px-3 py-1 md:py-1.5 rounded-full",
-                currentCall.type === 'voice'
-                  ? isDark
-                    ? "bg-teal-500/20 border border-teal-500/30"
-                    : "bg-teal-500/10 border border-teal-500/20"
-                  : isDark
-                    ? "bg-blue-500/20 border border-blue-500/30"
-                    : "bg-blue-500/10 border border-blue-500/20"
-              )}>
-                <div className={cn(
-                  "w-1.5 h-1.5 md:w-2 md:h-2 rounded-full animate-pulse",
-                  currentCall.type === 'voice' ? "bg-teal-500" : "bg-blue-500"
-                )} />
-                <span className={cn(
-                  "text-xs md:text-sm font-medium hidden sm:inline",
-                  currentCall.type === 'voice' ? "text-teal-400" : "text-blue-400"
-                )}>
-                  {currentCall.type === 'voice' ? '1 Call Active' : '1 Chat Active'}
-                </span>
-                <span className={cn(
-                  "text-xs font-medium sm:hidden",
-                  currentCall.type === 'voice' ? "text-teal-400" : "text-blue-400"
-                )}>
-                  1
-                </span>
+            {/* Call Status Indicator - Shows global active sessions */}
+            {(globalActiveSessions.voice > 0 || globalActiveSessions.text > 0 || currentCall?.status === 'active') && (
+              <div className="flex items-center gap-2">
+                {/* Voice calls indicator */}
+                {(globalActiveSessions.voice > 0 || (currentCall?.status === 'active' && currentCall.type === 'voice')) && (
+                  <div className={cn(
+                    "flex items-center gap-1.5 px-2 md:px-3 py-1 md:py-1.5 rounded-full",
+                    isDark
+                      ? "bg-teal-500/20 border border-teal-500/30"
+                      : "bg-teal-500/10 border border-teal-500/20"
+                  )}>
+                    <div className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full animate-pulse bg-teal-500" />
+                    <span className={cn(
+                      "text-xs md:text-sm font-medium text-teal-400"
+                    )}>
+                      {Math.max(globalActiveSessions.voice, currentCall?.status === 'active' && currentCall.type === 'voice' ? 1 : 0)} Call{globalActiveSessions.voice !== 1 ? 's' : ''}
+                    </span>
+                  </div>
+                )}
+                {/* Text chats indicator */}
+                {(globalActiveSessions.text > 0 || (currentCall?.status === 'active' && currentCall.type === 'text')) && (
+                  <div className={cn(
+                    "flex items-center gap-1.5 px-2 md:px-3 py-1 md:py-1.5 rounded-full",
+                    isDark
+                      ? "bg-blue-500/20 border border-blue-500/30"
+                      : "bg-blue-500/10 border border-blue-500/20"
+                  )}>
+                    <div className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full animate-pulse bg-blue-500" />
+                    <span className={cn(
+                      "text-xs md:text-sm font-medium text-blue-400"
+                    )}>
+                      {Math.max(globalActiveSessions.text, currentCall?.status === 'active' && currentCall.type === 'text' ? 1 : 0)} Chat{globalActiveSessions.text !== 1 ? 's' : ''}
+                    </span>
+                  </div>
+                )}
               </div>
             )}
 

@@ -69,7 +69,8 @@ export default function VoiceCallInterface({
     knowledgeBase,
     updateExtractedField,
     setCallPriority,
-    setCallCategory
+    setCallCategory,
+    globalActiveSessions
   } = useDemoCall();
 
   const [callDuration, setCallDuration] = useState(0);
@@ -301,7 +302,8 @@ export default function VoiceCallInterface({
               "text-xs md:text-sm font-medium truncate",
               isDark ? "text-white/80" : "text-black/80"
             )}>
-              {isActive ? (currentCall?.type === 'voice' ? '1 Active Call' : '0 Active Calls') : '0 Active Calls'}
+              {/* Show global + local (if local not yet synced) */}
+              {Math.max(globalActiveSessions.voice, isActive && currentCall?.type === 'voice' ? 1 : 0)} Active Call{globalActiveSessions.voice !== 1 ? 's' : ''}
             </span>
             <span className={cn(
               "text-xs md:text-sm font-medium truncate opacity-60",
@@ -313,7 +315,7 @@ export default function VoiceCallInterface({
               "text-xs md:text-sm font-medium truncate",
               isDark ? "text-white/80" : "text-black/80"
             )}>
-              {isActive ? (currentCall?.type === 'text' ? '1 Active Chat' : '0 Active Chats') : '0 Active Chats'}
+              {Math.max(globalActiveSessions.text, isActive && currentCall?.type === 'text' ? 1 : 0)} Active Chat{globalActiveSessions.text !== 1 ? 's' : ''}
             </span>
           </div>
           {isActive && (
