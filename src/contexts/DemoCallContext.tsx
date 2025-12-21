@@ -124,6 +124,10 @@ interface DemoCallContextType {
     followUpRequired: number;
   };
 
+  // Session management
+  getCurrentUserId: () => string;
+  switchSession: (sessionId: string, config?: Record<string, unknown>) => void;
+
   // Loading state
   isLoading: boolean;
 }
@@ -147,7 +151,7 @@ Always be empathetic, clear, and efficient in your communication.`,
 
   persona: 'Professional, empathetic, and efficient AI assistant',
 
-  greeting: "",
+  greeting: 'Hello! How can I help you today?',
 
   contextFields: [
     { id: 'name', name: 'Caller Name', description: 'Full name of the caller', required: true, type: 'text' },
@@ -262,26 +266,55 @@ export function DemoCallProvider({ children }: { children: ReactNode }) {
   const [callHistory, setCallHistory] = useState<CallHistoryItem[]>([]); // Start with empty - real data only
   const [isLoading, setIsLoading] = useState(true);
 
+  // Get or create a user session ID for user-specific data
+  const getUserId = useCallback(() => {
+    let userId = localStorage.getItem('clerktree_user_id');
+    if (!userId) {
+      userId = `user_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+      localStorage.setItem('clerktree_user_id', userId);
+    }
+    return userId;
+  }, []);
+
+  // Switch to a different session
+  const switchSession = useCallback((sessionId: string, config?: Record<string, unknown>) => {
+    // Update localStorage with new session ID
+    localStorage.setItem('clerktree_user_id', sessionId);
+
+    if (config) {
+      // Update knowledge base with new config
+      setKnowledgeBase({
+        ...defaultKnowledgeBase,  // Start with defaults
+        ...config as Partial<KnowledgeBaseConfig>  // Override with session config
+      } as KnowledgeBaseConfig);
+      localStorage.setItem(KNOWLEDGE_BASE_KEY, JSON.stringify(config));
+      console.log('✅ Switched to session:', sessionId);
+    }
+  }, []);
+
+
   // Load knowledge base and call history on mount
   useEffect(() => {
     const loadData = async () => {
       setIsLoading(true);
 
-      // Try to load from Supabase first, fallback to localStorage
-      try {
-        // Load knowledge base
-        const { data: kbData, error: kbError } = await supabase
-          .from('knowledge_base_config')
-          .select('*')
-          .single();
+      // LOADING ORDER:
+      // 1. Code defaults (already set via useState)
+      // 2. User's localStorage config (if they customized it)
+      // 3. Supabase for call_history only
 
-        if (!kbError && kbData?.config) {
-          setKnowledgeBase(kbData.config as KnowledgeBaseConfig);
-        } else {
-          // Fallback to localStorage
-          const localKB = localStorage.getItem(KNOWLEDGE_BASE_KEY);
-          if (localKB) {
-            setKnowledgeBase(JSON.parse(localKB));
+      try {
+        // Load user's custom knowledge base from localStorage (if any)
+        // This takes precedence over Supabase global config
+        const localKB = localStorage.getItem(KNOWLEDGE_BASE_KEY);
+        if (localKB) {
+          try {
+            const parsed = JSON.parse(localKB);
+            // Merge with defaults to ensure all fields exist
+            setKnowledgeBase(prev => ({ ...prev, ...parsed }));
+            console.log('✅ Loaded user knowledge base from localStorage');
+          } catch (e) {
+            console.warn('Failed to parse localStorage knowledge base:', e);
           }
         }
 
@@ -361,24 +394,28 @@ export function DemoCallProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
-  // Save knowledge base to Supabase
+  // Save knowledge base - user-specific storage
   const saveKnowledgeBase = useCallback(async (): Promise<boolean> => {
     try {
-      // Save to localStorage first (always works)
-      localStorage.setItem(KNOWLEDGE_BASE_KEY, JSON.stringify(knowledgeBase));
+      const userId = getUserId();
 
-      // Try to save to Supabase
+      // Save to localStorage first (always works, fast)
+      localStorage.setItem(KNOWLEDGE_BASE_KEY, JSON.stringify(knowledgeBase));
+      console.log('✅ Saved knowledge base to localStorage');
+
+      // Try to save to Supabase with user ID
       const { error } = await supabase
         .from('knowledge_base_config')
         .upsert({
-          id: 'default',
+          id: userId,  // User-specific ID instead of 'default'
           config: knowledgeBase,
           updated_at: new Date().toISOString()
         });
 
       if (error) {
-        console.warn('Supabase save failed, using localStorage:', error);
-        // localStorage save already done, so still return true
+        console.warn('Supabase save failed (localStorage still saved):', error.message);
+      } else {
+        console.log('✅ Saved knowledge base to Supabase for user:', userId);
       }
 
       return true;
@@ -387,23 +424,29 @@ export function DemoCallProvider({ children }: { children: ReactNode }) {
       // localStorage save already done
       return true;
     }
-  }, [knowledgeBase]);
+  }, [knowledgeBase, getUserId]);
 
-  // Load knowledge base from Supabase
+  // Load user's knowledge base from Supabase (called when user explicitly loads)
   const loadKnowledgeBase = useCallback(async (): Promise<void> => {
     try {
+      const userId = getUserId();
+
+      // Try to load user-specific config
       const { data, error } = await supabase
         .from('knowledge_base_config')
         .select('*')
+        .eq('id', userId)
         .single();
 
       if (!error && data?.config) {
-        setKnowledgeBase(data.config as KnowledgeBaseConfig);
+        setKnowledgeBase(prev => ({ ...prev, ...(data.config as KnowledgeBaseConfig) }));
+        localStorage.setItem(KNOWLEDGE_BASE_KEY, JSON.stringify(data.config));
+        console.log('✅ Loaded user knowledge base from Supabase');
       }
     } catch (error) {
       console.error('Error loading knowledge base:', error);
     }
-  }, []);
+  }, [getUserId]);
 
   const addContextField = useCallback((field: ContextField) => {
     setKnowledgeBase(prev => ({
@@ -647,6 +690,7 @@ export function DemoCallProvider({ children }: { children: ReactNode }) {
           summary: historyItem.summary,
           sentiment: historyItem.summary.sentiment || 'neutral',
           follow_up_required: historyItem.summary.followUpRequired || false  // snake_case
+          // Note: user_id column can be added later for user-specific filtering
         });
 
         if (error) {
@@ -660,7 +704,7 @@ export function DemoCallProvider({ children }: { children: ReactNode }) {
 
       setCurrentCall(null);
     }
-  }, [currentCall, knowledgeBase]);
+  }, [currentCall, knowledgeBase, getUserId]);
 
   const addMessage = useCallback((speaker: 'user' | 'agent', text: string) => {
     // Use functional update to avoid stale closure issues
@@ -776,6 +820,8 @@ export function DemoCallProvider({ children }: { children: ReactNode }) {
     getCallsByPriority,
     getCallsByCategory,
     getAnalytics,
+    getCurrentUserId: getUserId,
+    switchSession,
     isLoading,
   };
 
