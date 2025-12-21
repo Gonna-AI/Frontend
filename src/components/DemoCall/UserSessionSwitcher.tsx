@@ -257,6 +257,34 @@ export default function UserSessionSwitcher({
         setShowWelcomePopup(false);
     };
 
+    // Helper to get consistent color for session
+    const getSessionColor = (id: string, isDark: boolean) => {
+        const colors = [
+            { bg: isDark ? "bg-blue-500/10" : "bg-blue-100", text: isDark ? "text-blue-400" : "text-blue-600" },
+            { bg: isDark ? "bg-purple-500/10" : "bg-purple-100", text: isDark ? "text-purple-400" : "text-purple-600" },
+            { bg: isDark ? "bg-emerald-500/10" : "bg-emerald-100", text: isDark ? "text-emerald-400" : "text-emerald-600" },
+            { bg: isDark ? "bg-amber-500/10" : "bg-amber-100", text: isDark ? "text-amber-400" : "text-amber-600" },
+            { bg: isDark ? "bg-rose-500/10" : "bg-rose-100", text: isDark ? "text-rose-400" : "text-rose-600" },
+            { bg: isDark ? "bg-cyan-500/10" : "bg-cyan-100", text: isDark ? "text-cyan-400" : "text-cyan-600" },
+            { bg: isDark ? "bg-indigo-500/10" : "bg-indigo-100", text: isDark ? "text-indigo-400" : "text-indigo-600" },
+            { bg: isDark ? "bg-orange-500/10" : "bg-orange-100", text: isDark ? "text-orange-400" : "text-orange-600" },
+            { bg: isDark ? "bg-teal-500/10" : "bg-teal-100", text: isDark ? "text-teal-400" : "text-teal-600" },
+            { bg: isDark ? "bg-pink-500/10" : "bg-pink-100", text: isDark ? "text-pink-400" : "text-pink-600" },
+            { bg: isDark ? "bg-lime-500/10" : "bg-lime-100", text: isDark ? "text-lime-400" : "text-lime-600" },
+            { bg: isDark ? "bg-fuchsia-500/10" : "bg-fuchsia-100", text: isDark ? "text-fuchsia-400" : "text-fuchsia-600" },
+            { bg: isDark ? "bg-red-500/10" : "bg-red-100", text: isDark ? "text-red-400" : "text-red-600" },
+            { bg: isDark ? "bg-violet-500/10" : "bg-violet-100", text: isDark ? "text-violet-400" : "text-violet-600" },
+        ];
+
+        let hash = 0;
+        for (let i = 0; i < id.length; i++) {
+            hash = id.charCodeAt(i) + ((hash << 5) - hash);
+        }
+
+        const index = Math.abs(hash) % colors.length;
+        return colors[index];
+    };
+
     return (
         <>
             {/* Session Selector Button */}
@@ -286,153 +314,155 @@ export default function UserSessionSwitcher({
                     <>
                         {/* Backdrop */}
                         <div
-                            className="fixed inset-0 z-40"
+                            className="fixed inset-0 z-40 bg-black/5"
                             onClick={() => setIsOpen(false)}
                         />
 
                         <motion.div
-                            initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                            initial={{ opacity: 0, y: -8, scale: 0.96 }}
                             animate={{ opacity: 1, y: 0, scale: 1 }}
-                            exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                            exit={{ opacity: 0, y: -8, scale: 0.96 }}
+                            transition={{ duration: 0.15, ease: "easeOut" }}
                             className={cn(
-                                "absolute top-full right-0 mt-2 w-64 md:w-72 z-50",
-                                "rounded-xl overflow-hidden shadow-2xl backdrop-blur-xl border",
+                                "absolute top-full right-0 mt-3 w-72 md:w-80 z-50 origin-top-right",
+                                "rounded-2xl overflow-hidden shadow-2xl backdrop-blur-2xl border",
                                 isDark
-                                    ? "bg-black/80 border-white/10"
-                                    : "bg-white/80 border-black/10"
+                                    ? "bg-[#0A0A0A]/90 border-white/10 shadow-black/50"
+                                    : "bg-white/90 border-black/5 shadow-xl"
                             )}
                         >
                             {/* Header */}
                             <div className={cn(
-                                "px-3 md:px-4 py-2.5 md:py-3 border-b",
-                                isDark ? "border-white/10" : "border-black/5"
+                                "px-4 py-3 flex items-center justify-between border-b",
+                                isDark ? "border-white/5 bg-white/[0.02]" : "border-black/5 bg-black/[0.02]"
                             )}>
-                                <div className="flex items-center justify-between">
-                                    <h3 className={cn(
-                                        "text-xs md:text-sm font-medium",
-                                        isDark ? "text-white" : "text-black"
-                                    )}>
-                                        Sessions
-                                    </h3>
-                                    <button
-                                        onClick={() => {
-                                            setShowCreateDialog(true);
-                                            setIsOpen(false);
-                                        }}
-                                        className={cn(
-                                            "flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors",
-                                            isDark
-                                                ? "bg-white text-black hover:bg-white/90"
-                                                : "bg-black text-white hover:bg-black/90"
-                                        )}
-                                    >
-                                        <Plus className="w-3.5 h-3.5" />
-                                        <span>New</span>
-                                    </button>
-                                </div>
+                                <span className={cn(
+                                    "text-xs font-semibold uppercase tracking-wider opacity-70",
+                                    isDark ? "text-white" : "text-black"
+                                )}>
+                                    Switch Session
+                                </span>
+                                <button
+                                    onClick={() => {
+                                        setShowCreateDialog(true);
+                                        setIsOpen(false);
+                                    }}
+                                    className={cn(
+                                        "flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all group",
+                                        isDark
+                                            ? "bg-white text-black hover:bg-white/90"
+                                            : "bg-black text-white hover:bg-black/90"
+                                    )}
+                                >
+                                    <Plus className="w-3.5 h-3.5" />
+                                    <span>New</span>
+                                </button>
                             </div>
 
                             {/* Sessions List */}
-                            <div className="max-h-48 md:max-h-64 overflow-y-auto">
+                            <div className="max-h-[300px] overflow-y-auto scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
                                 {sessions.length === 0 ? (
-                                    <div className={cn(
-                                        "px-4 py-8 text-center",
-                                        isDark ? "text-white/40" : "text-black/40"
-                                    )}>
-                                        <Users className="w-8 h-8 mx-auto mb-3 opacity-50" />
-                                        <p className="text-sm font-medium mb-1">No sessions yet</p>
-                                        <p className="text-xs opacity-70">Create a session to save your settings</p>
+                                    <div className="px-4 py-12 text-center opacity-50">
+                                        <p className="text-sm">No sessions found</p>
                                     </div>
                                 ) : (
-                                    sessions.map(session => (
-                                        <div
-                                            key={session.id}
-                                            onClick={() => switchToSession(session)}
-                                            className={cn(
-                                                "px-3 md:px-4 py-3 cursor-pointer transition-colors group border-b last:border-0",
-                                                isDark ? "border-white/5" : "border-black/5",
-                                                session.id === currentUserId
-                                                    ? isDark
-                                                        ? "bg-white/5"
-                                                        : "bg-black/5"
-                                                    : isDark
-                                                        ? "hover:bg-white/5"
-                                                        : "hover:bg-black/5"
-                                            )}
-                                        >
-                                            <div className="flex items-center justify-between mb-1">
-                                                <div className="flex items-center gap-2 min-w-0">
-                                                    <p className={cn(
-                                                        "text-sm font-medium truncate",
-                                                        isDark ? "text-white" : "text-black"
-                                                    )}>
-                                                        {session.name}
-                                                    </p>
-                                                    {session.id === currentUserId && (
-                                                        <span className={cn(
-                                                            "px-1.5 py-0.5 rounded text-[10px] font-medium uppercase tracking-wider",
-                                                            isDark ? "bg-white/10 text-white/70" : "bg-black/10 text-black/70"
+                                    <div className="p-2 space-y-1">
+                                        {sessions.map(session => (
+                                            <div
+                                                key={session.id}
+                                                onClick={() => switchToSession(session)}
+                                                className={cn(
+                                                    "relative px-3 py-2.5 rounded-xl cursor-pointer transition-all group",
+                                                    session.id === currentUserId
+                                                        ? isDark
+                                                            ? "bg-white/10"
+                                                            : "bg-black/5"
+                                                        : isDark
+                                                            ? "hover:bg-white/5"
+                                                            : "hover:bg-black/5"
+                                                )}
+                                            >
+                                                <div className="flex items-center justify-between mb-0.5">
+                                                    <div className="flex items-center gap-2.5 min-w-0">
+                                                        {/* Session Icon/Avatar */}
+                                                        <div className={cn(
+                                                            "w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-colors",
+                                                            getSessionColor(session.id, isDark || false).bg
                                                         )}>
-                                                            Active
-                                                        </span>
-                                                    )}
-                                                </div>
+                                                            <ClerkTreeLogo className={cn(
+                                                                "w-4 h-4",
+                                                                getSessionColor(session.id, isDark || false).text
+                                                            )} isDark={isDark} />
+                                                        </div>
 
-                                                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                    <button
-                                                        onClick={(e) => openEditDialog(session, e)}
-                                                        className={cn(
-                                                            "p-1.5 rounded-md transition-colors",
-                                                            isDark
-                                                                ? "hover:bg-white/10 text-white/50 hover:text-white"
-                                                                : "hover:bg-black/10 text-black/50 hover:text-black"
-                                                        )}
-                                                    >
-                                                        <Edit2 className="w-3.5 h-3.5" />
-                                                    </button>
-                                                    {session.id !== currentUserId && (
+                                                        <div className="min-w-0">
+                                                            <div className="flex items-center gap-2">
+                                                                <p className={cn(
+                                                                    "text-sm font-medium truncate",
+                                                                    isDark ? "text-white" : "text-black"
+                                                                )}>
+                                                                    {session.name}
+                                                                </p>
+                                                                {session.id === currentUserId && (
+                                                                    <div className="w-1.5 h-1.5 rounded-full bg-green-500 shrink-0 shadow-[0_0_8px_rgba(34,197,94,0.5)]" />
+                                                                )}
+                                                            </div>
+                                                            {session.description && (
+                                                                <p className={cn(
+                                                                    "text-[11px] truncate max-w-[160px]",
+                                                                    isDark ? "text-white/40" : "text-black/40"
+                                                                )}>
+                                                                    {session.description}
+                                                                </p>
+                                                            )}
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Actions - Visible on hover only */}
+                                                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                                         <button
-                                                            onClick={(e) => {
-                                                                e.stopPropagation();
-                                                                deleteSession(session.id);
-                                                            }}
+                                                            onClick={(e) => openEditDialog(session, e)}
                                                             className={cn(
-                                                                "p-1.5 rounded-md transition-colors",
+                                                                "p-1.5 rounded-lg transition-colors",
                                                                 isDark
-                                                                    ? "hover:bg-red-500/20 text-white/50 hover:text-red-400"
-                                                                    : "hover:bg-red-500/10 text-black/50 hover:text-red-600"
+                                                                    ? "hover:bg-white/20 text-white/50 hover:text-white"
+                                                                    : "hover:bg-black/10 text-black/50 hover:text-black"
                                                             )}
                                                         >
-                                                            <Trash2 className="w-3.5 h-3.5" />
+                                                            <Edit2 className="w-3.5 h-3.5" />
                                                         </button>
-                                                    )}
+                                                        {session.id !== currentUserId && (
+                                                            <button
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    deleteSession(session.id);
+                                                                }}
+                                                                className={cn(
+                                                                    "p-1.5 rounded-lg transition-colors",
+                                                                    isDark
+                                                                        ? "hover:bg-red-500/20 text-white/50 hover:text-red-400"
+                                                                        : "hover:bg-red-500/10 text-black/50 hover:text-red-600"
+                                                                )}
+                                                            >
+                                                                <Trash2 className="w-3.5 h-3.5" />
+                                                            </button>
+                                                        )}
+                                                    </div>
                                                 </div>
                                             </div>
-
-                                            {session.description && (
-                                                <p className={cn(
-                                                    "text-xs truncate pl-0.5",
-                                                    isDark ? "text-white/40" : "text-black/40"
-                                                )}>
-                                                    {session.description}
-                                                </p>
-                                            )}
-                                        </div>
-                                    ))
+                                        ))}
+                                    </div>
                                 )}
                             </div>
 
-                            {/* Footer */}
+                            {/* Footer Status */}
                             <div className={cn(
-                                "px-3 md:px-4 py-2 border-t text-center",
-                                isDark ? "border-white/10 bg-white/[0.02]" : "border-black/5 bg-black/[0.02]"
+                                "px-4 py-2 text-center text-[10px] uppercase tracking-widest font-medium border-t",
+                                isDark
+                                    ? "border-white/5 text-white/20 bg-white/[0.01]"
+                                    : "border-black/5 text-black/20 bg-black/[0.01]"
                             )}>
-                                <p className={cn(
-                                    "text-[10px] md:text-xs font-medium uppercase tracking-widest",
-                                    isDark ? "text-white/20" : "text-black/20"
-                                )}>
-                                    {sessions.length} session{sessions.length !== 1 ? 's' : ''}
-                                </p>
+                                {sessions.length} Active Session{sessions.length !== 1 ? 's' : ''}
                             </div>
                         </motion.div>
                     </>
