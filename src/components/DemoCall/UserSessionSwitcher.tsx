@@ -285,21 +285,20 @@ export default function UserSessionSwitcher({
                             exit={{ opacity: 0, y: -10, scale: 0.95 }}
                             className={cn(
                                 "absolute top-full right-0 mt-2 w-64 md:w-72 z-50",
-                                "rounded-xl overflow-hidden",
-                                "backdrop-blur-xl border shadow-2xl",
+                                "rounded-xl overflow-hidden shadow-2xl backdrop-blur-xl border",
                                 isDark
-                                    ? "bg-[rgb(20,20,20)]/95 border-white/10"
-                                    : "bg-white/95 border-black/10"
+                                    ? "bg-black/80 border-white/10"
+                                    : "bg-white/80 border-black/10"
                             )}
                         >
                             {/* Header */}
                             <div className={cn(
                                 "px-3 md:px-4 py-2.5 md:py-3 border-b",
-                                isDark ? "border-white/10" : "border-black/10"
+                                isDark ? "border-white/10" : "border-black/5"
                             )}>
                                 <div className="flex items-center justify-between">
                                     <h3 className={cn(
-                                        "text-xs md:text-sm font-semibold",
+                                        "text-xs md:text-sm font-medium",
                                         isDark ? "text-white" : "text-black"
                                     )}>
                                         Sessions
@@ -310,14 +309,14 @@ export default function UserSessionSwitcher({
                                             setIsOpen(false);
                                         }}
                                         className={cn(
-                                            "flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium transition-all",
-                                            "bg-gradient-to-r from-blue-500 to-purple-500 text-white",
-                                            "hover:from-blue-600 hover:to-purple-600",
-                                            "shadow-lg shadow-blue-500/20"
+                                            "flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors",
+                                            isDark
+                                                ? "bg-white text-black hover:bg-white/90"
+                                                : "bg-black text-white hover:bg-black/90"
                                         )}
                                     >
-                                        <Plus className="w-3 h-3" />
-                                        <span className="hidden md:inline">New</span>
+                                        <Plus className="w-3.5 h-3.5" />
+                                        <span>New</span>
                                     </button>
                                 </div>
                             </div>
@@ -326,12 +325,12 @@ export default function UserSessionSwitcher({
                             <div className="max-h-48 md:max-h-64 overflow-y-auto">
                                 {sessions.length === 0 ? (
                                     <div className={cn(
-                                        "px-4 py-6 text-center",
+                                        "px-4 py-8 text-center",
                                         isDark ? "text-white/40" : "text-black/40"
                                     )}>
-                                        <Users className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                                        <p className="text-xs">No sessions yet</p>
-                                        <p className="text-xs mt-1">Create one to get started!</p>
+                                        <Users className="w-8 h-8 mx-auto mb-3 opacity-50" />
+                                        <p className="text-sm font-medium mb-1">No sessions yet</p>
+                                        <p className="text-xs opacity-70">Create a session to save your settings</p>
                                     </div>
                                 ) : (
                                     sessions.map(session => (
@@ -339,78 +338,74 @@ export default function UserSessionSwitcher({
                                             key={session.id}
                                             onClick={() => switchToSession(session)}
                                             className={cn(
-                                                "px-3 md:px-4 py-2.5 md:py-3 cursor-pointer transition-colors group",
-                                                "flex items-center justify-between",
+                                                "px-3 md:px-4 py-3 cursor-pointer transition-colors group border-b last:border-0",
+                                                isDark ? "border-white/5" : "border-black/5",
                                                 session.id === currentUserId
                                                     ? isDark
-                                                        ? "bg-blue-500/10"
-                                                        : "bg-blue-500/5"
+                                                        ? "bg-white/5"
+                                                        : "bg-black/5"
                                                     : isDark
                                                         ? "hover:bg-white/5"
                                                         : "hover:bg-black/5"
                                             )}
                                         >
-                                            <div className="flex items-center gap-2 md:gap-3 min-w-0">
-                                                <div className={cn(
-                                                    "w-7 h-7 md:w-8 md:h-8 rounded-lg flex items-center justify-center flex-shrink-0",
-                                                    session.id === currentUserId
-                                                        ? "bg-gradient-to-br from-blue-500 to-purple-500 text-white"
-                                                        : isDark
-                                                            ? "bg-white/5 text-white/60"
-                                                            : "bg-black/5 text-black/60"
-                                                )}>
-                                                    <User className="w-3.5 h-3.5 md:w-4 md:h-4" />
-                                                </div>
-                                                <div className="min-w-0">
+                                            <div className="flex items-center justify-between mb-1">
+                                                <div className="flex items-center gap-2 min-w-0">
                                                     <p className={cn(
-                                                        "text-xs md:text-sm font-medium truncate",
+                                                        "text-sm font-medium truncate",
                                                         isDark ? "text-white" : "text-black"
                                                     )}>
                                                         {session.name}
                                                     </p>
-                                                    {session.description && (
-                                                        <p className={cn(
-                                                            "text-[10px] md:text-xs truncate",
-                                                            isDark ? "text-white/40" : "text-black/40"
+                                                    {session.id === currentUserId && (
+                                                        <span className={cn(
+                                                            "px-1.5 py-0.5 rounded text-[10px] font-medium uppercase tracking-wider",
+                                                            isDark ? "bg-white/10 text-white/70" : "bg-black/10 text-black/70"
                                                         )}>
-                                                            {session.description}
-                                                        </p>
+                                                            Active
+                                                        </span>
+                                                    )}
+                                                </div>
+
+                                                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    <button
+                                                        onClick={(e) => openEditDialog(session, e)}
+                                                        className={cn(
+                                                            "p-1.5 rounded-md transition-colors",
+                                                            isDark
+                                                                ? "hover:bg-white/10 text-white/50 hover:text-white"
+                                                                : "hover:bg-black/10 text-black/50 hover:text-black"
+                                                        )}
+                                                    >
+                                                        <Edit2 className="w-3.5 h-3.5" />
+                                                    </button>
+                                                    {session.id !== currentUserId && (
+                                                        <button
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                deleteSession(session.id);
+                                                            }}
+                                                            className={cn(
+                                                                "p-1.5 rounded-md transition-colors",
+                                                                isDark
+                                                                    ? "hover:bg-red-500/20 text-white/50 hover:text-red-400"
+                                                                    : "hover:bg-red-500/10 text-black/50 hover:text-red-600"
+                                                            )}
+                                                        >
+                                                            <Trash2 className="w-3.5 h-3.5" />
+                                                        </button>
                                                     )}
                                                 </div>
                                             </div>
 
-                                            <div className="flex items-center gap-0.5 md:gap-1">
-                                                {session.id === currentUserId && (
-                                                    <Check className="w-3.5 h-3.5 md:w-4 md:h-4 text-blue-500" />
-                                                )}
-                                                <button
-                                                    onClick={(e) => openEditDialog(session, e)}
-                                                    className={cn(
-                                                        "p-1 md:p-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity",
-                                                        isDark
-                                                            ? "hover:bg-white/10 text-white/60"
-                                                            : "hover:bg-black/10 text-black/60"
-                                                    )}
-                                                >
-                                                    <Edit2 className="w-3 h-3 md:w-3.5 md:h-3.5" />
-                                                </button>
-                                                {session.id !== currentUserId && (
-                                                    <button
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            deleteSession(session.id);
-                                                        }}
-                                                        className={cn(
-                                                            "p-1 md:p-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity",
-                                                            isDark
-                                                                ? "hover:bg-red-500/20 text-red-400"
-                                                                : "hover:bg-red-500/10 text-red-600"
-                                                        )}
-                                                    >
-                                                        <Trash2 className="w-3 h-3 md:w-3.5 md:h-3.5" />
-                                                    </button>
-                                                )}
-                                            </div>
+                                            {session.description && (
+                                                <p className={cn(
+                                                    "text-xs truncate pl-0.5",
+                                                    isDark ? "text-white/40" : "text-black/40"
+                                                )}>
+                                                    {session.description}
+                                                </p>
+                                            )}
                                         </div>
                                     ))
                                 )}
@@ -419,11 +414,11 @@ export default function UserSessionSwitcher({
                             {/* Footer */}
                             <div className={cn(
                                 "px-3 md:px-4 py-2 border-t text-center",
-                                isDark ? "border-white/10 bg-white/[0.02]" : "border-black/10 bg-black/[0.02]"
+                                isDark ? "border-white/10 bg-white/[0.02]" : "border-black/5 bg-black/[0.02]"
                             )}>
                                 <p className={cn(
-                                    "text-[10px] md:text-xs",
-                                    isDark ? "text-white/30" : "text-black/30"
+                                    "text-[10px] md:text-xs font-medium uppercase tracking-widest",
+                                    isDark ? "text-white/20" : "text-black/20"
                                 )}>
                                     {sessions.length} session{sessions.length !== 1 ? 's' : ''}
                                 </p>
@@ -440,27 +435,27 @@ export default function UserSessionSwitcher({
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
+                        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
                     >
                         <motion.div
-                            initial={{ scale: 0.9, opacity: 0, y: 20 }}
-                            animate={{ scale: 1, opacity: 1, y: 0 }}
-                            exit={{ scale: 0.9, opacity: 0, y: 20 }}
+                            initial={{ scale: 0.95, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.95, opacity: 0 }}
                             className={cn(
                                 "w-full max-w-md rounded-2xl p-6 md:p-8",
-                                "backdrop-blur-xl border shadow-2xl",
+                                "border shadow-2xl backdrop-blur-md",
                                 isDark
-                                    ? "bg-[rgb(15,15,15)] border-white/10"
-                                    : "bg-white border-black/10"
+                                    ? "bg-black/90 border-white/10"
+                                    : "bg-white/90 border-black/10"
                             )}
                         >
                             {/* Header with Icon */}
                             <div className="text-center mb-6">
                                 <div className={cn(
-                                    "w-16 h-16 rounded-2xl mx-auto mb-4 flex items-center justify-center",
-                                    "bg-gradient-to-br from-blue-500 to-purple-600 shadow-lg shadow-purple-500/30"
+                                    "w-12 h-12 rounded-xl mx-auto mb-4 flex items-center justify-center",
+                                    isDark ? "bg-white/10" : "bg-black/5"
                                 )}>
-                                    <Sparkles className="w-8 h-8 text-white" />
+                                    <Sparkles className={cn("w-6 h-6", isDark ? "text-white" : "text-black")} />
                                 </div>
                                 <h2 className={cn(
                                     "text-xl md:text-2xl font-bold mb-2",
@@ -480,8 +475,8 @@ export default function UserSessionSwitcher({
                             <div className="space-y-4">
                                 <div>
                                     <label className={cn(
-                                        "block text-sm font-medium mb-2",
-                                        isDark ? "text-white/80" : "text-black/80"
+                                        "block text-xs font-medium mb-1.5 uppercase tracking-wider",
+                                        isDark ? "text-white/40" : "text-black/40"
                                     )}>
                                         Session Name
                                     </label>
@@ -489,24 +484,24 @@ export default function UserSessionSwitcher({
                                         type="text"
                                         value={newSessionName}
                                         onChange={(e) => setNewSessionName(e.target.value)}
-                                        placeholder="e.g., Medical Office, Law Firm..."
+                                        placeholder="e.g., Medical Office"
                                         autoFocus
                                         className={cn(
-                                            "w-full px-4 py-3 rounded-xl text-sm transition-all",
-                                            "focus:outline-none focus:ring-2 focus:ring-blue-500/50",
+                                            "w-full px-4 py-2.5 rounded-xl text-sm transition-all",
+                                            "focus:outline-none focus:ring-1",
                                             isDark
-                                                ? "bg-white/5 border border-white/10 text-white placeholder-white/30"
-                                                : "bg-black/5 border border-black/10 text-black placeholder-black/30"
+                                                ? "bg-white/5 border border-white/10 text-white placeholder-white/20 focus:ring-white/20"
+                                                : "bg-black/5 border border-black/10 text-black placeholder-black/20 focus:ring-black/20"
                                         )}
                                     />
                                 </div>
 
                                 <div>
                                     <label className={cn(
-                                        "block text-sm font-medium mb-2",
-                                        isDark ? "text-white/80" : "text-black/80"
+                                        "block text-xs font-medium mb-1.5 uppercase tracking-wider",
+                                        isDark ? "text-white/40" : "text-black/40"
                                     )}>
-                                        Description <span className={isDark ? "text-white/40" : "text-black/40"}>(optional)</span>
+                                        Description <span className="opacity-50">(optional)</span>
                                     </label>
                                     <textarea
                                         value={newSessionDescription}
@@ -514,38 +509,38 @@ export default function UserSessionSwitcher({
                                         placeholder="What is this session for?"
                                         rows={2}
                                         className={cn(
-                                            "w-full px-4 py-3 rounded-xl text-sm transition-all resize-none",
-                                            "focus:outline-none focus:ring-2 focus:ring-blue-500/50",
+                                            "w-full px-4 py-2.5 rounded-xl text-sm transition-all resize-none",
+                                            "focus:outline-none focus:ring-1",
                                             isDark
-                                                ? "bg-white/5 border border-white/10 text-white placeholder-white/30"
-                                                : "bg-black/5 border border-black/10 text-black placeholder-black/30"
+                                                ? "bg-white/5 border border-white/10 text-white placeholder-white/20 focus:ring-white/20"
+                                                : "bg-black/5 border border-black/10 text-black placeholder-black/20 focus:ring-black/20"
                                         )}
                                     />
                                 </div>
                             </div>
 
                             {/* Actions */}
-                            <div className="flex gap-3 mt-6">
+                            <div className="flex gap-3 mt-8">
                                 <button
                                     onClick={skipWelcome}
                                     className={cn(
-                                        "flex-1 px-4 py-3 rounded-xl text-sm font-medium transition-colors",
+                                        "flex-1 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors",
                                         isDark
                                             ? "bg-white/5 hover:bg-white/10 text-white/70"
                                             : "bg-black/5 hover:bg-black/10 text-black/70"
                                     )}
                                 >
-                                    Skip for now
+                                    Skip
                                 </button>
                                 <button
                                     onClick={createNewSession}
                                     disabled={!newSessionName.trim() || isLoading}
                                     className={cn(
-                                        "flex-1 px-4 py-3 rounded-xl text-sm font-medium transition-all",
-                                        "bg-gradient-to-r from-blue-500 to-purple-600 text-white",
-                                        "hover:from-blue-600 hover:to-purple-700",
-                                        "shadow-lg shadow-blue-500/25",
-                                        "disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none"
+                                        "flex-1 px-4 py-2.5 rounded-xl text-sm font-medium transition-all",
+                                        isDark
+                                            ? "bg-white text-black hover:bg-white/90"
+                                            : "bg-black text-white hover:bg-black/90",
+                                        "disabled:opacity-50 disabled:cursor-not-allowed"
                                     )}
                                 >
                                     {isLoading ? 'Creating...' : 'Create Session'}
@@ -559,10 +554,10 @@ export default function UserSessionSwitcher({
                                     isDark ? "border-white/10" : "border-black/10"
                                 )}>
                                     <p className={cn(
-                                        "text-xs mb-3 text-center",
-                                        isDark ? "text-white/50" : "text-black/50"
+                                        "text-xs mb-3 text-center uppercase tracking-wider",
+                                        isDark ? "text-white/30" : "text-black/30"
                                     )}>
-                                        Or select an existing session:
+                                        Existing sessions
                                     </p>
                                     <div className="space-y-2 max-h-32 overflow-y-auto">
                                         {sessions.map(session => (
@@ -570,17 +565,17 @@ export default function UserSessionSwitcher({
                                                 key={session.id}
                                                 onClick={() => switchToSession(session)}
                                                 className={cn(
-                                                    "w-full flex items-center gap-3 px-3 py-2 rounded-xl text-left transition-colors",
+                                                    "w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors",
                                                     isDark
-                                                        ? "bg-white/5 hover:bg-white/10"
-                                                        : "bg-black/5 hover:bg-black/10"
+                                                        ? "hover:bg-white/5"
+                                                        : "hover:bg-black/5"
                                                 )}
                                             >
                                                 <div className={cn(
-                                                    "w-8 h-8 rounded-lg flex items-center justify-center",
-                                                    "bg-gradient-to-br from-blue-500/20 to-purple-500/20"
+                                                    "w-8 h-8 rounded-md flex items-center justify-center",
+                                                    isDark ? "bg-white/10 text-white" : "bg-black/5 text-black"
                                                 )}>
-                                                    <User className="w-4 h-4 text-blue-400" />
+                                                    <User className="w-4 h-4" />
                                                 </div>
                                                 <div className="min-w-0">
                                                     <p className={cn(
@@ -589,14 +584,6 @@ export default function UserSessionSwitcher({
                                                     )}>
                                                         {session.name}
                                                     </p>
-                                                    {session.description && (
-                                                        <p className={cn(
-                                                            "text-xs truncate",
-                                                            isDark ? "text-white/40" : "text-black/40"
-                                                        )}>
-                                                            {session.description}
-                                                        </p>
-                                                    )}
                                                 </div>
                                             </button>
                                         ))}
@@ -615,20 +602,20 @@ export default function UserSessionSwitcher({
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
+                        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
                         onClick={() => setShowCreateDialog(false)}
                     >
                         <motion.div
-                            initial={{ scale: 0.9, opacity: 0 }}
+                            initial={{ scale: 0.95, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
-                            exit={{ scale: 0.9, opacity: 0 }}
+                            exit={{ scale: 0.95, opacity: 0 }}
                             onClick={(e) => e.stopPropagation()}
                             className={cn(
                                 "w-full max-w-md rounded-2xl p-6",
                                 "backdrop-blur-xl border shadow-2xl",
                                 isDark
-                                    ? "bg-[rgb(15,15,15)] border-white/10"
-                                    : "bg-white border-black/10"
+                                    ? "bg-black/80 border-white/10"
+                                    : "bg-white/90 border-black/10"
                             )}
                         >
                             <div className="flex items-center justify-between mb-5">
@@ -654,57 +641,55 @@ export default function UserSessionSwitcher({
                             <div className="space-y-4">
                                 <div>
                                     <label className={cn(
-                                        "block text-sm font-medium mb-1.5",
-                                        isDark ? "text-white/80" : "text-black/80"
+                                        "block text-xs font-medium mb-1.5 uppercase tracking-wider",
+                                        isDark ? "text-white/40" : "text-black/40"
                                     )}>
-                                        Session Name *
+                                        Session Name
                                     </label>
                                     <input
                                         type="text"
                                         value={newSessionName}
                                         onChange={(e) => setNewSessionName(e.target.value)}
-                                        placeholder="e.g., Medical Office, Law Firm..."
                                         autoFocus
                                         className={cn(
                                             "w-full px-4 py-2.5 rounded-xl text-sm transition-all",
-                                            "focus:outline-none focus:ring-2 focus:ring-blue-500/50",
+                                            "focus:outline-none focus:ring-1",
                                             isDark
-                                                ? "bg-white/5 border border-white/10 text-white placeholder-white/30"
-                                                : "bg-black/5 border border-black/10 text-black placeholder-black/30"
+                                                ? "bg-white/5 border border-white/10 text-white placeholder-white/20 focus:ring-white/20"
+                                                : "bg-black/5 border border-black/10 text-black placeholder-black/20 focus:ring-black/20"
                                         )}
                                     />
                                 </div>
 
                                 <div>
                                     <label className={cn(
-                                        "block text-sm font-medium mb-1.5",
-                                        isDark ? "text-white/80" : "text-black/80"
+                                        "block text-xs font-medium mb-1.5 uppercase tracking-wider",
+                                        isDark ? "text-white/40" : "text-black/40"
                                     )}>
-                                        Description (optional)
+                                        Description <span className="opacity-50">(optional)</span>
                                     </label>
                                     <textarea
                                         value={newSessionDescription}
                                         onChange={(e) => setNewSessionDescription(e.target.value)}
-                                        placeholder="What is this session for?"
                                         rows={2}
                                         className={cn(
                                             "w-full px-4 py-2.5 rounded-xl text-sm transition-all resize-none",
-                                            "focus:outline-none focus:ring-2 focus:ring-blue-500/50",
+                                            "focus:outline-none focus:ring-1",
                                             isDark
-                                                ? "bg-white/5 border border-white/10 text-white placeholder-white/30"
-                                                : "bg-black/5 border border-black/10 text-black placeholder-black/30"
+                                                ? "bg-white/5 border border-white/10 text-white placeholder-white/20 focus:ring-white/20"
+                                                : "bg-black/5 border border-black/10 text-black placeholder-black/20 focus:ring-black/20"
                                         )}
                                     />
                                 </div>
 
                                 <div className={cn(
-                                    "p-3 rounded-xl flex items-start gap-2",
-                                    isDark ? "bg-blue-500/10" : "bg-blue-500/5"
+                                    "p-3 rounded-lg flex items-start gap-2.5",
+                                    isDark ? "bg-white/5" : "bg-black/5"
                                 )}>
-                                    <Settings className="w-4 h-4 text-blue-500 mt-0.5 flex-shrink-0" />
+                                    <Settings className={cn("w-4 h-4 mt-0.5", isDark ? "text-white/50" : "text-black/50")} />
                                     <p className={cn(
-                                        "text-xs",
-                                        isDark ? "text-blue-300" : "text-blue-600"
+                                        "text-xs leading-relaxed",
+                                        isDark ? "text-white/50" : "text-black/50"
                                     )}>
                                         Creates a new session with your current settings.
                                     </p>
@@ -717,8 +702,8 @@ export default function UserSessionSwitcher({
                                     className={cn(
                                         "flex-1 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors",
                                         isDark
-                                            ? "bg-white/5 hover:bg-white/10 text-white"
-                                            : "bg-black/5 hover:bg-black/10 text-black"
+                                            ? "bg-white/5 hover:bg-white/10 text-white/70"
+                                            : "bg-black/5 hover:bg-black/10 text-black/70"
                                     )}
                                 >
                                     Cancel
@@ -728,10 +713,10 @@ export default function UserSessionSwitcher({
                                     disabled={!newSessionName.trim() || isLoading}
                                     className={cn(
                                         "flex-1 px-4 py-2.5 rounded-xl text-sm font-medium transition-all",
-                                        "bg-gradient-to-r from-blue-500 to-purple-600 text-white",
-                                        "hover:from-blue-600 hover:to-purple-700",
-                                        "shadow-lg shadow-blue-500/25",
-                                        "disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none"
+                                        isDark
+                                            ? "bg-white text-black hover:bg-white/90"
+                                            : "bg-black text-white hover:bg-black/90",
+                                        "disabled:opacity-50 disabled:cursor-not-allowed"
                                     )}
                                 >
                                     {isLoading ? 'Creating...' : 'Create Session'}
@@ -749,20 +734,20 @@ export default function UserSessionSwitcher({
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
+                        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
                         onClick={() => setShowEditDialog(false)}
                     >
                         <motion.div
-                            initial={{ scale: 0.9, opacity: 0 }}
+                            initial={{ scale: 0.95, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
-                            exit={{ scale: 0.9, opacity: 0 }}
+                            exit={{ scale: 0.95, opacity: 0 }}
                             onClick={(e) => e.stopPropagation()}
                             className={cn(
                                 "w-full max-w-md rounded-2xl p-6",
                                 "backdrop-blur-xl border shadow-2xl",
                                 isDark
-                                    ? "bg-[rgb(15,15,15)] border-white/10"
-                                    : "bg-white border-black/10"
+                                    ? "bg-black/80 border-white/10"
+                                    : "bg-white/90 border-black/10"
                             )}
                         >
                             <div className="flex items-center justify-between mb-5">
@@ -788,10 +773,10 @@ export default function UserSessionSwitcher({
                             <div className="space-y-4">
                                 <div>
                                     <label className={cn(
-                                        "block text-sm font-medium mb-1.5",
-                                        isDark ? "text-white/80" : "text-black/80"
+                                        "block text-xs font-medium mb-1.5 uppercase tracking-wider",
+                                        isDark ? "text-white/40" : "text-black/40"
                                     )}>
-                                        Session Name *
+                                        Session Name
                                     </label>
                                     <input
                                         type="text"
@@ -800,18 +785,18 @@ export default function UserSessionSwitcher({
                                         autoFocus
                                         className={cn(
                                             "w-full px-4 py-2.5 rounded-xl text-sm transition-all",
-                                            "focus:outline-none focus:ring-2 focus:ring-blue-500/50",
+                                            "focus:outline-none focus:ring-1",
                                             isDark
-                                                ? "bg-white/5 border border-white/10 text-white placeholder-white/30"
-                                                : "bg-black/5 border border-black/10 text-black placeholder-black/30"
+                                                ? "bg-white/5 border border-white/10 text-white placeholder-white/20 focus:ring-white/20"
+                                                : "bg-black/5 border border-black/10 text-black placeholder-black/20 focus:ring-black/20"
                                         )}
                                     />
                                 </div>
 
                                 <div>
                                     <label className={cn(
-                                        "block text-sm font-medium mb-1.5",
-                                        isDark ? "text-white/80" : "text-black/80"
+                                        "block text-xs font-medium mb-1.5 uppercase tracking-wider",
+                                        isDark ? "text-white/40" : "text-black/40"
                                     )}>
                                         Description
                                     </label>
@@ -821,10 +806,10 @@ export default function UserSessionSwitcher({
                                         rows={2}
                                         className={cn(
                                             "w-full px-4 py-2.5 rounded-xl text-sm transition-all resize-none",
-                                            "focus:outline-none focus:ring-2 focus:ring-blue-500/50",
+                                            "focus:outline-none focus:ring-1",
                                             isDark
-                                                ? "bg-white/5 border border-white/10 text-white placeholder-white/30"
-                                                : "bg-black/5 border border-black/10 text-black placeholder-black/30"
+                                                ? "bg-white/5 border border-white/10 text-white placeholder-white/20 focus:ring-white/20"
+                                                : "bg-black/5 border border-black/10 text-black placeholder-black/20 focus:ring-black/20"
                                         )}
                                     />
                                 </div>
@@ -836,8 +821,8 @@ export default function UserSessionSwitcher({
                                     className={cn(
                                         "flex-1 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors",
                                         isDark
-                                            ? "bg-white/5 hover:bg-white/10 text-white"
-                                            : "bg-black/5 hover:bg-black/10 text-black"
+                                            ? "bg-white/5 hover:bg-white/10 text-white/70"
+                                            : "bg-black/5 hover:bg-black/10 text-black/70"
                                     )}
                                 >
                                     Cancel
@@ -847,10 +832,10 @@ export default function UserSessionSwitcher({
                                     disabled={!newSessionName.trim() || isLoading}
                                     className={cn(
                                         "flex-1 px-4 py-2.5 rounded-xl text-sm font-medium transition-all",
-                                        "bg-gradient-to-r from-blue-500 to-purple-600 text-white",
-                                        "hover:from-blue-600 hover:to-purple-700",
-                                        "shadow-lg shadow-blue-500/25",
-                                        "disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none"
+                                        isDark
+                                            ? "bg-white text-black hover:bg-white/90"
+                                            : "bg-black text-white hover:bg-black/90",
+                                        "disabled:opacity-50 disabled:cursor-not-allowed"
                                     )}
                                 >
                                     {isLoading ? 'Saving...' : 'Save Changes'}
