@@ -270,6 +270,9 @@ export function DemoCallProvider({ children }: { children: ReactNode }) {
   const [callHistory, setCallHistory] = useState<CallHistoryItem[]>([]); // Start with empty - real data only
   const [isLoading, setIsLoading] = useState(true);
 
+  // Persistence key
+  const ACTIVE_CALL_KEY = 'active_call_session';
+
   // Get or create a user session ID for user-specific data
   const getUserId = useCallback(() => {
     let userId = localStorage.getItem('clerktree_user_id');
@@ -319,6 +322,30 @@ export function DemoCallProvider({ children }: { children: ReactNode }) {
             console.log('✅ Loaded user knowledge base from localStorage');
           } catch (e) {
             console.warn('Failed to parse localStorage knowledge base:', e);
+          }
+        }
+
+        // Load active call session if exists
+        const storedCall = localStorage.getItem(ACTIVE_CALL_KEY);
+        if (storedCall) {
+          try {
+            const parsedCall = JSON.parse(storedCall);
+            // Rehydrate dates
+            parsedCall.startTime = new Date(parsedCall.startTime);
+            if (parsedCall.endTime) parsedCall.endTime = new Date(parsedCall.endTime);
+            parsedCall.messages = parsedCall.messages.map((m: any) => ({
+              ...m,
+              timestamp: new Date(m.timestamp)
+            }));
+            parsedCall.extractedFields = parsedCall.extractedFields.map((f: any) => ({
+              ...f,
+              extractedAt: new Date(f.extractedAt)
+            }));
+            setCurrentCall(parsedCall);
+            console.log('✅ Restored active call session');
+          } catch (e) {
+            console.error('Failed to restore active call:', e);
+            localStorage.removeItem(ACTIVE_CALL_KEY);
           }
         }
 
@@ -500,6 +527,8 @@ export function DemoCallProvider({ children }: { children: ReactNode }) {
       priority: 'medium',
     };
     setCurrentCall(newCall);
+    // Persist active call
+    localStorage.setItem(ACTIVE_CALL_KEY, JSON.stringify(newCall));
   }, []);
 
   // Helper to find caller name from various sources
@@ -564,167 +593,117 @@ export function DemoCallProvider({ children }: { children: ReactNode }) {
 
   const endCall = useCallback(async () => {
     if (currentCall) {
+      // 1. Capture data
       const endedCall: CallSession = {
         ...currentCall,
         endTime: new Date(),
         status: 'ended',
       };
+      const duration = Math.floor((new Date().getTime() - endedCall.startTime.getTime()) / 1000);
 
-      const duration = Math.floor((endedCall.endTime!.getTime() - endedCall.startTime.getTime()) / 1000);
+      // 2. Clear UI immediately (Optimistic update)
+      setCurrentCall(null);
+      localStorage.removeItem(ACTIVE_CALL_KEY);
 
-      // Get initial caller name from various sources
-      let callerName = findCallerName(endedCall);
+      // 3. Process summary and save in background
+      // We wrap this in a self-executing logic so the main thread is free
+      (async () => {
+        try {
+          // Get initial caller name from various sources
+          let callerName = findCallerName(endedCall);
 
-      // Default summary while we wait for AI
-      let summary: CallSummary = {
-        mainPoints: ['Call completed'],
-        sentiment: 'neutral',
-        actionItems: [],
-        followUpRequired: endedCall.priority === 'high' || endedCall.priority === 'critical',
-        notes: 'Processing call summary...',
-      };
+          // Default summary while we wait for AI
+          let summary: CallSummary = {
+            mainPoints: ['Call completed'],
+            sentiment: 'neutral',
+            actionItems: [],
+            followUpRequired: endedCall.priority === 'high' || endedCall.priority === 'critical',
+            notes: 'Processing call summary...',
+          };
 
-      let finalCategory = endedCall.category;
-      let finalPriority = endedCall.priority;
-      let tags: string[] = [];
+          let finalCategory = endedCall.category;
+          let finalPriority = endedCall.priority;
+          let tags: string[] = [];
 
-      // Try to get AI summary using aiService (which has smart mock fallback)
-      try {
-        if (endedCall.messages.length > 0) {
-          const summaryResponse = await aiService.generateSummary(
-            endedCall.messages,
-            endedCall.extractedFields,
-            endedCall.category,
-            endedCall.priority
-          );
+          // Try to get AI summary using aiService (which has smart mock fallback)
+          try {
+            if (endedCall.messages.length > 0) {
+              const summaryResponse = await aiService.generateSummary(
+                endedCall.messages,
+                endedCall.extractedFields,
+                endedCall.category,
+                endedCall.priority
+              );
 
-          summary = summaryResponse.summary;
-          tags = summaryResponse.tags;
+              summary = summaryResponse.summary;
+              tags = summaryResponse.tags;
 
-          // Use caller name from summary if provided
-          if (summaryResponse.callerName && callerName === 'Unknown Caller') {
-            callerName = summaryResponse.callerName;
-            console.log('✅ Using caller name from AI summary:', callerName);
-          }
-
-          // Try to extract name from summary notes if not found yet
-          if (callerName === 'Unknown Caller' && summary.notes) {
-            const nameMatch = summary.notes.match(/(?:caller|from|name is|named)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)/i);
-            if (nameMatch?.[1]) {
-              callerName = nameMatch[1];
-              console.log('✅ Extracted caller name from summary notes:', callerName);
-            }
-          }
-
-          // Also check if summary extracted any new fields
-          if (summary.notes && callerName === 'Unknown Caller') {
-            // Look for name patterns in notes
-            const patterns = [
-              /(?:caller|from|name is|named)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)/i,
-              /([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)\s+(?:called|calling|contacted)/i,
-            ];
-            for (const pattern of patterns) {
-              const match = summary.notes.match(pattern);
-              if (match?.[1]) {
-                callerName = match[1];
-                console.log('✅ Extracted caller name from notes pattern:', callerName);
-                break;
+              if (summaryResponse.callerName && callerName === 'Unknown Caller') {
+                callerName = summaryResponse.callerName;
               }
             }
+          } catch (error) {
+            console.error('Error generating AI summary:', error);
           }
 
-          // Update priority if higher than current
-          const priorityOrder: PriorityLevel[] = ['low', 'medium', 'high', 'critical'];
-          const currentIdx = priorityOrder.indexOf(finalPriority);
-          const suggestedIdx = priorityOrder.indexOf(endedCall.priority);
-          if (suggestedIdx > currentIdx) {
-            finalPriority = endedCall.priority;
+          if (callerName === 'Unknown Caller') {
+            callerName = findCallerName(endedCall);
           }
+
+          const historyItem: CallHistoryItem = {
+            id: `history-${Date.now()}`,
+            callerName,
+            date: endedCall.startTime,
+            duration,
+            type: endedCall.type,
+            messages: endedCall.messages,
+            extractedFields: endedCall.extractedFields,
+            category: finalCategory,
+            priority: finalPriority,
+            tags,
+            summary,
+          };
+
+          // Add to local state
+          setCallHistory(prev => [historyItem, ...prev]);
+
+          // Save to Supabase
+          try {
+            // Build base payload
+            const basePayload = {
+              id: historyItem.id,
+              caller_name: historyItem.callerName,
+              date: historyItem.date.toISOString(),
+              duration: historyItem.duration,
+              messages: historyItem.messages.map(m => ({ ...m, timestamp: m.timestamp.toISOString() })),
+              extracted_fields: historyItem.extractedFields.map(f => ({ ...f, extractedAt: f.extractedAt.toISOString() })),
+              category: historyItem.category,
+              priority: historyItem.priority,
+              tags: historyItem.tags,
+              summary: historyItem.summary,
+              sentiment: historyItem.summary.sentiment || 'neutral',
+              follow_up_required: historyItem.summary.followUpRequired || false
+            };
+
+            // Try to insert with type field first
+            let { error } = await supabase.from('call_history').insert({
+              ...basePayload,
+              type: historyItem.type
+            });
+
+            if (error && error.code === 'PGRST204') {
+              // Retry without type if column missing
+              await supabase.from('call_history').insert(basePayload);
+            }
+          } catch (error) {
+            console.error('Error saving call to Supabase:', error);
+          }
+        } catch (bgError) {
+          console.error('Background processing error:', bgError);
         }
-      } catch (error) {
-        console.error('Error generating AI summary:', error);
-        // Create a basic summary from extracted fields
-        const purposeField = endedCall.extractedFields.find(f => f.id === 'purpose');
-        summary = {
-          mainPoints: purposeField ? [purposeField.value] : ['Call completed'],
-          sentiment: 'neutral',
-          actionItems: [],
-          followUpRequired: endedCall.priority === 'high' || endedCall.priority === 'critical',
-          notes: `Call from ${callerName}. ${purposeField ? `Regarding: ${purposeField.value}` : ''}`.trim(),
-        };
-      }
-
-      // Final check: if still unknown, try one more time with all messages
-      if (callerName === 'Unknown Caller') {
-        callerName = findCallerName(endedCall);
-      }
-
-      const historyItem: CallHistoryItem = {
-        id: `history-${Date.now()}`,
-        callerName,
-        date: endedCall.startTime,
-        duration,
-        type: endedCall.type, // Preserve the call type (voice/text)
-        messages: endedCall.messages,
-        extractedFields: endedCall.extractedFields,
-        category: finalCategory,
-        priority: finalPriority,
-        tags,
-        summary,
-      };
-
-      // Add to local state
-      setCallHistory(prev => [historyItem, ...prev]);
-
-      // Try to save to Supabase
-      try {
-        // Build base payload
-        const basePayload = {
-          id: historyItem.id,
-          caller_name: historyItem.callerName,  // snake_case for Supabase
-          date: historyItem.date.toISOString(),
-          duration: historyItem.duration,
-          messages: historyItem.messages.map(m => ({
-            ...m,
-            timestamp: m.timestamp.toISOString()
-          })),
-          extracted_fields: historyItem.extractedFields.map(f => ({  // snake_case
-            ...f,
-            extractedAt: f.extractedAt.toISOString()
-          })),
-          category: historyItem.category,
-          priority: historyItem.priority,
-          tags: historyItem.tags,
-          summary: historyItem.summary,
-          sentiment: historyItem.summary.sentiment || 'neutral',
-          follow_up_required: historyItem.summary.followUpRequired || false  // snake_case
-        };
-
-        // Try to insert with type field first
-        let { error } = await supabase.from('call_history').insert({
-          ...basePayload,
-          type: historyItem.type // voice or text
-        });
-
-        // If type column doesn't exist, retry without it
-        if (error && error.code === 'PGRST204') {
-          console.log('ℹ️ type column not found, inserting without it');
-          const result = await supabase.from('call_history').insert(basePayload);
-          error = result.error;
-        }
-
-        if (error) {
-          console.warn('Failed to save call to Supabase:', error);
-        } else {
-          console.log('✅ Call saved to Supabase:', historyItem.id, 'Type:', historyItem.type, 'Caller:', historyItem.callerName);
-        }
-      } catch (error) {
-        console.error('Error saving call to Supabase:', error);
-      }
-
-      setCurrentCall(null);
+      })();
     }
-  }, [currentCall, knowledgeBase, getUserId]);
+  }, [currentCall, knowledgeBase, getUserId]); // Ensure check dependencies
 
   const addMessage = useCallback((speaker: 'user' | 'agent', text: string) => {
     // Use functional update to avoid stale closure issues
@@ -741,10 +720,13 @@ export function DemoCallProvider({ children }: { children: ReactNode }) {
         timestamp: new Date(),
       };
       console.log(`📨 Adding ${speaker} message to call:`, text.substring(0, 50) + '...');
-      return {
+      const updated = {
         ...prev,
         messages: [...prev.messages, message],
       };
+      // Persist to localStorage
+      localStorage.setItem(ACTIVE_CALL_KEY, JSON.stringify(updated));
+      return updated;
     });
   }, []);
 

@@ -374,16 +374,15 @@ class LocalLLMService {
     }
 
     // 10. IMPORTANT: Instruct model to include extracted metadata as JSON
+    // Simplified for smaller models
     prompt += `\n\n---
-RESPONSE FORMAT:
-1. First write your natural conversational response to help the caller
-2. Then at the END only, add any extracted info as a JSON code block:
-
+RESPONSE INSTRUCTIONS:
+1. Respond naturally to the user first.
+2. If you detected any new info (name, purpose, contact), append it at the end in this format:
 \`\`\`json
-{"extracted":{"name":"...","purpose":"..."},"priority":"low|medium|high|critical","category":"..."}
+{"extracted": {"name": "...", "purpose": "..."}}
 \`\`\`
-
-Only include fields you actually detected. Natural response MUST come first!`;
+`;
 
     return prompt;
   }
