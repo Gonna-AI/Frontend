@@ -59,6 +59,7 @@ export interface CallHistoryItem {
   callerName: string;
   date: Date;
   duration: number;
+  type: 'voice' | 'text'; // Distinguish between voice calls and text chats
   messages: CallMessage[];
   extractedFields: ExtractedField[];
   category?: CallCategory;
@@ -232,6 +233,7 @@ interface SerializedCallHistoryItem {
   callerName: string;
   date: string;
   duration: number;
+  type?: 'voice' | 'text'; // Optional for backwards compatibility with old data
   messages: SerializedCallMessage[];
   extractedFields: SerializedExtractedField[];
   category?: CallCategory;
@@ -247,6 +249,7 @@ function deserializeCallHistory(data: string): CallHistoryItem[] {
     return parsed.map((item) => ({
       ...item,
       date: new Date(item.date),
+      type: item.type || 'text', // Default to 'text' for backwards compatibility
       messages: item.messages.map((m) => ({
         ...m,
         timestamp: new Date(m.timestamp)
@@ -333,6 +336,7 @@ export function DemoCallProvider({ children }: { children: ReactNode }) {
             callerName: item.caller_name || 'Unknown Caller',  // snake_case from Supabase
             date: new Date(item.date),
             duration: item.duration,
+            type: item.type || 'text', // Default to 'text' if not specified
             messages: (item.messages || []).map((m: SerializedCallMessage) => ({
               ...m,
               timestamp: new Date(m.timestamp)
@@ -660,6 +664,7 @@ export function DemoCallProvider({ children }: { children: ReactNode }) {
         callerName,
         date: endedCall.startTime,
         duration,
+        type: endedCall.type, // Preserve the call type (voice/text)
         messages: endedCall.messages,
         extractedFields: endedCall.extractedFields,
         category: finalCategory,
@@ -673,7 +678,8 @@ export function DemoCallProvider({ children }: { children: ReactNode }) {
 
       // Try to save to Supabase
       try {
-        const { error } = await supabase.from('call_history').insert({
+        // Build base payload
+        const basePayload = {
           id: historyItem.id,
           caller_name: historyItem.callerName,  // snake_case for Supabase
           date: historyItem.date.toISOString(),
@@ -692,13 +698,25 @@ export function DemoCallProvider({ children }: { children: ReactNode }) {
           summary: historyItem.summary,
           sentiment: historyItem.summary.sentiment || 'neutral',
           follow_up_required: historyItem.summary.followUpRequired || false  // snake_case
-          // Note: user_id column can be added later for user-specific filtering
+        };
+
+        // Try to insert with type field first
+        let { error } = await supabase.from('call_history').insert({
+          ...basePayload,
+          type: historyItem.type // voice or text
         });
+
+        // If type column doesn't exist, retry without it
+        if (error && error.code === 'PGRST204') {
+          console.log('ℹ️ type column not found, inserting without it');
+          const result = await supabase.from('call_history').insert(basePayload);
+          error = result.error;
+        }
 
         if (error) {
           console.warn('Failed to save call to Supabase:', error);
         } else {
-          console.log('✅ Call saved to Supabase:', historyItem.id, 'Caller:', historyItem.callerName);
+          console.log('✅ Call saved to Supabase:', historyItem.id, 'Type:', historyItem.type, 'Caller:', historyItem.callerName);
         }
       } catch (error) {
         console.error('Error saving call to Supabase:', error);

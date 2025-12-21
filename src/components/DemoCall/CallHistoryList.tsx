@@ -1,12 +1,12 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  History, 
-  Clock, 
-  ChevronDown, 
-  ChevronUp, 
-  MessageSquare, 
-  User, 
+import {
+  History,
+  Clock,
+  ChevronDown,
+  ChevronUp,
+  MessageSquare,
+  User,
   Bot,
   AlertTriangle,
   CheckCircle,
@@ -30,13 +30,14 @@ export default function CallHistoryList({ isDark = true, showFilters = true }: C
   const [activeTab, setActiveTab] = useState<'summary' | 'transcript' | 'details'>('summary');
   const [filterPriority, setFilterPriority] = useState<PriorityLevel | 'all'>('all');
   const [filterCategory, setFilterCategory] = useState<string>('all');
+  const [filterType, setFilterType] = useState<'all' | 'voice' | 'text'>('all');
 
   const formatDate = (date: Date) => {
     const now = new Date();
     const diff = now.getTime() - date.getTime();
     const hours = Math.floor(diff / (1000 * 60 * 60));
     const days = Math.floor(hours / 24);
-    
+
     if (hours < 1) return 'Just now';
     if (hours < 24) return `${hours}h ago`;
     if (days < 7) return `${days}d ago`;
@@ -60,29 +61,29 @@ export default function CallHistoryList({ isDark = true, showFilters = true }: C
 
   const getPriorityConfig = (priority: PriorityLevel) => {
     const configs = {
-      critical: { 
-        label: 'Critical', 
+      critical: {
+        label: 'Critical',
         color: 'red',
         bgClass: isDark ? 'bg-red-500/20 text-red-400 border-red-500/30' : 'bg-red-500/10 text-red-600 border-red-500/20',
-        icon: AlertTriangle 
+        icon: AlertTriangle
       },
-      high: { 
-        label: 'High', 
+      high: {
+        label: 'High',
         color: 'orange',
         bgClass: isDark ? 'bg-orange-500/20 text-orange-400 border-orange-500/30' : 'bg-orange-500/10 text-orange-600 border-orange-500/20',
-        icon: TrendingUp 
+        icon: TrendingUp
       },
-      medium: { 
-        label: 'Medium', 
+      medium: {
+        label: 'Medium',
         color: 'yellow',
         bgClass: isDark ? 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30' : 'bg-yellow-500/10 text-yellow-600 border-yellow-500/20',
-        icon: Circle 
+        icon: Circle
       },
-      low: { 
-        label: 'Low', 
+      low: {
+        label: 'Low',
         color: 'green',
         bgClass: isDark ? 'bg-green-500/20 text-green-400 border-green-500/30' : 'bg-green-500/10 text-green-600 border-green-500/20',
-        icon: CheckCircle 
+        icon: CheckCircle
       },
     };
     return configs[priority];
@@ -115,14 +116,19 @@ export default function CallHistoryList({ isDark = true, showFilters = true }: C
   const filteredHistory = callHistory.filter(call => {
     if (filterPriority !== 'all' && call.priority !== filterPriority) return false;
     if (filterCategory !== 'all' && call.category?.id !== filterCategory) return false;
+    if (filterType !== 'all' && call.type !== filterType) return false;
     return true;
   });
+
+  // Count by type
+  const voiceCount = callHistory.filter(c => c.type === 'voice').length;
+  const textCount = callHistory.filter(c => c.type === 'text').length;
 
   return (
     <div className={cn(
       "rounded-xl md:rounded-2xl overflow-hidden h-full flex flex-col",
-      isDark 
-        ? "bg-black/20 border border-white/10" 
+      isDark
+        ? "bg-black/20 border border-white/10"
         : "bg-white/80 border border-black/10"
     )}>
       {/* Header */}
@@ -140,13 +146,13 @@ export default function CallHistoryList({ isDark = true, showFilters = true }: C
               "font-semibold text-sm md:text-base",
               isDark ? "text-white" : "text-black"
             )}>
-              Call History
+              History
             </h3>
             <p className={cn(
               "text-[10px] md:text-xs",
               isDark ? "text-white/50" : "text-black/50"
             )}>
-              {filteredHistory.length} of {callHistory.length} calls
+              {filteredHistory.length} of {callHistory.length} items • {voiceCount} calls, {textCount} chats
             </p>
           </div>
         </div>
@@ -162,15 +168,31 @@ export default function CallHistoryList({ isDark = true, showFilters = true }: C
             "w-3 h-3 md:w-4 md:h-4 flex-shrink-0",
             isDark ? "text-white/40" : "text-black/40"
           )} />
-          
+
+          {/* Type filter */}
+          <select
+            value={filterType}
+            onChange={(e) => setFilterType(e.target.value as 'all' | 'voice' | 'text')}
+            className={cn(
+              "px-1.5 md:px-2 py-0.5 md:py-1 rounded-md md:rounded-lg text-[10px] md:text-xs focus:outline-none flex-shrink-0",
+              isDark
+                ? "bg-white/5 text-white border border-white/10"
+                : "bg-black/5 text-black border border-black/10"
+            )}
+          >
+            <option value="all">All Types</option>
+            <option value="voice">Calls Only</option>
+            <option value="text">Chats Only</option>
+          </select>
+
           {/* Priority filter */}
           <select
             value={filterPriority}
             onChange={(e) => setFilterPriority(e.target.value as PriorityLevel | 'all')}
             className={cn(
               "px-1.5 md:px-2 py-0.5 md:py-1 rounded-md md:rounded-lg text-[10px] md:text-xs focus:outline-none flex-shrink-0",
-              isDark 
-                ? "bg-white/5 text-white border border-white/10" 
+              isDark
+                ? "bg-white/5 text-white border border-white/10"
                 : "bg-black/5 text-black border border-black/10"
             )}
           >
@@ -187,8 +209,8 @@ export default function CallHistoryList({ isDark = true, showFilters = true }: C
             onChange={(e) => setFilterCategory(e.target.value)}
             className={cn(
               "px-1.5 md:px-2 py-0.5 md:py-1 rounded-md md:rounded-lg text-[10px] md:text-xs focus:outline-none flex-shrink-0",
-              isDark 
-                ? "bg-white/5 text-white border border-white/10" 
+              isDark
+                ? "bg-white/5 text-white border border-white/10"
                 : "bg-black/5 text-black border border-black/10"
             )}
           >
@@ -208,9 +230,9 @@ export default function CallHistoryList({ isDark = true, showFilters = true }: C
             isDark ? "text-white/40" : "text-black/40"
           )}>
             <History className="w-12 h-12 mb-4 opacity-40" />
-            <p className="text-lg font-medium mb-1">No Calls Found</p>
+            <p className="text-lg font-medium mb-1">No History Found</p>
             <p className="text-sm opacity-80">
-              {callHistory.length === 0 ? 'Call history will appear here' : 'Try adjusting your filters'}
+              {callHistory.length === 0 ? 'Call and chat history will appear here' : 'Try adjusting your filters'}
             </p>
           </div>
         ) : (
@@ -218,7 +240,7 @@ export default function CallHistoryList({ isDark = true, showFilters = true }: C
             {filteredHistory.map((item: CallHistoryItem) => {
               const priorityConfig = getPriorityConfig(item.priority);
               const PriorityIcon = priorityConfig.icon;
-              
+
               return (
                 <motion.div
                   key={item.id}
@@ -227,8 +249,8 @@ export default function CallHistoryList({ isDark = true, showFilters = true }: C
                   animate={{ opacity: 1, y: 0 }}
                   className={cn(
                     "rounded-xl overflow-hidden transition-colors",
-                    isDark 
-                      ? "bg-white/5 border border-white/5 hover:border-white/10" 
+                    isDark
+                      ? "bg-white/5 border border-white/5 hover:border-white/10"
                       : "bg-black/5 border border-black/5 hover:border-black/10"
                   )}
                 >
@@ -241,13 +263,37 @@ export default function CallHistoryList({ isDark = true, showFilters = true }: C
                       <div className="flex-1 min-w-0">
                         {/* Top row - Name and badges */}
                         <div className="flex items-center gap-1.5 md:gap-2 flex-wrap mb-1.5 md:mb-2">
+                          {/* Type badge (Call or Chat) */}
+                          <span className={cn(
+                            "text-[10px] md:text-xs px-1.5 md:px-2 py-0.5 rounded-full border flex items-center gap-0.5 md:gap-1",
+                            item.type === 'voice'
+                              ? isDark
+                                ? "bg-teal-500/20 text-teal-400 border-teal-500/30"
+                                : "bg-teal-500/10 text-teal-600 border-teal-500/20"
+                              : isDark
+                                ? "bg-blue-500/20 text-blue-400 border-blue-500/30"
+                                : "bg-blue-500/10 text-blue-600 border-blue-500/20"
+                          )}>
+                            {item.type === 'voice' ? (
+                              <>
+                                <svg xmlns="http://www.w3.org/2000/svg" className="w-2.5 h-2.5 md:w-3 md:h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+                                <span className="hidden sm:inline">Call</span>
+                              </>
+                            ) : (
+                              <>
+                                <MessageSquare className="w-2.5 h-2.5 md:w-3 md:h-3" />
+                                <span className="hidden sm:inline">Chat</span>
+                              </>
+                            )}
+                          </span>
+
                           <span className={cn(
                             "font-medium text-sm md:text-base",
                             isDark ? "text-white" : "text-black"
                           )}>
                             {item.callerName}
                           </span>
-                          
+
                           {/* Priority badge */}
                           <span className={cn(
                             "text-[10px] md:text-xs px-1.5 md:px-2 py-0.5 rounded-full border flex items-center gap-0.5 md:gap-1",
@@ -256,7 +302,7 @@ export default function CallHistoryList({ isDark = true, showFilters = true }: C
                             <PriorityIcon className="w-2.5 h-2.5 md:w-3 md:h-3" />
                             <span className="hidden sm:inline">{priorityConfig.label}</span>
                           </span>
-                          
+
                           {/* Category badge */}
                           {item.category && (
                             <span className={cn(
@@ -266,13 +312,13 @@ export default function CallHistoryList({ isDark = true, showFilters = true }: C
                               {item.category.name}
                             </span>
                           )}
-                          
+
                           {/* Follow-up badge */}
                           {item.summary.followUpRequired && (
                             <span className={cn(
                               "text-[10px] md:text-xs px-1.5 md:px-2 py-0.5 rounded-full",
-                              isDark 
-                                ? "bg-yellow-500/20 text-yellow-400" 
+                              isDark
+                                ? "bg-yellow-500/20 text-yellow-400"
                                 : "bg-yellow-500/10 text-yellow-600"
                             )}>
                               <span className="hidden sm:inline">Follow-up needed</span>
@@ -280,7 +326,7 @@ export default function CallHistoryList({ isDark = true, showFilters = true }: C
                             </span>
                           )}
                         </div>
-                        
+
                         {/* Summary preview */}
                         {item.summary.mainPoints[0] && (
                           <p className={cn(
@@ -290,7 +336,7 @@ export default function CallHistoryList({ isDark = true, showFilters = true }: C
                             {item.summary.mainPoints[0]}
                           </p>
                         )}
-                        
+
                         {/* Meta info */}
                         <div className={cn(
                           "flex items-center gap-2 md:gap-4 text-[10px] md:text-xs",
@@ -312,7 +358,7 @@ export default function CallHistoryList({ isDark = true, showFilters = true }: C
                           )}
                         </div>
                       </div>
-                      
+
                       <div className={cn(
                         "p-1 md:p-1.5 rounded-lg transition-colors flex-shrink-0",
                         isDark ? "hover:bg-white/10" : "hover:bg-black/10"
@@ -386,8 +432,8 @@ export default function CallHistoryList({ isDark = true, showFilters = true }: C
                                       key={i}
                                       className={cn(
                                         "text-sm pl-3 border-l-2",
-                                        isDark 
-                                          ? "text-white/80 border-white/20" 
+                                        isDark
+                                          ? "text-white/80 border-white/20"
                                           : "text-black/80 border-black/20"
                                       )}
                                     >
@@ -429,7 +475,7 @@ export default function CallHistoryList({ isDark = true, showFilters = true }: C
                                         key={action.id}
                                         className={cn(
                                           "flex items-center gap-2 text-sm",
-                                          action.completed 
+                                          action.completed
                                             ? isDark ? "text-white/40" : "text-black/40"
                                             : isDark ? "text-white/80" : "text-black/80"
                                         )}
@@ -485,8 +531,8 @@ export default function CallHistoryList({ isDark = true, showFilters = true }: C
                                     className={cn(
                                       "flex items-start gap-2 p-2 rounded-lg",
                                       msg.speaker === 'agent'
-                                        ? isDark 
-                                          ? "bg-blue-500/10" 
+                                        ? isDark
+                                          ? "bg-blue-500/10"
                                           : "bg-blue-500/5"
                                         : isDark
                                           ? "bg-purple-500/10"
@@ -579,8 +625,8 @@ export default function CallHistoryList({ isDark = true, showFilters = true }: C
                                         key={i}
                                         className={cn(
                                           "text-[10px] md:text-xs px-1.5 md:px-2 py-0.5 rounded-full",
-                                          isDark 
-                                            ? "bg-white/10 text-white/70" 
+                                          isDark
+                                            ? "bg-white/10 text-white/70"
                                             : "bg-black/10 text-black/70"
                                         )}
                                       >

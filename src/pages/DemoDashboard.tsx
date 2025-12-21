@@ -234,7 +234,7 @@ function DemoDashboardContent() {
   const tabs = [
     { id: 'monitor' as const, label: 'Monitor', fullLabel: 'Live Monitor', icon: Phone },
     { id: 'knowledge' as const, label: 'Config', fullLabel: 'Knowledge Base', icon: Brain },
-    { id: 'history' as const, label: 'History', fullLabel: 'Call History', icon: History },
+    { id: 'history' as const, label: 'History', fullLabel: 'History', icon: History },
   ];
 
   return (
@@ -311,16 +311,34 @@ function DemoDashboardContent() {
               />
             </div>
 
-            {/* Call Status Indicator */}
+            {/* Call Status Indicator - Shows active session type */}
             {currentCall?.status === 'active' && (
               <div className={cn(
                 "flex items-center gap-1.5 px-2 md:px-3 py-1 md:py-1.5 rounded-full",
-                isDark
-                  ? "bg-green-500/20 border border-green-500/30"
-                  : "bg-green-500/10 border border-green-500/20"
+                currentCall.type === 'voice'
+                  ? isDark
+                    ? "bg-teal-500/20 border border-teal-500/30"
+                    : "bg-teal-500/10 border border-teal-500/20"
+                  : isDark
+                    ? "bg-blue-500/20 border border-blue-500/30"
+                    : "bg-blue-500/10 border border-blue-500/20"
               )}>
-                <div className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-green-500 animate-pulse" />
-                <span className="text-green-400 text-xs md:text-sm font-medium hidden sm:inline">Active</span>
+                <div className={cn(
+                  "w-1.5 h-1.5 md:w-2 md:h-2 rounded-full animate-pulse",
+                  currentCall.type === 'voice' ? "bg-teal-500" : "bg-blue-500"
+                )} />
+                <span className={cn(
+                  "text-xs md:text-sm font-medium hidden sm:inline",
+                  currentCall.type === 'voice' ? "text-teal-400" : "text-blue-400"
+                )}>
+                  {currentCall.type === 'voice' ? '1 Call Active' : '1 Chat Active'}
+                </span>
+                <span className={cn(
+                  "text-xs font-medium sm:hidden",
+                  currentCall.type === 'voice' ? "text-teal-400" : "text-blue-400"
+                )}>
+                  1
+                </span>
               </div>
             )}
 
@@ -350,9 +368,9 @@ function DemoDashboardContent() {
             className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4 mb-4 md:mb-6"
           >
             <AnalyticsCard
-              title="Total Calls"
+              title="Total History"
               value={analytics.totalCalls}
-              subtitle="All time"
+              subtitle={currentCall?.status === 'active' ? '+1 active' : 'All time'}
               icon={MessageSquare}
               color="blue"
               isDark={isDark}
