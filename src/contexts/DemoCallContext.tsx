@@ -484,18 +484,24 @@ export function DemoCallProvider({ children }: { children: ReactNode }) {
     // Fetch initial count
     const fetchActiveSessions = async () => {
       try {
-        const { data } = await supabase
+        const { data, error } = await supabase
           .from('active_sessions')
           .select('session_type')
           .eq('status', 'active');
 
+        if (error) {
+          console.log('📡 Active sessions query error:', error.message);
+          return;
+        }
+
         if (data) {
           const voice = data.filter(s => s.session_type === 'voice').length;
           const text = data.filter(s => s.session_type === 'text').length;
+          console.log(`📡 Global active sessions: ${voice} calls, ${text} chats`);
           setGlobalActiveSessions({ voice, text });
         }
-      } catch {
-        // Table might not exist
+      } catch (e) {
+        console.error('📡 Active sessions fetch error:', e);
       }
     };
 
@@ -507,12 +513,15 @@ export function DemoCallProvider({ children }: { children: ReactNode }) {
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'active_sessions' },
-        () => {
+        (payload) => {
+          console.log('📡 Active sessions change:', payload.eventType);
           // Refetch on any change
           fetchActiveSessions();
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        console.log('📡 Active sessions subscription:', status);
+      });
 
     return () => {
       subscription.unsubscribe();
@@ -642,7 +651,7 @@ export function DemoCallProvider({ children }: { children: ReactNode }) {
 
     // Also register in Supabase for global visibility
     try {
-      await supabase.from('active_sessions').upsert({
+      const { error } = await supabase.from('active_sessions').upsert({
         id: newCall.id,
         session_type: type,
         started_at: newCall.startTime.toISOString(),
@@ -650,10 +659,13 @@ export function DemoCallProvider({ children }: { children: ReactNode }) {
         last_activity: new Date().toISOString(),
         message_count: 0
       });
-      console.log('📡 Session registered for global sync:', newCall.id);
+      if (error) {
+        console.error('📡 Failed to register session:', error.message);
+      } else {
+        console.log('📡 Session registered for global sync:', newCall.id);
+      }
     } catch (e) {
-      // Silently fail - table might not exist yet
-      console.log('Note: active_sessions table not available for global sync');
+      console.error('📡 Session registration error:', e);
     }
   }, []);
 
