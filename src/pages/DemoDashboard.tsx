@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { 
-  LayoutDashboard, 
-  Phone, 
-  ArrowLeft, 
+import {
+  LayoutDashboard,
+  Phone,
+  ArrowLeft,
   Brain,
   History,
   BarChart3,
@@ -12,9 +12,7 @@ import {
   Clock,
   Users,
   CheckCircle,
-  MessageSquare,
-  Menu,
-  X
+  MessageSquare
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '../utils/cn';
@@ -24,18 +22,19 @@ import {
   LiveCallMonitor,
   KnowledgeBase,
   CallHistoryList,
+  UserSessionSwitcher,
 } from '../components/DemoCall';
 
-function AnalyticsCard({ 
-  title, 
-  value, 
-  subtitle, 
-  icon: Icon, 
+function AnalyticsCard({
+  title,
+  value,
+  subtitle,
+  icon: Icon,
   color,
-  isDark 
-}: { 
-  title: string; 
-  value: string | number; 
+  isDark
+}: {
+  title: string;
+  value: string | number;
   subtitle?: string;
   icon: React.ElementType;
   color: string;
@@ -52,8 +51,8 @@ function AnalyticsCard({
   return (
     <div className={cn(
       "p-3 md:p-4 rounded-xl",
-      isDark 
-        ? "bg-white/5 border border-white/10" 
+      isDark
+        ? "bg-white/5 border border-white/10"
         : "bg-black/5 border border-black/10"
     )}>
       <div className="flex items-start justify-between">
@@ -92,7 +91,7 @@ function AnalyticsCard({
 
 function PriorityQueue({ isDark, compact = false }: { isDark: boolean; compact?: boolean }) {
   const { getCallsByPriority } = useDemoCall();
-  
+
   const priorities: { level: PriorityLevel; label: string; shortLabel: string; color: string; icon: React.ElementType }[] = [
     { level: 'critical', label: 'Critical', shortLabel: 'Critical', color: 'red', icon: AlertTriangle },
     { level: 'high', label: 'High Priority', shortLabel: 'High', color: 'orange', icon: TrendingUp },
@@ -156,8 +155,8 @@ function PriorityQueue({ isDark, compact = false }: { isDark: boolean; compact?:
   return (
     <div className={cn(
       "rounded-2xl overflow-hidden",
-      isDark 
-        ? "bg-black/20 border border-white/10" 
+      isDark
+        ? "bg-black/20 border border-white/10"
         : "bg-white/80 border border-black/10"
     )}>
       <div className={cn(
@@ -175,12 +174,12 @@ function PriorityQueue({ isDark, compact = false }: { isDark: boolean; compact?:
           Priority Queue
         </h3>
       </div>
-      
+
       <div className="p-3 md:p-4 space-y-2 md:space-y-3">
         {priorities.map(({ level, label, color, icon: Icon }) => {
           const calls = getCallsByPriority(level);
           const followUps = calls.filter(c => c.summary.followUpRequired).length;
-          
+
           return (
             <div
               key={level}
@@ -222,9 +221,8 @@ function DemoDashboardContent() {
   const navigate = useNavigate();
   const [isDark] = useState(true);
   const [activeTab, setActiveTab] = useState<'monitor' | 'knowledge' | 'history'>('monitor');
-  const [showMobileMenu, setShowMobileMenu] = useState(false);
-  const { getAnalytics, currentCall } = useDemoCall();
-  
+  const { getAnalytics, currentCall, getCurrentUserId, switchSession, knowledgeBase, saveKnowledgeBase } = useDemoCall();
+
   const analytics = getAnalytics();
 
   const formatDuration = (seconds: number) => {
@@ -242,8 +240,8 @@ function DemoDashboardContent() {
   return (
     <div className={cn(
       "min-h-screen transition-colors duration-300",
-      isDark 
-        ? "bg-[rgb(10,10,10)]" 
+      isDark
+        ? "bg-[rgb(10,10,10)]"
         : "bg-gradient-to-br from-gray-50 to-white"
     )}>
       {/* Background gradients */}
@@ -255,8 +253,8 @@ function DemoDashboardContent() {
       {/* Header */}
       <header className={cn(
         "fixed top-0 left-0 right-0 z-50 px-3 md:px-4 py-2 md:py-3 backdrop-blur-md border-b",
-        isDark 
-          ? "bg-[rgb(10,10,10)]/80 border-white/10" 
+        isDark
+          ? "bg-[rgb(10,10,10)]/80 border-white/10"
           : "bg-white/80 border-black/10"
       )}>
         <div className="max-w-7xl mx-auto flex items-center justify-between">
@@ -265,8 +263,8 @@ function DemoDashboardContent() {
               onClick={() => navigate('/')}
               className={cn(
                 "p-1.5 md:p-2 rounded-lg transition-colors",
-                isDark 
-                  ? "hover:bg-white/10 text-white/60 hover:text-white" 
+                isDark
+                  ? "hover:bg-white/10 text-white/60 hover:text-white"
                   : "hover:bg-black/10 text-black/60 hover:text-black"
               )}
             >
@@ -275,8 +273,8 @@ function DemoDashboardContent() {
             <div className="flex items-center gap-2 md:gap-3">
               <div className={cn(
                 "w-8 h-8 md:w-10 md:h-10 rounded-lg md:rounded-xl flex items-center justify-center",
-                isDark 
-                  ? "bg-gradient-to-br from-blue-500/20 to-purple-500/20 border border-white/10" 
+                isDark
+                  ? "bg-gradient-to-br from-blue-500/20 to-purple-500/20 border border-white/10"
                   : "bg-gradient-to-br from-blue-500/10 to-purple-500/10 border border-black/10"
               )}>
                 <LayoutDashboard className={cn(
@@ -302,25 +300,34 @@ function DemoDashboardContent() {
           </div>
 
           <div className="flex items-center gap-2 md:gap-3">
+            {/* User Session Switcher */}
+            <UserSessionSwitcher
+              isDark={isDark}
+              currentUserId={getCurrentUserId()}
+              onSessionChange={switchSession}
+              currentConfig={knowledgeBase as unknown as Record<string, unknown>}
+              onSaveSession={saveKnowledgeBase}
+            />
+
             {/* Call Status Indicator */}
             {currentCall?.status === 'active' && (
               <div className={cn(
                 "flex items-center gap-1.5 px-2 md:px-3 py-1 md:py-1.5 rounded-full",
-                isDark 
-                  ? "bg-green-500/20 border border-green-500/30" 
+                isDark
+                  ? "bg-green-500/20 border border-green-500/30"
                   : "bg-green-500/10 border border-green-500/20"
               )}>
                 <div className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-green-500 animate-pulse" />
                 <span className="text-green-400 text-xs md:text-sm font-medium hidden sm:inline">Active</span>
               </div>
             )}
-            
+
             <button
               onClick={() => navigate('/user')}
               className={cn(
                 "flex items-center gap-1.5 md:gap-2 px-2.5 md:px-4 py-1.5 md:py-2 rounded-lg md:rounded-xl text-xs md:text-sm font-medium transition-colors",
-                isDark 
-                  ? "bg-green-500/20 text-green-400 hover:bg-green-500/30 border border-green-500/30" 
+                isDark
+                  ? "bg-green-500/20 text-green-400 hover:bg-green-500/30 border border-green-500/30"
                   : "bg-green-500/10 text-green-600 hover:bg-green-500/20 border border-green-500/20"
               )}
             >
@@ -417,7 +424,7 @@ function DemoDashboardContent() {
               >
                 <VoiceCallInterface isDark={isDark} compact />
               </motion.div>
-              
+
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
