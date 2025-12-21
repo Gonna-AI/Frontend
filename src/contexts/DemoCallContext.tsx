@@ -292,19 +292,28 @@ export function DemoCallProvider({ children }: { children: ReactNode }) {
           .order('date', { ascending: false });
 
         if (!historyError && historyData && historyData.length > 0) {
-          const formattedHistory = (historyData as SerializedCallHistoryItem[]).map((item) => ({
-            ...item,
+          // Map Supabase snake_case to app camelCase
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const formattedHistory = historyData.map((item: any) => ({
+            id: item.id,
+            callerName: item.caller_name || 'Unknown Caller',  // snake_case from Supabase
             date: new Date(item.date),
-            messages: (item.messages || []).map((m) => ({
+            duration: item.duration,
+            messages: (item.messages || []).map((m: SerializedCallMessage) => ({
               ...m,
               timestamp: new Date(m.timestamp)
             })),
-            extractedFields: (item.extractedFields || []).map((f) => ({
+            extractedFields: (item.extracted_fields || []).map((f: SerializedExtractedField) => ({  // snake_case
               ...f,
               extractedAt: new Date(f.extractedAt)
-            }))
+            })),
+            category: item.category,
+            priority: item.priority || 'medium',
+            tags: item.tags || [],
+            summary: item.summary || { mainPoints: [], sentiment: 'neutral', actionItems: [], followUpRequired: false, notes: '' }
           })) as CallHistoryItem[];
           setCallHistory(formattedHistory);
+          console.log('✅ Loaded', formattedHistory.length, 'calls from Supabase');
         } else {
           // Fallback to localStorage
           const localHistory = localStorage.getItem(CALL_HISTORY_KEY);
@@ -621,25 +630,29 @@ export function DemoCallProvider({ children }: { children: ReactNode }) {
       try {
         const { error } = await supabase.from('call_history').insert({
           id: historyItem.id,
-          callerName: historyItem.callerName,
+          caller_name: historyItem.callerName,  // snake_case for Supabase
           date: historyItem.date.toISOString(),
           duration: historyItem.duration,
           messages: historyItem.messages.map(m => ({
             ...m,
             timestamp: m.timestamp.toISOString()
           })),
-          extractedFields: historyItem.extractedFields.map(f => ({
+          extracted_fields: historyItem.extractedFields.map(f => ({  // snake_case
             ...f,
             extractedAt: f.extractedAt.toISOString()
           })),
           category: historyItem.category,
           priority: historyItem.priority,
           tags: historyItem.tags,
-          summary: historyItem.summary
+          summary: historyItem.summary,
+          sentiment: historyItem.summary.sentiment || 'neutral',
+          follow_up_required: historyItem.summary.followUpRequired || false  // snake_case
         });
 
         if (error) {
           console.warn('Failed to save call to Supabase:', error);
+        } else {
+          console.log('✅ Call saved to Supabase:', historyItem.id, 'Caller:', historyItem.callerName);
         }
       } catch (error) {
         console.error('Error saving call to Supabase:', error);
