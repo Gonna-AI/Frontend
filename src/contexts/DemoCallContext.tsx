@@ -544,6 +544,9 @@ export function DemoCallProvider({ children }: { children: ReactNode }) {
       return nameField.value.trim();
     }
 
+    // Common words to filter out as false positives
+    const commonWords = ['hello', 'hi', 'hey', 'yes', 'no', 'okay', 'sure', 'thanks', 'thank', 'you', 'the', 'a', 'an', 'how', 'can', 'help', 'may', 'please', 'need', 'want', 'have'];
+
     // Try to find name in messages where user introduced themselves
     const userMessages = call.messages.filter(m => m.speaker === 'user');
     for (const msg of userMessages) {
@@ -552,6 +555,10 @@ export function DemoCallProvider({ children }: { children: ReactNode }) {
         /(?:my name is|i'?m|this is|i am|call me|hi,?\s*i'?m|hello,?\s*this is)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)/i,
         /^([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)\s+(?:here|calling|speaking)/i,
         /(?:hi|hello),?\s*([A-Z][a-z]+)/i,
+        // Pattern for just stating name directly like "Animesh Mishra" or "Animesh Mishra 9650848339"
+        /^([A-Z][a-z]+\s+[A-Z][a-z]+)(?:\s+\d+)?$/i,
+        // Pattern for "im Animesh" or "its Animesh"
+        /(?:im|its|it's)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)/i,
       ];
 
       for (const pattern of patterns) {
@@ -559,8 +566,7 @@ export function DemoCallProvider({ children }: { children: ReactNode }) {
         if (match?.[1]) {
           const name = match[1].trim();
           // Filter out common false positives
-          const commonWords = ['hello', 'hi', 'hey', 'yes', 'no', 'okay', 'sure', 'thanks', 'thank', 'you', 'the', 'a', 'an'];
-          if (!commonWords.includes(name.toLowerCase()) && name.length > 1) {
+          if (!commonWords.includes(name.toLowerCase()) && name.length > 2) {
             console.log('✅ Found caller name from message pattern:', name);
             return name;
           }
@@ -574,12 +580,16 @@ export function DemoCallProvider({ children }: { children: ReactNode }) {
       const patterns = [
         /(?:hi|hello),?\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)/i,
         /(?:thanks|thank you),?\s+([A-Z][a-z]+)/i,
+        // Pattern for "Mr./Ms./Mrs. X" - common in formal responses
+        /(?:Mr\.?|Ms\.?|Mrs\.?)\s+([A-Z][a-z]+)/i,
+        // Pattern for "Hello, Mr. Mishra" style
+        /(?:hello|hi),?\s+(?:Mr\.?|Ms\.?|Mrs\.?)\s+([A-Z][a-z]+)/i,
       ];
       for (const pattern of patterns) {
         const match = msg.text.match(pattern);
         if (match?.[1]) {
           const name = match[1].trim();
-          if (name.length > 1) {
+          if (!commonWords.includes(name.toLowerCase()) && name.length > 2) {
             console.log('✅ Found caller name from agent message:', name);
             return name;
           }
