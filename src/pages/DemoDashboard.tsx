@@ -301,13 +301,15 @@ function DemoDashboardContent() {
 
           <div className="flex items-center gap-2 md:gap-3">
             {/* User Session Switcher */}
-            <UserSessionSwitcher
-              isDark={isDark}
-              currentUserId={getCurrentUserId()}
-              onSessionChange={switchSession}
-              currentConfig={knowledgeBase as unknown as Record<string, unknown>}
-              onSaveSession={saveKnowledgeBase}
-            />
+            <div className="relative">
+              <UserSessionSwitcher
+                isDark={isDark}
+                currentUserId={getCurrentUserId()}
+                onSessionChange={switchSession}
+                currentConfig={knowledgeBase as unknown as Record<string, unknown>}
+                onSaveSession={saveKnowledgeBase}
+              />
+            </div>
 
             {/* Call Status Indicator */}
             {currentCall?.status === 'active' && (
