@@ -291,6 +291,12 @@ export default function UnifiedChatInterface({ isDark = true }: UnifiedChatInter
         await endCall();
     }, [endCall]);
 
+    // End text chat and save to history
+    const endTextChat = useCallback(async () => {
+        setAgentStatus('idle');
+        await endCall();
+    }, [endCall]);
+
     const toggleMute = useCallback(() => {
         if (isMuted) {
             if (recognitionRef.current && isVoiceMode) {
@@ -670,6 +676,39 @@ export default function UnifiedChatInterface({ isDark = true }: UnifiedChatInter
                                 </button>
                             </div>
                         </div>
+
+                        {/* End Chat Button - Show when in text mode with messages */}
+                        {isActive && !isVoiceMode && messages.length > 0 && (
+                            <motion.button
+                                type="button"
+                                onClick={endTextChat}
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                className={cn(
+                                    "relative p-3 rounded-xl overflow-hidden",
+                                    "transition-all duration-300",
+                                    "focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-transparent",
+                                    isDark
+                                        ? cn(
+                                            "bg-gradient-to-br from-rose-500/80 to-red-600/80",
+                                            "border border-rose-400/30",
+                                            "shadow-lg shadow-rose-500/20",
+                                            "hover:shadow-xl hover:shadow-rose-500/30",
+                                            "focus:ring-rose-500/50",
+                                            "text-white"
+                                        )
+                                        : cn(
+                                            "bg-gradient-to-br from-rose-500/90 to-red-600/90",
+                                            "border border-rose-400/30",
+                                            "shadow-lg shadow-rose-500/30",
+                                            "text-white"
+                                        )
+                                )}
+                            >
+                                <div className="absolute inset-0 bg-gradient-to-t from-transparent via-white/5 to-white/10 pointer-events-none" />
+                                <span className="relative z-10 text-xs font-medium px-1">End</span>
+                            </motion.button>
+                        )}
 
                         {/* Call Button - Premium Glassmorphic (Dark Teal instead of Green) */}
                         <motion.button
