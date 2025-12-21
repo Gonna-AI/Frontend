@@ -130,6 +130,9 @@ interface DemoCallContextType {
   getCurrentUserId: () => string;
   switchSession: (sessionId: string, config?: Record<string, unknown>) => void;
 
+  // Global active sessions (from all devices worldwide)
+  globalActiveSessions: { voice: number; text: number };
+
   // Loading state
   isLoading: boolean;
 }
@@ -269,6 +272,7 @@ export function DemoCallProvider({ children }: { children: ReactNode }) {
   const [currentCall, setCurrentCall] = useState<CallSession | null>(null);
   const [callHistory, setCallHistory] = useState<CallHistoryItem[]>([]); // Start with empty - real data only
   const [isLoading, setIsLoading] = useState(true);
+  const [globalActiveSessions, setGlobalActiveSessions] = useState<{ voice: number; text: number }>({ voice: 0, text: 0 });
 
   // Persistence key
   const ACTIVE_CALL_KEY = 'active_call_session';
@@ -409,6 +413,112 @@ export function DemoCallProvider({ children }: { children: ReactNode }) {
     loadData();
   }, []);
 
+  // Real-time subscription for global sync across devices
+  useEffect(() => {
+    // Subscribe to call_history changes from Supabase
+    const subscription = supabase
+      .channel('call_history_changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*', // Listen for all changes (INSERT, UPDATE, DELETE)
+          schema: 'public',
+          table: 'call_history'
+        },
+        (payload) => {
+          console.log('📡 Real-time update received:', payload.eventType);
+
+          if (payload.eventType === 'INSERT' && payload.new) {
+            // New call added - add to local state if not already present
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const newItem = payload.new as any;
+            const formattedItem: CallHistoryItem = {
+              id: newItem.id,
+              callerName: newItem.caller_name || 'Unknown Caller',
+              date: new Date(newItem.date),
+              duration: newItem.duration || 0,
+              type: newItem.type || 'text',
+              messages: (newItem.messages || []).map((m: SerializedCallMessage) => ({
+                ...m,
+                timestamp: new Date(m.timestamp)
+              })),
+              extractedFields: (newItem.extracted_fields || []).map((f: SerializedExtractedField) => ({
+                ...f,
+                extractedAt: new Date(f.extractedAt)
+              })),
+              category: newItem.category,
+              priority: newItem.priority || 'medium',
+              tags: newItem.tags || [],
+              summary: newItem.summary || { mainPoints: [], sentiment: 'neutral', actionItems: [], followUpRequired: false, notes: '' }
+            };
+
+            setCallHistory(prev => {
+              // Check if already exists
+              if (prev.some(c => c.id === formattedItem.id)) {
+                return prev;
+              }
+              console.log('📡 Adding new call from real-time sync:', formattedItem.callerName);
+              return [formattedItem, ...prev];
+            });
+          } else if (payload.eventType === 'DELETE' && payload.old) {
+            // Call deleted - remove from local state
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const oldItem = payload.old as any;
+            setCallHistory(prev => prev.filter(c => c.id !== oldItem.id));
+          }
+        }
+      )
+      .subscribe((status) => {
+        if (status === 'SUBSCRIBED') {
+          console.log('📡 Real-time sync enabled - dashboard updates globally');
+        }
+      });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
+
+  // Real-time subscription for global active sessions count
+  useEffect(() => {
+    // Fetch initial count
+    const fetchActiveSessions = async () => {
+      try {
+        const { data } = await supabase
+          .from('active_sessions')
+          .select('session_type')
+          .eq('status', 'active');
+
+        if (data) {
+          const voice = data.filter(s => s.session_type === 'voice').length;
+          const text = data.filter(s => s.session_type === 'text').length;
+          setGlobalActiveSessions({ voice, text });
+        }
+      } catch {
+        // Table might not exist
+      }
+    };
+
+    fetchActiveSessions();
+
+    // Subscribe to changes
+    const subscription = supabase
+      .channel('active_sessions_changes')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'active_sessions' },
+        () => {
+          // Refetch on any change
+          fetchActiveSessions();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
+
   // Save call history to localStorage whenever it changes (as backup)
   useEffect(() => {
     if (callHistory.length > 0) {
@@ -516,7 +626,7 @@ export function DemoCallProvider({ children }: { children: ReactNode }) {
   }, []);
 
   // Call session management
-  const startCall = useCallback((type: 'voice' | 'text' = 'text') => {
+  const startCall = useCallback(async (type: 'voice' | 'text' = 'text') => {
     const newCall: CallSession = {
       id: `call-${Date.now()}`,
       startTime: new Date(),
@@ -527,8 +637,24 @@ export function DemoCallProvider({ children }: { children: ReactNode }) {
       priority: 'medium',
     };
     setCurrentCall(newCall);
-    // Persist active call
+    // Persist active call locally
     localStorage.setItem(ACTIVE_CALL_KEY, JSON.stringify(newCall));
+
+    // Also register in Supabase for global visibility
+    try {
+      await supabase.from('active_sessions').upsert({
+        id: newCall.id,
+        session_type: type,
+        started_at: newCall.startTime.toISOString(),
+        status: 'active',
+        last_activity: new Date().toISOString(),
+        message_count: 0
+      });
+      console.log('📡 Session registered for global sync:', newCall.id);
+    } catch (e) {
+      // Silently fail - table might not exist yet
+      console.log('Note: active_sessions table not available for global sync');
+    }
   }, []);
 
   // Helper to find caller name from various sources
@@ -614,6 +740,14 @@ export function DemoCallProvider({ children }: { children: ReactNode }) {
       // 2. Clear UI immediately (Optimistic update)
       setCurrentCall(null);
       localStorage.removeItem(ACTIVE_CALL_KEY);
+
+      // Also remove from Supabase active_sessions
+      try {
+        await supabase.from('active_sessions').delete().eq('id', endedCall.id);
+        console.log('📡 Session removed from global sync:', endedCall.id);
+      } catch (e) {
+        // Silently fail - table might not exist
+      }
 
       // 3. Process summary and save in background
       // We wrap this in a self-executing logic so the main thread is free
@@ -834,6 +968,7 @@ export function DemoCallProvider({ children }: { children: ReactNode }) {
     getAnalytics,
     getCurrentUserId: getUserId,
     switchSession,
+    globalActiveSessions,
     isLoading,
   };
 

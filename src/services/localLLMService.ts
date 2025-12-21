@@ -297,34 +297,17 @@ class LocalLLMService {
 
   /**
    * Build system prompt for the AI
-   * OPTIMIZED FOR SMALL MODELS (phi3-mini, etc.)
-   * Keep it SHORT and SIMPLE - small models get confused by complex prompts
+   * ULTRA-MINIMAL for small models (phi3-mini 4B)
    */
-  private buildSystemPrompt(config: KnowledgeBaseConfig, existingFields: ExtractedField[]): string {
-    // For small models: SIMPLE IS BETTER
-    // Don't include complex instructions or templates - they get echoed
+  private buildSystemPrompt(_config: KnowledgeBaseConfig, existingFields: ExtractedField[]): string {
+    // phi3-mini needs MINIMAL prompts - too much instruction = echoing
 
-    const knownInfo = existingFields.length > 0
-      ? `\nYou already know: ${existingFields.map(f => `${f.label}=${f.value}`).join(', ')}`
-      : '';
+    let prompt = `You are a receptionist. Reply naturally in 1-2 sentences.`;
 
-    // Ultra-simple prompt for small models
-    const prompt = `You are a friendly receptionist for ClerkTree company. Have a natural conversation.
-
-RULES:
-- Give SHORT, direct responses (1-3 sentences max)
-- Be helpful and friendly
-- Ask for caller's name if you don't know it
-- Ask what they need help with
-- Do NOT output templates or placeholders
-- Do NOT say things in parentheses like "(if user...)"
-${knownInfo}
-
-When you learn someone's name or what they need, add at the end:
-\`\`\`json
-{"extracted":{"name":"their name","purpose":"what they need"}}
-\`\`\`
-Only add this JSON if you learned new info.`;
+    if (existingFields.length > 0) {
+      const info = existingFields.map(f => `${f.label}: ${f.value}`).join(', ');
+      prompt += ` Known info: ${info}`;
+    }
 
     return prompt;
   }
