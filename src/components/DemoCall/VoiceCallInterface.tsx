@@ -56,29 +56,29 @@ declare global {
   }
 }
 
-export default function VoiceCallInterface({ 
-  isDark = true, 
+export default function VoiceCallInterface({
+  isDark = true,
   onTranscript,
-  compact = false 
+  compact = false
 }: VoiceCallInterfaceProps) {
-  const { 
-    currentCall, 
-    startCall, 
-    endCall, 
-    addMessage, 
+  const {
+    currentCall,
+    startCall,
+    endCall,
+    addMessage,
     knowledgeBase,
     updateExtractedField,
     setCallPriority,
     setCallCategory
   } = useDemoCall();
-  
+
   const [callDuration, setCallDuration] = useState(0);
   const [isMuted, setIsMuted] = useState(false);
   const [isSpeakerOn, setIsSpeakerOn] = useState(true);
   const [currentTranscript, setCurrentTranscript] = useState('');
   const [agentStatus, setAgentStatus] = useState<'idle' | 'speaking' | 'listening' | 'processing'>('idle');
   const [language, setLanguage] = useState<'en-US' | 'hi-IN'>('en-US');
-  
+
   const recognitionRef = useRef<SpeechRecognitionInstance | null>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -123,7 +123,7 @@ export default function VoiceCallInterface({
         const current = event.resultIndex;
         const transcriptText = event.results[current][0].transcript;
         setCurrentTranscript(transcriptText);
-        
+
         if (event.results[current].isFinal) {
           handleUserInput(transcriptText);
         }
@@ -163,10 +163,10 @@ export default function VoiceCallInterface({
 
   const speakText = useCallback((text: string) => {
     if (!isSpeakerOn) return Promise.resolve();
-    
+
     // Get the selected voice from knowledge base
     const selectedVoice = (knowledgeBase.selectedVoiceId || 'af_nova') as KokoroVoiceId;
-    
+
     return ttsService.speak(text, {
       voice: selectedVoice,
       speed: 1.0,
@@ -191,7 +191,7 @@ export default function VoiceCallInterface({
 
   const handleUserInput = useCallback(async (text: string) => {
     if (!text.trim()) return;
-    
+
     addMessage('user', text);
     onTranscript?.(text, 'user');
     setCurrentTranscript('');
@@ -238,8 +238,8 @@ export default function VoiceCallInterface({
   const handleStartCall = useCallback(async () => {
     // Reset AI conversation state for new call
     aiService.resetState();
-    
-    startCall();
+
+    startCall('voice');
     setAgentStatus('listening');
     // Don't send automatic greeting - wait for user to speak first, then AI responds
   }, [startCall]);
@@ -285,8 +285,8 @@ export default function VoiceCallInterface({
     return (
       <div className={cn(
         "flex items-center gap-2 md:gap-4 p-3 md:p-4 rounded-xl md:rounded-2xl",
-        isDark 
-          ? "bg-black/20 border border-white/10" 
+        isDark
+          ? "bg-black/20 border border-white/10"
           : "bg-white/80 border border-black/10"
       )}>
         {/* Status indicator */}
@@ -294,17 +294,41 @@ export default function VoiceCallInterface({
           "w-2 h-2 md:w-3 md:h-3 rounded-full flex-shrink-0",
           isActive ? "bg-green-500 animate-pulse" : "bg-gray-500"
         )} />
-        
-        <span className={cn(
-          "text-xs md:text-sm font-medium truncate",
-          isDark ? "text-white/80" : "text-black/80"
-        )}>
-          {isActive ? `Active - ${formatDuration(callDuration)}` : 'No Active Call'}
-        </span>
+
+        <div className="flex flex-col min-w-0">
+          <div className="flex items-center gap-2">
+            <span className={cn(
+              "text-xs md:text-sm font-medium truncate",
+              isDark ? "text-white/80" : "text-black/80"
+            )}>
+              {isActive ? (currentCall?.type === 'voice' ? '1 Active Call' : '0 Active Calls') : '0 Active Calls'}
+            </span>
+            <span className={cn(
+              "text-xs md:text-sm font-medium truncate opacity-60",
+              isDark ? "text-white/60" : "text-black/60"
+            )}>
+              •
+            </span>
+            <span className={cn(
+              "text-xs md:text-sm font-medium truncate",
+              isDark ? "text-white/80" : "text-black/80"
+            )}>
+              {isActive ? (currentCall?.type === 'text' ? '1 Active Chat' : '0 Active Chats') : '0 Active Chats'}
+            </span>
+          </div>
+          {isActive && (
+            <span className={cn(
+              "text-[10px] opacity-60",
+              isDark ? "text-white/60" : "text-black/60"
+            )}>
+              Duration: {formatDuration(callDuration)}
+            </span>
+          )}
+        </div>
 
         {isActive && (
           <span className={cn(
-            "text-[10px] md:text-xs px-1.5 md:px-2 py-0.5 md:py-1 rounded-full flex-shrink-0",
+            "text-[10px] md:text-xs px-1.5 md:px-2 py-0.5 md:py-1 rounded-full flex-shrink-0 ml-auto",
             agentStatus === 'speaking' && "bg-blue-500/20 text-blue-400",
             agentStatus === 'listening' && "bg-green-500/20 text-green-400",
             agentStatus === 'processing' && "bg-yellow-500/20 text-yellow-400",
@@ -330,8 +354,8 @@ export default function VoiceCallInterface({
   return (
     <div className={cn(
       "flex flex-col items-center justify-center p-4 md:p-8 rounded-2xl md:rounded-3xl relative overflow-hidden",
-      isDark 
-        ? "bg-black/20 border border-white/10 backdrop-blur-md" 
+      isDark
+        ? "bg-black/20 border border-white/10 backdrop-blur-md"
         : "bg-white/80 border border-black/10 backdrop-blur-md"
     )}>
       {/* Background gradients */}
@@ -342,24 +366,24 @@ export default function VoiceCallInterface({
       <motion.div
         animate={{
           scale: isActive ? [1, 1.05, 1] : 1,
-          boxShadow: isActive 
+          boxShadow: isActive
             ? ['0 0 0 0 rgba(59, 130, 246, 0)', '0 0 0 15px rgba(59, 130, 246, 0.1)', '0 0 0 0 rgba(59, 130, 246, 0)']
             : 'none'
         }}
         transition={{ duration: 2, repeat: isActive ? Infinity : 0 }}
         className={cn(
           "w-16 h-16 md:w-24 md:h-24 rounded-xl md:rounded-2xl flex items-center justify-center mb-4 md:mb-6",
-          isDark 
-            ? "bg-black/30 border border-white/20" 
+          isDark
+            ? "bg-black/30 border border-white/20"
             : "bg-white border border-black/10"
         )}
       >
-        <svg 
-          xmlns="http://www.w3.org/2000/svg" 
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 464 468"
           className="w-10 h-10 md:w-16 md:h-16"
         >
-          <path 
+          <path
             fill={isDark ? "white" : "black"}
             d="M275.9 63.5c37.7 5.3 76.6 24.1 103.7 50.2 30 28.8 41.8 57.6 35.8 87.1-6.1 30.1-33.6 52.9-70.6 58.3-6 0.9-18.3 1-44.9 0.6l-36.6-0.7-0.5 17.8c-0.3 9.7-0.4 17.8-0.4 17.9 0.1 0.1 19.1 0.3 42.2 0.4 23.2 0 42.7 0.5 43.5 1 1.2 0.7 1.1 2.2-0.8 9.4-6 23-20.5 42.1-41.8 55-7.3 4.3-26.7 11.9-36 14.1-9 2-34 2-44.5 0-41.3-7.9-74.2-38-82.9-75.7-8.1-35.7 2.2-71.5 27.5-94.7 16.1-14.9 35.5-22.4 63.7-24.7l7.7-0.7v-34.1l-11.7 0.7c-22.2 1.3-37 5.3-56.4 15.2-28.7 14.6-49.7 39.3-59.9 70.2-9.6 29.3-9.3 62.6 0.8 91.4 3.3 9.2 12.2 25.6 18.3 33.8 11.3 14.9 30.6 30.8 48.7 39.9 19.9 10 49.2 15.9 73.2 14.7 26.5-1.3 52.5-9.6 74.2-23.9 26.9-17.6 47.2-47.9 53.3-79.7 1-5.2 2.3-10.1 2.8-10.8 0.8-0.9 6.9-1.2 27.1-1l26.1 0.3 0.3 3.8c1.2 14.6-10.9 52.1-23.9 74-17.8 30-43.2 54-75.9 71.5-20.9 11.2-38.3 16.5-67.2 20.7-27.6 3.9-47.9 3.1-75.8-3.1-36.9-8.3-67.8-25.6-97.1-54.6-23.6-23.2-44.8-61.9-51.7-93.8-5.1-23.7-5.5-28.1-4.9-48.8 1.7-63.2 23.4-111.8 67.7-152 28-25.4 60.4-41.3 99-48.8 18.5-3.6 46.1-4 67.9-0.9zm16.4 92.6c-6.3 2.4-12.8 8.5-15.4 14.5-2.6 6.1-2.6 18.3 0 23.9 5 11 20.2 17.7 32.3 14.1 11.9-3.4 19.8-14.3 19.8-27.1-0.1-19.9-18.2-32.5-36.7-25.4z"
           />
@@ -439,7 +463,7 @@ export default function VoiceCallInterface({
               className={cn(
                 "p-3 md:p-4 rounded-lg md:rounded-xl transition-all",
                 isDark
-                  ? isMuted 
+                  ? isMuted
                     ? "bg-red-500/20 border border-red-500/30 text-red-400 hover:bg-red-500/30"
                     : "bg-blue-500/20 border border-blue-500/30 text-blue-400 hover:bg-blue-500/30"
                   : isMuted
@@ -455,7 +479,7 @@ export default function VoiceCallInterface({
               className={cn(
                 "p-3 md:p-4 rounded-lg md:rounded-xl transition-all",
                 isDark
-                  ? isSpeakerOn 
+                  ? isSpeakerOn
                     ? "bg-green-500/20 border border-green-500/30 text-green-400 hover:bg-green-500/30"
                     : "bg-gray-500/20 border border-gray-500/30 text-gray-400 hover:bg-gray-500/30"
                   : isSpeakerOn

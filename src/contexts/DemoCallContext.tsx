@@ -47,6 +47,7 @@ export interface CallSession {
   startTime: Date;
   endTime?: Date;
   status: 'idle' | 'connecting' | 'active' | 'ended';
+  type: 'voice' | 'text';
   messages: CallMessage[];
   extractedFields: ExtractedField[];
   category?: CallCategory;
@@ -102,7 +103,7 @@ interface DemoCallContextType {
 
   // Current call session
   currentCall: CallSession | null;
-  startCall: () => void;
+  startCall: (type?: 'voice' | 'text') => void;
   endCall: () => Promise<void>;
   addMessage: (speaker: 'user' | 'agent', text: string) => void;
   updateExtractedField: (field: ExtractedField) => void;
@@ -484,11 +485,12 @@ export function DemoCallProvider({ children }: { children: ReactNode }) {
   }, []);
 
   // Call session management
-  const startCall = useCallback(() => {
+  const startCall = useCallback((type: 'voice' | 'text' = 'text') => {
     const newCall: CallSession = {
       id: `call-${Date.now()}`,
       startTime: new Date(),
       status: 'active',
+      type,
       messages: [],
       extractedFields: [],
       priority: 'medium',

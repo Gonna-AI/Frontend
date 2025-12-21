@@ -179,7 +179,7 @@ export default function UnifiedChatInterface({ isDark = true }: UnifiedChatInter
         if (!isActive) {
             aiService.resetState();
             pendingMessageRef.current = text;
-            startCall();
+            startCall(fromVoice ? 'voice' : 'text');
             // The useEffect will add the message when call becomes active
         } else {
             // Call is already active, add message directly
@@ -264,7 +264,7 @@ export default function UnifiedChatInterface({ isDark = true }: UnifiedChatInter
     const startVoiceCall = useCallback(() => {
         if (!isActive) {
             aiService.resetState();
-            startCall();
+            startCall('voice');
         }
         setIsVoiceMode(true);
         setAgentStatus('listening');
