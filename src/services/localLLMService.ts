@@ -269,16 +269,26 @@ class LocalLLMService {
     cleaned = cleaned.replace(/BEGINCONTEXT\s*/gi, '');
     cleaned = cleaned.replace(/\s*ENDCONTEXT/gi, '');
 
-    // Remove special tokens that models use internally
-    // Match patterns like <|assistant|>, 
+    // Remove special tokens that models use internally like <|assistant|>, <|end|>, etc.
+    cleaned = cleaned.replace(/<\|[^|]+\|>/g, '');
+
+    // Remove training data markers
+    cleaned = cleaned.replace(/Test instruction \d+[\s\S]*?(?=(?:Test instruction|\n\n|$))/gi, '');
+    cleaned = cleaned.replace(/^User:\s*I am a robot[\s\S]*/gim, '');
+    cleaned = cleaned.replace(/^(?:User|Human|Assistant):\s*$/gim, '');
+    cleaned = cleaned.replace(/(?:Human|User|Assistant):\s*\n+(?:Human|User|Assistant):/gi, '');
+
+    // Clean up whitespace
+    cleaned = cleaned.replace(/^\s*\n+/g, '').replace(/\n{3,}/g, '\n\n').trim();
+
+    // SAFETY: If cleaning resulted in empty but original had content
     if (!cleaned && text.trim()) {
-      console.warn('⚠️ cleanFinalAnswer stripped all content, using original text');
-      // As a last resort, try to extract just the first sentence
+      console.warn('cleanFinalAnswer stripped all content, using original text');
       const firstSentence = text.match(/[^.!?]*[.!?]/);
       if (firstSentence && firstSentence[0].length > 20) {
         cleaned = firstSentence[0].trim();
       } else {
-        cleaned = text.substring(0, 500).trim(); // Cap at 500 chars for safety
+        cleaned = text.substring(0, 500).trim();
       }
     }
 
@@ -287,46 +297,211 @@ class LocalLLMService {
 
   /**
    * Build system prompt for the AI
-   * NOTE: Kept VERY simple for small models like Qwen3-0.6B
+   * Instructs the model to naturally extract information and include metadata in response
    */
   private buildSystemPrompt(config: KnowledgeBaseConfig, existingFields: ExtractedField[]): string {
     const extractedInfo = existingFields.length > 0
       ? existingFields.map(f => `${f.label}: ${f.value}`).join(', ')
       : '';
 
-    // VERY simple prompt for small models
-    let prompt = `You are a helpful AI assistant.`;
+    // Build comprehensive prompt from Knowledge Base
+    let prompt = '';
 
-    // Only add persona if it looks like an AI character description, NOT a user message
-    // Skip personas that look like user scenarios/requests
-    if (config.persona && config.persona !== 'Professional, empathetic, and efficient AI assistant') {
+    // 1. Use the custom system prompt if provided
+    if (config.systemPrompt && config.systemPrompt.trim()) {
+      prompt += config.systemPrompt.trim();
+    } else {
+      prompt += 'You are a helpful AI call assistant.';
+    }
+
+    // 2. Add persona/character
+    if (config.persona && config.persona.trim() &&
+      config.persona !== 'Professional, empathetic, and efficient AI assistant') {
       const lowerPersona = config.persona.toLowerCase();
-      const looksLikeUserMessage =
-        lowerPersona.includes("i'm working") ||
-        lowerPersona.includes("i am working") ||
-        lowerPersona.includes("can you") ||
-        lowerPersona.includes("i need") ||
-        lowerPersona.includes("i want") ||
-        lowerPersona.includes("please help") ||
-        lowerPersona.includes("help me") ||
-        lowerPersona.startsWith("i'm ") ||
-        lowerPersona.startsWith("i am ") ||
-        lowerPersona.includes("my project");
-
-      if (!looksLikeUserMessage) {
-        prompt += ` ${config.persona}.`;
-      } else {
-        console.warn('⚠️ Persona looks like a user message, skipping to avoid confusion:', config.persona.substring(0, 50));
+      const isValidPersona = !lowerPersona.startsWith("i'm ") &&
+        !lowerPersona.startsWith("i am ") &&
+        !lowerPersona.includes("can you") &&
+        !lowerPersona.includes("please help");
+      if (isValidPersona) {
+        prompt += `\n\nYour personality: ${config.persona}`;
       }
     }
 
-    if (extractedInfo) {
-      prompt += ` Known info: ${extractedInfo}.`;
+    // 3. Add custom instructions
+    if (config.customInstructions && config.customInstructions.length > 0) {
+      prompt += '\n\nInstructions:\n';
+      config.customInstructions.forEach((instruction, i) => {
+        prompt += `${i + 1}. ${instruction}\n`;
+      });
     }
 
-    prompt += ` Respond helpfully and naturally.`;
+    // 4. Add response guidelines
+    if (config.responseGuidelines && config.responseGuidelines.trim()) {
+      prompt += `\n\n${config.responseGuidelines}`;
+    }
+
+    // 5. Define context fields to extract (for name, contact, purpose, etc.)
+    if (config.contextFields && config.contextFields.length > 0) {
+      prompt += '\n\nDuring the conversation, naturally gather the following information when the caller provides it:';
+      config.contextFields.forEach(field => {
+        const required = field.required ? ' (important)' : '';
+        prompt += `\n- ${field.name}: ${field.description}${required}`;
+      });
+    }
+
+    // 6. Add categories for classification
+    if (config.categories && config.categories.length > 0) {
+      prompt += '\n\nCall categories: ';
+      prompt += config.categories.map(c => `${c.name} (${c.description})`).join(', ');
+    }
+
+    // 7. Add priority rules
+    if (config.priorityRules && config.priorityRules.length > 0) {
+      prompt += '\n\nPriority assessment:';
+      config.priorityRules.forEach(rule => {
+        prompt += `\n- ${rule}`;
+      });
+    }
+
+    // 8. Add already extracted information
+    if (extractedInfo) {
+      prompt += `\n\nInformation already gathered from caller: ${extractedInfo}`;
+    }
+
+    // 9. Add greeting if this might be the start of a conversation
+    if (config.greeting && config.greeting.trim() && existingFields.length === 0) {
+      prompt += `\n\nFor first message, greet with: "${config.greeting}"`;
+    }
+
+    // 10. IMPORTANT: Instruct model to include extracted metadata as JSON
+    prompt += `\n\n---
+IMPORTANT: After your natural response, if you detected or extracted any information from the user's message, include a JSON block at the very end like this:
+
+\`\`\`json
+{
+  "extracted": {
+    "name": "caller's name if mentioned",
+    "purpose": "reason for calling if clear",
+    "contact": "phone/email if provided"
+  },
+  "priority": "critical|high|medium|low based on urgency",
+  "category": "category id that best matches"
+}
+\`\`\`
+
+Only include fields that were actually detected. If nothing was extracted, skip the JSON block entirely.
+Your natural conversational response comes FIRST, then the JSON if applicable.`;
 
     return prompt;
+  }
+
+  /**
+   * Parse extracted metadata from model response
+   * Looks for JSON block at end of response
+   */
+  private parseExtractedMetadata(response: string, config: KnowledgeBaseConfig, existingFields: ExtractedField[]): {
+    cleanResponse: string;
+    extractedFields: ExtractedField[];
+    suggestedCategory?: { id: string; name: string; confidence: number };
+    suggestedPriority?: PriorityLevel;
+  } {
+    let cleanResponse = response;
+    const newFields: ExtractedField[] = [...existingFields];
+    let suggestedPriority: PriorityLevel | undefined;
+    let suggestedCategory: { id: string; name: string; confidence: number } | undefined;
+
+    // Look for JSON block in response
+    const jsonMatch = response.match(/```json\s*([\s\S]*?)\s*```/i);
+    if (jsonMatch && jsonMatch[1]) {
+      try {
+        const metadata = JSON.parse(jsonMatch[1]);
+
+        // Remove JSON block from response
+        cleanResponse = response.replace(/```json\s*[\s\S]*?\s*```/gi, '').trim();
+
+        // Extract fields from metadata
+        if (metadata.extracted) {
+          const ext = metadata.extracted;
+
+          // Add caller name if found and not already present
+          if (ext.name && !existingFields.find(f => f.id === 'name')) {
+            newFields.push({
+              id: 'name',
+              label: 'Caller Name',
+              value: ext.name,
+              confidence: 0.9,
+              extractedAt: new Date()
+            });
+          }
+
+          // Add purpose if found
+          if (ext.purpose && !existingFields.find(f => f.id === 'purpose')) {
+            newFields.push({
+              id: 'purpose',
+              label: 'Call Purpose',
+              value: ext.purpose,
+              confidence: 0.85,
+              extractedAt: new Date()
+            });
+          }
+
+          // Add contact if found
+          if (ext.contact && !existingFields.find(f => f.id === 'contact')) {
+            newFields.push({
+              id: 'contact',
+              label: 'Contact Info',
+              value: ext.contact,
+              confidence: 0.9,
+              extractedAt: new Date()
+            });
+          }
+
+          // Add any other extracted fields
+          for (const [key, value] of Object.entries(ext)) {
+            if (value && typeof value === 'string' && !['name', 'purpose', 'contact'].includes(key)) {
+              if (!existingFields.find(f => f.id === key)) {
+                newFields.push({
+                  id: key,
+                  label: key.charAt(0).toUpperCase() + key.slice(1),
+                  value: value,
+                  confidence: 0.8,
+                  extractedAt: new Date()
+                });
+              }
+            }
+          }
+        }
+
+        // Get priority
+        if (metadata.priority && ['critical', 'high', 'medium', 'low'].includes(metadata.priority)) {
+          suggestedPriority = metadata.priority as PriorityLevel;
+        }
+
+        // Get category
+        if (metadata.category && config.categories) {
+          const cat = config.categories.find(c =>
+            c.id === metadata.category ||
+            c.name.toLowerCase() === metadata.category.toLowerCase()
+          );
+          if (cat) {
+            suggestedCategory = { ...cat, confidence: 0.85 };
+          }
+        }
+
+        console.log('Extracted metadata from model:', {
+          fields: newFields.length - existingFields.length,
+          priority: suggestedPriority,
+          category: suggestedCategory?.name
+        });
+
+      } catch (e) {
+        console.warn('Failed to parse model JSON metadata:', e);
+        // JSON parsing failed, just clean the response
+        cleanResponse = response.replace(/```json\s*[\s\S]*?\s*```/gi, '').trim();
+      }
+    }
+
+    return { cleanResponse, extractedFields: newFields, suggestedCategory, suggestedPriority };
   }
 
   /**
@@ -400,7 +575,7 @@ class LocalLLMService {
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
         const errorMsg = errorData.error || `Local LLM error: ${response.status}`;
-        console.error(`❌ Local LLM API error (${response.status}):`, errorMsg);
+        console.error(` Local LLM API error (${response.status}):`, errorMsg);
         throw new Error(`Local LLM error: ${response.status} - ${errorMsg}`);
       }
 
@@ -410,29 +585,34 @@ class LocalLLMService {
       // Response is in data.choices[0].message.content
       const rawResponse = data.choices?.[0]?.message?.content || data.content || '';
 
-      console.log('📥 Raw response length:', rawResponse.length, 'chars');
+      console.log(' Raw response length:', rawResponse.length, 'chars');
 
       const { reasoning, answer } = this.parseReasoningResponse(rawResponse);
 
-      console.log('🧠 Reasoning extracted:', reasoning ? `${reasoning.length} chars` : 'none');
-      console.log('💬 Final answer:', answer ? `${answer.length} chars` : 'none');
+      console.log(' Reasoning extracted:', reasoning ? `${reasoning.length} chars` : 'none');
+      console.log(' Final answer:', answer ? `${answer.length} chars` : 'none');
 
       // Use answer if available, otherwise fall back to raw response
       const finalResponse = answer || rawResponse;
 
       // Debug: Log first 200 chars of the response
-      console.log('📤 Sending response (first 200 chars):', finalResponse.substring(0, 200));
+      console.log(' Sending response (first 200 chars):', finalResponse.substring(0, 200));
 
       if (!finalResponse || !finalResponse.trim()) {
-        console.error('❌ Empty response after parsing!');
+        console.error(' Empty response after parsing!');
         console.error('   Raw response was:', rawResponse.substring(0, 500));
         throw new Error('Received empty response from LLM');
       }
 
+      // Parse extracted metadata from model's JSON output (model extracts naturally based on system prompt)
+      const extracted = this.parseExtractedMetadata(finalResponse, knowledgeBase, existingFields);
+
       return {
-        response: finalResponse,
+        response: extracted.cleanResponse,
         reasoning: reasoning || undefined,
-        extractedFields: existingFields,
+        extractedFields: extracted.extractedFields,
+        suggestedCategory: extracted.suggestedCategory,
+        suggestedPriority: extracted.suggestedPriority,
       };
 
     } catch (error) {
