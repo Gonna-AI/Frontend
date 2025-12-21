@@ -247,8 +247,17 @@ class LocalLLMService {
       cleaned = cleaned.replace(new RegExp(`</${tag}>`, 'gi'), '');
     }
 
-    // Remove "Response:" or "Answer:" prefixes only at the very start
-    cleaned = cleaned.replace(/^(?:Response|Answer|Output):\s*/i, '');
+    // Remove "Response:", "Answer:", "Persona:", "System:" prefixes only at the very start
+    // This prevents the model from echoing back system prompts
+    cleaned = cleaned.replace(/^(?:Response|Answer|Output|Persona|System|Instructions?):\s*/i, '');
+
+    // Remove any echoed persona content - patterns like "Persona: I'm working on..."
+    // This catches cases where the model echoes the knowledge base persona
+    cleaned = cleaned.replace(/\n*Persona:\s*[^\n]+(?:\n(?![A-Z][a-z]*:)[^\n]+)*/gi, '');
+
+    // Remove any echoed system prompt patterns at the start of response
+    // These patterns indicate the model is echoing training data or system prompts
+    cleaned = cleaned.replace(/^(?:I am|I'm|You are|You're)\s+(?:a\s+)?(?:helpful\s+)?(?:AI|assistant|helper|bot)[^.]*\./i, '');
 
     // IMPORTANT: Remove garbage patterns that indicate model confusion
     // "Test instruction X" patterns
