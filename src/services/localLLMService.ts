@@ -302,8 +302,27 @@ class LocalLLMService {
     // VERY simple prompt for small models
     let prompt = `You are a helpful AI assistant.`;
 
+    // Only add persona if it looks like an AI character description, NOT a user message
+    // Skip personas that look like user scenarios/requests
     if (config.persona && config.persona !== 'Professional, empathetic, and efficient AI assistant') {
-      prompt += ` ${config.persona}.`;
+      const lowerPersona = config.persona.toLowerCase();
+      const looksLikeUserMessage =
+        lowerPersona.includes("i'm working") ||
+        lowerPersona.includes("i am working") ||
+        lowerPersona.includes("can you") ||
+        lowerPersona.includes("i need") ||
+        lowerPersona.includes("i want") ||
+        lowerPersona.includes("please help") ||
+        lowerPersona.includes("help me") ||
+        lowerPersona.startsWith("i'm ") ||
+        lowerPersona.startsWith("i am ") ||
+        lowerPersona.includes("my project");
+
+      if (!looksLikeUserMessage) {
+        prompt += ` ${config.persona}.`;
+      } else {
+        console.warn('⚠️ Persona looks like a user message, skipping to avoid confusion:', config.persona.substring(0, 50));
+      }
     }
 
     if (extractedInfo) {
@@ -359,8 +378,8 @@ class LocalLLMService {
         body: JSON.stringify({
           prompt: prompt,
           n_predict: N_PREDICT,
-          // Stop sequences for simple format
-          stop: ['\nUser:', '\n\nUser:', '\nHuman:', '\n\n\n'],
+          // Stop sequences for simple format - including Persona to prevent echo
+          stop: ['\nUser:', '\n\nUser:', '\nHuman:', '\n\n\n', '\nPersona:', 'Persona:'],
           // Higher temperature for small models can help
           temperature: 0.8,
           // Repetition penalty to avoid loops
