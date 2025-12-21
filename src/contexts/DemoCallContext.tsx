@@ -99,7 +99,7 @@ interface DemoCallContextType {
   removeContextField: (id: string) => void;
   addCategory: (category: CallCategory) => void;
   removeCategory: (id: string) => void;
-  
+
   // Current call session
   currentCall: CallSession | null;
   startCall: () => void;
@@ -108,13 +108,13 @@ interface DemoCallContextType {
   updateExtractedField: (field: ExtractedField) => void;
   setCallPriority: (priority: PriorityLevel) => void;
   setCallCategory: (category: CallCategory) => void;
-  
+
   // Call history
   callHistory: CallHistoryItem[];
   addToCallHistory: (item: CallHistoryItem) => void;
   getCallsByPriority: (priority: PriorityLevel) => CallHistoryItem[];
   getCallsByCategory: (categoryId: string) => CallHistoryItem[];
-  
+
   // Analytics
   getAnalytics: () => {
     totalCalls: number;
@@ -123,7 +123,7 @@ interface DemoCallContextType {
     avgDuration: number;
     followUpRequired: number;
   };
-  
+
   // Loading state
   isLoading: boolean;
 }
@@ -144,11 +144,11 @@ const defaultKnowledgeBase: KnowledgeBaseConfig = {
 5. Provide helpful responses while gathering context
 
 Always be empathetic, clear, and efficient in your communication.`,
-  
+
   persona: 'Professional, empathetic, and efficient AI assistant',
-  
+
   greeting: "",
-  
+
   contextFields: [
     { id: 'name', name: 'Caller Name', description: 'Full name of the caller', required: true, type: 'text' },
     { id: 'contact', name: 'Contact Info', description: 'Phone or email for follow-up', required: false, type: 'text' },
@@ -156,7 +156,7 @@ Always be empathetic, clear, and efficient in your communication.`,
     { id: 'urgency', name: 'Urgency Level', description: 'How urgent is the matter', required: false, type: 'select', options: ['Not Urgent', 'Somewhat Urgent', 'Very Urgent', 'Emergency'] },
     { id: 'previousContact', name: 'Previous Contact', description: 'Have they contacted before', required: false, type: 'boolean' },
   ],
-  
+
   categories: [
     { id: 'inquiry', name: 'General Inquiry', color: 'blue', description: 'General questions and information requests' },
     { id: 'support', name: 'Support Request', color: 'orange', description: 'Technical or service support needed' },
@@ -165,28 +165,28 @@ Always be empathetic, clear, and efficient in your communication.`,
     { id: 'feedback', name: 'Feedback', color: 'purple', description: 'Customer feedback and suggestions' },
     { id: 'sales', name: 'Sales Inquiry', color: 'emerald', description: 'Sales and pricing questions' },
   ],
-  
+
   priorityRules: [
     'Mark as CRITICAL if caller mentions emergency, urgent medical issue, or safety concern',
     'Mark as HIGH if caller is frustrated, has waited long, or has time-sensitive request',
     'Mark as MEDIUM for standard requests that need follow-up',
     'Mark as LOW for general inquiries with no time pressure',
   ],
-  
+
   customInstructions: [
     'Always confirm the caller\'s name early in the conversation',
     'Ask clarifying questions if the purpose is unclear',
     'Offer to schedule follow-up if needed',
     'Summarize the conversation before ending the call',
   ],
-  
+
   responseGuidelines: `Guidelines for responses:
 - Keep responses concise but complete
 - Use the caller's name when appropriate
 - Acknowledge concerns before providing solutions
 - Avoid technical jargon unless the caller uses it
 - Offer alternatives when the primary solution isn't available`,
-  
+
   selectedVoiceId: 'af_nova', // Default voice
 };
 
@@ -266,7 +266,7 @@ export function DemoCallProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const loadData = async () => {
       setIsLoading(true);
-      
+
       // Try to load from Supabase first, fallback to localStorage
       try {
         // Load knowledge base
@@ -274,7 +274,7 @@ export function DemoCallProvider({ children }: { children: ReactNode }) {
           .from('knowledge_base_config')
           .select('*')
           .single();
-        
+
         if (!kbError && kbData?.config) {
           setKnowledgeBase(kbData.config as KnowledgeBaseConfig);
         } else {
@@ -290,7 +290,7 @@ export function DemoCallProvider({ children }: { children: ReactNode }) {
           .from('call_history')
           .select('*')
           .order('date', { ascending: false });
-        
+
         if (!historyError && historyData && historyData.length > 0) {
           const formattedHistory = (historyData as SerializedCallHistoryItem[]).map((item) => ({
             ...item,
@@ -328,7 +328,7 @@ export function DemoCallProvider({ children }: { children: ReactNode }) {
           setCallHistory(deserializeCallHistory(localHistory));
         }
       }
-      
+
       setIsLoading(false);
     };
 
@@ -357,7 +357,7 @@ export function DemoCallProvider({ children }: { children: ReactNode }) {
     try {
       // Save to localStorage first (always works)
       localStorage.setItem(KNOWLEDGE_BASE_KEY, JSON.stringify(knowledgeBase));
-      
+
       // Try to save to Supabase
       const { error } = await supabase
         .from('knowledge_base_config')
@@ -366,12 +366,12 @@ export function DemoCallProvider({ children }: { children: ReactNode }) {
           config: knowledgeBase,
           updated_at: new Date().toISOString()
         });
-      
+
       if (error) {
         console.warn('Supabase save failed, using localStorage:', error);
         // localStorage save already done, so still return true
       }
-      
+
       return true;
     } catch (error) {
       console.error('Error saving knowledge base:', error);
@@ -387,7 +387,7 @@ export function DemoCallProvider({ children }: { children: ReactNode }) {
         .from('knowledge_base_config')
         .select('*')
         .single();
-      
+
       if (!error && data?.config) {
         setKnowledgeBase(data.config as KnowledgeBaseConfig);
       }
@@ -447,8 +447,8 @@ export function DemoCallProvider({ children }: { children: ReactNode }) {
   // Helper to find caller name from various sources
   const findCallerName = (call: CallSession): string => {
     // First try extracted fields (most reliable)
-    const nameField = call.extractedFields.find(f => 
-      f.id === 'name' || 
+    const nameField = call.extractedFields.find(f =>
+      f.id === 'name' ||
       f.label.toLowerCase().includes('name') ||
       f.label.toLowerCase().includes('caller')
     );
@@ -456,7 +456,7 @@ export function DemoCallProvider({ children }: { children: ReactNode }) {
       console.log('✅ Found caller name from extracted fields:', nameField.value);
       return nameField.value.trim();
     }
-    
+
     // Try to find name in messages where user introduced themselves
     const userMessages = call.messages.filter(m => m.speaker === 'user');
     for (const msg of userMessages) {
@@ -466,7 +466,7 @@ export function DemoCallProvider({ children }: { children: ReactNode }) {
         /^([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)\s+(?:here|calling|speaking)/i,
         /(?:hi|hello),?\s*([A-Z][a-z]+)/i,
       ];
-      
+
       for (const pattern of patterns) {
         const match = msg.text.match(pattern);
         if (match?.[1]) {
@@ -480,7 +480,7 @@ export function DemoCallProvider({ children }: { children: ReactNode }) {
         }
       }
     }
-    
+
     // Try agent messages that might reference the caller's name
     const agentMessages = call.messages.filter(m => m.speaker === 'agent');
     for (const msg of agentMessages) {
@@ -499,7 +499,7 @@ export function DemoCallProvider({ children }: { children: ReactNode }) {
         }
       }
     }
-    
+
     console.log('⚠️ Could not find caller name, using "Unknown Caller"');
     return 'Unknown Caller';
   };
@@ -511,12 +511,12 @@ export function DemoCallProvider({ children }: { children: ReactNode }) {
         endTime: new Date(),
         status: 'ended',
       };
-      
+
       const duration = Math.floor((endedCall.endTime!.getTime() - endedCall.startTime.getTime()) / 1000);
-      
+
       // Get initial caller name from various sources
       let callerName = findCallerName(endedCall);
-      
+
       // Default summary while we wait for AI
       let summary: CallSummary = {
         mainPoints: ['Call completed'],
@@ -525,7 +525,7 @@ export function DemoCallProvider({ children }: { children: ReactNode }) {
         followUpRequired: endedCall.priority === 'high' || endedCall.priority === 'critical',
         notes: 'Processing call summary...',
       };
-      
+
       let finalCategory = endedCall.category;
       let finalPriority = endedCall.priority;
       let tags: string[] = [];
@@ -539,16 +539,16 @@ export function DemoCallProvider({ children }: { children: ReactNode }) {
             endedCall.category,
             endedCall.priority
           );
-          
+
           summary = summaryResponse.summary;
           tags = summaryResponse.tags;
-          
+
           // Use caller name from summary if provided
           if (summaryResponse.callerName && callerName === 'Unknown Caller') {
             callerName = summaryResponse.callerName;
             console.log('✅ Using caller name from AI summary:', callerName);
           }
-          
+
           // Try to extract name from summary notes if not found yet
           if (callerName === 'Unknown Caller' && summary.notes) {
             const nameMatch = summary.notes.match(/(?:caller|from|name is|named)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)/i);
@@ -557,7 +557,7 @@ export function DemoCallProvider({ children }: { children: ReactNode }) {
               console.log('✅ Extracted caller name from summary notes:', callerName);
             }
           }
-          
+
           // Also check if summary extracted any new fields
           if (summary.notes && callerName === 'Unknown Caller') {
             // Look for name patterns in notes
@@ -574,7 +574,7 @@ export function DemoCallProvider({ children }: { children: ReactNode }) {
               }
             }
           }
-          
+
           // Update priority if higher than current
           const priorityOrder: PriorityLevel[] = ['low', 'medium', 'high', 'critical'];
           const currentIdx = priorityOrder.indexOf(finalPriority);
@@ -595,12 +595,12 @@ export function DemoCallProvider({ children }: { children: ReactNode }) {
           notes: `Call from ${callerName}. ${purposeField ? `Regarding: ${purposeField.value}` : ''}`.trim(),
         };
       }
-      
+
       // Final check: if still unknown, try one more time with all messages
       if (callerName === 'Unknown Caller') {
         callerName = findCallerName(endedCall);
       }
-      
+
       const historyItem: CallHistoryItem = {
         id: `history-${Date.now()}`,
         callerName,
@@ -613,10 +613,10 @@ export function DemoCallProvider({ children }: { children: ReactNode }) {
         tags,
         summary,
       };
-      
+
       // Add to local state
       setCallHistory(prev => [historyItem, ...prev]);
-      
+
       // Try to save to Supabase
       try {
         const { error } = await supabase.from('call_history').insert({
@@ -637,32 +637,39 @@ export function DemoCallProvider({ children }: { children: ReactNode }) {
           tags: historyItem.tags,
           summary: historyItem.summary
         });
-        
+
         if (error) {
           console.warn('Failed to save call to Supabase:', error);
         }
       } catch (error) {
         console.error('Error saving call to Supabase:', error);
       }
-      
+
       setCurrentCall(null);
     }
   }, [currentCall, knowledgeBase]);
 
   const addMessage = useCallback((speaker: 'user' | 'agent', text: string) => {
-    if (currentCall) {
+    // Use functional update to avoid stale closure issues
+    // The message will be added if there's an active call in the current state
+    setCurrentCall(prev => {
+      if (!prev) {
+        console.warn('⚠️ addMessage called but no active call session. Message:', text.substring(0, 50));
+        return null;
+      }
       const message: CallMessage = {
         id: `msg-${Date.now()}`,
         speaker,
         text,
         timestamp: new Date(),
       };
-      setCurrentCall(prev => prev ? {
+      console.log(`📨 Adding ${speaker} message to call:`, text.substring(0, 50) + '...');
+      return {
         ...prev,
         messages: [...prev.messages, message],
-      } : null);
-    }
-  }, [currentCall]);
+      };
+    });
+  }, []);
 
   const updateExtractedField = useCallback((field: ExtractedField) => {
     if (currentCall) {
@@ -711,7 +718,7 @@ export function DemoCallProvider({ children }: { children: ReactNode }) {
       medium: 0,
       low: 0,
     };
-    
+
     const byCategory: Record<string, number> = {};
     let totalDuration = 0;
     let followUpCount = 0;
