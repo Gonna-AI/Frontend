@@ -2,10 +2,10 @@
  * Local LLM Service for ClerkTree
  * 
  * Provides AI using Ollama via Cloudflare tunnel
- * Default: https://from-treatments-physicians-dude.trycloudflare.com
+ * Default: https://spirit-indoor-chorus-equation.trycloudflare.com
  * Override with VITE_OLLAMA_URL in .env if needed
  * 
- * Uses /completion endpoint with prompt-based requests
+ * Uses /api/generate endpoint as requested
  */
 
 import {
@@ -17,7 +17,7 @@ import {
 } from '../contexts/DemoCallContext';
 
 // Configuration - using local service via cloudflare tunnel
-// Clean URL: remove trailing slashes, extra spaces, and any trailing text like "check with this"
+// Clean URL: remove trailing slashes, extra spaces, and any trailing text
 const getCleanURL = (url: string) => {
   if (!url) return '';
   // Remove any text after the URL (like " check with this")
@@ -26,13 +26,11 @@ const getCleanURL = (url: string) => {
   cleaned = cleaned.replace(/\/+$/, '');
   return cleaned;
 };
-const LLM_URL = getCleanURL(import.meta.env.VITE_OLLAMA_URL || 'https://from-treatments-physicians-dude.trycloudflare.com');
+const LLM_URL = getCleanURL(import.meta.env.VITE_OLLAMA_URL || 'https://spirit-indoor-chorus-equation.trycloudflare.com');
+const MODEL_NAME = 'qwen3:4b';
 
-// Number of tokens to generate per response
-const N_PREDICT = 1024; // Reduced for faster responses
-
-// Timeout in milliseconds - reduced for better UX
-const REQUEST_TIMEOUT = 120000; // 2 minutes instead of 5
+// Timeout in milliseconds
+const REQUEST_TIMEOUT = 120000; // 2 minutes
 
 // Types
 export interface LocalLLMResponse {
@@ -52,18 +50,19 @@ class LocalLLMService {
    */
   async checkAvailability(): Promise<boolean> {
     try {
-      // Log the actual URL being used
       console.log(`🔍 Checking Local LLM availability...`);
       console.log(`   URL: ${LLM_URL}`);
       console.log(`   Env Var: ${import.meta.env.VITE_OLLAMA_URL || 'NOT SET (using default)'}`);
 
-      // Test the /completion endpoint with a simple prompt
-      const testResponse = await fetch(`${LLM_URL}/completion`, {
+      // Test the /api/generate endpoint with a simple prompt
+      const testResponse = await fetch(`${LLM_URL}/api/generate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          prompt: 'test',
-          n_predict: 10,
+          model: MODEL_NAME,
+          prompt: 'ping',
+          stream: false,
+          thinking: false
         }),
         signal: AbortSignal.timeout(30000), // 30 second timeout for availability check
       });
@@ -79,7 +78,7 @@ class LocalLLMService {
       }
 
       const testData = await testResponse.json();
-      if (testData.content !== undefined) {
+      if (testData.response !== undefined) {
         this.isAvailable = true;
         console.log(`✅ Local LLM service available at ${LLM_URL}`);
         return true;
@@ -119,7 +118,8 @@ class LocalLLMService {
 
   /**
    * Parse response from reasoning model - separates thinking/reasoning from final answer
-   * Returns both the reasoning (for display) and the clean response (for speech)
+   * This function is largely deprecated with /api/generate and thinking: false,
+   * but kept for robustness if models still output tags.
    */
   private parseReasoningResponse(text: string): { reasoning: string; answer: string } {
     if (!text) return { reasoning: '', answer: '' };
@@ -127,39 +127,7 @@ class LocalLLMService {
     let reasoning = '';
     let answer = text;
 
-    // FIRST: Check if the response is garbage (model confusion indicators)
-    const garbageIndicators = [
-      /Test instruction \d+/i,
-      /User:\s*I am a robot/i,
-      /^(?:User|Human|Assistant):\s*\n+(?:User|Human|Assistant):/m,
-      /(?:User|Human):\s*[\s\S]*?(?:User|Human):\s*[\s\S]*?(?:User|Human):/i, // Multiple User: markers
-    ];
-
-    const isGarbage = garbageIndicators.some(pattern => pattern.test(text));
-    if (isGarbage) {
-      console.warn('⚠️ Detected garbage output from model, attempting to extract usable content');
-      // Try to find ANY sentence that looks like a real response
-      const sentences = text.match(/[A-Z][^.!?]*[.!?]/g) || [];
-      const validSentence = sentences.find(s =>
-        s.length > 30 &&
-        !s.includes('Test instruction') &&
-        !s.includes('I am a robot') &&
-        !s.startsWith('User:') &&
-        !s.startsWith('Human:')
-      );
-      if (validSentence) {
-        return { reasoning: '', answer: validSentence.trim() };
-      }
-      // If no valid sentence found, return a fallback
-      return {
-        reasoning: '',
-        answer: "I apologize, but I'm having trouble generating a proper response. Could you please rephrase your question?"
-      };
-    }
-
     // Common reasoning tag patterns used by different models
-    // DeepSeek R1, Qwen QwQ, etc. use <think>...</think>
-    // Some models use <thinking>, <reasoning>, <thought>
     const reasoningPatterns = [
       /<think>([\s\S]*?)<\/think>/gi,
       /<thinking>([\s\S]*?)<\/thinking>/gi,
@@ -224,13 +192,14 @@ class LocalLLMService {
   }
 
   /**
-   * Clean the final answer - remove template artifacts and formatting issues
-   * IMPORTANT: Be conservative to avoid stripping legitimate content
+   * Clean the final response text
    */
   private cleanFinalAnswer(text: string): string {
     if (!text) return '';
-
     let cleaned = text;
+
+    // Remove "Assistant:" prefix if present (common in completion models)
+    cleaned = cleaned.replace(/^(?:Assistant|AI):\s*/i, '');
 
     // Remove only specific template placeholders (be conservative)
     cleaned = cleaned
@@ -239,7 +208,6 @@ class LocalLLMService {
       .replace(/\[To be filled\]/gi, '');
 
     // Remove only known reasoning/thinking tags, NOT all XML-like content
-    // This preserves legitimate content like <b>, numbers like <100, etc.
     const tagsToRemove = ['think', 'thinking', 'reasoning', 'thought', 'internal_monologue', 'answer', 'response', 'output', 'final'];
     for (const tag of tagsToRemove) {
       cleaned = cleaned.replace(new RegExp(`<${tag}>[\\s\\S]*?</${tag}>`, 'gi'), '');
@@ -248,20 +216,15 @@ class LocalLLMService {
     }
 
     // Remove "Response:", "Answer:", "Persona:", "System:" prefixes only at the very start
-    // This prevents the model from echoing back system prompts
     cleaned = cleaned.replace(/^(?:Response|Answer|Output|Persona|System|Instructions?):\s*/i, '');
 
     // Remove any echoed persona content - patterns like "Persona: I'm working on..."
-    // This catches cases where the model echoes the knowledge base persona
     cleaned = cleaned.replace(/\n*Persona:\s*[^\n]+(?:\n(?![A-Z][a-z]*:)[^\n]+)*/gi, '');
 
     // Remove any echoed system prompt patterns at the start of response
-    // These patterns indicate the model is echoing training data or system prompts
     cleaned = cleaned.replace(/^(?:I am|I'm|You are|You're)\s+(?:a\s+)?(?:helpful\s+)?(?:AI|assistant|helper|bot)[^.]*\./i, '');
 
-    // IMPORTANT: Remove garbage patterns that indicate model confusion
-
-    // Training data markers like BEGININPUT, ENDINPUT, BEGINCONTEXT, etc.
+    // Remove garbage patterns that indicate model confusion
     cleaned = cleaned.replace(/BEGININPUT\*?[\s\S]*?\*?ENDINPUT\*?/gi, '');
     cleaned = cleaned.replace(/BEGINCONTEXT[\s\S]*?ENDCONTEXT/gi, '');
     cleaned = cleaned.replace(/BEGININPUT\s*/gi, '');
@@ -278,6 +241,9 @@ class LocalLLMService {
     cleaned = cleaned.replace(/^(?:User|Human|Assistant):\s*$/gim, '');
     cleaned = cleaned.replace(/(?:Human|User|Assistant):\s*\n+(?:Human|User|Assistant):/gi, '');
 
+    // Remove placeholder brackets
+    cleaned = cleaned.replace(/\[.*?\]/g, '');
+
     // Clean up whitespace
     cleaned = cleaned.replace(/^\s*\n+/g, '').replace(/\n{3,}/g, '\n\n').trim();
 
@@ -293,23 +259,6 @@ class LocalLLMService {
     }
 
     return cleaned;
-  }
-
-  /**
-   * Build system prompt for the AI
-   * ULTRA-MINIMAL for small models (phi3-mini 4B)
-   */
-  private buildSystemPrompt(_config: KnowledgeBaseConfig, existingFields: ExtractedField[]): string {
-    // phi3-mini needs MINIMAL prompts - too much instruction = echoing
-
-    let prompt = `You are a receptionist. Reply naturally in 1-2 sentences.`;
-
-    if (existingFields.length > 0) {
-      const info = existingFields.map(f => `${f.label}: ${f.value}`).join(', ');
-      prompt += ` Known info: ${info}`;
-    }
-
-    return prompt;
   }
 
   /**
@@ -333,7 +282,7 @@ class LocalLLMService {
       try {
         const metadata = JSON.parse(jsonMatch[1]);
 
-        // Remove JSON block from response
+        // Remove JSON block from response for the spoken part
         cleanResponse = response.replace(/```json\s*[\s\S]*?\s*```/gi, '').trim();
 
         // Extract fields from metadata
@@ -422,8 +371,7 @@ class LocalLLMService {
   }
 
   /**
-   * Generate response using Local LLM service
-   * Uses OpenAI-compatible /v1/chat/completions API with proper JSON structure
+   * Generate response using Local LLM service via /api/generate
    */
   async generateResponse(
     userMessage: string,
@@ -435,56 +383,42 @@ class LocalLLMService {
       throw new Error('Local LLM not available');
     }
 
-    const systemPrompt = this.buildSystemPrompt(knowledgeBase, existingFields);
+    // Build the prompt string for /api/generate
+    // We manually construct the chat history
 
-    // Build messages array in OpenAI chat format
-    // Only include last 4 messages to keep context minimal for small models
-    const recentHistory = conversationHistory.slice(-4);
-
-    interface ChatMessage {
-      role: 'system' | 'user' | 'assistant';
-      content: string;
+    // 1. System Prompt
+    let prompt = `System: You are a receptionist. Keep responses short (1-2 sentences).`;
+    if (existingFields.length > 0) {
+      const info = existingFields.map(f => `${f.label}: ${f.value}`).join(', ');
+      prompt += ` Known info: ${info}.`;
     }
+    prompt += `\n`;
 
-    const messages: ChatMessage[] = [
-      {
-        role: 'system',
-        content: systemPrompt
-      }
-    ];
-
-    // Add conversation history
+    // 2. Conversation History (last 6 messages)
+    const recentHistory = conversationHistory.slice(-6);
     for (const msg of recentHistory) {
-      const role = msg.speaker === 'agent' ? 'assistant' : 'user';
-      const cleanedText = msg.speaker === 'agent' ? this.cleanFinalAnswer(msg.text) : msg.text;
-      if (cleanedText.trim() && cleanedText.length < 500) {
-        messages.push({
-          role: role as 'user' | 'assistant',
-          content: cleanedText
-        });
+      const role = msg.speaker === 'agent' ? 'Assistant' : 'User';
+      // Clean previous agent messages to avoid feeding back garbage
+      const content = msg.speaker === 'agent' ? this.cleanFinalAnswer(msg.text) : msg.text;
+      if (content.trim() && content.length < 500) { // Limit length to avoid context stuffing
+        prompt += `${role}: ${content}\n`;
       }
     }
 
-    // Add the current user message
-    messages.push({
-      role: 'user',
-      content: userMessage
-    });
+    // 3. Current User Message
+    prompt += `User: ${userMessage}\nAssistant:`;
 
-    console.log('📝 Chat messages:', messages.length);
-    console.log('📝 System prompt:', systemPrompt.substring(0, 100) + '...');
-    console.log('📝 User message:', userMessage);
+    console.log('📝 Sending prompt to /api/generate:', prompt.substring(0, 500) + '...');
 
     try {
-      // Use OpenAI-compatible chat completions endpoint
-      const response = await fetch(`${LLM_URL}/v1/chat/completions`, {
+      const response = await fetch(`${LLM_URL}/api/generate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          messages: messages,
-          max_tokens: N_PREDICT,
-          temperature: 0.7,
-          stream: false
+          model: MODEL_NAME,
+          prompt: prompt,
+          stream: false,
+          thinking: false // Request no thinking output
         }),
         signal: AbortSignal.timeout(REQUEST_TIMEOUT),
       });
@@ -497,13 +431,11 @@ class LocalLLMService {
       }
 
       const data = await response.json();
+      const rawResponse = data.response || '';
 
-      // Extract response from OpenAI-compatible format
-      // Response is in data.choices[0].message.content
-      const rawResponse = data.choices?.[0]?.message?.content || data.content || '';
+      console.log('📝 Raw response length:', rawResponse.length, 'chars');
 
-      console.log(' Raw response length:', rawResponse.length, 'chars');
-
+      // Since 'thinking' is false, we don't expect <think> tags, but we should still handle them just in case
       const { reasoning, answer } = this.parseReasoningResponse(rawResponse);
 
       console.log(' Reasoning extracted:', reasoning ? `${reasoning.length} chars` : 'none');
@@ -512,16 +444,13 @@ class LocalLLMService {
       // Use answer if available, otherwise fall back to raw response
       const finalResponse = answer || rawResponse;
 
-      // Debug: Log first 200 chars of the response
-      console.log(' Sending response (first 200 chars):', finalResponse.substring(0, 200));
-
       if (!finalResponse || !finalResponse.trim()) {
         console.error(' Empty response after parsing!');
         console.error('   Raw response was:', rawResponse.substring(0, 500));
         throw new Error('Received empty response from LLM');
       }
 
-      // Parse extracted metadata from model's JSON output (model extracts naturally based on system prompt)
+      // Parse any metadata if the model outputted JSON (unlikely with this simple prompt but possible if trained)
       const extracted = this.parseExtractedMetadata(finalResponse, knowledgeBase, existingFields);
 
       return {
@@ -538,10 +467,8 @@ class LocalLLMService {
     }
   }
 
-
   /**
-   * Generate call summary using local LLM
-   * Uses OpenAI-compatible chat completions endpoint for better reliability
+   * Generate call summary using /api/generate
    */
   async summarizeCall(
     messages: CallMessage[],
@@ -595,18 +522,9 @@ class LocalLLMService {
       }
     }
 
-    // Build system prompt for summarization
-    const systemPrompt = `You are a call summarization assistant. Analyze the conversation and provide:
-1. A brief one-sentence summary
-2. Key points (2-3 bullet points)
-3. Sentiment (positive, neutral, or negative)
-4. Whether follow-up is needed
-
-Be concise. Respond in this JSON format:
-{"summary": "...", "mainPoints": ["...", "..."], "sentiment": "neutral", "followUpRequired": false, "notes": "..."}`;
-
-    const userPrompt = `Summarize this conversation:
-
+    // Simple prompt for summary
+    const prompt = `System: Summarize this call in JSON format: {"summary": "...", "mainPoints": ["...", "..."], "sentiment": "neutral", "followUpRequired": false, "notes": "..."}.
+    
 ${transcript}
 
 ${callerName ? `Caller Name: ${callerName}` : 'Caller name: Unknown'}
@@ -614,22 +532,19 @@ ${extractedText ? `Extracted Info: ${extractedText}` : ''}
 ${category ? `Category: ${category.name}` : ''}
 ${priority ? `Priority: ${priority}` : ''}
 
-Respond with a brief JSON summary.`;
+Assistant:`;
 
     try {
-      console.log('📝 Generating summary with chat completions API...');
+      console.log('📝 Generating summary with /api/generate...');
 
-      const response = await fetch(`${LLM_URL}/v1/chat/completions`, {
+      const response = await fetch(`${LLM_URL}/api/generate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          messages: [
-            { role: 'system', content: systemPrompt },
-            { role: 'user', content: userPrompt }
-          ],
-          max_tokens: 512, // Keep response short for speed
-          temperature: 0.3, // Lower temperature for more consistent output
-          stream: false
+          model: MODEL_NAME,
+          prompt: prompt,
+          stream: false,
+          thinking: false
         }),
         signal: AbortSignal.timeout(SUMMARY_TIMEOUT),
       });
@@ -639,24 +554,19 @@ Respond with a brief JSON summary.`;
       }
 
       const data = await response.json();
-      const rawResponse = data.choices?.[0]?.message?.content || data.content || '';
+      const rawResponse = data.response || '';
 
       console.log('📝 Summary raw response:', rawResponse.slice(0, 200));
 
-      // Parse the response - separate reasoning from final answer
-      const { answer: textResponse } = this.parseReasoningResponse(rawResponse);
-      const finalText = textResponse || rawResponse;
-
-      // Try to parse as JSON first
+      // Attempt to parse JSON
       let parsedSummary = null;
       try {
-        // Look for JSON in the response
-        const jsonMatch = finalText.match(/\{[\s\S]*\}/);
+        const jsonMatch = rawResponse.match(/\{[\s\S]*\}/);
         if (jsonMatch) {
           parsedSummary = JSON.parse(jsonMatch[0]);
         }
-      } catch {
-        console.log('Could not parse summary as JSON, using text fallback');
+      } catch (e) {
+        console.log('Could not parse summary as JSON, using text fallback:', e);
       }
 
       if (parsedSummary) {
@@ -665,20 +575,20 @@ Respond with a brief JSON summary.`;
           mainPoints: Array.isArray(parsedSummary.mainPoints) ? parsedSummary.mainPoints : [parsedSummary.summary || 'Call completed'],
           sentiment: ['positive', 'neutral', 'negative'].includes(parsedSummary.sentiment) ? parsedSummary.sentiment : 'neutral',
           followUpRequired: parsedSummary.followUpRequired === true || priority === 'high' || priority === 'critical',
-          notes: parsedSummary.notes || finalText,
+          notes: parsedSummary.notes || rawResponse,
           callerName: callerName
         };
       }
 
       // Fallback: extract summary from text
-      const summary = finalText.split('.')[0] || finalText.slice(0, 200) || 'Call completed';
+      const summary = rawResponse.split('.')[0] || rawResponse.slice(0, 200) || 'Call completed';
 
       return {
         summary: summary,
         mainPoints: [summary],
         sentiment: 'neutral',
         followUpRequired: priority === 'high' || priority === 'critical',
-        notes: finalText,
+        notes: rawResponse,
         callerName: callerName
       };
 
@@ -721,8 +631,6 @@ Respond with a brief JSON summary.`;
 export const localLLMService = new LocalLLMService();
 
 // Initialize on import
-localLLMService.initialize().catch(() => {
-  console.log('💡 To enable local AI, make sure your cloudflare tunnel is running.');
-});
+localLLMService.initialize();
 
 export default localLLMService;
