@@ -53,12 +53,12 @@ const Hero = () => {
             </div>
 
             <motion.div
-              className="max-w-4xl mx-auto mb-8 w-full"
+              className="max-w-6xl mx-auto mb-8 w-full"
               initial={animationConfig}
               animate={{ opacity: 1, y: 0 }}
               transition={transitionConfig}
             >
-              <h2 className="text-3xl sm:text-5xl md:text-7xl font-bold mb-8 tracking-tight">
+              <h2 className="text-5xl md:text-7xl font-bold mb-8 tracking-tight">
                 <span className="bg-gradient-to-r from-indigo-400 via-purple-400 to-indigo-600 text-transparent bg-clip-text block">
                   {t('hero.revolutionizing')}
                 </span>
