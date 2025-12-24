@@ -1,18 +1,19 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { ArrowLeft, Sun, Moon, Shield, ChevronDown } from 'lucide-react';
 
 const TermsOfService = () => {
   const [isDark, setIsDark] = React.useState(false);
   const [expandedSection, setExpandedSection] = React.useState(null);
-  
+
   const cn = (...classes) => {
     return classes.filter(Boolean).join(' ');
   };
 
   const sections = [
     {
-        title: "1. DEFINITIONS AND INTERPRETATION",
-        content: `1.1 In these Terms of Service ("Terms") and all documents incorporated herein by reference, the following words and expressions have the following meanings:
+      title: "1. DEFINITIONS AND INTERPRETATION",
+      content: `1.1 In these Terms of Service ("Terms") and all documents incorporated herein by reference, the following words and expressions have the following meanings:
   
   "Agreement" means collectively these Terms of Service, Privacy Policy, and any other documents incorporated by reference herein;
   
@@ -35,10 +36,10 @@ const TermsOfService = () => {
   1.2 The headings in this Agreement are for convenience only and shall not affect interpretation. Words importing the singular shall include the plural and vice versa.
   
   1.3 In the event of any conflict between these Terms and any other document incorporated herein by reference, these Terms shall prevail to the extent of the inconsistency.`
-      },
-      {
-        title: "2. ACCEPTANCE AND ELIGIBILITY",
-        content: `2.1 BY ACCESSING OR USING THE SERVICE IN ANY WAY, YOU:
+    },
+    {
+      title: "2. ACCEPTANCE AND ELIGIBILITY",
+      content: `2.1 BY ACCESSING OR USING THE SERVICE IN ANY WAY, YOU:
   
   (a) REPRESENT AND WARRANT THAT:
       (i) You have reached the legal age of majority in your jurisdiction;
@@ -63,10 +64,10 @@ const TermsOfService = () => {
   (b) Accurate and current professional credentials;
   (c) Valid organizational email address;
   (d) Completed verification process.`
-      },
-      {
-        title: "3. SERVICE ACCESS AND MODIFICATIONS",
-        content: `3.1 Service Access:
+    },
+    {
+      title: "3. SERVICE ACCESS AND MODIFICATIONS",
+      content: `3.1 Service Access:
   (a) Access is granted on a subscription basis;
   (b) Requires valid authentication credentials;
   (c) Subject to usage limitations and quotas;
@@ -92,10 +93,10 @@ const TermsOfService = () => {
   (b) Automatic updates may be required;
   (c) Legacy versions may be deprecated;
   (d) Compatibility requirements must be maintained.`
-      },
-      {
-        title: "4. DATA HANDLING AND PRIVACY",
-        content: `4.1 Data Processing:
+    },
+    {
+      title: "4. DATA HANDLING AND PRIVACY",
+      content: `4.1 Data Processing:
   (a) All Claims Data processed according to applicable laws;
   (b) Strict confidentiality maintained;
   (c) Data encryption in transit and at rest;
@@ -118,10 +119,10 @@ const TermsOfService = () => {
   (b) Audit logs maintained for 7 years;
   (c) User activity records preserved as required;
   (d) Backup data maintained securely.`
-      },
-      {
-        title: "5. USER OBLIGATIONS AND RESTRICTIONS",
-        content: `5.1 User Responsibilities:
+    },
+    {
+      title: "5. USER OBLIGATIONS AND RESTRICTIONS",
+      content: `5.1 User Responsibilities:
   (a) Maintain accurate credentials;
   (b) Ensure secure access to the Service;
   (c) Report security incidents promptly;
@@ -150,10 +151,10 @@ const TermsOfService = () => {
   (b) Meet response time requirements;
   (c) Follow quality control procedures;
   (d) Adhere to compliance checklist.`
-      },
-      {
-        title: "6. INTELLECTUAL PROPERTY",
-        content: `6.1 Ownership:
+    },
+    {
+      title: "6. INTELLECTUAL PROPERTY",
+      content: `6.1 Ownership:
   (a) All Service components remain Company property;
   (b) AI models and algorithms are proprietary;
   (c) Interface designs are protected;
@@ -170,10 +171,10 @@ const TermsOfService = () => {
   (b) No competitive analysis;
   (c) No unauthorized access;
   (d) No derivative works.`
-      },
-      {
-        title: "7. LIABILITY AND INDEMNIFICATION",
-        content: `7.1 Limitation of Liability:
+    },
+    {
+      title: "7. LIABILITY AND INDEMNIFICATION",
+      content: `7.1 Limitation of Liability:
   TO THE MAXIMUM EXTENT PERMITTED BY LAW:
   (a) No liability for indirect damages;
   (b) No liability for AI processing decisions;
@@ -192,10 +193,10 @@ const TermsOfService = () => {
   (b) Cyber insurance requirements;
   (c) Coverage minimums;
   (d) Proof of insurance.`
-      },
-      {
-        title: "8. TERM AND TERMINATION",
-        content: `8.1 Term:
+    },
+    {
+      title: "8. TERM AND TERMINATION",
+      content: `8.1 Term:
   (a) Effective upon Service access;
   (b) Continues until terminated;
   (c) Subject to renewal requirements;
@@ -212,10 +213,10 @@ const TermsOfService = () => {
   (b) Data preservation requirements;
   (c) Confidentiality obligations continue;
   (d) Wind-down procedures.`
-      },
-      {
-        title: "9. GOVERNING LAW AND JURISDICTION",
-        content: `9.1 Governing Law:
+    },
+    {
+      title: "9. GOVERNING LAW AND JURISDICTION",
+      content: `9.1 Governing Law:
   (a) Laws of [Jurisdiction];
   (b) Without regard to conflicts;
   (c) Excluding UN Convention;
@@ -232,16 +233,16 @@ const TermsOfService = () => {
   (b) Data protection laws;
   (c) Insurance requirements;
   (d) Professional standards.`
-      }
-  
+    }
+
   ];
 
   const GlassContainer = ({ children, className }) => (
     <div className={cn(
       "relative overflow-hidden",
       "rounded-xl p-6",
-      isDark 
-        ? "bg-black/20 border border-white/10" 
+      isDark
+        ? "bg-black/20 border border-white/10"
         : "bg-white/60 border border-black/5",
       "transition-all duration-200",
       className
@@ -253,8 +254,8 @@ const TermsOfService = () => {
   const IconContainer = ({ children }) => (
     <div className={cn(
       "w-12 h-12 rounded-xl flex items-center justify-center",
-      isDark 
-        ? "bg-black/20 border border-white/10" 
+      isDark
+        ? "bg-black/20 border border-white/10"
         : "bg-white/60 border border-black/5"
     )}>
       {children}
@@ -282,8 +283,8 @@ const TermsOfService = () => {
               onClick={() => window.history.back()}
               className={cn(
                 "flex items-center gap-2 px-4 py-2 rounded-xl transition-all duration-200",
-                isDark 
-                  ? "bg-black/20 hover:bg-black/30 text-white border border-white/10" 
+                isDark
+                  ? "bg-black/20 hover:bg-black/30 text-white border border-white/10"
                   : "bg-white/60 hover:bg-white/70 text-black border border-black/5"
               )}
             >
@@ -295,8 +296,8 @@ const TermsOfService = () => {
               onClick={() => setIsDark(!isDark)}
               className={cn(
                 "p-3 rounded-xl transition-all duration-200",
-                isDark 
-                  ? "bg-black/20 hover:bg-black/30 text-white border border-white/10" 
+                isDark
+                  ? "bg-black/20 hover:bg-black/30 text-white border border-white/10"
                   : "bg-white/60 hover:bg-white/70 text-black border border-black/5"
               )}
             >
@@ -330,8 +331,8 @@ const TermsOfService = () => {
             {/* Legal Notice */}
             <div className={cn(
               "p-4 rounded-xl mb-6",
-              isDark 
-                ? "bg-red-500/20 border border-red-500/20" 
+              isDark
+                ? "bg-red-500/20 border border-red-500/20"
                 : "bg-red-500/10 border border-red-500/10"
             )}>
               <p className={cn(
@@ -349,8 +350,8 @@ const TermsOfService = () => {
                   key={index}
                   className={cn(
                     "rounded-xl transition-all duration-200",
-                    isDark 
-                      ? "bg-black/20 hover:bg-black/30 border border-white/10" 
+                    isDark
+                      ? "bg-black/20 hover:bg-black/30 border border-white/10"
                       : "bg-white/60 hover:bg-white/70 border border-black/5"
                   )}
                 >
@@ -364,12 +365,12 @@ const TermsOfService = () => {
                     )}>
                       {section.title}
                     </h2>
-                    <ChevronDown 
+                    <ChevronDown
                       className={cn(
                         "w-5 h-5 transition-transform",
                         isDark ? "text-white/60" : "text-black/60",
                         expandedSection === index ? "transform rotate-180" : ""
-                      )} 
+                      )}
                     />
                   </button>
                   {expandedSection === index && (
@@ -400,16 +401,16 @@ const TermsOfService = () => {
                 "text-center mt-4",
                 isDark ? "text-white/60" : "text-black/60"
               )}>
-                For legal inquiries, please contact us:  {''}
-                <a 
-                  href="mailto:contact@clerktree.com"
+                For legal inquiries, please visit our  {''}
+                <Link
+                  to="/contact"
                   className={cn(
                     "underline hover:no-underline transition-all duration-200",
                     isDark ? "text-purple-400 hover:text-purple-300" : "text-purple-600 hover:text-purple-700"
                   )}
                 >
-                  contact@clerktree.com
-                </a>
+                  Contact page
+                </Link>
               </p>
             </div>
           </GlassContainer>

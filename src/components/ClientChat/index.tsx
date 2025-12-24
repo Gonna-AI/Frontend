@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { cn } from '../../utils/cn';
 import Logo from './Logo';
 import TicketInput from './TicketInput';
@@ -12,12 +13,12 @@ export default function ClientChat() {
     const savedVerification = localStorage.getItem('ticketVerification');
     return savedVerification === 'true';
   });
-  
+
   const [ticketCode, setTicketCode] = useState(() => {
     // Initialize from localStorage
     return localStorage.getItem('ticketCode') || '';
   });
-  
+
   const [error, setError] = useState('');
   const [isDark, setIsDark] = useState(() => {
     const saved = localStorage.getItem('clientChatTheme');
@@ -70,8 +71,8 @@ export default function ClientChat() {
   return (
     <div className={cn(
       "min-h-screen w-full transition-colors duration-300",
-      isDark 
-        ? "bg-gradient-to-br from-gray-900 to-black" 
+      isDark
+        ? "bg-gradient-to-br from-gray-900 to-black"
         : "bg-gradient-to-br from-gray-50 to-white"
     )}>
       {/* Theme Toggle */}
@@ -90,8 +91,8 @@ export default function ClientChat() {
             "max-w-2xl mx-auto",
             "rounded-2xl overflow-hidden",
             "shadow-xl",
-            isDark 
-              ? "bg-black/40 border border-white/10" 
+            isDark
+              ? "bg-black/40 border border-white/10"
               : "bg-white/80 border border-black/10",
             "backdrop-blur-lg"
           )}>
@@ -116,15 +117,15 @@ export default function ClientChat() {
             "text-center mt-8 text-sm",
             isDark ? "text-gray-400" : "text-gray-500"
           )}>
-            Need help? Contact our support team: contact@clerktree.com
+            Need help? Visit our <Link to="/contact" className="underline hover:text-gray-900 dark:hover:text-white transition-colors">Contact page</Link>
           </div>
         </div>
       ) : (
         // Chat Interface - Full Width on Desktop
         <div className="h-screen flex flex-col">
-          <ChatInterface 
-            ticketCode={ticketCode} 
-            isDark={isDark} 
+          <ChatInterface
+            ticketCode={ticketCode}
+            isDark={isDark}
             onLogout={handleLogout}
           />
         </div>
