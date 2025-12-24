@@ -599,12 +599,19 @@ When caller requests an appointment:
 
 ${knownInfo ? `## Already Known Information\n${knownInfo}` : ''}
 
-## Response Format
-Respond naturally and conversationally. After each exchange, internally analyze:
-1. What new information was shared?
-2. Do we have contact information? If not, ask for it!
-3. Is this an appointment request? Get date, time, and purpose!
-4. What should be the next step?
+## Response Format - CRITICAL
+- Respond ONLY with what you would say directly to the caller
+- Do NOT include any internal analysis, notes, or thoughts in your response
+- Do NOT use asterisks, parentheses, or brackets to show internal reasoning
+- Do NOT write things like "(Internally: ...)" or "[Note: ...]"
+- Keep your internal analysis SILENT - just think it, don't write it
+- Your response should be EXACTLY what the caller will hear/read
+
+Example of WRONG response:
+"Hello! How can I help? *(Internally: need to get their name)*"
+
+Example of CORRECT response:
+"Hello! How can I help you today?"
 
 Remember: ALWAYS collect contact info. Be helpful, efficient, and human.`;
 }

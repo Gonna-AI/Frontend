@@ -263,6 +263,21 @@ class LocalLLMService {
     // Remove "Response:", "Answer:", "Persona:", "System:" prefixes only at the very start
     cleaned = cleaned.replace(/^(?:Response|Answer|Output|Persona|System|Instructions?):\s*/i, '');
 
+    // Remove internal analysis/reasoning text that shouldn't be shown to users
+    // Patterns like: *(Internally: ...), [Internal Analysis], (Internal:), etc.
+    cleaned = cleaned.replace(/\*?\(Internally:[^)]*\)\*?/gi, '');
+    cleaned = cleaned.replace(/\*?\[Internally:[^\]]*\]\*?/gi, '');
+    cleaned = cleaned.replace(/\(Internal:[^)]*\)/gi, '');
+    cleaned = cleaned.replace(/\[Internal Analysis[^\]]*\]/gi, '');
+    cleaned = cleaned.replace(/\[Internal:[^\]]*\]/gi, '');
+    cleaned = cleaned.replace(/\*\(.*?internal.*?\)\*/gi, '');
+    cleaned = cleaned.replace(/\n*\*?\(Note to self:[^)]*\)\*?\n*/gi, '');
+    cleaned = cleaned.replace(/\n*---\s*Internal[^-]*---\n*/gi, '');
+    // Remove markdown italics containing "Internally" or "Internal"
+    cleaned = cleaned.replace(/\*[^*]*(?:Internally|Internal)[^*]*\*/gi, '');
+    // Remove parenthetical internal notes
+    cleaned = cleaned.replace(/\n*\([^)]*(?:no name|no contact|need to|should ask|internally)[^)]*\)\n*/gi, '');
+
     // Remove any echoed persona content - patterns like "Persona: I'm working on..."
     cleaned = cleaned.replace(/\n*Persona:\s*[^\n]+(?:\n(?![A-Z][a-z]*:)[^\n]+)*/gi, '');
 
@@ -469,41 +484,52 @@ class LocalLLMService {
       }
     }
 
-    // 3. Current User Message with analysis instruction
+    // 3. Current User Message - NO internal analysis instruction, just respond naturally
     prompt += `User: ${userMessage}\n`;
-    prompt += `\n[Internal Analysis - respond naturally, then extract key info]\n`;
+    prompt += `\nIMPORTANT: Respond ONLY with what you would say to the caller. Do NOT include any internal analysis, notes, or thoughts. Do NOT use asterisks or parentheses for internal notes. Just speak naturally.\n`;
     prompt += `Assistant:`;
 
-    console.log('📝 Sending enhanced prompt to /api/generate');
-    console.log('   Known fields:', existingFields.length);
-    console.log('   History messages:', recentHistory.length);
+    // Helper function to make the API request with retry logic
+    const makeRequest = async (retryCount = 0): Promise<string> => {
+      try {
+        const response = await fetch(`${LLM_URL}/api/generate`, {
+          method: 'POST',
+          mode: 'cors',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify({
+            model: MODEL_NAME,
+            prompt: prompt,
+            stream: false,
+            thinking: false // Request no thinking output
+          }),
+          signal: AbortSignal.timeout(retryCount === 0 ? REQUEST_TIMEOUT : 60000), // Shorter timeout on retry
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+          const errorMsg = errorData.error || `Local LLM error: ${response.status}`;
+          console.error(` Local LLM API error (${response.status}):`, errorMsg);
+          throw new Error(`Local LLM error: ${response.status} - ${errorMsg}`);
+        }
+
+        const data = await response.json();
+        return data.response || '';
+      } catch (error) {
+        // Retry once if first request fails (cold start issue)
+        if (retryCount === 0) {
+          console.warn('First request failed, retrying...', error);
+          await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second
+          return makeRequest(1);
+        }
+        throw error;
+      }
+    };
 
     try {
-      const response = await fetch(`${LLM_URL}/api/generate`, {
-        method: 'POST',
-        mode: 'cors',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        body: JSON.stringify({
-          model: MODEL_NAME,
-          prompt: prompt,
-          stream: false,
-          thinking: false // Request no thinking output
-        }),
-        signal: AbortSignal.timeout(REQUEST_TIMEOUT),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
-        const errorMsg = errorData.error || `Local LLM error: ${response.status}`;
-        console.error(` Local LLM API error (${response.status}):`, errorMsg);
-        throw new Error(`Local LLM error: ${response.status} - ${errorMsg}`);
-      }
-
-      const data = await response.json();
-      const rawResponse = data.response || '';
+      const rawResponse = await makeRequest();
 
       console.log('📝 Raw response length:', rawResponse.length, 'chars');
 
@@ -519,7 +545,11 @@ class LocalLLMService {
       if (!finalResponse || !finalResponse.trim()) {
         console.error(' Empty response after parsing!');
         console.error('   Raw response was:', rawResponse.substring(0, 500));
-        throw new Error('Received empty response from LLM');
+        // Instead of throwing, return a helpful message
+        return {
+          response: "I apologize, I'm still warming up. Could you please repeat that?",
+          extractedFields: []
+        };
       }
 
       // Parse any metadata if the model outputted JSON
