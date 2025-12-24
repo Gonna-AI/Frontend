@@ -9,6 +9,7 @@ import Footer from './Footer';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { Menu, X } from 'lucide-react';
+import LanguageSwitcher from '../Layout/LanguageSwitcher';
 
 export default function Landing() {
   const navigate = useNavigate();
@@ -96,6 +97,10 @@ export default function Landing() {
             >
               Contact Us
             </button>
+            <div className="w-px h-8 bg-white/10 mx-2" />
+            <div className="w-[100px]">
+              <LanguageSwitcher isExpanded={true} forceDark={true} />
+            </div>
           </nav>
 
           {/* Mobile Hamburger Menu Button - Visible only on Mobile */}
@@ -156,6 +161,10 @@ export default function Landing() {
                   >
                     Contact Us
                   </button>
+                  <div className="h-px w-3/4 bg-white/10" />
+                  <div className="w-full px-4">
+                    <LanguageSwitcher isExpanded={true} forceDark={true} />
+                  </div>
                 </nav>
               </div>
             </div>

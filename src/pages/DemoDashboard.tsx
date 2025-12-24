@@ -12,8 +12,11 @@ import {
   Clock,
   Users,
   CheckCircle,
-  MessageSquare
+  MessageSquare,
+  Menu
 } from 'lucide-react';
+import { ViewType } from '../types/navigation';
+import MobileSidebar from '../components/Layout/Sidebar/MobileSidebar';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '../utils/cn';
 import { DemoCallProvider, useDemoCall, PriorityLevel } from '../contexts/DemoCallContext';
@@ -220,6 +223,7 @@ function PriorityQueue({ isDark, compact = false }: { isDark: boolean; compact?:
 function DemoDashboardContent() {
   const navigate = useNavigate();
   const [isDark] = useState(true);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'monitor' | 'knowledge' | 'history'>('monitor');
   const { getAnalytics, currentCall, getCurrentUserId, switchSession, knowledgeBase, saveKnowledgeBase, globalActiveSessions } = useDemoCall();
 
@@ -260,9 +264,20 @@ function DemoDashboardContent() {
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-2 md:gap-4">
             <button
+              onClick={() => setIsMobileMenuOpen(true)}
+              className={cn(
+                "md:hidden p-1.5 rounded-lg transition-colors",
+                isDark
+                  ? "hover:bg-white/10 text-white/60 hover:text-white"
+                  : "hover:bg-black/10 text-black/60 hover:text-black"
+              )}
+            >
+              <Menu className="w-4 h-4" />
+            </button>
+            <button
               onClick={() => navigate('/')}
               className={cn(
-                "p-1.5 md:p-2 rounded-lg transition-colors",
+                "hidden md:block p-1.5 md:p-2 rounded-lg transition-colors",
                 isDark
                   ? "hover:bg-white/10 text-white/60 hover:text-white"
                   : "hover:bg-black/10 text-black/60 hover:text-black"
@@ -503,7 +518,15 @@ function DemoDashboardContent() {
           </p>
         </div>
       </footer>
-    </div>
+
+      <MobileSidebar
+        currentView={'dashboard'}
+        onViewChange={() => { }}
+        onSignOut={() => navigate('/')}
+        isOpen={isMobileMenuOpen}
+        onClose={() => setIsMobileMenuOpen(false)}
+      />
+    </div >
   );
 }
 
