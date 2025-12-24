@@ -2,11 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Lock, ChevronRight, AlertCircle } from 'lucide-react';
+import { useLanguage } from '../contexts/LanguageContext';
 
 const InvitePage = () => {
   const [inviteCode, setInviteCode] = useState('');
   const [showError, setShowError] = useState(false);
   const navigate = useNavigate();
+  const { t } = useLanguage();
 
   useEffect(() => {
     // Check if user has previously used a valid invite code
@@ -49,8 +51,6 @@ const InvitePage = () => {
       setTimeout(() => setShowError(false), 3000);
     }
   };
-
-
 
   return (
     <div className="min-h-screen bg-gray-900 text-gray-100 p-4 sm:p-6 md:p-8 relative overflow-hidden flex flex-col justify-center items-center">
@@ -98,7 +98,7 @@ const InvitePage = () => {
             to="/contact"
             className="text-gray-300 hover:text-gray-100 transition-colors"
           >
-            Support
+            {t('invite.support')}
           </Link>
         </nav>
       </motion.div>
@@ -127,7 +127,7 @@ const InvitePage = () => {
                   }}
                 >
                   <AlertCircle className="w-5 h-5 text-red-300" />
-                  <span className="text-red-100 font-medium">Invalid invite code. Please try again.</span>
+                  <span className="text-red-100 font-medium">{t('invite.error')}</span>
                 </div>
               </motion.div>
             )}
@@ -144,10 +144,10 @@ const InvitePage = () => {
         >
           <div className="space-y-2 text-center">
             <h2 className="text-3xl font-bold text-white">
-              Access the platform
+              {t('invite.title')}
             </h2>
             <p className="text-gray-400 text-sm">
-              Enter your organization's invite code to access the platform
+              {t('invite.subtitle')}
             </p>
           </div>
 
@@ -157,7 +157,7 @@ const InvitePage = () => {
                 type="text"
                 value={inviteCode}
                 onChange={(e) => setInviteCode(e.target.value)}
-                placeholder="Enter invite code"
+                placeholder={t('invite.placeholder')}
                 className="w-full px-4 py-3 bg-gray-700/50 border border-gray-600 rounded-lg 
                   focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/50 
                   transition-all duration-300 text-gray-100 placeholder:text-gray-500
@@ -176,13 +176,13 @@ const InvitePage = () => {
               hover:from-blue-700 hover:to-blue-900 transition-all duration-300 font-medium
               backdrop-blur-sm shadow-lg flex items-center justify-center gap-2"
           >
-            Continue
+            {t('invite.continue')}
             <ChevronRight className="w-5 h-5" />
           </motion.button>
 
           <div className="text-center">
             <a href="/contact" className="text-sm text-blue-400 hover:text-blue-300 transition-colors">
-              Request Access
+              {t('invite.requestAccess')}
             </a>
           </div>
         </motion.form>
@@ -191,7 +191,7 @@ const InvitePage = () => {
         <div className="mt-6 flex justify-center">
           <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-gray-800/70 border border-gray-700 backdrop-blur-sm">
             <div className="w-2 h-2 bg-green-400 rounded-full" />
-            <span className="text-sm text-gray-300">Secure Enterprise Connection</span>
+            <span className="text-sm text-gray-300">{t('invite.secure')}</span>
           </div>
         </div>
       </div>

@@ -38,55 +38,22 @@ export default function LanguageSwitcher({ isExpanded = false, forceDark = false
     }
 
     return (
-        <div className={cn(
-            "w-full flex items-center justify-between p-3 rounded-lg transition-colors",
-            isDark ? "bg-white/5" : "bg-black/5"
-        )}>
-            <div className="flex items-center gap-3">
-                <Globe className={cn(
-                    "w-5 h-5",
-                    isDark ? "text-white/70" : "text-black/70"
-                )} />
-                <span className={cn(
-                    "text-sm font-medium",
-                    isDark ? "text-white/90" : "text-black/90"
-                )}>
-                    {t('nav.language')}
-                </span>
-            </div>
-
-            <div className="flex bg-black/10 dark:bg-white/10 p-1 rouned-lg rounded-md">
-                <button
-                    onClick={() => setLanguage('en')}
-                    className={cn(
-                        "px-2 py-1 text-xs font-medium rounded transition-all",
-                        language === 'en'
-                            ? isDark
-                                ? "bg-white text-black shadow-sm"
-                                : "bg-white text-black shadow-sm"
-                            : isDark
-                                ? "text-white/60 hover:text-white"
-                                : "text-black/60 hover:text-black"
-                    )}
-                >
-                    EN
-                </button>
-                <button
-                    onClick={() => setLanguage('de')}
-                    className={cn(
-                        "px-2 py-1 text-xs font-medium rounded transition-all",
-                        language === 'de'
-                            ? isDark
-                                ? "bg-white text-black shadow-sm"
-                                : "bg-white text-black shadow-sm"
-                            : isDark
-                                ? "text-white/60 hover:text-white"
-                                : "text-black/60 hover:text-black"
-                    )}
-                >
-                    DE
-                </button>
-            </div>
-        </div>
+        <button
+            onClick={toggleLanguage}
+            className={cn(
+                "inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all outline-none border shadow-xs h-8 rounded-md px-3 backdrop-blur-md",
+                isDark
+                    ? "bg-white/5 border-white/10 text-white/90 hover:text-white hover:bg-white/10"
+                    : "bg-black/5 border-black/10 text-black/90 hover:text-black hover:bg-black/10",
+                "gap-1"
+            )}
+            style={{
+                fontFamily: 'Urbanist, sans-serif',
+            }}
+        >
+            <span className={cn(language === 'en' ? "opacity-100 font-bold" : "opacity-50")}>en</span>
+            <span className="opacity-30">|</span>
+            <span className={cn(language === 'de' ? "opacity-100 font-bold" : "opacity-50")}>de</span>
+        </button>
     );
 }

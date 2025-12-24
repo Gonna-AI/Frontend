@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronDown, HelpCircle } from 'lucide-react';
+import { useLanguage } from '../contexts/LanguageContext';
 
 interface FAQItem {
   question: string;
@@ -11,67 +12,68 @@ interface FAQItem {
 export default function FAQ() {
   const navigate = useNavigate();
   const [openIndex, setOpenIndex] = useState<number | null>(0);
+  const { t } = useLanguage();
 
   const faqs: FAQItem[] = [
     {
-      category: 'General',
-      question: 'What is ClerkTree?',
-      answer: 'ClerkTree is an AI-powered workflow automation platform designed for claims and back-office operations. We combine human expertise with artificial intelligence to reduce turnaround time by 40% while maintaining accuracy and quality.'
+      category: t('faqPage.catGeneral'),
+      question: t('faqPage.q1'),
+      answer: t('faqPage.a1')
     },
     {
-      category: 'General',
-      question: 'How does the Human+AI approach work?',
-      answer: 'Our hybrid approach uses AI to handle repetitive tasks like document extraction and data validation, while humans focus on complex decision-making and edge cases. The system intelligently routes tasks between AI and human agents based on complexity and confidence levels.'
+      category: t('faqPage.catGeneral'),
+      question: t('faqPage.q2'),
+      answer: t('faqPage.a2')
     },
     {
-      category: 'Product',
-      question: 'What industries do you serve?',
-      answer: 'We primarily serve Insurance, BFSI (Banking, Financial Services, and Insurance), BPO (Business Process Outsourcing), Operations teams, and Document Processing sectors. Our platform is optimized for document-heavy workflows and claims processing.'
+      category: t('faqPage.catProduct'),
+      question: t('faqPage.q3'),
+      answer: t('faqPage.a3')
     },
     {
-      category: 'Product',
-      question: 'What kind of documents can ClerkTree process?',
-      answer: 'ClerkTree can process a wide variety of documents including insurance claims, invoices, contracts, medical records, financial statements, and other business documents. Our AI is trained to extract relevant information accurately and efficiently.'
+      category: t('faqPage.catProduct'),
+      question: t('faqPage.q4'),
+      answer: t('faqPage.a4')
     },
     {
-      category: 'Product',
-      question: 'How long does implementation take?',
-      answer: 'Implementation typically takes 2-4 weeks depending on your specific requirements and existing systems. We provide dedicated onboarding support and training to ensure a smooth transition.'
+      category: t('faqPage.catProduct'),
+      question: t('faqPage.q5'),
+      answer: t('faqPage.a5')
     },
     {
-      category: 'Pricing',
-      question: 'How is ClerkTree priced?',
-      answer: 'We offer flexible pricing based on your volume of documents, number of users, and specific features required. Contact our sales team for a customized quote that fits your business needs.'
+      category: t('faqPage.catPricing'),
+      question: t('faqPage.q6'),
+      answer: t('faqPage.a6')
     },
     {
-      category: 'Pricing',
-      question: 'Do you offer a free trial?',
-      answer: 'Yes, we offer a 14-day free trial for qualified businesses. During the trial, you\'ll have access to our core features and dedicated support to help you evaluate the platform.'
+      category: t('faqPage.catPricing'),
+      question: t('faqPage.q7'),
+      answer: t('faqPage.a7')
     },
     {
-      category: 'Security',
-      question: 'Is my data secure with ClerkTree?',
-      answer: 'Absolutely. We take security seriously with end-to-end encryption, SOC 2 compliance, and regular security audits. Your data is stored in secure, enterprise-grade cloud infrastructure with multiple redundancy layers.'
+      category: t('faqPage.catSecurity'),
+      question: t('faqPage.q8'),
+      answer: t('faqPage.a8')
     },
     {
-      category: 'Security',
-      question: 'What compliance standards do you meet?',
-      answer: 'ClerkTree meets industry standards including GDPR, HIPAA, SOC 2 Type II, and ISO 27001. We continuously update our compliance measures to meet evolving regulatory requirements.'
+      category: t('faqPage.catSecurity'),
+      question: t('faqPage.q9'),
+      answer: t('faqPage.a9')
     },
     {
-      category: 'Support',
-      question: 'What kind of support do you provide?',
-      answer: 'We provide 24/7 customer support via email and chat for all enterprise customers. Premium plans include dedicated account managers and phone support. We also offer comprehensive documentation and training resources.'
+      category: t('faqPage.catSupport'),
+      question: t('faqPage.q10'),
+      answer: t('faqPage.a10')
     },
     {
-      category: 'Support',
-      question: 'Can I integrate ClerkTree with my existing systems?',
-      answer: 'Yes! ClerkTree offers REST APIs and pre-built integrations with popular business tools including Salesforce, SAP, Microsoft Dynamics, and more. Our team can also help with custom integrations.'
+      category: t('faqPage.catSupport'),
+      question: t('faqPage.q11'),
+      answer: t('faqPage.a11')
     },
     {
-      category: 'Support',
-      question: 'How do I get started?',
-      answer: 'Getting started is easy! Book a demo with our team through the Contact page, and we\'ll schedule a personalized walkthrough. After that, we\'ll help you set up a trial environment tailored to your specific use case.'
+      category: t('faqPage.catSupport'),
+      question: t('faqPage.q12'),
+      answer: t('faqPage.a12')
     }
   ];
 
@@ -85,14 +87,14 @@ export default function FAQ() {
     <div className="bg-[rgb(10,10,10)] min-h-screen relative overflow-x-hidden">
       {/* Indigo/Purple theme background accents */}
       <div className="fixed inset-0 bg-[rgb(10,10,10)] -z-10">
-        <div 
+        <div
           className="absolute top-0 right-0 -translate-y-1/4 translate-x-1/4 w-96 md:w-[800px] h-96 md:h-[800px] opacity-40"
           style={{
             background: 'radial-gradient(circle, rgba(99,102,241,0.6) 0%, rgba(99,102,241,0.25) 40%, transparent 100%)',
             filter: 'blur(80px)',
           }}
         />
-        <div 
+        <div
           className="absolute bottom-0 left-0 translate-y-1/4 -translate-x-1/4 w-72 md:w-[600px] h-72 md:h-[600px] opacity-30"
           style={{
             background: 'radial-gradient(circle, rgba(79,70,229,0.5) 0%, rgba(79,70,229,0.2) 40%, transparent 100%)',
@@ -119,28 +121,28 @@ export default function FAQ() {
           </button>
           <div className="md:hidden">
             <span className="px-3 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-medium whitespace-nowrap">
-              FAQs
+              {t('faq.title')}
             </span>
           </div>
         </div>
       </header>
-      
+
       <div className="relative z-10 py-12 px-6 pt-32 md:pt-36">
         <div className="max-w-4xl mx-auto">
-          
+
           {/* Header */}
           <div className="text-center mb-16">
             <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-6">
               <span className="bg-gradient-to-r from-white via-white/95 to-white/90 text-transparent bg-clip-text">
-                Frequently Asked
+                {t('faqPage.title1')}
               </span>
               <br />
               <span className="bg-gradient-to-r from-indigo-400 via-purple-400 to-indigo-600 text-transparent bg-clip-text">
-                Questions
+                {t('faqPage.title2')}
               </span>
             </h1>
             <p className="text-lg md:text-xl text-white/60 leading-relaxed max-w-3xl mx-auto">
-              Everything you need to know about ClerkTree and how we can help transform your operations
+              {t('faqPage.subtitle')}
             </p>
           </div>
 
@@ -178,15 +180,13 @@ export default function FAQ() {
                     </h3>
                   </div>
                   <ChevronDown
-                    className={`w-5 h-5 text-white/60 flex-shrink-0 transition-transform duration-300 ${
-                      openIndex === index ? 'rotate-180' : ''
-                    }`}
+                    className={`w-5 h-5 text-white/60 flex-shrink-0 transition-transform duration-300 ${openIndex === index ? 'rotate-180' : ''
+                      }`}
                   />
                 </button>
                 <div
-                  className={`transition-all duration-300 ease-in-out overflow-hidden ${
-                    openIndex === index ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
-                  }`}
+                  className={`transition-all duration-300 ease-in-out overflow-hidden ${openIndex === index ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+                    }`}
                 >
                   <div className="px-6 pb-5 pt-0">
                     <div className="h-px bg-gradient-to-r from-transparent via-white/10 to-transparent mb-4"></div>
@@ -203,16 +203,16 @@ export default function FAQ() {
           <div className="text-center py-16 rounded-2xl border border-indigo-500/20 bg-gradient-to-br from-indigo-500/5 to-purple-500/5 backdrop-blur-sm">
             <HelpCircle className="w-12 h-12 text-indigo-400 mx-auto mb-4" />
             <h2 className="text-3xl md:text-4xl font-bold mb-4 bg-gradient-to-r from-indigo-400 to-purple-400 text-transparent bg-clip-text">
-              Still Have Questions?
+              {t('faqPage.stillQuestions')}
             </h2>
             <p className="text-white/60 mb-8 max-w-2xl mx-auto">
-              Our team is here to help. Get in touch and we'll answer any questions you have.
+              {t('faqPage.stillDesc')}
             </p>
             <button
               onClick={() => navigate('/contact')}
               className="px-8 py-4 rounded-xl bg-gradient-to-r from-indigo-500/20 to-purple-500/20 border-2 border-indigo-500/30 text-white font-semibold hover:from-indigo-500/30 hover:to-purple-500/30 hover:border-indigo-500/50 transition-all duration-300"
             >
-              Contact Us
+              {t('faqPage.contactUs')}
             </button>
           </div>
         </div>

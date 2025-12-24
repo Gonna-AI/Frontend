@@ -6,9 +6,10 @@ import { getBlogPost, getAllBlogPosts } from '../data/blogPosts';
 import { FlickeringGrid } from '../components/Blog/FlickeringGrid';
 import { BlogCard } from '../components/Blog/BlogCard';
 import { useState } from 'react';
+import { useLanguage } from '../contexts/LanguageContext';
 
-const formatDate = (date: string): string => {
-  return new Date(date).toLocaleDateString("en-US", {
+const formatDate = (date: string, language: string): string => {
+  return new Date(date).toLocaleDateString(language === 'de' ? 'de-DE' : 'en-US', {
     year: "numeric",
     month: "long",
     day: "numeric",
@@ -18,22 +19,23 @@ const formatDate = (date: string): string => {
 export default function BlogPost() {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
-  const [markdownError, setMarkdownError] = useState<string | null>(null);
-  
+  const [markdownError] = useState<string | null>(null);
+  const { t, language } = useLanguage();
+
   if (!slug) {
     navigate('/blog');
     return null;
   }
 
   const post = getBlogPost(slug);
-  
+
   if (!post) {
     navigate('/blog');
     return null;
   }
 
-  const formattedDate = formatDate(post.date);
-  
+  const formattedDate = formatDate(post.date, language);
+
   // Get related posts (excluding current post)
   const relatedPosts = getAllBlogPosts()
     .filter(p => p.slug !== slug && p.tags?.some(tag => post.tags?.includes(tag)))
@@ -43,14 +45,14 @@ export default function BlogPost() {
     <div className="bg-[rgb(10,10,10)] min-h-screen relative overflow-x-hidden">
       {/* Blue theme background accents */}
       <div className="fixed inset-0 bg-[rgb(10,10,10)] -z-10">
-        <div 
+        <div
           className="absolute top-0 right-0 -translate-y-1/4 translate-x-1/4 w-96 md:w-[800px] h-96 md:h-[800px] opacity-40"
           style={{
             background: 'radial-gradient(circle, rgba(59,130,246,0.6) 0%, rgba(59,130,246,0.25) 40%, transparent 100%)',
             filter: 'blur(80px)',
           }}
         />
-        <div 
+        <div
           className="absolute bottom-0 left-0 translate-y-1/4 -translate-x-1/4 w-72 md:w-[600px] h-72 md:h-[600px] opacity-30"
           style={{
             background: 'radial-gradient(circle, rgba(29,78,216,0.5) 0%, rgba(29,78,216,0.2) 40%, transparent 100%)',
@@ -100,7 +102,7 @@ export default function BlogPost() {
                   className="h-8 w-8 flex items-center justify-center border border-transparent rounded-xl backdrop-blur-sm bg-white/5 hover:bg-white/10 hover:border-white/20 transition-all duration-300 text-white/60 hover:text-white"
                 >
                   <ArrowLeft className="w-4 h-4" />
-                  <span className="sr-only">Back to all articles</span>
+                  <span className="sr-only">{t('blogPost.backToAll')}</span>
                 </button>
                 {post.tags && post.tags.length > 0 && (
                   <div className="flex flex-wrap gap-3">
@@ -135,7 +137,7 @@ export default function BlogPost() {
               )}
             </div>
           </div>
-          
+
           <div className="flex divide-x divide-transparent relative mt-8">
             <div className="absolute max-w-7xl mx-auto left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] lg:w-full h-full border-x border-transparent p-0 pointer-events-none" />
             <main className="w-full p-0 overflow-hidden">
@@ -151,7 +153,7 @@ export default function BlogPost() {
               <div className="p-6 lg:p-10 rounded-2xl backdrop-blur-sm bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all duration-300">
                 {markdownError ? (
                   <div className="text-red-400 mb-4 p-4 bg-red-900/20 rounded-lg border border-red-500/30">
-                    <p className="font-semibold">Error rendering content:</p>
+                    <p className="font-semibold">{t('blogPost.errorRendering')}</p>
                     <p className="text-sm mt-2">{markdownError}</p>
                   </div>
                 ) : null}
@@ -253,13 +255,13 @@ export default function BlogPost() {
                   </div>
                 )}
               </div>
-              
+
               {relatedPosts.length > 0 && (
                 <div className="mt-10 p-6 lg:p-10 rounded-2xl backdrop-blur-sm bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all duration-300">
-                  <h2 className="text-2xl font-semibold mb-6 text-white">Related Articles</h2>
+                  <h2 className="text-2xl font-semibold mb-6 text-white">{t('blogPost.related')}</h2>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {relatedPosts.map((relatedPost) => {
-                      const relatedDate = formatDate(relatedPost.date);
+                      const relatedDate = formatDate(relatedPost.date, language);
                       return (
                         <BlogCard
                           key={relatedPost.slug}
