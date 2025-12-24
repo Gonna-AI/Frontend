@@ -11,11 +11,12 @@ import { useState } from 'react';
 import { Menu, X } from 'lucide-react';
 import LanguageSwitcher from '../Layout/LanguageSwitcher';
 
+import { useLanguage } from '../../contexts/LanguageContext';
+
 export default function Landing() {
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
-
+  const { t } = useLanguage();
 
   const handleAboutClick = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -67,7 +68,7 @@ export default function Landing() {
               onMouseEnter={(e) => e.currentTarget.style.color = 'oklch(0.9 0 0 / 0.7)'}
               onMouseLeave={(e) => e.currentTarget.style.color = 'oklch(0.9 0 0 / 0.5)'}
             >
-              Blog
+              {t('nav.blog')}
             </button>
             <button
               type="button"
@@ -82,7 +83,7 @@ export default function Landing() {
               onMouseEnter={(e) => e.currentTarget.style.color = 'oklch(0.9 0 0 / 0.7)'}
               onMouseLeave={(e) => e.currentTarget.style.color = 'oklch(0.9 0 0 / 0.5)'}
             >
-              About
+              {t('nav.about')}
             </button>
           </div>
 
@@ -95,7 +96,7 @@ export default function Landing() {
                 fontFamily: 'Urbanist, sans-serif',
               }}
             >
-              Contact Us
+              {t('nav.contact')}
             </button>
             <div className="w-px h-8 bg-white/10 mx-2" />
             <div className="w-[100px]">
@@ -135,14 +136,14 @@ export default function Landing() {
                     onClick={handleAboutClick}
                     className="text-white/80 hover:text-white transition-colors text-base font-medium px-4 py-2 w-full text-center"
                   >
-                    About
+                    {t('nav.about')}
                   </button>
                   <div className="h-px w-3/4 bg-white/10" />
                   <button
                     onClick={handleSolutionsClick}
                     className="text-white/80 hover:text-white transition-colors text-base font-medium px-4 py-2 w-full text-center"
                   >
-                    Solutions
+                    {t('nav.solutions')}
                   </button>
                   <div className="h-px w-3/4 bg-white/10" />
                   <button
@@ -152,14 +153,14 @@ export default function Landing() {
                     }}
                     className="text-white/80 hover:text-white transition-colors text-base font-medium px-4 py-2 w-full text-center"
                   >
-                    Blog
+                    {t('nav.blog')}
                   </button>
                   <div className="h-px w-3/4 bg-white/10" />
                   <button
                     onClick={handleContactClick}
                     className="text-white/80 hover:text-white transition-colors text-base font-medium px-4 py-2 w-full text-center"
                   >
-                    Contact Us
+                    {t('nav.contact')}
                   </button>
                   <div className="h-px w-3/4 bg-white/10" />
                   <div className="w-full px-4">

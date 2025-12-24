@@ -1,0 +1,533 @@
+import React, { createContext, useContext, useState, useEffect } from 'react';
+
+export type Language = 'en' | 'de';
+
+type LanguageContextType = {
+    language: Language;
+    setLanguage: (lang: Language) => void;
+    t: (key: string) => string;
+};
+
+const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
+
+export const translations: Record<Language, Record<string, string>> = {
+    en: {
+        // Navigation
+        'nav.about': 'About',
+        'nav.blog': 'Blog',
+        'nav.solutions': 'Solutions',
+        'nav.contact': 'Contact Us',
+        'nav.bookDemo': 'Book Demo',
+        'nav.seeSolutions': 'See Solutions',
+        'nav.language': 'Language',
+
+        // Landing - Hero
+        'hero.revolutionizing': 'Revolutionizing',
+        'hero.bpoClaims': 'BPO Claims Processing',
+        'hero.description': 'Transform your claims processing workflow with AI-driven automation, intelligent callback scheduling, and real-time sentiment analysis',
+
+        // Landing - About (Section)
+        'about.future': 'Building the Future of',
+        'about.opsIntel': 'Operations Intelligence',
+
+        // Landing - Products
+        'products.arborTitle': 'Arbor',
+        'products.arborDesc': 'See how AI automates your business workflows in real-time',
+        'products.click': 'Click',
+        'products.runDemo': 'Run Demo',
+        'products.seeAction': 'to see the workflow in action',
+        'products.scrollPan': 'Scroll to pan • Click nodes for details',
+        'products.tryArbor': 'Try Arbor',
+        'products.jurisTitle': 'Juris',
+        'products.tryJuris': 'Try Juris',
+
+        // Landing - Conversation
+        'conversation.title': 'Smart Calls, Smarter Agents.',
+
+        // Landing - FAQ
+        'faq.title': 'FAQ',
+        'faq.title1': 'Frequently Asked',
+        'faq.title2': 'Questions',
+        'faq.cantFind': "Can't find what you're looking for?",
+        'faq.visitOur': 'Visit our',
+        'faq.contactPage': 'Contact page',
+
+        // FAQ Items
+        'faq.q1': 'How do I get started?',
+        'faq.a1': "Getting started is easy! Book a demo with our team through the Contact page, and we'll schedule a personalized walkthrough. After that, we'll help you set up a trial environment tailored to your specific use case.",
+        'faq.q2': 'Do you offer a free trial?',
+        'faq.a2': "Yes, we offer a 14-day free trial for qualified businesses. During the trial, you'll have access to our core features and dedicated support to help you evaluate the platform.",
+        'faq.q3': 'How is ClerkTree priced?',
+        'faq.a3': 'We offer flexible pricing based on your volume of documents, number of users, and specific features required. Contact our sales team for a customized quote that fits your business needs.',
+        'faq.q4': 'How long does implementation take?',
+        'faq.a4': 'Implementation typically takes 2-4 weeks depending on your specific requirements and existing systems. We provide dedicated onboarding support and training to ensure a smooth transition.',
+        'faq.q5': 'Can I integrate ClerkTree with my existing systems?',
+        'faq.a5': 'Yes! ClerkTree offers REST APIs and pre-built integrations with popular business tools including Salesforce, SAP, Microsoft Dynamics, and more. Our team can also help with custom integrations.',
+
+        // Footer
+        'footer.product': 'Product',
+        'footer.company': 'Company',
+        'footer.contact': 'Contact',
+        'footer.features': 'Features',
+        'footer.smartContracts': 'Smart Contracts',
+        'footer.documents': 'Documents',
+        'footer.aboutUs': 'About Us',
+        'footer.careers': 'Careers',
+        'footer.privacy': 'Privacy Policy',
+        'footer.terms': 'Terms of Service',
+        'footer.security': 'Security & Data Handling',
+        'footer.rights': 'All rights reserved.',
+
+        // About Page
+        'about.whyTitle': 'Why We Built ClerkTree',
+        'about.whyDesc1': 'Growing operations teams face a common challenge: fragmented workflows that slow them down. Document processing scattered across multiple tools, manual data entry consuming valuable time, and disconnected systems creating bottlenecks.',
+        'about.whyDesc2': 'We built ClerkTree to solve this. Our platform unifies AI-powered automation with human expertise, creating a seamless workflow that reduces turnaround time by 40% while maintaining the accuracy and judgment that only humans can provide.',
+        'about.missionTitle': 'Our Mission',
+        'about.missionDesc': 'To empower operations teams with intelligent automation that amplifies human capabilities, transforming tedious document-heavy processes into streamlined, efficient workflows that drive business growth.',
+        'about.visionTitle': 'Our Vision',
+        'about.visionDesc': 'To become the operating system for modern claims and back-office operations, where AI and humans work in perfect harmony to deliver unprecedented speed, accuracy, and customer satisfaction.',
+        'about.hybridTitle': 'The Hybrid Human+AI Approach',
+        'about.hybridDesc': "We believe the future isn't about replacing humans with AI—it's about augmenting human intelligence with machine capabilities. Our platform is designed around this core philosophy:",
+        'about.aiRepetition': 'AI Handles Repetition',
+        'about.aiRepetitionDesc': 'Automated document extraction, data validation, and routine processing tasks',
+        'about.humanComplexity': 'Humans Handle Complexity',
+        'about.humanComplexityDesc': 'Complex decision-making, edge cases, and customer interactions requiring empathy',
+        'about.handoffs': 'Seamless Handoffs',
+        'about.handoffsDesc': 'Smart routing between AI and human agents based on task complexity and confidence levels',
+        'about.industriesTitle': 'Industries We Serve',
+        'about.ind1': 'Insurance',
+        'about.ind2': 'BFSI',
+        'about.ind3': 'BPO',
+        'about.ind4': 'Operations',
+        'about.ind5': 'Document Processing',
+        'about.joinTitle': 'Join Us on This Journey',
+        'about.joinDesc': "We're just getting started. Partner with us to transform your operations.",
+        'about.getInTouch': 'Get in Touch',
+        'about.joinTeam': 'Join Our Team',
+
+        // Contact Page
+        'contact.title1': "Let's Talk About",
+        'contact.title2': 'Your Business',
+        'contact.subtitle': 'Get in touch with our team for enterprise solutions and support',
+        'contact.phone': 'Phone',
+        'contact.location': 'Location',
+        'contact.sendMsgTitle': 'Send us a Message',
+        'contact.sendMsgDesc': "Fill out the form below and we'll get back to you within 1-2 business days.",
+        'contact.successTitle': 'Message Sent!',
+        'contact.successDesc': "Thank you for contacting us. We'll be in touch soon!",
+        'contact.fullName': 'Full Name',
+        'contact.companyName': 'Company Name',
+        'contact.email': 'Business Email',
+        'contact.phoneNumber': 'Phone Number',
+        'contact.interest': 'Interest',
+        'contact.selectInterest': 'Select your interest...',
+        'contact.intEnterprise': 'Enterprise License',
+        'contact.intBulk': 'Bulk Purchase',
+        'contact.intCustom': 'Custom Solution',
+        'contact.intOther': 'Other',
+        'contact.employees': 'Number of Employees',
+        'contact.selectRange': 'Select range...',
+        'contact.message': 'Message',
+        'contact.messagePlaceholder': 'Tell us about your needs and requirements...',
+        'contact.error': 'Something went wrong. Please try again later.',
+        'contact.sending': 'Sending...',
+        'contact.sendButton': 'Send Message',
+
+        // Solutions Page
+        'solutions.title1': 'Built for Modern',
+        'solutions.title2': 'Claims Operations',
+        'solutions.subtitle': 'Transform your workflow with enterprise-grade automation, powered by cutting-edge AI technology.',
+        'solutions.card1Title': 'AI-Powered Document Processing',
+        'solutions.card1Desc': 'Automatically extract, classify, and validate information from claims documents using advanced machine learning models.',
+        'solutions.card1Feat1': 'OCR & Data Extraction',
+        'solutions.card1Feat2': 'Document Classification',
+        'solutions.card1Feat3': 'Auto-validation',
+        'solutions.card2Title': 'Intelligent Workflow Automation',
+        'solutions.card2Desc': 'Streamline your claims process with smart routing, automated decision-making, and seamless handoffs between AI and human agents.',
+        'solutions.card2Feat1': 'Smart Task Routing',
+        'solutions.card2Feat2': 'Automated Approvals',
+        'solutions.card2Feat3': 'Process Optimization',
+        'solutions.card3Title': 'Claims Triage & Prioritization',
+        'solutions.card3Desc': 'Automatically categorize and prioritize incoming claims based on urgency, complexity, and potential fraud indicators.',
+        'solutions.card3Feat1': 'Urgency Detection',
+        'solutions.card3Feat2': 'Complexity Analysis',
+        'solutions.card3Feat3': 'Priority Scoring',
+        'solutions.card4Title': 'Real-Time Status Tracking',
+        'solutions.card4Desc': 'Provide complete visibility into claim status with automated updates, notifications, and comprehensive audit trails.',
+        'solutions.card4Feat1': 'Live Status Updates',
+        'solutions.card4Feat2': 'Automated Notifications',
+        'solutions.card4Feat3': 'Full Audit Trail',
+        'solutions.card5Title': 'Analytics & Reporting',
+        'solutions.card5Desc': 'Gain actionable insights with comprehensive dashboards, custom reports, and predictive analytics for better decision-making.',
+        'solutions.card5Feat1': 'Custom Dashboards',
+        'solutions.card5Feat2': 'Predictive Analytics',
+        'solutions.card5Feat3': 'Performance Metrics',
+        'solutions.card6Title': 'Compliance & Security',
+        'solutions.card6Desc': 'Ensure regulatory compliance with built-in security features, audit logging, and automated compliance checks.',
+        'solutions.card6Feat1': 'Data Encryption',
+        'solutions.card6Feat2': 'Compliance Monitoring',
+        'solutions.card6Feat3': 'Access Controls',
+        'solutions.ctaBadge': 'Start Your Journey',
+        'solutions.ctaTitle1': 'Ready to Transform',
+        'solutions.ctaTitle2': 'Your Operations?',
+        'solutions.ctaDesc': 'Schedule a personalized demo to see how our AI-powered solutions can reduce turnaround time by',
+        'solutions.ctaDescHighlight': '40%',
+        'solutions.ctaDescEnd': 'and dramatically improve accuracy.',
+        'solutions.bookDemo': 'Book a Demo',
+        'solutions.contactSales': 'Contact Sales',
+
+        // FAQ Page
+        'faqPage.title1': 'Frequently Asked',
+        'faqPage.title2': 'Questions',
+        'faqPage.subtitle': 'Everything you need to know about ClerkTree and how we can help transform your operations',
+        'faqPage.catGeneral': 'General',
+        'faqPage.catProduct': 'Product',
+        'faqPage.catPricing': 'Pricing',
+        'faqPage.catSecurity': 'Security',
+        'faqPage.catSupport': 'Support',
+        'faqPage.q1': 'What is ClerkTree?',
+        'faqPage.a1': 'ClerkTree is an AI-powered workflow automation platform designed for claims and back-office operations. We combine human expertise with artificial intelligence to reduce turnaround time by 40% while maintaining accuracy and quality.',
+        'faqPage.q2': 'How does the Human+AI approach work?',
+        'faqPage.a2': 'Our hybrid approach uses AI to handle repetitive tasks like document extraction and data validation, while humans focus on complex decision-making and edge cases. The system intelligently routes tasks between AI and human agents based on complexity and confidence levels.',
+        'faqPage.q3': 'What industries do you serve?',
+        'faqPage.a3': 'We primarily serve Insurance, BFSI (Banking, Financial Services, and Insurance), BPO (Business Process Outsourcing), Operations teams, and Document Processing sectors. Our platform is optimized for document-heavy workflows and claims processing.',
+        'faqPage.q4': 'What kind of documents can ClerkTree process?',
+        'faqPage.a4': 'ClerkTree can process a wide variety of documents including insurance claims, invoices, contracts, medical records, financial statements, and other business documents. Our AI is trained to extract relevant information accurately and efficiently.',
+        'faqPage.q5': 'How long does implementation take?',
+        'faqPage.a5': 'Implementation typically takes 2-4 weeks depending on your specific requirements and existing systems. We provide dedicated onboarding support and training to ensure a smooth transition.',
+        'faqPage.q6': 'How is ClerkTree priced?',
+        'faqPage.a6': 'We offer flexible pricing based on your volume of documents, number of users, and specific features required. Contact our sales team for a customized quote that fits your business needs.',
+        'faqPage.q7': 'Do you offer a free trial?',
+        'faqPage.a7': "Yes, we offer a 14-day free trial for qualified businesses. During the trial, you'll have access to our core features and dedicated support to help you evaluate the platform.",
+        'faqPage.q8': 'Is my data secure with ClerkTree?',
+        'faqPage.a8': 'Absolutely. We take security seriously with end-to-end encryption, SOC 2 compliance, and regular security audits. Your data is stored in secure, enterprise-grade cloud infrastructure with multiple redundancy layers.',
+        'faqPage.q9': 'What compliance standards do you meet?',
+        'faqPage.a9': 'ClerkTree meets industry standards including GDPR, HIPAA, SOC 2 Type II, and ISO 27001. We continuously update our compliance measures to meet evolving regulatory requirements.',
+        'faqPage.q10': 'What kind of support do you provide?',
+        'faqPage.a10': 'We provide 24/7 customer support via email and chat for all enterprise customers. Premium plans include dedicated account managers and phone support. We also offer comprehensive documentation and training resources.',
+        'faqPage.q11': 'Can I integrate ClerkTree with my existing systems?',
+        'faqPage.a11': 'Yes! ClerkTree offers REST APIs and pre-built integrations with popular business tools including Salesforce, SAP, Microsoft Dynamics, and more. Our team can also help with custom integrations.',
+        'faqPage.q12': 'How do I get started?',
+        'faqPage.a12': "Getting started is easy! Book a demo with our team through the Contact page, and we'll schedule a personalized walkthrough. After that, we'll help you set up a trial environment tailored to your specific use case.",
+        'faqPage.stillQuestions': 'Still Have Questions?',
+        'faqPage.stillDesc': 'Our team is here to help. Get in touch and we\'ll answer any questions you have.',
+        'faqPage.contactUs': 'Contact Us',
+
+        // Careers Page
+        'careers.title1': 'Join the',
+        'careers.title2': 'ClerkTree Team',
+        'careers.subtitle': 'Help us revolutionize operations with AI-powered automation',
+        'careers.linkedin': 'Check for new jobs on LinkedIn',
+        'careers.or': 'OR',
+        'careers.formTitle': 'Submit Your Résumé',
+        'careers.formDesc': "Fill out the form below and we'll get back to you within 2-3 business days.",
+        'careers.successTitle': 'Application Submitted!',
+        'careers.successDesc': "We'll review your application and get back to you soon.",
+        'careers.fullName': 'Full Name',
+        'careers.email': 'Email Address',
+        'careers.phone': 'Phone Number',
+        'careers.currentPos': 'Current Position',
+        'careers.experience': 'Years of Experience',
+        'careers.position': 'Position Applying For',
+        'careers.select': 'Select...',
+        'careers.selectPos': 'Select a position...',
+        'careers.pos1': 'Senior Frontend Engineer',
+        'careers.pos2': 'Fullstack Engineer',
+        'careers.pos3': 'Product Designer',
+        'careers.other': 'Other',
+        'careers.linkedinUrl': 'LinkedIn Profile URL',
+        'careers.portfolio': 'Portfolio/Website',
+        'careers.coverLetter': 'Cover Letter / Why do you want to join ClerkTree?',
+        'careers.resume': 'Résumé',
+        'careers.upload': 'Click to upload your résumé (PDF, DOC, DOCX)',
+        'careers.submit': 'Submit Application',
+        'careers.submitting': 'Submitting...',
+
+        // Invite Page
+        'invite.support': 'Support',
+        'invite.error': 'Invalid invite code. Please try again.',
+        'invite.title': 'Access the platform',
+        'invite.subtitle': "Enter your organization's invite code to access the platform",
+        'invite.placeholder': 'Enter invite code',
+        'invite.continue': 'Continue',
+        'invite.requestAccess': 'Request Access',
+        'invite.secure': 'Secure Enterprise Connection',
+    },
+    de: {
+        // Navigation
+        'nav.about': 'Über uns',
+        'nav.blog': 'Blog',
+        'nav.solutions': 'Lösungen',
+        'nav.contact': 'Kontaktieren Sie uns',
+        'nav.bookDemo': 'Demo buchen',
+        'nav.seeSolutions': 'Lösungen ansehen',
+        'nav.language': 'Sprache',
+
+        // Landing - Hero
+        'hero.revolutionizing': 'Revolutionierung der',
+        'hero.bpoClaims': 'BPO-Schadensbearbeitung',
+        'hero.description': 'Transformieren Sie Ihren Workflow zur Schadensbearbeitung mit KI-gesteuerter Automatisierung, intelligenter Rückrufplanung und Echtzeit-Stimmungsanalyse',
+
+        // Landing - About
+        'about.future': 'Die Zukunft der',
+        'about.opsIntel': 'Operations Intelligence gestalten',
+
+        // Landing - Products
+        'products.arborTitle': 'Arbor',
+        'products.arborDesc': 'Erleben Sie, wie KI Ihre Geschäftsabläufe in Echtzeit automatisiert',
+        'products.click': 'Klicken Sie auf',
+        'products.runDemo': 'Demo starten',
+        'products.seeAction': 'um den Workflow in Aktion zu sehen',
+        'products.scrollPan': 'Scrollen zum Schwenken • Klicken für Details',
+        'products.tryArbor': 'Arbor testen',
+        'products.jurisTitle': 'Juris',
+        'products.tryJuris': 'Juris testen',
+
+        // Landing - Conversation
+        'conversation.title': 'Smarte Anrufe, Klügere Agenten.',
+
+        // Landing - FAQ
+        'faq.title': 'FAQ',
+        'faq.title1': 'Häufig gestellte',
+        'faq.title2': 'Fragen',
+        'faq.cantFind': 'Nicht gefunden, was Sie suchen?',
+        'faq.visitOur': 'Besuchen Sie unsere',
+        'faq.contactPage': 'Kontaktseite',
+
+        // FAQ Items
+        'faq.q1': 'Wie fange ich an?',
+        'faq.a1': 'Der Einstieg ist einfach! Buchen Sie eine Demo über die Kontaktseite, und wir vereinbaren einen persönlichen Durchgang. Danach helfen wir Ihnen, eine Testumgebung einzurichten, die auf Ihren spezifischen Anwendungsfall zugeschnitten ist.',
+        'faq.q2': 'Bieten Sie eine kostenlose Testphase an?',
+        'faq.a2': 'Ja, wir bieten eine 14-tägige kostenlose Testphase für qualifizierte Unternehmen an. Während der Testphase haben Sie Zugriff auf unsere Kernfunktionen und engagierten Support, um die Plattform zu evaluieren.',
+        'faq.q3': 'Wie ist die Preisgestaltung von ClerkTree?',
+        'faq.a3': 'Wir bieten flexible Preise basierend auf Ihrem Dokumentenvolumen, der Anzahl der Benutzer und den benötigten Funktionen. Kontaktieren Sie unser Vertriebsteam für ein individuelles Angebot, das zu Ihren Geschäftsanforderungen passt.',
+        'faq.q4': 'Wie lange dauert die Implementierung?',
+        'faq.a4': 'Die Implementierung dauert in der Regel 2-4 Wochen, abhängig von Ihren spezifischen Anforderungen und bestehenden Systemen. Wir bieten dedizierte Onboarding-Unterstützung und Schulungen, um einen reibungslosen Übergang zu gewährleisten.',
+        'faq.q5': 'Kann ich ClerkTree in meine bestehenden Systeme integrieren?',
+        'faq.a5': 'Ja! ClerkTree bietet REST-APIs und vorgefertigte Integrationen mit beliebten Business-Tools wie Salesforce, SAP, Microsoft Dynamics und mehr. Unser Team kann auch bei benutzerdefinierten Integrationen helfen.',
+
+        // Footer
+        'footer.product': 'Produkt',
+        'footer.company': 'Unternehmen',
+        'footer.contact': 'Kontakt',
+        'footer.features': 'Funktionen',
+        'footer.smartContracts': 'Smart Contracts',
+        'footer.documents': 'Dokumente',
+        'footer.aboutUs': 'Über uns',
+        'footer.careers': 'Karriere',
+        'footer.privacy': 'Datenschutzerklärung',
+        'footer.terms': 'Nutzungsbedingungen',
+        'footer.security': 'Sicherheit & Datenverarbeitung',
+        'footer.rights': 'Alle Rechte vorbehalten.',
+
+        // About Page
+        'about.whyTitle': 'Warum wir ClerkTree gebaut haben',
+        'about.whyDesc1': 'Wachsende Operationsteams stehen vor einer gemeinsamen Herausforderung: fragmentierte Arbeitsabläufe, die sie verlangsamen. Die Dokumentenverarbeitung ist über mehrere Tools verteilt, manuelle Dateneingabe kostet wertvolle Zeit und getrennte Systeme schaffen Engpässe.',
+        'about.whyDesc2': 'Wir haben ClerkTree gebaut, um dieses Problem zu lösen. Unsere Plattform vereint KI-gesteuerte Automatisierung mit menschlicher Expertise und schafft einen nahtlosen Workflow, der die Durchlaufzeit um 40 % reduziert und gleichzeitig die Genauigkeit und das Urteilsvermögen beibehält, die nur Menschen bieten können.',
+        'about.missionTitle': 'Unsere Mission',
+        'about.missionDesc': 'Operationsteams mit intelligenter Automatisierung zu befähigen, die menschliche Fähigkeiten verstärkt und mühsame dokumentenlastige Prozesse in optimierte, effiziente Workflows verwandelt, die das Geschäftswachstum vorantreiben.',
+        'about.visionTitle': 'Unsere Vision',
+        'about.visionDesc': 'Das Betriebssystem für moderne Schadens- und Back-Office-Operationen zu werden, in dem KI und Menschen in perfekter Harmonie zusammenarbeiten, um beispiellose Geschwindigkeit, Genauigkeit und Kundenzufriedenheit zu liefern.',
+        'about.hybridTitle': 'Der Hybride Mensch+KI Ansatz',
+        'about.hybridDesc': 'Wir glauben, dass die Zukunft nicht darin liegt, Menschen durch KI zu ersetzen – sondern menschliche Intelligenz durch maschinelle Fähigkeiten zu erweitern. Unsere Plattform ist um diese Kernphilosophie herum aufgebaut:',
+        'about.aiRepetition': 'KI übernimmt Wiederholungen',
+        'about.aiRepetitionDesc': 'Automatisierte Dokumentenextraktion, Datenvalidierung und Routineverarbeitungsaufgaben',
+        'about.humanComplexity': 'Menschen übernehmen Komplexität',
+        'about.humanComplexityDesc': 'Komplexe Entscheidungsfindung, Grenzfälle und Kundeninteraktionen, die Empathie erfordern',
+        'about.handoffs': 'Nahtlose Übergaben',
+        'about.handoffsDesc': 'Intelligentes Routing zwischen KI und menschlichen Agenten basierend auf Aufgabenkomplexität und Vertrauensniveau',
+        'about.industriesTitle': 'Branchen, die wir bedienen',
+        'about.ind1': 'Versicherung',
+        'about.ind2': 'BFSI',
+        'about.ind3': 'BPO',
+        'about.ind4': 'Operatives Geschäft',
+        'about.ind5': 'Dokumentenverarbeitung',
+        'about.joinTitle': 'Begleiten Sie uns auf dieser Reise',
+        'about.joinDesc': 'Wir fangen gerade erst an. Arbeiten Sie mit uns zusammen, um Ihre Operationen zu transformieren.',
+        'about.getInTouch': 'Kontakt aufnehmen',
+        'about.joinTeam': 'Werden Sie Teil unseres Teams',
+
+        // Contact Page
+        'contact.title1': 'Lassen Sie uns über',
+        'contact.title2': 'Ihr Geschäft sprechen',
+        'contact.subtitle': 'Kontaktieren Sie unser Team für Unternehmenslösungen und Support',
+        'contact.phone': 'Telefon',
+        'contact.location': 'Standort',
+        'contact.sendMsgTitle': 'Senden Sie uns eine Nachricht',
+        'contact.sendMsgDesc': 'Füllen Sie das untenstehende Formular aus und wir melden uns innerhalb von 1-2 Werktagen bei Ihnen.',
+        'contact.successTitle': 'Nachricht gesendet!',
+        'contact.successDesc': 'Vielen Dank für Ihre Kontaktaufnahme. Wir werden uns bald bei Ihnen melden!',
+        'contact.fullName': 'Vollständiger Name',
+        'contact.companyName': 'Firmenname',
+        'contact.email': 'Geschäftliche E-Mail',
+        'contact.phoneNumber': 'Telefonnummer',
+        'contact.interest': 'Interesse',
+        'contact.selectInterest': 'Wählen Sie Ihr Interesse...',
+        'contact.intEnterprise': 'Unternehmenslizenz',
+        'contact.intBulk': 'Großabnahme',
+        'contact.intCustom': 'Individuelle Lösung',
+        'contact.intOther': 'Sonstiges',
+        'contact.employees': 'Anzahl der Mitarbeiter',
+        'contact.selectRange': 'Bereich auswählen...',
+        'contact.message': 'Nachricht',
+        'contact.messagePlaceholder': 'Erzählen Sie uns von Ihren Bedürfnissen und Anforderungen...',
+        'contact.error': 'Etwas ist schief gelaufen. Bitte versuchen Sie es später erneut.',
+        'contact.sending': 'Senden...',
+        'contact.sendButton': 'Nachricht senden',
+
+        // Solutions Page
+        'solutions.title1': 'Entwickelt für moderne',
+        'solutions.title2': 'Schadensabläufe',
+        'solutions.subtitle': 'Transformieren Sie Ihren Arbeitsablauf mit unternehmenstauglicher Automatisierung, angetrieben von modernster KI-Technologie.',
+        'solutions.card1Title': 'KI-gestützte Dokumentenverarbeitung',
+        'solutions.card1Desc': 'Automatisches Extrahieren, Klassifizieren und Validieren von Informationen aus Schadensdokumenten mithilfe fortschrittlicher Modelle des maschinellen Lernens.',
+        'solutions.card1Feat1': 'OCR & Datenextraktion',
+        'solutions.card1Feat2': 'Dokumentenklassifizierung',
+        'solutions.card1Feat3': 'Auto-Validierung',
+        'solutions.card2Title': 'Intelligente Workflow-Automatisierung',
+        'solutions.card2Desc': 'Optimieren Sie Ihren Schadenprozess mit intelligentem Routing, automatisierter Entscheidungsfindung und nahtlosen Übergaben zwischen KI und menschlichen Agenten.',
+        'solutions.card2Feat1': 'Intelligentes Aufgaben-Routing',
+        'solutions.card2Feat2': 'Automatisierte Genehmigungen',
+        'solutions.card2Feat3': 'Prozessoptimierung',
+        'solutions.card3Title': 'Schadens-Triage & Priorisierung',
+        'solutions.card3Desc': 'Automatisches Kategorisieren und Priorisieren eingehender Ansprüche basierend auf Dringlichkeit, Komplexität und potenziellen Betrugsindikatoren.',
+        'solutions.card3Feat1': 'Dringlichkeitserkennung',
+        'solutions.card3Feat2': 'Komplexitätsanalyse',
+        'solutions.card3Feat3': 'Prioritätsbewertung',
+        'solutions.card4Title': 'Echtzeit-Statusverfolgung',
+        'solutions.card4Desc': 'Bieten Sie vollständige Transparenz über den Status von Ansprüchen mit automatischen Updates, Benachrichtigungen und umfassenden Audit-Trails.',
+        'solutions.card4Feat1': 'Live-Status-Updates',
+        'solutions.card4Feat2': 'Automatisierte Benachrichtigungen',
+        'solutions.card4Feat3': 'Vollständiger Audit-Trail',
+        'solutions.card5Title': 'Analysen & Berichte',
+        'solutions.card5Desc': 'Gewinnen Sie umsetzbare Erkenntnisse mit umfassenden Dashboards, benutzerdefinierten Berichten und prädiktiven Analysen für eine bessere Entscheidungsfindung.',
+        'solutions.card5Feat1': 'Benutzerdefinierte Dashboards',
+        'solutions.card5Feat2': 'Prädiktive Analysen',
+        'solutions.card5Feat3': 'Leistungskennzahlen',
+        'solutions.card6Title': 'Compliance & Sicherheit',
+        'solutions.card6Desc': 'Gewährleisten Sie die Einhaltung gesetzlicher Vorschriften mit integrierten Sicherheitsfunktionen, Audit-Protokollierung und automatisierten Compliance-Prüfungen.',
+        'solutions.card6Feat1': 'Datenverschlüsselung',
+        'solutions.card6Feat2': 'Compliance-Überwachung',
+        'solutions.card6Feat3': 'Zugriffskontrollen',
+        'solutions.ctaBadge': 'Starten Sie Ihre Reise',
+        'solutions.ctaTitle1': 'Bereit, Ihre Abläufe',
+        'solutions.ctaTitle2': 'zu transformieren?',
+        'solutions.ctaDesc': 'Vereinbaren Sie eine personalisierte Demo, um zu sehen, wie unsere KI-gestützten Lösungen die Durchlaufzeit um',
+        'solutions.ctaDescHighlight': '40%',
+        'solutions.ctaDescEnd': 'reduzieren und die Genauigkeit drastisch verbessern können.',
+        'solutions.bookDemo': 'Demo buchen',
+        'solutions.contactSales': 'Vertrieb kontaktieren',
+
+        // FAQ Page
+        'faqPage.title1': 'Häufig gestellte',
+        'faqPage.title2': 'Fragen',
+        'faqPage.subtitle': 'Alles, was Sie über ClerkTree wissen müssen und wie wir Ihnen helfen können, Ihre Abläufe zu transformieren',
+        'faqPage.catGeneral': 'Allgemein',
+        'faqPage.catProduct': 'Produkt',
+        'faqPage.catPricing': 'Preise',
+        'faqPage.catSecurity': 'Sicherheit',
+        'faqPage.catSupport': 'Support',
+        'faqPage.q1': 'Was ist ClerkTree?',
+        'faqPage.a1': 'ClerkTree ist eine KI-gestützte Workflow-Automatisierungsplattform für Schadens- und Back-Office-Operationen. Wir kombinieren menschliche Expertise mit künstlicher Intelligenz, um die Durchlaufzeit um 40 % zu reduzieren und gleichzeitig Genauigkeit und Qualität beizubehalten.',
+        'faqPage.q2': 'Wie funktioniert der Mensch+KI-Ansatz?',
+        'faqPage.a2': 'Unser hybrider Ansatz nutzt KI für repetitive Aufgaben wie Dokumentenextraktion und Datenvalidierung, während sich Menschen auf komplexe Entscheidungsfindung und Grenzfälle konzentrieren. Das System leitet Aufgaben intelligent zwischen KI und menschlichen Agenten basierend auf Komplexität und Vertrauensniveau weiter.',
+        'faqPage.q3': 'Welche Branchen bedienen Sie?',
+        'faqPage.a3': 'Wir bedienen hauptsächlich Versicherungen, BFSI (Banken, Finanzdienstleistungen und Versicherungen), BPO (Business Process Outsourcing), Operationsteams und Dokumentenverarbeitungssektoren. Unsere Plattform ist für dokumentenlastige Workflows und Schadensbearbeitung optimiert.',
+        'faqPage.q4': 'Welche Art von Dokumenten kann ClerkTree verarbeiten?',
+        'faqPage.a4': 'ClerkTree kann eine Vielzahl von Dokumenten verarbeiten, darunter Versicherungsansprüche, Rechnungen, Verträge, medizinische Unterlagen, Finanzberichte und andere geschäftliche Dokumente. Unsere KI ist darauf trainiert, relevante Informationen genau und effizient zu extrahieren.',
+        'faqPage.q5': 'Wie lange dauert die Implementierung?',
+        'faqPage.a5': 'Die Implementierung dauert in der Regel 2-4 Wochen, abhängig von Ihren spezifischen Anforderungen und bestehenden Systemen. Wir bieten dedizierte Onboarding-Unterstützung und Schulungen, um einen reibungslosen Übergang zu gewährleisten.',
+        'faqPage.q6': 'Wie ist die Preisgestaltung von ClerkTree?',
+        'faqPage.a6': 'Wir bieten flexible Preise basierend auf Ihrem Dokumentenvolumen, der Anzahl der Benutzer und den benötigten Funktionen. Kontaktieren Sie unser Vertriebsteam für ein individuelles Angebot, das zu Ihren Geschäftsanforderungen passt.',
+        'faqPage.q7': 'Bieten Sie eine kostenlose Testphase an?',
+        'faqPage.a7': 'Ja, wir bieten eine 14-tägige kostenlose Testphase für qualifizierte Unternehmen an. Während der Testphase haben Sie Zugriff auf unsere Kernfunktionen und engagierten Support, um die Plattform zu evaluieren.',
+        'faqPage.q8': 'Ist meine Daten sicher bei ClerkTree?',
+        'faqPage.a8': 'Absolut. Wir nehmen Sicherheit ernst, mit Ende-zu-Ende-Verschlüsselung, SOC 2-Konformität und regelmäßigen Sicherheitsaudits. Ihre Daten werden in einer sicheren, unternehmensfähigen Cloud-Infrastruktur mit mehreren Redundanzebenen gespeichert.',
+        'faqPage.q9': 'Welche Compliance-Standards erfüllen Sie?',
+        'faqPage.a9': 'ClerkTree erfüllt Industriestandards wie GDPR, HIPAA, SOC 2 Typ II und ISO 27001. Wir aktualisieren unsere Compliance-Maßnahmen kontinuierlich, um den sich entwickelnden regulatorischen Anforderungen gerecht zu werden.',
+        'faqPage.q10': 'Welche Art von Support bieten Sie an?',
+        'faqPage.a10': 'Wir bieten rund um die Uhr Kundensupport per E-Mail und Chat für alle Unternehmenskunden. Premium-Pläne umfassen dedizierte Account-Manager und telefonischen Support. Wir bieten auch umfassende Dokumentations- und Schulungsressourcen.',
+        'faqPage.q11': 'Kann ich ClerkTree in meine bestehenden Systeme integrieren?',
+        'faqPage.a11': 'Ja! ClerkTree bietet REST-APIs und vorgefertigte Integrationen mit beliebten Business-Tools wie Salesforce, SAP, Microsoft Dynamics und mehr. Unser Team kann auch bei benutzerdefinierten Integrationen helfen.',
+        'faqPage.q12': 'Wie fange ich an?',
+        'faqPage.a12': 'Der Einstieg ist einfach! Buchen Sie eine Demo über die Kontaktseite, und wir vereinbaren einen persönlichen Durchgang. Danach helfen wir Ihnen, eine Testumgebung einzurichten, die auf Ihren spezifischen Anwendungsfall zugeschnitten ist.',
+        'faqPage.stillQuestions': 'Haben Sie noch Fragen?',
+        'faqPage.stillDesc': 'Unser Team ist hier, um zu helfen. Nehmen Sie Kontakt auf und wir beantworten alle Fragen, die Sie haben.',
+        'faqPage.contactUs': 'Kontaktieren Sie uns',
+
+        // Careers Page
+        'careers.title1': 'Werden Sie Teil des',
+        'careers.title2': 'ClerkTree-Teams',
+        'careers.subtitle': 'Helfen Sie uns, den Betrieb mit KI-gestützter Automatisierung zu revolutionieren',
+        'careers.linkedin': 'Suchen Sie nach neuen Jobs auf LinkedIn',
+        'careers.or': 'ODER',
+        'careers.formTitle': 'Reichen Sie Ihren Lebenslauf ein',
+        'careers.formDesc': 'Füllen Sie das untenstehende Formular aus und wir melden uns innerhalb von 2-3 Werktagen bei Ihnen.',
+        'careers.successTitle': 'Bewerbung abgeschickt!',
+        'careers.successDesc': 'Wir werden Ihre Bewerbung prüfen und uns bald bei Ihnen melden.',
+        'careers.fullName': 'Vollständiger Name',
+        'careers.email': 'E-Mail-Adresse',
+        'careers.phone': 'Telefonnummer',
+        'careers.currentPos': 'Aktuelle Position',
+        'careers.experience': 'Jahre Berufserfahrung',
+        'careers.position': 'Gewünschte Position',
+        'careers.select': 'Auswählen...',
+        'careers.selectPos': 'Position auswählen...',
+        'careers.pos1': 'Senior Frontend Engineer',
+        'careers.pos2': 'Fullstack Engineer',
+        'careers.pos3': 'Product Designer',
+        'careers.other': 'Sonstiges',
+        'careers.linkedinUrl': 'LinkedIn Profil-URL',
+        'careers.portfolio': 'Portfolio/Website',
+        'careers.coverLetter': 'Anschreiben / Warum möchten Sie zu ClerkTree?',
+        'careers.resume': 'Lebenslauf',
+        'careers.upload': 'Klicken Sie hier, um Ihren Lebenslauf hochzuladen (PDF, DOC, DOCX)',
+        'careers.submit': 'Bewerbung absenden',
+        'careers.submitting': 'Wird gesendet...',
+
+        // Invite Page
+        'invite.support': 'Support',
+        'invite.error': 'Ungültiger Einladungscode. Bitte versuchen Sie es erneut.',
+        'invite.title': 'Zugang zur Plattform',
+        'invite.subtitle': 'Geben Sie den Einladungscode Ihrer Organisation ein, um auf die Plattform zuzugreifen',
+        'invite.placeholder': 'Einladungscode eingeben',
+        'invite.continue': 'Weiter',
+        'invite.requestAccess': 'Zugang anfordern',
+        'invite.secure': 'Sichere Unternehmensverbindung',
+    }
+};
+
+export function LanguageProvider({ children }: { children: React.ReactNode }) {
+    const [language, setLanguageState] = useState<Language>('en');
+
+    useEffect(() => {
+        const savedLang = localStorage.getItem('app-language') as Language;
+        if (savedLang === 'en' || savedLang === 'de') {
+            setLanguageState(savedLang);
+        }
+    }, []);
+
+    const setLanguage = (lang: Language) => {
+        setLanguageState(lang);
+        localStorage.setItem('app-language', lang);
+        window.dispatchEvent(new CustomEvent('language-change', { detail: lang }));
+    };
+
+    const t = (key: string): string => {
+        return translations[language][key] || key;
+    };
+
+    return (
+        <LanguageContext.Provider value={{ language, setLanguage, t }}>
+            {children}
+        </LanguageContext.Provider>
+    );
+}
+
+export function useLanguage() {
+    const context = useContext(LanguageContext);
+    if (context === undefined) {
+        throw new Error('useLanguage must be used within a LanguageProvider');
+    }
+    return context;
+}

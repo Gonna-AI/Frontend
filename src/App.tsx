@@ -11,6 +11,7 @@ import { auth } from './services/auth';
 import GoogleCallback from './components/Auth/GoogleCallback';
 import ClientChat from './components/ClientChat';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { LanguageProvider } from './contexts/LanguageContext';
 import PrivacyPolicy from './components/Legal/PrivacyPolicy';
 import TermsOfService from './components/Legal/TermsOfService';
 import Security from './components/Legal/Security';
@@ -29,6 +30,7 @@ import Juris from './pages/Juris';
 import Bioflow from './pages/Bioflow';
 import DemoDashboard from './pages/DemoDashboard';
 import UserCall from './pages/UserCall';
+import { ViewType } from './types/navigation';
 import { PrivateRoute } from './components/Auth/PrivateRoute';
 import ScrollToTop from './components/ScrollToTop';
 // Create a client
@@ -117,7 +119,16 @@ function App() {
           </main>
 
           <Sidebar
-            currentPath={window.location.pathname}
+            currentView={((): ViewType => {
+              const path = window.location.pathname;
+              if (path.includes('dashboard')) return 'dashboard';
+              if (path.includes('ai-settings')) return 'ai-settings';
+              if (path.includes('profile')) return 'profile';
+              if (path.includes('billing')) return 'billing';
+              if (path.includes('settings')) return 'settings';
+              return 'dashboard';
+            })()}
+            onViewChange={() => { }}
             onSignOut={handleSignOut}
             isOpen={isMobileMenuOpen}
             onClose={() => setIsMobileMenuOpen(false)}
@@ -129,88 +140,90 @@ function App() {
   };
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
-        <ScrollToTop />
-        <Routes>
-          {/* Public Routes */}
-          <Route path="/" element={
-            isSignedIn ?
-              <Navigate to="/dashboard" /> :
-              <Landing />
-          } />
+    <LanguageProvider>
+      <QueryClientProvider client={queryClient}>
+        <BrowserRouter>
+          <ScrollToTop />
+          <Routes>
+            {/* Public Routes */}
+            <Route path="/" element={
+              isSignedIn ?
+                <Navigate to="/dashboard" /> :
+                <Landing />
+            } />
 
-          <Route path="/auth" element={
-            isSignedIn ?
-              <Navigate to="/dashboard" /> :
-              shouldRedirectToInvite() ?
-                <Navigate to="/invite" /> :
-                <AuthPage setIsSignedIn={setIsSignedIn} />
-          } />
+            <Route path="/auth" element={
+              isSignedIn ?
+                <Navigate to="/dashboard" /> :
+                shouldRedirectToInvite() ?
+                  <Navigate to="/invite" /> :
+                  <AuthPage setIsSignedIn={setIsSignedIn} />
+            } />
 
-          <Route path="/invite" element={
-            isSignedIn ?
-              <Navigate to="/dashboard" /> :
-              <InvitePage />
-          } />
+            <Route path="/invite" element={
+              isSignedIn ?
+                <Navigate to="/dashboard" /> :
+                <InvitePage />
+            } />
 
-          {/* Protected Routes */}
-          <Route path="/dashboard" element={
-            <PrivateRoute>
-              <AuthenticatedLayout>
-                <Dashboard />
-              </AuthenticatedLayout>
-            </PrivateRoute>
-          } />
-          {/* Chat route - accessible without auth */}
-          <Route path="/chat" element={<ClientChat />} />
-          
-          {/* Demo Call Agent Pages - Public for testing */}
-          <Route path="/demo-dashboard" element={<DemoDashboard />} />
-          <Route path="/user" element={<UserCall />} />
-          <Route path="/ai-settings" element={
-            <ProtectedRoute>
-              <AISettings />
-            </ProtectedRoute>
-          } />
-          <Route path="/about" element={<About />} />
-          <Route path="/careers" element={<Careers />} />
-          <Route path="/solutions" element={<Solutions />} />
-          <Route path="/faq" element={<FAQ />} />
-          <Route path="/blog" element={<Blog />} />
-          <Route path="/blog/:slug" element={<BlogPost />} />
-          <Route path="/arbor" element={<Arbor />} />
-          <Route path="/juris" element={<Juris />} />
-          <Route path="/bioflow" element={<Bioflow />} />
-          <Route path="/profile" element={
-            <ProtectedRoute>
-              <Profile />
-            </ProtectedRoute>
-          } />
-          <Route path="/billing" element={
-            <ProtectedRoute>
-              <Billing />
-            </ProtectedRoute>
-          } />
-          <Route path="/settings" element={
-            <ProtectedRoute>
-              <Settings />
-            </ProtectedRoute>
-          } />
+            {/* Protected Routes */}
+            <Route path="/dashboard" element={
+              <PrivateRoute>
+                <AuthenticatedLayout>
+                  <Dashboard />
+                </AuthenticatedLayout>
+              </PrivateRoute>
+            } />
+            {/* Chat route - accessible without auth */}
+            <Route path="/chat" element={<ClientChat />} />
 
-          <Route path="/terms-of-service" element={<TermsOfService />} />
-          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-          <Route path="/security" element={<Security />} />
-          {/* Catch all route */}
-          <Route path="*" element={<Navigate to="/" />} />
+            {/* Demo Call Agent Pages - Public for testing */}
+            <Route path="/demo-dashboard" element={<DemoDashboard />} />
+            <Route path="/user" element={<UserCall />} />
+            <Route path="/ai-settings" element={
+              <ProtectedRoute>
+                <AISettings />
+              </ProtectedRoute>
+            } />
+            <Route path="/about" element={<About />} />
+            <Route path="/careers" element={<Careers />} />
+            <Route path="/solutions" element={<Solutions />} />
+            <Route path="/faq" element={<FAQ />} />
+            <Route path="/blog" element={<Blog />} />
+            <Route path="/blog/:slug" element={<BlogPost />} />
+            <Route path="/arbor" element={<Arbor />} />
+            <Route path="/juris" element={<Juris />} />
+            <Route path="/bioflow" element={<Bioflow />} />
+            <Route path="/profile" element={
+              <ProtectedRoute>
+                <Profile />
+              </ProtectedRoute>
+            } />
+            <Route path="/billing" element={
+              <ProtectedRoute>
+                <Billing />
+              </ProtectedRoute>
+            } />
+            <Route path="/settings" element={
+              <ProtectedRoute>
+                <Settings />
+              </ProtectedRoute>
+            } />
 
-          <Route path="/auth/google/callback" element={<GoogleCallback />} />
-          <Route path="/smart-contracts" element={<SmartContracts />} />
-          <Route path="/documents" element={<Documents />} />
-          <Route path="/contact" element={<Contact />} />
-        </Routes>
-      </BrowserRouter>
-    </QueryClientProvider>
+            <Route path="/terms-of-service" element={<TermsOfService />} />
+            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+            <Route path="/security" element={<Security />} />
+            {/* Catch all route */}
+            <Route path="*" element={<Navigate to="/" />} />
+
+            <Route path="/auth/google/callback" element={<GoogleCallback />} />
+            <Route path="/smart-contracts" element={<SmartContracts />} />
+            <Route path="/documents" element={<Documents />} />
+            <Route path="/contact" element={<Contact />} />
+          </Routes>
+        </BrowserRouter>
+      </QueryClientProvider>
+    </LanguageProvider>
   );
 }
 

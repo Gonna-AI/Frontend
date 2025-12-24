@@ -1,5 +1,5 @@
 import { useState, useMemo, useCallback, memo } from 'react';
-import { Bot, Workflow, Database, Calendar, FileText, Zap, ArrowRight, Volume2, VolumeX } from 'lucide-react';
+import { ArrowRight, Volume2, VolumeX } from 'lucide-react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { useDeviceDetection } from '../../hooks/useDeviceDetection';
 import { Link } from 'react-router-dom';
@@ -65,8 +65,13 @@ const ProductCard = memo(({
 
 ProductCard.displayName = 'ProductCard';
 
+import { useLanguage } from '../../contexts/LanguageContext';
+
+// ... imports
+
 // Memoized content sections
 const ArborContent = memo(({ isLowEnd, prefersReducedMotion }: { isLowEnd: boolean; prefersReducedMotion: boolean }) => {
+    const { t } = useLanguage();
     const animationConfig = useMemo(() => ({
         initial: prefersReducedMotion || isLowEnd ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 },
         animate: { opacity: 1, y: 0 },
@@ -79,11 +84,11 @@ const ArborContent = memo(({ isLowEnd, prefersReducedMotion }: { isLowEnd: boole
             <div className="text-center mb-10">
                 <h2 className="text-4xl md:text-6xl font-bold tracking-tight mb-4">
                     <span className="bg-gradient-to-r from-emerald-400 via-teal-400 to-emerald-600 text-transparent bg-clip-text">
-                        Arbor
+                        {t('products.arborTitle')}
                     </span>
                 </h2>
                 <p className="text-lg text-white/60 max-w-2xl mx-auto">
-                    See how AI automates your business workflows in real-time
+                    {t('products.arborDesc')}
                 </p>
             </div>
 
@@ -103,10 +108,10 @@ const ArborContent = memo(({ isLowEnd, prefersReducedMotion }: { isLowEnd: boole
                 {/* Bottom info bar */}
                 <div className="relative border-t border-white/5 bg-black/20 px-6 py-3 flex items-center justify-between">
                     <p className="text-xs text-slate-500">
-                        Click <span className="text-emerald-400 font-medium">Run Demo</span> to see the workflow in action
+                        {t('products.click')} <span className="text-emerald-400 font-medium">{t('products.runDemo')}</span> {t('products.seeAction')}
                     </p>
                     <p className="text-xs text-slate-600 hidden sm:block">
-                        Scroll to pan • Click nodes for details
+                        {t('products.scrollPan')}
                     </p>
                 </div>
             </div>
@@ -123,7 +128,7 @@ const ArborContent = memo(({ isLowEnd, prefersReducedMotion }: { isLowEnd: boole
                         to="/arbor"
                         className="inline-flex items-center gap-2 px-8 py-4 bg-emerald-900/40 hover:bg-emerald-800/50 backdrop-blur-md border border-emerald-600/30 hover:border-emerald-500/50 text-emerald-100 font-medium rounded-2xl transition-all duration-300 hover:shadow-lg hover:shadow-emerald-900/30 group"
                     >
-                        <span>Try Arbor</span>
+                        <span>{t('products.tryArbor')}</span>
                         <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                     </Link>
                 </motion.div>
@@ -136,6 +141,7 @@ ArborContent.displayName = 'ArborContent';
 
 const JurisContent = memo(({ isLowEnd, prefersReducedMotion }: { isLowEnd: boolean; prefersReducedMotion: boolean }) => {
     const [isMuted, setIsMuted] = useState(true);
+    const { t } = useLanguage();
 
     const animationConfig = useMemo(() => ({
         initial: prefersReducedMotion || isLowEnd ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 },
@@ -202,7 +208,7 @@ const JurisContent = memo(({ isLowEnd, prefersReducedMotion }: { isLowEnd: boole
                         to="/juris"
                         className="inline-flex items-center gap-2 px-8 py-4 bg-purple-900/40 hover:bg-purple-800/50 backdrop-blur-md border border-purple-600/30 hover:border-purple-500/50 text-purple-100 font-medium rounded-2xl transition-all duration-300 hover:shadow-lg hover:shadow-purple-900/30 group"
                     >
-                        <span>Try Juris</span>
+                        <span>{t('products.tryJuris')}</span>
                         <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                     </Link>
                 </motion.div>
