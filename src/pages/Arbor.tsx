@@ -4,6 +4,7 @@ import ArborChat from '../components/Arbor/ArborChat';
 import ArborDashboard from '../components/Arbor/ArborDashboard';
 import { Settings } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useLanguage } from '../contexts/LanguageContext';
 
 type ChatMode = 'ask' | 'tell' | 'docsearch';
 
@@ -11,6 +12,7 @@ export default function Arbor() {
     const [chatMode, setChatMode] = useState<ChatMode>('ask');
     const [messages, setMessages] = useState<ArborMessage[]>([]);
     const [showDashboard, setShowDashboard] = useState(false);
+    const { t } = useLanguage();
 
     const [stats] = useState<SystemStats>({
         total_documents: 147,
@@ -51,10 +53,10 @@ export default function Arbor() {
             const aiMessage: ArborMessage = {
                 role: 'assistant',
                 content: chatMode === 'ask'
-                    ? `Based on the information in your documents, here's what I found: This is a simulated response. In production, this would connect to the Arbor backend API.`
+                    ? t('arbor.simulatedResponseAsk')
                     : chatMode === 'tell'
-                        ? `Task executed successfully. This is a simulated response. In production, this would connect to the Arbor backend and perform the requested action.`
-                        : `Found relevant documents matching your query. This is a simulated response.`,
+                        ? t('arbor.simulatedResponseTell')
+                        : t('arbor.simulatedResponseDoc'),
                 timestamp: new Date().toISOString(),
                 details: {
                     mode: chatMode,

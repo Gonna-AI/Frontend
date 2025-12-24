@@ -1,17 +1,17 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
 import { ArrowLeft, LayoutDashboard, Menu } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { ViewType } from '../types/navigation';
 import MobileSidebar from '../components/Layout/Sidebar/MobileSidebar';
 import { cn } from '../utils/cn';
 import { DemoCallProvider } from '../contexts/DemoCallContext';
 import { UnifiedChatInterface } from '../components/DemoCall';
+import { useLanguage } from '../contexts/LanguageContext';
 
 function UserCallContent() {
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const isDark = true;
+  const { t } = useLanguage();
 
   return (
     <div className={cn(
@@ -74,7 +74,7 @@ function UserCallContent() {
                   "text-xs font-medium",
                   isDark ? "text-white/40" : "text-black/40"
                 )}>
-                  AI Assistant
+                  {t('userCall.aiAssistant')}
                 </span>
               </div>
             </div>
@@ -90,7 +90,7 @@ function UserCallContent() {
             )}
           >
             <LayoutDashboard className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">Settings</span>
+            <span className="hidden sm:inline">{t('userCall.settings')}</span>
           </button>
         </div>
       </header>

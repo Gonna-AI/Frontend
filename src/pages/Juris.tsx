@@ -3,6 +3,7 @@ import { JurisMessage, SearchMode, CaseResult } from '../types/juris';
 import JurisChat from '../components/Juris/JurisChat';
 import { Link } from 'react-router-dom';
 import { MOCK_RESPONSES } from '../data/mockJurisData';
+import { useLanguage } from '../contexts/LanguageContext';
 
 // Sample mockup data
 const SAMPLE_CASES: CaseResult[] = [
@@ -59,13 +60,14 @@ export default function Juris() {
     const [messages, setMessages] = useState<JurisMessage[]>([]);
     const [showReasoning, setShowReasoning] = useState(false);
     const [pendingQuery, setPendingQuery] = useState('');
+    const { t } = useLanguage();
 
     const handleSendMessage = (message: string) => {
         // Add user message
         const userMessage: JurisMessage = {
             role: 'user',
             content: message,
-            timestamp: new Date()
+            timestamp: new Date().toISOString()
         };
         setMessages(prev => [...prev, userMessage]);
 
@@ -125,18 +127,9 @@ export default function Juris() {
             } else {
                 // Default/Fallback logic if query doesn't match specific mocks
                 if (isDeep) {
-                    content = `Based on your detailed query, I have conducted a comprehensive analysis of the relevant legal precedents and statutory provisions. 
-
-The search has identified ${results.length} highly significant cases that directly address the legal issues you've raised. The analysis suggests a strong precedential trend favoring the interpretation of specific statutory clauses in line with recent Supreme Court judgments.
-
-Key findings include:
-1. A consistent judicial approach towards protecting fundamental rights in similar contexts.
-2. Divergent views in High Court rulings which have been settled by the Apex Court.
-3. Specific reliance on procedural adherence as a critical factor in case outcomes.
-
-Below are the most relevant cases with detailed citation networks and reasoning patterns for your review.`;
+                    content = t('juris.simulatedDeep').replace('{count}', results.length.toString());
                 } else {
-                    content = `I found ${results.length} relevant cases for your situation. These cases cover similar scenarios and can help you understand the potential legal outcomes.`;
+                    content = t('juris.simulatedNormal').replace('{count}', results.length.toString());
                 }
             }
 

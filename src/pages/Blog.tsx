@@ -4,9 +4,10 @@ import { BlogCard } from '../components/Blog/BlogCard';
 import { TagFilter } from '../components/Blog/TagFilter';
 import { FlickeringGrid } from '../components/Blog/FlickeringGrid';
 import { getAllBlogPosts, getBlogPostsByTag, getAllTags } from '../data/blogPosts';
+import { useLanguage } from '../contexts/LanguageContext';
 
-const formatDate = (date: string): string => {
-  return new Date(date).toLocaleDateString("en-US", {
+const formatDate = (date: string, language: string): string => {
+  return new Date(date).toLocaleDateString(language === 'de' ? 'de-DE' : 'en-US', {
     year: "numeric",
     month: "long",
     day: "numeric",
@@ -17,6 +18,7 @@ function BlogContent() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const selectedTag = searchParams.get("tag") || "All";
+  const { t, language } = useLanguage();
 
   const allBlogs = getAllBlogPosts();
   const filteredBlogs = getBlogPostsByTag(selectedTag);
@@ -89,10 +91,10 @@ function BlogContent() {
           <div className="p-6 rounded-2xl backdrop-blur-sm bg-white/5 border border-white/10 flex flex-col gap-6 min-h-[250px] justify-center">
             <div className="flex flex-col gap-2">
               <h1 className="font-medium text-4xl md:text-5xl tracking-tighter text-white">
-                Blog
+                {t('blogPage.title')}
               </h1>
               <p className="text-white/60 text-sm md:text-base lg:text-lg">
-                Latest news and updates from ClerkTree.
+                {t('blogPage.subtitle')}
               </p>
             </div>
             {allTags.length > 0 && (
@@ -108,12 +110,12 @@ function BlogContent() {
         </div>
 
         <div className="max-w-7xl mx-auto w-full mt-8">
-          <Suspense fallback={<div className="text-white px-6">Loading articles...</div>}>
+          <Suspense fallback={<div className="text-white px-6">{t('blogPage.loadingArticles')}</div>}>
             <div
               className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 relative auto-rows-fr px-6 lg:px-0"
             >
               {filteredBlogs.map((blog) => {
-                const formattedDate = formatDate(blog.date);
+                const formattedDate = formatDate(blog.date, language);
 
                 return (
                   <div

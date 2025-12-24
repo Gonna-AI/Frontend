@@ -1,8 +1,11 @@
 import { Link } from 'react-router-dom';
 import WorkflowEditor from '../components/Bioflow/WorkflowEditor';
 import { ArrowLeft, Workflow, Cpu, Zap, Sparkles } from 'lucide-react';
+import { useLanguage } from '../contexts/LanguageContext';
 
 export default function Bioflow() {
+    const { t } = useLanguage();
+
     return (
         <div className="min-h-screen bg-[#0a0a0a] text-white">
             {/* Background Effects */}
@@ -32,10 +35,10 @@ export default function Bioflow() {
                                 </div>
                                 <div>
                                     <h1 className="text-lg sm:text-xl font-bold bg-gradient-to-r from-indigo-400 via-purple-400 to-indigo-600 text-transparent bg-clip-text">
-                                        AI Workflow Designer
+                                        {t('bioflow.title')}
                                     </h1>
                                     <p className="text-[10px] sm:text-xs text-slate-500 uppercase tracking-wider">
-                                        See how AI automates your tasks
+                                        {t('bioflow.subtitle')}
                                     </p>
                                 </div>
                             </div>
@@ -44,15 +47,15 @@ export default function Bioflow() {
                         <div className="hidden md:flex items-center gap-3">
                             <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10">
                                 <Cpu className="w-4 h-4 text-indigo-400" />
-                                <span className="text-xs text-slate-400">Powered by AI</span>
+                                <span className="text-xs text-slate-400">{t('bioflow.poweredBy')}</span>
                             </div>
                             <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10">
                                 <Sparkles className="w-4 h-4 text-purple-400" />
-                                <span className="text-xs text-slate-400">Smart Automation</span>
+                                <span className="text-xs text-slate-400">{t('bioflow.smartAuto')}</span>
                             </div>
                             <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10">
                                 <Zap className="w-4 h-4 text-amber-400" />
-                                <span className="text-xs text-slate-400">Real-time</span>
+                                <span className="text-xs text-slate-400">{t('bioflow.realTime')}</span>
                             </div>
                         </div>
 
@@ -61,7 +64,7 @@ export default function Bioflow() {
                             className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all text-sm text-slate-300 hover:text-white"
                         >
                             <ArrowLeft className="w-4 h-4" />
-                            <span className="hidden sm:inline">Back</span>
+                            <span className="hidden sm:inline">{t('bioflow.back')}</span>
                         </Link>
                     </div>
                 </div>
@@ -74,12 +77,12 @@ export default function Bioflow() {
                         <div className="flex items-center gap-3">
                             <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                             <p className="text-sm text-slate-400">
-                                <span className="text-white font-medium">Try it out:</span>{' '}
-                                Select a use case above, then click <span className="font-medium text-indigo-400">Run Workflow</span> to see the AI in action
+                                <span className="text-white font-medium">{t('bioflow.tryIt')}</span>{' '}
+                                {t('bioflow.instruction')} <span className="font-medium text-indigo-400">{t('bioflow.runWorkflow')}</span> {t('bioflow.inAction')}
                             </p>
                         </div>
                         <p className="text-xs text-slate-500">
-                            Scroll to pan • Click nodes for details • Zoom with controls
+                            {t('bioflow.controls')}
                         </p>
                     </div>
                 </div>

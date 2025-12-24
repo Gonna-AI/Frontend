@@ -17,6 +17,7 @@ import { cn } from '../../utils/cn';
 import { aiService } from '../../services/aiService';
 import { ttsService, KokoroVoiceId } from '../../services/ttsService';
 import { useDemoCall } from '../../contexts/DemoCallContext';
+import { useLanguage } from '../../contexts/LanguageContext';
 
 // Speech Recognition types - use any to avoid conflicts with other declarations
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -47,6 +48,7 @@ export default function UnifiedChatInterface({ isDark = true }: UnifiedChatInter
         setCallPriority,
         setCallCategory
     } = useDemoCall();
+    const { t } = useLanguage();
 
     const [inputMessage, setInputMessage] = useState('');
     const [isProcessing, setIsProcessing] = useState(false);
@@ -242,7 +244,7 @@ export default function UnifiedChatInterface({ isDark = true }: UnifiedChatInter
 
         } catch (error) {
             console.error('Error getting AI response:', error);
-            addMessage('agent', 'Sorry, I encountered an error. Please try again.');
+            addMessage('agent', t('chat.agentError'));
         } finally {
             setIsProcessing(false);
             setProcessingStartTime(null);
@@ -379,13 +381,13 @@ export default function UnifiedChatInterface({ isDark = true }: UnifiedChatInter
                                 "text-2xl font-semibold mb-3 tracking-tight",
                                 isDark ? "text-white" : "text-gray-900"
                             )}>
-                                How can I help you today?
+                                {t('chat.welcome')}
                             </h3>
                             <p className={cn(
                                 "text-base max-w-sm leading-relaxed",
                                 isDark ? "text-white/40" : "text-gray-500"
                             )}>
-                                Type a message or start a voice call to begin your conversation
+                                {t('chat.startPrompt')}
                             </p>
                         </motion.div>
                     </div>
@@ -441,7 +443,7 @@ export default function UnifiedChatInterface({ isDark = true }: UnifiedChatInter
                                                     )}
                                                 >
                                                     <Brain className="w-3.5 h-3.5" />
-                                                    <span>Thought for {reasoning.thinkingTime}s</span>
+                                                    <span>{t('chat.thought').replace('{time}', reasoning.thinkingTime.toString())}</span>
                                                     {isExpanded ? (
                                                         <ChevronDown className="w-3.5 h-3.5 ml-auto" />
                                                     ) : (
@@ -550,7 +552,7 @@ export default function UnifiedChatInterface({ isDark = true }: UnifiedChatInter
                                 ? "bg-blue-500/[0.08] text-blue-200 border border-blue-500/20 shadow-lg"
                                 : "bg-blue-50/80 text-blue-700 border border-blue-200/50"
                         )}>
-                            <p className="text-xs opacity-60 mb-1 uppercase tracking-wider font-semibold">Listening...</p>
+                            <p className="text-xs opacity-60 mb-1 uppercase tracking-wider font-semibold">{t('chat.listening')}</p>
                             <p className="text-[15px]">{currentTranscript}</p>
                         </div>
                         <div className={cn(
@@ -635,7 +637,7 @@ export default function UnifiedChatInterface({ isDark = true }: UnifiedChatInter
                                     type="text"
                                     value={inputMessage}
                                     onChange={(e) => setInputMessage(e.target.value)}
-                                    placeholder={isVoiceMode ? "Or type a message..." : "Type your message..."}
+                                    placeholder={isVoiceMode ? t('chat.placeholder.voice') : t('chat.placeholder.text')}
                                     disabled={isProcessing}
                                     className={cn(
                                         "w-full pl-5 pr-14 py-3.5 rounded-[20px] text-[15px]",
@@ -714,7 +716,7 @@ export default function UnifiedChatInterface({ isDark = true }: UnifiedChatInter
                                 )}
                             >
                                 <div className="absolute inset-0 bg-gradient-to-t from-transparent via-white/5 to-white/10 pointer-events-none" />
-                                <span className="relative z-10 text-xs font-medium px-1">End</span>
+                                <span className="relative z-10 text-xs font-medium px-1">{t('chat.end')}</span>
                             </motion.button>
                         )}
 

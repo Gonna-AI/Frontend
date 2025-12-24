@@ -3,6 +3,7 @@ import { useState } from 'react';
 import JurisCaseCard from './JurisCaseCard';
 import DeepSearchReasoning from './DeepSearchReasoning';
 import { Sparkles, Search, Brain } from 'lucide-react';
+import { useLanguage } from '../../contexts/LanguageContext';
 
 interface JurisChatProps {
     mode: SearchMode;
@@ -42,6 +43,7 @@ export default function JurisChat({
     const [selectedCase, setSelectedCase] = useState<CaseResult | null>(null);
     const [showCaseConnection, setShowCaseConnection] = useState(false);
     const [showExamples, setShowExamples] = useState(true);
+    const { t } = useLanguage();
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -74,14 +76,14 @@ export default function JurisChat({
 
     const modeConfig = {
         normal: {
-            description: 'Fast semantic search using AI embeddings',
-            placeholder: 'Search cases by legal concepts, facts, or holdings...',
-            detail: 'Quick results using vector similarity'
+            description: t('juris.descNormal'),
+            placeholder: t('juris.placeholderNormal'),
+            detail: t('juris.detailNormal')
         },
         deep_research: {
-            description: 'Comprehensive analysis with citation networks and precedents',
-            placeholder: 'Ask complex legal questions requiring deep analysis...',
-            detail: 'Combines semantic search, knowledge graph, and citations'
+            description: t('juris.descDeep'),
+            placeholder: t('juris.placeholderDeep'),
+            detail: t('juris.detailDeep')
         }
     };
 
@@ -95,38 +97,38 @@ export default function JurisChat({
                 {showCaseConnection && selectedCase && (
                     <div className="mb-6 p-6 bg-gradient-to-br from-purple-900/30 to-violet-900/30 border border-purple-500/30 rounded-2xl backdrop-blur-sm">
                         <div className="flex items-center justify-between mb-4">
-                            <h3 className="text-lg font-semibold text-purple-300">Case Connection Analysis</h3>
+                            <h3 className="text-lg font-semibold text-purple-300">{t('juris.caseConnection')}</h3>
                             <button
                                 onClick={() => setShowCaseConnection(false)}
                                 className="text-sm text-white/60 hover:text-white transition-colors"
                             >
-                                Close ✕
+                                {t('juris.close')} ✕
                             </button>
                         </div>
                         <div className="space-y-4">
                             <div>
-                                <h4 className="text-sm font-semibold text-white/80 mb-2">Selected Case</h4>
+                                <h4 className="text-sm font-semibold text-white/80 mb-2">{t('juris.selectedCase')}</h4>
                                 <p className="text-sm text-purple-200">{selectedCase.title}</p>
                                 <p className="text-xs text-white/50 mt-1">{selectedCase.citation}</p>
                             </div>
                             <div className="pt-4 border-t border-purple-500/20">
-                                <h4 className="text-sm font-semibold text-white/80 mb-3">How it connects to your query:</h4>
+                                <h4 className="text-sm font-semibold text-white/80 mb-3">{t('juris.connectsToQuery')}</h4>
                                 <ul className="space-y-2 text-sm text-white/70">
                                     <li className="flex items-start gap-2">
                                         <span className="text-purple-400">•</span>
-                                        <span><strong className="text-purple-300">Legal Concepts:</strong> Shares core principles on {selectedCase.metadata.jurisdiction.toLowerCase()}</span>
+                                        <span><strong className="text-purple-300">{t('juris.legalConcepts')}</strong> Shares core principles on {selectedCase.metadata.jurisdiction.toLowerCase()}</span>
                                     </li>
                                     <li className="flex items-start gap-2">
                                         <span className="text-purple-400">•</span>
-                                        <span><strong className="text-purple-300">Precedent Chain:</strong> Cites {selectedCase.precedents.length} common precedents with your query context</span>
+                                        <span><strong className="text-purple-300">{t('juris.precedentChain')}</strong> Cites {selectedCase.precedents.length} common precedents with your query context</span>
                                     </li>
                                     <li className="flex items-start gap-2">
                                         <span className="text-purple-400">•</span>
-                                        <span><strong className="text-purple-300">Similarity Score:</strong> {(selectedCase.similarityScore * 100).toFixed(0)}% semantic match</span>
+                                        <span><strong className="text-purple-300">{t('juris.similarityScore')}</strong> {(selectedCase.similarityScore * 100).toFixed(0)}% semantic match</span>
                                     </li>
                                     <li className="flex items-start gap-2">
                                         <span className="text-purple-400">•</span>
-                                        <span><strong className="text-purple-300">Cited Statutes:</strong> References {selectedCase.metadata.statutes_cited.slice(0, 2).join(', ')}</span>
+                                        <span><strong className="text-purple-300">{t('juris.citedStatutes')}</strong> References {selectedCase.metadata.statutes_cited.slice(0, 2).join(', ')}</span>
                                     </li>
                                 </ul>
                             </div>
@@ -142,7 +144,7 @@ export default function JurisChat({
                                     <Sparkles className="w-8 h-8 text-purple-400" />
                                 </div>
                             </div>
-                            <h3 className="text-xl font-semibold text-white/80">Legal Case Retrieval</h3>
+                            <h3 className="text-xl font-semibold text-white/80">{t('juris.retrievalTitle')}</h3>
                             <p className="text-white/50 text-sm leading-relaxed">
                                 {config.description}
                             </p>
@@ -170,7 +172,7 @@ export default function JurisChat({
                                         <div className="mt-4 space-y-3">
                                             <div className="flex items-center justify-between mb-3">
                                                 <span className="text-xs font-semibold text-purple-300 uppercase tracking-wide">
-                                                    Found {message.caseResults.length} Similar Cases
+                                                    {t('juris.foundSimilar')} ({message.caseResults.length})
                                                 </span>
                                             </div>
 
@@ -189,11 +191,11 @@ export default function JurisChat({
                                     {/* Analysis */}
                                     {message.analysis && (
                                         <div className="mt-4 p-4 bg-purple-500/5 border border-purple-500/10 rounded-xl">
-                                            <h4 className="text-sm font-semibold text-purple-300 mb-2">AI Analysis</h4>
+                                            <h4 className="text-sm font-semibold text-purple-300 mb-2">{t('juris.aiAnalysis')}</h4>
                                             <div className="space-y-2 text-xs text-white/70">
-                                                <p><strong className="text-purple-200">Summary:</strong> {message.analysis.similaritySummary}</p>
+                                                <p><strong className="text-purple-200">{t('juris.summary')}</strong> {message.analysis.similaritySummary}</p>
                                                 <div>
-                                                    <strong className="text-purple-200">Key Concepts:</strong>
+                                                    <strong className="text-purple-200">{t('juris.keyConcepts')}</strong>
                                                     <div className="flex flex-wrap gap-1 mt-1">
                                                         {message.analysis.keyLegalConcepts.map((concept, i) => (
                                                             <span key={i} className="px-2 py-0.5 bg-purple-500/10 border border-purple-500/20 rounded text-purple-200">
@@ -226,7 +228,7 @@ export default function JurisChat({
                     {/* Sample Cases - Only show if no messages and showExamples is true */}
                     {showExamples && messages.length === 0 && (
                         <div className="mb-3 sm:mb-4">
-                            <p className="text-xs text-white/40 mb-2 text-center">Try these examples:</p>
+                            <p className="text-xs text-white/40 mb-2 text-center">{t('juris.tryExamples')}</p>
                             <div className="flex flex-wrap justify-center gap-1.5 sm:gap-2">
                                 {(mode === 'deep_research' ? DEEP_SAMPLES : NORMAL_SAMPLES).map((sample, idx) => (
                                     <button
@@ -249,7 +251,7 @@ export default function JurisChat({
                             <input
                                 type="text"
                                 name="message"
-                                placeholder={messages.length > 0 ? "Clear chat to start a new search..." : config.placeholder}
+                                placeholder={messages.length > 0 ? t('juris.placeholderClear') : config.placeholder}
                                 className="flex-1 px-3 sm:px-6 py-3 sm:py-4 text-sm sm:text-base bg-transparent text-white placeholder-white/40 focus:outline-none disabled:cursor-not-allowed"
                                 autoComplete="off"
                                 disabled={messages.length > 0}
@@ -266,10 +268,10 @@ export default function JurisChat({
                                             ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
                                             : 'text-white/50 hover:text-white/70'
                                             } ${messages.length > 0 ? 'cursor-not-allowed' : ''}`}
-                                        title="Normal Search"
+                                        title={t('juris.modeNormal')}
                                     >
                                         <Search className="w-3.5 h-3.5 sm:w-3 sm:h-3" />
-                                        <span className="hidden sm:inline">Normal</span>
+                                        <span className="hidden sm:inline">{t('juris.modeNormal')}</span>
                                     </button>
                                     <button
                                         type="button"
@@ -279,10 +281,10 @@ export default function JurisChat({
                                             ? 'bg-violet-500/20 text-violet-300 border border-violet-500/30'
                                             : 'text-white/50 hover:text-white/70'
                                             } ${messages.length > 0 ? 'cursor-not-allowed' : ''}`}
-                                        title="Deep Search"
+                                        title={t('juris.modeDeep')}
                                     >
                                         <Brain className="w-3.5 h-3.5 sm:w-3 sm:h-3" />
-                                        <span className="hidden sm:inline">Deep Search</span>
+                                        <span className="hidden sm:inline">{t('juris.modeDeep')}</span>
                                     </button>
                                 </div>
 

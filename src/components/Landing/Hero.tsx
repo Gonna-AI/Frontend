@@ -7,7 +7,7 @@ const Logo = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 464 468"
-    className="w-20 h-20 md:w-24 md:h-24 -ml-2" // Reduced size from w-24/h-24 to w-20/h-20
+    className="w-12 h-12 sm:w-20 sm:h-20 md:w-24 md:h-24 -ml-2" // Responsive logo size
     aria-label="ClerkTree Logo"
   >
     <path
@@ -36,41 +36,40 @@ const Hero = () => {
 
   return (
     <>
-      <div className="min-h-screen relative bg-[rgb(10,10,10)]">
+      <div className="min-h-screen relative bg-[rgb(10,10,10)] overflow-x-hidden">
         {/* Main Content */}
         <div className="flex items-center justify-center min-h-screen pt-20">
-          <div className="max-w-7xl mx-auto text-center px-6 relative z-10">
+          <div className="max-w-7xl mx-auto text-center px-4 sm:px-6 relative z-10 w-full">
             <div className="mb-8 flex items-center justify-center">
               {/* Logo container with adjusted spacing for larger logo */}
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-3 sm:gap-4 flex-wrap justify-center">
                 <div className="flex items-center justify-center">
                   <Logo />
                 </div>
 
                 {/* Logo text white */}
-                <h1 className="text-6xl md:text-8xl font-bold tracking-tight text-white">ClerkTree</h1>
+                <h1 className="text-4xl sm:text-6xl md:text-8xl font-bold tracking-tight text-white whitespace-nowrap">ClerkTree</h1>
               </div>
             </div>
 
             <motion.div
-              className="max-w-4xl mx-auto mb-8"
+              className="max-w-4xl mx-auto mb-8 w-full"
               initial={animationConfig}
               animate={{ opacity: 1, y: 0 }}
               transition={transitionConfig}
             >
-              <h2 className="text-5xl md:text-7xl font-bold mb-8">
-                <span className="bg-gradient-to-r from-indigo-400 via-purple-400 to-indigo-600 text-transparent bg-clip-text">
+              <h2 className="text-3xl sm:text-5xl md:text-7xl font-bold mb-8 tracking-tight">
+                <span className="bg-gradient-to-r from-indigo-400 via-purple-400 to-indigo-600 text-transparent bg-clip-text block">
                   {t('hero.revolutionizing')}
                 </span>
-                <br />
-                <span className="bg-gradient-to-r from-white via-white/95 to-white/90 text-transparent bg-clip-text">
+                <span className="bg-gradient-to-r from-white via-white/95 to-white/90 text-transparent bg-clip-text block mt-2">
                   {t('hero.bpoClaims')}
                 </span>
               </h2>
             </motion.div>
 
             <motion.p
-              className="text-xl md:text-2xl text-white/70 max-w-3xl mx-auto leading-relaxed mb-12"
+              className="text-base sm:text-xl md:text-2xl text-white/70 max-w-3xl mx-auto leading-relaxed mb-12 px-2"
               initial={animationConfig}
               animate={{ opacity: 1, y: 0 }}
               transition={prefersReducedMotion || isMobile ? { duration: 0 } : { duration: 0.6, delay: 0.3 }}

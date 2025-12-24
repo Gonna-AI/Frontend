@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
+import { useLanguage } from '../contexts/LanguageContext';
 import {
   LayoutDashboard,
   Phone,
@@ -15,7 +16,6 @@ import {
   MessageSquare,
   Menu
 } from 'lucide-react';
-import { ViewType } from '../types/navigation';
 import MobileSidebar from '../components/Layout/Sidebar/MobileSidebar';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '../utils/cn';
@@ -94,12 +94,13 @@ function AnalyticsCard({
 
 function PriorityQueue({ isDark, compact = false }: { isDark: boolean; compact?: boolean }) {
   const { getCallsByPriority } = useDemoCall();
+  const { t } = useLanguage();
 
   const priorities: { level: PriorityLevel; label: string; shortLabel: string; color: string; icon: React.ElementType }[] = [
-    { level: 'critical', label: 'Critical', shortLabel: 'Critical', color: 'red', icon: AlertTriangle },
-    { level: 'high', label: 'High Priority', shortLabel: 'High', color: 'orange', icon: TrendingUp },
-    { level: 'medium', label: 'Medium', shortLabel: 'Medium', color: 'yellow', icon: Clock },
-    { level: 'low', label: 'Low Priority', shortLabel: 'Low', color: 'green', icon: CheckCircle },
+    { level: 'critical', label: t('dashboard.priority.critical'), shortLabel: t('dashboard.priority.critical'), color: 'red', icon: AlertTriangle },
+    { level: 'high', label: t('dashboard.priority.high'), shortLabel: t('dashboard.priority.highShort'), color: 'orange', icon: TrendingUp },
+    { level: 'medium', label: t('dashboard.priority.medium'), shortLabel: t('dashboard.priority.mediumShort'), color: 'yellow', icon: Clock },
+    { level: 'low', label: t('dashboard.priority.low'), shortLabel: t('dashboard.priority.lowShort'), color: 'green', icon: CheckCircle },
   ];
 
   const getColorClass = (color: string) => {
@@ -174,7 +175,7 @@ function PriorityQueue({ isDark, compact = false }: { isDark: boolean; compact?:
           "font-semibold",
           isDark ? "text-white" : "text-black"
         )}>
-          Priority Queue
+          {t('dashboard.priorityQueue')}
         </h3>
       </div>
 
@@ -203,7 +204,7 @@ function PriorityQueue({ isDark, compact = false }: { isDark: boolean; compact?:
                   "text-[10px] md:text-xs truncate",
                   isDark ? "text-white/50" : "text-black/50"
                 )}>
-                  {followUps > 0 ? `${followUps} need follow-up` : 'No pending'}
+                  {followUps > 0 ? `${followUps} ${t('dashboard.priority.needFollowUp')}` : t('dashboard.priority.noPending')}
                 </p>
               </div>
               <div className={cn(
@@ -226,6 +227,7 @@ function DemoDashboardContent() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'monitor' | 'knowledge' | 'history'>('monitor');
   const { getAnalytics, currentCall, getCurrentUserId, switchSession, knowledgeBase, saveKnowledgeBase, globalActiveSessions } = useDemoCall();
+  const { t } = useLanguage();
 
   const analytics = getAnalytics();
 
@@ -236,9 +238,9 @@ function DemoDashboardContent() {
   };
 
   const tabs = [
-    { id: 'monitor' as const, label: 'Monitor', fullLabel: 'Live Monitor', icon: Phone },
-    { id: 'knowledge' as const, label: 'Config', fullLabel: 'Knowledge Base', icon: Brain },
-    { id: 'history' as const, label: 'History', fullLabel: 'History', icon: History },
+    { id: 'monitor' as const, label: t('dashboard.tab.monitor'), fullLabel: t('dashboard.tab.monitorFull'), icon: Phone },
+    { id: 'knowledge' as const, label: t('dashboard.tab.config'), fullLabel: t('dashboard.tab.configFull'), icon: Brain },
+    { id: 'history' as const, label: t('dashboard.tab.history'), fullLabel: t('dashboard.tab.historyFull'), icon: History },
   ];
 
   return (
@@ -302,13 +304,13 @@ function DemoDashboardContent() {
                   "text-base md:text-lg font-semibold",
                   isDark ? "text-white" : "text-black"
                 )}>
-                  Dashboard
+                  {t('dashboard.title')}
                 </h1>
                 <p className={cn(
                   "text-[10px] md:text-xs hidden md:block",
                   isDark ? "text-white/50" : "text-black/50"
                 )}>
-                  Monitor & configure
+                  {t('dashboard.subtitle')}
                 </p>
               </div>
             </div>
@@ -374,7 +376,7 @@ function DemoDashboardContent() {
               )}
             >
               <Phone className="w-3.5 h-3.5 md:w-4 md:h-4" />
-              <span className="hidden sm:inline">User View</span>
+              <span className="hidden sm:inline">{t('dashboard.userView')}</span>
             </button>
           </div>
         </div>
@@ -390,33 +392,33 @@ function DemoDashboardContent() {
             className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4 mb-4 md:mb-6"
           >
             <AnalyticsCard
-              title="Total History"
+              title={t('dashboard.totalHistory')}
               value={analytics.totalCalls}
-              subtitle={currentCall?.status === 'active' ? '+1 active' : 'All time'}
+              subtitle={currentCall?.status === 'active' ? `+1 ${t('dashboard.active')}` : t('dashboard.allTime')}
               icon={MessageSquare}
               color="blue"
               isDark={isDark}
             />
             <AnalyticsCard
-              title="Critical/High"
+              title={t('dashboard.criticalHigh')}
               value={analytics.byPriority.critical + analytics.byPriority.high}
-              subtitle="Need attention"
+              subtitle={t('dashboard.needAttention')}
               icon={AlertTriangle}
               color="orange"
               isDark={isDark}
             />
             <AnalyticsCard
-              title="Avg Duration"
+              title={t('dashboard.avgDuration')}
               value={formatDuration(analytics.avgDuration)}
-              subtitle="Per call"
+              subtitle={t('dashboard.perCall')}
               icon={Clock}
               color="purple"
               isDark={isDark}
             />
             <AnalyticsCard
-              title="Follow-ups"
+              title={t('dashboard.followUps')}
               value={analytics.followUpRequired}
-              subtitle="Pending"
+              subtitle={t('dashboard.pending')}
               icon={Users}
               color="green"
               isDark={isDark}
@@ -514,7 +516,7 @@ function DemoDashboardContent() {
             "text-xs md:text-sm",
             isDark ? "text-white/40" : "text-black/40"
           )}>
-            ClerkTree AI Dashboard
+            {t('dashboard.footer')}
           </p>
         </div>
       </footer>

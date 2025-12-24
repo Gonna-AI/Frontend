@@ -1,6 +1,7 @@
 import { ArborMessage } from '../../types/arbor';
 import { useState } from 'react';
 import { Send } from 'lucide-react';
+import { useLanguage } from '../../contexts/LanguageContext';
 
 type ChatMode = 'ask' | 'tell' | 'docsearch';
 
@@ -15,6 +16,7 @@ interface ArborChatProps {
 export default function ArborChat({ mode, messages, onSendMessage, onClearChat, onModeChange }: ArborChatProps) {
     const [showFilters, setShowFilters] = useState(false);
     const [isReindexing, setIsReindexing] = useState(false);
+    const { t } = useLanguage();
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -28,16 +30,16 @@ export default function ArborChat({ mode, messages, onSendMessage, onClearChat, 
 
     const modeConfig = {
         ask: {
-            description: 'Ask questions and get intelligent answers',
-            placeholder: 'Ask a question about your documents...'
+            description: t('arbor.startDescAsk'),
+            placeholder: t('arbor.placeholderAsk')
         },
         tell: {
-            description: 'Execute autonomous tasks and actions',
-            placeholder: 'Tell Arbor what to do...'
+            description: t('arbor.startDescTell'),
+            placeholder: t('arbor.placeholderTell')
         },
         docsearch: {
-            description: 'Search through your documents',
-            placeholder: 'Search documents...'
+            description: t('arbor.startDescSearch'),
+            placeholder: t('arbor.placeholderSearch')
         }
     };
 
@@ -63,7 +65,7 @@ export default function ArborChat({ mode, messages, onSendMessage, onClearChat, 
                 {messages.length === 0 ? (
                     <div className="flex items-center justify-center h-full min-h-[400px]">
                         <div className="text-center space-y-2 sm:space-y-3 max-w-md px-4">
-                            <h3 className="text-lg sm:text-xl font-semibold text-white/80">Start a Conversation</h3>
+                            <h3 className="text-lg sm:text-xl font-semibold text-white/80">{t('arbor.startTitle')}</h3>
                             <p className="text-white/50 text-xs sm:text-sm leading-relaxed">
                                 {config.description}
                             </p>
@@ -88,7 +90,7 @@ export default function ArborChat({ mode, messages, onSendMessage, onClearChat, 
                                     {message.details && (
                                         <details className="mt-2 sm:mt-3 text-xs">
                                             <summary className="cursor-pointer text-white/50 hover:text-white/70 transition-colors">
-                                                View Details
+                                                {t('arbor.viewDetails')}
                                             </summary>
                                             <pre className="mt-2 p-2 sm:p-3 bg-black/30 rounded-lg overflow-x-auto text-white/60 text-xs">
                                                 {JSON.stringify(message.details, null, 2)}
@@ -127,7 +129,7 @@ export default function ArborChat({ mode, messages, onSendMessage, onClearChat, 
                                     : 'text-white/60 hover:text-white/80'
                                     }`}
                             >
-                                Ask
+                                {t('arbor.modeAsk')}
                             </button>
                             <button
                                 onClick={() => onModeChange('tell')}
@@ -136,7 +138,7 @@ export default function ArborChat({ mode, messages, onSendMessage, onClearChat, 
                                     : 'text-white/60 hover:text-white/80'
                                     }`}
                             >
-                                Tell
+                                {t('arbor.modeTell')}
                             </button>
                             <button
                                 onClick={() => onModeChange('docsearch')}
@@ -145,7 +147,7 @@ export default function ArborChat({ mode, messages, onSendMessage, onClearChat, 
                                     : 'text-white/60 hover:text-white/80'
                                     }`}
                             >
-                                Search
+                                {t('arbor.modeSearch')}
                             </button>
                         </div>
                     </div>
@@ -157,7 +159,7 @@ export default function ArborChat({ mode, messages, onSendMessage, onClearChat, 
                                 <div className="flex items-center gap-2 text-xs sm:text-sm">
                                     <span className="text-white/60">Status:</span>
                                     <span className="px-2 py-0.5 bg-emerald-500/20 border border-emerald-500/30 rounded-full text-emerald-400 text-xs">
-                                        {isReindexing ? 'Indexing...' : 'Indexed (147 docs)'}
+                                        {isReindexing ? t('arbor.statusIndexing') : t('arbor.statusIndexed')}
                                     </span>
                                 </div>
                                 <div className="flex gap-2">
@@ -169,7 +171,7 @@ export default function ArborChat({ mode, messages, onSendMessage, onClearChat, 
                                             : 'bg-white/5 hover:bg-white/10 border-white/10 hover:border-emerald-500/30 text-white/70 hover:text-white'
                                             }`}
                                     >
-                                        Filters
+                                        {t('arbor.filters')}
                                     </button>
                                     <button
                                         type="button"
@@ -177,14 +179,14 @@ export default function ArborChat({ mode, messages, onSendMessage, onClearChat, 
                                         disabled={isReindexing}
                                         className="px-3 py-1.5 text-xs sm:text-sm bg-white/5 hover:bg-white/10 border border-white/10 hover:border-emerald-500/30 text-white/70 hover:text-white rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
-                                        {isReindexing ? 'Indexing...' : 'Re-index'}
+                                        {isReindexing ? t('arbor.statusIndexing') : t('arbor.reindex')}
                                     </button>
                                 </div>
                             </div>
 
                             {showFilters && (
                                 <div className="p-4 bg-white/5 border border-white/10 rounded-xl backdrop-blur-sm mb-3">
-                                    <h4 className="text-sm font-medium text-white mb-3">Filter by Document Type</h4>
+                                    <h4 className="text-sm font-medium text-white mb-3">{t('arbor.filterType')}</h4>
                                     <div className="flex flex-wrap gap-2">
                                         {['All', 'PDF', 'DOCX', 'TXT', 'XLSX'].map((type) => (
                                             <button
@@ -200,13 +202,13 @@ export default function ArborChat({ mode, messages, onSendMessage, onClearChat, 
                                         ))}
                                     </div>
                                     <div className="mt-3 pt-3 border-t border-white/10">
-                                        <h4 className="text-sm font-medium text-white mb-3">Date Range</h4>
+                                        <h4 className="text-sm font-medium text-white mb-3">{t('arbor.dateRange')}</h4>
                                         <div className="flex gap-2 text-xs">
                                             <input
                                                 type="date"
                                                 className="flex-1 px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
                                             />
-                                            <span className="text-white/40 self-center">to</span>
+                                            <span className="text-white/40 self-center">{t('arbor.to')}</span>
                                             <input
                                                 type="date"
                                                 className="flex-1 px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
@@ -232,7 +234,7 @@ export default function ArborChat({ mode, messages, onSendMessage, onClearChat, 
                                 type="submit"
                                 className="px-4 sm:px-8 py-3 sm:py-4 text-sm sm:text-base bg-emerald-900/40 hover:bg-emerald-800/50 backdrop-blur-md border border-emerald-600/30 hover:border-emerald-500/50 text-emerald-100 font-medium rounded-xl sm:rounded-2xl transition-all duration-300 hover:shadow-lg hover:shadow-emerald-900/30 flex items-center justify-center"
                             >
-                                <span className="hidden sm:inline">Send</span>
+                                <span className="hidden sm:inline">{t('arbor.send')}</span>
                                 <Send className="w-5 h-5 sm:hidden" />
                             </button>
                             {messages.length > 0 && (
@@ -241,7 +243,7 @@ export default function ArborChat({ mode, messages, onSendMessage, onClearChat, 
                                     onClick={onClearChat}
                                     className="px-4 sm:px-6 py-3 sm:py-4 text-sm sm:text-base bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 text-white/70 hover:text-white font-medium rounded-xl sm:rounded-2xl transition-all duration-300"
                                 >
-                                    Clear
+                                    {t('arbor.clear')}
                                 </button>
                             )}
                         </div>
