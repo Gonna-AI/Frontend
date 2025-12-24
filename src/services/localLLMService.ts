@@ -335,6 +335,7 @@ class LocalLLMService {
     const newFields: ExtractedField[] = [...existingFields];
     let suggestedPriority: PriorityLevel | undefined;
     let suggestedCategory: { id: string; name: string; confidence: number } | undefined;
+    const now = new Date();
 
     // Look for JSON block in response
     const jsonMatch = response.match(/```json\s*([\s\S]*?)\s*```/i);
@@ -349,52 +350,85 @@ class LocalLLMService {
         if (metadata.extracted) {
           const ext = metadata.extracted;
 
+          // Helper to check if value is valid (not null, "null", empty)
+          const isValid = (val: unknown): val is string =>
+            val !== null && val !== 'null' && val !== '' && typeof val === 'string';
+
           // Add caller name if found and not already present
-          if (ext.name && !existingFields.find(f => f.id === 'name')) {
+          if (isValid(ext.name) && !existingFields.find(f => f.id === 'name')) {
             newFields.push({
               id: 'name',
               label: 'Caller Name',
               value: ext.name,
-              confidence: 0.9,
-              extractedAt: new Date()
+              confidence: 0.95,
+              extractedAt: now
             });
           }
 
-          // Add purpose if found
-          if (ext.purpose && !existingFields.find(f => f.id === 'purpose')) {
+          // Add email if found
+          if (isValid(ext.email) && !existingFields.find(f => f.id === 'email')) {
+            newFields.push({
+              id: 'email',
+              label: 'Email',
+              value: ext.email,
+              confidence: 0.95,
+              extractedAt: now
+            });
+          }
+
+          // Add phone if found
+          if (isValid(ext.phone) && !existingFields.find(f => f.id === 'phone')) {
+            newFields.push({
+              id: 'phone',
+              label: 'Phone',
+              value: ext.phone,
+              confidence: 0.95,
+              extractedAt: now
+            });
+          }
+
+          // Add company if found
+          if (isValid(ext.company) && !existingFields.find(f => f.id === 'company')) {
+            newFields.push({
+              id: 'company',
+              label: 'Company',
+              value: ext.company,
+              confidence: 0.9,
+              extractedAt: now
+            });
+          }
+
+          // Add appointment date if found
+          if (isValid(ext.appointment_date) && !existingFields.find(f => f.id === 'appt_date')) {
+            newFields.push({
+              id: 'appt_date',
+              label: 'Appointment Date',
+              value: ext.appointment_date,
+              confidence: 0.9,
+              extractedAt: now
+            });
+          }
+
+          // Add appointment time if found
+          if (isValid(ext.appointment_time) && !existingFields.find(f => f.id === 'appt_time')) {
+            newFields.push({
+              id: 'appt_time',
+              label: 'Appointment Time',
+              value: ext.appointment_time,
+              confidence: 0.9,
+              extractedAt: now
+            });
+          }
+
+          // Add purpose if found (legacy field)
+          if (isValid(ext.purpose) && !existingFields.find(f => f.id === 'purpose')) {
             newFields.push({
               id: 'purpose',
               label: 'Call Purpose',
               value: ext.purpose,
               confidence: 0.85,
-              extractedAt: new Date()
+              extractedAt: now
             });
-          }
-
-          // Add contact if found
-          if (ext.contact && !existingFields.find(f => f.id === 'contact')) {
-            newFields.push({
-              id: 'contact',
-              label: 'Contact Info',
-              value: ext.contact,
-              confidence: 0.9,
-              extractedAt: new Date()
-            });
-          }
-
-          // Add any other extracted fields
-          for (const [key, value] of Object.entries(ext)) {
-            if (value && typeof value === 'string' && !['name', 'purpose', 'contact'].includes(key)) {
-              if (!existingFields.find(f => f.id === key)) {
-                newFields.push({
-                  id: key,
-                  label: key.charAt(0).toUpperCase() + key.slice(1),
-                  value: value,
-                  confidence: 0.8,
-                  extractedAt: new Date()
-                });
-              }
-            }
           }
         }
 
@@ -484,9 +518,23 @@ class LocalLLMService {
       }
     }
 
-    // 3. Current User Message - NO internal analysis instruction, just respond naturally
+    // 3. Current User Message with inline extraction instructions
     prompt += `User: ${userMessage}\n`;
-    prompt += `\nIMPORTANT: Respond ONLY with what you would say to the caller. Do NOT include any internal analysis, notes, or thoughts. Do NOT use asterisks or parentheses for internal notes. Just speak naturally.\n`;
+    prompt += `\nRespond naturally to the caller, then AFTER your response, add a JSON block with any new information extracted.
+
+Format your response EXACTLY like this:
+[Your natural response to the caller here]
+
+\`\`\`json
+{"extracted": {"name": "caller name or null", "email": "email or null", "phone": "phone or null", "company": "company or null", "appointment_date": "date or null", "appointment_time": "time or null", "appointment_purpose": "purpose or null"}, "priority": "low|medium|high|critical", "category": "inquiry|support|complaint|appointment|other"}
+\`\`\`
+
+Rules:
+- Your spoken response comes FIRST (no internal notes!)
+- The JSON block comes AFTER, separated by a blank line
+- Only include fields that were mentioned in THIS message
+- Use null for fields not mentioned
+`;
     prompt += `Assistant:`;
 
     // Helper function to make the API request with retry logic
@@ -555,32 +603,15 @@ class LocalLLMService {
       // Parse any metadata if the model outputted JSON
       const extracted = this.parseExtractedMetadata(finalResponse, knowledgeBase, existingFields);
 
-      // Run AI-based analysis in background (non-blocking)
-      // This uses pure AI/ML - no hardcoded patterns
-      let aiAnalysis: Awaited<ReturnType<typeof this.extractAIAnalysis>> = { fields: [] };
-      try {
-        aiAnalysis = await this.extractAIAnalysis(userMessage, existingFields);
-      } catch (analysisError) {
-        console.warn('AI analysis failed, continuing without:', analysisError);
-      }
-
-      // Merge extracted fields with AI analysis
-      const allFields = [...extracted.extractedFields];
-      if (aiAnalysis.fields) {
-        for (const field of aiAnalysis.fields) {
-          if (!allFields.find(f => f.id === field.id)) {
-            allFields.push(field);
-          }
-        }
-      }
-
+      // Return response IMMEDIATELY - don't wait for AI analysis
+      // The analysis was causing delays and double API calls
+      // The main response already contains extracted data from parseExtractedMetadata
       return {
         response: extracted.cleanResponse,
         reasoning: reasoning || undefined,
-        extractedFields: allFields,
-        suggestedCategory: extracted.suggestedCategory || aiAnalysis.category,
-        suggestedPriority: extracted.suggestedPriority || aiAnalysis.priority,
-        analysis: aiAnalysis.analysis,
+        extractedFields: extracted.extractedFields,
+        suggestedCategory: extracted.suggestedCategory,
+        suggestedPriority: extracted.suggestedPriority,
       };
 
     } catch (error) {
