@@ -1,18 +1,19 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { ArrowLeft, Sun, Moon, Lock, ChevronDown } from 'lucide-react';
 
 const PrivacyPolicy = () => {
   const [isDark, setIsDark] = React.useState(false);
   const [expandedSection, setExpandedSection] = React.useState(null);
-  
+
   const cn = (...classes) => {
     return classes.filter(Boolean).join(' ');
   };
 
   const sections = [
     {
-        title: "1. DEFINITIONS AND SCOPE",
-        content: `1.1 Key Definitions
+      title: "1. DEFINITIONS AND SCOPE",
+      content: `1.1 Key Definitions
   
   "Personal Data" means any information relating to an identified or identifiable natural person, including but not limited to:
   (a) Customer identification information
@@ -46,10 +47,10 @@ const PrivacyPolicy = () => {
   (c) All related services and features
   (d) All jurisdictions where our service operates
   (e) All forms of data collection and processing`
-      },
-      {
-        title: "2. DATA COLLECTION AND SOURCES",
-        content: `2.1 Categories of Data Collected
+    },
+    {
+      title: "2. DATA COLLECTION AND SOURCES",
+      content: `2.1 Categories of Data Collected
   
   2.1.1 Claims Processing Data:
   (a) Policy information and details
@@ -94,10 +95,10 @@ const PrivacyPolicy = () => {
   (c) Financial institutions
   (d) Government agencies
   (e) Third-party service providers`
-      },
-      {
-        title: "3. USE OF PERSONAL DATA",
-        content: `3.1 Primary Processing Purposes
+    },
+    {
+      title: "3. USE OF PERSONAL DATA",
+      content: `3.1 Primary Processing Purposes
   
   3.1.1 Claims Processing:
   (a) Claim verification and validation
@@ -139,10 +140,10 @@ const PrivacyPolicy = () => {
   (b) Security maintenance
   (c) Service improvement
   (d) Research and development`
-      },
-      {
-        title: "4. DATA SHARING AND DISCLOSURE",
-        content: `4.1 Categories of Recipients
+    },
+    {
+      title: "4. DATA SHARING AND DISCLOSURE",
+      content: `4.1 Categories of Recipients
   
   4.1.1 Service Providers:
   (a) Cloud infrastructure providers
@@ -177,10 +178,10 @@ const PrivacyPolicy = () => {
   (b) Security assessments
   (c) Compliance verifications
   (d) Regular audits`
-      },
-      {
-        title: "5. DATA SECURITY",
-        content: `5.1 Technical Measures
+    },
+    {
+      title: "5. DATA SECURITY",
+      content: `5.1 Technical Measures
   
   5.1.1 Infrastructure Security:
   (a) Encryption in transit and at rest
@@ -217,10 +218,10 @@ const PrivacyPolicy = () => {
   (b) Containment measures
   (c) Notification procedures
   (d) Recovery processes`
-      },
-      {
-        title: "6. DATA RETENTION AND DELETION",
-        content: `6.1 Retention Periods
+    },
+    {
+      title: "6. DATA RETENTION AND DELETION",
+      content: `6.1 Retention Periods
   
   6.1.1 Claims Data:
   (a) Active claims: Duration of processing
@@ -247,10 +248,10 @@ const PrivacyPolicy = () => {
   (b) Regulatory requirements
   (c) Contractual obligations
   (d) Technical constraints`
-      },
-      {
-        title: "7. USER RIGHTS AND CHOICES",
-        content: `7.1 Data Subject Rights
+    },
+    {
+      title: "7. USER RIGHTS AND CHOICES",
+      content: `7.1 Data Subject Rights
   
   7.1.1 Access Rights:
   (a) Data copy requests
@@ -277,10 +278,10 @@ const PrivacyPolicy = () => {
   (b) Technical constraints
   (c) Third-party rights
   (d) Legitimate business needs`
-      },
-      {
-        title: "8. COMPLIANCE AND ACCOUNTABILITY",
-        content: `8.1 Regulatory Framework
+    },
+    {
+      title: "8. COMPLIANCE AND ACCOUNTABILITY",
+      content: `8.1 Regulatory Framework
   
   8.1.1 Applicable Laws:
   (a) Data protection regulations
@@ -307,10 +308,10 @@ const PrivacyPolicy = () => {
   (b) Risk evaluations
   (c) Compliance audits
   (d) Regular reviews`
-      },
-      {
-        title: "9. CONTACT AND COMPLAINTS",
-        content: `9.1 Contact Information
+    },
+    {
+      title: "9. CONTACT AND COMPLAINTS",
+      content: `9.1 Contact Information
   
   9.1.1 Privacy Inquiries:
   (a) Data Protection Officer
@@ -331,15 +332,15 @@ const PrivacyPolicy = () => {
   (b) Update notifications
   (c) Version control
   (d) Archive maintenance`
-      }
+    }
   ];
 
   const GlassContainer = ({ children, className }) => (
     <div className={cn(
       "relative overflow-hidden",
       "rounded-xl p-6",
-      isDark 
-        ? "bg-black/20 border border-white/10" 
+      isDark
+        ? "bg-black/20 border border-white/10"
         : "bg-white/60 border border-black/5",
       "transition-all duration-200",
       className
@@ -351,8 +352,8 @@ const PrivacyPolicy = () => {
   const IconContainer = ({ children }) => (
     <div className={cn(
       "w-12 h-12 rounded-xl flex items-center justify-center",
-      isDark 
-        ? "bg-black/20 border border-white/10" 
+      isDark
+        ? "bg-black/20 border border-white/10"
         : "bg-white/60 border border-black/5"
     )}>
       {children}
@@ -380,8 +381,8 @@ const PrivacyPolicy = () => {
               onClick={() => window.history.back()}
               className={cn(
                 "flex items-center gap-2 px-4 py-2 rounded-xl transition-all duration-200",
-                isDark 
-                  ? "bg-black/20 hover:bg-black/30 text-white border border-white/10" 
+                isDark
+                  ? "bg-black/20 hover:bg-black/30 text-white border border-white/10"
                   : "bg-white/60 hover:bg-white/70 text-black border border-black/5"
               )}
             >
@@ -393,8 +394,8 @@ const PrivacyPolicy = () => {
               onClick={() => setIsDark(!isDark)}
               className={cn(
                 "p-3 rounded-xl transition-all duration-200",
-                isDark 
-                  ? "bg-black/20 hover:bg-black/30 text-white border border-white/10" 
+                isDark
+                  ? "bg-black/20 hover:bg-black/30 text-white border border-white/10"
                   : "bg-white/60 hover:bg-white/70 text-black border border-black/5"
               )}
             >
@@ -428,8 +429,8 @@ const PrivacyPolicy = () => {
             {/* Legal Notice */}
             <div className={cn(
               "p-4 rounded-xl mb-6",
-              isDark 
-                ? "bg-blue-500/20 border border-blue-500/20" 
+              isDark
+                ? "bg-blue-500/20 border border-blue-500/20"
                 : "bg-blue-500/10 border border-blue-500/10"
             )}>
               <p className={cn(
@@ -447,8 +448,8 @@ const PrivacyPolicy = () => {
                   key={index}
                   className={cn(
                     "rounded-xl transition-all duration-200",
-                    isDark 
-                      ? "bg-black/20 hover:bg-black/30 border border-white/10" 
+                    isDark
+                      ? "bg-black/20 hover:bg-black/30 border border-white/10"
                       : "bg-white/60 hover:bg-white/70 border border-black/5"
                   )}
                 >
@@ -462,12 +463,12 @@ const PrivacyPolicy = () => {
                     )}>
                       {section.title}
                     </h2>
-                    <ChevronDown 
+                    <ChevronDown
                       className={cn(
                         "w-5 h-5 transition-transform",
                         isDark ? "text-white/60" : "text-black/60",
                         expandedSection === index ? "transform rotate-180" : ""
-                      )} 
+                      )}
                     />
                   </button>
                   {expandedSection === index && (
@@ -498,16 +499,16 @@ const PrivacyPolicy = () => {
                 "text-center mt-4",
                 isDark ? "text-white/60" : "text-black/60"
               )}>
-                For privacy-related inquiries, please contact us:  {' '}
-                <a 
-                  href="mailto:contact@clerktree.com"
+                For privacy-related inquiries, please visit our  {' '}
+                <Link
+                  to="/contact"
                   className={cn(
                     "underline hover:no-underline transition-all duration-200",
                     isDark ? "text-purple-400 hover:text-purple-300" : "text-purple-600 hover:text-purple-700"
                   )}
                 >
-                  contact@clerktree.com
-                </a>
+                  Contact page
+                </Link>
               </p>
             </div>
           </GlassContainer>

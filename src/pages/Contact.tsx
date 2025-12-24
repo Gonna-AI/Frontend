@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Mail, Phone, MapPin, CheckCircle2, Send } from 'lucide-react';
+import { Phone, MapPin, CheckCircle2, Send } from 'lucide-react';
 import { supabase } from '../config/supabase';
 import { useNavigate } from 'react-router-dom';
 
@@ -138,16 +138,7 @@ const Contact = () => {
           </div>
 
           {/* Contact Info Cards */}
-          <div className="grid md:grid-cols-3 gap-6 mb-16 max-w-4xl mx-auto">
-            <div className="group rounded-3xl border border-white/10 bg-white/[0.02] backdrop-blur-xl p-6 hover:border-red-500/30 hover:bg-white/[0.04] transition-all duration-300 text-center">
-              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-red-500/10 to-rose-500/10 border border-red-500/20 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
-                <Mail className="w-6 h-6 text-red-400" />
-              </div>
-              <h3 className="font-semibold mb-2 text-white/90 text-lg">Email</h3>
-              <a href="mailto:contact@clerktree.com" className="text-white/60 hover:text-red-400 transition-colors text-sm">
-                contact@clerktree.com
-              </a>
-            </div>
+          <div className="grid md:grid-cols-2 gap-6 mb-16 max-w-3xl mx-auto">
             <div className="group rounded-3xl border border-white/10 bg-white/[0.02] backdrop-blur-xl p-6 hover:border-red-500/30 hover:bg-white/[0.04] transition-all duration-300 text-center">
               <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-red-500/10 to-rose-500/10 border border-red-500/20 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
                 <Phone className="w-6 h-6 text-red-400" />

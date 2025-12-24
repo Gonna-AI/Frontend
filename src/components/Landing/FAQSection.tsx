@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { motion, useReducedMotion } from 'framer-motion';
 import { useDeviceDetection } from '../../hooks/useDeviceDetection';
 import {
@@ -17,7 +18,7 @@ interface FAQItem {
 export default function FAQSection() {
   const prefersReducedMotion = useReducedMotion();
   const { isMobile, isLowEnd } = useDeviceDetection();
-  
+
   const shouldReduceMotion = prefersReducedMotion || isMobile || isLowEnd;
 
   const faqs: FAQItem[] = [
@@ -51,7 +52,7 @@ export default function FAQSection() {
   return (
     <div className="w-full rounded-md relative py-24 px-6 antialiased bg-[rgb(10,10,10)]">
       <div className="max-w-6xl mx-auto relative z-10">
-        
+
         {/* Two Column Layout */}
         <div className="grid md:grid-cols-2 gap-4 items-start">
           {/* Left Side - Header */}
@@ -70,7 +71,7 @@ export default function FAQSection() {
                 Questions
               </span>
             </motion.h2>
-            
+
             <motion.div
               initial={shouldReduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -80,10 +81,10 @@ export default function FAQSection() {
             >
               <p>Can't find what you're looking for?</p>
               <p>
-                Send us an email at{' '}
-                <a href="mailto:contact@clerktree.com" className="text-white hover:text-white/80 underline">
-                  contact@clerktree.com
-                </a>
+                Visit our{' '}
+                <Link to="/contact" className="text-white hover:text-white/80 underline">
+                  Contact page
+                </Link>
               </p>
             </motion.div>
           </div>
