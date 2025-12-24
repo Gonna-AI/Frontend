@@ -768,22 +768,45 @@ export function DemoCallProvider({ children }: { children: ReactNode }) {
           // Get initial caller name from various sources
           let callerName = findCallerName(endedCall);
 
-          // Default summary while we wait for AI
-          let summary: CallSummary = {
+          let finalCategory = endedCall.category;
+          let finalPriority = endedCall.priority;
+
+          // Create history item immediately with placeholder summary
+          const historyId = `history-${Date.now()}`;
+          const placeholderSummary: CallSummary = {
             mainPoints: ['Call completed'],
             sentiment: 'neutral',
             actionItems: [],
             followUpRequired: endedCall.priority === 'high' || endedCall.priority === 'critical',
-            notes: 'Processing call summary...',
+            notes: '⏳ Generating summary...',
           };
 
-          let finalCategory = endedCall.category;
-          let finalPriority = endedCall.priority;
+          // Create initial history item with placeholder
+          const initialHistoryItem: CallHistoryItem = {
+            id: historyId,
+            callerName,
+            date: endedCall.startTime,
+            duration,
+            type: endedCall.type,
+            messages: endedCall.messages,
+            extractedFields: endedCall.extractedFields,
+            category: finalCategory,
+            priority: finalPriority,
+            tags: [],
+            summary: placeholderSummary,
+          };
+
+          // Add to history IMMEDIATELY so user sees it
+          setCallHistory(prev => [initialHistoryItem, ...prev]);
+          console.log('📝 Call added to history immediately:', historyId);
+
+          // Now generate summary in background and update
+          let finalSummary = placeholderSummary;
           let tags: string[] = [];
 
-          // Try to get AI summary using aiService (which has smart mock fallback)
           try {
             if (endedCall.messages.length > 0) {
+              console.log('🤖 Generating AI summary in background...');
               const summaryResponse = await aiService.generateSummary(
                 endedCall.messages,
                 endedCall.extractedFields,
@@ -791,23 +814,30 @@ export function DemoCallProvider({ children }: { children: ReactNode }) {
                 endedCall.priority
               );
 
-              summary = summaryResponse.summary;
+              finalSummary = summaryResponse.summary;
               tags = summaryResponse.tags;
 
               if (summaryResponse.callerName && callerName === 'Unknown Caller') {
                 callerName = summaryResponse.callerName;
               }
+              console.log('✅ AI summary generated successfully');
             }
           } catch (error) {
             console.error('Error generating AI summary:', error);
+            // Keep placeholder summary but update the note
+            finalSummary = {
+              ...placeholderSummary,
+              notes: 'Summary generation failed. Call recorded successfully.',
+            };
           }
 
           if (callerName === 'Unknown Caller') {
             callerName = findCallerName(endedCall);
           }
 
-          const historyItem: CallHistoryItem = {
-            id: `history-${Date.now()}`,
+          // Create the final history item with real summary
+          const finalHistoryItem: CallHistoryItem = {
+            id: historyId,
             callerName,
             date: endedCall.startTime,
             duration,
@@ -817,34 +847,37 @@ export function DemoCallProvider({ children }: { children: ReactNode }) {
             category: finalCategory,
             priority: finalPriority,
             tags,
-            summary,
+            summary: finalSummary,
           };
 
-          // Add to local state
-          setCallHistory(prev => [historyItem, ...prev]);
+          // Update history with the final summary
+          setCallHistory(prev => prev.map(item =>
+            item.id === historyId ? finalHistoryItem : item
+          ));
+          console.log('📝 Call history updated with summary:', historyId);
 
           // Save to Supabase
           try {
             // Build base payload
             const basePayload = {
-              id: historyItem.id,
-              caller_name: historyItem.callerName,
-              date: historyItem.date.toISOString(),
-              duration: historyItem.duration,
-              messages: historyItem.messages.map(m => ({ ...m, timestamp: m.timestamp.toISOString() })),
-              extracted_fields: historyItem.extractedFields.map(f => ({ ...f, extractedAt: f.extractedAt.toISOString() })),
-              category: historyItem.category,
-              priority: historyItem.priority,
-              tags: historyItem.tags,
-              summary: historyItem.summary,
-              sentiment: historyItem.summary.sentiment || 'neutral',
-              follow_up_required: historyItem.summary.followUpRequired || false
+              id: finalHistoryItem.id,
+              caller_name: finalHistoryItem.callerName,
+              date: finalHistoryItem.date.toISOString(),
+              duration: finalHistoryItem.duration,
+              messages: finalHistoryItem.messages.map(m => ({ ...m, timestamp: m.timestamp.toISOString() })),
+              extracted_fields: finalHistoryItem.extractedFields.map(f => ({ ...f, extractedAt: f.extractedAt.toISOString() })),
+              category: finalHistoryItem.category,
+              priority: finalHistoryItem.priority,
+              tags: finalHistoryItem.tags,
+              summary: finalHistoryItem.summary,
+              sentiment: finalHistoryItem.summary.sentiment || 'neutral',
+              follow_up_required: finalHistoryItem.summary.followUpRequired || false
             };
 
             // Try to insert with type field first
             let { error } = await supabase.from('call_history').insert({
               ...basePayload,
-              type: historyItem.type
+              type: finalHistoryItem.type
             });
 
             if (error && error.code === 'PGRST204') {
