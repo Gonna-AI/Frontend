@@ -27,7 +27,7 @@ const getCleanURL = (url: string) => {
   return cleaned;
 };
 const LLM_URL = getCleanURL(import.meta.env.VITE_OLLAMA_URL || 'https://consumption-monetary-thrown-manufacture.trycloudflare.com');
-const MODEL_NAME = 'qwen3:4b';
+const MODEL_NAME = 'ministral-3:14b';
 
 // Timeout in milliseconds
 const REQUEST_TIMEOUT = 120000; // 2 minutes
