@@ -1,10 +1,8 @@
 /**
- * AI Service Layer - Smart Conversation Handler
+ * AI Service Layer - Local Mistral Model via Ollama
  * 
- * Priority chain:
- * 1. Gemini API (cloud, most capable)
- * 2. Local LLM via cloudflare tunnel (local service)
- * 3. Smart Mock (fallback, always available)
+ * Uses local LLM (Ministral) via Cloudflare tunnel.
+ * No cloud APIs - all processing is local.
  */
 
 import {
@@ -16,18 +14,10 @@ import {
   CallSummary,
   ActionItem
 } from '../contexts/DemoCallContext';
-import {
-  generateCallResponse,
-  summarizeCall,
-  testGeminiConnection,
-  AIAnalysisResult,
-  CallSummaryResult
-} from './geminiService';
 import { localLLMService, LocalLLMResponse } from './localLLMService';
 
 // Configuration for AI operations
 interface AIConfig {
-  useGemini: boolean;
   useLocalLLM: boolean;
   fallbackToMock: boolean;
 }
@@ -58,7 +48,7 @@ export interface AIResponse {
   suggestedCategory?: CallCategory;
   suggestedPriority?: PriorityLevel;
   confidence: number;
-  source?: 'gemini' | 'local-llm' | 'mock';
+  source?: 'local-llm' | 'mock';
   // Enhanced function calling analysis
   analysis?: ConversationAnalysis;
 }
@@ -93,12 +83,10 @@ export interface PriorityPrediction {
 
 class AIService {
   private config: AIConfig = {
-    useGemini: true,
     useLocalLLM: true,
     fallbackToMock: true,
   };
   private knowledgeBase: KnowledgeBaseConfig | null = null;
-  private geminiAvailable: boolean | null = null;
   private localLLMAvailable: boolean | null = null;
   private conversationState: ConversationState = this.resetConversationState();
 
@@ -126,46 +114,30 @@ class AIService {
 
   /**
    * Initialize the AI service
-   * Parallelizes availability checks for faster startup
+   * Connects to local Mistral model via Ollama/Cloudflare tunnel
    */
   async initialize(): Promise<void> {
-    console.log('🔄 Initializing AI services...');
+    console.log('🔄 Initializing Local Mistral AI service...');
 
-    // Run both checks in parallel for faster startup
-    const [geminiResult, localResult] = await Promise.all([
-      testGeminiConnection().catch(() => false),
-      localLLMService.initialize().catch(() => false)
-    ]);
-
-    this.geminiAvailable = geminiResult;
-    this.localLLMAvailable = localResult;
-
-    console.log('☁️ Gemini API available:', this.geminiAvailable);
-    if (this.localLLMAvailable) {
-      console.log('🖥️ Local LLM available:', localLLMService.getServiceUrl());
-    } else {
-      const llmUrl = import.meta.env.VITE_OLLAMA_URL || 'https://production-jeff-shine-roy.trycloudflare.com';
-      console.log(`⚠️ Local LLM not available. Check: ${llmUrl}`);
-      console.log('💡 Make sure your cloudflare tunnel is running and accessible');
+    // Initialize local LLM only
+    try {
+      this.localLLMAvailable = await localLLMService.initialize();
+    } catch (error) {
+      console.error('Failed to initialize local LLM:', error);
+      this.localLLMAvailable = false;
     }
 
-    // Log the active chain
-    const chain = [];
-    if (this.geminiAvailable) chain.push('Gemini');
-    if (this.localLLMAvailable) chain.push('Local LLM');
-    chain.push('Smart Mock');
-    console.log('🔗 AI Chain:', chain.join(' → '));
-
-    if (!this.geminiAvailable && !this.localLLMAvailable) {
-      console.warn('⚠️ WARNING: Both Gemini and Local LLM are unavailable. Using Smart Mock fallback only.');
-      console.warn('💡 To fix:');
-      console.warn('   1. Check VITE_GEMINI_API_KEY is set');
-      console.warn('   2. Check VITE_OLLAMA_URL points to your cloudflare tunnel URL');
+    if (this.localLLMAvailable) {
+      console.log('✅ Local Mistral model available:', localLLMService.getServiceUrl());
+    } else {
+      const llmUrl = import.meta.env.VITE_OLLAMA_URL || 'NOT SET';
+      console.error(`❌ Local LLM not available. Check: ${llmUrl}`);
+      console.error('💡 Make sure your cloudflare tunnel is running and accessible');
     }
   }
 
   /**
-   * Set whether to use Gemini or mock responses
+   * Set configuration for AI operations
    */
   setConfig(config: Partial<AIConfig>) {
     this.config = { ...this.config, ...config };
@@ -182,11 +154,10 @@ class AIService {
   /**
    * Get current AI status
    */
-  getStatus(): { gemini: boolean; localLLM: boolean; localLLMModel?: string } {
+  getStatus(): { localLLM: boolean; localLLMUrl?: string } {
     return {
-      gemini: this.geminiAvailable === true,
       localLLM: this.localLLMAvailable === true,
-      localLLMModel: this.localLLMAvailable ? localLLMService.getServiceUrl() : undefined,
+      localLLMUrl: this.localLLMAvailable ? localLLMService.getServiceUrl() : undefined,
     };
   }
 
@@ -205,49 +176,7 @@ class AIService {
       return this.smartMockResponse(userMessage, conversationHistory, extractedFields);
     }
 
-    // Step 1: Try Gemini first (cloud)
-    if (this.config.useGemini && this.geminiAvailable !== false) {
-      try {
-        console.log('🌐 Calling Gemini API...');
-        console.log('   Gemini Available:', this.geminiAvailable);
-        console.log('   API Key Set:', !!import.meta.env.VITE_GEMINI_API_KEY);
-        const result: AIAnalysisResult = await generateCallResponse(
-          userMessage,
-          conversationHistory,
-          kb,
-          extractedFields
-        );
-
-        // Convert Gemini response to our format
-        const response: AIResponse = {
-          text: result.response,
-          extractedFields: result.extractedFields,
-          suggestedPriority: result.suggestedPriority,
-          confidence: 0.95,
-          source: 'gemini',
-        };
-
-        // Map suggested category
-        if (result.suggestedCategory) {
-          const matchedCategory = kb.categories.find(
-            c => c.id === result.suggestedCategory?.id ||
-              c.name.toLowerCase() === result.suggestedCategory?.name.toLowerCase()
-          );
-          if (matchedCategory) {
-            response.suggestedCategory = matchedCategory;
-          }
-        }
-
-        console.log('✅ Gemini response received');
-        return response;
-
-      } catch (error) {
-        console.error('❌ Gemini API error:', error);
-        this.geminiAvailable = false; // Mark as unavailable to avoid repeated failures
-      }
-    }
-
-    // Step 2: Try Local LLM
+    // Use Local Mistral Model via Ollama/Cloudflare tunnel
     if (this.config.useLocalLLM && this.localLLMAvailable !== false) {
       try {
         console.log('🖥️ Calling Local LLM...');
@@ -332,52 +261,7 @@ class AIService {
       return this.mockGenerateSummary(messages, extractedFields, category, priority);
     }
 
-    // Step 1: Try Gemini
-    if (this.config.useGemini && this.geminiAvailable) {
-      try {
-        console.log('🌐 Calling Gemini for summary...');
-        const result: CallSummaryResult = await summarizeCall(messages, kb, extractedFields);
-
-        const tags: string[] = [];
-        if (result.category) tags.push(result.category.id);
-        if (result.priority === 'critical' || result.priority === 'high') {
-          tags.push('follow-up-needed');
-        }
-        if (result.followUpRequired) tags.push('follow-up');
-
-        const actionItems: ActionItem[] = result.actionItems.map((item, index) => ({
-          id: `action-${Date.now()}-${index}`,
-          text: item.task,
-          completed: false,
-        }));
-
-        // Extract caller name from notes if present
-        let callerName: string | undefined;
-        if (result.notes) {
-          const nameMatch = result.notes.match(/(?:caller|from|name is|named):\s*([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)/i);
-          if (nameMatch?.[1]) {
-            callerName = nameMatch[1];
-          }
-        }
-
-        return {
-          summary: {
-            mainPoints: result.mainPoints,
-            sentiment: result.sentiment,
-            actionItems,
-            followUpRequired: result.followUpRequired,
-            notes: result.notes,
-          },
-          tags,
-          callerName,
-        };
-
-      } catch (error) {
-        console.error('❌ Gemini summary error:', error);
-      }
-    }
-
-    // Step 2: Try Local LLM with enhanced function calling
+    // Use Local Mistral Model for summary with enhanced function calling
     if (this.config.useLocalLLM && this.localLLMAvailable) {
       try {
         console.log('🖥️ Calling Local LLM for summary with function calling...');
