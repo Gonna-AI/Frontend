@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Brain, 
-  MessageSquare, 
-  Plus, 
-  Trash2, 
-  Edit3, 
-  Save, 
-  X, 
-  Settings, 
+import {
+  Brain,
+  MessageSquare,
+  Plus,
+  Trash2,
+  Edit3,
+  Save,
+  X,
+  Settings,
   Tag,
   AlertTriangle,
   BookOpen,
@@ -20,7 +20,6 @@ import {
   Loader2,
   Check,
   Zap,
-  Cloud,
   CloudOff,
   Monitor
 } from 'lucide-react';
@@ -28,7 +27,6 @@ import { cn } from '../../utils/cn';
 import { useDemoCall, ContextField, CallCategory } from '../../contexts/DemoCallContext';
 import VoiceSelector from './VoiceSelector';
 import { aiService } from '../../services/aiService';
-import { testGeminiConnection } from '../../services/geminiService';
 import { localLLMService } from '../../services/localLLMService';
 
 interface KnowledgeBaseProps {
@@ -38,24 +36,24 @@ interface KnowledgeBaseProps {
 type ActiveTab = 'prompt' | 'voice' | 'fields' | 'categories' | 'rules' | 'instructions';
 
 export default function KnowledgeBase({ isDark = true }: KnowledgeBaseProps) {
-  const { 
-    knowledgeBase, 
+  const {
+    knowledgeBase,
     updateKnowledgeBase,
     saveKnowledgeBase,
-    addContextField, 
-    updateContextField, 
+    addContextField,
+    updateContextField,
     removeContextField,
     addCategory,
-    removeCategory 
+    removeCategory
   } = useDemoCall();
-  
+
   const [activeTab, setActiveTab] = useState<ActiveTab>('prompt');
   const [editingFieldId, setEditingFieldId] = useState<string | null>(null);
   const [isAddingField, setIsAddingField] = useState(false);
   const [isAddingCategory, setIsAddingCategory] = useState(false);
   const [isAddingRule, setIsAddingRule] = useState(false);
   const [isAddingInstruction, setIsAddingInstruction] = useState(false);
-  
+
   // Form states
   const [newField, setNewField] = useState<Partial<ContextField>>({
     name: '',
@@ -66,11 +64,10 @@ export default function KnowledgeBase({ isDark = true }: KnowledgeBaseProps) {
   const [newCategory, setNewCategory] = useState({ name: '', color: 'blue', description: '' });
   const [newRule, setNewRule] = useState('');
   const [newInstruction, setNewInstruction] = useState('');
-  
+
   // AI and Save states
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
-  const [geminiConnected, setGeminiConnected] = useState<boolean | null>(null);
   const [localLLMConnected, setLocalLLMConnected] = useState<boolean | null>(null);
   const [localLLMModel, setLocalLLMModel] = useState<string | null>(null);
   const [isTestingConnection, setIsTestingConnection] = useState(false);
@@ -80,7 +77,7 @@ export default function KnowledgeBase({ isDark = true }: KnowledgeBaseProps) {
     aiService.setKnowledgeBase(knowledgeBase);
   }, [knowledgeBase]);
 
-  // Test Gemini and Local LLM connection on mount
+  // Test Local Mistral LLM connection on mount
   useEffect(() => {
     testConnection();
   }, []);
@@ -88,18 +85,13 @@ export default function KnowledgeBase({ isDark = true }: KnowledgeBaseProps) {
   const testConnection = async () => {
     setIsTestingConnection(true);
     try {
-      // Test Gemini
-      const gemini = await testGeminiConnection();
-      setGeminiConnected(gemini);
-      
-      // Test Local LLM (Ollama)
+      // Test Local LLM (Mistral via Ollama/Cloudflare)
       const localAvailable = await localLLMService.initialize();
       setLocalLLMConnected(localAvailable);
       if (localAvailable) {
         setLocalLLMModel(localLLMService.getServiceUrl());
       }
     } catch (error) {
-      setGeminiConnected(false);
       setLocalLLMConnected(false);
     }
     setIsTestingConnection(false);
@@ -114,7 +106,7 @@ export default function KnowledgeBase({ isDark = true }: KnowledgeBaseProps) {
       if (success) {
         // Update AI service with latest config
         aiService.setKnowledgeBase(knowledgeBase);
-        
+
         setSaveSuccess(true);
         setTimeout(() => setSaveSuccess(false), 2000);
       }
@@ -212,8 +204,8 @@ export default function KnowledgeBase({ isDark = true }: KnowledgeBaseProps) {
   return (
     <div className={cn(
       "rounded-xl md:rounded-2xl overflow-hidden h-full flex flex-col",
-      isDark 
-        ? "bg-black/20 border border-white/10" 
+      isDark
+        ? "bg-black/20 border border-white/10"
         : "bg-white/80 border border-black/10"
     )}>
       {/* Header */}
@@ -224,8 +216,8 @@ export default function KnowledgeBase({ isDark = true }: KnowledgeBaseProps) {
         <div className="flex items-center gap-2 md:gap-3">
           <div className={cn(
             "w-8 h-8 md:w-10 md:h-10 rounded-lg md:rounded-xl flex items-center justify-center flex-shrink-0",
-            isDark 
-              ? "bg-gradient-to-br from-purple-500/20 to-blue-500/20 border border-white/10" 
+            isDark
+              ? "bg-gradient-to-br from-purple-500/20 to-blue-500/20 border border-white/10"
               : "bg-gradient-to-br from-purple-500/10 to-blue-500/10 border border-black/10"
           )}>
             <Sparkles className={cn(
@@ -247,49 +239,32 @@ export default function KnowledgeBase({ isDark = true }: KnowledgeBaseProps) {
               )}>
                 Configure AI behavior
               </p>
-              {/* AI Status Badges */}
+              {/* AI Status Badge - Local Mistral Only */}
               <div className="flex items-center gap-1">
-                {/* Gemini Status */}
-                <button 
+                <button
                   onClick={testConnection}
                   disabled={isTestingConnection}
-                  title={geminiConnected ? 'Gemini Cloud Connected' : 'Gemini Offline'}
+                  title={localLLMConnected ? `Local Mistral: ${localLLMModel}` : 'Local LLM not connected'}
                   className={cn(
                     "flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] transition-colors",
                     isTestingConnection
                       ? isDark ? "bg-white/10 text-white/50" : "bg-black/10 text-black/50"
-                      : geminiConnected
+                      : localLLMConnected
                         ? isDark ? "bg-green-500/20 text-green-400" : "bg-green-500/10 text-green-600"
                         : isDark ? "bg-red-500/20 text-red-400" : "bg-red-500/10 text-red-600"
                   )}
                 >
                   {isTestingConnection ? (
                     <Loader2 className="w-2.5 h-2.5 animate-spin" />
-                  ) : geminiConnected ? (
-                    <Cloud className="w-2.5 h-2.5" />
+                  ) : localLLMConnected ? (
+                    <Monitor className="w-2.5 h-2.5" />
                   ) : (
                     <CloudOff className="w-2.5 h-2.5" />
                   )}
                   <span className="hidden sm:inline">
-                    {geminiConnected ? 'Gemini' : 'Cloud'}
+                    {localLLMConnected ? 'Mistral' : 'Offline'}
                   </span>
                 </button>
-
-                {/* Local LLM Status */}
-                <div 
-                  title={localLLMConnected ? `Local: ${localLLMModel}` : 'Ollama not running'}
-                  className={cn(
-                    "flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px]",
-                    localLLMConnected
-                      ? isDark ? "bg-blue-500/20 text-blue-400" : "bg-blue-500/10 text-blue-600"
-                      : isDark ? "bg-white/10 text-white/30" : "bg-black/10 text-black/30"
-                  )}
-                >
-                  <Monitor className="w-2.5 h-2.5" />
-                  <span className="hidden sm:inline">
-                    {localLLMConnected ? 'Local' : 'Local'}
-                  </span>
-                </div>
               </div>
             </div>
           </div>
@@ -303,8 +278,8 @@ export default function KnowledgeBase({ isDark = true }: KnowledgeBaseProps) {
             "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all",
             saveSuccess
               ? "bg-green-500/20 text-green-400 border border-green-500/30"
-              : isDark 
-                ? "bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 border border-blue-500/30" 
+              : isDark
+                ? "bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 border border-blue-500/30"
                 : "bg-blue-500/10 text-blue-600 hover:bg-blue-500/20 border border-blue-500/20"
           )}
         >
@@ -375,8 +350,8 @@ export default function KnowledgeBase({ isDark = true }: KnowledgeBaseProps) {
                   rows={8}
                   className={cn(
                     "w-full p-3 rounded-xl text-sm resize-none focus:outline-none focus:ring-2",
-                    isDark 
-                      ? "bg-black/30 text-white border border-white/10 focus:ring-purple-500/50" 
+                    isDark
+                      ? "bg-black/30 text-white border border-white/10 focus:ring-purple-500/50"
                       : "bg-white text-black border border-black/10 focus:ring-purple-500/50"
                   )}
                   placeholder="Define the AI's core behavior and personality..."
@@ -396,8 +371,8 @@ export default function KnowledgeBase({ isDark = true }: KnowledgeBaseProps) {
                   onChange={(e) => updateKnowledgeBase({ persona: e.target.value })}
                   className={cn(
                     "w-full p-3 rounded-xl text-sm focus:outline-none focus:ring-2",
-                    isDark 
-                      ? "bg-black/30 text-white border border-white/10 focus:ring-purple-500/50" 
+                    isDark
+                      ? "bg-black/30 text-white border border-white/10 focus:ring-purple-500/50"
                       : "bg-white text-black border border-black/10 focus:ring-purple-500/50"
                   )}
                   placeholder="e.g., Professional, empathetic, and efficient assistant"
@@ -419,8 +394,8 @@ export default function KnowledgeBase({ isDark = true }: KnowledgeBaseProps) {
                   rows={2}
                   className={cn(
                     "w-full p-3 rounded-xl text-sm resize-none focus:outline-none focus:ring-2",
-                    isDark 
-                      ? "bg-black/30 text-white border border-white/10 focus:ring-purple-500/50" 
+                    isDark
+                      ? "bg-black/30 text-white border border-white/10 focus:ring-purple-500/50"
                       : "bg-white text-black border border-black/10 focus:ring-purple-500/50"
                   )}
                   placeholder="How the AI greets callers..."
@@ -441,8 +416,8 @@ export default function KnowledgeBase({ isDark = true }: KnowledgeBaseProps) {
                   rows={5}
                   className={cn(
                     "w-full p-3 rounded-xl text-sm resize-none focus:outline-none focus:ring-2",
-                    isDark 
-                      ? "bg-black/30 text-white border border-white/10 focus:ring-purple-500/50" 
+                    isDark
+                      ? "bg-black/30 text-white border border-white/10 focus:ring-purple-500/50"
                       : "bg-white text-black border border-black/10 focus:ring-purple-500/50"
                   )}
                   placeholder="Guidelines for how the AI should respond..."
@@ -493,8 +468,8 @@ export default function KnowledgeBase({ isDark = true }: KnowledgeBaseProps) {
                   onClick={() => setIsAddingField(true)}
                   className={cn(
                     "flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors",
-                    isDark 
-                      ? "bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 border border-blue-500/30" 
+                    isDark
+                      ? "bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 border border-blue-500/30"
                       : "bg-blue-500/10 text-blue-600 hover:bg-blue-500/20 border border-blue-500/20"
                   )}
                 >
@@ -512,8 +487,8 @@ export default function KnowledgeBase({ isDark = true }: KnowledgeBaseProps) {
                     exit={{ opacity: 0, height: 0 }}
                     className={cn(
                       "rounded-lg md:rounded-xl p-3 md:p-4 space-y-2 md:space-y-3 overflow-hidden",
-                      isDark 
-                        ? "bg-blue-500/10 border border-blue-500/20" 
+                      isDark
+                        ? "bg-blue-500/10 border border-blue-500/20"
                         : "bg-blue-500/5 border border-blue-500/20"
                     )}
                   >
@@ -524,8 +499,8 @@ export default function KnowledgeBase({ isDark = true }: KnowledgeBaseProps) {
                         placeholder="Field name"
                         className={cn(
                           "p-2 rounded-md md:rounded-lg text-xs md:text-sm focus:outline-none focus:ring-2",
-                          isDark 
-                            ? "bg-black/30 text-white border border-white/10 focus:ring-blue-500/50" 
+                          isDark
+                            ? "bg-black/30 text-white border border-white/10 focus:ring-blue-500/50"
                             : "bg-white text-black border border-black/10 focus:ring-blue-500/50"
                         )}
                       />
@@ -534,8 +509,8 @@ export default function KnowledgeBase({ isDark = true }: KnowledgeBaseProps) {
                         onChange={(e) => setNewField({ ...newField, type: e.target.value as ContextField['type'] })}
                         className={cn(
                           "p-2 rounded-md md:rounded-lg text-xs md:text-sm focus:outline-none focus:ring-2",
-                          isDark 
-                            ? "bg-black/30 text-white border border-white/10 focus:ring-blue-500/50" 
+                          isDark
+                            ? "bg-black/30 text-white border border-white/10 focus:ring-blue-500/50"
                             : "bg-white text-black border border-black/10 focus:ring-blue-500/50"
                         )}
                       >
@@ -552,8 +527,8 @@ export default function KnowledgeBase({ isDark = true }: KnowledgeBaseProps) {
                       placeholder="Description (optional)"
                       className={cn(
                         "w-full p-2 rounded-lg text-sm focus:outline-none focus:ring-2",
-                        isDark 
-                          ? "bg-black/30 text-white border border-white/10 focus:ring-blue-500/50" 
+                        isDark
+                          ? "bg-black/30 text-white border border-white/10 focus:ring-blue-500/50"
                           : "bg-white text-black border border-black/10 focus:ring-blue-500/50"
                       )}
                     />
@@ -587,8 +562,8 @@ export default function KnowledgeBase({ isDark = true }: KnowledgeBaseProps) {
                         className={cn(
                           "flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors",
                           newField.name
-                            ? isDark 
-                              ? "bg-blue-500/20 text-blue-400 hover:bg-blue-500/30" 
+                            ? isDark
+                              ? "bg-blue-500/20 text-blue-400 hover:bg-blue-500/30"
                               : "bg-blue-500/10 text-blue-600 hover:bg-blue-500/20"
                             : "opacity-50 cursor-not-allowed"
                         )}
@@ -608,8 +583,8 @@ export default function KnowledgeBase({ isDark = true }: KnowledgeBaseProps) {
                   layout
                   className={cn(
                     "group flex items-center gap-3 p-3 rounded-xl transition-colors",
-                    isDark 
-                      ? "bg-white/5 hover:bg-white/10 border border-white/5" 
+                    isDark
+                      ? "bg-white/5 hover:bg-white/10 border border-white/5"
                       : "bg-black/5 hover:bg-black/10 border border-black/5"
                   )}
                 >
@@ -617,7 +592,7 @@ export default function KnowledgeBase({ isDark = true }: KnowledgeBaseProps) {
                     "w-4 h-4 opacity-0 group-hover:opacity-50 cursor-grab",
                     isDark ? "text-white" : "text-black"
                   )} />
-                  
+
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
                       <span className={cn(
@@ -650,8 +625,8 @@ export default function KnowledgeBase({ isDark = true }: KnowledgeBaseProps) {
                     onClick={() => removeContextField(field.id)}
                     className={cn(
                       "p-1.5 rounded-lg transition-colors opacity-0 group-hover:opacity-100",
-                      isDark 
-                        ? "text-red-400/60 hover:text-red-400 hover:bg-red-500/10" 
+                      isDark
+                        ? "text-red-400/60 hover:text-red-400 hover:bg-red-500/10"
                         : "text-red-600/60 hover:text-red-600 hover:bg-red-500/10"
                     )}
                   >
@@ -682,8 +657,8 @@ export default function KnowledgeBase({ isDark = true }: KnowledgeBaseProps) {
                   onClick={() => setIsAddingCategory(true)}
                   className={cn(
                     "flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors",
-                    isDark 
-                      ? "bg-green-500/20 text-green-400 hover:bg-green-500/30 border border-green-500/30" 
+                    isDark
+                      ? "bg-green-500/20 text-green-400 hover:bg-green-500/30 border border-green-500/30"
                       : "bg-green-500/10 text-green-600 hover:bg-green-500/20 border border-green-500/20"
                   )}
                 >
@@ -701,8 +676,8 @@ export default function KnowledgeBase({ isDark = true }: KnowledgeBaseProps) {
                     exit={{ opacity: 0, height: 0 }}
                     className={cn(
                       "rounded-xl p-4 space-y-3 overflow-hidden",
-                      isDark 
-                        ? "bg-green-500/10 border border-green-500/20" 
+                      isDark
+                        ? "bg-green-500/10 border border-green-500/20"
                         : "bg-green-500/5 border border-green-500/20"
                     )}
                   >
@@ -712,8 +687,8 @@ export default function KnowledgeBase({ isDark = true }: KnowledgeBaseProps) {
                       placeholder="Category name"
                       className={cn(
                         "w-full p-2 rounded-lg text-sm focus:outline-none focus:ring-2",
-                        isDark 
-                          ? "bg-black/30 text-white border border-white/10 focus:ring-green-500/50" 
+                        isDark
+                          ? "bg-black/30 text-white border border-white/10 focus:ring-green-500/50"
                           : "bg-white text-black border border-black/10 focus:ring-green-500/50"
                       )}
                     />
@@ -723,8 +698,8 @@ export default function KnowledgeBase({ isDark = true }: KnowledgeBaseProps) {
                       placeholder="Description"
                       className={cn(
                         "w-full p-2 rounded-lg text-sm focus:outline-none focus:ring-2",
-                        isDark 
-                          ? "bg-black/30 text-white border border-white/10 focus:ring-green-500/50" 
+                        isDark
+                          ? "bg-black/30 text-white border border-white/10 focus:ring-green-500/50"
                           : "bg-white text-black border border-black/10 focus:ring-green-500/50"
                       )}
                     />
@@ -758,8 +733,8 @@ export default function KnowledgeBase({ isDark = true }: KnowledgeBaseProps) {
                         className={cn(
                           "flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors",
                           newCategory.name
-                            ? isDark 
-                              ? "bg-green-500/20 text-green-400 hover:bg-green-500/30" 
+                            ? isDark
+                              ? "bg-green-500/20 text-green-400 hover:bg-green-500/30"
                               : "bg-green-500/10 text-green-600 hover:bg-green-500/20"
                             : "opacity-50 cursor-not-allowed"
                         )}
@@ -820,8 +795,8 @@ export default function KnowledgeBase({ isDark = true }: KnowledgeBaseProps) {
                   onClick={() => setIsAddingRule(true)}
                   className={cn(
                     "flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors",
-                    isDark 
-                      ? "bg-orange-500/20 text-orange-400 hover:bg-orange-500/30 border border-orange-500/30" 
+                    isDark
+                      ? "bg-orange-500/20 text-orange-400 hover:bg-orange-500/30 border border-orange-500/30"
                       : "bg-orange-500/10 text-orange-600 hover:bg-orange-500/20 border border-orange-500/20"
                   )}
                 >
@@ -839,8 +814,8 @@ export default function KnowledgeBase({ isDark = true }: KnowledgeBaseProps) {
                     exit={{ opacity: 0, height: 0 }}
                     className={cn(
                       "rounded-xl p-4 space-y-3 overflow-hidden",
-                      isDark 
-                        ? "bg-orange-500/10 border border-orange-500/20" 
+                      isDark
+                        ? "bg-orange-500/10 border border-orange-500/20"
                         : "bg-orange-500/5 border border-orange-500/20"
                     )}
                   >
@@ -851,8 +826,8 @@ export default function KnowledgeBase({ isDark = true }: KnowledgeBaseProps) {
                       rows={2}
                       className={cn(
                         "w-full p-2 rounded-lg text-sm resize-none focus:outline-none focus:ring-2",
-                        isDark 
-                          ? "bg-black/30 text-white border border-white/10 focus:ring-orange-500/50" 
+                        isDark
+                          ? "bg-black/30 text-white border border-white/10 focus:ring-orange-500/50"
                           : "bg-white text-black border border-black/10 focus:ring-orange-500/50"
                       )}
                     />
@@ -872,8 +847,8 @@ export default function KnowledgeBase({ isDark = true }: KnowledgeBaseProps) {
                         className={cn(
                           "flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors",
                           newRule.trim()
-                            ? isDark 
-                              ? "bg-orange-500/20 text-orange-400 hover:bg-orange-500/30" 
+                            ? isDark
+                              ? "bg-orange-500/20 text-orange-400 hover:bg-orange-500/30"
                               : "bg-orange-500/10 text-orange-600 hover:bg-orange-500/20"
                             : "opacity-50 cursor-not-allowed"
                         )}
@@ -893,8 +868,8 @@ export default function KnowledgeBase({ isDark = true }: KnowledgeBaseProps) {
                   layout
                   className={cn(
                     "group flex items-start gap-3 p-3 rounded-xl transition-colors",
-                    isDark 
-                      ? "bg-white/5 hover:bg-white/10 border border-white/5" 
+                    isDark
+                      ? "bg-white/5 hover:bg-white/10 border border-white/5"
                       : "bg-black/5 hover:bg-black/10 border border-black/5"
                   )}
                 >
@@ -912,8 +887,8 @@ export default function KnowledgeBase({ isDark = true }: KnowledgeBaseProps) {
                     onClick={() => handleRemoveRule(index)}
                     className={cn(
                       "p-1.5 rounded-lg transition-colors opacity-0 group-hover:opacity-100",
-                      isDark 
-                        ? "text-red-400/60 hover:text-red-400 hover:bg-red-500/10" 
+                      isDark
+                        ? "text-red-400/60 hover:text-red-400 hover:bg-red-500/10"
                         : "text-red-600/60 hover:text-red-600 hover:bg-red-500/10"
                     )}
                   >
@@ -944,8 +919,8 @@ export default function KnowledgeBase({ isDark = true }: KnowledgeBaseProps) {
                   onClick={() => setIsAddingInstruction(true)}
                   className={cn(
                     "flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors",
-                    isDark 
-                      ? "bg-purple-500/20 text-purple-400 hover:bg-purple-500/30 border border-purple-500/30" 
+                    isDark
+                      ? "bg-purple-500/20 text-purple-400 hover:bg-purple-500/30 border border-purple-500/30"
                       : "bg-purple-500/10 text-purple-600 hover:bg-purple-500/20 border border-purple-500/20"
                   )}
                 >
@@ -963,8 +938,8 @@ export default function KnowledgeBase({ isDark = true }: KnowledgeBaseProps) {
                     exit={{ opacity: 0, height: 0 }}
                     className={cn(
                       "rounded-xl p-4 space-y-3 overflow-hidden",
-                      isDark 
-                        ? "bg-purple-500/10 border border-purple-500/20" 
+                      isDark
+                        ? "bg-purple-500/10 border border-purple-500/20"
                         : "bg-purple-500/5 border border-purple-500/20"
                     )}
                   >
@@ -975,8 +950,8 @@ export default function KnowledgeBase({ isDark = true }: KnowledgeBaseProps) {
                       rows={2}
                       className={cn(
                         "w-full p-2 rounded-lg text-sm resize-none focus:outline-none focus:ring-2",
-                        isDark 
-                          ? "bg-black/30 text-white border border-white/10 focus:ring-purple-500/50" 
+                        isDark
+                          ? "bg-black/30 text-white border border-white/10 focus:ring-purple-500/50"
                           : "bg-white text-black border border-black/10 focus:ring-purple-500/50"
                       )}
                     />
@@ -996,8 +971,8 @@ export default function KnowledgeBase({ isDark = true }: KnowledgeBaseProps) {
                         className={cn(
                           "flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors",
                           newInstruction.trim()
-                            ? isDark 
-                              ? "bg-purple-500/20 text-purple-400 hover:bg-purple-500/30" 
+                            ? isDark
+                              ? "bg-purple-500/20 text-purple-400 hover:bg-purple-500/30"
                               : "bg-purple-500/10 text-purple-600 hover:bg-purple-500/20"
                             : "opacity-50 cursor-not-allowed"
                         )}
@@ -1017,8 +992,8 @@ export default function KnowledgeBase({ isDark = true }: KnowledgeBaseProps) {
                   layout
                   className={cn(
                     "group flex items-start gap-3 p-3 rounded-xl transition-colors",
-                    isDark 
-                      ? "bg-white/5 hover:bg-white/10 border border-white/5" 
+                    isDark
+                      ? "bg-white/5 hover:bg-white/10 border border-white/5"
                       : "bg-black/5 hover:bg-black/10 border border-black/5"
                   )}
                 >
@@ -1038,8 +1013,8 @@ export default function KnowledgeBase({ isDark = true }: KnowledgeBaseProps) {
                     onClick={() => handleRemoveInstruction(index)}
                     className={cn(
                       "p-1.5 rounded-lg transition-colors opacity-0 group-hover:opacity-100",
-                      isDark 
-                        ? "text-red-400/60 hover:text-red-400 hover:bg-red-500/10" 
+                      isDark
+                        ? "text-red-400/60 hover:text-red-400 hover:bg-red-500/10"
                         : "text-red-600/60 hover:text-red-600 hover:bg-red-500/10"
                     )}
                   >
@@ -1060,7 +1035,7 @@ export default function KnowledgeBase({ isDark = true }: KnowledgeBaseProps) {
         <div className="flex items-center justify-center gap-2">
           <Zap className={cn(
             "w-3 h-3",
-            geminiConnected || localLLMConnected
+            localLLMConnected
               ? isDark ? "text-green-400" : "text-green-600"
               : isDark ? "text-yellow-400" : "text-yellow-600"
           )} />
@@ -1068,11 +1043,9 @@ export default function KnowledgeBase({ isDark = true }: KnowledgeBaseProps) {
             "text-[10px] md:text-xs text-center",
             isDark ? "text-white/40" : "text-black/40"
           )}>
-            {geminiConnected 
-              ? `Gemini → ${localLLMConnected ? 'Local LLM →' : ''} Mock • Changes apply to next call`
-              : localLLMConnected
-                ? `Local LLM → Mock • Check cloudflare tunnel is running`
-                : 'Using Smart Mock • Install Ollama for local AI fallback'
+            {localLLMConnected
+              ? `Local Mistral Active • Changes apply to next call`
+              : 'Local LLM Offline • Check cloudflare tunnel is running'
             }
           </p>
         </div>
