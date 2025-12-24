@@ -7,6 +7,7 @@ import { menuItems } from '../../../config/navigation';
 import ThemeToggle from '../ThemeToggle';
 import { ViewType } from '../../../types/navigation';
 import { useNavigate } from 'react-router-dom';
+import LanguageSwitcher from '../LanguageSwitcher';
 
 // Sidebar Item Component
 interface SidebarItemProps {
@@ -98,16 +99,16 @@ export default function MobileSidebar({
               "rounded-t-[1.25rem] shadow-2xl",
               isDark
                 ? [
-                    "bg-black/95",
-                    "border-t border-white/10",
-                    "bg-gradient-to-br from-purple-500/10 via-purple-600/10 to-purple-800/10"
-                  ]
+                  "bg-black/95",
+                  "border-t border-white/10",
+                  "bg-gradient-to-br from-purple-500/10 via-purple-600/10 to-purple-800/10"
+                ]
                 : [
-                    "bg-white/60",
-                    "border-t border-white/20",
-                    "backdrop-blur-xl",
-                    "bg-gradient-to-br from-purple-50/30 via-transparent to-purple-100/20"
-                  ]
+                  "bg-white/60",
+                  "border-t border-white/20",
+                  "backdrop-blur-xl",
+                  "bg-gradient-to-br from-purple-50/30 via-transparent to-purple-100/20"
+                ]
             )}
           >
             {/* Header */}
@@ -159,8 +160,9 @@ export default function MobileSidebar({
             </div>
 
             {/* Footer */}
-            <div className="p-6 space-y-2 border-t border-white/5">
+            <div className="p-6 space-y-3 border-t border-white/5">
               <ThemeToggle isExpanded={true} />
+              <LanguageSwitcher isExpanded={true} />
               <button
                 onClick={onSignOut}
                 className={cn(

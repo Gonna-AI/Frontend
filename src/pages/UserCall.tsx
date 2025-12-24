@@ -1,13 +1,16 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, LayoutDashboard } from 'lucide-react';
+import { ArrowLeft, LayoutDashboard, Menu } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { ViewType } from '../types/navigation';
+import MobileSidebar from '../components/Layout/Sidebar/MobileSidebar';
 import { cn } from '../utils/cn';
 import { DemoCallProvider } from '../contexts/DemoCallContext';
 import { UnifiedChatInterface } from '../components/DemoCall';
 
 function UserCallContent() {
   const navigate = useNavigate();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const isDark = true;
 
   return (
@@ -32,9 +35,20 @@ function UserCallContent() {
         <div className="flex items-center justify-between max-w-7xl mx-auto w-full">
           <div className="flex items-center gap-4">
             <button
+              onClick={() => setIsMobileMenuOpen(true)}
+              className={cn(
+                "md:hidden p-2 -ml-2 rounded-lg transition-colors",
+                isDark
+                  ? "hover:bg-white/5 text-white/60 hover:text-white"
+                  : "hover:bg-black/5 text-black/60 hover:text-black"
+              )}
+            >
+              <Menu className="w-5 h-5" />
+            </button>
+            <button
               onClick={() => navigate('/')}
               className={cn(
-                "p-2 -ml-2 rounded-full transition-colors",
+                "hidden md:block p-2 -ml-2 rounded-full transition-colors",
                 isDark
                   ? "hover:bg-white/5 text-white/60 hover:text-white"
                   : "hover:bg-black/5 text-black/60 hover:text-black"
@@ -87,7 +101,15 @@ function UserCallContent() {
           <UnifiedChatInterface isDark={isDark} />
         </div>
       </main>
-    </div>
+
+      <MobileSidebar
+        currentView={'dashboard'}
+        onViewChange={() => { }}
+        onSignOut={() => navigate('/')}
+        isOpen={isMobileMenuOpen}
+        onClose={() => setIsMobileMenuOpen(false)}
+      />
+    </div >
   );
 }
 
