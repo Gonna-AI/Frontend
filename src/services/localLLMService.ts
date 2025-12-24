@@ -901,8 +901,8 @@ Extract and return JSON (use null if not detected):
       throw new Error('Local LLM not available');
     }
 
-    // Use longer timeout for summary generation (3 minutes)
-    const SUMMARY_TIMEOUT = 180000;
+    // Use shorter timeout for summary generation (60 seconds instead of 180)
+    const SUMMARY_TIMEOUT = 60000;
 
     // Format transcript concisely - limit to last 10 messages for faster processing
     const recentMessages = messages.slice(-10);
