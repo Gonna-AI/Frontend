@@ -460,6 +460,34 @@ export function DemoCallProvider({ children }: { children: ReactNode }) {
               console.log('📡 Adding new call from real-time sync:', formattedItem.callerName);
               return [formattedItem, ...prev];
             });
+          } else if (payload.eventType === 'UPDATE' && payload.new) {
+            // Call updated (e.g., summary generated) - update in local state
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const updatedItem = payload.new as any;
+            const formattedItem: CallHistoryItem = {
+              id: updatedItem.id,
+              callerName: updatedItem.caller_name || 'Unknown Caller',
+              date: new Date(updatedItem.date),
+              duration: updatedItem.duration || 0,
+              type: updatedItem.type || 'text',
+              messages: (updatedItem.messages || []).map((m: SerializedCallMessage) => ({
+                ...m,
+                timestamp: new Date(m.timestamp)
+              })),
+              extractedFields: (updatedItem.extracted_fields || []).map((f: SerializedExtractedField) => ({
+                ...f,
+                extractedAt: new Date(f.extractedAt)
+              })),
+              category: updatedItem.category,
+              priority: updatedItem.priority || 'medium',
+              tags: updatedItem.tags || [],
+              summary: updatedItem.summary || { mainPoints: [], sentiment: 'neutral', actionItems: [], followUpRequired: false, notes: '' }
+            };
+
+            setCallHistory(prev => prev.map(c =>
+              c.id === formattedItem.id ? formattedItem : c
+            ));
+            console.log('📡 Call updated from real-time sync:', formattedItem.callerName);
           } else if (payload.eventType === 'DELETE' && payload.old) {
             // Call deleted - remove from local state
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -800,6 +828,29 @@ export function DemoCallProvider({ children }: { children: ReactNode }) {
           setCallHistory(prev => [initialHistoryItem, ...prev]);
           console.log('📝 Call added to history immediately:', historyId);
 
+          // IMMEDIATELY save to Supabase so real-time sync works across tabs/pages
+          try {
+            const initialPayload = {
+              id: initialHistoryItem.id,
+              caller_name: initialHistoryItem.callerName,
+              date: initialHistoryItem.date.toISOString(),
+              duration: initialHistoryItem.duration,
+              type: initialHistoryItem.type,
+              messages: initialHistoryItem.messages.map(m => ({ ...m, timestamp: m.timestamp.toISOString() })),
+              extracted_fields: initialHistoryItem.extractedFields.map(f => ({ ...f, extractedAt: f.extractedAt.toISOString() })),
+              category: initialHistoryItem.category,
+              priority: initialHistoryItem.priority,
+              tags: initialHistoryItem.tags,
+              summary: initialHistoryItem.summary,
+              sentiment: 'neutral',
+              follow_up_required: initialHistoryItem.summary.followUpRequired
+            };
+            await supabase.from('call_history').insert(initialPayload);
+            console.log('📡 Call synced to Supabase for real-time updates');
+          } catch (syncError) {
+            console.warn('Initial sync to Supabase failed:', syncError);
+          }
+
           // Now generate summary in background and update
           let finalSummary = placeholderSummary;
           let tags: string[] = [];
@@ -874,15 +925,16 @@ export function DemoCallProvider({ children }: { children: ReactNode }) {
               follow_up_required: finalHistoryItem.summary.followUpRequired || false
             };
 
-            // Try to insert with type field first
-            let { error } = await supabase.from('call_history').insert({
+            // Use upsert to UPDATE the existing record with the final summary
+            const { error } = await supabase.from('call_history').upsert({
               ...basePayload,
               type: finalHistoryItem.type
             });
 
-            if (error && error.code === 'PGRST204') {
-              // Retry without type if column missing
-              await supabase.from('call_history').insert(basePayload);
+            if (error) {
+              console.error('Error updating call with summary:', error);
+            } else {
+              console.log('📡 Call updated with summary in Supabase');
             }
           } catch (error) {
             console.error('Error saving call to Supabase:', error);
