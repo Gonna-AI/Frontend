@@ -39,8 +39,8 @@ export default function LiveCallMonitor({ isDark = true }: LiveCallMonitorProps)
   return (
     <div className={cn(
       "flex flex-col h-full rounded-xl md:rounded-2xl overflow-hidden",
-      isDark 
-        ? "bg-black/20 border border-white/10" 
+      isDark
+        ? "bg-black/20 border border-white/10"
         : "bg-white/80 border border-black/10"
     )}>
       {/* Header */}
@@ -60,7 +60,7 @@ export default function LiveCallMonitor({ isDark = true }: LiveCallMonitorProps)
             Live Monitor
           </h3>
         </div>
-        
+
         <div className="flex items-center gap-1.5 md:gap-2">
           <div className={cn(
             "w-1.5 h-1.5 md:w-2 md:h-2 rounded-full",
@@ -83,41 +83,126 @@ export default function LiveCallMonitor({ isDark = true }: LiveCallMonitorProps)
         </div>
       </div>
 
-      {/* Extracted fields panel */}
+      {/* Extracted fields panel - Enhanced with sections */}
       {isActive && extractedFields.length > 0 && (
         <div className={cn(
           "px-3 md:px-4 py-2 md:py-3 border-b",
           isDark ? "border-white/10 bg-white/5" : "border-black/10 bg-black/5"
         )}>
-          <div className="flex items-center gap-1.5 md:gap-2 mb-1.5 md:mb-2">
-            <Tag className={cn(
-              "w-3 h-3 md:w-4 md:h-4",
-              isDark ? "text-white/60" : "text-black/60"
-            )} />
-            <span className={cn(
-              "text-[10px] md:text-xs font-medium",
-              isDark ? "text-white/60" : "text-black/60"
-            )}>
-              Extracted ({extractedFields.length})
-            </span>
-          </div>
-          <div className="flex flex-wrap gap-1.5 md:gap-2">
-            {extractedFields.map((field: ExtractedField) => (
-              <div
-                key={field.id}
-                className={cn(
-                  "text-[10px] md:text-xs px-1.5 md:px-2 py-0.5 md:py-1 rounded-md md:rounded-lg flex items-center gap-0.5 md:gap-1",
-                  isDark 
-                    ? "bg-blue-500/10 text-blue-400 border border-blue-500/20" 
-                    : "bg-blue-500/5 text-blue-600 border border-blue-500/10"
-                )}
-              >
-                <span className="opacity-70">{field.label}:</span>
-                <span className="font-medium truncate max-w-[60px] md:max-w-none">{field.value}</span>
-                <CheckCircle className="w-2.5 h-2.5 md:w-3 md:h-3 opacity-60 flex-shrink-0" />
+          {/* Appointment Section - if appointment fields exist */}
+          {extractedFields.some(f => f.id.startsWith('appt_')) && (
+            <div className="mb-3">
+              <div className="flex items-center gap-1.5 md:gap-2 mb-1.5">
+                <span className="text-lg">📅</span>
+                <span className={cn(
+                  "text-[10px] md:text-xs font-semibold uppercase tracking-wide",
+                  isDark ? "text-green-400" : "text-green-600"
+                )}>
+                  Appointment Details
+                </span>
               </div>
-            ))}
-          </div>
+              <div className={cn(
+                "rounded-lg p-2",
+                isDark ? "bg-green-500/10 border border-green-500/20" : "bg-green-50 border border-green-200"
+              )}>
+                {extractedFields.filter(f => f.id.startsWith('appt_')).map((field: ExtractedField) => (
+                  <div key={field.id} className="flex items-center gap-2 mb-1 last:mb-0">
+                    <span className={cn("text-xs", isDark ? "text-green-300/70" : "text-green-600/70")}>
+                      {field.label}:
+                    </span>
+                    <span className={cn("text-xs font-medium", isDark ? "text-green-200" : "text-green-800")}>
+                      {field.value}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Contact Info Section */}
+          {(extractedFields.some(f => ['phone', 'email', 'alt_contact'].includes(f.id)) ||
+            extractedFields.some(f => f.id === 'name')) && (
+              <div className="mb-3">
+                <div className="flex items-center gap-1.5 md:gap-2 mb-1.5">
+                  <span className="text-lg">👤</span>
+                  <span className={cn(
+                    "text-[10px] md:text-xs font-semibold uppercase tracking-wide",
+                    isDark ? "text-blue-400" : "text-blue-600"
+                  )}>
+                    Contact Info
+                  </span>
+                  {!extractedFields.some(f => ['phone', 'email', 'alt_contact'].includes(f.id)) && (
+                    <span className={cn(
+                      "text-[9px] px-1.5 py-0.5 rounded",
+                      isDark ? "bg-yellow-500/20 text-yellow-400" : "bg-yellow-100 text-yellow-700"
+                    )}>
+                      ⚠️ No contact yet
+                    </span>
+                  )}
+                </div>
+                <div className="flex flex-wrap gap-1.5 md:gap-2">
+                  {extractedFields.filter(f => ['name', 'phone', 'email', 'alt_contact', 'company'].includes(f.id)).map((field: ExtractedField) => (
+                    <div
+                      key={field.id}
+                      className={cn(
+                        "text-[10px] md:text-xs px-1.5 md:px-2 py-0.5 md:py-1 rounded-md md:rounded-lg flex items-center gap-0.5 md:gap-1",
+                        field.id === 'phone' || field.id === 'email' || field.id === 'alt_contact'
+                          ? isDark
+                            ? "bg-green-500/10 text-green-400 border border-green-500/20"
+                            : "bg-green-500/5 text-green-600 border border-green-500/10"
+                          : isDark
+                            ? "bg-blue-500/10 text-blue-400 border border-blue-500/20"
+                            : "bg-blue-500/5 text-blue-600 border border-blue-500/10"
+                      )}
+                    >
+                      <span className="opacity-70">{field.label}:</span>
+                      <span className="font-medium truncate max-w-[80px] md:max-w-none">{field.value}</span>
+                      <CheckCircle className="w-2.5 h-2.5 md:w-3 md:h-3 opacity-60 flex-shrink-0" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+          {/* Other Extracted Fields */}
+          {extractedFields.filter(f =>
+            !f.id.startsWith('appt_') &&
+            !['name', 'phone', 'email', 'alt_contact', 'company'].includes(f.id)
+          ).length > 0 && (
+              <div>
+                <div className="flex items-center gap-1.5 md:gap-2 mb-1.5">
+                  <Tag className={cn(
+                    "w-3 h-3 md:w-4 md:h-4",
+                    isDark ? "text-white/60" : "text-black/60"
+                  )} />
+                  <span className={cn(
+                    "text-[10px] md:text-xs font-medium",
+                    isDark ? "text-white/60" : "text-black/60"
+                  )}>
+                    Other Details
+                  </span>
+                </div>
+                <div className="flex flex-wrap gap-1.5 md:gap-2">
+                  {extractedFields.filter(f =>
+                    !f.id.startsWith('appt_') &&
+                    !['name', 'phone', 'email', 'alt_contact', 'company'].includes(f.id)
+                  ).map((field: ExtractedField) => (
+                    <div
+                      key={field.id}
+                      className={cn(
+                        "text-[10px] md:text-xs px-1.5 md:px-2 py-0.5 md:py-1 rounded-md md:rounded-lg flex items-center gap-0.5 md:gap-1",
+                        isDark
+                          ? "bg-purple-500/10 text-purple-400 border border-purple-500/20"
+                          : "bg-purple-500/5 text-purple-600 border border-purple-500/10"
+                      )}
+                    >
+                      <span className="opacity-70">{field.label}:</span>
+                      <span className="font-medium truncate max-w-[60px] md:max-w-none">{field.value}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
         </div>
       )}
 
@@ -172,19 +257,19 @@ export default function LiveCallMonitor({ isDark = true }: LiveCallMonitorProps)
                 {message.speaker === 'agent' && (
                   <div className={cn(
                     "w-6 h-6 md:w-8 md:h-8 rounded-md md:rounded-lg flex items-center justify-center flex-shrink-0",
-                    isDark 
-                      ? "bg-blue-500/20 border border-blue-500/30" 
+                    isDark
+                      ? "bg-blue-500/20 border border-blue-500/30"
                       : "bg-blue-500/10 border border-blue-500/20"
                   )}>
                     <Bot className="w-3 h-3 md:w-4 md:h-4 text-blue-400" />
                   </div>
                 )}
-                
+
                 <div className={cn(
                   "max-w-[80%] rounded-xl md:rounded-2xl px-3 md:px-4 py-2 md:py-3",
                   message.speaker === 'agent'
-                    ? isDark 
-                      ? "bg-blue-500/10 border border-blue-500/20" 
+                    ? isDark
+                      ? "bg-blue-500/10 border border-blue-500/20"
                       : "bg-blue-500/10 border border-blue-500/20"
                     : isDark
                       ? "bg-purple-500/10 border border-purple-500/20"
@@ -207,8 +292,8 @@ export default function LiveCallMonitor({ isDark = true }: LiveCallMonitorProps)
                 {message.speaker === 'user' && (
                   <div className={cn(
                     "w-6 h-6 md:w-8 md:h-8 rounded-md md:rounded-lg flex items-center justify-center flex-shrink-0",
-                    isDark 
-                      ? "bg-purple-500/20 border border-purple-500/30" 
+                    isDark
+                      ? "bg-purple-500/20 border border-purple-500/30"
                       : "bg-purple-500/10 border border-purple-500/20"
                   )}>
                     <User className="w-3 h-3 md:w-4 md:h-4 text-purple-400" />

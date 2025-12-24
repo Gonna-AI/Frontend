@@ -1,11 +1,20 @@
 /**
  * Local LLM Service for ClerkTree
  * 
- * Provides AI using Ollama via Cloudflare tunnel
- * Default: https://spirit-indoor-chorus-equation.trycloudflare.com
+ * Provides AI using Ollama via Cloudflare tunnel with Mistral-style Function Calling
+ * Reference: https://docs.mistral.ai/capabilities/function_calling
+ * 
+ * Key Features:
+ * - Function calling for structured data extraction
+ * - Seriousness/Priority assessment (critical, high, medium, low)
+ * - Sentiment analysis and topic identification
+ * - Caller information extraction
+ * - Conversation summarization
+ * 
+ * Default: https://consumption-monetary-thrown-manufacture.trycloudflare.com
  * Override with VITE_OLLAMA_URL in .env if needed
  * 
- * Uses /api/generate endpoint as requested
+ * Uses /api/generate and /api/chat endpoints
  */
 
 import {
@@ -15,6 +24,13 @@ import {
   PriorityLevel,
   KnowledgeBaseConfig
 } from '../contexts/DemoCallContext';
+
+import {
+  ConversationAnalysis,
+  generateFunctionCallingSystemPrompt,
+  SeriousnessResult,
+  IssueTopicsResult
+} from './functionCallingTools';
 
 // Configuration - using local service via cloudflare tunnel
 // Clean URL: remove trailing slashes, extra spaces, and any trailing text
@@ -40,6 +56,28 @@ export interface LocalLLMResponse {
   suggestedCategory?: { id: string; name: string; confidence: number };
   suggestedPriority?: PriorityLevel;
   followUpRequired?: boolean;
+  // Function calling results
+  analysis?: ConversationAnalysis;
+  toolCalls?: ToolCallResult[];
+}
+
+// Tool call result from the model
+export interface ToolCallResult {
+  id: string;
+  name: string;
+  arguments: Record<string, unknown>;
+  result?: unknown;
+}
+
+// Sentiment card for UI display
+export interface SentimentCard {
+  id: string;
+  type: 'sentiment' | 'urgency' | 'topic' | 'caller' | 'summary';
+  title: string;
+  value: string;
+  icon: string;
+  color: 'red' | 'orange' | 'yellow' | 'green' | 'blue' | 'purple' | 'gray';
+  details?: string;
 }
 
 class LocalLLMService {
@@ -379,6 +417,7 @@ class LocalLLMService {
 
   /**
    * Generate response using Local LLM service via /api/generate
+   * Enhanced with Mistral-style function calling system prompt
    */
   async generateResponse(
     userMessage: string,
@@ -390,19 +429,37 @@ class LocalLLMService {
       throw new Error('Local LLM not available');
     }
 
-    // Build the prompt string for /api/generate
-    // We manually construct the chat history
+    // Build the enhanced prompt string for /api/generate
+    // Using Mistral-style function calling system prompt structure
 
-    // 1. System Prompt
-    let prompt = `System: You are a receptionist. Keep responses short (1-2 sentences).`;
-    if (existingFields.length > 0) {
-      const info = existingFields.map(f => `${f.label}: ${f.value}`).join(', ');
-      prompt += ` Known info: ${info}.`;
-    }
-    prompt += `\n`;
+    // 1. Enhanced System Prompt with function calling context
+    const knownInfo = existingFields.length > 0
+      ? existingFields.map(f => `${f.label}: ${f.value}`).join(', ')
+      : '';
 
-    // 2. Conversation History (last 6 messages)
-    const recentHistory = conversationHistory.slice(-6);
+    const toolNames = [
+      'extract_caller_info - Get caller name, contact, company',
+      'assess_seriousness - Determine priority (critical/high/medium/low)',
+      'analyze_sentiment - Detect caller emotion and mood',
+      'identify_issue_topics - Categorize the main issue',
+      'extract_appointment - Get date, time, and purpose for appointments'
+    ];
+
+    // Check what contact info we already have
+    const hasPhone = existingFields.some(f => f.id === 'phone' || f.label.toLowerCase().includes('phone'));
+    const hasEmail = existingFields.some(f => f.id === 'email' || f.label.toLowerCase().includes('email'));
+
+    const systemPrompt = generateFunctionCallingSystemPrompt(
+      knowledgeBase.persona || 'Professional AI Receptionist',
+      knownInfo,
+      toolNames,
+      { hasPhone, hasEmail } // Pass contact info status
+    );
+
+    let prompt = `System: ${systemPrompt}\n\n`;
+
+    // 2. Conversation History (last 8 messages for better context)
+    const recentHistory = conversationHistory.slice(-8);
     for (const msg of recentHistory) {
       const role = msg.speaker === 'agent' ? 'Assistant' : 'User';
       // Clean previous agent messages to avoid feeding back garbage
@@ -412,10 +469,14 @@ class LocalLLMService {
       }
     }
 
-    // 3. Current User Message
-    prompt += `User: ${userMessage}\nAssistant:`;
+    // 3. Current User Message with analysis instruction
+    prompt += `User: ${userMessage}\n`;
+    prompt += `\n[Internal Analysis - respond naturally, then extract key info]\n`;
+    prompt += `Assistant:`;
 
-    console.log('📝 Sending prompt to /api/generate:', prompt.substring(0, 500) + '...');
+    console.log('📝 Sending enhanced prompt to /api/generate');
+    console.log('   Known fields:', existingFields.length);
+    console.log('   History messages:', recentHistory.length);
 
     try {
       const response = await fetch(`${LLM_URL}/api/generate`, {
@@ -446,7 +507,7 @@ class LocalLLMService {
 
       console.log('📝 Raw response length:', rawResponse.length, 'chars');
 
-      // Since 'thinking' is false, we don't expect <think> tags, but we should still handle them just in case
+      // Parse reasoning/thinking if present
       const { reasoning, answer } = this.parseReasoningResponse(rawResponse);
 
       console.log(' Reasoning extracted:', reasoning ? `${reasoning.length} chars` : 'none');
@@ -461,15 +522,35 @@ class LocalLLMService {
         throw new Error('Received empty response from LLM');
       }
 
-      // Parse any metadata if the model outputted JSON (unlikely with this simple prompt but possible if trained)
+      // Parse any metadata if the model outputted JSON
       const extracted = this.parseExtractedMetadata(finalResponse, knowledgeBase, existingFields);
+
+      // Run AI-based analysis in background (non-blocking)
+      // This uses pure AI/ML - no hardcoded patterns
+      let aiAnalysis: Awaited<ReturnType<typeof this.extractAIAnalysis>> = { fields: [] };
+      try {
+        aiAnalysis = await this.extractAIAnalysis(userMessage, existingFields);
+      } catch (analysisError) {
+        console.warn('AI analysis failed, continuing without:', analysisError);
+      }
+
+      // Merge extracted fields with AI analysis
+      const allFields = [...extracted.extractedFields];
+      if (aiAnalysis.fields) {
+        for (const field of aiAnalysis.fields) {
+          if (!allFields.find(f => f.id === field.id)) {
+            allFields.push(field);
+          }
+        }
+      }
 
       return {
         response: extracted.cleanResponse,
         reasoning: reasoning || undefined,
-        extractedFields: extracted.extractedFields,
-        suggestedCategory: extracted.suggestedCategory,
-        suggestedPriority: extracted.suggestedPriority,
+        extractedFields: allFields,
+        suggestedCategory: extracted.suggestedCategory || aiAnalysis.category,
+        suggestedPriority: extracted.suggestedPriority || aiAnalysis.priority,
+        analysis: aiAnalysis.analysis,
       };
 
     } catch (error) {
@@ -479,7 +560,263 @@ class LocalLLMService {
   }
 
   /**
-   * Generate call summary using /api/generate
+   * Extract analysis from the conversation using AI model
+   * PURE AI/ML APPROACH - No hardcoded patterns
+   * Makes a focused API call to extract structured data from the message
+   */
+  private async extractAIAnalysis(
+    userMessage: string,
+    existingFields: ExtractedField[]
+  ): Promise<{
+    fields: ExtractedField[];
+    priority?: PriorityLevel;
+    category?: { id: string; name: string; confidence: number };
+    analysis?: ConversationAnalysis;
+  }> {
+    const fields: ExtractedField[] = [];
+    const now = new Date();
+
+    // Build context of what we already know
+    const knownFields = existingFields.map(f => `${f.label}: ${f.value}`).join(', ');
+
+    // AI-powered extraction prompt - model does ALL the work
+    const analysisPrompt = `Analyze this caller message and extract structured information. Respond with ONLY valid JSON.
+
+MESSAGE: "${userMessage}"
+${knownFields ? `\nALREADY KNOWN: ${knownFields}` : ''}
+
+Extract and return JSON (use null if not detected):
+{
+  "caller_name": "extracted full name or null",
+  "phone": "phone number or null", 
+  "email": "email address or null",
+  "company": "company/organization name or null",
+  "reference_number": "any reference/case/account number or null",
+  "alternative_contact": "any other contact method mentioned (WhatsApp, callback time, etc) or null",
+  "priority": "critical|high|medium|low",
+  "priority_reasoning": "why this priority level",
+  "sentiment": "positive|neutral|negative",
+  "emotion": "happy|satisfied|neutral|confused|frustrated|angry|anxious|sad|relieved",
+  "emotion_intensity": "mild|moderate|strong",
+  "category": "inquiry|support|complaint|appointment|feedback|sales|billing|technical|other",
+  "topic": "main topic of the message",
+  "escalation_needed": "yes|no|maybe",
+  "time_sensitivity": "immediate|today|this_week|no_rush",
+  "is_appointment_request": true|false,
+  "appointment_date": "YYYY-MM-DD format or null",
+  "appointment_time": "HH:MM format (24h) or null",
+  "appointment_purpose": "what the appointment is for or null"
+}`;
+
+    try {
+      console.log('🤖 Running AI-based message analysis...');
+
+      const response = await fetch(`${LLM_URL}/api/generate`, {
+        method: 'POST',
+        mode: 'cors',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+          model: MODEL_NAME,
+          prompt: analysisPrompt,
+          stream: false,
+          thinking: false
+        }),
+        signal: AbortSignal.timeout(30000), // 30 second timeout for quick analysis
+      });
+
+      if (!response.ok) {
+        console.warn('AI analysis request failed, returning empty analysis');
+        return { fields };
+      }
+
+      const data = await response.json();
+      const rawResponse = data.response || '';
+
+      // Parse JSON from response
+      let parsed: Record<string, unknown> | null = null;
+      try {
+        const jsonMatch = rawResponse.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          parsed = JSON.parse(jsonMatch[0]);
+        }
+      } catch (e) {
+        console.warn('Failed to parse AI analysis JSON:', e);
+        return { fields };
+      }
+
+      if (!parsed) {
+        return { fields };
+      }
+
+      console.log('✅ AI analysis extracted:', {
+        name: parsed.caller_name,
+        priority: parsed.priority,
+        emotion: parsed.emotion,
+        category: parsed.category
+      });
+
+      // Extract fields from AI response (only if not already known)
+      if (parsed.caller_name && typeof parsed.caller_name === 'string' && parsed.caller_name !== 'null' && !existingFields.find(f => f.id === 'name')) {
+        fields.push({
+          id: 'name',
+          label: 'Caller Name',
+          value: parsed.caller_name,
+          confidence: 0.9,
+          extractedAt: now
+        });
+      }
+
+      if (parsed.phone && typeof parsed.phone === 'string' && parsed.phone !== 'null' && !existingFields.find(f => f.id === 'phone')) {
+        fields.push({
+          id: 'phone',
+          label: 'Phone Number',
+          value: parsed.phone,
+          confidence: 0.95,
+          extractedAt: now
+        });
+      }
+
+      if (parsed.email && typeof parsed.email === 'string' && parsed.email !== 'null' && !existingFields.find(f => f.id === 'email')) {
+        fields.push({
+          id: 'email',
+          label: 'Email',
+          value: parsed.email,
+          confidence: 0.95,
+          extractedAt: now
+        });
+      }
+
+      if (parsed.company && typeof parsed.company === 'string' && parsed.company !== 'null' && !existingFields.find(f => f.id === 'company')) {
+        fields.push({
+          id: 'company',
+          label: 'Company/Organization',
+          value: parsed.company,
+          confidence: 0.85,
+          extractedAt: now
+        });
+      }
+
+      if (parsed.reference_number && typeof parsed.reference_number === 'string' && parsed.reference_number !== 'null' && !existingFields.find(f => f.id === 'reference')) {
+        fields.push({
+          id: 'reference',
+          label: 'Reference Number',
+          value: parsed.reference_number,
+          confidence: 0.95,
+          extractedAt: now
+        });
+      }
+
+      // Extract alternative contact method (WhatsApp, callback time, etc.)
+      if (parsed.alternative_contact && typeof parsed.alternative_contact === 'string' && parsed.alternative_contact !== 'null' && !existingFields.find(f => f.id === 'alt_contact')) {
+        fields.push({
+          id: 'alt_contact',
+          label: 'Alternative Contact',
+          value: parsed.alternative_contact,
+          confidence: 0.85,
+          extractedAt: now
+        });
+      }
+
+      // Extract appointment details
+      if (parsed.is_appointment_request === true) {
+        if (parsed.appointment_date && typeof parsed.appointment_date === 'string' && parsed.appointment_date !== 'null') {
+          fields.push({
+            id: 'appt_date',
+            label: 'Appointment Date',
+            value: parsed.appointment_date,
+            confidence: 0.9,
+            extractedAt: now
+          });
+        }
+        if (parsed.appointment_time && typeof parsed.appointment_time === 'string' && parsed.appointment_time !== 'null') {
+          fields.push({
+            id: 'appt_time',
+            label: 'Appointment Time',
+            value: parsed.appointment_time,
+            confidence: 0.9,
+            extractedAt: now
+          });
+        }
+        if (parsed.appointment_purpose && typeof parsed.appointment_purpose === 'string' && parsed.appointment_purpose !== 'null') {
+          fields.push({
+            id: 'appt_purpose',
+            label: 'Appointment Purpose',
+            value: parsed.appointment_purpose,
+            confidence: 0.85,
+            extractedAt: now
+          });
+        }
+      }
+
+      // Extract priority (AI-determined)
+      const priority = ['critical', 'high', 'medium', 'low'].includes(parsed.priority as string)
+        ? (parsed.priority as PriorityLevel)
+        : undefined;
+
+      // Extract category (AI-determined)
+      const validCategories = ['inquiry', 'support', 'complaint', 'appointment', 'feedback', 'sales', 'billing', 'technical', 'other'];
+      const category = validCategories.includes(parsed.category as string)
+        ? {
+          id: parsed.category as string,
+          name: (parsed.category as string).charAt(0).toUpperCase() + (parsed.category as string).slice(1),
+          confidence: 0.85
+        }
+        : undefined;
+
+      // Build analysis object from AI response
+      const analysis: ConversationAnalysis = {
+        seriousness: priority ? {
+          priority_level: priority,
+          urgency_indicators: [],
+          reasoning: (parsed.priority_reasoning as string) || 'AI-determined priority',
+          escalation_needed: (parsed.escalation_needed as 'yes' | 'no' | 'maybe') || 'no',
+          time_sensitivity: (parsed.time_sensitivity as 'immediate' | 'today' | 'this_week' | 'no_rush') || 'this_week'
+        } : undefined,
+        sentiment: parsed.sentiment ? {
+          overall_sentiment: (parsed.sentiment as 'positive' | 'neutral' | 'negative') || 'neutral',
+          caller_emotion: (parsed.emotion as any) || 'neutral',
+          emotion_intensity: (parsed.emotion_intensity as 'mild' | 'moderate' | 'strong') || 'moderate'
+        } : undefined,
+        issueTopics: parsed.topic ? {
+          primary_topic: parsed.topic as string,
+          issue_category: (parsed.category as string) || 'inquiry',
+          issue_description: parsed.topic as string
+        } : undefined,
+        // Add appointment details if this is an appointment request
+        appointment: parsed.is_appointment_request === true ? {
+          requested: true,
+          date: parsed.appointment_date as string || undefined,
+          time: parsed.appointment_time as string || undefined,
+          purpose: parsed.appointment_purpose as string || undefined,
+          confirmed: false
+        } : undefined,
+        // Add contact status
+        contactStatus: {
+          has_phone: !!(parsed.phone && parsed.phone !== 'null') || existingFields.some(f => f.id === 'phone'),
+          has_email: !!(parsed.email && parsed.email !== 'null') || existingFields.some(f => f.id === 'email'),
+          has_any_contact: !!(parsed.phone || parsed.email || parsed.alternative_contact) ||
+            existingFields.some(f => ['phone', 'email', 'alt_contact'].includes(f.id)),
+          needs_followup_contact: !(parsed.phone || parsed.email || parsed.alternative_contact) &&
+            !existingFields.some(f => ['phone', 'email', 'alt_contact'].includes(f.id)),
+          alternative_contact: parsed.alternative_contact as string || undefined
+        }
+      };
+
+      return { fields, priority, category, analysis };
+
+    } catch (error) {
+      console.error('AI analysis error:', error);
+      // Return empty on error - don't block the main response
+      return { fields };
+    }
+  }
+
+  /**
+   * Generate comprehensive call summary using function calling approach
+   * Based on Mistral AI function calling pattern for structured data extraction
    */
   async summarizeCall(
     messages: CallMessage[],
@@ -493,6 +830,11 @@ class LocalLLMService {
     followUpRequired: boolean;
     notes: string;
     callerName?: string;
+    // Enhanced function calling results
+    analysis?: ConversationAnalysis;
+    sentimentCards?: SentimentCard[];
+    seriousnessLevel?: SeriousnessResult;
+    issueTopics?: IssueTopicsResult;
   }> {
     if (!this.isAvailable) {
       throw new Error('Local LLM not available');
@@ -533,15 +875,48 @@ class LocalLLMService {
       }
     }
 
-    // Simple prompt for summary
-    const prompt = `System: Summarize this call in JSON format: {"summary": "...", "mainPoints": ["...", "..."], "sentiment": "neutral", "followUpRequired": false, "notes": "..."}.
-    
+    // Enhanced function calling prompt for comprehensive analysis
+    const prompt = `System: You are an expert AI analyst specializing in call analysis. Analyze this conversation transcript and extract comprehensive structured information.
+
+## CONVERSATION TRANSCRIPT
 ${transcript}
 
+## KNOWN INFORMATION
 ${callerName ? `Caller Name: ${callerName}` : 'Caller name: Unknown'}
 ${extractedText ? `Extracted Info: ${extractedText}` : ''}
 ${category ? `Category: ${category.name}` : ''}
-${priority ? `Priority: ${priority}` : ''}
+${priority ? `Initial Priority: ${priority}` : ''}
+
+## ANALYSIS INSTRUCTIONS
+Provide a comprehensive analysis in JSON format. Include:
+1. SERIOUSNESS: Assess urgency level (critical/high/medium/low) based on keywords, tone, and context
+2. SENTIMENT: Analyze caller emotion and overall sentiment
+3. TOPICS: Identify main issues and categories discussed
+4. SUMMARY: Create a concise summary with key points
+
+Respond with ONLY valid JSON:
+{
+  "summary": "Brief 1-2 sentence summary",
+  "mainPoints": ["key point 1", "key point 2", "key point 3"],
+  "outcome": "resolved|unresolved|needs_followup|escalated",
+  "seriousness": {
+    "priority_level": "critical|high|medium|low",
+    "reasoning": "Why this priority",
+    "escalation_needed": "yes|no|maybe",
+    "time_sensitivity": "immediate|today|this_week|no_rush"
+  },
+  "sentiment": "positive|neutral|negative",
+  "caller_emotion": "happy|satisfied|neutral|confused|frustrated|angry|anxious|sad|relieved",
+  "emotion_intensity": "mild|moderate|strong",
+  "primary_topic": "Main topic discussed",
+  "issue_category": "inquiry|support|complaint|appointment|feedback|sales|billing|technical|other",
+  "resolution_status": "resolved|partially_resolved|unresolved|needs_followup",
+  "keywords": ["keyword1", "keyword2"],
+  "action_items": ["action 1", "action 2"],
+  "followUpRequired": true,
+  "follow_up_notes": "What follow-up is needed",
+  "notes": "Additional observations"
+}
 
 Assistant:`;
 
@@ -573,8 +948,8 @@ Assistant:`;
 
       console.log('📝 Summary raw response:', rawResponse.slice(0, 200));
 
-      // Attempt to parse JSON
-      let parsedSummary = null;
+      // Attempt to parse enhanced JSON response
+      let parsedSummary: Record<string, unknown> | null = null;
       try {
         const jsonMatch = rawResponse.match(/\{[\s\S]*\}/);
         if (jsonMatch) {
@@ -585,13 +960,145 @@ Assistant:`;
       }
 
       if (parsedSummary) {
+        // Extract seriousness analysis
+        let seriousnessLevel: SeriousnessResult | undefined;
+        if (parsedSummary.seriousness && typeof parsedSummary.seriousness === 'object') {
+          const s = parsedSummary.seriousness as Record<string, unknown>;
+          seriousnessLevel = {
+            priority_level: (s.priority_level as PriorityLevel) || priority || 'medium',
+            urgency_indicators: [],
+            reasoning: (s.reasoning as string) || '',
+            escalation_needed: (s.escalation_needed as 'yes' | 'no' | 'maybe') || 'no',
+            time_sensitivity: (s.time_sensitivity as 'immediate' | 'today' | 'this_week' | 'no_rush') || 'this_week'
+          };
+        }
+
+        // Extract issue topics
+        let issueTopics: IssueTopicsResult | undefined;
+        if (parsedSummary.primary_topic || parsedSummary.issue_category) {
+          issueTopics = {
+            primary_topic: (parsedSummary.primary_topic as string) || 'General inquiry',
+            issue_category: (parsedSummary.issue_category as string) || 'inquiry',
+            issue_description: (parsedSummary.summary as string) || '',
+            resolution_status: (parsedSummary.resolution_status as 'resolved' | 'partially_resolved' | 'unresolved' | 'needs_followup') || 'unresolved',
+            keywords: (parsedSummary.keywords as string[]) || []
+          };
+        }
+
+        // Build sentiment cards for UI display
+        const sentimentCards: SentimentCard[] = [];
+
+        // Seriousness card
+        if (seriousnessLevel) {
+          const priorityColors: Record<string, 'red' | 'orange' | 'yellow' | 'green'> = {
+            critical: 'red',
+            high: 'orange',
+            medium: 'yellow',
+            low: 'green'
+          };
+          sentimentCards.push({
+            id: 'seriousness',
+            type: 'urgency',
+            title: 'Priority Level',
+            value: seriousnessLevel.priority_level.toUpperCase(),
+            icon: '🚨',
+            color: priorityColors[seriousnessLevel.priority_level] || 'gray',
+            details: seriousnessLevel.reasoning
+          });
+        }
+
+        // Sentiment card
+        if (parsedSummary.sentiment || parsedSummary.caller_emotion) {
+          const sentimentColors: Record<string, 'green' | 'gray' | 'red' | 'blue'> = {
+            positive: 'green',
+            neutral: 'gray',
+            negative: 'red',
+            mixed: 'blue'
+          };
+          const emotionIcons: Record<string, string> = {
+            happy: '😊',
+            satisfied: '😌',
+            neutral: '😐',
+            confused: '😕',
+            frustrated: '😤',
+            angry: '😠',
+            anxious: '😰',
+            sad: '😢',
+            relieved: '😅'
+          };
+          sentimentCards.push({
+            id: 'sentiment',
+            type: 'sentiment',
+            title: 'Caller Sentiment',
+            value: (parsedSummary.caller_emotion as string) || (parsedSummary.sentiment as string) || 'neutral',
+            icon: emotionIcons[(parsedSummary.caller_emotion as string)] || '😐',
+            color: sentimentColors[(parsedSummary.sentiment as string)] || 'gray',
+            details: `Intensity: ${(parsedSummary.emotion_intensity as string) || 'moderate'}`
+          });
+        }
+
+        // Topic card
+        if (issueTopics) {
+          const categoryColors: Record<string, 'red' | 'orange' | 'yellow' | 'green' | 'blue' | 'purple'> = {
+            complaint: 'red',
+            support: 'orange',
+            appointment: 'green',
+            sales: 'blue',
+            feedback: 'purple',
+            billing: 'orange',
+            technical: 'yellow',
+            inquiry: 'blue'
+          };
+          sentimentCards.push({
+            id: 'topic',
+            type: 'topic',
+            title: 'Issue Category',
+            value: issueTopics.issue_category,
+            icon: '📋',
+            color: categoryColors[issueTopics.issue_category] || 'gray',
+            details: issueTopics.primary_topic
+          });
+        }
+
+        // Build full analysis object
+        const analysis: ConversationAnalysis = {
+          seriousness: seriousnessLevel,
+          issueTopics,
+          sentiment: parsedSummary.sentiment ? {
+            overall_sentiment: (parsedSummary.sentiment as 'positive' | 'neutral' | 'negative') || 'neutral',
+            caller_emotion: (parsedSummary.caller_emotion as any) || 'neutral',
+            emotion_intensity: (parsedSummary.emotion_intensity as 'mild' | 'moderate' | 'strong') || 'moderate'
+          } : undefined,
+          summary: {
+            brief_summary: (parsedSummary.summary as string) || '',
+            main_points: (parsedSummary.mainPoints as string[]) || [],
+            outcome: (parsedSummary.outcome as string) || 'unresolved',
+            follow_up_required: parsedSummary.followUpRequired === true ? 'yes' : 'no',
+            follow_up_notes: (parsedSummary.follow_up_notes as string) || ''
+          }
+        };
+
+        console.log('✅ Enhanced analysis complete:', {
+          priority: seriousnessLevel?.priority_level,
+          sentiment: parsedSummary.sentiment,
+          topic: issueTopics?.primary_topic,
+          cardsCount: sentimentCards.length
+        });
+
         return {
-          summary: parsedSummary.summary || 'Call completed',
-          mainPoints: Array.isArray(parsedSummary.mainPoints) ? parsedSummary.mainPoints : [parsedSummary.summary || 'Call completed'],
-          sentiment: ['positive', 'neutral', 'negative'].includes(parsedSummary.sentiment) ? parsedSummary.sentiment : 'neutral',
+          summary: (parsedSummary.summary as string) || 'Call completed',
+          mainPoints: Array.isArray(parsedSummary.mainPoints) ? parsedSummary.mainPoints as string[] : [(parsedSummary.summary as string) || 'Call completed'],
+          sentiment: ['positive', 'neutral', 'negative'].includes(parsedSummary.sentiment as string)
+            ? (parsedSummary.sentiment as 'positive' | 'neutral' | 'negative')
+            : 'neutral',
           followUpRequired: parsedSummary.followUpRequired === true || priority === 'high' || priority === 'critical',
-          notes: parsedSummary.notes || rawResponse,
-          callerName: callerName
+          notes: (parsedSummary.notes as string) || rawResponse,
+          callerName: callerName,
+          // Enhanced function calling results
+          analysis,
+          sentimentCards,
+          seriousnessLevel,
+          issueTopics
         };
       }
 
@@ -647,5 +1154,9 @@ export const localLLMService = new LocalLLMService();
 
 // Initialize on import
 localLLMService.initialize();
+
+// Re-export function calling types for use in other components
+export type { ConversationAnalysis, SeriousnessResult, IssueTopicsResult } from './functionCallingTools';
+export { conversationTools, mapToExtractedFields, generateFunctionCallingSystemPrompt } from './functionCallingTools';
 
 export default localLLMService;

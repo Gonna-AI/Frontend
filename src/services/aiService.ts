@@ -46,6 +46,10 @@ interface ConversationState {
   isWrappingUp: boolean;
 }
 
+// Import function calling types
+import type { ConversationAnalysis, SeriousnessResult, IssueTopicsResult } from './localLLMService';
+import type { SentimentCard } from './localLLMService';
+
 // Response types for AI operations
 export interface AIResponse {
   text: string;
@@ -55,12 +59,19 @@ export interface AIResponse {
   suggestedPriority?: PriorityLevel;
   confidence: number;
   source?: 'gemini' | 'local-llm' | 'mock';
+  // Enhanced function calling analysis
+  analysis?: ConversationAnalysis;
 }
 
 export interface SummaryResponse {
   summary: CallSummary;
   tags: string[];
   callerName?: string; // Caller name extracted during summary
+  // Enhanced function calling results
+  analysis?: ConversationAnalysis;
+  sentimentCards?: SentimentCard[];
+  seriousnessLevel?: SeriousnessResult;
+  issueTopics?: IssueTopicsResult;
 }
 
 export interface FieldExtractionResponse {
@@ -249,7 +260,7 @@ class AIService {
           extractedFields
         );
 
-        // Convert to our format
+        // Convert to our format, including enhanced function calling analysis
         const response: AIResponse = {
           text: result.response,
           reasoning: result.reasoning, // Pass through reasoning for display
@@ -257,6 +268,7 @@ class AIService {
           suggestedPriority: result.suggestedPriority,
           confidence: 0.88,
           source: 'local-llm',
+          analysis: result.analysis, // Pass through function calling analysis
         };
 
         // Map suggested category
@@ -271,6 +283,12 @@ class AIService {
         }
 
         console.log('✅ Local LLM response received');
+        if (result.analysis) {
+          console.log('   📊 Analysis included:', {
+            priority: result.analysis.seriousness?.priority_level,
+            sentiment: result.analysis.sentiment?.overall_sentiment
+          });
+        }
         return response;
 
       } catch (error) {
@@ -359,10 +377,10 @@ class AIService {
       }
     }
 
-    // Step 2: Try Local LLM
+    // Step 2: Try Local LLM with enhanced function calling
     if (this.config.useLocalLLM && this.localLLMAvailable) {
       try {
-        console.log('🖥️ Calling Local LLM for summary...');
+        console.log('🖥️ Calling Local LLM for summary with function calling...');
         const result = await localLLMService.summarizeCall(
           messages,
           extractedFields,
@@ -373,11 +391,20 @@ class AIService {
         const tags: string[] = [];
         if (category) tags.push(category.id);
         if (result.followUpRequired) tags.push('follow-up');
+        // Add tags based on enhanced analysis
+        if (result.seriousnessLevel?.priority_level === 'critical') tags.push('critical');
+        if (result.seriousnessLevel?.priority_level === 'high') tags.push('high-priority');
+        if (result.issueTopics?.issue_category) tags.push(result.issueTopics.issue_category);
 
         // Include caller name in notes if extracted
         let notes = result.notes;
         if (result.callerName && !notes.toLowerCase().includes(result.callerName.toLowerCase())) {
           notes = `Caller: ${result.callerName}. ${notes}`.trim();
+        }
+
+        console.log('✅ Enhanced summary with function calling complete');
+        if (result.sentimentCards) {
+          console.log(`   📊 Generated ${result.sentimentCards.length} sentiment cards`);
         }
 
         return {
@@ -389,7 +416,12 @@ class AIService {
             notes,
           },
           tags,
-          callerName: result.callerName, // Pass caller name back
+          callerName: result.callerName,
+          // Enhanced function calling results
+          analysis: result.analysis,
+          sentimentCards: result.sentimentCards,
+          seriousnessLevel: result.seriousnessLevel,
+          issueTopics: result.issueTopics,
         };
 
       } catch (error) {
