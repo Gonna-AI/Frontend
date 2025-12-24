@@ -133,7 +133,7 @@ class AIService {
     if (this.localLLMAvailable) {
       console.log('🖥️ Local LLM available:', localLLMService.getServiceUrl());
     } else {
-      const llmUrl = import.meta.env.VITE_OLLAMA_URL || 'https://spirit-indoor-chorus-equation.trycloudflare.com';
+      const llmUrl = import.meta.env.VITE_OLLAMA_URL || 'https://production-jeff-shine-roy.trycloudflare.com';
       console.log(`⚠️ Local LLM not available. Check: ${llmUrl}`);
       console.log('💡 Make sure your cloudflare tunnel is running and accessible');
     }
