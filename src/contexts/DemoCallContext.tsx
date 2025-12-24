@@ -711,7 +711,7 @@ export function DemoCallProvider({ children }: { children: ReactNode }) {
     }
 
     // Common words to filter out as false positives
-    const commonWords = ['hello', 'hi', 'hey', 'yes', 'no', 'okay', 'sure', 'thanks', 'thank', 'you', 'the', 'a', 'an', 'how', 'can', 'help', 'may', 'please', 'need', 'want', 'have'];
+    const commonWords = ['hello', 'hi', 'hey', 'yes', 'no', 'okay', 'sure', 'thanks', 'thank', 'you', 'the', 'a', 'an', 'how', 'can', 'help', 'may', 'please', 'need', 'want', 'have', 'for', 'reaching', 'out', 'your', 'this', 'that', 'with', 'about', 'today', 'there', 'got', 'it'];
 
     // Try to find name in messages where user introduced themselves
     const userMessages = call.messages.filter(m => m.speaker === 'user');
@@ -830,8 +830,10 @@ export function DemoCallProvider({ children }: { children: ReactNode }) {
 
           // IMMEDIATELY save to Supabase so real-time sync works across tabs/pages
           try {
+            const userId = getUserId();
             const initialPayload = {
               id: initialHistoryItem.id,
+              user_id: userId, // Required for RLS
               caller_name: initialHistoryItem.callerName,
               date: initialHistoryItem.date.toISOString(),
               duration: initialHistoryItem.duration,
@@ -918,9 +920,11 @@ export function DemoCallProvider({ children }: { children: ReactNode }) {
 
           // Save to Supabase
           try {
-            // Build base payload
+            // Build base payload with user_id for RLS
+            const userId = getUserId();
             const basePayload = {
               id: finalHistoryItem.id,
+              user_id: userId, // Required for RLS
               caller_name: finalHistoryItem.callerName,
               date: finalHistoryItem.date.toISOString(),
               duration: finalHistoryItem.duration,
