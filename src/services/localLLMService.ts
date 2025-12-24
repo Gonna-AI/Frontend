@@ -26,7 +26,7 @@ const getCleanURL = (url: string) => {
   cleaned = cleaned.replace(/\/+$/, '');
   return cleaned;
 };
-const LLM_URL = getCleanURL(import.meta.env.VITE_OLLAMA_URL || 'https://spirit-indoor-chorus-equation.trycloudflare.com');
+const LLM_URL = getCleanURL(import.meta.env.VITE_OLLAMA_URL || 'https://consumption-monetary-thrown-manufacture.trycloudflare.com');
 const MODEL_NAME = 'qwen3:4b';
 
 // Timeout in milliseconds
@@ -57,7 +57,11 @@ class LocalLLMService {
       // Test the /api/generate endpoint with a simple prompt
       const testResponse = await fetch(`${LLM_URL}/api/generate`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        mode: 'cors', // Explicitly request CORS
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
         body: JSON.stringify({
           model: MODEL_NAME,
           prompt: 'ping',
@@ -93,15 +97,18 @@ class LocalLLMService {
       console.error(`   Error: ${errorMsg}`);
       console.error(`   Error Type: ${e instanceof Error ? e.constructor.name : typeof e}`);
 
-      if (errorMsg.includes('Failed to fetch') || errorMsg.includes('NetworkError')) {
-        console.error('   💡 This is likely a CORS or network issue.');
-        console.error('   💡 Check if the local service is running and accessible via cloudflare tunnel.');
-        console.error('   💡 Verify the URL in Netlify environment variables matches your cloudflare tunnel URL.');
+      if (errorMsg.includes('Failed to fetch') || errorMsg.includes('NetworkError') || errorMsg.includes('Load failed')) {
+        console.error('   💡 This is a CORS (Cross-Origin Resource Sharing) issue!');
+        console.error('   💡 The Ollama server needs to allow requests from your website.');
+        console.error('   💡 FIX: On the machine running Ollama, set the environment variable:');
+        console.error('   💡       export OLLAMA_ORIGINS="*"');
+        console.error('   💡       Then restart Ollama with: ollama serve');
+        console.error('   💡 Alternatively, set OLLAMA_ORIGINS to your specific domain.');
       } else if (errorMsg.includes('timeout')) {
         console.error('   💡 Connection timed out. Service might be slow or down.');
       } else {
         console.error('   💡 Make sure VITE_OLLAMA_URL is set correctly in Netlify environment variables.');
-        console.error('   💡 Current value:', import.meta.env.VITE_OLLAMA_URL || 'NOT SET');
+        console.error(`   💡 Current value: – "${import.meta.env.VITE_OLLAMA_URL || 'NOT SET'}"`);
       }
 
       this.isAvailable = false;
@@ -413,7 +420,11 @@ class LocalLLMService {
     try {
       const response = await fetch(`${LLM_URL}/api/generate`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        mode: 'cors',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
         body: JSON.stringify({
           model: MODEL_NAME,
           prompt: prompt,
@@ -539,7 +550,11 @@ Assistant:`;
 
       const response = await fetch(`${LLM_URL}/api/generate`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        mode: 'cors',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
         body: JSON.stringify({
           model: MODEL_NAME,
           prompt: prompt,
