@@ -858,12 +858,21 @@ export function DemoCallProvider({ children }: { children: ReactNode }) {
           try {
             if (endedCall.messages.length > 0) {
               console.log('🤖 Generating AI summary in background...');
-              const summaryResponse = await aiService.generateSummary(
+
+              // Wrap in a timeout promise to prevent hanging
+              const summaryPromise = aiService.generateSummary(
                 endedCall.messages,
                 endedCall.extractedFields,
                 endedCall.category,
                 endedCall.priority
               );
+
+              // Race against a 45-second timeout
+              const timeoutPromise = new Promise<never>((_, reject) =>
+                setTimeout(() => reject(new Error('Summary generation timed out after 45s')), 45000)
+              );
+
+              const summaryResponse = await Promise.race([summaryPromise, timeoutPromise]);
 
               finalSummary = summaryResponse.summary;
               tags = summaryResponse.tags;
@@ -874,11 +883,11 @@ export function DemoCallProvider({ children }: { children: ReactNode }) {
               console.log('✅ AI summary generated successfully');
             }
           } catch (error) {
-            console.error('Error generating AI summary:', error);
+            console.error('❌ Error generating AI summary:', error);
             // Keep placeholder summary but update the note
             finalSummary = {
               ...placeholderSummary,
-              notes: 'Summary generation failed. Call recorded successfully.',
+              notes: `Summary generation failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
             };
           }
 
@@ -939,8 +948,9 @@ export function DemoCallProvider({ children }: { children: ReactNode }) {
           } catch (error) {
             console.error('Error saving call to Supabase:', error);
           }
+          console.log('✅ Background call processing complete for:', historyId);
         } catch (bgError) {
-          console.error('Background processing error:', bgError);
+          console.error('❌ Background processing error:', bgError);
         }
       })();
     }
