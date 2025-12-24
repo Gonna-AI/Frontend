@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect } from 'react';
+import { useLanguage } from '../../contexts/LanguageContext';
 import { useTheme } from '../../hooks/useTheme';
 import { cn } from '../../utils/cn';
 import { Globe } from 'lucide-react';
@@ -7,22 +6,13 @@ import { Globe } from 'lucide-react';
 export default function LanguageSwitcher({ isExpanded = false, forceDark = false }: { isExpanded?: boolean; forceDark?: boolean }) {
     const { isDark: themeIsDark } = useTheme();
     const isDark = forceDark || themeIsDark;
-    const [language, setLanguage] = useState<'en' | 'de'>('en');
 
-    // Initialize from localStorage
-    useEffect(() => {
-        const savedLang = localStorage.getItem('app-language');
-        if (savedLang === 'en' || savedLang === 'de') {
-            setLanguage(savedLang);
-        }
-    }, []);
+    // Use the context hook
+    const { language, setLanguage, t } = useLanguage();
 
     const toggleLanguage = () => {
         const newLang = language === 'en' ? 'de' : 'en';
         setLanguage(newLang);
-        localStorage.setItem('app-language', newLang);
-        // Optionally trigger a window event or reload if needed, 
-        // but for UI design only, state update is enough.
     };
 
     if (!isExpanded) {
@@ -61,16 +51,13 @@ export default function LanguageSwitcher({ isExpanded = false, forceDark = false
                     "text-sm font-medium",
                     isDark ? "text-white/90" : "text-black/90"
                 )}>
-                    Language
+                    {t('nav.language')}
                 </span>
             </div>
 
             <div className="flex bg-black/10 dark:bg-white/10 p-1 rouned-lg rounded-md">
                 <button
-                    onClick={() => {
-                        setLanguage('en');
-                        localStorage.setItem('app-language', 'en');
-                    }}
+                    onClick={() => setLanguage('en')}
                     className={cn(
                         "px-2 py-1 text-xs font-medium rounded transition-all",
                         language === 'en'
@@ -85,10 +72,7 @@ export default function LanguageSwitcher({ isExpanded = false, forceDark = false
                     EN
                 </button>
                 <button
-                    onClick={() => {
-                        setLanguage('de');
-                        localStorage.setItem('app-language', 'de');
-                    }}
+                    onClick={() => setLanguage('de')}
                     className={cn(
                         "px-2 py-1 text-xs font-medium rounded transition-all",
                         language === 'de'

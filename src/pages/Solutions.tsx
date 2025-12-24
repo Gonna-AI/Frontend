@@ -1,15 +1,17 @@
 import { useNavigate } from 'react-router-dom';
 import { Zap, Brain, FileCheck, Clock, BarChart3, Shield, ArrowRight } from 'lucide-react';
+import { useLanguage } from '../contexts/LanguageContext';
 
 export default function Solutions() {
   const navigate = useNavigate();
+  const { t } = useLanguage();
 
   const solutions = [
     {
       icon: Brain,
-      title: 'AI-Powered Document Processing',
-      description: 'Automatically extract, classify, and validate information from claims documents using advanced machine learning models.',
-      features: ['OCR & Data Extraction', 'Document Classification', 'Auto-validation'],
+      title: t('solutions.card1Title'),
+      description: t('solutions.card1Desc'),
+      features: [t('solutions.card1Feat1'), t('solutions.card1Feat2'), t('solutions.card1Feat3')],
       gradient: 'from-emerald-500/10 to-teal-500/10',
       iconGradient: 'from-emerald-400 to-teal-500',
       borderColor: 'emerald-500/30',
@@ -17,9 +19,9 @@ export default function Solutions() {
     },
     {
       icon: Zap,
-      title: 'Intelligent Workflow Automation',
-      description: 'Streamline your claims process with smart routing, automated decision-making, and seamless handoffs between AI and human agents.',
-      features: ['Smart Task Routing', 'Automated Approvals', 'Process Optimization'],
+      title: t('solutions.card2Title'),
+      description: t('solutions.card2Desc'),
+      features: [t('solutions.card2Feat1'), t('solutions.card2Feat2'), t('solutions.card2Feat3')],
       gradient: 'from-blue-500/10 to-indigo-500/10',
       iconGradient: 'from-blue-400 to-indigo-500',
       borderColor: 'blue-500/30',
@@ -27,9 +29,9 @@ export default function Solutions() {
     },
     {
       icon: FileCheck,
-      title: 'Claims Triage & Prioritization',
-      description: 'Automatically categorize and prioritize incoming claims based on urgency, complexity, and potential fraud indicators.',
-      features: ['Urgency Detection', 'Complexity Analysis', 'Priority Scoring'],
+      title: t('solutions.card3Title'),
+      description: t('solutions.card3Desc'),
+      features: [t('solutions.card3Feat1'), t('solutions.card3Feat2'), t('solutions.card3Feat3')],
       gradient: 'from-purple-500/10 to-pink-500/10',
       iconGradient: 'from-purple-400 to-pink-500',
       borderColor: 'purple-500/30',
@@ -37,9 +39,9 @@ export default function Solutions() {
     },
     {
       icon: Clock,
-      title: 'Real-Time Status Tracking',
-      description: 'Provide complete visibility into claim status with automated updates, notifications, and comprehensive audit trails.',
-      features: ['Live Status Updates', 'Automated Notifications', 'Full Audit Trail'],
+      title: t('solutions.card4Title'),
+      description: t('solutions.card4Desc'),
+      features: [t('solutions.card4Feat1'), t('solutions.card4Feat2'), t('solutions.card4Feat3')],
       gradient: 'from-orange-500/10 to-red-500/10',
       iconGradient: 'from-orange-400 to-red-500',
       borderColor: 'orange-500/30',
@@ -47,9 +49,9 @@ export default function Solutions() {
     },
     {
       icon: BarChart3,
-      title: 'Analytics & Reporting',
-      description: 'Gain actionable insights with comprehensive dashboards, custom reports, and predictive analytics for better decision-making.',
-      features: ['Custom Dashboards', 'Predictive Analytics', 'Performance Metrics'],
+      title: t('solutions.card5Title'),
+      description: t('solutions.card5Desc'),
+      features: [t('solutions.card5Feat1'), t('solutions.card5Feat2'), t('solutions.card5Feat3')],
       gradient: 'from-cyan-500/10 to-blue-500/10',
       iconGradient: 'from-cyan-400 to-blue-500',
       borderColor: 'cyan-500/30',
@@ -57,9 +59,9 @@ export default function Solutions() {
     },
     {
       icon: Shield,
-      title: 'Compliance & Security',
-      description: 'Ensure regulatory compliance with built-in security features, audit logging, and automated compliance checks.',
-      features: ['Data Encryption', 'Compliance Monitoring', 'Access Controls'],
+      title: t('solutions.card6Title'),
+      description: t('solutions.card6Desc'),
+      features: [t('solutions.card6Feat1'), t('solutions.card6Feat2'), t('solutions.card6Feat3')],
       gradient: 'from-violet-500/10 to-purple-500/10',
       iconGradient: 'from-violet-400 to-purple-500',
       borderColor: 'violet-500/30',
@@ -109,7 +111,7 @@ export default function Solutions() {
           {/* Mobile Pill */}
           <div className="md:hidden">
             <span className="px-3 py-1.5 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-400 text-xs font-medium whitespace-nowrap">
-              Our Solutions
+              {t('nav.solutions')}
             </span>
           </div>
         </div>
@@ -122,15 +124,15 @@ export default function Solutions() {
           <div className="text-center mb-20">
             <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-6">
               <span className="bg-gradient-to-r from-white via-white/95 to-white/90 text-transparent bg-clip-text">
-                Built for Modern
+                {t('solutions.title1')}
               </span>
               <br />
               <span className="bg-gradient-to-r from-indigo-400 via-purple-400 to-indigo-600 text-transparent bg-clip-text">
-                Claims Operations
+                {t('solutions.title2')}
               </span>
             </h1>
             <p className="text-xl md:text-2xl text-white/60 leading-relaxed max-w-4xl mx-auto">
-              Transform your workflow with enterprise-grade automation, powered by cutting-edge AI technology.
+              {t('solutions.subtitle')}
             </p>
           </div>
 
@@ -192,22 +194,22 @@ export default function Solutions() {
             <div className="relative z-10 text-center py-16 px-8">
               <div className="inline-block mb-4">
                 <span className="px-4 py-2 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-400 text-sm font-medium">
-                  Start Your Journey
+                  {t('solutions.ctaBadge')}
                 </span>
               </div>
 
               <h2 className="text-4xl md:text-5xl font-bold mb-6">
                 <span className="bg-gradient-to-r from-white to-white/90 text-transparent bg-clip-text">
-                  Ready to Transform
+                  {t('solutions.ctaTitle1')}
                 </span>
                 <br />
                 <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-purple-600 text-transparent bg-clip-text">
-                  Your Operations?
+                  {t('solutions.ctaTitle2')}
                 </span>
               </h2>
 
               <p className="text-lg text-white/60 mb-10 max-w-2xl mx-auto leading-relaxed">
-                Schedule a personalized demo to see how our AI-powered solutions can reduce turnaround time by <span className="text-purple-400 font-semibold">40%</span> and dramatically improve accuracy.
+                {t('solutions.ctaDesc')} <span className="text-purple-400 font-semibold">{t('solutions.ctaDescHighlight')}</span> {t('solutions.ctaDescEnd')}
               </p>
 
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -215,7 +217,7 @@ export default function Solutions() {
                   onClick={() => navigate('/contact')}
                   className="w-full sm:w-auto group px-8 py-4 rounded-xl bg-gradient-to-r from-purple-500/20 via-pink-500/20 to-purple-600/20 border-2 border-purple-500/30 text-white font-semibold hover:from-purple-500/30 hover:via-pink-500/30 hover:to-purple-600/30 hover:border-purple-500/50 transition-all duration-300 flex items-center justify-center gap-2"
                 >
-                  <span>Book a Demo</span>
+                  <span>{t('solutions.bookDemo')}</span>
                   <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                 </button>
 
@@ -223,7 +225,7 @@ export default function Solutions() {
                   onClick={() => navigate('/contact')}
                   className="w-full sm:w-auto px-8 py-4 rounded-xl bg-white/5 border-2 border-white/10 text-white font-semibold hover:bg-white/10 hover:border-white/20 transition-all duration-300"
                 >
-                  Contact Sales
+                  {t('solutions.contactSales')}
                 </button>
               </div>
             </div>

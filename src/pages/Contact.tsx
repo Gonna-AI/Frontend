@@ -2,9 +2,11 @@ import React, { useState } from 'react';
 import { Phone, MapPin, CheckCircle2, Send } from 'lucide-react';
 import { supabase } from '../config/supabase';
 import { useNavigate } from 'react-router-dom';
+import { useLanguage } from '../contexts/LanguageContext';
 
 const Contact = () => {
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const [formData, setFormData] = useState({
     fullName: '',
     companyName: '',
@@ -112,7 +114,7 @@ const Contact = () => {
           {/* Mobile Pill */}
           <div className="md:hidden">
             <span className="px-3 py-1.5 rounded-full bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-medium whitespace-nowrap">
-              Contact Us
+              {t('nav.contact')}
             </span>
           </div>
         </div>
@@ -125,15 +127,15 @@ const Contact = () => {
           <div className="text-center mb-16">
             <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-6">
               <span className="bg-gradient-to-r from-white via-white/95 to-white/90 text-transparent bg-clip-text">
-                Let's Talk About
+                {t('contact.title1')}
               </span>
               <br />
               <span className="bg-gradient-to-r from-red-400 via-rose-400 to-red-600 text-transparent bg-clip-text">
-                Your Business
+                {t('contact.title2')}
               </span>
             </h1>
             <p className="text-lg md:text-xl text-white/60 leading-relaxed max-w-3xl mx-auto">
-              Get in touch with our team for enterprise solutions and support
+              {t('contact.subtitle')}
             </p>
           </div>
 
@@ -143,7 +145,7 @@ const Contact = () => {
               <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-red-500/10 to-rose-500/10 border border-red-500/20 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
                 <Phone className="w-6 h-6 text-red-400" />
               </div>
-              <h3 className="font-semibold mb-2 text-white/90 text-lg">Phone</h3>
+              <h3 className="font-semibold mb-2 text-white/90 text-lg">{t('contact.phone')}</h3>
               <a href="tel:+919650848339" className="text-white/60 hover:text-red-400 transition-colors text-sm block">
                 +91 (965) 084-8339<br />+49 160 96893540
               </a>
@@ -152,7 +154,7 @@ const Contact = () => {
               <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-red-500/10 to-rose-500/10 border border-red-500/20 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
                 <MapPin className="w-6 h-6 text-red-400" />
               </div>
-              <h3 className="font-semibold mb-2 text-white/90 text-lg">Location</h3>
+              <h3 className="font-semibold mb-2 text-white/90 text-lg">{t('contact.location')}</h3>
               <p className="text-white/60 text-sm">
                 Mallersdorfer Str. 10<br />94315 Straubing, Germany
               </p>
@@ -166,10 +168,10 @@ const Contact = () => {
 
             <div className="text-center mb-10">
               <h2 className="text-3xl md:text-4xl font-bold mb-4 bg-gradient-to-r from-white via-white/90 to-white/70 text-transparent bg-clip-text">
-                Send us a Message
+                {t('contact.sendMsgTitle')}
               </h2>
               <p className="text-white/50 text-lg max-w-lg mx-auto">
-                Fill out the form below and we'll get back to you within 1-2 business days.
+                {t('contact.sendMsgDesc')}
               </p>
             </div>
 
@@ -178,8 +180,8 @@ const Contact = () => {
                 <div className="w-20 h-20 bg-green-500/10 rounded-full flex items-center justify-center mx-auto mb-6 border border-green-500/20">
                   <CheckCircle2 className="w-10 h-10 text-green-500" />
                 </div>
-                <h3 className="text-2xl font-bold text-white mb-3">Message Sent!</h3>
-                <p className="text-white/60">Thank you for contacting us. We'll be in touch soon!</p>
+                <h3 className="text-2xl font-bold text-white mb-3">{t('contact.successTitle')}</h3>
+                <p className="text-white/60">{t('contact.successDesc')}</p>
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-6">
@@ -187,7 +189,7 @@ const Contact = () => {
                 <div className="grid md:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <label htmlFor="fullName" className="text-sm font-medium text-white/70 ml-1">
-                      Full Name <span className="text-red-500">*</span>
+                      {t('contact.fullName')} <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="text"
@@ -202,7 +204,7 @@ const Contact = () => {
                   </div>
                   <div className="space-y-2">
                     <label htmlFor="companyName" className="text-sm font-medium text-white/70 ml-1">
-                      Company Name <span className="text-red-500">*</span>
+                      {t('contact.companyName')} <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="text"
@@ -221,7 +223,7 @@ const Contact = () => {
                 <div className="grid md:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <label htmlFor="email" className="text-sm font-medium text-white/70 ml-1">
-                      Business Email <span className="text-red-500">*</span>
+                      {t('contact.email')} <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="email"
@@ -236,7 +238,7 @@ const Contact = () => {
                   </div>
                   <div className="space-y-2">
                     <label htmlFor="phone" className="text-sm font-medium text-white/70 ml-1">
-                      Phone Number <span className="text-red-500">*</span>
+                      {t('contact.phoneNumber')} <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="tel"
@@ -255,7 +257,7 @@ const Contact = () => {
                 <div className="grid md:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <label htmlFor="interest" className="text-sm font-medium text-white/70 ml-1">
-                      Interest <span className="text-red-500">*</span>
+                      {t('contact.interest')} <span className="text-red-500">*</span>
                     </label>
                     <div className="relative">
                       <select
@@ -266,11 +268,11 @@ const Contact = () => {
                         onChange={handleChange}
                         className="w-full px-5 py-3.5 rounded-xl bg-white/[0.03] border border-white/10 text-white focus:outline-none focus:border-red-500/50 focus:bg-white/[0.05] focus:ring-4 focus:ring-red-500/10 transition-all duration-300 appearance-none"
                       >
-                        <option value="" className="bg-neutral-900">Select your interest...</option>
-                        <option value="enterprise" className="bg-neutral-900">Enterprise License</option>
-                        <option value="bulk" className="bg-neutral-900">Bulk Purchase</option>
-                        <option value="custom" className="bg-neutral-900">Custom Solution</option>
-                        <option value="other" className="bg-neutral-900">Other</option>
+                        <option value="" className="bg-neutral-900">{t('contact.selectInterest')}</option>
+                        <option value="enterprise" className="bg-neutral-900">{t('contact.intEnterprise')}</option>
+                        <option value="bulk" className="bg-neutral-900">{t('contact.intBulk')}</option>
+                        <option value="custom" className="bg-neutral-900">{t('contact.intCustom')}</option>
+                        <option value="other" className="bg-neutral-900">{t('contact.intOther')}</option>
                       </select>
                       <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-white/30">
                         <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -281,7 +283,7 @@ const Contact = () => {
                   </div>
                   <div className="space-y-2">
                     <label htmlFor="employeeCount" className="text-sm font-medium text-white/70 ml-1">
-                      Number of Employees <span className="text-red-500">*</span>
+                      {t('contact.employees')} <span className="text-red-500">*</span>
                     </label>
                     <div className="relative">
                       <select
@@ -292,7 +294,7 @@ const Contact = () => {
                         onChange={handleChange}
                         className="w-full px-5 py-3.5 rounded-xl bg-white/[0.03] border border-white/10 text-white focus:outline-none focus:border-red-500/50 focus:bg-white/[0.05] focus:ring-4 focus:ring-red-500/10 transition-all duration-300 appearance-none"
                       >
-                        <option value="" className="bg-neutral-900">Select range...</option>
+                        <option value="" className="bg-neutral-900">{t('contact.selectRange')}</option>
                         <option value="1-10" className="bg-neutral-900">1-10</option>
                         <option value="11-50" className="bg-neutral-900">11-50</option>
                         <option value="51-200" className="bg-neutral-900">51-200</option>
@@ -311,7 +313,7 @@ const Contact = () => {
                 {/* Message */}
                 <div className="space-y-2">
                   <label htmlFor="message" className="text-sm font-medium text-white/70 ml-1">
-                    Message <span className="text-red-500">*</span>
+                    {t('contact.message')} <span className="text-red-500">*</span>
                   </label>
                   <div className="relative group">
                     <textarea
@@ -322,7 +324,7 @@ const Contact = () => {
                       value={formData.message}
                       onChange={handleChange}
                       className="peer w-full px-5 py-4 rounded-xl bg-white/[0.03] border border-white/10 text-white placeholder-white/20 focus:outline-none focus:bg-white/[0.05] transition-all duration-300 resize-none text-base leading-relaxed"
-                      placeholder="Tell us about your needs and requirements..."
+                      placeholder={t('contact.messagePlaceholder')}
                     />
                     {/* Animated Border Gradient on Focus */}
                     <div className="absolute inset-0 rounded-xl border border-red-500/50 opacity-0 peer-focus:opacity-100 transition-opacity duration-300 pointer-events-none shadow-[0_0_20px_rgba(239,68,68,0.15)]" />
@@ -331,7 +333,7 @@ const Contact = () => {
 
                 {submitStatus === 'error' && (
                   <div className="p-4 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-center text-sm animate-in fade-in slide-in-from-top-2">
-                    Something went wrong. Please try again later.
+                    {t('contact.error')}
                   </div>
                 )}
 
@@ -352,11 +354,11 @@ const Contact = () => {
                               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                             </svg>
-                            <span>Sending...</span>
+                            <span>{t('contact.sending')}</span>
                           </>
                         ) : (
                           <>
-                            <span className="tracking-wide">Send Message</span>
+                            <span className="tracking-wide">{t('contact.sendButton')}</span>
                             <Send className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1 group-hover:-translate-y-1" />
                           </>
                         )}
@@ -372,5 +374,6 @@ const Contact = () => {
     </div>
   );
 };
+
 
 export default Contact;

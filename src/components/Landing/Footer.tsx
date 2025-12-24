@@ -1,37 +1,38 @@
-import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useMemo } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 import { Shield, Lock, ShieldCheck, Phone } from 'lucide-react';
 import { useDeviceDetection } from '../../hooks/useDeviceDetection';
+import { useLanguage } from '../../contexts/LanguageContext';
 
 export default function Footer() {
   const navigate = useNavigate();
   const currentYear = new Date().getFullYear();
   const prefersReducedMotion = useReducedMotion();
   const { isMobile } = useDeviceDetection();
+  const { t } = useLanguage();
 
   const shouldReduceMotion = prefersReducedMotion || isMobile;
 
-  const footerLinks = {
+  const footerLinks = useMemo(() => ({
     product: [
-      { name: 'Features', path: '/#features' },
-      { name: 'Solutions', path: '/solutions' },
-      { name: 'Smart Contracts', path: '/smart-contracts' },
-      { name: 'Documents', path: '/documents' },
+      { name: t('footer.features'), path: '/#features' },
+      { name: t('nav.solutions'), path: '/solutions' },
+      { name: t('footer.smartContracts'), path: '/smart-contracts' },
+      { name: t('footer.documents'), path: '/documents' },
     ],
     company: [
-      { name: 'About Us', path: '/about' },
-      { name: 'Careers', path: '/careers' },
-      { name: 'Contact', path: '/contact' },
+      { name: t('footer.aboutUs'), path: '/about' },
+      { name: t('footer.careers'), path: '/careers' },
+      { name: t('nav.contact'), path: '/contact' },
       { name: 'FAQ', path: '/faq' },
     ],
     legal: [
-      { name: 'Privacy Policy', path: '/privacy-policy', icon: Lock },
-      { name: 'Terms of Service', path: '/terms-of-service', icon: Shield },
-      { name: 'Security & Data Handling', path: '/security', icon: ShieldCheck },
+      { name: t('footer.privacy'), path: '/privacy-policy', icon: Lock },
+      { name: t('footer.terms'), path: '/terms-of-service', icon: Shield },
+      { name: t('footer.security'), path: '/security', icon: ShieldCheck },
     ],
-
-  };
+  }), [t]);
 
   const handleNavigation = (path: string) => {
     if (path.startsWith('/#')) {
@@ -85,7 +86,7 @@ export default function Footer() {
               viewport={{ once: true }}
               transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.4, delay: 0.05 }}
             >
-              <h4 className="text-neutral-200 font-semibold mb-4">Product</h4>
+              <h4 className="text-neutral-200 font-semibold mb-4">{t('footer.product')}</h4>
               <ul className="space-y-3">
                 {footerLinks.product.map((link) => (
                   <li key={link.path}>
@@ -107,7 +108,7 @@ export default function Footer() {
               viewport={{ once: true }}
               transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.4, delay: 0.1 }}
             >
-              <h4 className="text-neutral-200 font-semibold mb-4">Company</h4>
+              <h4 className="text-neutral-200 font-semibold mb-4">{t('footer.company')}</h4>
               <ul className="space-y-3">
                 {footerLinks.company.map((link) => (
                   <li key={link.path}>
@@ -129,7 +130,7 @@ export default function Footer() {
               viewport={{ once: true }}
               transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.4, delay: 0.15 }}
             >
-              <h4 className="text-neutral-200 font-semibold mb-4">Contact</h4>
+              <h4 className="text-neutral-200 font-semibold mb-4">{t('footer.contact')}</h4>
               <div className="space-y-3">
 
                 <a
@@ -167,7 +168,7 @@ export default function Footer() {
         >
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-neutral-500 text-sm">
-              © {currentYear} ClerkTree. All rights reserved.
+              © {currentYear} ClerkTree. {t('footer.rights')}
             </p>
             <div className="flex flex-wrap justify-center gap-6">
               {footerLinks.legal.map((link) => (

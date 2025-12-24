@@ -1,18 +1,19 @@
 import { useState, useEffect, useMemo } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { cn } from "../../utils/cn";
+import { useLanguage } from "../../contexts/LanguageContext";
 
 // Optimized BackgroundBeams with reduced paths for mobile
 const BackgroundBeams = ({ className }: { className?: string }) => {
   const prefersReducedMotion = useReducedMotion();
   const [isMobile, setIsMobile] = useState(false);
-  
+
   // Check for mobile device on mount and window resize
   useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768);
     };
-    
+
     checkMobile();
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
@@ -47,7 +48,7 @@ const BackgroundBeams = ({ className }: { className?: string }) => {
         y2: "100%",
       };
     }
-    
+
     return {
       x1: ["0%", "100%"],
       x2: ["0%", "95%"],
@@ -107,11 +108,12 @@ const BackgroundBeams = ({ className }: { className?: string }) => {
 };
 
 const WaitlistWithBeams = () => {
+  const { t } = useLanguage();
   return (
     <div id="waitlist-section" className="h-[40rem] w-full rounded-md relative flex flex-col items-center justify-center antialiased bg-[rgb(10,10,10)]">
       <div className="max-w-2xl mx-auto p-4 relative z-10 flex flex-col items-center">
         <h1 className="text-4xl md:text-7xl font-bold text-center bg-clip-text text-transparent bg-gradient-to-b from-neutral-50 to-neutral-400 bg-opacity-50 pb-2">
-          Smart Calls, Smarter Agents.
+          {t('conversation.title')}
         </h1>
       </div>
       <BackgroundBeams />

@@ -1,29 +1,31 @@
 import { useNavigate } from 'react-router-dom';
 import { Target, Lightbulb, Users, Building2, Shield, FileText, TrendingUp } from 'lucide-react';
+import { useLanguage } from '../contexts/LanguageContext';
 
 export default function About() {
   const navigate = useNavigate();
+  const { t } = useLanguage();
 
   const industries = [
-    { icon: Shield, name: 'Insurance', color: 'from-blue-400 to-cyan-500' },
-    { icon: Building2, name: 'BFSI', color: 'from-emerald-400 to-teal-500' },
-    { icon: Users, name: 'BPO', color: 'from-purple-400 to-pink-500' },
-    { icon: TrendingUp, name: 'Operations', color: 'from-orange-400 to-red-500' },
-    { icon: FileText, name: 'Document Processing', color: 'from-violet-400 to-purple-500' },
+    { icon: Shield, name: t('about.ind1'), color: 'from-blue-400 to-cyan-500' },
+    { icon: Building2, name: t('about.ind2'), color: 'from-emerald-400 to-teal-500' },
+    { icon: Users, name: t('about.ind3'), color: 'from-purple-400 to-pink-500' },
+    { icon: TrendingUp, name: t('about.ind4'), color: 'from-orange-400 to-red-500' },
+    { icon: FileText, name: t('about.ind5'), color: 'from-violet-400 to-purple-500' },
   ];
 
   return (
     <div className="bg-[rgb(10,10,10)] min-h-screen relative overflow-x-hidden">
       {/* Blue theme background accents */}
       <div className="fixed inset-0 bg-[rgb(10,10,10)] -z-10">
-        <div 
+        <div
           className="absolute top-0 right-0 -translate-y-1/4 translate-x-1/4 w-96 md:w-[800px] h-96 md:h-[800px] opacity-40"
           style={{
             background: 'radial-gradient(circle, rgba(59,130,246,0.6) 0%, rgba(59,130,246,0.25) 40%, transparent 100%)',
             filter: 'blur(80px)',
           }}
         />
-        <div 
+        <div
           className="absolute bottom-0 left-0 translate-y-1/4 -translate-x-1/4 w-72 md:w-[600px] h-72 md:h-[600px] opacity-30"
           style={{
             background: 'radial-gradient(circle, rgba(29,78,216,0.5) 0%, rgba(29,78,216,0.2) 40%, transparent 100%)',
@@ -50,24 +52,24 @@ export default function About() {
           </button>
           <div className="md:hidden">
             <span className="px-3 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-medium whitespace-nowrap">
-              About Us
+              {t('nav.about')}
             </span>
           </div>
         </div>
       </header>
-      
+
       <div className="relative z-10 py-12 px-6 pt-32 md:pt-36">
         <div className="max-w-6xl mx-auto">
-          
+
           {/* Header */}
           <div className="text-center mb-20">
             <h1 className="text-5xl md:text-7xl font-bold tracking-tight">
               <span className="bg-gradient-to-r from-white via-white/95 to-white/90 text-transparent bg-clip-text">
-                Building the Future of
+                {t('about.future')}
               </span>
               <br />
               <span className="bg-gradient-to-r from-blue-400 via-cyan-400 to-blue-600 text-transparent bg-clip-text">
-                Operations Intelligence
+                {t('about.opsIntel')}
               </span>
             </h1>
           </div>
@@ -80,12 +82,12 @@ export default function About() {
                   <Lightbulb className="w-6 h-6 text-blue-400" />
                 </div>
                 <div>
-                  <h2 className="text-3xl md:text-4xl font-bold text-white/90 mb-4">Why We Built ClerkTree</h2>
+                  <h2 className="text-3xl md:text-4xl font-bold text-white/90 mb-4">{t('about.whyTitle')}</h2>
                   <p className="text-lg text-white/60 leading-relaxed">
-                    Growing operations teams face a common challenge: <span className="text-blue-400 font-semibold">fragmented workflows</span> that slow them down. Document processing scattered across multiple tools, manual data entry consuming valuable time, and disconnected systems creating bottlenecks.
+                    {t('about.whyDesc1')}
                   </p>
                   <p className="text-lg text-white/60 leading-relaxed mt-4">
-                    We built ClerkTree to solve this. Our platform unifies AI-powered automation with human expertise, creating a seamless workflow that <span className="text-blue-400 font-semibold">reduces turnaround time by 40%</span> while maintaining the accuracy and judgment that only humans can provide.
+                    {t('about.whyDesc2')}
                   </p>
                 </div>
               </div>
@@ -97,20 +99,20 @@ export default function About() {
             <div className="rounded-2xl border border-white/5 bg-gradient-to-br from-white/[0.02] via-white/[0.01] to-transparent backdrop-blur-sm p-8">
               <div className="flex items-center gap-3 mb-4">
                 <Target className="w-8 h-8 bg-gradient-to-r from-blue-400 to-cyan-500 text-transparent bg-clip-text" strokeWidth={1.5} />
-                <h3 className="text-2xl font-bold text-white/90">Our Mission</h3>
+                <h3 className="text-2xl font-bold text-white/90">{t('about.missionTitle')}</h3>
               </div>
               <p className="text-white/60 leading-relaxed">
-                To empower operations teams with intelligent automation that amplifies human capabilities, transforming tedious document-heavy processes into streamlined, efficient workflows that drive business growth.
+                {t('about.missionDesc')}
               </p>
             </div>
 
             <div className="rounded-2xl border border-white/5 bg-gradient-to-br from-white/[0.02] via-white/[0.01] to-transparent backdrop-blur-sm p-8">
               <div className="flex items-center gap-3 mb-4">
                 <Lightbulb className="w-8 h-8 bg-gradient-to-r from-cyan-400 to-blue-500 text-transparent bg-clip-text" strokeWidth={1.5} />
-                <h3 className="text-2xl font-bold text-white/90">Our Vision</h3>
+                <h3 className="text-2xl font-bold text-white/90">{t('about.visionTitle')}</h3>
               </div>
               <p className="text-white/60 leading-relaxed">
-                To become the operating system for modern claims and back-office operations, where AI and humans work in perfect harmony to deliver unprecedented speed, accuracy, and customer satisfaction.
+                {t('about.visionDesc')}
               </p>
             </div>
           </div>
@@ -120,24 +122,24 @@ export default function About() {
             <div className="rounded-2xl border border-blue-500/20 bg-gradient-to-br from-blue-500/5 to-cyan-500/5 backdrop-blur-sm p-8 md:p-12">
               <h2 className="text-3xl md:text-4xl font-bold mb-6">
                 <span className="bg-gradient-to-r from-blue-400 to-cyan-400 text-transparent bg-clip-text">
-                  The Hybrid Human+AI Approach
+                  {t('about.hybridTitle')}
                 </span>
               </h2>
               <p className="text-lg text-white/70 leading-relaxed mb-6">
-                We believe the future isn't about replacing humans with AI—it's about augmenting human intelligence with machine capabilities. Our platform is designed around this core philosophy:
+                {t('about.hybridDesc')}
               </p>
               <div className="grid md:grid-cols-3 gap-4">
                 <div className="p-4 rounded-xl bg-white/5 border border-white/10">
-                  <h4 className="font-semibold text-white/90 mb-2">AI Handles Repetition</h4>
-                  <p className="text-sm text-white/60">Automated document extraction, data validation, and routine processing tasks</p>
+                  <h4 className="font-semibold text-white/90 mb-2">{t('about.aiRepetition')}</h4>
+                  <p className="text-sm text-white/60">{t('about.aiRepetitionDesc')}</p>
                 </div>
                 <div className="p-4 rounded-xl bg-white/5 border border-white/10">
-                  <h4 className="font-semibold text-white/90 mb-2">Humans Handle Complexity</h4>
-                  <p className="text-sm text-white/60">Complex decision-making, edge cases, and customer interactions requiring empathy</p>
+                  <h4 className="font-semibold text-white/90 mb-2">{t('about.humanComplexity')}</h4>
+                  <p className="text-sm text-white/60">{t('about.humanComplexityDesc')}</p>
                 </div>
                 <div className="p-4 rounded-xl bg-white/5 border border-white/10">
-                  <h4 className="font-semibold text-white/90 mb-2">Seamless Handoffs</h4>
-                  <p className="text-sm text-white/60">Smart routing between AI and human agents based on task complexity and confidence levels</p>
+                  <h4 className="font-semibold text-white/90 mb-2">{t('about.handoffs')}</h4>
+                  <p className="text-sm text-white/60">{t('about.handoffsDesc')}</p>
                 </div>
               </div>
             </div>
@@ -146,13 +148,13 @@ export default function About() {
           {/* Industries We Serve */}
           <div className="mb-20">
             <div className="text-center mb-12">
-              <h2 className="text-3xl md:text-4xl font-bold mb-4 text-white/90">Industries We Serve</h2>
+              <h2 className="text-3xl md:text-4xl font-bold mb-4 text-white/90">{t('about.industriesTitle')}</h2>
             </div>
             <div className="flex flex-wrap justify-center gap-4 max-w-4xl mx-auto">
               {industries.map((industry, index) => {
                 const Icon = industry.icon;
                 return (
-                  <div 
+                  <div
                     key={index}
                     className="group flex items-center gap-3 px-6 py-4 rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm hover:border-blue-500/30 hover:bg-white/10 transition-all duration-300"
                   >
@@ -169,23 +171,23 @@ export default function About() {
           {/* CTA */}
           <div className="text-center py-16 rounded-2xl border border-blue-500/20 bg-gradient-to-br from-blue-500/5 to-cyan-500/5 backdrop-blur-sm">
             <h2 className="text-3xl md:text-4xl font-bold mb-4 bg-gradient-to-r from-blue-400 to-cyan-400 text-transparent bg-clip-text">
-              Join Us on This Journey
+              {t('about.joinTitle')}
             </h2>
             <p className="text-white/60 mb-8 max-w-2xl mx-auto">
-              We're just getting started. Partner with us to transform your operations.
+              {t('about.joinDesc')}
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <button
                 onClick={() => navigate('/contact')}
                 className="px-8 py-4 rounded-xl bg-gradient-to-r from-blue-500/20 to-cyan-500/20 border-2 border-blue-500/30 text-white font-semibold hover:from-blue-500/30 hover:to-cyan-500/30 hover:border-blue-500/50 transition-all duration-300"
               >
-                Get in Touch
+                {t('about.getInTouch')}
               </button>
               <button
                 onClick={() => navigate('/careers')}
                 className="px-8 py-4 rounded-xl bg-white/5 border-2 border-white/10 text-white font-semibold hover:bg-white/10 hover:border-white/20 transition-all duration-300"
               >
-                Join Our Team
+                {t('about.joinTeam')}
               </button>
             </div>
           </div>

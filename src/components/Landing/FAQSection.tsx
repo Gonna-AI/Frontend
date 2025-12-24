@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion, useReducedMotion } from 'framer-motion';
 import { useDeviceDetection } from '../../hooks/useDeviceDetection';
+import { useLanguage } from '../../contexts/LanguageContext';
 import {
   Accordion,
   AccordionContent,
@@ -18,34 +19,35 @@ interface FAQItem {
 export default function FAQSection() {
   const prefersReducedMotion = useReducedMotion();
   const { isMobile, isLowEnd } = useDeviceDetection();
+  const { t } = useLanguage();
 
   const shouldReduceMotion = prefersReducedMotion || isMobile || isLowEnd;
 
   const faqs: FAQItem[] = [
     {
       category: 'Support',
-      question: 'How do I get started?',
-      answer: 'Getting started is easy! Book a demo with our team through the Contact page, and we\'ll schedule a personalized walkthrough. After that, we\'ll help you set up a trial environment tailored to your specific use case.'
+      question: t('faq.q1'),
+      answer: t('faq.a1')
     },
     {
       category: 'Pricing',
-      question: 'Do you offer a free trial?',
-      answer: 'Yes, we offer a 14-day free trial for qualified businesses. During the trial, you\'ll have access to our core features and dedicated support to help you evaluate the platform.'
+      question: t('faq.q2'),
+      answer: t('faq.a2')
     },
     {
       category: 'Pricing',
-      question: 'How is ClerkTree priced?',
-      answer: 'We offer flexible pricing based on your volume of documents, number of users, and specific features required. Contact our sales team for a customized quote that fits your business needs.'
+      question: t('faq.q3'),
+      answer: t('faq.a3')
     },
     {
       category: 'Product',
-      question: 'How long does implementation take?',
-      answer: 'Implementation typically takes 2-4 weeks depending on your specific requirements and existing systems. We provide dedicated onboarding support and training to ensure a smooth transition.'
+      question: t('faq.q4'),
+      answer: t('faq.a4')
     },
     {
       category: 'Support',
-      question: 'Can I integrate ClerkTree with my existing systems?',
-      answer: 'Yes! ClerkTree offers REST APIs and pre-built integrations with popular business tools including Salesforce, SAP, Microsoft Dynamics, and more. Our team can also help with custom integrations.'
+      question: t('faq.q5'),
+      answer: t('faq.a5')
     }
   ];
 
@@ -65,10 +67,10 @@ export default function FAQSection() {
               className="text-2xl md:text-3xl font-semibold mb-6"
             >
               <span className="text-white block">
-                Frequently Asked
+                {t('faq.title1')}
               </span>
               <span className="text-white block">
-                Questions
+                {t('faq.title2')}
               </span>
             </motion.h2>
 
@@ -79,11 +81,11 @@ export default function FAQSection() {
               transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.4, delay: 0.1 }}
               className="text-sm text-neutral-400 space-y-2"
             >
-              <p>Can't find what you're looking for?</p>
+              <p>{t('faq.cantFind')}</p>
               <p>
-                Visit our{' '}
+                {t('faq.visitOur')}{' '}
                 <Link to="/contact" className="text-white hover:text-white/80 underline">
-                  Contact page
+                  {t('faq.contactPage')}
                 </Link>
               </p>
             </motion.div>
