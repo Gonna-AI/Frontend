@@ -882,8 +882,8 @@ Extract and return JSON (use null if not detected):
   async summarizeCall(
     messages: CallMessage[],
     extractedFields: ExtractedField[],
-    category?: CallCategory,
-    priority?: PriorityLevel
+    _category?: CallCategory,
+    _priority?: PriorityLevel
   ): Promise<{
     summary: string;
     mainPoints: string[];
@@ -901,13 +901,13 @@ Extract and return JSON (use null if not detected):
       throw new Error('Local LLM not available');
     }
 
-    // Use shorter timeout for summary generation (60 seconds instead of 180)
-    const SUMMARY_TIMEOUT = 60000;
+    // Quick timeout for fast notes generation (30 seconds)
+    const SUMMARY_TIMEOUT = 30000;
 
-    // Format transcript concisely - limit to last 10 messages for faster processing
-    const recentMessages = messages.slice(-10);
+    // Format transcript concisely - limit to last 8 messages for faster processing
+    const recentMessages = messages.slice(-8);
     const transcript = recentMessages.map(m =>
-      `${m.speaker === 'agent' ? 'AI' : 'Caller'}: ${m.text.slice(0, 200)}`
+      `${m.speaker === 'agent' ? 'AI' : 'Caller'}: ${m.text.slice(0, 150)}`
     ).join('\n');
 
     const extractedText = extractedFields.map(f => `${f.label}: ${f.value}`).join(', ');
@@ -919,16 +919,21 @@ Extract and return JSON (use null if not detected):
     if (!callerName) {
       for (const msg of messages) {
         if (msg.speaker === 'user') {
-          // Look for name patterns
+          // Look for name patterns - enhanced for all cultures
           const patterns = [
-            /(?:my name is|i'?m|this is|i am)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)/i,
-            /^([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)\s+(?:here|calling|speaking)/i,
+            /(?:my name is|i'?m|this is|i am)\s+([A-Za-z][A-Za-z]+(?:\s+[A-Za-z][A-Za-z]+)?)/i,
+            /^([A-Za-z][A-Za-z]+(?:\s+[A-Za-z][A-Za-z]+)?)\s+(?:here|calling|speaking)/i,
+            /(?:im|its|it's)\s+([A-Za-z][A-Za-z]+(?:\s+[A-Za-z][A-Za-z]+)?)/i,
           ];
           for (const pattern of patterns) {
             const match = msg.text.match(pattern);
             if (match?.[1] && match[1].length > 2) {
-              callerName = match[1].trim();
-              break;
+              const name = match[1].trim();
+              const commonWords = ['hello', 'hi', 'hey', 'yes', 'no', 'okay', 'sure', 'thanks', 'thank', 'you', 'the', 'help', 'need', 'want', 'thing', 'calling', 'good', 'fine', 'here'];
+              if (!commonWords.includes(name.toLowerCase())) {
+                callerName = name;
+                break;
+              }
             }
           }
           if (callerName) break;
@@ -936,50 +941,16 @@ Extract and return JSON (use null if not detected):
       }
     }
 
-    // Enhanced function calling prompt for comprehensive analysis
-    const prompt = `System: You are an expert AI analyst specializing in call analysis. Analyze this conversation transcript and extract comprehensive structured information.
+    // Simple, fast prompt for 3-4 bullet point notes (not comprehensive analysis)
+    const prompt = `Write 3-4 brief bullet points summarizing this call. Be concise.
 
-## CONVERSATION TRANSCRIPT
+TRANSCRIPT:
 ${transcript}
 
-## KNOWN INFORMATION
-${callerName ? `Caller Name: ${callerName}` : 'Caller name: Unknown'}
-${extractedText ? `Extracted Info: ${extractedText}` : ''}
-${category ? `Category: ${category.name}` : ''}
-${priority ? `Initial Priority: ${priority}` : ''}
+${callerName ? `Caller: ${callerName}` : ''}${extractedText ? `\nInfo: ${extractedText}` : ''}
 
-## ANALYSIS INSTRUCTIONS
-Provide a comprehensive analysis in JSON format. Include:
-1. SERIOUSNESS: Assess urgency level (critical/high/medium/low) based on keywords, tone, and context
-2. SENTIMENT: Analyze caller emotion and overall sentiment
-3. TOPICS: Identify main issues and categories discussed
-4. SUMMARY: Create a concise summary with key points
-
-Respond with ONLY valid JSON:
-{
-  "summary": "Brief 1-2 sentence summary",
-  "mainPoints": ["key point 1", "key point 2", "key point 3"],
-  "outcome": "resolved|unresolved|needs_followup|escalated",
-  "seriousness": {
-    "priority_level": "critical|high|medium|low",
-    "reasoning": "Why this priority",
-    "escalation_needed": "yes|no|maybe",
-    "time_sensitivity": "immediate|today|this_week|no_rush"
-  },
-  "sentiment": "positive|neutral|negative",
-  "caller_emotion": "happy|satisfied|neutral|confused|frustrated|angry|anxious|sad|relieved",
-  "emotion_intensity": "mild|moderate|strong",
-  "primary_topic": "Main topic discussed",
-  "issue_category": "inquiry|support|complaint|appointment|feedback|sales|billing|technical|other",
-  "resolution_status": "resolved|partially_resolved|unresolved|needs_followup",
-  "keywords": ["keyword1", "keyword2"],
-  "action_items": ["action 1", "action 2"],
-  "followUpRequired": true,
-  "follow_up_notes": "What follow-up is needed",
-  "notes": "Additional observations"
-}
-
-Assistant:`;
+Respond ONLY with JSON:
+{"notes": ["point 1", "point 2", "point 3"], "sentiment": "positive|neutral|negative", "followUp": false}`;
 
     try {
       console.log('📝 Generating summary with /api/generate...');
@@ -1021,145 +992,22 @@ Assistant:`;
       }
 
       if (parsedSummary) {
-        // Extract seriousness analysis
-        let seriousnessLevel: SeriousnessResult | undefined;
-        if (parsedSummary.seriousness && typeof parsedSummary.seriousness === 'object') {
-          const s = parsedSummary.seriousness as Record<string, unknown>;
-          seriousnessLevel = {
-            priority_level: (s.priority_level as PriorityLevel) || priority || 'medium',
-            urgency_indicators: [],
-            reasoning: (s.reasoning as string) || '',
-            escalation_needed: (s.escalation_needed as 'yes' | 'no' | 'maybe') || 'no',
-            time_sensitivity: (s.time_sensitivity as 'immediate' | 'today' | 'this_week' | 'no_rush') || 'this_week'
-          };
-        }
+        // Simple notes format: {"notes": [...], "sentiment": "...", "followUp": false}
+        const notes = Array.isArray(parsedSummary.notes) ? parsedSummary.notes as string[] : [];
+        const sentiment = ['positive', 'neutral', 'negative'].includes(parsedSummary.sentiment as string)
+          ? (parsedSummary.sentiment as 'positive' | 'neutral' | 'negative')
+          : 'neutral';
+        const followUp = parsedSummary.followUp === true || parsedSummary.followUpRequired === true;
 
-        // Extract issue topics
-        let issueTopics: IssueTopicsResult | undefined;
-        if (parsedSummary.primary_topic || parsedSummary.issue_category) {
-          issueTopics = {
-            primary_topic: (parsedSummary.primary_topic as string) || 'General inquiry',
-            issue_category: (parsedSummary.issue_category as string) || 'inquiry',
-            issue_description: (parsedSummary.summary as string) || '',
-            resolution_status: (parsedSummary.resolution_status as 'resolved' | 'partially_resolved' | 'unresolved' | 'needs_followup') || 'unresolved',
-            keywords: (parsedSummary.keywords as string[]) || []
-          };
-        }
-
-        // Build sentiment cards for UI display
-        const sentimentCards: SentimentCard[] = [];
-
-        // Seriousness card
-        if (seriousnessLevel) {
-          const priorityColors: Record<string, 'red' | 'orange' | 'yellow' | 'green'> = {
-            critical: 'red',
-            high: 'orange',
-            medium: 'yellow',
-            low: 'green'
-          };
-          sentimentCards.push({
-            id: 'seriousness',
-            type: 'urgency',
-            title: 'Priority Level',
-            value: seriousnessLevel.priority_level.toUpperCase(),
-            icon: '🚨',
-            color: priorityColors[seriousnessLevel.priority_level] || 'gray',
-            details: seriousnessLevel.reasoning
-          });
-        }
-
-        // Sentiment card
-        if (parsedSummary.sentiment || parsedSummary.caller_emotion) {
-          const sentimentColors: Record<string, 'green' | 'gray' | 'red' | 'blue'> = {
-            positive: 'green',
-            neutral: 'gray',
-            negative: 'red',
-            mixed: 'blue'
-          };
-          const emotionIcons: Record<string, string> = {
-            happy: '😊',
-            satisfied: '😌',
-            neutral: '😐',
-            confused: '😕',
-            frustrated: '😤',
-            angry: '😠',
-            anxious: '😰',
-            sad: '😢',
-            relieved: '😅'
-          };
-          sentimentCards.push({
-            id: 'sentiment',
-            type: 'sentiment',
-            title: 'Caller Sentiment',
-            value: (parsedSummary.caller_emotion as string) || (parsedSummary.sentiment as string) || 'neutral',
-            icon: emotionIcons[(parsedSummary.caller_emotion as string)] || '😐',
-            color: sentimentColors[(parsedSummary.sentiment as string)] || 'gray',
-            details: `Intensity: ${(parsedSummary.emotion_intensity as string) || 'moderate'}`
-          });
-        }
-
-        // Topic card
-        if (issueTopics) {
-          const categoryColors: Record<string, 'red' | 'orange' | 'yellow' | 'green' | 'blue' | 'purple'> = {
-            complaint: 'red',
-            support: 'orange',
-            appointment: 'green',
-            sales: 'blue',
-            feedback: 'purple',
-            billing: 'orange',
-            technical: 'yellow',
-            inquiry: 'blue'
-          };
-          sentimentCards.push({
-            id: 'topic',
-            type: 'topic',
-            title: 'Issue Category',
-            value: issueTopics.issue_category,
-            icon: '📋',
-            color: categoryColors[issueTopics.issue_category] || 'gray',
-            details: issueTopics.primary_topic
-          });
-        }
-
-        // Build full analysis object
-        const analysis: ConversationAnalysis = {
-          seriousness: seriousnessLevel,
-          issueTopics,
-          sentiment: parsedSummary.sentiment ? {
-            overall_sentiment: (parsedSummary.sentiment as 'positive' | 'neutral' | 'negative') || 'neutral',
-            caller_emotion: (parsedSummary.caller_emotion as any) || 'neutral',
-            emotion_intensity: (parsedSummary.emotion_intensity as 'mild' | 'moderate' | 'strong') || 'moderate'
-          } : undefined,
-          summary: {
-            brief_summary: (parsedSummary.summary as string) || '',
-            main_points: (parsedSummary.mainPoints as string[]) || [],
-            outcome: (parsedSummary.outcome as string) || 'unresolved',
-            follow_up_required: parsedSummary.followUpRequired === true ? 'yes' : 'no',
-            follow_up_notes: (parsedSummary.follow_up_notes as string) || ''
-          }
-        };
-
-        console.log('✅ Enhanced analysis complete:', {
-          priority: seriousnessLevel?.priority_level,
-          sentiment: parsedSummary.sentiment,
-          topic: issueTopics?.primary_topic,
-          cardsCount: sentimentCards.length
-        });
+        console.log('✅ Quick notes generated:', notes.length, 'points');
 
         return {
-          summary: (parsedSummary.summary as string) || 'Call completed',
-          mainPoints: Array.isArray(parsedSummary.mainPoints) ? parsedSummary.mainPoints as string[] : [(parsedSummary.summary as string) || 'Call completed'],
-          sentiment: ['positive', 'neutral', 'negative'].includes(parsedSummary.sentiment as string)
-            ? (parsedSummary.sentiment as 'positive' | 'neutral' | 'negative')
-            : 'neutral',
-          followUpRequired: parsedSummary.followUpRequired === true || priority === 'high' || priority === 'critical',
-          notes: (parsedSummary.notes as string) || rawResponse,
+          summary: notes.join(' • ') || 'Call completed',
+          mainPoints: notes.length > 0 ? notes : ['Call completed'],
+          sentiment,
+          followUpRequired: followUp,
+          notes: notes.join('\n• ') || 'Call completed',
           callerName: callerName,
-          // Enhanced function calling results
-          analysis,
-          sentimentCards,
-          seriousnessLevel,
-          issueTopics
         };
       }
 
@@ -1170,7 +1018,7 @@ Assistant:`;
         summary: summary,
         mainPoints: [summary],
         sentiment: 'neutral',
-        followUpRequired: priority === 'high' || priority === 'critical',
+        followUpRequired: false,
         notes: rawResponse,
         callerName: callerName
       };
@@ -1188,7 +1036,7 @@ Assistant:`;
         summary: basicSummary,
         mainPoints: [basicSummary],
         sentiment: 'neutral',
-        followUpRequired: priority === 'high' || priority === 'critical',
+        followUpRequired: false,
         notes: `Summary generation failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
         callerName: callerName
       };

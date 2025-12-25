@@ -871,7 +871,7 @@ export function DemoCallProvider({ children }: { children: ReactNode }) {
 
               // Race against a 45-second timeout
               const timeoutPromise = new Promise<never>((_, reject) =>
-                setTimeout(() => reject(new Error('Summary generation timed out after 45s')), 45000)
+                setTimeout(() => reject(new Error('Notes generation timed out after 35s')), 35000)
               );
 
               const summaryResponse = await Promise.race([summaryPromise, timeoutPromise]);
