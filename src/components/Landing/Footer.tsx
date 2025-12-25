@@ -16,10 +16,7 @@ export default function Footer() {
 
   const footerLinks = useMemo(() => ({
     product: [
-      { name: t('footer.features'), path: '/#features' },
       { name: t('nav.solutions'), path: '/solutions' },
-      { name: t('footer.smartContracts'), path: '/smart-contracts' },
-      { name: t('footer.documents'), path: '/documents' },
     ],
     company: [
       { name: t('footer.aboutUs'), path: '/about' },
@@ -30,6 +27,7 @@ export default function Footer() {
     legal: [
       { name: t('footer.privacy'), path: '/privacy-policy', icon: Lock },
       { name: t('footer.terms'), path: '/terms-of-service', icon: Shield },
+      { name: "Cookie Policy", path: '/cookie-policy', icon: Shield },
       { name: t('footer.security'), path: '/security', icon: ShieldCheck },
     ],
   }), [t]);
@@ -180,6 +178,9 @@ export default function Footer() {
                   {link.name}
                 </button>
               ))}
+              <a href="#" className="termly-display-preferences text-neutral-500 hover:text-purple-400 transition-colors text-sm">
+                Consent Preferences
+              </a>
             </div>
           </div>
         </motion.div>

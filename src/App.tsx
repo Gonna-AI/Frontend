@@ -15,6 +15,7 @@ import { LanguageProvider } from './contexts/LanguageContext';
 import PrivacyPolicy from './components/Legal/PrivacyPolicy';
 import TermsOfService from './components/Legal/TermsOfService';
 import Security from './components/Legal/Security';
+import CookiePolicy from './components/Legal/CookiePolicy';
 import SmartContracts from './pages/SmartContracts';
 import Documents from './pages/Documents';
 import Contact from './pages/Contact';
@@ -210,6 +211,7 @@ function App() {
 
             <Route path="/terms-of-service" element={<TermsOfService />} />
             <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+            <Route path="/cookie-policy" element={<CookiePolicy />} />
             <Route path="/security" element={<Security />} />
             {/* Catch all route */}
             <Route path="*" element={<Navigate to="/" />} />
