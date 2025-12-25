@@ -42,9 +42,10 @@ export interface CallSummary {
   followUpRequired: boolean;
   notes: string;
   // Enhanced summary fields
+  summaryText?: string; // Clean summary text for preview
   suggestions?: string[];
   callerIntent?: string;
-  moodIndicators?: string[];
+  moodIndicators?: string[]
   topics?: string[];
   resolution?: string;
   riskLevel?: string;

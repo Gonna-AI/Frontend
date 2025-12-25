@@ -1193,10 +1193,28 @@ Respond ONLY with valid JSON:
       if (parsedSummary) {
         // Enhanced format: detailed summary with suggestions
         const summaryText = (parsedSummary.summary as string) || '';
-        const keyPoints = Array.isArray(parsedSummary.keyPoints)
-          ? parsedSummary.keyPoints as string[]
-          : (Array.isArray(parsedSummary.notes) ? parsedSummary.notes as string[] : []);
-        const callerIntent = (parsedSummary.callerIntent as string) || '';
+
+        // Try multiple possible field names for key points
+        let keyPoints: string[] = [];
+        if (Array.isArray(parsedSummary.keyPoints) && parsedSummary.keyPoints.length > 0) {
+          keyPoints = parsedSummary.keyPoints as string[];
+        } else if (Array.isArray(parsedSummary.key_points) && parsedSummary.key_points.length > 0) {
+          keyPoints = parsedSummary.key_points as string[];
+        } else if (Array.isArray(parsedSummary.notes) && parsedSummary.notes.length > 0) {
+          keyPoints = parsedSummary.notes as string[];
+        } else if (summaryText) {
+          // If no keyPoints but we have summary, split summary into points
+          keyPoints = [summaryText];
+        }
+
+        console.log('📋 Parsed summary fields:', {
+          summaryText: summaryText.slice(0, 50),
+          keyPointsCount: keyPoints.length,
+          hasCallerIntent: !!parsedSummary.callerIntent,
+          hasSuggestions: Array.isArray(parsedSummary.suggestions)
+        });
+
+        const callerIntent = (parsedSummary.callerIntent as string) || (parsedSummary.caller_intent as string) || '';
         const suggestions = Array.isArray(parsedSummary.suggestions)
           ? parsedSummary.suggestions as string[]
           : [];
