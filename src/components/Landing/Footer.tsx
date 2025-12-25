@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useMemo } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
-import { Shield, Lock, ShieldCheck, Phone } from 'lucide-react';
+import { Shield, Lock, Phone } from 'lucide-react';
 import { useDeviceDetection } from '../../hooks/useDeviceDetection';
 import { useLanguage } from '../../contexts/LanguageContext';
 
@@ -28,7 +28,6 @@ export default function Footer() {
       { name: t('footer.privacy'), path: '/privacy-policy', icon: Lock },
       { name: t('footer.terms'), path: '/terms-of-service', icon: Shield },
       { name: "Cookie Policy", path: '/cookie-policy', icon: Shield },
-      { name: t('footer.security'), path: '/security', icon: ShieldCheck },
     ],
   }), [t]);
 
