@@ -1126,11 +1126,11 @@ Respond ONLY with valid JSON:
             body: JSON.stringify({
               model: GROQ_MODEL,
               messages: [
-                { role: 'system', content: 'You are a helpful assistant that summarizes calls. Respond ONLY with valid JSON.' },
+                { role: 'system', content: 'You are a call summarization assistant. Always respond with valid JSON containing summary, keyPoints, sentiment, suggestions, etc.' },
                 { role: 'user', content: prompt }
               ],
-              temperature: 0.3,
-              max_tokens: 512,
+              temperature: 0.4,
+              max_tokens: 1024,
             }),
             signal: AbortSignal.timeout(SUMMARY_TIMEOUT),
           });
@@ -1138,7 +1138,15 @@ Respond ONLY with valid JSON:
           if (groqResponse.ok) {
             const data = await groqResponse.json();
             rawResponse = data.choices?.[0]?.message?.content || '';
-            console.log('✅ Groq summary received');
+            console.log('✅ Groq summary received, length:', rawResponse.length);
+
+            // Log if response is empty
+            if (!rawResponse) {
+              console.warn('⚠️ Groq returned empty content. Full response:', JSON.stringify(data).slice(0, 500));
+            }
+          } else {
+            const errorText = await groqResponse.text();
+            console.error('❌ Groq summary request failed:', groqResponse.status, errorText.slice(0, 200));
           }
         } catch (e) {
           console.warn('⚠️ Groq summary failed:', e);
@@ -1148,8 +1156,25 @@ Respond ONLY with valid JSON:
         throw new Error('Groq not available for summary');
       }
 
+      // Handle empty response with a simple fallback
       if (!rawResponse) {
-        throw new Error('Empty summary response from Groq');
+        console.log('⚠️ Empty response, generating simple summary...');
+        // Create a simple fallback summary
+        const fallbackSummary = {
+          summary: `Call with ${callerName || 'Unknown Caller'}. ${extractedText || 'No additional details extracted.'}`,
+          keyPoints: ['Call completed', extractedText || 'No details provided'].filter(Boolean),
+          callerIntent: 'General inquiry',
+          sentiment: 'neutral',
+          moodIndicators: [],
+          urgency: 'low',
+          topics: [],
+          suggestions: ['Review call recording if available'],
+          resolution: 'unresolved',
+          riskLevel: 'low',
+          followUp: false,
+          estimatedPriority: 'low'
+        };
+        rawResponse = JSON.stringify(fallbackSummary);
       }
 
       console.log('📝 Summary raw response:', rawResponse.slice(0, 200));
