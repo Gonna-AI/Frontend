@@ -368,15 +368,6 @@ export default function UnifiedChatInterface({ isDark = true }: UnifiedChatInter
                             {/* Subtle glow effect */}
                             <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-blue-500/5 via-transparent to-purple-500/5 pointer-events-none" />
 
-                            <div className={cn(
-                                "w-20 h-20 rounded-3xl flex items-center justify-center mb-6 mx-auto",
-                                "backdrop-blur-xl",
-                                isDark
-                                    ? "bg-gradient-to-br from-blue-500/20 to-purple-500/20 border border-white/10 shadow-xl shadow-blue-500/10"
-                                    : "bg-gradient-to-br from-blue-500/15 to-purple-500/15 border border-black/5"
-                            )}>
-                                <ClerkTreeLogo className={cn("w-10 h-10", isDark ? "text-blue-400" : "text-blue-600")} isDark={isDark} />
-                            </div>
                             <h3 className={cn(
                                 "text-2xl font-semibold mb-3 tracking-tight",
                                 isDark ? "text-white" : "text-gray-900"
@@ -669,14 +660,22 @@ export default function UnifiedChatInterface({ isDark = true }: UnifiedChatInter
                                         "transition-all duration-300",
                                         "focus:outline-none focus:ring-2 focus:ring-offset-2",
                                         inputMessage.trim() && !isProcessing
-                                            ? cn(
-                                                "bg-gradient-to-r from-blue-500 to-blue-600 text-white",
-                                                "hover:from-blue-400 hover:to-blue-500",
-                                                "shadow-lg shadow-blue-500/30",
-                                                "hover:shadow-xl hover:shadow-blue-500/40",
-                                                "hover:scale-105 active:scale-95",
-                                                "focus:ring-blue-500/50"
-                                            )
+                                            ? isDark
+                                                ? cn(
+                                                    "bg-black/80 backdrop-blur-xl",
+                                                    "border border-blue-500/30",
+                                                    "text-blue-400",
+                                                    "hover:bg-blue-500/20",
+                                                    "shadow-lg shadow-blue-500/10",
+                                                    "hover:shadow-blue-500/20",
+                                                    "hover:scale-105 active:scale-95",
+                                                    "focus:ring-blue-500/50"
+                                                )
+                                                : cn(
+                                                    "bg-gradient-to-r from-blue-500 to-blue-600 text-white",
+                                                    "hover:from-blue-400 hover:to-blue-500",
+                                                    "shadow-lg shadow-blue-500/30"
+                                                )
                                             : isDark
                                                 ? "bg-white/[0.05] text-white/20 cursor-not-allowed"
                                                 : "bg-black/[0.05] text-gray-300 cursor-not-allowed"
@@ -700,12 +699,13 @@ export default function UnifiedChatInterface({ isDark = true }: UnifiedChatInter
                                     "focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-transparent",
                                     isDark
                                         ? cn(
-                                            "bg-gradient-to-br from-rose-500/80 to-red-600/80",
-                                            "border border-rose-400/30",
-                                            "shadow-lg shadow-rose-500/20",
-                                            "hover:shadow-xl hover:shadow-rose-500/30",
-                                            "focus:ring-rose-500/50",
-                                            "text-white"
+                                            "bg-black/80 backdrop-blur-xl",
+                                            "border border-rose-500/30",
+                                            "text-rose-400",
+                                            "hover:bg-rose-500/20",
+                                            "shadow-lg shadow-rose-500/10",
+                                            "hover:shadow-rose-500/20",
+                                            "focus:ring-rose-500/50"
                                         )
                                         : cn(
                                             "bg-gradient-to-br from-rose-500/90 to-red-600/90",
@@ -731,31 +731,36 @@ export default function UnifiedChatInterface({ isDark = true }: UnifiedChatInter
                                 "transition-all duration-300",
                                 "focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-transparent",
                                 isVoiceMode
-                                    ? cn(
-                                        "bg-gradient-to-br from-rose-500/90 to-red-600/90",
-                                        "border border-rose-400/30",
-                                        "shadow-lg shadow-rose-500/30",
-                                        "hover:shadow-xl hover:shadow-rose-500/40",
-                                        "focus:ring-rose-500/50",
-                                        "text-white"
-                                    )
+                                    ? isDark
+                                        ? cn(
+                                            "bg-black/80 backdrop-blur-xl",
+                                            "border border-rose-500/30",
+                                            "text-rose-400",
+                                            "hover:bg-rose-500/20",
+                                            "shadow-lg shadow-rose-500/10",
+                                            "hover:shadow-rose-500/20",
+                                            "focus:ring-rose-500/50"
+                                        )
+                                        : cn(
+                                            "bg-gradient-to-br from-rose-500/90 to-red-600/90",
+                                            "border border-rose-400/30",
+                                            "shadow-lg shadow-rose-500/30",
+                                            "text-white"
+                                        )
                                     : isDark
                                         ? cn(
-                                            // Dark emerald/teal gradient - sophisticated, not cartoonish
-                                            "bg-gradient-to-br from-emerald-600/90 to-teal-700/90",
-                                            "border border-emerald-400/20",
-                                            "shadow-lg shadow-emerald-500/20",
-                                            "hover:shadow-xl hover:shadow-emerald-500/30",
-                                            "hover:from-emerald-500/90 hover:to-teal-600/90",
-                                            "focus:ring-emerald-500/50",
-                                            "text-white"
+                                            "bg-black/80 backdrop-blur-xl",
+                                            "border border-emerald-500/30",
+                                            "text-emerald-400",
+                                            "hover:bg-emerald-500/20",
+                                            "shadow-lg shadow-emerald-500/10",
+                                            "hover:shadow-emerald-500/20",
+                                            "focus:ring-emerald-500/50"
                                         )
                                         : cn(
                                             "bg-gradient-to-br from-emerald-500/90 to-teal-600/90",
                                             "border border-emerald-400/30",
                                             "shadow-lg shadow-emerald-500/30",
-                                            "hover:shadow-xl hover:shadow-emerald-500/40",
-                                            "focus:ring-emerald-500/50",
                                             "text-white"
                                         )
                             )}

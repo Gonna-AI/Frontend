@@ -83,7 +83,7 @@ function UserCallContent() {
           <button
             onClick={() => navigate('/demo-dashboard')}
             className={cn(
-              "flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium transition-colors border",
+              "hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium transition-colors border",
               isDark
                 ? "bg-white/5 text-white/60 hover:bg-white/10 hover:text-white border-white/10"
                 : "bg-black/5 text-black/60 hover:bg-black/10 hover:text-black border-black/10"
