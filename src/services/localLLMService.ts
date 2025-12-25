@@ -1,8 +1,8 @@
 /**
- * Local LLM Service for ClerkTree
+ * LLM Service for ClerkTree
  * 
- * Provides AI using Ollama via Cloudflare tunnel with Mistral-style Function Calling
- * Reference: https://docs.mistral.ai/capabilities/function_calling
+ * Primary: Groq API with openai/gpt-oss-20b model (fast, powerful)
+ * Fallback: Local Ollama via Cloudflare tunnel
  * 
  * Key Features:
  * - Function calling for structured data extraction
@@ -11,10 +11,8 @@
  * - Caller information extraction
  * - Conversation summarization
  * 
- * Default: https://classroom-currency-employ-lisa.trycloudflare.com
- * Override with VITE_OLLAMA_URL in .env if needed
- * 
- * Uses /api/generate and /api/chat endpoints
+ * Groq API: https://api.groq.com/openai/v1/chat/completions
+ * Fallback: Local Ollama via Cloudflare tunnel
  */
 
 import {
@@ -32,21 +30,24 @@ import {
   IssueTopicsResult
 } from './functionCallingTools';
 
-// Configuration - using local service via cloudflare tunnel
-// Clean URL: remove trailing slashes, extra spaces, and any trailing text
+// ============= GROQ API CONFIGURATION (PRIMARY) =============
+const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY;
+const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
+const GROQ_MODEL = 'openai/gpt-oss-20b';
+
+// ============= LOCAL OLLAMA CONFIGURATION (FALLBACK) =============
 const getCleanURL = (url: string) => {
   if (!url) return '';
-  // Remove any text after the URL (like " check with this")
   let cleaned = url.trim().split(/\s+/)[0];
-  // Remove trailing slashes
   cleaned = cleaned.replace(/\/+$/, '');
   return cleaned;
 };
-const LLM_URL = getCleanURL(import.meta.env.VITE_OLLAMA_URL || 'https://classroom-currency-employ-lisa.trycloudflare.com');
-const MODEL_NAME = 'ministral-3:14b';
+const LOCAL_LLM_URL = getCleanURL(import.meta.env.VITE_OLLAMA_URL || 'https://classroom-currency-employ-lisa.trycloudflare.com');
+const LOCAL_MODEL_NAME = 'ministral-3:14b';
 
 // Timeout in milliseconds
-const REQUEST_TIMEOUT = 120000; // 2 minutes
+const REQUEST_TIMEOUT = 60000; // 1 minute for Groq (it's fast)
+const LOCAL_REQUEST_TIMEOUT = 120000; // 2 minutes for local
 
 // Types
 export interface LocalLLMResponse {
@@ -82,76 +83,117 @@ export interface SentimentCard {
 
 class LocalLLMService {
   private isAvailable: boolean | null = null;
+  private groqAvailable: boolean | null = null;
+  private localAvailable: boolean | null = null;
+
+  /**
+   * Check if Groq API is available
+   */
+  private async checkGroqAvailability(): Promise<boolean> {
+    try {
+      console.log('🔍 Checking Groq API availability...');
+      console.log(`   Model: ${GROQ_MODEL}`);
+
+      const testResponse = await fetch(GROQ_API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${GROQ_API_KEY}`
+        },
+        body: JSON.stringify({
+          model: GROQ_MODEL,
+          messages: [{ role: 'user', content: 'Hi' }],
+          max_tokens: 10
+        }),
+        signal: AbortSignal.timeout(15000), // 15 second timeout
+      });
+
+      console.log(`   Groq Response Status: ${testResponse.status}`);
+
+      if (testResponse.ok) {
+        const data = await testResponse.json();
+        if (data.choices?.[0]?.message?.content) {
+          console.log('✅ Groq API available');
+          this.groqAvailable = true;
+          return true;
+        }
+      } else {
+        const error = await testResponse.text().catch(() => 'Unknown error');
+        console.warn(`⚠️ Groq API returned ${testResponse.status}: ${error}`);
+      }
+
+      this.groqAvailable = false;
+      return false;
+    } catch (e) {
+      console.warn('⚠️ Groq API check failed:', e instanceof Error ? e.message : e);
+      this.groqAvailable = false;
+      return false;
+    }
+  }
 
   /**
    * Check if Local LLM service is running and available
    */
-  async checkAvailability(): Promise<boolean> {
+  private async checkLocalAvailability(): Promise<boolean> {
     try {
-      console.log(`🔍 Checking Local LLM availability...`);
-      console.log(`   URL: ${LLM_URL}`);
-      console.log(`   Env Var: ${import.meta.env.VITE_OLLAMA_URL || 'NOT SET (using default)'}`);
+      console.log('🔍 Checking Local LLM availability...');
+      console.log(`   URL: ${LOCAL_LLM_URL}`);
 
-      // Test the /api/generate endpoint with a simple prompt
-      const testResponse = await fetch(`${LLM_URL}/api/generate`, {
+      const testResponse = await fetch(`${LOCAL_LLM_URL}/api/generate`, {
         method: 'POST',
-        mode: 'cors', // Explicitly request CORS
+        mode: 'cors',
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json'
         },
         body: JSON.stringify({
-          model: MODEL_NAME,
+          model: LOCAL_MODEL_NAME,
           prompt: 'ping',
           stream: false,
           thinking: false
         }),
-        signal: AbortSignal.timeout(30000), // 30 second timeout for availability check
+        signal: AbortSignal.timeout(30000),
       });
 
-      console.log(`   Response Status: ${testResponse.status} ${testResponse.statusText}`);
+      console.log(`   Local Response Status: ${testResponse.status}`);
 
-      if (!testResponse.ok) {
-        const errorText = await testResponse.text().catch(() => 'Unknown error');
-        console.error(`❌ Local LLM service not available: HTTP ${testResponse.status} at ${LLM_URL}`);
-        console.error(`   Error: ${errorText}`);
-        this.isAvailable = false;
-        return false;
+      if (testResponse.ok) {
+        const testData = await testResponse.json();
+        if (testData.response !== undefined) {
+          console.log(`✅ Local LLM available at ${LOCAL_LLM_URL}`);
+          this.localAvailable = true;
+          return true;
+        }
       }
 
-      const testData = await testResponse.json();
-      if (testData.response !== undefined) {
-        this.isAvailable = true;
-        console.log(`✅ Local LLM service available at ${LLM_URL}`);
-        return true;
-      }
-
-      this.isAvailable = false;
+      this.localAvailable = false;
       return false;
-
     } catch (e) {
-      const errorMsg = e instanceof Error ? e.message : String(e);
-      console.error(`❌ Local LLM connection failed at ${LLM_URL}`);
-      console.error(`   Error: ${errorMsg}`);
-      console.error(`   Error Type: ${e instanceof Error ? e.constructor.name : typeof e}`);
-
-      if (errorMsg.includes('Failed to fetch') || errorMsg.includes('NetworkError') || errorMsg.includes('Load failed')) {
-        console.error('   💡 This is a CORS (Cross-Origin Resource Sharing) issue!');
-        console.error('   💡 The Ollama server needs to allow requests from your website.');
-        console.error('   💡 FIX: On the machine running Ollama, set the environment variable:');
-        console.error('   💡       export OLLAMA_ORIGINS="*"');
-        console.error('   💡       Then restart Ollama with: ollama serve');
-        console.error('   💡 Alternatively, set OLLAMA_ORIGINS to your specific domain.');
-      } else if (errorMsg.includes('timeout')) {
-        console.error('   💡 Connection timed out. Service might be slow or down.');
-      } else {
-        console.error('   💡 Make sure VITE_OLLAMA_URL is set correctly in Netlify environment variables.');
-        console.error(`   💡 Current value: – "${import.meta.env.VITE_OLLAMA_URL || 'NOT SET'}"`);
-      }
-
-      this.isAvailable = false;
+      console.warn('⚠️ Local LLM check failed:', e instanceof Error ? e.message : e);
+      this.localAvailable = false;
       return false;
     }
+  }
+
+  /**
+   * Check availability of both services
+   */
+  async checkAvailability(): Promise<boolean> {
+    // Check Groq first (primary), then local (fallback)
+    const groqOk = await this.checkGroqAvailability();
+    const localOk = await this.checkLocalAvailability();
+
+    this.isAvailable = groqOk || localOk;
+
+    if (groqOk) {
+      console.log('� Using Groq API as primary LLM');
+    } else if (localOk) {
+      console.log('� Using Local Ollama as fallback LLM');
+    } else {
+      console.error('❌ No LLM service available!');
+    }
+
+    return this.isAvailable;
   }
 
   /**
@@ -537,10 +579,61 @@ Rules:
 `;
     prompt += `Assistant:`;
 
-    // Helper function to make the API request with retry logic
-    const makeRequest = async (retryCount = 0): Promise<string> => {
+    // Build messages array for Groq API (OpenAI format)
+    const groqMessages = [
+      { role: 'system' as const, content: systemPrompt },
+      ...recentHistory.map(msg => ({
+        role: msg.speaker === 'agent' ? 'assistant' as const : 'user' as const,
+        content: msg.speaker === 'agent' ? this.cleanFinalAnswer(msg.text) : msg.text
+      })),
+      { role: 'user' as const, content: `${userMessage}\n\nRespond naturally to the caller, then AFTER your response, add a JSON block with extracted information.\n\nFormat:\n[Your response]\n\n\`\`\`json\n{"extracted": {"name": "caller name or null", "email": "email or null", "phone": "phone or null", "company": "company or null"}, "priority": "low|medium|high|critical", "category": "inquiry|support|complaint|appointment|other"}\n\`\`\`` }
+    ];
+
+    // Helper function for Groq API request
+    const makeGroqRequest = async (): Promise<string | null> => {
+      if (!this.groqAvailable) return null;
+
       try {
-        const response = await fetch(`${LLM_URL}/api/generate`, {
+        console.log('🚀 Calling Groq API...');
+        const response = await fetch(GROQ_API_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${GROQ_API_KEY}`
+          },
+          body: JSON.stringify({
+            model: GROQ_MODEL,
+            messages: groqMessages,
+            temperature: 0.7,
+            max_tokens: 2048,
+          }),
+          signal: AbortSignal.timeout(REQUEST_TIMEOUT),
+        });
+
+        if (!response.ok) {
+          const error = await response.text().catch(() => 'Unknown error');
+          console.warn(`⚠️ Groq API error (${response.status}):`, error);
+          return null;
+        }
+
+        const data = await response.json();
+        const content = data.choices?.[0]?.message?.content;
+        if (content) {
+          console.log('✅ Groq response received');
+          return content;
+        }
+        return null;
+      } catch (error) {
+        console.warn('⚠️ Groq request failed:', error instanceof Error ? error.message : error);
+        return null;
+      }
+    };
+
+    // Helper function for Local Ollama request
+    const makeLocalRequest = async (retryCount = 0): Promise<string> => {
+      try {
+        console.log('📡 Calling Local LLM...');
+        const response = await fetch(`${LOCAL_LLM_URL}/api/generate`, {
           method: 'POST',
           mode: 'cors',
           headers: {
@@ -548,36 +641,42 @@ Rules:
             'Accept': 'application/json'
           },
           body: JSON.stringify({
-            model: MODEL_NAME,
+            model: LOCAL_MODEL_NAME,
             prompt: prompt,
             stream: false,
-            thinking: false // Request no thinking output
+            thinking: false
           }),
-          signal: AbortSignal.timeout(retryCount === 0 ? REQUEST_TIMEOUT : 60000), // Shorter timeout on retry
+          signal: AbortSignal.timeout(retryCount === 0 ? LOCAL_REQUEST_TIMEOUT : 60000),
         });
 
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
           const errorMsg = errorData.error || `Local LLM error: ${response.status}`;
-          console.error(` Local LLM API error (${response.status}):`, errorMsg);
+          console.error(`❌ Local LLM API error (${response.status}):`, errorMsg);
           throw new Error(`Local LLM error: ${response.status} - ${errorMsg}`);
         }
 
         const data = await response.json();
+        console.log('✅ Local LLM response received');
         return data.response || '';
       } catch (error) {
-        // Retry once if first request fails (cold start issue)
         if (retryCount === 0) {
-          console.warn('First request failed, retrying...', error);
-          await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second
-          return makeRequest(1);
+          console.warn('First local request failed, retrying...', error);
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          return makeLocalRequest(1);
         }
         throw error;
       }
     };
 
     try {
-      const rawResponse = await makeRequest();
+      // Try Groq first (primary), then local (fallback)
+      let rawResponse = await makeGroqRequest();
+
+      if (!rawResponse) {
+        console.log('📡 Groq unavailable, falling back to local LLM...');
+        rawResponse = await makeLocalRequest();
+      }
 
       console.log('📝 Raw response length:', rawResponse.length, 'chars');
 
@@ -672,7 +771,7 @@ Extract and return JSON (use null if not detected):
     try {
       console.log('🤖 Running AI-based message analysis...');
 
-      const response = await fetch(`${LLM_URL}/api/generate`, {
+      const response = await fetch(`${LOCAL_LLM_URL}/api/generate`, {
         method: 'POST',
         mode: 'cors',
         headers: {
@@ -680,7 +779,7 @@ Extract and return JSON (use null if not detected):
           'Accept': 'application/json'
         },
         body: JSON.stringify({
-          model: MODEL_NAME,
+          model: LOCAL_MODEL_NAME,
           prompt: analysisPrompt,
           stream: false,
           thinking: false
@@ -953,30 +1052,72 @@ Respond ONLY with JSON:
 {"notes": ["point 1", "point 2", "point 3"], "sentiment": "positive|neutral|negative", "followUp": false}`;
 
     try {
-      console.log('📝 Generating summary with /api/generate...');
+      console.log('📝 Generating summary...');
 
-      const response = await fetch(`${LLM_URL}/api/generate`, {
-        method: 'POST',
-        mode: 'cors',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        body: JSON.stringify({
-          model: MODEL_NAME,
-          prompt: prompt,
-          stream: false,
-          thinking: false
-        }),
-        signal: AbortSignal.timeout(SUMMARY_TIMEOUT),
-      });
+      let rawResponse = '';
 
-      if (!response.ok) {
-        throw new Error(`Local LLM error: ${response.status}`);
+      // Try Groq first for faster summary (it's much faster)
+      if (this.groqAvailable) {
+        try {
+          console.log('🚀 Using Groq for summary...');
+          const groqResponse = await fetch(GROQ_API_URL, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${GROQ_API_KEY}`
+            },
+            body: JSON.stringify({
+              model: GROQ_MODEL,
+              messages: [
+                { role: 'system', content: 'You are a helpful assistant that summarizes calls. Respond ONLY with valid JSON.' },
+                { role: 'user', content: prompt }
+              ],
+              temperature: 0.3,
+              max_tokens: 512,
+            }),
+            signal: AbortSignal.timeout(SUMMARY_TIMEOUT),
+          });
+
+          if (groqResponse.ok) {
+            const data = await groqResponse.json();
+            rawResponse = data.choices?.[0]?.message?.content || '';
+            console.log('✅ Groq summary received');
+          }
+        } catch (e) {
+          console.warn('⚠️ Groq summary failed, trying local...', e);
+        }
       }
 
-      const data = await response.json();
-      const rawResponse = data.response || '';
+      // Fallback to local if Groq didn't work
+      if (!rawResponse && this.localAvailable) {
+        console.log('📡 Using local LLM for summary...');
+        const response = await fetch(`${LOCAL_LLM_URL}/api/generate`, {
+          method: 'POST',
+          mode: 'cors',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify({
+            model: LOCAL_MODEL_NAME,
+            prompt: prompt,
+            stream: false,
+            thinking: false
+          }),
+          signal: AbortSignal.timeout(SUMMARY_TIMEOUT),
+        });
+
+        if (!response.ok) {
+          throw new Error(`Local LLM error: ${response.status}`);
+        }
+
+        const data = await response.json();
+        rawResponse = data.response || '';
+      }
+
+      if (!rawResponse) {
+        throw new Error('No LLM available for summary');
+      }
 
       console.log('📝 Summary raw response:', rawResponse.slice(0, 200));
 
@@ -1054,7 +1195,7 @@ Respond ONLY with JSON:
    * Get the service URL being used
    */
   getServiceUrl(): string {
-    return LLM_URL;
+    return this.groqAvailable ? GROQ_API_URL : LOCAL_LLM_URL;
   }
 }
 
