@@ -528,8 +528,15 @@ class LocalLLMService {
     knowledgeBase: KnowledgeBaseConfig,
     existingFields: ExtractedField[]
   ): Promise<LocalLLMResponse> {
-    if (!this.isAvailable) {
-      throw new Error('Local LLM not available');
+    // Auto-initialize if not yet done
+    if (this.isAvailable === null) {
+      console.log('🔄 Auto-initializing LLM service...');
+      await this.checkAvailability();
+    }
+
+    // Check if either Groq or Local is available
+    if (!this.groqAvailable && !this.localAvailable) {
+      throw new Error('No AI service available - check Groq API key and/or local LLM');
     }
 
     // Build the enhanced prompt string for /api/generate
@@ -1008,8 +1015,15 @@ Extract and return JSON (use null if not detected):
     seriousnessLevel?: SeriousnessResult;
     issueTopics?: IssueTopicsResult;
   }> {
-    if (!this.isAvailable) {
-      throw new Error('Local LLM not available');
+    // Auto-initialize if not yet done
+    if (this.isAvailable === null) {
+      console.log('🔄 Auto-initializing LLM service for summary...');
+      await this.checkAvailability();
+    }
+
+    // Check if either Groq or Local is available
+    if (!this.groqAvailable && !this.localAvailable) {
+      throw new Error('No AI service available for summary');
     }
 
     // Quick timeout for fast notes generation (30 seconds)

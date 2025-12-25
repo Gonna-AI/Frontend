@@ -176,13 +176,13 @@ class AIService {
       return this.smartMockResponse(userMessage, conversationHistory, extractedFields);
     }
 
-    // Use Local Mistral Model via Ollama/Cloudflare tunnel
-    // Check that LLM is explicitly available (true), not just "not false"
-    if (this.config.useLocalLLM && this.localLLMAvailable === true) {
+    // Use Groq API (primary) or Local LLM (fallback) via localLLMService
+    // The service handles Groq vs Local availability internally
+    if (this.config.useLocalLLM) {
       try {
-        console.log('🖥️ Calling Local LLM...');
-        console.log('   Local LLM Available:', this.localLLMAvailable);
-        console.log('   Ollama URL:', import.meta.env.VITE_OLLAMA_URL || 'NOT SET');
+        console.log('🤖 Calling AI Service (Groq/Local)...');
+        console.log('   Service Available:', this.localLLMAvailable);
+
         const result: LocalLLMResponse = await localLLMService.generateResponse(
           userMessage,
           conversationHistory,
@@ -212,7 +212,7 @@ class AIService {
           }
         }
 
-        console.log('✅ Local LLM response received');
+        console.log('✅ AI response received');
         if (result.analysis) {
           console.log('   📊 Analysis included:', {
             priority: result.analysis.seriousness?.priority_level,
@@ -222,7 +222,7 @@ class AIService {
         return response;
 
       } catch (error) {
-        console.error('❌ Local LLM error:', error);
+        console.error('❌ AI Service error:', error);
         // Only mark as unavailable for connection errors, not timeouts or aborts
         if (error instanceof Error) {
           const isTimeoutOrAbort = error.name === 'AbortError' ||
@@ -232,7 +232,7 @@ class AIService {
           if (!isTimeoutOrAbort) {
             this.localLLMAvailable = false; // Only mark unavailable for actual connection failures
           } else {
-            console.warn('⏱️ LLM request timed out - model may still be processing');
+            console.warn('⏱️ AI request timed out - model may still be processing');
             // Provide a helpful timeout message
             throw new Error('The AI is taking longer than expected. Please try again - your request may have been too complex.');
           }
@@ -243,8 +243,8 @@ class AIService {
     }
 
     // Step 3: No fallback - model must be available
-    console.error('❌ No AI model available - cloudflare model must be accessible');
-    throw new Error('AI model unavailable - ensure cloudflare tunnel is running and accessible');
+    console.error('❌ No AI model available - useLocalLLM is disabled');
+    throw new Error('AI model unavailable - useLocalLLM config is disabled');
   }
 
   /**
