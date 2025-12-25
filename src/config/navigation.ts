@@ -1,40 +1,22 @@
-import { Home, Settings, User, CreditCard, Bot, MessageSquare, FileCheck, Brain } from 'lucide-react';
+import { Home, MessageSquare, LayoutDashboard } from 'lucide-react';
 
 export const menuItems = [
   {
-    id: 'dashboard',
+    id: 'home',
     icon: Home,
+    label: 'Home',
+    path: '/'
+  },
+  {
+    id: 'dashboard',
+    icon: LayoutDashboard,
     label: 'Dashboard',
-    path: '/dashboard'
+    path: '/demo-dashboard'
   },
   {
-    id: 'documents',
-    icon: FileCheck,
-    label: 'Documents',
-    path: '/documents'
-  },
-  {
-    id: 'ai-settings',
-    icon: Brain,
-    label: 'AI Settings',
-    path: '/ai-settings'
-  },
-  {
-    id: 'profile',
-    icon: User,
-    label: 'Profile',
-    path: '/profile'
-  },
-  {
-    id: 'billing',
-    icon: CreditCard,
-    label: 'Billing',
-    path: '/billing'
-  },
-  {
-    id: 'settings',
-    icon: Settings,
-    label: 'Settings',
-    path: '/settings'
+    id: 'chatbot',
+    icon: MessageSquare,
+    label: 'Chatbot',
+    path: '/user'
   }
 ] as const;
