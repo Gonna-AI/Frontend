@@ -56,7 +56,7 @@ export default function MobileSidebar({
               "rounded-t-[1.25rem] shadow-2xl",
               isDark
                 ? [
-                  "bg-black/40", // Increased transparency for glassier look
+                  "bg-black/60", // Darker black glass
                   "backdrop-blur-xl",
                   "border-t border-white/10"
                 ]
