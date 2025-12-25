@@ -185,3 +185,11 @@
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
+
+/* Hide Termly 'Powered by' badge */
+
+/* Hide Termly 'Powered by' badge and logo */
+.termly-badge,
+img[alt="Powered by Termly"] {
+  display: none !important;
+}
