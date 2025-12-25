@@ -90,6 +90,13 @@ class LocalLLMService {
    * Check if Groq API is available
    */
   private async checkGroqAvailability(): Promise<boolean> {
+    // Skip if no API key configured
+    if (!GROQ_API_KEY) {
+      console.log('⚠️ Groq API key not configured, skipping...');
+      this.groqAvailable = false;
+      return false;
+    }
+
     try {
       console.log('🔍 Checking Groq API availability...');
       console.log(`   Model: ${GROQ_MODEL}`);
@@ -105,17 +112,22 @@ class LocalLLMService {
           messages: [{ role: 'user', content: 'Hi' }],
           max_tokens: 10
         }),
-        signal: AbortSignal.timeout(15000), // 15 second timeout
+        signal: AbortSignal.timeout(15000),
       });
 
       console.log(`   Groq Response Status: ${testResponse.status}`);
 
       if (testResponse.ok) {
         const data = await testResponse.json();
-        if (data.choices?.[0]?.message?.content) {
+        console.log('   Groq Response data:', JSON.stringify(data).slice(0, 200));
+
+        // Check if we got a valid response structure (just needs choices array)
+        if (data.choices && Array.isArray(data.choices)) {
           console.log('✅ Groq API available');
           this.groqAvailable = true;
           return true;
+        } else {
+          console.warn('⚠️ Groq API response missing choices array');
         }
       } else {
         const error = await testResponse.text().catch(() => 'Unknown error');

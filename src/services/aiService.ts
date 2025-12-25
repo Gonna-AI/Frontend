@@ -177,7 +177,8 @@ class AIService {
     }
 
     // Use Local Mistral Model via Ollama/Cloudflare tunnel
-    if (this.config.useLocalLLM && this.localLLMAvailable !== false) {
+    // Check that LLM is explicitly available (true), not just "not false"
+    if (this.config.useLocalLLM && this.localLLMAvailable === true) {
       try {
         console.log('🖥️ Calling Local LLM...');
         console.log('   Local LLM Available:', this.localLLMAvailable);
