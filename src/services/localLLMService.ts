@@ -1007,6 +1007,10 @@ Extract and return JSON (use null if not detected):
     followUpRequired: boolean;
     notes: string;
     callerName?: string;
+    // Enhanced summary fields
+    suggestions?: string[];
+    callerIntent?: string;
+    urgency?: string;
     // Enhanced function calling results
     analysis?: ConversationAnalysis;
     sentimentCards?: SentimentCard[];
@@ -1064,16 +1068,25 @@ Extract and return JSON (use null if not detected):
       }
     }
 
-    // Simple, fast prompt for 3-4 bullet point notes (not comprehensive analysis)
-    const prompt = `Write 3-4 brief bullet points summarizing this call. Be concise.
+    // Enhanced prompt for detailed summary with admin suggestions
+    const prompt = `Analyze this call transcript and provide a detailed summary with actionable suggestions.
 
 TRANSCRIPT:
 ${transcript}
 
-${callerName ? `Caller: ${callerName}` : ''}${extractedText ? `\nInfo: ${extractedText}` : ''}
+${callerName ? `Caller: ${callerName}` : ''}${extractedText ? `\nExtracted Info: ${extractedText}` : ''}
 
-Respond ONLY with JSON:
-{"notes": ["point 1", "point 2", "point 3"], "sentiment": "positive|neutral|negative", "followUp": false}`;
+Generate a JSON response with:
+1. "summary": A 2-3 sentence overview of what happened in the call
+2. "keyPoints": 3-5 specific, detailed bullet points about the call
+3. "callerIntent": What the caller wanted (1 sentence)
+4. "sentiment": "positive" | "neutral" | "negative" 
+5. "urgency": "low" | "medium" | "high" | "critical"
+6. "suggestions": 1-2 actionable items for the admin (e.g., "Follow up within 24 hours", "Schedule callback", "Escalate to supervisor")
+7. "followUp": true/false - does this need follow-up action?
+
+Respond ONLY with valid JSON:
+{"summary": "...", "keyPoints": ["...", "..."], "callerIntent": "...", "sentiment": "...", "urgency": "...", "suggestions": ["...", "..."], "followUp": true/false}`;
 
     try {
       console.log('📝 Generating summary...');
@@ -1133,22 +1146,50 @@ Respond ONLY with JSON:
       }
 
       if (parsedSummary) {
-        // Simple notes format: {"notes": [...], "sentiment": "...", "followUp": false}
-        const notes = Array.isArray(parsedSummary.notes) ? parsedSummary.notes as string[] : [];
+        // Enhanced format: detailed summary with suggestions
+        const summaryText = (parsedSummary.summary as string) || '';
+        const keyPoints = Array.isArray(parsedSummary.keyPoints)
+          ? parsedSummary.keyPoints as string[]
+          : (Array.isArray(parsedSummary.notes) ? parsedSummary.notes as string[] : []);
+        const callerIntent = (parsedSummary.callerIntent as string) || '';
+        const suggestions = Array.isArray(parsedSummary.suggestions)
+          ? parsedSummary.suggestions as string[]
+          : [];
+        const urgency = ['low', 'medium', 'high', 'critical'].includes(parsedSummary.urgency as string)
+          ? (parsedSummary.urgency as string)
+          : 'medium';
         const sentiment = ['positive', 'neutral', 'negative'].includes(parsedSummary.sentiment as string)
           ? (parsedSummary.sentiment as 'positive' | 'neutral' | 'negative')
           : 'neutral';
         const followUp = parsedSummary.followUp === true || parsedSummary.followUpRequired === true;
 
-        console.log('✅ Quick notes generated:', notes.length, 'points');
+        console.log('✅ Enhanced summary generated:', {
+          keyPoints: keyPoints.length,
+          suggestions: suggestions.length,
+          urgency,
+          sentiment
+        });
+
+        // Build detailed notes string
+        const notesArray = [
+          summaryText ? `📋 ${summaryText}` : '',
+          callerIntent ? `🎯 Intent: ${callerIntent}` : '',
+          keyPoints.length > 0 ? `\n📌 Key Points:\n• ${keyPoints.join('\n• ')}` : '',
+          suggestions.length > 0 ? `\n💡 Suggestions:\n• ${suggestions.join('\n• ')}` : '',
+          urgency !== 'low' ? `\n⚠️ Urgency: ${urgency.toUpperCase()}` : ''
+        ].filter(Boolean).join('\n');
 
         return {
-          summary: notes.join(' • ') || 'Call completed',
-          mainPoints: notes.length > 0 ? notes : ['Call completed'],
+          summary: summaryText || keyPoints.join(' • ') || 'Call completed',
+          mainPoints: keyPoints.length > 0 ? keyPoints : ['Call completed'],
           sentiment,
           followUpRequired: followUp,
-          notes: notes.join('\n• ') || 'Call completed',
+          notes: notesArray || 'Call completed',
           callerName: callerName,
+          // Enhanced fields
+          suggestions: suggestions,
+          callerIntent: callerIntent,
+          urgency: urgency,
         };
       }
 
