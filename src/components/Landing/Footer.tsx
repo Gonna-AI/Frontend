@@ -26,7 +26,7 @@ export default function Footer() {
     ],
     legal: [
       { name: t('footer.privacy'), path: '/privacy-policy', icon: Lock },
-      { name: t('footer.terms'), path: '/terms-of-service', icon: Shield },
+      { name: "Terms & Conditions", path: '/terms-of-service', icon: Shield },
       { name: "Cookie Policy", path: '/cookie-policy', icon: Shield },
     ],
   }), [t]);
@@ -177,9 +177,7 @@ export default function Footer() {
                   {link.name}
                 </button>
               ))}
-              <button className="termly-display-preferences text-neutral-500 hover:text-purple-400 transition-colors text-sm">
-                Consent Preferences
-              </button>
+
             </div>
           </div>
         </motion.div>
