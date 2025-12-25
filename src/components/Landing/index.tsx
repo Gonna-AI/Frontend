@@ -9,6 +9,7 @@ import Footer from './Footer';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { Menu, X } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import LanguageSwitcher from '../Layout/LanguageSwitcher';
 
 import { useLanguage } from '../../contexts/LanguageContext';
@@ -119,59 +120,82 @@ export default function Landing() {
         </div>
       </header>
 
-      {/* Mobile Menu Floating Bar */}
-      {isMobileMenuOpen && (
-        <>
-          {/* Backdrop */}
-          <div
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 md:hidden"
-            onClick={() => setIsMobileMenuOpen(false)}
-          />
-          {/* Floating Bar Below Header */}
-          <div className="fixed top-[70px] left-0 right-0 z-40 md:hidden px-4 pt-4">
-            <div className="max-w-7xl mx-auto">
-              <div className="backdrop-blur-md bg-[rgb(10,10,10)]/80 border border-white/10 rounded-2xl shadow-lg">
-                <nav className="flex flex-col items-center justify-center gap-4 p-6">
+      {/* Mobile Menu Overlay */}
+      <AnimatePresence>
+        {isMobileMenuOpen && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden"
+              onClick={() => setIsMobileMenuOpen(false)}
+            />
+
+            {/* Glassy Popup Menu */}
+            <motion.div
+              initial={{ opacity: 0, y: -20, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -20, scale: 0.95 }}
+              transition={{ duration: 0.2, ease: "easeOut" }}
+              className="fixed top-[80px] left-4 right-4 z-50 md:hidden"
+            >
+              <div className="backdrop-blur-xl bg-black/40 border border-white/10 rounded-2xl shadow-2xl overflow-hidden ring-1 ring-white/5">
+                <nav className="flex flex-col p-2">
                   <button
                     onClick={handleAboutClick}
-                    className="text-white/80 hover:text-white transition-colors text-base font-medium px-4 py-2 w-full text-center"
+                    className="flex items-center justify-between px-4 py-3.5 rounded-xl text-white/90 hover:text-white hover:bg-white/10 transition-all group"
                   >
-                    {t('nav.about')}
+                    <span className="text-base font-medium font-urbanist">{t('nav.about')}</span>
+                    <span className="text-white/20 group-hover:text-white/60 transition-colors">→</span>
                   </button>
-                  <div className="h-px w-3/4 bg-white/10" />
+
+                  <div className="h-px bg-white/5 mx-2" />
+
                   <button
                     onClick={handleSolutionsClick}
-                    className="text-white/80 hover:text-white transition-colors text-base font-medium px-4 py-2 w-full text-center"
+                    className="flex items-center justify-between px-4 py-3.5 rounded-xl text-white/90 hover:text-white hover:bg-white/10 transition-all group"
                   >
-                    {t('nav.solutions')}
+                    <span className="text-base font-medium font-urbanist">{t('nav.solutions')}</span>
+                    <span className="text-white/20 group-hover:text-white/60 transition-colors">→</span>
                   </button>
-                  <div className="h-px w-3/4 bg-white/10" />
+
+                  <div className="h-px bg-white/5 mx-2" />
+
                   <button
                     onClick={() => {
                       setIsMobileMenuOpen(false);
                       navigate('/blog');
                     }}
-                    className="text-white/80 hover:text-white transition-colors text-base font-medium px-4 py-2 w-full text-center"
+                    className="flex items-center justify-between px-4 py-3.5 rounded-xl text-white/90 hover:text-white hover:bg-white/10 transition-all group"
                   >
-                    {t('nav.blog')}
+                    <span className="text-base font-medium font-urbanist">{t('nav.blog')}</span>
+                    <span className="text-white/20 group-hover:text-white/60 transition-colors">→</span>
                   </button>
-                  <div className="h-px w-3/4 bg-white/10" />
+
+                  <div className="h-px bg-white/5 mx-2" />
+
                   <button
                     onClick={handleContactClick}
-                    className="text-white/80 hover:text-white transition-colors text-base font-medium px-4 py-2 w-full text-center"
+                    className="flex items-center justify-between px-4 py-3.5 rounded-xl text-white/90 hover:text-white hover:bg-white/10 transition-all group"
                   >
-                    {t('nav.contact')}
+                    <span className="text-base font-medium font-urbanist">{t('nav.contact')}</span>
+                    <span className="text-white/20 group-hover:text-white/60 transition-colors">→</span>
                   </button>
-                  <div className="h-px w-3/4 bg-white/10" />
-                  <div className="w-full px-4">
+
+                  <div className="h-px bg-white/5 mx-2 my-1" />
+
+                  <div className="p-2">
                     <LanguageSwitcher isExpanded={true} forceDark={true} />
                   </div>
                 </nav>
               </div>
-            </div>
-          </div>
-        </>
-      )}
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
 
       <div className="relative z-10">
         <Hero />
