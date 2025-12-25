@@ -17,7 +17,7 @@ function UserCallContent() {
     <div className={cn(
       "h-screen w-screen flex flex-col overflow-hidden",
       isDark
-        ? "bg-[#0A0A0A]"
+        ? "bg-black"
         : "bg-white"
     )}>
       {/* Background gradients */}
@@ -29,7 +29,7 @@ function UserCallContent() {
       <header className={cn(
         "flex-shrink-0 px-4 py-3 border-b z-20",
         isDark
-          ? "bg-[#0A0A0A]/80 border-white/5 backdrop-blur-xl"
+          ? "bg-black/80 border-white/5 backdrop-blur-xl"
           : "bg-white/80 border-black/5 backdrop-blur-xl"
       )}>
         <div className="flex items-center justify-between max-w-7xl mx-auto w-full">

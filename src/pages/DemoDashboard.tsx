@@ -247,7 +247,7 @@ function DemoDashboardContent() {
     <div className={cn(
       "min-h-screen transition-colors duration-300",
       isDark
-        ? "bg-[rgb(10,10,10)]"
+        ? "bg-black"
         : "bg-gradient-to-br from-gray-50 to-white"
     )}>
       {/* Background gradients */}
@@ -260,7 +260,7 @@ function DemoDashboardContent() {
       <header className={cn(
         "fixed top-0 left-0 right-0 z-50 px-3 md:px-4 py-2 md:py-3 backdrop-blur-md border-b",
         isDark
-          ? "bg-[rgb(10,10,10)]/80 border-white/10"
+          ? "bg-black/80 border-white/10"
           : "bg-white/80 border-black/10"
       )}>
         <div className="max-w-7xl mx-auto flex items-center justify-between">
