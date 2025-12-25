@@ -36,10 +36,19 @@ export interface CallMessage {
 
 export interface CallSummary {
   mainPoints: string[];
-  sentiment: 'positive' | 'neutral' | 'negative';
+  // Expanded sentiment types for detailed analysis
+  sentiment: 'very_positive' | 'positive' | 'slightly_positive' | 'neutral' | 'mixed' | 'slightly_negative' | 'negative' | 'very_negative' | 'anxious' | 'urgent';
   actionItems: ActionItem[];
   followUpRequired: boolean;
   notes: string;
+  // Enhanced summary fields
+  suggestions?: string[];
+  callerIntent?: string;
+  moodIndicators?: string[];
+  topics?: string[];
+  resolution?: string;
+  riskLevel?: string;
+  estimatedPriority?: string;
 }
 
 export interface CallSession {
