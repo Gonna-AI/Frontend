@@ -55,7 +55,7 @@ function AnalyticsCard({
     <div className={cn(
       "p-3 md:p-4 rounded-xl",
       isDark
-        ? "bg-white/5 border border-white/10"
+        ? "bg-black/40 backdrop-blur-xl border border-white/10"
         : "bg-black/5 border border-black/10"
     )}>
       <div className="flex items-start justify-between">
@@ -160,7 +160,7 @@ function PriorityQueue({ isDark, compact = false }: { isDark: boolean; compact?:
     <div className={cn(
       "rounded-2xl overflow-hidden",
       isDark
-        ? "bg-black/20 border border-white/10"
+        ? "bg-black/40 backdrop-blur-xl border border-white/10"
         : "bg-white/80 border border-black/10"
     )}>
       <div className={cn(
@@ -433,7 +433,7 @@ function DemoDashboardContent() {
           {/* Tab navigation */}
           <div className={cn(
             "flex items-center gap-1 md:gap-2 mb-4 md:mb-6 p-1 rounded-xl overflow-x-auto scrollbar-hide",
-            isDark ? "bg-white/5" : "bg-black/5"
+            isDark ? "bg-black/40 backdrop-blur-xl border border-white/10" : "bg-black/5"
           )}>
             {tabs.map((tab) => (
               <button
