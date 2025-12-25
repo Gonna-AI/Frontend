@@ -40,7 +40,7 @@ export default function LiveCallMonitor({ isDark = true }: LiveCallMonitorProps)
     <div className={cn(
       "flex flex-col h-full rounded-xl md:rounded-2xl overflow-hidden",
       isDark
-        ? "bg-black/20 border border-white/10"
+        ? "bg-black/40 backdrop-blur-xl border border-white/10"
         : "bg-white/80 border border-black/10"
     )}>
       {/* Header */}

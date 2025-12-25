@@ -135,7 +135,7 @@ export default function CallHistoryList({ isDark = true, showFilters = true }: C
     <div className={cn(
       "rounded-xl md:rounded-2xl overflow-hidden h-full flex flex-col",
       isDark
-        ? "bg-black/20 border border-white/10"
+        ? "bg-black/40 backdrop-blur-xl border border-white/10"
         : "bg-white/80 border border-black/10"
     )}>
       {/* Header */}
