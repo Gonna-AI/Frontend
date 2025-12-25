@@ -295,10 +295,18 @@ class AIService {
         return {
           summary: {
             mainPoints: result.mainPoints,
-            sentiment: result.sentiment,
+            sentiment: result.sentiment as CallSummary['sentiment'],
             actionItems: [],
             followUpRequired: result.followUpRequired,
             notes,
+            // Enhanced fields
+            suggestions: result.suggestions,
+            callerIntent: result.callerIntent,
+            moodIndicators: result.moodIndicators,
+            topics: result.topics,
+            resolution: result.resolution,
+            riskLevel: result.riskLevel,
+            estimatedPriority: result.estimatedPriority,
           },
           tags,
           callerName: result.callerName,

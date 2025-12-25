@@ -1003,7 +1003,7 @@ Extract and return JSON (use null if not detected):
   ): Promise<{
     summary: string;
     mainPoints: string[];
-    sentiment: 'positive' | 'neutral' | 'negative';
+    sentiment: string; // Now supports 10 sentiment types
     followUpRequired: boolean;
     notes: string;
     callerName?: string;
@@ -1011,6 +1011,11 @@ Extract and return JSON (use null if not detected):
     suggestions?: string[];
     callerIntent?: string;
     urgency?: string;
+    moodIndicators?: string[];
+    topics?: string[];
+    resolution?: string;
+    riskLevel?: string;
+    estimatedPriority?: string;
     // Enhanced function calling results
     analysis?: ConversationAnalysis;
     sentimentCards?: SentimentCard[];
@@ -1068,25 +1073,40 @@ Extract and return JSON (use null if not detected):
       }
     }
 
-    // Enhanced prompt for detailed summary with admin suggestions
-    const prompt = `Analyze this call transcript and provide a detailed summary with actionable suggestions.
+    // Enhanced prompt for detailed summary with comprehensive analysis
+    const prompt = `Analyze this call transcript thoroughly and provide a comprehensive summary.
 
 TRANSCRIPT:
 ${transcript}
 
 ${callerName ? `Caller: ${callerName}` : ''}${extractedText ? `\nExtracted Info: ${extractedText}` : ''}
 
-Generate a JSON response with:
+Generate a detailed JSON response with:
 1. "summary": A 2-3 sentence overview of what happened in the call
-2. "keyPoints": 3-5 specific, detailed bullet points about the call
+2. "keyPoints": 4-6 specific, detailed bullet points about the call
 3. "callerIntent": What the caller wanted (1 sentence)
-4. "sentiment": "positive" | "neutral" | "negative" 
-5. "urgency": "low" | "medium" | "high" | "critical"
-6. "suggestions": 1-2 actionable items for the admin (e.g., "Follow up within 24 hours", "Schedule callback", "Escalate to supervisor")
-7. "followUp": true/false - does this need follow-up action?
+4. "sentiment": Choose the most accurate:
+   - "very_positive" (enthusiastic, grateful, delighted)
+   - "positive" (satisfied, pleased, happy)
+   - "slightly_positive" (content, agreeable)
+   - "neutral" (informational, no strong emotion)
+   - "mixed" (alternating emotions, confused)
+   - "slightly_negative" (mildly frustrated, impatient)
+   - "negative" (upset, disappointed, annoyed)
+   - "very_negative" (angry, furious, distressed)
+   - "anxious" (worried, concerned, nervous)
+   - "urgent" (panicked, emergency tone)
+5. "moodIndicators": Array of 2-4 emotions detected (e.g., ["concerned", "hopeful", "frustrated"])
+6. "urgency": "none" | "low" | "medium" | "high" | "critical" | "emergency"
+7. "topics": Array of 2-5 topics discussed (e.g., ["billing inquiry", "appointment scheduling", "complaint"])
+8. "suggestions": 2-3 actionable items for the admin
+9. "resolution": "resolved" | "partially_resolved" | "unresolved" | "requires_callback" | "escalation_needed"
+10. "riskLevel": "none" | "low" | "medium" | "high" (potential for escalation or complaint)
+11. "followUp": true/false - does this need follow-up action?
+12. "estimatedPriority": "low" | "medium" | "high" | "critical"
 
 Respond ONLY with valid JSON:
-{"summary": "...", "keyPoints": ["...", "..."], "callerIntent": "...", "sentiment": "...", "urgency": "...", "suggestions": ["...", "..."], "followUp": true/false}`;
+{"summary": "...", "keyPoints": ["...", "..."], "callerIntent": "...", "sentiment": "...", "moodIndicators": ["...", "..."], "urgency": "...", "topics": ["...", "..."], "suggestions": ["...", "..."], "resolution": "...", "riskLevel": "...", "followUp": true/false, "estimatedPriority": "..."}`;
 
     try {
       console.log('📝 Generating summary...');
@@ -1155,28 +1175,50 @@ Respond ONLY with valid JSON:
         const suggestions = Array.isArray(parsedSummary.suggestions)
           ? parsedSummary.suggestions as string[]
           : [];
-        const urgency = ['low', 'medium', 'high', 'critical'].includes(parsedSummary.urgency as string)
+        const moodIndicators = Array.isArray(parsedSummary.moodIndicators)
+          ? parsedSummary.moodIndicators as string[]
+          : [];
+        const topics = Array.isArray(parsedSummary.topics)
+          ? parsedSummary.topics as string[]
+          : [];
+        const resolution = (parsedSummary.resolution as string) || 'unresolved';
+        const riskLevel = (parsedSummary.riskLevel as string) || 'low';
+        const estimatedPriority = (parsedSummary.estimatedPriority as string) || 'medium';
+
+        // Support all 10 sentiment types
+        const validSentiments = [
+          'very_positive', 'positive', 'slightly_positive', 'neutral', 'mixed',
+          'slightly_negative', 'negative', 'very_negative', 'anxious', 'urgent'
+        ];
+        const sentiment = validSentiments.includes(parsedSummary.sentiment as string)
+          ? (parsedSummary.sentiment as string)
+          : 'neutral';
+
+        const urgency = ['none', 'low', 'medium', 'high', 'critical', 'emergency'].includes(parsedSummary.urgency as string)
           ? (parsedSummary.urgency as string)
           : 'medium';
-        const sentiment = ['positive', 'neutral', 'negative'].includes(parsedSummary.sentiment as string)
-          ? (parsedSummary.sentiment as 'positive' | 'neutral' | 'negative')
-          : 'neutral';
         const followUp = parsedSummary.followUp === true || parsedSummary.followUpRequired === true;
 
-        console.log('✅ Enhanced summary generated:', {
+        console.log('✅ Comprehensive summary generated:', {
           keyPoints: keyPoints.length,
           suggestions: suggestions.length,
+          moodIndicators: moodIndicators.length,
+          topics: topics.length,
+          sentiment,
           urgency,
-          sentiment
+          resolution
         });
 
-        // Build detailed notes string
+        // Build detailed notes string with all info
         const notesArray = [
           summaryText ? `📋 ${summaryText}` : '',
           callerIntent ? `🎯 Intent: ${callerIntent}` : '',
           keyPoints.length > 0 ? `\n📌 Key Points:\n• ${keyPoints.join('\n• ')}` : '',
+          topics.length > 0 ? `\n🏷️ Topics: ${topics.join(', ')}` : '',
+          moodIndicators.length > 0 ? `\n😊 Mood: ${moodIndicators.join(', ')}` : '',
           suggestions.length > 0 ? `\n💡 Suggestions:\n• ${suggestions.join('\n• ')}` : '',
-          urgency !== 'low' ? `\n⚠️ Urgency: ${urgency.toUpperCase()}` : ''
+          `\n📊 Status: ${resolution.replace('_', ' ')} | Risk: ${riskLevel}`,
+          urgency !== 'none' && urgency !== 'low' ? `\n⚠️ Urgency: ${urgency.toUpperCase()}` : ''
         ].filter(Boolean).join('\n');
 
         return {
@@ -1190,6 +1232,11 @@ Respond ONLY with valid JSON:
           suggestions: suggestions,
           callerIntent: callerIntent,
           urgency: urgency,
+          moodIndicators: moodIndicators,
+          topics: topics,
+          resolution: resolution,
+          riskLevel: riskLevel,
+          estimatedPriority: estimatedPriority,
         };
       }
 
