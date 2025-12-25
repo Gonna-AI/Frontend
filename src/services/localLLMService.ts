@@ -143,9 +143,9 @@ class LocalLLMService {
     }
   }
 
-  /**
-   * Check if Local LLM service is running and available
-   */
+  // NOTE: Local LLM check disabled - using Groq only for faster startup
+  // Uncomment if you want to re-enable local Ollama fallback
+  /*
   private async checkLocalAvailability(): Promise<boolean> {
     try {
       console.log('🔍 Checking Local LLM availability...');
@@ -186,23 +186,22 @@ class LocalLLMService {
       return false;
     }
   }
+  */
 
   /**
-   * Check availability of both services
+   * Check availability - Groq only (faster startup)
    */
   async checkAvailability(): Promise<boolean> {
-    // Check Groq first (primary), then local (fallback)
+    // Only check Groq (primary) - skip local LLM for faster startup
     const groqOk = await this.checkGroqAvailability();
-    const localOk = await this.checkLocalAvailability();
 
-    this.isAvailable = groqOk || localOk;
+    this.isAvailable = groqOk;
+    this.localAvailable = false; // Skip local check
 
     if (groqOk) {
-      console.log('� Using Groq API as primary LLM');
-    } else if (localOk) {
-      console.log('� Using Local Ollama as fallback LLM');
+      console.log('🚀 Using Groq API as primary LLM');
     } else {
-      console.error('❌ No LLM service available!');
+      console.error('❌ Groq API not available! Check your VITE_GROQ_API_KEY');
     }
 
     return this.isAvailable;
@@ -689,12 +688,11 @@ Rules:
     };
 
     try {
-      // Try Groq first (primary), then local (fallback)
-      let rawResponse = await makeGroqRequest();
+      // Use Groq only (no local fallback for faster responses)
+      const rawResponse = await makeGroqRequest();
 
       if (!rawResponse) {
-        console.log('📡 Groq unavailable, falling back to local LLM...');
-        rawResponse = await makeLocalRequest();
+        throw new Error('Groq API failed - check your API key');
       }
 
       console.log('📝 Raw response length:', rawResponse.length, 'chars');
@@ -1110,39 +1108,15 @@ Respond ONLY with JSON:
             console.log('✅ Groq summary received');
           }
         } catch (e) {
-          console.warn('⚠️ Groq summary failed, trying local...', e);
+          console.warn('⚠️ Groq summary failed:', e);
+          throw new Error('Groq summary failed');
         }
-      }
-
-      // Fallback to local if Groq didn't work
-      if (!rawResponse && this.localAvailable) {
-        console.log('📡 Using local LLM for summary...');
-        const response = await fetch(`${LOCAL_LLM_URL}/api/generate`, {
-          method: 'POST',
-          mode: 'cors',
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-          },
-          body: JSON.stringify({
-            model: LOCAL_MODEL_NAME,
-            prompt: prompt,
-            stream: false,
-            thinking: false
-          }),
-          signal: AbortSignal.timeout(SUMMARY_TIMEOUT),
-        });
-
-        if (!response.ok) {
-          throw new Error(`Local LLM error: ${response.status}`);
-        }
-
-        const data = await response.json();
-        rawResponse = data.response || '';
+      } else {
+        throw new Error('Groq not available for summary');
       }
 
       if (!rawResponse) {
-        throw new Error('No LLM available for summary');
+        throw new Error('Empty summary response from Groq');
       }
 
       console.log('📝 Summary raw response:', rawResponse.slice(0, 200));
