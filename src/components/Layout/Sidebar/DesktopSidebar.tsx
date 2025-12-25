@@ -6,6 +6,7 @@ import { menuItems } from '../../../config/navigation';
 import { ViewType } from '../../../types/navigation';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { useLanguage } from '../../../contexts/LanguageContext';
 
 // Separate SidebarItem component with enhanced animations
 function SidebarItem({
@@ -28,11 +29,11 @@ function SidebarItem({
         className={cn(
           "w-full h-12 rounded-xl flex items-center justify-center",
           "transition-all duration-300 ease-in-out",
-          isActive 
-            ? isDark 
-              ? "bg-white/10 text-white" 
+          isActive
+            ? isDark
+              ? "bg-white/10 text-white"
               : "bg-black/10 text-black"
-            : isDark 
+            : isDark
               ? "text-white/80 hover:bg-white/5 hover:text-white"
               : "text-black/80 hover:bg-black/5 hover:text-black"
         )}
@@ -44,31 +45,33 @@ function SidebarItem({
           "stroke-[1.5]"
         )} />
       </button>
-      
-      {/* Custom Tooltip */}
-      <div className={cn(
-        "absolute left-0 transform -translate-x-full -translate-y-1/2 top-1/2",
-        "px-3 py-2 mr-2",
-        "rounded-lg",
-        "text-sm font-medium",
-        "opacity-0 group-hover:opacity-100",
-        "pointer-events-none",
-        "transition-all duration-200",
-        "whitespace-nowrap",
-        isDark
-          ? "bg-black/90 text-white backdrop-blur-sm border border-white/10"
-          : "bg-white/90 text-black backdrop-blur-sm border border-black/10",
-      )}>
-        {label}
-        {/* Tooltip Arrow */}
+
+      {/* Custom Tooltip - only show if label exists */}
+      {label && (
         <div className={cn(
-          "absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 rotate-45",
-          "w-2 h-2",
+          "absolute left-0 transform -translate-x-full -translate-y-1/2 top-1/2",
+          "px-3 py-2 mr-2",
+          "rounded-lg",
+          "text-sm font-medium",
+          "opacity-0 group-hover:opacity-100",
+          "pointer-events-none",
+          "transition-all duration-200",
+          "whitespace-nowrap",
           isDark
-            ? "bg-black/90 border-r border-t border-white/10"
-            : "bg-white/90 border-r border-t border-black/10"
-        )} />
-      </div>
+            ? "bg-black/90 text-white backdrop-blur-sm border border-white/10"
+            : "bg-white/90 text-black backdrop-blur-sm border border-black/10",
+        )}>
+          {label}
+          {/* Tooltip Arrow */}
+          <div className={cn(
+            "absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 rotate-45",
+            "w-2 h-2",
+            isDark
+              ? "bg-black/90 border-r border-t border-white/10"
+              : "bg-white/90 border-r border-t border-black/10"
+          )} />
+        </div>
+      )}
     </div>
   );
 }
@@ -85,6 +88,7 @@ export default function DesktopSidebar({
   onSignOut,
 }: DesktopSidebarProps) {
   const { isDark, toggleTheme } = useTheme();
+  // Removed useLanguage
   const navigate = useNavigate();
   const [showSignOutConfirm, setShowSignOutConfirm] = useState(false);
 
@@ -93,7 +97,7 @@ export default function DesktopSidebar({
     ...menuItems.map(item => ({
       id: item.id,
       icon: item.icon,
-      label: item.label,
+      label: item.label, // Use label directly
       onClick: () => {
         navigate(item.path);
         onViewChange(item.id);
@@ -103,14 +107,14 @@ export default function DesktopSidebar({
     {
       id: 'theme',
       icon: isDark ? Moon : Sun,
-      label: isDark ? 'Dark Mode' : 'Light Mode',
+      label: '', // Removed text as requested
       onClick: toggleTheme,
       isActive: false,
     },
     {
       id: 'signout',
       icon: ChevronRight,
-      label: 'Sign Out',
+      label: '', // Removed text as requested
       onClick: () => setShowSignOutConfirm(true),
       isActive: false,
     },
@@ -156,7 +160,7 @@ export default function DesktopSidebar({
           "backdrop-blur-sm"
         )}>
           {/* Gradient Backdrop */}
-          <div 
+          <div
             className="absolute inset-0 opacity-30"
             style={{
               background: 'radial-gradient(circle at center, rgba(147,51,234,0.5) 0%, rgba(147,51,234,0.2) 40%, transparent 100%)',
@@ -164,7 +168,7 @@ export default function DesktopSidebar({
             }}
           />
 
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}

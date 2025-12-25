@@ -1,4 +1,4 @@
-export type ViewType = 'dashboard' | 'ai-settings' | 'profile' | 'billing' | 'settings';
+export type ViewType = 'home' | 'dashboard' | 'chatbot';
 
 export interface MenuItem {
   icon: React.ComponentType;

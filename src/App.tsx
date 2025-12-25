@@ -121,12 +121,10 @@ function App() {
           <Sidebar
             currentView={((): ViewType => {
               const path = window.location.pathname;
-              if (path.includes('dashboard')) return 'dashboard';
-              if (path.includes('ai-settings')) return 'ai-settings';
-              if (path.includes('profile')) return 'profile';
-              if (path.includes('billing')) return 'billing';
-              if (path.includes('settings')) return 'settings';
-              return 'dashboard';
+              if (path === '/') return 'home';
+              if (path.includes('dashboard') || path.includes('demo-dashboard')) return 'dashboard';
+              if (path.includes('user')) return 'chatbot';
+              return 'home';
             })()}
             onViewChange={() => { }}
             onSignOut={handleSignOut}

@@ -103,7 +103,7 @@ function UserCallContent() {
       </main>
 
       <MobileSidebar
-        currentView={'dashboard'}
+        currentView={'chatbot'}
         onViewChange={() => { }}
         onSignOut={() => navigate('/')}
         isOpen={isMobileMenuOpen}
