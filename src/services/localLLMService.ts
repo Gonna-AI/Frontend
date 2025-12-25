@@ -11,7 +11,7 @@
  * - Caller information extraction
  * - Conversation summarization
  * 
- * Default: https://consumption-monetary-thrown-manufacture.trycloudflare.com
+ * Default: https://classroom-currency-employ-lisa.trycloudflare.com
  * Override with VITE_OLLAMA_URL in .env if needed
  * 
  * Uses /api/generate and /api/chat endpoints
@@ -42,7 +42,7 @@ const getCleanURL = (url: string) => {
   cleaned = cleaned.replace(/\/+$/, '');
   return cleaned;
 };
-const LLM_URL = getCleanURL(import.meta.env.VITE_OLLAMA_URL || 'https://consumption-monetary-thrown-manufacture.trycloudflare.com');
+const LLM_URL = getCleanURL(import.meta.env.VITE_OLLAMA_URL || 'https://classroom-currency-employ-lisa.trycloudflare.com');
 const MODEL_NAME = 'ministral-3:14b';
 
 // Timeout in milliseconds
