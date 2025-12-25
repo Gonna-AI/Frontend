@@ -178,9 +178,9 @@ export default function Footer() {
                   {link.name}
                 </button>
               ))}
-              <a href="#" className="termly-display-preferences text-neutral-500 hover:text-purple-400 transition-colors text-sm">
+              <button className="termly-display-preferences text-neutral-500 hover:text-purple-400 transition-colors text-sm">
                 Consent Preferences
-              </a>
+              </button>
             </div>
           </div>
         </motion.div>
