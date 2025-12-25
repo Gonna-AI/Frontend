@@ -830,10 +830,8 @@ export function DemoCallProvider({ children }: { children: ReactNode }) {
 
           // IMMEDIATELY save to Supabase so real-time sync works across tabs/pages
           try {
-            const userId = getUserId();
             const initialPayload = {
               id: initialHistoryItem.id,
-              user_id: userId, // Required for RLS
               caller_name: initialHistoryItem.callerName,
               date: initialHistoryItem.date.toISOString(),
               duration: initialHistoryItem.duration,
@@ -920,11 +918,9 @@ export function DemoCallProvider({ children }: { children: ReactNode }) {
 
           // Save to Supabase
           try {
-            // Build base payload with user_id for RLS
-            const userId = getUserId();
+            // Build base payload
             const basePayload = {
               id: finalHistoryItem.id,
-              user_id: userId, // Required for RLS
               caller_name: finalHistoryItem.callerName,
               date: finalHistoryItem.date.toISOString(),
               duration: finalHistoryItem.duration,
