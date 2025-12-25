@@ -335,12 +335,12 @@ export default function CallHistoryList({ isDark = true, showFilters = true }: C
                         </div>
 
                         {/* Summary preview */}
-                        {item.summary.mainPoints[0] && (
+                        {(item.summary.summaryText || item.summary.mainPoints[0]) && (
                           <p className={cn(
                             "text-xs md:text-sm truncate mb-1.5 md:mb-2",
                             isDark ? "text-white/60" : "text-black/60"
                           )}>
-                            {item.summary.mainPoints[0]}
+                            {item.summary.summaryText || item.summary.mainPoints[0]}
                           </p>
                         )}
 
@@ -424,6 +424,21 @@ export default function CallHistoryList({ isDark = true, showFilters = true }: C
                           {/* Summary Tab */}
                           {activeTab === 'summary' && (
                             <div className="space-y-4">
+                              {/* Summary Overview */}
+                              {item.summary.summaryText && (
+                                <div className={cn(
+                                  "p-3 rounded-lg",
+                                  isDark ? "bg-white/5" : "bg-black/5"
+                                )}>
+                                  <p className={cn(
+                                    "text-sm leading-relaxed",
+                                    isDark ? "text-white/80" : "text-black/80"
+                                  )}>
+                                    {item.summary.summaryText}
+                                  </p>
+                                </div>
+                              )}
+
                               {/* Status Cards Row */}
                               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                                 {/* Sentiment Card */}

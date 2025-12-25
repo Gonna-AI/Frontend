@@ -300,6 +300,7 @@ class AIService {
             followUpRequired: result.followUpRequired,
             notes,
             // Enhanced fields
+            summaryText: result.summary, // Clean summary text for preview
             suggestions: result.suggestions,
             callerIntent: result.callerIntent,
             moodIndicators: result.moodIndicators,
