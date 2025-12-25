@@ -89,13 +89,20 @@ export default function CallHistoryList({ isDark = true, showFilters = true }: C
     return configs[priority];
   };
 
-  const getSentimentConfig = (sentiment: 'positive' | 'neutral' | 'negative') => {
-    const configs = {
+  const getSentimentConfig = (sentiment: string) => {
+    const configs: Record<string, { label: string; color: string; bg: string }> = {
+      very_positive: { label: 'Very Positive', color: 'text-emerald-400', bg: 'bg-emerald-500/20' },
       positive: { label: 'Positive', color: 'text-green-400', bg: 'bg-green-500/20' },
+      slightly_positive: { label: 'Slightly Positive', color: 'text-lime-400', bg: 'bg-lime-500/20' },
       neutral: { label: 'Neutral', color: 'text-gray-400', bg: 'bg-gray-500/20' },
-      negative: { label: 'Negative', color: 'text-red-400', bg: 'bg-red-500/20' },
+      mixed: { label: 'Mixed', color: 'text-purple-400', bg: 'bg-purple-500/20' },
+      slightly_negative: { label: 'Slightly Negative', color: 'text-amber-400', bg: 'bg-amber-500/20' },
+      negative: { label: 'Negative', color: 'text-orange-400', bg: 'bg-orange-500/20' },
+      very_negative: { label: 'Very Negative', color: 'text-red-400', bg: 'bg-red-500/20' },
+      anxious: { label: 'Anxious', color: 'text-yellow-400', bg: 'bg-yellow-500/20' },
+      urgent: { label: 'Urgent', color: 'text-rose-400', bg: 'bg-rose-500/20' },
     };
-    return configs[sentiment];
+    return configs[sentiment] || configs.neutral;
   };
 
   const getCategoryColor = (color: string) => {
@@ -417,7 +424,113 @@ export default function CallHistoryList({ isDark = true, showFilters = true }: C
                           {/* Summary Tab */}
                           {activeTab === 'summary' && (
                             <div className="space-y-4">
-                              {/* Main Points */}
+                              {/* Status Cards Row */}
+                              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                                {/* Sentiment Card */}
+                                <div className={cn(
+                                  "p-2.5 rounded-lg border",
+                                  isDark ? "bg-white/5 border-white/10" : "bg-black/5 border-black/10"
+                                )}>
+                                  <span className={cn(
+                                    "text-[10px] block mb-1",
+                                    isDark ? "text-white/40" : "text-black/40"
+                                  )}>Sentiment</span>
+                                  <div className="flex items-center gap-1.5">
+                                    <span className={cn(
+                                      "text-xs font-medium",
+                                      getSentimentConfig(item.summary.sentiment).color
+                                    )}>
+                                      {getSentimentConfig(item.summary.sentiment).label}
+                                    </span>
+                                  </div>
+                                </div>
+
+                                {/* Urgency Card */}
+                                {item.summary.estimatedPriority && (
+                                  <div className={cn(
+                                    "p-2.5 rounded-lg border",
+                                    isDark ? "bg-white/5 border-white/10" : "bg-black/5 border-black/10"
+                                  )}>
+                                    <span className={cn(
+                                      "text-[10px] block mb-1",
+                                      isDark ? "text-white/40" : "text-black/40"
+                                    )}>Priority</span>
+                                    <span className={cn(
+                                      "text-xs font-medium px-2 py-0.5 rounded-full capitalize",
+                                      item.summary.estimatedPriority === 'critical' ? "bg-red-500/20 text-red-400" :
+                                        item.summary.estimatedPriority === 'high' ? "bg-orange-500/20 text-orange-400" :
+                                          item.summary.estimatedPriority === 'medium' ? "bg-yellow-500/20 text-yellow-400" :
+                                            "bg-green-500/20 text-green-400"
+                                    )}>
+                                      {item.summary.estimatedPriority}
+                                    </span>
+                                  </div>
+                                )}
+
+                                {/* Resolution Card */}
+                                {item.summary.resolution && (
+                                  <div className={cn(
+                                    "p-2.5 rounded-lg border",
+                                    isDark ? "bg-white/5 border-white/10" : "bg-black/5 border-black/10"
+                                  )}>
+                                    <span className={cn(
+                                      "text-[10px] block mb-1",
+                                      isDark ? "text-white/40" : "text-black/40"
+                                    )}>Resolution</span>
+                                    <span className={cn(
+                                      "text-xs font-medium px-2 py-0.5 rounded-full capitalize",
+                                      item.summary.resolution === 'resolved' ? "bg-green-500/20 text-green-400" :
+                                        item.summary.resolution === 'partially_resolved' ? "bg-blue-500/20 text-blue-400" :
+                                          item.summary.resolution === 'escalation_needed' ? "bg-red-500/20 text-red-400" :
+                                            "bg-gray-500/20 text-gray-400"
+                                    )}>
+                                      {item.summary.resolution.replace('_', ' ')}
+                                    </span>
+                                  </div>
+                                )}
+
+                                {/* Risk Level Card */}
+                                {item.summary.riskLevel && (
+                                  <div className={cn(
+                                    "p-2.5 rounded-lg border",
+                                    isDark ? "bg-white/5 border-white/10" : "bg-black/5 border-black/10"
+                                  )}>
+                                    <span className={cn(
+                                      "text-[10px] block mb-1",
+                                      isDark ? "text-white/40" : "text-black/40"
+                                    )}>Risk Level</span>
+                                    <span className={cn(
+                                      "text-xs font-medium px-2 py-0.5 rounded-full capitalize",
+                                      item.summary.riskLevel === 'high' ? "bg-red-500/20 text-red-400" :
+                                        item.summary.riskLevel === 'medium' ? "bg-orange-500/20 text-orange-400" :
+                                          "bg-green-500/20 text-green-400"
+                                    )}>
+                                      {item.summary.riskLevel}
+                                    </span>
+                                  </div>
+                                )}
+                              </div>
+
+                              {/* Caller Intent */}
+                              {item.summary.callerIntent && (
+                                <div className={cn(
+                                  "p-3 rounded-lg border-l-4 border-l-blue-500",
+                                  isDark ? "bg-blue-500/10" : "bg-blue-500/5"
+                                )}>
+                                  <span className={cn(
+                                    "text-[10px] block mb-1 font-medium",
+                                    isDark ? "text-blue-400" : "text-blue-600"
+                                  )}>Caller Intent</span>
+                                  <p className={cn(
+                                    "text-sm",
+                                    isDark ? "text-white/80" : "text-black/80"
+                                  )}>
+                                    {item.summary.callerIntent}
+                                  </p>
+                                </div>
+                              )}
+
+                              {/* Key Points */}
                               <div>
                                 <h4 className={cn(
                                   "text-xs font-medium mb-2 flex items-center gap-1",
@@ -426,12 +539,12 @@ export default function CallHistoryList({ isDark = true, showFilters = true }: C
                                   <FileText className="w-3 h-3" />
                                   Key Points
                                 </h4>
-                                <ul className="space-y-1">
-                                  {item.summary.mainPoints.map((point, i) => (
+                                <ul className="space-y-1.5">
+                                  {item.summary.mainPoints.filter(p => p.trim()).map((point, i) => (
                                     <li
                                       key={i}
                                       className={cn(
-                                        "text-sm pl-3 border-l-2",
+                                        "text-sm pl-3 border-l-2 py-0.5",
                                         isDark
                                           ? "text-white/80 border-white/20"
                                           : "text-black/80 border-black/20"
@@ -443,22 +556,85 @@ export default function CallHistoryList({ isDark = true, showFilters = true }: C
                                 </ul>
                               </div>
 
-                              {/* Sentiment */}
-                              <div className="flex items-center gap-2">
-                                <span className={cn(
-                                  "text-xs",
-                                  isDark ? "text-white/60" : "text-black/60"
+                              {/* Topics */}
+                              {item.summary.topics && item.summary.topics.length > 0 && (
+                                <div>
+                                  <h4 className={cn(
+                                    "text-[10px] font-medium mb-2",
+                                    isDark ? "text-white/50" : "text-black/50"
+                                  )}>Topics</h4>
+                                  <div className="flex flex-wrap gap-1.5">
+                                    {item.summary.topics.map((topic, i) => (
+                                      <span
+                                        key={i}
+                                        className={cn(
+                                          "text-xs px-2.5 py-1 rounded-full border",
+                                          isDark
+                                            ? "bg-purple-500/10 text-purple-300 border-purple-500/20"
+                                            : "bg-purple-500/10 text-purple-600 border-purple-500/20"
+                                        )}
+                                      >
+                                        {topic}
+                                      </span>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* Mood Indicators */}
+                              {item.summary.moodIndicators && item.summary.moodIndicators.length > 0 && (
+                                <div>
+                                  <h4 className={cn(
+                                    "text-[10px] font-medium mb-2",
+                                    isDark ? "text-white/50" : "text-black/50"
+                                  )}>Mood Indicators</h4>
+                                  <div className="flex flex-wrap gap-1.5">
+                                    {item.summary.moodIndicators.map((mood, i) => (
+                                      <span
+                                        key={i}
+                                        className={cn(
+                                          "text-xs px-2.5 py-1 rounded-full border capitalize",
+                                          isDark
+                                            ? "bg-cyan-500/10 text-cyan-300 border-cyan-500/20"
+                                            : "bg-cyan-500/10 text-cyan-600 border-cyan-500/20"
+                                        )}
+                                      >
+                                        {mood}
+                                      </span>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* AI Suggestions */}
+                              {item.summary.suggestions && item.summary.suggestions.length > 0 && (
+                                <div className={cn(
+                                  "p-3 rounded-lg",
+                                  isDark ? "bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/20"
+                                    : "bg-gradient-to-r from-amber-500/5 to-orange-500/5 border border-amber-500/15"
                                 )}>
-                                  Sentiment:
-                                </span>
-                                <span className={cn(
-                                  "text-xs px-2 py-0.5 rounded-full",
-                                  getSentimentConfig(item.summary.sentiment).bg,
-                                  getSentimentConfig(item.summary.sentiment).color
-                                )}>
-                                  {getSentimentConfig(item.summary.sentiment).label}
-                                </span>
-                              </div>
+                                  <h4 className={cn(
+                                    "text-xs font-medium mb-2 flex items-center gap-1.5",
+                                    isDark ? "text-amber-400" : "text-amber-600"
+                                  )}>
+                                    AI Suggestions for Admin
+                                  </h4>
+                                  <ul className="space-y-1.5">
+                                    {item.summary.suggestions.map((suggestion, i) => (
+                                      <li
+                                        key={i}
+                                        className={cn(
+                                          "text-sm flex items-start gap-2",
+                                          isDark ? "text-white/80" : "text-black/80"
+                                        )}
+                                      >
+                                        <span className="text-amber-500 mt-0.5">→</span>
+                                        {suggestion}
+                                      </li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              )}
 
                               {/* Action Items */}
                               {item.summary.actionItems.length > 0 && (
@@ -491,24 +667,6 @@ export default function CallHistoryList({ isDark = true, showFilters = true }: C
                                       </div>
                                     ))}
                                   </div>
-                                </div>
-                              )}
-
-                              {/* Notes */}
-                              {item.summary.notes && (
-                                <div className={cn(
-                                  "p-3 rounded-lg text-sm",
-                                  isDark ? "bg-white/5" : "bg-black/5"
-                                )}>
-                                  <span className={cn(
-                                    "text-xs font-medium block mb-1",
-                                    isDark ? "text-white/60" : "text-black/60"
-                                  )}>
-                                    Notes
-                                  </span>
-                                  <p className={isDark ? "text-white/80" : "text-black/80"}>
-                                    {item.summary.notes}
-                                  </p>
                                 </div>
                               )}
                             </div>
