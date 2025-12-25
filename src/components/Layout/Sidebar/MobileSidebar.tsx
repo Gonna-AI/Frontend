@@ -14,6 +14,7 @@ interface MobileSidebarProps {
   onSignOut: () => void;
   isOpen: boolean;
   onClose: () => void;
+  children?: React.ReactNode;
 }
 
 export default function MobileSidebar({
@@ -21,7 +22,8 @@ export default function MobileSidebar({
   onViewChange,
   onSignOut,
   isOpen,
-  onClose
+  onClose,
+  children
 }: MobileSidebarProps) {
   const { isDark } = useTheme();
   const navigate = useNavigate();
@@ -52,16 +54,16 @@ export default function MobileSidebar({
             }}
             className={cn(
               "fixed inset-x-0 bottom-0 z-50",
-              "h-auto max-h-[80vh]",
+              "h-auto max-h-[85vh] overflow-y-auto", // Increased height and added scroll
               "rounded-t-[1.25rem] shadow-2xl",
               isDark
                 ? [
-                  "bg-black/60", // Darker black glass
+                  "bg-black/90", // Increased opacity for better visibility of content
                   "backdrop-blur-xl",
                   "border-t border-white/10"
                 ]
                 : [
-                  "bg-white/80",
+                  "bg-white/90",
                   "backdrop-blur-xl",
                   "border-t border-white/20"
                 ]
@@ -87,6 +89,14 @@ export default function MobileSidebar({
                 <X className="w-5 h-5" />
               </button>
             </div>
+
+            {/* Custom Content (e.g. Session Switcher) */}
+            {children && (
+              <div className="p-6 pb-0 space-y-4">
+                {children}
+                <div className={cn("h-px w-full", isDark ? "bg-white/10" : "bg-black/10")} />
+              </div>
+            )}
 
             {/* Menu Items */}
             <div className="p-6 space-y-2">

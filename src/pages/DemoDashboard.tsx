@@ -2,9 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useLanguage } from '../contexts/LanguageContext';
 import {
-  LayoutDashboard,
   Phone,
-  ArrowLeft,
   Brain,
   History,
   BarChart3,
@@ -245,7 +243,7 @@ function DemoDashboardContent() {
 
   return (
     <div className={cn(
-      "min-h-screen transition-colors duration-300",
+      "min-h-screen transition-colors duration-300 pb-8 md:pb-8",
       isDark
         ? "bg-black"
         : "bg-gradient-to-br from-gray-50 to-white"
@@ -258,90 +256,70 @@ function DemoDashboardContent() {
 
       {/* Header */}
       <header className={cn(
-        "fixed top-0 left-0 right-0 z-50 px-3 md:px-4 py-2 md:py-3 backdrop-blur-md border-b",
+        "fixed top-0 left-0 right-0 z-50 py-3 px-4 md:px-6 backdrop-blur-md border-b",
         isDark
-          ? "bg-black/80 border-white/10"
+          ? "bg-[rgb(10,10,10)]/80 border-white/10"
           : "bg-white/80 border-black/10"
       )}>
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-2 md:gap-4">
             <button
-              onClick={() => setIsMobileMenuOpen(true)}
-              className={cn(
-                "md:hidden p-1.5 rounded-lg transition-colors",
-                isDark
-                  ? "hover:bg-white/10 text-white/60 hover:text-white"
-                  : "hover:bg-black/10 text-black/60 hover:text-black"
-              )}
-            >
-              <Menu className="w-4 h-4" />
-            </button>
-            <button
               onClick={() => navigate('/')}
-              className={cn(
-                "hidden md:block p-1.5 md:p-2 rounded-lg transition-colors",
-                isDark
-                  ? "hover:bg-white/10 text-white/60 hover:text-white"
-                  : "hover:bg-black/10 text-black/60 hover:text-black"
-              )}
+              className="flex items-center gap-2 group hover:opacity-80 transition-opacity"
             >
-              <ArrowLeft className="w-4 h-4 md:w-5 md:h-5" />
-            </button>
-            <div className="flex items-center gap-2 md:gap-3">
-              <div className={cn(
-                "w-8 h-8 md:w-10 md:h-10 rounded-lg md:rounded-xl flex items-center justify-center",
-                isDark
-                  ? "bg-gradient-to-br from-blue-500/20 to-purple-500/20 border border-white/10"
-                  : "bg-gradient-to-br from-blue-500/10 to-purple-500/10 border border-black/10"
-              )}>
-                <LayoutDashboard className={cn(
-                  "w-4 h-4 md:w-5 md:h-5",
-                  isDark ? "text-white" : "text-black"
-                )} />
-              </div>
-              <div className="hidden sm:block">
-                <h1 className={cn(
-                  "text-base md:text-lg font-semibold",
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 464 468"
+                className="w-9 h-9 md:w-11 md:h-11"
+                aria-label="ClerkTree Logo"
+              >
+                <path
+                  fill={isDark ? "white" : "black"}
+                  d="M275.9 63.5c37.7 5.3 76.6 24.1 103.7 50.2 30 28.8 41.8 57.6 35.8 87.1-6.1 30.1-33.6 52.9-70.6 58.3-6 0.9-18.3 1-44.9 0.6l-36.6-0.7-0.5 17.8c-0.3 9.7-0.4 17.8-0.4 17.9 0.1 0.1 19.1 0.3 42.2 0.4 23.2 0 42.7 0.5 43.5 1 1.2 0.7 1.1 2.2-0.8 9.4-6 23-20.5 42.1-41.8 55-7.3 4.3-26.7 11.9-36 14.1-9 2-34 2-44.5 0-41.3-7.9-74.2-38-82.9-75.7-8.1-35.7 2.2-71.5 27.5-94.7 16.1-14.9 35.5-22.4 63.7-24.7l7.7-0.7v-34.1l-11.7 0.7c-22.2 1.3-37 5.3-56.4 15.2-28.7 14.6-49.7 39.3-59.9 70.2-9.6 29.3-9.3 62.6 0.8 91.4 3.3 9.2 12.2 25.6 18.3 33.8 11.3 14.9 30.6 30.8 48.7 39.9 19.9 10 49.2 15.9 73.2 14.7 26.5-1.3 52.5-9.6 74.2-23.9 26.9-17.6 47.2-47.9 53.3-79.7 1-5.2 2.3-10.1 2.8-10.8 0.8-0.9 6.9-1.2 27.1-1l26.1 0.3 0.3 3.8c1.2 14.6-10.9 52.1-23.9 74-17.8 30-43.2 54-75.9 71.5-20.9 11.2-38.3 16.5-67.2 20.7-27.6 3.9-47.9 3.1-75.8-3.1-36.9-8.3-67.8-25.6-97.1-54.6-23.6-23.2-44.8-61.9-51.7-93.8-5.1-23.7-5.5-28.1-4.9-48.8 1.7-63.2 23.4-111.8 67.7-152 28-25.4 60.4-41.3 99-48.8 18.5-3.6 46.1-4 67.9-0.9zm16.4 92.6c-6.3 2.4-12.8 8.5-15.4 14.5-2.6 6.1-2.6 18.3 0 23.9 5 11 20.2 17.7 32.3 14.1 11.9-3.4 19.8-14.3 19.8-27.1-0.1-19.9-18.2-32.5-36.7-25.4z"
+                />
+              </svg>
+              <div className="flex flex-col">
+                <span className={cn(
+                  "text-xl md:text-2xl font-semibold leading-none",
                   isDark ? "text-white" : "text-black"
                 )}>
-                  {t('dashboard.title')}
-                </h1>
-                <p className={cn(
-                  "text-[10px] md:text-xs hidden md:block",
+                  ClerkTree
+                </span>
+                <span className={cn(
+                  "text-xs font-medium pl-0.5",
                   isDark ? "text-white/50" : "text-black/50"
                 )}>
                   {t('dashboard.subtitle')}
-                </p>
+                </span>
               </div>
-            </div>
+            </button>
           </div>
 
-          <div className="flex items-center gap-2 md:gap-3">
+          {/* Desktop Controls (Hidden on Mobile) */}
+          <div className="hidden md:flex items-center gap-3">
             {/* User Session Switcher */}
-            <div className="relative">
-              <UserSessionSwitcher
-                isDark={isDark}
-                currentUserId={getCurrentUserId()}
-                onSessionChange={switchSession}
-                currentConfig={knowledgeBase as unknown as Record<string, unknown>}
-                onSaveSession={saveKnowledgeBase}
-              />
-            </div>
+            <UserSessionSwitcher
+              isDark={isDark}
+              currentUserId={getCurrentUserId()}
+              onSessionChange={switchSession}
+              currentConfig={knowledgeBase as unknown as Record<string, unknown>}
+              onSaveSession={saveKnowledgeBase}
+            />
 
-            {/* Call Status Indicator - Shows global active sessions */}
+            {/* Call Status Indicator */}
             {(globalActiveSessions.voice > 0 || globalActiveSessions.text > 0 || currentCall?.status === 'active') && (
               <div className="flex items-center gap-2">
                 {/* Voice calls indicator */}
                 {(globalActiveSessions.voice > 0 || (currentCall?.status === 'active' && currentCall.type === 'voice')) && (
                   <div className={cn(
-                    "flex items-center gap-1.5 px-2 md:px-3 py-1 md:py-1.5 rounded-full",
+                    "flex items-center gap-1.5 px-3 py-1.5 rounded-full",
                     isDark
                       ? "bg-teal-500/20 border border-teal-500/30"
                       : "bg-teal-500/10 border border-teal-500/20"
                   )}>
-                    <div className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full animate-pulse bg-teal-500" />
+                    <div className="w-2 h-2 rounded-full animate-pulse bg-teal-500" />
                     <span className={cn(
-                      "text-xs md:text-sm font-medium text-teal-400"
+                      "text-sm font-medium text-teal-400"
                     )}>
                       {Math.max(globalActiveSessions.voice, currentCall?.status === 'active' && currentCall.type === 'voice' ? 1 : 0)} Call{globalActiveSessions.voice !== 1 ? 's' : ''}
                     </span>
@@ -350,14 +328,14 @@ function DemoDashboardContent() {
                 {/* Text chats indicator */}
                 {(globalActiveSessions.text > 0 || (currentCall?.status === 'active' && currentCall.type === 'text')) && (
                   <div className={cn(
-                    "flex items-center gap-1.5 px-2 md:px-3 py-1 md:py-1.5 rounded-full",
+                    "flex items-center gap-1.5 px-3 py-1.5 rounded-full",
                     isDark
                       ? "bg-blue-500/20 border border-blue-500/30"
                       : "bg-blue-500/10 border border-blue-500/20"
                   )}>
-                    <div className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full animate-pulse bg-blue-500" />
+                    <div className="w-2 h-2 rounded-full animate-pulse bg-blue-500" />
                     <span className={cn(
-                      "text-xs md:text-sm font-medium text-blue-400"
+                      "text-sm font-medium text-blue-400"
                     )}>
                       {Math.max(globalActiveSessions.text, currentCall?.status === 'active' && currentCall.type === 'text' ? 1 : 0)} Chat{globalActiveSessions.text !== 1 ? 's' : ''}
                     </span>
@@ -369,21 +347,34 @@ function DemoDashboardContent() {
             <button
               onClick={() => navigate('/user')}
               className={cn(
-                "flex items-center gap-1.5 md:gap-2 px-2.5 md:px-4 py-1.5 md:py-2 rounded-lg md:rounded-xl text-xs md:text-sm font-medium transition-colors",
+                "flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-colors",
                 isDark
                   ? "bg-green-500/20 text-green-400 hover:bg-green-500/30 border border-green-500/30"
                   : "bg-green-500/10 text-green-600 hover:bg-green-500/20 border border-green-500/20"
               )}
             >
-              <Phone className="w-3.5 h-3.5 md:w-4 md:h-4" />
-              <span className="hidden sm:inline">{t('dashboard.userView')}</span>
+              <Phone className="w-4 h-4" />
+              <span>{t('dashboard.userView')}</span>
             </button>
           </div>
+
+          {/* Mobile Menu Button */}
+          <button
+            onClick={() => setIsMobileMenuOpen(true)}
+            className={cn(
+              "md:hidden p-2 rounded-lg transition-colors",
+              isDark
+                ? "hover:bg-white/10 text-white/80 hover:text-white"
+                : "hover:bg-black/10 text-black/80 hover:text-black"
+            )}
+          >
+            <Menu className="w-6 h-6" />
+          </button>
         </div>
-      </header>
+      </header >
 
       {/* Main content */}
-      <main className="relative z-10 pt-16 md:pt-24 pb-6 md:pb-8 px-3 md:px-4">
+      < main className="relative z-10 pt-20 md:pt-24 px-3 md:px-4" >
         <div className="max-w-7xl mx-auto">
           {/* Analytics Cards */}
           <motion.div
@@ -499,27 +490,13 @@ function DemoDashboardContent() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="mt-4 md:mt-6"
+            className="mt-4 md:mt-6 pb-6 md:pb-0"
           >
             <VoiceCallInterface isDark={isDark} />
           </motion.div>
         </div>
-      </main>
+      </main >
 
-      {/* Footer */}
-      <footer className={cn(
-        "relative z-10 py-4 md:py-6 border-t",
-        isDark ? "border-white/10" : "border-black/10"
-      )}>
-        <div className="max-w-7xl mx-auto px-4 text-center">
-          <p className={cn(
-            "text-xs md:text-sm",
-            isDark ? "text-white/40" : "text-black/40"
-          )}>
-            {t('dashboard.footer')}
-          </p>
-        </div>
-      </footer>
 
       <MobileSidebar
         currentView={'dashboard'}
@@ -527,8 +504,70 @@ function DemoDashboardContent() {
         onSignOut={() => navigate('/')}
         isOpen={isMobileMenuOpen}
         onClose={() => setIsMobileMenuOpen(false)}
-      />
-    </div >
+      >
+        <div className="flex flex-col gap-6">
+          {/* Session Switcher */}
+          <div className="flex flex-col gap-2">
+            <h3 className={cn("text-xs font-semibold uppercase tracking-wider pl-1", isDark ? "text-white/40" : "text-black/40")}>
+              Session
+            </h3>
+            <div className="w-full">
+              <UserSessionSwitcher
+                isDark={isDark}
+                currentUserId={getCurrentUserId()}
+                onSessionChange={switchSession}
+                currentConfig={knowledgeBase as unknown as Record<string, unknown>}
+                onSaveSession={saveKnowledgeBase}
+                mobile={true}
+              />
+            </div>
+          </div>
+
+          {/* Status Indicators */}
+          {(globalActiveSessions.voice > 0 || globalActiveSessions.text > 0 || currentCall?.status === 'active') && (
+            <div className="flex flex-col gap-2">
+              <h3 className={cn("text-xs font-semibold uppercase tracking-wider pl-1", isDark ? "text-white/40" : "text-black/40")}>
+                Status
+              </h3>
+              <div className="flex flex-col gap-2 w-full">
+                {/* Voice calls indicator */}
+                {(globalActiveSessions.voice > 0 || (currentCall?.status === 'active' && currentCall.type === 'voice')) && (
+                  <div className={cn(
+                    "flex items-center gap-2 px-4 py-3 rounded-xl w-full transition-colors",
+                    isDark
+                      ? "bg-teal-500/10 border border-teal-500/20"
+                      : "bg-teal-500/5 border border-teal-500/10"
+                  )}>
+                    <div className="w-2 h-2 rounded-full animate-pulse bg-teal-500 shadow-[0_0_8px_rgba(20,184,166,0.5)]" />
+                    <span className={cn(
+                      "text-sm font-medium text-teal-400"
+                    )}>
+                      {Math.max(globalActiveSessions.voice, currentCall?.status === 'active' && currentCall.type === 'voice' ? 1 : 0)} Active Call{globalActiveSessions.voice !== 1 ? 's' : ''}
+                    </span>
+                  </div>
+                )}
+                {/* Text chats indicator */}
+                {(globalActiveSessions.text > 0 || (currentCall?.status === 'active' && currentCall.type === 'text')) && (
+                  <div className={cn(
+                    "flex items-center gap-2 px-4 py-3 rounded-xl w-full transition-colors",
+                    isDark
+                      ? "bg-blue-500/10 border border-blue-500/20"
+                      : "bg-blue-500/5 border border-blue-500/10"
+                  )}>
+                    <div className="w-2 h-2 rounded-full animate-pulse bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]" />
+                    <span className={cn(
+                      "text-sm font-medium text-blue-400"
+                    )}>
+                      {Math.max(globalActiveSessions.text, currentCall?.status === 'active' && currentCall.type === 'text' ? 1 : 0)} Active Chat{globalActiveSessions.text !== 1 ? 's' : ''}
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      </MobileSidebar>
+    </div>
   );
 }
 

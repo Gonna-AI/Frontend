@@ -342,7 +342,7 @@ export default function UnifiedChatInterface({ isDark = true }: UnifiedChatInter
 
     return (
         <div className={cn(
-            "flex flex-col h-full w-full",
+            "flex flex-col h-full w-full pt-16 md:pt-20",
             isDark
                 ? "bg-transparent"
                 : "bg-white/50 backdrop-blur-sm"
@@ -369,13 +369,13 @@ export default function UnifiedChatInterface({ isDark = true }: UnifiedChatInter
                             <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-blue-500/5 via-transparent to-purple-500/5 pointer-events-none" />
 
                             <h3 className={cn(
-                                "text-2xl font-semibold mb-3 tracking-tight",
+                                "text-3xl md:text-4xl font-bold mb-4 tracking-tight",
                                 isDark ? "text-white" : "text-gray-900"
                             )}>
                                 {t('chat.welcome')}
                             </h3>
                             <p className={cn(
-                                "text-base max-w-sm leading-relaxed",
+                                "text-xl md:text-2xl max-w-xl leading-relaxed",
                                 isDark ? "text-white/40" : "text-gray-500"
                             )}>
                                 {t('chat.startPrompt')}
@@ -563,11 +563,11 @@ export default function UnifiedChatInterface({ isDark = true }: UnifiedChatInter
 
             {/* Input Area - Premium Glassmorphic */}
             <div className={cn(
-                "p-4 md:p-6 pb-6 md:pb-8",
+                "p-4 md:p-6 pb-6 md:pb-8 flex justify-center",
             )}>
                 {/* Glassmorphic Input Container - symmetrical corners with inner input */}
                 <div className={cn(
-                    "p-2 rounded-3xl",
+                    "p-2 rounded-3xl w-full max-w-2xl",
                     "backdrop-blur-2xl",
                     isDark
                         ? "bg-white/[0.03] border border-white/[0.08] shadow-2xl"
