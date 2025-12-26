@@ -197,7 +197,7 @@ export default function ArborChat({ mode, messages, onSendMessage, onClearChat, 
                                                     : 'bg-white/5 border border-white/10 text-white/70 hover:bg-white/10 hover:text-white'
                                                     }`}
                                             >
-                                                {type}
+                                                {type === 'All' ? t('blog.all') : type}
                                             </button>
                                         ))}
                                     </div>

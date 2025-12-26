@@ -4,7 +4,6 @@ import ProductsSection from './ProductsSection';
 import Metrics from './Metrics';
 import Features from './Features';
 import Conversation from './Conversation';
-import FAQSection from './FAQSection';
 import Footer from './Footer';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
@@ -206,7 +205,7 @@ export default function Landing() {
         <ProductsSection />
         <Metrics />
         <Features />
-        <FAQSection />
+
         <Conversation />
         <Footer />
       </div>
