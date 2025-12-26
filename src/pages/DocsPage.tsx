@@ -59,7 +59,7 @@ const CodeBlock = ({ code, language = 'bash' }: { code: string; language?: strin
     };
 
     return (
-        <div className="relative group rounded-xl overflow-hidden bg-[#0A0A0A] border border-white/10 my-6">
+        <div className="relative group rounded-xl overflow-hidden bg-[#0A0A0A] border border-white/10 my-6 max-w-full">
             <div className="flex items-center justify-between px-4 py-2 bg-white/5 border-b border-white/5">
                 <span className="text-xs text-white/40 font-mono">{language}</span>
                 <button
@@ -205,7 +205,7 @@ export default function DocsPage() {
                 </nav>
 
                 {/* Main Content */}
-                <main className="flex-1 px-6 md:px-12 py-12 max-w-5xl">
+                <main className="flex-1 px-4 md:px-12 py-12 max-w-full md:max-w-5xl overflow-hidden">
                     <div className="space-y-16">
 
                         {/* Intro Section */}
@@ -220,7 +220,7 @@ export default function DocsPage() {
                                 </p>
                             </div>
 
-                            <div className="grid md:grid-cols-2 gap-4 mt-8">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8">
                                 <div className="p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-purple-500/30 transition-colors">
                                     <h3 className="text-lg font-semibold text-white mb-2">Workflow Automation</h3>
                                     <p className="text-white/50 text-sm">Automate business logic with our visual bioflow editor and API.</p>
@@ -244,8 +244,8 @@ export default function DocsPage() {
                                 <p>Your API keys carry many privileges, so be sure to keep them secure! Do not share your secret API keys in publicly accessible areas such as GitHub, client-side code, and so forth.</p>
                             </div>
 
-                            <p className="text-white/60">
-                                All API requests should include your API key in an <code className="text-purple-300 bg-purple-500/10 px-1.5 py-0.5 rounded">Authorization</code> header as follows:
+                            <p className="text-white/60 break-words">
+                                All API requests should include your API key in an <code className="text-purple-300 bg-purple-500/10 px-1.5 py-0.5 rounded break-all">Authorization</code> header as follows:
                             </p>
 
                             <CodeBlock code={`Authorization: Bearer YOUR_API_KEY`} language="http" />
