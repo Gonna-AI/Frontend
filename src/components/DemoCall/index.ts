@@ -6,3 +6,4 @@ export { default as KnowledgeBase } from './KnowledgeBase';
 export { default as CallHistoryList } from './CallHistoryList';
 export { default as VoiceSelector } from './VoiceSelector';
 export { default as UserSessionSwitcher } from './UserSessionSwitcher';
+export { default as UserPhoneInterface } from './UserPhoneInterface';
