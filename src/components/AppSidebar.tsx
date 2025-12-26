@@ -56,7 +56,7 @@ interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
 
 export function AppSidebar({ activeTab, setActiveTab, ...props }: AppSidebarProps) {
     const { t } = useLanguage();
-    const { state } = useSidebar();
+    const { state, isMobile } = useSidebar();
     const { getCurrentUserId, switchSession, knowledgeBase, saveKnowledgeBase } = useDemoCall();
     const isDark = true; // Sidebar is always dark themed per design
 
@@ -90,22 +90,24 @@ export function AppSidebar({ activeTab, setActiveTab, ...props }: AppSidebarProp
 
     return (
         <Sidebar collapsible="icon" {...props} className="border-r border-white/10 dark bg-black">
-            <SidebarHeader>
-                <SidebarMenu>
-                    <SidebarMenuItem>
-                        <SidebarMenuButton size="lg" asChild>
-                            <div className="flex items-center gap-3 cursor-pointer text-white">
-                                <div className="flex aspect-square size-10 items-center justify-center">
-                                    <img src="/favicon.svg" alt="ClerkTree Logo" className="size-10" />
+            {!isMobile && (
+                <SidebarHeader>
+                    <SidebarMenu>
+                        <SidebarMenuItem>
+                            <SidebarMenuButton size="lg" asChild>
+                                <div className="flex items-center gap-3 cursor-pointer text-white">
+                                    <div className="flex aspect-square size-10 items-center justify-center">
+                                        <img src="/favicon.svg" alt="ClerkTree Logo" className="size-10" />
+                                    </div>
+                                    <div className="flex flex-col">
+                                        <span className="text-xl font-semibold tracking-tight">ClerkTree</span>
+                                    </div>
                                 </div>
-                                <div className="flex flex-col">
-                                    <span className="text-xl font-semibold tracking-tight">ClerkTree</span>
-                                </div>
-                            </div>
-                        </SidebarMenuButton>
-                    </SidebarMenuItem>
-                </SidebarMenu>
-            </SidebarHeader>
+                            </SidebarMenuButton>
+                        </SidebarMenuItem>
+                    </SidebarMenu>
+                </SidebarHeader>
+            )}
             <SidebarContent>
                 {/* Main Dashboard Group */}
                 <SidebarGroup>
