@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useState, useEffect } from "react"
 import {
     Phone,
     History,
@@ -12,6 +12,8 @@ import {
     Sparkles,
     Terminal
 } from "lucide-react"
+
+import { getGroqSettings, GROQ_MODELS, GroqSettings } from "./DemoCall/GroqSettings"
 
 import {
     Sidebar,
@@ -58,19 +60,46 @@ export function AppSidebar({ activeTab, setActiveTab, ...props }: AppSidebarProp
     const { getCurrentUserId, switchSession, knowledgeBase, saveKnowledgeBase } = useDemoCall();
     const isDark = true; // Sidebar is always dark themed per design
 
+    const [currentModelName, setCurrentModelName] = useState<string>('');
+
+    useEffect(() => {
+        // Initial load
+        const loadSettings = () => {
+            const settings = getGroqSettings();
+            const model = GROQ_MODELS.find(m => m.id === settings.model);
+            if (model) {
+                // Shorten name if too long
+                const shortName = model.name.replace('Llama 3.3', 'Llama 3.3').replace('Versatile', '').replace('Instant', '').trim();
+                setCurrentModelName(shortName);
+            }
+        };
+        loadSettings();
+
+        // Listen for updates
+        const handleUpdate = (e: CustomEvent<GroqSettings>) => {
+            const model = GROQ_MODELS.find(m => m.id === e.detail.model);
+            if (model) {
+                const shortName = model.name.replace('Llama 3.3', 'Llama 3.3').replace('Versatile', '').replace('Instant', '').trim();
+                setCurrentModelName(shortName);
+            }
+        };
+
+        window.addEventListener('groq-settings-updated', handleUpdate as EventListener);
+        return () => window.removeEventListener('groq-settings-updated', handleUpdate as EventListener);
+    }, []);
+
     return (
         <Sidebar collapsible="icon" {...props} className="border-r border-white/10 dark bg-black">
             <SidebarHeader>
                 <SidebarMenu>
                     <SidebarMenuItem>
                         <SidebarMenuButton size="lg" asChild>
-                            <div className="flex items-center gap-2 cursor-pointer text-white">
-                                <div className="flex aspect-square size-8 items-center justify-center">
-                                    <img src="/favicon.svg" alt="ClerkTree Logo" className="size-8" />
+                            <div className="flex items-center gap-3 cursor-pointer text-white">
+                                <div className="flex aspect-square size-10 items-center justify-center">
+                                    <img src="/favicon.svg" alt="ClerkTree Logo" className="size-10" />
                                 </div>
-                                <div className="flex flex-col gap-0.5 leading-none">
-                                    <span className="font-semibold">ClerkTree</span>
-                                    <span className="">Dashboard</span>
+                                <div className="flex flex-col">
+                                    <span className="text-xl font-semibold tracking-tight">ClerkTree</span>
                                 </div>
                             </div>
                         </SidebarMenuButton>
@@ -136,7 +165,11 @@ export function AppSidebar({ activeTab, setActiveTab, ...props }: AppSidebarProp
                                 >
                                     <Sparkles className="text-purple-400" />
                                     <span>Groq AI</span>
-                                    <SidebarMenuBadge className="bg-purple-500/20 text-purple-300">Settings</SidebarMenuBadge>
+                                    {currentModelName && (
+                                        <SidebarMenuBadge className="bg-purple-500/20 text-purple-300">
+                                            {currentModelName}
+                                        </SidebarMenuBadge>
+                                    )}
                                 </SidebarMenuButton>
                             </SidebarMenuItem>
 
