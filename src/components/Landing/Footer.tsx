@@ -17,6 +17,7 @@ export default function Footer() {
   const footerLinks = useMemo(() => ({
     product: [
       { name: t('nav.solutions'), path: '/solutions' },
+      { name: 'Docs', path: '/docs' },
     ],
     company: [
       { name: t('footer.aboutUs'), path: '/about' },
