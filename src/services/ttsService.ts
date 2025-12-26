@@ -157,14 +157,11 @@ class TTSService {
     // Stop Groq TTS
     groqTTSService.stop();
 
-    // Stop Kokoro audio
+    // Stop any lingering Kokoro audio element
     if (this.currentAudio) {
       this.currentAudio.pause();
       this.currentAudio = null;
     }
-
-    // Stop browser TTS
-    window.speechSynthesis?.cancel();
   }
 
   /**
@@ -176,7 +173,7 @@ class TTSService {
   }
 
   /**
-   * Speak text using the best available TTS backend
+   * Speak text using Groq TTS only (no browser fallback)
    */
   async speak(
     text: string,
@@ -198,7 +195,7 @@ class TTSService {
     // Stop any current playback
     this.stop();
 
-    // Try Groq TTS first (primary)
+    // Use Groq TTS only (no browser fallback)
     if (this.config.useGroqTTS && this.groqAvailable !== false) {
       try {
         console.log('🎤 Using Groq TTS...');
@@ -213,15 +210,16 @@ class TTSService {
         this.currentBackend = 'groq';
         return;
       } catch (error) {
-        console.warn('⚠️ Groq TTS failed, falling back to browser...', error);
-        this.groqAvailable = false;
+        console.error('❌ Groq TTS failed:', error);
+        // Don't fallback to browser - just call onEnd to continue the flow
+        options?.onEnd?.();
+        return;
       }
     }
 
-    // Fallback to browser TTS
-    console.log('🎤 Using Browser TTS...');
-    this.currentBackend = 'browser';
-    await this.speakWithBrowser(text, kokoroVoice, speed, options);
+    // If Groq is not available, just log and call onEnd
+    console.warn('⚠️ Groq TTS not available, skipping speech');
+    options?.onEnd?.();
   }
 
   /**
