@@ -296,9 +296,7 @@ export default function UserPhoneInterface({
 
         startCall('voice');
 
-        // CRITICAL FOR MOBILE: Speak a greeting immediately during the user gesture
-        // On iOS/Android, speech synthesis must be initiated directly from a click event
-        // to work subsequently. This "unlocks" the speech synthesis for later programmatic calls.
+        // Speak a greeting using Groq TTS
         const greeting = language === 'de-DE'
             ? 'Hallo! Wie kann ich Ihnen helfen?'
             : 'Hello! How can I help you today?';
@@ -307,30 +305,28 @@ export default function UserPhoneInterface({
         addMessage('agent', greeting);
         setAgentStatus('speaking');
 
-        // Speak directly from user click context (critical for mobile)
-        if (window.speechSynthesis) {
-            window.speechSynthesis.cancel();
-            const utterance = new SpeechSynthesisUtterance(greeting);
-            utterance.rate = 1.0;
-            utterance.volume = 1.0;
-
-            utterance.onend = () => {
-                console.log('🔊 Initial greeting finished, starting recognition');
-                setAgentStatus('listening');
-                startRecognition();
-            };
-
-            utterance.onerror = (e) => {
-                console.error('🔊 Greeting TTS error:', e);
-                setAgentStatus('listening');
-                startRecognition();
-            };
-
-            window.speechSynthesis.speak(utterance);
-        } else {
-            // No speech synthesis, just start listening
+        // Use Groq TTS for the greeting
+        try {
+            await ttsService.speak(greeting, {
+                speed: 1.0,
+                onStart: () => {
+                    console.log('🔊 Groq TTS greeting started');
+                },
+                onEnd: () => {
+                    console.log('🔊 Initial greeting finished, starting recognition');
+                    setAgentStatus('listening');
+                    startRecognition();
+                },
+                onError: (error) => {
+                    console.error('🔊 Greeting TTS error:', error);
+                    setAgentStatus('listening');
+                    startRecognition();
+                }
+            });
+        } catch (error) {
+            console.error('🔊 Greeting TTS failed:', error);
             setAgentStatus('listening');
-            setTimeout(() => startRecognition(), 100);
+            startRecognition();
         }
     }, [startCall, startRecognition, language, addMessage]);
 
@@ -339,11 +335,6 @@ export default function UserPhoneInterface({
 
         // Stop all TTS immediately
         ttsService.stop();
-
-        // Directly cancel browser speech synthesis
-        if (window.speechSynthesis) {
-            window.speechSynthesis.cancel();
-        }
 
         // Stop speech recognition
         stopRecognition();
@@ -363,7 +354,6 @@ export default function UserPhoneInterface({
         // Final TTS cleanup after a short delay
         setTimeout(() => {
             ttsService.stop();
-            window.speechSynthesis?.cancel();
         }, 100);
     }, [endCall, stopRecognition]);
 
