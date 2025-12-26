@@ -73,21 +73,36 @@ class GroqTTSService {
     private isAvailable: boolean | null = null;
     private currentAudio: HTMLAudioElement | null = null;
     private audioUnlocked: boolean = false;
+    private audioContext: AudioContext | null = null;
+    private unlockedAudioPool: HTMLAudioElement[] = [];
+    private isIOS: boolean = false;
 
     /**
      * Initialize the Groq TTS service
      */
     async initialize(): Promise<boolean> {
+        // Detect iOS
+        if (typeof window !== 'undefined' && typeof navigator !== 'undefined') {
+            this.isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+                (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+            if (this.isIOS) {
+                console.log('📱 iOS device detected, using iOS-specific audio handling');
+            }
+        }
+
         // Add global click listener to unlock audio on first interaction
         if (typeof window !== 'undefined') {
-            const unlockHandler = () => {
-                this.unlockAudio();
+            const unlockHandler = async () => {
+                await this.unlockAudio();
                 window.removeEventListener('click', unlockHandler);
                 window.removeEventListener('touchstart', unlockHandler);
+                window.removeEventListener('touchend', unlockHandler);
                 window.removeEventListener('keydown', unlockHandler);
             };
             window.addEventListener('click', unlockHandler);
             window.addEventListener('touchstart', unlockHandler);
+            window.addEventListener('touchend', unlockHandler);
             window.addEventListener('keydown', unlockHandler);
         }
 
@@ -116,41 +131,82 @@ class GroqTTSService {
 
     /**
      * Unlock audio playback - must be called during a user gesture (click/tap)
-     * This is required by browser autoplay policies
+     * This is required by browser autoplay policies, especially strict on iOS Safari
      */
-    unlockAudio(): void {
+    async unlockAudio(): Promise<void> {
         if (this.audioUnlocked) return;
 
         try {
-            console.log('🔊 Attempting to unlock audio...');
+            console.log('🔊 Attempting to unlock audio (iOS-compatible)...');
 
-            // Create a silent audio context to unlock audio
-            const AudioContext = window.AudioContext || (window as unknown as { webkitAudioContext: typeof window.AudioContext }).webkitAudioContext;
-            if (AudioContext) {
-                const audioContext = new AudioContext();
+            // Create and resume AudioContext
+            const AudioContextClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof window.AudioContext }).webkitAudioContext;
+            if (AudioContextClass) {
+                if (!this.audioContext) {
+                    this.audioContext = new AudioContextClass();
+                }
+
+                // Resume if suspended (common on iOS)
+                if (this.audioContext.state === 'suspended') {
+                    await this.audioContext.resume();
+                    console.log('🔊 AudioContext resumed from suspended state');
+                }
+
                 // Create a short silent buffer and play it
-                const buffer = audioContext.createBuffer(1, 1, 22050);
-                const source = audioContext.createBufferSource();
+                const buffer = this.audioContext.createBuffer(1, 1, 22050);
+                const source = this.audioContext.createBufferSource();
                 source.buffer = buffer;
-                source.connect(audioContext.destination);
+                source.connect(this.audioContext.destination);
                 source.start(0);
-
-                // Also create and play a silent HTML audio to unlock that too
-                const silentAudio = new Audio('data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=');
-                silentAudio.volume = 0.01;
-                // Fire and forget
-                silentAudio.play().then(() => {
-                    console.log('🔊 Audio element unlocked');
-                }).catch((e) => {
-                    console.warn('⚠️ Audio element unlock failed:', e);
-                });
-
-                this.audioUnlocked = true;
-                console.log('🔊 Audio playback unlocked successfully');
             }
+
+            // Create a pool of pre-unlocked audio elements for iOS
+            // iOS requires audio elements to be "unlocked" by playing during user gesture
+            for (let i = 0; i < 3; i++) {
+                const audio = new Audio();
+                audio.setAttribute('playsinline', 'true');
+                audio.setAttribute('webkit-playsinline', 'true');
+                audio.preload = 'auto';
+                audio.volume = 0.01;
+
+                // Use a tiny silent MP3 (more compatible with iOS than WAV)
+                audio.src = 'data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4Ljc2LjEwMAAAAAAAAAAAAAAA/+M4wAAAAAAAAAAAAEluZm8AAAAPAAAAAwAAABQAqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqr/8zLEAyQAekAAAAFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV//MyxAYjKAJQAYd4AVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV/+M4xAAAAANIAAAAAFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/zMsQGAAADSAAAAABVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVX/8zLEBgAAA0gAAAAAVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVU=';
+
+                try {
+                    await audio.play();
+                    audio.pause();
+                    audio.currentTime = 0;
+                    this.unlockedAudioPool.push(audio);
+                    console.log(`🔊 Pre-unlocked audio element ${i + 1}`);
+                } catch (e) {
+                    console.warn(`⚠️ Failed to pre-unlock audio element ${i + 1}:`, e);
+                }
+            }
+
+            this.audioUnlocked = true;
+            console.log('🔊 Audio playback unlocked successfully');
         } catch (e) {
             console.warn('⚠️ Could not unlock audio:', e);
         }
+    }
+
+    /**
+     * Get a pre-unlocked audio element from the pool, or create a new one
+     */
+    private getAudioElement(): HTMLAudioElement {
+        // Try to get a pre-unlocked element from the pool
+        const pooledAudio = this.unlockedAudioPool.pop();
+        if (pooledAudio) {
+            console.log('🔊 Using pre-unlocked audio element from pool');
+            return pooledAudio;
+        }
+
+        // Create a new audio element with iOS-compatible attributes
+        const audio = new Audio();
+        audio.setAttribute('playsinline', 'true');
+        audio.setAttribute('webkit-playsinline', 'true');
+        audio.preload = 'auto';
+        return audio;
     }
 
     /**
@@ -315,12 +371,19 @@ class GroqTTSService {
             const timeoutId = setTimeout(() => abortController.abort(), 60000); // 60 second timeout
 
             try {
+                // Ensure AudioContext is resumed (important for iOS)
+                if (this.audioContext && this.audioContext.state === 'suspended') {
+                    console.log('🔊 Resuming suspended AudioContext before playback...');
+                    await this.audioContext.resume();
+                }
+
                 // Prepend vocal direction if specified
                 const directionPrefix = VOCAL_DIRECTIONS[vocalDirection];
                 const processedText = directionPrefix ? `${directionPrefix} ${text}` : text;
 
-                console.log(`🎤 Synthesizing speech with Groq TTS (voice: ${voice}, direction: ${vocalDirection})`);
+                console.log(`🎤 Synthesizing speech with Groq TTS (voice: ${voice}, direction: ${vocalDirection}, iOS: ${this.isIOS})`);
 
+                // Use MP3 format for better iOS Safari compatibility
                 const response = await fetch(GROQ_TTS_URL, {
                     method: 'POST',
                     headers: {
@@ -331,7 +394,7 @@ class GroqTTSService {
                         model: GROQ_TTS_MODEL,
                         input: processedText,
                         voice: voice,
-                        response_format: 'wav',
+                        response_format: 'mp3', // Changed from 'wav' to 'mp3' for iOS Safari compatibility
                         speed: speed,
                     }),
                     signal: abortController.signal,
@@ -349,8 +412,9 @@ class GroqTTSService {
                 const audioBlob = await response.blob();
                 const audioUrl = URL.createObjectURL(audioBlob);
 
-                // Create and play audio
-                this.currentAudio = new Audio(audioUrl);
+                // Use pre-unlocked audio element from pool (important for iOS)
+                this.currentAudio = this.getAudioElement();
+                this.currentAudio.src = audioUrl;
                 this.currentAudio.volume = 1.0;
 
                 this.currentAudio.onloadeddata = () => {
@@ -377,7 +441,14 @@ class GroqTTSService {
 
                 // Play the audio with explicit error handling for mobile
                 try {
-                    await this.currentAudio.play();
+                    // Load the audio first
+                    await this.currentAudio.load();
+
+                    // Then play
+                    const playPromise = this.currentAudio.play();
+                    if (playPromise !== undefined) {
+                        await playPromise;
+                    }
                 } catch (playError) {
                     console.error('🔊 Audio play() failed:', playError);
                     URL.revokeObjectURL(audioUrl);
@@ -385,7 +456,7 @@ class GroqTTSService {
 
                     // On NotAllowedError, the audio isn't unlocked
                     if (playError instanceof Error && playError.name === 'NotAllowedError') {
-                        console.warn('⚠️ Audio not unlocked - user gesture required');
+                        console.warn('⚠️ Audio not unlocked - user gesture required. iOS may require explicit user interaction.');
                     }
 
                     options?.onError?.(playError as Error);
