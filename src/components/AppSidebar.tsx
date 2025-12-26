@@ -37,6 +37,7 @@ import {
 import { cn } from "@/utils/cn"
 import { useLanguage } from "@/contexts/LanguageContext"
 import UserSessionSwitcher from "./DemoCall/UserSessionSwitcher"
+import LanguageSwitcher from "./Layout/LanguageSwitcher"
 import { useDemoCall } from "@/contexts/DemoCallContext"
 
 // Company Logo component
@@ -111,7 +112,7 @@ export function AppSidebar({ activeTab, setActiveTab, ...props }: AppSidebarProp
             <SidebarContent>
                 {/* Main Dashboard Group */}
                 <SidebarGroup>
-                    <SidebarGroupLabel className="text-white/60">Platform</SidebarGroupLabel>
+                    <SidebarGroupLabel className="text-white/60">{t('sidebar.platform')}</SidebarGroupLabel>
                     <SidebarGroupContent>
                         <SidebarMenu>
                             <SidebarMenuItem>
@@ -122,7 +123,7 @@ export function AppSidebar({ activeTab, setActiveTab, ...props }: AppSidebarProp
                                     className="text-white/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-white/10 data-[active=true]:text-white"
                                 >
                                     <Phone />
-                                    <span>Monitor</span>
+                                    <span>{t('dashboard.tab.monitor')}</span>
                                 </SidebarMenuButton>
                             </SidebarMenuItem>
                             <SidebarMenuItem>
@@ -133,7 +134,7 @@ export function AppSidebar({ activeTab, setActiveTab, ...props }: AppSidebarProp
                                     className="text-white/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-white/10 data-[active=true]:text-white"
                                 >
                                     <Brain />
-                                    <span>Configuration</span>
+                                    <span>{t('dashboard.tab.config')}</span>
                                 </SidebarMenuButton>
                             </SidebarMenuItem>
                             <SidebarMenuItem>
@@ -144,7 +145,7 @@ export function AppSidebar({ activeTab, setActiveTab, ...props }: AppSidebarProp
                                     className="text-white/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-white/10 data-[active=true]:text-white"
                                 >
                                     <History />
-                                    <span>Call History</span>
+                                    <span>{t('dashboard.tab.history')}</span>
                                 </SidebarMenuButton>
                             </SidebarMenuItem>
                         </SidebarMenu>
@@ -155,7 +156,7 @@ export function AppSidebar({ activeTab, setActiveTab, ...props }: AppSidebarProp
 
                 {/* AI Configuration Group */}
                 <SidebarGroup>
-                    <SidebarGroupLabel className="text-white/60">Configure AI Behavior</SidebarGroupLabel>
+                    <SidebarGroupLabel className="text-white/60">{t('sidebar.aiBehavior')}</SidebarGroupLabel>
                     <SidebarGroupContent>
                         <SidebarMenu>
                             {/* Model Selection */}
@@ -166,7 +167,7 @@ export function AppSidebar({ activeTab, setActiveTab, ...props }: AppSidebarProp
                                     className="text-white/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-white/10 data-[active=true]:text-white"
                                 >
                                     <Sparkles className="text-purple-400" />
-                                    <span>Groq AI</span>
+                                    <span>{t('sidebar.groqAi')}</span>
                                     {currentModelName && (
                                         <SidebarMenuBadge className="bg-purple-500/20 text-purple-300">
                                             {currentModelName}
@@ -182,7 +183,7 @@ export function AppSidebar({ activeTab, setActiveTab, ...props }: AppSidebarProp
                                     className="text-white/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-white/10 data-[active=true]:text-white"
                                 >
                                     <Terminal />
-                                    <span>System Prompt</span>
+                                    <span>{t('sidebar.systemPrompt')}</span>
                                 </SidebarMenuButton>
                             </SidebarMenuItem>
                             <SidebarMenuItem>
@@ -192,7 +193,7 @@ export function AppSidebar({ activeTab, setActiveTab, ...props }: AppSidebarProp
                                     className="text-white/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-white/10 data-[active=true]:text-white"
                                 >
                                     <Mic />
-                                    <span>AI Voice</span>
+                                    <span>{t('sidebar.aiVoice')}</span>
                                 </SidebarMenuButton>
                             </SidebarMenuItem>
                             <SidebarMenuItem>
@@ -202,7 +203,7 @@ export function AppSidebar({ activeTab, setActiveTab, ...props }: AppSidebarProp
                                     className="text-white/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-white/10 data-[active=true]:text-white"
                                 >
                                     <Database />
-                                    <span>Context Fields</span>
+                                    <span>{t('sidebar.contextFields')}</span>
                                 </SidebarMenuButton>
                             </SidebarMenuItem>
                             <SidebarMenuItem>
@@ -212,7 +213,7 @@ export function AppSidebar({ activeTab, setActiveTab, ...props }: AppSidebarProp
                                     className="text-white/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-white/10 data-[active=true]:text-white"
                                 >
                                     <Tags />
-                                    <span>Categories</span>
+                                    <span>{t('sidebar.categories')}</span>
                                 </SidebarMenuButton>
                             </SidebarMenuItem>
                             <SidebarMenuItem>
@@ -222,7 +223,7 @@ export function AppSidebar({ activeTab, setActiveTab, ...props }: AppSidebarProp
                                     className="text-white/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-white/10 data-[active=true]:text-white"
                                 >
                                     <ListOrdered />
-                                    <span>Priority Rules</span>
+                                    <span>{t('sidebar.priorityRules')}</span>
                                 </SidebarMenuButton>
                             </SidebarMenuItem>
                             <SidebarMenuItem>
@@ -232,7 +233,7 @@ export function AppSidebar({ activeTab, setActiveTab, ...props }: AppSidebarProp
                                     className="text-white/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-white/10 data-[active=true]:text-white"
                                 >
                                     <Scroll />
-                                    <span>Instructions</span>
+                                    <span>{t('sidebar.instructions')}</span>
                                 </SidebarMenuButton>
                             </SidebarMenuItem>
 
@@ -242,7 +243,7 @@ export function AppSidebar({ activeTab, setActiveTab, ...props }: AppSidebarProp
                                     className="bg-green-500/10 text-green-400 hover:bg-green-500/20 hover:text-green-300 border border-green-500/20 mt-2"
                                 >
                                     <Save />
-                                    <span>Save Config</span>
+                                    <span>{t('sidebar.saveConfig')}</span>
                                 </SidebarMenuButton>
                             </SidebarMenuItem>
                         </SidebarMenu>
@@ -253,6 +254,14 @@ export function AppSidebar({ activeTab, setActiveTab, ...props }: AppSidebarProp
             </SidebarContent>
             <SidebarFooter>
                 <SidebarMenu>
+                    <SidebarMenuItem>
+                        <div className="flex items-center justify-between px-2 py-2">
+                            <span className="text-sm font-medium text-white/70">{t('sidebar.language')}</span>
+                            <div className="scale-90 origin-right">
+                                <LanguageSwitcher isExpanded={true} forceDark={true} />
+                            </div>
+                        </div>
+                    </SidebarMenuItem>
                     <SidebarMenuItem>
                         <UserSessionSwitcher
                             isDark={isDark}

@@ -23,7 +23,6 @@ import InvitePage from './pages/InvitePage';
 import About from './pages/About';
 import Careers from './pages/Careers';
 import Solutions from './pages/Solutions';
-import FAQ from './pages/FAQ';
 import Blog from './pages/Blog';
 import BlogPost from './pages/BlogPost';
 import Arbor from './pages/Arbor';
@@ -188,7 +187,6 @@ function App() {
             <Route path="/about" element={<About />} />
             <Route path="/careers" element={<Careers />} />
             <Route path="/solutions" element={<Solutions />} />
-            <Route path="/faq" element={<FAQ />} />
             <Route path="/blog" element={<Blog />} />
             <Route path="/blog/:slug" element={<BlogPost />} />
             <Route path="/arbor" element={<Arbor />} />

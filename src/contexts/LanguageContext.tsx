@@ -77,6 +77,11 @@ export const translations: Record<Language, Record<string, string>> = {
         'footer.terms': 'Terms of Service',
         'footer.security': 'Security & Data Handling',
         'footer.rights': 'All rights reserved.',
+        'footer.legal': 'Legal',
+        'footer.docs': 'Docs',
+        'footer.phone': 'Phone',
+        'footer.linkedin': 'LinkedIn',
+        'footer.cookiePolicy': 'Cookie Policy',
 
         // About Page
         'about.whyTitle': 'Why We Built ClerkTree',
@@ -242,6 +247,31 @@ export const translations: Record<Language, Record<string, string>> = {
         'careers.upload': 'Click to upload your résumé (PDF, DOC, DOCX)',
         'careers.submit': 'Submit Application',
         'careers.submitting': 'Submitting...',
+        'careers.years': 'years',
+
+        // Blog
+        'blog.all': 'All',
+        'blog.selectCategory': 'Select Category',
+
+        // Header
+        'header.notifications': 'Notifications',
+        'header.markAllRead': 'Mark all as read',
+        'header.noNotifications': 'No new notifications',
+
+        'header.stayUpdated': 'Stay updated with your latest activities',
+
+        // Sidebar
+        'sidebar.platform': 'Platform',
+        'sidebar.aiBehavior': 'Configure AI Behavior',
+        'sidebar.groqAi': 'Groq AI',
+        'sidebar.systemPrompt': 'System Prompt',
+        'sidebar.aiVoice': 'AI Voice',
+        'sidebar.contextFields': 'Context Fields',
+        'sidebar.categories': 'Categories',
+        'sidebar.priorityRules': 'Priority Rules',
+        'sidebar.instructions': 'Instructions',
+        'sidebar.saveConfig': 'Save Config',
+        'sidebar.language': 'Language',
 
         // Invite Page
         'invite.support': 'Support',
@@ -326,8 +356,8 @@ export const translations: Record<Language, Record<string, string>> = {
         'dashboard.priority.noPending': 'No pending',
         'dashboard.priority.needFollowUp': 'need follow-up',
 
-        'dashboard.tab.monitor': 'Dashboard',
-        'dashboard.tab.config': 'Dashboard',
+        'dashboard.tab.monitor': 'Monitor',
+        'dashboard.tab.config': 'Configuration',
         'dashboard.tab.history': 'History',
         'dashboard.tab.monitorFull': 'Live Monitor',
         'dashboard.tab.configFull': 'Knowledge Base',
@@ -489,6 +519,11 @@ export const translations: Record<Language, Record<string, string>> = {
         'footer.terms': 'Nutzungsbedingungen',
         'footer.security': 'Sicherheit & Datenverarbeitung',
         'footer.rights': 'Alle Rechte vorbehalten.',
+        'footer.legal': 'Rechtliches',
+        'footer.docs': 'Dokumentation',
+        'footer.phone': 'Telefon',
+        'footer.linkedin': 'LinkedIn',
+        'footer.cookiePolicy': 'Cookie-Richtlinie',
 
         // About Page
         'about.whyTitle': 'Warum wir ClerkTree gebaut haben',
@@ -654,6 +689,31 @@ export const translations: Record<Language, Record<string, string>> = {
         'careers.upload': 'Klicken Sie hier, um Ihren Lebenslauf hochzuladen (PDF, DOC, DOCX)',
         'careers.submit': 'Bewerbung absenden',
         'careers.submitting': 'Wird gesendet...',
+        'careers.years': 'Jahre',
+
+        // Blog
+        'blog.all': 'Alle',
+        'blog.selectCategory': 'Kategorie auswählen',
+
+        // Header
+        'header.notifications': 'Benachrichtigungen',
+        'header.markAllRead': 'Alle als gelesen markieren',
+        'header.noNotifications': 'Keine neuen Benachrichtigungen',
+
+        'header.stayUpdated': 'Bleiben Sie über Ihre neuesten Aktivitäten auf dem Laufenden',
+
+        // Sidebar
+        'sidebar.platform': 'Plattform',
+        'sidebar.aiBehavior': 'KI-Verhalten konfigurieren',
+        'sidebar.groqAi': 'Groq KI',
+        'sidebar.systemPrompt': 'System-Prompt',
+        'sidebar.aiVoice': 'KI-Stimme',
+        'sidebar.contextFields': 'Kontextfelder',
+        'sidebar.categories': 'Kategorien',
+        'sidebar.priorityRules': 'Prioritätsregeln',
+        'sidebar.instructions': 'Anweisungen',
+        'sidebar.saveConfig': 'Konfig. speichern',
+        'sidebar.language': 'Sprache',
 
         // Invite Page
         'invite.support': 'Support',
@@ -738,8 +798,8 @@ export const translations: Record<Language, Record<string, string>> = {
         'dashboard.priority.noPending': 'Keine ausstehenden',
         'dashboard.priority.needFollowUp': 'erfordern Nachverfolgung',
 
-        'dashboard.tab.monitor': 'Dashboard',
-        'dashboard.tab.config': 'Dashboard',
+        'dashboard.tab.monitor': 'Überwachung',
+        'dashboard.tab.config': 'Konfiguration',
         'dashboard.tab.history': 'Verlauf',
         'dashboard.tab.monitorFull': 'Live-Monitor',
         'dashboard.tab.configFull': 'Wissensbasis',
@@ -834,6 +894,75 @@ export const translations: Record<Language, Record<string, string>> = {
         'juris.modeDeep': 'Tiefensuche',
         'juris.simulatedDeep': "Basierend auf Ihrer detaillierten Anfrage habe ich eine umfassende Analyse der relevanten Rechtspräzedenzfälle und gesetzlichen Bestimmungen durchgeführt.\n\nDie Suche hat {count} hochsignifikante Fälle identifiziert, die sich direkt mit den von Ihnen aufgeworfenen rechtlichen Fragen befassen. Die Analyse deutet auf einen starken Präzedenztrend hin, der die Auslegung spezifischer gesetzlicher Klauseln im Einklang mit jüngsten Urteilen des Obersten Gerichtshofs begünstigt.\n\nWichtige Ergebnisse sind:\n1. Ein konsistenter gerichtlicher Ansatz zum Schutz der Grundrechte in ähnlichen Kontexten.\n2. Unterschiedliche Ansichten in Urteilen des High Court, die vom Apex Court beigelegt wurden.\n3. Spezifisches Vertrauen auf die Einhaltung von Verfahren als kritischer Faktor für den Ausgang des Verfahrens.\n\nUnten finden Sie die relevantesten Fälle mit detaillierten Zitiernetzwerken und Begründungsmustern für Ihre Überprüfung.",
         'juris.simulatedNormal': 'Ich habe {count} relevante Fälle für Ihre Situation gefunden. Diese Fälle decken ähnliche Szenarien ab und können Ihnen helfen, die potenziellen rechtlichen Ergebnisse zu verstehen.',
+
+        // LiveCallMonitor
+        'monitor.title': 'Live-Monitor',
+        'monitor.status.active': 'Aktiv',
+        'monitor.status.idle': 'Inaktiv',
+        'monitor.apptDetails': 'Termindetails',
+        'monitor.contactInfo': 'Kontaktinfo',
+        'monitor.noContact': 'Kein Kontakt',
+        'monitor.otherDetails': 'Andere Details',
+        'monitor.category': 'Kategorie:',
+        'monitor.noActive': 'Keine aktive Unterhaltung',
+        'monitor.waiting': 'Warten auf Unterhaltung...',
+        'monitor.startCall': 'Starten Sie einen Anruf, um das Transkript zu sehen',
+        'monitor.recording': 'Aufzeichnung & Analyse...',
+        'monitor.recordingShort': 'Aufzeichnung...',
+
+        // KnowledgeBase (Config)
+        'config.title': 'Wissensbasis',
+        'config.subtitle': 'KI-Verhalten konfigurieren',
+        'config.save': 'Konfig. speichern',
+        'config.saved': 'Gespeichert!',
+        'config.systemPrompt': 'System-Prompt',
+        'config.systemPromptDesc': 'Definieren Sie das Kernverhalten und die Persönlichkeit der KI...',
+        'config.persona': 'KI-Persona',
+        'config.personaPlaceholder': 'z.B. Professioneller, empathischer Assistent',
+        'config.greeting': 'Begrüßung',
+        'config.greetingPlaceholder': 'Wie die KI Anrufer begrüßt...',
+        'config.guidelines': 'Antwortrichtlinien',
+        'config.guidelinesPlaceholder': 'Richtlinien, wie die KI antworten soll...',
+        'config.voice': 'KI-Stimme',
+        'config.fields': 'Kontextfelder',
+        'config.categories': 'Kategorien',
+        'config.rules': 'Prioritätsregeln',
+        'config.instructions': 'Anweisungen',
+        'config.addField': 'Feld hinzufügen',
+        'config.addCategory': 'Kategorie hinzufügen',
+        'config.fieldName': 'Feldname',
+        'config.fieldDesc': 'Beschreibung (optional)',
+        'config.required': 'Pflichtfeld',
+        'config.cancel': 'Abbrechen',
+        'config.add': 'Hinzufügen',
+        'config.catName': 'Kategoriename',
+        'config.catDesc': 'Beschreibung',
+        'config.groqConnected': 'Groq KI',
+        'config.groqOffline': 'Offline',
+
+        // CallHistory
+        'history.title': 'Verlauf',
+        'history.stats': '{count} von {total} Elementen • {voice} Anrufe, {text} Chats',
+        'history.justNow': 'Gerade eben',
+        'history.ago.h': 'vor {h} Std.',
+        'history.ago.d': 'vor {d} Tagen',
+        'history.duration': '{m}m {s}s',
+        'history.noHistory': 'Kein Verlauf gefunden',
+        'history.noHistoryDesc': 'Anruf- und Chatverlauf erscheint hier',
+        'history.adjustFilters': 'Versuchen Sie, Ihre Filter anzupassen',
+        'history.filter.allTypes': 'Alle Typen',
+        'history.filter.calls': 'Nur Anrufe',
+        'history.filter.chats': 'Nur Chats',
+        'history.filter.allPriorities': 'Alle Prioritäten',
+        'history.filter.allCategories': 'Alle Kategorien',
+        'history.intent': 'Anrufer-Absicht',
+        'history.keyPoints': 'Wichtige Punkte',
+        'history.topics': 'Themen',
+        'history.mood': 'Stimmungsindikatoren',
+        'history.suggestions': 'KI-Vorschläge für Admin',
+        'history.actionItems': 'Aktionselemente',
+        'history.extractedInfo': 'Extrahierte Informationen',
+        'history.tags': 'Tags',
     }
 };
 
