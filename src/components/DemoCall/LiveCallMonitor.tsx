@@ -8,7 +8,10 @@ interface LiveCallMonitorProps {
   isDark?: boolean;
 }
 
+import { useLanguage } from '../../contexts/LanguageContext';
+
 export default function LiveCallMonitor({ isDark = true }: LiveCallMonitorProps) {
+  const { t } = useLanguage();
   const { currentCall } = useDemoCall();
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -57,7 +60,7 @@ export default function LiveCallMonitor({ isDark = true }: LiveCallMonitorProps)
             "font-semibold text-sm md:text-base",
             isDark ? "text-white" : "text-black"
           )}>
-            Live Monitor
+            {t('monitor.title')}
           </h3>
         </div>
 
@@ -70,7 +73,7 @@ export default function LiveCallMonitor({ isDark = true }: LiveCallMonitorProps)
             "text-xs md:text-sm",
             isDark ? "text-white/60" : "text-black/60"
           )}>
-            {isActive ? 'Active' : 'Idle'}
+            {isActive ? t('monitor.status.active') : t('monitor.status.idle')}
           </span>
           {currentCall?.priority && currentCall.priority !== 'medium' && (
             <span className={cn(
@@ -98,7 +101,7 @@ export default function LiveCallMonitor({ isDark = true }: LiveCallMonitorProps)
                   "text-[10px] md:text-xs font-semibold uppercase tracking-wide",
                   isDark ? "text-green-400" : "text-green-600"
                 )}>
-                  Appointment Details
+                  {t('monitor.apptDetails')}
                 </span>
               </div>
               <div className={cn(
@@ -129,14 +132,14 @@ export default function LiveCallMonitor({ isDark = true }: LiveCallMonitorProps)
                     "text-[10px] md:text-xs font-semibold uppercase tracking-wide",
                     isDark ? "text-blue-400" : "text-blue-600"
                   )}>
-                    Contact Info
+                    {t('monitor.contactInfo')}
                   </span>
                   {!extractedFields.some(f => ['phone', 'email', 'alt_contact'].includes(f.id)) && (
                     <span className={cn(
                       "text-[9px] px-1.5 py-0.5 rounded",
                       isDark ? "bg-yellow-500/20 text-yellow-400" : "bg-yellow-100 text-yellow-700"
                     )}>
-                      ⚠️ No contact yet
+                      ⚠️ {t('monitor.noContact')}
                     </span>
                   )}
                 </div>
@@ -179,7 +182,7 @@ export default function LiveCallMonitor({ isDark = true }: LiveCallMonitorProps)
                     "text-[10px] md:text-xs font-medium",
                     isDark ? "text-white/60" : "text-black/60"
                   )}>
-                    Other Details
+                    {t('monitor.otherDetails')}
                   </span>
                 </div>
                 <div className="flex flex-wrap gap-1.5 md:gap-2">
@@ -216,7 +219,7 @@ export default function LiveCallMonitor({ isDark = true }: LiveCallMonitorProps)
             "text-[10px] md:text-xs",
             isDark ? "text-white/50" : "text-black/50"
           )}>
-            Category:
+            {t('monitor.category')}
           </span>
           <span className={cn(
             "text-[10px] md:text-xs px-1.5 md:px-2 py-0.5 rounded-full",
@@ -235,9 +238,9 @@ export default function LiveCallMonitor({ isDark = true }: LiveCallMonitorProps)
             isDark ? "text-white/40" : "text-black/40"
           )}>
             <MessageSquare className="w-8 h-8 md:w-12 md:h-12 mb-2 md:mb-4 opacity-40" />
-            <p className="text-sm md:text-lg font-medium mb-0.5 md:mb-1">No Active Conversation</p>
+            <p className="text-sm md:text-lg font-medium mb-0.5 md:mb-1">{t('monitor.noActive')}</p>
             <p className="text-xs md:text-sm opacity-80">
-              {isActive ? 'Waiting for conversation...' : 'Start a call to see transcript'}
+              {isActive ? t('monitor.waiting') : t('monitor.startCall')}
             </p>
           </div>
         ) : (
@@ -333,8 +336,8 @@ export default function LiveCallMonitor({ isDark = true }: LiveCallMonitorProps)
             "text-[10px] md:text-xs",
             isDark ? "text-white/50" : "text-black/50"
           )}>
-            <span className="hidden sm:inline">Recording & analyzing conversation...</span>
-            <span className="sm:hidden">Recording...</span>
+            <span className="hidden sm:inline">{t('monitor.recording')}</span>
+            <span className="sm:hidden">{t('monitor.recordingShort')}</span>
           </span>
         </div>
       )}

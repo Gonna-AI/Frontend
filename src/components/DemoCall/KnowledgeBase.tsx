@@ -28,6 +28,7 @@ import { useDemoCall, ContextField, CallCategory } from '../../contexts/DemoCall
 import VoiceSelector from './VoiceSelector';
 import { aiService } from '../../services/aiService';
 import { localLLMService } from '../../services/localLLMService';
+import { useLanguage } from '../../contexts/LanguageContext';
 
 interface KnowledgeBaseProps {
   isDark?: boolean;
@@ -37,6 +38,7 @@ interface KnowledgeBaseProps {
 type ActiveTab = 'prompt' | 'voice' | 'fields' | 'categories' | 'rules' | 'instructions';
 
 export default function KnowledgeBase({ isDark = true, activeSection }: KnowledgeBaseProps) {
+  const { t } = useLanguage();
   const {
     knowledgeBase,
     updateKnowledgeBase,
@@ -124,12 +126,12 @@ export default function KnowledgeBase({ isDark = true, activeSection }: Knowledg
   };
 
   const tabs = [
-    { id: 'prompt' as const, label: 'System Prompt', icon: Brain },
-    { id: 'voice' as const, label: 'AI Voice', icon: Mic },
-    { id: 'fields' as const, label: 'Context Fields', icon: Tag },
-    { id: 'categories' as const, label: 'Categories', icon: BookOpen },
-    { id: 'rules' as const, label: 'Priority Rules', icon: AlertTriangle },
-    { id: 'instructions' as const, label: 'Instructions', icon: Settings },
+    { id: 'prompt' as const, label: t('config.systemPrompt'), icon: Brain },
+    { id: 'voice' as const, label: t('config.voice'), icon: Mic },
+    { id: 'fields' as const, label: t('config.fields'), icon: Tag },
+    { id: 'categories' as const, label: t('config.categories'), icon: BookOpen },
+    { id: 'rules' as const, label: t('config.rules'), icon: AlertTriangle },
+    { id: 'instructions' as const, label: t('config.instructions'), icon: Settings },
   ];
 
   const colors = ['blue', 'purple', 'green', 'orange', 'red', 'emerald', 'pink', 'yellow', 'cyan', 'indigo'];
@@ -237,21 +239,21 @@ export default function KnowledgeBase({ isDark = true, activeSection }: Knowledg
               "font-semibold text-sm md:text-base",
               isDark ? "text-white" : "text-black"
             )}>
-              Knowledge Base
+              {t('config.title')}
             </h3>
             <div className="flex items-center gap-2">
               <p className={cn(
                 "text-[10px] md:text-xs truncate",
                 isDark ? "text-white/50" : "text-black/50"
               )}>
-                Configure AI behavior
+                {t('config.subtitle')}
               </p>
               {/* AI Status Badge - Groq API */}
               <div className="flex items-center gap-1">
                 <button
                   onClick={testConnection}
                   disabled={isTestingConnection}
-                  title={localLLMConnected ? `Groq AI: ${localLLMModel}` : 'Groq API not connected'}
+                  title={localLLMConnected ? `${t('config.groqConnected')}: ${localLLMModel}` : t('config.groqOffline')}
                   className={cn(
                     "flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] transition-colors",
                     isTestingConnection
@@ -269,7 +271,7 @@ export default function KnowledgeBase({ isDark = true, activeSection }: Knowledg
                     <CloudOff className="w-2.5 h-2.5" />
                   )}
                   <span className="hidden sm:inline">
-                    {localLLMConnected ? 'Groq' : 'Offline'}
+                    {localLLMConnected ? t('config.groqConnected') : t('config.groqOffline')}
                   </span>
                 </button>
               </div>
@@ -298,7 +300,7 @@ export default function KnowledgeBase({ isDark = true, activeSection }: Knowledg
             <Save className="w-3.5 h-3.5" />
           )}
           <span className="hidden sm:inline">
-            {saveSuccess ? 'Saved!' : 'Save Config'}
+            {saveSuccess ? t('config.saved') : t('config.save')}
           </span>
         </button>
       </div>
@@ -351,7 +353,7 @@ export default function KnowledgeBase({ isDark = true, activeSection }: Knowledg
                   isDark ? "text-white/80" : "text-black/80"
                 )}>
                   <Brain className="w-4 h-4" />
-                  System Prompt
+                  {t('config.systemPrompt')}
                 </label>
                 <textarea
                   value={knowledgeBase.systemPrompt}
@@ -363,7 +365,7 @@ export default function KnowledgeBase({ isDark = true, activeSection }: Knowledg
                       ? "bg-black/30 text-white border border-white/10 focus:ring-purple-500/50"
                       : "bg-white text-black border border-black/10 focus:ring-purple-500/50"
                   )}
-                  placeholder="Define the AI's core behavior and personality..."
+                  placeholder={t('config.systemPromptDesc')}
                 />
               </div>
 
@@ -373,7 +375,7 @@ export default function KnowledgeBase({ isDark = true, activeSection }: Knowledg
                   "text-sm font-medium",
                   isDark ? "text-white/80" : "text-black/80"
                 )}>
-                  AI Persona
+                  {t('config.persona')}
                 </label>
                 <input
                   value={knowledgeBase.persona}
@@ -384,7 +386,7 @@ export default function KnowledgeBase({ isDark = true, activeSection }: Knowledg
                       ? "bg-black/30 text-white border border-white/10 focus:ring-purple-500/50"
                       : "bg-white text-black border border-black/10 focus:ring-purple-500/50"
                   )}
-                  placeholder="e.g., Professional, empathetic, and efficient assistant"
+                  placeholder={t('config.personaPlaceholder')}
                 />
               </div>
 
@@ -395,7 +397,7 @@ export default function KnowledgeBase({ isDark = true, activeSection }: Knowledg
                   isDark ? "text-white/80" : "text-black/80"
                 )}>
                   <MessageSquare className="w-4 h-4" />
-                  Opening Greeting
+                  {t('config.greeting')}
                 </label>
                 <textarea
                   value={knowledgeBase.greeting}
@@ -407,7 +409,7 @@ export default function KnowledgeBase({ isDark = true, activeSection }: Knowledg
                       ? "bg-black/30 text-white border border-white/10 focus:ring-purple-500/50"
                       : "bg-white text-black border border-black/10 focus:ring-purple-500/50"
                   )}
-                  placeholder="How the AI greets callers..."
+                  placeholder={t('config.greetingPlaceholder')}
                 />
               </div>
 
@@ -417,7 +419,7 @@ export default function KnowledgeBase({ isDark = true, activeSection }: Knowledg
                   "text-sm font-medium",
                   isDark ? "text-white/80" : "text-black/80"
                 )}>
-                  Response Guidelines
+                  {t('config.guidelines')}
                 </label>
                 <textarea
                   value={knowledgeBase.responseGuidelines}
@@ -429,7 +431,7 @@ export default function KnowledgeBase({ isDark = true, activeSection }: Knowledg
                       ? "bg-black/30 text-white border border-white/10 focus:ring-purple-500/50"
                       : "bg-white text-black border border-black/10 focus:ring-purple-500/50"
                   )}
-                  placeholder="Guidelines for how the AI should respond..."
+                  placeholder={t('config.guidelinesPlaceholder')}
                 />
               </div>
             </motion.div>
@@ -471,7 +473,7 @@ export default function KnowledgeBase({ isDark = true, activeSection }: Knowledg
                   "text-sm",
                   isDark ? "text-white/60" : "text-black/60"
                 )}>
-                  Define fields the AI should extract from conversations
+                  {t('config.fieldsDesc')}
                 </p>
                 <button
                   onClick={() => setIsAddingField(true)}
@@ -483,7 +485,7 @@ export default function KnowledgeBase({ isDark = true, activeSection }: Knowledg
                   )}
                 >
                   <Plus className="w-4 h-4" />
-                  Add Field
+                  {t('config.addField')}
                 </button>
               </div>
 
@@ -505,7 +507,7 @@ export default function KnowledgeBase({ isDark = true, activeSection }: Knowledg
                       <input
                         value={newField.name}
                         onChange={(e) => setNewField({ ...newField, name: e.target.value })}
-                        placeholder="Field name"
+                        placeholder={t('config.fieldName')}
                         className={cn(
                           "p-2 rounded-md md:rounded-lg text-xs md:text-sm focus:outline-none focus:ring-2",
                           isDark
@@ -533,7 +535,7 @@ export default function KnowledgeBase({ isDark = true, activeSection }: Knowledg
                     <input
                       value={newField.description}
                       onChange={(e) => setNewField({ ...newField, description: e.target.value })}
-                      placeholder="Description (optional)"
+                      placeholder={t('config.fieldDesc')}
                       className={cn(
                         "w-full p-2 rounded-lg text-sm focus:outline-none focus:ring-2",
                         isDark
@@ -552,7 +554,7 @@ export default function KnowledgeBase({ isDark = true, activeSection }: Knowledg
                         "text-sm",
                         isDark ? "text-white/80" : "text-black/80"
                       )}>
-                        Required field
+                        {t('config.required')}
                       </span>
                     </label>
                     <div className="flex justify-end gap-2">
@@ -563,7 +565,7 @@ export default function KnowledgeBase({ isDark = true, activeSection }: Knowledg
                           isDark ? "text-white/60 hover:bg-white/10" : "text-black/60 hover:bg-black/10"
                         )}
                       >
-                        Cancel
+                        {t('config.cancel')}
                       </button>
                       <button
                         onClick={handleAddField}
@@ -578,7 +580,7 @@ export default function KnowledgeBase({ isDark = true, activeSection }: Knowledg
                         )}
                       >
                         <Save className="w-4 h-4" />
-                        Add
+                        {t('config.add')}
                       </button>
                     </div>
                   </motion.div>
@@ -660,7 +662,7 @@ export default function KnowledgeBase({ isDark = true, activeSection }: Knowledg
                   "text-sm",
                   isDark ? "text-white/60" : "text-black/60"
                 )}>
-                  Categories for call classification
+                  {t('config.categoriesDesc')}
                 </p>
                 <button
                   onClick={() => setIsAddingCategory(true)}
@@ -672,7 +674,7 @@ export default function KnowledgeBase({ isDark = true, activeSection }: Knowledg
                   )}
                 >
                   <Plus className="w-4 h-4" />
-                  Add Category
+                  {t('config.addCategory')}
                 </button>
               </div>
 
@@ -693,7 +695,7 @@ export default function KnowledgeBase({ isDark = true, activeSection }: Knowledg
                     <input
                       value={newCategory.name}
                       onChange={(e) => setNewCategory({ ...newCategory, name: e.target.value })}
-                      placeholder="Category name"
+                      placeholder={t('config.catName')}
                       className={cn(
                         "w-full p-2 rounded-lg text-sm focus:outline-none focus:ring-2",
                         isDark
@@ -704,7 +706,7 @@ export default function KnowledgeBase({ isDark = true, activeSection }: Knowledg
                     <input
                       value={newCategory.description}
                       onChange={(e) => setNewCategory({ ...newCategory, description: e.target.value })}
-                      placeholder="Description"
+                      placeholder={t('config.catDesc')}
                       className={cn(
                         "w-full p-2 rounded-lg text-sm focus:outline-none focus:ring-2",
                         isDark
@@ -734,7 +736,7 @@ export default function KnowledgeBase({ isDark = true, activeSection }: Knowledg
                           isDark ? "text-white/60 hover:bg-white/10" : "text-black/60 hover:bg-black/10"
                         )}
                       >
-                        Cancel
+                        {t('config.cancel')}
                       </button>
                       <button
                         onClick={handleAddCategory}
@@ -749,7 +751,7 @@ export default function KnowledgeBase({ isDark = true, activeSection }: Knowledg
                         )}
                       >
                         <Save className="w-4 h-4" />
-                        Add
+                        {t('config.add')}
                       </button>
                     </div>
                   </motion.div>

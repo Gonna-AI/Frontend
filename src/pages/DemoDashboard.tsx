@@ -284,7 +284,7 @@ function DemoDashboardContent() {
                     <span className={cn(
                       "text-sm font-medium text-teal-400 hidden md:inline"
                     )}>
-                      {Math.max(globalActiveSessions.voice, currentCall?.status === 'active' && currentCall.type === 'voice' ? 1 : 0)} Active
+                      {Math.max(globalActiveSessions.voice, currentCall?.status === 'active' && currentCall.type === 'voice' ? 1 : 0)} {t('dashboard.active')}
                     </span>
                   </div>
                 )}
@@ -300,7 +300,7 @@ function DemoDashboardContent() {
                     <span className={cn(
                       "text-sm font-medium text-blue-400 hidden md:inline"
                     )}>
-                      {Math.max(globalActiveSessions.text, currentCall?.status === 'active' && currentCall.type === 'text' ? 1 : 0)} Chat
+                      {Math.max(globalActiveSessions.text, currentCall?.status === 'active' && currentCall.type === 'text' ? 1 : 0)} {t('history.type.chat')}
                     </span>
                   </div>
                 )}
