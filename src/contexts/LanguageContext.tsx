@@ -304,7 +304,7 @@ export const translations: Record<Language, Record<string, string>> = {
 
         // Demo Dashboard
         'dashboard.title': 'Dashboard',
-        'dashboard.subtitle': 'Monitor & configure',
+        'dashboard.subtitle': 'Dashboard',
         'dashboard.userView': 'User View',
         'dashboard.totalHistory': 'Total History',
         'dashboard.criticalHigh': 'Critical/High',
@@ -326,8 +326,8 @@ export const translations: Record<Language, Record<string, string>> = {
         'dashboard.priority.noPending': 'No pending',
         'dashboard.priority.needFollowUp': 'need follow-up',
 
-        'dashboard.tab.monitor': 'Monitor',
-        'dashboard.tab.config': 'Config',
+        'dashboard.tab.monitor': 'Dashboard',
+        'dashboard.tab.config': 'Dashboard',
         'dashboard.tab.history': 'History',
         'dashboard.tab.monitorFull': 'Live Monitor',
         'dashboard.tab.configFull': 'Knowledge Base',
@@ -385,7 +385,7 @@ export const translations: Record<Language, Record<string, string>> = {
         'documents.modal.noHistory': 'No review history available',
 
         // User Call & Chat
-        'userCall.aiAssistant': 'AI Assistant',
+        'userCall.aiAssistant': 'Chat',
         'userCall.settings': 'Settings',
         'chat.welcome': 'How can I help you today?',
         'chat.startPrompt': 'Type a message or start a voice call to begin your conversation',
@@ -716,7 +716,7 @@ export const translations: Record<Language, Record<string, string>> = {
 
         // Demo Dashboard
         'dashboard.title': 'Dashboard',
-        'dashboard.subtitle': 'Überwachen & Konfigurieren',
+        'dashboard.subtitle': 'Dashboard',
         'dashboard.userView': 'Benutzeransicht',
         'dashboard.totalHistory': 'Gesamtverlauf',
         'dashboard.criticalHigh': 'Kritisch/Hoch',
@@ -738,8 +738,8 @@ export const translations: Record<Language, Record<string, string>> = {
         'dashboard.priority.noPending': 'Keine ausstehenden',
         'dashboard.priority.needFollowUp': 'erfordern Nachverfolgung',
 
-        'dashboard.tab.monitor': 'Monitor',
-        'dashboard.tab.config': 'Konfig',
+        'dashboard.tab.monitor': 'Dashboard',
+        'dashboard.tab.config': 'Dashboard',
         'dashboard.tab.history': 'Verlauf',
         'dashboard.tab.monitorFull': 'Live-Monitor',
         'dashboard.tab.configFull': 'Wissensbasis',
@@ -797,7 +797,7 @@ export const translations: Record<Language, Record<string, string>> = {
         'documents.modal.noHistory': 'Kein Prüfverlauf verfügbar',
 
         // User Call & Chat
-        'userCall.aiAssistant': 'KI-Assistent',
+        'userCall.aiAssistant': 'Chat',
         'userCall.settings': 'Einstellungen',
         'chat.welcome': 'Wie kann ich Ihnen heute helfen?',
         'chat.startPrompt': 'Tippen Sie eine Nachricht oder starten Sie einen Anruf, um das Gespräch zu beginnen',

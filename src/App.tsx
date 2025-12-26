@@ -34,6 +34,7 @@ import UserCall from './pages/UserCall';
 import { ViewType } from './types/navigation';
 import { PrivateRoute } from './components/Auth/PrivateRoute';
 import ScrollToTop from './components/ScrollToTop';
+import DocsPage from './pages/DocsPage';
 // Create a client
 const queryClient = new QueryClient();
 
@@ -220,6 +221,7 @@ function App() {
             <Route path="/smart-contracts" element={<SmartContracts />} />
             <Route path="/documents" element={<Documents />} />
             <Route path="/contact" element={<Contact />} />
+            <Route path="/docs" element={<DocsPage />} />
           </Routes>
         </BrowserRouter>
       </QueryClientProvider>
