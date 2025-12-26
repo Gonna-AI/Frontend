@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Phone, PhoneOff, Mic, MicOff, Volume2, VolumeX, Minimize2, Maximize2 } from 'lucide-react';
+import { Phone, PhoneOff, Volume2, VolumeX, Minimize2, Maximize2 } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { useDemoCall } from '../../contexts/DemoCallContext';
 import { aiService } from '../../services/aiService';
@@ -46,7 +46,6 @@ export default function UserPhoneInterface({
     } = useDemoCall();
 
     const [callDuration, setCallDuration] = useState(0);
-    const [isMuted, setIsMuted] = useState(false);
     const [isSpeakerOn, setIsSpeakerOn] = useState(true);
     const [currentTranscript, setCurrentTranscript] = useState('');
     const [lastAgentMessage, setLastAgentMessage] = useState('');
@@ -296,14 +295,44 @@ export default function UserPhoneInterface({
         aiService.resetState();
 
         startCall('voice');
-        setAgentStatus('listening');
 
-        // Start speech recognition immediately when call begins
-        // Small delay to ensure state is updated
-        setTimeout(() => {
-            startRecognition();
-        }, 100);
-    }, [startCall, startRecognition]);
+        // CRITICAL FOR MOBILE: Speak a greeting immediately during the user gesture
+        // On iOS/Android, speech synthesis must be initiated directly from a click event
+        // to work subsequently. This "unlocks" the speech synthesis for later programmatic calls.
+        const greeting = language === 'de-DE'
+            ? 'Hallo! Wie kann ich Ihnen helfen?'
+            : 'Hello! How can I help you today?';
+
+        setLastAgentMessage(greeting);
+        addMessage('agent', greeting);
+        setAgentStatus('speaking');
+
+        // Speak directly from user click context (critical for mobile)
+        if (window.speechSynthesis) {
+            window.speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(greeting);
+            utterance.rate = 1.0;
+            utterance.volume = 1.0;
+
+            utterance.onend = () => {
+                console.log('🔊 Initial greeting finished, starting recognition');
+                setAgentStatus('listening');
+                startRecognition();
+            };
+
+            utterance.onerror = (e) => {
+                console.error('🔊 Greeting TTS error:', e);
+                setAgentStatus('listening');
+                startRecognition();
+            };
+
+            window.speechSynthesis.speak(utterance);
+        } else {
+            // No speech synthesis, just start listening
+            setAgentStatus('listening');
+            setTimeout(() => startRecognition(), 100);
+        }
+    }, [startCall, startRecognition, language, addMessage]);
 
     const handleEndCall = useCallback(async () => {
         console.log('🔴 End call button pressed');
@@ -337,20 +366,6 @@ export default function UserPhoneInterface({
             window.speechSynthesis?.cancel();
         }, 100);
     }, [endCall, stopRecognition]);
-
-    const toggleMute = useCallback(() => {
-        if (isMuted) {
-            // Unmute - start listening
-            if (currentCall?.status === 'active') {
-                setAgentStatus('listening');
-                startRecognition();
-            }
-        } else {
-            // Mute - stop listening
-            stopRecognition();
-        }
-        setIsMuted(!isMuted);
-    }, [isMuted, currentCall?.status, startRecognition, stopRecognition]);
 
     const isActive = currentCall?.status === 'active';
 
@@ -518,19 +533,6 @@ export default function UserPhoneInterface({
                             )}
                         >
                             {isSpeakerOn ? <Volume2 className="w-6 h-6" /> : <VolumeX className="w-6 h-6" />}
-                        </button>
-
-                        {/* Mute */}
-                        <button
-                            onClick={toggleMute}
-                            className={cn(
-                                "w-14 h-14 rounded-full flex items-center justify-center transition-all border backdrop-blur-md",
-                                isMuted
-                                    ? "bg-white text-black border-white"
-                                    : "bg-white/10 text-white hover:bg-white/20 border-white/5"
-                            )}
-                        >
-                            {isMuted ? <MicOff className="w-6 h-6" /> : <Mic className="w-6 h-6" />}
                         </button>
 
                         {/* End Call - Glassy Red */}
