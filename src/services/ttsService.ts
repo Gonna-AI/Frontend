@@ -328,44 +328,96 @@ class TTSService {
         return;
       }
 
+      console.log('🎤 Using Browser TTS for:', text.substring(0, 50) + '...');
+
+      // Cancel any ongoing speech
+      window.speechSynthesis.cancel();
+
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.rate = speed;
       utterance.pitch = 1.0;
+      utterance.volume = 1.0;
 
-      // Try to find a matching voice
-      const voices = window.speechSynthesis.getVoices();
-      const voiceInfo = KOKORO_VOICES[voice];
+      // Track if speech has actually started
+      let speechStarted = false;
+      let speechStartTime = 0;
 
-      if (voiceInfo) {
-        // Try to find a voice that matches the accent
-        const langCode = voiceInfo.accent === 'British' ? 'en-GB' : 'en-US';
-        const matchingVoice = voices.find(v =>
-          v.lang.startsWith(langCode.substring(0, 2)) &&
-          v.name.toLowerCase().includes(voiceInfo.gender === 'female' ? 'female' : 'male')
-        ) || voices.find(v => v.lang.startsWith(langCode.substring(0, 2)));
+      // Function to set voice and speak
+      const speakWithVoice = () => {
+        const voices = window.speechSynthesis.getVoices();
+        const voiceInfo = KOKORO_VOICES[voice];
 
-        if (matchingVoice) {
-          utterance.voice = matchingVoice;
+        if (voiceInfo && voices.length > 0) {
+          // Try to find a voice that matches the accent
+          const langCode = voiceInfo.accent === 'British' ? 'en-GB' : 'en-US';
+          const matchingVoice = voices.find(v =>
+            v.lang.startsWith(langCode.substring(0, 2)) &&
+            v.name.toLowerCase().includes(voiceInfo.gender === 'female' ? 'female' : 'male')
+          ) || voices.find(v => v.lang.startsWith(langCode.substring(0, 2))) || voices[0];
+
+          if (matchingVoice) {
+            utterance.voice = matchingVoice;
+            console.log('🔊 Selected voice:', matchingVoice.name);
+          }
         }
+
+        utterance.onstart = () => {
+          console.log('🔊 Browser TTS started speaking');
+          speechStarted = true;
+          speechStartTime = Date.now();
+          options?.onStart?.();
+        };
+
+        utterance.onend = () => {
+          const duration = Date.now() - speechStartTime;
+          console.log('🔊 Browser TTS ended, duration:', duration, 'ms');
+
+          // Check if speech actually happened (minimum duration check)
+          // If it ended too quickly, it might have failed silently
+          if (!speechStarted || duration < 200) {
+            console.warn('⚠️ Speech may not have played correctly (too short or never started)');
+            // Still call onEnd to not block the flow
+          }
+
+          options?.onEnd?.();
+          resolve();
+        };
+
+        utterance.onerror = (e) => {
+          console.error('🔊 Browser TTS error:', e.error);
+          const error = new Error(`Speech synthesis error: ${e.error}`);
+          options?.onError?.(error);
+          reject(error);
+        };
+
+        // Speak
+        window.speechSynthesis.speak(utterance);
+
+        // Mobile Safari workaround: sometimes speech doesn't start
+        // Force a resume after a short delay
+        setTimeout(() => {
+          if (!speechStarted && window.speechSynthesis.paused) {
+            console.log('🔊 Resuming paused speech synthesis');
+            window.speechSynthesis.resume();
+          }
+        }, 100);
+      };
+
+      // Check if voices are loaded
+      const voices = window.speechSynthesis.getVoices();
+      if (voices.length === 0) {
+        // Voices not loaded yet, wait for them
+        console.log('🔊 Waiting for voices to load...');
+        window.speechSynthesis.addEventListener('voiceschanged', speakWithVoice, { once: true });
+        // Fallback: if voices don't load in 500ms, try anyway
+        setTimeout(() => {
+          if (!speechStarted) {
+            speakWithVoice();
+          }
+        }, 500);
+      } else {
+        speakWithVoice();
       }
-
-      utterance.onstart = () => {
-        options?.onStart?.();
-      };
-
-      utterance.onend = () => {
-        options?.onEnd?.();
-        resolve();
-      };
-
-      utterance.onerror = (e) => {
-        const error = new Error(`Speech synthesis error: ${e.error}`);
-        options?.onError?.(error);
-        reject(error);
-      };
-
-      window.speechSynthesis.cancel();
-      window.speechSynthesis.speak(utterance);
     });
   }
 
