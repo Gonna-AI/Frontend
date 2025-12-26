@@ -351,6 +351,7 @@ class GroqTTSService {
 
                 // Create and play audio
                 this.currentAudio = new Audio(audioUrl);
+                this.currentAudio.volume = 1.0;
 
                 this.currentAudio.onloadeddata = () => {
                     console.log('🔊 Audio loaded, playing...');
@@ -374,8 +375,22 @@ class GroqTTSService {
                     reject(error);
                 };
 
-                // Play the audio
-                await this.currentAudio.play();
+                // Play the audio with explicit error handling for mobile
+                try {
+                    await this.currentAudio.play();
+                } catch (playError) {
+                    console.error('🔊 Audio play() failed:', playError);
+                    URL.revokeObjectURL(audioUrl);
+                    this.currentAudio = null;
+
+                    // On NotAllowedError, the audio isn't unlocked
+                    if (playError instanceof Error && playError.name === 'NotAllowedError') {
+                        console.warn('⚠️ Audio not unlocked - user gesture required');
+                    }
+
+                    options?.onError?.(playError as Error);
+                    reject(playError);
+                }
 
             } catch (error) {
                 clearTimeout(timeoutId);
