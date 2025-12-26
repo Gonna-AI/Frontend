@@ -96,11 +96,24 @@ export function AppSidebar({ activeTab, setActiveTab, ...props }: AppSidebarProp
                     <SidebarMenu>
                         <SidebarMenuItem>
                             <SidebarMenuButton size="lg" asChild>
-                                <div className="flex items-center gap-3 cursor-pointer text-white">
-                                    <div className="flex aspect-square size-10 items-center justify-center">
-                                        <img src="/favicon.svg" alt="ClerkTree Logo" className="size-10" />
+                                <div className={cn(
+                                    "flex items-center gap-3 cursor-pointer text-white",
+                                    state === "collapsed" && "justify-center"
+                                )}>
+                                    <div className="flex aspect-square items-center justify-center">
+                                        <img
+                                            src="/favicon.svg"
+                                            alt="ClerkTree Logo"
+                                            className={cn(
+                                                "transition-all",
+                                                state === "collapsed" ? "size-6" : "size-10"
+                                            )}
+                                        />
                                     </div>
-                                    <div className="flex flex-col">
+                                    <div className={cn(
+                                        "flex flex-col",
+                                        state === "collapsed" && "hidden"
+                                    )}>
                                         <span className="text-xl font-semibold tracking-tight">ClerkTree</span>
                                     </div>
                                 </div>
