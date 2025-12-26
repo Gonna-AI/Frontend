@@ -1036,29 +1036,6 @@ export default function KnowledgeBase({ isDark = true, activeSection }: Knowledg
         </AnimatePresence>
       </div>
 
-      {/* Footer */}
-      <div className={cn(
-        "px-3 md:px-4 py-2 md:py-3 border-t",
-        isDark ? "border-white/10 bg-white/5" : "border-black/10 bg-black/5"
-      )}>
-        <div className="flex items-center justify-center gap-2">
-          <Zap className={cn(
-            "w-3 h-3",
-            localLLMConnected
-              ? isDark ? "text-green-400" : "text-green-600"
-              : isDark ? "text-yellow-400" : "text-yellow-600"
-          )} />
-          <p className={cn(
-            "text-[10px] md:text-xs text-center",
-            isDark ? "text-white/40" : "text-black/40"
-          )}>
-            {localLLMConnected
-              ? `Groq AI Active • Changes apply to next call`
-              : 'Local LLM Offline • Check cloudflare tunnel is running'
-            }
-          </p>
-        </div>
-      </div>
     </div>
   );
 }

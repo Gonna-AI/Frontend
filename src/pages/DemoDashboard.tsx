@@ -309,93 +309,105 @@ function DemoDashboardContent() {
           </div>
 
           <div className="p-4 md:p-6 max-w-7xl mx-auto space-y-6">
-            {/* Analytics Cards */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4"
-            >
-              <AnalyticsCard
-                title={t('dashboard.totalHistory')}
-                value={analytics.totalCalls}
-                subtitle={currentCall?.status === 'active' ? `+1 ${t('dashboard.active')}` : t('dashboard.allTime')}
-                icon={MessageSquare}
-                color="blue"
-                isDark={isDark}
-              />
-              <AnalyticsCard
-                title={t('dashboard.criticalHigh')}
-                value={analytics.byPriority.critical + analytics.byPriority.high}
-                subtitle={t('dashboard.needAttention')}
-                icon={AlertTriangle}
-                color="orange"
-                isDark={isDark}
-              />
-              <AnalyticsCard
-                title={t('dashboard.avgDuration')}
-                value={formatDuration(analytics.avgDuration)}
-                subtitle={t('dashboard.perCall')}
-                icon={Clock}
-                color="purple"
-                isDark={isDark}
-              />
-              <AnalyticsCard
-                title={t('dashboard.followUps')}
-                value={analytics.followUpRequired}
-                subtitle={t('dashboard.pending')}
-                icon={Users}
-                color="green"
-                isDark={isDark}
-              />
-            </motion.div>
-
-            {/* Mobile Priority Queue logic was here, merging with main flow since sidebar is responsive now */}
-
-            {/* Main content grid */}
-            <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-              {/* Left sidebar column - Call interface and Priority Queue */}
+            {/* Monitor View */}
+            {activeTab === 'monitor' && (
               <div className="space-y-6">
+                {/* Analytics Cards */}
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.1 }}
+                  className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4"
                 >
-                  <VoiceCallInterface isDark={isDark} compact />
+                  <AnalyticsCard
+                    title={t('dashboard.totalHistory')}
+                    value={analytics.totalCalls}
+                    subtitle={currentCall?.status === 'active' ? `+1 ${t('dashboard.active')}` : t('dashboard.allTime')}
+                    icon={MessageSquare}
+                    color="blue"
+                    isDark={isDark}
+                  />
+                  <AnalyticsCard
+                    title={t('dashboard.criticalHigh')}
+                    value={analytics.byPriority.critical + analytics.byPriority.high}
+                    subtitle={t('dashboard.needAttention')}
+                    icon={AlertTriangle}
+                    color="orange"
+                    isDark={isDark}
+                  />
+                  <AnalyticsCard
+                    title={t('dashboard.avgDuration')}
+                    value={formatDuration(analytics.avgDuration)}
+                    subtitle={t('dashboard.perCall')}
+                    icon={Clock}
+                    color="purple"
+                    isDark={isDark}
+                  />
+                  <AnalyticsCard
+                    title={t('dashboard.followUps')}
+                    value={analytics.followUpRequired}
+                    subtitle={t('dashboard.pending')}
+                    icon={Users}
+                    color="green"
+                    isDark={isDark}
+                  />
                 </motion.div>
 
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.2 }}
-                >
-                  <PriorityQueue isDark={isDark} />
-                </motion.div>
+                {/* Monitor Content Grid */}
+                <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+                  {/* Left sidebar column - Call interface and Priority Queue */}
+                  <div className="space-y-6">
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.1 }}
+                    >
+                      <VoiceCallInterface isDark={isDark} compact />
+                    </motion.div>
+
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.2 }}
+                    >
+                      <PriorityQueue isDark={isDark} />
+                    </motion.div>
+                  </div>
+
+                  {/* Live Monitor Panel */}
+                  <div className="xl:col-span-2">
+                    <motion.div
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ duration: 0.2 }}
+                      className="h-[600px] border border-white/10 rounded-xl overflow-hidden bg-black/40 backdrop-blur-sm"
+                    >
+                      <LiveCallMonitor isDark={isDark} />
+                    </motion.div>
+                  </div>
+                </div>
               </div>
+            )}
 
-              {/* Main panel based on active tab */}
-              <div className="xl:col-span-2">
-                <motion.div
-                  key={activeTab}
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.2 }}
-                  className="h-[600px] border border-white/10 rounded-xl overflow-hidden bg-black/40 backdrop-blur-sm"
-                >
-                  {activeTab === 'monitor' && <LiveCallMonitor isDark={isDark} />}
-                  {activeTab === 'history' && <CallHistoryList isDark={isDark} />}
-
-                  {/* Knowledge Base Sections */}
-                  {activeTab === 'knowledge' && <KnowledgeBase isDark={isDark} activeSection="prompt" />}
-                  {activeTab === 'system_prompt' && <KnowledgeBase isDark={isDark} activeSection="prompt" />}
-                  {activeTab === 'ai_voice' && <KnowledgeBase isDark={isDark} activeSection="voice" />}
-                  {activeTab === 'context_fields' && <KnowledgeBase isDark={isDark} activeSection="fields" />}
-                  {activeTab === 'categories' && <KnowledgeBase isDark={isDark} activeSection="categories" />}
-                  {activeTab === 'priority_rules' && <KnowledgeBase isDark={isDark} activeSection="rules" />}
-                  {activeTab === 'instructions' && <KnowledgeBase isDark={isDark} activeSection="instructions" />}
-                  {activeTab === 'groq_settings' && <GroqSettingsPage isDark={isDark} />}
-                </motion.div>
-              </div>
-            </div>
+            {/* Other Views - Full Width/Height */}
+            {activeTab !== 'monitor' && (
+              <motion.div
+                key={activeTab}
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.2 }}
+                className="min-h-[600px] h-full"
+              >
+                {activeTab === 'history' && <CallHistoryList isDark={isDark} />}
+                {activeTab === 'knowledge' && <KnowledgeBase isDark={isDark} activeSection="prompt" />}
+                {activeTab === 'system_prompt' && <KnowledgeBase isDark={isDark} activeSection="prompt" />}
+                {activeTab === 'ai_voice' && <KnowledgeBase isDark={isDark} activeSection="voice" />}
+                {activeTab === 'context_fields' && <KnowledgeBase isDark={isDark} activeSection="fields" />}
+                {activeTab === 'categories' && <KnowledgeBase isDark={isDark} activeSection="categories" />}
+                {activeTab === 'priority_rules' && <KnowledgeBase isDark={isDark} activeSection="rules" />}
+                {activeTab === 'instructions' && <KnowledgeBase isDark={isDark} activeSection="instructions" />}
+                {activeTab === 'groq_settings' && <GroqSettingsPage isDark={isDark} />}
+              </motion.div>
+            )}
           </div>
         </main>
       </div>

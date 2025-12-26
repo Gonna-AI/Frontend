@@ -149,16 +149,23 @@ export default function DocsPage() {
                             <kbd className="ml-2 px-1.5 py-0.5 text-xs bg-white/10 rounded text-white/60">⌘K</kbd>
                         </div>
                     </div>
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-3 md:gap-4">
+                        <button
+                            onClick={() => setIsSearchOpen(true)}
+                            className="md:hidden p-2 text-white/60 hover:text-white"
+                        >
+                            <Search className="w-5 h-5" />
+                        </button>
                         <Link to="/contact" className="hidden md:block text-sm text-white/60 hover:text-white transition-colors">Support</Link>
-                        <Link to="/" className="px-4 py-2 bg-white text-black text-sm font-medium rounded-lg hover:bg-neutral-200 transition-colors">
-                            Go to Dashboard
+                        <Link to="/" className="px-3 md:px-4 py-2 bg-white text-black text-xs md:text-sm font-medium rounded-lg hover:bg-neutral-200 transition-colors">
+                            <span className="md:hidden">Dashboard</span>
+                            <span className="hidden md:inline">Go to Dashboard</span>
                         </Link>
                         <button
                             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                             className="md:hidden p-2 text-white/60 hover:text-white"
                         >
-                            {isMobileMenuOpen ? <X /> : <Menu />}
+                            {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
                         </button>
                     </div>
                 </div>
@@ -167,7 +174,7 @@ export default function DocsPage() {
             <div className="max-w-[1600px] mx-auto pt-16 flex min-h-screen">
                 {/* Sidebar Navigation */}
                 <nav className={`
-          fixed inset-0 z-40 bg-black/95 backdrop-blur-xl md:static md:bg-transparent md:w-72 border-r border-white/10 pt-8 pb-12 px-6 overflow-y-auto
+          fixed inset-0 z-40 bg-black/95 backdrop-blur-xl md:static md:bg-transparent md:w-72 border-r border-white/10 pt-24 pb-12 px-6 overflow-y-auto
           ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
           transition-transform duration-300 ease-in-out
         `}>
@@ -205,7 +212,7 @@ export default function DocsPage() {
                         <section id="welcome" className="scroll-mt-24 space-y-6">
                             <div className="space-y-4">
                                 <p className="text-purple-400 font-medium">Get Started</p>
-                                <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-white to-white/50 bg-clip-text text-transparent">
+                                <h1 className="text-3xl md:text-5xl font-bold bg-gradient-to-r from-white to-white/50 bg-clip-text text-transparent">
                                     Welcome to ClerkTree
                                 </h1>
                                 <p className="text-xl text-white/60 leading-relaxed max-w-3xl">
