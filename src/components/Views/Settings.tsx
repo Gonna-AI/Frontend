@@ -7,9 +7,8 @@ import { useTheme } from '../../hooks/useTheme';
 import { cn } from '../../utils/cn';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api, { API_BASE_URL } from '../../config/api';
-import { Switch } from '../../components/ui/Switch';
-import { Badge } from '../../components/ui/Badge';
-import { Input } from '../../components/ui/input';
+import { Switch } from '../ui/Switch';
+import { Input } from '../ui/input';
 
 export default function Settings() {
   const { isDark } = useTheme();
