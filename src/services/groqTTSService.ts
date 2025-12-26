@@ -72,11 +72,25 @@ class GroqTTSService {
 
     private isAvailable: boolean | null = null;
     private currentAudio: HTMLAudioElement | null = null;
+    private audioUnlocked: boolean = false;
 
     /**
      * Initialize the Groq TTS service
      */
     async initialize(): Promise<boolean> {
+        // Add global click listener to unlock audio on first interaction
+        if (typeof window !== 'undefined') {
+            const unlockHandler = () => {
+                this.unlockAudio();
+                window.removeEventListener('click', unlockHandler);
+                window.removeEventListener('touchstart', unlockHandler);
+                window.removeEventListener('keydown', unlockHandler);
+            };
+            window.addEventListener('click', unlockHandler);
+            window.addEventListener('touchstart', unlockHandler);
+            window.addEventListener('keydown', unlockHandler);
+        }
+
         if (!GROQ_API_KEY) {
             console.warn('⚠️ Groq API key not configured for TTS');
             this.isAvailable = false;
@@ -98,6 +112,52 @@ class GroqTTSService {
             this.isAvailable = false;
             return false;
         }
+    }
+
+    /**
+     * Unlock audio playback - must be called during a user gesture (click/tap)
+     * This is required by browser autoplay policies
+     */
+    unlockAudio(): void {
+        if (this.audioUnlocked) return;
+
+        try {
+            console.log('🔊 Attempting to unlock audio...');
+
+            // Create a silent audio context to unlock audio
+            const AudioContext = window.AudioContext || (window as unknown as { webkitAudioContext: typeof window.AudioContext }).webkitAudioContext;
+            if (AudioContext) {
+                const audioContext = new AudioContext();
+                // Create a short silent buffer and play it
+                const buffer = audioContext.createBuffer(1, 1, 22050);
+                const source = audioContext.createBufferSource();
+                source.buffer = buffer;
+                source.connect(audioContext.destination);
+                source.start(0);
+
+                // Also create and play a silent HTML audio to unlock that too
+                const silentAudio = new Audio('data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=');
+                silentAudio.volume = 0.01;
+                // Fire and forget
+                silentAudio.play().then(() => {
+                    console.log('🔊 Audio element unlocked');
+                }).catch((e) => {
+                    console.warn('⚠️ Audio element unlock failed:', e);
+                });
+
+                this.audioUnlocked = true;
+                console.log('🔊 Audio playback unlocked successfully');
+            }
+        } catch (e) {
+            console.warn('⚠️ Could not unlock audio:', e);
+        }
+    }
+
+    /**
+     * Check if audio is unlocked
+     */
+    isAudioUnlocked(): boolean {
+        return this.audioUnlocked;
     }
 
     /**
