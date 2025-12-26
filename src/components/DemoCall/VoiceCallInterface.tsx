@@ -282,77 +282,7 @@ export default function VoiceCallInterface({
 
   const isActive = currentCall?.status === 'active';
 
-  if (compact) {
-    return (
-      <div className={cn(
-        "flex items-center gap-2 md:gap-4 p-3 md:p-4 rounded-xl md:rounded-2xl",
-        isDark
-          ? "bg-black/20 border border-white/10"
-          : "bg-white/80 border border-black/10"
-      )}>
-        {/* Status indicator */}
-        <div className={cn(
-          "w-2 h-2 md:w-3 md:h-3 rounded-full flex-shrink-0",
-          isActive ? "bg-green-500 animate-pulse" : "bg-gray-500"
-        )} />
-
-        <div className="flex flex-col min-w-0">
-          <div className="flex items-center gap-2">
-            <span className={cn(
-              "text-xs md:text-sm font-medium truncate",
-              isDark ? "text-white/80" : "text-black/80"
-            )}>
-              {/* Show global + local (if local not yet synced) */}
-              {Math.max(globalActiveSessions.voice, isActive && currentCall?.type === 'voice' ? 1 : 0)} Active Call{globalActiveSessions.voice !== 1 ? 's' : ''}
-            </span>
-            <span className={cn(
-              "text-xs md:text-sm font-medium truncate opacity-60",
-              isDark ? "text-white/60" : "text-black/60"
-            )}>
-              •
-            </span>
-            <span className={cn(
-              "text-xs md:text-sm font-medium truncate",
-              isDark ? "text-white/80" : "text-black/80"
-            )}>
-              {Math.max(globalActiveSessions.text, isActive && currentCall?.type === 'text' ? 1 : 0)} Active Chat{globalActiveSessions.text !== 1 ? 's' : ''}
-            </span>
-          </div>
-          {isActive && (
-            <span className={cn(
-              "text-[10px] opacity-60",
-              isDark ? "text-white/60" : "text-black/60"
-            )}>
-              Duration: {formatDuration(callDuration)}
-            </span>
-          )}
-        </div>
-
-        {isActive && (
-          <span className={cn(
-            "text-[10px] md:text-xs px-1.5 md:px-2 py-0.5 md:py-1 rounded-full flex-shrink-0 ml-auto",
-            agentStatus === 'speaking' && "bg-blue-500/20 text-blue-400",
-            agentStatus === 'listening' && "bg-green-500/20 text-green-400",
-            agentStatus === 'processing' && "bg-yellow-500/20 text-yellow-400",
-          )}>
-            {agentStatus}
-          </span>
-        )}
-
-        {currentCall?.priority && currentCall.priority !== 'medium' && (
-          <span className={cn(
-            "text-[10px] md:text-xs px-1.5 md:px-2 py-0.5 md:py-1 rounded-full capitalize flex-shrink-0 hidden sm:inline",
-            currentCall.priority === 'critical' && "bg-red-500/20 text-red-400",
-            currentCall.priority === 'high' && "bg-orange-500/20 text-orange-400",
-            currentCall.priority === 'low' && "bg-green-500/20 text-green-400",
-          )}>
-            {currentCall.priority}
-          </span>
-        )}
-      </div>
-    );
-  }
-
+  // Return the original Card-like UI
   return (
     <div className={cn(
       "flex flex-col items-center justify-center p-4 md:p-8 rounded-2xl md:rounded-3xl relative overflow-hidden",

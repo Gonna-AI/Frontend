@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import MobileSidebar from '../components/Layout/Sidebar/MobileSidebar';
 import { cn } from '../utils/cn';
 import { DemoCallProvider } from '../contexts/DemoCallContext';
-import { UnifiedChatInterface } from '../components/DemoCall';
+import { UnifiedChatInterface, UserPhoneInterface } from '../components/DemoCall';
 import { useLanguage } from '../contexts/LanguageContext';
 
 function UserCallContent() {
@@ -95,7 +95,8 @@ function UserCallContent() {
       {/* Main content - Full width/height chat */}
       < main className="flex-1 relative flex flex-col min-h-0" >
         <div className="absolute inset-0 w-full flex flex-col">
-          <UnifiedChatInterface isDark={isDark} />
+          <UnifiedChatInterface isDark={isDark} externalCallUI={true} />
+          <UserPhoneInterface mode="overlay" />
         </div>
       </main >
 

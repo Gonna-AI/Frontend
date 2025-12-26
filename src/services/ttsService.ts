@@ -1,15 +1,20 @@
 /**
  * TTS Service for ClerkTree
  * 
- * Provides text-to-speech functionality using either:
- * 1. Kokoro TTS API (higher quality, requires backend)
- * 2. Browser Web Speech API (fallback, works offline)
+ * Provides text-to-speech functionality with multiple backends:
+ * 1. Groq TTS (primary - using canopylabs/orpheus-v1-english model)
+ * 2. Kokoro TTS API (secondary - higher quality, requires backend)
+ * 3. Browser Web Speech API (fallback - works offline)
+ * 
+ * The service automatically falls back to the next available option.
  */
 
-// TTS API Configuration
+import { groqTTSService, OrpheusVoiceId, ORPHEUS_VOICES, VocalDirection } from './groqTTSService';
+
+// TTS API Configuration (Kokoro backend)
 const TTS_API_URL = import.meta.env.VITE_TTS_API_URL || 'http://localhost:5001';
 
-// Available voices (matches Kokoro TTS)
+// Available voices (matches Kokoro TTS - for backward compatibility)
 export const KOKORO_VOICES = {
   af_nova: { name: 'Nova', gender: 'female', accent: 'American' },
   af_sky: { name: 'Sky', gender: 'female', accent: 'American' },
@@ -26,43 +31,94 @@ export const KOKORO_VOICES = {
 
 export type KokoroVoiceId = keyof typeof KOKORO_VOICES;
 
+// Map Kokoro voices to Orpheus voices for backward compatibility
+const VOICE_MAPPING: Record<KokoroVoiceId, OrpheusVoiceId> = {
+  af_nova: 'autumn',
+  af_sky: 'diana',
+  af_bella: 'hannah',
+  af_nicole: 'autumn',
+  af_sarah: 'diana',
+  bf_emma: 'hannah',
+  bf_isabella: 'diana',
+  am_adam: 'austin',
+  am_michael: 'daniel',
+  bm_george: 'troy',
+  bm_lewis: 'austin',
+};
+
+// Re-export Orpheus types for direct access
+export type { OrpheusVoiceId, VocalDirection };
+export { ORPHEUS_VOICES };
+
+type TTSBackend = 'groq' | 'kokoro' | 'browser';
+
 interface TTSConfig {
+  preferredBackend: TTSBackend;
+  useGroqTTS: boolean;
   useKokoroTTS: boolean;
   fallbackToBrowser: boolean;
   defaultVoice: KokoroVoiceId;
+  defaultOrpheusVoice: OrpheusVoiceId;
   speed: number;
+  vocalDirection: VocalDirection;
 }
 
 class TTSService {
   private config: TTSConfig = {
+    preferredBackend: 'groq',
+    useGroqTTS: true,
     useKokoroTTS: true,
     fallbackToBrowser: true,
     defaultVoice: 'af_nova',
+    defaultOrpheusVoice: 'autumn',
     speed: 1.0,
+    vocalDirection: 'professional',
   };
-  
+
   private kokoroAvailable: boolean | null = null;
+  private groqAvailable: boolean | null = null;
   private currentAudio: HTMLAudioElement | null = null;
-  private audioContext: AudioContext | null = null;
+  private currentBackend: TTSBackend | null = null;
 
   /**
-   * Initialize TTS service and check Kokoro availability
+   * Initialize TTS service and check all backends
    */
   async initialize(): Promise<boolean> {
+    console.log('🎤 Initializing TTS Service...');
+
+    // Initialize Groq TTS
+    try {
+      this.groqAvailable = await groqTTSService.initialize();
+      console.log(`   Groq TTS: ${this.groqAvailable ? '✅ Available' : '❌ Not available'}`);
+    } catch (error) {
+      console.warn('   Groq TTS: ❌ Failed to initialize', error);
+      this.groqAvailable = false;
+    }
+
+    // Check Kokoro TTS
     try {
       const response = await fetch(`${TTS_API_URL}/health`, {
         method: 'GET',
         signal: AbortSignal.timeout(3000),
       });
-      
       this.kokoroAvailable = response.ok;
-      console.log('Kokoro TTS available:', this.kokoroAvailable);
-      return this.kokoroAvailable;
+      console.log(`   Kokoro TTS: ${this.kokoroAvailable ? '✅ Available' : '❌ Not available'}`);
     } catch (error) {
-      console.warn('Kokoro TTS not available, will use browser TTS:', error);
+      console.warn('   Kokoro TTS: ❌ Not available');
       this.kokoroAvailable = false;
-      return false;
     }
+
+    // Determine current backend
+    if (this.groqAvailable && this.config.useGroqTTS) {
+      this.currentBackend = 'groq';
+    } else if (this.kokoroAvailable && this.config.useKokoroTTS) {
+      this.currentBackend = 'kokoro';
+    } else {
+      this.currentBackend = 'browser';
+    }
+
+    console.log(`🔊 TTS Backend: ${this.currentBackend}`);
+    return this.groqAvailable || this.kokoroAvailable || true; // Browser is always available
   }
 
   /**
@@ -70,6 +126,14 @@ class TTSService {
    */
   setConfig(config: Partial<TTSConfig>) {
     this.config = { ...this.config, ...config };
+
+    // Update Groq TTS config if relevant
+    if (config.vocalDirection) {
+      groqTTSService.setVocalDirection(config.vocalDirection);
+    }
+    if (config.defaultOrpheusVoice) {
+      groqTTSService.setVoice(config.defaultOrpheusVoice);
+    }
   }
 
   /**
@@ -77,47 +141,98 @@ class TTSService {
    */
   setVoice(voiceId: KokoroVoiceId) {
     this.config.defaultVoice = voiceId;
+    // Also update Orpheus voice mapping
+    this.config.defaultOrpheusVoice = VOICE_MAPPING[voiceId];
+    groqTTSService.setVoice(this.config.defaultOrpheusVoice);
+  }
+
+  /**
+   * Set Orpheus voice directly
+   */
+  setOrpheusVoice(voiceId: OrpheusVoiceId) {
+    this.config.defaultOrpheusVoice = voiceId;
+    groqTTSService.setVoice(voiceId);
+  }
+
+  /**
+   * Set vocal direction for expressive speech (Groq TTS only)
+   */
+  setVocalDirection(direction: VocalDirection) {
+    this.config.vocalDirection = direction;
+    groqTTSService.setVocalDirection(direction);
   }
 
   /**
    * Stop any currently playing audio
    */
   stop() {
+    // Stop Groq TTS
+    groqTTSService.stop();
+
+    // Stop Kokoro audio
     if (this.currentAudio) {
       this.currentAudio.pause();
       this.currentAudio = null;
     }
+
+    // Stop browser TTS
     window.speechSynthesis?.cancel();
   }
 
   /**
-   * Speak text using Kokoro TTS or browser fallback
+   * Speak text using the best available TTS backend
    */
   async speak(
     text: string,
     options?: {
       voice?: KokoroVoiceId;
+      orpheusVoice?: OrpheusVoiceId;
       speed?: number;
+      vocalDirection?: VocalDirection;
       onStart?: () => void;
       onEnd?: () => void;
       onError?: (error: Error) => void;
     }
   ): Promise<void> {
-    const voice = options?.voice || this.config.defaultVoice;
+    const kokoroVoice = options?.voice || this.config.defaultVoice;
+    const orpheusVoice = options?.orpheusVoice || VOICE_MAPPING[kokoroVoice] || this.config.defaultOrpheusVoice;
     const speed = options?.speed || this.config.speed;
+    const vocalDirection = options?.vocalDirection || this.config.vocalDirection;
 
     // Stop any current playback
     this.stop();
 
-    // Try Kokoro TTS first
-    if (this.config.useKokoroTTS && this.kokoroAvailable !== false) {
+    // Try Groq TTS first (primary)
+    if (this.config.useGroqTTS && this.groqAvailable !== false) {
       try {
-        await this.speakWithKokoro(text, voice, speed, options);
+        console.log('🎤 Using Groq TTS...');
+        await groqTTSService.speak(text, {
+          voice: orpheusVoice,
+          speed,
+          vocalDirection,
+          onStart: options?.onStart,
+          onEnd: options?.onEnd,
+          onError: options?.onError,
+        });
+        this.currentBackend = 'groq';
         return;
       } catch (error) {
-        console.warn('Kokoro TTS failed, falling back to browser:', error);
+        console.warn('⚠️ Groq TTS failed, trying Kokoro...', error);
+        this.groqAvailable = false;
+      }
+    }
+
+    // Try Kokoro TTS (secondary)
+    if (this.config.useKokoroTTS && this.kokoroAvailable !== false) {
+      try {
+        console.log('🎤 Using Kokoro TTS...');
+        await this.speakWithKokoro(text, kokoroVoice, speed, options);
+        this.currentBackend = 'kokoro';
+        return;
+      } catch (error) {
+        console.warn('⚠️ Kokoro TTS failed, falling back to browser...', error);
         this.kokoroAvailable = false;
-        
+
         if (!this.config.fallbackToBrowser) {
           options?.onError?.(error as Error);
           throw error;
@@ -126,7 +241,9 @@ class TTSService {
     }
 
     // Fallback to browser TTS
-    await this.speakWithBrowser(text, voice, speed, options);
+    console.log('🎤 Using Browser TTS...');
+    this.currentBackend = 'browser';
+    await this.speakWithBrowser(text, kokoroVoice, speed, options);
   }
 
   /**
@@ -145,7 +262,7 @@ class TTSService {
     return new Promise(async (resolve, reject) => {
       const abortController = new AbortController();
       const timeoutId = setTimeout(() => abortController.abort(), 120000); // 120 second timeout
-      
+
       try {
         // Call TTS API
         const response = await fetch(`${TTS_API_URL}/speak`, {
@@ -160,7 +277,7 @@ class TTSService {
           }),
           signal: abortController.signal,
         });
-        
+
         clearTimeout(timeoutId);
 
         if (!response.ok) {
@@ -174,7 +291,7 @@ class TTSService {
 
         // Create audio element
         this.currentAudio = new Audio(audioUrl);
-        
+
         this.currentAudio.onloadeddata = () => {
           options?.onStart?.();
         };
@@ -186,7 +303,7 @@ class TTSService {
           resolve();
         };
 
-        this.currentAudio.onerror = (e) => {
+        this.currentAudio.onerror = () => {
           URL.revokeObjectURL(audioUrl);
           this.currentAudio = null;
           const error = new Error('Audio playback failed');
@@ -240,15 +357,15 @@ class TTSService {
       // Try to find a matching voice
       const voices = window.speechSynthesis.getVoices();
       const voiceInfo = KOKORO_VOICES[voice];
-      
+
       if (voiceInfo) {
         // Try to find a voice that matches the accent
         const langCode = voiceInfo.accent === 'British' ? 'en-GB' : 'en-US';
-        const matchingVoice = voices.find(v => 
-          v.lang.startsWith(langCode.substring(0, 2)) && 
+        const matchingVoice = voices.find(v =>
+          v.lang.startsWith(langCode.substring(0, 2)) &&
           v.name.toLowerCase().includes(voiceInfo.gender === 'female' ? 'female' : 'male')
         ) || voices.find(v => v.lang.startsWith(langCode.substring(0, 2)));
-        
+
         if (matchingVoice) {
           utterance.voice = matchingVoice;
         }
@@ -275,6 +392,13 @@ class TTSService {
   }
 
   /**
+   * Check if Groq TTS is available
+   */
+  isGroqTTSAvailable(): boolean {
+    return this.groqAvailable === true;
+  }
+
+  /**
    * Check if Kokoro TTS is available
    */
   isKokoroAvailable(): boolean {
@@ -282,10 +406,24 @@ class TTSService {
   }
 
   /**
-   * Get current TTS mode
+   * Get current TTS backend
    */
-  getMode(): 'kokoro' | 'browser' {
-    return this.kokoroAvailable ? 'kokoro' : 'browser';
+  getMode(): TTSBackend {
+    return this.currentBackend || 'browser';
+  }
+
+  /**
+   * Get available Orpheus voices (for Groq TTS)
+   */
+  getOrpheusVoices() {
+    return ORPHEUS_VOICES;
+  }
+
+  /**
+   * Get available Kokoro voices
+   */
+  getKokoroVoices() {
+    return KOKORO_VOICES;
   }
 }
 
@@ -296,4 +434,3 @@ export const ttsService = new TTSService();
 ttsService.initialize().catch(console.error);
 
 export default ttsService;
-

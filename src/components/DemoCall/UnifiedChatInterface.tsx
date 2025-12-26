@@ -25,6 +25,7 @@ type SpeechRecognitionInstance = any;
 
 interface UnifiedChatInterfaceProps {
     isDark?: boolean;
+    externalCallUI?: boolean;
 }
 
 // Company Logo component for AI avatar
@@ -37,7 +38,7 @@ const ClerkTreeLogo = ({ className, isDark = true }: { className?: string; isDar
     </svg>
 );
 
-export default function UnifiedChatInterface({ isDark = true }: UnifiedChatInterfaceProps) {
+export default function UnifiedChatInterface({ isDark = true, externalCallUI = false }: UnifiedChatInterfaceProps) {
     const {
         currentCall,
         startCall,
@@ -268,6 +269,9 @@ export default function UnifiedChatInterface({ isDark = true }: UnifiedChatInter
             aiService.resetState();
             startCall('voice');
         }
+
+        if (externalCallUI) return;
+
         setIsVoiceMode(true);
         setAgentStatus('listening');
         setMessageReasonings(new Map());
@@ -280,18 +284,20 @@ export default function UnifiedChatInterface({ isDark = true }: UnifiedChatInter
                 console.error('Error starting recognition:', e);
             }
         }
-    }, [isActive, startCall, isMuted]);
+    }, [isActive, startCall, isMuted, externalCallUI]);
 
     const endVoiceCall = useCallback(async () => {
-        ttsService.stop();
-        if (recognitionRef.current) {
-            recognitionRef.current.abort();
+        if (!externalCallUI) {
+            ttsService.stop();
+            if (recognitionRef.current) {
+                recognitionRef.current.abort();
+            }
+            setIsVoiceMode(false);
+            setAgentStatus('idle');
+            setCurrentTranscript('');
         }
-        setIsVoiceMode(false);
-        setAgentStatus('idle');
-        setCurrentTranscript('');
         await endCall();
-    }, [endCall]);
+    }, [endCall, externalCallUI]);
 
     // End text chat and save to history
     const endTextChat = useCallback(async () => {
@@ -574,8 +580,8 @@ export default function UnifiedChatInterface({ isDark = true }: UnifiedChatInter
                         : "bg-black/[0.02] border border-black/[0.05] shadow-xl"
                 )}>
                     <form onSubmit={handleSubmit} className="flex items-center gap-2">
-                        {/* Voice Controls (shown when in voice mode) - Glassmorphic */}
-                        {isVoiceMode && (
+                        {/* Voice Controls (shown when in voice mode) - Glassmorphic. Hidden if external UI is used */}
+                        {isVoiceMode && !externalCallUI && (
                             <>
                                 <motion.button
                                     initial={{ scale: 0, opacity: 0 }}
@@ -723,7 +729,7 @@ export default function UnifiedChatInterface({ isDark = true }: UnifiedChatInter
                         {/* Call Button - Premium Glassmorphic (Dark Teal instead of Green) */}
                         <motion.button
                             type="button"
-                            onClick={isVoiceMode ? endVoiceCall : startVoiceCall}
+                            onClick={externalCallUI ? (isActive ? endVoiceCall : startVoiceCall) : (isVoiceMode ? endVoiceCall : startVoiceCall)}
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
                             className={cn(
@@ -767,7 +773,7 @@ export default function UnifiedChatInterface({ isDark = true }: UnifiedChatInter
                         >
                             {/* Subtle inner glow */}
                             <div className="absolute inset-0 bg-gradient-to-t from-transparent via-white/5 to-white/10 pointer-events-none" />
-                            {isVoiceMode ? (
+                            {(externalCallUI ? isActive : isVoiceMode) ? (
                                 <PhoneOff className="w-5 h-5 relative z-10" />
                             ) : (
                                 <Phone className="w-5 h-5 relative z-10" />
