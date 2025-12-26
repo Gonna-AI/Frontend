@@ -31,11 +31,12 @@ import { localLLMService } from '../../services/localLLMService';
 
 interface KnowledgeBaseProps {
   isDark?: boolean;
+  activeSection?: string;
 }
 
 type ActiveTab = 'prompt' | 'voice' | 'fields' | 'categories' | 'rules' | 'instructions';
 
-export default function KnowledgeBase({ isDark = true }: KnowledgeBaseProps) {
+export default function KnowledgeBase({ isDark = true, activeSection }: KnowledgeBaseProps) {
   const {
     knowledgeBase,
     updateKnowledgeBase,
@@ -47,7 +48,13 @@ export default function KnowledgeBase({ isDark = true }: KnowledgeBaseProps) {
     removeCategory
   } = useDemoCall();
 
-  const [activeTab, setActiveTab] = useState<ActiveTab>('prompt');
+  const [activeTab, setActiveTab] = useState<ActiveTab>((activeSection as ActiveTab) || 'prompt');
+
+  useEffect(() => {
+    if (activeSection) {
+      setActiveTab(activeSection as ActiveTab);
+    }
+  }, [activeSection]);
   const [editingFieldId, setEditingFieldId] = useState<string | null>(null);
   const [isAddingField, setIsAddingField] = useState(false);
   const [isAddingCategory, setIsAddingCategory] = useState(false);
@@ -77,7 +84,7 @@ export default function KnowledgeBase({ isDark = true }: KnowledgeBaseProps) {
     aiService.setKnowledgeBase(knowledgeBase);
   }, [knowledgeBase]);
 
-  // Test Local Mistral LLM connection on mount
+  // Test Groq LLM connection on mount
   useEffect(() => {
     testConnection();
   }, []);
@@ -85,7 +92,7 @@ export default function KnowledgeBase({ isDark = true }: KnowledgeBaseProps) {
   const testConnection = async () => {
     setIsTestingConnection(true);
     try {
-      // Test Local LLM (Mistral via Ollama/Cloudflare)
+      // Test Groq API connection
       const localAvailable = await localLLMService.initialize();
       setLocalLLMConnected(localAvailable);
       if (localAvailable) {
@@ -239,12 +246,12 @@ export default function KnowledgeBase({ isDark = true }: KnowledgeBaseProps) {
               )}>
                 Configure AI behavior
               </p>
-              {/* AI Status Badge - Local Mistral Only */}
+              {/* AI Status Badge - Groq API */}
               <div className="flex items-center gap-1">
                 <button
                   onClick={testConnection}
                   disabled={isTestingConnection}
-                  title={localLLMConnected ? `Local Mistral: ${localLLMModel}` : 'Local LLM not connected'}
+                  title={localLLMConnected ? `Groq AI: ${localLLMModel}` : 'Groq API not connected'}
                   className={cn(
                     "flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] transition-colors",
                     isTestingConnection
@@ -262,7 +269,7 @@ export default function KnowledgeBase({ isDark = true }: KnowledgeBaseProps) {
                     <CloudOff className="w-2.5 h-2.5" />
                   )}
                   <span className="hidden sm:inline">
-                    {localLLMConnected ? 'Mistral' : 'Offline'}
+                    {localLLMConnected ? 'Groq' : 'Offline'}
                   </span>
                 </button>
               </div>
@@ -296,32 +303,34 @@ export default function KnowledgeBase({ isDark = true }: KnowledgeBaseProps) {
         </button>
       </div>
 
-      {/* Tabs */}
-      <div className={cn(
-        "flex gap-1 p-1.5 md:p-2 overflow-x-auto border-b scrollbar-hide",
-        isDark ? "border-white/10" : "border-black/10"
-      )}>
-        {tabs.map(tab => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            className={cn(
-              "flex items-center gap-1 md:gap-1.5 px-2 md:px-3 py-1 md:py-1.5 rounded-md md:rounded-lg text-[10px] md:text-xs font-medium whitespace-nowrap transition-all flex-shrink-0",
-              activeTab === tab.id
-                ? isDark
-                  ? "bg-white/10 text-white"
-                  : "bg-black/10 text-black"
-                : isDark
-                  ? "text-white/50 hover:text-white/80 hover:bg-white/5"
-                  : "text-black/50 hover:text-black/80 hover:bg-black/5"
-            )}
-          >
-            <tab.icon className="w-3 h-3 md:w-3.5 md:h-3.5" />
-            <span className="hidden sm:inline">{tab.label}</span>
-            <span className="sm:hidden">{tab.label.split(' ')[0]}</span>
-          </button>
-        ))}
-      </div>
+      {/* Tabs - Only show if not controlled externally (optional, strictly requested to have separate UIs, sidebar acts as tabs) */}
+      {!activeSection && (
+        <div className={cn(
+          "flex gap-1 p-1.5 md:p-2 overflow-x-auto border-b scrollbar-hide",
+          isDark ? "border-white/10" : "border-black/10"
+        )}>
+          {tabs.map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={cn(
+                "flex items-center gap-1 md:gap-1.5 px-2 md:px-3 py-1 md:py-1.5 rounded-md md:rounded-lg text-[10px] md:text-xs font-medium whitespace-nowrap transition-all flex-shrink-0",
+                activeTab === tab.id
+                  ? isDark
+                    ? "bg-white/10 text-white"
+                    : "bg-black/10 text-black"
+                  : isDark
+                    ? "text-white/50 hover:text-white/80 hover:bg-white/5"
+                    : "text-black/50 hover:text-black/80 hover:bg-black/5"
+              )}
+            >
+              <tab.icon className="w-3 h-3 md:w-3.5 md:h-3.5" />
+              <span className="hidden sm:inline">{tab.label}</span>
+              <span className="sm:hidden">{tab.label.split(' ')[0]}</span>
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* Content */}
       <div className="flex-1 overflow-y-auto p-3 md:p-4 custom-scrollbar">
@@ -1044,7 +1053,7 @@ export default function KnowledgeBase({ isDark = true }: KnowledgeBaseProps) {
             isDark ? "text-white/40" : "text-black/40"
           )}>
             {localLLMConnected
-              ? `Local Mistral Active • Changes apply to next call`
+              ? `Groq AI Active • Changes apply to next call`
               : 'Local LLM Offline • Check cloudflare tunnel is running'
             }
           </p>

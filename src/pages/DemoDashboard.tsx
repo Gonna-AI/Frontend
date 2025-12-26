@@ -11,20 +11,19 @@ import {
   Clock,
   Users,
   CheckCircle,
-  MessageSquare,
-  Menu
+  MessageSquare
 } from 'lucide-react';
-import MobileSidebar from '../components/Layout/Sidebar/MobileSidebar';
-import { useNavigate } from 'react-router-dom';
 import { cn } from '../utils/cn';
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
+import { AppSidebar } from "@/components/AppSidebar"
 import { DemoCallProvider, useDemoCall, PriorityLevel } from '../contexts/DemoCallContext';
 import {
   VoiceCallInterface,
   LiveCallMonitor,
   KnowledgeBase,
   CallHistoryList,
-  UserSessionSwitcher,
 } from '../components/DemoCall';
+import GroqSettingsPage from '../components/DemoCall/GroqSettings';
 
 function AnalyticsCard({
   title,
@@ -220,10 +219,9 @@ function PriorityQueue({ isDark, compact = false }: { isDark: boolean; compact?:
 }
 
 function DemoDashboardContent() {
-  const navigate = useNavigate();
+  // const navigate = useNavigate(); // Removed unused
   const [isDark] = useState(true);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<'monitor' | 'knowledge' | 'history'>('monitor');
+  const [activeTab, setActiveTab] = useState<string>('monitor');
   const { getAnalytics, currentCall, getCurrentUserId, switchSession, knowledgeBase, saveKnowledgeBase, globalActiveSessions } = useDemoCall();
   const { t } = useLanguage();
 
@@ -242,63 +240,36 @@ function DemoDashboardContent() {
   ];
 
   return (
-    <div className={cn(
-      "min-h-screen transition-colors duration-300 pb-8 md:pb-8",
-      isDark
-        ? "bg-black"
-        : "bg-gradient-to-br from-gray-50 to-white"
-    )}>
-      {/* Background gradients */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute top-0 right-0 w-[40rem] md:w-[60rem] h-[40rem] md:h-[60rem] bg-gradient-to-bl from-blue-500/5 via-purple-500/5 to-transparent blur-3xl" />
-        <div className="absolute bottom-0 left-0 w-[40rem] md:w-[60rem] h-[40rem] md:h-[60rem] bg-gradient-to-tr from-purple-500/5 via-blue-500/5 to-transparent blur-3xl" />
-      </div>
-
-      {/* Header */}
-      <header className={cn(
-        "fixed top-0 left-0 right-0 z-50 py-3 px-4 md:px-6 backdrop-blur-md border-b",
-        isDark
-          ? "bg-[rgb(10,10,10)]/80 border-white/10"
-          : "bg-white/80 border-black/10"
+    <SidebarProvider defaultOpen={true}>
+      <div className={cn(
+        "flex w-full min-h-screen transition-colors duration-300",
+        isDark ? "dark bg-black" : "bg-white"
       )}>
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-2 md:gap-4">
-            <button
-              onClick={() => navigate('/')}
-              className="flex items-center gap-2 group hover:opacity-80 transition-opacity"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 464 468"
-                className="w-8 h-8 opacity-90 group-hover:opacity-100 transition-opacity"
-                aria-label="ClerkTree Logo"
-              >
-                <path
-                  fill={isDark ? "white" : "black"}
-                  d="M275.9 63.5c37.7 5.3 76.6 24.1 103.7 50.2 30 28.8 41.8 57.6 35.8 87.1-6.1 30.1-33.6 52.9-70.6 58.3-6 0.9-18.3 1-44.9 0.6l-36.6-0.7-0.5 17.8c-0.3 9.7-0.4 17.8-0.4 17.9 0.1 0.1 19.1 0.3 42.2 0.4 23.2 0 42.7 0.5 43.5 1 1.2 0.7 1.1 2.2-0.8 9.4-6 23-20.5 42.1-41.8 55-7.3 4.3-26.7 11.9-36 14.1-9 2-34 2-44.5 0-41.3-7.9-74.2-38-82.9-75.7-8.1-35.7 2.2-71.5 27.5-94.7 16.1-14.9 35.5-22.4 63.7-24.7l7.7-0.7v-34.1l-11.7 0.7c-22.2 1.3-37 5.3-56.4 15.2-28.7 14.6-49.7 39.3-59.9 70.2-9.6 29.3-9.3 62.6 0.8 91.4 3.3 9.2 12.2 25.6 18.3 33.8 11.3 14.9 30.6 30.8 48.7 39.9 19.9 10 49.2 15.9 73.2 14.7 26.5-1.3 52.5-9.6 74.2-23.9 26.9-17.6 47.2-47.9 53.3-79.7 1-5.2 2.3-10.1 2.8-10.8 0.8-0.9 6.9-1.2 27.1-1l26.1 0.3 0.3 3.8c1.2 14.6-10.9 52.1-23.9 74-17.8 30-43.2 54-75.9 71.5-20.9 11.2-38.3 16.5-67.2 20.7-27.6 3.9-47.9 3.1-75.8-3.1-36.9-8.3-67.8-25.6-97.1-54.6-23.6-23.2-44.8-61.9-51.7-93.8-5.1-23.7-5.5-28.1-4.9-48.8 1.7-63.2 23.4-111.8 67.7-152 28-25.4 60.4-41.3 99-48.8 18.5-3.6 46.1-4 67.9-0.9zm16.4 92.6c-6.3 2.4-12.8 8.5-15.4 14.5-2.6 6.1-2.6 18.3 0 23.9 5 11 20.2 17.7 32.3 14.1 11.9-3.4 19.8-14.3 19.8-27.1-0.1-19.9-18.2-32.5-36.7-25.4z"
-                />
-              </svg>
-              <span className={cn(
-                "font-semibold text-lg tracking-tight",
-                isDark ? "text-white" : "text-black"
-              )}>
-                ClerkTree {t('dashboard.subtitle')}
-              </span>
-            </button>
-          </div>
+        {/* Background gradients */}
+        <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
+          <div className="absolute top-0 right-0 w-[40rem] md:w-[60rem] h-[40rem] md:h-[60rem] bg-gradient-to-bl from-blue-500/5 via-purple-500/5 to-transparent blur-3xl" />
+          <div className="absolute bottom-0 left-0 w-[40rem] md:w-[60rem] h-[40rem] md:h-[60rem] bg-gradient-to-tr from-purple-500/5 via-blue-500/5 to-transparent blur-3xl" />
+        </div>
 
-          {/* Desktop Controls (Hidden on Mobile) */}
-          <div className="hidden md:flex items-center gap-3">
-            {/* User Session Switcher */}
-            <UserSessionSwitcher
-              isDark={isDark}
-              currentUserId={getCurrentUserId()}
-              onSessionChange={switchSession}
-              currentConfig={knowledgeBase as unknown as Record<string, unknown>}
-              onSaveSession={saveKnowledgeBase}
-            />
+        <AppSidebar
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+        />
 
-            {/* Call Status Indicator */}
+        <main className="relative flex-1 min-w-0 z-10 overflow-auto">
+          {/* Top Bar with Trigger */}
+          <div className={cn(
+            "sticky top-0 z-20 flex items-center justify-between px-4 py-3 border-b backdrop-blur-md",
+            isDark ? "bg-[rgb(10,10,10)]/80 border-white/10" : "bg-white/80 border-black/10"
+          )}>
+            <div className="flex items-center gap-4">
+              <SidebarTrigger className={isDark ? "text-white" : "text-black"} />
+              <h1 className={cn("text-lg font-semibold", isDark ? "text-white" : "text-black")}>
+                {tabs.find(t => t.id === activeTab)?.fullLabel}
+              </h1>
+            </div>
+
+            {/* Status Indicators in Header */}
             {(globalActiveSessions.voice > 0 || globalActiveSessions.text > 0 || currentCall?.status === 'active') && (
               <div className="flex items-center gap-2">
                 {/* Voice calls indicator */}
@@ -311,9 +282,9 @@ function DemoDashboardContent() {
                   )}>
                     <div className="w-2 h-2 rounded-full animate-pulse bg-teal-500" />
                     <span className={cn(
-                      "text-sm font-medium text-teal-400"
+                      "text-sm font-medium text-teal-400 hidden md:inline"
                     )}>
-                      {Math.max(globalActiveSessions.voice, currentCall?.status === 'active' && currentCall.type === 'voice' ? 1 : 0)} Call{globalActiveSessions.voice !== 1 ? 's' : ''}
+                      {Math.max(globalActiveSessions.voice, currentCall?.status === 'active' && currentCall.type === 'voice' ? 1 : 0)} Active
                     </span>
                   </div>
                 )}
@@ -327,239 +298,108 @@ function DemoDashboardContent() {
                   )}>
                     <div className="w-2 h-2 rounded-full animate-pulse bg-blue-500" />
                     <span className={cn(
-                      "text-sm font-medium text-blue-400"
+                      "text-sm font-medium text-blue-400 hidden md:inline"
                     )}>
-                      {Math.max(globalActiveSessions.text, currentCall?.status === 'active' && currentCall.type === 'text' ? 1 : 0)} Chat{globalActiveSessions.text !== 1 ? 's' : ''}
+                      {Math.max(globalActiveSessions.text, currentCall?.status === 'active' && currentCall.type === 'text' ? 1 : 0)} Chat
                     </span>
                   </div>
                 )}
               </div>
             )}
+          </div>
 
-            <button
-              onClick={() => navigate('/user')}
-              className={cn(
-                "flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-colors",
-                isDark
-                  ? "bg-green-500/20 text-green-400 hover:bg-green-500/30 border border-green-500/30"
-                  : "bg-green-500/10 text-green-600 hover:bg-green-500/20 border border-green-500/20"
-              )}
+          <div className="p-4 md:p-6 max-w-7xl mx-auto space-y-6">
+            {/* Analytics Cards */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4"
             >
-              <Phone className="w-4 h-4" />
-              <span>{t('dashboard.userView')}</span>
-            </button>
-          </div>
-
-          {/* Mobile Menu Button */}
-          <button
-            onClick={() => setIsMobileMenuOpen(true)}
-            className={cn(
-              "md:hidden p-2 rounded-lg transition-colors",
-              isDark
-                ? "hover:bg-white/10 text-white/80 hover:text-white"
-                : "hover:bg-black/10 text-black/80 hover:text-black"
-            )}
-          >
-            <Menu className="w-6 h-6" />
-          </button>
-        </div>
-      </header >
-
-      {/* Main content */}
-      < main className="relative z-10 pt-20 md:pt-24 px-3 md:px-4" >
-        <div className="max-w-7xl mx-auto">
-          {/* Analytics Cards */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4 mb-4 md:mb-6"
-          >
-            <AnalyticsCard
-              title={t('dashboard.totalHistory')}
-              value={analytics.totalCalls}
-              subtitle={currentCall?.status === 'active' ? `+1 ${t('dashboard.active')}` : t('dashboard.allTime')}
-              icon={MessageSquare}
-              color="blue"
-              isDark={isDark}
-            />
-            <AnalyticsCard
-              title={t('dashboard.criticalHigh')}
-              value={analytics.byPriority.critical + analytics.byPriority.high}
-              subtitle={t('dashboard.needAttention')}
-              icon={AlertTriangle}
-              color="orange"
-              isDark={isDark}
-            />
-            <AnalyticsCard
-              title={t('dashboard.avgDuration')}
-              value={formatDuration(analytics.avgDuration)}
-              subtitle={t('dashboard.perCall')}
-              icon={Clock}
-              color="purple"
-              isDark={isDark}
-            />
-            <AnalyticsCard
-              title={t('dashboard.followUps')}
-              value={analytics.followUpRequired}
-              subtitle={t('dashboard.pending')}
-              icon={Users}
-              color="green"
-              isDark={isDark}
-            />
-          </motion.div>
-
-          {/* Mobile Priority Queue */}
-          <div className="mb-4 md:hidden">
-            <PriorityQueue isDark={isDark} compact />
-          </div>
-
-          {/* Tab navigation */}
-          <div className={cn(
-            "flex items-center gap-1 md:gap-2 mb-4 md:mb-6 p-1 rounded-xl overflow-x-auto scrollbar-hide",
-            isDark ? "bg-black/60 backdrop-blur-xl border border-white/10" : "bg-black/5"
-          )}>
-            {tabs.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={cn(
-                  "flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-1.5 md:py-2 rounded-lg text-xs md:text-sm font-medium transition-all whitespace-nowrap flex-shrink-0",
-                  activeTab === tab.id
-                    ? isDark
-                      ? "bg-white/10 text-white"
-                      : "bg-black/10 text-black"
-                    : isDark
-                      ? "text-white/50 hover:text-white/80"
-                      : "text-black/50 hover:text-black/80"
-                )}
-              >
-                <tab.icon className="w-3.5 h-3.5 md:w-4 md:h-4" />
-                <span className="md:hidden">{tab.label}</span>
-                <span className="hidden md:inline">{tab.fullLabel}</span>
-              </button>
-            ))}
-          </div>
-
-          {/* Main content grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
-            {/* Left sidebar - Call interface and Priority Queue (hidden on mobile) */}
-            <div className="hidden lg:block space-y-6">
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 }}
-              >
-                <VoiceCallInterface isDark={isDark} compact />
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-              >
-                <PriorityQueue isDark={isDark} />
-              </motion.div>
-            </div>
-
-            {/* Main panel based on active tab */}
-            <div className="lg:col-span-2">
-              <motion.div
-                key={activeTab}
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.2 }}
-                className="h-[400px] md:h-[500px] lg:h-[600px]"
-              >
-                {activeTab === 'monitor' && <LiveCallMonitor isDark={isDark} />}
-                {activeTab === 'knowledge' && <KnowledgeBase isDark={isDark} />}
-                {activeTab === 'history' && <CallHistoryList isDark={isDark} />}
-              </motion.div>
-            </div>
-          </div>
-
-          {/* Full call interface - visible on all screens */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="mt-4 md:mt-6 pb-6 md:pb-0"
-          >
-            <VoiceCallInterface isDark={isDark} />
-          </motion.div>
-        </div>
-      </main >
-
-
-      <MobileSidebar
-        currentView={'dashboard'}
-        onViewChange={() => { }}
-        onSignOut={() => navigate('/')}
-        isOpen={isMobileMenuOpen}
-        onClose={() => setIsMobileMenuOpen(false)}
-      >
-        <div className="flex flex-col gap-6">
-          {/* Session Switcher */}
-          <div className="flex flex-col gap-2">
-            <h3 className={cn("text-xs font-semibold uppercase tracking-wider pl-1", isDark ? "text-white/40" : "text-black/40")}>
-              Session
-            </h3>
-            <div className="w-full">
-              <UserSessionSwitcher
+              <AnalyticsCard
+                title={t('dashboard.totalHistory')}
+                value={analytics.totalCalls}
+                subtitle={currentCall?.status === 'active' ? `+1 ${t('dashboard.active')}` : t('dashboard.allTime')}
+                icon={MessageSquare}
+                color="blue"
                 isDark={isDark}
-                currentUserId={getCurrentUserId()}
-                onSessionChange={switchSession}
-                currentConfig={knowledgeBase as unknown as Record<string, unknown>}
-                onSaveSession={saveKnowledgeBase}
-                mobile={true}
               />
-            </div>
-          </div>
+              <AnalyticsCard
+                title={t('dashboard.criticalHigh')}
+                value={analytics.byPriority.critical + analytics.byPriority.high}
+                subtitle={t('dashboard.needAttention')}
+                icon={AlertTriangle}
+                color="orange"
+                isDark={isDark}
+              />
+              <AnalyticsCard
+                title={t('dashboard.avgDuration')}
+                value={formatDuration(analytics.avgDuration)}
+                subtitle={t('dashboard.perCall')}
+                icon={Clock}
+                color="purple"
+                isDark={isDark}
+              />
+              <AnalyticsCard
+                title={t('dashboard.followUps')}
+                value={analytics.followUpRequired}
+                subtitle={t('dashboard.pending')}
+                icon={Users}
+                color="green"
+                isDark={isDark}
+              />
+            </motion.div>
 
-          {/* Status Indicators */}
-          {(globalActiveSessions.voice > 0 || globalActiveSessions.text > 0 || currentCall?.status === 'active') && (
-            <div className="flex flex-col gap-2">
-              <h3 className={cn("text-xs font-semibold uppercase tracking-wider pl-1", isDark ? "text-white/40" : "text-black/40")}>
-                Status
-              </h3>
-              <div className="flex flex-col gap-2 w-full">
-                {/* Voice calls indicator */}
-                {(globalActiveSessions.voice > 0 || (currentCall?.status === 'active' && currentCall.type === 'voice')) && (
-                  <div className={cn(
-                    "flex items-center gap-2 px-4 py-3 rounded-xl w-full transition-colors",
-                    isDark
-                      ? "bg-teal-500/10 border border-teal-500/20"
-                      : "bg-teal-500/5 border border-teal-500/10"
-                  )}>
-                    <div className="w-2 h-2 rounded-full animate-pulse bg-teal-500 shadow-[0_0_8px_rgba(20,184,166,0.5)]" />
-                    <span className={cn(
-                      "text-sm font-medium text-teal-400"
-                    )}>
-                      {Math.max(globalActiveSessions.voice, currentCall?.status === 'active' && currentCall.type === 'voice' ? 1 : 0)} Active Call{globalActiveSessions.voice !== 1 ? 's' : ''}
-                    </span>
-                  </div>
-                )}
-                {/* Text chats indicator */}
-                {(globalActiveSessions.text > 0 || (currentCall?.status === 'active' && currentCall.type === 'text')) && (
-                  <div className={cn(
-                    "flex items-center gap-2 px-4 py-3 rounded-xl w-full transition-colors",
-                    isDark
-                      ? "bg-blue-500/10 border border-blue-500/20"
-                      : "bg-blue-500/5 border border-blue-500/10"
-                  )}>
-                    <div className="w-2 h-2 rounded-full animate-pulse bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]" />
-                    <span className={cn(
-                      "text-sm font-medium text-blue-400"
-                    )}>
-                      {Math.max(globalActiveSessions.text, currentCall?.status === 'active' && currentCall.type === 'text' ? 1 : 0)} Active Chat{globalActiveSessions.text !== 1 ? 's' : ''}
-                    </span>
-                  </div>
-                )}
+            {/* Mobile Priority Queue logic was here, merging with main flow since sidebar is responsive now */}
+
+            {/* Main content grid */}
+            <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+              {/* Left sidebar column - Call interface and Priority Queue */}
+              <div className="space-y-6">
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1 }}
+                >
+                  <VoiceCallInterface isDark={isDark} compact />
+                </motion.div>
+
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2 }}
+                >
+                  <PriorityQueue isDark={isDark} />
+                </motion.div>
+              </div>
+
+              {/* Main panel based on active tab */}
+              <div className="xl:col-span-2">
+                <motion.div
+                  key={activeTab}
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="h-[600px] border border-white/10 rounded-xl overflow-hidden bg-black/40 backdrop-blur-sm"
+                >
+                  {activeTab === 'monitor' && <LiveCallMonitor isDark={isDark} />}
+                  {activeTab === 'history' && <CallHistoryList isDark={isDark} />}
+
+                  {/* Knowledge Base Sections */}
+                  {activeTab === 'knowledge' && <KnowledgeBase isDark={isDark} activeSection="prompt" />}
+                  {activeTab === 'system_prompt' && <KnowledgeBase isDark={isDark} activeSection="prompt" />}
+                  {activeTab === 'ai_voice' && <KnowledgeBase isDark={isDark} activeSection="voice" />}
+                  {activeTab === 'context_fields' && <KnowledgeBase isDark={isDark} activeSection="fields" />}
+                  {activeTab === 'categories' && <KnowledgeBase isDark={isDark} activeSection="categories" />}
+                  {activeTab === 'priority_rules' && <KnowledgeBase isDark={isDark} activeSection="rules" />}
+                  {activeTab === 'instructions' && <KnowledgeBase isDark={isDark} activeSection="instructions" />}
+                  {activeTab === 'groq_settings' && <GroqSettingsPage isDark={isDark} />}
+                </motion.div>
               </div>
             </div>
-          )}
-        </div>
-      </MobileSidebar>
-    </div>
+          </div>
+        </main>
+      </div>
+    </SidebarProvider>
   );
 }
 

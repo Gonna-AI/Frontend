@@ -1,8 +1,8 @@
 /**
- * AI Service Layer - Local Mistral Model via Ollama
+ * AI Service Layer - Groq API
  * 
- * Uses local LLM (Ministral) via Cloudflare tunnel.
- * No cloud APIs - all processing is local.
+ * Uses Groq API for fast, powerful AI responses.
+ * Primary model: configured via VITE_GROQ_API_KEY
  */
 
 import {
@@ -114,10 +114,10 @@ class AIService {
 
   /**
    * Initialize the AI service
-   * Connects to local Mistral model via Ollama/Cloudflare tunnel
+   * Connects to Groq API for AI responses
    */
   async initialize(): Promise<void> {
-    console.log('🔄 Initializing Local Mistral AI service...');
+    console.log('🔄 Initializing Groq AI service...');
 
     // Initialize local LLM only
     try {
@@ -128,7 +128,7 @@ class AIService {
     }
 
     if (this.localLLMAvailable) {
-      console.log('✅ Local Mistral model available:', localLLMService.getServiceUrl());
+      console.log('✅ Groq AI service available');
     } else {
       const llmUrl = import.meta.env.VITE_OLLAMA_URL || 'NOT SET';
       console.error(`❌ Local LLM not available. Check: ${llmUrl}`);
@@ -262,7 +262,7 @@ class AIService {
       return this.mockGenerateSummary(messages, extractedFields, category, priority);
     }
 
-    // Use Local Mistral Model for summary with enhanced function calling
+    // Use Groq API for summary with enhanced function calling
     if (this.config.useLocalLLM && this.localLLMAvailable) {
       try {
         console.log('🖥️ Calling Local LLM for summary with function calling...');
