@@ -56,7 +56,7 @@ interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
 }
 
 export function AppSidebar({ activeTab, setActiveTab, ...props }: AppSidebarProps) {
-    const { t } = useLanguage();
+    const { t, language, setLanguage } = useLanguage();
     const { state, isMobile } = useSidebar();
     const { getCurrentUserId, switchSession, knowledgeBase, saveKnowledgeBase } = useDemoCall();
     const isDark = true; // Sidebar is always dark themed per design
@@ -268,11 +268,29 @@ export function AppSidebar({ activeTab, setActiveTab, ...props }: AppSidebarProp
             <SidebarFooter>
                 <SidebarMenu>
                     <SidebarMenuItem>
-                        <div className="flex items-center justify-between px-2 py-2">
-                            <span className="text-sm font-medium text-white/70">{t('sidebar.language')}</span>
-                            <div className="scale-90 origin-right">
-                                <LanguageSwitcher isExpanded={true} forceDark={true} />
-                            </div>
+                        <div className={cn(
+                            "flex items-center transition-all duration-200",
+                            state === "collapsed" ? "justify-center py-2" : "justify-between px-2 py-2"
+                        )}>
+                            <span className={cn(
+                                "text-sm font-medium text-white/70",
+                                state === "collapsed" && "hidden"
+                            )}>
+                                {t('sidebar.language')}
+                            </span>
+
+                            {state === "collapsed" ? (
+                                <button
+                                    onClick={() => setLanguage(language === 'en' ? 'de' : 'en')}
+                                    className="flex h-8 w-8 items-center justify-center rounded-md bg-white/5 text-xs font-bold text-white hover:bg-white/10 transition-colors uppercase"
+                                >
+                                    {language}
+                                </button>
+                            ) : (
+                                <div className="scale-90 origin-right">
+                                    <LanguageSwitcher isExpanded={true} forceDark={true} />
+                                </div>
+                            )}
                         </div>
                     </SidebarMenuItem>
                     <SidebarMenuItem>
