@@ -1,8 +1,8 @@
 /**
- * Function Calling Tools Definition
+ * Function Calling Tools for AI Service
  * 
- * Based on Mistral AI Function Calling specification:
- * https://docs.mistral.ai/capabilities/function_calling
+ * Based on OpenAI-style Function Calling specification:
+ * Used for structured data extraction from conversations.
  * 
  * These tools help extract structured data from conversations:
  * - Seriousness/Priority Level

@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
-import { Bell, Lock, Settings as SettingsIcon, User, 
-  FileText, Users, Database, Boxes, HelpCircle, MessageSquare, Check } from 'lucide-react';
+import {
+  Bell, Lock, Settings as SettingsIcon, User,
+  FileText, Users, Database, Boxes, HelpCircle, MessageSquare, Check
+} from 'lucide-react';
 import { useTheme } from '../../hooks/useTheme';
 import { cn } from '../../utils/cn';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api, { API_BASE_URL } from '../../config/api';
 import { Switch } from '../../components/ui/Switch';
 import { Badge } from '../../components/ui/Badge';
-import { Input } from '../../components/ui/Input';
+import { Input } from '../../components/ui/input';
 
 export default function Settings() {
   const { isDark } = useTheme();
@@ -90,8 +92,8 @@ export default function Settings() {
   const GlassContainer = ({ children, className }: { children: React.ReactNode, className?: string }) => (
     <div className={cn(
       "rounded-3xl border shadow-lg",
-      isDark 
-        ? "bg-black/20 border-white/10 backdrop-blur-xl" 
+      isDark
+        ? "bg-black/20 border-white/10 backdrop-blur-xl"
         : "bg-white/10 border-black/10 backdrop-blur-xl",
       className
     )}>
@@ -113,8 +115,8 @@ export default function Settings() {
                 {/* Settings Icon */}
                 <div className={cn(
                   "w-12 h-12 rounded-xl flex items-center justify-center mb-6 hidden md:flex",
-                  isDark 
-                    ? "bg-black/20 border border-white/10" 
+                  isDark
+                    ? "bg-black/20 border border-white/10"
                     : "bg-white/10 border border-black/10"
                 )}>
                   <SettingsIcon className={cn(
@@ -122,7 +124,7 @@ export default function Settings() {
                     isDark ? "text-white/70" : "text-black/70"
                   )} />
                 </div>
-                
+
                 {/* Navigation Icons */}
                 <div className="flex md:flex-col w-full gap-3">
                   {sidebarItems.map((item) => (
@@ -133,8 +135,8 @@ export default function Settings() {
                         "flex items-center gap-3 p-3 rounded-xl transition-all w-full",
                         "group outline-none",
                         activeTab === item.id
-                          ? isDark 
-                            ? "bg-black/20 border border-white/10" 
+                          ? isDark
+                            ? "bg-black/20 border border-white/10"
                             : "bg-white/10 border border-black/10"
                           : isDark
                             ? "hover:bg-black/20 hover:border hover:border-white/10"
@@ -144,16 +146,16 @@ export default function Settings() {
                       <div className={cn(
                         "w-10 h-10 rounded-lg flex items-center justify-center",
                         activeTab === item.id
-                          ? isDark 
-                            ? "bg-black/20" 
+                          ? isDark
+                            ? "bg-black/20"
                             : "bg-white/10"
                           : "bg-transparent"
                       )}>
                         <item.icon className={cn(
                           "w-5 h-5",
                           activeTab === item.id
-                            ? isDark 
-                              ? "text-white" 
+                            ? isDark
+                              ? "text-white"
                               : "text-black"
                             : isDark
                               ? "text-white/60"
@@ -174,7 +176,7 @@ export default function Settings() {
                     "text-xl font-semibold",
                     isDark ? "text-white" : "text-black"
                   )}>General Settings</h2>
-                  
+
                   <div className="space-y-6">
 
                     <GlassContainer className="p-8 space-y-6">
@@ -234,12 +236,12 @@ export default function Settings() {
                               Add an extra layer of security to your account
                             </p>
                           </div>
-                                                      <button
+                          <button
                             onClick={() => setShowTwoFactor(true)}
                             className={cn(
                               "px-4 py-2 rounded-xl transition-colors w-full sm:w-auto",
-                              isDark 
-                                ? "bg-black/20 hover:bg-black/30 border border-white/10 text-white" 
+                              isDark
+                                ? "bg-black/20 hover:bg-black/30 border border-white/10 text-white"
                                 : "bg-white/10 hover:bg-white/20 border border-black/10 text-black"
                             )}>
                             Configure
@@ -264,7 +266,7 @@ export default function Settings() {
                               Scan the QR code with your authenticator app
                             </span>
                           </div>
-                          
+
                           <div className="mx-auto">
                             <GlassContainer className="p-4 w-40 h-40">
                               <div className={cn(
@@ -300,8 +302,8 @@ export default function Settings() {
                             <div className="flex justify-end">
                               <button className={cn(
                                 "px-4 py-2 rounded-xl transition-colors",
-                                isDark 
-                                  ? "bg-black/20 hover:bg-black/30 border border-white/10 text-white" 
+                                isDark
+                                  ? "bg-black/20 hover:bg-black/30 border border-white/10 text-white"
                                   : "bg-white/10 hover:bg-white/20 border border-black/10 text-black"
                               )}>
                                 Verify & Enable
@@ -337,7 +339,7 @@ export default function Settings() {
                         </div>
                         <Switch
                           checked={value}
-                          onCheckedChange={(checked) => 
+                          onCheckedChange={(checked) =>
                             setNotifications(prev => ({ ...prev, [key]: checked }))
                           }
                         />
@@ -356,8 +358,8 @@ export default function Settings() {
                     )}>API Tokens</h2>
                     <button className={cn(
                       "px-4 py-2 rounded-xl transition-colors",
-                      isDark 
-                        ? "bg-black/20 hover:bg-black/30 border border-white/10 text-white" 
+                      isDark
+                        ? "bg-black/20 hover:bg-black/30 border border-white/10 text-white"
                         : "bg-white/10 hover:bg-white/20 border border-black/10 text-black"
                     )}>
                       Generate New Token
@@ -383,8 +385,8 @@ export default function Settings() {
                         </div>
                         <button className={cn(
                           "px-4 py-2 rounded-xl transition-colors text-red-500",
-                          isDark 
-                            ? "bg-red-500/10 hover:bg-red-500/20 border border-red-500/20" 
+                          isDark
+                            ? "bg-red-500/10 hover:bg-red-500/20 border border-red-500/20"
                             : "bg-red-500/10 hover:bg-red-500/20 border border-red-500/20"
                         )}>
                           Revoke
@@ -412,8 +414,8 @@ export default function Settings() {
                         />
                         <button className={cn(
                           "px-4 py-2 rounded-xl transition-colors",
-                          isDark 
-                            ? "bg-black/20 hover:bg-black/30 border border-white/10 text-white" 
+                          isDark
+                            ? "bg-black/20 hover:bg-black/30 border border-white/10 text-white"
                             : "bg-white/10 hover:bg-white/20 border border-black/10 text-black"
                         )}>
                           Invite Member

@@ -30,10 +30,17 @@ import {
   IssueTopicsResult
 } from './functionCallingTools';
 
+// Import Groq settings for dynamic configuration
+import { getGroqSettings, type GroqSettings } from '../components/DemoCall/GroqSettings';
+
 // ============= GROQ API CONFIGURATION (PRIMARY) =============
 const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY;
 const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
-const GROQ_MODEL = 'openai/gpt-oss-20b';
+
+// Get current model and settings dynamically
+function getCurrentGroqSettings(): GroqSettings {
+  return getGroqSettings();
+}
 
 // ============= LOCAL OLLAMA CONFIGURATION (FALLBACK) =============
 const getCleanURL = (url: string) => {
@@ -98,8 +105,9 @@ class LocalLLMService {
     }
 
     try {
+      const settings = getCurrentGroqSettings();
       console.log('🔍 Checking Groq API availability...');
-      console.log(`   Model: ${GROQ_MODEL}`);
+      console.log(`   Model: ${settings.model}`);
 
       const testResponse = await fetch(GROQ_API_URL, {
         method: 'POST',
@@ -108,7 +116,7 @@ class LocalLLMService {
           'Authorization': `Bearer ${GROQ_API_KEY}`
         },
         body: JSON.stringify({
-          model: GROQ_MODEL,
+          model: settings.model,
           messages: [{ role: 'user', content: 'Hi' }],
           max_tokens: 10
         }),
@@ -518,8 +526,8 @@ class LocalLLMService {
   }
 
   /**
-   * Generate response using Local LLM service via /api/generate
-   * Enhanced with Mistral-style function calling system prompt
+   * Generate response using Groq API
+   * Enhanced with function calling system prompt
    */
   async generateResponse(
     userMessage: string,
@@ -538,8 +546,8 @@ class LocalLLMService {
       throw new Error('No AI service available - check Groq API key and/or local LLM');
     }
 
-    // Build the enhanced prompt string for /api/generate
-    // Using Mistral-style function calling system prompt structure
+    // Build the enhanced prompt string
+    // Using function calling system prompt structure
 
     // 1. Enhanced System Prompt with function calling context
     const knownInfo = existingFields.length > 0
@@ -611,8 +619,9 @@ Rules:
     const makeGroqRequest = async (): Promise<string | null> => {
       if (!this.groqAvailable) return null;
 
+      const settings = getCurrentGroqSettings();
       try {
-        console.log('🚀 Calling Groq API...');
+        console.log(`🚀 Calling Groq API (model: ${settings.model}, temp: ${settings.temperature})...`);
         const response = await fetch(GROQ_API_URL, {
           method: 'POST',
           headers: {
@@ -620,10 +629,11 @@ Rules:
             'Authorization': `Bearer ${GROQ_API_KEY}`
           },
           body: JSON.stringify({
-            model: GROQ_MODEL,
+            model: settings.model,
             messages: groqMessages,
-            temperature: 0.7,
-            max_tokens: 2048,
+            temperature: settings.temperature,
+            max_tokens: settings.maxTokens,
+            top_p: settings.topP,
           }),
           signal: AbortSignal.timeout(REQUEST_TIMEOUT),
         });
@@ -993,7 +1003,7 @@ Extract and return JSON (use null if not detected):
 
   /**
    * Generate comprehensive call summary using function calling approach
-   * Based on Mistral AI function calling pattern for structured data extraction
+   * Based on Groq API function calling pattern for structured data extraction
    */
   async summarizeCall(
     messages: CallMessage[],
@@ -1115,8 +1125,9 @@ Respond ONLY with valid JSON:
 
       // Try Groq first for faster summary (it's much faster)
       if (this.groqAvailable) {
+        const settings = getCurrentGroqSettings();
         try {
-          console.log('🚀 Using Groq for summary...');
+          console.log(`🚀 Using Groq for summary (model: ${settings.model})...`);
           const groqResponse = await fetch(GROQ_API_URL, {
             method: 'POST',
             headers: {
@@ -1124,7 +1135,7 @@ Respond ONLY with valid JSON:
               'Authorization': `Bearer ${GROQ_API_KEY}`
             },
             body: JSON.stringify({
-              model: GROQ_MODEL,
+              model: settings.model,
               messages: [
                 { role: 'system', content: 'You are a call summarization assistant. Always respond with valid JSON containing summary, keyPoints, sentiment, suggestions, etc.' },
                 { role: 'user', content: prompt }
