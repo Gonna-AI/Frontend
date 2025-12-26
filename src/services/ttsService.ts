@@ -95,30 +95,18 @@ class TTSService {
       this.groqAvailable = false;
     }
 
-    // Check Kokoro TTS
-    try {
-      const response = await fetch(`${TTS_API_URL}/health`, {
-        method: 'GET',
-        signal: AbortSignal.timeout(3000),
-      });
-      this.kokoroAvailable = response.ok;
-      console.log(`   Kokoro TTS: ${this.kokoroAvailable ? '✅ Available' : '❌ Not available'}`);
-    } catch (error) {
-      console.warn('   Kokoro TTS: ❌ Not available');
-      this.kokoroAvailable = false;
-    }
+    // Kokoro TTS is disabled - skip initialization
+    this.kokoroAvailable = false;
 
     // Determine current backend
     if (this.groqAvailable && this.config.useGroqTTS) {
       this.currentBackend = 'groq';
-    } else if (this.kokoroAvailable && this.config.useKokoroTTS) {
-      this.currentBackend = 'kokoro';
     } else {
       this.currentBackend = 'browser';
     }
 
     console.log(`🔊 TTS Backend: ${this.currentBackend}`);
-    return this.groqAvailable || this.kokoroAvailable || true; // Browser is always available
+    return this.groqAvailable || true; // Browser is always available
   }
 
   /**
@@ -180,6 +168,14 @@ class TTSService {
   }
 
   /**
+   * Unlock audio playback - must be called during a user gesture (click/tap)
+   * This is required by browser autoplay policies
+   */
+  async unlockAudio(): Promise<void> {
+    await groqTTSService.unlockAudio();
+  }
+
+  /**
    * Speak text using the best available TTS backend
    */
   async speak(
@@ -217,26 +213,8 @@ class TTSService {
         this.currentBackend = 'groq';
         return;
       } catch (error) {
-        console.warn('⚠️ Groq TTS failed, trying Kokoro...', error);
+        console.warn('⚠️ Groq TTS failed, falling back to browser...', error);
         this.groqAvailable = false;
-      }
-    }
-
-    // Try Kokoro TTS (secondary)
-    if (this.config.useKokoroTTS && this.kokoroAvailable !== false) {
-      try {
-        console.log('🎤 Using Kokoro TTS...');
-        await this.speakWithKokoro(text, kokoroVoice, speed, options);
-        this.currentBackend = 'kokoro';
-        return;
-      } catch (error) {
-        console.warn('⚠️ Kokoro TTS failed, falling back to browser...', error);
-        this.kokoroAvailable = false;
-
-        if (!this.config.fallbackToBrowser) {
-          options?.onError?.(error as Error);
-          throw error;
-        }
       }
     }
 

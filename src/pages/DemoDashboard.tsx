@@ -18,7 +18,6 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/AppSidebar"
 import { DemoCallProvider, useDemoCall, PriorityLevel } from '../contexts/DemoCallContext';
 import {
-  VoiceCallInterface,
   LiveCallMonitor,
   KnowledgeBase,
   CallHistoryList,
@@ -361,7 +360,79 @@ function DemoDashboardContent() {
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.1 }}
                     >
-                      <VoiceCallInterface isDark={isDark} compact />
+                      {/* Active Sessions Panel */}
+                      <div className={cn(
+                        "p-4 rounded-2xl",
+                        isDark
+                          ? "bg-black/60 backdrop-blur-xl border border-white/10"
+                          : "bg-white/80 border border-black/10"
+                      )}>
+                        <div className={cn(
+                          "flex items-center gap-3 mb-4 pb-3 border-b",
+                          isDark ? "border-white/10" : "border-black/10"
+                        )}>
+                          <Phone className={cn("w-5 h-5", isDark ? "text-white/60" : "text-black/60")} />
+                          <h3 className={cn("font-semibold", isDark ? "text-white" : "text-black")}>
+                            {t('dashboard.activeSessions')}
+                          </h3>
+                        </div>
+
+                        <div className="space-y-3">
+                          {/* Voice Calls */}
+                          <div className={cn(
+                            "flex items-center justify-between p-3 rounded-xl",
+                            globalActiveSessions.voice > 0
+                              ? isDark ? "bg-teal-500/10 border border-teal-500/20" : "bg-teal-500/5 border border-teal-500/10"
+                              : isDark ? "bg-white/5 border border-white/10" : "bg-black/5 border border-black/10"
+                          )}>
+                            <div className="flex items-center gap-3">
+                              <div className={cn(
+                                "w-10 h-10 rounded-xl flex items-center justify-center",
+                                globalActiveSessions.voice > 0 ? "bg-teal-500/20" : isDark ? "bg-white/10" : "bg-black/10"
+                              )}>
+                                <Phone className={cn("w-5 h-5", globalActiveSessions.voice > 0 ? "text-teal-400" : isDark ? "text-white/40" : "text-black/40")} />
+                              </div>
+                              <div>
+                                <p className={cn("font-medium text-sm", isDark ? "text-white" : "text-black")}>{t('dashboard.voiceCalls')}</p>
+                                <p className={cn("text-xs", isDark ? "text-white/50" : "text-black/50")}>
+                                  {globalActiveSessions.voice > 0 ? t('dashboard.inProgress') : t('dashboard.noActive')}
+                                </p>
+                              </div>
+                            </div>
+                            <div className={cn("flex items-center gap-2 px-3 py-1.5 rounded-full", globalActiveSessions.voice > 0 ? "bg-teal-500/20" : isDark ? "bg-white/10" : "bg-black/10")}>
+                              {globalActiveSessions.voice > 0 && <div className="w-2 h-2 rounded-full animate-pulse bg-teal-500" />}
+                              <span className={cn("font-bold text-lg", globalActiveSessions.voice > 0 ? "text-teal-400" : isDark ? "text-white/40" : "text-black/40")}>{globalActiveSessions.voice}</span>
+                            </div>
+                          </div>
+
+                          {/* Text Chats */}
+                          <div className={cn(
+                            "flex items-center justify-between p-3 rounded-xl",
+                            globalActiveSessions.text > 0
+                              ? isDark ? "bg-blue-500/10 border border-blue-500/20" : "bg-blue-500/5 border border-blue-500/10"
+                              : isDark ? "bg-white/5 border border-white/10" : "bg-black/5 border border-black/10"
+                          )}>
+                            <div className="flex items-center gap-3">
+                              <div className={cn(
+                                "w-10 h-10 rounded-xl flex items-center justify-center",
+                                globalActiveSessions.text > 0 ? "bg-blue-500/20" : isDark ? "bg-white/10" : "bg-black/10"
+                              )}>
+                                <MessageSquare className={cn("w-5 h-5", globalActiveSessions.text > 0 ? "text-blue-400" : isDark ? "text-white/40" : "text-black/40")} />
+                              </div>
+                              <div>
+                                <p className={cn("font-medium text-sm", isDark ? "text-white" : "text-black")}>{t('dashboard.textChats')}</p>
+                                <p className={cn("text-xs", isDark ? "text-white/50" : "text-black/50")}>
+                                  {globalActiveSessions.text > 0 ? t('dashboard.inProgress') : t('dashboard.noActive')}
+                                </p>
+                              </div>
+                            </div>
+                            <div className={cn("flex items-center gap-2 px-3 py-1.5 rounded-full", globalActiveSessions.text > 0 ? "bg-blue-500/20" : isDark ? "bg-white/10" : "bg-black/10")}>
+                              {globalActiveSessions.text > 0 && <div className="w-2 h-2 rounded-full animate-pulse bg-blue-500" />}
+                              <span className={cn("font-bold text-lg", globalActiveSessions.text > 0 ? "text-blue-400" : isDark ? "text-white/40" : "text-black/40")}>{globalActiveSessions.text}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                     </motion.div>
 
                     <motion.div

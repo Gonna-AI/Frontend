@@ -531,6 +531,13 @@ export const translations: Record<Language, Record<string, string>> = {
         'history.actionItems': 'Action Items',
         'history.extractedInfo': 'Extracted Information',
         'history.tags': 'Tags',
+
+        // Active Sessions Panel
+        'dashboard.activeSessions': 'Active Sessions',
+        'dashboard.voiceCalls': 'Voice Calls',
+        'dashboard.textChats': 'Text Chats',
+        'dashboard.inProgress': 'In progress',
+        'dashboard.noActive': 'No active sessions',
     },
     de: {
         // Navigation
@@ -1052,6 +1059,13 @@ export const translations: Record<Language, Record<string, string>> = {
         'history.actionItems': 'Aktionselemente',
         'history.extractedInfo': 'Extrahierte Informationen',
         'history.tags': 'Tags',
+
+        // Active Sessions Panel
+        'dashboard.activeSessions': 'Aktive Sitzungen',
+        'dashboard.voiceCalls': 'Sprachanrufe',
+        'dashboard.textChats': 'Text-Chats',
+        'dashboard.inProgress': 'Läuft',
+        'dashboard.noActive': 'Keine aktiven Sitzungen',
     }
 };
 

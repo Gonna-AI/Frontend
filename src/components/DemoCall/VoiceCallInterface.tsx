@@ -78,10 +78,21 @@ export default function VoiceCallInterface({
   const [isSpeakerOn, setIsSpeakerOn] = useState(true);
   const [currentTranscript, setCurrentTranscript] = useState('');
   const [agentStatus, setAgentStatus] = useState<'idle' | 'speaking' | 'listening' | 'processing'>('idle');
-  const [language, setLanguage] = useState<'en-US' | 'hi-IN'>('en-US');
+  const [language, setLanguage] = useState<'en-US' | 'de-DE'>('en-US');
 
   const recognitionRef = useRef<SpeechRecognitionInstance | null>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const isRecognitionRunningRef = useRef(false);
+
+  // Refs to avoid stale closures in speech recognition callbacks
+  const currentCallRef = useRef(currentCall);
+  const agentStatusRef = useRef(agentStatus);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const handleUserInputRef = useRef<((text: string) => Promise<void>) | null>(null);
+
+  // Keep refs in sync with state
+  useEffect(() => { currentCallRef.current = currentCall; }, [currentCall]);
+  useEffect(() => { agentStatusRef.current = agentStatus; }, [agentStatus]);
 
   const messages = currentCall?.messages || [];
   const extractedFields = currentCall?.extractedFields || [];
@@ -111,40 +122,83 @@ export default function VoiceCallInterface({
     };
   }, [currentCall?.status]);
 
+  // Helper functions for starting/stopping recognition safely
+  const startRecognition = useCallback(() => {
+    if (!recognitionRef.current || isRecognitionRunningRef.current) {
+      console.log('🎤 Recognition already running or not available');
+      return;
+    }
+    try {
+      console.log('🎤 Starting speech recognition...');
+      recognitionRef.current.start();
+      isRecognitionRunningRef.current = true;
+    } catch (e) {
+      console.error('Error starting recognition:', e);
+      isRecognitionRunningRef.current = false;
+    }
+  }, []);
+
+  const stopRecognition = useCallback(() => {
+    if (!recognitionRef.current) return;
+    try {
+      recognitionRef.current.stop();
+      isRecognitionRunningRef.current = false;
+    } catch (e) {
+      console.error('Error stopping recognition:', e);
+    }
+  }, []);
+
   // Initialize speech recognition
   useEffect(() => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (SpeechRecognition) {
-      recognitionRef.current = new SpeechRecognition();
-      recognitionRef.current.continuous = true;
-      recognitionRef.current.interimResults = true;
-      recognitionRef.current.lang = language;
+      const recognition: SpeechRecognitionInstance = new SpeechRecognition();
+      recognition.continuous = true;
+      recognition.interimResults = true;
+      recognition.lang = language;
+      recognitionRef.current = recognition;
 
-      recognitionRef.current.onresult = (event: SpeechRecognitionEvent) => {
+      recognition.onresult = (event: SpeechRecognitionEvent) => {
         const current = event.resultIndex;
         const transcriptText = event.results[current][0].transcript;
         setCurrentTranscript(transcriptText);
 
         if (event.results[current].isFinal) {
-          handleUserInput(transcriptText);
+          // Use ref to get latest handleUserInput callback
+          handleUserInputRef.current?.(transcriptText);
         }
       };
 
-      recognitionRef.current.onerror = (event: SpeechRecognitionErrorEvent) => {
+      recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
         console.error('Speech recognition error:', event.error);
+        isRecognitionRunningRef.current = false;
         if (event.error !== 'aborted') {
           setAgentStatus('idle');
         }
       };
 
-      recognitionRef.current.onend = () => {
-        // Restart if still in call and not muted
-        if (currentCall?.status === 'active' && !isMuted && agentStatus === 'listening') {
-          try {
-            recognitionRef.current?.start();
-          } catch (e) {
-            console.error('Error restarting recognition:', e);
-          }
+      recognition.onend = () => {
+        isRecognitionRunningRef.current = false;
+        // Restart if still in call and listening - use refs for latest values
+        const isActive = currentCallRef.current?.status === 'active';
+        const status = agentStatusRef.current;
+
+        console.log('🎤 Speech recognition ended, checking restart:', { isActive, status });
+
+        if (isActive && status === 'listening') {
+          // Small delay to prevent rapid restart issues
+          setTimeout(() => {
+            if (currentCallRef.current?.status === 'active' && agentStatusRef.current === 'listening') {
+              try {
+                console.log('🎤 Restarting speech recognition...');
+                recognitionRef.current?.start();
+                isRecognitionRunningRef.current = true;
+              } catch (e) {
+                console.error('Error restarting recognition:', e);
+                isRecognitionRunningRef.current = false;
+              }
+            }
+          }, 100);
         }
       };
     }
@@ -152,6 +206,7 @@ export default function VoiceCallInterface({
     return () => {
       if (recognitionRef.current) {
         recognitionRef.current.abort();
+        isRecognitionRunningRef.current = false;
       }
     };
   }, [language]);
@@ -168,6 +223,9 @@ export default function VoiceCallInterface({
     // Get the selected voice from knowledge base
     const selectedVoice = (knowledgeBase.selectedVoiceId || 'af_nova') as KokoroVoiceId;
 
+    // Stop recognition before speaking to avoid conflicts
+    stopRecognition();
+
     return ttsService.speak(text, {
       voice: selectedVoice,
       speed: 1.0,
@@ -175,20 +233,15 @@ export default function VoiceCallInterface({
       onEnd: () => {
         setAgentStatus('listening');
         // Start listening after speaking
-        if (!isMuted && recognitionRef.current) {
-          try {
-            recognitionRef.current.start();
-          } catch (e) {
-            console.error('Error starting recognition after speech:', e);
-          }
-        }
+        startRecognition();
       },
       onError: (error) => {
         console.error('TTS error:', error);
         setAgentStatus('listening');
+        startRecognition();
       }
     });
-  }, [knowledgeBase.selectedVoiceId, isSpeakerOn, isMuted]);
+  }, [knowledgeBase.selectedVoiceId, isSpeakerOn, startRecognition, stopRecognition]);
 
   const handleUserInput = useCallback(async (text: string) => {
     if (!text.trim()) return;
@@ -199,13 +252,7 @@ export default function VoiceCallInterface({
     setAgentStatus('processing');
 
     // Stop recognition while processing
-    if (recognitionRef.current) {
-      try {
-        recognitionRef.current.stop();
-      } catch (e) {
-        console.error('Error stopping recognition:', e);
-      }
-    }
+    stopRecognition();
 
     // Use AI service to generate response
     const response = await aiService.generateResponse(
@@ -234,51 +281,74 @@ export default function VoiceCallInterface({
     addMessage('agent', response.text);
     onTranscript?.(response.text, 'agent');
     await speakText(response.text);
-  }, [addMessage, onTranscript, messages, extractedFields, updateExtractedField, setCallPriority, setCallCategory, speakText]);
+  }, [addMessage, onTranscript, messages, extractedFields, updateExtractedField, setCallPriority, setCallCategory, speakText, stopRecognition]);
+
+  // Keep handleUserInputRef in sync (must be after handleUserInput is defined)
+  useEffect(() => { handleUserInputRef.current = handleUserInput; }, [handleUserInput]);
 
   const handleStartCall = useCallback(async () => {
+    // Unlock audio playback (required by browser autoplay policies)
+    // This must happen during the user gesture (click)
+    await ttsService.unlockAudio();
+
     // Reset AI conversation state for new call
     aiService.resetState();
 
     startCall('voice');
     setAgentStatus('listening');
-    // Don't send automatic greeting - wait for user to speak first, then AI responds
-  }, [startCall]);
+
+    // Start speech recognition immediately when call begins
+    // Small delay to ensure state is updated
+    setTimeout(() => {
+      startRecognition();
+    }, 100);
+  }, [startCall, startRecognition]);
 
   const handleEndCall = useCallback(async () => {
+    console.log('🔴 End call button pressed');
+
+    // Stop all TTS immediately
     ttsService.stop();
+
+    // Directly cancel browser speech synthesis
+    if (window.speechSynthesis) {
+      window.speechSynthesis.cancel();
+    }
+
+    // Stop speech recognition
+    stopRecognition();
     if (recognitionRef.current) {
       recognitionRef.current.abort();
+      isRecognitionRunningRef.current = false;
     }
+
     setAgentStatus('idle');
+
     // Wait for AI summary to be generated before ending
     await endCall();
+
     setCurrentTranscript('');
-  }, [endCall]);
+
+    // Final TTS cleanup after a short delay
+    setTimeout(() => {
+      ttsService.stop();
+      window.speechSynthesis?.cancel();
+    }, 100);
+  }, [endCall, stopRecognition]);
 
   const toggleMute = useCallback(() => {
     if (isMuted) {
       // Unmute - start listening
-      if (recognitionRef.current && currentCall?.status === 'active') {
-        try {
-          recognitionRef.current.start();
-          setAgentStatus('listening');
-        } catch (e) {
-          console.error('Error starting recognition:', e);
-        }
+      if (currentCall?.status === 'active') {
+        setAgentStatus('listening');
+        startRecognition();
       }
     } else {
       // Mute - stop listening
-      if (recognitionRef.current) {
-        try {
-          recognitionRef.current.stop();
-        } catch (e) {
-          console.error('Error stopping recognition:', e);
-        }
-      }
+      stopRecognition();
     }
     setIsMuted(!isMuted);
-  }, [isMuted, currentCall?.status]);
+  }, [isMuted, currentCall?.status, startRecognition, stopRecognition]);
 
   const isActive = currentCall?.status === 'active';
 
@@ -442,7 +512,7 @@ export default function VoiceCallInterface({
 
         {isActive && (
           <button
-            onClick={() => setLanguage(prev => prev === 'en-US' ? 'hi-IN' : 'en-US')}
+            onClick={() => setLanguage(prev => prev === 'en-US' ? 'de-DE' : 'en-US')}
             className={cn(
               "px-3 md:px-4 py-2 md:py-3 rounded-lg md:rounded-xl text-xs md:text-sm font-medium transition-all",
               isDark
@@ -450,7 +520,7 @@ export default function VoiceCallInterface({
                 : "bg-purple-500/10 border border-purple-500/20 text-purple-600 hover:bg-purple-500/20"
             )}
           >
-            {language === 'en-US' ? 'हिंदी' : 'EN'}
+            {language === 'en-US' ? 'DE' : 'EN'}
           </button>
         )}
       </div>

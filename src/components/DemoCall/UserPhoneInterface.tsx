@@ -51,11 +51,23 @@ export default function UserPhoneInterface({
     const [currentTranscript, setCurrentTranscript] = useState('');
     const [lastAgentMessage, setLastAgentMessage] = useState('');
     const [agentStatus, setAgentStatus] = useState<'idle' | 'speaking' | 'listening' | 'processing'>('idle');
-    const [language, setLanguage] = useState<'en-US' | 'hi-IN'>('en-US');
+    const [language, setLanguage] = useState<'en-US' | 'de-DE'>('en-US');
     const [isMinimized, setIsMinimized] = useState(false);
 
     const recognitionRef = useRef<SpeechRecognitionInstance | null>(null);
     const timerRef = useRef<NodeJS.Timeout | null>(null);
+    const isRecognitionRunningRef = useRef(false);
+
+    // Refs to avoid stale closures in speech recognition callbacks
+    const currentCallRef = useRef(currentCall);
+    const agentStatusRef = useRef(agentStatus);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const handleUserInputRef = useRef<((text: string) => Promise<void>) | null>(null);
+
+    // Keep refs in sync with state
+    useEffect(() => { currentCallRef.current = currentCall; }, [currentCall]);
+    useEffect(() => { agentStatusRef.current = agentStatus; }, [agentStatus]);
+    // Note: handleUserInputRef is synced after handleUserInput is defined below
 
     const messages = currentCall?.messages || [];
     const extractedFields = currentCall?.extractedFields || [];
@@ -86,41 +98,107 @@ export default function UserPhoneInterface({
         };
     }, [currentCall?.status]);
 
+    // Auto-start recognition when call becomes active (for overlay mode when started externally)
+    useEffect(() => {
+        if (currentCall?.status === 'active' && currentCall?.type === 'voice' && mode === 'overlay') {
+            // Small delay to ensure component is ready
+            const timer = setTimeout(() => {
+                if (agentStatus === 'idle') {
+                    console.log('📞 Call started externally, starting recognition in overlay mode');
+                    setAgentStatus('listening');
+                }
+                if (!isRecognitionRunningRef.current) {
+                    try {
+                        recognitionRef.current?.start();
+                        isRecognitionRunningRef.current = true;
+                        console.log('🎤 Recognition started for external call');
+                    } catch (e) {
+                        console.error('Error auto-starting recognition:', e);
+                    }
+                }
+            }, 200);
+            return () => clearTimeout(timer);
+        }
+    }, [currentCall?.status, currentCall?.type, mode, agentStatus]);
+
+    // Helper functions for starting/stopping recognition safely
+    const startRecognition = useCallback(() => {
+        if (!recognitionRef.current || isRecognitionRunningRef.current) {
+            console.log('🎤 Recognition already running or not available');
+            return;
+        }
+        try {
+            console.log('🎤 Starting speech recognition...');
+            recognitionRef.current.start();
+            isRecognitionRunningRef.current = true;
+        } catch (e) {
+            console.error('Error starting recognition:', e);
+            isRecognitionRunningRef.current = false;
+        }
+    }, []);
+
+    const stopRecognition = useCallback(() => {
+        if (!recognitionRef.current) return;
+        try {
+            recognitionRef.current.stop();
+            isRecognitionRunningRef.current = false;
+        } catch (e) {
+            console.error('Error stopping recognition:', e);
+        }
+    }, []);
+
     // Initialize speech recognition
     useEffect(() => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
         if (SpeechRecognition) {
-            recognitionRef.current = new SpeechRecognition();
-            recognitionRef.current.continuous = true;
-            recognitionRef.current.interimResults = true;
-            recognitionRef.current.lang = language;
+            const recognition = new SpeechRecognition();
+            recognition.continuous = true;
+            recognition.interimResults = true;
+            recognition.lang = language;
+            recognitionRef.current = recognition;
 
-            recognitionRef.current.onresult = (event: SpeechRecognitionEvent) => {
+            recognition.onresult = (event: SpeechRecognitionEvent) => {
                 const current = event.resultIndex;
                 const transcriptText = event.results[current][0].transcript;
                 setCurrentTranscript(transcriptText);
 
                 if (event.results[current].isFinal) {
-                    handleUserInput(transcriptText);
+                    // Use ref to get latest handleUserInput callback
+                    handleUserInputRef.current?.(transcriptText);
                 }
             };
 
-            recognitionRef.current.onerror = (event: SpeechRecognitionErrorEvent) => {
+            recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
                 console.error('Speech recognition error:', event.error);
+                isRecognitionRunningRef.current = false;
                 if (event.error !== 'aborted') {
                     setAgentStatus('idle');
                 }
             };
 
-            recognitionRef.current.onend = () => {
-                // Restart if still in call and not muted
-                if (currentCall?.status === 'active' && !isMuted && agentStatus === 'listening') {
-                    try {
-                        recognitionRef.current?.start();
-                    } catch (e) {
-                        console.error('Error restarting recognition:', e);
-                    }
+            recognition.onend = () => {
+                isRecognitionRunningRef.current = false;
+                // Restart if still in call and listening - use refs for latest values
+                const isActive = currentCallRef.current?.status === 'active';
+                const status = agentStatusRef.current;
+
+                console.log('🎤 Speech recognition ended, checking restart:', { isActive, status });
+
+                if (isActive && status === 'listening') {
+                    // Small delay to prevent rapid restart issues
+                    setTimeout(() => {
+                        if (currentCallRef.current?.status === 'active' && agentStatusRef.current === 'listening') {
+                            try {
+                                console.log('🎤 Restarting speech recognition...');
+                                recognitionRef.current?.start();
+                                isRecognitionRunningRef.current = true;
+                            } catch (e) {
+                                console.error('Error restarting recognition:', e);
+                                isRecognitionRunningRef.current = false;
+                            }
+                        }
+                    }, 100);
                 }
             };
         }
@@ -128,6 +206,7 @@ export default function UserPhoneInterface({
         return () => {
             if (recognitionRef.current) {
                 recognitionRef.current.abort();
+                isRecognitionRunningRef.current = false;
             }
         };
     }, [language]);
@@ -144,6 +223,9 @@ export default function UserPhoneInterface({
         // Get the selected voice from knowledge base
         const selectedVoice = (knowledgeBase.selectedVoiceId || 'af_nova') as KokoroVoiceId;
 
+        // Stop recognition before speaking to avoid conflicts
+        stopRecognition();
+
         return ttsService.speak(text, {
             voice: selectedVoice,
             speed: 1.0,
@@ -151,20 +233,15 @@ export default function UserPhoneInterface({
             onEnd: () => {
                 setAgentStatus('listening');
                 // Start listening after speaking
-                if (!isMuted && recognitionRef.current) {
-                    try {
-                        recognitionRef.current.start();
-                    } catch (e) {
-                        console.error('Error starting recognition after speech:', e);
-                    }
-                }
+                startRecognition();
             },
             onError: (error) => {
                 console.error('TTS error:', error);
                 setAgentStatus('listening');
+                startRecognition();
             }
         });
-    }, [knowledgeBase.selectedVoiceId, isSpeakerOn, isMuted]);
+    }, [knowledgeBase.selectedVoiceId, isSpeakerOn, startRecognition, stopRecognition]);
 
     const handleUserInput = useCallback(async (text: string) => {
         if (!text.trim()) return;
@@ -175,13 +252,7 @@ export default function UserPhoneInterface({
         setAgentStatus('processing');
 
         // Stop recognition while processing
-        if (recognitionRef.current) {
-            try {
-                recognitionRef.current.stop();
-            } catch (e) {
-                console.error('Error stopping recognition:', e);
-            }
-        }
+        stopRecognition();
 
         // Use AI service to generate response
         const response = await aiService.generateResponse(
@@ -211,52 +282,75 @@ export default function UserPhoneInterface({
         setLastAgentMessage(response.text);
         onTranscript?.(response.text, 'agent');
         await speakText(response.text);
-    }, [addMessage, onTranscript, messages, extractedFields, updateExtractedField, setCallPriority, setCallCategory, speakText]);
+    }, [addMessage, onTranscript, messages, extractedFields, updateExtractedField, setCallPriority, setCallCategory, speakText, stopRecognition]);
+
+    // Keep handleUserInputRef in sync (must be after handleUserInput is defined)
+    useEffect(() => { handleUserInputRef.current = handleUserInput; }, [handleUserInput]);
 
     const handleStartCall = useCallback(async () => {
+        // Unlock audio playback (required by browser autoplay policies)
+        // This must happen during the user gesture (click)
+        await ttsService.unlockAudio();
+
         // Reset AI conversation state for new call
         aiService.resetState();
 
         startCall('voice');
         setAgentStatus('listening');
-        // Don't send automatic greeting - wait for user to speak first, then AI responds
-    }, [startCall]);
+
+        // Start speech recognition immediately when call begins
+        // Small delay to ensure state is updated
+        setTimeout(() => {
+            startRecognition();
+        }, 100);
+    }, [startCall, startRecognition]);
 
     const handleEndCall = useCallback(async () => {
+        console.log('🔴 End call button pressed');
+
+        // Stop all TTS immediately
         ttsService.stop();
+
+        // Directly cancel browser speech synthesis
+        if (window.speechSynthesis) {
+            window.speechSynthesis.cancel();
+        }
+
+        // Stop speech recognition
+        stopRecognition();
         if (recognitionRef.current) {
             recognitionRef.current.abort();
+            isRecognitionRunningRef.current = false;
         }
+
         setAgentStatus('idle');
+
         // Wait for AI summary to be generated before ending
         await endCall();
+
         setCurrentTranscript('');
         setLastAgentMessage('');
-    }, [endCall]);
+
+        // Final TTS cleanup after a short delay
+        setTimeout(() => {
+            ttsService.stop();
+            window.speechSynthesis?.cancel();
+        }, 100);
+    }, [endCall, stopRecognition]);
 
     const toggleMute = useCallback(() => {
         if (isMuted) {
             // Unmute - start listening
-            if (recognitionRef.current && currentCall?.status === 'active') {
-                try {
-                    recognitionRef.current.start();
-                    setAgentStatus('listening');
-                } catch (e) {
-                    console.error('Error starting recognition:', e);
-                }
+            if (currentCall?.status === 'active') {
+                setAgentStatus('listening');
+                startRecognition();
             }
         } else {
             // Mute - stop listening
-            if (recognitionRef.current) {
-                try {
-                    recognitionRef.current.stop();
-                } catch (e) {
-                    console.error('Error stopping recognition:', e);
-                }
-            }
+            stopRecognition();
         }
         setIsMuted(!isMuted);
-    }, [isMuted, currentCall?.status]);
+    }, [isMuted, currentCall?.status, startRecognition, stopRecognition]);
 
     const isActive = currentCall?.status === 'active';
 
@@ -306,197 +400,148 @@ export default function UserPhoneInterface({
     // Full Screen Phone UI
     if (isActive) {
         return (
-            <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-                {/* Backdrop */}
+            <div className="fixed inset-0 z-50 flex flex-col bg-black text-white overflow-hidden">
+                {/* Background Layer */}
                 <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    className="absolute inset-0 bg-black/60 backdrop-blur-lg"
+                    className="absolute inset-0 z-0 pointer-events-none"
+                    animate={{
+                        background: agentStatus === 'speaking'
+                            ? 'radial-gradient(circle at center, rgba(59, 130, 246, 0.15) 0%, transparent 80%)'
+                            : agentStatus === 'listening'
+                                ? 'radial-gradient(circle at center, rgba(34, 197, 94, 0.15) 0%, transparent 80%)'
+                                : 'radial-gradient(circle at center, rgba(168, 85, 247, 0.1) 0%, transparent 80%)'
+                    }}
+                    transition={{ duration: 0.8, ease: "easeInOut" }}
                 />
 
-                {/* Phone Container */}
-                <motion.div
-                    initial={{ scale: 0.9, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    exit={{ scale: 0.9, opacity: 0 }}
-                    className={cn(
-                        "relative w-full max-w-sm aspect-[9/16] max-h-[90vh] rounded-3xl overflow-hidden flex flex-col shadow-2xl border",
-                        isDark
-                            ? "bg-gradient-to-br from-gray-900 to-black border-white/10"
-                            : "bg-gradient-to-br from-white to-gray-100 border-black/10"
-                    )}
-                >
-                    {/* Header Actions */}
-                    <div className="absolute top-4 right-4 z-20 flex gap-2">
-                        <button
-                            onClick={() => setIsMinimized(true)}
-                            className={cn(
-                                "p-2 rounded-full transition-colors backdrop-blur-md",
-                                isDark ? "bg-black/20 text-white hover:bg-black/40" : "bg-white/20 text-black hover:bg-white/40"
-                            )}
+                {/* Header Actions */}
+                <div className="absolute top-6 right-6 z-20">
+                    <button
+                        onClick={() => setIsMinimized(true)}
+                        className="p-3 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md transition-colors"
+                    >
+                        <Minimize2 className="w-5 h-5 text-white" />
+                    </button>
+                </div>
+
+                {/* Main Content Area */}
+                <div className="flex-1 flex flex-col items-center justify-center relative px-6 z-10 w-full max-w-lg mx-auto">
+
+                    {/* Avatar / Visualizer */}
+                    <div className="relative mb-12">
+                        <motion.div
+                            animate={{
+                                scale: agentStatus === 'speaking' ? [1, 1.1, 1] : 1,
+                            }}
+                            transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+                            className="w-40 h-40 rounded-full flex items-center justify-center text-5xl shadow-2xl border-4 border-white/10 bg-white/5 backdrop-blur-sm relative z-10 text-white"
                         >
-                            <Minimize2 className="w-5 h-5" />
-                        </button>
-                    </div>
+                            <span className="font-bold">AI</span>
+                        </motion.div>
 
-                    {/* Main Content Area */}
-                    <div className="flex-1 flex flex-col items-center justify-center relative p-6">
-                        {/* Animated Glow Background */}
-                        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                            <div className={cn(
-                                "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 rounded-full blur-[100px] transition-all duration-1000",
-                                agentStatus === 'speaking' ? "bg-blue-500/30 scale-150" :
-                                    agentStatus === 'listening' ? "bg-green-500/20 scale-110" :
-                                        "bg-purple-500/10 scale-100"
-                            )} />
-                        </div>
-
-                        {/* Avatar / Visualizer */}
-                        <div className="relative mb-8">
+                        {/* Status Rings - Simplified and aligned */}
+                        {agentStatus === 'listening' && (
                             <motion.div
-                                animate={{
-                                    scale: agentStatus === 'speaking' ? [1, 1.1, 1] : 1,
-                                }}
-                                transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-                                className={cn(
-                                    "w-32 h-32 rounded-full flex items-center justify-center text-4xl shadow-2xl border-4 relative z-10",
-                                    isDark
-                                        ? "bg-gray-800 border-gray-700 text-white"
-                                        : "bg-white border-gray-100 text-gray-800"
-                                )}
-                            >
-                                <span className="font-bold">AI</span>
-                            </motion.div>
+                                initial={{ opacity: 0, scale: 1 }}
+                                animate={{ opacity: [0, 0.5, 0], scale: [1, 1.5, 1.5] }}
+                                transition={{ duration: 2, repeat: Infinity, ease: "easeOut" }}
+                                className="absolute inset-0 rounded-full border-2 border-green-500/50"
+                            />
+                        )}
 
-                            {/* Status Ring */}
-                            {/* Status Ring / Ripple Animation for Listening */}
-                            {agentStatus === 'listening' && (
-                                <>
-                                    <motion.div
-                                        initial={{ opacity: 0, scale: 1 }}
-                                        animate={{ opacity: [0, 0.5, 0], scale: [1, 1.4, 1.4] }}
-                                        transition={{ duration: 2, repeat: Infinity, ease: "easeOut" }}
-                                        className="absolute inset-0 rounded-full border-2 border-green-500/50"
-                                    />
-                                    <motion.div
-                                        initial={{ opacity: 0, scale: 1 }}
-                                        animate={{ opacity: [0, 0.5, 0], scale: [1, 1.4, 1.4] }}
-                                        transition={{ duration: 2, repeat: Infinity, ease: "easeOut", delay: 1 }}
-                                        className="absolute inset-0 rounded-full border-2 border-green-500/30"
-                                    />
-                                </>
-                            )}
-
-                            {/* Spinning Ring for Speaking/Processing */}
-                            <div className={cn(
-                                "absolute -inset-4 rounded-full border-2",
-                                agentStatus === 'speaking' ? "animate-[spin_4s_linear_infinite] border-t-blue-500/50 border-r-transparent border-b-blue-500/50 border-l-transparent" :
-                                    agentStatus === 'processing' ? "animate-[spin_2s_linear_infinite] border-t-yellow-500/50 border-r-transparent border-b-yellow-500/50 border-l-transparent" :
-                                        agentStatus === 'listening' ? "border-green-500/20" : // Static base ring for listening
-                                            "border-transparent"
-                            )} />
-                        </div>
-
-                        {/* Call Status & Duration */}
-                        <div className="text-center space-y-2 mb-8 relative z-10">
-                            <h2 className={cn("text-2xl font-semibold", isDark ? "text-white" : "text-black")}>
-                                Alice (AI Agent)
-                            </h2>
-                            <p className={cn("font-mono text-sm opacity-60", isDark ? "text-white" : "text-black")}>
-                                {formatDuration(callDuration)} • {agentStatus}
-                            </p>
-                        </div>
-
-                        {/* Unified Caption Box */}
-                        <div className="w-full px-4 mb-4 relative z-10">
-                            <AnimatePresence mode="wait">
-                                {(currentTranscript || lastAgentMessage) && (
-                                    <motion.div
-                                        key={currentTranscript ? 'user' : 'agent'}
-                                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                                        exit={{ opacity: 0, y: -10, scale: 0.95 }}
-                                        className={cn(
-                                            "p-4 rounded-2xl backdrop-blur-xl border shadow-lg min-h-[80px] flex items-center justify-center text-center",
-                                            isDark
-                                                ? "bg-white/10 border-white/10 text-white"
-                                                : "bg-black/5 border-black/5 text-black"
-                                        )}
-                                    >
-                                        <div>
-                                            {currentTranscript ? (
-                                                <>
-                                                    <p className="text-xs uppercase tracking-wider font-bold opacity-50 mb-1 text-green-400">You</p>
-                                                    <p className="text-lg font-medium leading-relaxed">"{currentTranscript}"</p>
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <p className="text-xs uppercase tracking-wider font-bold opacity-50 mb-1 text-blue-400">Alice</p>
-                                                    <p className="text-lg font-medium leading-relaxed">{lastAgentMessage}</p>
-                                                </>
-                                            )}
-                                        </div>
-                                    </motion.div>
-                                )}
-                            </AnimatePresence>
-                        </div>
+                        <div className={cn(
+                            "absolute -inset-4 rounded-full border-2",
+                            agentStatus === 'speaking' ? "animate-[spin_4s_linear_infinite] border-t-blue-500/50 border-r-transparent border-b-blue-500/50 border-l-transparent" :
+                                agentStatus === 'processing' ? "animate-[spin_2s_linear_infinite] border-t-yellow-500/50 border-r-transparent border-b-yellow-500/50 border-l-transparent" :
+                                    "border-transparent"
+                        )} />
                     </div>
 
-                    {/* Bottom Controls */}
-                    <div className={cn(
-                        "p-8 pb-12 flex justify-between items-center relative z-20",
-                        isDark ? "bg-black/20" : "bg-white/50"
-                    )}>
-                        {/* Language Toggle or Keypad (Secondary) */}
-                        <button
-                            onClick={() => setLanguage(prev => prev === 'en-US' ? 'hi-IN' : 'en-US')}
-                            className={cn(
-                                "w-14 h-14 rounded-full flex items-center justify-center transition-all",
-                                isDark ? "bg-gray-800 text-white hover:bg-gray-700" : "bg-white text-black shadow-sm hover:bg-gray-50"
+                    {/* Call Status */}
+                    <div className="text-center space-y-2 mb-10">
+                        <h2 className="text-3xl font-semibold text-white tracking-tight">
+                            Alice (AI Agent)
+                        </h2>
+                        <p className="font-mono text-sm text-white/50 tracking-wider uppercase">
+                            {formatDuration(callDuration)} • {agentStatus}
+                        </p>
+                    </div>
+
+                    {/* Caption Box - Darker Glassy */}
+                    <div className="w-full mb-8 min-h-[100px] flex items-center justify-center">
+                        <AnimatePresence mode="wait">
+                            {(currentTranscript || lastAgentMessage) && (
+                                <motion.div
+                                    key={currentTranscript ? 'user' : 'agent'}
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, y: -10 }}
+                                    className="w-full p-6 rounded-3xl bg-black/60 backdrop-blur-xl border border-white/10 shadow-2xl text-center"
+                                >
+                                    {currentTranscript ? (
+                                        <>
+                                            <p className="text-xs uppercase tracking-widest font-bold opacity-40 mb-2 text-green-400">You</p>
+                                            <p className="text-xl font-medium leading-relaxed text-white/90">"{currentTranscript}"</p>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <p className="text-xs uppercase tracking-widest font-bold opacity-40 mb-2 text-blue-400">Alice</p>
+                                            <p className="text-xl font-medium leading-relaxed text-white/90">{lastAgentMessage}</p>
+                                        </>
+                                    )}
+                                </motion.div>
                             )}
+                        </AnimatePresence>
+                    </div>
+                </div>
+
+                {/* Bottom Controls - Fully aligned */}
+                <div className="p-8 pb-12 w-full z-20 bg-gradient-to-t from-black via-black/80 to-transparent">
+                    <div className="flex items-center justify-center gap-6 max-w-lg mx-auto">
+
+                        {/* Language */}
+                        <button
+                            onClick={() => setLanguage(prev => prev === 'en-US' ? 'de-DE' : 'en-US')}
+                            className="w-14 h-14 rounded-full flex items-center justify-center bg-white/10 hover:bg-white/20 backdrop-blur-md transition-all border border-white/5"
                         >
-                            <span className="text-sm font-bold">{language === 'en-US' ? 'EN' : 'HI'}</span>
+                            <span className="text-sm font-bold text-white">{language === 'en-US' ? 'EN' : 'DE'}</span>
                         </button>
 
-                        {/* Mute Toggle */}
-                        <button
-                            onClick={toggleMute}
-                            className={cn(
-                                "w-16 h-16 rounded-full flex items-center justify-center transition-all",
-                                isMuted
-                                    ? "bg-white text-black shadow-lg"
-                                    : isDark ? "bg-gray-800 text-white hover:bg-gray-700" : "bg-white text-black shadow-sm hover:bg-gray-50"
-                            )}
-                        >
-                            {isMuted ? <MicOff className="w-6 h-6" /> : <Mic className="w-6 h-6" />}
-                        </button>
-
-                        {/* Speaker Toggle */}
+                        {/* Speaker */}
                         <button
                             onClick={() => setIsSpeakerOn(!isSpeakerOn)}
                             className={cn(
-                                "w-14 h-14 rounded-full flex items-center justify-center transition-all",
+                                "w-14 h-14 rounded-full flex items-center justify-center transition-all border backdrop-blur-md",
                                 !isSpeakerOn
-                                    ? "bg-white text-black shadow-lg"
-                                    : isDark ? "bg-gray-800 text-white hover:bg-gray-700" : "bg-white text-black shadow-sm hover:bg-gray-50"
+                                    ? "bg-white text-black border-white"
+                                    : "bg-white/10 text-white hover:bg-white/20 border-white/5"
                             )}
                         >
                             {isSpeakerOn ? <Volume2 className="w-6 h-6" /> : <VolumeX className="w-6 h-6" />}
                         </button>
 
-                    </div>
+                        {/* Mute */}
+                        <button
+                            onClick={toggleMute}
+                            className={cn(
+                                "w-14 h-14 rounded-full flex items-center justify-center transition-all border backdrop-blur-md",
+                                isMuted
+                                    ? "bg-white text-black border-white"
+                                    : "bg-white/10 text-white hover:bg-white/20 border-white/5"
+                            )}
+                        >
+                            {isMuted ? <MicOff className="w-6 h-6" /> : <Mic className="w-6 h-6" />}
+                        </button>
 
-                    {/* End Call Button - Floating above controls or integrated */}
-                    <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-30">
+                        {/* End Call - Glassy Red */}
                         <button
                             onClick={handleEndCall}
-                            className="w-20 h-20 rounded-full bg-red-500 text-white flex items-center justify-center shadow-red-500/30 shadow-xl hover:scale-105 transition-transform"
+                            className="w-20 h-14 rounded-full flex items-center justify-center bg-red-500/20 border border-red-500/30 text-red-500 hover:bg-red-500/30 backdrop-blur-md transition-all shadow-lg shadow-red-900/20"
                         >
-                            <PhoneOff className="w-8 h-8" />
+                            <PhoneOff className="w-6 h-6" />
                         </button>
                     </div>
-                </motion.div>
+                </div>
             </div>
         );
     }

@@ -264,7 +264,10 @@ export default function UnifiedChatInterface({ isDark = true, externalCallUI = f
         handleSendMessage(inputMessage);
     }, [inputMessage, handleSendMessage]);
 
-    const startVoiceCall = useCallback(() => {
+    const startVoiceCall = useCallback(async () => {
+        // Unlock audio playback (required by browser autoplay policies)
+        await ttsService.unlockAudio();
+
         if (!isActive) {
             aiService.resetState();
             startCall('voice');
