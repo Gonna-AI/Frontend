@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { useDemoCall, CallHistoryItem, PriorityLevel } from '../../contexts/DemoCallContext';
+import { useLanguage } from '../../contexts/LanguageContext';
 
 interface CallHistoryListProps {
   isDark?: boolean;
@@ -25,6 +26,7 @@ interface CallHistoryListProps {
 }
 
 export default function CallHistoryList({ isDark = true, showFilters = true }: CallHistoryListProps) {
+  const { t } = useLanguage();
   const { callHistory, knowledgeBase } = useDemoCall();
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'summary' | 'transcript' | 'details'>('summary');
@@ -38,9 +40,9 @@ export default function CallHistoryList({ isDark = true, showFilters = true }: C
     const hours = Math.floor(diff / (1000 * 60 * 60));
     const days = Math.floor(hours / 24);
 
-    if (hours < 1) return 'Just now';
-    if (hours < 24) return `${hours}h ago`;
-    if (days < 7) return `${days}d ago`;
+    if (hours < 1) return t('history.justNow');
+    if (hours < 24) return t('history.ago.h').replace('{h}', hours.toString());
+    if (days < 7) return t('history.ago.d').replace('{d}', days.toString());
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   };
 
@@ -51,7 +53,7 @@ export default function CallHistoryList({ isDark = true, showFilters = true }: C
   const formatDuration = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
-    return `${mins}m ${secs}s`;
+    return t('history.duration').replace('{m}', mins.toString()).replace('{s}', secs.toString());
   };
 
   const toggleExpand = (id: string) => {
@@ -153,13 +155,18 @@ export default function CallHistoryList({ isDark = true, showFilters = true }: C
               "font-semibold text-sm md:text-base",
               isDark ? "text-white" : "text-black"
             )}>
-              History
+              {t('history.title')}
             </h3>
             <p className={cn(
               "text-[10px] md:text-xs",
               isDark ? "text-white/50" : "text-black/50"
             )}>
-              {filteredHistory.length} of {callHistory.length} items • {voiceCount} calls, {textCount} chats
+              {t('history.stats')
+                .replace('{count}', filteredHistory.length.toString())
+                .replace('{total}', callHistory.length.toString())
+                .replace('{voice}', voiceCount.toString())
+                .replace('{text}', textCount.toString())
+              }
             </p>
           </div>
         </div>
@@ -187,9 +194,9 @@ export default function CallHistoryList({ isDark = true, showFilters = true }: C
                 : "bg-black/5 text-black border border-black/10"
             )}
           >
-            <option value="all">All Types</option>
-            <option value="voice">Calls Only</option>
-            <option value="text">Chats Only</option>
+            <option value="all">{t('history.filter.allTypes')}</option>
+            <option value="voice">{t('history.filter.calls')}</option>
+            <option value="text">{t('history.filter.chats')}</option>
           </select>
 
           {/* Priority filter */}
@@ -203,11 +210,11 @@ export default function CallHistoryList({ isDark = true, showFilters = true }: C
                 : "bg-black/5 text-black border border-black/10"
             )}
           >
-            <option value="all">All Priorities</option>
-            <option value="critical">Critical</option>
-            <option value="high">High</option>
-            <option value="medium">Medium</option>
-            <option value="low">Low</option>
+            <option value="all">{t('history.filter.allPriorities')}</option>
+            <option value="critical">{t('dashboard.priority.critical')}</option>
+            <option value="high">{t('dashboard.priority.high')}</option>
+            <option value="medium">{t('dashboard.priority.medium')}</option>
+            <option value="low">{t('dashboard.priority.low')}</option>
           </select>
 
           {/* Category filter */}
@@ -221,7 +228,7 @@ export default function CallHistoryList({ isDark = true, showFilters = true }: C
                 : "bg-black/5 text-black border border-black/10"
             )}
           >
-            <option value="all">All Categories</option>
+            <option value="all">{t('history.filter.allCategories')}</option>
             {knowledgeBase.categories.map(cat => (
               <option key={cat.id} value={cat.id}>{cat.name}</option>
             ))}
@@ -237,9 +244,9 @@ export default function CallHistoryList({ isDark = true, showFilters = true }: C
             isDark ? "text-white/40" : "text-black/40"
           )}>
             <History className="w-12 h-12 mb-4 opacity-40" />
-            <p className="text-lg font-medium mb-1">No History Found</p>
+            <p className="text-lg font-medium mb-1">{t('history.noHistory')}</p>
             <p className="text-sm opacity-80">
-              {callHistory.length === 0 ? 'Call and chat history will appear here' : 'Try adjusting your filters'}
+              {callHistory.length === 0 ? t('history.noHistoryDesc') : t('history.adjustFilters')}
             </p>
           </div>
         ) : (
@@ -284,12 +291,12 @@ export default function CallHistoryList({ isDark = true, showFilters = true }: C
                             {item.type === 'voice' ? (
                               <>
                                 <svg xmlns="http://www.w3.org/2000/svg" className="w-2.5 h-2.5 md:w-3 md:h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
-                                <span className="hidden sm:inline">Call</span>
+                                <span className="hidden sm:inline">{t('userCall.aiAssistant')}</span>
                               </>
                             ) : (
                               <>
                                 <MessageSquare className="w-2.5 h-2.5 md:w-3 md:h-3" />
-                                <span className="hidden sm:inline">Chat</span>
+                                <span className="hidden sm:inline">{t('userCall.aiAssistant')}</span>
                               </>
                             )}
                           </span>
@@ -328,7 +335,7 @@ export default function CallHistoryList({ isDark = true, showFilters = true }: C
                                 ? "bg-yellow-500/20 text-yellow-400"
                                 : "bg-yellow-500/10 text-yellow-600"
                             )}>
-                              <span className="hidden sm:inline">Follow-up needed</span>
+                              <span className="hidden sm:inline">{t('monitor.followUp')}</span>
                               <span className="sm:hidden">F/U</span>
                             </span>
                           )}
@@ -360,7 +367,7 @@ export default function CallHistoryList({ isDark = true, showFilters = true }: C
                           {item.tags.length > 0 && (
                             <span className="flex items-center gap-0.5 md:gap-1 hidden sm:flex">
                               <Tag className="w-2.5 h-2.5 md:w-3 md:h-3" />
-                              {item.tags.length} tags
+                              {item.tags.length} {t('history.tags')}
                             </span>
                           )}
                         </div>
@@ -449,7 +456,7 @@ export default function CallHistoryList({ isDark = true, showFilters = true }: C
                                   <span className={cn(
                                     "text-[10px] block mb-1",
                                     isDark ? "text-white/40" : "text-black/40"
-                                  )}>Sentiment</span>
+                                  )}>{t('history.sentiment')}</span>
                                   <div className="flex items-center gap-1.5">
                                     <span className={cn(
                                       "text-xs font-medium",
@@ -469,7 +476,7 @@ export default function CallHistoryList({ isDark = true, showFilters = true }: C
                                     <span className={cn(
                                       "text-[10px] block mb-1",
                                       isDark ? "text-white/40" : "text-black/40"
-                                    )}>Priority</span>
+                                    )}>{t('history.priority')}</span>
                                     <span className={cn(
                                       "text-xs font-medium px-2 py-0.5 rounded-full capitalize",
                                       item.summary.estimatedPriority === 'critical' ? "bg-red-500/20 text-red-400" :
@@ -491,7 +498,7 @@ export default function CallHistoryList({ isDark = true, showFilters = true }: C
                                     <span className={cn(
                                       "text-[10px] block mb-1",
                                       isDark ? "text-white/40" : "text-black/40"
-                                    )}>Resolution</span>
+                                    )}>{t('history.resolution')}</span>
                                     <span className={cn(
                                       "text-xs font-medium px-2 py-0.5 rounded-full capitalize",
                                       item.summary.resolution === 'resolved' ? "bg-green-500/20 text-green-400" :
@@ -513,7 +520,7 @@ export default function CallHistoryList({ isDark = true, showFilters = true }: C
                                     <span className={cn(
                                       "text-[10px] block mb-1",
                                       isDark ? "text-white/40" : "text-black/40"
-                                    )}>Risk Level</span>
+                                    )}>{t('history.riskLevel')}</span>
                                     <span className={cn(
                                       "text-xs font-medium px-2 py-0.5 rounded-full capitalize",
                                       item.summary.riskLevel === 'high' ? "bg-red-500/20 text-red-400" :
@@ -535,7 +542,7 @@ export default function CallHistoryList({ isDark = true, showFilters = true }: C
                                   <span className={cn(
                                     "text-[10px] block mb-1 font-medium",
                                     isDark ? "text-blue-400" : "text-blue-600"
-                                  )}>Caller Intent</span>
+                                  )}>{t('history.intent')}</span>
                                   <p className={cn(
                                     "text-sm",
                                     isDark ? "text-white/80" : "text-black/80"
@@ -552,7 +559,7 @@ export default function CallHistoryList({ isDark = true, showFilters = true }: C
                                   isDark ? "text-white/60" : "text-black/60"
                                 )}>
                                   <FileText className="w-3 h-3" />
-                                  Key Points
+                                  {t('history.keyPoints')}
                                 </h4>
                                 <ul className="space-y-1.5">
                                   {item.summary.mainPoints.filter(p => p.trim()).map((point, i) => (
@@ -577,7 +584,7 @@ export default function CallHistoryList({ isDark = true, showFilters = true }: C
                                   <h4 className={cn(
                                     "text-[10px] font-medium mb-2",
                                     isDark ? "text-white/50" : "text-black/50"
-                                  )}>Topics</h4>
+                                  )}>{t('history.topics')}</h4>
                                   <div className="flex flex-wrap gap-1.5">
                                     {item.summary.topics.map((topic, i) => (
                                       <span
@@ -602,7 +609,7 @@ export default function CallHistoryList({ isDark = true, showFilters = true }: C
                                   <h4 className={cn(
                                     "text-[10px] font-medium mb-2",
                                     isDark ? "text-white/50" : "text-black/50"
-                                  )}>Mood Indicators</h4>
+                                  )}>{t('history.mood')}</h4>
                                   <div className="flex flex-wrap gap-1.5">
                                     {item.summary.moodIndicators.map((mood, i) => (
                                       <span
@@ -632,7 +639,7 @@ export default function CallHistoryList({ isDark = true, showFilters = true }: C
                                     "text-xs font-medium mb-2 flex items-center gap-1.5",
                                     isDark ? "text-amber-400" : "text-amber-600"
                                   )}>
-                                    AI Suggestions for Admin
+                                    {t('history.suggestions')}
                                   </h4>
                                   <ul className="space-y-1.5">
                                     {item.summary.suggestions.map((suggestion, i) => (
@@ -658,7 +665,7 @@ export default function CallHistoryList({ isDark = true, showFilters = true }: C
                                     "text-xs font-medium mb-2",
                                     isDark ? "text-white/60" : "text-black/60"
                                   )}>
-                                    Action Items
+                                    {t('history.actionItems')}
                                   </h4>
                                   <div className="space-y-1">
                                     {item.summary.actionItems.map(action => (
@@ -695,7 +702,7 @@ export default function CallHistoryList({ isDark = true, showFilters = true }: C
                                   "text-sm text-center py-4",
                                   isDark ? "text-white/40" : "text-black/40"
                                 )}>
-                                  No transcript available
+                                  {t('history.noTranscript')}
                                 </p>
                               ) : (
                                 item.messages.map((msg) => (
@@ -748,7 +755,7 @@ export default function CallHistoryList({ isDark = true, showFilters = true }: C
                                     "text-[10px] md:text-xs font-medium mb-1.5 md:mb-2",
                                     isDark ? "text-white/60" : "text-black/60"
                                   )}>
-                                    Extracted Information
+                                    {t('history.extractedInfo')}
                                   </h4>
                                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 md:gap-2">
                                     {item.extractedFields.map(field => (
@@ -790,7 +797,7 @@ export default function CallHistoryList({ isDark = true, showFilters = true }: C
                                     "text-[10px] md:text-xs font-medium mb-1.5 md:mb-2",
                                     isDark ? "text-white/60" : "text-black/60"
                                   )}>
-                                    Tags
+                                    {t('history.tags')}
                                   </h4>
                                   <div className="flex flex-wrap gap-1">
                                     {item.tags.map((tag, i) => (
