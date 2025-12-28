@@ -83,13 +83,8 @@ export default function UserSessionSwitcher({
             const session = sessions.find(s => s.id === currentUserId);
             if (session) {
                 setCurrentSession(session);
-            } else if (sessions.length === 0) {
-                // First time user - show welcome popup
-                const hasSeenWelcome = localStorage.getItem('clerktree_seen_welcome');
-                if (!hasSeenWelcome) {
-                    setShowWelcomePopup(true);
-                }
             }
+            // Logic for welcome popup moved to WelcomeManager to support mobile
         }
     }, [sessions, currentUserId, hasCheckedFirstTime]);
 
@@ -522,7 +517,7 @@ export default function UserSessionSwitcher({
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
                                 exit={{ opacity: 0 }}
-                                className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md"
+                                className="fixed inset-0 z-[1000] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md"
                             >
                                 <motion.div
                                     initial={{ scale: 0.95, opacity: 0, y: 20 }}
@@ -722,7 +717,7 @@ export default function UserSessionSwitcher({
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
                                 exit={{ opacity: 0 }}
-                                className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+                                className="fixed inset-0 z-[1000] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
                                 onClick={() => setShowCreateDialog(false)}
                             >
                                 <motion.div

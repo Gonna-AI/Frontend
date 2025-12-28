@@ -17,6 +17,7 @@ import UsageView from '../components/DashboardViews/UsageView';
 import BillingView from '../components/DashboardViews/BillingView';
 import KeysView from '../components/DashboardViews/KeysView';
 import MonitorView from '../components/DashboardViews/MonitorView';
+import WelcomeManager from '../components/DemoCall/WelcomeManager';
 
 function DemoDashboardContent() {
   const { isDark } = useTheme();
@@ -54,6 +55,8 @@ function DemoDashboardContent() {
           activeTab={activeTab}
           setActiveTab={setActiveTab}
         />
+
+        <WelcomeManager isDark={isDark} />
 
         <main className="flex-1 flex flex-col h-screen overflow-hidden relative">
           {/* Sticky Header Container */}

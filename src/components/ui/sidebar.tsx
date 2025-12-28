@@ -9,12 +9,11 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/Input"
 import { Separator } from "@/components/ui/separator"
 import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet"
+  Drawer,
+  DrawerContent,
+  DrawerDescription,
+  DrawerTitle,
+} from "@/components/ui/drawer"
 import { Skeleton } from "@/components/ui/skeleton"
 import {
   Tooltip,
@@ -198,31 +197,25 @@ const Sidebar = React.forwardRef<
 
     if (isMobile) {
       return (
-        <Sheet open={openMobile} onOpenChange={setOpenMobile} {...props}>
-          <SheetContent
+        <Drawer open={openMobile} onOpenChange={setOpenMobile}>
+          <DrawerContent
             data-sidebar="sidebar"
             data-mobile="true"
-            className="w-full h-[60vh] bg-[#0A0A0A] p-0 text-white border-t border-white/10 [&>button]:hidden rounded-t-2xl"
+            className="bg-[#0A0A0A] p-0 text-white border-t border-white/10 rounded-t-2xl [&>div.bg-muted]:bg-white/20"
             style={
               {
                 "--sidebar-width": "100%",
               } as React.CSSProperties
             }
-            side="bottom"
+            {...props}
           >
-            <SheetHeader className="sr-only">
-              <SheetTitle>Sidebar</SheetTitle>
-              <SheetDescription>Displays the mobile sidebar.</SheetDescription>
-            </SheetHeader>
-            <div className="flex h-full w-full flex-col overflow-y-auto">
-              {/* Handle bar for mobile sheet */}
-              <div className="flex justify-center py-3 border-b border-white/10">
-                <div className="w-12 h-1.5 rounded-full bg-white/20" />
-              </div>
+            <DrawerTitle className="sr-only">Sidebar</DrawerTitle>
+            <DrawerDescription className="sr-only">Displays the mobile sidebar.</DrawerDescription>
+            <div className="flex h-full w-full flex-col overflow-y-auto max-h-[85vh]">
               {children}
             </div>
-          </SheetContent>
-        </Sheet>
+          </DrawerContent>
+        </Drawer>
       )
     }
 

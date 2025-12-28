@@ -1,175 +1,129 @@
-import React, { useState, useEffect, createContext, useContext } from "react";
-import { createPortal } from "react-dom";
-import { motion, AnimatePresence } from "framer-motion";
-import { X } from "lucide-react";
-import { cn } from "../../utils/cn";
+import * as React from "react"
+import { Drawer as DrawerPrimitive } from "vaul"
 
-interface DrawerContextType {
-    isOpen: boolean;
-    setIsOpen: (open: boolean) => void;
-}
+import { cn } from "@/utils/cn"
 
-const DrawerContext = createContext<DrawerContextType | undefined>(undefined);
+const Drawer = ({
+    shouldScaleBackground = true,
+    ...props
+}: React.ComponentProps<typeof DrawerPrimitive.Root>) => (
+    <DrawerPrimitive.Root
+        shouldScaleBackground={shouldScaleBackground}
+        {...props}
+    />
+)
+Drawer.displayName = "Drawer"
 
-const useDrawer = () => {
-    const context = useContext(DrawerContext);
-    if (!context) {
-        throw new Error("Drawer components must be used within a Drawer");
-    }
-    return context;
-};
+const DrawerTrigger = DrawerPrimitive.Trigger
 
-interface DrawerProps {
-    children: React.ReactNode;
-}
+const DrawerPortal = DrawerPrimitive.Portal
 
-export function Drawer({ children }: DrawerProps) {
-    const [isOpen, setIsOpen] = useState(false);
+const DrawerClose = DrawerPrimitive.Close
 
-    useEffect(() => {
-        if (isOpen) {
-            document.body.style.overflow = "hidden";
-        } else {
-            document.body.style.overflow = "unset";
-        }
+const DrawerOverlay = React.forwardRef<
+    React.ElementRef<typeof DrawerPrimitive.Overlay>,
+    React.ComponentPropsWithoutRef<typeof DrawerPrimitive.Overlay>
+>(({ className, ...props }, ref) => (
+    <DrawerPrimitive.Overlay
+        ref={ref}
+        className={cn("fixed inset-0 z-[500] bg-black/80", className)}
+        {...props}
+    />
+))
+DrawerOverlay.displayName = DrawerPrimitive.Overlay.displayName
 
-        return () => {
-            document.body.style.overflow = "unset";
-        };
-    }, [isOpen]);
-
-    return (
-        <DrawerContext.Provider value={{ isOpen, setIsOpen }}>
-            {children}
-        </DrawerContext.Provider>
-    );
-}
-
-interface DrawerTriggerProps {
-    children: React.ReactNode;
-    className?: string;
-}
-
-export function DrawerTrigger({ children, className }: DrawerTriggerProps) {
-    const { setIsOpen } = useDrawer();
-
-    return (
-        <button
-            onClick={() => setIsOpen(true)}
-            className={cn(className)}
+const DrawerContent = React.forwardRef<
+    React.ElementRef<typeof DrawerPrimitive.Content>,
+    React.ComponentPropsWithoutRef<typeof DrawerPrimitive.Content>
+>(({ className, children, ...props }, ref) => (
+    <DrawerPortal>
+        <DrawerOverlay />
+        <DrawerPrimitive.Content
+            ref={ref}
+            className={cn(
+                "fixed inset-x-0 bottom-0 z-[500] mt-24 flex h-auto flex-col rounded-t-[10px] border bg-background outline-none",
+                "after:hidden", // Remove default handle if any
+                className
+            )}
+            {...props}
         >
+            <div className="mx-auto mt-4 h-2 w-[100px] rounded-full bg-muted" />
             {children}
-        </button>
-    );
+        </DrawerPrimitive.Content>
+    </DrawerPortal>
+))
+DrawerContent.displayName = "DrawerContent"
+
+const DrawerHeader = ({
+    className,
+    ...props
+}: React.HTMLAttributes<HTMLDivElement>) => (
+    <div
+        className={cn("grid gap-1.5 p-4 text-center sm:text-left", className)}
+        {...props}
+    />
+)
+DrawerHeader.displayName = "DrawerHeader"
+
+const DrawerFooter = ({
+    className,
+    ...props
+}: React.HTMLAttributes<HTMLDivElement>) => (
+    <div
+        className={cn("mt-auto flex flex-col gap-2 p-4", className)}
+        {...props}
+    />
+)
+DrawerFooter.displayName = "DrawerFooter"
+
+const DrawerTitle = React.forwardRef<
+    React.ElementRef<typeof DrawerPrimitive.Title>,
+    React.ComponentPropsWithoutRef<typeof DrawerPrimitive.Title>
+>(({ className, ...props }, ref) => (
+    <DrawerPrimitive.Title
+        ref={ref}
+        className={cn(
+            "text-lg font-semibold leading-none tracking-tight",
+            className
+        )}
+        {...props}
+    />
+))
+DrawerTitle.displayName = DrawerPrimitive.Title.displayName
+
+const DrawerDescription = React.forwardRef<
+    React.ElementRef<typeof DrawerPrimitive.Description>,
+    React.ComponentPropsWithoutRef<typeof DrawerPrimitive.Description>
+>(({ className, ...props }, ref) => (
+    <DrawerPrimitive.Description
+        ref={ref}
+        className={cn("text-sm text-muted-foreground", className)}
+        {...props}
+    />
+))
+DrawerDescription.displayName = DrawerPrimitive.Description.displayName
+
+const DrawerBody = ({
+    className,
+    ...props
+}: React.HTMLAttributes<HTMLDivElement>) => (
+    <div
+        className={cn("p-4 overflow-y-auto flex-1 min-h-0", className)}
+        {...props}
+    />
+)
+DrawerBody.displayName = "DrawerBody"
+
+export {
+    Drawer,
+    DrawerPortal,
+    DrawerOverlay,
+    DrawerTrigger,
+    DrawerClose,
+    DrawerContent,
+    DrawerHeader,
+    DrawerBody,
+    DrawerFooter,
+    DrawerTitle,
+    DrawerDescription,
 }
-
-interface DrawerContentProps {
-    children: React.ReactNode;
-    className?: string;
-}
-
-export function DrawerContent({ children, className }: DrawerContentProps) {
-    const { isOpen, setIsOpen } = useDrawer();
-    const [mounted, setMounted] = useState(false);
-
-    useEffect(() => {
-        setMounted(true);
-        return () => setMounted(false);
-    }, []);
-
-    if (!mounted) return null;
-
-    const drawerContent = (
-        <AnimatePresence mode="wait">
-            {isOpen && (
-                <>
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        transition={{ duration: 0.2, ease: "easeOut" }}
-                        className="fixed inset-0 bg-black/50 z-[100]"
-                        onClick={() => setIsOpen(false)}
-                    />
-
-                    <motion.div
-                        initial={{ y: "100%", opacity: 0 }}
-                        animate={{ y: 0, opacity: 1 }}
-                        exit={{ y: "100%", opacity: 0 }}
-                        transition={{
-                            duration: 0.25,
-                            ease: [0.16, 1, 0.3, 1]
-                        }}
-                        className={cn(
-                            "fixed bottom-3 left-3 right-3 backdrop-blur-2xl border border-white/30 rounded-3xl z-[100] flex flex-col",
-                            className
-                        )}
-                        style={{
-                            maxHeight: '85vh',
-                            top: 'auto',
-                            background: 'rgba(10, 10, 10, 0.3)',
-                            boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.5), inset 0 1px 1px 0 rgba(255, 255, 255, 0.2), inset 0 -1px 1px 0 rgba(255, 255, 255, 0.05)',
-                        }}
-                    >
-                        {children}
-                    </motion.div>
-                </>
-            )}
-        </AnimatePresence>
-    );
-
-    return createPortal(drawerContent, document.body);
-}
-
-interface DrawerHeaderProps {
-    children: React.ReactNode;
-    className?: string;
-    showCloseButton?: boolean;
-}
-
-export function DrawerHeader({ children, className, showCloseButton = true }: DrawerHeaderProps) {
-    const { setIsOpen } = useDrawer();
-
-    return (
-        <div className={cn("flex items-center justify-between p-4 border-b border-transparent flex-shrink-0", className)}>
-            <div className="flex-1">{children}</div>
-            {showCloseButton && (
-                <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => setIsOpen(false)}
-                    className="text-white/60 hover:text-white transition-colors ml-4 flex-shrink-0"
-                >
-                    <X size={20} />
-                </motion.button>
-            )}
-        </div>
-    );
-}
-
-interface DrawerBodyProps {
-    children: React.ReactNode;
-    className?: string;
-}
-
-export function DrawerBody({ children, className }: DrawerBodyProps) {
-    return (
-        <div className={cn("p-4 overflow-y-auto flex-1 min-h-0", className)}>
-            {children}
-        </div>
-    );
-}
-
-interface DrawerFooterProps {
-    children: React.ReactNode;
-    className?: string;
-}
-
-export function DrawerFooter({ children, className }: DrawerFooterProps) {
-    return (
-        <div className={cn("border-t border-border", className)}>
-            {children}
-        </div>
-    );
-}
-
