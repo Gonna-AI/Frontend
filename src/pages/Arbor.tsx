@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ArborMessage, SystemStats } from '../types/arbor';
 import ArborChat from '../components/Arbor/ArborChat';
 import ArborDashboard from '../components/Arbor/ArborDashboard';
@@ -13,7 +13,18 @@ export default function Arbor() {
     const [chatMode, setChatMode] = useState<ChatMode>('ask');
     const [messages, setMessages] = useState<ArborMessage[]>([]);
     const [showDashboard, setShowDashboard] = useState(false);
+    const [isScrolled, setIsScrolled] = useState(false);
     const { t } = useLanguage();
+
+    // Track scroll position to change header background
+    useEffect(() => {
+        const handleScroll = () => {
+            setIsScrolled(window.scrollY > 20);
+        };
+        window.addEventListener('scroll', handleScroll);
+        handleScroll(); // Check initial state
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
 
     const [stats] = useState<SystemStats>({
         total_documents: 147,
@@ -87,7 +98,10 @@ export default function Arbor() {
             </div>
 
             {/* Header */}
-            <div className="relative border-b border-white/10 bg-black/20 backdrop-blur-sm">
+            <div className={`sticky top-0 z-50 border-b border-white/10 transition-all duration-300 ${isScrolled
+                    ? 'bg-black/95 backdrop-blur-xl'
+                    : 'bg-black/20 backdrop-blur-sm'
+                }`}>
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4">
                     <div className="flex items-center justify-between gap-3 sm:gap-4">
                         <div className="flex items-center gap-3 sm:gap-4">
