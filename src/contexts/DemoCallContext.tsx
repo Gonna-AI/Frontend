@@ -519,13 +519,33 @@ export function DemoCallProvider({ children }: { children: ReactNode }) {
 
   // Real-time subscription for global active sessions count
   useEffect(() => {
-    // Fetch initial count
+    // Clean up stale sessions (older than 5 minutes without activity)
+    const cleanupStaleSessions = async () => {
+      try {
+        const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
+        const { error, count } = await supabase
+          .from('active_sessions')
+          .delete()
+          .eq('status', 'active')
+          .lt('last_activity', fiveMinutesAgo);
+
+        if (!error && count && count > 0) {
+          console.log(`🧹 Cleaned up ${count} stale sessions`);
+        }
+      } catch (e) {
+        console.error('🧹 Stale session cleanup error:', e);
+      }
+    };
+
+    // Fetch initial count (only sessions with recent activity - within last 5 min)
     const fetchActiveSessions = async () => {
       try {
+        const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
         const { data, error } = await supabase
           .from('active_sessions')
           .select('session_type')
-          .eq('status', 'active');
+          .eq('status', 'active')
+          .gte('last_activity', fiveMinutesAgo);
 
         if (error) {
           console.log('📡 Active sessions query error:', error.message);
@@ -543,7 +563,13 @@ export function DemoCallProvider({ children }: { children: ReactNode }) {
       }
     };
 
-    fetchActiveSessions();
+    // Initial cleanup then fetch
+    cleanupStaleSessions().then(() => fetchActiveSessions());
+
+    // Periodically cleanup stale sessions every minute
+    const cleanupInterval = setInterval(() => {
+      cleanupStaleSessions();
+    }, 60 * 1000);
 
     // Subscribe to changes
     const subscription = supabase
@@ -562,6 +588,7 @@ export function DemoCallProvider({ children }: { children: ReactNode }) {
       });
 
     return () => {
+      clearInterval(cleanupInterval);
       subscription.unsubscribe();
     };
   }, []);
@@ -706,6 +733,65 @@ export function DemoCallProvider({ children }: { children: ReactNode }) {
       console.error('📡 Session registration error:', e);
     }
   }, []);
+
+  // Heartbeat: Update last_activity while call is active to prevent stale session cleanup
+  useEffect(() => {
+    if (!currentCall || currentCall.status !== 'active') return;
+
+    const updateHeartbeat = async () => {
+      try {
+        await supabase
+          .from('active_sessions')
+          .update({ last_activity: new Date().toISOString() })
+          .eq('id', currentCall.id);
+        console.log('💓 Session heartbeat updated:', currentCall.id);
+      } catch (e) {
+        // Silently fail - not critical
+      }
+    };
+
+    // Update heartbeat every 30 seconds
+    const heartbeatInterval = setInterval(updateHeartbeat, 30 * 1000);
+
+    // Initial update
+    updateHeartbeat();
+
+    return () => clearInterval(heartbeatInterval);
+  }, [currentCall?.id, currentCall?.status]);
+
+  // Cleanup session when tab/window closes
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      if (currentCall?.status === 'active') {
+        // Use sendBeacon for reliable delivery during page unload
+        const url = `${import.meta.env.VITE_SUPABASE_URL}/rest/v1/active_sessions?id=eq.${currentCall.id}`;
+        const headers = {
+          'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY || '',
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY || ''}`,
+          'Content-Type': 'application/json',
+        };
+
+        // sendBeacon doesn't support custom headers directly, so we fall back to sync fetch
+        try {
+          // Mark as ended first via localStorage so other tabs can see
+          localStorage.removeItem(ACTIVE_CALL_KEY);
+
+          // Attempt delete - this may or may not complete
+          fetch(url, {
+            method: 'DELETE',
+            headers,
+            keepalive: true, // Allows request to outlive the page
+          });
+          console.log('🚪 Session cleanup initiated on page unload');
+        } catch (e) {
+          // Silent fail - cleanup will happen via stale session cleanup
+        }
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [currentCall?.id, currentCall?.status]);
 
   // Helper to find caller name from various sources
   const findCallerName = (call: CallSession): string => {
