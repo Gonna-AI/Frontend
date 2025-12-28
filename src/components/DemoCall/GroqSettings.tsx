@@ -142,33 +142,33 @@ export default function GroqSettingsPage({ isDark = true, onSettingsChange }: Gr
     };
 
     return (
-        <div className="space-y-8 max-w-6xl mx-auto pb-10">
+        <div className="space-y-6 max-w-[1600px] mx-auto pb-10">
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div>
                     <h1 className={cn("text-2xl font-bold", isDark ? "text-white" : "text-black")}>
-                        Groq Configuration
+                        Model Configuration
                     </h1>
                     <p className={cn("text-sm", isDark ? "text-white/60" : "text-black/60")}>
-                        Model selection and inference parameters
+                        Customize inference parameters and model selection
                     </p>
                 </div>
                 <button
                     onClick={testConnection}
                     title={testError || ''}
                     className={cn(
-                        "flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all",
+                        "flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all border",
                         isTestingConnection
-                            ? isDark ? "bg-white/10 text-white/50" : "bg-black/10 text-black/50"
+                            ? (isDark ? "bg-white/5 border-white/10 text-white/50" : "bg-black/5 border-black/5 text-black/50")
                             : connectionStatus === 'success'
-                                ? "bg-green-500/20 text-green-400"
+                                ? (isDark ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400" : "bg-emerald-50 border-emerald-200 text-emerald-700")
                                 : connectionStatus === 'error'
-                                    ? "bg-red-500/20 text-red-400"
-                                    : isDark ? "bg-white text-black" : "bg-black text-white"
+                                    ? (isDark ? "bg-rose-500/10 border-rose-500/20 text-rose-400" : "bg-rose-50 border-rose-200 text-rose-700")
+                                    : (isDark ? "bg-white text-black hover:bg-white/90" : "bg-black text-white hover:bg-black/90")
                     )}
                 >
                     {isTestingConnection ? <Loader2 className="w-4 h-4 animate-spin" /> : connectionStatus === 'success' ? <Check className="w-4 h-4" /> : connectionStatus === 'error' ? <AlertCircle className="w-4 h-4" /> : <Zap className="w-4 h-4" />}
-                    {isTestingConnection ? 'Testing...' : connectionStatus === 'success' ? 'Connected' : connectionStatus === 'error' ? 'Failed' : 'Test Connection'}
+                    {isTestingConnection ? 'Testing...' : connectionStatus === 'success' ? 'Systems Operational' : connectionStatus === 'error' ? 'Connection Failed' : 'Test Connection'}
                 </button>
             </div>
 
@@ -176,7 +176,7 @@ export default function GroqSettingsPage({ isDark = true, onSettingsChange }: Gr
                 {/* Model Selection - Minimal Card */}
                 <div className={cn(
                     "p-6 rounded-xl border",
-                    isDark ? "bg-black/40 border-white/10 text-white" : "bg-white border-black/10 text-black"
+                    isDark ? "bg-[#09090B] border-white/10 text-white" : "bg-white border-black/10 text-black"
                 )}>
                     <h3 className={cn("text-lg font-semibold mb-1", isDark ? "text-white" : "text-black")}>
                         Model Selection
@@ -206,10 +206,12 @@ export default function GroqSettingsPage({ isDark = true, onSettingsChange }: Gr
                                         {model.name}
                                     </span>
                                     {settings.model === model.id && (
-                                        <Check className={cn("w-4 h-4", isDark ? "text-purple-400" : "text-purple-600")} />
+                                        <div className="bg-purple-500/20 rounded-full p-0.5">
+                                            <Check className={cn("w-3 h-3", isDark ? "text-purple-400" : "text-purple-600")} />
+                                        </div>
                                     )}
                                 </div>
-                                <p className={cn("text-xs", isDark ? "text-white/50" : "text-black/50")}>
+                                <p className={cn("text-xs opacity-60", isDark ? "text-white" : "text-black")}>
                                     {model.description}
                                 </p>
                             </button>
@@ -220,7 +222,7 @@ export default function GroqSettingsPage({ isDark = true, onSettingsChange }: Gr
                 {/* Parameters - Minimal Card */}
                 <div className={cn(
                     "p-6 rounded-xl border h-fit",
-                    isDark ? "bg-black/40 border-white/10 text-white" : "bg-white border-black/10 text-black"
+                    isDark ? "bg-[#09090B] border-white/10 text-white" : "bg-white border-black/10 text-black"
                 )}>
                     <h3 className={cn("text-lg font-semibold mb-1", isDark ? "text-white" : "text-black")}>
                         Parameters
@@ -235,7 +237,7 @@ export default function GroqSettingsPage({ isDark = true, onSettingsChange }: Gr
                                 <label className={cn("text-sm font-medium", isDark ? "text-white" : "text-black")}>
                                     Temperature
                                 </label>
-                                <span className={cn("text-xs font-mono px-2 py-1 rounded", isDark ? "bg-white/5" : "bg-black/5")}>
+                                <span className={cn("text-xs font-mono px-2 py-1 rounded border", isDark ? "bg-white/5 border-white/10" : "bg-black/5 border-black/5")}>
                                     {settings.temperature}
                                 </span>
                             </div>
@@ -243,7 +245,10 @@ export default function GroqSettingsPage({ isDark = true, onSettingsChange }: Gr
                                 type="range" min="0" max="2" step="0.1"
                                 value={settings.temperature}
                                 onChange={(e) => saveSettings({ ...settings, temperature: parseFloat(e.target.value) })}
-                                className="w-full h-1.5 rounded-full appearance-none bg-white/10 cursor-pointer accent-white"
+                                className={cn(
+                                    "w-full h-1.5 rounded-full appearance-none cursor-pointer",
+                                    isDark ? "bg-white/10 accent-white" : "bg-black/10 accent-black"
+                                )}
                             />
                             <p className={cn("text-xs mt-2", isDark ? "text-white/40" : "text-black/40")}>
                                 Controls creativity. Lower values are more deterministic.
@@ -255,7 +260,7 @@ export default function GroqSettingsPage({ isDark = true, onSettingsChange }: Gr
                                 <label className={cn("text-sm font-medium", isDark ? "text-white" : "text-black")}>
                                     Max Tokens
                                 </label>
-                                <span className={cn("text-xs font-mono px-2 py-1 rounded", isDark ? "bg-white/5" : "bg-black/5")}>
+                                <span className={cn("text-xs font-mono px-2 py-1 rounded border", isDark ? "bg-white/5 border-white/10" : "bg-black/5 border-black/5")}>
                                     {settings.maxTokens}
                                 </span>
                             </div>
@@ -263,7 +268,10 @@ export default function GroqSettingsPage({ isDark = true, onSettingsChange }: Gr
                                 type="range" min="256" max="8192" step="256"
                                 value={settings.maxTokens}
                                 onChange={(e) => saveSettings({ ...settings, maxTokens: parseInt(e.target.value) })}
-                                className="w-full h-1.5 rounded-full appearance-none bg-white/10 cursor-pointer accent-white"
+                                className={cn(
+                                    "w-full h-1.5 rounded-full appearance-none cursor-pointer",
+                                    isDark ? "bg-white/10 accent-white" : "bg-black/10 accent-black"
+                                )}
                             />
                         </div>
 
@@ -272,7 +280,7 @@ export default function GroqSettingsPage({ isDark = true, onSettingsChange }: Gr
                                 <label className={cn("text-sm font-medium", isDark ? "text-white" : "text-black")}>
                                     Top P
                                 </label>
-                                <span className={cn("text-xs font-mono px-2 py-1 rounded", isDark ? "bg-white/5" : "bg-black/5")}>
+                                <span className={cn("text-xs font-mono px-2 py-1 rounded border", isDark ? "bg-white/5 border-white/10" : "bg-black/5 border-black/5")}>
                                     {settings.topP}
                                 </span>
                             </div>
@@ -280,7 +288,10 @@ export default function GroqSettingsPage({ isDark = true, onSettingsChange }: Gr
                                 type="range" min="0.1" max="1" step="0.05"
                                 value={settings.topP}
                                 onChange={(e) => saveSettings({ ...settings, topP: parseFloat(e.target.value) })}
-                                className="w-full h-1.5 rounded-full appearance-none bg-white/10 cursor-pointer accent-white"
+                                className={cn(
+                                    "w-full h-1.5 rounded-full appearance-none cursor-pointer",
+                                    isDark ? "bg-white/10 accent-white" : "bg-black/10 accent-black"
+                                )}
                             />
                         </div>
                     </div>

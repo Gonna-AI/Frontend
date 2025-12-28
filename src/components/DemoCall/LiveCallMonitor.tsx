@@ -1,14 +1,13 @@
 import React, { useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MessageSquare, User, Bot, Tag, AlertTriangle, CheckCircle } from 'lucide-react';
+import { MessageSquare, User, Bot, Activity } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { useDemoCall, CallMessage, ExtractedField } from '../../contexts/DemoCallContext';
+import { useLanguage } from '../../contexts/LanguageContext';
 
 interface LiveCallMonitorProps {
   isDark?: boolean;
 }
-
-import { useLanguage } from '../../contexts/LanguageContext';
 
 export default function LiveCallMonitor({ isDark = true }: LiveCallMonitorProps) {
   const { t } = useLanguage();
@@ -31,53 +30,71 @@ export default function LiveCallMonitor({ isDark = true }: LiveCallMonitorProps)
 
   const getPriorityColor = (priority: string) => {
     const colors: Record<string, string> = {
-      critical: 'text-red-400 bg-red-500/20',
-      high: 'text-orange-400 bg-orange-500/20',
-      medium: 'text-yellow-400 bg-yellow-500/20',
-      low: 'text-green-400 bg-green-500/20',
+      critical: 'text-rose-400 bg-rose-500/10 border-rose-500/20',
+      high: 'text-orange-400 bg-orange-500/10 border-orange-500/20',
+      medium: 'text-blue-400 bg-blue-500/10 border-blue-500/20',
+      low: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
     };
     return colors[priority] || colors.medium;
   };
 
   return (
     <div className={cn(
-      "flex flex-col h-full rounded-xl md:rounded-2xl overflow-hidden",
+      "flex flex-col h-[600px] rounded-xl overflow-hidden border shadow-sm",
       isDark
-        ? "bg-black/60 backdrop-blur-xl border border-white/10"
-        : "bg-white/80 border border-black/10"
+        ? "bg-[#09090B] border-white/10"
+        : "bg-white border-black/10"
     )}>
       {/* Header */}
       <div className={cn(
-        "flex items-center justify-between px-3 md:px-4 py-2 md:py-3 border-b",
-        isDark ? "border-white/10" : "border-black/10"
+        "flex items-center justify-between px-4 py-3 border-b backdrop-blur-sm",
+        isDark ? "border-white/10 bg-white/[0.02]" : "border-black/5 bg-gray-50/50"
       )}>
-        <div className="flex items-center gap-2 md:gap-3">
-          <MessageSquare className={cn(
-            "w-4 h-4 md:w-5 md:h-5",
-            isDark ? "text-white/60" : "text-black/60"
-          )} />
-          <h3 className={cn(
-            "font-semibold text-sm md:text-base",
-            isDark ? "text-white" : "text-black"
+        <div className="flex items-center gap-3">
+          <div className={cn(
+            "p-2 rounded-lg",
+            isDark ? "bg-white/5" : "bg-black/5"
           )}>
-            {t('monitor.title')}
-          </h3>
+            <Activity className={cn(
+              "w-4 h-4",
+              isDark ? "text-white" : "text-black"
+            )} />
+          </div>
+          <div>
+            <h3 className={cn(
+              "font-semibold text-sm leading-none",
+              isDark ? "text-white" : "text-gray-900"
+            )}>
+              {t('monitor.title')}
+            </h3>
+            <p className={cn("text-xs mt-1", isDark ? "text-white/40" : "text-gray-500")}>
+              Real-time conversation stream
+            </p>
+          </div>
         </div>
 
-        <div className="flex items-center gap-1.5 md:gap-2">
-          <div className={cn(
-            "w-1.5 h-1.5 md:w-2 md:h-2 rounded-full",
-            isActive ? "bg-green-500 animate-pulse" : "bg-gray-500"
-          )} />
-          <span className={cn(
-            "text-xs md:text-sm",
-            isDark ? "text-white/60" : "text-black/60"
-          )}>
-            {isActive ? t('monitor.status.active') : t('monitor.status.idle')}
-          </span>
-          {currentCall?.priority && currentCall.priority !== 'medium' && (
+        <div className="flex items-center gap-2">
+          {isActive ? (
+            <div className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+              </span>
+              <span className="text-xs font-medium text-emerald-500 uppercase tracking-wider">Live</span>
+            </div>
+          ) : (
+            <div className={cn(
+              "flex items-center gap-1.5 px-2 py-1 rounded-full border",
+              isDark ? "bg-white/5 border-white/10 text-white/40" : "bg-black/5 border-black/5 text-black/40"
+            )}>
+              <div className="w-2 h-2 rounded-full bg-current opacity-50" />
+              <span className="text-xs font-medium uppercase tracking-wider">Idle</span>
+            </div>
+          )}
+
+          {currentCall?.priority && (
             <span className={cn(
-              "text-[10px] md:text-xs px-1.5 md:px-2 py-0.5 rounded-full capitalize",
+              "text-xs px-2 py-1 rounded-full capitalize font-medium border",
               getPriorityColor(currentCall.priority)
             )}>
               {currentCall.priority}
@@ -86,261 +103,112 @@ export default function LiveCallMonitor({ isDark = true }: LiveCallMonitorProps)
         </div>
       </div>
 
-      {/* Extracted fields panel - Enhanced with sections */}
+      {/* Extracted fields panel */}
       {isActive && extractedFields.length > 0 && (
         <div className={cn(
-          "px-3 md:px-4 py-2 md:py-3 border-b",
-          isDark ? "border-white/10 bg-white/5" : "border-black/10 bg-black/5"
+          "px-4 py-3 border-b overflow-x-auto",
+          isDark ? "border-white/10 bg-white/[0.02]" : "border-black/5 bg-gray-50/50"
         )}>
-          {/* Appointment Section - if appointment fields exist */}
-          {extractedFields.some(f => f.id.startsWith('appt_')) && (
-            <div className="mb-3">
-              <div className="flex items-center gap-1.5 md:gap-2 mb-1.5">
-                <span className="text-lg">📅</span>
-                <span className={cn(
-                  "text-[10px] md:text-xs font-semibold uppercase tracking-wide",
-                  isDark ? "text-green-400" : "text-green-600"
-                )}>
-                  {t('monitor.apptDetails')}
+          <div className="flex gap-4 min-w-max">
+            {extractedFields.map((field: ExtractedField) => (
+              <div key={field.id} className={cn(
+                "flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs",
+                isDark ? "bg-white/5 border-white/10" : "bg-white border-black/5 shadow-sm"
+              )}>
+                <span className={cn("opacity-50 font-medium", isDark ? "text-white" : "text-black")}>
+                  {field.label}:
+                </span>
+                <span className={cn("font-medium", isDark ? "text-white" : "text-gray-900")}>
+                  {field.value}
                 </span>
               </div>
-              <div className={cn(
-                "rounded-lg p-2",
-                isDark ? "bg-green-500/10 border border-green-500/20" : "bg-green-50 border border-green-200"
-              )}>
-                {extractedFields.filter(f => f.id.startsWith('appt_')).map((field: ExtractedField) => (
-                  <div key={field.id} className="flex items-center gap-2 mb-1 last:mb-0">
-                    <span className={cn("text-xs", isDark ? "text-green-300/70" : "text-green-600/70")}>
-                      {field.label}:
-                    </span>
-                    <span className={cn("text-xs font-medium", isDark ? "text-green-200" : "text-green-800")}>
-                      {field.value}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Contact Info Section */}
-          {(extractedFields.some(f => ['phone', 'email', 'alt_contact'].includes(f.id)) ||
-            extractedFields.some(f => f.id === 'name')) && (
-              <div className="mb-3">
-                <div className="flex items-center gap-1.5 md:gap-2 mb-1.5">
-                  <span className="text-lg">👤</span>
-                  <span className={cn(
-                    "text-[10px] md:text-xs font-semibold uppercase tracking-wide",
-                    isDark ? "text-blue-400" : "text-blue-600"
-                  )}>
-                    {t('monitor.contactInfo')}
-                  </span>
-                  {!extractedFields.some(f => ['phone', 'email', 'alt_contact'].includes(f.id)) && (
-                    <span className={cn(
-                      "text-[9px] px-1.5 py-0.5 rounded",
-                      isDark ? "bg-yellow-500/20 text-yellow-400" : "bg-yellow-100 text-yellow-700"
-                    )}>
-                      ⚠️ {t('monitor.noContact')}
-                    </span>
-                  )}
-                </div>
-                <div className="flex flex-wrap gap-1.5 md:gap-2">
-                  {extractedFields.filter(f => ['name', 'phone', 'email', 'alt_contact', 'company'].includes(f.id)).map((field: ExtractedField) => (
-                    <div
-                      key={field.id}
-                      className={cn(
-                        "text-[10px] md:text-xs px-1.5 md:px-2 py-0.5 md:py-1 rounded-md md:rounded-lg flex items-center gap-0.5 md:gap-1",
-                        field.id === 'phone' || field.id === 'email' || field.id === 'alt_contact'
-                          ? isDark
-                            ? "bg-green-500/10 text-green-400 border border-green-500/20"
-                            : "bg-green-500/5 text-green-600 border border-green-500/10"
-                          : isDark
-                            ? "bg-blue-500/10 text-blue-400 border border-blue-500/20"
-                            : "bg-blue-500/5 text-blue-600 border border-blue-500/10"
-                      )}
-                    >
-                      <span className="opacity-70">{field.label}:</span>
-                      <span className="font-medium truncate max-w-[80px] md:max-w-none">{field.value}</span>
-                      <CheckCircle className="w-2.5 h-2.5 md:w-3 md:h-3 opacity-60 flex-shrink-0" />
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-          {/* Other Extracted Fields */}
-          {extractedFields.filter(f =>
-            !f.id.startsWith('appt_') &&
-            !['name', 'phone', 'email', 'alt_contact', 'company'].includes(f.id)
-          ).length > 0 && (
-              <div>
-                <div className="flex items-center gap-1.5 md:gap-2 mb-1.5">
-                  <Tag className={cn(
-                    "w-3 h-3 md:w-4 md:h-4",
-                    isDark ? "text-white/60" : "text-black/60"
-                  )} />
-                  <span className={cn(
-                    "text-[10px] md:text-xs font-medium",
-                    isDark ? "text-white/60" : "text-black/60"
-                  )}>
-                    {t('monitor.otherDetails')}
-                  </span>
-                </div>
-                <div className="flex flex-wrap gap-1.5 md:gap-2">
-                  {extractedFields.filter(f =>
-                    !f.id.startsWith('appt_') &&
-                    !['name', 'phone', 'email', 'alt_contact', 'company'].includes(f.id)
-                  ).map((field: ExtractedField) => (
-                    <div
-                      key={field.id}
-                      className={cn(
-                        "text-[10px] md:text-xs px-1.5 md:px-2 py-0.5 md:py-1 rounded-md md:rounded-lg flex items-center gap-0.5 md:gap-1",
-                        isDark
-                          ? "bg-purple-500/10 text-purple-400 border border-purple-500/20"
-                          : "bg-purple-500/5 text-purple-600 border border-purple-500/10"
-                      )}
-                    >
-                      <span className="opacity-70">{field.label}:</span>
-                      <span className="font-medium truncate max-w-[60px] md:max-w-none">{field.value}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
+            ))}
+          </div>
         </div>
       )}
 
-      {/* Category display */}
+      {/* Category display (Sticky if active) */}
       {isActive && currentCall?.category && (
         <div className={cn(
-          "px-3 md:px-4 py-1.5 md:py-2 border-b flex items-center gap-1.5 md:gap-2",
-          isDark ? "border-white/10" : "border-black/10"
+          "px-4 py-2 border-b flex items-center justify-between text-xs",
+          isDark ? "border-white/10 bg-purple-500/5 text-purple-200" : "border-black/5 bg-purple-50 text-purple-700"
         )}>
-          <span className={cn(
-            "text-[10px] md:text-xs",
-            isDark ? "text-white/50" : "text-black/50"
-          )}>
-            {t('monitor.category')}
-          </span>
-          <span className={cn(
-            "text-[10px] md:text-xs px-1.5 md:px-2 py-0.5 rounded-full",
-            isDark ? "bg-purple-500/20 text-purple-400" : "bg-purple-500/10 text-purple-600"
-          )}>
-            {currentCall.category.name}
-          </span>
+          <span className="opacity-70">Detected Intent</span>
+          <span className="font-semibold">{currentCall.category.name}</span>
         </div>
       )}
 
       {/* Messages area */}
-      <div className="flex-1 overflow-y-auto p-3 md:p-4 space-y-2 md:space-y-3 custom-scrollbar">
+      <div className={cn(
+        "flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar scroll-smooth",
+        isDark ? "bg-[#09090B]" : "bg-gray-50/30"
+      )}>
         {messages.length === 0 ? (
           <div className={cn(
-            "flex flex-col items-center justify-center h-full text-center py-8 md:py-12",
-            isDark ? "text-white/40" : "text-black/40"
+            "flex flex-col items-center justify-center h-full text-center py-12",
+            isDark ? "text-white/20" : "text-black/20"
           )}>
-            <MessageSquare className="w-8 h-8 md:w-12 md:h-12 mb-2 md:mb-4 opacity-40" />
-            <p className="text-sm md:text-lg font-medium mb-0.5 md:mb-1">{t('monitor.noActive')}</p>
-            <p className="text-xs md:text-sm opacity-80">
+            <div className={cn(
+              "w-16 h-16 rounded-2xl flex items-center justify-center mb-4",
+              isDark ? "bg-white/5" : "bg-black/5"
+            )}>
+              <MessageSquare className="w-8 h-8 opacity-50" />
+            </div>
+            <p className="text-sm font-medium">{t('monitor.noActive')}</p>
+            <p className="text-xs opacity-60 mt-1">
               {isActive ? t('monitor.waiting') : t('monitor.startCall')}
             </p>
           </div>
         ) : (
-          <AnimatePresence mode="popLayout">
+          <AnimatePresence mode="popLayout" initial={false}>
             {messages.map((message: CallMessage) => (
               <motion.div
                 key={message.id}
-                initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                initial={{ opacity: 0, y: 10, scale: 0.98 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                transition={{ duration: 0.2 }}
                 className={cn(
-                  "flex gap-1.5 md:gap-3",
-                  message.speaker === 'agent' ? "justify-start" : "justify-end"
+                  "flex gap-3 max-w-[85%]",
+                  message.speaker === 'agent' ? "mr-auto" : "ml-auto flex-row-reverse"
                 )}
               >
-                {message.speaker === 'agent' && (
-                  <div className={cn(
-                    "w-6 h-6 md:w-8 md:h-8 rounded-md md:rounded-lg flex items-center justify-center flex-shrink-0",
-                    isDark
-                      ? "bg-blue-500/20 border border-blue-500/30"
-                      : "bg-blue-500/10 border border-blue-500/20"
-                  )}>
-                    <Bot className="w-3 h-3 md:w-4 md:h-4 text-blue-400" />
-                  </div>
-                )}
-
                 <div className={cn(
-                  "max-w-[80%] rounded-xl md:rounded-2xl px-3 md:px-4 py-2 md:py-3",
+                  "w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 shadow-sm mt-1",
                   message.speaker === 'agent'
-                    ? isDark
-                      ? "bg-blue-500/10 border border-blue-500/20"
-                      : "bg-blue-500/10 border border-blue-500/20"
-                    : isDark
-                      ? "bg-purple-500/10 border border-purple-500/20"
-                      : "bg-purple-500/10 border border-purple-500/20"
+                    ? (isDark ? "bg-indigo-500/20 text-indigo-400 border border-indigo-500/20" : "bg-indigo-50 text-indigo-600 border border-indigo-100")
+                    : (isDark ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/20" : "bg-emerald-50 text-emerald-600 border border-emerald-100")
                 )}>
-                  <p className={cn(
-                    "text-xs md:text-sm",
-                    isDark ? "text-white/90" : "text-black/90"
-                  )}>
-                    {message.text}
-                  </p>
-                  <p className={cn(
-                    "text-[10px] md:text-xs mt-0.5 md:mt-1",
-                    isDark ? "text-white/40" : "text-black/40"
-                  )}>
-                    {formatTime(message.timestamp)}
-                  </p>
+                  {message.speaker === 'agent' ? <Bot className="w-4 h-4" /> : <User className="w-4 h-4" />}
                 </div>
 
-                {message.speaker === 'user' && (
+                <div className={cn(
+                  "flex flex-col",
+                  message.speaker === 'agent' ? "items-start" : "items-end"
+                )}>
                   <div className={cn(
-                    "w-6 h-6 md:w-8 md:h-8 rounded-md md:rounded-lg flex items-center justify-center flex-shrink-0",
-                    isDark
-                      ? "bg-purple-500/20 border border-purple-500/30"
-                      : "bg-purple-500/10 border border-purple-500/20"
+                    "rounded-2xl px-4 py-2.5 shadow-sm text-sm leading-relaxed relative group",
+                    message.speaker === 'agent'
+                      ? (isDark
+                        ? "bg-white/10 text-white rounded-tl-none border border-white/5"
+                        : "bg-white text-gray-800 rounded-tl-none border border-gray-100")
+                      : (isDark
+                        ? "bg-emerald-600 text-white rounded-tr-none"
+                        : "bg-emerald-600 text-white rounded-tr-none shadow-md")
                   )}>
-                    <User className="w-3 h-3 md:w-4 md:h-4 text-purple-400" />
+                    {message.text}
                   </div>
-                )}
+                  <span className={cn(
+                    "text-[10px] mt-1 opacity-40 px-1",
+                    isDark ? "text-white" : "text-black"
+                  )}>
+                    {formatTime(message.timestamp)}
+                  </span>
+                </div>
               </motion.div>
             ))}
           </AnimatePresence>
         )}
         <div ref={messagesEndRef} />
       </div>
-
-      {/* Status bar */}
-      {isActive && (
-        <div className={cn(
-          "px-3 md:px-4 py-1.5 md:py-2 border-t flex items-center gap-1.5 md:gap-2",
-          isDark ? "border-white/10 bg-white/5" : "border-black/10 bg-black/5"
-        )}>
-          <div className="flex space-x-0.5 md:space-x-1">
-            <motion.div
-              animate={{ opacity: [0.3, 1, 0.3] }}
-              transition={{ duration: 1.5, repeat: Infinity, delay: 0 }}
-              className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-green-500"
-            />
-            <motion.div
-              animate={{ opacity: [0.3, 1, 0.3] }}
-              transition={{ duration: 1.5, repeat: Infinity, delay: 0.2 }}
-              className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-green-500"
-            />
-            <motion.div
-              animate={{ opacity: [0.3, 1, 0.3] }}
-              transition={{ duration: 1.5, repeat: Infinity, delay: 0.4 }}
-              className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-green-500"
-            />
-          </div>
-          <span className={cn(
-            "text-[10px] md:text-xs",
-            isDark ? "text-white/50" : "text-black/50"
-          )}>
-            <span className="hidden sm:inline">{t('monitor.recording')}</span>
-            <span className="sm:hidden">{t('monitor.recordingShort')}</span>
-          </span>
-        </div>
-      )}
     </div>
   );
 }
