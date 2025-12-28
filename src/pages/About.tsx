@@ -99,17 +99,18 @@ export default function About() {
           </div>
 
           {/* Team Section */}
-          <div className="mb-20">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl md:text-4xl font-bold text-white/90">Our Team</h2>
+          <div className="mb-32 relative">
+            {/* Background elements for modern feel */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-full bg-blue-500/5 blur-[120px] -z-10 rounded-full" />
+
+            <div className="text-center mb-16 relative z-10">
+              <h2 className="text-4xl md:text-5xl font-bold text-white tracking-tight mb-4">
+                Our Team
+              </h2>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 items-stretch">
+
+            <div className="flex flex-wrap justify-center gap-10 items-stretch relative z-10">
               {[
-                {
-                  name: 'Kenshin Kiriyama',
-                  image: 'https://xlzwfkgurrrspcdyqele.supabase.co/storage/v1/object/public/buck/KenshinKiriyama.jpeg',
-                  description: t('about.team.kenshin')
-                },
                 {
                   name: 'Animesh Mishra',
                   image: 'https://xlzwfkgurrrspcdyqele.supabase.co/storage/v1/object/public/buck/animeshmishra.PNG',
@@ -117,10 +118,9 @@ export default function About() {
                   objectPosition: 'center top'
                 },
                 {
-                  name: 'Krishang Sharma',
-                  image: 'https://xlzwfkgurrrspcdyqele.supabase.co/storage/v1/object/public/buck/krishangsharma.JPG',
-                  description: t('about.team.krishang'),
-                  objectPosition: '20% 45%'
+                  name: 'Kenshin Kiriyama',
+                  image: 'https://xlzwfkgurrrspcdyqele.supabase.co/storage/v1/object/public/buck/KenshinKiriyama.jpeg',
+                  description: t('about.team.kenshin')
                 },
                 {
                   name: 'Shobhit Mishra',
@@ -129,29 +129,54 @@ export default function About() {
                   objectPosition: 'center top'
                 },
                 {
+                  name: 'Krishang Sharma',
+                  image: 'https://xlzwfkgurrrspcdyqele.supabase.co/storage/v1/object/public/buck/krishangfinal.JPG',
+                  description: t('about.team.krishang'),
+                  objectPosition: '55% 5%',
+                  scale: '1.7',
+                  hoverScale: '1.87'
+                },
+                {
                   name: 'Urja Shrestha',
                   image: 'https://xlzwfkgurrrspcdyqele.supabase.co/storage/v1/object/public/buck/Urja%20Shrestha.jpeg',
                   description: t('about.team.urja')
                 },
               ].map((member, index) => (
-                <div key={index} className="h-full group rounded-2xl border border-white/5 bg-[rgb(10,10,10)] p-5 flex flex-col items-center hover:border-white/10 transition-colors">
-                  <div className="w-24 h-24 mb-4 rounded-full overflow-hidden ring-2 ring-white/10 group-hover:ring-blue-500/50 transition-all shrink-0">
-                    <img
-                      src={member.image}
-                      alt={member.name}
-                      className="w-full h-full object-cover"
-                      style={{ objectPosition: member.objectPosition || 'center' }}
-                    />
-                  </div>
-                  <h3 className="text-sm font-semibold text-white/90 mb-3 text-center shrink-0">{member.name}</h3>
-                  <div className="flex-grow flex items-start justify-center">
-                    {member.description ? (
-                      <p className="text-[11px] text-white/50 text-center leading-relaxed font-medium">
-                        {member.description}
-                      </p>
-                    ) : (
-                      <div className="w-full h-20 bg-white/5 rounded-lg border border-white/5"></div>
-                    )}
+                <div
+                  key={index}
+                  className="group relative w-full sm:w-[calc(50%-2rem)] lg:w-[calc(33.33%-2rem)] xl:w-[calc(30%-2rem)] min-w-[320px] max-w-md grow rounded-3xl bg-white/5 border border-white/10 hover:border-blue-500/30 transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_0_30px_-5px_rgba(59,130,246,0.15)] overflow-hidden flex flex-col"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+                  <div className="p-6 flex flex-col items-center h-full relative z-10">
+                    <div className="w-28 h-28 mb-6 rounded-full p-[2px] bg-gradient-to-br from-white/10 to-white/5 group-hover:from-blue-500/50 group-hover:to-cyan-500/50 transition-all duration-500">
+                      <div className="w-full h-full rounded-full overflow-hidden bg-black/50">
+                        <img
+                          src={member.image}
+                          alt={member.name}
+                          className="w-full h-full object-cover transition-transform duration-700 scale-[var(--base-scale)] group-hover:scale-[var(--hover-scale)]"
+                          style={{
+                            objectPosition: member.objectPosition || 'center',
+                            '--base-scale': member.scale || '1',
+                            '--hover-scale': member.hoverScale || '1.1'
+                          } as React.CSSProperties}
+                        />
+                      </div>
+                    </div>
+
+                    <h3 className="text-lg font-bold text-white mb-3 text-center tracking-tight group-hover:text-blue-200 transition-colors">
+                      {member.name}
+                    </h3>
+
+                    <div className="flex-grow flex items-start justify-center">
+                      {member.description ? (
+                        <p className="text-sm text-white/50 text-center leading-relaxed font-medium group-hover:text-white/70 transition-colors">
+                          {member.description}
+                        </p>
+                      ) : (
+                        <div className="w-full h-20 bg-white/5 rounded-lg border border-white/5 animate-pulse"></div>
+                      )}
+                    </div>
                   </div>
                 </div>
               ))}
