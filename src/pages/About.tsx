@@ -75,13 +75,13 @@ export default function About() {
 
           {/* Why We Built ClerkTree */}
           <div className="mb-20 flex justify-center">
-            <div className="rounded-2xl border border-white/5 bg-[rgb(10,10,10)] p-8 md:p-12 w-full max-w-4xl">
-              <h2 className="text-3xl md:text-4xl font-bold text-white/90 mb-6 text-center">{t('about.whyTitle')}</h2>
+            <div className="w-full max-w-5xl">
+              <h2 className="text-4xl md:text-5xl font-bold text-white tracking-tight mb-12 text-center">{t('about.whyTitle')}</h2>
               <div>
-                <p className="text-lg text-white/60 leading-relaxed">
+                <p className="text-lg md:text-xl text-white leading-relaxed">
                   {t('about.whyDesc1')}
                 </p>
-                <p className="text-lg text-white/60 leading-relaxed mt-4">
+                <p className="text-lg md:text-xl text-white leading-relaxed mt-6">
                   {t('about.whyDesc2')}
                 </p>
               </div>
@@ -90,9 +90,9 @@ export default function About() {
 
           {/* Mission */}
           <div className="mb-20 flex justify-center">
-            <div className="rounded-2xl border border-white/5 bg-[rgb(10,10,10)] p-8 md:p-12 w-full max-w-4xl">
-              <h3 className="text-3xl md:text-4xl font-bold text-white/90 mb-6 text-center">{t('about.missionTitle')}</h3>
-              <p className="text-lg text-white/60 leading-relaxed">
+            <div className="w-full max-w-5xl">
+              <h3 className="text-4xl md:text-5xl font-bold text-white tracking-tight mb-12 text-center">{t('about.missionTitle')}</h3>
+              <p className="text-lg md:text-xl text-white leading-relaxed">
                 {t('about.missionDesc')}
               </p>
             </div>
@@ -170,7 +170,7 @@ export default function About() {
 
                     <div className="flex-grow flex items-start justify-center">
                       {member.description ? (
-                        <p className="text-sm text-white/50 text-center leading-relaxed font-medium group-hover:text-white/70 transition-colors">
+                        <p className="text-sm text-white text-center leading-relaxed font-medium transition-colors">
                           {member.description}
                         </p>
                       ) : (
