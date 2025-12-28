@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { FileCheck, Search, Filter, CheckCircle, XCircle, AlertCircle, MoreVertical, Download, History, Eye, User, Calendar, Clock, Shield, Sun, Moon } from 'lucide-react';
 import { adminApi, API_BASE_URL } from '../config/api';
 import { useLanguage } from '../contexts/LanguageContext';
+import LanguageSwitcher from '../components/Layout/LanguageSwitcher';
 
 // Add type definitions to fix type errors
 interface Document {
@@ -527,6 +528,7 @@ const AdminDashboard = () => {
           </div>
 
           <div className="flex items-center justify-between sm:justify-end gap-4">
+            <LanguageSwitcher isExpanded={true} />
             {/* Dashboard Link */}
             <button
               onClick={() => window.location.href = '/dashboard'}

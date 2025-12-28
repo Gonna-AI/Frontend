@@ -1,18 +1,14 @@
 import { useNavigate } from 'react-router-dom';
-import { Target, Lightbulb, Users, Building2, Shield, FileText, TrendingUp } from 'lucide-react';
+import { Target } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
+import LanguageSwitcher from '../components/Layout/LanguageSwitcher';
+import Footer from '../components/Landing/Footer';
 
 export default function About() {
   const navigate = useNavigate();
   const { t } = useLanguage();
 
-  const industries = [
-    { icon: Shield, name: t('about.ind1'), color: 'from-blue-400 to-cyan-500' },
-    { icon: Building2, name: t('about.ind2'), color: 'from-emerald-400 to-teal-500' },
-    { icon: Users, name: t('about.ind3'), color: 'from-purple-400 to-pink-500' },
-    { icon: TrendingUp, name: t('about.ind4'), color: 'from-orange-400 to-red-500' },
-    { icon: FileText, name: t('about.ind5'), color: 'from-violet-400 to-purple-500' },
-  ];
+
 
   return (
     <div className="bg-[rgb(10,10,10)] min-h-screen relative overflow-x-hidden">
@@ -50,10 +46,13 @@ export default function About() {
               ClerkTree
             </span>
           </button>
-          <div className="md:hidden">
-            <span className="px-3 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-medium whitespace-nowrap">
-              {t('nav.about')}
-            </span>
+          <div className="flex items-center gap-3">
+            <div className="md:hidden">
+              <span className="px-3 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-medium whitespace-nowrap">
+                {t('nav.about')}
+              </span>
+            </div>
+            <LanguageSwitcher isExpanded={true} forceDark={true} />
           </div>
         </div>
       </header>
@@ -75,98 +74,31 @@ export default function About() {
           </div>
 
           {/* Why We Built ClerkTree */}
-          <div className="mb-20">
-            <div className="rounded-2xl border border-blue-500/20 bg-gradient-to-br from-white/[0.02] via-white/[0.01] to-transparent backdrop-blur-sm p-8 md:p-12">
-              <div className="flex items-start gap-4 mb-6">
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500/10 to-cyan-500/10 border border-blue-500/30 flex items-center justify-center flex-shrink-0">
-                  <Lightbulb className="w-6 h-6 text-blue-400" />
-                </div>
-                <div>
-                  <h2 className="text-3xl md:text-4xl font-bold text-white/90 mb-4">{t('about.whyTitle')}</h2>
-                  <p className="text-lg text-white/60 leading-relaxed">
-                    {t('about.whyDesc1')}
-                  </p>
-                  <p className="text-lg text-white/60 leading-relaxed mt-4">
-                    {t('about.whyDesc2')}
-                  </p>
-                </div>
+          <div className="mb-20 flex justify-center">
+            <div className="rounded-2xl border border-white/5 bg-[rgb(10,10,10)] p-8 md:p-12 w-full max-w-4xl">
+              <h2 className="text-3xl md:text-4xl font-bold text-white/90 mb-6 text-center">{t('about.whyTitle')}</h2>
+              <div>
+                <p className="text-lg text-white/60 leading-relaxed">
+                  {t('about.whyDesc1')}
+                </p>
+                <p className="text-lg text-white/60 leading-relaxed mt-4">
+                  {t('about.whyDesc2')}
+                </p>
               </div>
             </div>
           </div>
 
-          {/* Mission & Vision */}
-          <div className="grid md:grid-cols-2 gap-6 mb-20">
-            <div className="rounded-2xl border border-white/5 bg-gradient-to-br from-white/[0.02] via-white/[0.01] to-transparent backdrop-blur-sm p-8">
-              <div className="flex items-center gap-3 mb-4">
-                <Target className="w-8 h-8 bg-gradient-to-r from-blue-400 to-cyan-500 text-transparent bg-clip-text" strokeWidth={1.5} />
-                <h3 className="text-2xl font-bold text-white/90">{t('about.missionTitle')}</h3>
-              </div>
-              <p className="text-white/60 leading-relaxed">
+          {/* Mission */}
+          <div className="mb-20 flex justify-center">
+            <div className="rounded-2xl border border-white/5 bg-[rgb(10,10,10)] p-8 md:p-12 w-full max-w-4xl">
+              <h3 className="text-3xl md:text-4xl font-bold text-white/90 mb-6 text-center">{t('about.missionTitle')}</h3>
+              <p className="text-lg text-white/60 leading-relaxed">
                 {t('about.missionDesc')}
               </p>
             </div>
-
-            <div className="rounded-2xl border border-white/5 bg-gradient-to-br from-white/[0.02] via-white/[0.01] to-transparent backdrop-blur-sm p-8">
-              <div className="flex items-center gap-3 mb-4">
-                <Lightbulb className="w-8 h-8 bg-gradient-to-r from-cyan-400 to-blue-500 text-transparent bg-clip-text" strokeWidth={1.5} />
-                <h3 className="text-2xl font-bold text-white/90">{t('about.visionTitle')}</h3>
-              </div>
-              <p className="text-white/60 leading-relaxed">
-                {t('about.visionDesc')}
-              </p>
-            </div>
           </div>
 
-          {/* Hybrid Human+AI Approach */}
-          <div className="mb-20">
-            <div className="rounded-2xl border border-blue-500/20 bg-gradient-to-br from-blue-500/5 to-cyan-500/5 backdrop-blur-sm p-8 md:p-12">
-              <h2 className="text-3xl md:text-4xl font-bold mb-6">
-                <span className="bg-gradient-to-r from-blue-400 to-cyan-400 text-transparent bg-clip-text">
-                  {t('about.hybridTitle')}
-                </span>
-              </h2>
-              <p className="text-lg text-white/70 leading-relaxed mb-6">
-                {t('about.hybridDesc')}
-              </p>
-              <div className="grid md:grid-cols-3 gap-4">
-                <div className="p-4 rounded-xl bg-white/5 border border-white/10">
-                  <h4 className="font-semibold text-white/90 mb-2">{t('about.aiRepetition')}</h4>
-                  <p className="text-sm text-white/60">{t('about.aiRepetitionDesc')}</p>
-                </div>
-                <div className="p-4 rounded-xl bg-white/5 border border-white/10">
-                  <h4 className="font-semibold text-white/90 mb-2">{t('about.humanComplexity')}</h4>
-                  <p className="text-sm text-white/60">{t('about.humanComplexityDesc')}</p>
-                </div>
-                <div className="p-4 rounded-xl bg-white/5 border border-white/10">
-                  <h4 className="font-semibold text-white/90 mb-2">{t('about.handoffs')}</h4>
-                  <p className="text-sm text-white/60">{t('about.handoffsDesc')}</p>
-                </div>
-              </div>
-            </div>
-          </div>
 
-          {/* Industries We Serve */}
-          <div className="mb-20">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl md:text-4xl font-bold mb-4 text-white/90">{t('about.industriesTitle')}</h2>
-            </div>
-            <div className="flex flex-wrap justify-center gap-4 max-w-4xl mx-auto">
-              {industries.map((industry, index) => {
-                const Icon = industry.icon;
-                return (
-                  <div
-                    key={index}
-                    className="group flex items-center gap-3 px-6 py-4 rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm hover:border-blue-500/30 hover:bg-white/10 transition-all duration-300"
-                  >
-                    <Icon className={`w-6 h-6 text-blue-400 group-hover:scale-110 transition-transform duration-300`} strokeWidth={1.5} />
-                    <span className="font-medium text-white/80 group-hover:text-white/95 transition-colors">
-                      {industry.name}
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
 
           {/* CTA */}
           <div className="text-center py-16 rounded-2xl border border-blue-500/20 bg-gradient-to-br from-blue-500/5 to-cyan-500/5 backdrop-blur-sm">
@@ -193,6 +125,7 @@ export default function About() {
           </div>
         </div>
       </div>
+      <Footer />
     </div>
   );
 }

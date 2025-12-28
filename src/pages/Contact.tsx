@@ -3,6 +3,8 @@ import { Phone, MapPin, CheckCircle2, Send } from 'lucide-react';
 import { supabase } from '../config/supabase';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
+import LanguageSwitcher from '../components/Layout/LanguageSwitcher';
+import Footer from '../components/Landing/Footer';
 
 const Contact = () => {
   const navigate = useNavigate();
@@ -117,6 +119,7 @@ const Contact = () => {
               {t('nav.contact')}
             </span>
           </div>
+          <LanguageSwitcher isExpanded={true} forceDark={true} />
         </div>
       </header>
 
@@ -371,6 +374,7 @@ const Contact = () => {
           </div>
         </div>
       </div>
+      <Footer />
     </div>
   );
 };

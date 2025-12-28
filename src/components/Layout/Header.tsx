@@ -10,6 +10,7 @@ import AnalogClock from '../AnalogClock';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { notificationsApi } from '../../config/api';
 import { useLanguage } from '../../contexts/LanguageContext';
+import LanguageSwitcher from './LanguageSwitcher';
 
 interface HeaderProps {
   onMobileMenuClick: () => void;
@@ -143,6 +144,8 @@ export default function Header({ onMobileMenuClick }: HeaderProps) {
 
           {/* Notification and Clock Container */}
           <div className="flex items-center gap-3">
+            <LanguageSwitcher isExpanded={true} />
+
             {/* Notification Button */}
             <button
               onClick={() => setShowNotifications(!showNotifications)}

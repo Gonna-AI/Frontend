@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import WorkflowEditor from '../components/Bioflow/WorkflowEditor';
 import { ArrowLeft, Workflow, Cpu, Zap, Sparkles } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
+import LanguageSwitcher from '../components/Layout/LanguageSwitcher';
 
 export default function Bioflow() {
     const { t } = useLanguage();
@@ -59,13 +60,16 @@ export default function Bioflow() {
                             </div>
                         </div>
 
-                        <Link
-                            to="/"
-                            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all text-sm text-slate-300 hover:text-white"
-                        >
-                            <ArrowLeft className="w-4 h-4" />
-                            <span className="hidden sm:inline">{t('bioflow.back')}</span>
-                        </Link>
+                        <div className="flex items-center gap-3">
+                            <Link
+                                to="/"
+                                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all text-sm text-slate-300 hover:text-white"
+                            >
+                                <ArrowLeft className="w-4 h-4" />
+                                <span className="hidden sm:inline">{t('bioflow.back')}</span>
+                            </Link>
+                            <LanguageSwitcher isExpanded={true} forceDark={true} />
+                        </div>
                     </div>
                 </div>
             </div>

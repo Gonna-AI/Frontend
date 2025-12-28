@@ -1,6 +1,8 @@
 import { useNavigate } from 'react-router-dom';
 import { Zap, Brain, FileCheck, Clock, BarChart3, Shield, ArrowRight } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
+import LanguageSwitcher from '../components/Layout/LanguageSwitcher';
+import Footer from '../components/Landing/Footer';
 
 export default function Solutions() {
   const navigate = useNavigate();
@@ -108,11 +110,14 @@ export default function Solutions() {
               ClerkTree
             </span>
           </button>
-          {/* Mobile Pill */}
-          <div className="md:hidden">
-            <span className="px-3 py-1.5 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-400 text-xs font-medium whitespace-nowrap">
-              {t('nav.solutions')}
-            </span>
+          <div className="flex items-center gap-3">
+            {/* Mobile Pill */}
+            <div className="md:hidden">
+              <span className="px-3 py-1.5 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-400 text-xs font-medium whitespace-nowrap">
+                {t('nav.solutions')}
+              </span>
+            </div>
+            <LanguageSwitcher isExpanded={true} forceDark={true} />
           </div>
         </div>
       </header>
@@ -232,6 +237,7 @@ export default function Solutions() {
           </div>
         </div>
       </div>
+      <Footer />
     </div>
   );
 }

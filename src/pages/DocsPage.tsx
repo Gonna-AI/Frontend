@@ -454,7 +454,7 @@ export default function DocsPage() {
 
             {/* Search Modal */}
             {isSearchOpen && (
-                <div className="fixed inset-0 z-[60] flex items-start justify-center pt-24 px-4">
+                <div className="fixed inset-0 z-[60] flex items-start justify-center pt-12 md:pt-24 px-4">
                     <div
                         className="absolute inset-0 bg-black/60 backdrop-blur-sm"
                         onClick={() => setIsSearchOpen(false)}
@@ -465,7 +465,7 @@ export default function DocsPage() {
                             <input
                                 type="text"
                                 placeholder="Search documentation..."
-                                className="flex-1 bg-transparent border-none outline-none text-white placeholder-white/40 text-sm h-6"
+                                className="flex-1 bg-transparent border-none outline-none text-white placeholder-white/40 text-base md:text-sm h-6"
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                                 autoFocus
@@ -477,7 +477,7 @@ export default function DocsPage() {
                                 <kbd className="text-xs bg-white/10 px-1.5 py-0.5 rounded">ESC</kbd>
                             </button>
                         </div>
-                        <div className="max-h-[60vh] overflow-y-auto py-2">
+                        <div className="max-h-[50vh] md:max-h-[60vh] overflow-y-auto py-2">
                             {filteredItems.length === 0 ? (
                                 <div className="px-4 py-8 text-center text-white/40 text-sm">
                                     No results found for "{searchQuery}"
