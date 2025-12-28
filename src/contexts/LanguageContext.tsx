@@ -109,6 +109,11 @@ export const translations: Record<Language, Record<string, string>> = {
         'about.joinDesc': "We're just getting started. Partner with us to transform your operations.",
         'about.getInTouch': 'Get in Touch',
         'about.joinTeam': 'Join Our Team',
+        'about.team.kenshin': 'Kenshin Kiriyama (COO) studies Sustainable Management at TUM. Previously in sales at Affordables working with Decathlon and Sparkasse. A Deutschlandstipendium recipient, he now ensures reliable customer service and maintenance at ClerkTree, developing tailored solutions for complex client needs.',
+        'about.team.animesh': 'Animesh Mishra (Founder) studies CS & ML at Shiv Nadar Institute of Eminence. Previously a Quant Research Analyst at Consult Add Services developing predictive models, he now focuses on enterprise AI orchestration at ClerkTree. He engineers autonomous agentic workflows to streamline high-throughput claims processing.',
+        'about.team.krishang': 'Krishang Sharma (AI Solutions Engineer) studies CSE at Shiv Nadar Institute of Eminence and is a graduate of the Arizona State University AI in Business program. He builds production-grade ML, LLM, and RAG systems at ClerkTree. Previously, he contributed to ML engineering and research at I4C (Ministry of Home Affairs) and the Scientific Analysis Group, DRDO.',
+        'about.team.shobhit': 'Shobhit Mishra (CEO) studies at TUM, focusing on sustainable data automation. Previously working on automation projects at Robotico, he now leads scalable solution building and strategic operations at ClerkTree, driving technical innovation to help businesses streamline complex workflows.',
+        'about.team.urja': 'Urja Shrestha (Customer Success Manager) studies Sustainable Management and Technology at TUM in Straubing, Bavaria. At ClerkTree, she drives client engagement by optimizing product adoption and tailoring success strategies for seamless integration.',
 
         // Contact Page
         'contact.title1': "Let's Talk About",
@@ -637,6 +642,11 @@ export const translations: Record<Language, Record<string, string>> = {
         'about.joinDesc': 'Wir fangen gerade erst an. Arbeiten Sie mit uns zusammen, um Ihre Operationen zu transformieren.',
         'about.getInTouch': 'Kontakt aufnehmen',
         'about.joinTeam': 'Werden Sie Teil unseres Teams',
+        'about.team.kenshin': 'Kenshin Kiriyama (COO) studiert Sustainable Management an der TUM. Zuvor war er im Vertrieb bei Affordables tätig und arbeitete mit Decathlon und der Sparkasse zusammen. Als Deutschlandstipendiat sorgt er nun bei ClerkTree für zuverlässigen Kundenservice und Wartung und entwickelt maßgeschneiderte Lösungen für komplexe Kundenanforderungen.',
+        'about.team.animesh': 'Animesh Mishra (Gründer) studiert CS & ML am Shiv Nadar Institute of Eminence. Zuvor entwickelte er als Quant Research Analyst bei Consult Add Services Vorhersagemodelle. Bei ClerkTree konzentriert er sich nun auf Enterprise AI Orchestration und entwickelt autonome agentenbasierte Workflows zur Optimierung der Schadensbearbeitung und operativen Entscheidungsfindung.',
+        'about.team.krishang': 'Krishang Sharma (AI Engineer) studiert CSE am Shiv Nadar Institute of Eminence und ist Absolvent des Arizona State University AI in Business Programms. Bei ClerkTree entwickelt er produktionsreife ML-, LLM- und RAG-Systeme. Zuvor trug er zu ML-Engineering und Forschung beim I4C (Innenministerium) und der Scientific Analysis Group, DRDO, bei.',
+        'about.team.shobhit': 'Shobhit Mishra (CEO) studiert an der TUM mit Schwerpunkt auf nachhaltiger Datenautomatisierung. Zuvor arbeitete er an Automatisierungsprojekten bei Robotico. Bei ClerkTree leitet er nun die Entwicklung skalierbarer Lösungen und strategischer Prozesse, um Unternehmen bei der Optimierung komplexer digitaler Abläufe zu unterstützen.',
+        'about.team.urja': 'Urja Shrestha (Customer Success Manager) studiert Sustainable Management and Technology an der TUM in Straubing, Bayern. Bei ClerkTree fördert sie die Kundenbindung durch Optimierung der Produktakzeptanz und maßgeschneiderte Strategien für eine nahtlose Integration. Ihr Fokus auf nachhaltige Systeme hilft Unternehmen, effiziente und langfristige betriebliche Abläufe aufzubauen.',
 
         // Contact Page
         'contact.title1': 'Lassen Sie uns über',
