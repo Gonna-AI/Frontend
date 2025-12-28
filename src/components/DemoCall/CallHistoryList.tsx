@@ -4,20 +4,20 @@ import {
   History,
   Clock,
   ChevronDown,
-  ChevronUp,
   MessageSquare,
-  User,
-  Bot,
   AlertTriangle,
   CheckCircle,
   Circle,
-  Tag,
-  FileText,
   TrendingUp,
-  Filter
+  Filter,
+  Phone,
+  ListTodo,
+  Smile,
+  Tag,
+  Database
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
-import { useDemoCall, CallHistoryItem, PriorityLevel } from '../../contexts/DemoCallContext';
+import { useDemoCall, PriorityLevel } from '../../contexts/DemoCallContext';
 import { useLanguage } from '../../contexts/LanguageContext';
 
 interface CallHistoryListProps {
@@ -27,33 +27,20 @@ interface CallHistoryListProps {
 
 export default function CallHistoryList({ isDark = true, showFilters = true }: CallHistoryListProps) {
   const { t } = useLanguage();
-  const { callHistory, knowledgeBase } = useDemoCall();
+  const { callHistory } = useDemoCall();
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'summary' | 'transcript' | 'details'>('summary');
   const [filterPriority, setFilterPriority] = useState<PriorityLevel | 'all'>('all');
-  const [filterCategory, setFilterCategory] = useState<string>('all');
   const [filterType, setFilterType] = useState<'all' | 'voice' | 'text'>('all');
 
   const formatDate = (date: Date) => {
-    const now = new Date();
-    const diff = now.getTime() - date.getTime();
-    const hours = Math.floor(diff / (1000 * 60 * 60));
-    const days = Math.floor(hours / 24);
-
-    if (hours < 1) return t('history.justNow');
-    if (hours < 24) return t('history.ago.h').replace('{h}', hours.toString());
-    if (days < 7) return t('history.ago.d').replace('{d}', days.toString());
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-  };
-
-  const formatTime = (date: Date) => {
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
   };
 
   const formatDuration = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
-    return t('history.duration').replace('{m}', mins.toString()).replace('{s}', secs.toString());
+    return `${mins}m ${secs}s`;
   };
 
   const toggleExpand = (id: string) => {
@@ -63,803 +50,336 @@ export default function CallHistoryList({ isDark = true, showFilters = true }: C
 
   const getPriorityConfig = (priority: PriorityLevel) => {
     const configs = {
-      critical: {
-        label: 'Critical',
-        color: 'red',
-        bgClass: isDark ? 'bg-red-500/20 text-red-400 border-red-500/30' : 'bg-red-500/10 text-red-600 border-red-500/20',
-        icon: AlertTriangle
-      },
-      high: {
-        label: 'High',
-        color: 'orange',
-        bgClass: isDark ? 'bg-orange-500/20 text-orange-400 border-orange-500/30' : 'bg-orange-500/10 text-orange-600 border-orange-500/20',
-        icon: TrendingUp
-      },
-      medium: {
-        label: 'Medium',
-        color: 'yellow',
-        bgClass: isDark ? 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30' : 'bg-yellow-500/10 text-yellow-600 border-yellow-500/20',
-        icon: Circle
-      },
-      low: {
-        label: 'Low',
-        color: 'green',
-        bgClass: isDark ? 'bg-green-500/20 text-green-400 border-green-500/30' : 'bg-green-500/10 text-green-600 border-green-500/20',
-        icon: CheckCircle
-      },
+      critical: { label: 'Critical', color: 'red', icon: AlertTriangle },
+      high: { label: 'High', color: 'orange', icon: TrendingUp },
+      medium: { label: 'Medium', color: 'yellow', icon: Circle },
+      low: { label: 'Low', color: 'green', icon: CheckCircle },
     };
     return configs[priority];
-  };
-
-  const getSentimentConfig = (sentiment: string) => {
-    const configs: Record<string, { label: string; color: string; bg: string }> = {
-      very_positive: { label: 'Very Positive', color: 'text-emerald-400', bg: 'bg-emerald-500/20' },
-      positive: { label: 'Positive', color: 'text-green-400', bg: 'bg-green-500/20' },
-      slightly_positive: { label: 'Slightly Positive', color: 'text-lime-400', bg: 'bg-lime-500/20' },
-      neutral: { label: 'Neutral', color: 'text-gray-400', bg: 'bg-gray-500/20' },
-      mixed: { label: 'Mixed', color: 'text-purple-400', bg: 'bg-purple-500/20' },
-      slightly_negative: { label: 'Slightly Negative', color: 'text-amber-400', bg: 'bg-amber-500/20' },
-      negative: { label: 'Negative', color: 'text-orange-400', bg: 'bg-orange-500/20' },
-      very_negative: { label: 'Very Negative', color: 'text-red-400', bg: 'bg-red-500/20' },
-      anxious: { label: 'Anxious', color: 'text-yellow-400', bg: 'bg-yellow-500/20' },
-      urgent: { label: 'Urgent', color: 'text-rose-400', bg: 'bg-rose-500/20' },
-    };
-    return configs[sentiment] || configs.neutral;
-  };
-
-  const getCategoryColor = (color: string) => {
-    const colorMap: Record<string, string> = {
-      blue: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
-      purple: 'bg-purple-500/20 text-purple-400 border-purple-500/30',
-      green: 'bg-green-500/20 text-green-400 border-green-500/30',
-      orange: 'bg-orange-500/20 text-orange-400 border-orange-500/30',
-      red: 'bg-red-500/20 text-red-400 border-red-500/30',
-      emerald: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
-      pink: 'bg-pink-500/20 text-pink-400 border-pink-500/30',
-      yellow: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30',
-    };
-    return colorMap[color] || colorMap.blue;
   };
 
   // Filter call history
   const filteredHistory = callHistory.filter(call => {
     if (filterPriority !== 'all' && call.priority !== filterPriority) return false;
-    if (filterCategory !== 'all' && call.category?.id !== filterCategory) return false;
     if (filterType !== 'all' && call.type !== filterType) return false;
     return true;
   });
 
-  // Count by type
-  const voiceCount = callHistory.filter(c => c.type === 'voice').length;
-  const textCount = callHistory.filter(c => c.type === 'text').length;
-
   return (
-    <div className={cn(
-      "rounded-xl md:rounded-2xl overflow-hidden h-full flex flex-col",
-      isDark
-        ? "bg-black/60 backdrop-blur-xl border border-white/10"
-        : "bg-white/80 border border-black/10"
-    )}>
+    <div className="space-y-8 max-w-6xl mx-auto pb-10">
       {/* Header */}
-      <div className={cn(
-        "flex items-center justify-between px-3 md:px-4 py-2 md:py-3 border-b",
-        isDark ? "border-white/10" : "border-black/10"
-      )}>
-        <div className="flex items-center gap-2 md:gap-3">
-          <History className={cn(
-            "w-4 h-4 md:w-5 md:h-5",
-            isDark ? "text-white/60" : "text-black/60"
-          )} />
-          <div>
-            <h3 className={cn(
-              "font-semibold text-sm md:text-base",
-              isDark ? "text-white" : "text-black"
-            )}>
-              {t('history.title')}
-            </h3>
-            <p className={cn(
-              "text-[10px] md:text-xs",
-              isDark ? "text-white/50" : "text-black/50"
-            )}>
-              {t('history.stats')
-                .replace('{count}', filteredHistory.length.toString())
-                .replace('{total}', callHistory.length.toString())
-                .replace('{voice}', voiceCount.toString())
-                .replace('{text}', textCount.toString())
-              }
-            </p>
-          </div>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 className={cn("text-2xl font-bold", isDark ? "text-white" : "text-black")}>
+            {t('history.title')}
+          </h1>
+          <p className={cn("text-sm", isDark ? "text-white/60" : "text-black/60")}>
+            {filteredHistory.length} records found
+          </p>
         </div>
       </div>
 
-      {/* Filters */}
-      {showFilters && (
-        <div className={cn(
-          "flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-1.5 md:py-2 border-b overflow-x-auto scrollbar-hide",
-          isDark ? "border-white/10" : "border-black/10"
-        )}>
-          <Filter className={cn(
-            "w-3 h-3 md:w-4 md:h-4 flex-shrink-0",
-            isDark ? "text-white/40" : "text-black/40"
-          )} />
-
-          {/* Type filter */}
-          <select
-            value={filterType}
-            onChange={(e) => setFilterType(e.target.value as 'all' | 'voice' | 'text')}
-            className={cn(
-              "px-1.5 md:px-2 py-0.5 md:py-1 rounded-md md:rounded-lg text-[10px] md:text-xs focus:outline-none flex-shrink-0",
-              isDark
-                ? "bg-white/5 text-white border border-white/10"
-                : "bg-black/5 text-black border border-black/10"
-            )}
-          >
-            <option value="all">{t('history.filter.allTypes')}</option>
-            <option value="voice">{t('history.filter.calls')}</option>
-            <option value="text">{t('history.filter.chats')}</option>
-          </select>
-
-          {/* Priority filter */}
-          <select
-            value={filterPriority}
-            onChange={(e) => setFilterPriority(e.target.value as PriorityLevel | 'all')}
-            className={cn(
-              "px-1.5 md:px-2 py-0.5 md:py-1 rounded-md md:rounded-lg text-[10px] md:text-xs focus:outline-none flex-shrink-0",
-              isDark
-                ? "bg-white/5 text-white border border-white/10"
-                : "bg-black/5 text-black border border-black/10"
-            )}
-          >
-            <option value="all">{t('history.filter.allPriorities')}</option>
-            <option value="critical">{t('dashboard.priority.critical')}</option>
-            <option value="high">{t('dashboard.priority.high')}</option>
-            <option value="medium">{t('dashboard.priority.medium')}</option>
-            <option value="low">{t('dashboard.priority.low')}</option>
-          </select>
-
-          {/* Category filter */}
-          <select
-            value={filterCategory}
-            onChange={(e) => setFilterCategory(e.target.value)}
-            className={cn(
-              "px-1.5 md:px-2 py-0.5 md:py-1 rounded-md md:rounded-lg text-[10px] md:text-xs focus:outline-none flex-shrink-0",
-              isDark
-                ? "bg-white/5 text-white border border-white/10"
-                : "bg-black/5 text-black border border-black/10"
-            )}
-          >
-            <option value="all">{t('history.filter.allCategories')}</option>
-            {knowledgeBase.categories.map(cat => (
-              <option key={cat.id} value={cat.id}>{cat.name}</option>
-            ))}
-          </select>
-        </div>
-      )}
-
-      {/* History list */}
-      <div className="flex-1 overflow-y-auto p-3 md:p-4 space-y-2 md:space-y-3 custom-scrollbar">
-        {filteredHistory.length === 0 ? (
+      {/* Main Table Card */}
+      <div className={cn(
+        "rounded-xl border overflow-hidden",
+        isDark ? "bg-black/40 border-white/10" : "bg-white border-black/10"
+      )}>
+        {/* Toolbar / Filters */}
+        {showFilters && (
           <div className={cn(
-            "flex flex-col items-center justify-center h-full text-center py-12",
-            isDark ? "text-white/40" : "text-black/40"
+            "p-4 border-b flex flex-wrap items-center gap-4",
+            isDark ? "border-white/5" : "border-black/5"
           )}>
-            <History className="w-12 h-12 mb-4 opacity-40" />
-            <p className="text-lg font-medium mb-1">{t('history.noHistory')}</p>
-            <p className="text-sm opacity-80">
-              {callHistory.length === 0 ? t('history.noHistoryDesc') : t('history.adjustFilters')}
-            </p>
+            <div className="flex items-center gap-2">
+              <Filter className={cn("w-4 h-4", isDark ? "text-white/40" : "text-black/40")} />
+              <span className={cn("text-sm font-medium", isDark ? "text-white/60" : "text-black/60")}>Filters:</span>
+            </div>
+
+            <select
+              value={filterType}
+              onChange={(e) => setFilterType(e.target.value as any)}
+              className={cn(
+                "bg-transparent text-sm focus:outline-none cursor-pointer hover:opacity-80 transition-opacity",
+                isDark ? "text-white" : "text-black"
+              )}
+            >
+              <option value="all">All Types</option>
+              <option value="voice">Voice Calls</option>
+              <option value="text">Chat Logs</option>
+            </select>
+
+            <div className={cn("w-px h-4", isDark ? "bg-white/10" : "bg-black/10")} />
+
+            <select
+              value={filterPriority}
+              onChange={(e) => setFilterPriority(e.target.value as any)}
+              className={cn(
+                "bg-transparent text-sm focus:outline-none cursor-pointer hover:opacity-80 transition-opacity",
+                isDark ? "text-white" : "text-black"
+              )}
+            >
+              <option value="all">All Priorities</option>
+              <option value="critical">Critical</option>
+              <option value="high">High</option>
+            </select>
           </div>
-        ) : (
-          <AnimatePresence mode="popLayout">
-            {filteredHistory.map((item: CallHistoryItem) => {
-              const priorityConfig = getPriorityConfig(item.priority);
-              const PriorityIcon = priorityConfig.icon;
+        )}
 
-              return (
-                <motion.div
-                  key={item.id}
-                  layout
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className={cn(
-                    "rounded-xl overflow-hidden transition-colors",
-                    isDark
-                      ? "bg-black/40 border border-white/5 hover:border-white/10"
-                      : "bg-black/5 border border-black/5 hover:border-black/10"
-                  )}
-                >
-                  {/* Call summary header */}
-                  <button
-                    onClick={() => toggleExpand(item.id)}
-                    className="w-full p-3 md:p-4 text-left"
+        {/* Content List */}
+        <div>
+          {filteredHistory.length === 0 ? (
+            <div className="p-12 text-center opacity-40">
+              <History className="w-12 h-12 mx-auto mb-4" />
+              <p>No history records found</p>
+            </div>
+          ) : (
+            <div>
+              {filteredHistory.map((item) => {
+                const priority = getPriorityConfig(item.priority);
+
+                return (
+                  <div
+                    key={item.id}
+                    className={cn(
+                      "border-b last:border-0 transition-colors",
+                      isDark ? "border-white/5 hover:bg-white/5" : "border-black/5 hover:bg-black/5"
+                    )}
                   >
-                    <div className="flex items-start justify-between gap-2 md:gap-3">
-                      <div className="flex-1 min-w-0">
-                        {/* Top row - Name and badges */}
-                        <div className="flex items-center gap-1.5 md:gap-2 flex-wrap mb-1.5 md:mb-2">
-                          {/* Type badge (Call or Chat) */}
-                          <span className={cn(
-                            "text-[10px] md:text-xs px-1.5 md:px-2 py-0.5 rounded-full border flex items-center gap-0.5 md:gap-1",
-                            item.type === 'voice'
-                              ? isDark
-                                ? "bg-teal-500/20 text-teal-400 border-teal-500/30"
-                                : "bg-teal-500/10 text-teal-600 border-teal-500/20"
-                              : isDark
-                                ? "bg-blue-500/20 text-blue-400 border-blue-500/30"
-                                : "bg-blue-500/10 text-blue-600 border-blue-500/20"
-                          )}>
-                            {item.type === 'voice' ? (
-                              <>
-                                <svg xmlns="http://www.w3.org/2000/svg" className="w-2.5 h-2.5 md:w-3 md:h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
-                                <span className="hidden sm:inline">{t('userCall.aiAssistant')}</span>
-                              </>
-                            ) : (
-                              <>
-                                <MessageSquare className="w-2.5 h-2.5 md:w-3 md:h-3" />
-                                <span className="hidden sm:inline">{t('userCall.aiAssistant')}</span>
-                              </>
-                            )}
-                          </span>
-
-                          <span className={cn(
-                            "font-medium text-sm md:text-base",
-                            isDark ? "text-white" : "text-black"
-                          )}>
-                            {item.callerName}
-                          </span>
-
-                          {/* Priority badge */}
-                          <span className={cn(
-                            "text-[10px] md:text-xs px-1.5 md:px-2 py-0.5 rounded-full border flex items-center gap-0.5 md:gap-1",
-                            priorityConfig.bgClass
-                          )}>
-                            <PriorityIcon className="w-2.5 h-2.5 md:w-3 md:h-3" />
-                            <span className="hidden sm:inline">{priorityConfig.label}</span>
-                          </span>
-
-                          {/* Category badge */}
-                          {item.category && (
-                            <span className={cn(
-                              "text-[10px] md:text-xs px-1.5 md:px-2 py-0.5 rounded-full border hidden sm:inline-flex",
-                              getCategoryColor(item.category.color)
-                            )}>
-                              {item.category.name}
-                            </span>
-                          )}
-
-                          {/* Follow-up badge */}
-                          {item.summary.followUpRequired && (
-                            <span className={cn(
-                              "text-[10px] md:text-xs px-1.5 md:px-2 py-0.5 rounded-full",
-                              isDark
-                                ? "bg-yellow-500/20 text-yellow-400"
-                                : "bg-yellow-500/10 text-yellow-600"
-                            )}>
-                              <span className="hidden sm:inline">{t('monitor.followUp')}</span>
-                              <span className="sm:hidden">F/U</span>
-                            </span>
-                          )}
-                        </div>
-
-                        {/* Summary preview */}
-                        {(item.summary.summaryText || item.summary.mainPoints[0]) && (
-                          <p className={cn(
-                            "text-xs md:text-sm truncate mb-1.5 md:mb-2",
-                            isDark ? "text-white/60" : "text-black/60"
-                          )}>
-                            {item.summary.summaryText || item.summary.mainPoints[0]}
-                          </p>
-                        )}
-
-                        {/* Meta info */}
+                    {/* Row Header */}
+                    <div
+                      onClick={() => toggleExpand(item.id)}
+                      className="p-4 cursor-pointer grid grid-cols-12 gap-4 items-center"
+                    >
+                      {/* Status / Type Icon (Col 1) */}
+                      <div className="col-span-12 md:col-span-4 flex items-center gap-3">
                         <div className={cn(
-                          "flex items-center gap-2 md:gap-4 text-[10px] md:text-xs",
-                          isDark ? "text-white/40" : "text-black/40"
+                          "w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0",
+                          item.type === 'voice'
+                            ? isDark ? "bg-teal-500/10 text-teal-400" : "bg-teal-500/5 text-teal-600"
+                            : isDark ? "bg-blue-500/10 text-blue-400" : "bg-blue-500/5 text-blue-600"
                         )}>
-                          <span className="flex items-center gap-0.5 md:gap-1">
-                            <Clock className="w-2.5 h-2.5 md:w-3 md:h-3" />
-                            {formatDate(item.date)}
-                          </span>
-                          <span className="flex items-center gap-0.5 md:gap-1">
-                            <MessageSquare className="w-2.5 h-2.5 md:w-3 md:h-3" />
-                            {formatDuration(item.duration)}
-                          </span>
-                          {item.tags.length > 0 && (
-                            <span className="flex items-center gap-0.5 md:gap-1 hidden sm:flex">
-                              <Tag className="w-2.5 h-2.5 md:w-3 md:h-3" />
-                              {item.tags.length} {t('history.tags')}
+                          {item.type === 'voice' ? <Phone className="w-5 h-5" /> : <MessageSquare className="w-5 h-5" />}
+                        </div>
+                        <div>
+                          <p className={cn("font-medium", isDark ? "text-white" : "text-black")}>
+                            {item.callerName}
+                          </p>
+                          <div className="flex items-center gap-2 mt-0.5">
+                            <span className={cn(
+                              "text-[10px] px-1.5 py-0.5 rounded border uppercase tracking-wider",
+                              priority.color === 'red' ? "border-red-500/30 text-red-500" :
+                                priority.color === 'orange' ? "border-orange-500/30 text-orange-500" :
+                                  "border-white/10 text-white/40"
+                            )}>
+                              {priority.label}
                             </span>
-                          )}
+                          </div>
                         </div>
                       </div>
 
-                      <div className={cn(
-                        "p-1 md:p-1.5 rounded-lg transition-colors flex-shrink-0",
-                        isDark ? "hover:bg-white/10" : "hover:bg-black/10"
-                      )}>
-                        {expandedId === item.id ? (
-                          <ChevronUp className={cn(
-                            "w-4 h-4 md:w-5 md:h-5",
-                            isDark ? "text-white/60" : "text-black/60"
-                          )} />
-                        ) : (
-                          <ChevronDown className={cn(
-                            "w-4 h-4 md:w-5 md:h-5",
-                            isDark ? "text-white/60" : "text-black/60"
-                          )} />
-                        )}
+                      {/* Summary (Col 2 - Span) */}
+                      <div className="col-span-12 md:col-span-5">
+                        <p className={cn("text-sm truncate opacity-60", isDark ? "text-white" : "text-black")}>
+                          {item.summary.summaryText || "No summary available"}
+                        </p>
+                        <div className={cn("flex items-center gap-3 mt-1 text-xs opacity-40", isDark ? "text-white" : "text-black")}>
+                          <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {formatDuration(item.duration)}</span>
+                          <span>{formatDate(item.date)}</span>
+                        </div>
+                      </div>
+
+                      {/* Actions (Col 3) */}
+                      <div className="col-span-12 md:col-span-3 flex justify-end">
+                        <div className={cn(
+                          "p-2 rounded-full transition-transform duration-200",
+                          expandedId === item.id && "rotate-180"
+                        )}>
+                          <ChevronDown className={cn("w-5 h-5 opacity-40", isDark ? "text-white" : "text-black")} />
+                        </div>
                       </div>
                     </div>
-                  </button>
 
-                  {/* Expanded content */}
-                  <AnimatePresence>
-                    {expandedId === item.id && (
-                      <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: 'auto', opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        transition={{ duration: 0.2 }}
-                        className="overflow-hidden"
-                      >
-                        {/* Tabs */}
-                        <div className={cn(
-                          "flex gap-1 px-3 md:px-4 py-1.5 md:py-2 border-t",
-                          isDark ? "border-white/10" : "border-black/10"
-                        )}>
-                          {(['summary', 'transcript', 'details'] as const).map(tab => (
-                            <button
-                              key={tab}
-                              onClick={(e) => { e.stopPropagation(); setActiveTab(tab); }}
-                              className={cn(
-                                "px-2 md:px-3 py-0.5 md:py-1 rounded-md md:rounded-lg text-[10px] md:text-xs font-medium capitalize transition-colors",
-                                activeTab === tab
-                                  ? isDark
-                                    ? "bg-white/10 text-white"
-                                    : "bg-black/10 text-black"
-                                  : isDark
-                                    ? "text-white/50 hover:text-white/80"
-                                    : "text-black/50 hover:text-black/80"
-                              )}
-                            >
-                              {tab}
-                            </button>
-                          ))}
-                        </div>
+                    {/* Expanded Details */}
+                    <AnimatePresence>
+                      {expandedId === item.id && (
+                        <motion.div
+                          initial={{ height: 0 }}
+                          animate={{ height: 'auto' }}
+                          exit={{ height: 0 }}
+                          className="overflow-hidden"
+                        >
+                          <div className={cn(
+                            "border-t p-6",
+                            isDark ? "border-white/5 bg-black/20 text-white" : "border-black/5 bg-black/5 text-black"
+                          )}>
+                            {/* Tabs Header inside expanded */}
+                            <div className={cn("flex gap-4 border-b pb-2 mb-6 text-sm font-medium", isDark ? "border-white/5" : "border-black/5")}>
+                              {(['summary', 'transcript', 'details'] as const).map(tab => (
+                                <button
+                                  key={tab}
+                                  onClick={() => setActiveTab(tab)}
+                                  className={cn(
+                                    "capitalize transition-colors",
+                                    activeTab === tab
+                                      ? isDark ? "text-white border-b-2 border-white" : "text-black border-b-2 border-black"
+                                      : isDark ? "text-white/40 hover:text-white" : "text-black/40 hover:text-black"
+                                  )}
+                                >
+                                  {tab}
+                                </button>
+                              ))}
+                            </div>
 
-                        <div className="px-3 md:px-4 pb-3 md:pb-4 pt-1.5 md:pt-2">
-                          {/* Summary Tab */}
-                          {activeTab === 'summary' && (
-                            <div className="space-y-4">
-                              {/* Summary Overview */}
-                              {item.summary.summaryText && (
-                                <div className={cn(
-                                  "p-3 rounded-lg",
-                                  isDark ? "bg-white/5" : "bg-black/5"
-                                )}>
-                                  <p className={cn(
-                                    "text-sm leading-relaxed",
-                                    isDark ? "text-white/80" : "text-black/80"
-                                  )}>
-                                    {item.summary.summaryText}
+                            {/* Content */}
+                            {activeTab === 'summary' && (
+                              <div className="space-y-6">
+                                {/* Summary Text */}
+                                <div>
+                                  <h4 className={cn("text-xs uppercase mb-2 opacity-50 font-bold tracking-wider", isDark ? "text-white" : "text-black")}>Overview</h4>
+                                  <p className={cn("border-l-2 pl-4 py-1 text-sm leading-relaxed", isDark ? "border-white/20 text-white/80" : "border-black/10 text-black/80")}>
+                                    {item.summary.summaryText || "No summary details generated."}
                                   </p>
                                 </div>
-                              )}
 
-                              {/* Status Cards Row */}
-                              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                                {/* Sentiment Card */}
-                                <div className={cn(
-                                  "p-2.5 rounded-lg border",
-                                  isDark ? "bg-white/5 border-white/10" : "bg-black/5 border-black/10"
-                                )}>
-                                  <span className={cn(
-                                    "text-[10px] block mb-1",
-                                    isDark ? "text-white/40" : "text-black/40"
-                                  )}>{t('history.sentiment')}</span>
-                                  <div className="flex items-center gap-1.5">
-                                    <span className={cn(
-                                      "text-xs font-medium",
-                                      getSentimentConfig(item.summary.sentiment).color
-                                    )}>
-                                      {getSentimentConfig(item.summary.sentiment).label}
-                                    </span>
-                                  </div>
-                                </div>
-
-                                {/* Urgency Card */}
-                                {item.summary.estimatedPriority && (
-                                  <div className={cn(
-                                    "p-2.5 rounded-lg border",
-                                    isDark ? "bg-white/5 border-white/10" : "bg-black/5 border-black/10"
-                                  )}>
-                                    <span className={cn(
-                                      "text-[10px] block mb-1",
-                                      isDark ? "text-white/40" : "text-black/40"
-                                    )}>{t('history.priority')}</span>
-                                    <span className={cn(
-                                      "text-xs font-medium px-2 py-0.5 rounded-full capitalize",
-                                      item.summary.estimatedPriority === 'critical' ? "bg-red-500/20 text-red-400" :
-                                        item.summary.estimatedPriority === 'high' ? "bg-orange-500/20 text-orange-400" :
-                                          item.summary.estimatedPriority === 'medium' ? "bg-yellow-500/20 text-yellow-400" :
-                                            "bg-green-500/20 text-green-400"
-                                    )}>
-                                      {item.summary.estimatedPriority}
-                                    </span>
+                                {/* Main Points */}
+                                {item.summary.mainPoints && item.summary.mainPoints.length > 0 && (
+                                  <div>
+                                    <h4 className={cn("text-xs uppercase mb-2 opacity-50 font-bold tracking-wider", isDark ? "text-white" : "text-black")}>Key Points</h4>
+                                    <ul className={cn("list-disc list-inside space-y-1 text-sm ml-2", isDark ? "text-white/70" : "text-black/70")}>
+                                      {item.summary.mainPoints.map((point, i) => (
+                                        <li key={i}>{point}</li>
+                                      ))}
+                                    </ul>
                                   </div>
                                 )}
 
-                                {/* Resolution Card */}
-                                {item.summary.resolution && (
-                                  <div className={cn(
-                                    "p-2.5 rounded-lg border",
-                                    isDark ? "bg-white/5 border-white/10" : "bg-black/5 border-black/10"
-                                  )}>
-                                    <span className={cn(
-                                      "text-[10px] block mb-1",
-                                      isDark ? "text-white/40" : "text-black/40"
-                                    )}>{t('history.resolution')}</span>
-                                    <span className={cn(
-                                      "text-xs font-medium px-2 py-0.5 rounded-full capitalize",
-                                      item.summary.resolution === 'resolved' ? "bg-green-500/20 text-green-400" :
-                                        item.summary.resolution === 'partially_resolved' ? "bg-blue-500/20 text-blue-400" :
-                                          item.summary.resolution === 'escalation_needed' ? "bg-red-500/20 text-red-400" :
-                                            "bg-gray-500/20 text-gray-400"
-                                    )}>
-                                      {item.summary.resolution.replace('_', ' ')}
-                                    </span>
-                                  </div>
-                                )}
-
-                                {/* Risk Level Card */}
-                                {item.summary.riskLevel && (
-                                  <div className={cn(
-                                    "p-2.5 rounded-lg border",
-                                    isDark ? "bg-white/5 border-white/10" : "bg-black/5 border-black/10"
-                                  )}>
-                                    <span className={cn(
-                                      "text-[10px] block mb-1",
-                                      isDark ? "text-white/40" : "text-black/40"
-                                    )}>{t('history.riskLevel')}</span>
-                                    <span className={cn(
-                                      "text-xs font-medium px-2 py-0.5 rounded-full capitalize",
-                                      item.summary.riskLevel === 'high' ? "bg-red-500/20 text-red-400" :
-                                        item.summary.riskLevel === 'medium' ? "bg-orange-500/20 text-orange-400" :
-                                          "bg-green-500/20 text-green-400"
-                                    )}>
-                                      {item.summary.riskLevel}
-                                    </span>
-                                  </div>
-                                )}
-                              </div>
-
-                              {/* Caller Intent */}
-                              {item.summary.callerIntent && (
-                                <div className={cn(
-                                  "p-3 rounded-lg border-l-4 border-l-blue-500",
-                                  isDark ? "bg-blue-500/10" : "bg-blue-500/5"
-                                )}>
-                                  <span className={cn(
-                                    "text-[10px] block mb-1 font-medium",
-                                    isDark ? "text-blue-400" : "text-blue-600"
-                                  )}>{t('history.intent')}</span>
-                                  <p className={cn(
-                                    "text-sm",
-                                    isDark ? "text-white/80" : "text-black/80"
-                                  )}>
-                                    {item.summary.callerIntent}
-                                  </p>
-                                </div>
-                              )}
-
-                              {/* Key Points */}
-                              <div>
-                                <h4 className={cn(
-                                  "text-xs font-medium mb-2 flex items-center gap-1",
-                                  isDark ? "text-white/60" : "text-black/60"
-                                )}>
-                                  <FileText className="w-3 h-3" />
-                                  {t('history.keyPoints')}
-                                </h4>
-                                <ul className="space-y-1.5">
-                                  {item.summary.mainPoints.filter(p => p.trim()).map((point, i) => (
-                                    <li
-                                      key={i}
-                                      className={cn(
-                                        "text-sm pl-3 border-l-2 py-0.5",
-                                        isDark
-                                          ? "text-white/80 border-white/20"
-                                          : "text-black/80 border-black/20"
-                                      )}
-                                    >
-                                      {point}
-                                    </li>
-                                  ))}
-                                </ul>
-                              </div>
-
-                              {/* Topics */}
-                              {item.summary.topics && item.summary.topics.length > 0 && (
-                                <div>
-                                  <h4 className={cn(
-                                    "text-[10px] font-medium mb-2",
-                                    isDark ? "text-white/50" : "text-black/50"
-                                  )}>{t('history.topics')}</h4>
-                                  <div className="flex flex-wrap gap-1.5">
-                                    {item.summary.topics.map((topic, i) => (
-                                      <span
-                                        key={i}
-                                        className={cn(
-                                          "text-xs px-2.5 py-1 rounded-full border",
-                                          isDark
-                                            ? "bg-purple-500/10 text-purple-300 border-purple-500/20"
-                                            : "bg-purple-500/10 text-purple-600 border-purple-500/20"
-                                        )}
-                                      >
-                                        {topic}
-                                      </span>
-                                    ))}
-                                  </div>
-                                </div>
-                              )}
-
-                              {/* Mood Indicators */}
-                              {item.summary.moodIndicators && item.summary.moodIndicators.length > 0 && (
-                                <div>
-                                  <h4 className={cn(
-                                    "text-[10px] font-medium mb-2",
-                                    isDark ? "text-white/50" : "text-black/50"
-                                  )}>{t('history.mood')}</h4>
-                                  <div className="flex flex-wrap gap-1.5">
-                                    {item.summary.moodIndicators.map((mood, i) => (
-                                      <span
-                                        key={i}
-                                        className={cn(
-                                          "text-xs px-2.5 py-1 rounded-full border capitalize",
-                                          isDark
-                                            ? "bg-cyan-500/10 text-cyan-300 border-cyan-500/20"
-                                            : "bg-cyan-500/10 text-cyan-600 border-cyan-500/20"
-                                        )}
-                                      >
-                                        {mood}
-                                      </span>
-                                    ))}
-                                  </div>
-                                </div>
-                              )}
-
-                              {/* AI Suggestions */}
-                              {item.summary.suggestions && item.summary.suggestions.length > 0 && (
-                                <div className={cn(
-                                  "p-3 rounded-lg",
-                                  isDark ? "bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/20"
-                                    : "bg-gradient-to-r from-amber-500/5 to-orange-500/5 border border-amber-500/15"
-                                )}>
-                                  <h4 className={cn(
-                                    "text-xs font-medium mb-2 flex items-center gap-1.5",
-                                    isDark ? "text-amber-400" : "text-amber-600"
-                                  )}>
-                                    {t('history.suggestions')}
-                                  </h4>
-                                  <ul className="space-y-1.5">
-                                    {item.summary.suggestions.map((suggestion, i) => (
-                                      <li
-                                        key={i}
-                                        className={cn(
-                                          "text-sm flex items-start gap-2",
-                                          isDark ? "text-white/80" : "text-black/80"
-                                        )}
-                                      >
-                                        <span className="text-amber-500 mt-0.5">→</span>
-                                        {suggestion}
-                                      </li>
-                                    ))}
-                                  </ul>
-                                </div>
-                              )}
-
-                              {/* Action Items */}
-                              {item.summary.actionItems.length > 0 && (
-                                <div>
-                                  <h4 className={cn(
-                                    "text-xs font-medium mb-2",
-                                    isDark ? "text-white/60" : "text-black/60"
-                                  )}>
-                                    {t('history.actionItems')}
-                                  </h4>
-                                  <div className="space-y-1">
-                                    {item.summary.actionItems.map(action => (
-                                      <div
-                                        key={action.id}
-                                        className={cn(
-                                          "flex items-center gap-2 text-sm",
-                                          action.completed
-                                            ? isDark ? "text-white/40" : "text-black/40"
-                                            : isDark ? "text-white/80" : "text-black/80"
-                                        )}
-                                      >
-                                        {action.completed ? (
-                                          <CheckCircle className="w-4 h-4 text-green-400" />
-                                        ) : (
-                                          <Circle className="w-4 h-4" />
-                                        )}
-                                        <span className={action.completed ? "line-through" : ""}>
-                                          {action.text}
-                                        </span>
-                                      </div>
-                                    ))}
-                                  </div>
-                                </div>
-                              )}
-                            </div>
-                          )}
-
-                          {/* Transcript Tab */}
-                          {activeTab === 'transcript' && (
-                            <div className="space-y-2 max-h-[300px] overflow-y-auto custom-scrollbar">
-                              {item.messages.length === 0 ? (
-                                <p className={cn(
-                                  "text-sm text-center py-4",
-                                  isDark ? "text-white/40" : "text-black/40"
-                                )}>
-                                  {t('history.noTranscript')}
-                                </p>
-                              ) : (
-                                item.messages.map((msg) => (
-                                  <div
-                                    key={msg.id}
-                                    className={cn(
-                                      "flex items-start gap-2 p-2 rounded-lg",
-                                      msg.speaker === 'agent'
-                                        ? isDark
-                                          ? "bg-blue-500/10"
-                                          : "bg-blue-500/5"
-                                        : isDark
-                                          ? "bg-purple-500/10"
-                                          : "bg-purple-500/5"
-                                    )}
-                                  >
-                                    <div className={cn(
-                                      "w-6 h-6 rounded flex items-center justify-center flex-shrink-0",
-                                      msg.speaker === 'agent'
-                                        ? "bg-blue-500/20"
-                                        : "bg-purple-500/20"
-                                    )}>
-                                      {msg.speaker === 'agent' ? (
-                                        <Bot className="w-3 h-3 text-blue-400" />
-                                      ) : (
-                                        <User className="w-3 h-3 text-purple-400" />
-                                      )}
+                                {/* Action Items */}
+                                {item.summary.actionItems && item.summary.actionItems.length > 0 && (
+                                  <div>
+                                    <div className="flex items-center gap-2 mb-2">
+                                      <ListTodo className="w-4 h-4 opacity-50" />
+                                      <h4 className={cn("text-xs uppercase opacity-50 font-bold tracking-wider", isDark ? "text-white" : "text-black")}>Action Items</h4>
                                     </div>
-                                    <div className="flex-1 min-w-0">
-                                      <p className={cn(
-                                        "text-xs",
-                                        isDark ? "text-white/70" : "text-black/70"
-                                      )}>
-                                        {msg.text}
-                                      </p>
+                                    <div className="grid gap-2">
+                                      {item.summary.actionItems.map((action, i) => (
+                                        <div key={i} className={cn("flex items-start gap-2 p-3 rounded-lg text-sm", isDark ? "bg-white/5 text-white/90" : "bg-black/5 text-black/90")}>
+                                          <div className={cn("w-4 h-4 rounded border mt-0.5 flex items-center justify-center flex-shrink-0", action.completed ? "bg-green-500/20 border-green-500/50" : "border-white/20")}>
+                                            {action.completed && <CheckCircle className="w-3 h-3 text-green-500" />}
+                                          </div>
+                                          <span className={action.completed ? "line-through opacity-50" : ""}>{action.text}</span>
+                                        </div>
+                                      ))}
                                     </div>
                                   </div>
-                                ))
-                              )}
-                            </div>
-                          )}
+                                )}
 
-                          {/* Details Tab */}
-                          {activeTab === 'details' && (
-                            <div className="space-y-3 md:space-y-4">
-                              {/* Extracted Fields */}
-                              {item.extractedFields.length > 0 && (
-                                <div>
-                                  <h4 className={cn(
-                                    "text-[10px] md:text-xs font-medium mb-1.5 md:mb-2",
-                                    isDark ? "text-white/60" : "text-black/60"
-                                  )}>
-                                    {t('history.extractedInfo')}
-                                  </h4>
-                                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 md:gap-2">
-                                    {item.extractedFields.map(field => (
-                                      <div
-                                        key={field.id}
-                                        className={cn(
-                                          "p-1.5 md:p-2 rounded-md md:rounded-lg",
-                                          isDark ? "bg-white/5" : "bg-black/5"
-                                        )}
-                                      >
-                                        <span className={cn(
-                                          "text-[10px] md:text-xs block",
-                                          isDark ? "text-white/40" : "text-black/40"
-                                        )}>
-                                          {field.label}
-                                        </span>
-                                        <span className={cn(
-                                          "text-xs md:text-sm font-medium",
-                                          isDark ? "text-white" : "text-black"
-                                        )}>
-                                          {field.value}
-                                        </span>
-                                        <span className={cn(
-                                          "text-[10px] md:text-xs ml-1",
-                                          isDark ? "text-white/30" : "text-black/30"
-                                        )}>
-                                          ({Math.round(field.confidence * 100)}%)
-                                        </span>
-                                      </div>
-                                    ))}
+                                {/* Sentiment & Topics */}
+                                <div className={cn("grid grid-cols-2 gap-4 pt-4 border-t", isDark ? "border-white/5" : "border-black/5")}>
+                                  <div>
+                                    <div className="flex items-center gap-2 mb-1 opacity-50">
+                                      <Smile className="w-3 h-3" />
+                                      <span className="text-xs uppercase font-bold tracking-wider">Sentiment</span>
+                                    </div>
+                                    <span className={cn(
+                                      "capitalize text-sm font-medium px-2 py-0.5 rounded",
+                                      item.summary.sentiment.includes('positive') ? "bg-green-500/20 text-green-400" :
+                                        item.summary.sentiment.includes('negative') ? "bg-red-500/20 text-red-400" :
+                                          isDark ? "bg-white/10 text-white/70" : "bg-black/10 text-black/70"
+                                    )}>
+                                      {item.summary.sentiment.replace('_', ' ')}
+                                    </span>
                                   </div>
-                                </div>
-                              )}
-
-                              {/* Tags */}
-                              {item.tags.length > 0 && (
-                                <div>
-                                  <h4 className={cn(
-                                    "text-[10px] md:text-xs font-medium mb-1.5 md:mb-2",
-                                    isDark ? "text-white/60" : "text-black/60"
-                                  )}>
-                                    {t('history.tags')}
-                                  </h4>
-                                  <div className="flex flex-wrap gap-1">
-                                    {item.tags.map((tag, i) => (
-                                      <span
-                                        key={i}
-                                        className={cn(
-                                          "text-[10px] md:text-xs px-1.5 md:px-2 py-0.5 rounded-full",
-                                          isDark
-                                            ? "bg-white/10 text-white/70"
-                                            : "bg-black/10 text-black/70"
-                                        )}
-                                      >
-                                        #{tag}
-                                      </span>
-                                    ))}
+                                  <div>
+                                    <div className="flex items-center gap-2 mb-1 opacity-50">
+                                      <Tag className="w-3 h-3" />
+                                      <span className="text-xs uppercase font-bold tracking-wider">Tags</span>
+                                    </div>
+                                    <div className="flex flex-wrap gap-1">
+                                      {item.summary.topics?.map(topic => (
+                                        <span key={topic} className={cn("px-2 py-0.5 rounded text-xs opacity-60", isDark ? "bg-white/5 text-white" : "bg-black/5 text-black")}>#{topic}</span>
+                                      ))}
+                                    </div>
                                   </div>
-                                </div>
-                              )}
-
-                              {/* Call Details */}
-                              <div className="grid grid-cols-2 gap-1.5 md:gap-2 text-xs md:text-sm">
-                                <div className={cn(
-                                  "p-1.5 md:p-2 rounded-md md:rounded-lg",
-                                  isDark ? "bg-white/5" : "bg-black/5"
-                                )}>
-                                  <span className={cn(
-                                    "text-[10px] md:text-xs block",
-                                    isDark ? "text-white/40" : "text-black/40"
-                                  )}>
-                                    Date & Time
-                                  </span>
-                                  <span className={isDark ? "text-white" : "text-black"}>
-                                    <span className="hidden sm:inline">{item.date.toLocaleDateString()} {formatTime(item.date)}</span>
-                                    <span className="sm:hidden">{formatDate(item.date)}</span>
-                                  </span>
-                                </div>
-                                <div className={cn(
-                                  "p-1.5 md:p-2 rounded-md md:rounded-lg",
-                                  isDark ? "bg-white/5" : "bg-black/5"
-                                )}>
-                                  <span className={cn(
-                                    "text-[10px] md:text-xs block",
-                                    isDark ? "text-white/40" : "text-black/40"
-                                  )}>
-                                    Duration
-                                  </span>
-                                  <span className={isDark ? "text-white" : "text-black"}>
-                                    {formatDuration(item.duration)}
-                                  </span>
                                 </div>
                               </div>
-                            </div>
-                          )}
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </motion.div>
-              );
-            })}
-          </AnimatePresence>
-        )}
+                            )}
+
+                            {activeTab === 'transcript' && (
+                              <div className="space-y-3 max-h-80 overflow-y-auto pr-2 custom-scrollbar">
+                                {item.messages.length === 0 ? (
+                                  <p className="opacity-40 italic text-sm text-center py-4">No transcript available</p>
+                                ) : item.messages.map((msg, idx) => (
+                                  <div key={idx} className="flex gap-4 text-sm group">
+                                    <span className={cn(
+                                      "uppercase text-[10px] font-bold w-12 pt-1 opacity-50 group-hover:opacity-100 transition-opacity",
+                                      msg.speaker === 'agent' ? "text-blue-400" : "text-purple-400"
+                                    )}>
+                                      {msg.speaker}
+                                    </span>
+                                    <div className={cn("px-3 py-2 rounded-lg flex-1", msg.speaker === 'agent' ? (isDark ? "bg-white/5" : "bg-black/5") : "bg-transparent")}>
+                                      <p className="opacity-80 leading-relaxed">{msg.text}</p>
+                                      <span className="text-[10px] opacity-20 mt-1 block">{new Date(msg.timestamp).toLocaleTimeString()}</span>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+
+                            {activeTab === 'details' && (
+                              <div className="space-y-6">
+                                {/* Extracted Fields */}
+                                <div>
+                                  <div className="flex items-center gap-2 mb-3">
+                                    <Database className="w-4 h-4 opacity-50" />
+                                    <h4 className={cn("text-xs uppercase opacity-50 font-bold tracking-wider", isDark ? "text-white" : "text-black")}>Extracted Data</h4>
+                                  </div>
+
+                                  {item.extractedFields.length > 0 ? (
+                                    <div className="grid gap-1">
+                                      {item.extractedFields.map(field => (
+                                        <div key={field.id} className={cn("grid grid-cols-12 gap-4 text-sm p-2 rounded transition-colors", isDark ? "hover:bg-white/5" : "hover:bg-black/5")}>
+                                          <span className={cn("col-span-4 opacity-60 font-medium truncate", isDark ? "text-white" : "text-black")}>{field.label}</span>
+                                          <span className={cn("col-span-6", isDark ? "text-white" : "text-black")}>{field.value}</span>
+                                          <span className="col-span-2 text-right opacity-40 text-xs font-mono">{Math.round(field.confidence * 100)}%</span>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  ) : (
+                                    <p className="opacity-40 text-sm italic">No data fields extracted.</p>
+                                  )}
+                                </div>
+
+                                {/* Metadata */}
+                                <div className={cn("pt-4 border-t grid grid-cols-2 md:grid-cols-4 gap-4", isDark ? "border-white/5" : "border-black/5")}>
+                                  <div>
+                                    <span className="text-xs opacity-40 block mb-1">Duration</span>
+                                    <span className="font-mono">{formatDuration(item.duration)}</span>
+                                  </div>
+                                  <div>
+                                    <span className="text-xs opacity-40 block mb-1">Priority</span>
+                                    <span className="capitalize">{item.priority}</span>
+                                  </div>
+                                  <div>
+                                    <span className="text-xs opacity-40 block mb-1">Processing ID</span>
+                                    <span className="font-mono text-xs opacity-60 truncate block">{item.id}</span>
+                                  </div>
+                                  <div>
+                                    <span className="text-xs opacity-40 block mb-1">Category</span>
+                                    <span className="capitalize">{item.category?.name || 'Uncategorized'}</span>
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                )
+              })}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

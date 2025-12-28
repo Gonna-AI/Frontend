@@ -10,7 +10,10 @@ import {
     Save,
     Brain,
     Sparkles,
-    Terminal
+    Terminal,
+    CreditCard,
+    Key,
+    BarChart
 } from "lucide-react"
 
 import { getGroqSettings, GROQ_MODELS, GroqSettings } from "./DemoCall/GroqSettings"
@@ -257,6 +260,47 @@ export function AppSidebar({ activeTab, setActiveTab, ...props }: AppSidebarProp
                                 >
                                     <Save />
                                     <span>{t('sidebar.saveConfig')}</span>
+                                </SidebarMenuButton>
+                            </SidebarMenuItem>
+                        </SidebarMenu>
+                    </SidebarGroupContent>
+                </SidebarGroup>
+
+                <SidebarSeparator className="bg-white/10" />
+
+                {/* Account Group */}
+                <SidebarGroup>
+                    <SidebarGroupLabel className="text-white/60">Account</SidebarGroupLabel>
+                    <SidebarGroupContent>
+                        <SidebarMenu>
+                            <SidebarMenuItem>
+                                <SidebarMenuButton
+                                    isActive={activeTab === 'usage'}
+                                    onClick={() => setActiveTab('usage')}
+                                    className="text-white/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-white/10 data-[active=true]:text-white"
+                                >
+                                    <BarChart />
+                                    <span>Usage</span>
+                                </SidebarMenuButton>
+                            </SidebarMenuItem>
+                            <SidebarMenuItem>
+                                <SidebarMenuButton
+                                    isActive={activeTab === 'billing'}
+                                    onClick={() => setActiveTab('billing')}
+                                    className="text-white/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-white/10 data-[active=true]:text-white"
+                                >
+                                    <CreditCard />
+                                    <span>Billing</span>
+                                </SidebarMenuButton>
+                            </SidebarMenuItem>
+                            <SidebarMenuItem>
+                                <SidebarMenuButton
+                                    isActive={activeTab === 'keys'}
+                                    onClick={() => setActiveTab('keys')}
+                                    className="text-white/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-white/10 data-[active=true]:text-white"
+                                >
+                                    <Key />
+                                    <span>Keys</span>
                                 </SidebarMenuButton>
                             </SidebarMenuItem>
                         </SidebarMenu>
