@@ -14,6 +14,7 @@ import LanguageSwitcher from './LanguageSwitcher';
 
 interface HeaderProps {
   onMobileMenuClick: () => void;
+  isStatic?: boolean;
 }
 
 // Add interface for API notification type
@@ -25,7 +26,7 @@ interface Notification {
   created_at: string;
 }
 
-export default function Header({ onMobileMenuClick }: HeaderProps) {
+export default function Header({ onMobileMenuClick, isStatic = false }: HeaderProps) {
   const [showCalendar, setShowCalendar] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
   const { isDark } = useTheme();
@@ -92,7 +93,7 @@ export default function Header({ onMobileMenuClick }: HeaderProps) {
   return (
     <>
       <header className={cn(
-        "fixed top-0 left-0 right-0 z-40",
+        isStatic ? "relative" : "fixed top-0 left-0 right-0 z-40",
         "h-16 md:h-20 flex items-center justify-between px-4 md:px-6",
         "transition-all duration-300",
         isDark

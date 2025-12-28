@@ -218,26 +218,25 @@ export default function KnowledgeBase({ isDark = true, activeSection }: Knowledg
 
 
   const tabInfo = {
-    prompt: { label: t('config.systemPrompt'), icon: Terminal, description: "Define the core identity and behavior of your AI agent." },
-    voice: { label: t('config.voice'), icon: Volume2, description: "Choose the voice that best fits your brand personality." },
-    fields: { label: t('config.fields'), icon: Database, description: "Structured data to extract from every conversation." },
-    categories: { label: t('config.categories'), icon: Settings, description: "Call classification buckets for analytics." },
-    rules: { label: t('config.rules'), icon: AlertTriangle, description: "Logic for determining call priority levels." },
-    instructions: { label: t('config.instructions'), icon: Lightbulb, description: "Specific behavioral guidelines for the agent." }
+    prompt: { label: t('sidebar.systemPrompt'), icon: Terminal, description: "Define the core identity and behavior of your AI agent." },
+    voice: { label: t('sidebar.aiVoice'), icon: Volume2, description: "Choose the voice that best fits your brand personality." },
+    fields: { label: t('sidebar.contextFields'), icon: Database, description: "Structured data to extract from every conversation." },
+    categories: { label: t('sidebar.categories'), icon: Settings, description: "Call classification buckets for analytics." },
+    rules: { label: t('sidebar.priorityRules'), icon: AlertTriangle, description: "Logic for determining call priority levels." },
+    instructions: { label: t('sidebar.instructions'), icon: Lightbulb, description: "Specific behavioral guidelines for the agent." }
   };
 
   const currentTabInfo = tabInfo[activeTab];
 
   return (
-    <div className="space-y-6 max-w-6xl mx-auto pb-10">
+    <div className="space-y-6 max-w-[1600px] mx-auto pb-10">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className={cn("text-2xl font-bold flex items-center gap-2", isDark ? "text-white" : "text-black")}>
-            <currentTabInfo.icon className="w-6 h-6 opacity-80" />
+          <h1 className={cn("text-2xl font-bold", isDark ? "text-white" : "text-gray-900")}>
             {currentTabInfo.label}
           </h1>
-          <p className={cn("text-sm mt-1", isDark ? "text-white/60" : "text-black/60")}>
+          <p className={cn("text-sm mt-1", isDark ? "text-white/60" : "text-gray-500")}>
             {currentTabInfo.description}
           </p>
         </div>
@@ -249,12 +248,12 @@ export default function KnowledgeBase({ isDark = true, activeSection }: Knowledg
             disabled={isTestingConnection}
             title={localLLMConnected ? `${t('config.groqConnected')}: ${localLLMModel}` : t('config.groqOffline')}
             className={cn(
-              "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors",
+              "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors border",
               isTestingConnection
-                ? isDark ? "bg-white/10 text-white/50" : "bg-black/10 text-black/50"
+                ? (isDark ? "bg-white/5 border-white/10 text-white/50" : "bg-black/5 border-black/5 text-black/50")
                 : localLLMConnected
-                  ? isDark ? "bg-green-500/20 text-green-400" : "bg-green-500/10 text-green-600"
-                  : isDark ? "bg-red-500/20 text-red-400" : "bg-red-500/10 text-red-600"
+                  ? (isDark ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400" : "bg-emerald-50 border-emerald-200 text-emerald-700")
+                  : (isDark ? "bg-rose-500/10 border-rose-500/20 text-rose-400" : "bg-rose-50 border-rose-200 text-rose-700")
             )}
           >
             {isTestingConnection ? (
@@ -274,12 +273,10 @@ export default function KnowledgeBase({ isDark = true, activeSection }: Knowledg
             onClick={handleSaveToSupabase}
             disabled={isSaving}
             className={cn(
-              "flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all",
+              "flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition-all shadow-sm",
               saveSuccess
-                ? "bg-green-500/20 text-green-400 border border-green-500/30"
-                : isDark
-                  ? "bg-white text-black hover:bg-white/90"
-                  : "bg-black text-white hover:bg-black/90"
+                ? "bg-emerald-500 text-white border-transparent"
+                : "bg-white text-black hover:bg-gray-100 border border-gray-200"
             )}
           >
             {isSaving ? (
@@ -313,7 +310,7 @@ export default function KnowledgeBase({ isDark = true, activeSection }: Knowledg
         /* Main Settings Card */
         <div className={cn(
           "p-6 rounded-xl border min-h-[400px]",
-          isDark ? "bg-black/40 border-white/10 text-white" : "bg-white border-black/10 text-black"
+          isDark ? "bg-[#09090B] border-white/10 text-white" : "bg-white border-black/10 text-black"
         )}>
           <AnimatePresence mode="wait">
             {/* System Prompt Tab */}
@@ -326,51 +323,48 @@ export default function KnowledgeBase({ isDark = true, activeSection }: Knowledg
                 className="space-y-6"
               >
                 <div className="space-y-2">
-                  <label className={cn("text-sm font-medium", isDark ? "text-white/80" : "text-black/80")}>
-                    {t('config.systemPrompt')}
-                  </label>
                   <textarea
                     value={knowledgeBase.systemPrompt}
                     onChange={(e) => updateKnowledgeBase({ systemPrompt: e.target.value })}
                     rows={12}
                     className={cn(
-                      "w-full p-4 rounded-xl text-sm resize-none focus:outline-none focus:ring-2",
+                      "w-full p-4 rounded-xl text-sm resize-none focus:outline-none focus:ring-1 transition-all",
                       isDark
-                        ? "bg-white/5 text-white border border-white/10 focus:ring-white/20"
-                        : "bg-black/5 text-black border border-black/10 focus:ring-black/20"
+                        ? "bg-white/5 text-white border border-white/10 focus:ring-white/20 focus:border-white/20"
+                        : "bg-gray-50 text-black border border-gray-200 focus:ring-gray-300 focus:border-gray-300"
                     )}
                     placeholder={t('config.systemPromptDesc')}
                   />
                 </div>
                 <div className="grid md:grid-cols-2 gap-6">
                   <div className="space-y-2">
-                    <label className={cn("text-sm font-medium", isDark ? "text-white/80" : "text-black/80")}>
+                    <label className={cn("text-sm font-medium", isDark ? "text-white/80" : "text-gray-700")}>
                       {t('config.persona')}
                     </label>
                     <input
                       value={knowledgeBase.persona}
                       onChange={(e) => updateKnowledgeBase({ persona: e.target.value })}
                       className={cn(
-                        "w-full p-4 rounded-xl text-sm focus:outline-none focus:ring-2",
+                        "w-full p-4 rounded-xl text-sm focus:outline-none focus:ring-1 transition-all",
                         isDark
-                          ? "bg-white/5 text-white border border-white/10 focus:ring-white/20"
-                          : "bg-black/5 text-black border border-black/10 focus:ring-black/20"
+                          ? "bg-white/5 text-white border border-white/10 focus:ring-white/20 focus:border-white/20"
+                          : "bg-gray-50 text-black border border-gray-200 focus:ring-gray-300 focus:border-gray-300"
                       )}
                       placeholder={t('config.personaPlaceholder')}
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className={cn("text-sm font-medium", isDark ? "text-white/80" : "text-black/80")}>
+                    <label className={cn("text-sm font-medium", isDark ? "text-white/80" : "text-gray-700")}>
                       {t('config.greeting')}
                     </label>
                     <input
                       value={knowledgeBase.greeting}
                       onChange={(e) => updateKnowledgeBase({ greeting: e.target.value })}
                       className={cn(
-                        "w-full p-4 rounded-xl text-sm focus:outline-none focus:ring-2",
+                        "w-full p-4 rounded-xl text-sm focus:outline-none focus:ring-1 transition-all",
                         isDark
-                          ? "bg-white/5 text-white border border-white/10 focus:ring-white/20"
-                          : "bg-black/5 text-black border border-black/10 focus:ring-black/20"
+                          ? "bg-white/5 text-white border border-white/10 focus:ring-white/20 focus:border-white/20"
+                          : "bg-gray-50 text-black border border-gray-200 focus:ring-gray-300 focus:border-gray-300"
                       )}
                       placeholder={t('config.greetingPlaceholder')}
                     />
@@ -382,61 +376,75 @@ export default function KnowledgeBase({ isDark = true, activeSection }: Knowledg
             {/* Context Fields Tab */}
             {activeTab === 'fields' && (
               <motion.div key="fields" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-6">
-                <div className="flex justify-between items-center pb-4 border-b border-white/5">
-                  <h3 className={cn("text-lg font-semibold", isDark ? "text-white" : "text-black")}>Data Collection Fields</h3>
-                  <button onClick={() => setIsAddingField(true)} className={cn("px-3 py-1.5 rounded-lg text-sm bg-white text-black font-medium hover:bg-white/90")}>
+                <div className={cn("flex justify-between items-center pb-4 border-b", isDark ? "border-white/10" : "border-gray-100")}>
+                  <h3 className={cn("text-lg font-semibold", isDark ? "text-white" : "text-gray-900")}>Data Collection Fields</h3>
+                  <button onClick={() => setIsAddingField(true)} className={cn("px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors", isDark ? "bg-white text-black hover:bg-white/90" : "bg-black text-white hover:bg-black/90")}>
                     Add Field
                   </button>
                 </div>
 
-                {/* New Field Form (Simplified) */}
+                {/* New Field Form */}
                 <AnimatePresence>
                   {isAddingField && (
                     <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden mb-4">
-                      <div className={cn("p-4 rounded-lg space-y-3", isDark ? "bg-white/5" : "bg-black/5")}>
+                      <div className={cn("p-4 rounded-lg space-y-3 border", isDark ? "bg-white/5 border-white/10" : "bg-gray-50 border-gray-100")}>
                         <input
                           placeholder="Field Name (e.g. Order Number)"
                           value={newField.name}
                           onChange={(e) => setNewField({ ...newField, name: e.target.value })}
-                          className="w-full bg-transparent border-b border-white/10 pb-2 focus:outline-none focus:border-white/40"
+                          className={cn(
+                            "w-full bg-transparent border-b pb-2 focus:outline-none text-sm",
+                            isDark ? "border-white/10 focus:border-white/40 placeholder-white/20" : "border-black/10 focus:border-black/20 placeholder-black/40"
+                          )}
                         />
-                        <div className="flex justify-end gap-2">
-                          <button onClick={() => setIsAddingField(false)} className="text-sm opacity-60 hover:opacity-100">Cancel</button>
-                          <button onClick={handleAddField} className="text-sm font-bold opacity-80 hover:opacity-100">Save</button>
+                        <input
+                          placeholder="Description (optional)"
+                          value={newField.description}
+                          onChange={(e) => setNewField({ ...newField, description: e.target.value })}
+                          className={cn(
+                            "w-full bg-transparent border-b pb-2 focus:outline-none text-sm",
+                            isDark ? "border-white/10 focus:border-white/40 placeholder-white/20" : "border-black/10 focus:border-black/20 placeholder-black/40"
+                          )}
+                        />
+                        <div className="flex justify-end gap-2 pt-2">
+                          <button onClick={() => setIsAddingField(false)} className={cn("text-xs px-3 py-1.5 rounded hover:bg-white/10", isDark ? "text-white/60" : "text-black/60")}>Cancel</button>
+                          <button onClick={handleAddField} className={cn("text-xs font-semibold px-3 py-1.5 rounded bg-white text-black")}>Save Field</button>
                         </div>
                       </div>
                     </motion.div>
                   )}
                 </AnimatePresence>
 
-                {/* Flat List */}
-                <div className="divide-y divide-white/5">
+                {/* Field List */}
+                <div className={cn("divide-y", isDark ? "divide-white/5" : "divide-gray-100")}>
                   {knowledgeBase.contextFields.map(field => (
-                    <div key={field.id} className="py-4 flex items-center justify-between group">
+                    <div key={field.id} className="py-4 flex items-center justify-between group transition-colors px-2 rounded-lg hover:bg-white/5">
                       <div>
                         <div className="flex items-center gap-2">
-                          <span className={cn("font-medium", isDark ? "text-white" : "text-black")}>{field.name}</span>
-                          {field.required && <span className="text-red-400 text-xs">*</span>}
-                          <span className={cn("text-[10px] uppercase border px-1 rounded", isDark ? "text-white/60 border-white/20" : "text-black/60 border-black/20")}>{field.type}</span>
+                          <span className={cn("font-medium", isDark ? "text-white" : "text-gray-900")}>{field.name}</span>
+                          {field.required && <span className="text-rose-400 text-xs font-medium bg-rose-400/10 px-1.5 py-0.5 rounded-full">Required</span>}
+                          <span className={cn("text-[10px] uppercase border px-1.5 py-0.5 rounded font-medium", isDark ? "text-white/40 border-white/10" : "text-gray-500 border-gray-200")}>{field.type}</span>
                         </div>
-                        {field.description && <p className={cn("text-xs mt-1", isDark ? "text-white/50" : "text-black/50")}>{field.description}</p>}
+                        {field.description && <p className={cn("text-xs mt-1", isDark ? "text-white/40" : "text-gray-500")}>{field.description}</p>}
                       </div>
-                      <button onClick={() => removeContextField(field.id)} className="opacity-0 group-hover:opacity-100 text-red-400 transition-opacity p-2">
+                      <button onClick={() => removeContextField(field.id)} className="opacity-0 group-hover:opacity-100 text-rose-400 p-2 hover:bg-rose-400/10 rounded-lg transition-all">
                         <Trash2 className="w-4 h-4" />
                       </button>
                     </div>
                   ))}
+                  {knowledgeBase.contextFields.length === 0 && (
+                    <p className={cn("text-center py-8 text-sm italic", isDark ? "text-white/20" : "text-black/20")}>No fields configured yet.</p>
+                  )}
                 </div>
               </motion.div>
             )}
 
-            {/* Categories Tab - simplified list */}
+            {/* Categories Tab */}
             {activeTab === 'categories' && (
               <motion.div key="categories" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
-                {/* Similar structure to fields but for categories */}
-                <div className="flex justify-between items-center pb-4 border-b border-white/5">
-                  <h3 className={cn("text-lg font-semibold", isDark ? "text-white" : "text-black")}>Call Categories</h3>
-                  <button onClick={() => setIsAddingCategory(true)} className={cn("px-3 py-1.5 rounded-lg text-sm bg-white text-black font-medium hover:bg-white/90")}>
+                <div className={cn("flex justify-between items-center pb-4 border-b", isDark ? "border-white/10" : "border-gray-100")}>
+                  <h3 className={cn("text-lg font-semibold", isDark ? "text-white" : "text-gray-900")}>Call Categories</h3>
+                  <button onClick={() => setIsAddingCategory(true)} className={cn("px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors", isDark ? "bg-white text-black hover:bg-white/90" : "bg-black text-white hover:bg-black/90")}>
                     Add Category
                   </button>
                 </div>
@@ -445,111 +453,155 @@ export default function KnowledgeBase({ isDark = true, activeSection }: Knowledg
                 <AnimatePresence>
                   {isAddingCategory && (
                     <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden mb-4">
-                      <div className={cn("p-4 rounded-lg space-y-3", isDark ? "bg-white/5" : "bg-black/5")}>
-                        <input
-                          placeholder="Category Name (e.g. Sales)"
-                          value={newCategory.name}
-                          onChange={(e) => setNewCategory({ ...newCategory, name: e.target.value })}
-                          className="w-full bg-transparent border-b border-white/10 pb-2 focus:outline-none focus:border-white/40 mb-2"
-                        />
-                        <input
-                          placeholder="Description"
-                          value={newCategory.description}
-                          onChange={(e) => setNewCategory({ ...newCategory, description: e.target.value })}
-                          className="w-full bg-transparent border-b border-white/10 pb-2 focus:outline-none focus:border-white/40 text-sm opacity-80"
-                        />
+                      <div className={cn("p-4 rounded-lg space-y-3 border", isDark ? "bg-white/5 border-white/10" : "bg-gray-50 border-gray-100")}>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <input
+                            placeholder="Category Name"
+                            value={newCategory.name}
+                            onChange={(e) => setNewCategory({ ...newCategory, name: e.target.value })}
+                            className={cn(
+                              "w-full bg-transparent border-b pb-2 focus:outline-none text-sm",
+                              isDark ? "border-white/10 focus:border-white/40 placeholder-white/20" : "border-black/10 focus:border-black/20 placeholder-black/40"
+                            )}
+                          />
+                          <input
+                            placeholder="Description"
+                            value={newCategory.description}
+                            onChange={(e) => setNewCategory({ ...newCategory, description: e.target.value })}
+                            className={cn(
+                              "w-full bg-transparent border-b pb-2 focus:outline-none text-sm",
+                              isDark ? "border-white/10 focus:border-white/40 placeholder-white/20" : "border-black/10 focus:border-black/20 placeholder-black/40"
+                            )}
+                          />
+                        </div>
+
                         <div className="flex items-center gap-2 mt-2">
-                          <span className="text-xs opacity-60 mr-2">Color:</span>
+                          <span className={cn("text-xs opacity-60 mr-2", isDark ? "text-white" : "text-black")}>Color:</span>
                           {['blue', 'orange', 'red', 'green', 'purple', 'emerald'].map(color => (
                             <button
                               key={color}
                               onClick={() => setNewCategory({ ...newCategory, color })}
                               className={cn(
-                                "w-5 h-5 rounded-full transition-transform hover:scale-110",
-                                newCategory.color === color ? "ring-2 ring-white/50 scale-110" : "opacity-60"
+                                "w-5 h-5 rounded-full transition-transform hover:scale-110 border-2",
+                                newCategory.color === color ? "border-white scale-110 shadow-sm" : "border-transparent opacity-60 hover:opacity-100"
                               )}
                               style={{ backgroundColor: color }}
                             />
                           ))}
                         </div>
-                        <div className="flex justify-end gap-2 mt-2">
-                          <button onClick={() => setIsAddingCategory(false)} className="text-sm opacity-60 hover:opacity-100">Cancel</button>
-                          <button onClick={handleAddCategory} className="text-sm font-bold opacity-80 hover:opacity-100">Save</button>
+                        <div className="flex justify-end gap-2 pt-2">
+                          <button onClick={() => setIsAddingCategory(false)} className={cn("text-xs px-3 py-1.5 rounded hover:bg-white/10", isDark ? "text-white/60" : "text-black/60")}>Cancel</button>
+                          <button onClick={handleAddCategory} className={cn("text-xs font-semibold px-3 py-1.5 rounded bg-white text-black")}>Save Category</button>
                         </div>
                       </div>
                     </motion.div>
                   )}
                 </AnimatePresence>
 
-                <div className="divide-y divide-white/5">
+                <div className={cn("divide-y", isDark ? "divide-white/5" : "divide-gray-100")}>
                   {knowledgeBase.categories.map(cat => (
-                    <div key={cat.id} className="py-4 flex items-center justify-between group">
+                    <div key={cat.id} className="py-4 flex items-center justify-between group px-2 rounded-lg hover:bg-white/5 transition-colors">
                       <div className="flex items-center gap-3">
                         <div className={cn("w-3 h-3 rounded-full")} style={{ backgroundColor: cat.color || 'gray' }} />
                         <div>
-                          <p className={cn("font-medium", isDark ? "text-white" : "text-black")}>{cat.name}</p>
-                          <p className="text-xs opacity-50">{cat.description}</p>
+                          <p className={cn("font-medium", isDark ? "text-white" : "text-gray-900")}>{cat.name}</p>
+                          <p className={cn("text-xs", isDark ? "text-white/40" : "text-gray-500")}>{cat.description}</p>
                         </div>
                       </div>
-                      <button onClick={() => removeCategory(cat.id)} className="opacity-0 group-hover:opacity-100 text-red-400 transition-opacity p-2">
+                      <button onClick={() => removeCategory(cat.id)} className="opacity-0 group-hover:opacity-100 text-rose-400 p-2 hover:bg-rose-400/10 rounded-lg transition-all">
                         <Trash2 className="w-4 h-4" />
                       </button>
                     </div>
                   ))}
+                  {knowledgeBase.categories.length === 0 && (
+                    <p className={cn("text-center py-8 text-sm italic", isDark ? "text-white/20" : "text-black/20")}>No categories defined.</p>
+                  )}
                 </div>
               </motion.div>
             )}
 
-            {/* Rules Tab - simplified list */}
+            {/* Rules Tab */}
             {activeTab === 'rules' && (
               <motion.div key="rules" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
-                <div className="flex justify-between items-center pb-4 border-b border-white/5">
-                  <h3 className={cn("text-lg font-semibold", isDark ? "text-white" : "text-black")}>Priority Rules</h3>
-                  <button onClick={() => setIsAddingRule(true)} className={cn("px-3 py-1.5 rounded-lg text-sm bg-white text-black font-medium hover:bg-white/90")}>
+                <div className={cn("flex justify-between items-center pb-4 border-b", isDark ? "border-white/10" : "border-gray-100")}>
+                  <h3 className={cn("text-lg font-semibold", isDark ? "text-white" : "text-gray-900")}>Priority Rules</h3>
+                  <button onClick={() => setIsAddingRule(true)} className={cn("px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors", isDark ? "bg-white text-black hover:bg-white/90" : "bg-black text-white hover:bg-black/90")}>
                     Add Rule
                   </button>
                 </div>
+
                 {isAddingRule && (
-                  <div className={cn("p-4 rounded-lg space-y-3", isDark ? "bg-white/5" : "bg-black/5")}>
-                    <input value={newRule} onChange={(e) => setNewRule(e.target.value)} placeholder="e.g. Mark as HIGH if user mentions 'cancel'" className="w-full bg-transparent border-b border-white/10 pb-2 focus:outline-none" />
-                    <button onClick={handleAddRule} className="text-sm font-bold">Save</button>
+                  <div className={cn("p-4 rounded-lg space-y-3 border", isDark ? "bg-white/5 border-white/10" : "bg-gray-50 border-gray-100")}>
+                    <input
+                      value={newRule}
+                      onChange={(e) => setNewRule(e.target.value)}
+                      placeholder="e.g. Mark as HIGH if user mentions 'cancel'"
+                      className={cn(
+                        "w-full bg-transparent border-b pb-2 focus:outline-none text-sm",
+                        isDark ? "border-white/10 focus:border-white/40 placeholder-white/20" : "border-black/10 focus:border-black/20 placeholder-black/40"
+                      )}
+                    />
+                    <div className="flex justify-end gap-2 pt-2">
+                      <button onClick={() => setIsAddingRule(false)} className={cn("text-xs px-3 py-1.5 rounded hover:bg-white/10", isDark ? "text-white/60" : "text-black/60")}>Cancel</button>
+                      <button onClick={handleAddRule} className="text-xs font-semibold px-3 py-1.5 rounded bg-white text-black">Save Rule</button>
+                    </div>
                   </div>
                 )}
-                <div className="divide-y divide-white/5">
+                <div className={cn("divide-y", isDark ? "divide-white/5" : "divide-gray-100")}>
                   {knowledgeBase.priorityRules.map((rule, i) => (
-                    <div key={i} className="py-4 flex items-start gap-3 group">
-                      <AlertTriangle className="w-4 h-4 text-orange-400 mt-1 flex-shrink-0" />
-                      <p className={cn("flex-1 text-sm", isDark ? "text-white/80" : "text-black/80")}>{rule}</p>
-                      <button onClick={() => handleRemoveRule(i)} className="opacity-0 group-hover:opacity-100 text-red-400"><Trash2 className="w-4 h-4" /></button>
+                    <div key={i} className="py-4 flex items-start gap-3 group px-2 rounded-lg hover:bg-white/5 transition-colors">
+                      <div className="p-1.5 rounded-md bg-orange-500/10 text-orange-400 mt-0.5">
+                        <AlertTriangle className="w-3.5 h-3.5" />
+                      </div>
+                      <p className={cn("flex-1 text-sm leading-relaxed", isDark ? "text-white/80" : "text-gray-700")}>{rule}</p>
+                      <button onClick={() => handleRemoveRule(i)} className="opacity-0 group-hover:opacity-100 text-rose-400 p-2 hover:bg-rose-400/10 rounded-lg transition-all"><Trash2 className="w-4 h-4" /></button>
                     </div>
                   ))}
+                  {knowledgeBase.priorityRules.length === 0 && (
+                    <p className={cn("text-center py-8 text-sm italic", isDark ? "text-white/20" : "text-black/20")}>No priority rules defined.</p>
+                  )}
                 </div>
               </motion.div>
             )}
 
-            {/* Instructions Tab - simplified list */}
+            {/* Instructions Tab */}
             {activeTab === 'instructions' && (
               <motion.div key="instructions" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
-                <div className="flex justify-between items-center pb-4 border-b border-white/5">
-                  <h3 className={cn("text-lg font-semibold", isDark ? "text-white" : "text-black")}>Custom Instructions</h3>
-                  <button onClick={() => setIsAddingInstruction(true)} className={cn("px-3 py-1.5 rounded-lg text-sm bg-white text-black font-medium hover:bg-white/90")}>
-                    Add Inst.
+                <div className={cn("flex justify-between items-center pb-4 border-b", isDark ? "border-white/10" : "border-gray-100")}>
+                  <h3 className={cn("text-lg font-semibold", isDark ? "text-white" : "text-gray-900")}>Custom Instructions</h3>
+                  <button onClick={() => setIsAddingInstruction(true)} className={cn("px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors", isDark ? "bg-white text-black hover:bg-white/90" : "bg-black text-white hover:bg-black/90")}>
+                    Add Instruction
                   </button>
                 </div>
+
                 {isAddingInstruction && (
-                  <div className={cn("p-4 rounded-lg space-y-3", isDark ? "bg-white/5" : "bg-black/5")}>
-                    <input value={newInstruction} onChange={(e) => setNewInstruction(e.target.value)} placeholder="e.g. Always ask for email confirmation" className="w-full bg-transparent border-b border-white/10 pb-2 focus:outline-none" />
-                    <button onClick={handleAddInstruction} className="text-sm font-bold">Save</button>
+                  <div className={cn("p-4 rounded-lg space-y-3 border", isDark ? "bg-white/5 border-white/10" : "bg-gray-50 border-gray-100")}>
+                    <input
+                      value={newInstruction}
+                      onChange={(e) => setNewInstruction(e.target.value)}
+                      placeholder="e.g. Always ask for email confirmation"
+                      className={cn(
+                        "w-full bg-transparent border-b pb-2 focus:outline-none text-sm",
+                        isDark ? "border-white/10 focus:border-white/40 placeholder-white/20" : "border-black/10 focus:border-black/20 placeholder-black/40"
+                      )}
+                    />
+                    <div className="flex justify-end gap-2 pt-2">
+                      <button onClick={() => setIsAddingInstruction(false)} className={cn("text-xs px-3 py-1.5 rounded hover:bg-white/10", isDark ? "text-white/60" : "text-black/60")}>Cancel</button>
+                      <button onClick={handleAddInstruction} className="text-xs font-semibold px-3 py-1.5 rounded bg-white text-black">Save Instruction</button>
+                    </div>
                   </div>
                 )}
-                <div className="divide-y divide-white/5">
+                <div className={cn("divide-y", isDark ? "divide-white/5" : "divide-gray-100")}>
                   {knowledgeBase.customInstructions.map((inst, i) => (
-                    <div key={i} className="py-4 flex items-start gap-3 group">
-                      <span className="w-5 h-5 rounded-full bg-purple-500/20 text-purple-400 flex items-center justify-center text-xs">{i + 1}</span>
-                      <p className={cn("flex-1 text-sm", isDark ? "text-white/80" : "text-black/80")}>{inst}</p>
-                      <button onClick={() => handleRemoveInstruction(i)} className="opacity-0 group-hover:opacity-100 text-red-400"><Trash2 className="w-4 h-4" /></button>
+                    <div key={i} className="py-4 flex items-start gap-3 group px-2 rounded-lg hover:bg-white/5 transition-colors">
+                      <span className="w-5 h-5 rounded-full bg-purple-500/10 text-purple-400 flex items-center justify-center text-xs font-medium border border-purple-500/20">{i + 1}</span>
+                      <p className={cn("flex-1 text-sm leading-relaxed", isDark ? "text-white/80" : "text-gray-700")}>{inst}</p>
+                      <button onClick={() => handleRemoveInstruction(i)} className="opacity-0 group-hover:opacity-100 text-rose-400 p-2 hover:bg-rose-400/10 rounded-lg transition-all"><Trash2 className="w-4 h-4" /></button>
                     </div>
                   ))}
+                  {knowledgeBase.customInstructions.length === 0 && (
+                    <p className={cn("text-center py-8 text-sm italic", isDark ? "text-white/20" : "text-black/20")}>No custom instructions defined.</p>
+                  )}
                 </div>
               </motion.div>
             )}

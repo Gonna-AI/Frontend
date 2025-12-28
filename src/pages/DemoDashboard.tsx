@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { SidebarProvider } from "@/components/ui/sidebar";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from '../components/AppSidebar';
 import { DemoCallProvider } from '../contexts/DemoCallContext';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -8,9 +8,9 @@ import KnowledgeBase from '../components/DemoCall/KnowledgeBase';
 import CallHistoryList from '../components/DemoCall/CallHistoryList';
 import GroqSettingsPage from '../components/DemoCall/GroqSettings';
 import TopBanner from '../components/Layout/TopBanner';
-import Navbar from "../components/Layout/Header";
 import { cn } from '../utils/cn';
 import { motion } from 'framer-motion';
+import { RotateCcw } from 'lucide-react';
 
 // Dashboard Views
 import UsageView from '../components/DashboardViews/UsageView';
@@ -20,10 +20,29 @@ import MonitorView from '../components/DashboardViews/MonitorView';
 
 function DemoDashboardContent() {
   const { isDark } = useTheme();
-  // Subscribe to language changes
-  useLanguage();
+  const { t } = useLanguage();
   const [activeTab, setActiveTab] = useState('monitor');
   const [sidebarOpen, setSidebarOpen] = useState(true);
+
+  // Get tab label using translation keys matching the sidebar
+  const getTabLabel = (tab: string): string => {
+    const labelMap: Record<string, string> = {
+      monitor: t('dashboard.tab.monitor'),
+      history: t('history.title'),
+      knowledge: t('config.title'),
+      system_prompt: t('sidebar.systemPrompt'),
+      ai_voice: t('sidebar.aiVoice'),
+      context_fields: t('sidebar.contextFields'),
+      categories: t('sidebar.categories'),
+      priority_rules: t('sidebar.priorityRules'),
+      instructions: t('sidebar.instructions'),
+      groq_settings: t('sidebar.groqAi'),
+      usage: 'Usage',
+      billing: 'Billing',
+      keys: 'API Keys',
+    };
+    return labelMap[tab] || tab;
+  };
 
   return (
     <SidebarProvider open={sidebarOpen} onOpenChange={setSidebarOpen}>
@@ -38,9 +57,38 @@ function DemoDashboardContent() {
 
         <main className="flex-1 flex flex-col h-screen overflow-hidden relative">
           {/* Sticky Header Container */}
-          <div className="sticky top-0 z-20 w-full flex-col">
+          <div className="sticky top-0 z-[200] w-full flex flex-col">
             <TopBanner />
-            <Navbar onMobileMenuClick={() => setSidebarOpen(!sidebarOpen)} />
+            {/* Top Bar with Trigger */}
+            <div className={cn(
+              "flex items-center justify-between px-4 py-3 border-b backdrop-blur-md",
+              isDark ? "bg-[rgb(10,10,10)]/80 border-white/10" : "bg-white/80 border-black/10"
+            )}>
+              <div className="flex items-center gap-4">
+                <SidebarTrigger className={isDark ? "text-white" : "text-black"} />
+                <h1 className={cn("text-lg font-semibold", isDark ? "text-white" : "text-black")}>
+                  {getTabLabel(activeTab)}
+                </h1>
+                <button
+                  className={cn(
+                    "p-1.5 rounded-md transition-colors",
+                    isDark ? "hover:bg-white/10 text-white/60" : "hover:bg-black/10 text-black/60"
+                  )}
+                  onClick={() => window.location.reload()}
+                >
+                  <RotateCcw className="w-4 h-4" />
+                </button>
+              </div>
+              <a
+                href="/docs"
+                className={cn(
+                  "text-sm font-medium transition-colors",
+                  isDark ? "text-white/60 hover:text-white" : "text-black/60 hover:text-black"
+                )}
+              >
+                Docs
+              </a>
+            </div>
           </div>
 
           {/* Main Content Area */}

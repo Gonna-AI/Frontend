@@ -1,68 +1,407 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import { cn } from '../../utils/cn';
-import { RotateCcw } from 'lucide-react';
+import { CreditCard, Check, Zap, Star, Building2, Rocket, Coins, ArrowRight, ShieldCheck, Sparkles } from 'lucide-react';
+import { useDemoCall } from '../../contexts/DemoCallContext';
+
+// ClerkTree Credits System - synced with UsageView
+const TOTAL_CREDITS = 50;
+const VOICE_CREDITS_PER_MINUTE = 1;
+const TEXT_CREDITS_PER_10_REQUESTS = 1;
+
+interface PlanFeature {
+    text: string;
+    included: boolean;
+    highlight?: boolean;
+}
+
+interface Plan {
+    name: string;
+    price: string;
+    period: string;
+    description: string;
+    credits: number;
+    features: PlanFeature[];
+    popular?: boolean;
+    current?: boolean;
+    cta: string;
+}
 
 export default function BillingView({ isDark = true }: { isDark?: boolean }) {
-    const pricing = [
-        { item: 'Voice Call', cost: '5 credits per minute' },
-        { item: 'LLM Processing (Input)', cost: '0.1 credits per 1k tokens' },
-        { item: 'LLM Processing (Output)', cost: '0.2 credits per 1k tokens' },
-        { item: 'Knowledge Base Query', cost: '1 credit per search' },
-        { item: 'Text Message', cost: '0.5 credits per message' },
+    const { callHistory } = useDemoCall();
+    const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
+
+    // Calculate actual usage from call history
+    const usageStats = useMemo(() => {
+        const voiceCalls = callHistory.filter(c => c.type === 'voice');
+        const textChats = callHistory.filter(c => c.type === 'text');
+
+        const totalVoiceSeconds = voiceCalls.reduce((acc, call) => acc + (call.duration || 0), 0);
+        const totalVoiceMinutes = Math.ceil(totalVoiceSeconds / 60);
+        const totalTextRequests = textChats.reduce((acc, call) => acc + call.messages.filter(m => m.speaker === 'user').length, 0);
+
+        const voiceCreditsUsed = totalVoiceMinutes * VOICE_CREDITS_PER_MINUTE;
+        const textCreditsUsed = Math.ceil(totalTextRequests / 10) * TEXT_CREDITS_PER_10_REQUESTS;
+        const totalCreditsUsed = voiceCreditsUsed + textCreditsUsed;
+        const creditsRemaining = Math.max(0, TOTAL_CREDITS - totalCreditsUsed);
+
+        return {
+            totalCreditsUsed,
+            creditsRemaining,
+            creditsUsedPercent: (totalCreditsUsed / TOTAL_CREDITS) * 100
+        };
+    }, [callHistory]);
+
+    const plans: Plan[] = [
+        {
+            name: 'Free',
+            price: '$0',
+            period: 'forever',
+            description: 'Perfect to explore and build prototypes.',
+            credits: 50,
+            current: true,
+            cta: 'Current Plan',
+            features: [
+                { text: '50 ClerkTree Credits / month', included: true, highlight: true },
+                { text: 'Standard voice quality', included: true },
+                { text: '500 text requests included', included: true },
+                { text: 'Basic community support', included: true },
+                { text: '1 active project', included: true },
+                { text: 'Custom voice cloning', included: false },
+                { text: 'API Access', included: false },
+            ]
+        },
+        {
+            name: 'Pro',
+            price: billingCycle === 'monthly' ? '$49' : '$39',
+            period: billingCycle === 'monthly' ? '/ month' : '/ month, billed yearly',
+            description: 'For startups and growing teams needing power.',
+            credits: 500,
+            popular: true,
+            cta: 'Upgrade to Pro',
+            features: [
+                { text: '500 ClerkTree Credits / month', included: true, highlight: true },
+                { text: 'Premium ultra-low latency voice', included: true, highlight: true },
+                { text: '5,000 text requests included', included: true },
+                { text: 'Priority email support', included: true },
+                { text: 'Unlimited projects', included: true },
+                { text: 'Custom voice cloning (3 voices)', included: true },
+                { text: 'Full API Access', included: true },
+            ]
+        },
+        {
+            name: 'Enterprise',
+            price: 'Custom',
+            period: 'contact sales',
+            description: 'For large organizations with custom needs.',
+            credits: -1, // Unlimited
+            cta: 'Contact Sales',
+            features: [
+                { text: 'Unlimited ClerkTree Credits', included: true, highlight: true },
+                { text: 'Dedicated GPU infrastructure', included: true },
+                { text: 'Unlimited custom voices', included: true },
+                { text: '24/7 dedicated support channel', included: true },
+                { text: 'SSO & Advanced Security', included: true },
+                { text: 'SLA Guarantees', included: true },
+                { text: 'On-premise deployment option', included: true },
+            ]
+        }
     ];
 
     return (
-        <div className="space-y-8 max-w-6xl mx-auto pb-10">
-            <div className="flex items-center gap-2">
-                <h1 className={cn("text-2xl font-bold", isDark ? "text-white" : "text-black")}>Billing</h1>
-                <RotateCcw className={cn("w-4 h-4 cursor-pointer hover:rotate-180 transition-transform", isDark ? "text-white/40" : "text-black/40")} />
+        <div className="space-y-8 max-w-[1600px] mx-auto pb-10">
+            {/* Header */}
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <h1 className={cn("text-2xl font-bold", isDark ? "text-white" : "text-black")}>Billing & Plans</h1>
+                    <p className={cn("text-sm mt-1", isDark ? "text-white/60" : "text-black/60")}>
+                        Manage your subscription, credits, and payment methods
+                    </p>
+                </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Balance Card */}
+            {/* Current Plan & Credits Status */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* Current Plan Card */}
                 <div className={cn(
-                    "p-8 rounded-xl border flex flex-col justify-between min-h-[250px]",
-                    isDark ? "bg-black/40 border-white/10" : "bg-white border-black/10"
+                    "lg:col-span-2 p-8 rounded-2xl border flex flex-col justify-center h-full relative overflow-hidden",
+                    isDark ? "bg-[#09090B] border-white/10" : "bg-white border-black/10"
                 )}>
-                    <div>
-                        <h3 className={cn("text-base font-medium", isDark ? "text-white/80" : "text-black/80")}>Remaining Balance</h3>
-                        <div className="flex items-baseline gap-2 mt-4">
-                            <span className={cn("text-6xl font-bold", isDark ? "text-white" : "text-black")}>50</span>
-                            <span className={cn("text-xl font-medium", isDark ? "text-white/40" : "text-black/40")}>Credits</span>
-                        </div>
-                    </div>
+                    {/* Background decoration */}
+                    <div className={cn(
+                        "absolute top-0 right-0 w-[400px] h-[400px] rounded-full blur-[120px] opacity-10 pointer-events-none -translate-y-1/2 translate-x-1/2",
+                        isDark ? "bg-white" : "bg-black"
+                    )} />
 
-                    <div className="flex justify-end mt-8">
+                    <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
+                        <div className="flex items-start gap-6">
+                            <div className={cn(
+                                "w-16 h-16 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-lg",
+                                isDark ? "bg-white/5 border border-white/10" : "bg-black/5 border border-black/5"
+                            )}>
+                                <Rocket className={cn("w-8 h-8", isDark ? "text-white" : "text-black")} />
+                            </div>
+                            <div className="space-y-2">
+                                <div className="flex items-center gap-3">
+                                    <h3 className={cn("text-xl font-bold", isDark ? "text-white" : "text-black")}>Free Research Preview</h3>
+                                    <span className={cn(
+                                        "px-2.5 py-0.5 rounded-full text-[10px] uppercase font-bold tracking-wider",
+                                        isDark ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/20" : "bg-emerald-100 text-emerald-700 border border-emerald-200"
+                                    )}>
+                                        Active
+                                    </span>
+                                </div>
+                                <p className={cn("text-sm max-w-lg leading-relaxed", isDark ? "text-white/60" : "text-black/60")}>
+                                    You are currently on the Free plan. Great for prototypes and testing.
+                                    Upgrade to <span className="font-semibold text-emerald-500">Pro</span> for production-ready latency and higher limits.
+                                </p>
+                            </div>
+                        </div>
                         <button className={cn(
-                            "px-4 py-2 rounded-lg font-medium text-sm transition-colors",
-                            isDark ? "bg-white text-black hover:bg-white/90" : "bg-black text-white hover:bg-black/90"
+                            "hidden md:flex px-5 py-2.5 rounded-xl text-sm font-semibold transition-all hover:scale-105 active:scale-95",
+                            isDark
+                                ? "bg-white text-black hover:bg-gray-200 shadow-[0_0_20px_rgba(255,255,255,0.1)]"
+                                : "bg-black text-white hover:bg-gray-800 shadow-[0_0_20px_rgba(0,0,0,0.1)]"
                         )}>
-                            Top up balance
+                            Upgrade Plan
                         </button>
                     </div>
                 </div>
 
-                {/* API Access Card */}
+                {/* Credit Balance Card */}
                 <div className={cn(
-                    "p-8 rounded-xl border flex flex-col min-h-[250px]",
-                    isDark ? "bg-black/40 border-white/10" : "bg-white border-black/10"
+                    "p-8 rounded-2xl border h-full flex flex-col justify-center relative overflow-hidden",
+                    usageStats.creditsRemaining === 0
+                        ? (isDark ? "bg-rose-950/20 border-rose-500/20" : "bg-rose-50 border-rose-200")
+                        : (isDark ? "bg-[#09090B] border-white/10" : "bg-white border-black/10")
                 )}>
-                    <h3 className={cn("text-base font-medium", isDark ? "text-white" : "text-black")}>API Access</h3>
-                    <p className={cn("text-sm mt-1 mb-6", isDark ? "text-white/40" : "text-black/40")}>
-                        Your API keys will be disabled when your balance reaches 0 credits.
-                    </p>
+                    {/* Glow Effect */}
+                    <div className={cn(
+                        "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[200px] h-[200px] rounded-full blur-[80px] opacity-20 pointer-events-none",
+                        usageStats.creditsRemaining === 0 ? "bg-rose-500" : "bg-emerald-500"
+                    )} />
 
-                    <div className="space-y-4">
-                        {pricing.map((p, i) => (
-                            <div key={i} className={cn(
-                                "flex items-center justify-between py-3 border-b border-dashed last:border-0",
-                                isDark ? "border-white/10" : "border-black/10"
-                            )}>
-                                <span className={cn("text-sm font-medium", isDark ? "text-white/80" : "text-black/80")}>{p.item}</span>
-                                <span className={cn("text-sm", isDark ? "text-white/60" : "text-black/60")}>{p.cost}</span>
+                    <div className="relative z-10">
+                        <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center gap-2">
+                                <Coins className={cn(
+                                    "w-5 h-5",
+                                    usageStats.creditsRemaining === 0 ? "text-rose-500" : "text-emerald-500"
+                                )} />
+                                <span className={cn(
+                                    "text-sm font-medium",
+                                    usageStats.creditsRemaining === 0 ? "text-rose-500" : (isDark ? "text-emerald-400" : "text-emerald-600")
+                                )}>Available Credits</span>
                             </div>
-                        ))}
+                            <span className={cn("text-xs font-mono opacity-50", isDark ? "text-white" : "text-black")}>Monthly Reset: Nov 1</span>
+                        </div>
+
+                        <div className="flex items-baseline gap-1 mt-2 mb-4">
+                            <span className={cn(
+                                "text-5xl font-bold tracking-tight",
+                                isDark ? "text-white" : "text-black"
+                            )}>
+                                {usageStats.creditsRemaining}
+                            </span>
+                            <span className={cn("text-lg", isDark ? "text-white/40" : "text-black/40")}> / {TOTAL_CREDITS}</span>
+                        </div>
+
+                        <div className={cn("w-full h-2 rounded-full overflow-hidden mb-2", isDark ? "bg-white/10" : "bg-black/5")}>
+                            <div
+                                className={cn(
+                                    "h-full rounded-full transition-all duration-500",
+                                    usageStats.creditsUsedPercent >= 100 ? "bg-rose-500" : "bg-emerald-500"
+                                )}
+                                style={{ width: `${Math.min(usageStats.creditsUsedPercent, 100)}%` }}
+                            />
+                        </div>
+
+                        <p className={cn(
+                            "text-xs",
+                            usageStats.creditsRemaining === 0
+                                ? "text-rose-400"
+                                : (isDark ? "text-white/40" : "text-black/40")
+                        )}>
+                            Refills automatically on billing cycle reset.
+                        </p>
                     </div>
+                </div>
+            </div>
+
+            {/* Billing Cycle Toggle */}
+            <div className="py-8 flex flex-col items-center justify-center space-y-4">
+                <h2 className={cn("text-2xl font-bold text-center", isDark ? "text-white" : "text-black")}>
+                    Simple, transparent pricing
+                </h2>
+                <div className={cn(
+                    "p-1 rounded-full flex items-center gap-1 border",
+                    isDark ? "bg-white/5 border-white/10" : "bg-gray-100 border-gray-200"
+                )}>
+                    <button
+                        onClick={() => setBillingCycle('monthly')}
+                        className={cn(
+                            "px-6 py-2 rounded-full text-sm font-medium transition-all duration-300",
+                            billingCycle === 'monthly'
+                                ? (isDark ? "bg-white text-black shadow-lg" : "bg-white text-black shadow-sm")
+                                : (isDark ? "text-white/60 hover:text-white" : "text-black/60 hover:text-black")
+                        )}
+                    >
+                        Monthly
+                    </button>
+                    <button
+                        onClick={() => setBillingCycle('yearly')}
+                        className={cn(
+                            "px-6 py-2 rounded-full text-sm font-medium transition-all duration-300 flex items-center gap-2",
+                            billingCycle === 'yearly'
+                                ? (isDark ? "bg-white text-black shadow-lg" : "bg-white text-black shadow-sm")
+                                : (isDark ? "text-white/60 hover:text-white" : "text-black/60 hover:text-black")
+                        )}
+                    >
+                        Yearly
+                        <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-500 text-white">
+                            -20%
+                        </span>
+                    </button>
+                </div>
+            </div>
+
+            {/* Pricing Plans */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
+                {plans.map((plan) => (
+                    <div
+                        key={plan.name}
+                        className={cn(
+                            "relative p-8 rounded-2xl border flex flex-col transition-all duration-300 hover:-translate-y-1",
+                            plan.popular
+                                ? (isDark ? "bg-gradient-to-b from-[#09090B] to-emerald-950/20 border-emerald-500/50 shadow-[0_0_40px_-10px_rgba(16,185,129,0.2)]" : "bg-white border-emerald-200 shadow-xl shadow-emerald-500/10")
+                                : (isDark ? "bg-[#09090B] border-white/10 hover:border-white/20" : "bg-white border-black/10 hover:border-black/20"),
+                            plan.current && "ring-1 ring-emerald-500/50"
+                        )}
+                    >
+                        {plan.popular && (
+                            <div className="absolute -top-4 left-1/2 -translate-x-1/2">
+                                <span className={cn(
+                                    "px-4 py-1.5 rounded-full text-xs font-bold flex items-center gap-1.5 shadow-lg uppercase tracking-wider",
+                                    isDark ? "bg-emerald-500 text-white" : "bg-black text-white"
+                                )}>
+                                    <Sparkles className="w-3 h-3 fill-current" /> Most Popular
+                                </span>
+                            </div>
+                        )}
+
+                        <div className="mb-8">
+                            <h3 className={cn("text-xl font-bold mb-2", isDark ? "text-white" : "text-black")}>{plan.name}</h3>
+                            <div className="flex items-baseline gap-1 mb-3">
+                                <span className={cn("text-4xl font-bold tracking-tight", isDark ? "text-white" : "text-black")}>{plan.price}</span>
+                                <span className={cn("text-sm font-medium", isDark ? "text-white/40" : "text-black/40")}>{plan.period}</span>
+                            </div>
+                            <p className={cn("text-sm leading-relaxed", isDark ? "text-white/60" : "text-black/60")}>{plan.description}</p>
+                        </div>
+
+                        {/* Divider */}
+                        <div className={cn("w-full h-px mb-8", isDark ? "bg-white/10" : "bg-black/5")} />
+
+                        <div className="flex-1 space-y-4 mb-8">
+                            {plan.features.map((feature, index) => (
+                                <div key={index} className="flex items-start gap-3 group">
+                                    <div className={cn(
+                                        "w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 transition-colors",
+                                        feature.included
+                                            ? (feature.highlight ? "bg-emerald-500 text-white" : (isDark ? "bg-white/10 text-white" : "bg-black/5 text-black"))
+                                            : (isDark ? "bg-white/5 text-white/20" : "bg-black/5 text-black/20")
+                                    )}>
+                                        <Check className="w-3 h-3" />
+                                    </div>
+                                    <span className={cn(
+                                        "text-sm transition-colors",
+                                        feature.included
+                                            ? (feature.highlight
+                                                ? (isDark ? "text-white font-medium" : "text-black font-medium")
+                                                : (isDark ? "text-white/70" : "text-black/70"))
+                                            : (isDark ? "text-white/30" : "text-black/30")
+                                    )}>
+                                        {feature.text}
+                                    </span>
+                                </div>
+                            ))}
+                        </div>
+
+                        <button
+                            disabled={plan.current}
+                            className={cn(
+                                "w-full py-4 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2",
+                                plan.current
+                                    ? (isDark ? "bg-white/5 text-white/40 cursor-not-allowed border border-white/5" : "bg-black/5 text-black/40 cursor-not-allowed border border-black/5")
+                                    : plan.popular
+                                        ? "bg-emerald-500 text-white hover:bg-emerald-600 hover:shadow-lg hover:shadow-emerald-500/25 transform hover:-translate-y-0.5"
+                                        : (isDark ? "bg-white text-black hover:bg-gray-200 transform hover:-translate-y-0.5" : "bg-black text-white hover:bg-gray-800 transform hover:-translate-y-0.5")
+                            )}
+                        >
+                            {plan.cta}
+                            {!plan.current && <ArrowRight className="w-4 h-4" />}
+                        </button>
+                    </div>
+                ))}
+            </div>
+
+            {/* Enterprise / Security Section */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-12">
+                <div className={cn(
+                    "p-8 rounded-2xl border flex flex-col justify-center",
+                    isDark ? "bg-[#09090B] border-white/10" : "bg-white border-black/10"
+                )}>
+                    <div className="flex items-center gap-4 mb-4">
+                        <div className={cn("p-3 rounded-xl", isDark ? "bg-purple-500/10 text-purple-400" : "bg-purple-50 text-purple-600")}>
+                            <Building2 className="w-6 h-6" />
+                        </div>
+                        <div>
+                            <h3 className={cn("font-bold text-lg", isDark ? "text-white" : "text-black")}>Enterprise Needs?</h3>
+                            <p className={cn("text-sm", isDark ? "text-white/60" : "text-black/60")}>Custom deployment & SLAs</p>
+                        </div>
+                    </div>
+                    <p className={cn("text-sm mb-6 leading-relaxed", isDark ? "text-white/60" : "text-black/60")}>
+                        We offer dedicated GPU instances, VPC peering, and custom fine-tuning for large scale deployments. Let's talk about your specific requirements.
+                    </p>
+                    <button className={cn(
+                        "w-full py-3 rounded-xl text-sm font-medium border transition-colors",
+                        isDark ? "border-white/10 hover:bg-white/5 text-white" : "border-black/10 hover:bg-gray-50 text-black"
+                    )}>
+                        Contact Enterprise Sales
+                    </button>
+                </div>
+
+                <div className={cn(
+                    "p-8 rounded-2xl border flex flex-col justify-center",
+                    isDark ? "bg-[#09090B] border-white/10" : "bg-white border-black/10"
+                )}>
+                    <div className="flex items-center gap-4 mb-4">
+                        <div className={cn("p-3 rounded-xl", isDark ? "bg-blue-500/10 text-blue-400" : "bg-blue-50 text-blue-600")}>
+                            <ShieldCheck className="w-6 h-6" />
+                        </div>
+                        <div>
+                            <h3 className={cn("font-bold text-lg", isDark ? "text-white" : "text-black")}>Secure & Compliant</h3>
+                            <p className={cn("text-sm", isDark ? "text-white/60" : "text-black/60")}>Enterprise-grade security</p>
+                        </div>
+                    </div>
+                    <div className="space-y-3 mb-6">
+                        <div className="flex items-center gap-2 text-sm">
+                            <Check className="w-4 h-4 text-emerald-500" />
+                            <span className={isDark ? "text-white/60" : "text-black/60"}>SOC2 Type II Compliant</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm">
+                            <Check className="w-4 h-4 text-emerald-500" />
+                            <span className={isDark ? "text-white/60" : "text-black/60"}>Data Encryption at Rest & Transit</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm">
+                            <Check className="w-4 h-4 text-emerald-500" />
+                            <span className={isDark ? "text-white/60" : "text-black/60"}>GDPR & CCPA Ready</span>
+                        </div>
+                    </div>
+                    <button className={cn(
+                        "w-full py-3 rounded-xl text-sm font-medium border transition-colors",
+                        isDark ? "border-white/10 hover:bg-white/5 text-white" : "border-black/10 hover:bg-gray-50 text-black"
+                    )}>
+                        View Security Documentation
+                    </button>
                 </div>
             </div>
         </div>

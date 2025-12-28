@@ -1,57 +1,182 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useDemoCall } from '../../contexts/DemoCallContext';
-import { Phone, MessageSquare } from 'lucide-react';
+import { TrendingUp, ArrowUpRight, ArrowDownRight, MoreHorizontal, Filter, Plus, Phone, Clock, Activity, Users, Radio } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { LiveCallMonitor } from '../DemoCall';
-import PriorityQueue from '../DemoCall/PriorityQueue';
+import {
+    AreaChart,
+    Area,
+    XAxis,
+    YAxis,
+    CartesianGrid,
+    Tooltip,
+    ResponsiveContainer
+} from 'recharts';
 
-function StatsCard({
-    title,
-    value,
-    subtitle,
-    isDark
-}: {
+// --- Constants ---
+
+
+// --- Types ---
+interface StatsCardProps {
     title: string;
     value: string | number;
-    subtitle?: string;
+    change?: string;
+    trend?: 'up' | 'down' | 'neutral';
+    subtitle: string;
+    icon?: React.ReactNode;
     isDark: boolean;
-}) {
+    progress?: number;
+    color?: 'emerald' | 'blue' | 'purple' | 'orange';
+}
+
+// --- Mock Data for Chart (replace with real if available) ---
+const chartData = [
+    { name: 'Mon', calls: 12 },
+    { name: 'Tue', calls: 19 },
+    { name: 'Wed', calls: 15 },
+    { name: 'Thu', calls: 25 },
+    { name: 'Fri', calls: 32 },
+    { name: 'Sat', calls: 20 },
+    { name: 'Sun', calls: 28 },
+];
+
+// --- Components ---
+
+function StatsCard({ title, value, change, trend, subtitle, icon, isDark, progress, color = 'emerald' }: StatsCardProps) {
     return (
         <div className={cn(
-            "p-6 rounded-xl border flex flex-col justify-between h-40",
+            "p-8 rounded-2xl border flex flex-col justify-between h-[220px] relative overflow-hidden transition-all duration-300 hover:border-opacity-50",
             isDark
-                ? "bg-black/40 border-white/10"
+                ? cn("bg-[#09090B]",
+                    color === 'emerald' ? "border-emerald-500/20" :
+                        color === 'blue' ? "border-blue-500/20" :
+                            color === 'purple' ? "border-purple-500/20" :
+                                color === 'orange' ? "border-orange-500/20" : "border-white/10"
+                )
                 : "bg-white border-black/10"
         )}>
-            <div>
-                <h3 className={cn("text-sm font-medium", isDark ? "text-white/60" : "text-black/60")}>
-                    {title}
-                </h3>
-                <div className={cn(
-                    "text-4xl font-semibold mt-2",
-                    isDark ? "text-white" : "text-black"
-                )}>
-                    {value}
+            {/* Ambient Background Glow - Centered like Billing View */}
+            <div className={cn(
+                "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[200px] h-[200px] rounded-full blur-[80px] opacity-20 pointer-events-none",
+                color === 'emerald' && "bg-emerald-500",
+                color === 'blue' && "bg-blue-500",
+                color === 'purple' && "bg-purple-500",
+                color === 'orange' && "bg-orange-500"
+            )} />
+
+            <div className="relative z-10 flex flex-col h-full justify-between">
+                <div className="flex items-start justify-between">
+                    <div className="flex items-center gap-3">
+                        <div className={cn(
+                            "p-2 rounded-lg border",
+                            isDark ? "bg-white/5 border-white/10" : "bg-black/5 border-black/5",
+                            color === 'emerald' && isDark && "text-emerald-400 bg-emerald-500/10 border-emerald-500/20",
+                            color === 'blue' && isDark && "text-blue-400 bg-blue-500/10 border-blue-500/20",
+                            color === 'purple' && isDark && "text-purple-400 bg-purple-500/10 border-purple-500/20",
+                            color === 'orange' && isDark && "text-orange-400 bg-orange-500/10 border-orange-500/20"
+                        )}>
+                            {icon}
+                        </div>
+                        <h3 className={cn("text-sm font-medium",
+                            isDark
+                                ? (color === 'emerald' ? "text-emerald-400" :
+                                    color === 'blue' ? "text-blue-400" :
+                                        color === 'purple' ? "text-purple-400" :
+                                            color === 'orange' ? "text-orange-400" : "text-gray-400")
+                                : (color === 'emerald' ? "text-emerald-600" :
+                                    color === 'blue' ? "text-blue-600" :
+                                        color === 'purple' ? "text-purple-600" :
+                                            color === 'orange' ? "text-orange-600" : "text-gray-600")
+                        )}>
+                            {title}
+                        </h3>
+                    </div>
+                    {change && (
+                        <div className={cn(
+                            "flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full border uppercase tracking-wider",
+                            trend === 'up'
+                                ? (isDark ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-emerald-100 text-emerald-700 border-emerald-200")
+                                : trend === 'down'
+                                    ? (isDark ? "bg-rose-500/10 text-rose-400 border-rose-500/20" : "bg-rose-100 text-rose-700 border-rose-200")
+                                    : (isDark ? "bg-gray-500/10 text-gray-400 border-gray-500/20" : "bg-gray-100 text-gray-700 border-gray-200")
+                        )}>
+                            {trend === 'up' ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
+                            {change}
+                        </div>
+                    )}
+                </div>
+
+                <div className="z-10 mt-auto">
+                    <div className={cn(
+                        "text-5xl font-bold tracking-tight mb-4",
+                        isDark ? "text-white" : "text-gray-900"
+                    )}>
+                        {value}
+                    </div>
+
+                    {/* Progress Bar */}
+                    {progress !== undefined && (
+                        <div className={cn("w-full h-1.5 rounded-full mb-3 overflow-hidden", isDark ? "bg-white/10" : "bg-gray-100")}>
+                            <div
+                                className={cn(
+                                    "h-full rounded-full transition-all duration-500",
+                                    color === 'emerald' && "bg-emerald-500",
+                                    color === 'blue' && "bg-blue-500",
+                                    color === 'purple' && "bg-purple-500",
+                                    color === 'orange' && "bg-orange-500"
+                                )}
+                                style={{ width: `${Math.min(progress, 100)}%` }}
+                            />
+                        </div>
+                    )}
+
+                    <p className={cn(
+                        "text-xs flex items-center gap-1",
+                        isDark ? "text-gray-500" : "text-gray-500"
+                    )}>
+                        {subtitle}
+                    </p>
                 </div>
             </div>
-            {subtitle && (
-                <p className={cn(
-                    "text-xs font-medium",
-                    isDark ? "text-white/40" : "text-black/40"
-                )}>
-                    {subtitle}
-                </p>
-            )}
         </div>
     );
 }
 
+function SectionTab({ active, onClick, children, isDark }: { active: boolean, onClick: () => void, children: React.ReactNode, isDark: boolean }) {
+    return (
+        <button
+            onClick={onClick}
+            className={cn(
+                "relative px-6 py-2.5 text-sm font-medium rounded-full transition-all duration-300",
+                active
+                    ? (isDark ? "text-white" : "text-black")
+                    : (isDark ? "text-white/40 hover:text-white" : "text-black/40 hover:text-black")
+            )}
+        >
+            {active && (
+                <motion.div
+                    layoutId="activeTab"
+                    className={cn(
+                        "absolute inset-0 rounded-full shadow-sm",
+                        isDark ? "bg-white/10" : "bg-white shadow"
+                    )}
+                    initial={false}
+                    transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                />
+            )}
+            <span className="relative z-10 flex items-center gap-2">
+                {children}
+            </span>
+        </button>
+    );
+}
+
 export default function MonitorView({ isDark = true }: { isDark?: boolean }) {
-    const { getAnalytics, currentCall, globalActiveSessions } = useDemoCall();
-    const { t } = useLanguage();
+    const { getAnalytics, callHistory, currentCall } = useDemoCall();
     const analytics = getAnalytics();
+    const [activeSection, setActiveSection] = useState<'history' | 'live'>('live');
 
     const formatDuration = (seconds: number) => {
         const mins = Math.floor(seconds / 60);
@@ -59,148 +184,291 @@ export default function MonitorView({ isDark = true }: { isDark?: boolean }) {
         return `${mins}:${secs.toString().padStart(2, '0')}`;
     };
 
+
+
+    // Custom Tooltip for Chart
+    const CustomTooltip = ({ active, payload, label }: any) => {
+        if (active && payload && payload.length) {
+            return (
+                <div className={cn(
+                    "p-3 rounded-lg border shadow-xl backdrop-blur-md",
+                    isDark ? "bg-black/80 border-white/10" : "bg-white/80 border-black/10"
+                )}>
+                    <p className={cn("text-xs font-semibold mb-2", isDark ? "text-white" : "text-black")}>{label}</p>
+                    <div className="flex items-center gap-2 text-xs">
+                        <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
+                        <span className={isDark ? "text-gray-300" : "text-gray-600"}>Calls: {payload[0].value}</span>
+                    </div>
+                </div>
+            );
+        }
+        return null;
+    };
+
     return (
-        <div className="space-y-8 max-w-6xl mx-auto pb-10">
+        <div className="space-y-8 max-w-[1600px] mx-auto pb-10">
             {/* Header */}
-            <div>
-                <h1 className={cn("text-2xl font-bold", isDark ? "text-white" : "text-black")}>Platform Monitor</h1>
-                <p className={cn("text-sm", isDark ? "text-white/60" : "text-black/60")}>Real-time activity and analytics</p>
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <h1 className={cn("text-2xl font-bold", isDark ? "text-white" : "text-black")}>
+                        Live Monitor
+                    </h1>
+                    <p className={cn("text-sm mt-1", isDark ? "text-white/60" : "text-black/60")}>
+                        Real-time system overview and activity tracking
+                    </p>
+                </div>
+
             </div>
 
-            {/* Stats Grid - MATCHING USAGE VIEW STYLE */}
+            {/* Stats Grid */}
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"
+                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
             >
                 <StatsCard
-                    title={t('dashboard.totalHistory')}
+                    title="Total Calls"
                     value={analytics.totalCalls}
-                    subtitle={currentCall?.status === 'active' ? `Active Call In Progress` : "Total processed calls"}
-                    isDark={isDark}
-                />
-                <StatsCard
-                    title="Critical Issues"
-                    value={analytics.byPriority.critical + analytics.byPriority.high}
-                    subtitle="Requires immediate attention"
+                    change="+12.5%"
+                    trend="up"
+                    subtitle="Last 7 days"
+                    icon={<Phone className="w-5 h-5" />}
+                    color="blue"
+                    progress={75}
                     isDark={isDark}
                 />
                 <StatsCard
                     title="Avg Duration"
                     value={formatDuration(analytics.avgDuration)}
-                    subtitle="Average handle time"
+                    change="-5%"
+                    trend="down"
+                    subtitle="Target: < 5:00"
+                    icon={<Clock className="w-5 h-5" />}
+                    color="purple"
+                    progress={65}
                     isDark={isDark}
                 />
                 <StatsCard
-                    title="Pending Follow-ups"
-                    value={analytics.followUpRequired}
-                    subtitle="Action items remaining"
+                    title="Active Sessions"
+                    value={currentCall?.status === 'active' ? 1 : 0}
+                    change="LIVE"
+                    trend="up"
+                    subtitle="Real-time connections"
+                    icon={<Activity className="w-5 h-5" />}
+                    color="emerald"
+                    progress={currentCall?.status === 'active' ? 100 : 0}
+                    isDark={isDark}
+                />
+
+                {/* Available Credits Card (Glassmorphic) */}
+                <StatsCard
+                    title="Satisfaction"
+                    value="94.5%"
+                    change="+4.5%"
+                    trend="up"
+                    subtitle="4.8/5.0 Customer Rating"
+                    icon={<Users className="w-5 h-5" />}
+                    color="orange"
+                    progress={94.5}
                     isDark={isDark}
                 />
             </motion.div>
 
-            {/* Content Grid */}
-            <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-                {/* Left Column */}
-                <div className="space-y-6">
-                    {/* Active Sessions - Minimal Design */}
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.1 }}
-                        className={cn(
-                            "p-6 rounded-xl border h-fit",
-                            isDark ? "bg-black/40 border-white/10" : "bg-white border-black/10"
-                        )}
-                    >
-                        <h3 className={cn("text-lg font-semibold mb-6", isDark ? "text-white" : "text-black")}>
-                            {t('dashboard.activeSessions')}
-                        </h3>
+            {/* Main Chart Section */}
+            <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
+                className={cn(
+                    "p-8 rounded-2xl border min-h-[400px] flex flex-col relative overflow-hidden",
+                    isDark ? "bg-[#09090B] border-white/10" : "bg-white border-black/10"
+                )}
+            >
+                {/* Background Glow */}
+                <div className={cn(
+                    "absolute -top-[200px] left-1/3 w-[500px] h-[500px] rounded-full blur-[120px] opacity-10 pointer-events-none",
+                    isDark ? "bg-blue-500" : "bg-blue-300"
+                )} />
 
-                        <div className="space-y-6">
-                            {/* Voice Row */}
-                            <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-4">
-                                    <div className={cn(
-                                        "w-12 h-12 rounded-full flex items-center justify-center",
-                                        globalActiveSessions.voice > 0
-                                            ? "bg-teal-500/20 text-teal-400"
-                                            : isDark ? "bg-white/5 text-white/20" : "bg-black/5 text-black/20"
-                                    )}>
-                                        <Phone className="w-6 h-6" />
-                                    </div>
-                                    <div>
-                                        <p className={cn("font-medium", isDark ? "text-white" : "text-black")}>Voice Calls</p>
-                                        <p className={cn("text-xs", isDark ? "text-white/40" : "text-black/40")}>
-                                            {globalActiveSessions.voice > 0 ? "Live now" : "No active calls"}
-                                        </p>
-                                    </div>
-                                </div>
-                                <span className={cn(
-                                    "text-2xl font-bold",
-                                    globalActiveSessions.voice > 0 ? "text-teal-400" : isDark ? "text-white/20" : "text-black/20"
-                                )}>
-                                    {globalActiveSessions.voice}
-                                </span>
-                            </div>
+                <div className="relative z-10 flex justify-between items-center mb-8">
+                    <div>
+                        <h2 className={cn("text-xl font-bold", isDark ? "text-white" : "text-gray-900")}>Call Volume Trends</h2>
+                        <p className={cn("text-sm mt-1", isDark ? "text-gray-400" : "text-gray-500")}>Inbound traffic analysis (Last 7 days)</p>
+                    </div>
+                </div>
 
-                            {/* Divider if needed, or just space */}
+                <div className="relative z-10 flex-1 w-full h-[300px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                        <AreaChart data={chartData} margin={{ top: 10, right: 0, left: -20, bottom: 0 }}>
+                            <defs>
+                                <linearGradient id="colorCalls" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
+                                    <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
+                                </linearGradient>
+                            </defs>
+                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)"} />
+                            <XAxis
+                                dataKey="name"
+                                axisLine={false}
+                                tickLine={false}
+                                tick={{ fill: isDark ? '#666' : '#999', fontSize: 12, fontWeight: 500 }}
+                                dy={10}
+                            />
+                            <YAxis
+                                axisLine={false}
+                                tickLine={false}
+                                tick={{ fill: isDark ? '#666' : '#999', fontSize: 12 }}
+                            />
+                            <Tooltip content={<CustomTooltip />} />
+                            <Area
+                                type="monotone"
+                                dataKey="calls"
+                                stroke="#3b82f6"
+                                strokeWidth={3}
+                                fillOpacity={1}
+                                fill="url(#colorCalls)"
+                            />
+                        </AreaChart>
+                    </ResponsiveContainer>
+                </div>
+            </motion.div>
 
-                            {/* Text Row */}
-                            <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-4">
-                                    <div className={cn(
-                                        "w-12 h-12 rounded-full flex items-center justify-center",
-                                        globalActiveSessions.text > 0
-                                            ? "bg-blue-500/20 text-blue-400"
-                                            : isDark ? "bg-white/5 text-white/20" : "bg-black/5 text-black/20"
-                                    )}>
-                                        <MessageSquare className="w-6 h-6" />
-                                    </div>
-                                    <div>
-                                        <p className={cn("font-medium", isDark ? "text-white" : "text-black")}>Text Chats</p>
-                                        <p className={cn("text-xs", isDark ? "text-white/40" : "text-black/40")}>
-                                            {globalActiveSessions.text > 0 ? "Live now" : "No active chats"}
-                                        </p>
-                                    </div>
-                                </div>
-                                <span className={cn(
-                                    "text-2xl font-bold",
-                                    globalActiveSessions.text > 0 ? "text-blue-400" : isDark ? "text-white/20" : "text-black/20"
-                                )}>
-                                    {globalActiveSessions.text}
-                                </span>
+            {/* Bottom Section: Tabs & Table/Monitor */}
+            <div className="space-y-6">
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div className={cn(
+                        "flex items-center p-1.5 rounded-full border shadow-sm",
+                        isDark ? "bg-black/40 border-white/10 backdrop-blur-md" : "bg-gray-50 border-gray-200"
+                    )}>
+                        <SectionTab isDark={isDark} active={activeSection === 'live'} onClick={() => setActiveSection('live')}>
+                            <Radio className={cn("w-4 h-4", activeSection === 'live' && "text-rose-500 animate-pulse")} />
+                            Live Monitor
+                        </SectionTab>
+                        <SectionTab isDark={isDark} active={activeSection === 'history'} onClick={() => setActiveSection('history')}>
+                            <Clock className="w-4 h-4" />
+                            History Log
+                        </SectionTab>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                        <button className={cn(
+                            "flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-xl border transition-colors",
+                            isDark ? "border-white/10 hover:bg-white/5 text-white/80" : "border-black/10 hover:bg-gray-50 text-gray-700"
+                        )}>
+                            <Filter className="w-4 h-4" />
+                            Filter
+                        </button>
+                    </div>
+                </div>
+
+                <motion.div
+                    key={activeSection}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3 }}
+                >
+                    {activeSection === 'live' ? (
+                        <div className={cn(
+                            "rounded-2xl border overflow-hidden relative",
+                            isDark ? "bg-[#09090B] border-white/10" : "bg-white border-black/10"
+                        )}>
+                            <div className="p-1">
+                                <LiveCallMonitor isDark={isDark} />
                             </div>
                         </div>
-                    </motion.div>
-
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.2 }}
-                    >
-                        <PriorityQueue isDark={isDark} />
-                    </motion.div>
-                </div>
-
-                {/* Right Column - Live Monitor */}
-                <div className="xl:col-span-2">
-                    <motion.div
-                        initial={{ opacity: 0, x: 20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ duration: 0.2 }}
-                        className={cn(
-                            "h-[600px] border rounded-xl overflow-hidden",
-                            isDark ? "bg-black/40 border-white/10" : "bg-white border-black/10"
-                        )}
-                    >
-                        {/* Header for the panel inside LiveCallMonitor or simplified here? 
-                             LiveCallMonitor has its own header. I'll trust it matches if I updated it? 
-                             Actually LiveCallMonitor is complex. I'll just wrap it nicely.
-                         */}
-                        <LiveCallMonitor isDark={isDark} />
-                    </motion.div>
-                </div>
+                    ) : (
+                        <div className={cn(
+                            "rounded-2xl border overflow-hidden",
+                            isDark ? "bg-[#09090B] border-white/10" : "bg-white border-black/10"
+                        )}>
+                            <div className="overflow-x-auto">
+                                <table className="w-full text-sm text-left">
+                                    <thead className={cn(
+                                        "text-xs uppercase font-semibold tracking-wider",
+                                        isDark ? "bg-white/5 text-white/50" : "bg-gray-50 text-gray-500"
+                                    )}>
+                                        <tr>
+                                            <th className="px-8 py-5">Caller</th>
+                                            <th className="px-6 py-5">Category</th>
+                                            <th className="px-6 py-5">Status</th>
+                                            <th className="px-6 py-5">Duration</th>
+                                            <th className="px-6 py-5">Date</th>
+                                            <th className="px-6 py-5 text-right">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-gray-200 dark:divide-white/5">
+                                        {callHistory.length === 0 ? (
+                                            <tr>
+                                                <td colSpan={6} className={cn("px-6 py-12 text-center", isDark ? "text-white/40" : "text-gray-500")}>
+                                                    <div className="flex flex-col items-center gap-3">
+                                                        <div className={cn("p-4 rounded-full", isDark ? "bg-white/5" : "bg-gray-100")}>
+                                                            <Clock className="w-6 h-6 opacity-50" />
+                                                        </div>
+                                                        <p>No call history available yet</p>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ) : (
+                                            callHistory.slice(0, 8).map((call) => (
+                                                <tr key={call.id} className={cn("transition-colors group", isDark ? "hover:bg-white/5" : "hover:bg-gray-50")}>
+                                                    <td className={cn("px-8 py-5 font-medium", isDark ? "text-white" : "text-gray-900")}>
+                                                        <div className="flex items-center gap-3">
+                                                            <div className={cn(
+                                                                "w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold",
+                                                                isDark ? "bg-white/10 text-white" : "bg-black/5 text-black"
+                                                            )}>
+                                                                {call.callerName.substring(0, 2).toUpperCase()}
+                                                            </div>
+                                                            {call.callerName}
+                                                        </div>
+                                                    </td>
+                                                    <td className="px-6 py-5">
+                                                        <span className={cn(
+                                                            "px-2.5 py-1 rounded-full text-xs font-medium border shadow-sm",
+                                                            call.category
+                                                                ? `bg-${call.category.color}-500/10 text-${call.category.color}-500 border-${call.category.color}-500/20`
+                                                                : "bg-gray-500/10 text-gray-400 border-gray-500/20"
+                                                        )}>
+                                                            {call.category?.name || 'Uncategorized'}
+                                                        </span>
+                                                    </td>
+                                                    <td className="px-6 py-5">
+                                                        <span className={cn(
+                                                            "flex items-center w-fit gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border shadow-sm",
+                                                            call.priority === 'critical' ? "bg-red-500/10 text-red-400 border-red-500/20" :
+                                                                call.priority === 'high' ? "bg-orange-500/10 text-orange-400 border-orange-500/20" :
+                                                                    "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                                                        )}>
+                                                            <div className={cn("w-1.5 h-1.5 rounded-full",
+                                                                call.priority === 'critical' ? "bg-red-400 font-bold animate-pulse" :
+                                                                    call.priority === 'high' ? "bg-orange-400" : "bg-emerald-400"
+                                                            )} />
+                                                            {call.priority === 'critical' ? 'Critical' : call.priority === 'high' ? 'High Priority' : 'Resolved'}
+                                                        </span>
+                                                    </td>
+                                                    <td className={cn("px-6 py-5 font-mono text-xs", isDark ? "text-white/60" : "text-gray-600")}>
+                                                        {formatDuration(call.duration)}
+                                                    </td>
+                                                    <td className={cn("px-6 py-5 text-xs", isDark ? "text-white/60" : "text-gray-600")}>
+                                                        {new Date(call.date).toLocaleDateString()} <span className="opacity-50 ml-1">{new Date(call.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                                                    </td>
+                                                    <td className="px-6 py-5 text-right">
+                                                        <button className={cn(
+                                                            "p-2 rounded-lg transition-all opacity-0 group-hover:opacity-100",
+                                                            isDark ? "hover:bg-white/10 text-white/40 hover:text-white" : "hover:bg-gray-100 text-gray-400 hover:text-gray-900"
+                                                        )}>
+                                                            <MoreHorizontal className="w-4 h-4" />
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            ))
+                                        )}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    )}
+                </motion.div>
             </div>
         </div>
     );
