@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
 import { cn } from '../../utils/cn';
 import Logo from './Logo';
 import TicketInput from './TicketInput';
@@ -117,7 +116,7 @@ export default function ClientChat() {
             "text-center mt-8 text-sm",
             isDark ? "text-gray-400" : "text-gray-500"
           )}>
-            Need help? Visit our <Link to="/contact" className="underline hover:text-gray-900 dark:hover:text-white transition-colors">Contact page</Link>
+            Need help? Email us at <a href="mailto:contact@clerktree.com" className="underline hover:text-gray-900 dark:hover:text-white transition-colors">contact@clerktree.com</a>
           </div>
         </div>
       ) : (
