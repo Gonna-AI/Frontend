@@ -129,7 +129,7 @@ export default function Footer() {
                 <span>team@clerktree.com</span>
               </a>
               <a
-                href="tel:+4916096893540"
+                href="tel:+4917683075116"
                 className="flex items-center gap-2 text-neutral-400 hover:text-white transition-colors text-sm font-medium group"
                 aria-label="Phone"
               >
