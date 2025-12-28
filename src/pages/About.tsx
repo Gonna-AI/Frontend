@@ -98,6 +98,62 @@ export default function About() {
             </div>
           </div>
 
+          {/* Team Section */}
+          <div className="mb-20">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl md:text-4xl font-bold text-white/90">Our Team</h2>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 items-stretch">
+              {[
+                {
+                  name: 'Kenshin Kiriyama',
+                  image: 'https://xlzwfkgurrrspcdyqele.supabase.co/storage/v1/object/public/buck/KenshinKiriyama.jpeg',
+                  description: 'Kenshin Kiriyama studies Sustainable Management at TUM. Previously in sales at Affordables working with Decathlon and Sparkasse. A Deutschlandstipendium recipient, he now ensures reliable customer service and maintenance at ClerkTree, developing tailored solutions for complex client needs.'
+                },
+                {
+                  name: 'Animesh Mishra',
+                  image: 'https://xlzwfkgurrrspcdyqele.supabase.co/storage/v1/object/public/buck/animeshmishra.PNG',
+                  description: 'Animesh Mishra (Founder) studies CS & ML at Shiv Nadar Institute of Eminence. Previously a Quant Research Analyst at Consult Add Services developing predictive models, he now focuses on enterprise AI orchestration at ClerkTree. He engineers autonomous agentic workflows to streamline high-throughput claims processing.'
+                },
+                {
+                  name: 'Krishang Sharma',
+                  image: 'https://xlzwfkgurrrspcdyqele.supabase.co/storage/v1/object/public/buck/krishangsharma.JPG',
+                  description: 'Krishang Sharma (AI Engineer) studies CSE at Shiv Nadar Institute of Eminence and is an ASU AI in Business graduate. He builds production-grade ML, LLM, and RAG systems at ClerkTree. Previously, he contributed to ML engineering and research at I4C (Ministry of Home Affairs) and the Scientific Analysis Group, DRDO.'
+                },
+                {
+                  name: 'Shobhit Mishra',
+                  image: 'https://xlzwfkgurrrspcdyqele.supabase.co/storage/v1/object/public/buck/shobhitmishra.jpeg',
+                  description: 'Shobhit Mishra studies at TUM, focusing on sustainable data automation. Previously working on automation projects at Robotico, he now leads scalable solution building at ClerkTree to help businesses streamline operations.'
+                },
+                {
+                  name: 'Urja Shrestha',
+                  image: 'https://xlzwfkgurrrspcdyqele.supabase.co/storage/v1/object/public/buck/Urja%20Shrestha.jpeg',
+                  description: 'Urja Shrestha (CSM) studies Sustainable Management and Technology at TUM. She supports clients in maximizing value through effective product adoption and customer success strategies at ClerkTree.'
+                },
+              ].map((member, index) => (
+                <div key={index} className="h-full group rounded-2xl border border-white/5 bg-[rgb(10,10,10)] p-5 flex flex-col items-center hover:border-white/10 transition-colors">
+                  <div className="w-24 h-24 mb-4 rounded-full overflow-hidden ring-2 ring-white/10 group-hover:ring-blue-500/50 transition-all shrink-0">
+                    <img
+                      src={member.image}
+                      alt={member.name}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <h3 className="text-sm font-semibold text-white/90 mb-3 text-center shrink-0">{member.name}</h3>
+                  <div className="flex-grow flex items-start justify-center">
+                    {member.description ? (
+                      <p className="text-[11px] text-white/50 text-center leading-relaxed font-medium">
+                        {member.description}
+                      </p>
+                    ) : (
+                      <div className="w-full h-20 bg-white/5 rounded-lg border border-white/5"></div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
 
 
           {/* CTA */}
