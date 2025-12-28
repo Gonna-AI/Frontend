@@ -1,1044 +1,561 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Brain,
-  MessageSquare,
-  Plus,
-  Trash2,
-  Edit3,
   Save,
-  X,
-  Settings,
-  Tag,
+  Trash2,
   AlertTriangle,
-  BookOpen,
-  Sparkles,
-  ChevronDown,
-  ChevronUp,
-  GripVertical,
-  Mic,
-  Loader2,
+  Lightbulb,
+  Settings,
+  Terminal,
+  Volume2,
   Check,
-  Zap,
   CloudOff,
-  Monitor
+  Monitor,
+  Loader2,
+  Database
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
-import { useDemoCall, ContextField, CallCategory } from '../../contexts/DemoCallContext';
 import VoiceSelector from './VoiceSelector';
-import { aiService } from '../../services/aiService';
-import { localLLMService } from '../../services/localLLMService';
+import { useDemoCall, ContextField } from '../../contexts/DemoCallContext';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { localLLMService } from '../../services/localLLMService';
+
+// Define the tabs structure
+type ActiveTab = 'prompt' | 'voice' | 'fields' | 'categories' | 'rules' | 'instructions';
 
 interface KnowledgeBaseProps {
   isDark?: boolean;
   activeSection?: string;
 }
 
-type ActiveTab = 'prompt' | 'voice' | 'fields' | 'categories' | 'rules' | 'instructions';
+interface KnowledgeBaseState {
+  systemPrompt: string;
+  persona: string;
+  greeting: string;
+  contextFields: ContextField[];
+  categories: any[];
+  priorityRules: string[];
+  customInstructions: string[];
+  responseGuidelines: string;
+  aiVoice: string;
+}
 
 export default function KnowledgeBase({ isDark = true, activeSection }: KnowledgeBaseProps) {
-  const { t } = useLanguage();
   const {
-    knowledgeBase,
-    updateKnowledgeBase,
-    saveKnowledgeBase,
+    knowledgeBase: contextKB,
+    updateKnowledgeBase: updateContextKB,
+    saveKnowledgeBase: saveContextKB,
     addContextField,
-    updateContextField,
     removeContextField,
     addCategory,
     removeCategory
   } = useDemoCall();
 
+  const { t } = useLanguage();
+
   const [activeTab, setActiveTab] = useState<ActiveTab>((activeSection as ActiveTab) || 'prompt');
 
+  // Local state for immediate UI updates
+  const [knowledgeBase, setKnowledgeBase] = useState<KnowledgeBaseState>({
+    systemPrompt: '',
+    persona: '',
+    greeting: '',
+    contextFields: [],
+    categories: [],
+    priorityRules: [],
+    customInstructions: [],
+    responseGuidelines: '',
+    aiVoice: 'af_nova'
+  });
+
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
+
+  // LLM Connection State
+  const [localLLMConnected, setLocalLLMConnected] = useState(false);
+  const [localLLMModel, setLocalLLMModel] = useState<string>('');
+  const [isTestingConnection, setIsTestingConnection] = useState(false);
+
+  // New item states
+  const [isAddingField, setIsAddingField] = useState(false);
+  const [newField, setNewField] = useState<Partial<ContextField>>({ name: '', type: 'text', required: false, description: '' });
+
+  const [isAddingCategory, setIsAddingCategory] = useState(false);
+  const [newCategory, setNewCategory] = useState({ name: '', description: '', color: 'blue' });
+
+  const [isAddingRule, setIsAddingRule] = useState(false);
+  const [newRule, setNewRule] = useState('');
+
+  const [isAddingInstruction, setIsAddingInstruction] = useState(false);
+  const [newInstruction, setNewInstruction] = useState('');
+
+  // Sync with context on mount/update
+  useEffect(() => {
+    if (contextKB) {
+      setKnowledgeBase({
+        systemPrompt: contextKB.systemPrompt || '',
+        persona: contextKB.persona || '',
+        greeting: contextKB.greeting || '',
+        contextFields: contextKB.contextFields || [],
+        categories: contextKB.categories || [],
+        priorityRules: contextKB.priorityRules || [],
+        customInstructions: contextKB.customInstructions || [],
+        responseGuidelines: contextKB.responseGuidelines || '',
+        aiVoice: contextKB.selectedVoiceId || 'af_nova'
+      });
+    }
+  }, [contextKB]);
+
+  // Handle active section prop change
   useEffect(() => {
     if (activeSection) {
       setActiveTab(activeSection as ActiveTab);
     }
   }, [activeSection]);
-  const [editingFieldId, setEditingFieldId] = useState<string | null>(null);
-  const [isAddingField, setIsAddingField] = useState(false);
-  const [isAddingCategory, setIsAddingCategory] = useState(false);
-  const [isAddingRule, setIsAddingRule] = useState(false);
-  const [isAddingInstruction, setIsAddingInstruction] = useState(false);
 
-  // Form states
-  const [newField, setNewField] = useState<Partial<ContextField>>({
-    name: '',
-    description: '',
-    required: false,
-    type: 'text',
-  });
-  const [newCategory, setNewCategory] = useState({ name: '', color: 'blue', description: '' });
-  const [newRule, setNewRule] = useState('');
-  const [newInstruction, setNewInstruction] = useState('');
-
-  // AI and Save states
-  const [isSaving, setIsSaving] = useState(false);
-  const [saveSuccess, setSaveSuccess] = useState(false);
-  const [localLLMConnected, setLocalLLMConnected] = useState<boolean | null>(null);
-  const [localLLMModel, setLocalLLMModel] = useState<string | null>(null);
-  const [isTestingConnection, setIsTestingConnection] = useState(false);
-
-  // Update AI service when knowledge base changes
-  useEffect(() => {
-    aiService.setKnowledgeBase(knowledgeBase);
-  }, [knowledgeBase]);
-
-  // Test Groq LLM connection on mount
-  useEffect(() => {
-    testConnection();
-  }, []);
-
+  // Test LLM Connection
   const testConnection = async () => {
     setIsTestingConnection(true);
-    try {
-      // Test Groq API connection
-      const localAvailable = await localLLMService.initialize();
-      setLocalLLMConnected(localAvailable);
-      if (localAvailable) {
-        setLocalLLMModel(localLLMService.getServiceUrl());
-      }
-    } catch (error) {
-      setLocalLLMConnected(false);
+    const connected = await localLLMService.checkConnection();
+    setLocalLLMConnected(connected);
+    if (connected) {
+      const model = localLLMService.getModel();
+      setLocalLLMModel(model);
     }
     setIsTestingConnection(false);
+  };
+
+  useEffect(() => {
+    testConnection();
+    const interval = setInterval(testConnection, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Update local state and context
+  const updateKnowledgeBase = (updates: Partial<KnowledgeBaseState>) => {
+    setKnowledgeBase(prev => {
+      const newState = { ...prev, ...updates };
+      // Sync to context immediately
+      if (updates.aiVoice) updateContextKB({ selectedVoiceId: updates.aiVoice });
+      if (updates.systemPrompt) updateContextKB({ systemPrompt: updates.systemPrompt });
+      if (updates.persona) updateContextKB({ persona: updates.persona });
+      if (updates.greeting) updateContextKB({ greeting: updates.greeting });
+      if (updates.responseGuidelines) updateContextKB({ responseGuidelines: updates.responseGuidelines });
+      if (updates.priorityRules) updateContextKB({ priorityRules: updates.priorityRules });
+      if (updates.customInstructions) updateContextKB({ customInstructions: updates.customInstructions });
+
+      return newState;
+    });
   };
 
   const handleSaveToSupabase = async () => {
     setIsSaving(true);
     try {
-      // Use the context's save method which handles both Supabase and localStorage
-      const success = await saveKnowledgeBase();
-
-      if (success) {
-        // Update AI service with latest config
-        aiService.setKnowledgeBase(knowledgeBase);
-
-        setSaveSuccess(true);
-        setTimeout(() => setSaveSuccess(false), 2000);
-      }
+      await saveContextKB();
+      setSaveSuccess(true);
+      setTimeout(() => setSaveSuccess(false), 2000);
     } catch (error) {
-      console.error('Save error:', error);
+      console.error('Failed to save:', error);
+    } finally {
+      setIsSaving(false);
     }
-    setIsSaving(false);
   };
 
-  const tabs = [
-    { id: 'prompt' as const, label: t('config.systemPrompt'), icon: Brain },
-    { id: 'voice' as const, label: t('config.voice'), icon: Mic },
-    { id: 'fields' as const, label: t('config.fields'), icon: Tag },
-    { id: 'categories' as const, label: t('config.categories'), icon: BookOpen },
-    { id: 'rules' as const, label: t('config.rules'), icon: AlertTriangle },
-    { id: 'instructions' as const, label: t('config.instructions'), icon: Settings },
-  ];
-
-  const colors = ['blue', 'purple', 'green', 'orange', 'red', 'emerald', 'pink', 'yellow', 'cyan', 'indigo'];
-
+  // Handler functions for lists
   const handleAddField = () => {
-    if (newField.name) {
-      addContextField({
-        id: `field-${Date.now()}`,
-        name: newField.name,
-        description: newField.description || '',
-        required: newField.required || false,
-        type: newField.type || 'text',
-        options: newField.options,
-      });
-      setNewField({ name: '', description: '', required: false, type: 'text' });
-      setIsAddingField(false);
-    }
+    if (!newField.name) return;
+    const field: ContextField = {
+      id: newField.name.toLowerCase().replace(/\s+/g, '_'),
+      name: newField.name,
+      description: newField.description || '',
+      type: newField.type as any || 'text',
+      required: newField.required || false
+    };
+    addContextField(field);
+    setNewField({ name: '', type: 'text', required: false, description: '' });
+    setIsAddingField(false);
   };
 
+  // ... (Other handlers omitted for brevity but implementing logic below)
   const handleAddCategory = () => {
-    if (newCategory.name) {
-      addCategory({
-        id: `cat-${Date.now()}`,
-        ...newCategory,
-      });
-      setNewCategory({ name: '', color: 'blue', description: '' });
-      setIsAddingCategory(false);
-    }
+    if (!newCategory.name) return;
+    const cat = {
+      id: newCategory.name.toLowerCase().replace(/\s+/g, '_'),
+      name: newCategory.name,
+      description: newCategory.description,
+      color: newCategory.color
+    };
+    addCategory(cat);
+    setNewCategory({ name: '', description: '', color: 'blue' });
+    setIsAddingCategory(false);
   };
 
   const handleAddRule = () => {
-    if (newRule.trim()) {
-      updateKnowledgeBase({
-        priorityRules: [...knowledgeBase.priorityRules, newRule.trim()],
-      });
-      setNewRule('');
-      setIsAddingRule(false);
-    }
+    if (!newRule.trim()) return;
+    updateKnowledgeBase({ priorityRules: [...knowledgeBase.priorityRules, newRule] });
+    setNewRule('');
+    setIsAddingRule(false);
   };
 
   const handleRemoveRule = (index: number) => {
-    updateKnowledgeBase({
-      priorityRules: knowledgeBase.priorityRules.filter((_, i) => i !== index),
-    });
+    const newRules = [...knowledgeBase.priorityRules];
+    newRules.splice(index, 1);
+    updateKnowledgeBase({ priorityRules: newRules });
   };
 
   const handleAddInstruction = () => {
-    if (newInstruction.trim()) {
-      updateKnowledgeBase({
-        customInstructions: [...knowledgeBase.customInstructions, newInstruction.trim()],
-      });
-      setNewInstruction('');
-      setIsAddingInstruction(false);
-    }
+    if (!newInstruction.trim()) return;
+    updateKnowledgeBase({ customInstructions: [...knowledgeBase.customInstructions, newInstruction] });
+    setNewInstruction('');
+    setIsAddingInstruction(false);
   };
 
   const handleRemoveInstruction = (index: number) => {
-    updateKnowledgeBase({
-      customInstructions: knowledgeBase.customInstructions.filter((_, i) => i !== index),
-    });
+    const newInstructions = [...knowledgeBase.customInstructions];
+    newInstructions.splice(index, 1);
+    updateKnowledgeBase({ customInstructions: newInstructions });
   };
 
-  const getColorClasses = (color: string) => {
-    const colorMap: Record<string, string> = {
-      blue: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
-      purple: 'bg-purple-500/20 text-purple-400 border-purple-500/30',
-      green: 'bg-green-500/20 text-green-400 border-green-500/30',
-      orange: 'bg-orange-500/20 text-orange-400 border-orange-500/30',
-      red: 'bg-red-500/20 text-red-400 border-red-500/30',
-      emerald: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
-      pink: 'bg-pink-500/20 text-pink-400 border-pink-500/30',
-      yellow: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30',
-      cyan: 'bg-cyan-500/20 text-cyan-400 border-cyan-500/30',
-      indigo: 'bg-indigo-500/20 text-indigo-400 border-indigo-500/30',
-    };
-    return colorMap[color] || colorMap.blue;
+
+  const tabInfo = {
+    prompt: { label: t('config.systemPrompt'), icon: Terminal, description: "Define the core identity and behavior of your AI agent." },
+    voice: { label: t('config.voice'), icon: Volume2, description: "Choose the voice that best fits your brand personality." },
+    fields: { label: t('config.fields'), icon: Database, description: "Structured data to extract from every conversation." },
+    categories: { label: t('config.categories'), icon: Settings, description: "Call classification buckets for analytics." },
+    rules: { label: t('config.rules'), icon: AlertTriangle, description: "Logic for determining call priority levels." },
+    instructions: { label: t('config.instructions'), icon: Lightbulb, description: "Specific behavioral guidelines for the agent." }
   };
+
+  const currentTabInfo = tabInfo[activeTab];
 
   return (
-    <div className={cn(
-      "rounded-xl md:rounded-2xl overflow-hidden h-full flex flex-col",
-      isDark
-        ? "bg-black/60 backdrop-blur-xl border border-white/10"
-        : "bg-white/80 border border-black/10"
-    )}>
+    <div className="space-y-6 max-w-6xl mx-auto pb-10">
       {/* Header */}
-      <div className={cn(
-        "flex items-center justify-between gap-2 md:gap-3 px-3 md:px-4 py-2 md:py-3 border-b",
-        isDark ? "border-white/10" : "border-black/10"
-      )}>
-        <div className="flex items-center gap-2 md:gap-3">
-          <div className={cn(
-            "w-8 h-8 md:w-10 md:h-10 rounded-lg md:rounded-xl flex items-center justify-center flex-shrink-0",
-            isDark
-              ? "bg-gradient-to-br from-purple-500/20 to-blue-500/20 border border-white/10"
-              : "bg-gradient-to-br from-purple-500/10 to-blue-500/10 border border-black/10"
-          )}>
-            <Sparkles className={cn(
-              "w-4 h-4 md:w-5 md:h-5",
-              isDark ? "text-purple-400" : "text-purple-600"
-            )} />
-          </div>
-          <div className="min-w-0">
-            <h3 className={cn(
-              "font-semibold text-sm md:text-base",
-              isDark ? "text-white" : "text-black"
-            )}>
-              {t('config.title')}
-            </h3>
-            <div className="flex items-center gap-2">
-              <p className={cn(
-                "text-[10px] md:text-xs truncate",
-                isDark ? "text-white/50" : "text-black/50"
-              )}>
-                {t('config.subtitle')}
-              </p>
-              {/* AI Status Badge - Groq API */}
-              <div className="flex items-center gap-1">
-                <button
-                  onClick={testConnection}
-                  disabled={isTestingConnection}
-                  title={localLLMConnected ? `${t('config.groqConnected')}: ${localLLMModel}` : t('config.groqOffline')}
-                  className={cn(
-                    "flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] transition-colors",
-                    isTestingConnection
-                      ? isDark ? "bg-white/10 text-white/50" : "bg-black/10 text-black/50"
-                      : localLLMConnected
-                        ? isDark ? "bg-green-500/20 text-green-400" : "bg-green-500/10 text-green-600"
-                        : isDark ? "bg-red-500/20 text-red-400" : "bg-red-500/10 text-red-600"
-                  )}
-                >
-                  {isTestingConnection ? (
-                    <Loader2 className="w-2.5 h-2.5 animate-spin" />
-                  ) : localLLMConnected ? (
-                    <Monitor className="w-2.5 h-2.5" />
-                  ) : (
-                    <CloudOff className="w-2.5 h-2.5" />
-                  )}
-                  <span className="hidden sm:inline">
-                    {localLLMConnected ? t('config.groqConnected') : t('config.groqOffline')}
-                  </span>
-                </button>
-              </div>
-            </div>
-          </div>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 className={cn("text-2xl font-bold flex items-center gap-2", isDark ? "text-white" : "text-black")}>
+            <currentTabInfo.icon className="w-6 h-6 opacity-80" />
+            {currentTabInfo.label}
+          </h1>
+          <p className={cn("text-sm mt-1", isDark ? "text-white/60" : "text-black/60")}>
+            {currentTabInfo.description}
+          </p>
         </div>
 
-        {/* Save Button */}
-        <button
-          onClick={handleSaveToSupabase}
-          disabled={isSaving}
-          className={cn(
-            "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all",
-            saveSuccess
-              ? "bg-green-500/20 text-green-400 border border-green-500/30"
-              : isDark
-                ? "bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 border border-blue-500/30"
-                : "bg-blue-500/10 text-blue-600 hover:bg-blue-500/20 border border-blue-500/20"
-          )}
-        >
-          {isSaving ? (
-            <Loader2 className="w-3.5 h-3.5 animate-spin" />
-          ) : saveSuccess ? (
-            <Check className="w-3.5 h-3.5" />
-          ) : (
-            <Save className="w-3.5 h-3.5" />
-          )}
-          <span className="hidden sm:inline">
-            {saveSuccess ? t('config.saved') : t('config.save')}
-          </span>
-        </button>
+        <div className="flex items-center gap-3">
+          {/* AI Status Badge */}
+          <button
+            onClick={testConnection}
+            disabled={isTestingConnection}
+            title={localLLMConnected ? `${t('config.groqConnected')}: ${localLLMModel}` : t('config.groqOffline')}
+            className={cn(
+              "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors",
+              isTestingConnection
+                ? isDark ? "bg-white/10 text-white/50" : "bg-black/10 text-black/50"
+                : localLLMConnected
+                  ? isDark ? "bg-green-500/20 text-green-400" : "bg-green-500/10 text-green-600"
+                  : isDark ? "bg-red-500/20 text-red-400" : "bg-red-500/10 text-red-600"
+            )}
+          >
+            {isTestingConnection ? (
+              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+            ) : localLLMConnected ? (
+              <Monitor className="w-3.5 h-3.5" />
+            ) : (
+              <CloudOff className="w-3.5 h-3.5" />
+            )}
+            <span className="hidden sm:inline">
+              {localLLMConnected ? t('config.groqConnected') : t('config.groqOffline')}
+            </span>
+          </button>
+
+          {/* Save Button */}
+          <button
+            onClick={handleSaveToSupabase}
+            disabled={isSaving}
+            className={cn(
+              "flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all",
+              saveSuccess
+                ? "bg-green-500/20 text-green-400 border border-green-500/30"
+                : isDark
+                  ? "bg-white text-black hover:bg-white/90"
+                  : "bg-black text-white hover:bg-black/90"
+            )}
+          >
+            {isSaving ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : saveSuccess ? (
+              <Check className="w-4 h-4" />
+            ) : (
+              <Save className="w-4 h-4" />
+            )}
+            <span>{saveSuccess ? t('config.saved') : t('config.save')}</span>
+          </button>
+        </div>
       </div>
 
-      {/* Tabs - Only show if not controlled externally (optional, strictly requested to have separate UIs, sidebar acts as tabs) */}
-      {!activeSection && (
+      {/* Content Area - Conditional Wrapper to avoid nested cards for Voice Tab */}
+      {activeTab === 'voice' ? (
+        <motion.div
+          key="voice"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 10 }}
+        >
+          <VoiceSelector
+            selectedVoiceId={knowledgeBase.aiVoice}
+            onVoiceSelect={(voiceId) => updateKnowledgeBase({ aiVoice: voiceId })}
+            onSave={handleSaveToSupabase}
+            isDark={isDark}
+          />
+        </motion.div>
+      ) : (
+        /* Main Settings Card */
         <div className={cn(
-          "flex gap-1 p-1.5 md:p-2 overflow-x-auto border-b scrollbar-hide",
-          isDark ? "border-white/10" : "border-black/10"
+          "p-6 rounded-xl border min-h-[400px]",
+          isDark ? "bg-black/40 border-white/10 text-white" : "bg-white border-black/10 text-black"
         )}>
-          {tabs.map(tab => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={cn(
-                "flex items-center gap-1 md:gap-1.5 px-2 md:px-3 py-1 md:py-1.5 rounded-md md:rounded-lg text-[10px] md:text-xs font-medium whitespace-nowrap transition-all flex-shrink-0",
-                activeTab === tab.id
-                  ? isDark
-                    ? "bg-white/10 text-white"
-                    : "bg-black/10 text-black"
-                  : isDark
-                    ? "text-white/50 hover:text-white/80 hover:bg-white/5"
-                    : "text-black/50 hover:text-black/80 hover:bg-black/5"
-              )}
-            >
-              <tab.icon className="w-3 h-3 md:w-3.5 md:h-3.5" />
-              <span className="hidden sm:inline">{tab.label}</span>
-              <span className="sm:hidden">{tab.label.split(' ')[0]}</span>
-            </button>
-          ))}
+          <AnimatePresence mode="wait">
+            {/* System Prompt Tab */}
+            {activeTab === 'prompt' && (
+              <motion.div
+                key="prompt"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="space-y-6"
+              >
+                <div className="space-y-2">
+                  <label className={cn("text-sm font-medium", isDark ? "text-white/80" : "text-black/80")}>
+                    {t('config.systemPrompt')}
+                  </label>
+                  <textarea
+                    value={knowledgeBase.systemPrompt}
+                    onChange={(e) => updateKnowledgeBase({ systemPrompt: e.target.value })}
+                    rows={12}
+                    className={cn(
+                      "w-full p-4 rounded-xl text-sm resize-none focus:outline-none focus:ring-2",
+                      isDark
+                        ? "bg-white/5 text-white border border-white/10 focus:ring-white/20"
+                        : "bg-black/5 text-black border border-black/10 focus:ring-black/20"
+                    )}
+                    placeholder={t('config.systemPromptDesc')}
+                  />
+                </div>
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <label className={cn("text-sm font-medium", isDark ? "text-white/80" : "text-black/80")}>
+                      {t('config.persona')}
+                    </label>
+                    <input
+                      value={knowledgeBase.persona}
+                      onChange={(e) => updateKnowledgeBase({ persona: e.target.value })}
+                      className={cn(
+                        "w-full p-4 rounded-xl text-sm focus:outline-none focus:ring-2",
+                        isDark
+                          ? "bg-white/5 text-white border border-white/10 focus:ring-white/20"
+                          : "bg-black/5 text-black border border-black/10 focus:ring-black/20"
+                      )}
+                      placeholder={t('config.personaPlaceholder')}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className={cn("text-sm font-medium", isDark ? "text-white/80" : "text-black/80")}>
+                      {t('config.greeting')}
+                    </label>
+                    <input
+                      value={knowledgeBase.greeting}
+                      onChange={(e) => updateKnowledgeBase({ greeting: e.target.value })}
+                      className={cn(
+                        "w-full p-4 rounded-xl text-sm focus:outline-none focus:ring-2",
+                        isDark
+                          ? "bg-white/5 text-white border border-white/10 focus:ring-white/20"
+                          : "bg-black/5 text-black border border-black/10 focus:ring-black/20"
+                      )}
+                      placeholder={t('config.greetingPlaceholder')}
+                    />
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
+            {/* Context Fields Tab */}
+            {activeTab === 'fields' && (
+              <motion.div key="fields" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-6">
+                <div className="flex justify-between items-center pb-4 border-b border-white/5">
+                  <h3 className={cn("text-lg font-semibold", isDark ? "text-white" : "text-black")}>Data Collection Fields</h3>
+                  <button onClick={() => setIsAddingField(true)} className={cn("px-3 py-1.5 rounded-lg text-sm bg-white text-black font-medium hover:bg-white/90")}>
+                    Add Field
+                  </button>
+                </div>
+
+                {/* New Field Form (Simplified) */}
+                <AnimatePresence>
+                  {isAddingField && (
+                    <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden mb-4">
+                      <div className={cn("p-4 rounded-lg space-y-3", isDark ? "bg-white/5" : "bg-black/5")}>
+                        <input
+                          placeholder="Field Name (e.g. Order Number)"
+                          value={newField.name}
+                          onChange={(e) => setNewField({ ...newField, name: e.target.value })}
+                          className="w-full bg-transparent border-b border-white/10 pb-2 focus:outline-none focus:border-white/40"
+                        />
+                        <div className="flex justify-end gap-2">
+                          <button onClick={() => setIsAddingField(false)} className="text-sm opacity-60 hover:opacity-100">Cancel</button>
+                          <button onClick={handleAddField} className="text-sm font-bold opacity-80 hover:opacity-100">Save</button>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                {/* Flat List */}
+                <div className="divide-y divide-white/5">
+                  {knowledgeBase.contextFields.map(field => (
+                    <div key={field.id} className="py-4 flex items-center justify-between group">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className={cn("font-medium", isDark ? "text-white" : "text-black")}>{field.name}</span>
+                          {field.required && <span className="text-red-400 text-xs">*</span>}
+                          <span className={cn("text-[10px] uppercase border px-1 rounded", isDark ? "text-white/60 border-white/20" : "text-black/60 border-black/20")}>{field.type}</span>
+                        </div>
+                        {field.description && <p className={cn("text-xs mt-1", isDark ? "text-white/50" : "text-black/50")}>{field.description}</p>}
+                      </div>
+                      <button onClick={() => removeContextField(field.id)} className="opacity-0 group-hover:opacity-100 text-red-400 transition-opacity p-2">
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+
+            {/* Categories Tab - simplified list */}
+            {activeTab === 'categories' && (
+              <motion.div key="categories" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
+                {/* Similar structure to fields but for categories */}
+                <div className="flex justify-between items-center pb-4 border-b border-white/5">
+                  <h3 className={cn("text-lg font-semibold", isDark ? "text-white" : "text-black")}>Call Categories</h3>
+                  <button onClick={() => setIsAddingCategory(true)} className={cn("px-3 py-1.5 rounded-lg text-sm bg-white text-black font-medium hover:bg-white/90")}>
+                    Add Category
+                  </button>
+                </div>
+
+                {/* New Category Form */}
+                <AnimatePresence>
+                  {isAddingCategory && (
+                    <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden mb-4">
+                      <div className={cn("p-4 rounded-lg space-y-3", isDark ? "bg-white/5" : "bg-black/5")}>
+                        <input
+                          placeholder="Category Name (e.g. Sales)"
+                          value={newCategory.name}
+                          onChange={(e) => setNewCategory({ ...newCategory, name: e.target.value })}
+                          className="w-full bg-transparent border-b border-white/10 pb-2 focus:outline-none focus:border-white/40 mb-2"
+                        />
+                        <input
+                          placeholder="Description"
+                          value={newCategory.description}
+                          onChange={(e) => setNewCategory({ ...newCategory, description: e.target.value })}
+                          className="w-full bg-transparent border-b border-white/10 pb-2 focus:outline-none focus:border-white/40 text-sm opacity-80"
+                        />
+                        <div className="flex items-center gap-2 mt-2">
+                          <span className="text-xs opacity-60 mr-2">Color:</span>
+                          {['blue', 'orange', 'red', 'green', 'purple', 'emerald'].map(color => (
+                            <button
+                              key={color}
+                              onClick={() => setNewCategory({ ...newCategory, color })}
+                              className={cn(
+                                "w-5 h-5 rounded-full transition-transform hover:scale-110",
+                                newCategory.color === color ? "ring-2 ring-white/50 scale-110" : "opacity-60"
+                              )}
+                              style={{ backgroundColor: color }}
+                            />
+                          ))}
+                        </div>
+                        <div className="flex justify-end gap-2 mt-2">
+                          <button onClick={() => setIsAddingCategory(false)} className="text-sm opacity-60 hover:opacity-100">Cancel</button>
+                          <button onClick={handleAddCategory} className="text-sm font-bold opacity-80 hover:opacity-100">Save</button>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                <div className="divide-y divide-white/5">
+                  {knowledgeBase.categories.map(cat => (
+                    <div key={cat.id} className="py-4 flex items-center justify-between group">
+                      <div className="flex items-center gap-3">
+                        <div className={cn("w-3 h-3 rounded-full")} style={{ backgroundColor: cat.color || 'gray' }} />
+                        <div>
+                          <p className={cn("font-medium", isDark ? "text-white" : "text-black")}>{cat.name}</p>
+                          <p className="text-xs opacity-50">{cat.description}</p>
+                        </div>
+                      </div>
+                      <button onClick={() => removeCategory(cat.id)} className="opacity-0 group-hover:opacity-100 text-red-400 transition-opacity p-2">
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+
+            {/* Rules Tab - simplified list */}
+            {activeTab === 'rules' && (
+              <motion.div key="rules" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
+                <div className="flex justify-between items-center pb-4 border-b border-white/5">
+                  <h3 className={cn("text-lg font-semibold", isDark ? "text-white" : "text-black")}>Priority Rules</h3>
+                  <button onClick={() => setIsAddingRule(true)} className={cn("px-3 py-1.5 rounded-lg text-sm bg-white text-black font-medium hover:bg-white/90")}>
+                    Add Rule
+                  </button>
+                </div>
+                {isAddingRule && (
+                  <div className={cn("p-4 rounded-lg space-y-3", isDark ? "bg-white/5" : "bg-black/5")}>
+                    <input value={newRule} onChange={(e) => setNewRule(e.target.value)} placeholder="e.g. Mark as HIGH if user mentions 'cancel'" className="w-full bg-transparent border-b border-white/10 pb-2 focus:outline-none" />
+                    <button onClick={handleAddRule} className="text-sm font-bold">Save</button>
+                  </div>
+                )}
+                <div className="divide-y divide-white/5">
+                  {knowledgeBase.priorityRules.map((rule, i) => (
+                    <div key={i} className="py-4 flex items-start gap-3 group">
+                      <AlertTriangle className="w-4 h-4 text-orange-400 mt-1 flex-shrink-0" />
+                      <p className={cn("flex-1 text-sm", isDark ? "text-white/80" : "text-black/80")}>{rule}</p>
+                      <button onClick={() => handleRemoveRule(i)} className="opacity-0 group-hover:opacity-100 text-red-400"><Trash2 className="w-4 h-4" /></button>
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+
+            {/* Instructions Tab - simplified list */}
+            {activeTab === 'instructions' && (
+              <motion.div key="instructions" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
+                <div className="flex justify-between items-center pb-4 border-b border-white/5">
+                  <h3 className={cn("text-lg font-semibold", isDark ? "text-white" : "text-black")}>Custom Instructions</h3>
+                  <button onClick={() => setIsAddingInstruction(true)} className={cn("px-3 py-1.5 rounded-lg text-sm bg-white text-black font-medium hover:bg-white/90")}>
+                    Add Inst.
+                  </button>
+                </div>
+                {isAddingInstruction && (
+                  <div className={cn("p-4 rounded-lg space-y-3", isDark ? "bg-white/5" : "bg-black/5")}>
+                    <input value={newInstruction} onChange={(e) => setNewInstruction(e.target.value)} placeholder="e.g. Always ask for email confirmation" className="w-full bg-transparent border-b border-white/10 pb-2 focus:outline-none" />
+                    <button onClick={handleAddInstruction} className="text-sm font-bold">Save</button>
+                  </div>
+                )}
+                <div className="divide-y divide-white/5">
+                  {knowledgeBase.customInstructions.map((inst, i) => (
+                    <div key={i} className="py-4 flex items-start gap-3 group">
+                      <span className="w-5 h-5 rounded-full bg-purple-500/20 text-purple-400 flex items-center justify-center text-xs">{i + 1}</span>
+                      <p className={cn("flex-1 text-sm", isDark ? "text-white/80" : "text-black/80")}>{inst}</p>
+                      <button onClick={() => handleRemoveInstruction(i)} className="opacity-0 group-hover:opacity-100 text-red-400"><Trash2 className="w-4 h-4" /></button>
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       )}
-
-      {/* Content */}
-      <div className="flex-1 overflow-y-auto p-3 md:p-4 custom-scrollbar">
-        <AnimatePresence mode="wait">
-          {/* System Prompt Tab */}
-          {activeTab === 'prompt' && (
-            <motion.div
-              key="prompt"
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 10 }}
-              className="space-y-4"
-            >
-              {/* System Prompt */}
-              <div className="space-y-2">
-                <label className={cn(
-                  "text-sm font-medium flex items-center gap-2",
-                  isDark ? "text-white/80" : "text-black/80"
-                )}>
-                  <Brain className="w-4 h-4" />
-                  {t('config.systemPrompt')}
-                </label>
-                <textarea
-                  value={knowledgeBase.systemPrompt}
-                  onChange={(e) => updateKnowledgeBase({ systemPrompt: e.target.value })}
-                  rows={8}
-                  className={cn(
-                    "w-full p-3 rounded-xl text-sm resize-none focus:outline-none focus:ring-2",
-                    isDark
-                      ? "bg-black/30 text-white border border-white/10 focus:ring-purple-500/50"
-                      : "bg-white text-black border border-black/10 focus:ring-purple-500/50"
-                  )}
-                  placeholder={t('config.systemPromptDesc')}
-                />
-              </div>
-
-              {/* Persona */}
-              <div className="space-y-2">
-                <label className={cn(
-                  "text-sm font-medium",
-                  isDark ? "text-white/80" : "text-black/80"
-                )}>
-                  {t('config.persona')}
-                </label>
-                <input
-                  value={knowledgeBase.persona}
-                  onChange={(e) => updateKnowledgeBase({ persona: e.target.value })}
-                  className={cn(
-                    "w-full p-3 rounded-xl text-sm focus:outline-none focus:ring-2",
-                    isDark
-                      ? "bg-black/30 text-white border border-white/10 focus:ring-purple-500/50"
-                      : "bg-white text-black border border-black/10 focus:ring-purple-500/50"
-                  )}
-                  placeholder={t('config.personaPlaceholder')}
-                />
-              </div>
-
-              {/* Greeting */}
-              <div className="space-y-2">
-                <label className={cn(
-                  "text-sm font-medium flex items-center gap-2",
-                  isDark ? "text-white/80" : "text-black/80"
-                )}>
-                  <MessageSquare className="w-4 h-4" />
-                  {t('config.greeting')}
-                </label>
-                <textarea
-                  value={knowledgeBase.greeting}
-                  onChange={(e) => updateKnowledgeBase({ greeting: e.target.value })}
-                  rows={2}
-                  className={cn(
-                    "w-full p-3 rounded-xl text-sm resize-none focus:outline-none focus:ring-2",
-                    isDark
-                      ? "bg-black/30 text-white border border-white/10 focus:ring-purple-500/50"
-                      : "bg-white text-black border border-black/10 focus:ring-purple-500/50"
-                  )}
-                  placeholder={t('config.greetingPlaceholder')}
-                />
-              </div>
-
-              {/* Response Guidelines */}
-              <div className="space-y-2">
-                <label className={cn(
-                  "text-sm font-medium",
-                  isDark ? "text-white/80" : "text-black/80"
-                )}>
-                  {t('config.guidelines')}
-                </label>
-                <textarea
-                  value={knowledgeBase.responseGuidelines}
-                  onChange={(e) => updateKnowledgeBase({ responseGuidelines: e.target.value })}
-                  rows={5}
-                  className={cn(
-                    "w-full p-3 rounded-xl text-sm resize-none focus:outline-none focus:ring-2",
-                    isDark
-                      ? "bg-black/30 text-white border border-white/10 focus:ring-purple-500/50"
-                      : "bg-white text-black border border-black/10 focus:ring-purple-500/50"
-                  )}
-                  placeholder={t('config.guidelinesPlaceholder')}
-                />
-              </div>
-            </motion.div>
-          )}
-
-          {/* AI Voice Tab */}
-          {activeTab === 'voice' && (
-            <motion.div
-              key="voice"
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 10 }}
-            >
-              <VoiceSelector
-                isDark={isDark}
-                selectedVoiceId={knowledgeBase.selectedVoiceId}
-                onVoiceSelect={(voiceId) => updateKnowledgeBase({ selectedVoiceId: voiceId })}
-                onSave={async (voiceId) => {
-                  // Save to local storage or backend
-                  console.log('Saving voice selection:', voiceId);
-                  updateKnowledgeBase({ selectedVoiceId: voiceId });
-                }}
-                compact
-              />
-            </motion.div>
-          )}
-
-          {/* Context Fields Tab */}
-          {activeTab === 'fields' && (
-            <motion.div
-              key="fields"
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 10 }}
-              className="space-y-3"
-            >
-              <div className="flex items-center justify-between mb-4">
-                <p className={cn(
-                  "text-sm",
-                  isDark ? "text-white/60" : "text-black/60"
-                )}>
-                  {t('config.fieldsDesc')}
-                </p>
-                <button
-                  onClick={() => setIsAddingField(true)}
-                  className={cn(
-                    "flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors",
-                    isDark
-                      ? "bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 border border-blue-500/30"
-                      : "bg-blue-500/10 text-blue-600 hover:bg-blue-500/20 border border-blue-500/20"
-                  )}
-                >
-                  <Plus className="w-4 h-4" />
-                  {t('config.addField')}
-                </button>
-              </div>
-
-              {/* Add Field Form */}
-              <AnimatePresence>
-                {isAddingField && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
-                    exit={{ opacity: 0, height: 0 }}
-                    className={cn(
-                      "rounded-lg md:rounded-xl p-3 md:p-4 space-y-2 md:space-y-3 overflow-hidden",
-                      isDark
-                        ? "bg-blue-500/10 border border-blue-500/20"
-                        : "bg-blue-500/5 border border-blue-500/20"
-                    )}
-                  >
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 md:gap-3">
-                      <input
-                        value={newField.name}
-                        onChange={(e) => setNewField({ ...newField, name: e.target.value })}
-                        placeholder={t('config.fieldName')}
-                        className={cn(
-                          "p-2 rounded-md md:rounded-lg text-xs md:text-sm focus:outline-none focus:ring-2",
-                          isDark
-                            ? "bg-black/30 text-white border border-white/10 focus:ring-blue-500/50"
-                            : "bg-white text-black border border-black/10 focus:ring-blue-500/50"
-                        )}
-                      />
-                      <select
-                        value={newField.type}
-                        onChange={(e) => setNewField({ ...newField, type: e.target.value as ContextField['type'] })}
-                        className={cn(
-                          "p-2 rounded-md md:rounded-lg text-xs md:text-sm focus:outline-none focus:ring-2",
-                          isDark
-                            ? "bg-black/30 text-white border border-white/10 focus:ring-blue-500/50"
-                            : "bg-white text-black border border-black/10 focus:ring-blue-500/50"
-                        )}
-                      >
-                        <option value="text">Text</option>
-                        <option value="number">Number</option>
-                        <option value="date">Date</option>
-                        <option value="boolean">Yes/No</option>
-                        <option value="select">Select</option>
-                      </select>
-                    </div>
-                    <input
-                      value={newField.description}
-                      onChange={(e) => setNewField({ ...newField, description: e.target.value })}
-                      placeholder={t('config.fieldDesc')}
-                      className={cn(
-                        "w-full p-2 rounded-lg text-sm focus:outline-none focus:ring-2",
-                        isDark
-                          ? "bg-black/30 text-white border border-white/10 focus:ring-blue-500/50"
-                          : "bg-white text-black border border-black/10 focus:ring-blue-500/50"
-                      )}
-                    />
-                    <label className="flex items-center gap-2">
-                      <input
-                        type="checkbox"
-                        checked={newField.required}
-                        onChange={(e) => setNewField({ ...newField, required: e.target.checked })}
-                        className="rounded"
-                      />
-                      <span className={cn(
-                        "text-sm",
-                        isDark ? "text-white/80" : "text-black/80"
-                      )}>
-                        {t('config.required')}
-                      </span>
-                    </label>
-                    <div className="flex justify-end gap-2">
-                      <button
-                        onClick={() => setIsAddingField(false)}
-                        className={cn(
-                          "px-3 py-1.5 rounded-lg text-sm transition-colors",
-                          isDark ? "text-white/60 hover:bg-white/10" : "text-black/60 hover:bg-black/10"
-                        )}
-                      >
-                        {t('config.cancel')}
-                      </button>
-                      <button
-                        onClick={handleAddField}
-                        disabled={!newField.name}
-                        className={cn(
-                          "flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors",
-                          newField.name
-                            ? isDark
-                              ? "bg-blue-500/20 text-blue-400 hover:bg-blue-500/30"
-                              : "bg-blue-500/10 text-blue-600 hover:bg-blue-500/20"
-                            : "opacity-50 cursor-not-allowed"
-                        )}
-                      >
-                        <Save className="w-4 h-4" />
-                        {t('config.add')}
-                      </button>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-
-              {/* Fields List */}
-              {knowledgeBase.contextFields.map((field, index) => (
-                <motion.div
-                  key={field.id}
-                  layout
-                  className={cn(
-                    "group flex items-center gap-3 p-3 rounded-xl transition-colors",
-                    isDark
-                      ? "bg-white/5 hover:bg-white/10 border border-white/5"
-                      : "bg-black/5 hover:bg-black/10 border border-black/5"
-                  )}
-                >
-                  <GripVertical className={cn(
-                    "w-4 h-4 opacity-0 group-hover:opacity-50 cursor-grab",
-                    isDark ? "text-white" : "text-black"
-                  )} />
-
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span className={cn(
-                        "font-medium text-sm",
-                        isDark ? "text-white" : "text-black"
-                      )}>
-                        {field.name}
-                      </span>
-                      {field.required && (
-                        <span className="text-xs text-red-400">*</span>
-                      )}
-                      <span className={cn(
-                        "text-xs px-2 py-0.5 rounded",
-                        isDark ? "bg-white/10 text-white/60" : "bg-black/10 text-black/60"
-                      )}>
-                        {field.type}
-                      </span>
-                    </div>
-                    {field.description && (
-                      <p className={cn(
-                        "text-xs mt-0.5",
-                        isDark ? "text-white/50" : "text-black/50"
-                      )}>
-                        {field.description}
-                      </p>
-                    )}
-                  </div>
-
-                  <button
-                    onClick={() => removeContextField(field.id)}
-                    className={cn(
-                      "p-1.5 rounded-lg transition-colors opacity-0 group-hover:opacity-100",
-                      isDark
-                        ? "text-red-400/60 hover:text-red-400 hover:bg-red-500/10"
-                        : "text-red-600/60 hover:text-red-600 hover:bg-red-500/10"
-                    )}
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </motion.div>
-              ))}
-            </motion.div>
-          )}
-
-          {/* Categories Tab */}
-          {activeTab === 'categories' && (
-            <motion.div
-              key="categories"
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 10 }}
-              className="space-y-3"
-            >
-              <div className="flex items-center justify-between mb-4">
-                <p className={cn(
-                  "text-sm",
-                  isDark ? "text-white/60" : "text-black/60"
-                )}>
-                  {t('config.categoriesDesc')}
-                </p>
-                <button
-                  onClick={() => setIsAddingCategory(true)}
-                  className={cn(
-                    "flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors",
-                    isDark
-                      ? "bg-green-500/20 text-green-400 hover:bg-green-500/30 border border-green-500/30"
-                      : "bg-green-500/10 text-green-600 hover:bg-green-500/20 border border-green-500/20"
-                  )}
-                >
-                  <Plus className="w-4 h-4" />
-                  {t('config.addCategory')}
-                </button>
-              </div>
-
-              {/* Add Category Form */}
-              <AnimatePresence>
-                {isAddingCategory && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
-                    exit={{ opacity: 0, height: 0 }}
-                    className={cn(
-                      "rounded-xl p-4 space-y-3 overflow-hidden",
-                      isDark
-                        ? "bg-green-500/10 border border-green-500/20"
-                        : "bg-green-500/5 border border-green-500/20"
-                    )}
-                  >
-                    <input
-                      value={newCategory.name}
-                      onChange={(e) => setNewCategory({ ...newCategory, name: e.target.value })}
-                      placeholder={t('config.catName')}
-                      className={cn(
-                        "w-full p-2 rounded-lg text-sm focus:outline-none focus:ring-2",
-                        isDark
-                          ? "bg-black/30 text-white border border-white/10 focus:ring-green-500/50"
-                          : "bg-white text-black border border-black/10 focus:ring-green-500/50"
-                      )}
-                    />
-                    <input
-                      value={newCategory.description}
-                      onChange={(e) => setNewCategory({ ...newCategory, description: e.target.value })}
-                      placeholder={t('config.catDesc')}
-                      className={cn(
-                        "w-full p-2 rounded-lg text-sm focus:outline-none focus:ring-2",
-                        isDark
-                          ? "bg-black/30 text-white border border-white/10 focus:ring-green-500/50"
-                          : "bg-white text-black border border-black/10 focus:ring-green-500/50"
-                      )}
-                    />
-                    <div className="flex flex-wrap gap-2">
-                      {colors.map(color => (
-                        <button
-                          key={color}
-                          onClick={() => setNewCategory({ ...newCategory, color })}
-                          className={cn(
-                            "w-6 h-6 rounded-full border-2 transition-transform",
-                            newCategory.color === color ? "scale-110 border-white" : "border-transparent",
-                            `bg-${color}-500`
-                          )}
-                          style={{ backgroundColor: `var(--${color}-500, ${color})` }}
-                        />
-                      ))}
-                    </div>
-                    <div className="flex justify-end gap-2">
-                      <button
-                        onClick={() => setIsAddingCategory(false)}
-                        className={cn(
-                          "px-3 py-1.5 rounded-lg text-sm transition-colors",
-                          isDark ? "text-white/60 hover:bg-white/10" : "text-black/60 hover:bg-black/10"
-                        )}
-                      >
-                        {t('config.cancel')}
-                      </button>
-                      <button
-                        onClick={handleAddCategory}
-                        disabled={!newCategory.name}
-                        className={cn(
-                          "flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors",
-                          newCategory.name
-                            ? isDark
-                              ? "bg-green-500/20 text-green-400 hover:bg-green-500/30"
-                              : "bg-green-500/10 text-green-600 hover:bg-green-500/20"
-                            : "opacity-50 cursor-not-allowed"
-                        )}
-                      >
-                        <Save className="w-4 h-4" />
-                        {t('config.add')}
-                      </button>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-
-              {/* Categories List */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                {knowledgeBase.categories.map(category => (
-                  <div
-                    key={category.id}
-                    className={cn(
-                      "group flex items-center gap-2 p-2 md:p-3 rounded-lg md:rounded-xl border transition-colors",
-                      getColorClasses(category.color)
-                    )}
-                  >
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium text-xs md:text-sm">{category.name}</p>
-                      {category.description && (
-                        <p className="text-[10px] md:text-xs opacity-70 truncate">{category.description}</p>
-                      )}
-                    </div>
-                    <button
-                      onClick={() => removeCategory(category.id)}
-                      className="p-1 rounded opacity-50 md:opacity-0 group-hover:opacity-100 hover:bg-black/20 transition-all"
-                    >
-                      <X className="w-3 h-3" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </motion.div>
-          )}
-
-          {/* Priority Rules Tab */}
-          {activeTab === 'rules' && (
-            <motion.div
-              key="rules"
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 10 }}
-              className="space-y-3"
-            >
-              <div className="flex items-center justify-between mb-4">
-                <p className={cn(
-                  "text-sm",
-                  isDark ? "text-white/60" : "text-black/60"
-                )}>
-                  Rules for determining call priority
-                </p>
-                <button
-                  onClick={() => setIsAddingRule(true)}
-                  className={cn(
-                    "flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors",
-                    isDark
-                      ? "bg-orange-500/20 text-orange-400 hover:bg-orange-500/30 border border-orange-500/30"
-                      : "bg-orange-500/10 text-orange-600 hover:bg-orange-500/20 border border-orange-500/20"
-                  )}
-                >
-                  <Plus className="w-4 h-4" />
-                  Add Rule
-                </button>
-              </div>
-
-              {/* Add Rule Form */}
-              <AnimatePresence>
-                {isAddingRule && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
-                    exit={{ opacity: 0, height: 0 }}
-                    className={cn(
-                      "rounded-xl p-4 space-y-3 overflow-hidden",
-                      isDark
-                        ? "bg-orange-500/10 border border-orange-500/20"
-                        : "bg-orange-500/5 border border-orange-500/20"
-                    )}
-                  >
-                    <textarea
-                      value={newRule}
-                      onChange={(e) => setNewRule(e.target.value)}
-                      placeholder="e.g., Mark as HIGH if caller mentions deadline..."
-                      rows={2}
-                      className={cn(
-                        "w-full p-2 rounded-lg text-sm resize-none focus:outline-none focus:ring-2",
-                        isDark
-                          ? "bg-black/30 text-white border border-white/10 focus:ring-orange-500/50"
-                          : "bg-white text-black border border-black/10 focus:ring-orange-500/50"
-                      )}
-                    />
-                    <div className="flex justify-end gap-2">
-                      <button
-                        onClick={() => setIsAddingRule(false)}
-                        className={cn(
-                          "px-3 py-1.5 rounded-lg text-sm transition-colors",
-                          isDark ? "text-white/60 hover:bg-white/10" : "text-black/60 hover:bg-black/10"
-                        )}
-                      >
-                        Cancel
-                      </button>
-                      <button
-                        onClick={handleAddRule}
-                        disabled={!newRule.trim()}
-                        className={cn(
-                          "flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors",
-                          newRule.trim()
-                            ? isDark
-                              ? "bg-orange-500/20 text-orange-400 hover:bg-orange-500/30"
-                              : "bg-orange-500/10 text-orange-600 hover:bg-orange-500/20"
-                            : "opacity-50 cursor-not-allowed"
-                        )}
-                      >
-                        <Plus className="w-4 h-4" />
-                        Add
-                      </button>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-
-              {/* Rules List */}
-              {knowledgeBase.priorityRules.map((rule, index) => (
-                <motion.div
-                  key={index}
-                  layout
-                  className={cn(
-                    "group flex items-start gap-3 p-3 rounded-xl transition-colors",
-                    isDark
-                      ? "bg-white/5 hover:bg-white/10 border border-white/5"
-                      : "bg-black/5 hover:bg-black/10 border border-black/5"
-                  )}
-                >
-                  <AlertTriangle className={cn(
-                    "w-4 h-4 mt-0.5 flex-shrink-0",
-                    isDark ? "text-orange-400" : "text-orange-600"
-                  )} />
-                  <p className={cn(
-                    "flex-1 text-sm",
-                    isDark ? "text-white/80" : "text-black/80"
-                  )}>
-                    {rule}
-                  </p>
-                  <button
-                    onClick={() => handleRemoveRule(index)}
-                    className={cn(
-                      "p-1.5 rounded-lg transition-colors opacity-0 group-hover:opacity-100",
-                      isDark
-                        ? "text-red-400/60 hover:text-red-400 hover:bg-red-500/10"
-                        : "text-red-600/60 hover:text-red-600 hover:bg-red-500/10"
-                    )}
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </motion.div>
-              ))}
-            </motion.div>
-          )}
-
-          {/* Instructions Tab */}
-          {activeTab === 'instructions' && (
-            <motion.div
-              key="instructions"
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 10 }}
-              className="space-y-3"
-            >
-              <div className="flex items-center justify-between mb-4">
-                <p className={cn(
-                  "text-sm",
-                  isDark ? "text-white/60" : "text-black/60"
-                )}>
-                  Custom instructions for the AI
-                </p>
-                <button
-                  onClick={() => setIsAddingInstruction(true)}
-                  className={cn(
-                    "flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors",
-                    isDark
-                      ? "bg-purple-500/20 text-purple-400 hover:bg-purple-500/30 border border-purple-500/30"
-                      : "bg-purple-500/10 text-purple-600 hover:bg-purple-500/20 border border-purple-500/20"
-                  )}
-                >
-                  <Plus className="w-4 h-4" />
-                  Add Instruction
-                </button>
-              </div>
-
-              {/* Add Instruction Form */}
-              <AnimatePresence>
-                {isAddingInstruction && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
-                    exit={{ opacity: 0, height: 0 }}
-                    className={cn(
-                      "rounded-xl p-4 space-y-3 overflow-hidden",
-                      isDark
-                        ? "bg-purple-500/10 border border-purple-500/20"
-                        : "bg-purple-500/5 border border-purple-500/20"
-                    )}
-                  >
-                    <textarea
-                      value={newInstruction}
-                      onChange={(e) => setNewInstruction(e.target.value)}
-                      placeholder="e.g., Always ask for callback number if issue unresolved..."
-                      rows={2}
-                      className={cn(
-                        "w-full p-2 rounded-lg text-sm resize-none focus:outline-none focus:ring-2",
-                        isDark
-                          ? "bg-black/30 text-white border border-white/10 focus:ring-purple-500/50"
-                          : "bg-white text-black border border-black/10 focus:ring-purple-500/50"
-                      )}
-                    />
-                    <div className="flex justify-end gap-2">
-                      <button
-                        onClick={() => setIsAddingInstruction(false)}
-                        className={cn(
-                          "px-3 py-1.5 rounded-lg text-sm transition-colors",
-                          isDark ? "text-white/60 hover:bg-white/10" : "text-black/60 hover:bg-black/10"
-                        )}
-                      >
-                        Cancel
-                      </button>
-                      <button
-                        onClick={handleAddInstruction}
-                        disabled={!newInstruction.trim()}
-                        className={cn(
-                          "flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors",
-                          newInstruction.trim()
-                            ? isDark
-                              ? "bg-purple-500/20 text-purple-400 hover:bg-purple-500/30"
-                              : "bg-purple-500/10 text-purple-600 hover:bg-purple-500/20"
-                            : "opacity-50 cursor-not-allowed"
-                        )}
-                      >
-                        <Plus className="w-4 h-4" />
-                        Add
-                      </button>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-
-              {/* Instructions List */}
-              {knowledgeBase.customInstructions.map((instruction, index) => (
-                <motion.div
-                  key={index}
-                  layout
-                  className={cn(
-                    "group flex items-start gap-3 p-3 rounded-xl transition-colors",
-                    isDark
-                      ? "bg-white/5 hover:bg-white/10 border border-white/5"
-                      : "bg-black/5 hover:bg-black/10 border border-black/5"
-                  )}
-                >
-                  <span className={cn(
-                    "w-5 h-5 rounded flex items-center justify-center text-xs font-medium flex-shrink-0",
-                    isDark ? "bg-purple-500/20 text-purple-400" : "bg-purple-500/10 text-purple-600"
-                  )}>
-                    {index + 1}
-                  </span>
-                  <p className={cn(
-                    "flex-1 text-sm",
-                    isDark ? "text-white/80" : "text-black/80"
-                  )}>
-                    {instruction}
-                  </p>
-                  <button
-                    onClick={() => handleRemoveInstruction(index)}
-                    className={cn(
-                      "p-1.5 rounded-lg transition-colors opacity-0 group-hover:opacity-100",
-                      isDark
-                        ? "text-red-400/60 hover:text-red-400 hover:bg-red-500/10"
-                        : "text-red-600/60 hover:text-red-600 hover:bg-red-500/10"
-                    )}
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </motion.div>
-              ))}
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-
     </div>
   );
 }
-

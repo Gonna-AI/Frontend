@@ -223,6 +223,21 @@ class LocalLLMService {
   }
 
   /**
+   * Alias for checkAvailability to match component usage
+   */
+  async checkConnection(): Promise<boolean> {
+    return await this.checkAvailability();
+  }
+
+  /**
+   * Get current model name
+   */
+  getModel(): string {
+    const settings = getCurrentGroqSettings();
+    return settings.model;
+  }
+
+  /**
    * Parse response from reasoning model - separates thinking/reasoning from final answer
    * This function is largely deprecated with /api/generate and thinking: false,
    * but kept for robustness if models still output tags.
