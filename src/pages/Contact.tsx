@@ -167,8 +167,8 @@ const Contact = () => {
                 <Mail className="w-6 h-6 text-red-400" />
               </div>
               <h3 className="font-semibold mb-2 text-white/90 text-lg">{t('contact.email')}</h3>
-              <a href="mailto:contact@clerktree.com" className="text-white/60 hover:text-red-400 transition-colors text-sm block">
-                contact@clerktree.com
+              <a href="mailto:team@clerktree.com" className="text-white/60 hover:text-red-400 transition-colors text-sm block">
+                team@clerktree.com
               </a>
             </div>
           </div>
