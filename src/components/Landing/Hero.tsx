@@ -84,7 +84,7 @@ const Hero = () => {
               {/* Secondary Link: Plain text, no icon initially to match ref "Read customer stories" */}
               <button
                 onClick={() => navigate('/solutions')}
-                className="text-white hover:text-neutral-300 transition-colors font-medium text-base h-[52px] flex items-center justify-center w-full sm:w-auto gap-2"
+                className="bg-[#FF4D00] hover:bg-[#CC3D00] text-white px-8 h-[52px] rounded-lg font-medium text-base tracking-tight transition-colors flex items-center justify-center w-full sm:w-auto"
               >
                 {t('nav.seeSolutions')}
               </button>

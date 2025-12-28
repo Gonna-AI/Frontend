@@ -528,20 +528,20 @@ export default function CallHistoryList({ isDark = true, showFilters = true }: C
                                 {/* Metadata */}
                                 <div className={cn("pt-6 border-t grid grid-cols-2 md:grid-cols-4 gap-6", isDark ? "border-white/5" : "border-black/5")}>
                                   <div>
-                                    <span className={cn("text-xs uppercase font-semibold tracking-wider block mb-1", isDark ? "text-white/40" : "text-black/40")}>Duration</span>
-                                    <span className="font-mono text-lg">{formatDuration(item.duration)}</span>
+                                    <span className={cn("text-xs uppercase font-semibold tracking-wider block mb-1", isDark ? "text-white" : "text-black/40")}>Duration</span>
+                                    <span className={cn("font-mono text-lg", isDark ? "text-white" : "text-black")}>{formatDuration(item.duration)}</span>
                                   </div>
                                   <div>
-                                    <span className={cn("text-xs uppercase font-semibold tracking-wider block mb-1", isDark ? "text-white/40" : "text-black/40")}>Priority</span>
-                                    <span className="capitalize">{item.priority}</span>
+                                    <span className={cn("text-xs uppercase font-semibold tracking-wider block mb-1", isDark ? "text-white" : "text-black/40")}>Priority</span>
+                                    <span className={cn("capitalize", isDark ? "text-white" : "text-black")}>{item.priority}</span>
                                   </div>
                                   <div>
-                                    <span className={cn("text-xs uppercase font-semibold tracking-wider block mb-1", isDark ? "text-white/40" : "text-black/40")}>Ref ID</span>
+                                    <span className={cn("text-xs uppercase font-semibold tracking-wider block mb-1", isDark ? "text-white" : "text-black/40")}>Ref ID</span>
                                     <span className={cn("font-mono text-xs block truncate opacity-60", isDark ? "text-white" : "text-black")}>{item.id}</span>
                                   </div>
                                   <div>
-                                    <span className={cn("text-xs uppercase font-semibold tracking-wider block mb-1", isDark ? "text-white/40" : "text-black/40")}>Category</span>
-                                    <span className="capitalize">{item.category?.name || 'Uncategorized'}</span>
+                                    <span className={cn("text-xs uppercase font-semibold tracking-wider block mb-1", isDark ? "text-white" : "text-black/40")}>Category</span>
+                                    <span className={cn("capitalize", isDark ? "text-white" : "text-black")}>{item.category?.name || 'Uncategorized'}</span>
                                   </div>
                                 </div>
                               </div>
