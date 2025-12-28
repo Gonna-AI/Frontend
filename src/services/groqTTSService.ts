@@ -76,18 +76,23 @@ class GroqTTSService {
     private audioContext: AudioContext | null = null;
     private unlockedAudioPool: HTMLAudioElement[] = [];
     private isIOS: boolean = false;
+    private isAndroid: boolean = false;
+    private isMobile: boolean = false;
 
     /**
      * Initialize the Groq TTS service
      */
     async initialize(): Promise<boolean> {
-        // Detect iOS
+        // Detect mobile devices
         if (typeof window !== 'undefined' && typeof navigator !== 'undefined') {
+            const ua = navigator.userAgent.toLowerCase();
             this.isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
                 (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+            this.isAndroid = /android/.test(ua);
+            this.isMobile = this.isIOS || this.isAndroid || /mobile/.test(ua);
 
-            if (this.isIOS) {
-                console.log('📱 iOS device detected, using iOS-specific audio handling');
+            if (this.isMobile) {
+                console.log(`📱 Mobile device detected (iOS: ${this.isIOS}, Android: ${this.isAndroid}), using mobile-specific audio handling`);
             }
         }
 
@@ -192,9 +197,25 @@ class GroqTTSService {
 
     /**
      * Get a pre-unlocked audio element from the pool, or create a new one
+     * On mobile, always create a fresh element for better compatibility
      */
     private getAudioElement(): HTMLAudioElement {
-        // Try to get a pre-unlocked element from the pool
+        // On mobile, always create a fresh audio element for each playback
+        // This is more reliable than reusing elements
+        if (this.isMobile) {
+            console.log('📱 Creating fresh audio element for mobile');
+            const audio = new Audio();
+            audio.setAttribute('playsinline', 'true');
+            audio.setAttribute('webkit-playsinline', 'true');
+            audio.setAttribute('x-webkit-airplay', 'allow');
+            audio.preload = 'auto';
+            audio.volume = 1.0;
+            // Important: set crossOrigin for mobile
+            audio.crossOrigin = 'anonymous';
+            return audio;
+        }
+
+        // On desktop, try to get a pre-unlocked element from the pool
         const pooledAudio = this.unlockedAudioPool.pop();
         if (pooledAudio) {
             console.log('🔊 Using pre-unlocked audio element from pool');
@@ -412,14 +433,33 @@ class GroqTTSService {
                 const audioBlob = await response.blob();
                 const audioUrl = URL.createObjectURL(audioBlob);
 
-                // Use pre-unlocked audio element from pool (important for iOS)
+                // On mobile, ensure audio is unlocked before creating element
+                if (this.isMobile && !this.audioUnlocked) {
+                    console.log('📱 Mobile detected - ensuring audio is unlocked...');
+                    await this.unlockAudio();
+                }
+
+                // Create fresh audio element (especially important for mobile)
                 this.currentAudio = this.getAudioElement();
                 this.currentAudio.src = audioUrl;
                 this.currentAudio.volume = 1.0;
 
+                // Set up event handlers before loading
                 this.currentAudio.onloadeddata = () => {
                     console.log('🔊 Audio loaded and ready to play');
-                    // onStart will be called after play() succeeds
+                };
+
+                this.currentAudio.oncanplay = () => {
+                    console.log('🔊 Audio can play');
+                };
+
+                this.currentAudio.oncanplaythrough = () => {
+                    console.log('🔊 Audio can play through');
+                };
+
+                this.currentAudio.onplay = () => {
+                    console.log('✅ Audio playback started');
+                    options?.onStart?.();
                 };
 
                 this.currentAudio.onended = () => {
@@ -431,7 +471,7 @@ class GroqTTSService {
                 };
 
                 this.currentAudio.onerror = (e) => {
-                    console.error('Audio playback error:', e);
+                    console.error('❌ Audio playback error:', e);
                     URL.revokeObjectURL(audioUrl);
                     this.currentAudio = null;
                     const error = new Error('Audio playback failed');
@@ -441,40 +481,61 @@ class GroqTTSService {
 
                 // Play the audio with explicit error handling for mobile
                 try {
-                    // Load the audio first
-                    await this.currentAudio.load();
-                    console.log('🔊 Audio loaded, calling play()...');
-
-                    // Then play
-                    const playPromise = this.currentAudio.play();
-                    if (playPromise !== undefined) {
-                        await playPromise;
-                        console.log('✅ Audio play() promise resolved');
-                        // Call onStart after play succeeds
-                        options?.onStart?.();
+                    // For mobile, we need to set src and then play immediately
+                    // Don't call load() separately on mobile - it can cause issues
+                    if (this.isMobile) {
+                        console.log('📱 Mobile: Setting src and playing directly...');
+                        // Set src (this triggers loading)
+                        this.currentAudio.src = audioUrl;
+                        
+                        // Wait a tiny bit for src to be set
+                        await new Promise(resolve => setTimeout(resolve, 50));
+                        
+                        // Play immediately
+                        const playPromise = this.currentAudio.play();
+                        if (playPromise !== undefined) {
+                            await playPromise;
+                            console.log('✅ Mobile audio play() promise resolved');
+                        } else {
+                            console.log('✅ Mobile audio play() called (no promise)');
+                        }
                     } else {
-                        console.log('✅ Audio play() called (no promise)');
-                        // Call onStart even if no promise
-                        options?.onStart?.();
+                        // Desktop: load first, then play
+                        await this.currentAudio.load();
+                        console.log('🔊 Desktop: Audio loaded, calling play()...');
+                        
+                        const playPromise = this.currentAudio.play();
+                        if (playPromise !== undefined) {
+                            await playPromise;
+                            console.log('✅ Desktop audio play() promise resolved');
+                            options?.onStart?.();
+                        } else {
+                            console.log('✅ Desktop audio play() called (no promise)');
+                            options?.onStart?.();
+                        }
                     }
                 } catch (playError) {
                     console.error('❌ Audio play() failed:', playError);
-                    URL.revokeObjectURL(audioUrl);
-                    this.currentAudio = null;
-
-                    // On NotAllowedError, the audio isn't unlocked
+                    
+                    // On NotAllowedError, try to unlock and retry
                     if (playError instanceof Error && playError.name === 'NotAllowedError') {
-                        console.warn('⚠️ Audio not unlocked - user gesture required. iOS may require explicit user interaction.');
-                        // Try to unlock audio and retry
+                        console.warn('⚠️ Audio not unlocked - attempting to unlock and retry...');
                         try {
+                            // Force unlock
+                            this.audioUnlocked = false;
                             await this.unlockAudio();
                             console.log('🔓 Audio unlocked, retrying playback...');
-                            // Create new audio element and try again
+                            
+                            // Create completely fresh audio element
                             const retryAudio = this.getAudioElement();
                             retryAudio.src = audioUrl;
                             retryAudio.volume = 1.0;
-                            await retryAudio.play();
-                            this.currentAudio = retryAudio;
+                            
+                            // Set up handlers
+                            retryAudio.onplay = () => {
+                                console.log('✅ Retry audio playback started');
+                                options?.onStart?.();
+                            };
                             retryAudio.onended = () => {
                                 console.log('✅ Retry audio playback complete');
                                 URL.revokeObjectURL(audioUrl);
@@ -483,20 +544,25 @@ class GroqTTSService {
                                 resolve();
                             };
                             retryAudio.onerror = (e) => {
-                                console.error('Retry audio playback error:', e);
+                                console.error('❌ Retry audio playback error:', e);
                                 URL.revokeObjectURL(audioUrl);
                                 this.currentAudio = null;
                                 const error = new Error('Audio playback failed after retry');
                                 options?.onError?.(error);
                                 reject(error);
                             };
-                            options?.onStart?.();
+                            
+                            // Try to play
+                            await retryAudio.play();
+                            this.currentAudio = retryAudio;
                             return; // Success, exit early
                         } catch (retryError) {
                             console.error('❌ Retry also failed:', retryError);
                         }
                     }
 
+                    URL.revokeObjectURL(audioUrl);
+                    this.currentAudio = null;
                     options?.onError?.(playError as Error);
                     reject(playError);
                 }

@@ -391,11 +391,16 @@ export default function VoiceCallInterface({
     try {
       console.log('🟢 Start call button clicked');
       
-      // Unlock audio playback (required by browser autoplay policies)
-      // This must happen during the user gesture (click)
-      console.log('🔓 Unlocking audio...');
-      await ttsService.unlockAudio();
-      console.log('✅ Audio unlocked');
+      // CRITICAL: Unlock audio playback FIRST (required by browser autoplay policies)
+      // This MUST happen during the user gesture (click/tap) - especially important for mobile
+      console.log('🔓 Unlocking audio (critical for mobile)...');
+      try {
+        await ttsService.unlockAudio();
+        console.log('✅ Audio unlocked successfully');
+      } catch (unlockError) {
+        console.error('⚠️ Audio unlock warning (may still work):', unlockError);
+        // Continue anyway - some browsers may still allow playback
+      }
 
       // Reset AI conversation state for new call
       aiService.resetState();
