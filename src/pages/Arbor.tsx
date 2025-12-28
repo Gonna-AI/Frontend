@@ -5,6 +5,7 @@ import ArborDashboard from '../components/Arbor/ArborDashboard';
 import { Settings } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
+import LanguageSwitcher from '../components/Layout/LanguageSwitcher';
 
 type ChatMode = 'ask' | 'tell' | 'docsearch';
 
@@ -113,6 +114,7 @@ export default function Arbor() {
                         >
                             <Settings className="w-5 h-5 sm:w-6 sm:h-6" />
                         </button>
+                        <LanguageSwitcher isExpanded={true} forceDark={true} />
                     </div>
                 </div>
             </div>

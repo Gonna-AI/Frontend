@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { FileCheck, Upload, CheckCircle, XCircle, Activity, User, Clock, FileText, X, AlertCircle, Loader2 } from 'lucide-react';
 import { documentApi, ticketApi, setTicketHeader } from '../config/api';
+import LanguageSwitcher from '../components/Layout/LanguageSwitcher';
 
 // Add a type for the AI analysis response
 interface AIAnalysis {
@@ -90,12 +91,12 @@ const DocumentVerification = () => {
     try {
       const response = await documentApi.listDocuments();
       setDocuments(response.data.documents);
-      
+
       // Update stats separately
       const verified = response.data.documents.filter(doc => doc.is_submitted && doc.is_verified).length;
       const pending = response.data.documents.filter(doc => doc.is_submitted && !doc.is_verified).length;
       const total = response.data.documents.length;
-      
+
       setDocumentStats({
         total,
         status: pending > 0 ? 'pending' : verified > 0 ? 'verified' : 'rejected'
@@ -110,10 +111,10 @@ const DocumentVerification = () => {
     if (userInfo) {
       // Initial fetch when user is verified
       fetchDocuments();
-      
+
       // Optional: Set up periodic refresh (every 30 seconds)
       const interval = setInterval(fetchDocuments, 30000);
-      
+
       // Cleanup interval on unmount
       return () => clearInterval(interval);
     }
@@ -125,7 +126,7 @@ const DocumentVerification = () => {
       try {
         const response = await documentApi.getVerificationStatus();
         setVerificationStatus(response.data.status);
-        
+
         // Update document stats with the new status
         setDocumentStats(prev => ({
           ...prev,
@@ -145,7 +146,7 @@ const DocumentVerification = () => {
     setAiProcessing(true);
     try {
       await new Promise(resolve => setTimeout(resolve, 2000));
-      
+
       const suggestion = {
         documentType: "Medical Report",
         confidence: 92,
@@ -156,7 +157,7 @@ const DocumentVerification = () => {
           "Digital signatures present"
         ]
       };
-      
+
       setAiSuggestion(suggestion);
       setShowConfirmation(true);
     } catch (error) {
@@ -173,16 +174,16 @@ const DocumentVerification = () => {
       setVerificationStatus(null);
       setAiSuggestion(null);
       setShowConfirmation(false);
-      
+
       setUploadStatus('uploading');
       try {
         // Upload the document first
         const uploadResponse = await documentApi.uploadDocument(file);
         setUploadStatus('analyzing');
-        
+
         // Use the document_id from the upload response
         const documentId = uploadResponse.data.document_id;
-        
+
         // Add the document to the list immediately as "Processing"
         const newDocument = {
           document_id: documentId,
@@ -191,25 +192,25 @@ const DocumentVerification = () => {
           is_verified: false,
           uploaded_at: new Date().toISOString()
         };
-        
+
         // Update documents list with the new document at the top
         setDocuments(prevDocs => [newDocument, ...prevDocs]);
-        
+
         // Store the document ID from the upload response
         setSelectedFile({
           ...file,
           document_id: documentId  // Store the same ID here
         });
-        
+
         const analysisResponse = await documentApi.analyzeDocuments();
-        
+
         // Parse the JSON string from the analysis
         const parsedAnalysis = JSON.parse(analysisResponse.data.documents[0].analysis.replace(/```json\n|\n```/g, ''));
-        
+
         setAiSuggestion(parsedAnalysis);
         setShowConfirmation(true);
         setUploadStatus('');
-        
+
         // Set verification status with the same document ID
         setVerificationStatus({
           success: true,
@@ -217,10 +218,10 @@ const DocumentVerification = () => {
           documentId: documentId,  // Use the same ID here
           timestamp: new Date().toISOString()
         });
-        
+
         // Fetch updated documents to ensure consistency
         await fetchDocuments();
-        
+
       } catch (error) {
         console.error('Error processing document:', error);
         setUploadStatus('error');
@@ -233,12 +234,12 @@ const DocumentVerification = () => {
       console.error('No valid document ID found');
       return;
     }
-    
+
     setIsLoading(true);
     try {
       // Submit document for verification
       await documentApi.submitDocuments([selectedFile.document_id]);
-      
+
       // Update verification status with simplified information
       setVerificationStatus({
         success: true,
@@ -255,9 +256,9 @@ const DocumentVerification = () => {
         is_verified: false,
         uploaded_at: new Date().toISOString()
       };
-      
+
       setDocuments(prevDocs => [newDocument, ...prevDocs]);
-      
+
       // Update document stats
       setDocumentStats(prev => ({
         ...prev,
@@ -267,7 +268,7 @@ const DocumentVerification = () => {
 
       // Refresh full document list
       await fetchDocuments();
-      
+
     } catch (error) {
       console.error('Verification error:', error);
       setVerificationStatus({
@@ -283,14 +284,14 @@ const DocumentVerification = () => {
 
   const handleTicketVerification = async () => {
     if (!ticketId) return;
-    
+
     setIsLoading(true);
     try {
       // Set the ticket ID in API headers
       setTicketHeader(ticketId);
-      
+
       const response = await ticketApi.getDetails(ticketId);
-      
+
       if (response.data) {
         setUserInfo({
           name: response.data.user || 'Anonymous',
@@ -305,7 +306,7 @@ const DocumentVerification = () => {
           lastActivity: '2024-12-30 15:45'
         });
         setShowTicketModal(false);
-        
+
         // Fetch documents after successful ticket verification
         await fetchDocuments();
       }
@@ -333,12 +334,12 @@ const DocumentVerification = () => {
     try {
       const formData = new FormData();
       formData.append('file', file);
-      
+
       // First store the document and get its hash
       const response = await documentApi.processBlockchain(formData);
       const documentHash = response.data.document_hash;
       setDocumentHash(documentHash);
-      
+
       // Create new document with all necessary fields
       const newDocument = {
         document_id: documentHash,
@@ -350,7 +351,7 @@ const DocumentVerification = () => {
         blockchain_verified: false, // Document starts as unverified on blockchain
         metadata: response.data.metadata || {}
       };
-      
+
       // Update documents list
       setDocuments(prevDocs => {
         const existingDocIndex = prevDocs.findIndex(doc => doc.document_hash === documentHash);
@@ -370,7 +371,7 @@ const DocumentVerification = () => {
         document_hash: documentHash,
         message: "Document successfully stored. Awaiting verification by admin."
       });
-      
+
     } catch (error) {
       console.error('Error Uploading Document:', error);
       setBlockchainResult({
@@ -420,12 +421,12 @@ const DocumentVerification = () => {
     if (aiSuggestion && showConfirmation) {
       // Handle both new and old response formats
       const analysis = {
-        missing: aiSuggestion.documentCompleteness?.missingInformation || 
-                 aiSuggestion["Document Completeness"]?.["Missing Information"] || [],
+        missing: aiSuggestion.documentCompleteness?.missingInformation ||
+          aiSuggestion["Document Completeness"]?.["Missing Information"] || [],
         actions: aiSuggestion.requiredActions?.specificItems ||
-                aiSuggestion["Required Actions"]?.["Specific Items"] || [],
+          aiSuggestion["Required Actions"]?.["Specific Items"] || [],
         improvements: aiSuggestion.recommendations?.improvements ||
-                     aiSuggestion["Recommendations"]?.["Improvements"] || []
+          aiSuggestion["Recommendations"]?.["Improvements"] || []
       };
 
       return (
@@ -435,7 +436,7 @@ const DocumentVerification = () => {
           </div>
           <div className="text-center space-y-2">
             <h3 className="text-lg font-medium text-white">AI Analysis Results</h3>
-            
+
             {analysis.missing.length > 0 && (
               <div className="mt-4">
                 <h4 className="text-purple-400 font-medium">Missing Information:</h4>
@@ -469,7 +470,7 @@ const DocumentVerification = () => {
               </div>
             )}
           </div>
-          
+
           <div className="flex gap-3 mt-4">
             <button
               onClick={handleVerification}
@@ -508,7 +509,7 @@ const DocumentVerification = () => {
   const renderRecentVerifications = () => (
     <div className="space-y-4">
       {documents.map((doc) => (
-        <div 
+        <div
           key={doc.document_id}
           className="p-4 rounded-xl bg-purple-500/5 border border-purple-500/20 backdrop-blur-sm hover:border-purple-500/30 transition-colors"
         >
@@ -527,11 +528,10 @@ const DocumentVerification = () => {
                   Blockchain
                 </span>
               )}
-              <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                doc.is_verified 
-                  ? 'bg-green-500/20 text-green-400'
-                  : 'bg-yellow-500/20 text-yellow-400'
-              }`}>
+              <span className={`px-3 py-1 rounded-full text-sm font-medium ${doc.is_verified
+                ? 'bg-green-500/20 text-green-400'
+                : 'bg-yellow-500/20 text-yellow-400'
+                }`}>
                 {doc.is_verified ? 'Verified' : 'Processing'}
               </span>
             </div>
@@ -569,7 +569,7 @@ const DocumentVerification = () => {
               <span>Verify Hash</span>
             </button>
           </div>
-          
+
           {/* Added Dismissible Alert Messages */}
           <div className="mb-6 space-y-3">
             {showAIAlert && (
@@ -580,7 +580,7 @@ const DocumentVerification = () => {
                     Note: AI analysis is not available for blockchain verification. This process only verifies document existence and authenticity.
                   </p>
                 </div>
-                <button 
+                <button
                   onClick={() => setShowAIAlert(false)}
                   className="shrink-0 text-yellow-400 hover:text-yellow-300 transition-colors"
                 >
@@ -588,7 +588,7 @@ const DocumentVerification = () => {
                 </button>
               </div>
             )}
-            
+
             {showHashAlert && (
               <div className="flex items-start justify-between gap-2 p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">
                 <div className="flex items-start gap-2">
@@ -597,7 +597,7 @@ const DocumentVerification = () => {
                     Important: Please save your document hash after verification. You'll need it to verify your document in the future.
                   </p>
                 </div>
-                <button 
+                <button
                   onClick={() => setShowHashAlert(false)}
                   className="shrink-0 text-blue-400 hover:text-blue-300 transition-colors"
                 >
@@ -659,12 +659,12 @@ const DocumentVerification = () => {
                     <AlertCircle className="h-8 w-8 text-blue-400" />
                   )}
                 </div>
-                
+
                 <div className="text-left space-y-3">
                   <h3 className="text-lg font-medium text-white text-center mb-4">
                     Document Storage Results
                   </h3>
-                  
+
                   <div className="bg-blue-500/5 border border-blue-500/20 rounded-lg p-4 space-y-2 overflow-x-auto">
                     <p className="text-gray-300 break-all">
                       <span className="text-blue-400">Document Hash:</span> {documentHash}
@@ -685,7 +685,7 @@ const DocumentVerification = () => {
                     )}
                   </div>
                 </div>
-                
+
                 <button
                   onClick={() => {
                     setBlockchainResult(null);
@@ -753,7 +753,7 @@ const DocumentVerification = () => {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-6 md:p-10 relative bg-gradient-to-b from-[#0a0a0a] to-[#1a1a1a]">
       {/* Enhanced gradient background */}
-      <div 
+      <div
         className="absolute inset-0 opacity-40"
         style={{
           background: 'radial-gradient(circle at top, rgba(147,51,234,0.3) 0%, rgba(147,51,234,0.1) 40%, transparent 100%), radial-gradient(circle at bottom, rgba(88,28,135,0.2) 0%, transparent 100%)',
@@ -800,15 +800,15 @@ const DocumentVerification = () => {
       {showTicketModal && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-md z-50 flex items-center justify-center">
           <div className="bg-black/90 border border-purple-500/30 rounded-xl w-full max-w-md p-8 relative">
-            <button 
-              onClick={() => setShowTicketModal(false)} 
+            <button
+              onClick={() => setShowTicketModal(false)}
               className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors"
             >
               <X className="w-5 h-5" />
             </button>
-            
+
             <h2 className="text-2xl font-semibold text-white mb-6">Verify Your Ticket</h2>
-            
+
             <div className="space-y-6">
               <div className="flex gap-3">
                 <input
@@ -843,49 +843,54 @@ const DocumentVerification = () => {
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-3">
             {/* Logo */}
-            <svg 
-              xmlns="http://www.w3.org/2000/svg" 
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 464 468"
-              className="w-11 h-11" 
+              className="w-11 h-11"
               aria-label="ClerkTree Logo"
             >
-              <path 
+              <path
                 fill="white"
                 d="M275.9 63.5c37.7 5.3 76.6 24.1 103.7 50.2 30 28.8 41.8 57.6 35.8 87.1-6.1 30.1-33.6 52.9-70.6 58.3-6 0.9-18.3 1-44.9 0.6l-36.6-0.7-0.5 17.8c-0.3 9.7-0.4 17.8-0.4 17.9 0.1 0.1 19.1 0.3 42.2 0.4 23.2 0 42.7 0.5 43.5 1 1.2 0.7 1.1 2.2-0.8 9.4-6 23-20.5 42.1-41.8 55-7.3 4.3-26.7 11.9-36 14.1-9 2-34 2-44.5 0-41.3-7.9-74.2-38-82.9-75.7-8.1-35.7 2.2-71.5 27.5-94.7 16.1-14.9 35.5-22.4 63.7-24.7l7.7-0.7v-34.1l-11.7 0.7c-22.2 1.3-37 5.3-56.4 15.2-28.7 14.6-49.7 39.3-59.9 70.2-9.6 29.3-9.3 62.6 0.8 91.4 3.3 9.2 12.2 25.6 18.3 33.8 11.3 14.9 30.6 30.8 48.7 39.9 19.9 10 49.2 15.9 73.2 14.7 26.5-1.3 52.5-9.6 74.2-23.9 26.9-17.6 47.2-47.9 53.3-79.7 1-5.2 2.3-10.1 2.8-10.8 0.8-0.9 6.9-1.2 27.1-1l26.1 0.3 0.3 3.8c1.2 14.6-10.9 52.1-23.9 74-17.8 30-43.2 54-75.9 71.5-20.9 11.2-38.3 16.5-67.2 20.7-27.6 3.9-47.9 3.1-75.8-3.1-36.9-8.3-67.8-25.6-97.1-54.6-23.6-23.2-44.8-61.9-51.7-93.8-5.1-23.7-5.5-28.1-4.9-48.8 1.7-63.2 23.4-111.8 67.7-152 28-25.4 60.4-41.3 99-48.8 18.5-3.6 46.1-4 67.9-0.9zm16.4 92.6c-6.3 2.4-12.8 8.5-15.4 14.5-2.6 6.1-2.6 18.3 0 23.9 5 11 20.2 17.7 32.3 14.1 11.9-3.4 19.8-14.3 19.8-27.1-0.1-19.9-18.2-32.5-36.7-25.4z"
               />
-       
+
             </svg>
             <div className="flex flex-col">
               <span className="text-2xl font-bold text-white">ClerkTree</span>
               <span className="text-sm text-gray-400">Document Verification System</span>
             </div>
           </div>
-          
-          {/* Rest of the header content */}
-          {userInfo && (
-            <button 
-              onClick={() => setShowUserDetails(!showUserDetails)}
-              className="flex items-center gap-2 sm:gap-4 bg-purple-900/20 border border-purple-500/30 rounded-xl p-2 sm:p-4 hover:bg-purple-900/30 transition-colors"
-            >
-              <div className="flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-purple-600">
-                <User className="h-4 w-4 sm:h-5 sm:w-5" />
-              </div>
-              <div className="text-left hidden xs:block">
-                <h3 className="text-sm sm:text-base text-white font-medium">{userInfo.name}</h3>
-                <p className="text-xs sm:text-sm text-gray-400">
-                  Ticket: {userInfo.ticketId} • {userInfo.verifiedDocuments} verified
-                </p>
-              </div>
-            </button>
-          )}
-        </div>
+
+
+
+          <div className="flex items-center gap-4">
+            <LanguageSwitcher isExpanded={true} forceDark={true} />
+            {/* Rest of the header content */}
+            {userInfo && (
+              <button
+                onClick={() => setShowUserDetails(!showUserDetails)}
+                className="flex items-center gap-2 sm:gap-4 bg-purple-900/20 border border-purple-500/30 rounded-xl p-2 sm:p-4 hover:bg-purple-900/30 transition-colors"
+              >
+                <div className="flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-purple-600">
+                  <User className="h-4 w-4 sm:h-5 sm:w-5" />
+                </div>
+                <div className="text-left hidden xs:block">
+                  <h3 className="text-sm sm:text-base text-white font-medium">{userInfo.name}</h3>
+                  <p className="text-xs sm:text-sm text-gray-400">
+                    Ticket: {userInfo.ticketId} • {userInfo.verifiedDocuments} verified
+                  </p>
+                </div>
+              </button>
+            )}
+          </div>
+        </div >
 
         <div className="grid gap-6">
           {/* Upload Section */}
           <div className="bg-black/40 backdrop-blur-xl border border-purple-500/20 rounded-xl overflow-hidden shadow-xl">
             <div className="p-8">
               <h2 className="text-2xl font-semibold text-white mb-6">Upload Document</h2>
-              
+
               <div className="border-2 border-dashed border-purple-500/30 rounded-xl p-10 text-center transition-colors hover:border-purple-500/50">
                 <input
                   type="file"
@@ -898,11 +903,10 @@ const DocumentVerification = () => {
               </div>
 
               {verificationStatus && verificationStatus.message && (
-                <div className={`mt-6 p-6 rounded-xl backdrop-blur-sm ${
-                  verificationStatus.success 
-                    ? 'bg-green-500/10 border border-green-500/30' 
+                <div className={`mt-6 p-6 rounded-xl backdrop-blur-sm ${verificationStatus.success
+                    ? 'bg-green-500/10 border border-green-500/30'
                     : 'bg-red-500/10 border border-red-500/30'
-                }`}>
+                  }`}>
                   {verificationStatus.success ? (
                     <div className="flex flex-col gap-3">
                       <div className="flex items-center gap-2 text-green-400">
@@ -936,7 +940,7 @@ const DocumentVerification = () => {
                   <Activity className="w-6 h-6 text-purple-400" />
                   <h2 className="text-2xl font-semibold text-white">Recent Verifications</h2>
                 </div>
-                
+
                 {renderRecentVerifications()}
               </div>
             </div>
@@ -948,7 +952,7 @@ const DocumentVerification = () => {
                   <FileText className="w-6 h-6 text-purple-400" />
                   <h2 className="text-2xl font-semibold text-white">Your Documents</h2>
                 </div>
-                
+
                 {userInfo ? (
                   <div className="grid gap-4">
                     <div className="p-6 rounded-xl bg-purple-500/5 border border-purple-500/20 backdrop-blur-sm">
@@ -978,8 +982,8 @@ const DocumentVerification = () => {
         <div className="text-center text-sm text-gray-400 mt-8">
           Clerktree • All documents are encrypted and verified
         </div>
-      </div>
-    </div>
+      </div >
+    </div >
   );
 };
 

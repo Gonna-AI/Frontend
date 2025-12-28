@@ -5,6 +5,8 @@ import { TagFilter } from '../components/Blog/TagFilter';
 import { FlickeringGrid } from '../components/Blog/FlickeringGrid';
 import { getAllBlogPosts, getBlogPostsByTag, getAllTags } from '../data/blogPosts';
 import { useLanguage } from '../contexts/LanguageContext';
+import LanguageSwitcher from '../components/Layout/LanguageSwitcher';
+import Footer from '../components/Landing/Footer';
 
 const formatDate = (date: string, language: string): string => {
   return new Date(date).toLocaleDateString(language === 'de' ? 'de-DE' : 'en-US', {
@@ -71,6 +73,7 @@ function BlogContent() {
               ClerkTree
             </span>
           </button>
+          <LanguageSwitcher isExpanded={true} forceDark={true} />
         </div>
       </header>
 
@@ -84,7 +87,7 @@ function BlogContent() {
           maxOpacity={0.2}
           flickerChance={0.05}
         />
-      </div>
+      </div >
 
       <div className="relative z-10 py-12 px-6 pt-24">
         <div className="max-w-7xl mx-auto w-full">
@@ -137,7 +140,8 @@ function BlogContent() {
           </Suspense>
         </div>
       </div>
-    </div>
+      <Footer />
+    </div >
   );
 }
 

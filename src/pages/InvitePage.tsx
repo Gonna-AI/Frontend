@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Lock, ChevronRight, AlertCircle } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
+import LanguageSwitcher from '../components/Layout/LanguageSwitcher';
 
 const InvitePage = () => {
   const [inviteCode, setInviteCode] = useState('');
@@ -100,6 +101,7 @@ const InvitePage = () => {
           >
             {t('invite.support')}
           </Link>
+          <LanguageSwitcher isExpanded={true} />
         </nav>
       </motion.div>
 

@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ExternalLink, Upload, CheckCircle2 } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
+import LanguageSwitcher from '../components/Layout/LanguageSwitcher';
+import Footer from '../components/Landing/Footer';
 
 export default function Careers() {
   const navigate = useNavigate();
@@ -96,11 +98,14 @@ export default function Careers() {
               ClerkTree
             </span>
           </button>
-          {/* Mobile Pill */}
-          <div className="md:hidden">
-            <span className="px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-medium whitespace-nowrap">
-              {t('footer.careers')}
-            </span>
+          <div className="flex items-center gap-3">
+            {/* Mobile Pill */}
+            <div className="md:hidden">
+              <span className="px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-medium whitespace-nowrap">
+                {t('footer.careers')}
+              </span>
+            </div>
+            <LanguageSwitcher isExpanded={true} forceDark={true} />
           </div>
         </div>
       </header>
@@ -363,6 +368,7 @@ export default function Careers() {
           </div>
         </div>
       </div>
+      <Footer />
     </div>
   );
 }

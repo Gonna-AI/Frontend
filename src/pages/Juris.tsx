@@ -4,6 +4,7 @@ import JurisChat from '../components/Juris/JurisChat';
 import { Link } from 'react-router-dom';
 import { MOCK_RESPONSES } from '../data/mockJurisData';
 import { useLanguage } from '../contexts/LanguageContext';
+import LanguageSwitcher from '../components/Layout/LanguageSwitcher';
 
 // Sample mockup data
 const SAMPLE_CASES: CaseResult[] = [
@@ -174,6 +175,7 @@ export default function Juris() {
                                 Juris
                             </h1>
                         </div>
+                        <LanguageSwitcher isExpanded={true} forceDark={true} />
                     </div>
                 </div>
             </div>
@@ -190,7 +192,7 @@ export default function Juris() {
                     pendingQuery={pendingQuery}
                     onReasoningComplete={handleReasoningComplete}
                 />
-            </div>
-        </div>
+            </div >
+        </div >
     );
 }

@@ -7,6 +7,8 @@ import { FlickeringGrid } from '../components/Blog/FlickeringGrid';
 import { BlogCard } from '../components/Blog/BlogCard';
 import { useState } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
+import LanguageSwitcher from '../components/Layout/LanguageSwitcher';
+import Footer from '../components/Landing/Footer';
 
 const formatDate = (date: string, language: string): string => {
   return new Date(date).toLocaleDateString(language === 'de' ? 'de-DE' : 'en-US', {
@@ -77,6 +79,7 @@ export default function BlogPost() {
               ClerkTree
             </span>
           </button>
+          <LanguageSwitcher isExpanded={true} forceDark={true} />
         </div>
       </header>
 
@@ -281,6 +284,7 @@ export default function BlogPost() {
           </div>
         </div>
       </div>
+      <Footer />
     </div>
   );
 }
