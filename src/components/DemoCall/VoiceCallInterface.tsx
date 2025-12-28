@@ -83,6 +83,9 @@ export default function VoiceCallInterface({
   const recognitionRef = useRef<SpeechRecognitionInstance | null>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const isRecognitionRunningRef = useRef(false);
+  const silenceTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const pendingTranscriptRef = useRef<string>('');
+  const lastFinalResultTimeRef = useRef<number>(0);
 
   // Refs to avoid stale closures in speech recognition callbacks
   const currentCallRef = useRef(currentCall);
@@ -164,8 +167,28 @@ export default function VoiceCallInterface({
         setCurrentTranscript(transcriptText);
 
         if (event.results[current].isFinal) {
-          // Use ref to get latest handleUserInput callback
-          handleUserInputRef.current?.(transcriptText);
+          // Store the final transcript
+          pendingTranscriptRef.current = transcriptText.trim();
+          lastFinalResultTimeRef.current = Date.now();
+          
+          // Clear any existing silence timer
+          if (silenceTimerRef.current) {
+            clearTimeout(silenceTimerRef.current);
+          }
+          
+          // Wait for silence period (800ms) to ensure user has finished speaking
+          // This prevents the AI from responding too quickly
+          silenceTimerRef.current = setTimeout(() => {
+            const transcript = pendingTranscriptRef.current;
+            const timeSinceLastResult = Date.now() - lastFinalResultTimeRef.current;
+            
+            // Only process if we have text and enough time has passed
+            if (transcript && timeSinceLastResult >= 800) {
+              console.log('🎤 User finished speaking, processing:', transcript);
+              handleUserInputRef.current?.(transcript);
+              pendingTranscriptRef.current = '';
+            }
+          }, 800); // Wait 800ms of silence before processing
         }
       };
 
@@ -208,6 +231,9 @@ export default function VoiceCallInterface({
         recognitionRef.current.abort();
         isRecognitionRunningRef.current = false;
       }
+      if (silenceTimerRef.current) {
+        clearTimeout(silenceTimerRef.current);
+      }
     };
   }, [language]);
 
@@ -217,8 +243,20 @@ export default function VoiceCallInterface({
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const speakText = useCallback((text: string) => {
-    if (!isSpeakerOn) return Promise.resolve();
+  const speakText = useCallback(async (text: string) => {
+    if (!text || !text.trim()) {
+      console.warn('⚠️ Empty text provided to speakText');
+      setAgentStatus('listening');
+      startRecognition();
+      return;
+    }
+
+    console.log('🔊 Speaking text:', text.substring(0, 50) + '...', 'Speaker on:', isSpeakerOn);
+
+    // Check if speaker is on - if not, log warning but still try to speak
+    if (!isSpeakerOn) {
+      console.warn('⚠️ Speaker is off, but attempting to speak anyway');
+    }
 
     // Get the selected voice from knowledge base
     const selectedVoice = (knowledgeBase.selectedVoiceId || 'af_nova') as KokoroVoiceId;
@@ -226,25 +264,71 @@ export default function VoiceCallInterface({
     // Stop recognition before speaking to avoid conflicts
     stopRecognition();
 
-    return ttsService.speak(text, {
-      voice: selectedVoice,
-      speed: 1.0,
-      onStart: () => setAgentStatus('speaking'),
-      onEnd: () => {
-        setAgentStatus('listening');
-        // Start listening after speaking
-        startRecognition();
-      },
-      onError: (error) => {
-        console.error('TTS error:', error);
-        setAgentStatus('listening');
-        startRecognition();
-      }
-    });
-  }, [knowledgeBase.selectedVoiceId, isSpeakerOn, startRecognition, stopRecognition]);
+    // Clear any pending silence timers
+    if (silenceTimerRef.current) {
+      clearTimeout(silenceTimerRef.current);
+      silenceTimerRef.current = null;
+    }
+
+    try {
+      // Always try to speak - the TTS service will handle speaker state
+      await ttsService.speak(text, {
+        voice: selectedVoice,
+        speed: 1.0,
+        onStart: () => {
+          console.log('✅ TTS started speaking');
+          setAgentStatus('speaking');
+        },
+        onEnd: () => {
+          console.log('✅ TTS finished speaking');
+          setAgentStatus('listening');
+          // Start listening after speaking with a small delay
+          setTimeout(() => {
+            if (currentCallRef.current?.status === 'active' && !isMuted) {
+              console.log('🎤 Restarting recognition after TTS ended');
+              startRecognition();
+            }
+          }, 300);
+        },
+        onError: (error) => {
+          console.error('❌ TTS error:', error);
+          setAgentStatus('listening');
+          // Try to restart listening even on error
+          setTimeout(() => {
+            if (currentCallRef.current?.status === 'active' && !isMuted) {
+              console.log('🎤 Restarting recognition after TTS error');
+              startRecognition();
+            }
+          }, 300);
+        }
+      });
+    } catch (error) {
+      console.error('❌ Failed to speak text:', error);
+      setAgentStatus('listening');
+      // Restart listening on error
+      setTimeout(() => {
+        if (currentCallRef.current?.status === 'active' && !isMuted) {
+          console.log('🎤 Restarting recognition after speak error');
+          startRecognition();
+        }
+      }, 300);
+    }
+  }, [knowledgeBase.selectedVoiceId, isSpeakerOn, startRecognition, stopRecognition, isMuted]);
 
   const handleUserInput = useCallback(async (text: string) => {
-    if (!text.trim()) return;
+    if (!text.trim()) {
+      console.warn('⚠️ Empty text in handleUserInput');
+      return;
+    }
+
+    console.log('💬 Processing user input:', text);
+
+    // Clear pending transcript
+    pendingTranscriptRef.current = '';
+    if (silenceTimerRef.current) {
+      clearTimeout(silenceTimerRef.current);
+      silenceTimerRef.current = null;
+    }
 
     addMessage('user', text);
     onTranscript?.(text, 'user');
@@ -254,58 +338,101 @@ export default function VoiceCallInterface({
     // Stop recognition while processing
     stopRecognition();
 
-    // Use AI service to generate response
-    const response = await aiService.generateResponse(
-      text,
-      messages,
-      extractedFields
-    );
+    try {
+      // Use AI service to generate response
+      console.log('🤖 Generating AI response...');
+      const response = await aiService.generateResponse(
+        text,
+        messages,
+        extractedFields
+      );
 
-    // Update extracted fields
-    if (response.extractedFields) {
-      response.extractedFields.forEach(field => {
-        updateExtractedField(field);
-      });
+      console.log('✅ AI response received:', response.text?.substring(0, 50) + '...');
+
+      // Update extracted fields
+      if (response.extractedFields) {
+        response.extractedFields.forEach(field => {
+          updateExtractedField(field);
+        });
+      }
+
+      // Update priority if suggested
+      if (response.suggestedPriority) {
+        setCallPriority(response.suggestedPriority);
+      }
+
+      // Update category if suggested
+      if (response.suggestedCategory) {
+        setCallCategory(response.suggestedCategory);
+      }
+
+      addMessage('agent', response.text);
+      onTranscript?.(response.text, 'agent');
+      
+      // Always try to speak the response
+      console.log('🔊 Speaking AI response...');
+      await speakText(response.text);
+    } catch (error) {
+      console.error('❌ Error processing user input:', error);
+      setAgentStatus('listening');
+      // Restart listening on error
+      setTimeout(() => {
+        if (currentCallRef.current?.status === 'active' && !isMuted) {
+          startRecognition();
+        }
+      }, 500);
     }
-
-    // Update priority if suggested
-    if (response.suggestedPriority) {
-      setCallPriority(response.suggestedPriority);
-    }
-
-    // Update category if suggested
-    if (response.suggestedCategory) {
-      setCallCategory(response.suggestedCategory);
-    }
-
-    addMessage('agent', response.text);
-    onTranscript?.(response.text, 'agent');
-    await speakText(response.text);
-  }, [addMessage, onTranscript, messages, extractedFields, updateExtractedField, setCallPriority, setCallCategory, speakText, stopRecognition]);
+  }, [addMessage, onTranscript, messages, extractedFields, updateExtractedField, setCallPriority, setCallCategory, speakText, stopRecognition, startRecognition, isMuted]);
 
   // Keep handleUserInputRef in sync (must be after handleUserInput is defined)
   useEffect(() => { handleUserInputRef.current = handleUserInput; }, [handleUserInput]);
 
   const handleStartCall = useCallback(async () => {
-    // Unlock audio playback (required by browser autoplay policies)
-    // This must happen during the user gesture (click)
-    await ttsService.unlockAudio();
+    try {
+      console.log('🟢 Start call button clicked');
+      
+      // Unlock audio playback (required by browser autoplay policies)
+      // This must happen during the user gesture (click)
+      console.log('🔓 Unlocking audio...');
+      await ttsService.unlockAudio();
+      console.log('✅ Audio unlocked');
 
-    // Reset AI conversation state for new call
-    aiService.resetState();
+      // Reset AI conversation state for new call
+      aiService.resetState();
 
-    startCall('voice');
-    setAgentStatus('listening');
+      // Clear any pending transcripts
+      pendingTranscriptRef.current = '';
+      if (silenceTimerRef.current) {
+        clearTimeout(silenceTimerRef.current);
+        silenceTimerRef.current = null;
+      }
 
-    // Start speech recognition immediately when call begins
-    // Small delay to ensure state is updated
-    setTimeout(() => {
-      startRecognition();
-    }, 100);
+      // Start the call
+      console.log('📞 Starting call...');
+      startCall('voice');
+      setAgentStatus('listening');
+
+      // Start speech recognition immediately when call begins
+      // Small delay to ensure state is updated
+      setTimeout(() => {
+        console.log('🎤 Starting speech recognition after call start...');
+        startRecognition();
+      }, 200);
+    } catch (error) {
+      console.error('❌ Error starting call:', error);
+      setAgentStatus('idle');
+    }
   }, [startCall, startRecognition]);
 
   const handleEndCall = useCallback(async () => {
     console.log('🔴 End call button pressed');
+
+    // Clear any pending silence timers
+    if (silenceTimerRef.current) {
+      clearTimeout(silenceTimerRef.current);
+      silenceTimerRef.current = null;
+    }
+    pendingTranscriptRef.current = '';
 
     // Stop all TTS immediately
     ttsService.stop();

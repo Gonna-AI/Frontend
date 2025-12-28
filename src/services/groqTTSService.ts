@@ -418,8 +418,8 @@ class GroqTTSService {
                 this.currentAudio.volume = 1.0;
 
                 this.currentAudio.onloadeddata = () => {
-                    console.log('🔊 Audio loaded, playing...');
-                    options?.onStart?.();
+                    console.log('🔊 Audio loaded and ready to play');
+                    // onStart will be called after play() succeeds
                 };
 
                 this.currentAudio.onended = () => {
@@ -443,20 +443,58 @@ class GroqTTSService {
                 try {
                     // Load the audio first
                     await this.currentAudio.load();
+                    console.log('🔊 Audio loaded, calling play()...');
 
                     // Then play
                     const playPromise = this.currentAudio.play();
                     if (playPromise !== undefined) {
                         await playPromise;
+                        console.log('✅ Audio play() promise resolved');
+                        // Call onStart after play succeeds
+                        options?.onStart?.();
+                    } else {
+                        console.log('✅ Audio play() called (no promise)');
+                        // Call onStart even if no promise
+                        options?.onStart?.();
                     }
                 } catch (playError) {
-                    console.error('🔊 Audio play() failed:', playError);
+                    console.error('❌ Audio play() failed:', playError);
                     URL.revokeObjectURL(audioUrl);
                     this.currentAudio = null;
 
                     // On NotAllowedError, the audio isn't unlocked
                     if (playError instanceof Error && playError.name === 'NotAllowedError') {
                         console.warn('⚠️ Audio not unlocked - user gesture required. iOS may require explicit user interaction.');
+                        // Try to unlock audio and retry
+                        try {
+                            await this.unlockAudio();
+                            console.log('🔓 Audio unlocked, retrying playback...');
+                            // Create new audio element and try again
+                            const retryAudio = this.getAudioElement();
+                            retryAudio.src = audioUrl;
+                            retryAudio.volume = 1.0;
+                            await retryAudio.play();
+                            this.currentAudio = retryAudio;
+                            retryAudio.onended = () => {
+                                console.log('✅ Retry audio playback complete');
+                                URL.revokeObjectURL(audioUrl);
+                                this.currentAudio = null;
+                                options?.onEnd?.();
+                                resolve();
+                            };
+                            retryAudio.onerror = (e) => {
+                                console.error('Retry audio playback error:', e);
+                                URL.revokeObjectURL(audioUrl);
+                                this.currentAudio = null;
+                                const error = new Error('Audio playback failed after retry');
+                                options?.onError?.(error);
+                                reject(error);
+                            };
+                            options?.onStart?.();
+                            return; // Success, exit early
+                        } catch (retryError) {
+                            console.error('❌ Retry also failed:', retryError);
+                        }
                     }
 
                     options?.onError?.(playError as Error);
