@@ -31,8 +31,19 @@ export default function Header({ onMobileMenuClick, isStatic = false }: HeaderPr
   const [currentTime, setCurrentTime] = useState(new Date());
   const { isDark } = useTheme();
   const [showNotifications, setShowNotifications] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
   const queryClient = useQueryClient();
   const { t } = useLanguage();
+
+  // Track scroll position to change header background
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 20);
+    };
+    window.addEventListener('scroll', handleScroll);
+    handleScroll(); // Check initial state
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   // Replace MOCK_NOTIFICATIONS with API call
   const { data: notifications = [] } = useQuery<Notification[]>({
@@ -96,24 +107,28 @@ export default function Header({ onMobileMenuClick, isStatic = false }: HeaderPr
         isStatic ? "relative" : "fixed top-0 left-0 right-0 z-40",
         "h-16 md:h-20 flex items-center justify-between px-4 md:px-6",
         "transition-all duration-300",
-        // Make header transparent to let the hero glow shine through
-        // We add a very subtle white wash to catch the light, but no dark background
-        "bg-transparent",
-        "border-b border-white/5",
-        "backdrop-blur-[2px]", // Reduced blur for clarity
-        "shadow-none", // Remove shadow to feel more ethereal
+        // Dynamic background based on scroll position
+        isScrolled
+          ? "bg-black/90 backdrop-blur-xl border-b border-white/10" // Solid dark when scrolled
+          : "bg-transparent backdrop-blur-[2px] border-b border-white/5", // Transparent at top
         "overflow-hidden"
       )}>
-        {/* Unified White Glow Effect - Stronger top wash */}
+        {/* Unified White Glow Effect - Only show when at top */}
         <div
-          className="absolute top-0 left-0 w-full h-full pointer-events-none opacity-40 z-0"
+          className={cn(
+            "absolute top-0 left-0 w-full h-full pointer-events-none z-0 transition-opacity duration-300",
+            isScrolled ? "opacity-0" : "opacity-40"
+          )}
           style={{
             background: 'linear-gradient(to bottom, rgba(255,255,255,0.05) 0%, transparent 100%)',
           }}
         />
-        {/* Additional top-right highlight to match Hero spotlight */}
+        {/* Additional top-right highlight to match Hero spotlight - Only show when at top */}
         <div
-          className="absolute top-0 right-0 w-[60%] h-full pointer-events-none opacity-30 z-0"
+          className={cn(
+            "absolute top-0 right-0 w-[60%] h-full pointer-events-none z-0 transition-opacity duration-300",
+            isScrolled ? "opacity-0" : "opacity-30"
+          )}
           style={{
             background: 'linear-gradient(to left, rgba(255,255,255,0.15), transparent)',
             filter: 'blur(40px)'

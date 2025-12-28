@@ -6,7 +6,7 @@ import Features from './Features';
 import Conversation from './Conversation';
 import Footer from './Footer';
 import { useNavigate } from 'react-router-dom';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Menu, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import LanguageSwitcher from '../Layout/LanguageSwitcher';
@@ -16,7 +16,18 @@ import { useLanguage } from '../../contexts/LanguageContext';
 export default function Landing() {
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
   const { t } = useLanguage();
+
+  // Track scroll position to change header background
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 20);
+    };
+    window.addEventListener('scroll', handleScroll);
+    handleScroll(); // Check initial state
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const handleAboutClick = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -37,12 +48,17 @@ export default function Landing() {
 
   return (
     <div className="min-h-screen overflow-hidden relative bg-[rgb(10,10,10)]">
-      {/* Header - Dark background fading to transparent on right for corner glow */}
-      <header className="fixed top-0 left-0 right-0 z-50 w-full py-3 px-4 sm:px-6 overflow-hidden">
-        {/* Dark-to-transparent gradient background with fading bottom edge */}
+      {/* Header - Dark background fading to transparent on right for corner glow, solid when scrolled */}
+      <header className={`fixed top-0 left-0 right-0 z-50 w-full py-3 px-4 sm:px-6 overflow-hidden transition-all duration-300 ${isScrolled ? 'backdrop-blur-xl' : ''
+        }`}>
+        {/* Dark-to-transparent gradient background with fading bottom edge - or solid when scrolled */}
         <div
-          className="absolute inset-0 -z-10"
-          style={{
+          className="absolute inset-0 -z-10 transition-all duration-300"
+          style={isScrolled ? {
+            background: 'rgb(10,10,10)',
+            opacity: 0.95,
+            boxShadow: 'inset 0 -1px 0 0 rgba(255,255,255,0.1)',
+          } : {
             background: 'linear-gradient(to right, rgb(10,10,10) 0%, rgb(10,10,10) 50%, transparent 85%)',
             boxShadow: 'inset 0 -1px 0 0 rgba(255,255,255,0.05)',
             maskImage: 'linear-gradient(to right, black 0%, black 40%, transparent 70%)',
