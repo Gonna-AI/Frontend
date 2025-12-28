@@ -211,7 +211,8 @@ class TTSService {
         return;
       } catch (error) {
         console.error('❌ Groq TTS failed:', error);
-        // Don't fallback to browser - just call onEnd to continue the flow
+        // No fallback - just call onEnd to continue the flow
+        options?.onError?.(error as Error);
         options?.onEnd?.();
         return;
       }
@@ -219,6 +220,7 @@ class TTSService {
 
     // If Groq is not available, just log and call onEnd
     console.warn('⚠️ Groq TTS not available, skipping speech');
+    options?.onError?.(new Error('Groq TTS not available'));
     options?.onEnd?.();
   }
 
