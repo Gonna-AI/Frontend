@@ -49,7 +49,7 @@ export default function Landing() {
             WebkitMaskImage: 'linear-gradient(to right, black 0%, black 40%, transparent 70%)',
           }}
         />
-        <div className="w-full max-w-[30%] md:max-w-screen-2xl mx-auto flex items-center justify-between pl-8">
+        <div className="w-full max-w-[90%] md:max-w-screen-2xl mx-auto flex items-center justify-between pl-0 md:pl-8">
           {/* Logo and Text on Left */}
           <div className="flex items-center gap-2">
             <button

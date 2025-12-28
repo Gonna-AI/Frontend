@@ -48,10 +48,10 @@ const Hero = () => {
               transition={{ duration: 0.5, delay: 0.1 }}
               className="mb-8 font-urbanist"
             >
-              <h1 className="text-6xl sm:text-7xl md:text-8xl font-semibold tracking-tighter text-white leading-[0.95] mb-2 text-left">
+              <h1 className="text-5xl sm:text-7xl md:text-[5rem] font-semibold tracking-tighter text-white leading-[0.95] mb-2 text-left">
                 {t('hero.revolutionizing')}
               </h1>
-              <h1 className="text-6xl sm:text-7xl md:text-8xl font-semibold tracking-tighter text-white leading-[0.95] text-left whitespace-nowrap">
+              <h1 className="text-5xl sm:text-7xl md:text-[5rem] font-semibold tracking-tighter text-white leading-[0.95] text-left whitespace-normal md:whitespace-nowrap">
                 {t('hero.bpoClaims')}
               </h1>
             </motion.div>
@@ -71,12 +71,12 @@ const Hero = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.3 }}
-              className="flex flex-col sm:flex-row items-start sm:items-center gap-8"
+              className="flex flex-col sm:flex-row items-center sm:items-center w-full sm:w-auto gap-4 sm:gap-8"
             >
               {/* Primary Button: White bg, Black text */}
               <button
                 onClick={() => navigate('/contact')}
-                className="bg-[#E5E5E5] hover:bg-white text-black transition-colors px-8 py-3.5 rounded-lg font-medium text-base tracking-tight"
+                className="bg-[#E5E5E5] hover:bg-white text-black transition-colors px-8 h-[52px] rounded-lg font-medium text-base tracking-tight flex items-center justify-center w-full sm:w-auto"
               >
                 {t('nav.bookDemo')}
               </button>
@@ -84,7 +84,7 @@ const Hero = () => {
               {/* Secondary Link: Plain text, no icon initially to match ref "Read customer stories" */}
               <button
                 onClick={() => navigate('/solutions')}
-                className="text-white hover:text-neutral-300 transition-colors font-medium text-base flex items-center gap-2"
+                className="text-white hover:text-neutral-300 transition-colors font-medium text-base h-[52px] flex items-center justify-center w-full sm:w-auto gap-2"
               >
                 {t('nav.seeSolutions')}
               </button>
