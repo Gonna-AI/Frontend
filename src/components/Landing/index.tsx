@@ -13,11 +13,14 @@ import LanguageSwitcher from '../Layout/LanguageSwitcher';
 
 import { useLanguage } from '../../contexts/LanguageContext';
 
+import { useDeviceDetection } from '../../hooks/useDeviceDetection';
+
 export default function Landing() {
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const { t } = useLanguage();
+  const { isMobile } = useDeviceDetection();
 
   // Track scroll position to change header background
   useEffect(() => {
@@ -54,7 +57,7 @@ export default function Landing() {
         {/* Dark-to-transparent gradient background with fading bottom edge - or solid when scrolled */}
         <div
           className="absolute inset-0 -z-10 transition-all duration-300"
-          style={isScrolled ? {
+          style={(isScrolled || isMobile) ? {
             background: 'rgb(10,10,10)',
             opacity: 0.95,
             boxShadow: 'inset 0 -1px 0 0 rgba(255,255,255,0.1)',

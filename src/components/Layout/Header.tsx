@@ -110,7 +110,7 @@ export default function Header({ onMobileMenuClick, isStatic = false }: HeaderPr
         // Dynamic background based on scroll position
         isScrolled
           ? "bg-black/90 backdrop-blur-xl border-b border-white/10" // Solid dark when scrolled
-          : "bg-transparent backdrop-blur-[2px] border-b border-white/5", // Transparent at top
+          : "bg-black md:bg-transparent backdrop-blur-[2px] border-b border-white/5", // Black on mobile, Transparent on desktop at top
         "overflow-hidden"
       )}>
         {/* Unified White Glow Effect - Only show when at top */}
