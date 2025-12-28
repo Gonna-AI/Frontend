@@ -307,7 +307,11 @@ export default function UserPhoneInterface({
 
         // Use Groq TTS for the greeting
         try {
+            // Get selected voice
+            const selectedVoice = (knowledgeBase.selectedVoiceId || 'af_nova') as KokoroVoiceId;
+
             await ttsService.speak(greeting, {
+                voice: selectedVoice,
                 speed: 1.0,
                 onStart: () => {
                     console.log('🔊 Groq TTS greeting started');
