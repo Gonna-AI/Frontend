@@ -37,9 +37,19 @@ export default function Landing() {
 
   return (
     <div className="min-h-screen overflow-hidden relative bg-[rgb(10,10,10)]">
-      {/* Glassy Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 w-full py-3 px-4 sm:px-6 backdrop-blur-md bg-[rgb(10,10,10)]/80 border-b border-white/10">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
+      {/* Header - Dark background fading to transparent on right for corner glow */}
+      <header className="fixed top-0 left-0 right-0 z-50 w-full py-3 px-4 sm:px-6 overflow-hidden">
+        {/* Dark-to-transparent gradient background with fading bottom edge */}
+        <div
+          className="absolute inset-0 -z-10"
+          style={{
+            background: 'linear-gradient(to right, rgb(10,10,10) 0%, rgb(10,10,10) 50%, transparent 85%)',
+            boxShadow: 'inset 0 -1px 0 0 rgba(255,255,255,0.05)',
+            maskImage: 'linear-gradient(to right, black 0%, black 40%, transparent 70%)',
+            WebkitMaskImage: 'linear-gradient(to right, black 0%, black 40%, transparent 70%)',
+          }}
+        />
+        <div className="w-full max-w-[30%] md:max-w-screen-2xl mx-auto flex items-center justify-between pl-8">
           {/* Logo and Text on Left */}
           <div className="flex items-center gap-2">
             <button
