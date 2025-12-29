@@ -48,11 +48,14 @@ const Hero = () => {
               transition={{ duration: 0.5, delay: 0.1 }}
               className="mb-8 font-urbanist"
             >
-              <h1 className="text-5xl sm:text-7xl md:text-[5rem] font-semibold tracking-tighter text-white leading-[0.95] mb-2 text-left">
-                {t('hero.revolutionizing')}
-              </h1>
-              <h1 className="text-5xl sm:text-7xl md:text-[5rem] font-semibold tracking-tighter text-white leading-[0.95] text-left whitespace-normal md:whitespace-nowrap">
-                {t('hero.bpoClaims')}
+              <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-6 text-left">
+                <span className="bg-gradient-to-r from-white via-white/95 to-white/90 text-transparent bg-clip-text">
+                  {t('hero.revolutionizing')}
+                </span>
+                <br />
+                <span className="bg-gradient-to-r from-indigo-400 via-purple-400 to-indigo-600 text-transparent bg-clip-text whitespace-normal md:whitespace-nowrap">
+                  {t('hero.bpoClaims')}
+                </span>
               </h1>
             </motion.div>
 
