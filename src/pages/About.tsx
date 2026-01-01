@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { Target } from 'lucide-react';
+
 import { useLanguage } from '../contexts/LanguageContext';
 import LanguageSwitcher from '../components/Layout/LanguageSwitcher';
 import Footer from '../components/Landing/Footer';
@@ -140,6 +140,12 @@ export default function About() {
                   name: 'Urja Shrestha',
                   image: 'https://xlzwfkgurrrspcdyqele.supabase.co/storage/v1/object/public/buck/Urja%20Shrestha.jpeg',
                   description: t('about.team.urja')
+                },
+                {
+                  name: 'Sinem Koc',
+                  image: 'https://xlzwfkgurrrspcdyqele.supabase.co/storage/v1/object/public/buck/KOC.jpeg',
+                  description: t('about.team.sinem'),
+                  objectPosition: 'center top'
                 },
               ].map((member, index) => (
                 <div
