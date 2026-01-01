@@ -115,18 +115,29 @@ export default function About() {
                   name: 'Animesh Mishra',
                   image: 'https://xlzwfkgurrrspcdyqele.supabase.co/storage/v1/object/public/buck/animeshmishra.PNG',
                   description: t('about.team.animesh'),
-                  objectPosition: 'center top'
+                  objectPosition: 'center top',
+                  linkedin: 'https://www.linkedin.com/in/animeshmishra0'
                 },
                 {
                   name: 'Kenshin Kiriyama',
                   image: 'https://xlzwfkgurrrspcdyqele.supabase.co/storage/v1/object/public/buck/KenshinKiriyama.jpeg',
-                  description: t('about.team.kenshin')
+                  description: t('about.team.kenshin'),
+                  linkedin: 'https://www.linkedin.com/in/kenshin-kiriyama-2b2031357/'
                 },
                 {
                   name: 'Shobhit Mishra',
                   image: 'https://xlzwfkgurrrspcdyqele.supabase.co/storage/v1/object/public/buck/shobhitmishra.jpeg',
                   description: t('about.team.shobhit'),
-                  objectPosition: 'center top'
+                  objectPosition: 'center top',
+                  linkedin: 'https://www.linkedin.com/in/shobhit-mishra-8716961bb/'
+                },
+
+                {
+                  name: 'Sinem Koc',
+                  image: 'https://xlzwfkgurrrspcdyqele.supabase.co/storage/v1/object/public/buck/KOC.jpeg',
+                  description: t('about.team.sinem'),
+                  objectPosition: 'center top',
+                  linkedin: 'https://www.linkedin.com/in/sinem-koc-450174337?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app'
                 },
                 {
                   name: 'Krishang Sharma',
@@ -134,18 +145,14 @@ export default function About() {
                   description: t('about.team.krishang'),
                   objectPosition: '55% 5%',
                   scale: '1.7',
-                  hoverScale: '1.87'
+                  hoverScale: '1.87',
+                  linkedin: 'https://www.linkedin.com/in/krishangsharma118/'
                 },
                 {
                   name: 'Urja Shrestha',
                   image: 'https://xlzwfkgurrrspcdyqele.supabase.co/storage/v1/object/public/buck/Urja%20Shrestha.jpeg',
-                  description: t('about.team.urja')
-                },
-                {
-                  name: 'Sinem Koc',
-                  image: 'https://xlzwfkgurrrspcdyqele.supabase.co/storage/v1/object/public/buck/KOC.jpeg',
-                  description: t('about.team.sinem'),
-                  objectPosition: 'center top'
+                  description: t('about.team.urja'),
+                  linkedin: 'https://www.linkedin.com/in/urja-shrestha-a4ba5324a/'
                 },
               ].map((member, index) => (
                 <div
@@ -153,6 +160,26 @@ export default function About() {
                   className="group relative w-full sm:w-[calc(50%-2rem)] lg:w-[calc(33.33%-2rem)] xl:w-[calc(30%-2rem)] min-w-[320px] max-w-md grow rounded-3xl bg-white/5 border border-white/10 hover:border-blue-500/30 transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_0_30px_-5px_rgba(59,130,246,0.15)] overflow-hidden flex flex-col"
                 >
                   <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+                  {/* LinkedIn Icon - Top Right */}
+                  {member.linkedin && (
+                    <a
+                      href={member.linkedin}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="absolute top-4 right-4 z-20 p-2.5 rounded-full bg-black/40 backdrop-blur-md border border-white/10 text-white/70 hover:text-white hover:bg-[#0077b5] hover:border-[#0077b5] transition-all duration-300 shadow-lg"
+                      aria-label={`${member.name}'s LinkedIn`}
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                        className="w-5 h-5"
+                      >
+                        <path d="M20.5 2h-17A1.5 1.5 0 002 3.5v17A1.5 1.5 0 003.5 22h17a1.5 1.5 0 001.5-1.5v-17A1.5 1.5 0 0020.5 2zM8 19H5v-9h3zM6.5 8.25A1.75 1.75 0 118.3 6.5a1.78 1.78 0 01-1.8 1.75zM19 19h-3v-4.74c0-1.42-.6-1.93-1.38-1.93A1.74 1.74 0 0013 14.19a.66.66 0 000 .14V19h-3v-9h2.9v1.3a3.11 3.11 0 012.7-1.4c1.55 0 3.36.86 3.36 3.66z"></path>
+                      </svg>
+                    </a>
+                  )}
 
                   <div className="p-6 flex flex-col items-center h-full relative z-10">
                     <div className="w-28 h-28 mb-6 rounded-full p-[2px] bg-gradient-to-br from-white/10 to-white/5 group-hover:from-blue-500/50 group-hover:to-cyan-500/50 transition-all duration-500">
@@ -183,6 +210,7 @@ export default function About() {
                         <div className="w-full h-20 bg-white/5 rounded-lg border border-white/5 animate-pulse"></div>
                       )}
                     </div>
+
                   </div>
                 </div>
               ))}
