@@ -133,12 +133,6 @@ export default function About() {
                 },
 
                 {
-                  name: 'Sinem Koc',
-                  image: 'https://xlzwfkgurrrspcdyqele.supabase.co/storage/v1/object/public/buck/KOC.jpeg',
-                  description: t('about.team.sinem'),
-                  objectPosition: 'center top',
-                  linkedin: 'https://www.linkedin.com/in/sinem-koc-450174337?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app'
-                },
                 {
                   name: 'Krishang Sharma',
                   image: 'https://xlzwfkgurrrspcdyqele.supabase.co/storage/v1/object/public/buck/krishangfinal.JPG',
@@ -147,6 +141,14 @@ export default function About() {
                   scale: '1.7',
                   hoverScale: '1.87',
                   linkedin: 'https://www.linkedin.com/in/krishangsharma118/'
+                },
+                {
+                {
+                  name: 'Sinem Koc',
+                  image: 'https://xlzwfkgurrrspcdyqele.supabase.co/storage/v1/object/public/buck/KOC.jpeg',
+                  description: t('about.team.sinem'),
+                  objectPosition: 'center top',
+                  linkedin: 'https://www.linkedin.com/in/sinem-koc-450174337?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app'
                 },
                 {
                   name: 'Urja Shrestha',
