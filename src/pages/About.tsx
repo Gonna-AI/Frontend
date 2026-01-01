@@ -133,7 +133,7 @@ export default function About() {
                 },
 
                 {
-                {
+
                   name: 'Krishang Sharma',
                   image: 'https://xlzwfkgurrrspcdyqele.supabase.co/storage/v1/object/public/buck/krishangfinal.JPG',
                   description: t('about.team.krishang'),
@@ -143,7 +143,7 @@ export default function About() {
                   linkedin: 'https://www.linkedin.com/in/krishangsharma118/'
                 },
                 {
-                {
+
                   name: 'Sinem Koc',
                   image: 'https://xlzwfkgurrrspcdyqele.supabase.co/storage/v1/object/public/buck/KOC.jpeg',
                   description: t('about.team.sinem'),
