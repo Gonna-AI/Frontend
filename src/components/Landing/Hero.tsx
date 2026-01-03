@@ -106,7 +106,7 @@ const Hero = () => {
                 Constraint: In Frame (max-h-screen, max-w-screen).
                 Position: Centered/Left-shifted to avoid cutoff.
             */}
-            <div className="relative w-[275%] -ml-[70%] h-[100vh] flex items-center justify-center -mt-[45%]">
+            <div className="relative w-[275%] -ml-[80%] h-[100vh] flex items-center justify-center -mt-[45%]">
               <img
                 src="/Untitled - Copy@1-1470x748-2.png"
                 alt="Hero Graphic"
