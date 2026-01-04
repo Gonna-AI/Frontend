@@ -48,7 +48,8 @@ const Hero = () => {
               transition={{ duration: 0.5, delay: 0.1 }}
               className="mb-8 font-urbanist"
             >
-              <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-6 text-left">
+              <h1 className="sr-only">ClerkTree</h1>
+              <h2 className="text-5xl md:text-7xl font-bold tracking-tight mb-6 text-left">
                 <span className="bg-gradient-to-r from-white via-white/95 to-white/90 text-transparent bg-clip-text">
                   {t('hero.revolutionizing')}
                 </span>
@@ -56,7 +57,7 @@ const Hero = () => {
                 <span className="bg-gradient-to-r from-gray-200 via-slate-300 to-gray-400 text-transparent bg-clip-text whitespace-normal md:whitespace-nowrap">
                   {t('hero.bpoClaims')}
                 </span>
-              </h1>
+              </h2>
             </motion.div>
 
             {/* Subheadline (Paragraph) - Matching description style */}
