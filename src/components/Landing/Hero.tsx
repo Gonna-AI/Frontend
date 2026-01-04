@@ -48,7 +48,9 @@ const Hero = () => {
               transition={{ duration: 0.5, delay: 0.1 }}
               className="mb-8 font-urbanist"
             >
-              <h1 className="sr-only">ClerkTree</h1>
+              <span itemScope itemType="https://schema.org/Brand">
+                <h1 className="sr-only" itemProp="name">ClerkTree</h1>
+              </span>
               <h2 className="text-5xl md:text-7xl font-bold tracking-tight mb-6 text-left">
                 <span className="bg-gradient-to-r from-white via-white/95 to-white/90 text-transparent bg-clip-text">
                   {t('hero.revolutionizing')}
