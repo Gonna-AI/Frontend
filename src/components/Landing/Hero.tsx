@@ -79,7 +79,7 @@ const Hero = () => {
               {/* Primary Button: White bg, Black text */}
               <button
                 onClick={() => navigate('/contact')}
-                className="bg-[#E5E5E5] hover:bg-white text-black transition-colors px-8 h-[52px] rounded-lg font-medium text-base tracking-tight flex items-center justify-center w-full sm:w-auto"
+                className="bg-[#E5E5E5] hover:bg-white text-black transition-colors px-8 h-[52px] rounded-lg font-medium font-urbanist text-base tracking-tight flex items-center justify-center w-full sm:w-auto"
               >
                 {t('nav.bookDemo')}
               </button>
@@ -87,7 +87,7 @@ const Hero = () => {
               {/* Secondary Link: Plain text, no icon initially to match ref "Read customer stories" */}
               <button
                 onClick={() => navigate('/solutions')}
-                className="bg-[#FF4D00] hover:bg-[#CC3D00] text-white px-8 h-[52px] rounded-lg font-medium text-base tracking-tight transition-colors flex items-center justify-center w-full sm:w-auto"
+                className="bg-[#FF4D00] hover:bg-[#CC3D00] text-white px-8 h-[52px] rounded-lg font-medium font-urbanist text-base tracking-tight transition-colors flex items-center justify-center w-full sm:w-auto"
               >
                 {t('nav.seeSolutions')}
               </button>
