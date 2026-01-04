@@ -1,1 +1,6 @@
+# Static files should be passed through
+/sitemap.xml /sitemap.xml 200
+/robots.txt /robots.txt 200
+
+# SPA Catch-all
 /* /index.html 200
