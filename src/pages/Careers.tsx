@@ -4,6 +4,7 @@ import { ExternalLink, Upload, CheckCircle2 } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import LanguageSwitcher from '../components/Layout/LanguageSwitcher';
 import Footer from '../components/Landing/Footer';
+import { supabase } from '../config/supabase';
 
 export default function Careers() {
   const navigate = useNavigate();
@@ -34,32 +35,76 @@ export default function Careers() {
     }
   };
 
+
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    // Simulate form submission
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    try {
+      let resumeUrl = '';
 
-    setSubmitted(true);
-    setIsSubmitting(false);
+      if (formData.resume) {
+        const fileExt = formData.resume.name.split('.').pop();
+        const fileName = `${Math.random().toString(36).substring(2)}_${Date.now()}.${fileExt}`;
 
-    // Reset form after 3 seconds
-    setTimeout(() => {
-      setSubmitted(false);
-      setFormData({
-        fullName: '',
-        email: '',
-        phone: '',
-        linkedinProfile: '',
-        currentPosition: '',
-        yearsOfExperience: '',
-        positionApplyingFor: '',
-        coverLetter: '',
-        portfolioWebsite: '',
-        resume: null,
-      });
-    }, 3000);
+        const { error: uploadError } = await supabase.storage
+          .from('resumes')
+          .upload(fileName, formData.resume);
+
+        if (uploadError) throw uploadError;
+
+        const { data: { publicUrl } } = supabase.storage
+          .from('resumes')
+          .getPublicUrl(fileName);
+
+        resumeUrl = publicUrl;
+      }
+
+      const { error: insertError } = await supabase
+        .from('career_applications')
+        .insert([
+          {
+            full_name: formData.fullName,
+            email: formData.email,
+            phone: formData.phone,
+            linkedin_profile: formData.linkedinProfile,
+            current_position: formData.currentPosition,
+            years_of_experience: formData.yearsOfExperience,
+            position_applying_for: formData.positionApplyingFor,
+            cover_letter: formData.coverLetter,
+            portfolio_website: formData.portfolioWebsite,
+            resume_url: resumeUrl,
+          }
+        ]);
+
+      if (insertError) throw insertError;
+
+      setSubmitted(true);
+
+      // Reset form after 3 seconds
+      setTimeout(() => {
+        setSubmitted(false);
+        setFormData({
+          fullName: '',
+          email: '',
+          phone: '',
+          linkedinProfile: '',
+          currentPosition: '',
+          yearsOfExperience: '',
+          positionApplyingFor: '',
+          coverLetter: '',
+          portfolioWebsite: '',
+          resume: null,
+        });
+      }, 3000);
+
+    } catch (error) {
+      console.error('Error submitting application:', error);
+      alert('Failed to submit application. Please check your connection and try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
