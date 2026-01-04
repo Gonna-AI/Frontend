@@ -1,3 +1,22 @@
 User-agent: *
 Allow: /
+
+# Disallow crawling of private dashboard and auth routes
+Disallow: /dashboard/
+Disallow: /auth/
+Disallow: /settings/
+Disallow: /profile/
+Disallow: /billing/
+Disallow: /invite/
+Disallow: /chat/
+Disallow: /demo-dashboard/
+Disallow: /user/
+Disallow: /ai-settings/
+
+# Allow crawling of valid content
+Allow: /blog/
+Allow: /docs/
+Allow: /about/
+Allow: /solutions/
+
 Sitemap: https://clerktree.com/sitemap.xml
