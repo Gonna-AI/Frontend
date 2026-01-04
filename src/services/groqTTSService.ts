@@ -78,6 +78,18 @@ class GroqTTSService {
     private isIOS: boolean = false;
     private isAndroid: boolean = false;
     private isMobile: boolean = false;
+    private unlockHandler: (() => void) | null = null;
+    private isUnlocking: boolean = false;
+
+    private removeUnlockListeners() {
+        if (typeof window !== 'undefined' && this.unlockHandler) {
+            window.removeEventListener('click', this.unlockHandler);
+            window.removeEventListener('touchstart', this.unlockHandler);
+            window.removeEventListener('touchend', this.unlockHandler);
+            window.removeEventListener('keydown', this.unlockHandler);
+            this.unlockHandler = null;
+        }
+    }
 
     /**
      * Initialize the Groq TTS service
@@ -97,18 +109,20 @@ class GroqTTSService {
         }
 
         // Add global click listener to unlock audio on first interaction
-        if (typeof window !== 'undefined') {
-            const unlockHandler = async () => {
+        if (typeof window !== 'undefined' && !this.audioUnlocked) {
+            // Remove any existing listeners first to prevent duplicates
+            this.removeUnlockListeners();
+
+            this.unlockHandler = async () => {
+                // Remove immediately to prevent multiple triggers
+                this.removeUnlockListeners();
                 await this.unlockAudio();
-                window.removeEventListener('click', unlockHandler);
-                window.removeEventListener('touchstart', unlockHandler);
-                window.removeEventListener('touchend', unlockHandler);
-                window.removeEventListener('keydown', unlockHandler);
             };
-            window.addEventListener('click', unlockHandler);
-            window.addEventListener('touchstart', unlockHandler);
-            window.addEventListener('touchend', unlockHandler);
-            window.addEventListener('keydown', unlockHandler);
+
+            window.addEventListener('click', this.unlockHandler);
+            window.addEventListener('touchstart', this.unlockHandler);
+            window.addEventListener('touchend', this.unlockHandler);
+            window.addEventListener('keydown', this.unlockHandler);
         }
 
         if (!GROQ_API_KEY) {
@@ -139,7 +153,9 @@ class GroqTTSService {
      * This is required by browser autoplay policies, especially strict on iOS Safari
      */
     async unlockAudio(): Promise<void> {
-        if (this.audioUnlocked) return;
+        if (this.audioUnlocked || this.isUnlocking) return;
+
+        this.isUnlocking = true;
 
         try {
             console.log('🔊 Attempting to unlock audio (iOS-compatible)...');
@@ -192,6 +208,8 @@ class GroqTTSService {
             console.log('🔊 Audio playback unlocked successfully');
         } catch (e) {
             console.warn('⚠️ Could not unlock audio:', e);
+        } finally {
+            this.isUnlocking = false;
         }
     }
 
@@ -487,10 +505,10 @@ class GroqTTSService {
                         console.log('📱 Mobile: Setting src and playing directly...');
                         // Set src (this triggers loading)
                         this.currentAudio.src = audioUrl;
-                        
+
                         // Wait a tiny bit for src to be set
                         await new Promise(resolve => setTimeout(resolve, 50));
-                        
+
                         // Play immediately
                         const playPromise = this.currentAudio.play();
                         if (playPromise !== undefined) {
@@ -503,7 +521,7 @@ class GroqTTSService {
                         // Desktop: load first, then play
                         await this.currentAudio.load();
                         console.log('🔊 Desktop: Audio loaded, calling play()...');
-                        
+
                         const playPromise = this.currentAudio.play();
                         if (playPromise !== undefined) {
                             await playPromise;
@@ -516,7 +534,7 @@ class GroqTTSService {
                     }
                 } catch (playError) {
                     console.error('❌ Audio play() failed:', playError);
-                    
+
                     // On NotAllowedError, try to unlock and retry
                     if (playError instanceof Error && playError.name === 'NotAllowedError') {
                         console.warn('⚠️ Audio not unlocked - attempting to unlock and retry...');
@@ -525,12 +543,12 @@ class GroqTTSService {
                             this.audioUnlocked = false;
                             await this.unlockAudio();
                             console.log('🔓 Audio unlocked, retrying playback...');
-                            
+
                             // Create completely fresh audio element
                             const retryAudio = this.getAudioElement();
                             retryAudio.src = audioUrl;
                             retryAudio.volume = 1.0;
-                            
+
                             // Set up handlers
                             retryAudio.onplay = () => {
                                 console.log('✅ Retry audio playback started');
@@ -551,7 +569,7 @@ class GroqTTSService {
                                 options?.onError?.(error);
                                 reject(error);
                             };
-                            
+
                             // Try to play
                             await retryAudio.play();
                             this.currentAudio = retryAudio;
