@@ -35,6 +35,7 @@ import { PrivateRoute } from './components/Auth/PrivateRoute';
 import ScrollToTop from './components/ScrollToTop';
 import DocsPage from './pages/DocsPage';
 import CanonicalLink from './components/SEO/CanonicalLink';
+import HreflangTags from './components/SEO/HreflangTags';
 // Create a client
 const queryClient = new QueryClient();
 
@@ -144,6 +145,7 @@ function App() {
       <QueryClientProvider client={queryClient}>
         <BrowserRouter>
           <CanonicalLink />
+          <HreflangTags />
           <ScrollToTop />
           <Routes>
             {/* Public Routes */}
