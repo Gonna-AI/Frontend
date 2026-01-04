@@ -34,6 +34,7 @@ import { ViewType } from './types/navigation';
 import { PrivateRoute } from './components/Auth/PrivateRoute';
 import ScrollToTop from './components/ScrollToTop';
 import DocsPage from './pages/DocsPage';
+import CanonicalLink from './components/SEO/CanonicalLink';
 // Create a client
 const queryClient = new QueryClient();
 
@@ -142,6 +143,7 @@ function App() {
     <LanguageProvider>
       <QueryClientProvider client={queryClient}>
         <BrowserRouter>
+          <CanonicalLink />
           <ScrollToTop />
           <Routes>
             {/* Public Routes */}
