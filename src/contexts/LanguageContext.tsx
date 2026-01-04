@@ -1085,9 +1085,19 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     const [language, setLanguageState] = useState<Language>('en');
 
     useEffect(() => {
-        const savedLang = localStorage.getItem('app-language') as Language;
-        if (savedLang === 'en' || savedLang === 'de') {
-            setLanguageState(savedLang);
+        // Check URL params first
+        const params = new URLSearchParams(window.location.search);
+        const urlLang = params.get('lang') as Language;
+
+        if (urlLang === 'en' || urlLang === 'de') {
+            setLanguageState(urlLang);
+            localStorage.setItem('app-language', urlLang);
+        } else {
+            // Fallback to local storage
+            const savedLang = localStorage.getItem('app-language') as Language;
+            if (savedLang === 'en' || savedLang === 'de') {
+                setLanguageState(savedLang);
+            }
         }
     }, []);
 
