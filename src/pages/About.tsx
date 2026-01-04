@@ -244,6 +244,14 @@ export default function About() {
               </button>
             </div>
           </div>
+
+          {/* Location Info */}
+          <div className="mt-16 text-center">
+            <h3 className="text-xl font-semibold text-white/80 mb-2">Our Office</h3>
+            <p className="text-white/50">
+              Industriestraße 2, 94315 Straubing, Germany
+            </p>
+          </div>
         </div>
       </div>
       <Footer />

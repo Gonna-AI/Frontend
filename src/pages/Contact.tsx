@@ -159,7 +159,7 @@ const Contact = () => {
               </div>
               <h3 className="font-semibold mb-2 text-white/90 text-lg">{t('contact.location')}</h3>
               <p className="text-white/60 text-sm">
-                Mallersdorfer Str. 10<br />94315 Straubing, Germany
+                Industriestraße 2<br />94315 Straubing, Germany
               </p>
             </div>
             <div className="group rounded-3xl border border-white/10 bg-white/[0.02] backdrop-blur-xl p-6 hover:border-red-500/30 hover:bg-white/[0.04] transition-all duration-300 text-center">
