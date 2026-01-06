@@ -80,6 +80,8 @@ class GroqTTSService {
     private isMobile: boolean = false;
     private unlockHandler: (() => void) | null = null;
     private isUnlocking: boolean = false;
+    // Persistent audio element for mobile - reused across playbacks to maintain unlock state
+    private persistentMobileAudio: HTMLAudioElement | null = null;
 
     private removeUnlockListeners() {
         if (typeof window !== 'undefined' && this.unlockHandler) {
@@ -197,7 +199,16 @@ class GroqTTSService {
                     await audio.play();
                     audio.pause();
                     audio.currentTime = 0;
-                    this.unlockedAudioPool.push(audio);
+                    audio.volume = 1.0; // Reset volume for actual playback
+
+                    // On mobile, save the first unlocked element as the persistent audio
+                    // This element maintains its "unlocked" state for subsequent playback
+                    if (this.isMobile && i === 0 && !this.persistentMobileAudio) {
+                        this.persistentMobileAudio = audio;
+                        console.log('📱 Saved first unlocked element as persistent mobile audio');
+                    } else {
+                        this.unlockedAudioPool.push(audio);
+                    }
                     console.log(`🔊 Pre-unlocked audio element ${i + 1}`);
                 } catch (e) {
                     console.warn(`⚠️ Failed to pre-unlock audio element ${i + 1}:`, e);
@@ -215,21 +226,38 @@ class GroqTTSService {
 
     /**
      * Get a pre-unlocked audio element from the pool, or create a new one
-     * On mobile, always create a fresh element for better compatibility
+     * On mobile, reuse persistent element to maintain unlock state
      */
     private getAudioElement(): HTMLAudioElement {
-        // On mobile, always create a fresh audio element for each playback
-        // This is more reliable than reusing elements
+        // On mobile, reuse the persistent pre-unlocked audio element
+        // This is critical because mobile browsers require audio to be unlocked during user gesture
+        // and new elements lose that unlock state
         if (this.isMobile) {
-            console.log('📱 Creating fresh audio element for mobile');
+            if (this.persistentMobileAudio) {
+                console.log('📱 Reusing persistent mobile audio element (maintains unlock state)');
+                // Reset the element for new playback
+                this.persistentMobileAudio.pause();
+                this.persistentMobileAudio.currentTime = 0;
+                this.persistentMobileAudio.src = '';
+                return this.persistentMobileAudio;
+            }
+            // Fallback: try to get from pool
+            const pooled = this.unlockedAudioPool.pop();
+            if (pooled) {
+                console.log('📱 Using pooled audio element for mobile');
+                this.persistentMobileAudio = pooled; // Save for reuse
+                return pooled;
+            }
+            // Last resort: create new element (may not play on some mobile browsers)
+            console.warn('⚠️ Creating fresh audio element for mobile - may not play without user gesture');
             const audio = new Audio();
             audio.setAttribute('playsinline', 'true');
             audio.setAttribute('webkit-playsinline', 'true');
             audio.setAttribute('x-webkit-airplay', 'allow');
             audio.preload = 'auto';
             audio.volume = 1.0;
-            // Important: set crossOrigin for mobile
-            audio.crossOrigin = 'anonymous';
+            // Note: DO NOT set crossOrigin for blob URLs - it causes issues on some mobile browsers
+            this.persistentMobileAudio = audio; // Save for future reuse
             return audio;
         }
 
