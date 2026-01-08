@@ -151,6 +151,17 @@ export default function UserPhoneInterface({
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
         if (SpeechRecognition) {
+            // Cleanup previous instance if it exists
+            if (recognitionRef.current) {
+                try {
+                    recognitionRef.current.abort();
+                } catch (e) {
+                    // Ignore
+                }
+            }
+
+            console.log(`🎤 Initializing speech recognition for language: ${language} (${TTS_LANGUAGES[language].code})`);
+
             const recognition = new SpeechRecognition();
             recognition.continuous = true;
             recognition.interimResults = true;
@@ -169,10 +180,15 @@ export default function UserPhoneInterface({
             };
 
             recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
-                console.error('Speech recognition error:', event.error);
+                if (event.error !== 'no-speech' && event.error !== 'aborted') {
+                    console.error('Speech recognition error:', event.error);
+                }
+
                 isRecognitionRunningRef.current = false;
-                if (event.error !== 'aborted') {
+
+                if (event.error === 'not-allowed') {
                     setAgentStatus('idle');
+                    alert('Please allow microphone access.');
                 }
             };
 
@@ -182,7 +198,7 @@ export default function UserPhoneInterface({
                 const isActive = currentCallRef.current?.status === 'active';
                 const status = agentStatusRef.current;
 
-                console.log('🎤 Speech recognition ended, checking restart:', { isActive, status });
+                console.log('🎤 Speech recognition ended:', { isActive, status, language });
 
                 if (isActive && status === 'listening') {
                     // Small delay to prevent rapid restart issues
@@ -197,14 +213,29 @@ export default function UserPhoneInterface({
                                 isRecognitionRunningRef.current = false;
                             }
                         }
-                    }, 100);
+                    }, 300);
                 }
             };
+
+            // If we are already in listening mode (e.g. after language switch), restart immediately
+            if (agentStatus === 'listening') {
+                try {
+                    console.log('🎤 Auto-restarting recognition after language switch');
+                    recognition.start();
+                    isRecognitionRunningRef.current = true;
+                } catch (e) {
+                    console.warn('Could not auto-start recognition:', e);
+                }
+            }
         }
 
         return () => {
             if (recognitionRef.current) {
-                recognitionRef.current.abort();
+                try {
+                    recognitionRef.current.abort();
+                } catch (e) {
+                    // Ignore
+                }
                 isRecognitionRunningRef.current = false;
             }
         };
