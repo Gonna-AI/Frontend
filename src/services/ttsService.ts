@@ -2,14 +2,23 @@
  * TTS Service for ClerkTree
  * 
  * Provides text-to-speech functionality with multiple backends:
- * 1. Groq TTS (primary - using canopylabs/orpheus-v1-english model)
- * 2. Kokoro TTS API (secondary - higher quality, requires backend)
+ * 1. Groq TTS (English - using canopylabs/orpheus-v1-english model)
+ * 2. ElevenLabs TTS (German - using multilingual v2 model)
  * 3. Browser Web Speech API (fallback - works offline)
  * 
- * The service automatically falls back to the next available option.
+ * The service automatically routes to the appropriate backend based on language.
  */
 
 import { groqTTSService, OrpheusVoiceId, ORPHEUS_VOICES, VocalDirection } from './groqTTSService';
+import { elevenLabsTTSService } from './elevenLabsTTSService';
+
+// Supported languages
+export type TTSLanguage = 'en' | 'de';
+
+export const TTS_LANGUAGES = {
+  en: { name: 'English', code: 'en-US' },
+  de: { name: 'Deutsch', code: 'de-DE' },
+} as const;
 
 // TTS API Configuration (Kokoro backend)
 const TTS_API_URL = import.meta.env.VITE_TTS_API_URL || 'http://localhost:5001';
@@ -64,7 +73,7 @@ interface TTSConfig {
 }
 
 class TTSService {
-  private config: TTSConfig = {
+  private config: TTSConfig & { language: TTSLanguage } = {
     preferredBackend: 'groq',
     useGroqTTS: true,
     useKokoroTTS: true,
@@ -73,6 +82,7 @@ class TTSService {
     defaultOrpheusVoice: 'autumn',
     speed: 1.0,
     vocalDirection: 'professional',
+    language: 'en',
   };
 
   private kokoroAvailable: boolean | null = null;
@@ -151,6 +161,23 @@ class TTSService {
   }
 
   /**
+   * Set the TTS language
+   * - 'en': English (uses Groq TTS)
+   * - 'de': German (uses ElevenLabs TTS)
+   */
+  setLanguage(language: TTSLanguage) {
+    this.config.language = language;
+    console.log(`🌍 TTS language set to: ${TTS_LANGUAGES[language].name}`);
+  }
+
+  /**
+   * Get the current TTS language
+   */
+  getLanguage(): TTSLanguage {
+    return this.config.language;
+  }
+
+  /**
    * Stop any currently playing audio
    */
   stop() {
@@ -173,7 +200,9 @@ class TTSService {
   }
 
   /**
-   * Speak text using Groq TTS only (no browser fallback)
+   * Speak text using appropriate TTS backend based on language
+   * - English: Groq TTS
+   * - German: ElevenLabs TTS
    */
   async speak(
     text: string,
@@ -182,11 +211,13 @@ class TTSService {
       orpheusVoice?: OrpheusVoiceId;
       speed?: number;
       vocalDirection?: VocalDirection;
+      language?: TTSLanguage;
       onStart?: () => void;
       onEnd?: () => void;
       onError?: (error: Error) => void;
     }
   ): Promise<void> {
+    const language = options?.language || this.config.language;
     const kokoroVoice = options?.voice || this.config.defaultVoice;
     const orpheusVoice = options?.orpheusVoice || VOICE_MAPPING[kokoroVoice] || this.config.defaultOrpheusVoice;
     const speed = options?.speed || this.config.speed;
@@ -195,10 +226,31 @@ class TTSService {
     // Stop any current playback
     this.stop();
 
-    // Use Groq TTS only (no browser fallback)
+    // Route to appropriate TTS backend based on language
+    if (language === 'de') {
+      // German: Use ElevenLabs TTS
+      try {
+        console.log('🇩🇪 Using ElevenLabs TTS for German...');
+        await elevenLabsTTSService.speak(text, {
+          speed,
+          onStart: options?.onStart,
+          onEnd: options?.onEnd,
+          onError: options?.onError,
+        });
+        this.currentBackend = 'groq'; // Reuse enum, represents ElevenLabs
+        return;
+      } catch (error) {
+        console.error('❌ ElevenLabs TTS failed:', error);
+        options?.onError?.(error as Error);
+        options?.onEnd?.();
+        return;
+      }
+    }
+
+    // English: Use Groq TTS
     if (this.config.useGroqTTS && this.groqAvailable !== false) {
       try {
-        console.log('🎤 Using Groq TTS...');
+        console.log('🎤 Using Groq TTS for English...');
         await groqTTSService.speak(text, {
           voice: orpheusVoice,
           speed,
@@ -211,16 +263,15 @@ class TTSService {
         return;
       } catch (error) {
         console.error('❌ Groq TTS failed:', error);
-        // No fallback - just call onEnd to continue the flow
         options?.onError?.(error as Error);
         options?.onEnd?.();
         return;
       }
     }
 
-    // If Groq is not available, just log and call onEnd
-    console.warn('⚠️ Groq TTS not available, skipping speech');
-    options?.onError?.(new Error('Groq TTS not available'));
+    // If TTS is not available, just log and call onEnd
+    console.warn('⚠️ TTS not available, skipping speech');
+    options?.onError?.(new Error('TTS not available'));
     options?.onEnd?.();
   }
 
