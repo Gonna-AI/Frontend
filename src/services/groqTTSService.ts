@@ -153,6 +153,7 @@ class GroqTTSService {
     /**
      * Unlock audio playback - must be called during a user gesture (click/tap)
      * This is required by browser autoplay policies, especially strict on iOS Safari
+     * CRITICAL: For iOS Safari, the audio.play() must happen SYNCHRONOUSLY within the user gesture
      */
     async unlockAudio(): Promise<void> {
         if (this.audioUnlocked || this.isUnlocking) return;
@@ -162,61 +163,94 @@ class GroqTTSService {
         try {
             console.log('🔊 Attempting to unlock audio (iOS-compatible)...');
 
-            // Create and resume AudioContext
+            // Create and resume AudioContext SYNCHRONOUSLY
             const AudioContextClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof window.AudioContext }).webkitAudioContext;
             if (AudioContextClass) {
                 if (!this.audioContext) {
                     this.audioContext = new AudioContextClass();
                 }
 
-                // Resume if suspended (common on iOS)
+                // Resume AudioContext - this is allowed to be async
                 if (this.audioContext.state === 'suspended') {
-                    await this.audioContext.resume();
-                    console.log('🔊 AudioContext resumed from suspended state');
+                    // Don't await - just start the resume
+                    this.audioContext.resume().then(() => {
+                        console.log('🔊 AudioContext resumed from suspended state');
+                    });
                 }
 
-                // Create a short silent buffer and play it
-                const buffer = this.audioContext.createBuffer(1, 1, 22050);
-                const source = this.audioContext.createBufferSource();
-                source.buffer = buffer;
-                source.connect(this.audioContext.destination);
-                source.start(0);
+                // Play silent buffer through AudioContext
+                try {
+                    const buffer = this.audioContext.createBuffer(1, 1, 22050);
+                    const source = this.audioContext.createBufferSource();
+                    source.buffer = buffer;
+                    source.connect(this.audioContext.destination);
+                    source.start(0);
+                } catch (e) {
+                    console.warn('⚠️ Could not play silent buffer:', e);
+                }
             }
 
-            // Create a pool of pre-unlocked audio elements for iOS
-            // iOS requires audio elements to be "unlocked" by playing during user gesture
-            for (let i = 0; i < 3; i++) {
+            // CRITICAL FOR iOS: Create and play audio element SYNCHRONOUSLY
+            // Do NOT use await in this section - it breaks the user gesture context
+            if (this.isMobile && !this.persistentMobileAudio) {
+                console.log('📱 Creating persistent mobile audio element SYNCHRONOUSLY...');
+
                 const audio = new Audio();
                 audio.setAttribute('playsinline', 'true');
                 audio.setAttribute('webkit-playsinline', 'true');
                 audio.preload = 'auto';
                 audio.volume = 0.01;
 
-                // Use a tiny silent MP3 (more compatible with iOS than WAV)
-                audio.src = 'data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4Ljc2LjEwMAAAAAAAAAAAAAAA/+M4wAAAAAAAAAAAAEluZm8AAAAPAAAAAwAAABQAqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqr/8zLEAyQAekAAAAFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV//MyxAYjKAJQAYd4AVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV/+M4xAAAAANIAAAAAFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/zMsQGAAADSAAAAABVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVX/8zLEBgAAA0gAAAAAVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVU=';
+                // Use inline silent WAV (tiny, works on iOS)
+                audio.src = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA';
 
-                try {
-                    await audio.play();
-                    audio.pause();
-                    audio.currentTime = 0;
-                    audio.volume = 1.0; // Reset volume for actual playback
+                // SYNCHRONOUS play - do not await!
+                const playPromise = audio.play();
 
-                    // On mobile, save the first unlocked element as the persistent audio
-                    // This element maintains its "unlocked" state for subsequent playback
-                    if (this.isMobile && i === 0 && !this.persistentMobileAudio) {
-                        this.persistentMobileAudio = audio;
-                        console.log('📱 Saved first unlocked element as persistent mobile audio');
-                    } else {
-                        this.unlockedAudioPool.push(audio);
-                    }
-                    console.log(`🔊 Pre-unlocked audio element ${i + 1}`);
-                } catch (e) {
-                    console.warn(`⚠️ Failed to pre-unlock audio element ${i + 1}:`, e);
+                // Store immediately - even before play resolves
+                this.persistentMobileAudio = audio;
+
+                if (playPromise !== undefined) {
+                    playPromise
+                        .then(() => {
+                            console.log('📱 Persistent mobile audio unlocked successfully');
+                            audio.pause();
+                            audio.currentTime = 0;
+                            audio.volume = 1.0;
+                        })
+                        .catch((e) => {
+                            console.warn('⚠️ Mobile audio unlock play failed:', e);
+                            // Still keep the element - it might work for src swap
+                        });
+                }
+            }
+
+            // For desktop or as backup, create pool elements (these can be async)
+            if (!this.isMobile) {
+                for (let i = 0; i < 2; i++) {
+                    const audio = new Audio();
+                    audio.setAttribute('playsinline', 'true');
+                    audio.setAttribute('webkit-playsinline', 'true');
+                    audio.preload = 'auto';
+                    audio.volume = 0.01;
+                    audio.src = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA';
+
+                    audio.play()
+                        .then(() => {
+                            audio.pause();
+                            audio.currentTime = 0;
+                            audio.volume = 1.0;
+                            this.unlockedAudioPool.push(audio);
+                            console.log(`🔊 Pre-unlocked desktop audio element ${i + 1}`);
+                        })
+                        .catch((e) => {
+                            console.warn(`⚠️ Failed to pre-unlock desktop audio ${i + 1}:`, e);
+                        });
                 }
             }
 
             this.audioUnlocked = true;
-            console.log('🔊 Audio playback unlocked successfully');
+            console.log('🔊 Audio unlock initiated');
         } catch (e) {
             console.warn('⚠️ Could not unlock audio:', e);
         } finally {
@@ -527,10 +561,51 @@ class GroqTTSService {
 
                 // Play the audio with explicit error handling for mobile
                 try {
-                    // For mobile, we need to set src and then play immediately
-                    // Don't call load() separately on mobile - it can cause issues
+                    // For iOS, try Web Audio API FIRST - it's more reliable than HTMLAudioElement
+                    if (this.isIOS && this.audioContext) {
+                        console.log('📱 iOS: Using Web Audio API for playback (more reliable)...');
+
+                        try {
+                            // Ensure context is resumed
+                            if (this.audioContext.state === 'suspended') {
+                                await this.audioContext.resume();
+                            }
+
+                            // Get the audio data as ArrayBuffer
+                            const arrayBuffer = await audioBlob.arrayBuffer();
+
+                            // Decode the audio data
+                            const audioBuffer = await this.audioContext.decodeAudioData(arrayBuffer);
+
+                            console.log('🔊 Audio decoded successfully, playing...');
+
+                            // Create buffer source and play
+                            const source = this.audioContext.createBufferSource();
+                            source.buffer = audioBuffer;
+                            source.connect(this.audioContext.destination);
+
+                            source.onended = () => {
+                                console.log('✅ iOS Web Audio playback complete');
+                                URL.revokeObjectURL(audioUrl);
+                                this.currentAudio = null;
+                                options?.onEnd?.();
+                                resolve();
+                            };
+
+                            options?.onStart?.();
+                            source.start(0);
+
+                            console.log('✅ iOS Web Audio playback started');
+                            return; // Success with Web Audio, exit early
+                        } catch (webAudioError) {
+                            console.warn('⚠️ iOS Web Audio failed, falling back to HTMLAudioElement:', webAudioError);
+                            // Fall through to HTMLAudioElement attempt
+                        }
+                    }
+
+                    // For Android mobile or as iOS fallback
                     if (this.isMobile) {
-                        console.log('📱 Mobile: Setting src and playing directly...');
+                        console.log('📱 Mobile: Setting src and playing with HTMLAudioElement...');
                         // Set src (this triggers loading)
                         this.currentAudio.src = audioUrl;
 
@@ -563,47 +638,49 @@ class GroqTTSService {
                 } catch (playError) {
                     console.error('❌ Audio play() failed:', playError);
 
-                    // On NotAllowedError, try to unlock and retry
+                    // On NotAllowedError, try Web Audio API fallback
+                    // Web Audio API is more permissive once AudioContext is resumed
                     if (playError instanceof Error && playError.name === 'NotAllowedError') {
-                        console.warn('⚠️ Audio not unlocked - attempting to unlock and retry...');
+                        console.warn('⚠️ HTMLAudioElement blocked - trying Web Audio API fallback...');
+
                         try {
-                            // Force unlock
-                            this.audioUnlocked = false;
-                            await this.unlockAudio();
-                            console.log('🔓 Audio unlocked, retrying playback...');
+                            // Use Web Audio API instead of HTMLAudioElement
+                            if (this.audioContext) {
+                                // Ensure context is resumed
+                                if (this.audioContext.state === 'suspended') {
+                                    await this.audioContext.resume();
+                                }
 
-                            // Create completely fresh audio element
-                            const retryAudio = this.getAudioElement();
-                            retryAudio.src = audioUrl;
-                            retryAudio.volume = 1.0;
+                                console.log('🔊 Decoding audio with Web Audio API...');
 
-                            // Set up handlers
-                            retryAudio.onplay = () => {
-                                console.log('✅ Retry audio playback started');
+                                // Get the audio data as ArrayBuffer
+                                const arrayBuffer = await audioBlob.arrayBuffer();
+
+                                // Decode the audio data
+                                const audioBuffer = await this.audioContext.decodeAudioData(arrayBuffer);
+
+                                console.log('🔊 Audio decoded, playing via Web Audio API...');
+
+                                // Create buffer source and play
+                                const source = this.audioContext.createBufferSource();
+                                source.buffer = audioBuffer;
+                                source.connect(this.audioContext.destination);
+
+                                source.onended = () => {
+                                    console.log('✅ Web Audio API playback complete');
+                                    URL.revokeObjectURL(audioUrl);
+                                    options?.onEnd?.();
+                                    resolve();
+                                };
+
                                 options?.onStart?.();
-                            };
-                            retryAudio.onended = () => {
-                                console.log('✅ Retry audio playback complete');
-                                URL.revokeObjectURL(audioUrl);
-                                this.currentAudio = null;
-                                options?.onEnd?.();
-                                resolve();
-                            };
-                            retryAudio.onerror = (e) => {
-                                console.error('❌ Retry audio playback error:', e);
-                                URL.revokeObjectURL(audioUrl);
-                                this.currentAudio = null;
-                                const error = new Error('Audio playback failed after retry');
-                                options?.onError?.(error);
-                                reject(error);
-                            };
+                                source.start(0);
 
-                            // Try to play
-                            await retryAudio.play();
-                            this.currentAudio = retryAudio;
-                            return; // Success, exit early
-                        } catch (retryError) {
-                            console.error('❌ Retry also failed:', retryError);
+                                console.log('✅ Web Audio API playback started');
+                                return; // Success, exit early
+                            }
+                        } catch (webAudioError) {
+                            console.error('❌ Web Audio API fallback also failed:', webAudioError);
                         }
                     }
 
