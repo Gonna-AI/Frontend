@@ -91,7 +91,7 @@ class ElevenLabsTTSService {
     }
 
     /**
-     * Speak text using ElevenLabs TTS (German)
+     * Speak text using ElevenLabs TTS (German) with streaming for low latency
      */
     async speak(text: string, options?: ElevenLabsTTSOptions): Promise<void> {
         if (!text.trim()) {
@@ -109,10 +109,22 @@ class ElevenLabsTTSService {
         // Format text for better pronunciation
         const formattedText = this.formatTextForTTS(text);
 
+        // AbortController for timeout
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+
         try {
             console.log('🇩🇪 Synthesizing German speech with ElevenLabs TTS...');
+            console.log('   Text length:', formattedText.length, 'chars');
 
-            const response = await fetch(`${ELEVENLABS_TTS_URL}/${voiceId}`, {
+            // Use streaming endpoint with latency optimization
+            // optimize_streaming_latency: 3 = max latency optimization
+            // output_format: mp3_22050_32 = smaller file, faster transfer
+            const url = new URL(`${ELEVENLABS_TTS_URL}/${voiceId}/stream`);
+            url.searchParams.set('optimize_streaming_latency', '3');
+            url.searchParams.set('output_format', 'mp3_22050_32');
+
+            const response = await fetch(url.toString(), {
                 method: 'POST',
                 headers: {
                     'Accept': 'audio/mpeg',
@@ -121,7 +133,7 @@ class ElevenLabsTTSService {
                 },
                 body: JSON.stringify({
                     text: formattedText,
-                    model_id: 'eleven_multilingual_v2',
+                    model_id: 'eleven_flash_v2_5', // Fastest model with good quality
                     voice_settings: {
                         stability: 0.5,
                         similarity_boost: 0.75,
@@ -129,22 +141,34 @@ class ElevenLabsTTSService {
                         use_speaker_boost: true
                     }
                 }),
+                signal: controller.signal,
             });
+
+            clearTimeout(timeoutId);
 
             if (!response.ok) {
                 const errorText = await response.text();
                 throw new Error(`ElevenLabs API error: ${response.status} - ${errorText}`);
             }
 
+            console.log('🇩🇪 ElevenLabs response received, processing audio...');
+
             // Get audio blob
             const audioBlob = await response.blob();
+            console.log('🇩🇪 Audio blob size:', audioBlob.size, 'bytes');
 
             // Use Web Audio API for playback (more reliable on mobile)
             await this.playWithWebAudio(audioBlob, options);
 
         } catch (error) {
-            console.error('ElevenLabs TTS error:', error);
-            options?.onError?.(error as Error);
+            clearTimeout(timeoutId);
+            if ((error as Error).name === 'AbortError') {
+                console.error('ElevenLabs TTS timeout after 30 seconds');
+                options?.onError?.(new Error('ElevenLabs TTS request timed out'));
+            } else {
+                console.error('ElevenLabs TTS error:', error);
+                options?.onError?.(error as Error);
+            }
             throw error;
         }
     }
