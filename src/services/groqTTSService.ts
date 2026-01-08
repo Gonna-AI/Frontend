@@ -461,7 +461,7 @@ class GroqTTSService {
                         model: GROQ_TTS_MODEL,
                         input: processedText,
                         voice: voice,
-                        response_format: 'mp3', // Changed from 'wav' to 'mp3' for iOS Safari compatibility
+                        response_format: 'wav', // Orpheus TTS only supports WAV format
                         speed: speed,
                     }),
                     signal: abortController.signal,
