@@ -412,6 +412,37 @@ class GroqTTSService {
     }
 
     /**
+     * Format text for better TTS pronunciation
+     * - Formats phone numbers to be read digit by digit
+     * - Formats other number patterns appropriately
+     */
+    private formatTextForTTS(text: string): string {
+        let formatted = text;
+
+        // Format phone number patterns (7+ consecutive digits with optional separators)
+        // Matches patterns like: 123-456-7890, (123) 456-7890, +1 234 567 8901, etc.
+        formatted = formatted.replace(/(\+?\d[\d\s\-\(\)]{6,}\d)/g, (match) => {
+            // Extract just the digits
+            const digits = match.replace(/\D/g, '');
+            // Space-separate each digit for TTS
+            return digits.split('').join(' ');
+        });
+
+        // Format standalone number sequences (4+ digits that aren't years like 2024)
+        formatted = formatted.replace(/\b(\d{4,})\b/g, (match) => {
+            const num = parseInt(match);
+            // Don't format years (1900-2099)
+            if (num >= 1900 && num <= 2099) {
+                return match;
+            }
+            // Space-separate digits
+            return match.split('').join(' ');
+        });
+
+        return formatted;
+    }
+
+    /**
      * Chunk text into smaller pieces that fit within the character limit
      * Smart chunking that respects sentence and word boundaries
      */
@@ -480,7 +511,9 @@ class GroqTTSService {
 
                 // Prepend vocal direction if specified
                 const directionPrefix = VOCAL_DIRECTIONS[vocalDirection];
-                const processedText = directionPrefix ? `${directionPrefix} ${text}` : text;
+                // Format text for better pronunciation (phone numbers, etc.)
+                const formattedText = this.formatTextForTTS(text);
+                const processedText = directionPrefix ? `${directionPrefix} ${formattedText}` : formattedText;
 
                 console.log(`🎤 Synthesizing speech with Groq TTS (voice: ${voice}, direction: ${vocalDirection}, iOS: ${this.isIOS})`);
 

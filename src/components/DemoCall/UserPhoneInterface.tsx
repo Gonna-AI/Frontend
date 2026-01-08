@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Phone, PhoneOff, Volume2, VolumeX, Minimize2, Maximize2 } from 'lucide-react';
+import { Phone, PhoneOff, Volume2, VolumeX, Minimize2, Maximize2, Globe } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { useDemoCall } from '../../contexts/DemoCallContext';
 import { aiService } from '../../services/aiService';
-import { ttsService, KokoroVoiceId } from '../../services/ttsService';
+import { ttsService, KokoroVoiceId, TTSLanguage, TTS_LANGUAGES } from '../../services/ttsService';
 
 interface UserPhoneInterfaceProps {
     isDark?: boolean;
@@ -50,7 +50,7 @@ export default function UserPhoneInterface({
     const [currentTranscript, setCurrentTranscript] = useState('');
     const [lastAgentMessage, setLastAgentMessage] = useState('');
     const [agentStatus, setAgentStatus] = useState<'idle' | 'speaking' | 'listening' | 'processing'>('idle');
-    const [language, setLanguage] = useState<'en-US' | 'de-DE'>('en-US');
+    const [language, setLanguage] = useState<TTSLanguage>('en');
     const [isMinimized, setIsMinimized] = useState(false);
 
     const recognitionRef = useRef<SpeechRecognitionInstance | null>(null);
@@ -154,7 +154,7 @@ export default function UserPhoneInterface({
             const recognition = new SpeechRecognition();
             recognition.continuous = true;
             recognition.interimResults = true;
-            recognition.lang = language;
+            recognition.lang = TTS_LANGUAGES[language].code;
             recognitionRef.current = recognition;
 
             recognition.onresult = (event: SpeechRecognitionEvent) => {
@@ -228,6 +228,7 @@ export default function UserPhoneInterface({
         return ttsService.speak(text, {
             voice: selectedVoice,
             speed: 1.0,
+            language, // Use selected language (en = Groq, de = ElevenLabs)
             onStart: () => setAgentStatus('speaking'),
             onEnd: () => {
                 setAgentStatus('listening');
@@ -240,7 +241,7 @@ export default function UserPhoneInterface({
                 startRecognition();
             }
         });
-    }, [knowledgeBase.selectedVoiceId, isSpeakerOn, startRecognition, stopRecognition]);
+    }, [knowledgeBase.selectedVoiceId, isSpeakerOn, language, startRecognition, stopRecognition]);
 
     const handleUserInput = useCallback(async (text: string) => {
         if (!text.trim()) return;
@@ -296,8 +297,8 @@ export default function UserPhoneInterface({
 
         startCall('voice');
 
-        // Speak a greeting using Groq TTS
-        const greeting = language === 'de-DE'
+        // Speak a greeting based on selected language
+        const greeting = language === 'de'
             ? 'Hallo! Wie kann ich Ihnen helfen?'
             : 'Hello! How can I help you today?';
 
@@ -305,7 +306,7 @@ export default function UserPhoneInterface({
         addMessage('agent', greeting);
         setAgentStatus('speaking');
 
-        // Use Groq TTS for the greeting
+        // Use TTS for the greeting (Groq for English, ElevenLabs for German)
         try {
             // Get selected voice
             const selectedVoice = (knowledgeBase.selectedVoiceId || 'af_nova') as KokoroVoiceId;
@@ -313,8 +314,9 @@ export default function UserPhoneInterface({
             await ttsService.speak(greeting, {
                 voice: selectedVoice,
                 speed: 1.0,
+                language, // Use selected language
                 onStart: () => {
-                    console.log('🔊 Groq TTS greeting started');
+                    console.log('🔊 TTS greeting started');
                 },
                 onEnd: () => {
                     console.log('🔊 Initial greeting finished, starting recognition');
@@ -363,8 +365,8 @@ export default function UserPhoneInterface({
 
     const isActive = currentCall?.status === 'active';
 
-    // If call is active but minimized, show compact bar
-    if (isActive && isMinimized) {
+    // If call is active but minimized, show compact bar (only for voice calls)
+    if (isActive && isMinimized && currentCall?.type === 'voice') {
         return (
             <div className="fixed bottom-4 right-4 z-50">
                 <motion.div
@@ -406,8 +408,8 @@ export default function UserPhoneInterface({
         );
     }
 
-    // Full Screen Phone UI
-    if (isActive) {
+    // Full Screen Phone UI - only show for voice calls
+    if (isActive && currentCall?.type === 'voice') {
         return (
             <div className="fixed inset-0 z-50 flex flex-col bg-black text-white overflow-hidden">
                 {/* Background Layer */}
@@ -508,12 +510,17 @@ export default function UserPhoneInterface({
                 <div className="p-8 pb-12 w-full z-20 bg-gradient-to-t from-black via-black/80 to-transparent">
                     <div className="flex items-center justify-center gap-6 max-w-lg mx-auto">
 
-                        {/* Language */}
+                        {/* Language Toggle */}
                         <button
-                            onClick={() => setLanguage(prev => prev === 'en-US' ? 'de-DE' : 'en-US')}
+                            onClick={() => {
+                                const newLang = language === 'en' ? 'de' : 'en';
+                                setLanguage(newLang);
+                                ttsService.setLanguage(newLang);
+                            }}
                             className="w-14 h-14 rounded-full flex items-center justify-center bg-white/10 hover:bg-white/20 backdrop-blur-md transition-all border border-white/5"
                         >
-                            <span className="text-sm font-bold text-white">{language === 'en-US' ? 'EN' : 'DE'}</span>
+                            <Globe className="w-4 h-4 text-white mr-1" />
+                            <span className="text-sm font-bold text-white">{language === 'en' ? 'EN' : 'DE'}</span>
                         </button>
 
                         {/* Speaker */}

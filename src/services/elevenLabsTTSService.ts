@@ -1,0 +1,196 @@
+/**
+ * ElevenLabs TTS Service for ClerkTree
+ * 
+ * Used for German text-to-speech as Groq TTS only supports English.
+ * Uses the ElevenLabs API with a German voice.
+ */
+
+// ElevenLabs API Configuration
+const ELEVENLABS_API_KEY = import.meta.env.VITE_ELEVENLABS_API_KEY;
+const ELEVENLABS_TTS_URL = 'https://api.elevenlabs.io/v1/text-to-speech';
+
+// German voice ID from ElevenLabs voice library
+const GERMAN_VOICE_ID = 'j46AY0iVY3oHcnZbgEJg';
+
+interface ElevenLabsTTSOptions {
+    voiceId?: string;
+    speed?: number;
+    onStart?: () => void;
+    onEnd?: () => void;
+    onError?: (error: Error) => void;
+}
+
+class ElevenLabsTTSService {
+    private audioContext: AudioContext | null = null;
+    private isIOS: boolean = false;
+    private isMobile: boolean = false;
+
+    constructor() {
+        // Detect mobile devices
+        if (typeof window !== 'undefined' && typeof navigator !== 'undefined') {
+            const ua = navigator.userAgent.toLowerCase();
+            this.isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+                (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+            this.isMobile = this.isIOS || /android/.test(ua) || /mobile/.test(ua);
+        }
+    }
+
+    /**
+     * Initialize AudioContext (should be called during user gesture)
+     */
+    async initAudioContext(): Promise<void> {
+        if (!this.audioContext) {
+            const AudioContextClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof window.AudioContext }).webkitAudioContext;
+            if (AudioContextClass) {
+                this.audioContext = new AudioContextClass();
+            }
+        }
+
+        if (this.audioContext && this.audioContext.state === 'suspended') {
+            await this.audioContext.resume();
+        }
+    }
+
+    /**
+     * Check if ElevenLabs TTS is available
+     */
+    isAvailable(): boolean {
+        return !!ELEVENLABS_API_KEY;
+    }
+
+    /**
+     * Format text for better TTS pronunciation
+     * - Formats phone numbers to be read digit by digit
+     * - Formats other number patterns appropriately
+     */
+    private formatTextForTTS(text: string): string {
+        // Format phone numbers: convert sequences of digits to space-separated digits
+        // Matches patterns like: 123-456-7890, (123) 456-7890, +1 234 567 8901, etc.
+        let formatted = text;
+
+        // Format phone number patterns (7+ consecutive digits with optional separators)
+        formatted = formatted.replace(/(\+?\d[\d\s\-\(\)]{6,}\d)/g, (match) => {
+            // Extract just the digits
+            const digits = match.replace(/\D/g, '');
+            // Space-separate each digit for TTS
+            return digits.split('').join(' ');
+        });
+
+        // Format standalone number sequences (4+ digits that aren't years like 2024)
+        formatted = formatted.replace(/\b(\d{4,})\b/g, (match) => {
+            const num = parseInt(match);
+            // Don't format years (1900-2099)
+            if (num >= 1900 && num <= 2099) {
+                return match;
+            }
+            // Space-separate digits
+            return match.split('').join(' ');
+        });
+
+        return formatted;
+    }
+
+    /**
+     * Speak text using ElevenLabs TTS (German)
+     */
+    async speak(text: string, options?: ElevenLabsTTSOptions): Promise<void> {
+        if (!text.trim()) {
+            return;
+        }
+
+        if (!ELEVENLABS_API_KEY) {
+            const error = new Error('ElevenLabs API key not configured');
+            options?.onError?.(error);
+            throw error;
+        }
+
+        const voiceId = options?.voiceId || GERMAN_VOICE_ID;
+
+        // Format text for better pronunciation
+        const formattedText = this.formatTextForTTS(text);
+
+        try {
+            console.log('🇩🇪 Synthesizing German speech with ElevenLabs TTS...');
+
+            const response = await fetch(`${ELEVENLABS_TTS_URL}/${voiceId}`, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'audio/mpeg',
+                    'Content-Type': 'application/json',
+                    'xi-api-key': ELEVENLABS_API_KEY,
+                },
+                body: JSON.stringify({
+                    text: formattedText,
+                    model_id: 'eleven_multilingual_v2',
+                    voice_settings: {
+                        stability: 0.5,
+                        similarity_boost: 0.75,
+                        style: 0.0,
+                        use_speaker_boost: true
+                    }
+                }),
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`ElevenLabs API error: ${response.status} - ${errorText}`);
+            }
+
+            // Get audio blob
+            const audioBlob = await response.blob();
+
+            // Use Web Audio API for playback (more reliable on mobile)
+            await this.playWithWebAudio(audioBlob, options);
+
+        } catch (error) {
+            console.error('ElevenLabs TTS error:', error);
+            options?.onError?.(error as Error);
+            throw error;
+        }
+    }
+
+    /**
+     * Play audio using Web Audio API (more reliable on iOS)
+     */
+    private async playWithWebAudio(audioBlob: Blob, options?: ElevenLabsTTSOptions): Promise<void> {
+        // Ensure AudioContext is initialized
+        await this.initAudioContext();
+
+        if (!this.audioContext) {
+            throw new Error('AudioContext not available');
+        }
+
+        // Decode the audio data
+        const arrayBuffer = await audioBlob.arrayBuffer();
+        const audioBuffer = await this.audioContext.decodeAudioData(arrayBuffer);
+
+        console.log('🔊 ElevenLabs audio decoded, playing...');
+
+        return new Promise((resolve, reject) => {
+            if (!this.audioContext) {
+                reject(new Error('AudioContext not available'));
+                return;
+            }
+
+            const source = this.audioContext.createBufferSource();
+            source.buffer = audioBuffer;
+            source.connect(this.audioContext.destination);
+
+            source.onended = () => {
+                console.log('✅ ElevenLabs playback complete');
+                options?.onEnd?.();
+                resolve();
+            };
+
+            options?.onStart?.();
+            source.start(0);
+
+            console.log('✅ ElevenLabs playback started');
+        });
+    }
+}
+
+// Export singleton instance
+export const elevenLabsTTSService = new ElevenLabsTTSService();
+
+export default elevenLabsTTSService;
