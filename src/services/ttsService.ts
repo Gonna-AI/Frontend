@@ -105,6 +105,10 @@ class TTSService {
       this.groqAvailable = false;
     }
 
+    // Check ElevenLabs availability (for German TTS)
+    const elevenLabsAvailable = elevenLabsTTSService.isAvailable();
+    console.log(`   ElevenLabs TTS: ${elevenLabsAvailable ? '✅ Available (German)' : '❌ Not available (No API Key)'}`);
+
     // Kokoro TTS is disabled - skip initialization
     this.kokoroAvailable = false;
 
