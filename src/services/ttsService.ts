@@ -487,6 +487,13 @@ class TTSService {
   }
 
   /**
+   * Check if ElevenLabs TTS is available
+   */
+  isElevenLabsAvailable(): boolean {
+    return elevenLabsTTSService.isAvailable();
+  }
+
+  /**
    * Get current TTS backend
    */
   getMode(): TTSBackend {
