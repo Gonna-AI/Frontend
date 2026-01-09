@@ -13,8 +13,12 @@ import {
     Terminal,
     CreditCard,
     Key,
-    BarChart
+    BarChart,
+    Sun,
+    Moon
 } from "lucide-react"
+
+import { useTheme } from "@/hooks/useTheme"
 
 import { getGroqSettings, GROQ_MODELS, GroqSettings } from "./DemoCall/GroqSettings"
 
@@ -62,7 +66,7 @@ export function AppSidebar({ activeTab, setActiveTab, ...props }: AppSidebarProp
     const { t, language, setLanguage } = useLanguage();
     const { state, isMobile } = useSidebar();
     const { getCurrentUserId, switchSession, knowledgeBase, saveKnowledgeBase } = useDemoCall();
-    const isDark = true; // Sidebar is always dark themed per design
+    const { isDark, toggleTheme } = useTheme();
 
     const [currentModelName, setCurrentModelName] = useState<string>('');
 
@@ -93,14 +97,18 @@ export function AppSidebar({ activeTab, setActiveTab, ...props }: AppSidebarProp
     }, []);
 
     return (
-        <Sidebar collapsible="icon" {...props} className="border-r border-white/10 dark bg-black">
+        <Sidebar collapsible="icon" {...props} className={cn(
+            "border-r transition-colors duration-300",
+            isDark ? "border-white/10 bg-black" : "border-black/5 bg-white"
+        )}>
             {!isMobile && (
                 <SidebarHeader>
                     <SidebarMenu>
                         <SidebarMenuItem>
                             <SidebarMenuButton size="lg" asChild>
                                 <div className={cn(
-                                    "flex items-center gap-3 cursor-pointer text-white",
+                                    "flex items-center gap-3 cursor-pointer",
+                                    isDark ? "text-white" : "text-gray-900",
                                     state === "collapsed" && "justify-center"
                                 )}>
                                     <div className="flex aspect-square items-center justify-center">
@@ -128,7 +136,7 @@ export function AppSidebar({ activeTab, setActiveTab, ...props }: AppSidebarProp
             <SidebarContent>
                 {/* Main Dashboard Group */}
                 <SidebarGroup>
-                    <SidebarGroupLabel className="text-white/60">{t('sidebar.platform')}</SidebarGroupLabel>
+                    <SidebarGroupLabel className={isDark ? "text-white/60" : "text-black/60"}>{t('sidebar.platform')}</SidebarGroupLabel>
                     <SidebarGroupContent>
                         <SidebarMenu>
                             <SidebarMenuItem>
@@ -136,7 +144,13 @@ export function AppSidebar({ activeTab, setActiveTab, ...props }: AppSidebarProp
                                     isActive={activeTab === 'monitor'}
                                     onClick={() => setActiveTab('monitor')}
                                     tooltip="Monitor"
-                                    className="text-white/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-white/10 data-[active=true]:text-white"
+                                    tooltip="Monitor"
+                                    className={cn(
+                                        "transition-colors",
+                                        isDark
+                                            ? "text-white/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-white/10 data-[active=true]:text-white"
+                                            : "text-gray-600 hover:text-gray-900 hover:bg-black/5 data-[active=true]:bg-black/5 data-[active=true]:text-black"
+                                    )}
                                 >
                                     <Phone />
                                     <span>{t('dashboard.tab.monitor')}</span>
@@ -147,7 +161,13 @@ export function AppSidebar({ activeTab, setActiveTab, ...props }: AppSidebarProp
                                     isActive={activeTab === 'knowledge'}
                                     onClick={() => setActiveTab('knowledge')}
                                     tooltip="Configuration"
-                                    className="text-white/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-white/10 data-[active=true]:text-white"
+                                    tooltip="Configuration"
+                                    className={cn(
+                                        "transition-colors",
+                                        isDark
+                                            ? "text-white/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-white/10 data-[active=true]:text-white"
+                                            : "text-gray-600 hover:text-gray-900 hover:bg-black/5 data-[active=true]:bg-black/5 data-[active=true]:text-black"
+                                    )}
                                 >
                                     <Brain />
                                     <span>{t('dashboard.tab.config')}</span>
@@ -158,7 +178,13 @@ export function AppSidebar({ activeTab, setActiveTab, ...props }: AppSidebarProp
                                     isActive={activeTab === 'history'}
                                     onClick={() => setActiveTab('history')}
                                     tooltip="History"
-                                    className="text-white/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-white/10 data-[active=true]:text-white"
+                                    tooltip="History"
+                                    className={cn(
+                                        "transition-colors",
+                                        isDark
+                                            ? "text-white/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-white/10 data-[active=true]:text-white"
+                                            : "text-gray-600 hover:text-gray-900 hover:bg-black/5 data-[active=true]:bg-black/5 data-[active=true]:text-black"
+                                    )}
                                 >
                                     <History />
                                     <span>{t('dashboard.tab.history')}</span>
@@ -168,11 +194,11 @@ export function AppSidebar({ activeTab, setActiveTab, ...props }: AppSidebarProp
                     </SidebarGroupContent>
                 </SidebarGroup>
 
-                <SidebarSeparator className="bg-white/10" />
+                <SidebarSeparator className={isDark ? "bg-white/10" : "bg-black/5"} />
 
                 {/* AI Configuration Group */}
                 <SidebarGroup>
-                    <SidebarGroupLabel className="text-white/60">{t('sidebar.aiBehavior')}</SidebarGroupLabel>
+                    <SidebarGroupLabel className={isDark ? "text-white/60" : "text-black/60"}>{t('sidebar.aiBehavior')}</SidebarGroupLabel>
                     <SidebarGroupContent>
                         <SidebarMenu>
                             {/* Model Selection */}
@@ -180,7 +206,12 @@ export function AppSidebar({ activeTab, setActiveTab, ...props }: AppSidebarProp
                                 <SidebarMenuButton
                                     isActive={activeTab === 'groq_settings'}
                                     onClick={() => setActiveTab('groq_settings')}
-                                    className="text-white/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-white/10 data-[active=true]:text-white"
+                                    className={cn(
+                                        "transition-colors",
+                                        isDark
+                                            ? "text-white/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-white/10 data-[active=true]:text-white"
+                                            : "text-gray-600 hover:text-gray-900 hover:bg-black/5 data-[active=true]:bg-black/5 data-[active=true]:text-black"
+                                    )}
                                 >
                                     <Sparkles className="text-purple-400" />
                                     <span>{t('sidebar.groqAi')}</span>
@@ -196,7 +227,12 @@ export function AppSidebar({ activeTab, setActiveTab, ...props }: AppSidebarProp
                                 <SidebarMenuButton
                                     isActive={activeTab === 'system_prompt'}
                                     onClick={() => setActiveTab('system_prompt')}
-                                    className="text-white/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-white/10 data-[active=true]:text-white"
+                                    className={cn(
+                                        "transition-colors",
+                                        isDark
+                                            ? "text-white/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-white/10 data-[active=true]:text-white"
+                                            : "text-gray-600 hover:text-gray-900 hover:bg-black/5 data-[active=true]:bg-black/5 data-[active=true]:text-black"
+                                    )}
                                 >
                                     <Terminal />
                                     <span>{t('sidebar.systemPrompt')}</span>
@@ -206,7 +242,12 @@ export function AppSidebar({ activeTab, setActiveTab, ...props }: AppSidebarProp
                                 <SidebarMenuButton
                                     isActive={activeTab === 'ai_voice'}
                                     onClick={() => setActiveTab('ai_voice')}
-                                    className="text-white/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-white/10 data-[active=true]:text-white"
+                                    className={cn(
+                                        "transition-colors",
+                                        isDark
+                                            ? "text-white/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-white/10 data-[active=true]:text-white"
+                                            : "text-gray-600 hover:text-gray-900 hover:bg-black/5 data-[active=true]:bg-black/5 data-[active=true]:text-black"
+                                    )}
                                 >
                                     <Mic />
                                     <span>{t('sidebar.aiVoice')}</span>
@@ -216,7 +257,12 @@ export function AppSidebar({ activeTab, setActiveTab, ...props }: AppSidebarProp
                                 <SidebarMenuButton
                                     isActive={activeTab === 'context_fields'}
                                     onClick={() => setActiveTab('context_fields')}
-                                    className="text-white/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-white/10 data-[active=true]:text-white"
+                                    className={cn(
+                                        "transition-colors",
+                                        isDark
+                                            ? "text-white/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-white/10 data-[active=true]:text-white"
+                                            : "text-gray-600 hover:text-gray-900 hover:bg-black/5 data-[active=true]:bg-black/5 data-[active=true]:text-black"
+                                    )}
                                 >
                                     <Database />
                                     <span>{t('sidebar.contextFields')}</span>
@@ -226,7 +272,12 @@ export function AppSidebar({ activeTab, setActiveTab, ...props }: AppSidebarProp
                                 <SidebarMenuButton
                                     isActive={activeTab === 'categories'}
                                     onClick={() => setActiveTab('categories')}
-                                    className="text-white/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-white/10 data-[active=true]:text-white"
+                                    className={cn(
+                                        "transition-colors",
+                                        isDark
+                                            ? "text-white/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-white/10 data-[active=true]:text-white"
+                                            : "text-gray-600 hover:text-gray-900 hover:bg-black/5 data-[active=true]:bg-black/5 data-[active=true]:text-black"
+                                    )}
                                 >
                                     <Tags />
                                     <span>{t('sidebar.categories')}</span>
@@ -236,7 +287,12 @@ export function AppSidebar({ activeTab, setActiveTab, ...props }: AppSidebarProp
                                 <SidebarMenuButton
                                     isActive={activeTab === 'priority_rules'}
                                     onClick={() => setActiveTab('priority_rules')}
-                                    className="text-white/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-white/10 data-[active=true]:text-white"
+                                    className={cn(
+                                        "transition-colors",
+                                        isDark
+                                            ? "text-white/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-white/10 data-[active=true]:text-white"
+                                            : "text-gray-600 hover:text-gray-900 hover:bg-black/5 data-[active=true]:bg-black/5 data-[active=true]:text-black"
+                                    )}
                                 >
                                     <ListOrdered />
                                     <span>{t('sidebar.priorityRules')}</span>
@@ -246,7 +302,12 @@ export function AppSidebar({ activeTab, setActiveTab, ...props }: AppSidebarProp
                                 <SidebarMenuButton
                                     isActive={activeTab === 'instructions'}
                                     onClick={() => setActiveTab('instructions')}
-                                    className="text-white/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-white/10 data-[active=true]:text-white"
+                                    className={cn(
+                                        "transition-colors",
+                                        isDark
+                                            ? "text-white/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-white/10 data-[active=true]:text-white"
+                                            : "text-gray-600 hover:text-gray-900 hover:bg-black/5 data-[active=true]:bg-black/5 data-[active=true]:text-black"
+                                    )}
                                 >
                                     <Scroll />
                                     <span>{t('sidebar.instructions')}</span>
@@ -266,11 +327,11 @@ export function AppSidebar({ activeTab, setActiveTab, ...props }: AppSidebarProp
                     </SidebarGroupContent>
                 </SidebarGroup>
 
-                <SidebarSeparator className="bg-white/10" />
+                <SidebarSeparator className={isDark ? "bg-white/10" : "bg-black/5"} />
 
                 {/* Account Group */}
                 <SidebarGroup>
-                    <SidebarGroupLabel className="text-white/60">Account</SidebarGroupLabel>
+                    <SidebarGroupLabel className={isDark ? "text-white/60" : "text-black/60"}>Account</SidebarGroupLabel>
                     <SidebarGroupContent>
                         <SidebarMenu>
                             <SidebarMenuItem>
@@ -312,12 +373,35 @@ export function AppSidebar({ activeTab, setActiveTab, ...props }: AppSidebarProp
             <SidebarFooter>
                 <SidebarMenu>
                     <SidebarMenuItem>
+                        <SidebarMenuButton
+                            onClick={toggleTheme}
+                            className={cn(
+                                "justify-between",
+                                isDark
+                                    ? "text-white/70 hover:text-white hover:bg-white/10"
+                                    : "text-black/70 hover:text-black hover:bg-black/5"
+                            )}
+                        >
+                            <div className="flex items-center gap-2">
+                                {isDark ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
+                                <span>{isDark ? "Dark Mode" : "Light Mode"}</span>
+                            </div>
+                            <div className={cn(
+                                "text-xs px-1.5 py-0.5 rounded-md font-medium border",
+                                isDark ? "bg-white/10 border-white/10 text-white/50" : "bg-black/5 border-black/5 text-black/50"
+                            )}>
+                                {isDark ? "ON" : "OFF"}
+                            </div>
+                        </SidebarMenuButton>
+                    </SidebarMenuItem>
+                    <SidebarMenuItem>
                         <div className={cn(
                             "flex items-center transition-all duration-200",
                             state === "collapsed" ? "justify-center py-2" : "justify-between px-2 py-2"
                         )}>
                             <span className={cn(
-                                "text-sm font-medium text-white/70",
+                                "text-sm font-medium",
+                                isDark ? "text-white/70" : "text-black/70",
                                 state === "collapsed" && "hidden"
                             )}>
                                 {t('sidebar.language')}
@@ -326,13 +410,16 @@ export function AppSidebar({ activeTab, setActiveTab, ...props }: AppSidebarProp
                             {state === "collapsed" ? (
                                 <button
                                     onClick={() => setLanguage(language === 'en' ? 'de' : 'en')}
-                                    className="flex h-8 w-8 items-center justify-center rounded-md bg-white/5 text-xs font-bold text-white hover:bg-white/10 transition-colors uppercase"
+                                    className={cn(
+                                        "flex h-8 w-8 items-center justify-center rounded-md text-xs font-bold transition-colors uppercase",
+                                        isDark ? "bg-white/5 text-white hover:bg-white/10" : "bg-black/5 text-black hover:bg-black/10"
+                                    )}
                                 >
                                     {language}
                                 </button>
                             ) : (
                                 <div className="scale-90 origin-right">
-                                    <LanguageSwitcher isExpanded={true} forceDark={true} />
+                                    <LanguageSwitcher isExpanded={true} forceDark={isDark} />
                                 </div>
                             )}
                         </div>
