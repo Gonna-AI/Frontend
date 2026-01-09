@@ -212,77 +212,75 @@ export default function WelcomeManager({ isDark = true }: WelcomeManagerProps) {
                             <div className="md:w-7/12 p-6 md:p-8 flex flex-col justify-center">
                                 <div className="space-y-6">
                                     <div>
-                                        <div>
-                                            <label className={cn(
-                                                "block text-xs font-medium mb-1.5 uppercase tracking-wider",
-                                                isDark ? "text-white/40" : "text-black/40"
-                                            )}>
-                                                {t('welcome.sessionName')}
-                                            </label>
-                                            <input
-                                                type="text"
-                                                value={newSessionName}
-                                                onChange={(e) => setNewSessionName(e.target.value)}
-                                                placeholder={t('welcome.sessionNamePlaceholder')}
-                                                autoFocus
-                                                className={cn(
-                                                    "w-full px-4 py-3 rounded-xl text-sm transition-all",
-                                                    "focus:outline-none focus:ring-1",
-                                                    isDark
-                                                        ? "bg-white/5 border border-white/10 text-white placeholder-white/20 focus:ring-white/20"
-                                                        : "bg-black/5 border border-black/10 text-black placeholder-black/20 focus:ring-black/20"
-                                                )}
-                                            />
-                                        </div>
+                                        <label className={cn(
+                                            "block text-xs font-medium mb-1.5 uppercase tracking-wider",
+                                            isDark ? "text-white/40" : "text-black/40"
+                                        )}>
+                                            {t('welcome.sessionName')}
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={newSessionName}
+                                            onChange={(e) => setNewSessionName(e.target.value)}
+                                            placeholder={t('welcome.sessionNamePlaceholder')}
+                                            autoFocus
+                                            className={cn(
+                                                "w-full px-4 py-3 rounded-xl text-sm transition-all",
+                                                "focus:outline-none focus:ring-1",
+                                                isDark
+                                                    ? "bg-white/5 border border-white/10 text-white placeholder-white/20 focus:ring-white/20"
+                                                    : "bg-black/5 border border-black/10 text-black placeholder-black/20 focus:ring-black/20"
+                                            )}
+                                        />
+                                    </div>
 
-                                        <div>
-                                            <label className={cn(
-                                                "block text-xs font-medium mb-1.5 uppercase tracking-wider",
-                                                isDark ? "text-white/40" : "text-black/40"
-                                            )}>
-                                                {t('welcome.description')} <span className="opacity-50">{t('welcome.descriptionOptional')}</span>
-                                            </label>
-                                            <textarea
-                                                value={newSessionDescription}
-                                                onChange={(e) => setNewSessionDescription(e.target.value)}
-                                                placeholder={t('welcome.descriptionPlaceholder')}
-                                                rows={3}
-                                                className={cn(
-                                                    "w-full px-4 py-3 rounded-xl text-sm transition-all resize-none",
-                                                    "focus:outline-none focus:ring-1",
-                                                    isDark
-                                                        ? "bg-white/5 border border-white/10 text-white placeholder-white/20 focus:ring-white/20"
-                                                        : "bg-black/5 border border-black/10 text-black placeholder-black/20 focus:ring-black/20"
-                                                )}
-                                            />
-                                        </div>
+                                    <div>
+                                        <label className={cn(
+                                            "block text-xs font-medium mb-1.5 uppercase tracking-wider",
+                                            isDark ? "text-white/40" : "text-black/40"
+                                        )}>
+                                            {t('welcome.description')} <span className="opacity-50">{t('welcome.descriptionOptional')}</span>
+                                        </label>
+                                        <textarea
+                                            value={newSessionDescription}
+                                            onChange={(e) => setNewSessionDescription(e.target.value)}
+                                            placeholder={t('welcome.descriptionPlaceholder')}
+                                            rows={3}
+                                            className={cn(
+                                                "w-full px-4 py-3 rounded-xl text-sm transition-all resize-none",
+                                                "focus:outline-none focus:ring-1",
+                                                isDark
+                                                    ? "bg-white/5 border border-white/10 text-white placeholder-white/20 focus:ring-white/20"
+                                                    : "bg-black/5 border border-black/10 text-black placeholder-black/20 focus:ring-black/20"
+                                            )}
+                                        />
+                                    </div>
 
-                                        <div className="pt-4 flex gap-3">
-                                            <button
-                                                onClick={skipSetup}
-                                                className={cn(
-                                                    "flex-1 px-4 py-3 rounded-xl text-sm font-medium transition-colors",
-                                                    isDark
-                                                        ? "bg-white/5 hover:bg-white/10 text-white/70"
-                                                        : "bg-black/5 hover:bg-black/10 text-black/70"
-                                                )}
-                                            >
-                                                {t('welcome.skip')}
-                                            </button>
-                                            <button
-                                                onClick={createNewSession}
-                                                disabled={!newSessionName.trim() || isLoading}
-                                                className={cn(
-                                                    "flex-1 px-4 py-3 rounded-xl text-sm font-medium transition-all",
-                                                    isDark
-                                                        ? "bg-white text-black hover:bg-white/90"
-                                                        : "bg-black text-white hover:bg-black/90",
-                                                    "disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
-                                                )}
-                                            >
-                                                {isLoading ? t('welcome.creating') : t('welcome.create')}
-                                            </button>
-                                        </div>
+                                    <div className="pt-4 flex gap-3">
+                                        <button
+                                            onClick={skipSetup}
+                                            className={cn(
+                                                "flex-1 px-4 py-3 rounded-xl text-sm font-medium transition-colors",
+                                                isDark
+                                                    ? "bg-white/5 hover:bg-white/10 text-white/70"
+                                                    : "bg-black/5 hover:bg-black/10 text-black/70"
+                                            )}
+                                        >
+                                            {t('welcome.skip')}
+                                        </button>
+                                        <button
+                                            onClick={createNewSession}
+                                            disabled={!newSessionName.trim() || isLoading}
+                                            className={cn(
+                                                "flex-1 px-4 py-3 rounded-xl text-sm font-medium transition-all",
+                                                isDark
+                                                    ? "bg-white text-black hover:bg-white/90"
+                                                    : "bg-black text-white hover:bg-black/90",
+                                                "disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
+                                            )}
+                                        >
+                                            {isLoading ? t('welcome.creating') : t('welcome.create')}
+                                        </button>
                                     </div>
 
                                     {/* Existing Sessions Quick Link */}
@@ -314,6 +312,7 @@ export default function WelcomeManager({ isDark = true }: WelcomeManagerProps) {
                                     )}
                                 </div>
                             </div>
+                        </div>
                     </motion.div>
                 </motion.div>
             )}
