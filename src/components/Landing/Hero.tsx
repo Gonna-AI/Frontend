@@ -56,7 +56,7 @@ const Hero = () => {
                   {t('hero.revolutionizing')}
                 </span>
                 <br />
-                <span className="bg-gradient-to-r from-gray-200 via-slate-300 to-gray-400 text-transparent bg-clip-text whitespace-normal md:whitespace-nowrap">
+                <span className="bg-gradient-to-br from-white via-white/90 to-white/50 text-transparent bg-clip-text whitespace-normal md:whitespace-nowrap">
                   {t('hero.bpoClaims')}
                 </span>
               </h2>
