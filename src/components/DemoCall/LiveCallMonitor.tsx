@@ -12,14 +12,19 @@ interface LiveCallMonitorProps {
 export default function LiveCallMonitor({ isDark = true }: LiveCallMonitorProps) {
   const { t } = useLanguage();
   const { currentCall } = useDemoCall();
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const messages = currentCall?.messages || [];
   const extractedFields = currentCall?.extractedFields || [];
 
   // Auto-scroll to latest message
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTo({
+        top: scrollContainerRef.current.scrollHeight,
+        behavior: 'smooth'
+      });
+    }
   }, [messages]);
 
   const formatTime = (date: Date) => {
@@ -139,10 +144,12 @@ export default function LiveCallMonitor({ isDark = true }: LiveCallMonitorProps)
       )}
 
       {/* Messages area */}
-      <div className={cn(
-        "flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar scroll-smooth",
-        isDark ? "bg-[#09090B]" : "bg-gray-50/30"
-      )}>
+      <div
+        ref={scrollContainerRef}
+        className={cn(
+          "flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar scroll-smooth",
+          isDark ? "bg-[#09090B]" : "bg-gray-50/30"
+        )}>
         {messages.length === 0 ? (
           <div className={cn(
             "flex flex-col items-center justify-center h-full text-center py-12",
@@ -207,7 +214,7 @@ export default function LiveCallMonitor({ isDark = true }: LiveCallMonitorProps)
             ))}
           </AnimatePresence>
         )}
-        <div ref={messagesEndRef} />
+
       </div>
     </div>
   );

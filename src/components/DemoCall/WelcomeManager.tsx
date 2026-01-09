@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Check, Settings } from 'lucide-react';
 import { supabase } from '../../config/supabase';
 import { useDemoCall } from '../../contexts/DemoCallContext';
+import { useLanguage } from '../../contexts/LanguageContext';
 import { cn } from '../../utils/cn';
 
 // Company Logo component
@@ -21,6 +22,7 @@ interface WelcomeManagerProps {
 }
 
 export default function WelcomeManager({ isDark = true }: WelcomeManagerProps) {
+    const { t } = useLanguage();
     const { knowledgeBase, switchSession } = useDemoCall();
     const [showWelcomePopup, setShowWelcomePopup] = useState(false);
     const [newSessionName, setNewSessionName] = useState('');
@@ -154,7 +156,7 @@ export default function WelcomeManager({ isDark = true }: WelcomeManagerProps) {
                                 "text-xs font-medium opacity-50",
                                 isDark ? "text-white" : "text-black"
                             )}>
-                                ClerkTree Session Manager
+                                {t('welcome.sessionManager')}
                             </div>
                             <div className="w-10" />
                         </div>
@@ -180,28 +182,28 @@ export default function WelcomeManager({ isDark = true }: WelcomeManagerProps) {
                                         "text-2xl font-bold mb-4",
                                         isDark ? "text-white" : "text-black"
                                     )}>
-                                        Welcome to ClerkTree
+                                        {t('welcome.title')}
                                     </h2>
                                     <p className={cn(
                                         "text-sm leading-relaxed",
                                         isDark ? "text-white/60" : "text-black/60"
                                     )}>
-                                        Create a personalized session for your AI workflow. Sessions allow you to maintain separate configurations and contexts.
+                                        {t('welcome.subtitle')}
                                     </p>
                                 </div>
 
                                 <div className="relative z-10 space-y-3 mt-6 md:mt-0">
                                     <div className={cn("flex items-center gap-3 text-xs", isDark ? "text-white/40" : "text-black/40")}>
                                         <Check className="w-4 h-4 shrink-0" />
-                                        <span>Context-aware interactions</span>
+                                        <span>{t('welcome.feature1')}</span>
                                     </div>
                                     <div className={cn("flex items-center gap-3 text-xs", isDark ? "text-white/40" : "text-black/40")}>
                                         <Check className="w-4 h-4 shrink-0" />
-                                        <span>Persistent configuration</span>
+                                        <span>{t('welcome.feature2')}</span>
                                     </div>
                                     <div className={cn("flex items-center gap-3 text-xs", isDark ? "text-white/40" : "text-black/40")}>
                                         <Check className="w-4 h-4 shrink-0" />
-                                        <span>Secure data isolation</span>
+                                        <span>{t('welcome.feature3')}</span>
                                     </div>
                                 </div>
                             </div>
@@ -210,107 +212,108 @@ export default function WelcomeManager({ isDark = true }: WelcomeManagerProps) {
                             <div className="md:w-7/12 p-6 md:p-8 flex flex-col justify-center">
                                 <div className="space-y-6">
                                     <div>
-                                        <label className={cn(
-                                            "block text-xs font-medium mb-1.5 uppercase tracking-wider",
-                                            isDark ? "text-white/40" : "text-black/40"
-                                        )}>
-                                            Session Name
-                                        </label>
-                                        <input
-                                            type="text"
-                                            value={newSessionName}
-                                            onChange={(e) => setNewSessionName(e.target.value)}
-                                            placeholder="e.g., Medical Office"
-                                            autoFocus
-                                            className={cn(
-                                                "w-full px-4 py-3 rounded-xl text-sm transition-all",
-                                                "focus:outline-none focus:ring-1",
-                                                isDark
-                                                    ? "bg-white/5 border border-white/10 text-white placeholder-white/20 focus:ring-white/20"
-                                                    : "bg-black/5 border border-black/10 text-black placeholder-black/20 focus:ring-black/20"
-                                            )}
-                                        />
-                                    </div>
+                                        <div>
+                                            <label className={cn(
+                                                "block text-xs font-medium mb-1.5 uppercase tracking-wider",
+                                                isDark ? "text-white/40" : "text-black/40"
+                                            )}>
+                                                {t('welcome.sessionName')}
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={newSessionName}
+                                                onChange={(e) => setNewSessionName(e.target.value)}
+                                                placeholder={t('welcome.sessionNamePlaceholder')}
+                                                autoFocus
+                                                className={cn(
+                                                    "w-full px-4 py-3 rounded-xl text-sm transition-all",
+                                                    "focus:outline-none focus:ring-1",
+                                                    isDark
+                                                        ? "bg-white/5 border border-white/10 text-white placeholder-white/20 focus:ring-white/20"
+                                                        : "bg-black/5 border border-black/10 text-black placeholder-black/20 focus:ring-black/20"
+                                                )}
+                                            />
+                                        </div>
 
-                                    <div>
-                                        <label className={cn(
-                                            "block text-xs font-medium mb-1.5 uppercase tracking-wider",
-                                            isDark ? "text-white/40" : "text-black/40"
-                                        )}>
-                                            Description <span className="opacity-50">(optional)</span>
-                                        </label>
-                                        <textarea
-                                            value={newSessionDescription}
-                                            onChange={(e) => setNewSessionDescription(e.target.value)}
-                                            placeholder="What is this session for?"
-                                            rows={3}
-                                            className={cn(
-                                                "w-full px-4 py-3 rounded-xl text-sm transition-all resize-none",
-                                                "focus:outline-none focus:ring-1",
-                                                isDark
-                                                    ? "bg-white/5 border border-white/10 text-white placeholder-white/20 focus:ring-white/20"
-                                                    : "bg-black/5 border border-black/10 text-black placeholder-black/20 focus:ring-black/20"
-                                            )}
-                                        />
-                                    </div>
+                                        <div>
+                                            <label className={cn(
+                                                "block text-xs font-medium mb-1.5 uppercase tracking-wider",
+                                                isDark ? "text-white/40" : "text-black/40"
+                                            )}>
+                                                {t('welcome.description')} <span className="opacity-50">{t('welcome.descriptionOptional')}</span>
+                                            </label>
+                                            <textarea
+                                                value={newSessionDescription}
+                                                onChange={(e) => setNewSessionDescription(e.target.value)}
+                                                placeholder={t('welcome.descriptionPlaceholder')}
+                                                rows={3}
+                                                className={cn(
+                                                    "w-full px-4 py-3 rounded-xl text-sm transition-all resize-none",
+                                                    "focus:outline-none focus:ring-1",
+                                                    isDark
+                                                        ? "bg-white/5 border border-white/10 text-white placeholder-white/20 focus:ring-white/20"
+                                                        : "bg-black/5 border border-black/10 text-black placeholder-black/20 focus:ring-black/20"
+                                                )}
+                                            />
+                                        </div>
 
-                                    <div className="pt-4 flex gap-3">
-                                        <button
-                                            onClick={skipSetup}
-                                            className={cn(
-                                                "flex-1 px-4 py-3 rounded-xl text-sm font-medium transition-colors",
-                                                isDark
-                                                    ? "bg-white/5 hover:bg-white/10 text-white/70"
-                                                    : "bg-black/5 hover:bg-black/10 text-black/70"
-                                            )}
-                                        >
-                                            Skip Setup
-                                        </button>
-                                        <button
-                                            onClick={createNewSession}
-                                            disabled={!newSessionName.trim() || isLoading}
-                                            className={cn(
-                                                "flex-1 px-4 py-3 rounded-xl text-sm font-medium transition-all",
-                                                isDark
-                                                    ? "bg-white text-black hover:bg-white/90"
-                                                    : "bg-black text-white hover:bg-black/90",
-                                                "disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
-                                            )}
-                                        >
-                                            {isLoading ? 'Creating...' : 'Create Session'}
-                                        </button>
-                                    </div>
-                                </div>
-
-                                {/* Existing Sessions Quick Link */}
-                                {existingSessions.length > 0 && (
-                                    <div className="mt-8 pt-6 border-t border-dashed border-white/10">
-                                        <p className={cn(
-                                            "text-xs mb-3 text-center uppercase tracking-wider",
-                                            isDark ? "text-white/30" : "text-black/30"
-                                        )}>
-                                            or continue with
-                                        </p>
-                                        <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide justify-center">
-                                            {existingSessions.slice(0, 3).map(session => (
-                                                <button
-                                                    key={session.id}
-                                                    onClick={() => switchToSession(session)}
-                                                    className={cn(
-                                                        "px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap border",
-                                                        isDark
-                                                            ? "bg-white/5 border-white/10 hover:bg-white/10 text-white/70"
-                                                            : "bg-black/5 border-black/10 hover:bg-black/10 text-black/70"
-                                                    )}
-                                                >
-                                                    {session.name}
-                                                </button>
-                                            ))}
+                                        <div className="pt-4 flex gap-3">
+                                            <button
+                                                onClick={skipSetup}
+                                                className={cn(
+                                                    "flex-1 px-4 py-3 rounded-xl text-sm font-medium transition-colors",
+                                                    isDark
+                                                        ? "bg-white/5 hover:bg-white/10 text-white/70"
+                                                        : "bg-black/5 hover:bg-black/10 text-black/70"
+                                                )}
+                                            >
+                                                {t('welcome.skip')}
+                                            </button>
+                                            <button
+                                                onClick={createNewSession}
+                                                disabled={!newSessionName.trim() || isLoading}
+                                                className={cn(
+                                                    "flex-1 px-4 py-3 rounded-xl text-sm font-medium transition-all",
+                                                    isDark
+                                                        ? "bg-white text-black hover:bg-white/90"
+                                                        : "bg-black text-white hover:bg-black/90",
+                                                    "disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
+                                                )}
+                                            >
+                                                {isLoading ? t('welcome.creating') : t('welcome.create')}
+                                            </button>
                                         </div>
                                     </div>
-                                )}
+
+                                    {/* Existing Sessions Quick Link */}
+                                    {existingSessions.length > 0 && (
+                                        <div className="mt-8 pt-6 border-t border-dashed border-white/10">
+                                            <p className={cn(
+                                                "text-xs mb-3 text-center uppercase tracking-wider",
+                                                isDark ? "text-white/30" : "text-black/30"
+                                            )}>
+                                                {t('welcome.orContinue')}
+                                            </p>
+                                            <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide justify-center">
+                                                {existingSessions.slice(0, 3).map(session => (
+                                                    <button
+                                                        key={session.id}
+                                                        onClick={() => switchToSession(session)}
+                                                        className={cn(
+                                                            "px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap border",
+                                                            isDark
+                                                                ? "bg-white/5 border-white/10 hover:bg-white/10 text-white/70"
+                                                                : "bg-black/5 border-black/10 hover:bg-black/10 text-black/70"
+                                                        )}
+                                                    >
+                                                        {session.name}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
-                        </div>
                     </motion.div>
                 </motion.div>
             )}
