@@ -106,7 +106,7 @@ function UserCallContent() {
             {/* Right: Settings & Hamburger */}
             <div className="flex items-center gap-3">
               <button
-                onClick={() => navigate('/demo-dashboard')}
+                onClick={() => navigate('/dashboard')}
                 className={cn(
                   "hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium transition-colors border",
                   isDark

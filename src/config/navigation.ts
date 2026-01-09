@@ -11,7 +11,7 @@ export const menuItems = [
     id: 'dashboard',
     icon: LayoutDashboard,
     label: 'Dashboard',
-    path: '/demo-dashboard'
+    path: '/dashboard'
   },
   {
     id: 'chatbot',
