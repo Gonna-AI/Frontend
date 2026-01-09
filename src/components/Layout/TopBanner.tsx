@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { X, Lock } from 'lucide-react';
-import { cn } from '../../utils/cn';
+import { useLanguage } from '../../contexts/LanguageContext';
 
 export default function TopBanner() {
+    const { t } = useLanguage();
     const navigate = useNavigate();
     const [isVisible, setIsVisible] = useState(false);
 
@@ -28,9 +29,9 @@ export default function TopBanner() {
                 <div className="flex items-center gap-3 min-w-0">
                     <Lock className="w-4 h-4 text-orange-500 flex-shrink-0" />
                     <div className="flex items-center gap-2 text-sm overflow-hidden">
-                        <span className="font-medium text-white whitespace-nowrap">Platform access not found</span>
+                        <span className="font-medium text-white whitespace-nowrap">{t('banner.platformNotFound')}</span>
                         <span className="text-white/40 hidden sm:inline">•</span>
-                        <span className="text-white/60 truncate">You currently only have access to the API</span>
+                        <span className="text-white/60 truncate">{t('banner.apiOnlyAccess')}</span>
                     </div>
                 </div>
 
@@ -39,7 +40,7 @@ export default function TopBanner() {
                         onClick={() => navigate('/contact')}
                         className="px-3 py-1.5 bg-orange-600 hover:bg-orange-700 text-white text-xs font-medium rounded-lg transition-colors"
                     >
-                        Request Access
+                        {t('banner.requestAccess')}
                     </button>
                     <button
                         onClick={handleDismiss}

@@ -198,7 +198,7 @@ export default function MonitorView({ isDark = true }: { isDark?: boolean }) {
                     <p className={cn("text-xs font-semibold mb-2", isDark ? "text-white" : "text-black")}>{label}</p>
                     <div className="flex items-center gap-2 text-xs">
                         <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
-                        <span className={isDark ? "text-gray-300" : "text-gray-600"}>Calls: {payload[0].value}</span>
+                        <span className={isDark ? "text-gray-300" : "text-gray-600"}>{t('monitor.stats.totalCalls')}: {payload[0].value}</span>
                     </div>
                 </div>
             );
