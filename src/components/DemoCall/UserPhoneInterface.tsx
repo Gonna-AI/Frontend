@@ -56,6 +56,7 @@ export default function UserPhoneInterface({
     const [agentStatus, setAgentStatus] = useState<'idle' | 'speaking' | 'listening' | 'processing'>('idle');
     const [language, setLanguage] = useState<TTSLanguage>('en');
     const [isMinimized, setIsMinimized] = useState(false);
+    const [isEnding, setIsEnding] = useState(false);
 
     const recognitionRef = useRef<SpeechRecognitionInstance | null>(null);
     const timerRef = useRef<NodeJS.Timeout | null>(null);
@@ -461,6 +462,7 @@ export default function UserPhoneInterface({
 
     const handleEndCall = useCallback(async () => {
         console.log('🔴 End call button pressed');
+        setIsEnding(true);
 
         // Stop all TTS immediately
         ttsService.stop();
@@ -684,7 +686,12 @@ export default function UserPhoneInterface({
 
                         {/* End Call - Glassy Red */}
                         <button
-                            onClick={handleEndCall}
+                            onClick={async () => {
+                                await handleEndCall();
+                                if (mode === 'fullscreen' && onBack) {
+                                    onBack();
+                                }
+                            }}
                             className="w-20 h-14 rounded-full flex items-center justify-center bg-red-500/20 border border-red-500/30 text-red-500 hover:bg-red-500/30 backdrop-blur-md transition-all shadow-lg shadow-red-900/20"
                         >
                             <PhoneOff className="w-6 h-6" />
@@ -696,7 +703,7 @@ export default function UserPhoneInterface({
     }
 
     // Fullscreen Connecting State - Show while auto-starting
-    if (mode === 'fullscreen' && autoStart && !isActive) {
+    if (mode === 'fullscreen' && autoStart && !isActive && !isEnding) {
         return (
             <div className="fixed inset-0 z-50 flex flex-col bg-black text-white overflow-hidden">
                 {/* Background Layer */}
