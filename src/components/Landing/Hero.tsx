@@ -51,7 +51,7 @@ const Hero = () => {
               <span itemScope itemType="https://schema.org/Brand">
                 <h1 className="sr-only" itemProp="name">ClerkTree</h1>
               </span>
-              <h2 className="text-5xl md:text-7xl font-bold tracking-tight mb-6 text-left">
+              <h2 className="text-3xl sm:text-5xl md:text-7xl font-bold tracking-tight mb-6 text-left break-words hyphens-auto">
                 <span className="bg-gradient-to-r from-white via-white/95 to-white/90 text-transparent bg-clip-text">
                   {t('hero.revolutionizing')}
                 </span>
