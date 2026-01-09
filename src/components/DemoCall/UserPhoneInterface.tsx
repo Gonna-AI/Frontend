@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Phone, PhoneOff, Volume2, VolumeX, Minimize2, Maximize2, Globe } from 'lucide-react';
+import { Phone, PhoneOff, Volume2, VolumeX, Minimize2, Maximize2, Globe, ArrowLeft } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { useDemoCall } from '../../contexts/DemoCallContext';
 import { aiService } from '../../services/aiService';
@@ -10,7 +10,9 @@ interface UserPhoneInterfaceProps {
     isDark?: boolean;
     onTranscript?: (text: string, speaker: 'user' | 'agent') => void;
     compact?: boolean;
-    mode?: 'standalone' | 'overlay';
+    mode?: 'standalone' | 'overlay' | 'fullscreen';
+    autoStart?: boolean;
+    onBack?: () => void;
 }
 
 // Speech Recognition types - use any to avoid conflicts with other declarations
@@ -32,7 +34,9 @@ export default function UserPhoneInterface({
     onTranscript,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     compact = false,
-    mode = 'standalone'
+    mode = 'standalone',
+    autoStart = false,
+    onBack
 }: UserPhoneInterfaceProps) {
     const {
         currentCall,
@@ -442,6 +446,19 @@ export default function UserPhoneInterface({
         }
     }, [startCall, startRecognition, language, addMessage]);
 
+    // Auto-start call when autoStart prop is true (fullscreen mode)
+    const autoStartRef = useRef(false);
+    useEffect(() => {
+        if (autoStart && !autoStartRef.current && mode === 'fullscreen' && !currentCall) {
+            autoStartRef.current = true;
+            // Small delay to ensure everything is ready
+            const timer = setTimeout(() => {
+                handleStartCall();
+            }, 300);
+            return () => clearTimeout(timer);
+        }
+    }, [autoStart, mode, currentCall, handleStartCall]);
+
     const handleEndCall = useCallback(async () => {
         console.log('🔴 End call button pressed');
 
@@ -532,15 +549,33 @@ export default function UserPhoneInterface({
                     transition={{ duration: 0.8, ease: "easeInOut" }}
                 />
 
-                {/* Header Actions */}
-                <div className="absolute top-6 right-6 z-20">
-                    <button
-                        onClick={() => setIsMinimized(true)}
-                        className="p-3 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md transition-colors"
-                    >
-                        <Minimize2 className="w-5 h-5 text-white" />
-                    </button>
-                </div>
+                {/* Header Actions - Hide minimize button in fullscreen mode */}
+                {mode !== 'fullscreen' && (
+                    <div className="absolute top-6 right-6 z-20">
+                        <button
+                            onClick={() => setIsMinimized(true)}
+                            className="p-3 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md transition-colors"
+                        >
+                            <Minimize2 className="w-5 h-5 text-white" />
+                        </button>
+                    </div>
+                )}
+
+                {/* Back Button for fullscreen mode */}
+                {mode === 'fullscreen' && onBack && (
+                    <div className="absolute top-6 left-6 z-20">
+                        <button
+                            onClick={async () => {
+                                await handleEndCall();
+                                onBack();
+                            }}
+                            className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md transition-colors text-white text-sm font-medium"
+                        >
+                            <ArrowLeft className="w-4 h-4" />
+                            <span>Back</span>
+                        </button>
+                    </div>
+                )}
 
                 {/* Main Content Area */}
                 <div className="flex-1 flex flex-col items-center justify-center relative px-6 z-10 w-full max-w-lg mx-auto">
@@ -660,8 +695,91 @@ export default function UserPhoneInterface({
         );
     }
 
+    // Fullscreen Connecting State - Show while auto-starting
+    if (mode === 'fullscreen' && autoStart && !isActive) {
+        return (
+            <div className="fixed inset-0 z-50 flex flex-col bg-black text-white overflow-hidden">
+                {/* Background Layer */}
+                <motion.div
+                    className="absolute inset-0 z-0 pointer-events-none"
+                    animate={{
+                        background: 'radial-gradient(circle at center, rgba(59, 130, 246, 0.15) 0%, transparent 80%)'
+                    }}
+                    transition={{ duration: 0.8, ease: "easeInOut" }}
+                />
+
+                {/* Back Button */}
+                {onBack && (
+                    <div className="absolute top-6 left-6 z-20">
+                        <button
+                            onClick={onBack}
+                            className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md transition-colors text-white text-sm font-medium"
+                        >
+                            <ArrowLeft className="w-4 h-4" />
+                            <span>Back</span>
+                        </button>
+                    </div>
+                )}
+
+                {/* Main Content Area */}
+                <div className="flex-1 flex flex-col items-center justify-center relative px-6 z-10 w-full max-w-lg mx-auto">
+                    {/* Avatar / Visualizer - Pulsing */}
+                    <div className="relative mb-12">
+                        <motion.div
+                            animate={{
+                                scale: [1, 1.1, 1],
+                            }}
+                            transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+                            className="w-40 h-40 rounded-full flex items-center justify-center text-5xl shadow-2xl border-4 border-white/10 bg-white/5 backdrop-blur-sm relative z-10 text-white"
+                        >
+                            <span className="font-bold">AI</span>
+                        </motion.div>
+
+                        {/* Connection Rings */}
+                        <motion.div
+                            initial={{ opacity: 0, scale: 1 }}
+                            animate={{ opacity: [0, 0.5, 0], scale: [1, 1.5, 1.5] }}
+                            transition={{ duration: 2, repeat: Infinity, ease: "easeOut" }}
+                            className="absolute inset-0 rounded-full border-2 border-blue-500/50"
+                        />
+                        <motion.div
+                            initial={{ opacity: 0, scale: 1 }}
+                            animate={{ opacity: [0, 0.3, 0], scale: [1, 1.8, 1.8] }}
+                            transition={{ duration: 2, repeat: Infinity, ease: "easeOut", delay: 0.5 }}
+                            className="absolute inset-0 rounded-full border-2 border-blue-500/30"
+                        />
+
+                        <div className="absolute -inset-4 rounded-full border-2 animate-[spin_4s_linear_infinite] border-t-blue-500/50 border-r-transparent border-b-blue-500/50 border-l-transparent" />
+                    </div>
+
+                    {/* Connecting Status */}
+                    <div className="text-center space-y-2 mb-10">
+                        <h2 className="text-3xl font-semibold text-white tracking-tight">
+                            Connecting...
+                        </h2>
+                        <p className="font-mono text-sm text-white/50 tracking-wider uppercase">
+                            Preparing AI Agent
+                        </p>
+                    </div>
+
+                    {/* Info Box */}
+                    <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="w-full p-6 rounded-3xl bg-black/60 backdrop-blur-xl border border-white/10 shadow-2xl text-center"
+                    >
+                        <p className="text-xs uppercase tracking-widest font-bold opacity-40 mb-2 text-blue-400">Please Wait</p>
+                        <p className="text-lg font-medium leading-relaxed text-white/80">
+                            Initializing voice connection...
+                        </p>
+                    </motion.div>
+                </div>
+            </div>
+        );
+    }
+
     // Idle Card State (Initial View)
-    if (mode === 'overlay') return null;
+    if (mode === 'overlay' || mode === 'fullscreen') return null;
 
     return (
         <div className={cn(

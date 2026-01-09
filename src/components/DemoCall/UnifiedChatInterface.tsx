@@ -26,6 +26,7 @@ type SpeechRecognitionInstance = any;
 interface UnifiedChatInterfaceProps {
     isDark?: boolean;
     externalCallUI?: boolean;
+    chatOnly?: boolean;
 }
 
 // Company Logo component for AI avatar
@@ -38,7 +39,7 @@ const ClerkTreeLogo = ({ className, isDark = true }: { className?: string; isDar
     </svg>
 );
 
-export default function UnifiedChatInterface({ isDark = true, externalCallUI = false }: UnifiedChatInterfaceProps) {
+export default function UnifiedChatInterface({ isDark = true, externalCallUI = false, chatOnly = false }: UnifiedChatInterfaceProps) {
     const {
         currentCall,
         startCall,
@@ -729,59 +730,61 @@ export default function UnifiedChatInterface({ isDark = true, externalCallUI = f
                             </motion.button>
                         )}
 
-                        {/* Call Button - Premium Glassmorphic (Dark Teal instead of Green) */}
-                        <motion.button
-                            type="button"
-                            onClick={externalCallUI ? (isActive ? endVoiceCall : startVoiceCall) : (isVoiceMode ? endVoiceCall : startVoiceCall)}
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                            className={cn(
-                                "relative p-3.5 rounded-full overflow-hidden",
-                                "transition-all duration-300",
-                                "focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-transparent",
-                                isVoiceMode
-                                    ? isDark
-                                        ? cn(
-                                            "bg-black/80 backdrop-blur-xl",
-                                            "border border-rose-500/30",
-                                            "text-rose-400",
-                                            "hover:bg-rose-500/20",
-                                            "shadow-lg shadow-rose-500/10",
-                                            "hover:shadow-rose-500/20",
-                                            "focus:ring-rose-500/50"
-                                        )
-                                        : cn(
-                                            "bg-gradient-to-br from-rose-500/90 to-red-600/90",
-                                            "border border-rose-400/30",
-                                            "shadow-lg shadow-rose-500/30",
-                                            "text-white"
-                                        )
-                                    : isDark
-                                        ? cn(
-                                            "bg-black/80 backdrop-blur-xl",
-                                            "border border-emerald-500/30",
-                                            "text-emerald-400",
-                                            "hover:bg-emerald-500/20",
-                                            "shadow-lg shadow-emerald-500/10",
-                                            "hover:shadow-emerald-500/20",
-                                            "focus:ring-emerald-500/50"
-                                        )
-                                        : cn(
-                                            "bg-gradient-to-br from-emerald-500/90 to-teal-600/90",
-                                            "border border-emerald-400/30",
-                                            "shadow-lg shadow-emerald-500/30",
-                                            "text-white"
-                                        )
-                            )}
-                        >
-                            {/* Subtle inner glow */}
-                            <div className="absolute inset-0 bg-gradient-to-t from-transparent via-white/5 to-white/10 pointer-events-none" />
-                            {(externalCallUI ? isActive : isVoiceMode) ? (
-                                <PhoneOff className="w-5 h-5 relative z-10" />
-                            ) : (
-                                <Phone className="w-5 h-5 relative z-10" />
-                            )}
-                        </motion.button>
+                        {/* Call Button - Premium Glassmorphic (Dark Teal instead of Green) - Hidden in chatOnly mode */}
+                        {!chatOnly && (
+                            <motion.button
+                                type="button"
+                                onClick={externalCallUI ? (isActive ? endVoiceCall : startVoiceCall) : (isVoiceMode ? endVoiceCall : startVoiceCall)}
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                className={cn(
+                                    "relative p-3.5 rounded-full overflow-hidden",
+                                    "transition-all duration-300",
+                                    "focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-transparent",
+                                    isVoiceMode
+                                        ? isDark
+                                            ? cn(
+                                                "bg-black/80 backdrop-blur-xl",
+                                                "border border-rose-500/30",
+                                                "text-rose-400",
+                                                "hover:bg-rose-500/20",
+                                                "shadow-lg shadow-rose-500/10",
+                                                "hover:shadow-rose-500/20",
+                                                "focus:ring-rose-500/50"
+                                            )
+                                            : cn(
+                                                "bg-gradient-to-br from-rose-500/90 to-red-600/90",
+                                                "border border-rose-400/30",
+                                                "shadow-lg shadow-rose-500/30",
+                                                "text-white"
+                                            )
+                                        : isDark
+                                            ? cn(
+                                                "bg-black/80 backdrop-blur-xl",
+                                                "border border-emerald-500/30",
+                                                "text-emerald-400",
+                                                "hover:bg-emerald-500/20",
+                                                "shadow-lg shadow-emerald-500/10",
+                                                "hover:shadow-emerald-500/20",
+                                                "focus:ring-emerald-500/50"
+                                            )
+                                            : cn(
+                                                "bg-gradient-to-br from-emerald-500/90 to-teal-600/90",
+                                                "border border-emerald-400/30",
+                                                "shadow-lg shadow-emerald-500/30",
+                                                "text-white"
+                                            )
+                                )}
+                            >
+                                {/* Subtle inner glow */}
+                                <div className="absolute inset-0 bg-gradient-to-t from-transparent via-white/5 to-white/10 pointer-events-none" />
+                                {(externalCallUI ? isActive : isVoiceMode) ? (
+                                    <PhoneOff className="w-5 h-5 relative z-10" />
+                                ) : (
+                                    <Phone className="w-5 h-5 relative z-10" />
+                                )}
+                            </motion.button>
+                        )}
                     </form>
                 </div>
             </div>
