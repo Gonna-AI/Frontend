@@ -30,6 +30,8 @@ import Juris from './pages/Juris';
 import Bioflow from './pages/Bioflow';
 import DemoDashboard from './pages/DemoDashboard';
 import UserCall from './pages/UserCall';
+import UserChat from './pages/UserChat';
+import UserVoiceCall from './pages/UserVoiceCall';
 import { ViewType } from './types/navigation';
 import { PrivateRoute } from './components/Auth/PrivateRoute';
 import ScrollToTop from './components/ScrollToTop';
@@ -183,6 +185,8 @@ function App() {
             {/* Demo Call Agent Pages - Public for testing */}
             <Route path="/demo-dashboard" element={<DemoDashboard />} />
             <Route path="/user" element={<UserCall />} />
+            <Route path="/user/chat" element={<UserChat />} />
+            <Route path="/user/call" element={<UserVoiceCall />} />
             <Route path="/ai-settings" element={
               <ProtectedRoute>
                 <AISettings />

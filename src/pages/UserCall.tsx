@@ -10,10 +10,14 @@ import { useLanguage } from '../contexts/LanguageContext';
 
 type InteractionMode = 'select' | 'chat' | 'call';
 
-function UserCallContent() {
+interface UserCallContentProps {
+  initialMode?: InteractionMode;
+}
+
+function UserCallContent({ initialMode = 'select' }: UserCallContentProps) {
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [mode, setMode] = useState<InteractionMode>('select');
+  const [mode, setMode] = useState<InteractionMode>(initialMode);
   const isDark = true;
   const { t } = useLanguage();
   const { currentCall, endCall } = useDemoCall();
@@ -137,7 +141,7 @@ function UserCallContent() {
 
       {/* Main content */}
       <main className={cn(
-        "flex-1 relative flex flex-col min-h-0",
+        "flex-1 relative flex flex-col overflow-y-auto", // Changed min-h-0 to overflow-y-auto for better mobile scrolling in select mode
         mode !== 'call' && "pt-16" // Only add top padding when header is visible
       )}>
         <AnimatePresence mode="wait">
@@ -155,10 +159,10 @@ function UserCallContent() {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.4 }}
-                  className="text-center mb-16"
+                  className="text-center mb-8 md:mb-16"
                 >
                   <h1 className={cn(
-                    "text-4xl md:text-6xl font-black mb-6 tracking-tight",
+                    "text-3xl md:text-6xl font-black mb-6 tracking-tight",
                     "bg-gradient-to-br from-white via-white/90 to-white/50 bg-clip-text text-transparent" // Modern text gradient
                   )}>
                     How would you like to connect?
@@ -180,7 +184,7 @@ function UserCallContent() {
                     transition={{ delay: 0.1, duration: 0.4 }}
                     onClick={() => setMode('chat')}
                     className={cn(
-                      "group relative p-10 rounded-[32px] overflow-hidden text-left w-full",
+                      "group relative p-6 md:p-10 rounded-[32px] overflow-hidden text-left w-full",
                       "border transition-all duration-500",
                       isDark
                         ? "bg-gradient-to-b from-white/[0.08] to-transparent border-white/[0.08]"
@@ -197,20 +201,20 @@ function UserCallContent() {
                     {/* Content */}
                     <div className="relative z-10 flex flex-col h-full">
                       <div className={cn(
-                        "w-16 h-16 rounded-2xl flex items-center justify-center mb-8",
+                        "w-12 h-12 md:w-16 md:h-16 rounded-2xl flex items-center justify-center mb-8",
                         "bg-gradient-to-br transition-transform duration-500 group-hover:scale-110",
                         isDark
                           ? "from-blue-500/20 to-blue-600/5 border border-blue-500/20"
                           : "from-blue-50 to-blue-100 border border-blue-200"
                       )}>
                         <MessageSquare className={cn(
-                          "w-8 h-8",
+                          "w-6 h-6 md:w-8 md:h-8",
                           isDark ? "text-blue-400" : "text-blue-600"
                         )} />
                       </div>
 
                       <h2 className={cn(
-                        "text-3xl font-bold mb-4",
+                        "text-2xl md:text-3xl font-bold mb-4",
                         isDark ? "text-white" : "text-gray-900"
                       )}>
                         Text Chat
@@ -233,7 +237,7 @@ function UserCallContent() {
                     transition={{ delay: 0.2, duration: 0.4 }}
                     onClick={() => setMode('call')}
                     className={cn(
-                      "group relative p-10 rounded-[32px] overflow-hidden text-left w-full",
+                      "group relative p-6 md:p-10 rounded-[32px] overflow-hidden text-left w-full",
                       "border transition-all duration-500",
                       isDark
                         ? "bg-gradient-to-b from-white/[0.08] to-transparent border-white/[0.08]"
@@ -249,20 +253,20 @@ function UserCallContent() {
 
                     <div className="relative z-10 flex flex-col h-full">
                       <div className={cn(
-                        "w-16 h-16 rounded-2xl flex items-center justify-center mb-8",
+                        "w-12 h-12 md:w-16 md:h-16 rounded-2xl flex items-center justify-center mb-8",
                         "bg-gradient-to-br transition-transform duration-500 group-hover:scale-110",
                         isDark
                           ? "from-emerald-500/20 to-emerald-600/5 border border-emerald-500/20"
                           : "from-emerald-50 to-emerald-100 border border-emerald-200"
                       )}>
                         <Phone className={cn(
-                          "w-8 h-8",
+                          "w-6 h-6 md:w-8 md:h-8",
                           isDark ? "text-emerald-400" : "text-emerald-600"
                         )} />
                       </div>
 
                       <h2 className={cn(
-                        "text-3xl font-bold mb-4",
+                        "text-2xl md:text-3xl font-bold mb-4",
                         isDark ? "text-white" : "text-gray-900"
                       )}>
                         Voice Call
@@ -324,10 +328,10 @@ function UserCallContent() {
   );
 }
 
-export default function UserCall() {
+export default function UserCall({ initialMode }: UserCallContentProps = {}) {
   return (
     <DemoCallProvider>
-      <UserCallContent />
+      <UserCallContent initialMode={initialMode} />
     </DemoCallProvider>
   );
 }
