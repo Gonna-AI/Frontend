@@ -201,7 +201,7 @@ const Sidebar = React.forwardRef<
           <DrawerContent
             data-sidebar="sidebar"
             data-mobile="true"
-            className="bg-[#0A0A0A] p-0 text-white border-t border-white/10 rounded-t-2xl [&>div.bg-muted]:bg-white/20"
+            className="dark:bg-[#0A0A0A] bg-white p-0 dark:text-white text-black border-t dark:border-white/10 border-black/10 rounded-t-2xl [&>div.bg-muted]:dark:bg-white/20 [&>div.bg-muted]:bg-black/5"
             style={
               {
                 "--sidebar-width": "100%",

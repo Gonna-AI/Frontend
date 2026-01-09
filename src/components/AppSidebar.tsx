@@ -116,7 +116,7 @@ export function AppSidebar({ activeTab, setActiveTab, ...props }: AppSidebarProp
                                             src="/favicon.svg"
                                             alt="ClerkTree Logo"
                                             className={cn(
-                                                "transition-all",
+                                                "transition-all dark:invert-0 invert",
                                                 state === "collapsed" ? "size-6" : "size-10"
                                             )}
                                         />
@@ -376,22 +376,13 @@ export function AppSidebar({ activeTab, setActiveTab, ...props }: AppSidebarProp
                         <SidebarMenuButton
                             onClick={toggleTheme}
                             className={cn(
-                                "justify-between",
                                 isDark
                                     ? "text-white/70 hover:text-white hover:bg-white/10"
                                     : "text-black/70 hover:text-black hover:bg-black/5"
                             )}
                         >
-                            <div className="flex items-center gap-2">
-                                {isDark ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
-                                <span>{isDark ? "Dark Mode" : "Light Mode"}</span>
-                            </div>
-                            <div className={cn(
-                                "text-xs px-1.5 py-0.5 rounded-md font-medium border",
-                                isDark ? "bg-white/10 border-white/10 text-white/50" : "bg-black/5 border-black/5 text-black/50"
-                            )}>
-                                {isDark ? "ON" : "OFF"}
-                            </div>
+                            {isDark ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
+                            <span>{isDark ? "Dark Mode" : "Light Mode"}</span>
                         </SidebarMenuButton>
                     </SidebarMenuItem>
                     <SidebarMenuItem>
