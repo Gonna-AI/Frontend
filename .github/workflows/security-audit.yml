@@ -1,0 +1,361 @@
+# =============================================================================
+# Automated Security Audit & Auto-Fix Pipeline
+# =============================================================================
+# This workflow runs security scans, creates issues for problems found,
+# attempts to auto-fix common issues, and opens PRs with the fixes.
+# Schedule: Every Monday at 9 AM UTC
+# =============================================================================
+
+name: "Security Audit & Auto-Fix"
+
+on:
+  schedule:
+    # Runs every Monday at 9:00 AM UTC
+    - cron: "0 9 * * 1"
+  workflow_dispatch: # Allow manual trigger
+    inputs:
+      create_issues:
+        description: "Create GitHub issues for findings"
+        required: false
+        default: true
+        type: boolean
+      auto_fix:
+        description: "Attempt to auto-fix issues"
+        required: false
+        default: true
+        type: boolean
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+env:
+  NODE_VERSION: "20"
+  BRANCH_PREFIX: "security-bot"
+
+jobs:
+  # ===========================================================================
+  # Job 1: Security Headers & Best Practices Audit
+  # ===========================================================================
+  security-headers-audit:
+    name: "Security Headers Audit"
+    runs-on: ubuntu-latest
+    outputs:
+      issues_found: ${{ steps.audit.outputs.issues_found }}
+      audit_report: ${{ steps.audit.outputs.report }}
+    
+    steps:
+      - name: "Checkout Repository"
+        uses: actions/checkout@v4
+
+      - name: "Audit Security Headers"
+        id: audit
+        run: |
+          echo "Auditing security headers in _headers file..."
+          
+          ISSUES_FOUND=""
+          HEADERS_FILE="public/_headers"
+          
+          if [ ! -f "$HEADERS_FILE" ]; then
+            echo "ERROR: _headers file not found!"
+            ISSUES_FOUND="missing_headers_file"
+          else
+            # Check for required security headers
+            if ! grep -q "X-XSS-Protection" "$HEADERS_FILE"; then
+              ISSUES_FOUND="${ISSUES_FOUND}missing_xss_protection,"
+            fi
+            
+            if ! grep -q "X-Content-Type-Options" "$HEADERS_FILE"; then
+              ISSUES_FOUND="${ISSUES_FOUND}missing_content_type_options,"
+            fi
+            
+            if ! grep -q "X-Frame-Options" "$HEADERS_FILE"; then
+              ISSUES_FOUND="${ISSUES_FOUND}missing_frame_options,"
+            fi
+            
+            if ! grep -q "Strict-Transport-Security" "$HEADERS_FILE"; then
+              ISSUES_FOUND="${ISSUES_FOUND}missing_hsts,"
+            fi
+            
+            if ! grep -q "Content-Security-Policy" "$HEADERS_FILE"; then
+              ISSUES_FOUND="${ISSUES_FOUND}missing_csp,"
+            fi
+            
+            if ! grep -q "Referrer-Policy" "$HEADERS_FILE"; then
+              ISSUES_FOUND="${ISSUES_FOUND}missing_referrer_policy,"
+            fi
+            
+            if ! grep -q "Permissions-Policy" "$HEADERS_FILE"; then
+              ISSUES_FOUND="${ISSUES_FOUND}missing_permissions_policy,"
+            fi
+          fi
+          
+          # Check for security.txt
+          if [ ! -f "public/.well-known/security.txt" ]; then
+            ISSUES_FOUND="${ISSUES_FOUND}missing_security_txt,"
+          fi
+          
+          echo "issues_found=$ISSUES_FOUND" >> $GITHUB_OUTPUT
+          echo "Issues found: $ISSUES_FOUND"
+
+  # ===========================================================================
+  # Job 2: Dependency Vulnerability Scan
+  # ===========================================================================
+  dependency-audit:
+    name: "Dependency Audit"
+    runs-on: ubuntu-latest
+    outputs:
+      vulnerabilities: ${{ steps.audit.outputs.vulnerabilities }}
+      critical_count: ${{ steps.audit.outputs.critical }}
+      high_count: ${{ steps.audit.outputs.high }}
+    
+    steps:
+      - name: "Checkout Repository"
+        uses: actions/checkout@v4
+
+      - name: "Setup Node.js"
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+
+      - name: "Install Dependencies"
+        run: npm ci --ignore-scripts
+
+      - name: "Run npm audit"
+        id: audit
+        continue-on-error: true
+        run: |
+          echo "Running npm audit..."
+          
+          # Run audit and capture output
+          npm audit --json > audit-report.json 2>&1 || true
+          
+          # Parse results
+          CRITICAL=$(cat audit-report.json | jq '.metadata.vulnerabilities.critical // 0')
+          HIGH=$(cat audit-report.json | jq '.metadata.vulnerabilities.high // 0')
+          MODERATE=$(cat audit-report.json | jq '.metadata.vulnerabilities.moderate // 0')
+          
+          echo "critical=$CRITICAL" >> $GITHUB_OUTPUT
+          echo "high=$HIGH" >> $GITHUB_OUTPUT
+          
+          if [ "$CRITICAL" -gt 0 ] || [ "$HIGH" -gt 0 ]; then
+            echo "vulnerabilities=true" >> $GITHUB_OUTPUT
+          else
+            echo "vulnerabilities=false" >> $GITHUB_OUTPUT
+          fi
+          
+          echo "Vulnerability Summary:"
+          echo "   Critical: $CRITICAL"
+          echo "   High: $HIGH"
+          echo "   Moderate: $MODERATE"
+
+      - name: "Upload Audit Report"
+        uses: actions/upload-artifact@v4
+        with:
+          name: npm-audit-report
+          path: audit-report.json
+          retention-days: 30
+
+  # ===========================================================================
+  # Job 3: Lighthouse Performance & Accessibility Audit
+  # ===========================================================================
+  lighthouse-audit:
+    name: "Lighthouse Audit"
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch'
+    
+    steps:
+      - name: "Checkout Repository"
+        uses: actions/checkout@v4
+
+      - name: "Setup Node.js"
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: "Run Lighthouse CI"
+        run: |
+          npm install -g @lhci/cli@0.13.x
+          echo "Lighthouse CLI installed"
+          echo "Note: Configure lhci with your production URL for full audits"
+
+  # ===========================================================================
+  # Job 4: Auto-Fix Security Issues
+  # ===========================================================================
+  auto-fix:
+    name: "Auto-Fix Security Issues"
+    runs-on: ubuntu-latest
+    needs: [security-headers-audit, dependency-audit]
+    if: |
+      always() && 
+      (needs.security-headers-audit.outputs.issues_found != '' || 
+       needs.dependency-audit.outputs.vulnerabilities == 'true')
+    
+    steps:
+      - name: "Checkout Repository"
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: "Setup Node.js"
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+
+      - name: "Fix Security Headers"
+        id: fix-headers
+        if: contains(needs.security-headers-audit.outputs.issues_found, 'missing_')
+        run: |
+          echo "Fixing security headers..."
+          
+          HEADERS_FILE="public/_headers"
+          ISSUES="${{ needs.security-headers-audit.outputs.issues_found }}"
+          FIXES_MADE=""
+          
+          # Add Permissions-Policy if missing
+          if echo "$ISSUES" | grep -q "missing_permissions_policy"; then
+            if ! grep -q "Permissions-Policy" "$HEADERS_FILE"; then
+              # Insert after X-XSS-Protection line
+              sed -i '/X-XSS-Protection/a\  Permissions-Policy: accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()' "$HEADERS_FILE"
+              FIXES_MADE="${FIXES_MADE}Permissions-Policy, "
+            fi
+          fi
+          
+          echo "fixes_made=$FIXES_MADE" >> $GITHUB_OUTPUT
+          echo "Fixes applied: $FIXES_MADE"
+
+      - name: "Fix Dependency Vulnerabilities"
+        id: fix-deps
+        if: needs.dependency-audit.outputs.vulnerabilities == 'true'
+        run: |
+          echo "Attempting to fix dependency vulnerabilities..."
+          
+          npm ci --ignore-scripts
+          npm audit fix --force || true
+          
+          # Check if package-lock.json changed
+          if git diff --quiet package-lock.json; then
+            echo "deps_fixed=false" >> $GITHUB_OUTPUT
+          else
+            echo "deps_fixed=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: "Create Pull Request"
+        if: |
+          steps.fix-headers.outputs.fixes_made != '' || 
+          steps.fix-deps.outputs.deps_fixed == 'true'
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "security: auto-fix vulnerabilities [bot]"
+          title: "Security Auto-Fix: ${{ github.run_number }}"
+          body: |
+            ## Automated Security Fixes
+            
+            This PR was automatically generated by the Security Audit workflow.
+            
+            ### Changes Made
+            
+            **Security Headers:**
+            ${{ steps.fix-headers.outputs.fixes_made || 'No changes needed' }}
+            
+            **Dependencies:**
+            ${{ steps.fix-deps.outputs.deps_fixed == 'true' && 'Vulnerabilities fixed via npm audit fix' || 'No changes needed' }}
+            
+            ### Audit Summary
+            - Critical vulnerabilities: ${{ needs.dependency-audit.outputs.critical_count || '0' }}
+            - High vulnerabilities: ${{ needs.dependency-audit.outputs.high_count || '0' }}
+            
+            ---
+            
+            Generated by [Security Audit Workflow](../actions/runs/${{ github.run_id }})
+          branch: "${{ env.BRANCH_PREFIX }}/auto-fix-${{ github.run_number }}"
+          delete-branch: true
+          labels: |
+            security
+            automated
+            dependencies
+
+  # ===========================================================================
+  # Job 5: Create GitHub Issues for Findings
+  # ===========================================================================
+  create-issues:
+    name: "Create Issues for Findings"
+    runs-on: ubuntu-latest
+    needs: [security-headers-audit, dependency-audit]
+    if: |
+      always() &&
+      (github.event.inputs.create_issues != 'false') &&
+      (needs.dependency-audit.outputs.critical_count > 0 || 
+       needs.dependency-audit.outputs.high_count > 0)
+    
+    steps:
+      - name: "Create Critical Vulnerability Issue"
+        if: needs.dependency-audit.outputs.critical_count > 0
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const criticalCount = '${{ needs.dependency-audit.outputs.critical_count }}';
+            const highCount = '${{ needs.dependency-audit.outputs.high_count }}';
+            
+            // Check if similar issue already exists
+            const issues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'security,critical'
+            });
+            
+            const existingIssue = issues.data.find(issue => 
+              issue.title.includes('Critical Security Vulnerabilities')
+            );
+            
+            if (existingIssue) {
+              // Update existing issue
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: existingIssue.number,
+                body: `## Updated Scan Results\n\n- **Critical:** ${criticalCount}\n- **High:** ${highCount}\n\n> Scan run: ${new Date().toISOString()}`
+              });
+            } else {
+              // Create new issue
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: `Critical Security Vulnerabilities Detected (${criticalCount} critical)`,
+                body: `## Security Audit Alert\n\nOur automated security scan has detected vulnerabilities that require immediate attention.\n\n### Summary\n- **Critical:** ${criticalCount}\n- **High:** ${highCount}\n\n### Recommended Actions\n1. Run \`npm audit\` locally to see details\n2. Run \`npm audit fix\` to auto-fix where possible\n3. Manually review and update packages that cannot be auto-fixed\n\n### Resources\n- [npm audit documentation](https://docs.npmjs.com/cli/v8/commands/npm-audit)\n- [Workflow Run](../actions/runs/${{ github.run_id }})\n\n---\n> This issue was automatically created by the Security Audit workflow.`,
+                labels: ['security', 'critical', 'automated']
+              });
+            }
+
+  # ===========================================================================
+  # Job 6: Summary Report
+  # ===========================================================================
+  summary:
+    name: "Generate Summary"
+    runs-on: ubuntu-latest
+    needs: [security-headers-audit, dependency-audit, auto-fix, create-issues]
+    if: always()
+    
+    steps:
+      - name: "Generate Summary Report"
+        run: |
+          echo "# Security Audit Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Security Headers" >> $GITHUB_STEP_SUMMARY
+          echo "Issues found: \`${{ needs.security-headers-audit.outputs.issues_found || 'None' }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Dependencies" >> $GITHUB_STEP_SUMMARY
+          echo "- Critical: ${{ needs.dependency-audit.outputs.critical_count || '0' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- High: ${{ needs.dependency-audit.outputs.high_count || '0' }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Auto-Fix Status" >> $GITHUB_STEP_SUMMARY
+          echo "Job Status: \`${{ needs.auto-fix.result }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "---" >> $GITHUB_STEP_SUMMARY
+          echo "> Generated at $(date -u +"%Y-%m-%d %H:%M:%S UTC")" >> $GITHUB_STEP_SUMMARY
