@@ -204,9 +204,7 @@ export default function Footer() {
             </p>
           </div>
 
-          <div className="flex items-center gap-6">
-            <span className="text-neutral-600 text-xs">Latest version: <span className="bg-neutral-800 px-1.5 py-0.5 rounded text-neutral-400">2.0.0</span></span>
-          </div>
+
         </motion.div>
       </div>
     </footer>
