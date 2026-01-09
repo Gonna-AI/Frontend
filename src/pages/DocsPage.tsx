@@ -430,9 +430,9 @@ export default function DocsPage() {
                     <footer className="mt-24 pt-12 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-6 text-white/40 text-sm">
                         <p>&copy; {new Date().getFullYear()} ClerkTree Inc. All rights reserved.</p>
                         <div className="flex gap-6">
-                            <a href="#" className="hover:text-white transition-colors">Privacy Policy</a>
-                            <a href="#" className="hover:text-white transition-colors">Terms of Service</a>
-                            <a href="#" className="hover:text-white transition-colors">Status</a>
+                            <Link to="/privacy-policy" className="hover:text-white transition-colors">Privacy Policy</Link>
+                            <Link to="/terms-of-service" className="hover:text-white transition-colors">Terms of Service</Link>
+                            <Link to="/security" className="hover:text-white transition-colors">Security</Link>
                         </div>
                     </footer>
                 </main>
