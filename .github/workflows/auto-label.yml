@@ -1,0 +1,170 @@
+# =============================================================================
+# Auto-Label Issues & PRs
+# =============================================================================
+# Automatically labels issues and PRs based on content
+# =============================================================================
+
+name: "Auto-Label"
+
+on:
+  issues:
+    types: [opened, edited]
+  pull_request:
+    types: [opened, edited]
+
+permissions:
+  issues: write
+  pull-requests: write
+  contents: read
+
+jobs:
+  label-issues:
+    name: "Label Issues"
+    runs-on: ubuntu-latest
+    if: github.event_name == 'issues'
+    
+    steps:
+      - name: "Auto-Label Issue"
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issue = context.payload.issue;
+            const title = issue.title.toLowerCase();
+            const body = (issue.body || '').toLowerCase();
+            const content = title + ' ' + body;
+            
+            const labels = [];
+            
+            // Bug detection
+            if (content.includes('bug') || content.includes('error') || content.includes('broken') || content.includes('not working')) {
+              labels.push('bug');
+            }
+            
+            // Feature requests
+            if (content.includes('feature') || content.includes('request') || content.includes('would be nice') || content.includes('suggestion')) {
+              labels.push('enhancement');
+            }
+            
+            // Security related
+            if (content.includes('security') || content.includes('vulnerability') || content.includes('xss') || content.includes('csrf')) {
+              labels.push('security');
+            }
+            
+            // Documentation
+            if (content.includes('docs') || content.includes('documentation') || content.includes('readme')) {
+              labels.push('documentation');
+            }
+            
+            // UI/UX
+            if (content.includes('ui') || content.includes('ux') || content.includes('design') || content.includes('layout')) {
+              labels.push('ui/ux');
+            }
+            
+            // Performance
+            if (content.includes('slow') || content.includes('performance') || content.includes('speed') || content.includes('optimize')) {
+              labels.push('performance');
+            }
+            
+            if (labels.length > 0) {
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                labels: labels
+              });
+              
+              console.log(`Added labels: ${labels.join(', ')}`);
+            }
+
+  label-prs:
+    name: "Label PRs"
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    
+    steps:
+      - name: "Checkout Repository"
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: "Auto-Label PR by Files"
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data: files } = await github.rest.pulls.listFiles({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.payload.pull_request.number
+            });
+            
+            const labels = new Set();
+            
+            for (const file of files) {
+              const path = file.filename.toLowerCase();
+              
+              // Frontend files
+              if (path.includes('src/') || path.endsWith('.tsx') || path.endsWith('.jsx')) {
+                labels.add('frontend');
+              }
+              
+              // Styling
+              if (path.endsWith('.css') || path.endsWith('.scss') || path.includes('tailwind')) {
+                labels.add('styling');
+              }
+              
+              // Config files
+              if (path.includes('config') || path.endsWith('.json') || path.endsWith('.yml') || path.endsWith('.yaml')) {
+                labels.add('configuration');
+              }
+              
+              // Tests
+              if (path.includes('test') || path.includes('spec')) {
+                labels.add('tests');
+              }
+              
+              // Documentation
+              if (path.endsWith('.md') || path.includes('docs/')) {
+                labels.add('documentation');
+              }
+              
+              // Dependencies
+              if (path === 'package.json' || path === 'package-lock.json') {
+                labels.add('dependencies');
+              }
+              
+              // CI/CD
+              if (path.includes('.github/')) {
+                labels.add('ci/cd');
+              }
+              
+              // Security headers
+              if (path.includes('_headers') || path.includes('security')) {
+                labels.add('security');
+              }
+            }
+            
+            // Size labels based on changed lines
+            const totalChanges = files.reduce((sum, f) => sum + f.additions + f.deletions, 0);
+            
+            if (totalChanges < 10) {
+              labels.add('size/XS');
+            } else if (totalChanges < 50) {
+              labels.add('size/S');
+            } else if (totalChanges < 200) {
+              labels.add('size/M');
+            } else if (totalChanges < 500) {
+              labels.add('size/L');
+            } else {
+              labels.add('size/XL');
+            }
+            
+            if (labels.size > 0) {
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.pull_request.number,
+                labels: Array.from(labels)
+              });
+              
+              console.log(`Added labels: ${Array.from(labels).join(', ')}`);
+            }
