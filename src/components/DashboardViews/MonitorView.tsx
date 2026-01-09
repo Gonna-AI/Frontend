@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useDemoCall } from '../../contexts/DemoCallContext';
-import { ArrowUpRight, ArrowDownRight, MoreHorizontal, Filter, Phone, Clock, Activity, Users, Radio } from 'lucide-react';
+import { ArrowUpRight, ArrowDownRight, MoreHorizontal, Filter, Phone, Clock, Activity, AlertCircle, Radio } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { LiveCallMonitor } from '../DemoCall';
 import {
@@ -31,16 +31,7 @@ interface StatsCardProps {
     color?: 'emerald' | 'blue' | 'purple' | 'orange';
 }
 
-// --- Mock Data for Chart (replace with real if available) ---
-const chartData = [
-    { name: 'Mon', calls: 12 },
-    { name: 'Tue', calls: 19 },
-    { name: 'Wed', calls: 15 },
-    { name: 'Thu', calls: 25 },
-    { name: 'Fri', calls: 32 },
-    { name: 'Sat', calls: 20 },
-    { name: 'Sun', calls: 28 },
-];
+// Chart data is now computed from real callHistory inside the component
 
 // --- Components ---
 
@@ -185,6 +176,31 @@ export default function MonitorView({ isDark = true }: { isDark?: boolean }) {
         return `${mins}:${secs.toString().padStart(2, '0')}`;
     };
 
+    // Compute chart data from real callHistory aggregated by day
+    const chartData = useMemo(() => {
+        const data: { name: string; calls: number }[] = [];
+        const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+        // Show last 7 days
+        for (let i = 6; i >= 0; i--) {
+            const date = new Date();
+            date.setDate(date.getDate() - i);
+            const dayStart = new Date(date.setHours(0, 0, 0, 0));
+            const dayEnd = new Date(date.setHours(23, 59, 59, 999));
+
+            const callCount = callHistory.filter(c =>
+                new Date(c.date) >= dayStart &&
+                new Date(c.date) <= dayEnd
+            ).length;
+
+            data.push({
+                name: dayNames[new Date(dayStart).getDay()],
+                calls: callCount
+            });
+        }
+        return data;
+    }, [callHistory]);
+
 
 
     // Custom Tooltip for Chart
@@ -230,30 +246,26 @@ export default function MonitorView({ isDark = true }: { isDark?: boolean }) {
                 <StatsCard
                     title={t('monitor.stats.totalCalls')}
                     value={analytics.totalCalls}
-                    change="+12.5%"
-                    trend="up"
                     subtitle={t('monitor.stats.last7Days')}
                     icon={<Phone className="w-5 h-5" />}
                     color="blue"
-                    progress={75}
+                    progress={Math.min((analytics.totalCalls / 50) * 100, 100)}
                     isDark={isDark}
                 />
                 <StatsCard
                     title={t('monitor.stats.avgDuration')}
                     value={formatDuration(analytics.avgDuration)}
-                    change="-5%"
-                    trend="down"
                     subtitle={t('monitor.stats.target')}
                     icon={<Clock className="w-5 h-5" />}
                     color="purple"
-                    progress={65}
+                    progress={Math.min((analytics.avgDuration / 300) * 100, 100)}
                     isDark={isDark}
                 />
                 <StatsCard
                     title={t('monitor.stats.activeSessions')}
                     value={currentCall?.status === 'active' ? 1 : 0}
-                    change="LIVE"
-                    trend="up"
+                    change={currentCall?.status === 'active' ? 'LIVE' : undefined}
+                    trend={currentCall?.status === 'active' ? 'up' : undefined}
                     subtitle={t('monitor.stats.realTimeConn')}
                     icon={<Activity className="w-5 h-5" />}
                     color="emerald"
@@ -261,16 +273,16 @@ export default function MonitorView({ isDark = true }: { isDark?: boolean }) {
                     isDark={isDark}
                 />
 
-                {/* Available Credits Card (Glassmorphic) */}
+                {/* Follow-ups Required Card - Real Data */}
                 <StatsCard
-                    title={t('monitor.stats.satisfaction')}
-                    value="94.5%"
-                    change="+4.5%"
-                    trend="up"
-                    subtitle={t('monitor.stats.rating')}
-                    icon={<Users className="w-5 h-5" />}
+                    title={t('monitor.stats.followUps')}
+                    value={analytics.followUpRequired}
+                    change={analytics.followUpRequired > 0 ? 'PENDING' : undefined}
+                    trend={analytics.followUpRequired > 0 ? 'down' : undefined}
+                    subtitle={t('monitor.stats.needsAction')}
+                    icon={<AlertCircle className="w-5 h-5" />}
                     color="orange"
-                    progress={94.5}
+                    progress={analytics.totalCalls > 0 ? (analytics.followUpRequired / analytics.totalCalls) * 100 : 0}
                     isDark={isDark}
                 />
             </motion.div>
