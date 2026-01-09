@@ -137,7 +137,7 @@ function UserCallContent() {
 
       {/* Main content */}
       <main className={cn(
-        "flex-1 relative flex flex-col min-h-0",
+        "flex-1 relative flex flex-col min-h-0 overflow-y-auto",
         mode !== 'call' && "pt-16" // Only add top padding when header is visible
       )}>
         <AnimatePresence mode="wait">
@@ -147,7 +147,7 @@ function UserCallContent() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="flex-1 flex items-center justify-center px-4"
+              className="flex-1 flex flex-col items-center justify-start md:justify-center px-4 py-10 md:py-0"
             >
               <div className="w-full max-w-4xl">
                 {/* Title */}

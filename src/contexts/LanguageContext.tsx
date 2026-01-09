@@ -1092,11 +1092,15 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
         if (urlLang === 'en' || urlLang === 'de') {
             setLanguageState(urlLang);
             localStorage.setItem('app-language', urlLang);
+            document.documentElement.lang = urlLang;
         } else {
             // Fallback to local storage
             const savedLang = localStorage.getItem('app-language') as Language;
             if (savedLang === 'en' || savedLang === 'de') {
                 setLanguageState(savedLang);
+                document.documentElement.lang = savedLang;
+            } else {
+                document.documentElement.lang = 'en';
             }
         }
     }, []);
@@ -1104,6 +1108,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     const setLanguage = (lang: Language) => {
         setLanguageState(lang);
         localStorage.setItem('app-language', lang);
+        document.documentElement.lang = lang;
         window.dispatchEvent(new CustomEvent('language-change', { detail: lang }));
     };
 
