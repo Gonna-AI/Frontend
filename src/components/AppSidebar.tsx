@@ -116,7 +116,8 @@ export function AppSidebar({ activeTab, setActiveTab, ...props }: AppSidebarProp
                                             src="/favicon.svg"
                                             alt="ClerkTree Logo"
                                             className={cn(
-                                                "transition-all dark:invert-0 invert",
+                                                "transition-all",
+                                                isDark ? "invert-0" : "invert",
                                                 state === "collapsed" ? "size-6" : "size-10"
                                             )}
                                         />
@@ -144,7 +145,6 @@ export function AppSidebar({ activeTab, setActiveTab, ...props }: AppSidebarProp
                                     isActive={activeTab === 'monitor'}
                                     onClick={() => setActiveTab('monitor')}
                                     tooltip="Monitor"
-                                    tooltip="Monitor"
                                     className={cn(
                                         "transition-colors",
                                         isDark
@@ -161,7 +161,6 @@ export function AppSidebar({ activeTab, setActiveTab, ...props }: AppSidebarProp
                                     isActive={activeTab === 'knowledge'}
                                     onClick={() => setActiveTab('knowledge')}
                                     tooltip="Configuration"
-                                    tooltip="Configuration"
                                     className={cn(
                                         "transition-colors",
                                         isDark
@@ -177,7 +176,6 @@ export function AppSidebar({ activeTab, setActiveTab, ...props }: AppSidebarProp
                                 <SidebarMenuButton
                                     isActive={activeTab === 'history'}
                                     onClick={() => setActiveTab('history')}
-                                    tooltip="History"
                                     tooltip="History"
                                     className={cn(
                                         "transition-colors",
@@ -338,7 +336,12 @@ export function AppSidebar({ activeTab, setActiveTab, ...props }: AppSidebarProp
                                 <SidebarMenuButton
                                     isActive={activeTab === 'usage'}
                                     onClick={() => setActiveTab('usage')}
-                                    className="text-white/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-white/10 data-[active=true]:text-white"
+                                    className={cn(
+                                        "transition-colors",
+                                        isDark
+                                            ? "text-white/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-white/10 data-[active=true]:text-white"
+                                            : "text-gray-600 hover:text-gray-900 hover:bg-black/5 data-[active=true]:bg-black/5 data-[active=true]:text-black"
+                                    )}
                                 >
                                     <BarChart />
                                     <span>Usage</span>
@@ -348,7 +351,12 @@ export function AppSidebar({ activeTab, setActiveTab, ...props }: AppSidebarProp
                                 <SidebarMenuButton
                                     isActive={activeTab === 'billing'}
                                     onClick={() => setActiveTab('billing')}
-                                    className="text-white/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-white/10 data-[active=true]:text-white"
+                                    className={cn(
+                                        "transition-colors",
+                                        isDark
+                                            ? "text-white/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-white/10 data-[active=true]:text-white"
+                                            : "text-gray-600 hover:text-gray-900 hover:bg-black/5 data-[active=true]:bg-black/5 data-[active=true]:text-black"
+                                    )}
                                 >
                                     <CreditCard />
                                     <span>Billing</span>
@@ -358,7 +366,12 @@ export function AppSidebar({ activeTab, setActiveTab, ...props }: AppSidebarProp
                                 <SidebarMenuButton
                                     isActive={activeTab === 'keys'}
                                     onClick={() => setActiveTab('keys')}
-                                    className="text-white/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-white/10 data-[active=true]:text-white"
+                                    className={cn(
+                                        "transition-colors",
+                                        isDark
+                                            ? "text-white/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-white/10 data-[active=true]:text-white"
+                                            : "text-gray-600 hover:text-gray-900 hover:bg-black/5 data-[active=true]:bg-black/5 data-[active=true]:text-black"
+                                    )}
                                 >
                                     <Key />
                                     <span>Keys</span>

@@ -4,6 +4,7 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { PanelLeft } from "lucide-react"
 
 import { useIsMobile } from "@/hooks/use-mobile"
+import { useTheme } from "@/hooks/useTheme"
 import { cn } from "@/utils/cn"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/Input"
@@ -179,6 +180,7 @@ const Sidebar = React.forwardRef<
     ref
   ) => {
     const { isMobile, state, openMobile, setOpenMobile } = useSidebar()
+    const { isDark } = useTheme()
 
     if (collapsible === "none") {
       return (
@@ -201,7 +203,12 @@ const Sidebar = React.forwardRef<
           <DrawerContent
             data-sidebar="sidebar"
             data-mobile="true"
-            className="dark:bg-[#0A0A0A] bg-white p-0 dark:text-white text-black border-t dark:border-white/10 border-black/10 rounded-t-2xl [&>div.bg-muted]:dark:bg-white/20 [&>div.bg-muted]:bg-black/5"
+            className={cn(
+              "p-0 border-t rounded-t-2xl",
+              isDark
+                ? "bg-[#0A0A0A] text-white border-white/10 [&>div.bg-muted]:bg-white/20"
+                : "bg-white text-black border-black/10 [&>div.bg-muted]:bg-black/5"
+            )}
             style={
               {
                 "--sidebar-width": "100%",

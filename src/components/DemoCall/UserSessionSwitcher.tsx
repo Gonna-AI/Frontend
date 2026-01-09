@@ -437,8 +437,10 @@ export default function UserSessionSwitcher({
                 }}
                 tooltip={currentSession?.name || 'Sessions'}
                 className={cn(
-                    "text-white/80 hover:text-white hover:bg-white/10",
-                    isOpen && "bg-white/10"
+                    isDark
+                        ? "text-white/80 hover:text-white hover:bg-white/10"
+                        : "text-black/80 hover:text-black hover:bg-black/5",
+                    isOpen && (isDark ? "bg-white/10" : "bg-black/5")
                 )}
             >
                 <Users />
