@@ -111,7 +111,7 @@ const Hero = () => {
             */}
             <div className="relative w-[275%] -ml-[80%] h-[100vh] flex items-center justify-center -mt-[45%]">
               <img
-                src="/Untitled - Copy@1-1470x748-2.png"
+                src="/hero-dashboard-graphic.png"
                 alt="Hero Graphic"
                 className="w-full h-full object-contain scale-140"
                 style={{
