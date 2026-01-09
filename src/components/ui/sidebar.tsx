@@ -218,7 +218,7 @@ const Sidebar = React.forwardRef<
           >
             <DrawerTitle className="sr-only">Sidebar</DrawerTitle>
             <DrawerDescription className="sr-only">Displays the mobile sidebar.</DrawerDescription>
-            <div className="flex h-full w-full flex-col overflow-y-auto max-h-[85vh]">
+            <div className="flex h-full w-full flex-col overflow-y-auto max-h-[55vh]">
               {children}
             </div>
           </DrawerContent>
