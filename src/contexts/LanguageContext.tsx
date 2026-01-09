@@ -277,7 +277,12 @@ export const translations: Record<Language, Record<string, string>> = {
         'sidebar.priorityRules': 'Priority Rules',
         'sidebar.instructions': 'Instructions',
         'sidebar.saveConfig': 'Save Config',
+
         'sidebar.language': 'Language',
+        'sidebar.usage': 'Usage',
+        'sidebar.billing': 'Billing',
+        'sidebar.keys': 'API Keys',
+        'sidebar.docs': 'Docs',
 
         // Invite Page
         'invite.support': 'Support',
@@ -544,6 +549,93 @@ export const translations: Record<Language, Record<string, string>> = {
         'dashboard.textChats': 'Text Chats',
         'dashboard.inProgress': 'In progress',
         'dashboard.noActive': 'No active sessions',
+
+        // Welcome Manager
+        'welcome.sessionManager': 'ClerkTree Session Manager',
+        'welcome.title': 'Welcome to ClerkTree',
+        'welcome.subtitle': 'Create a personalized session for your AI workflow. Sessions allow you to maintain separate configurations and contexts.',
+        'welcome.feature1': 'Context-aware interactions',
+        'welcome.feature2': 'Persistent configuration',
+        'welcome.feature3': 'Secure data isolation',
+        'welcome.sessionName': 'Session Name',
+        'welcome.sessionNamePlaceholder': 'e.g., Medical Office',
+        'welcome.description': 'Description',
+        'welcome.descriptionOptional': '(optional)',
+        'welcome.descriptionPlaceholder': 'What is this session for?',
+        'welcome.skip': 'Skip Setup',
+        'welcome.create': 'Create Session',
+        'welcome.creating': 'Creating...',
+        'welcome.orContinue': 'or continue with',
+
+        // Monitor View Extended
+        'monitor.appSubtitle': 'Real-time system overview and activity tracking',
+        'monitor.stats.totalCalls': 'Total Calls',
+        'monitor.stats.last7Days': 'Last 7 days',
+        'monitor.stats.avgDuration': 'Avg Duration',
+        'monitor.stats.target': 'Target: < 5:00',
+        'monitor.stats.activeSessions': 'Active Sessions',
+        'monitor.stats.realTimeConn': 'Real-time connections',
+        'monitor.stats.followUps': 'Follow-ups Required',
+        'monitor.stats.needsAction': 'Calls needing follow-up',
+        'monitor.chart.title': 'Call Volume Trends',
+        'monitor.chart.subtitle': 'Inbound traffic analysis (Last 7 days)',
+        'monitor.tab.live': 'Live Monitor',
+        'monitor.tab.history': 'History Log',
+        'monitor.filter': 'Filter',
+        'monitor.table.caller': 'Caller',
+        'monitor.table.category': 'Category',
+        'monitor.table.status': 'Status',
+        'monitor.table.duration': 'Duration',
+        'monitor.table.date': 'Date',
+        'monitor.table.actions': 'Actions',
+        'monitor.table.noHistory': 'No call history available yet',
+        'monitor.status.critical': 'Critical',
+        'monitor.status.high': 'High Priority',
+        'monitor.status.resolved': 'Resolved',
+        'monitor.category.uncategorized': 'Uncategorized',
+        'monitor.conversationStream': 'Real-time conversation stream',
+        'monitor.status.live': 'Live',
+        'monitor.detectedIntent': 'Detected Intent',
+
+        // Top Banner
+        'banner.platformNotFound': 'Platform access not found',
+        'banner.apiOnlyAccess': 'You currently only have access to the API',
+        'banner.requestAccess': 'Request Access',
+
+        // Usage View
+        'usage.title': 'Usage',
+        'usage.subtitle': 'Track api consumption and credits',
+        'usage.freePlanStatus': 'Free Plan Status',
+        'usage.active': 'Active',
+        'usage.limitReached': 'Limit Reached',
+        'usage.creditsRemaining': 'You have {count} credits remaining this month',
+        'usage.upgradeCredits': 'Upgrade for more credits',
+        'usage.voiceMinutes': 'Voice Minutes',
+        'usage.creditPerMin': '1 credit / min',
+        'usage.textRequests': 'Text Requests',
+        'usage.creditPerReqs': '1 credit / 10 reqs',
+        'usage.totalSessions': 'Total Sessions',
+        'usage.lifetimeCalls': 'Lifetime calls',
+        'usage.followUps': '{count} follow-ups',
+        'usage.avgDuration': 'Avg Duration',
+        'usage.perSession': 'Per session',
+        'usage.usageTrends': 'Usage Trends',
+        'usage.last7Days': 'Activity over the last 7 days',
+        'usage.voice': 'Voice',
+        'usage.text': 'Text',
+        'usage.voiceCalls': '{count} calls',
+        'usage.textChats': '{count} chats',
+        'usage.usageBreakdown': 'Usage Breakdown',
+        'usage.table.service': 'Service',
+        'usage.table.consumption': 'Consumption',
+        'usage.table.creditsUsed': 'Credits Used',
+        'usage.table.limit': 'Limit',
+        'usage.voiceCallsLabel': 'Voice Calls',
+        'usage.textChatLabel': 'Text Chat',
+        'usage.mins': '{count} mins',
+        'usage.reqs': '{count} reqs',
+        'usage.credits': '{count} credits',
+        'usage.sharedPool': 'Shared Pool',
     },
     de: {
         // Navigation
@@ -798,6 +890,94 @@ export const translations: Record<Language, Record<string, string>> = {
         'header.markAllRead': 'Alle als gelesen markieren',
         'header.noNotifications': 'Keine neuen Benachrichtigungen',
 
+        // Welcome Manager
+        'welcome.sessionManager': 'ClerkTree Sitzungsmanager',
+        'welcome.title': 'Willkommen bei ClerkTree',
+        'welcome.subtitle': 'Erstellen Sie eine personalisierte Sitzung für Ihren KI-Workflow. Sitzungen ermöglichen es Ihnen, separate Konfigurationen und Kontexte beizubehalten.',
+        'welcome.feature1': 'Kontextbezogene Interaktionen',
+        'welcome.feature2': 'Dauerhafte Konfiguration',
+        'welcome.feature3': 'Sichere Datenisolierung',
+        'welcome.sessionName': 'Sitzungsname',
+        'welcome.sessionNamePlaceholder': 'z.B. Arztpraxis',
+        'welcome.description': 'Beschreibung',
+        'welcome.descriptionOptional': '(optional)',
+        'welcome.descriptionPlaceholder': 'Wofür ist diese Sitzung?',
+        'welcome.skip': 'Einrichtung überspringen',
+        'welcome.create': 'Sitzung erstellen',
+        'welcome.creating': 'Erstellen...',
+        'welcome.orContinue': 'oder fahren Sie fort mit',
+
+        // Monitor View Extended
+        'monitor.appSubtitle': 'Echtzeit-Systemübersicht und Aktivitätsverfolgung',
+        'monitor.stats.totalCalls': 'Anrufe gesamt',
+        'monitor.stats.last7Days': 'Letzte 7 Tage',
+        'monitor.stats.avgDuration': 'Durchschnittsdauer',
+        'monitor.stats.target': 'Ziel: < 5:00',
+        'monitor.stats.activeSessions': 'Aktive Sitzungen',
+        'monitor.stats.realTimeConn': 'Echtzeit-Verbindungen',
+        'monitor.stats.followUps': 'Nachverfolgungen',
+        'monitor.stats.needsAction': 'Anrufe mit Nachverfolgung',
+        'monitor.chart.title': 'Anrufvolumen-Trends',
+        'monitor.chart.subtitle': 'Eingehende Verkehrsanalyse (Letzte 7 Tage)',
+        'monitor.tab.live': 'Live-Monitor',
+        'monitor.tab.history': 'Verlaufsprotokoll',
+        'monitor.filter': 'Filtern',
+        'monitor.table.caller': 'Anrufer',
+        'monitor.table.category': 'Kategorie',
+        'monitor.table.status': 'Status',
+        'monitor.table.duration': 'Dauer',
+        'monitor.table.date': 'Datum',
+        'monitor.table.actions': 'Aktionen',
+        'monitor.table.noHistory': 'Noch kein Anrufverlauf verfügbar',
+        'monitor.status.critical': 'Kritisch',
+        'monitor.status.high': 'Hohe Priorität',
+        'monitor.status.resolved': 'Gelöst',
+        'monitor.category.uncategorized': 'Nicht kategorisiert',
+        'monitor.conversationStream': 'Echtzeit-Gesprächsverlauf',
+        'monitor.status.live': 'Live',
+        'monitor.status.idle': 'Inaktiv',
+        'monitor.detectedIntent': 'Erkannte Absicht',
+
+        // Top Banner
+        'banner.platformNotFound': 'Plattformzugang nicht gefunden',
+        'banner.apiOnlyAccess': 'Sie haben derzeit nur Zugriff auf die API',
+        'banner.requestAccess': 'Zugang anfordern',
+
+        // Usage View
+        'usage.title': 'Nutzung',
+        'usage.subtitle': 'API-Verbrauch und Credits verfolgen',
+        'usage.freePlanStatus': 'Kostenloser Plan Status',
+        'usage.active': 'Aktiv',
+        'usage.limitReached': 'Limit erreicht',
+        'usage.creditsRemaining': 'Sie haben {count} Credits diesen Monat übrig',
+        'usage.upgradeCredits': 'Upgrade für mehr Credits',
+        'usage.voiceMinutes': 'Sprachminuten',
+        'usage.creditPerMin': '1 Credit / Min',
+        'usage.textRequests': 'Textanfragen',
+        'usage.creditPerReqs': '1 Credit / 10 Anf.',
+        'usage.totalSessions': 'Sitzungen gesamt',
+        'usage.lifetimeCalls': 'Alle Anrufe',
+        'usage.followUps': '{count} Nachverfolgungen',
+        'usage.avgDuration': 'Durchschnittsdauer',
+        'usage.perSession': 'Pro Sitzung',
+        'usage.usageTrends': 'Nutzungstrends',
+        'usage.last7Days': 'Aktivität der letzten 7 Tage',
+        'usage.voice': 'Sprache',
+        'usage.text': 'Text',
+        'usage.voiceCalls': '{count} Anrufe',
+        'usage.textChats': '{count} Chats',
+        'usage.usageBreakdown': 'Nutzungsaufschlüsselung',
+        'usage.table.service': 'Dienst',
+        'usage.table.consumption': 'Verbrauch',
+        'usage.table.creditsUsed': 'Verwendete Credits',
+        'usage.table.limit': 'Limit',
+        'usage.voiceCallsLabel': 'Sprachanrufe',
+        'usage.textChatLabel': 'Text-Chat',
+        'usage.mins': '{count} Min',
+        'usage.reqs': '{count} Anf.',
+        'usage.credits': '{count} Credits',
+        'usage.sharedPool': 'Gemeinsamer Pool',
+
         'header.stayUpdated': 'Bleiben Sie über Ihre neuesten Aktivitäten auf dem Laufenden',
 
         // Sidebar
@@ -812,6 +992,10 @@ export const translations: Record<Language, Record<string, string>> = {
         'sidebar.instructions': 'Anweisungen',
         'sidebar.saveConfig': 'Konfig. speichern',
         'sidebar.language': 'Sprache',
+        'sidebar.usage': 'Nutzung',
+        'sidebar.billing': 'Abrechnung',
+        'sidebar.keys': 'API-Schlüssel',
+        'sidebar.docs': 'Dokumentation',
 
         // Invite Page
         'invite.support': 'Support',
@@ -995,8 +1179,6 @@ export const translations: Record<Language, Record<string, string>> = {
 
         // LiveCallMonitor
         'monitor.title': 'Live-Monitor',
-        'monitor.status.active': 'Aktiv',
-        'monitor.status.idle': 'Inaktiv',
         'monitor.apptDetails': 'Termindetails',
         'monitor.contactInfo': 'Kontaktinfo',
         'monitor.noContact': 'Kein Kontakt',
@@ -1092,11 +1274,15 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
         if (urlLang === 'en' || urlLang === 'de') {
             setLanguageState(urlLang);
             localStorage.setItem('app-language', urlLang);
+            document.documentElement.lang = urlLang;
         } else {
             // Fallback to local storage
             const savedLang = localStorage.getItem('app-language') as Language;
             if (savedLang === 'en' || savedLang === 'de') {
                 setLanguageState(savedLang);
+                document.documentElement.lang = savedLang;
+            } else {
+                document.documentElement.lang = 'en';
             }
         }
     }, []);
@@ -1104,6 +1290,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     const setLanguage = (lang: Language) => {
         setLanguageState(lang);
         localStorage.setItem('app-language', lang);
+        document.documentElement.lang = lang;
         window.dispatchEvent(new CustomEvent('language-change', { detail: lang }));
     };
 

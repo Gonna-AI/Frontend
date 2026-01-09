@@ -1,0 +1,119 @@
+# =============================================================================
+# Stale Issue & PR Cleanup
+# =============================================================================
+# Automatically marks and closes stale issues and PRs
+# Schedule: Daily at midnight UTC
+# =============================================================================
+
+name: "Stale Cleanup"
+
+on:
+  schedule:
+    - cron: "0 0 * * *" # Daily at midnight
+  workflow_dispatch:
+
+permissions:
+  issues: write
+  pull-requests: write
+
+jobs:
+  stale:
+    name: "Mark & Close Stale"
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: "Process Stale Issues/PRs"
+        uses: actions/stale@v9
+        with:
+          # Issue configuration
+          stale-issue-message: |
+            This issue has been automatically marked as stale because it has not had recent activity.
+            
+            It will be closed in **7 days** if no further activity occurs.
+            
+            If this issue is still relevant:
+            - Add a comment with an update
+            - Remove the `stale` label
+            
+            Thank you for your contributions!
+          stale-issue-label: "stale"
+          days-before-issue-stale: 30
+          days-before-issue-close: 7
+          exempt-issue-labels: "security,critical,pinned,in-progress"
+          
+          # PR configuration
+          stale-pr-message: |
+            This PR has been automatically marked as stale because it has not had recent activity.
+            
+            It will be closed in **14 days** if no further activity occurs.
+            
+            If this PR is still relevant:
+            - Rebase on the latest main branch
+            - Add a comment with an update
+            - Request a review
+            
+            Thank you for your contributions!
+          stale-pr-label: "stale"
+          days-before-pr-stale: 21
+          days-before-pr-close: 14
+          exempt-pr-labels: "security,critical,work-in-progress"
+          
+          # Operations per run
+          operations-per-run: 50
+          
+          # Don't close issues/PRs with certain labels
+          remove-stale-when-updated: true
+
+  # Weekly summary of repository health
+  weekly-summary:
+    name: "Weekly Health Check"
+    runs-on: ubuntu-latest
+    if: github.event.schedule == '0 0 * * 0' # Only on Sundays
+    
+    steps:
+      - name: "Generate Weekly Summary"
+        uses: actions/github-script@v7
+        with:
+          script: |
+            // Get open issues count
+            const { data: issues } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              per_page: 100
+            });
+            
+            // Get open PRs count
+            const { data: prs } = await github.rest.pulls.list({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              per_page: 100
+            });
+            
+            // Get recent commits
+            const { data: commits } = await github.rest.repos.listCommits({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              per_page: 7
+            });
+            
+            const summary = `
+            ## Weekly Repository Health Summary
+            
+            | Metric | Count |
+            |--------|-------|
+            | Open Issues | ${issues.length} |
+            | Open PRs | ${prs.length} |
+            | Commits this week | ${commits.length} |
+            
+            ### Issue Breakdown
+            - Bug: ${issues.filter(i => i.labels.some(l => l.name === 'bug')).length}
+            - Enhancement: ${issues.filter(i => i.labels.some(l => l.name === 'enhancement')).length}
+            - Security: ${issues.filter(i => i.labels.some(l => l.name === 'security')).length}
+            
+            ---
+            > Generated automatically
+            `;
+            
+            console.log(summary);

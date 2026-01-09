@@ -110,7 +110,7 @@ function UserCallContent({ initialMode = 'select' }: UserCallContentProps) {
             {/* Right: Settings & Hamburger */}
             <div className="flex items-center gap-3">
               <button
-                onClick={() => navigate('/demo-dashboard')}
+                onClick={() => navigate('/dashboard')}
                 className={cn(
                   "hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium transition-colors border",
                   isDark
@@ -151,7 +151,7 @@ function UserCallContent({ initialMode = 'select' }: UserCallContentProps) {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="flex-1 flex items-center justify-center px-4"
+              className="flex-1 flex flex-col items-center justify-start md:justify-center px-4 py-10 md:py-0"
             >
               <div className="w-full max-w-4xl">
                 {/* Title */}

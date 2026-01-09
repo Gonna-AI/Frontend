@@ -1,8 +1,9 @@
-import React, { useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { TrendingUp, Activity, MessageSquare, Mic, Coins } from 'lucide-react';
+import { TrendingUp, MessageSquare, Mic, Coins } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { useDemoCall } from '../../contexts/DemoCallContext';
+import { useLanguage } from '../../contexts/LanguageContext';
 import DateRangePicker from './DateRangePicker';
 
 interface StatsCardProps {
@@ -76,6 +77,7 @@ function StatsCard({ title, value, change, trend, subtitle, isDark, progress }: 
 }
 
 export default function UsageView({ isDark = true }: { isDark?: boolean }) {
+    const { t } = useLanguage();
     const { callHistory, getAnalytics } = useDemoCall();
     const analytics = getAnalytics();
 
@@ -160,11 +162,11 @@ export default function UsageView({ isDark = true }: { isDark?: boolean }) {
                     <div className="space-y-1">
                         <div className="flex items-center gap-2 text-xs">
                             <div className="w-2 h-2 rounded-full bg-emerald-500" />
-                            <span className={isDark ? "text-gray-300" : "text-gray-600"}>Voice: {payload[0].value} calls</span>
+                            <span className={isDark ? "text-gray-300" : "text-gray-600"}>{t('usage.voice')}: {payload[0].value}</span>
                         </div>
                         <div className="flex items-center gap-2 text-xs">
                             <div className="w-2 h-2 rounded-full bg-blue-500" />
-                            <span className={isDark ? "text-gray-300" : "text-gray-600"}>Text: {payload[1].value} chats</span>
+                            <span className={isDark ? "text-gray-300" : "text-gray-600"}>{t('usage.text')}: {payload[1].value}</span>
                         </div>
                     </div>
                 </div>
@@ -179,10 +181,10 @@ export default function UsageView({ isDark = true }: { isDark?: boolean }) {
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
                     <h1 className={cn("text-2xl font-bold", isDark ? "text-white" : "text-black")}>
-                        Usage
+                        {t('usage.title')}
                     </h1>
                     <p className={cn("text-sm mt-1", isDark ? "text-white/60" : "text-black/60")}>
-                        Track api consumption and credits
+                        {t('usage.subtitle')}
                     </p>
                 </div>
 
@@ -221,7 +223,7 @@ export default function UsageView({ isDark = true }: { isDark?: boolean }) {
                         <div>
                             <div className="flex items-center gap-2">
                                 <h2 className={cn("text-lg font-semibold", isDark ? "text-white" : "text-black")}>
-                                    Free Plan Status
+                                    {t('usage.freePlanStatus')}
                                 </h2>
                                 <span className={cn(
                                     "text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full border",
@@ -229,18 +231,18 @@ export default function UsageView({ isDark = true }: { isDark?: boolean }) {
                                         ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20"
                                         : "bg-rose-500/10 text-rose-500 border-rose-500/20"
                                 )}>
-                                    {usageStats.creditsRemaining > 0 ? "Active" : "Limit Reached"}
+                                    {usageStats.creditsRemaining > 0 ? t('usage.active') : t('usage.limitReached')}
                                 </span>
                             </div>
                             <p className={cn("text-sm mt-1", isDark ? "text-white/60" : "text-black/60")}>
-                                You have <span className={isDark ? "text-white" : "text-black"}>{usageStats.creditsRemaining} credits</span> remaining this month
+                                {t('usage.creditsRemaining').replace('{count}', String(usageStats.creditsRemaining))}
                             </p>
                         </div>
                     </div>
 
                     <div className="flex flex-col items-end gap-2 min-w-[200px]">
                         <div className="flex justify-between w-full text-xs">
-                            <span className={isDark ? "text-white/40" : "text-black/40"}>Usage</span>
+                            <span className={isDark ? "text-white/40" : "text-black/40"}>{t('usage.title')}</span>
                             <span className={isDark ? "text-white" : "text-black"}>{usageStats.totalCreditsUsed} / {TOTAL_CREDITS}</span>
                         </div>
                         <div className={cn("w-full h-2 rounded-full overflow-hidden", isDark ? "bg-white/10" : "bg-black/5")}>
@@ -253,7 +255,7 @@ export default function UsageView({ isDark = true }: { isDark?: boolean }) {
                             />
                         </div>
                         <a href="#billing" className={cn("text-xs font-medium hover:underline", isDark ? "text-white/60 hover:text-white" : "text-black/60 hover:text-black")}>
-                            Upgrade for more credits &rarr;
+                            {t('usage.upgradeCredits')} →
                         </a>
                     </div>
                 </div>
@@ -262,31 +264,31 @@ export default function UsageView({ isDark = true }: { isDark?: boolean }) {
             {/* KPI Cards */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <StatsCard
-                    title="Voice Minutes"
+                    title={t('usage.voiceMinutes')}
                     value={usageStats.totalVoiceMinutes}
-                    subtitle="1 credit / min"
+                    subtitle={t('usage.creditPerMin')}
                     progress={(usageStats.totalVoiceMinutes / TOTAL_CREDITS) * 100}
                     isDark={isDark}
                 />
                 <StatsCard
-                    title="Text Requests"
+                    title={t('usage.textRequests')}
                     value={usageStats.totalTextRequests}
-                    subtitle="1 credit / 10 reqs"
+                    subtitle={t('usage.creditPerReqs')}
                     progress={(usageStats.totalTextRequests / (TOTAL_CREDITS * 10)) * 100}
                     isDark={isDark}
                 />
                 <StatsCard
-                    title="Total Sessions"
+                    title={t('usage.totalSessions')}
                     value={analytics.totalCalls}
-                    subtitle="Lifetime calls"
-                    change={analytics.followUpRequired > 0 ? `${analytics.followUpRequired} follow-ups` : undefined}
+                    subtitle={t('usage.lifetimeCalls')}
+                    change={analytics.followUpRequired > 0 ? t('usage.followUps').replace('{count}', String(analytics.followUpRequired)) : undefined}
                     trend="neutral"
                     isDark={isDark}
                 />
                 <StatsCard
-                    title="Avg Duration"
+                    title={t('usage.avgDuration')}
                     value={analytics.avgDuration > 0 ? `${Math.floor(analytics.avgDuration / 60)}m ${Math.round(analytics.avgDuration % 60)}s` : '0m 0s'}
-                    subtitle="Per session"
+                    subtitle={t('usage.perSession')}
                     isDark={isDark}
                 />
             </div>
@@ -298,18 +300,18 @@ export default function UsageView({ isDark = true }: { isDark?: boolean }) {
             )}>
                 <div className="flex justify-between items-center mb-6">
                     <div>
-                        <h2 className={cn("text-lg font-semibold", isDark ? "text-white" : "text-black")}>Usage Trends</h2>
-                        <p className={cn("text-sm", isDark ? "text-white/40" : "text-black/40")}>Activity over the last 7 days</p>
+                        <h2 className={cn("text-lg font-semibold", isDark ? "text-white" : "text-black")}>{t('usage.usageTrends')}</h2>
+                        <p className={cn("text-sm", isDark ? "text-white/40" : "text-black/40")}>{t('usage.last7Days')}</p>
                     </div>
                     {/* Legend */}
                     <div className="flex items-center gap-4 text-xs font-medium">
                         <div className="flex items-center gap-2">
                             <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
-                            <span className={isDark ? "text-white/60" : "text-black/60"}>Voice</span>
+                            <span className={isDark ? "text-white/60" : "text-black/60"}>{t('usage.voice')}</span>
                         </div>
                         <div className="flex items-center gap-2">
                             <span className="w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]" />
-                            <span className={isDark ? "text-white/60" : "text-black/60"}>Text</span>
+                            <span className={isDark ? "text-white/60" : "text-black/60"}>{t('usage.text')}</span>
                         </div>
                     </div>
                 </div>
@@ -368,7 +370,7 @@ export default function UsageView({ isDark = true }: { isDark?: boolean }) {
                 isDark ? "bg-[#09090B] border-white/10" : "bg-white border-black/10"
             )}>
                 <div className="p-6 border-b border-inherit">
-                    <h3 className={cn("text-lg font-semibold", isDark ? "text-white" : "text-black")}>Usage Breakdown</h3>
+                    <h3 className={cn("text-lg font-semibold", isDark ? "text-white" : "text-black")}>{t('usage.usageBreakdown')}</h3>
                 </div>
                 <div className="overflow-x-auto">
                     <table className="w-full text-sm text-left">
@@ -377,10 +379,10 @@ export default function UsageView({ isDark = true }: { isDark?: boolean }) {
                             isDark ? "bg-white/5 text-gray-400" : "bg-gray-50 text-gray-600"
                         )}>
                             <tr>
-                                <th className="px-6 py-4">Service</th>
-                                <th className="px-6 py-4">Consumption</th>
-                                <th className="px-6 py-4">Credits Used</th>
-                                <th className="px-6 py-4 text-right">Limit</th>
+                                <th className="px-6 py-4">{t('usage.table.service')}</th>
+                                <th className="px-6 py-4">{t('usage.table.consumption')}</th>
+                                <th className="px-6 py-4">{t('usage.table.creditsUsed')}</th>
+                                <th className="px-6 py-4 text-right">{t('usage.table.limit')}</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-200 dark:divide-white/5">
@@ -389,30 +391,30 @@ export default function UsageView({ isDark = true }: { isDark?: boolean }) {
                                     <div className={cn("p-2 rounded-lg", isDark ? "bg-emerald-500/10" : "bg-emerald-50")}>
                                         <Mic className="w-4 h-4 text-emerald-500" />
                                     </div>
-                                    <span className={isDark ? "text-white" : "text-black"}>Voice Calls</span>
+                                    <span className={isDark ? "text-white" : "text-black"}>{t('usage.voiceCallsLabel')}</span>
                                 </td>
                                 <td className={cn("px-6 py-4", isDark ? "text-gray-400" : "text-gray-600")}>
-                                    {usageStats.totalVoiceMinutes} mins
+                                    {t('usage.mins').replace('{count}', String(usageStats.totalVoiceMinutes))}
                                 </td>
                                 <td className={cn("px-6 py-4 font-medium", isDark ? "text-white" : "text-black")}>
                                     {usageStats.voiceCreditsUsed}
                                 </td>
-                                <td className={cn("px-6 py-4 text-right", isDark ? "text-gray-400" : "text-gray-600")}>50 credits</td>
+                                <td className={cn("px-6 py-4 text-right", isDark ? "text-gray-400" : "text-gray-600")}>{t('usage.credits').replace('{count}', '50')}</td>
                             </tr>
                             <tr className={cn(isDark ? "hover:bg-white/5" : "hover:bg-gray-50")}>
                                 <td className="px-6 py-4 flex items-center gap-3">
                                     <div className={cn("p-2 rounded-lg", isDark ? "bg-blue-500/10" : "bg-blue-50")}>
                                         <MessageSquare className="w-4 h-4 text-blue-500" />
                                     </div>
-                                    <span className={isDark ? "text-white" : "text-black"}>Text Chat</span>
+                                    <span className={isDark ? "text-white" : "text-black"}>{t('usage.textChatLabel')}</span>
                                 </td>
                                 <td className={cn("px-6 py-4", isDark ? "text-gray-400" : "text-gray-600")}>
-                                    {usageStats.totalTextRequests} reqs
+                                    {t('usage.reqs').replace('{count}', String(usageStats.totalTextRequests))}
                                 </td>
                                 <td className={cn("px-6 py-4 font-medium", isDark ? "text-white" : "text-black")}>
                                     {usageStats.textCreditsUsed}
                                 </td>
-                                <td className={cn("px-6 py-4 text-right", isDark ? "text-gray-400" : "text-gray-600")}>Shared Pool</td>
+                                <td className={cn("px-6 py-4 text-right", isDark ? "text-gray-400" : "text-gray-600")}>{t('usage.sharedPool')}</td>
                             </tr>
                         </tbody>
                     </table>

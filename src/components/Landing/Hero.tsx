@@ -51,12 +51,12 @@ const Hero = () => {
               <span itemScope itemType="https://schema.org/Brand">
                 <h1 className="sr-only" itemProp="name">ClerkTree</h1>
               </span>
-              <h2 className="text-5xl md:text-7xl font-bold tracking-tight mb-6 text-left">
+              <h2 className="text-3xl sm:text-5xl md:text-7xl font-bold tracking-tight mb-6 text-left break-words hyphens-auto">
                 <span className="bg-gradient-to-r from-white via-white/95 to-white/90 text-transparent bg-clip-text">
                   {t('hero.revolutionizing')}
                 </span>
                 <br />
-                <span className="bg-gradient-to-r from-gray-200 via-slate-300 to-gray-400 text-transparent bg-clip-text whitespace-normal md:whitespace-nowrap">
+                <span className="bg-gradient-to-br from-white via-white/90 to-white/50 text-transparent bg-clip-text whitespace-normal md:whitespace-nowrap">
                   {t('hero.bpoClaims')}
                 </span>
               </h2>
@@ -111,7 +111,7 @@ const Hero = () => {
             */}
             <div className="relative w-[275%] -ml-[80%] h-[100vh] flex items-center justify-center -mt-[45%]">
               <img
-                src="/Untitled - Copy@1-1470x748-2.png"
+                src="/hero-dashboard-graphic.png"
                 alt="Hero Graphic"
                 className="w-full h-full object-contain scale-140"
                 style={{

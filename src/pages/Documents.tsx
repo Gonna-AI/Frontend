@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { FileCheck, Search, Filter, CheckCircle, XCircle, AlertCircle, MoreVertical, Download, History, Eye, User, Calendar, Clock, Shield, Sun, Moon } from 'lucide-react';
 import { adminApi, API_BASE_URL } from '../config/api';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -41,6 +42,7 @@ interface GroupedDocument {
 }
 
 const AdminDashboard = () => {
+  const navigate = useNavigate();
   const [documents, setDocuments] = useState<Document[]>([]);
   const [selectedDocument, setSelectedDocument] = useState<any>(null);
   const [showDetails, setShowDetails] = useState(false);
@@ -531,7 +533,7 @@ const AdminDashboard = () => {
             <LanguageSwitcher isExpanded={true} />
             {/* Dashboard Link */}
             <button
-              onClick={() => window.location.href = '/dashboard'}
+              onClick={() => navigate('/dashboard')}
               className={`p-2 rounded-lg transition-all duration-200 ${isDarkMode
                 ? 'bg-purple-500/20 text-purple-300 hover:bg-purple-500/30 border border-purple-500/30'
                 : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'

@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useDemoCall } from '../../contexts/DemoCallContext';
-import { TrendingUp, ArrowUpRight, ArrowDownRight, MoreHorizontal, Filter, Plus, Phone, Clock, Activity, Users, Radio } from 'lucide-react';
+import { ArrowUpRight, ArrowDownRight, MoreHorizontal, Filter, Phone, Clock, Activity, AlertCircle, Radio } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { LiveCallMonitor } from '../DemoCall';
 import {
@@ -31,16 +31,7 @@ interface StatsCardProps {
     color?: 'emerald' | 'blue' | 'purple' | 'orange';
 }
 
-// --- Mock Data for Chart (replace with real if available) ---
-const chartData = [
-    { name: 'Mon', calls: 12 },
-    { name: 'Tue', calls: 19 },
-    { name: 'Wed', calls: 15 },
-    { name: 'Thu', calls: 25 },
-    { name: 'Fri', calls: 32 },
-    { name: 'Sat', calls: 20 },
-    { name: 'Sun', calls: 28 },
-];
+// Chart data is now computed from real callHistory inside the component
 
 // --- Components ---
 
@@ -174,6 +165,7 @@ function SectionTab({ active, onClick, children, isDark }: { active: boolean, on
 }
 
 export default function MonitorView({ isDark = true }: { isDark?: boolean }) {
+    const { t } = useLanguage();
     const { getAnalytics, callHistory, currentCall } = useDemoCall();
     const analytics = getAnalytics();
     const [activeSection, setActiveSection] = useState<'history' | 'live'>('live');
@@ -183,6 +175,31 @@ export default function MonitorView({ isDark = true }: { isDark?: boolean }) {
         const secs = Math.round(seconds % 60);
         return `${mins}:${secs.toString().padStart(2, '0')}`;
     };
+
+    // Compute chart data from real callHistory aggregated by day
+    const chartData = useMemo(() => {
+        const data: { name: string; calls: number }[] = [];
+        const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+        // Show last 7 days
+        for (let i = 6; i >= 0; i--) {
+            const date = new Date();
+            date.setDate(date.getDate() - i);
+            const dayStart = new Date(date.setHours(0, 0, 0, 0));
+            const dayEnd = new Date(date.setHours(23, 59, 59, 999));
+
+            const callCount = callHistory.filter(c =>
+                new Date(c.date) >= dayStart &&
+                new Date(c.date) <= dayEnd
+            ).length;
+
+            data.push({
+                name: dayNames[new Date(dayStart).getDay()],
+                calls: callCount
+            });
+        }
+        return data;
+    }, [callHistory]);
 
 
 
@@ -197,7 +214,7 @@ export default function MonitorView({ isDark = true }: { isDark?: boolean }) {
                     <p className={cn("text-xs font-semibold mb-2", isDark ? "text-white" : "text-black")}>{label}</p>
                     <div className="flex items-center gap-2 text-xs">
                         <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
-                        <span className={isDark ? "text-gray-300" : "text-gray-600"}>Calls: {payload[0].value}</span>
+                        <span className={isDark ? "text-gray-300" : "text-gray-600"}>{t('monitor.stats.totalCalls')}: {payload[0].value}</span>
                     </div>
                 </div>
             );
@@ -211,10 +228,10 @@ export default function MonitorView({ isDark = true }: { isDark?: boolean }) {
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
                     <h1 className={cn("text-2xl font-bold", isDark ? "text-white" : "text-black")}>
-                        Live Monitor
+                        {t('monitor.title')}
                     </h1>
                     <p className={cn("text-sm mt-1", isDark ? "text-white/60" : "text-black/60")}>
-                        Real-time system overview and activity tracking
+                        {t('monitor.appSubtitle')}
                     </p>
                 </div>
 
@@ -227,49 +244,45 @@ export default function MonitorView({ isDark = true }: { isDark?: boolean }) {
                 className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
             >
                 <StatsCard
-                    title="Total Calls"
+                    title={t('monitor.stats.totalCalls')}
                     value={analytics.totalCalls}
-                    change="+12.5%"
-                    trend="up"
-                    subtitle="Last 7 days"
+                    subtitle={t('monitor.stats.last7Days')}
                     icon={<Phone className="w-5 h-5" />}
                     color="blue"
-                    progress={75}
+                    progress={Math.min((analytics.totalCalls / 50) * 100, 100)}
                     isDark={isDark}
                 />
                 <StatsCard
-                    title="Avg Duration"
+                    title={t('monitor.stats.avgDuration')}
                     value={formatDuration(analytics.avgDuration)}
-                    change="-5%"
-                    trend="down"
-                    subtitle="Target: < 5:00"
+                    subtitle={t('monitor.stats.target')}
                     icon={<Clock className="w-5 h-5" />}
                     color="purple"
-                    progress={65}
+                    progress={Math.min((analytics.avgDuration / 300) * 100, 100)}
                     isDark={isDark}
                 />
                 <StatsCard
-                    title="Active Sessions"
+                    title={t('monitor.stats.activeSessions')}
                     value={currentCall?.status === 'active' ? 1 : 0}
-                    change="LIVE"
-                    trend="up"
-                    subtitle="Real-time connections"
+                    change={currentCall?.status === 'active' ? 'LIVE' : undefined}
+                    trend={currentCall?.status === 'active' ? 'up' : undefined}
+                    subtitle={t('monitor.stats.realTimeConn')}
                     icon={<Activity className="w-5 h-5" />}
                     color="emerald"
                     progress={currentCall?.status === 'active' ? 100 : 0}
                     isDark={isDark}
                 />
 
-                {/* Available Credits Card (Glassmorphic) */}
+                {/* Follow-ups Required Card - Real Data */}
                 <StatsCard
-                    title="Satisfaction"
-                    value="94.5%"
-                    change="+4.5%"
-                    trend="up"
-                    subtitle="4.8/5.0 Customer Rating"
-                    icon={<Users className="w-5 h-5" />}
+                    title={t('monitor.stats.followUps')}
+                    value={analytics.followUpRequired}
+                    change={analytics.followUpRequired > 0 ? 'PENDING' : undefined}
+                    trend={analytics.followUpRequired > 0 ? 'down' : undefined}
+                    subtitle={t('monitor.stats.needsAction')}
+                    icon={<AlertCircle className="w-5 h-5" />}
                     color="orange"
-                    progress={94.5}
+                    progress={analytics.totalCalls > 0 ? (analytics.followUpRequired / analytics.totalCalls) * 100 : 0}
                     isDark={isDark}
                 />
             </motion.div>
@@ -292,8 +305,8 @@ export default function MonitorView({ isDark = true }: { isDark?: boolean }) {
 
                 <div className="relative z-10 flex justify-between items-center mb-8">
                     <div>
-                        <h2 className={cn("text-xl font-bold", isDark ? "text-white" : "text-gray-900")}>Call Volume Trends</h2>
-                        <p className={cn("text-sm mt-1", isDark ? "text-gray-400" : "text-gray-500")}>Inbound traffic analysis (Last 7 days)</p>
+                        <h2 className={cn("text-xl font-bold", isDark ? "text-white" : "text-gray-900")}>{t('monitor.chart.title')}</h2>
+                        <p className={cn("text-sm mt-1", isDark ? "text-gray-400" : "text-gray-500")}>{t('monitor.chart.subtitle')}</p>
                     </div>
                 </div>
 
@@ -342,11 +355,11 @@ export default function MonitorView({ isDark = true }: { isDark?: boolean }) {
                     )}>
                         <SectionTab isDark={isDark} active={activeSection === 'live'} onClick={() => setActiveSection('live')}>
                             <Radio className={cn("w-4 h-4", activeSection === 'live' && "text-rose-500 animate-pulse")} />
-                            Live Monitor
+                            {t('monitor.tab.live')}
                         </SectionTab>
                         <SectionTab isDark={isDark} active={activeSection === 'history'} onClick={() => setActiveSection('history')}>
                             <Clock className="w-4 h-4" />
-                            History Log
+                            {t('monitor.tab.history')}
                         </SectionTab>
                     </div>
 
@@ -356,7 +369,7 @@ export default function MonitorView({ isDark = true }: { isDark?: boolean }) {
                             isDark ? "border-white/10 hover:bg-white/5 text-white/80" : "border-black/10 hover:bg-gray-50 text-gray-700"
                         )}>
                             <Filter className="w-4 h-4" />
-                            Filter
+                            {t('monitor.filter')}
                         </button>
                     </div>
                 </div>
@@ -388,12 +401,12 @@ export default function MonitorView({ isDark = true }: { isDark?: boolean }) {
                                         isDark ? "bg-white/5 text-white/50" : "bg-gray-50 text-gray-500"
                                     )}>
                                         <tr>
-                                            <th className="px-8 py-5">Caller</th>
-                                            <th className="px-6 py-5">Category</th>
-                                            <th className="px-6 py-5">Status</th>
-                                            <th className="px-6 py-5">Duration</th>
-                                            <th className="px-6 py-5">Date</th>
-                                            <th className="px-6 py-5 text-right">Actions</th>
+                                            <th className="px-8 py-5">{t('monitor.table.caller')}</th>
+                                            <th className="px-6 py-5">{t('monitor.table.category')}</th>
+                                            <th className="px-6 py-5">{t('monitor.table.status')}</th>
+                                            <th className="px-6 py-5">{t('monitor.table.duration')}</th>
+                                            <th className="px-6 py-5">{t('monitor.table.date')}</th>
+                                            <th className="px-6 py-5 text-right">{t('monitor.table.actions')}</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-gray-200 dark:divide-white/5">
@@ -404,7 +417,7 @@ export default function MonitorView({ isDark = true }: { isDark?: boolean }) {
                                                         <div className={cn("p-4 rounded-full", isDark ? "bg-white/5" : "bg-gray-100")}>
                                                             <Clock className="w-6 h-6 opacity-50" />
                                                         </div>
-                                                        <p>No call history available yet</p>
+                                                        <p>{t('monitor.table.noHistory')}</p>
                                                     </div>
                                                 </td>
                                             </tr>
@@ -429,7 +442,7 @@ export default function MonitorView({ isDark = true }: { isDark?: boolean }) {
                                                                 ? `bg-${call.category.color}-500/10 text-${call.category.color}-500 border-${call.category.color}-500/20`
                                                                 : "bg-gray-500/10 text-gray-400 border-gray-500/20"
                                                         )}>
-                                                            {call.category?.name || 'Uncategorized'}
+                                                            {call.category?.name || t('monitor.category.uncategorized')}
                                                         </span>
                                                     </td>
                                                     <td className="px-6 py-5">
@@ -443,7 +456,7 @@ export default function MonitorView({ isDark = true }: { isDark?: boolean }) {
                                                                 call.priority === 'critical' ? "bg-red-400 font-bold animate-pulse" :
                                                                     call.priority === 'high' ? "bg-orange-400" : "bg-emerald-400"
                                                             )} />
-                                                            {call.priority === 'critical' ? 'Critical' : call.priority === 'high' ? 'High Priority' : 'Resolved'}
+                                                            {call.priority === 'critical' ? t('monitor.status.critical') : call.priority === 'high' ? t('monitor.status.high') : t('monitor.status.resolved')}
                                                         </span>
                                                     </td>
                                                     <td className={cn("px-6 py-5 font-mono text-xs", isDark ? "text-white/60" : "text-gray-600")}>
