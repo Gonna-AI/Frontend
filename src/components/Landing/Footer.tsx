@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useMemo } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
-import { Shield, Lock, Phone } from 'lucide-react';
+import { Shield, Lock, Phone, Mail } from 'lucide-react';
 import { useDeviceDetection } from '../../hooks/useDeviceDetection';
 import { useLanguage } from '../../contexts/LanguageContext';
 
@@ -123,10 +123,8 @@ export default function Footer() {
                 className="flex items-center gap-2 text-neutral-400 hover:text-white transition-colors text-sm font-medium group"
                 aria-label="Email"
               >
-                <svg className="w-4 h-4 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                </svg>
-                <span>team@clerktree.com</span>
+                <Mail className="w-4 h-4 group-hover:scale-110 transition-transform shrink-0" />
+                <span>Email</span>
               </a>
               <a
                 href="tel:+4917683075116"
@@ -206,9 +204,7 @@ export default function Footer() {
             </p>
           </div>
 
-          <div className="flex items-center gap-6">
-            <span className="text-neutral-600 text-xs">Latest version: <span className="bg-neutral-800 px-1.5 py-0.5 rounded text-neutral-400">2.0.0</span></span>
-          </div>
+
         </motion.div>
       </div>
     </footer>

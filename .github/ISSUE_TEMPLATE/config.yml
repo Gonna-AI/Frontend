@@ -1,0 +1,6 @@
+# Issue Templates Configuration
+blank_issues_enabled: false
+contact_links:
+  - name: "Discussion"
+    url: https://github.com/Gonna-AI/Frontend/discussions
+    about: "For general questions and discussions"

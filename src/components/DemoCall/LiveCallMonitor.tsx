@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import { useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MessageSquare, User, Bot, Activity } from 'lucide-react';
 import { cn } from '../../utils/cn';
@@ -12,14 +12,19 @@ interface LiveCallMonitorProps {
 export default function LiveCallMonitor({ isDark = true }: LiveCallMonitorProps) {
   const { t } = useLanguage();
   const { currentCall } = useDemoCall();
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const messages = currentCall?.messages || [];
   const extractedFields = currentCall?.extractedFields || [];
 
   // Auto-scroll to latest message
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTo({
+        top: scrollContainerRef.current.scrollHeight,
+        behavior: 'smooth'
+      });
+    }
   }, [messages]);
 
   const formatTime = (date: Date) => {
@@ -68,7 +73,7 @@ export default function LiveCallMonitor({ isDark = true }: LiveCallMonitorProps)
               {t('monitor.title')}
             </h3>
             <p className={cn("text-xs mt-1", isDark ? "text-white/40" : "text-gray-500")}>
-              Real-time conversation stream
+              {t('monitor.conversationStream')}
             </p>
           </div>
         </div>
@@ -80,7 +85,7 @@ export default function LiveCallMonitor({ isDark = true }: LiveCallMonitorProps)
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
               </span>
-              <span className="text-xs font-medium text-emerald-500 uppercase tracking-wider">Live</span>
+              <span className="text-xs font-medium text-emerald-500 uppercase tracking-wider">{t('monitor.status.live')}</span>
             </div>
           ) : (
             <div className={cn(
@@ -88,7 +93,7 @@ export default function LiveCallMonitor({ isDark = true }: LiveCallMonitorProps)
               isDark ? "bg-white/5 border-white/10 text-white/40" : "bg-black/5 border-black/5 text-black/40"
             )}>
               <div className="w-2 h-2 rounded-full bg-current opacity-50" />
-              <span className="text-xs font-medium uppercase tracking-wider">Idle</span>
+              <span className="text-xs font-medium uppercase tracking-wider">{t('monitor.status.idle')}</span>
             </div>
           )}
 
@@ -133,16 +138,18 @@ export default function LiveCallMonitor({ isDark = true }: LiveCallMonitorProps)
           "px-4 py-2 border-b flex items-center justify-between text-xs",
           isDark ? "border-white/10 bg-purple-500/5 text-purple-200" : "border-black/5 bg-purple-50 text-purple-700"
         )}>
-          <span className="opacity-70">Detected Intent</span>
+          <span className="opacity-70">{t('monitor.detectedIntent')}</span>
           <span className="font-semibold">{currentCall.category.name}</span>
         </div>
       )}
 
       {/* Messages area */}
-      <div className={cn(
-        "flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar scroll-smooth",
-        isDark ? "bg-[#09090B]" : "bg-gray-50/30"
-      )}>
+      <div
+        ref={scrollContainerRef}
+        className={cn(
+          "flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar scroll-smooth",
+          isDark ? "bg-[#09090B]" : "bg-gray-50/30"
+        )}>
         {messages.length === 0 ? (
           <div className={cn(
             "flex flex-col items-center justify-center h-full text-center py-12",
@@ -207,7 +214,7 @@ export default function LiveCallMonitor({ isDark = true }: LiveCallMonitorProps)
             ))}
           </AnimatePresence>
         )}
-        <div ref={messagesEndRef} />
+
       </div>
     </div>
   );
