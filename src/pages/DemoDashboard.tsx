@@ -38,9 +38,9 @@ function DemoDashboardContent() {
       priority_rules: t('sidebar.priorityRules'),
       instructions: t('sidebar.instructions'),
       groq_settings: t('sidebar.groqAi'),
-      usage: 'Usage',
-      billing: 'Billing',
-      keys: 'API Keys',
+      usage: t('sidebar.usage'),
+      billing: t('sidebar.billing'),
+      keys: t('sidebar.keys'),
     };
     return labelMap[tab] || tab;
   };
@@ -89,7 +89,7 @@ function DemoDashboardContent() {
                   isDark ? "text-white/60 hover:text-white" : "text-black/60 hover:text-black"
                 )}
               >
-                Docs
+                {t('sidebar.docs')}
               </a>
             </div>
           </div>
