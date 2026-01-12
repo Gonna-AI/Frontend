@@ -38,7 +38,7 @@
     "d3-force": "^3.0.0",
     "dotenv": "^16.4.7",
     "dotted-map": "^2.2.3",
-    "ethereum-waffle": "^4.0.10",
+    "ethereum-waffle": "^3.4.4",
     "ethers": "^5.7.2",
     "fastify": "^5.2.0",
     "framer-motion": "^11.15.0",
