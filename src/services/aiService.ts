@@ -18,7 +18,7 @@ import { localLLMService, LocalLLMResponse } from './localLLMService';
 
 // Configuration for AI operations
 interface AIConfig {
-  useLocalLLM: boolean;
+  useGroq: boolean;
   fallbackToMock: boolean;
 }
 
@@ -48,7 +48,7 @@ export interface AIResponse {
   suggestedCategory?: CallCategory;
   suggestedPriority?: PriorityLevel;
   confidence: number;
-  source?: 'local-llm' | 'mock';
+  source?: 'groq' | 'mock';
   // Enhanced function calling analysis
   analysis?: ConversationAnalysis;
 }
@@ -83,11 +83,11 @@ export interface PriorityPrediction {
 
 class AIService {
   private config: AIConfig = {
-    useLocalLLM: true,
+    useGroq: true,
     fallbackToMock: true,
   };
   private knowledgeBase: KnowledgeBaseConfig | null = null;
-  private localLLMAvailable: boolean | null = null;
+  private groqAvailable: boolean | null = null;
   private conversationState: ConversationState = this.resetConversationState();
 
   private resetConversationState(): ConversationState {
@@ -119,20 +119,17 @@ class AIService {
   async initialize(): Promise<void> {
     console.log('🔄 Initializing Groq AI service...');
 
-    // Initialize local LLM only
     try {
-      this.localLLMAvailable = await localLLMService.initialize();
+      this.groqAvailable = await localLLMService.initialize();
     } catch (error) {
-      console.error('Failed to initialize local LLM:', error);
-      this.localLLMAvailable = false;
+      console.error('Failed to initialize Groq service:', error);
+      this.groqAvailable = false;
     }
 
-    if (this.localLLMAvailable) {
+    if (this.groqAvailable) {
       console.log('✅ Groq AI service available');
     } else {
-      const llmUrl = import.meta.env.VITE_OLLAMA_URL || 'NOT SET';
-      console.error(`❌ Local LLM not available. Check: ${llmUrl}`);
-      console.error('💡 Make sure your cloudflare tunnel is running and accessible');
+      console.error('❌ Groq API not available. Check your VITE_GROQ_API_KEY');
     }
   }
 
@@ -154,10 +151,10 @@ class AIService {
   /**
    * Get current AI status
    */
-  getStatus(): { localLLM: boolean; localLLMUrl?: string } {
+  getStatus(): { groq: boolean; groqUrl?: string } {
     return {
-      localLLM: this.localLLMAvailable === true,
-      localLLMUrl: this.localLLMAvailable ? localLLMService.getServiceUrl() : undefined,
+      groq: this.groqAvailable === true,
+      groqUrl: this.groqAvailable ? localLLMService.getServiceUrl() : undefined,
     };
   }
 
@@ -176,12 +173,11 @@ class AIService {
       return this.smartMockResponse(userMessage, conversationHistory, extractedFields);
     }
 
-    // Use Groq API (primary) or Local LLM (fallback) via localLLMService
-    // The service handles Groq vs Local availability internally
-    if (this.config.useLocalLLM) {
+    // Use Groq API via localLLMService (named for backwards compatibility)
+    if (this.config.useGroq) {
       try {
-        console.log('🤖 Calling AI Service (Groq/Local)...');
-        console.log('   Service Available:', this.localLLMAvailable);
+        console.log('🤖 Calling Groq AI Service...');
+        console.log('   Service Available:', this.groqAvailable);
 
         const result: LocalLLMResponse = await localLLMService.generateResponse(
           userMessage,
@@ -197,7 +193,7 @@ class AIService {
           extractedFields: result.extractedFields,
           suggestedPriority: result.suggestedPriority,
           confidence: 0.88,
-          source: 'local-llm',
+          source: 'groq',
           analysis: result.analysis, // Pass through function calling analysis
         };
 
@@ -230,7 +226,7 @@ class AIService {
             error.message.includes('timeout') ||
             error.message.includes('aborted');
           if (!isTimeoutOrAbort) {
-            this.localLLMAvailable = false; // Only mark unavailable for actual connection failures
+            this.groqAvailable = false; // Only mark unavailable for actual connection failures
           } else {
             console.warn('⏱️ AI request timed out - model may still be processing');
             // Provide a helpful timeout message
@@ -242,9 +238,9 @@ class AIService {
       }
     }
 
-    // Step 3: No fallback - model must be available
-    console.error('❌ No AI model available - useLocalLLM is disabled');
-    throw new Error('AI model unavailable - useLocalLLM config is disabled');
+    // No fallback - Groq must be available
+    console.error('❌ Groq API not enabled in config');
+    throw new Error('Groq API is disabled in config');
   }
 
   /**
@@ -262,10 +258,10 @@ class AIService {
       return this.mockGenerateSummary(messages, extractedFields, category, priority);
     }
 
-    // Use Groq API for summary with enhanced function calling
-    if (this.config.useLocalLLM && this.localLLMAvailable) {
+    // Use Groq API for summary
+    if (this.config.useGroq && this.groqAvailable) {
       try {
-        console.log('🖥️ Calling Local LLM for summary with function calling...');
+        console.log('� Calling Groq for summary...');
         const result = await localLLMService.summarizeCall(
           messages,
           extractedFields,
