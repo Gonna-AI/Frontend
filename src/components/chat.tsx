@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
+import { API_BASE_URL } from '../config/api';
 
 interface Message {
   text: string;
@@ -28,7 +29,7 @@ const Chat: React.FC = () => {
     setIsTyping(true);
 
     try {
-      const response = await axios.post('https://backend-sq0u.onrender.com/api/chat', { message: inputMessage }, {
+      const response = await axios.post(`${API_BASE_URL}/api/chat`, { message: inputMessage }, {
         withCredentials: true
       });
       const aiMessage: Message = { text: response.data.response, isUser: false };
@@ -46,14 +47,13 @@ const Chat: React.FC = () => {
     <div className="flex flex-col h-full bg-transparent">
       <div className="flex-1 overflow-y-auto p-4">
         {messages.map((message, index) => (
-          <div 
-            key={index} 
+          <div
+            key={index}
             className={`mb-4 ${message.isUser ? 'text-right' : 'text-left'}`}
           >
-            <span 
-              className={`inline-block p-2 rounded-lg ${
-                message.isUser ? 'bg-blue-500 text-white' : 'bg-white/10 text-white'
-              }`}
+            <span
+              className={`inline-block p-2 rounded-lg ${message.isUser ? 'bg-blue-500 text-white' : 'bg-white/10 text-white'
+                }`}
             >
               {message.text}
             </span>
@@ -77,8 +77,8 @@ const Chat: React.FC = () => {
             className="flex-1 border rounded-l-lg p-2 bg-white/10 text-white placeholder-white/50"
             placeholder="Type your message..."
           />
-          <button 
-            type="submit" 
+          <button
+            type="submit"
             className="bg-blue-500 text-white p-2 rounded-r-lg"
             disabled={isTyping}
           >
