@@ -1,8 +1,7 @@
 /**
  * LLM Service for ClerkTree
  * 
- * Primary: Groq API with openai/gpt-oss-20b model (fast, powerful)
- * Fallback: Local Ollama via Cloudflare tunnel
+ * Primary: Groq API (fast, powerful)
  * 
  * Key Features:
  * - Function calling for structured data extraction
@@ -12,7 +11,6 @@
  * - Conversation summarization
  * 
  * Groq API: https://api.groq.com/openai/v1/chat/completions
- * Fallback: Local Ollama via Cloudflare tunnel
  */
 
 import {
@@ -42,19 +40,8 @@ function getCurrentGroqSettings(): GroqSettings {
   return getGroqSettings();
 }
 
-// ============= LOCAL OLLAMA CONFIGURATION (FALLBACK) =============
-const getCleanURL = (url: string) => {
-  if (!url) return '';
-  let cleaned = url.trim().split(/\s+/)[0];
-  cleaned = cleaned.replace(/\/+$/, '');
-  return cleaned;
-};
-const LOCAL_LLM_URL = getCleanURL(import.meta.env.VITE_OLLAMA_URL || 'https://classroom-currency-employ-lisa.trycloudflare.com');
-const LOCAL_MODEL_NAME = 'ministral-3:14b';
-
 // Timeout in milliseconds
-const REQUEST_TIMEOUT = 60000; // 1 minute for Groq (it's fast)
-const LOCAL_REQUEST_TIMEOUT = 120000; // 2 minutes for local
+const REQUEST_TIMEOUT = 60000; // 1 minute for Groq
 
 // Types
 export interface LocalLLMResponse {
@@ -88,10 +75,9 @@ export interface SentimentCard {
   details?: string;
 }
 
-class LocalLLMService {
+class GroqLLMService {
   private isAvailable: boolean | null = null;
   private groqAvailable: boolean | null = null;
-  private localAvailable: boolean | null = null;
 
   /**
    * Check if Groq API is available
@@ -197,17 +183,15 @@ class LocalLLMService {
   */
 
   /**
-   * Check availability - Groq only (faster startup)
+   * Check availability - Groq only
    */
   async checkAvailability(): Promise<boolean> {
-    // Only check Groq (primary) - skip local LLM for faster startup
     const groqOk = await this.checkGroqAvailability();
 
     this.isAvailable = groqOk;
-    this.localAvailable = false; // Skip local check
 
     if (groqOk) {
-      console.log('🚀 Using Groq API as primary LLM');
+      console.log('🚀 Using Groq API');
     } else {
       console.error('❌ Groq API not available! Check your VITE_GROQ_API_KEY');
     }
@@ -556,9 +540,9 @@ class LocalLLMService {
       await this.checkAvailability();
     }
 
-    // Check if either Groq or Local is available
-    if (!this.groqAvailable && !this.localAvailable) {
-      throw new Error('No AI service available - check Groq API key and/or local LLM');
+    // Check if Groq is available
+    if (!this.groqAvailable) {
+      throw new Error('Groq API not available - check VITE_GROQ_API_KEY');
     }
 
     // Build the enhanced prompt string
@@ -672,46 +656,6 @@ Rules:
       }
     };
 
-    // Helper function for Local Ollama request
-    const makeLocalRequest = async (retryCount = 0): Promise<string> => {
-      try {
-        console.log('📡 Calling Local LLM...');
-        const response = await fetch(`${LOCAL_LLM_URL}/api/generate`, {
-          method: 'POST',
-          mode: 'cors',
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-          },
-          body: JSON.stringify({
-            model: LOCAL_MODEL_NAME,
-            prompt: prompt,
-            stream: false,
-            thinking: false
-          }),
-          signal: AbortSignal.timeout(retryCount === 0 ? LOCAL_REQUEST_TIMEOUT : 60000),
-        });
-
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
-          const errorMsg = errorData.error || `Local LLM error: ${response.status}`;
-          console.error(`❌ Local LLM API error (${response.status}):`, errorMsg);
-          throw new Error(`Local LLM error: ${response.status} - ${errorMsg}`);
-        }
-
-        const data = await response.json();
-        console.log('✅ Local LLM response received');
-        return data.response || '';
-      } catch (error) {
-        if (retryCount === 0) {
-          console.warn('First local request failed, retrying...', error);
-          await new Promise(resolve => setTimeout(resolve, 1000));
-          return makeLocalRequest(1);
-        }
-        throw error;
-      }
-    };
-
     try {
       // Use Groq only (no local fallback for faster responses)
       const rawResponse = await makeGroqRequest();
@@ -761,260 +705,6 @@ Rules:
     }
   }
 
-  /**
-   * Extract analysis from the conversation using AI model
-   * PURE AI/ML APPROACH - No hardcoded patterns
-   * Makes a focused API call to extract structured data from the message
-   */
-  private async extractAIAnalysis(
-    userMessage: string,
-    existingFields: ExtractedField[]
-  ): Promise<{
-    fields: ExtractedField[];
-    priority?: PriorityLevel;
-    category?: { id: string; name: string; confidence: number };
-    analysis?: ConversationAnalysis;
-  }> {
-    const fields: ExtractedField[] = [];
-    const now = new Date();
-
-    // Build context of what we already know
-    const knownFields = existingFields.map(f => `${f.label}: ${f.value}`).join(', ');
-
-    // AI-powered extraction prompt - model does ALL the work
-    const analysisPrompt = `Analyze this caller message and extract structured information. Respond with ONLY valid JSON.
-
-MESSAGE: "${userMessage}"
-${knownFields ? `\nALREADY KNOWN: ${knownFields}` : ''}
-
-Extract and return JSON (use null if not detected):
-{
-  "caller_name": "extracted full name or null",
-  "phone": "phone number or null", 
-  "email": "email address or null",
-  "company": "company/organization name or null",
-  "reference_number": "any reference/case/account number or null",
-  "alternative_contact": "any other contact method mentioned (WhatsApp, callback time, etc) or null",
-  "priority": "critical|high|medium|low",
-  "priority_reasoning": "why this priority level",
-  "sentiment": "positive|neutral|negative",
-  "emotion": "happy|satisfied|neutral|confused|frustrated|angry|anxious|sad|relieved",
-  "emotion_intensity": "mild|moderate|strong",
-  "category": "inquiry|support|complaint|appointment|feedback|sales|billing|technical|other",
-  "topic": "main topic of the message",
-  "escalation_needed": "yes|no|maybe",
-  "time_sensitivity": "immediate|today|this_week|no_rush",
-  "is_appointment_request": true|false,
-  "appointment_date": "YYYY-MM-DD format or null",
-  "appointment_time": "HH:MM format (24h) or null",
-  "appointment_purpose": "what the appointment is for or null"
-}`;
-
-    try {
-      console.log('🤖 Running AI-based message analysis...');
-
-      const response = await fetch(`${LOCAL_LLM_URL}/api/generate`, {
-        method: 'POST',
-        mode: 'cors',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        body: JSON.stringify({
-          model: LOCAL_MODEL_NAME,
-          prompt: analysisPrompt,
-          stream: false,
-          thinking: false
-        }),
-        signal: AbortSignal.timeout(30000), // 30 second timeout for quick analysis
-      });
-
-      if (!response.ok) {
-        console.warn('AI analysis request failed, returning empty analysis');
-        return { fields };
-      }
-
-      const data = await response.json();
-      const rawResponse = data.response || '';
-
-      // Parse JSON from response
-      let parsed: Record<string, unknown> | null = null;
-      try {
-        const jsonMatch = rawResponse.match(/\{[\s\S]*\}/);
-        if (jsonMatch) {
-          parsed = JSON.parse(jsonMatch[0]);
-        }
-      } catch (e) {
-        console.warn('Failed to parse AI analysis JSON:', e);
-        return { fields };
-      }
-
-      if (!parsed) {
-        return { fields };
-      }
-
-      console.log('✅ AI analysis extracted:', {
-        name: parsed.caller_name,
-        priority: parsed.priority,
-        emotion: parsed.emotion,
-        category: parsed.category
-      });
-
-      // Extract fields from AI response (only if not already known)
-      if (parsed.caller_name && typeof parsed.caller_name === 'string' && parsed.caller_name !== 'null' && !existingFields.find(f => f.id === 'name')) {
-        fields.push({
-          id: 'name',
-          label: 'Caller Name',
-          value: parsed.caller_name,
-          confidence: 0.9,
-          extractedAt: now
-        });
-      }
-
-      if (parsed.phone && typeof parsed.phone === 'string' && parsed.phone !== 'null' && !existingFields.find(f => f.id === 'phone')) {
-        fields.push({
-          id: 'phone',
-          label: 'Phone Number',
-          value: parsed.phone,
-          confidence: 0.95,
-          extractedAt: now
-        });
-      }
-
-      if (parsed.email && typeof parsed.email === 'string' && parsed.email !== 'null' && !existingFields.find(f => f.id === 'email')) {
-        fields.push({
-          id: 'email',
-          label: 'Email',
-          value: parsed.email,
-          confidence: 0.95,
-          extractedAt: now
-        });
-      }
-
-      if (parsed.company && typeof parsed.company === 'string' && parsed.company !== 'null' && !existingFields.find(f => f.id === 'company')) {
-        fields.push({
-          id: 'company',
-          label: 'Company/Organization',
-          value: parsed.company,
-          confidence: 0.85,
-          extractedAt: now
-        });
-      }
-
-      if (parsed.reference_number && typeof parsed.reference_number === 'string' && parsed.reference_number !== 'null' && !existingFields.find(f => f.id === 'reference')) {
-        fields.push({
-          id: 'reference',
-          label: 'Reference Number',
-          value: parsed.reference_number,
-          confidence: 0.95,
-          extractedAt: now
-        });
-      }
-
-      // Extract alternative contact method (WhatsApp, callback time, etc.)
-      if (parsed.alternative_contact && typeof parsed.alternative_contact === 'string' && parsed.alternative_contact !== 'null' && !existingFields.find(f => f.id === 'alt_contact')) {
-        fields.push({
-          id: 'alt_contact',
-          label: 'Alternative Contact',
-          value: parsed.alternative_contact,
-          confidence: 0.85,
-          extractedAt: now
-        });
-      }
-
-      // Extract appointment details
-      if (parsed.is_appointment_request === true) {
-        if (parsed.appointment_date && typeof parsed.appointment_date === 'string' && parsed.appointment_date !== 'null') {
-          fields.push({
-            id: 'appt_date',
-            label: 'Appointment Date',
-            value: parsed.appointment_date,
-            confidence: 0.9,
-            extractedAt: now
-          });
-        }
-        if (parsed.appointment_time && typeof parsed.appointment_time === 'string' && parsed.appointment_time !== 'null') {
-          fields.push({
-            id: 'appt_time',
-            label: 'Appointment Time',
-            value: parsed.appointment_time,
-            confidence: 0.9,
-            extractedAt: now
-          });
-        }
-        if (parsed.appointment_purpose && typeof parsed.appointment_purpose === 'string' && parsed.appointment_purpose !== 'null') {
-          fields.push({
-            id: 'appt_purpose',
-            label: 'Appointment Purpose',
-            value: parsed.appointment_purpose,
-            confidence: 0.85,
-            extractedAt: now
-          });
-        }
-      }
-
-      // Extract priority (AI-determined)
-      const priority = ['critical', 'high', 'medium', 'low'].includes(parsed.priority as string)
-        ? (parsed.priority as PriorityLevel)
-        : undefined;
-
-      // Extract category (AI-determined)
-      const validCategories = ['inquiry', 'support', 'complaint', 'appointment', 'feedback', 'sales', 'billing', 'technical', 'other'];
-      const category = validCategories.includes(parsed.category as string)
-        ? {
-          id: parsed.category as string,
-          name: (parsed.category as string).charAt(0).toUpperCase() + (parsed.category as string).slice(1),
-          confidence: 0.85
-        }
-        : undefined;
-
-      // Build analysis object from AI response
-      const analysis: ConversationAnalysis = {
-        seriousness: priority ? {
-          priority_level: priority,
-          urgency_indicators: [],
-          reasoning: (parsed.priority_reasoning as string) || 'AI-determined priority',
-          escalation_needed: (parsed.escalation_needed as 'yes' | 'no' | 'maybe') || 'no',
-          time_sensitivity: (parsed.time_sensitivity as 'immediate' | 'today' | 'this_week' | 'no_rush') || 'this_week'
-        } : undefined,
-        sentiment: parsed.sentiment ? {
-          overall_sentiment: (parsed.sentiment as 'positive' | 'neutral' | 'negative') || 'neutral',
-          caller_emotion: (parsed.emotion as any) || 'neutral',
-          emotion_intensity: (parsed.emotion_intensity as 'mild' | 'moderate' | 'strong') || 'moderate'
-        } : undefined,
-        issueTopics: parsed.topic ? {
-          primary_topic: parsed.topic as string,
-          issue_category: (parsed.category as string) || 'inquiry',
-          issue_description: parsed.topic as string
-        } : undefined,
-        // Add appointment details if this is an appointment request
-        appointment: parsed.is_appointment_request === true ? {
-          requested: true,
-          date: parsed.appointment_date as string || undefined,
-          time: parsed.appointment_time as string || undefined,
-          purpose: parsed.appointment_purpose as string || undefined,
-          confirmed: false
-        } : undefined,
-        // Add contact status
-        contactStatus: {
-          has_phone: !!(parsed.phone && parsed.phone !== 'null') || existingFields.some(f => f.id === 'phone'),
-          has_email: !!(parsed.email && parsed.email !== 'null') || existingFields.some(f => f.id === 'email'),
-          has_any_contact: !!(parsed.phone || parsed.email || parsed.alternative_contact) ||
-            existingFields.some(f => ['phone', 'email', 'alt_contact'].includes(f.id)),
-          needs_followup_contact: !(parsed.phone || parsed.email || parsed.alternative_contact) &&
-            !existingFields.some(f => ['phone', 'email', 'alt_contact'].includes(f.id)),
-          alternative_contact: parsed.alternative_contact as string || undefined
-        }
-      };
-
-      return { fields, priority, category, analysis };
-
-    } catch (error) {
-      console.error('AI analysis error:', error);
-      // Return empty on error - don't block the main response
-      return { fields };
-    }
-  }
 
   /**
    * Generate comprehensive call summary using function calling approach
@@ -1053,9 +743,9 @@ Extract and return JSON (use null if not detected):
       await this.checkAvailability();
     }
 
-    // Check if either Groq or Local is available
-    if (!this.groqAvailable && !this.localAvailable) {
-      throw new Error('No AI service available for summary');
+    // Check if Groq is available
+    if (!this.groqAvailable) {
+      throw new Error('Groq API not available for summary');
     }
 
     // Quick timeout for fast notes generation (30 seconds)
@@ -1352,12 +1042,12 @@ Respond ONLY with valid JSON:
    * Get the service URL being used
    */
   getServiceUrl(): string {
-    return this.groqAvailable ? GROQ_API_URL : LOCAL_LLM_URL;
+    return GROQ_API_URL;
   }
 }
 
-// Export singleton
-export const localLLMService = new LocalLLMService();
+// Export singleton (keeping name for backwards compatibility)
+export const localLLMService = new GroqLLMService();
 
 // Initialize on import
 localLLMService.initialize();
