@@ -41,7 +41,7 @@ export default function Landing() {
 
   const handleContactClick = () => {
     setIsMobileMenuOpen(false);
-    navigate('/contact');
+    navigate('/dashboard');
   };
 
   const handleSolutionsClick = () => {

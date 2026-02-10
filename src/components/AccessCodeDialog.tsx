@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useAccessCode } from '../contexts/AccessCodeContext';
 import { cn } from '../utils/cn';
 import { useTheme } from '../hooks/useTheme';
-import { Shield, ArrowRight, CheckCircle2, Loader2, Lock, KeyRound } from 'lucide-react';
+import { ArrowRight, CheckCircle2, Loader2, AlertCircle, ShieldCheck } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 type DialogState = 'input' | 'validating' | 'success' | 'error';
@@ -16,7 +16,6 @@ export default function AccessCodeDialog() {
     const inputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
-        // Auto-focus input on mount
         const timer = setTimeout(() => inputRef.current?.focus(), 300);
         return () => clearTimeout(timer);
     }, []);
@@ -42,7 +41,6 @@ export default function AccessCodeDialog() {
         if (success) {
             setDialogState('success');
         }
-        // error state is handled by the useEffect above
     };
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -57,11 +55,10 @@ export default function AccessCodeDialog() {
     return (
         <div className="flex items-center justify-center w-full h-full min-h-[60vh]">
             <motion.div
-                initial={{ opacity: 0, y: 24, scale: 0.96 }}
+                initial={{ opacity: 0, y: 20 }}
                 animate={{
                     opacity: 1,
                     y: 0,
-                    scale: 1,
                     x: shake ? [0, -12, 12, -8, 8, -4, 4, 0] : 0,
                 }}
                 transition={{
@@ -69,86 +66,55 @@ export default function AccessCodeDialog() {
                     ease: [0.16, 1, 0.3, 1],
                 }}
                 className={cn(
-                    "relative w-full max-w-md rounded-2xl border p-8 shadow-2xl overflow-hidden",
+                    "w-full max-w-[440px] rounded-[32px] border shadow-2xl overflow-hidden transition-all duration-500",
                     isDark
-                        ? "bg-[#111111]/90 border-white/[0.08] shadow-black/60"
-                        : "bg-white/90 border-black/[0.06] shadow-black/10",
-                    "backdrop-blur-xl"
+                        ? "bg-[#121214] border-white/5 shadow-black/50"
+                        : "bg-white border-gray-200/50 shadow-xl shadow-gray-200/50"
                 )}
             >
-                {/* Decorative gradient orbs */}
-                <div className="absolute -top-24 -right-24 w-48 h-48 rounded-full bg-gradient-to-br from-purple-500/20 to-blue-500/10 blur-3xl pointer-events-none" />
-                <div className="absolute -bottom-20 -left-20 w-40 h-40 rounded-full bg-gradient-to-tr from-emerald-500/10 to-cyan-500/10 blur-3xl pointer-events-none" />
-
-                {/* Content */}
-                <div className="relative z-10">
+                <div className="p-8 md:p-10">
                     {/* Icon */}
-                    <div className="flex justify-center mb-6">
-                        <AnimatePresence mode="wait">
-                            {dialogState === 'success' ? (
-                                <motion.div
-                                    key="success"
-                                    initial={{ scale: 0, rotate: -180 }}
-                                    animate={{ scale: 1, rotate: 0 }}
-                                    className="w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-500/20 to-emerald-500/5 flex items-center justify-center border border-emerald-500/20"
-                                >
-                                    <CheckCircle2 className="w-8 h-8 text-emerald-400" />
-                                </motion.div>
-                            ) : (
-                                <motion.div
-                                    key="lock"
-                                    initial={{ scale: 0.8 }}
-                                    animate={{ scale: 1 }}
-                                    className={cn(
-                                        "w-16 h-16 rounded-2xl flex items-center justify-center border",
-                                        "bg-gradient-to-br from-purple-500/20 to-blue-500/10 border-purple-500/20"
-                                    )}
-                                >
-                                    <Shield className="w-8 h-8 text-purple-400" />
-                                </motion.div>
-                            )}
-                        </AnimatePresence>
+                    <div className="flex items-center gap-3 mb-10">
+                        <div className={cn(
+                            "w-10 h-10 rounded-xl flex items-center justify-center border shadow-sm transition-all duration-300",
+                            isDark ? "bg-white/5 border-white/10" : "bg-white border-gray-200"
+                        )}>
+                            <ShieldCheck className={cn("w-5 h-5", isDark ? "text-white/70" : "text-gray-700")} />
+                        </div>
+                        <span className={cn("text-xl font-bold tracking-tight", isDark ? "text-white" : "text-gray-900")}>
+                            Access Code
+                        </span>
                     </div>
 
-                    {/* Title & Description */}
+                    {/* Header Text */}
                     <AnimatePresence mode="wait">
                         {dialogState === 'success' ? (
                             <motion.div
                                 key="success-text"
                                 initial={{ opacity: 0, y: 8 }}
                                 animate={{ opacity: 1, y: 0 }}
-                                className="text-center mb-6"
+                                className="mb-8"
                             >
-                                <h2 className={cn(
-                                    "text-xl font-bold mb-2 tracking-tight",
-                                    isDark ? "text-white" : "text-gray-900"
+                                <div className={cn(
+                                    "w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6",
+                                    isDark ? "bg-emerald-500/10 text-emerald-400" : "bg-emerald-50 text-emerald-500"
                                 )}>
+                                    <CheckCircle2 className="w-8 h-8" />
+                                </div>
+                                <h1 className={cn("text-3xl font-bold mb-2 tracking-tight text-center", isDark ? "text-white" : "text-gray-900")}>
                                     Access Granted
-                                </h2>
-                                <p className={cn(
-                                    "text-sm",
-                                    isDark ? "text-white/50" : "text-gray-500"
-                                )}>
+                                </h1>
+                                <p className={cn("text-sm text-center", isDark ? "text-zinc-400" : "text-gray-500")}>
                                     Your dashboard is being unlocked...
                                 </p>
                             </motion.div>
                         ) : (
-                            <motion.div
-                                key="input-text"
-                                className="text-center mb-6"
-                            >
-                                <h2 className={cn(
-                                    "text-xl font-bold mb-2 tracking-tight",
-                                    isDark ? "text-white" : "text-gray-900"
-                                )}>
-                                    Enter Access Code
-                                </h2>
-                                <p className={cn(
-                                    "text-sm leading-relaxed",
-                                    isDark ? "text-white/50" : "text-gray-500"
-                                )}>
-                                    A valid access code is required to unlock the full dashboard.
-                                    Contact your administrator if you don't have one.
+                            <motion.div key="input-text" className="mb-8">
+                                <h1 className={cn("text-3xl font-bold mb-2 tracking-tight", isDark ? "text-white" : "text-gray-900")}>
+                                    Unlock Dashboard
+                                </h1>
+                                <p className={cn("text-sm", isDark ? "text-zinc-400" : "text-gray-500")}>
+                                    Enter the access code provided by your administrator.
                                 </p>
                             </motion.div>
                         )}
@@ -156,31 +122,27 @@ export default function AccessCodeDialog() {
 
                     {/* Form */}
                     {dialogState !== 'success' && (
-                        <form onSubmit={handleSubmit} className="space-y-4">
-                            {/* Input */}
-                            <div className="relative">
-                                <div className={cn(
-                                    "absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none",
-                                    isDark ? "text-white/30" : "text-gray-400"
-                                )}>
-                                    <KeyRound className="w-4 h-4" />
-                                </div>
+                        <form onSubmit={handleSubmit} className="space-y-5">
+                            <div className="space-y-1.5">
+                                <label className={cn("text-sm font-medium", isDark ? "text-zinc-300" : "text-gray-700")}>
+                                    Access Code
+                                </label>
                                 <input
                                     ref={inputRef}
                                     type="text"
                                     value={code}
                                     onChange={handleInputChange}
-                                    placeholder="ENTER CODE"
-                                    maxLength={20}
+                                    placeholder="CTX-XXX-XXXX-XXXX-XXXX"
+                                    maxLength={30}
                                     disabled={dialogState === 'validating'}
                                     className={cn(
-                                        "w-full pl-10 pr-4 py-3.5 rounded-xl text-sm font-mono tracking-[0.2em] text-center",
-                                        "transition-all duration-200 outline-none",
-                                        "placeholder:tracking-[0.15em] placeholder:font-sans placeholder:font-normal",
+                                        "w-full px-4 py-3 rounded-xl text-sm font-mono tracking-wider border focus:ring-2 focus:ring-offset-0 outline-none transition-all duration-200",
                                         isDark
-                                            ? "bg-white/[0.04] border border-white/[0.08] text-white placeholder:text-white/25 focus:border-purple-500/40 focus:bg-white/[0.06] focus:ring-1 focus:ring-purple-500/20"
-                                            : "bg-black/[0.03] border border-black/[0.06] text-gray-900 placeholder:text-gray-400 focus:border-purple-500/40 focus:bg-white focus:ring-1 focus:ring-purple-500/20",
-                                        dialogState === 'error' && (isDark ? "border-red-500/40 bg-red-500/[0.04]" : "border-red-400/50 bg-red-50/50"),
+                                            ? "bg-zinc-900/50 border-zinc-800 text-white placeholder-zinc-500 focus:border-zinc-700 focus:ring-zinc-800"
+                                            : "bg-gray-50 border-gray-200 text-gray-900 placeholder-gray-400 focus:border-gray-300 focus:ring-gray-100",
+                                        dialogState === 'error' && (isDark
+                                            ? "border-red-500/40 bg-red-500/[0.06] focus:ring-red-500/20"
+                                            : "border-red-300 bg-red-50/50 focus:ring-red-100"),
                                         dialogState === 'validating' && "opacity-60 cursor-not-allowed"
                                     )}
                                     autoComplete="off"
@@ -191,14 +153,20 @@ export default function AccessCodeDialog() {
                             {/* Error Message */}
                             <AnimatePresence>
                                 {dialogState === 'error' && error && (
-                                    <motion.p
-                                        initial={{ opacity: 0, y: -4, height: 0 }}
-                                        animate={{ opacity: 1, y: 0, height: 'auto' }}
-                                        exit={{ opacity: 0, y: -4, height: 0 }}
-                                        className="text-xs text-red-400 text-center font-medium"
+                                    <motion.div
+                                        initial={{ opacity: 0, height: 0 }}
+                                        animate={{ opacity: 1, height: 'auto' }}
+                                        exit={{ opacity: 0, height: 0 }}
+                                        className={cn(
+                                            "text-xs flex items-center gap-2 p-3 rounded-lg border",
+                                            isDark
+                                                ? "bg-red-500/10 border-red-500/20 text-red-400"
+                                                : "bg-red-50 border-red-200 text-red-600"
+                                        )}
                                     >
+                                        <AlertCircle className="w-4 h-4 shrink-0" />
                                         {error}
-                                    </motion.p>
+                                    </motion.div>
                                 )}
                             </AnimatePresence>
 
@@ -207,26 +175,19 @@ export default function AccessCodeDialog() {
                                 type="submit"
                                 disabled={!code.trim() || dialogState === 'validating'}
                                 className={cn(
-                                    "w-full py-3.5 rounded-xl text-sm font-semibold transition-all duration-300 flex items-center justify-center gap-2",
-                                    "cursor-pointer",
-                                    code.trim() && dialogState !== 'validating'
-                                        ? "bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-lg shadow-purple-500/20 hover:shadow-purple-500/30 hover:from-purple-500 hover:to-blue-500 active:scale-[0.98]"
-                                        : cn(
-                                            "cursor-not-allowed",
-                                            isDark
-                                                ? "bg-white/[0.04] text-white/25 border border-white/[0.06]"
-                                                : "bg-gray-100 text-gray-400 border border-gray-200"
-                                        )
+                                    "w-full py-3 rounded-xl text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2",
+                                    "shadow-lg hover:shadow-xl hover:-translate-y-0.5",
+                                    "disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none",
+                                    isDark
+                                        ? "bg-white text-black hover:bg-gray-100 shadow-white/5"
+                                        : "bg-black text-white hover:bg-gray-800 shadow-black/10"
                                 )}
                             >
                                 {dialogState === 'validating' ? (
-                                    <>
-                                        <Loader2 className="w-4 h-4 animate-spin" />
-                                        <span>Validating...</span>
-                                    </>
+                                    <Loader2 className="w-4 h-4 animate-spin" />
                                 ) : (
                                     <>
-                                        <span>Unlock Dashboard</span>
+                                        <span>Enter</span>
                                         <ArrowRight className="w-4 h-4" />
                                     </>
                                 )}
@@ -234,19 +195,7 @@ export default function AccessCodeDialog() {
                         </form>
                     )}
 
-                    {/* Footer info */}
-                    <div className={cn(
-                        "mt-6 pt-5 border-t flex items-center justify-center gap-2",
-                        isDark ? "border-white/[0.06]" : "border-black/[0.04]"
-                    )}>
-                        <Lock className={cn("w-3 h-3", isDark ? "text-white/25" : "text-gray-400")} />
-                        <p className={cn(
-                            "text-[11px]",
-                            isDark ? "text-white/25" : "text-gray-400"
-                        )}>
-                            Enterprise-grade access control · End-to-end encrypted
-                        </p>
-                    </div>
+
                 </div>
             </motion.div>
         </div>

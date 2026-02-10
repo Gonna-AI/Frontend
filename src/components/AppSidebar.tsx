@@ -519,33 +519,33 @@ function AuthUserSection({ isDark, state }: { isDark: boolean; state: string }) 
                 >
                     <div
                         className={cn(
-                            "relative w-[340px] rounded-2xl p-6 shadow-2xl border animate-scale-in",
+                            "relative w-[380px] rounded-[28px] p-8 shadow-2xl border animate-scale-in transition-all duration-500",
                             isDark
-                                ? "bg-[#1a1a1a] border-white/10"
-                                : "bg-white border-black/10"
+                                ? "bg-[#121214] border-white/5 shadow-black/50"
+                                : "bg-white border-gray-200/50 shadow-xl shadow-gray-200/50"
                         )}
                         onClick={(e) => e.stopPropagation()}
                     >
                         {/* Icon */}
-                        <div className="flex justify-center mb-4">
+                        <div className="flex justify-center mb-5">
                             <div className={cn(
-                                "w-12 h-12 rounded-full flex items-center justify-center",
-                                isDark ? "bg-red-500/10" : "bg-red-50"
+                                "w-12 h-12 rounded-xl flex items-center justify-center border shadow-sm",
+                                isDark ? "bg-white/5 border-white/10" : "bg-white border-gray-200"
                             )}>
-                                <LogOut className={cn("w-5 h-5", isDark ? "text-red-400" : "text-red-500")} />
+                                <LogOut className={cn("w-5 h-5", isDark ? "text-white/70" : "text-gray-700")} />
                             </div>
                         </div>
 
                         {/* Text */}
                         <h3 className={cn(
-                            "text-center text-base font-semibold mb-1",
+                            "text-center text-lg font-bold mb-1.5 tracking-tight",
                             isDark ? "text-white" : "text-gray-900"
                         )}>
                             Sign out?
                         </h3>
                         <p className={cn(
-                            "text-center text-sm mb-6",
-                            isDark ? "text-white/50" : "text-gray-500"
+                            "text-center text-sm mb-7",
+                            isDark ? "text-zinc-400" : "text-gray-500"
                         )}>
                             You'll need to sign in again to access your dashboard.
                         </p>
@@ -555,17 +555,17 @@ function AuthUserSection({ isDark, state }: { isDark: boolean; state: string }) 
                             <button
                                 onClick={() => setShowConfirm(false)}
                                 className={cn(
-                                    "flex-1 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 cursor-pointer",
+                                    "flex-1 px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-200 cursor-pointer border",
                                     isDark
-                                        ? "bg-white/5 hover:bg-white/10 text-white/70 hover:text-white border border-white/10"
-                                        : "bg-gray-100 hover:bg-gray-200 text-gray-600 hover:text-gray-800 border border-gray-200"
+                                        ? "bg-white/5 hover:bg-white/10 text-white/70 hover:text-white border-white/10"
+                                        : "bg-gray-50 hover:bg-gray-100 text-gray-600 hover:text-gray-800 border-gray-200"
                                 )}
                             >
                                 Cancel
                             </button>
                             <button
                                 onClick={handleSignOut}
-                                className="flex-1 px-4 py-2.5 rounded-xl text-sm font-medium bg-red-500 hover:bg-red-600 text-white transition-all duration-200 shadow-lg shadow-red-500/20 hover:shadow-red-500/30 cursor-pointer"
+                                className="flex-1 px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-200 cursor-pointer bg-red-500/80 backdrop-blur-sm hover:bg-red-500 text-white shadow-lg shadow-red-500/20 hover:shadow-red-500/30 hover:-translate-y-0.5"
                             >
                                 Sign out
                             </button>
