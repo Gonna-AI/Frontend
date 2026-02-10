@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from '../components/AppSidebar';
 import { DemoCallProvider } from '../contexts/DemoCallContext';
@@ -18,12 +18,30 @@ import BillingView from '../components/DashboardViews/BillingView';
 import KeysView from '../components/DashboardViews/KeysView';
 import MonitorView from '../components/DashboardViews/MonitorView';
 import WelcomeManager from '../components/DemoCall/WelcomeManager';
+import { AccessCodeProvider, useAccessCode } from '../contexts/AccessCodeContext';
+import AccessCodeDialog from '../components/AccessCodeDialog';
 
 function DemoDashboardContent() {
   const { isDark } = useTheme();
   const { t } = useLanguage();
-  const [activeTab, setActiveTab] = useState('monitor');
+  const [activeTab, setActiveTab] = useState('');
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const { hasAccess, isLoading: accessLoading } = useAccessCode();
+
+  // Auto-select monitor tab once access is granted and no tab is active
+  useEffect(() => {
+    if (hasAccess && activeTab === '') {
+      setActiveTab('monitor');
+    }
+  }, [hasAccess, activeTab]);
+
+  // Tabs that are always accessible without an access code
+  const alwaysAccessibleTabs = ['billing', 'keys'];
+
+  const handleSetActiveTab = (tab: string) => {
+    if (!hasAccess && !alwaysAccessibleTabs.includes(tab)) return;
+    setActiveTab(tab);
+  };
 
   // Get tab label using translation keys matching the sidebar
   const getTabLabel = (tab: string): string => {
@@ -53,7 +71,8 @@ function DemoDashboardContent() {
       )}>
         <AppSidebar
           activeTab={activeTab}
-          setActiveTab={setActiveTab}
+          setActiveTab={handleSetActiveTab}
+          hasAccess={hasAccess}
         />
 
         <WelcomeManager isDark={isDark} />
@@ -97,34 +116,51 @@ function DemoDashboardContent() {
           {/* Main Content Area */}
           <div className="flex-1 overflow-y-auto p-4 md:p-6 scrollbar-hide">
             <div className="max-w-7xl mx-auto w-full pb-10">
+              {/* Show Access Code Dialog when no tab is selected and no access */}
+              {activeTab === '' && !hasAccess && !accessLoading && (
+                <AccessCodeDialog />
+              )}
+
+              {/* Show loading state while checking access */}
+              {activeTab === '' && accessLoading && (
+                <div className="flex items-center justify-center w-full min-h-[60vh]">
+                  <div className="flex flex-col items-center gap-4">
+                    <div className="w-8 h-8 border-2 border-white/20 border-t-purple-500 rounded-full animate-spin" />
+                    <p className={cn("text-sm", isDark ? "text-white/50" : "text-gray-500")}>Checking access...</p>
+                  </div>
+                </div>
+              )}
+
               {/* Dynamically render content based on activeTab */}
-              <motion.div
-                key={activeTab}
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.2 }}
-                className="h-full"
-              >
-                {activeTab === 'monitor' && <MonitorView isDark={isDark} />}
+              {activeTab !== '' && (
+                <motion.div
+                  key={activeTab}
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="h-full"
+                >
+                  {activeTab === 'monitor' && <MonitorView isDark={isDark} />}
 
-                {activeTab === 'history' && <CallHistoryList isDark={isDark} />}
+                  {activeTab === 'history' && <CallHistoryList isDark={isDark} />}
 
-                {/* Knowledge Base Sections */}
-                {activeTab === 'knowledge' && <KnowledgeBase isDark={isDark} activeSection="prompt" />}
-                {activeTab === 'system_prompt' && <KnowledgeBase isDark={isDark} activeSection="prompt" />}
-                {activeTab === 'ai_voice' && <KnowledgeBase isDark={isDark} activeSection="voice" />}
-                {activeTab === 'context_fields' && <KnowledgeBase isDark={isDark} activeSection="fields" />}
-                {activeTab === 'categories' && <KnowledgeBase isDark={isDark} activeSection="categories" />}
-                {activeTab === 'priority_rules' && <KnowledgeBase isDark={isDark} activeSection="rules" />}
-                {activeTab === 'instructions' && <KnowledgeBase isDark={isDark} activeSection="instructions" />}
+                  {/* Knowledge Base Sections */}
+                  {activeTab === 'knowledge' && <KnowledgeBase isDark={isDark} activeSection="prompt" />}
+                  {activeTab === 'system_prompt' && <KnowledgeBase isDark={isDark} activeSection="prompt" />}
+                  {activeTab === 'ai_voice' && <KnowledgeBase isDark={isDark} activeSection="voice" />}
+                  {activeTab === 'context_fields' && <KnowledgeBase isDark={isDark} activeSection="fields" />}
+                  {activeTab === 'categories' && <KnowledgeBase isDark={isDark} activeSection="categories" />}
+                  {activeTab === 'priority_rules' && <KnowledgeBase isDark={isDark} activeSection="rules" />}
+                  {activeTab === 'instructions' && <KnowledgeBase isDark={isDark} activeSection="instructions" />}
 
-                {activeTab === 'groq_settings' && <GroqSettingsPage isDark={isDark} />}
+                  {activeTab === 'groq_settings' && <GroqSettingsPage isDark={isDark} />}
 
-                {/* New Account Sections */}
-                {activeTab === 'usage' && <UsageView isDark={isDark} />}
-                {activeTab === 'billing' && <BillingView isDark={isDark} />}
-                {activeTab === 'keys' && <KeysView isDark={isDark} />}
-              </motion.div>
+                  {/* New Account Sections */}
+                  {activeTab === 'usage' && <UsageView isDark={isDark} />}
+                  {activeTab === 'billing' && <BillingView isDark={isDark} />}
+                  {activeTab === 'keys' && <KeysView isDark={isDark} />}
+                </motion.div>
+              )}
             </div>
           </div>
         </main>
@@ -136,7 +172,9 @@ function DemoDashboardContent() {
 export default function DemoDashboard() {
   return (
     <DemoCallProvider>
-      <DemoDashboardContent />
+      <AccessCodeProvider>
+        <DemoDashboardContent />
+      </AccessCodeProvider>
     </DemoCallProvider>
   );
 }

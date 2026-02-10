@@ -64,9 +64,13 @@ const ClerkTreeLogo = ({ className, isDark = true }: { className?: string; isDar
 interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
     activeTab: string;
     setActiveTab: (tab: string) => void;
+    hasAccess?: boolean;
 }
 
-export function AppSidebar({ activeTab, setActiveTab, ...props }: AppSidebarProps) {
+// Tabs that are always accessible without an access code
+const ALWAYS_ACCESSIBLE_TABS = ['billing', 'keys'];
+
+export function AppSidebar({ activeTab, setActiveTab, hasAccess = false, ...props }: AppSidebarProps) {
     const { t, language, setLanguage } = useLanguage();
     const { state, isMobile } = useSidebar();
     const { getCurrentUserId, switchSession, knowledgeBase, saveKnowledgeBase } = useDemoCall();
@@ -99,6 +103,17 @@ export function AppSidebar({ activeTab, setActiveTab, ...props }: AppSidebarProp
         window.addEventListener('groq-settings-updated', handleUpdate as EventListener);
         return () => window.removeEventListener('groq-settings-updated', handleUpdate as EventListener);
     }, []);
+
+    // Helper: returns disabled styles for locked tabs
+    const getLockedStyles = (tabName: string) => {
+        if (hasAccess || ALWAYS_ACCESSIBLE_TABS.includes(tabName)) return '';
+        return 'opacity-40 pointer-events-none cursor-not-allowed select-none';
+    };
+
+    const handleTabClick = (tabName: string) => {
+        if (!hasAccess && !ALWAYS_ACCESSIBLE_TABS.includes(tabName)) return;
+        setActiveTab(tabName);
+    };
 
     return (
         <Sidebar collapsible="icon" {...props} className={cn(
@@ -140,14 +155,14 @@ export function AppSidebar({ activeTab, setActiveTab, ...props }: AppSidebarProp
             )}
             <SidebarContent>
                 {/* Main Dashboard Group */}
-                <SidebarGroup>
+                <SidebarGroup className={getLockedStyles('monitor')}>
                     <SidebarGroupLabel className={isDark ? "text-white/60" : "text-black/60"}>{t('sidebar.platform')}</SidebarGroupLabel>
                     <SidebarGroupContent>
                         <SidebarMenu>
                             <SidebarMenuItem>
                                 <SidebarMenuButton
                                     isActive={activeTab === 'monitor'}
-                                    onClick={() => setActiveTab('monitor')}
+                                    onClick={() => handleTabClick('monitor')}
                                     tooltip="Monitor"
                                     className={cn(
                                         "transition-colors",
@@ -163,7 +178,7 @@ export function AppSidebar({ activeTab, setActiveTab, ...props }: AppSidebarProp
                             <SidebarMenuItem>
                                 <SidebarMenuButton
                                     isActive={activeTab === 'knowledge'}
-                                    onClick={() => setActiveTab('knowledge')}
+                                    onClick={() => handleTabClick('knowledge')}
                                     tooltip="Configuration"
                                     className={cn(
                                         "transition-colors",
@@ -179,7 +194,7 @@ export function AppSidebar({ activeTab, setActiveTab, ...props }: AppSidebarProp
                             <SidebarMenuItem>
                                 <SidebarMenuButton
                                     isActive={activeTab === 'history'}
-                                    onClick={() => setActiveTab('history')}
+                                    onClick={() => handleTabClick('history')}
                                     tooltip="History"
                                     className={cn(
                                         "transition-colors",
@@ -199,7 +214,7 @@ export function AppSidebar({ activeTab, setActiveTab, ...props }: AppSidebarProp
                 <SidebarSeparator className={isDark ? "bg-white/10" : "bg-black/5"} />
 
                 {/* AI Configuration Group */}
-                <SidebarGroup>
+                <SidebarGroup className={getLockedStyles('groq_settings')}>
                     <SidebarGroupLabel className={isDark ? "text-white/60" : "text-black/60"}>{t('sidebar.aiBehavior')}</SidebarGroupLabel>
                     <SidebarGroupContent>
                         <SidebarMenu>
@@ -207,7 +222,7 @@ export function AppSidebar({ activeTab, setActiveTab, ...props }: AppSidebarProp
                             <SidebarMenuItem>
                                 <SidebarMenuButton
                                     isActive={activeTab === 'groq_settings'}
-                                    onClick={() => setActiveTab('groq_settings')}
+                                    onClick={() => handleTabClick('groq_settings')}
                                     className={cn(
                                         "transition-colors",
                                         isDark
@@ -228,7 +243,7 @@ export function AppSidebar({ activeTab, setActiveTab, ...props }: AppSidebarProp
                             <SidebarMenuItem>
                                 <SidebarMenuButton
                                     isActive={activeTab === 'system_prompt'}
-                                    onClick={() => setActiveTab('system_prompt')}
+                                    onClick={() => handleTabClick('system_prompt')}
                                     className={cn(
                                         "transition-colors",
                                         isDark
@@ -243,7 +258,7 @@ export function AppSidebar({ activeTab, setActiveTab, ...props }: AppSidebarProp
                             <SidebarMenuItem>
                                 <SidebarMenuButton
                                     isActive={activeTab === 'ai_voice'}
-                                    onClick={() => setActiveTab('ai_voice')}
+                                    onClick={() => handleTabClick('ai_voice')}
                                     className={cn(
                                         "transition-colors",
                                         isDark
@@ -258,7 +273,7 @@ export function AppSidebar({ activeTab, setActiveTab, ...props }: AppSidebarProp
                             <SidebarMenuItem>
                                 <SidebarMenuButton
                                     isActive={activeTab === 'context_fields'}
-                                    onClick={() => setActiveTab('context_fields')}
+                                    onClick={() => handleTabClick('context_fields')}
                                     className={cn(
                                         "transition-colors",
                                         isDark
@@ -273,7 +288,7 @@ export function AppSidebar({ activeTab, setActiveTab, ...props }: AppSidebarProp
                             <SidebarMenuItem>
                                 <SidebarMenuButton
                                     isActive={activeTab === 'categories'}
-                                    onClick={() => setActiveTab('categories')}
+                                    onClick={() => handleTabClick('categories')}
                                     className={cn(
                                         "transition-colors",
                                         isDark
@@ -288,7 +303,7 @@ export function AppSidebar({ activeTab, setActiveTab, ...props }: AppSidebarProp
                             <SidebarMenuItem>
                                 <SidebarMenuButton
                                     isActive={activeTab === 'priority_rules'}
-                                    onClick={() => setActiveTab('priority_rules')}
+                                    onClick={() => handleTabClick('priority_rules')}
                                     className={cn(
                                         "transition-colors",
                                         isDark
@@ -303,7 +318,7 @@ export function AppSidebar({ activeTab, setActiveTab, ...props }: AppSidebarProp
                             <SidebarMenuItem>
                                 <SidebarMenuButton
                                     isActive={activeTab === 'instructions'}
-                                    onClick={() => setActiveTab('instructions')}
+                                    onClick={() => handleTabClick('instructions')}
                                     className={cn(
                                         "transition-colors",
                                         isDark
@@ -336,10 +351,10 @@ export function AppSidebar({ activeTab, setActiveTab, ...props }: AppSidebarProp
                     <SidebarGroupLabel className={isDark ? "text-white/60" : "text-black/60"}>Account</SidebarGroupLabel>
                     <SidebarGroupContent>
                         <SidebarMenu>
-                            <SidebarMenuItem>
+                            <SidebarMenuItem className={getLockedStyles('usage')}>
                                 <SidebarMenuButton
                                     isActive={activeTab === 'usage'}
-                                    onClick={() => setActiveTab('usage')}
+                                    onClick={() => handleTabClick('usage')}
                                     className={cn(
                                         "transition-colors",
                                         isDark
@@ -354,7 +369,7 @@ export function AppSidebar({ activeTab, setActiveTab, ...props }: AppSidebarProp
                             <SidebarMenuItem>
                                 <SidebarMenuButton
                                     isActive={activeTab === 'billing'}
-                                    onClick={() => setActiveTab('billing')}
+                                    onClick={() => handleTabClick('billing')}
                                     className={cn(
                                         "transition-colors",
                                         isDark
@@ -369,7 +384,7 @@ export function AppSidebar({ activeTab, setActiveTab, ...props }: AppSidebarProp
                             <SidebarMenuItem>
                                 <SidebarMenuButton
                                     isActive={activeTab === 'keys'}
-                                    onClick={() => setActiveTab('keys')}
+                                    onClick={() => handleTabClick('keys')}
                                     className={cn(
                                         "transition-colors",
                                         isDark
