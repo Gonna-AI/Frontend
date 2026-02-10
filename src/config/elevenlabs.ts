@@ -1,5 +1,12 @@
+// ElevenLabs Configuration
+// API keys are loaded from environment variables for security
 export const ELEVENLABS_CONFIG = {
-  API_KEY: 'sk_d2a3556683942636ebb36b517e8369542866afe5bd914a51',
-  AGENT_ID: 'y3uv6b8h6XigSqRSiqab',
+  API_KEY: import.meta.env.VITE_ELEVENLABS_API_KEY || '',
+  AGENT_ID: import.meta.env.VITE_ELEVENLABS_AGENT_ID || '',
   // Add any other configuration options
+};
+
+// Validation helper
+export const isElevenLabsConfigured = (): boolean => {
+  return !!ELEVENLABS_CONFIG.API_KEY && !!ELEVENLABS_CONFIG.AGENT_ID;
 }; 
