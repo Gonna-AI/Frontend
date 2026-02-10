@@ -15,7 +15,9 @@ import {
     Key,
     BarChart,
     Sun,
-    Moon
+    Moon,
+    LogOut,
+    User
 } from "lucide-react"
 
 import { useTheme } from "@/hooks/useTheme"
@@ -46,6 +48,7 @@ import { useLanguage } from "@/contexts/LanguageContext"
 import UserSessionSwitcher from "./DemoCall/UserSessionSwitcher"
 import LanguageSwitcher from "./Layout/LanguageSwitcher"
 import { useDemoCall } from "@/contexts/DemoCallContext"
+import { useAuth } from "@/contexts/AuthContext"
 
 // Company Logo component
 const ClerkTreeLogo = ({ className, isDark = true }: { className?: string; isDark?: boolean }) => (
@@ -437,9 +440,75 @@ export function AppSidebar({ activeTab, setActiveTab, ...props }: AppSidebarProp
                             onSaveSession={saveKnowledgeBase}
                         />
                     </SidebarMenuItem>
+                    <SidebarSeparator className={isDark ? "bg-white/10" : "bg-black/5"} />
+                    <AuthUserSection isDark={isDark} state={state} />
                 </SidebarMenu>
             </SidebarFooter>
             <SidebarRail />
         </Sidebar>
     )
+}
+
+// Separate component to use useAuth inside sidebar
+function AuthUserSection({ isDark, state }: { isDark: boolean; state: string }) {
+    const { user, signOut } = useAuth();
+    const navigate = (window as any).__navigate;
+
+    if (!user) return null;
+
+    const displayName = user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split('@')[0] || 'User';
+    const avatarUrl = user.user_metadata?.avatar_url || user.user_metadata?.picture;
+    const email = user.email;
+
+    return (
+        <SidebarMenuItem>
+            <div className={cn(
+                "flex items-center gap-3 px-2 py-2",
+                state === "collapsed" && "justify-center"
+            )}>
+                {avatarUrl ? (
+                    <img
+                        src={avatarUrl}
+                        alt={displayName}
+                        className="w-7 h-7 rounded-full flex-shrink-0 ring-1 ring-white/10"
+                    />
+                ) : (
+                    <div className={cn(
+                        "w-7 h-7 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-bold",
+                        isDark ? "bg-white/10 text-white/70" : "bg-black/10 text-black/70"
+                    )}>
+                        {displayName.charAt(0).toUpperCase()}
+                    </div>
+                )}
+                {state !== "collapsed" && (
+                    <div className="flex-1 min-w-0">
+                        <p className={cn("text-xs font-medium truncate", isDark ? "text-white/80" : "text-black/80")}>
+                            {displayName}
+                        </p>
+                        {email && (
+                            <p className={cn("text-[10px] truncate", isDark ? "text-white/40" : "text-black/40")}>
+                                {email}
+                            </p>
+                        )}
+                    </div>
+                )}
+                <button
+                    onClick={async () => {
+                        await signOut();
+                        window.location.href = '/login';
+                    }}
+                    className={cn(
+                        "p-1.5 rounded-md transition-colors flex-shrink-0",
+                        isDark
+                            ? "text-white/40 hover:text-red-400 hover:bg-red-500/10"
+                            : "text-black/40 hover:text-red-500 hover:bg-red-500/10",
+                        state === "collapsed" && "hidden"
+                    )}
+                    title="Sign out"
+                >
+                    <LogOut className="w-3.5 h-3.5" />
+                </button>
+            </div>
+        </SidebarMenuItem>
+    );
 }
