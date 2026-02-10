@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react"
+import { createPortal } from "react-dom"
 import {
     Phone,
     History,
@@ -452,7 +453,8 @@ export function AppSidebar({ activeTab, setActiveTab, ...props }: AppSidebarProp
 // Separate component to use useAuth inside sidebar
 function AuthUserSection({ isDark, state }: { isDark: boolean; state: string }) {
     const { user, signOut } = useAuth();
-    const navigate = (window as any).__navigate;
+    const [showConfirm, setShowConfirm] = useState(false);
+    const [isSigningOut, setIsSigningOut] = useState(false);
 
     if (!user) return null;
 
@@ -460,55 +462,150 @@ function AuthUserSection({ isDark, state }: { isDark: boolean; state: string }) 
     const avatarUrl = user.user_metadata?.avatar_url || user.user_metadata?.picture;
     const email = user.email;
 
+    const handleSignOut = async () => {
+        setShowConfirm(false);
+        setIsSigningOut(true);
+        try {
+            await signOut();
+            // Brief delay so the user sees the signing-out state
+            await new Promise(resolve => setTimeout(resolve, 800));
+            window.location.href = '/login';
+        } catch {
+            setIsSigningOut(false);
+        }
+    };
+
     return (
-        <SidebarMenuItem>
-            <div className={cn(
-                "flex items-center gap-3 px-2 py-2",
-                state === "collapsed" && "justify-center"
-            )}>
-                {avatarUrl ? (
-                    <img
-                        src={avatarUrl}
-                        alt={displayName}
-                        className="w-7 h-7 rounded-full flex-shrink-0 ring-1 ring-white/10"
-                    />
-                ) : (
-                    <div className={cn(
-                        "w-7 h-7 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-bold",
-                        isDark ? "bg-white/10 text-white/70" : "bg-black/10 text-black/70"
-                    )}>
-                        {displayName.charAt(0).toUpperCase()}
+        <>
+            {/* Signing Out Full-Screen Overlay */}
+            {isSigningOut && createPortal(
+                <div className="fixed inset-0 z-[100000] flex items-center justify-center bg-black/80 backdrop-blur-md animate-fade-in">
+                    <div className="flex flex-col items-center gap-5">
+                        {/* Animated spinner */}
+                        <div className="relative w-14 h-14">
+                            <div className="absolute inset-0 rounded-full border-[3px] border-white/10" />
+                            <div className="absolute inset-0 rounded-full border-[3px] border-transparent border-t-white animate-spin" />
+                            <div className="absolute inset-2 rounded-full border-[2px] border-transparent border-b-red-400 animate-spin" style={{ animationDirection: 'reverse', animationDuration: '0.8s' }} />
+                        </div>
+                        <div className="text-center">
+                            <p className="text-white text-lg font-semibold tracking-tight">Signing out...</p>
+                            <p className="text-white/50 text-sm mt-1">Clearing your session</p>
+                        </div>
                     </div>
-                )}
-                {state !== "collapsed" && (
-                    <div className="flex-1 min-w-0">
-                        <p className={cn("text-xs font-medium truncate", isDark ? "text-white/80" : "text-black/80")}>
-                            {displayName}
-                        </p>
-                        {email && (
-                            <p className={cn("text-[10px] truncate", isDark ? "text-white/40" : "text-black/40")}>
-                                {email}
-                            </p>
-                        )}
-                    </div>
-                )}
-                <button
-                    onClick={async () => {
-                        await signOut();
-                        window.location.href = '/login';
-                    }}
-                    className={cn(
-                        "p-1.5 rounded-md transition-colors flex-shrink-0",
-                        isDark
-                            ? "text-white/40 hover:text-red-400 hover:bg-red-500/10"
-                            : "text-black/40 hover:text-red-500 hover:bg-red-500/10",
-                        state === "collapsed" && "hidden"
-                    )}
-                    title="Sign out"
+                </div>,
+                document.body
+            )}
+
+            {/* Sign Out Confirmation Dialog */}
+            {showConfirm && createPortal(
+                <div
+                    className="fixed inset-0 z-[100000] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fade-in"
+                    onClick={() => setShowConfirm(false)}
                 >
-                    <LogOut className="w-3.5 h-3.5" />
-                </button>
-            </div>
-        </SidebarMenuItem>
+                    <div
+                        className={cn(
+                            "relative w-[340px] rounded-2xl p-6 shadow-2xl border animate-scale-in",
+                            isDark
+                                ? "bg-[#1a1a1a] border-white/10"
+                                : "bg-white border-black/10"
+                        )}
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        {/* Icon */}
+                        <div className="flex justify-center mb-4">
+                            <div className={cn(
+                                "w-12 h-12 rounded-full flex items-center justify-center",
+                                isDark ? "bg-red-500/10" : "bg-red-50"
+                            )}>
+                                <LogOut className={cn("w-5 h-5", isDark ? "text-red-400" : "text-red-500")} />
+                            </div>
+                        </div>
+
+                        {/* Text */}
+                        <h3 className={cn(
+                            "text-center text-base font-semibold mb-1",
+                            isDark ? "text-white" : "text-gray-900"
+                        )}>
+                            Sign out?
+                        </h3>
+                        <p className={cn(
+                            "text-center text-sm mb-6",
+                            isDark ? "text-white/50" : "text-gray-500"
+                        )}>
+                            You'll need to sign in again to access your dashboard.
+                        </p>
+
+                        {/* Actions */}
+                        <div className="flex gap-3">
+                            <button
+                                onClick={() => setShowConfirm(false)}
+                                className={cn(
+                                    "flex-1 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 cursor-pointer",
+                                    isDark
+                                        ? "bg-white/5 hover:bg-white/10 text-white/70 hover:text-white border border-white/10"
+                                        : "bg-gray-100 hover:bg-gray-200 text-gray-600 hover:text-gray-800 border border-gray-200"
+                                )}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleSignOut}
+                                className="flex-1 px-4 py-2.5 rounded-xl text-sm font-medium bg-red-500 hover:bg-red-600 text-white transition-all duration-200 shadow-lg shadow-red-500/20 hover:shadow-red-500/30 cursor-pointer"
+                            >
+                                Sign out
+                            </button>
+                        </div>
+                    </div>
+                </div>,
+                document.body
+            )}
+
+            <SidebarMenuItem>
+                <div className={cn(
+                    "flex items-center gap-3 px-2 py-2",
+                    state === "collapsed" && "justify-center"
+                )}>
+                    {avatarUrl ? (
+                        <img
+                            src={avatarUrl}
+                            alt={displayName}
+                            className="w-7 h-7 rounded-full flex-shrink-0 ring-1 ring-white/10"
+                        />
+                    ) : (
+                        <div className={cn(
+                            "w-7 h-7 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-bold",
+                            isDark ? "bg-white/10 text-white/70" : "bg-black/10 text-black/70"
+                        )}>
+                            {displayName.charAt(0).toUpperCase()}
+                        </div>
+                    )}
+                    {state !== "collapsed" && (
+                        <div className="flex-1 min-w-0">
+                            <p className={cn("text-xs font-medium truncate", isDark ? "text-white/80" : "text-black/80")}>
+                                {displayName}
+                            </p>
+                            {email && (
+                                <p className={cn("text-[10px] truncate", isDark ? "text-white/40" : "text-black/40")}>
+                                    {email}
+                                </p>
+                            )}
+                        </div>
+                    )}
+                    <button
+                        onClick={() => setShowConfirm(true)}
+                        className={cn(
+                            "p-1.5 rounded-md transition-colors flex-shrink-0",
+                            isDark
+                                ? "text-white/40 hover:text-red-400 hover:bg-red-500/10"
+                                : "text-black/40 hover:text-red-500 hover:bg-red-500/10",
+                            state === "collapsed" && "hidden"
+                        )}
+                        title="Sign out"
+                    >
+                        <LogOut className="w-3.5 h-3.5" />
+                    </button>
+                </div>
+            </SidebarMenuItem>
+        </>
     );
 }
