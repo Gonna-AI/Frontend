@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Landing from './components/Landing';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { LanguageProvider } from './contexts/LanguageContext';
+import { AuthProvider } from './contexts/AuthContext';
 import PrivacyPolicy from './components/Legal/PrivacyPolicy';
 import TermsOfService from './components/Legal/TermsOfService';
 import Security from './components/Legal/Security';
@@ -29,65 +30,77 @@ import ScrollToTop from './components/ScrollToTop';
 import DocsPage from './pages/DocsPage';
 import CanonicalLink from './components/SEO/CanonicalLink';
 import HreflangTags from './components/SEO/HreflangTags';
+import AuthPage from './pages/AuthPage';
+import AuthCallback from './pages/AuthCallback';
 
 // Create a client
 const queryClient = new QueryClient();
 
 function App() {
   return (
-    <LanguageProvider>
-      <QueryClientProvider client={queryClient}>
-        <BrowserRouter>
-          <CanonicalLink />
-          <HreflangTags />
-          <ScrollToTop />
-          <Routes>
-            {/* Public Routes */}
-            <Route path="/" element={<Landing />} />
+    <AuthProvider>
+      <LanguageProvider>
+        <QueryClientProvider client={queryClient}>
+          <BrowserRouter>
+            <CanonicalLink />
+            <HreflangTags />
+            <ScrollToTop />
+            <Routes>
+              {/* Public Routes */}
+              <Route path="/" element={<Landing />} />
 
-            {/* Dashboard */}
-            <Route path="/dashboard" element={<DemoDashboard />} />
+              {/* Auth Routes */}
+              <Route path="/login" element={<AuthPage />} />
+              <Route path="/auth/callback" element={<AuthCallback />} />
 
-            {/* User Call */}
-            <Route path="/user" element={<UserCall />} />
-            <Route path="/user/chat" element={<UserChat />} />
-            <Route path="/user/call" element={<UserVoiceCall />} />
-            <Route path="/ai-settings" element={
-              <PrivateRoute>
-                <AISettings />
-              </PrivateRoute>
-            } />
-            <Route path="/arbor" element={<Arbor />} />
-            <Route path="/juris" element={<Juris />} />
-            <Route path="/bioflow" element={<Bioflow />} />
+              {/* Protected Dashboard */}
+              <Route path="/dashboard" element={
+                <PrivateRoute>
+                  <DemoDashboard />
+                </PrivateRoute>
+              } />
 
-            {/* Company Pages */}
-            <Route path="/about" element={<About />} />
-            <Route path="/careers" element={<Careers />} />
-            <Route path="/solutions" element={<Solutions />} />
-            <Route path="/contact" element={<Contact />} />
+              {/* User Call */}
+              <Route path="/user" element={<UserCall />} />
+              <Route path="/user/chat" element={<UserChat />} />
+              <Route path="/user/call" element={<UserVoiceCall />} />
+              <Route path="/ai-settings" element={
+                <PrivateRoute>
+                  <AISettings />
+                </PrivateRoute>
+              } />
+              <Route path="/arbor" element={<Arbor />} />
+              <Route path="/juris" element={<Juris />} />
+              <Route path="/bioflow" element={<Bioflow />} />
 
-            {/* Blog */}
-            <Route path="/blog" element={<Blog />} />
-            <Route path="/blog/:slug" element={<BlogPost />} />
+              {/* Company Pages */}
+              <Route path="/about" element={<About />} />
+              <Route path="/careers" element={<Careers />} />
+              <Route path="/solutions" element={<Solutions />} />
+              <Route path="/contact" element={<Contact />} />
 
-            {/* Documentation */}
-            <Route path="/docs" element={<DocsPage />} />
-            <Route path="/smart-contracts" element={<SmartContracts />} />
-            <Route path="/documents" element={<Documents />} />
+              {/* Blog */}
+              <Route path="/blog" element={<Blog />} />
+              <Route path="/blog/:slug" element={<BlogPost />} />
 
-            {/* Legal */}
-            <Route path="/terms-of-service" element={<TermsOfService />} />
-            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-            <Route path="/cookie-policy" element={<CookiePolicy />} />
-            <Route path="/security" element={<Security />} />
+              {/* Documentation */}
+              <Route path="/docs" element={<DocsPage />} />
+              <Route path="/smart-contracts" element={<SmartContracts />} />
+              <Route path="/documents" element={<Documents />} />
 
-            {/* Catch all route */}
-            <Route path="*" element={<Navigate to="/" />} />
-          </Routes>
-        </BrowserRouter>
-      </QueryClientProvider>
-    </LanguageProvider>
+              {/* Legal */}
+              <Route path="/terms-of-service" element={<TermsOfService />} />
+              <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+              <Route path="/cookie-policy" element={<CookiePolicy />} />
+              <Route path="/security" element={<Security />} />
+
+              {/* Catch all route */}
+              <Route path="*" element={<Navigate to="/" />} />
+            </Routes>
+          </BrowserRouter>
+        </QueryClientProvider>
+      </LanguageProvider>
+    </AuthProvider>
   );
 }
 
