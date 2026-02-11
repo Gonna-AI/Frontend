@@ -68,11 +68,24 @@ const DEFAULT_SETTINGS: GroqSettings = {
     systemPromptEnabled: true
 };
 
-const STORAGE_KEY = 'clerktree_groq_settings';
+const STORAGE_KEY_PREFIX = 'clerktree_groq_settings_';
+
+function getStorageKey(): string {
+    // Use supabase session to get user-scoped key
+    try {
+        const sessionStr = localStorage.getItem('sb-xlzwfkgurrrspcdyqele-auth-token');
+        if (sessionStr) {
+            const session = JSON.parse(sessionStr);
+            const userId = session?.user?.id;
+            if (userId) return `${STORAGE_KEY_PREFIX}${userId}`;
+        }
+    } catch { /* ignore */ }
+    return 'clerktree_groq_settings';
+}
 
 export function getGroqSettings(): GroqSettings {
     try {
-        const stored = localStorage.getItem(STORAGE_KEY);
+        const stored = localStorage.getItem(getStorageKey());
         if (stored) return { ...DEFAULT_SETTINGS, ...JSON.parse(stored) };
     } catch { /* ignore */ }
     return DEFAULT_SETTINGS;
@@ -81,7 +94,7 @@ export function getGroqSettings(): GroqSettings {
 export function updateGroqSettings(settings: Partial<GroqSettings>): GroqSettings {
     const current = getGroqSettings();
     const updated = { ...current, ...settings };
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+    localStorage.setItem(getStorageKey(), JSON.stringify(updated));
     window.dispatchEvent(new CustomEvent('groq-settings-updated', { detail: updated }));
     return updated;
 }
@@ -103,7 +116,7 @@ export default function GroqSettingsPage({ isDark = true, onSettingsChange }: Gr
 
     const saveSettings = (newSettings: GroqSettings) => {
         setSettings(newSettings);
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(newSettings));
+        localStorage.setItem(getStorageKey(), JSON.stringify(newSettings));
         window.dispatchEvent(new CustomEvent('groq-settings-updated', { detail: newSettings }));
         if (onSettingsChange) onSettingsChange(newSettings);
     };
