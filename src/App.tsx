@@ -32,6 +32,7 @@ import CanonicalLink from './components/SEO/CanonicalLink';
 import HreflangTags from './components/SEO/HreflangTags';
 import AuthPage from './pages/AuthPage';
 import AuthCallback from './pages/AuthCallback';
+import InvitePage from './pages/InvitePage';
 
 // Create a client
 const queryClient = new QueryClient();
@@ -52,6 +53,7 @@ function App() {
               {/* Auth Routes */}
               <Route path="/login" element={<AuthPage />} />
               <Route path="/auth/callback" element={<AuthCallback />} />
+              <Route path="/invite" element={<InvitePage />} />
 
               {/* Protected Dashboard */}
               <Route path="/dashboard" element={

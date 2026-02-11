@@ -1,5 +1,5 @@
 import { useState, FormEvent } from 'react';
-import { Navigate, useNavigate } from 'react-router-dom';
+import { Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../hooks/useTheme';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -13,11 +13,16 @@ export default function AuthPage() {
     const { isDark, toggleTheme } = useTheme();
     const navigate = useNavigate();
 
-    const [view, setView] = useState<AuthView>('signin');
+    const [searchParams] = useSearchParams();
+    const initialView = searchParams.get('view') as AuthView || 'signin';
+    const initialMessage = searchParams.get('message') || '';
+
+    const [view, setView] = useState<AuthView>(initialView);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [fullName, setFullName] = useState('');
     const [error, setError] = useState('');
+    const [info, setInfo] = useState(initialMessage);
     const [successMessage, setSuccessMessage] = useState('');
     const [submitting, setSubmitting] = useState(false);
 
@@ -29,6 +34,7 @@ export default function AuthPage() {
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
         setError('');
+        setInfo('');
         setSuccessMessage('');
         setSubmitting(true);
 
@@ -253,8 +259,21 @@ export default function AuthPage() {
                                 </div>
                             )}
 
-                            {/* Error Display */}
+                            {/* Info/Error Display */}
                             <AnimatePresence>
+                                {info && (
+                                    <motion.div
+                                        initial={{ opacity: 0, height: 0 }}
+                                        animate={{ opacity: 1, height: 'auto' }}
+                                        exit={{ opacity: 0, height: 0 }}
+                                        className={cn("text-xs flex items-center gap-2 p-3 rounded-lg border",
+                                            isDark ? "bg-blue-500/10 border-blue-500/20 text-blue-400" : "bg-blue-50 border-blue-200 text-blue-600"
+                                        )}
+                                    >
+                                        <CheckCircle2 className="w-4 h-4" />
+                                        {info}
+                                    </motion.div>
+                                )}
                                 {error && (
                                     <motion.div
                                         initial={{ opacity: 0, height: 0 }}

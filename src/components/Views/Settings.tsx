@@ -9,6 +9,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api, { API_BASE_URL } from '../../config/api';
 import { Switch } from '../ui/Switch';
 import { Input } from '../ui/Input';
+import { useAuth } from '../../contexts/AuthContext';
+import ReauthModal from '../ReauthModal';
 
 export default function Settings() {
   const { isDark } = useTheme();
@@ -65,6 +67,51 @@ export default function Settings() {
     }
   };
 
+  const { updateUser } = useAuth();
+  const [reauthOpen, setReauthOpen] = useState(false);
+  const [pendingAction, setPendingAction] = useState<(() => Promise<void>) | null>(null);
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [newEmail, setNewEmail] = useState('');
+  const [securityError, setSecurityError] = useState('');
+  const [securitySuccess, setSecuritySuccess] = useState('');
+
+  const handleSecurityAction = (action: () => Promise<void>) => {
+    setPendingAction(() => action);
+    setReauthOpen(true);
+  };
+
+  const handleReauthSuccess = async () => {
+    setReauthOpen(false);
+    if (pendingAction) {
+      await pendingAction();
+      setPendingAction(null);
+    }
+  };
+
+  const updatePassword = async () => {
+    if (newPassword !== confirmPassword) {
+      setSecurityError("Passwords do not match");
+      return;
+    }
+    const { error } = await updateUser({ password: newPassword });
+    if (error) setSecurityError(error.message);
+    else {
+      setSecuritySuccess("Password updated successfully");
+      setNewPassword('');
+      setConfirmPassword('');
+    }
+  };
+
+  const updateEmailAddress = async () => {
+    const { error } = await updateUser({ email: newEmail });
+    if (error) setSecurityError(error.message);
+    else {
+      setSecuritySuccess("Confirmation link sent to new email address");
+      setNewEmail('');
+    }
+  };
+
   const handleUpdatePicture = async () => {
     if (!isUpdateDisabled) {
       const formData = new FormData();
@@ -83,9 +130,8 @@ export default function Settings() {
   const sidebarItems = [
     { icon: FileText, label: 'General', id: 'general' },
     { icon: Bell, label: 'Notifications', id: 'notifications' },
-    { icon: Lock, label: 'Two Factor Auth', id: '2fa' },
-    { icon: Database, label: 'API Tokens', id: 'api' },
-    { icon: Users, label: 'Team', id: 'team' }
+    { icon: Lock, label: 'Security', id: 'security' },
+    { icon: Database, label: 'API Tokens', id: 'api' }
   ];
 
   const GlassContainer = ({ children, className }: { children: React.ReactNode, className?: string }) => (
@@ -212,13 +258,87 @@ export default function Settings() {
                 </div>
               )}
 
-              {activeTab === '2fa' && (
+              {activeTab === 'security' && (
                 <div className="space-y-6">
                   <h2 className={cn(
                     "text-xl font-semibold",
                     isDark ? "text-white" : "text-black"
-                  )}>Two-Factor Authentication</h2>
+                  )}>Security Settings</h2>
 
+                  {/* Password Change */}
+                  <GlassContainer className="p-6">
+                    <h3 className={cn("text-lg font-medium mb-4", isDark ? "text-white" : "text-black")}>Change Password</h3>
+                    <div className="space-y-4 max-w-md">
+                      <div>
+                        <label className={cn("block text-sm font-medium mb-2", isDark ? "text-white/60" : "text-black/60")}>New Password</label>
+                        <Input
+                          type="password"
+                          value={newPassword}
+                          onChange={(e) => setNewPassword(e.target.value)}
+                          placeholder="Enter new password"
+                        />
+                      </div>
+                      <div>
+                        <label className={cn("block text-sm font-medium mb-2", isDark ? "text-white/60" : "text-black/60")}>Confirm Password</label>
+                        <Input
+                          type="password"
+                          value={confirmPassword}
+                          onChange={(e) => setConfirmPassword(e.target.value)}
+                          placeholder="Confirm new password"
+                        />
+                      </div>
+                      <button
+                        onClick={() => handleSecurityAction(updatePassword)}
+                        disabled={!newPassword || !confirmPassword}
+                        className={cn(
+                          "px-4 py-2 rounded-xl transition-colors",
+                          isDark
+                            ? "bg-white text-black hover:bg-gray-200 disabled:bg-white/50"
+                            : "bg-black text-white hover:bg-gray-800 disabled:bg-black/50"
+                        )}>
+                        Update Password
+                      </button>
+                    </div>
+                  </GlassContainer>
+
+                  {/* Email Change */}
+                  <GlassContainer className="p-6">
+                    <h3 className={cn("text-lg font-medium mb-4", isDark ? "text-white" : "text-black")}>Change Email</h3>
+                    <div className="space-y-4 max-w-md">
+                      <div>
+                        <label className={cn("block text-sm font-medium mb-2", isDark ? "text-white/60" : "text-black/60")}>New Email Address</label>
+                        <Input
+                          type="email"
+                          value={newEmail}
+                          onChange={(e) => setNewEmail(e.target.value)}
+                          placeholder="Enter new email"
+                        />
+                      </div>
+                      <button
+                        onClick={() => handleSecurityAction(updateEmailAddress)}
+                        disabled={!newEmail}
+                        className={cn(
+                          "px-4 py-2 rounded-xl transition-colors",
+                          isDark
+                            ? "bg-white text-black hover:bg-gray-200 disabled:bg-white/50"
+                            : "bg-black text-white hover:bg-gray-800 disabled:bg-black/50"
+                        )}>
+                        Update Email
+                      </button>
+                    </div>
+                  </GlassContainer>
+
+                  {/* Feedback Messages */}
+                  {(securityError || securitySuccess) && (
+                    <div className={cn(
+                      "p-4 rounded-xl",
+                      securityError ? "bg-red-500/10 text-red-500" : "bg-emerald-500/10 text-emerald-500"
+                    )}>
+                      {securityError || securitySuccess}
+                    </div>
+                  )}
+
+                  {/* Two Factor (Existing) */}
                   <GlassContainer className="p-6">
                     <div className="space-y-6">
                       {!showTwoFactor ? (
@@ -227,7 +347,7 @@ export default function Settings() {
                             <h3 className={cn(
                               "text-lg font-medium mb-1",
                               isDark ? "text-white" : "text-black"
-                            )}>Enable Two-Factor Auth</h3>
+                            )}>Two-Factor Authentication</h3>
                             <p className={cn(
                               "text-sm",
                               isDark ? "text-white/60" : "text-black/60"
@@ -262,52 +382,8 @@ export default function Settings() {
                               "text-sm",
                               isDark ? "text-emerald-400" : "text-emerald-600"
                             )}>
-                              Scan the QR code with your authenticator app
+                              Two-factor authentication is enabled
                             </span>
-                          </div>
-
-                          <div className="mx-auto">
-                            <GlassContainer className="p-4 w-40 h-40">
-                              <div className={cn(
-                                "w-full h-full rounded-lg flex items-center justify-center text-sm",
-                                isDark ? "text-white/70" : "text-black/70"
-                              )}>
-                                QR Code
-                              </div>
-                            </GlassContainer>
-                          </div>
-
-                          <div className="space-y-4">
-                            <div>
-                              <label className={cn(
-                                "block text-sm font-medium mb-2",
-                                isDark ? "text-white/60" : "text-black/60"
-                              )}>Verification Code</label>
-                              <input
-                                type="text"
-                                className={cn(
-                                  "w-full px-4 py-2 rounded-xl transition-colors",
-                                  isDark
-                                    ? "bg-black/20 border border-white/10 text-white"
-                                    : "bg-white/10 border border-black/10 text-black",
-                                  "focus:outline-none focus:ring-2",
-                                  isDark
-                                    ? "focus:ring-white/20"
-                                    : "focus:ring-black/20"
-                                )}
-                                placeholder="Enter the 6-digit code"
-                              />
-                            </div>
-                            <div className="flex justify-end">
-                              <button className={cn(
-                                "px-4 py-2 rounded-xl transition-colors",
-                                isDark
-                                  ? "bg-black/20 hover:bg-black/30 border border-white/10 text-white"
-                                  : "bg-white/10 hover:bg-white/20 border border-black/10 text-black"
-                              )}>
-                                Verify & Enable
-                              </button>
-                            </div>
                           </div>
                         </div>
                       )}
@@ -396,38 +472,16 @@ export default function Settings() {
                 </div>
               )}
 
-              {activeTab === 'team' && (
-                <div className="space-y-6">
-                  <h2 className={cn(
-                    "text-xl font-semibold",
-                    isDark ? "text-white" : "text-black"
-                  )}>Team Management</h2>
-
-                  <GlassContainer className="p-6">
-                    <div className="space-y-4">
-                      <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-                        <Input
-                          type="email"
-                          placeholder="Enter team member's email"
-                          className="flex-1"
-                        />
-                        <button className={cn(
-                          "px-4 py-2 rounded-xl transition-colors",
-                          isDark
-                            ? "bg-black/20 hover:bg-black/30 border border-white/10 text-white"
-                            : "bg-white/10 hover:bg-white/20 border border-black/10 text-black"
-                        )}>
-                          Invite Member
-                        </button>
-                      </div>
-                    </div>
-                  </GlassContainer>
-                </div>
-              )}
             </div>
           </div>
         </GlassContainer>
       </div>
+      <ReauthModal
+        isOpen={reauthOpen}
+        onClose={() => setReauthOpen(false)}
+        onSuccess={handleReauthSuccess}
+        isDark={isDark}
+      />
     </div>
   );
 }

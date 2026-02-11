@@ -283,6 +283,22 @@ export const translations: Record<Language, Record<string, string>> = {
         'sidebar.billing': 'Billing',
         'sidebar.keys': 'API Keys',
         'sidebar.docs': 'Docs',
+        'sidebar.team': 'Team',
+
+        // Team Management
+        'team.title': 'Team Management',
+        'team.subtitle': 'Manage your team members and their access',
+        'team.invite': 'Invite Member',
+        'team.emailPlaceholder': 'Enter email address',
+        'team.role': 'Role',
+        'team.sendInvite': 'Send Invite',
+        'team.members': 'Team Members',
+        'team.status.active': 'Active',
+        'team.status.pending': 'Pending',
+        'team.role.admin': 'Admin',
+        'team.role.member': 'Member',
+        'team.dateAdded': 'Date Added',
+        'team.lastActive': 'Last Active',
 
         // Invite Page
         'invite.support': 'Support',
@@ -996,6 +1012,22 @@ export const translations: Record<Language, Record<string, string>> = {
         'sidebar.billing': 'Abrechnung',
         'sidebar.keys': 'API-Schlüssel',
         'sidebar.docs': 'Dokumentation',
+        'sidebar.team': 'Team',
+
+        // Team Management
+        'team.title': 'Teamverwaltung',
+        'team.subtitle': 'Verwalten Sie Ihre Teammitglieder und deren Zugriff',
+        'team.invite': 'Mitglied einladen',
+        'team.emailPlaceholder': 'E-Mail-Adresse eingeben',
+        'team.role': 'Rolle',
+        'team.sendInvite': 'Einladung senden',
+        'team.members': 'Teammitglieder',
+        'team.status.active': 'Aktiv',
+        'team.status.pending': 'Ausstehend',
+        'team.role.admin': 'Admin',
+        'team.role.member': 'Mitglied',
+        'team.dateAdded': 'Hinzugefügt am',
+        'team.lastActive': 'Zuletzt aktiv',
 
         // Invite Page
         'invite.support': 'Support',

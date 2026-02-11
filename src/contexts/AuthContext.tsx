@@ -11,6 +11,8 @@ interface AuthContextType {
     signInWithGoogle: () => Promise<{ error: AuthError | null }>;
     resetPassword: (email: string) => Promise<{ error: AuthError | null }>;
     signOut: () => Promise<void>;
+    updateUser: (attributes: { email?: string; password?: string }) => Promise<{ error: AuthError | null }>;
+    reauthenticate: (password: string) => Promise<{ error: AuthError | null }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -25,6 +27,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         supabase.auth.getSession().then(({ data: { session } }) => {
             setSession(session);
             setUser(session?.user ?? null);
+            setLoading(false);
+        }).catch((error) => {
+            console.error('Auth check failed:', error);
             setLoading(false);
         });
 
@@ -79,8 +84,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         await supabase.auth.signOut();
     };
 
+    const updateUser = async (attributes: { email?: string; password?: string }) => {
+        const { error } = await supabase.auth.updateUser(attributes);
+        return { error };
+    };
+
+    const reauthenticate = async (password: string) => {
+        if (!user?.email) return { error: { message: 'No user email found', name: 'AuthError', status: 400 } as AuthError };
+        const { error } = await supabase.auth.signInWithPassword({
+            email: user.email,
+            password
+        });
+        return { error };
+    };
+
     return (
-        <AuthContext.Provider value={{ user, session, loading, signIn, signUp, signInWithGoogle, resetPassword, signOut }}>
+        <AuthContext.Provider value={{
+            user, session, loading,
+            signIn, signUp, signInWithGoogle, resetPassword, signOut,
+            updateUser, reauthenticate
+        }}>
             {children}
         </AuthContext.Provider>
     );

@@ -16,6 +16,7 @@ import { RotateCcw } from 'lucide-react';
 import UsageView from '../components/DashboardViews/UsageView';
 import BillingView from '../components/DashboardViews/BillingView';
 import KeysView from '../components/DashboardViews/KeysView';
+import TeamView from '../components/DashboardViews/TeamView';
 import MonitorView from '../components/DashboardViews/MonitorView';
 import WelcomeManager from '../components/DemoCall/WelcomeManager';
 import { AccessCodeProvider, useAccessCode } from '../contexts/AccessCodeContext';
@@ -36,7 +37,7 @@ function DemoDashboardContent() {
   }, [hasAccess, activeTab]);
 
   // Tabs that are always accessible without an access code
-  const alwaysAccessibleTabs = ['billing', 'keys'];
+  const alwaysAccessibleTabs = ['billing', 'keys', 'team', 'usage'];
 
   const handleSetActiveTab = (tab: string) => {
     if (!hasAccess && !alwaysAccessibleTabs.includes(tab)) return;
@@ -59,6 +60,7 @@ function DemoDashboardContent() {
       usage: t('sidebar.usage'),
       billing: t('sidebar.billing'),
       keys: t('sidebar.keys'),
+      team: t('sidebar.team'),
     };
     return labelMap[tab] || tab;
   };
@@ -159,6 +161,7 @@ function DemoDashboardContent() {
                   {activeTab === 'usage' && <UsageView isDark={isDark} />}
                   {activeTab === 'billing' && <BillingView isDark={isDark} />}
                   {activeTab === 'keys' && <KeysView isDark={isDark} />}
+                  {activeTab === 'team' && <TeamView isDark={isDark} />}
                 </motion.div>
               )}
             </div>
