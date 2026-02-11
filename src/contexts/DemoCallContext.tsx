@@ -150,9 +150,11 @@ interface DemoCallContextType {
 
 const DemoCallContext = createContext<DemoCallContextType | undefined>(undefined);
 
-// Storage keys
-const KNOWLEDGE_BASE_KEY = 'clerktree_knowledge_base';
-const CALL_HISTORY_KEY = 'clerktree_call_history';
+// Storage keys - made user-scoped via helper functions
+const KNOWLEDGE_BASE_KEY_PREFIX = 'clerktree_knowledge_base_';
+const CALL_HISTORY_KEY_PREFIX = 'clerktree_call_history_';
+const ACTIVE_CALL_KEY_PREFIX = 'active_call_session_';
+const GROQ_SETTINGS_KEY_PREFIX = 'clerktree_groq_settings_';
 
 // Default Knowledge Base configuration
 const defaultKnowledgeBase: KnowledgeBaseConfig = {
@@ -286,8 +288,9 @@ export function DemoCallProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const [globalActiveSessions, setGlobalActiveSessions] = useState<{ voice: number; text: number }>({ voice: 0, text: 0 });
 
-  // Persistence key
-  const ACTIVE_CALL_KEY = 'active_call_session';
+  const ACTIVE_CALL_KEY = user?.id ? `${ACTIVE_CALL_KEY_PREFIX}${user.id}` : 'active_call_session';
+  const KNOWLEDGE_BASE_KEY = user?.id ? `${KNOWLEDGE_BASE_KEY_PREFIX}${user.id}` : 'clerktree_knowledge_base';
+  const CALL_HISTORY_KEY = user?.id ? `${CALL_HISTORY_KEY_PREFIX}${user.id}` : 'clerktree_call_history';
 
   // Get the authenticated user's ID for user-specific data
   const getUserId = useCallback(() => {
@@ -322,17 +325,31 @@ export function DemoCallProvider({ children }: { children: ReactNode }) {
       // 3. Supabase for call_history only
 
       try {
-        // Load user's custom knowledge base from localStorage (if any)
-        // This takes precedence over Supabase global config
-        const localKB = localStorage.getItem(KNOWLEDGE_BASE_KEY);
-        if (localKB) {
-          try {
-            const parsed = JSON.parse(localKB);
-            // Merge with defaults to ensure all fields exist
-            setKnowledgeBase(prev => ({ ...prev, ...parsed }));
-            console.log('✅ Loaded user knowledge base from localStorage');
-          } catch (e) {
-            console.warn('Failed to parse localStorage knowledge base:', e);
+        // Load user's custom knowledge base - prioritize Supabase for authenticated users
+        if (user?.id) {
+          // Load from Supabase first (source of truth)
+          const { data: kbData, error: kbError } = await supabase
+            .from('knowledge_base_config')
+            .select('*')
+            .eq('user_id', user.id)
+            .single();
+
+          if (!kbError && kbData?.config) {
+            setKnowledgeBase(prev => ({ ...prev, ...(kbData.config as KnowledgeBaseConfig) }));
+            localStorage.setItem(KNOWLEDGE_BASE_KEY, JSON.stringify(kbData.config));
+            console.log('✅ Loaded user knowledge base from Supabase');
+          } else {
+            // Try user-scoped localStorage as fallback
+            const localKB = localStorage.getItem(KNOWLEDGE_BASE_KEY);
+            if (localKB) {
+              try {
+                const parsed = JSON.parse(localKB);
+                setKnowledgeBase(prev => ({ ...prev, ...parsed }));
+                console.log('✅ Loaded user knowledge base from localStorage');
+              } catch (e) {
+                console.warn('Failed to parse localStorage knowledge base:', e);
+              }
+            }
           }
         }
 
@@ -398,27 +415,13 @@ export function DemoCallProvider({ children }: { children: ReactNode }) {
           setCallHistory(formattedHistory);
           console.log('✅ Loaded', formattedHistory.length, 'calls from Supabase');
         } else {
-          // Fallback to localStorage
-          const localHistory = localStorage.getItem(CALL_HISTORY_KEY);
-          if (localHistory) {
-            setCallHistory(deserializeCallHistory(localHistory));
-          }
+          // No data for this user — start fresh (do NOT fall back to localStorage which may contain other users' data)
+          setCallHistory([]);
         }
       } catch (error) {
         console.error('Error loading data:', error);
-        // Fallback to localStorage
-        const localKB = localStorage.getItem(KNOWLEDGE_BASE_KEY);
-        if (localKB) {
-          try {
-            setKnowledgeBase(JSON.parse(localKB));
-          } catch (e) {
-            console.error('Error parsing local KB:', e);
-          }
-        }
-        const localHistory = localStorage.getItem(CALL_HISTORY_KEY);
-        if (localHistory) {
-          setCallHistory(deserializeCallHistory(localHistory));
-        }
+        // Do NOT fall back to localStorage for user-scoped data
+        setCallHistory([]);
       }
 
       setIsLoading(false);
@@ -427,17 +430,20 @@ export function DemoCallProvider({ children }: { children: ReactNode }) {
     loadData();
   }, [user?.id]);
 
-  // Real-time subscription for global sync across devices
+  // Real-time subscription for user-scoped sync across devices
   useEffect(() => {
-    // Subscribe to call_history changes from Supabase
+    if (!user?.id) return;
+
+    // Subscribe to call_history changes for this user only
     const subscription = supabase
-      .channel('call_history_changes')
+      .channel(`call_history_changes_${user.id}`)
       .on(
         'postgres_changes',
         {
           event: '*', // Listen for all changes (INSERT, UPDATE, DELETE)
           schema: 'public',
-          table: 'call_history'
+          table: 'call_history',
+          filter: `user_id=eq.${user.id}`
         },
         (payload) => {
           console.log('📡 Real-time update received:', payload.eventType);
@@ -512,14 +518,14 @@ export function DemoCallProvider({ children }: { children: ReactNode }) {
       )
       .subscribe((status) => {
         if (status === 'SUBSCRIBED') {
-          console.log('📡 Real-time sync enabled - dashboard updates globally');
+          console.log('📡 Real-time sync enabled for user:', user.id);
         }
       });
 
     return () => {
       subscription.unsubscribe();
     };
-  }, []);
+  }, [user?.id]);
 
   // Real-time subscription for global active sessions count
   useEffect(() => {
