@@ -13,6 +13,7 @@ import {
     Sparkles,
     Terminal,
     CreditCard,
+    Link2,
     Key,
     BarChart,
     Sun,
@@ -409,6 +410,21 @@ export function AppSidebar({ activeTab, setActiveTab, hasAccess = false, ...prop
                                 >
                                     <Users />
                                     <span>{t('sidebar.team')}</span>
+                                </SidebarMenuButton>
+                            </SidebarMenuItem>
+                            <SidebarMenuItem>
+                                <SidebarMenuButton
+                                    isActive={activeTab === 'integrations'}
+                                    onClick={() => handleTabClick('integrations')}
+                                    className={cn(
+                                        "transition-colors",
+                                        isDark
+                                            ? "text-white/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-white/10 data-[active=true]:text-white"
+                                            : "text-gray-600 hover:text-gray-900 hover:bg-black/5 data-[active=true]:bg-black/5 data-[active=true]:text-black"
+                                    )}
+                                >
+                                    <Link2 />
+                                    <span>Integrations</span>
                                 </SidebarMenuButton>
                             </SidebarMenuItem>
                         </SidebarMenu>
