@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { LayoutDashboard, Menu, MessageSquare, Phone, ArrowLeft } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import MobileSidebar from '../components/Layout/Sidebar/MobileSidebar';
 import { cn } from '../utils/cn';
@@ -329,8 +329,11 @@ function UserCallContent({ initialMode = 'select' }: UserCallContentProps) {
 }
 
 export default function UserCall({ initialMode }: UserCallContentProps = {}) {
+  const [searchParams] = useSearchParams();
+  const agentId = searchParams.get('agentId') || undefined;
+
   return (
-    <DemoCallProvider>
+    <DemoCallProvider initialAgentId={agentId}>
       <UserCallContent initialMode={initialMode} />
     </DemoCallProvider>
   );

@@ -141,6 +141,9 @@ interface DemoCallContextType {
   getCurrentUserId: () => string;
   switchSession: (sessionId: string, config?: Record<string, unknown>) => void;
 
+  // Agent ID for attributing calls to a specific dashboard user
+  agentId: string | null;
+
   // Global active sessions (from all devices worldwide)
   globalActiveSessions: { voice: number; text: number };
 
@@ -280,8 +283,10 @@ function deserializeCallHistory(data: string): CallHistoryItem[] {
   }
 }
 
-export function DemoCallProvider({ children }: { children: ReactNode }) {
+export function DemoCallProvider({ children, initialAgentId }: { children: ReactNode; initialAgentId?: string }) {
   const { user } = useAuth();
+  // agentId: the dashboard owner whose knowledge base this call is attributed to
+  const agentId = initialAgentId || user?.id || null;
   const [knowledgeBase, setKnowledgeBase] = useState<KnowledgeBaseConfig>(defaultKnowledgeBase);
   const [currentCall, setCurrentCall] = useState<CallSession | null>(null);
   const [callHistory, setCallHistory] = useState<CallHistoryItem[]>([]); // Start with empty - real data only
@@ -957,7 +962,8 @@ export function DemoCallProvider({ children }: { children: ReactNode }) {
               summary: initialHistoryItem.summary,
               sentiment: 'neutral',
               follow_up_required: initialHistoryItem.summary.followUpRequired,
-              user_id: user?.id
+              user_id: user?.id,
+              agent_id: agentId || user?.id || null
             };
             await supabase.from('call_history').insert(initialPayload);
             console.log('📡 Call synced to Supabase for real-time updates');
@@ -1190,6 +1196,7 @@ export function DemoCallProvider({ children }: { children: ReactNode }) {
     getAnalytics,
     getCurrentUserId: getUserId,
     switchSession,
+    agentId,
     globalActiveSessions,
     isLoading,
   };

@@ -18,6 +18,7 @@ import BillingView from '../components/DashboardViews/BillingView';
 import KeysView from '../components/DashboardViews/KeysView';
 import TeamView from '../components/DashboardViews/TeamView';
 import MonitorView from '../components/DashboardViews/MonitorView';
+import IntegrationView from '../components/DashboardViews/IntegrationView';
 import WelcomeManager from '../components/DemoCall/WelcomeManager';
 import { AccessCodeProvider, useAccessCode } from '../contexts/AccessCodeContext';
 import AccessCodeDialog from '../components/AccessCodeDialog';
@@ -37,7 +38,7 @@ function DemoDashboardContent() {
   }, [hasAccess, activeTab]);
 
   // Tabs that are always accessible without an access code
-  const alwaysAccessibleTabs = ['billing', 'keys', 'team', 'usage'];
+  const alwaysAccessibleTabs = ['billing', 'keys', 'team', 'usage', 'integrations'];
 
   const handleSetActiveTab = (tab: string) => {
     if (!hasAccess && !alwaysAccessibleTabs.includes(tab)) return;
@@ -61,6 +62,7 @@ function DemoDashboardContent() {
       billing: t('sidebar.billing'),
       keys: t('sidebar.keys'),
       team: t('sidebar.team'),
+      integrations: 'Integrations',
     };
     return labelMap[tab] || tab;
   };
@@ -162,6 +164,7 @@ function DemoDashboardContent() {
                   {activeTab === 'billing' && <BillingView isDark={isDark} />}
                   {activeTab === 'keys' && <KeysView isDark={isDark} />}
                   {activeTab === 'team' && <TeamView isDark={isDark} />}
+                  {activeTab === 'integrations' && <IntegrationView isDark={isDark} />}
                 </motion.div>
               )}
             </div>
