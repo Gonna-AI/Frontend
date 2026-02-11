@@ -22,7 +22,7 @@ api.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       // Redirect to login page if unauthorized
-      window.location.href = '/invite';
+      window.location.href = '/login';
     }
     return Promise.reject(error);
   }
