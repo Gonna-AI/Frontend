@@ -1,8 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { cn } from '../../utils/cn';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { Plus, User, Mail, Shield, Trash2, Check, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { supabase } from '../../config/supabase';
+import { useAuth } from '../../contexts/AuthContext';
 
 interface TeamMember {
     id: string;
@@ -15,66 +17,111 @@ interface TeamMember {
 
 export default function TeamView({ isDark = true }: { isDark?: boolean }) {
     const { t } = useLanguage();
+    const { user } = useAuth();
     const [email, setEmail] = useState('');
     const [role, setRole] = useState<'admin' | 'member'>('member');
     const [isInviting, setIsInviting] = useState(false);
     const [inviteSuccess, setInviteSuccess] = useState(false);
+    const [members, setMembers] = useState<TeamMember[]>([]);
+    const [isLoadingMembers, setIsLoadingMembers] = useState(true);
 
-    // Mock initial data
-    const [members, setMembers] = useState<TeamMember[]>([
-        {
-            id: '1',
-            email: 'admin@clerktree.com',
-            role: 'admin',
-            status: 'active',
-            dateAdded: '2024-01-15',
-            lastActive: 'Just now'
-        },
-        {
-            id: '2',
-            email: 'sarah@clerktree.com',
-            role: 'member',
-            status: 'active',
-            dateAdded: '2024-02-01',
-            lastActive: '2 hours ago'
-        },
-        {
-            id: '3',
-            email: 'dev@clerktree.com',
-            role: 'member',
-            status: 'pending',
-            dateAdded: '2024-02-10'
+    // Load team members from Supabase
+    const loadMembers = useCallback(async () => {
+        if (!user?.id) return;
+        setIsLoadingMembers(true);
+        try {
+            const { data, error } = await supabase
+                .from('team_members')
+                .select('*')
+                .eq('owner_id', user.id)
+                .order('invited_at', { ascending: false });
+
+            if (!error && data) {
+                setMembers(data.map(m => ({
+                    id: m.id,
+                    email: m.email,
+                    role: m.role,
+                    status: m.status,
+                    dateAdded: new Date(m.invited_at).toISOString().split('T')[0],
+                    lastActive: m.last_active ? getRelativeTime(new Date(m.last_active)) : undefined
+                })));
+            }
+        } catch (err) {
+            console.error('Failed to load team members:', err);
+        } finally {
+            setIsLoadingMembers(false);
         }
-    ]);
+    }, [user?.id]);
+
+    useEffect(() => {
+        loadMembers();
+    }, [loadMembers]);
+
+    const getRelativeTime = (date: Date) => {
+        const diff = Date.now() - date.getTime();
+        const minutes = Math.floor(diff / 60000);
+        if (minutes < 1) return 'Just now';
+        if (minutes < 60) return `${minutes} min ago`;
+        const hours = Math.floor(minutes / 60);
+        if (hours < 24) return `${hours} hours ago`;
+        return `${Math.floor(hours / 24)} days ago`;
+    };
 
     const handleInvite = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!email) return;
+        if (!email || !user?.id) return;
 
         setIsInviting(true);
 
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 1500));
+        try {
+            const { data, error } = await supabase
+                .from('team_members')
+                .insert({
+                    owner_id: user.id,
+                    email,
+                    role,
+                    status: 'pending'
+                })
+                .select()
+                .single();
 
-        const newMember: TeamMember = {
-            id: Math.random().toString(36).substr(2, 9),
-            email,
-            role,
-            status: 'pending',
-            dateAdded: new Date().toISOString().split('T')[0]
-        };
-
-        setMembers([newMember, ...members]);
-        setIsInviting(false);
-        setInviteSuccess(true);
-        setEmail('');
-
-        setTimeout(() => setInviteSuccess(false), 3000);
+            if (!error && data) {
+                const newMember: TeamMember = {
+                    id: data.id,
+                    email: data.email,
+                    role: data.role,
+                    status: data.status,
+                    dateAdded: new Date(data.invited_at).toISOString().split('T')[0]
+                };
+                setMembers([newMember, ...members]);
+                setInviteSuccess(true);
+                setEmail('');
+                setTimeout(() => setInviteSuccess(false), 3000);
+            } else {
+                console.error('Failed to invite member:', error);
+            }
+        } catch (err) {
+            console.error('Failed to invite member:', err);
+        } finally {
+            setIsInviting(false);
+        }
     };
 
-    const handleRemoveMember = (id: string) => {
+    const handleRemoveMember = async (id: string) => {
         if (confirm('Are you sure you want to remove this member?')) {
-            setMembers(members.filter(m => m.id !== id));
+            try {
+                const { error } = await supabase
+                    .from('team_members')
+                    .delete()
+                    .eq('id', id)
+                    .eq('owner_id', user?.id);
+
+                if (!error) {
+                    setMembers(members.filter(m => m.id !== id));
+                }
+            } catch (err) {
+                console.error('Failed to remove member:', err);
+            }
         }
     };
 

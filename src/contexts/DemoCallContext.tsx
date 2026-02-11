@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useCallback, useEffect, ReactNode } from 'react';
 import { supabase } from '../config/supabase';
 import { aiService } from '../services/aiService';
+import { useAuth } from './AuthContext';
 
 // Types for dynamic context extraction
 export interface ExtractedField {
@@ -278,6 +279,7 @@ function deserializeCallHistory(data: string): CallHistoryItem[] {
 }
 
 export function DemoCallProvider({ children }: { children: ReactNode }) {
+  const { user } = useAuth();
   const [knowledgeBase, setKnowledgeBase] = useState<KnowledgeBaseConfig>(defaultKnowledgeBase);
   const [currentCall, setCurrentCall] = useState<CallSession | null>(null);
   const [callHistory, setCallHistory] = useState<CallHistoryItem[]>([]); // Start with empty - real data only
@@ -287,15 +289,10 @@ export function DemoCallProvider({ children }: { children: ReactNode }) {
   // Persistence key
   const ACTIVE_CALL_KEY = 'active_call_session';
 
-  // Get or create a user session ID for user-specific data
+  // Get the authenticated user's ID for user-specific data
   const getUserId = useCallback(() => {
-    let userId = localStorage.getItem('clerktree_user_id');
-    if (!userId) {
-      userId = `user_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
-      localStorage.setItem('clerktree_user_id', userId);
-    }
-    return userId;
-  }, []);
+    return user?.id || 'anonymous';
+  }, [user]);
 
   // Switch to a different session
   const switchSession = useCallback((sessionId: string, config?: Record<string, unknown>) => {
@@ -364,9 +361,16 @@ export function DemoCallProvider({ children }: { children: ReactNode }) {
         }
 
         // Load call history
+        // Only load data if user is authenticated
+        if (!user?.id) {
+          setIsLoading(false);
+          return;
+        }
+
         const { data: historyData, error: historyError } = await supabase
           .from('call_history')
           .select('*')
+          .eq('user_id', user.id)
           .order('date', { ascending: false });
 
         if (!historyError && historyData && historyData.length > 0) {
@@ -421,7 +425,7 @@ export function DemoCallProvider({ children }: { children: ReactNode }) {
     };
 
     loadData();
-  }, []);
+  }, [user?.id]);
 
   // Real-time subscription for global sync across devices
   useEffect(() => {
@@ -619,11 +623,16 @@ export function DemoCallProvider({ children }: { children: ReactNode }) {
       localStorage.setItem(KNOWLEDGE_BASE_KEY, JSON.stringify(knowledgeBase));
       console.log('✅ Saved knowledge base to localStorage');
 
+      if (userId === 'anonymous') {
+        return true; // Not logged in, localStorage only
+      }
+
       // Try to save to Supabase with user ID
       const { error } = await supabase
         .from('knowledge_base_config')
         .upsert({
-          id: userId,  // User-specific ID instead of 'default'
+          id: userId,  // User-specific ID
+          user_id: userId,
           config: knowledgeBase,
           updated_at: new Date().toISOString()
         });
@@ -646,12 +655,13 @@ export function DemoCallProvider({ children }: { children: ReactNode }) {
   const loadKnowledgeBase = useCallback(async (): Promise<void> => {
     try {
       const userId = getUserId();
+      if (userId === 'anonymous') return;
 
       // Try to load user-specific config
       const { data, error } = await supabase
         .from('knowledge_base_config')
         .select('*')
-        .eq('id', userId)
+        .eq('user_id', userId)
         .single();
 
       if (!error && data?.config) {
@@ -722,7 +732,8 @@ export function DemoCallProvider({ children }: { children: ReactNode }) {
         started_at: newCall.startTime.toISOString(),
         status: 'active',
         last_activity: new Date().toISOString(),
-        message_count: 0
+        message_count: 0,
+        user_id: user?.id || null
       });
       if (error) {
         console.error('📡 Failed to register session:', error.message);
@@ -939,7 +950,8 @@ export function DemoCallProvider({ children }: { children: ReactNode }) {
               tags: initialHistoryItem.tags,
               summary: initialHistoryItem.summary,
               sentiment: 'neutral',
-              follow_up_required: initialHistoryItem.summary.followUpRequired
+              follow_up_required: initialHistoryItem.summary.followUpRequired,
+              user_id: user?.id
             };
             await supabase.from('call_history').insert(initialPayload);
             console.log('📡 Call synced to Supabase for real-time updates');
@@ -1027,7 +1039,8 @@ export function DemoCallProvider({ children }: { children: ReactNode }) {
               tags: finalHistoryItem.tags,
               summary: finalHistoryItem.summary,
               sentiment: finalHistoryItem.summary.sentiment || 'neutral',
-              follow_up_required: finalHistoryItem.summary.followUpRequired || false
+              follow_up_required: finalHistoryItem.summary.followUpRequired || false,
+              user_id: user?.id
             };
 
             // Use upsert to UPDATE the existing record with the final summary

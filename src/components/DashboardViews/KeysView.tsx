@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { cn } from '../../utils/cn';
-import { Plus, Copy, Trash2, Key, Shield, Check, ArrowRight, ArrowLeft, X, Eye, EyeOff, AlertTriangle, Zap, MessageSquare, Mic } from 'lucide-react';
+import { Plus, Copy, Trash2, Key, Shield, Check, ArrowRight, ArrowLeft, X, Eye, EyeOff, AlertTriangle, Zap, MessageSquare, Mic, Loader2 } from 'lucide-react';
+import { supabase } from '../../config/supabase';
+import { useAuth } from '../../contexts/AuthContext';
 
 interface ApiKey {
     id: string;
@@ -16,7 +18,9 @@ interface ApiKey {
 type WizardStep = 'name' | 'permissions' | 'limits' | 'confirm' | 'created';
 
 export default function KeysView({ isDark = true }: { isDark?: boolean }) {
+    const { user } = useAuth();
     const [keys, setKeys] = useState<ApiKey[]>([]);
+    const [isLoadingKeys, setIsLoadingKeys] = useState(true);
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [wizardStep, setWizardStep] = useState<WizardStep>('name');
     const [copiedId, setCopiedId] = useState<string | null>(null);
@@ -46,28 +50,95 @@ export default function KeysView({ isDark = true }: { isDark?: boolean }) {
         resetForm();
     };
 
-    const createKey = () => {
+    // Load keys from Supabase on mount
+    const loadKeys = useCallback(async () => {
+        if (!user?.id) return;
+        setIsLoadingKeys(true);
+        try {
+            const { data, error } = await supabase
+                .from('user_api_keys')
+                .select('*')
+                .eq('user_id', user.id)
+                .order('created_at', { ascending: false });
+
+            if (!error && data) {
+                setKeys(data.map(k => ({
+                    id: k.id,
+                    name: k.name,
+                    token: k.token,
+                    created: new Date(k.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+                    lastUsed: k.last_used ? new Date(k.last_used).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Never',
+                    status: k.status,
+                    permissions: k.permissions || [],
+                    rateLimit: k.rate_limit
+                })));
+            }
+        } catch (err) {
+            console.error('Failed to load API keys:', err);
+        } finally {
+            setIsLoadingKeys(false);
+        }
+    }, [user?.id]);
+
+    useEffect(() => {
+        loadKeys();
+    }, [loadKeys]);
+
+    const createKey = async () => {
+        if (!user?.id) return;
         const token = 'ct_live_' + Math.random().toString(36).substr(2, 8) + Math.random().toString(36).substr(2, 8) + Math.random().toString(36).substr(2, 8);
 
-        const newKey: ApiKey = {
-            id: 'key_' + Math.random().toString(36).substr(2, 9),
-            name: newKeyName,
-            token: token,
-            created: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-            lastUsed: 'Never',
-            status: 'active',
-            permissions: newKeyPermissions,
-            rateLimit: newKeyRateLimit
-        };
+        try {
+            const { data, error } = await supabase
+                .from('user_api_keys')
+                .insert({
+                    user_id: user.id,
+                    name: newKeyName,
+                    token: token,
+                    permissions: newKeyPermissions,
+                    rate_limit: newKeyRateLimit,
+                    status: 'active'
+                })
+                .select()
+                .single();
 
-        setKeys([newKey, ...keys]);
-        setCreatedKeyToken(token);
-        setWizardStep('created');
+            if (!error && data) {
+                const newKey: ApiKey = {
+                    id: data.id,
+                    name: data.name,
+                    token: data.token,
+                    created: new Date(data.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+                    lastUsed: 'Never',
+                    status: data.status,
+                    permissions: data.permissions || [],
+                    rateLimit: data.rate_limit
+                };
+                setKeys([newKey, ...keys]);
+                setCreatedKeyToken(token);
+                setWizardStep('created');
+            } else {
+                console.error('Failed to create API key:', error);
+            }
+        } catch (err) {
+            console.error('Failed to create API key:', err);
+        }
     };
 
-    const deleteKey = (id: string) => {
+    const deleteKey = async (id: string) => {
         if (confirm('Are you sure you want to revoke this API key? This action cannot be undone.')) {
-            setKeys(keys.filter(k => k.id !== id));
+            try {
+                const { error } = await supabase
+                    .from('user_api_keys')
+                    .delete()
+                    .eq('id', id)
+                    .eq('user_id', user?.id);
+
+                if (!error) {
+                    setKeys(keys.filter(k => k.id !== id));
+                }
+            } catch (err) {
+                console.error('Failed to delete API key:', err);
+            }
         }
     };
 
