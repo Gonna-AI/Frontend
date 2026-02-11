@@ -47,7 +47,6 @@ import {
 } from "@/components/ui/sidebar"
 import { cn } from "@/utils/cn"
 import { useLanguage } from "@/contexts/LanguageContext"
-import UserSessionSwitcher from "./DemoCall/UserSessionSwitcher"
 import LanguageSwitcher from "./Layout/LanguageSwitcher"
 import { useDemoCall } from "@/contexts/DemoCallContext"
 import { useAuth } from "@/contexts/AuthContext"
@@ -462,15 +461,6 @@ export function AppSidebar({ activeTab, setActiveTab, hasAccess = false, ...prop
                                 </div>
                             )}
                         </div>
-                    </SidebarMenuItem>
-                    <SidebarMenuItem>
-                        <UserSessionSwitcher
-                            isDark={isDark}
-                            currentUserId={getCurrentUserId()}
-                            onSessionChange={switchSession}
-                            currentConfig={knowledgeBase as unknown as Record<string, unknown>}
-                            onSaveSession={saveKnowledgeBase}
-                        />
                     </SidebarMenuItem>
                     <SidebarSeparator className={isDark ? "bg-white/10" : "bg-black/5"} />
                     <AuthUserSection isDark={isDark} state={state} />
