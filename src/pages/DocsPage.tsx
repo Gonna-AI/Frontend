@@ -192,7 +192,7 @@ export default function DocsPage() {
                     </div>
                     <div className="flex items-center gap-3 md:gap-4">
                         <button onClick={() => setIsSearchOpen(true)} className="md:hidden p-2 text-white/60 hover:text-white"><Search className="w-5 h-5" /></button>
-                        <Link to="/contact" className="hidden md:block text-sm text-white/60 hover:text-white transition-colors">Support</Link>
+                        <Link to="/support" className="hidden md:block text-sm text-white/60 hover:text-white transition-colors">Support</Link>
                         <Link to="/dashboard" className="px-3 md:px-4 py-2 bg-white text-black text-xs md:text-sm font-medium rounded-lg hover:bg-neutral-200 transition-colors">
                             <span className="md:hidden">Dashboard</span><span className="hidden md:inline">Go to Dashboard</span>
                         </Link>
