@@ -8,7 +8,7 @@ import ScrollToTop from './components/ScrollToTop';
 import CanonicalLink from './components/SEO/CanonicalLink';
 import CookieConsent from './components/CookieConsent';
 import HreflangTags from './components/SEO/HreflangTags';
-import LoadingSpinner from './components/LoadingSpinner';
+
 
 // Lazy load pages
 const Landing = React.lazy(() => import('./components/Landing'));
@@ -48,7 +48,8 @@ function App() {
             <CanonicalLink />
             <HreflangTags />
             <ScrollToTop />
-            <Suspense fallback={<LoadingSpinner />}>
+            <Seo />
+            <Suspense fallback={null}>
               <Routes>
                 {/* Public Routes */}
                 <Route path="/" element={<Landing />} />

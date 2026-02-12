@@ -2,6 +2,7 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import viteCompression from 'vite-plugin-compression';
 import { VitePWA } from 'vite-plugin-pwa';
+import Sitemap from 'vite-plugin-sitemap';
 import path from "path"
 
 // https://vitejs.dev/config/
@@ -30,6 +31,19 @@ export default defineConfig({
           },
         ],
       },
+    }),
+    Sitemap({
+      hostname: 'https://clerktree.com',
+      dynamicRoutes: [
+        '/about',
+        '/solutions',
+        '/blog',
+        '/contact',
+        '/terms-of-service',
+        '/privacy-policy',
+        '/cookie-policy',
+        '/security',
+      ],
     }),
   ],
   resolve: {
