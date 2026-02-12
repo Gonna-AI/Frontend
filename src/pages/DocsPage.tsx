@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Search, Menu, X, Check, Copy, ChevronRight } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import {
     EndpointDoc, BASE_URL, chatEndpoints, callEndpoints,
     dashboardEndpoints, errorCodes
@@ -168,10 +168,25 @@ export default function DocsPage() {
 
     const scrollToSection = (id: string) => {
         setActiveId(id);
-        document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        const element = document.getElementById(id);
+        if (element) {
+            element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
         setIsMobileMenuOpen(false);
         setIsSearchOpen(false);
     };
+
+    const location = useLocation();
+
+    useEffect(() => {
+        if (location.hash) {
+            const id = location.hash.replace('#', '');
+            // Brief delay to ensure render
+            setTimeout(() => {
+                scrollToSection(id);
+            }, 100);
+        }
+    }, [location.hash]);
 
     return (
         <div className="min-h-screen bg-black text-white font-sans selection:bg-purple-500/30">
