@@ -3,7 +3,7 @@ import { Zap, Brain, FileCheck, Clock, BarChart3, Shield, ArrowRight } from 'luc
 import { useLanguage } from '../contexts/LanguageContext';
 import LanguageSwitcher from '../components/Layout/LanguageSwitcher';
 import Footer from '../components/Landing/Footer';
-import DitherShaderDemoDuotone from '../components/ui/dither-shader-demo-duotone';
+import ThreeDMarqueeDemo from '../components/ui/3d-marquee-demo';
 
 export default function Solutions() {
   const navigate = useNavigate();
@@ -143,7 +143,7 @@ export default function Solutions() {
           </div>
 
           <div className="mb-20">
-            <DitherShaderDemoDuotone />
+            <ThreeDMarqueeDemo />
           </div>
 
           {/* Solutions Grid */}
