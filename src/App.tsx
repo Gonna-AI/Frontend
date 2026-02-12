@@ -29,6 +29,7 @@ import ScrollToTop from './components/ScrollToTop';
 import DocsPage from './pages/DocsPage';
 import SupportPage from './pages/SupportPage';
 import CanonicalLink from './components/SEO/CanonicalLink';
+import CookieConsent from './components/CookieConsent';
 import HreflangTags from './components/SEO/HreflangTags';
 import AuthPage from './pages/AuthPage';
 import AuthCallback from './pages/AuthCallback';
@@ -99,6 +100,7 @@ function App() {
               {/* Catch all route */}
               <Route path="*" element={<Navigate to="/" />} />
             </Routes>
+            <CookieConsent />
           </BrowserRouter>
         </QueryClientProvider>
       </LanguageProvider>
