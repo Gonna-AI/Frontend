@@ -45,10 +45,7 @@ export default function Landing() {
     navigate('/about');
   };
 
-  const handleContactClick = () => {
-    setIsMobileMenuOpen(false);
-    navigate('/dashboard');
-  };
+
 
   const handleSolutionsClick = () => {
     setIsMobileMenuOpen(false);
@@ -63,7 +60,7 @@ export default function Landing() {
       {/* Header - Dark background fading to transparent on right for corner glow, solid when scrolled */}
       <header
         className={`fixed left-0 right-0 z-50 w-full py-3 px-4 sm:px-6 overflow-hidden transition-all duration-300 ${isScrolled ? 'backdrop-blur-xl' : ''}`}
-        style={{ top: bannerVisible ? '52px' : '0' }}
+        style={{ top: bannerVisible ? '44px' : '0' }}
       >
         {/* Dark-to-transparent gradient background with fading bottom edge - or solid when scrolled */}
         <div
@@ -200,7 +197,7 @@ export default function Landing() {
               exit={{ opacity: 0, y: -20, scale: 0.95 }}
               transition={{ duration: 0.2, ease: "easeOut" }}
               className="fixed left-4 right-4 z-50 md:hidden"
-              style={{ top: bannerVisible ? '132px' : '80px' }}
+              style={{ top: bannerVisible ? '108px' : '64px' }}
             >
               <div className="backdrop-blur-xl bg-black/40 border border-white/10 rounded-2xl shadow-2xl overflow-hidden ring-1 ring-white/5">
                 <nav className="flex flex-col p-2">
