@@ -209,13 +209,7 @@
   display: none;
 }
 
-/* Hide Termly 'Powered by' badge */
-
-/* Hide Termly 'Powered by' badge and logo */
-.termly-badge,
-img[alt="Powered by Termly"] {
-  display: none !important;
-}
+/* Cookie consent is now handled by custom CookieConsent component */
 
 @layer base {
   * {
