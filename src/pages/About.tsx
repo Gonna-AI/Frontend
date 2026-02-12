@@ -189,6 +189,7 @@ export default function About() {
                         <img
                           src={member.image}
                           alt={member.name}
+                          crossOrigin="anonymous"
                           className="w-full h-full object-cover transition-transform duration-700 scale-[var(--base-scale)] group-hover:scale-[var(--hover-scale)]"
                           style={{
                             objectPosition: member.objectPosition || 'center',
