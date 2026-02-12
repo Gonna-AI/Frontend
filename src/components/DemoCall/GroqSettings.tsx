@@ -7,6 +7,8 @@ import {
     Loader2
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
+import { supabase } from '../../config/supabase';
+import { proxyJSON, ProxyRoutes } from '../../services/proxyClient';
 
 // Available Groq models (free tier)
 export const GROQ_MODELS = [
@@ -70,16 +72,20 @@ const DEFAULT_SETTINGS: GroqSettings = {
 
 const STORAGE_KEY_PREFIX = 'clerktree_groq_settings_';
 
-function getStorageKey(): string {
-    // Use supabase session to get user-scoped key
-    try {
-        const sessionStr = localStorage.getItem('sb-xlzwfkgurrrspcdyqele-auth-token');
-        if (sessionStr) {
-            const session = JSON.parse(sessionStr);
-            const userId = session?.user?.id;
-            if (userId) return `${STORAGE_KEY_PREFIX}${userId}`;
-        }
-    } catch { /* ignore */ }
+// Cached user ID to avoid async calls in synchronous contexts
+let _cachedUserId: string | null = null;
+
+// Initialize cached userId from Supabase session
+supabase.auth.getSession().then(({ data: { session } }) => {
+    _cachedUserId = session?.user?.id ?? null;
+});
+supabase.auth.onAuthStateChange((_event, session) => {
+    _cachedUserId = session?.user?.id ?? null;
+});
+
+function getStorageKey(userId?: string): string {
+    const id = userId || _cachedUserId;
+    if (id) return `${STORAGE_KEY_PREFIX}${id}`;
     return 'clerktree_groq_settings';
 }
 
@@ -125,27 +131,17 @@ export default function GroqSettingsPage({ isDark = true, onSettingsChange }: Gr
         setIsTestingConnection(true);
         setConnectionStatus('idle');
         setTestError(null);
-        const apiKey = import.meta.env.VITE_GROQ_API_KEY;
 
-        if (!apiKey) {
-            setConnectionStatus('error');
-            setTestError('No API key configured.');
-            setIsTestingConnection(false);
-            return;
-        }
+        // No client-side key check needed — auth is handled via Supabase session
 
         try {
-            const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
-                body: JSON.stringify({
-                    model: settings.model,
-                    messages: [{ role: 'user', content: 'Hi' }],
-                    max_tokens: 5
-                })
-            });
-            if (response.ok) setConnectionStatus('success');
-            else throw new Error('API Error');
+            await proxyJSON(ProxyRoutes.COMPLETIONS, {
+                model: settings.model,
+                messages: [{ role: 'user', content: 'Hi' }],
+                max_tokens: 5
+            }, { timeout: 10000 });
+
+            setConnectionStatus('success');
         } catch (e: any) {
             setConnectionStatus('error');
             setTestError(e.message || 'Connection failed');

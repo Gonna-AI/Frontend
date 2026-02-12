@@ -6,7 +6,10 @@
  */
 
 // ElevenLabs API Configuration
-const ELEVENLABS_API_KEY = import.meta.env.VITE_ELEVENLABS_API_KEY;
+// ElevenLabs API Configuration
+import { proxyBlob, ProxyRoutes } from './proxyClient';
+
+// const ELEVENLABS_API_KEY = import.meta.env.VITE_ELEVENLABS_API_KEY;
 const ELEVENLABS_TTS_URL = 'https://api.elevenlabs.io/v1/text-to-speech';
 
 // German voice ID from ElevenLabs voice library
@@ -55,7 +58,8 @@ class ElevenLabsTTSService {
      * Check if ElevenLabs TTS is available
      */
     isAvailable(): boolean {
-        return !!ELEVENLABS_API_KEY;
+        return true; // Configured server-side
+        // return !!ELEVENLABS_API_KEY;
     }
 
     /**
@@ -98,11 +102,13 @@ class ElevenLabsTTSService {
             return;
         }
 
+        /*
         if (!ELEVENLABS_API_KEY) {
             const error = new Error('ElevenLabs API key not configured');
             options?.onError?.(error);
             throw error;
         }
+        */
 
         const voiceId = options?.voiceId || GERMAN_VOICE_ID;
 
@@ -120,41 +126,43 @@ class ElevenLabsTTSService {
             // Use streaming endpoint with latency optimization
             // optimize_streaming_latency: 3 = max latency optimization
             // output_format: mp3_22050_32 = smaller file, faster transfer
+            // Use streaming endpoint with latency optimization
+            // optimize_streaming_latency: 3 = max latency optimization
+            // output_format: mp3_22050_32 = smaller file, faster transfer
+
+            /*
             const url = new URL(`${ELEVENLABS_TTS_URL}/${voiceId}/stream`);
             url.searchParams.set('optimize_streaming_latency', '3');
             url.searchParams.set('output_format', 'mp3_22050_32');
+            */
 
-            const response = await fetch(url.toString(), {
-                method: 'POST',
-                headers: {
-                    'Accept': 'audio/mpeg',
-                    'Content-Type': 'application/json',
-                    'xi-api-key': ELEVENLABS_API_KEY,
-                },
-                body: JSON.stringify({
-                    text: formattedText,
-                    model_id: 'eleven_flash_v2_5', // Fastest model with good quality
-                    voice_settings: {
-                        stability: 0.5,
-                        similarity_boost: 0.75,
-                        style: 0.0,
-                        use_speaker_boost: true
-                    }
-                }),
-                signal: controller.signal,
-            });
+            const audioBlob = await proxyBlob(ProxyRoutes.TTS_ALT, {
+                text: formattedText,
+                voiceId: voiceId,
+                model_id: 'eleven_flash_v2_5', // Fastest model with good quality
+                optimize_streaming_latency: '3',
+                output_format: 'mp3_22050_32',
+                voice_settings: {
+                    stability: 0.5,
+                    similarity_boost: 0.75,
+                    style: 0.0,
+                    use_speaker_boost: true
+                }
+            }, { signal: controller.signal });
 
             clearTimeout(timeoutId);
 
+            /*
             if (!response.ok) {
                 const errorText = await response.text();
                 throw new Error(`ElevenLabs API error: ${response.status} - ${errorText}`);
             }
+            */
 
             console.log('🇩🇪 ElevenLabs response received, processing audio...');
 
-            // Get audio blob
-            const audioBlob = await response.blob();
+            // Audio blob is already returned by proxyBlob
+            // const audioBlob = await response.blob(); 
             console.log('🇩🇪 Audio blob size:', audioBlob.size, 'bytes');
 
             // Use Web Audio API for playback (more reliable on mobile)

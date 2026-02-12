@@ -7,6 +7,7 @@ if (!API_BASE_URL) {
 
 // Create an axios instance with default config
 import axios from 'axios';
+import { supabase } from './supabase';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -14,6 +15,19 @@ const api = axios.create({
     'Content-Type': 'application/json',
   },
   withCredentials: true, // Important for cookies/sessions
+});
+
+// Inject Supabase auth token into every request
+api.interceptors.request.use(async (config) => {
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session?.access_token) {
+      config.headers.Authorization = `Bearer ${session.access_token}`;
+    }
+  } catch {
+    // Silently proceed without token if auth check fails
+  }
+  return config;
 });
 
 // Add an interceptor to handle 401 responses
