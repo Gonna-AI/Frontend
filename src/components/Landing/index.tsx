@@ -63,7 +63,7 @@ export default function Landing() {
       {/* Header - Dark background fading to transparent on right for corner glow, solid when scrolled */}
       <header
         className={`fixed left-0 right-0 z-50 w-full py-3 px-4 sm:px-6 overflow-hidden transition-all duration-300 ${isScrolled ? 'backdrop-blur-xl' : ''}`}
-        style={{ top: bannerVisible ? '40px' : '0' }}
+        style={{ top: bannerVisible ? '52px' : '0' }}
       >
         {/* Dark-to-transparent gradient background with fading bottom edge - or solid when scrolled */}
         <div
@@ -130,18 +130,14 @@ export default function Landing() {
           {/* Desktop Navigation Links - Hidden on Mobile */}
           <nav className="hidden md:flex items-center gap-2">
             <button
-              onClick={handleContactClick}
+              onClick={() => navigate('/docs')}
               className="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive border shadow-xs h-8 rounded-md gap-1.5 px-3 has-[>svg]:px-2.5 backdrop-blur-md bg-white/5 border-white/10 text-white/90 hover:text-white hover:bg-white/10"
               style={{
                 fontFamily: 'Urbanist, sans-serif',
               }}
             >
-              {t('nav.contact')}
+              Docs
             </button>
-            <div className="w-px h-8 bg-white/10 mx-2" />
-            <div className="w-[100px]">
-              <LanguageSwitcher isExpanded={true} forceDark={true} />
-            </div>
             <div className="w-px h-8 bg-white/10 mx-2" />
             {/* Login Button - dark bordered style */}
             <button
@@ -162,6 +158,10 @@ export default function Landing() {
             >
               Login
             </button>
+            <div className="w-px h-8 bg-white/10 mx-2" />
+            <div className="w-[100px]">
+              <LanguageSwitcher isExpanded={true} forceDark={true} />
+            </div>
           </nav>
 
           {/* Mobile Hamburger Menu Button - Visible only on Mobile */}
@@ -200,7 +200,7 @@ export default function Landing() {
               exit={{ opacity: 0, y: -20, scale: 0.95 }}
               transition={{ duration: 0.2, ease: "easeOut" }}
               className="fixed left-4 right-4 z-50 md:hidden"
-              style={{ top: bannerVisible ? '120px' : '80px' }}
+              style={{ top: bannerVisible ? '132px' : '80px' }}
             >
               <div className="backdrop-blur-xl bg-black/40 border border-white/10 rounded-2xl shadow-2xl overflow-hidden ring-1 ring-white/5">
                 <nav className="flex flex-col p-2">
@@ -238,10 +238,13 @@ export default function Landing() {
                   <div className="h-px bg-white/5 mx-2" />
 
                   <button
-                    onClick={handleContactClick}
+                    onClick={() => {
+                      setIsMobileMenuOpen(false);
+                      navigate('/docs');
+                    }}
                     className="flex items-center justify-between px-4 py-3.5 rounded-xl text-white/90 hover:text-white hover:bg-white/10 transition-all group"
                   >
-                    <span className="text-base font-medium font-urbanist">{t('nav.contact')}</span>
+                    <span className="text-base font-medium font-urbanist">Docs</span>
                     <span className="text-white/20 group-hover:text-white/60 transition-colors">→</span>
                   </button>
 
