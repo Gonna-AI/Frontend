@@ -5,8 +5,9 @@ import Metrics from './Metrics';
 import Features from './Features';
 import Conversation from './Conversation';
 import Footer from './Footer';
+import AnnouncementBanner from './AnnouncementBanner';
 import { useNavigate } from 'react-router-dom';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Menu, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import LanguageSwitcher from '../Layout/LanguageSwitcher';
@@ -21,6 +22,11 @@ export default function Landing() {
   const [isScrolled, setIsScrolled] = useState(false);
   const { t } = useLanguage();
   const { isMobile } = useDeviceDetection();
+  const [bannerVisible, setBannerVisible] = useState(true);
+
+  const handleBannerVisibility = useCallback((visible: boolean) => {
+    setBannerVisible(visible);
+  }, []);
 
   // Track scroll position to change header background
   useEffect(() => {
@@ -51,9 +57,14 @@ export default function Landing() {
 
   return (
     <div className="min-h-screen overflow-hidden relative bg-[rgb(10,10,10)]">
+      {/* Announcement Banner */}
+      <AnnouncementBanner onVisibilityChange={handleBannerVisibility} />
+
       {/* Header - Dark background fading to transparent on right for corner glow, solid when scrolled */}
-      <header className={`fixed top-0 left-0 right-0 z-50 w-full py-3 px-4 sm:px-6 overflow-hidden transition-all duration-300 ${isScrolled ? 'backdrop-blur-xl' : ''
-        }`}>
+      <header
+        className={`fixed left-0 right-0 z-50 w-full py-3 px-4 sm:px-6 overflow-hidden transition-all duration-300 ${isScrolled ? 'backdrop-blur-xl' : ''}`}
+        style={{ top: bannerVisible ? '40px' : '0' }}
+      >
         {/* Dark-to-transparent gradient background with fading bottom edge - or solid when scrolled */}
         <div
           className="absolute inset-0 -z-10 transition-all duration-300"
@@ -131,6 +142,26 @@ export default function Landing() {
             <div className="w-[100px]">
               <LanguageSwitcher isExpanded={true} forceDark={true} />
             </div>
+            <div className="w-px h-8 bg-white/10 mx-2" />
+            {/* Login Button - dark bordered style */}
+            <button
+              onClick={() => navigate('/login')}
+              className="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all h-8 rounded-md px-4"
+              style={{
+                fontFamily: 'Urbanist, sans-serif',
+                background: 'rgba(255, 255, 255, 0.95)',
+                color: 'rgb(10, 10, 10)',
+                border: '1px solid rgba(255, 255, 255, 0.9)',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = 'rgba(255, 255, 255, 1)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.95)';
+              }}
+            >
+              Login
+            </button>
           </nav>
 
           {/* Mobile Hamburger Menu Button - Visible only on Mobile */}
@@ -148,7 +179,7 @@ export default function Landing() {
         </div>
       </header>
 
-      {/* Mobile Menu Overlay */}
+      {/* Mobile Menu Overlay - offset top when banner is visible */}
       <AnimatePresence>
         {isMobileMenuOpen && (
           <>
@@ -168,7 +199,8 @@ export default function Landing() {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -20, scale: 0.95 }}
               transition={{ duration: 0.2, ease: "easeOut" }}
-              className="fixed top-[80px] left-4 right-4 z-50 md:hidden"
+              className="fixed left-4 right-4 z-50 md:hidden"
+              style={{ top: bannerVisible ? '120px' : '80px' }}
             >
               <div className="backdrop-blur-xl bg-black/40 border border-white/10 rounded-2xl shadow-2xl overflow-hidden ring-1 ring-white/5">
                 <nav className="flex flex-col p-2">
@@ -218,6 +250,23 @@ export default function Landing() {
                   <div className="p-2">
                     <LanguageSwitcher isExpanded={true} forceDark={true} />
                   </div>
+
+                  <div className="h-px bg-white/5 mx-2" />
+
+                  <button
+                    onClick={() => {
+                      setIsMobileMenuOpen(false);
+                      navigate('/login');
+                    }}
+                    className="flex items-center justify-center mx-2 my-2 px-4 py-3 rounded-xl text-sm font-medium transition-all"
+                    style={{
+                      fontFamily: 'Urbanist, sans-serif',
+                      background: 'rgba(255, 255, 255, 0.95)',
+                      color: 'rgb(10, 10, 10)',
+                    }}
+                  >
+                    Login
+                  </button>
                 </nav>
               </div>
             </motion.div>
