@@ -66,7 +66,7 @@ const CodeBlock = ({ code, language = 'bash' }: { code: string; language?: strin
                     {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4 text-white/40 group-hover:text-white/70" />}
                 </button>
             </div>
-            <div className="p-4 overflow-x-auto"><pre className="text-sm font-mono text-white/80"><code>{code}</code></pre></div>
+            <div className="p-4 overflow-x-auto w-full"><pre className="text-sm font-mono text-white/80 whitespace-pre"><code>{code}</code></pre></div>
         </div>
     );
 };
@@ -77,7 +77,7 @@ const MethodBadge = ({ method, color }: { method: string; color: string }) => {
         purple: 'bg-purple-500/20 text-purple-400', amber: 'bg-amber-500/20 text-amber-400',
         blue: 'bg-blue-500/20 text-blue-400',
     };
-    return <span className={`px-2 py-1 ${colors[color] || colors.emerald} rounded text-sm font-mono font-bold`}>{method}</span>;
+    return <span className={`px-2 py-1 ${colors[color] || colors.emerald} rounded text-sm font-mono font-bold flex-shrink-0`}>{method}</span>;
 };
 
 const ParamTable = ({ params, title }: { params: EndpointDoc['params']; title?: string }) => {
@@ -85,8 +85,8 @@ const ParamTable = ({ params, title }: { params: EndpointDoc['params']; title?: 
     return (
         <div className="mt-6">
             {title && <h4 className="text-sm font-semibold text-white/80 mb-3">{title}</h4>}
-            <div className="rounded-xl border border-white/10 overflow-hidden">
-                <table className="w-full text-sm">
+            <div className="rounded-xl border border-white/10 overflow-hidden w-full overflow-x-auto">
+                <table className="w-full text-sm min-w-[600px]">
                     <thead><tr className="bg-white/5 text-left">
                         <th className="px-4 py-3 text-white/60 font-medium">Parameter</th>
                         <th className="px-4 py-3 text-white/60 font-medium">Type</th>
@@ -126,9 +126,9 @@ const EndpointSection = ({ ep }: { ep: EndpointDoc }) => (
     <section id={ep.id} className="scroll-mt-24 space-y-4 py-8">
         <h3 className="text-2xl font-semibold text-white">{ep.title}</h3>
         <p className="text-white/60 leading-relaxed">{ep.description}</p>
-        <div className="flex items-center gap-3 text-sm font-mono mt-4">
+        <div className="flex items-center gap-3 text-sm font-mono mt-4 overflow-x-auto pb-2 w-full">
             <MethodBadge method={ep.method} color={ep.color} />
-            <span className="text-white/70">{BASE_URL}{ep.path}</span>
+            <span className="text-white/70 whitespace-nowrap">{BASE_URL}{ep.path}</span>
         </div>
         <ParamTable params={ep.params} title="Request Body Parameters" />
         <ParamTable params={ep.queryParams} title="Query Parameters" />
@@ -280,9 +280,19 @@ export default function DocsPage() {
                         <section id="quickstart" className="scroll-mt-24 space-y-6 border-t border-white/5 pt-12">
                             <h2 className="text-3xl font-bold text-white">Quickstart</h2>
                             <p className="text-white/60">Get up and running in under 2 minutes. All you need is an API key from your <Link to="/dashboard" className="text-purple-400 hover:text-purple-300 underline underline-offset-4">ClerkTree Dashboard</Link>.</p>
-                            <div className="space-y-4">
-                                <div className="flex items-start gap-3"><span className="flex-shrink-0 w-7 h-7 rounded-full bg-purple-500/20 text-purple-400 flex items-center justify-center text-sm font-bold">1</span><div><p className="text-white font-medium">Get your API key</p><p className="text-white/50 text-sm mt-1">Navigate to Dashboard → API Keys → Create New Key. Copy the generated token.</p></div></div>
-                                <div className="flex items-start gap-3"><span className="flex-shrink-0 w-7 h-7 rounded-full bg-purple-500/20 text-purple-400 flex items-center justify-center text-sm font-bold">2</span><div><p className="text-white font-medium">Make your first Chat request</p><CodeBlock code={`curl -X POST "https://api.clerktree.com/v1/chat/completions" \\
+                            <div className="space-y-6">
+                                <div className="flex flex-col md:flex-row items-start gap-3">
+                                    <span className="flex-shrink-0 w-7 h-7 rounded-full bg-purple-500/20 text-purple-400 flex items-center justify-center text-sm font-bold">1</span>
+                                    <div className="min-w-0 flex-1">
+                                        <p className="text-white font-medium">Get your API key</p>
+                                        <p className="text-white/50 text-sm mt-1">Navigate to Dashboard → API Keys → Create New Key. Copy the generated token.</p>
+                                    </div>
+                                </div>
+                                <div className="flex flex-col md:flex-row items-start gap-3">
+                                    <span className="flex-shrink-0 w-7 h-7 rounded-full bg-purple-500/20 text-purple-400 flex items-center justify-center text-sm font-bold">2</span>
+                                    <div className="w-full min-w-0 flex-1">
+                                        <p className="text-white font-medium mb-2">Make your first Chat request</p>
+                                        <CodeBlock code={`curl -X POST "https://api.clerktree.com/v1/chat/completions" \\
   -H "Authorization: Bearer ct_live_YOUR_KEY" \\
   -H "Content-Type: application/json" \\
   -d '{
@@ -290,15 +300,23 @@ export default function DocsPage() {
     "messages": [
       { "role": "user", "content": "Hello, what can you do?" }
     ]
-  }'`} language="bash" /></div></div>
-                                <div className="flex items-start gap-3"><span className="flex-shrink-0 w-7 h-7 rounded-full bg-purple-500/20 text-purple-400 flex items-center justify-center text-sm font-bold">3</span><div><p className="text-white font-medium">Make your first Call request</p><CodeBlock code={`curl -X POST "https://api.clerktree.com/v1/calls" \\
+  }'`} language="bash" />
+                                    </div>
+                                </div>
+                                <div className="flex flex-col md:flex-row items-start gap-3">
+                                    <span className="flex-shrink-0 w-7 h-7 rounded-full bg-purple-500/20 text-purple-400 flex items-center justify-center text-sm font-bold">3</span>
+                                    <div className="w-full min-w-0 flex-1">
+                                        <p className="text-white font-medium mb-2">Make your first Call request</p>
+                                        <CodeBlock code={`curl -X POST "https://api.clerktree.com/v1/calls" \\
   -H "Authorization: Bearer ct_live_YOUR_KEY" \\
   -H "Content-Type: application/json" \\
   -d '{
     "phone_number": "+14155551234",
     "agent_id": "agent_sales_v2",
     "context": { "customer_name": "Jane Doe" }
-  }'`} language="bash" /></div></div>
+  }'`} language="bash" />
+                                    </div>
+                                </div>
                             </div>
                         </section>
 
@@ -313,8 +331,8 @@ export default function DocsPage() {
                             <p className="text-white/60">All requests must include the <code className="text-purple-300 bg-purple-500/10 px-1.5 py-0.5 rounded">Authorization</code> header:</p>
                             <CodeBlock code={`Authorization: Bearer ct_live_YOUR_API_KEY`} language="http" />
                             <p className="text-white/60">API keys are prefixed for easy identification:</p>
-                            <div className="rounded-xl border border-white/10 overflow-hidden">
-                                <table className="w-full text-sm"><tbody>
+                            <div className="rounded-xl border border-white/10 overflow-hidden w-full overflow-x-auto">
+                                <table className="w-full text-sm min-w-[600px]"><tbody>
                                     <tr className="border-b border-white/5"><td className="px-4 py-3 font-mono text-emerald-400">ct_live_*</td><td className="px-4 py-3 text-white/60">Production key — full access</td></tr>
                                     <tr className="border-b border-white/5"><td className="px-4 py-3 font-mono text-amber-400">ct_test_*</td><td className="px-4 py-3 text-white/60">Test key — sandbox only, no real calls</td></tr>
                                     <tr><td className="px-4 py-3 font-mono text-blue-400">ct_restrict_*</td><td className="px-4 py-3 text-white/60">Restricted key — limited scopes</td></tr>
@@ -326,8 +344,8 @@ export default function DocsPage() {
                         <section id="rate-limits" className="scroll-mt-24 space-y-6 border-t border-white/5 pt-12">
                             <h2 className="text-3xl font-bold text-white">Rate Limits</h2>
                             <p className="text-white/60">Rate limits vary by plan. Limits are applied per API key.</p>
-                            <div className="rounded-xl border border-white/10 overflow-hidden">
-                                <table className="w-full text-sm">
+                            <div className="rounded-xl border border-white/10 overflow-hidden w-full overflow-x-auto">
+                                <table className="w-full text-sm min-w-[600px]">
                                     <thead><tr className="bg-white/5"><th className="px-4 py-3 text-left text-white/60">Plan</th><th className="px-4 py-3 text-left text-white/60">Chat</th><th className="px-4 py-3 text-left text-white/60">Calls</th><th className="px-4 py-3 text-left text-white/60">Dashboard</th></tr></thead>
                                     <tbody>
                                         <tr className="border-t border-white/5"><td className="px-4 py-3 text-white">Starter</td><td className="px-4 py-3 text-white/60">30 req/min</td><td className="px-4 py-3 text-white/60">5 concurrent</td><td className="px-4 py-3 text-white/60">60 req/min</td></tr>
@@ -351,8 +369,8 @@ export default function DocsPage() {
     "request_id": "req_abc123"
   }
 }`} language="json" />
-                            <div className="rounded-xl border border-white/10 overflow-hidden">
-                                <table className="w-full text-sm">
+                            <div className="rounded-xl border border-white/10 overflow-hidden w-full overflow-x-auto">
+                                <table className="w-full text-sm min-w-[600px]">
                                     <thead><tr className="bg-white/5"><th className="px-4 py-3 text-left text-white/60">Status</th><th className="px-4 py-3 text-left text-white/60">Meaning</th><th className="px-4 py-3 text-left text-white/60">What to do</th></tr></thead>
                                     <tbody>{errorCodes.map(e => (
                                         <tr key={e.code} className="border-t border-white/5"><td className="px-4 py-3 font-mono text-white">{e.code}</td><td className="px-4 py-3 text-white font-medium">{e.name}</td><td className="px-4 py-3 text-white/60">{e.desc}</td></tr>
@@ -369,7 +387,7 @@ export default function DocsPage() {
                                 iconColor="bg-emerald-500"
                                 iconClass="bg-emerald-500/10 text-emerald-500"
                             />
-                            <p className="text-white/60 px-2">Base URL: <code className="text-purple-300 bg-purple-500/10 px-1.5 py-0.5 rounded ml-2">{BASE_URL}/chat</code></p>
+                            <p className="text-white/60 px-2 flex items-center gap-2 overflow-x-auto pb-2 w-full"><span className="flex-shrink-0">Base URL:</span> <code className="text-purple-300 bg-purple-500/10 px-1.5 py-0.5 rounded ml-2 whitespace-nowrap">{BASE_URL}/chat</code></p>
                         </section>
                         {chatEndpoints.map(ep => <EndpointSection key={ep.id} ep={ep} />)}
 
@@ -381,7 +399,7 @@ export default function DocsPage() {
                                 iconColor="bg-pink-500"
                                 iconClass="bg-pink-500/10 text-pink-500"
                             />
-                            <p className="text-white/60 px-2">Base URL: <code className="text-purple-300 bg-purple-500/10 px-1.5 py-0.5 rounded ml-2">{BASE_URL}/calls</code></p>
+                            <p className="text-white/60 px-2 flex items-center gap-2 overflow-x-auto pb-2 w-full"><span className="flex-shrink-0">Base URL:</span> <code className="text-purple-300 bg-purple-500/10 px-1.5 py-0.5 rounded ml-2 whitespace-nowrap">{BASE_URL}/calls</code></p>
                         </section>
                         {callEndpoints.map(ep => <EndpointSection key={ep.id} ep={ep} />)}
 
@@ -393,7 +411,7 @@ export default function DocsPage() {
                                 iconColor="bg-purple-500"
                                 iconClass="bg-purple-500/10 text-purple-500"
                             />
-                            <p className="text-white/60 px-2">Base URL: <code className="text-purple-300 bg-purple-500/10 px-1.5 py-0.5 rounded ml-2">{BASE_URL}/dashboard</code></p>
+                            <p className="text-white/60 px-2 flex items-center gap-2 overflow-x-auto pb-2 w-full"><span className="flex-shrink-0">Base URL:</span> <code className="text-purple-300 bg-purple-500/10 px-1.5 py-0.5 rounded ml-2 whitespace-nowrap">{BASE_URL}/dashboard</code></p>
                         </section>
                         {dashboardEndpoints.map(ep => <EndpointSection key={ep.id} ep={ep} />)}
 
@@ -406,8 +424,8 @@ export default function DocsPage() {
                                 iconClass="bg-amber-500/10 text-amber-500"
                             />
                             <h3 className="text-xl font-semibold text-white mt-8 px-2">Available Events</h3>
-                            <div className="rounded-xl border border-white/10 overflow-hidden">
-                                <table className="w-full text-sm">
+                            <div className="rounded-xl border border-white/10 overflow-hidden w-full overflow-x-auto">
+                                <table className="w-full text-sm min-w-[600px]">
                                     <thead><tr className="bg-white/5"><th className="px-4 py-3 text-left text-white/60">Event</th><th className="px-4 py-3 text-left text-white/60">Description</th></tr></thead>
                                     <tbody>
                                         <tr className="border-t border-white/5"><td className="px-4 py-3 font-mono text-emerald-400">call.started</td><td className="px-4 py-3 text-white/60">Call has been connected</td></tr>
