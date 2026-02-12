@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { Cookie, ChevronDown, ChevronRight, X, ExternalLink } from 'lucide-react';
+import { Cookie, ChevronDown, ChevronRight, X, ExternalLink, Check, Info } from 'lucide-react';
 
 declare global {
     interface Window {
@@ -83,38 +83,42 @@ const COOKIE_CATEGORIES: CookieCategory[] = [
     },
 ];
 
-/* ─── Toggle Switch ─── */
-function Toggle({
+/* ─── Checkbox Control ─── */
+function Checkbox({
     checked,
     disabled,
     onChange,
+    id
 }: {
     checked: boolean;
     disabled?: boolean;
     onChange?: () => void;
+    id: string;
 }) {
     return (
-        <button
-            type="button"
-            role="switch"
-            aria-checked={checked}
-            disabled={disabled}
-            onClick={onChange}
-            className={`
-        relative inline-flex h-6 w-11 flex-shrink-0 rounded-full border-2 border-transparent
-        transition-colors duration-200 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30
-        ${disabled ? 'cursor-not-allowed opacity-70' : 'cursor-pointer'}
-        ${checked ? 'bg-white' : 'bg-neutral-800'}
-      `}
-        >
-            <span
-                className={`
-          pointer-events-none inline-block h-5 w-5 rounded-full shadow-lg
-          transform transition-transform duration-200 ease-in-out
-          ${checked ? 'translate-x-5 bg-black' : 'translate-x-0 bg-neutral-600'}
-        `}
+        <div className="relative flex items-center">
+            <input
+                type="checkbox"
+                id={id}
+                checked={checked}
+                disabled={disabled}
+                onChange={onChange}
+                className="peer sr-only"
             />
-        </button>
+            <label
+                htmlFor={id}
+                className={`
+          flex h-5 w-5 items-center justify-center rounded border transition-colors cursor-pointer
+          ${disabled ? 'cursor-not-allowed opacity-50' : ''}
+          ${checked
+                        ? 'bg-white border-white text-black'
+                        : 'bg-transparent border-neutral-600 hover:border-neutral-400'
+                    }
+        `}
+            >
+                {checked && <Check className="h-3.5 w-3.5 stroke-[3]" />}
+            </label>
+        </div>
     );
 }
 
@@ -133,80 +137,88 @@ function CategoryAccordion({
     onExpand: () => void;
 }) {
     return (
-        <div className="border border-neutral-800/60 rounded-xl overflow-hidden transition-colors duration-200 hover:border-neutral-700/60">
+        <div className="border border-neutral-800/60 rounded-xl overflow-hidden bg-neutral-900/20 transition-colors duration-200 hover:border-neutral-700/60">
             {/* Header Row */}
-            <div className="flex items-center gap-3 px-5 py-4">
+            <div className="flex items-center gap-3 px-4 py-3 sm:px-5 sm:py-4 select-none">
                 {/* Expand arrow */}
                 <button
                     type="button"
                     onClick={onExpand}
-                    className="text-neutral-500 hover:text-neutral-300 transition-colors flex-shrink-0"
+                    className="p-1 -ml-1 text-neutral-500 hover:text-neutral-300 transition-colors flex-shrink-0"
                     aria-label={expanded ? 'Collapse' : 'Expand'}
                 >
                     {expanded ? (
-                        <ChevronDown className="w-4 h-4" />
+                        <ChevronDown className="w-5 h-5" />
                     ) : (
-                        <ChevronRight className="w-4 h-4" />
+                        <ChevronRight className="w-5 h-5" />
                     )}
                 </button>
 
                 {/* Title + count */}
-                <button
-                    type="button"
+                <div
                     onClick={onExpand}
-                    className="flex-1 text-left flex items-center gap-3 min-w-0"
+                    className="flex-1 text-left flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 min-w-0 cursor-pointer"
                 >
                     <span className="text-sm font-medium text-white">{cat.title}</span>
-                    <span className="text-[11px] text-neutral-600 font-mono">
-                        {cat.cookies.length} cookie{cat.cookies.length !== 1 ? 's' : ''}
-                    </span>
-                    {cat.locked && (
-                        <span className="text-[10px] text-neutral-500 bg-neutral-900 px-2 py-0.5 rounded-full font-medium tracking-wide uppercase">
-                            Required
+                    <div className="flex items-center gap-2">
+                        <span className="text-[11px] text-neutral-500 font-mono hidden sm:inline-block">
+                            {cat.cookies.length} cookie{cat.cookies.length !== 1 ? 's' : ''}
                         </span>
-                    )}
-                </button>
+                        {cat.locked && (
+                            <span className="text-[10px] text-neutral-400 bg-neutral-800 border border-neutral-700 px-1.5 py-0.5 roundedElement font-medium tracking-wide uppercase">
+                                Required
+                            </span>
+                        )}
+                    </div>
+                </div>
 
-                {/* Toggle */}
-                <Toggle checked={checked} disabled={cat.locked} onChange={cat.locked ? undefined : onToggle} />
+                {/* Checkbox */}
+                <Checkbox
+                    id={`cookie-cat-${cat.id}`}
+                    checked={checked}
+                    disabled={cat.locked}
+                    onChange={cat.locked ? undefined : onToggle}
+                />
             </div>
 
             {/* Expanded content */}
-            {expanded && (
-                <div className="px-5 pb-5 pt-0 space-y-4">
-                    {/* Description */}
-                    <p className="text-xs text-neutral-500 leading-relaxed pl-7">
-                        {cat.description}
-                    </p>
+            <div
+                className={`grid transition-all duration-300 ease-in-out ${expanded ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'
+                    }`}
+            >
+                <div className="overflow-hidden">
+                    <div className="px-4 pb-4 pt-0 sm:px-5 sm:pb-5 space-y-4">
+                        {/* Description */}
+                        <p className="text-xs text-neutral-400 leading-relaxed pl-1 sm:pl-8 border-l-2 border-neutral-800 ml-1.5 sm:ml-0">
+                            {cat.description}
+                        </p>
 
-                    {/* Cookie table */}
-                    <div className="ml-7 rounded-lg border border-neutral-800/40 overflow-hidden">
-                        <table className="w-full text-xs">
-                            <thead>
-                                <tr className="bg-neutral-900/80">
-                                    <th className="text-left px-3 py-2 text-neutral-600 font-medium">Cookie</th>
-                                    <th className="text-left px-3 py-2 text-neutral-600 font-medium hidden sm:table-cell">Provider</th>
-                                    <th className="text-left px-3 py-2 text-neutral-600 font-medium">Purpose</th>
-                                    <th className="text-left px-3 py-2 text-neutral-600 font-medium hidden sm:table-cell">Expiry</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {cat.cookies.map((c, i) => (
-                                    <tr
-                                        key={c.name}
-                                        className={`${i > 0 ? 'border-t border-neutral-800/30' : ''}`}
-                                    >
-                                        <td className="px-3 py-2 font-mono text-neutral-400">{c.name}</td>
-                                        <td className="px-3 py-2 text-neutral-500 hidden sm:table-cell">{c.provider}</td>
-                                        <td className="px-3 py-2 text-neutral-500">{c.purpose}</td>
-                                        <td className="px-3 py-2 text-neutral-600 hidden sm:table-cell">{c.expiry}</td>
+                        {/* Cookie table */}
+                        <div className="sm:ml-8 rounded-lg border border-neutral-800/40 overflow-hidden overflow-x-auto">
+                            <table className="w-full text-xs min-w-[500px]">
+                                <thead>
+                                    <tr className="bg-neutral-900/80 border-b border-neutral-800">
+                                        <th className="text-left px-3 py-2 text-neutral-500 font-medium w-1/4">Name</th>
+                                        <th className="text-left px-3 py-2 text-neutral-500 font-medium w-1/4">Provider</th>
+                                        <th className="text-left px-3 py-2 text-neutral-500 font-medium w-1/3">Purpose</th>
+                                        <th className="text-left px-3 py-2 text-neutral-500 font-medium w-1/6">Expiry</th>
                                     </tr>
-                                ))}
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody className="divide-y divide-neutral-800/50">
+                                    {cat.cookies.map((c) => (
+                                        <tr key={c.name} className="hover:bg-white/[0.02]">
+                                            <td className="px-3 py-2 font-mono text-neutral-300 break-words">{c.name}</td>
+                                            <td className="px-3 py-2 text-neutral-400">{c.provider}</td>
+                                            <td className="px-3 py-2 text-neutral-400">{c.purpose}</td>
+                                            <td className="px-3 py-2 text-neutral-500">{c.expiry}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
-            )}
+            </div>
         </div>
     );
 }
@@ -238,6 +250,7 @@ export default function CookieConsent() {
             }, 1500);
             return () => clearTimeout(timer);
         }
+        // Logic to re-apply consent if needed could go here
     }, []);
 
     const dismiss = useCallback(() => {
@@ -254,17 +267,23 @@ export default function CookieConsent() {
                 marketing: state.marketing ?? false,
                 timestamp: new Date().toISOString(),
             };
-            localStorage.setItem(CONSENT_KEY, JSON.stringify(full));
 
-            // Update Google Analytics consent
-            if (window.gtag) {
-                window.gtag('consent', 'update', {
-                    analytics_storage: full.analytics ? 'granted' : 'denied',
-                    ad_storage: full.marketing ? 'granted' : 'denied',
-                    ad_user_data: full.marketing ? 'granted' : 'denied',
-                    ad_personalization: full.marketing ? 'granted' : 'denied',
-                    functionality_storage: full.functional ? 'granted' : 'denied',
-                });
+            try {
+                localStorage.setItem(CONSENT_KEY, JSON.stringify(full));
+
+                // Update Google Analytics consent
+                if (typeof window !== 'undefined' && window.gtag) {
+                    window.gtag('consent', 'update', {
+                        analytics_storage: full.analytics ? 'granted' : 'denied',
+                        ad_storage: full.marketing ? 'granted' : 'denied',
+                        ad_user_data: full.marketing ? 'granted' : 'denied',
+                        ad_personalization: full.marketing ? 'granted' : 'denied',
+                        functionality_storage: full.functional ? 'granted' : 'denied',
+                    });
+                    console.log('Consent updated:', full);
+                }
+            } catch (e) {
+                console.error('Failed to save consent:', e);
             }
 
             dismiss();
@@ -296,13 +315,17 @@ export default function CookieConsent() {
 
     return (
         <div
-            className={`fixed inset-0 z-[9999] flex items-end justify-center transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${animateIn ? 'opacity-100' : 'opacity-0 pointer-events-none'
-                }`}
+            className={`fixed inset-0 z-[9999] flex items-end sm:items-center justify-center isolate pointer-events-none`}
         >
-            {/* Backdrop (only in preferences view) */}
+            {/* ─── BANNER BACKDROP (transparent) ─── */}
+            {view === 'banner' && (
+                <div className={`absolute inset-0 transition-opacity duration-500 ${animateIn ? 'opacity-100' : 'opacity-0'}`} />
+            )}
+
+            {/* ─── PREFERENCES BACKDROP (Solid) ─── */}
             {view === 'preferences' && (
                 <div
-                    className={`absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-300 ${animateIn ? 'opacity-100' : 'opacity-0'
+                    className={`absolute inset-0 bg-black/80 backdrop-blur-sm transition-opacity duration-500 pointer-events-auto ${animateIn ? 'opacity-100' : 'opacity-0'
                         }`}
                     onClick={() => setView('banner')}
                 />
@@ -311,147 +334,153 @@ export default function CookieConsent() {
             {/* ─── BANNER VIEW ─── */}
             {view === 'banner' && (
                 <div
-                    className={`w-full transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${animateIn ? 'translate-y-0' : 'translate-y-full'
-                        }`}
+                    className={`
+            pointer-events-auto w-full absolute bottom-0 left-0 right-0 
+            transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] transform
+            ${animateIn ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0'}
+          `}
                 >
-                    <div className="bg-[rgb(10,10,10)] border-t border-neutral-800/50">
-                        <div className="max-w-7xl mx-auto px-6 py-5">
-                            <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-                                {/* Icon + Text */}
-                                <div className="flex items-start gap-3 flex-1 min-w-0">
-                                    <Cookie className="w-5 h-5 text-neutral-500 mt-0.5 flex-shrink-0" />
-                                    <p className="text-neutral-400 text-sm leading-relaxed">
-                                        We use cookies and similar technologies to enhance your experience, analyze
-                                        traffic, and personalize content. You can choose which cookies to accept.{' '}
-                                        <Link
-                                            to="/privacy-policy"
-                                            className="text-white/60 hover:text-white underline underline-offset-2 decoration-neutral-700 transition-colors inline-flex items-center gap-1"
-                                        >
+                    {/* Top Fade */}
+                    <div className="h-12 bg-gradient-to-t from-black/80 to-transparent pointer-events-none" />
+
+                    <div className="bg-[rgb(10,10,10)] border-t border-neutral-800/80 shadow-[0_-10px_40px_rgba(0,0,0,0.5)]">
+                        <div className="max-w-7xl mx-auto px-4 py-4 sm:px-6 sm:py-5">
+                            <div className="flex flex-col lg:flex-row lg:items-center gap-4 lg:gap-8">
+                                {/* Text Content */}
+                                <div className="flex-1">
+                                    <div className="flex items-center gap-2 mb-2 text-white font-medium">
+                                        <Cookie className="w-4 h-4" />
+                                        <span>Cookie Preferences</span>
+                                    </div>
+                                    <p className="text-neutral-400 text-sm leading-relaxed max-w-3xl">
+                                        We use cookies to ensure you get the best experience on our website.
+                                        By clicking "Accept All", you consent to our use of cookies.
+                                        Manage settings to choose which cookies to allow. {' '}
+                                        <Link to="/privacy-policy" className="text-white hover:underline underline-offset-2">
                                             Privacy Policy
-                                            <ExternalLink className="w-3 h-3" />
                                         </Link>
                                     </p>
                                 </div>
 
-                                {/* Actions */}
-                                <div className="flex items-center gap-2 flex-shrink-0 pl-8 sm:pl-0">
-                                    <button
-                                        onClick={rejectAll}
-                                        className="px-4 py-2.5 text-sm text-neutral-500 hover:text-neutral-300 transition-colors whitespace-nowrap"
-                                    >
-                                        Reject all
-                                    </button>
+                                {/* Banner Actions */}
+                                <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 flex-shrink-0">
                                     <button
                                         onClick={() => setView('preferences')}
-                                        className="px-4 py-2.5 text-sm text-neutral-300 hover:text-white border border-neutral-800 hover:border-neutral-600 rounded-lg transition-all duration-200 whitespace-nowrap"
+                                        className="order-2 sm:order-1 px-4 py-2.5 rounded-lg border border-neutral-700 hover:border-neutral-500 text-neutral-300 hover:text-white text-sm font-medium transition-colors"
                                     >
                                         Preferences
                                     </button>
                                     <button
-                                        onClick={acceptAll}
-                                        className="px-5 py-2.5 text-sm font-medium text-black bg-white hover:bg-neutral-200 rounded-lg transition-colors duration-200 whitespace-nowrap"
+                                        onClick={rejectAll}
+                                        className="order-3 sm:order-2 px-4 py-2.5 rounded-lg hover:bg-neutral-800 text-neutral-400 hover:text-white text-sm font-medium transition-colors"
                                     >
-                                        Accept all
+                                        Reject All
+                                    </button>
+                                    <button
+                                        onClick={acceptAll}
+                                        className="order-1 sm:order-3 px-6 py-2.5 rounded-lg bg-white hover:bg-neutral-200 text-black text-sm font-medium transition-colors shadow-lg shadow-white/5"
+                                    >
+                                        Accept All
                                     </button>
                                 </div>
                             </div>
                         </div>
+                        {/* Safe Area for Mobile Home Indicator */}
+                        <div className="h-[env(safe-area-inset-bottom)] bg-[rgb(10,10,10)]" />
                     </div>
                 </div>
             )}
 
-            {/* ─── PREFERENCES VIEW ─── */}
+            {/* ─── PREFERENCES MODAL VIEW ─── */}
             {view === 'preferences' && (
                 <div
-                    className={`relative w-full max-w-2xl mx-4 mb-4 sm:mb-8 max-h-[85vh] flex flex-col rounded-2xl overflow-hidden
-            bg-[rgb(12,12,12)] border border-neutral-800/60 shadow-2xl shadow-black/70
-            transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]
-            ${animateIn ? 'translate-y-0 scale-100' : 'translate-y-8 scale-95'}
+                    className={`
+            pointer-events-auto relative w-full max-w-2xl mx-auto 
+            flex flex-col bg-[rgb(12,12,12)] border border-neutral-800/80 shadow-2xl shadow-black
+            rounded-t-2xl sm:rounded-2xl overflow-hidden
+            max-h-[90vh] sm:max-h-[85vh] h-[90vh] sm:h-auto
+            transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] transform
+            ${animateIn ? 'translate-y-0 scale-100 opacity-100' : 'translate-y-8 scale-95 opacity-0'}
           `}
                 >
-                    {/* Header */}
-                    <div className="flex items-center justify-between px-6 py-5 border-b border-neutral-800/50 flex-shrink-0">
-                        <div className="flex items-center gap-3">
-                            <Cookie className="w-5 h-5 text-neutral-400" />
-                            <div>
-                                <h2 className="text-base font-semibold text-white">Cookie Preferences</h2>
-                                <p className="text-xs text-neutral-600 mt-0.5">
-                                    Manage how we use cookies on this site
-                                </p>
-                            </div>
+                    {/* Modal Header */}
+                    <div className="flex items-center justify-between px-5 py-4 border-b border-neutral-800 bg-[rgb(12,12,12)] z-10 shrink-0">
+                        <div>
+                            <h2 className="text-lg font-semibold text-white flex items-center gap-2">
+                                <Cookie className="w-5 h-5" />
+                                Cookie Preferences
+                            </h2>
                         </div>
                         <button
                             onClick={() => setView('banner')}
-                            className="p-2 rounded-lg text-neutral-600 hover:text-neutral-300 hover:bg-neutral-800/50 transition-all"
-                            aria-label="Close preferences"
+                            className="p-2 -mr-2 text-neutral-400 hover:text-white hover:bg-neutral-800 rounded-full transition-colors"
+                            aria-label="Close"
                         >
-                            <X className="w-4 h-4" />
+                            <X className="w-5 h-5" />
                         </button>
                     </div>
 
-                    {/* Description */}
-                    <div className="px-6 py-4 border-b border-neutral-800/30 flex-shrink-0">
-                        <p className="text-sm text-neutral-500 leading-relaxed">
-                            When you visit our website, we may store or retrieve information on your browser,
-                            mostly in the form of cookies. This information might be about you, your preferences,
-                            or your device and is mostly used to make the site work as you expect it to. The
-                            information does not usually directly identify you, but it can give you a more
-                            personalized web experience.
-                        </p>
-                        <div className="flex items-center gap-3 mt-3">
-                            <Link
-                                to="/cookie-policy"
-                                className="text-xs text-neutral-500 hover:text-white underline underline-offset-2 decoration-neutral-700 transition-colors inline-flex items-center gap-1"
-                            >
-                                Cookie Policy <ExternalLink className="w-3 h-3" />
-                            </Link>
-                            <Link
-                                to="/privacy-policy"
-                                className="text-xs text-neutral-500 hover:text-white underline underline-offset-2 decoration-neutral-700 transition-colors inline-flex items-center gap-1"
-                            >
-                                Privacy Policy <ExternalLink className="w-3 h-3" />
-                            </Link>
+                    {/* Modal Body (Scrollable) */}
+                    <div className="flex-1 overflow-y-auto px-5 py-2 custom-scrollbar overscroll-contain">
+                        <div className="py-4 space-y-6">
+                            <div className="bg-neutral-900/30 p-4 rounded-xl border border-neutral-800/50">
+                                <p className="text-sm text-neutral-400 leading-relaxed">
+                                    Customise your preferences for cookies and similar technologies.
+                                    We respect your privacy and give you control over which cookies you accept.
+                                    Some are essential for the site to work, while others help us improve your experience.
+                                </p>
+                                <div className="mt-3 flex gap-4 text-xs">
+                                    <Link to="/privacy-policy" className="flex items-center gap-1 text-white hover:text-neutral-300 transition-colors">
+                                        Privacy Policy <ExternalLink className="w-3 h-3" />
+                                    </Link>
+                                    <Link to="/cookie-policy" className="flex items-center gap-1 text-white hover:text-neutral-300 transition-colors">
+                                        Cookie Policy <ExternalLink className="w-3 h-3" />
+                                    </Link>
+                                </div>
+                            </div>
+
+                            <div className="space-y-3">
+                                {COOKIE_CATEGORIES.map((cat) => (
+                                    <CategoryAccordion
+                                        key={cat.id}
+                                        cat={cat}
+                                        checked={cat.locked ? true : (consent[cat.id] ?? cat.defaultOn)}
+                                        expanded={expandedCat === cat.id}
+                                        onToggle={() =>
+                                            setConsent((prev) => ({ ...prev, [cat.id]: !prev[cat.id] }))
+                                        }
+                                        onExpand={() =>
+                                            setExpandedCat((prev) => (prev === cat.id ? null : cat.id))
+                                        }
+                                    />
+                                ))}
+                            </div>
                         </div>
                     </div>
 
-                    {/* Categories */}
-                    <div className="flex-1 overflow-y-auto px-6 py-4 space-y-3 custom-scrollbar">
-                        {COOKIE_CATEGORIES.map((cat) => (
-                            <CategoryAccordion
-                                key={cat.id}
-                                cat={cat}
-                                checked={cat.locked ? true : (consent[cat.id] ?? cat.defaultOn)}
-                                expanded={expandedCat === cat.id}
-                                onToggle={() =>
-                                    setConsent((prev) => ({ ...prev, [cat.id]: !prev[cat.id] }))
-                                }
-                                onExpand={() =>
-                                    setExpandedCat((prev) => (prev === cat.id ? null : cat.id))
-                                }
-                            />
-                        ))}
-                    </div>
-
-                    {/* Footer Actions */}
-                    <div className="px-6 py-4 border-t border-neutral-800/50 flex items-center gap-3 flex-shrink-0 bg-[rgb(10,10,10)]">
-                        <button
-                            onClick={rejectAll}
-                            className="flex-1 px-4 py-2.5 text-sm text-neutral-500 hover:text-neutral-300 transition-colors"
-                        >
-                            Reject all
-                        </button>
-                        <button
-                            onClick={savePreferences}
-                            className="flex-1 px-4 py-2.5 text-sm text-neutral-300 hover:text-white border border-neutral-800 hover:border-neutral-600 rounded-lg transition-all duration-200"
-                        >
-                            Save preferences
-                        </button>
-                        <button
-                            onClick={acceptAll}
-                            className="flex-1 px-5 py-2.5 text-sm font-medium text-black bg-white hover:bg-neutral-200 rounded-lg transition-colors duration-200"
-                        >
-                            Accept all
-                        </button>
+                    {/* Modal Footer (Fixed) */}
+                    <div className="p-4 sm:px-6 sm:py-5 border-t border-neutral-800 bg-[rgb(12,12,12)] shrink-0 pb-[max(1rem,env(safe-area-inset-bottom))]">
+                        <div className="flex flex-col sm:flex-row gap-3">
+                            <button
+                                onClick={rejectAll}
+                                className="w-full sm:w-auto px-5 py-2.5 rounded-lg border border-neutral-700 hover:border-neutral-500 text-neutral-400 hover:text-white font-medium transition-colors text-sm"
+                            >
+                                Reject All
+                            </button>
+                            <div className="flex-1 hidden sm:block" />
+                            <button
+                                onClick={savePreferences}
+                                className="w-full sm:w-auto px-5 py-2.5 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-white font-medium transition-colors text-sm"
+                            >
+                                Save Preferences
+                            </button>
+                            <button
+                                onClick={acceptAll}
+                                className="w-full sm:w-auto px-6 py-2.5 rounded-lg bg-white hover:bg-neutral-200 text-black font-medium transition-colors shadow-lg shadow-white/10 text-sm"
+                            >
+                                Accept All
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}
