@@ -4,6 +4,7 @@ import viteCompression from 'vite-plugin-compression';
 import { VitePWA } from 'vite-plugin-pwa';
 import Sitemap from 'vite-plugin-sitemap';
 import path from "path"
+import { blogPosts } from './src/data/blogPosts';
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -43,6 +44,7 @@ export default defineConfig({
         '/privacy-policy',
         '/cookie-policy',
         '/security',
+        ...blogPosts.map((post) => `/blog/${post.slug}`),
       ],
     }),
   ],

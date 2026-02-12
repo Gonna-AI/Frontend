@@ -8,6 +8,7 @@ import ScrollToTop from './components/ScrollToTop';
 import CanonicalLink from './components/SEO/CanonicalLink';
 import CookieConsent from './components/CookieConsent';
 import HreflangTags from './components/SEO/HreflangTags';
+import SEO from './components/SEO/SEO';
 
 
 // Lazy load pages
@@ -48,7 +49,10 @@ function App() {
             <CanonicalLink />
             <HreflangTags />
             <ScrollToTop />
-            <Seo />
+            <SEO
+              title="ClerkTree"
+              description="AI-powered workflow automation for claims and back-office operations. Transform your operations with intelligent automation that reduces turnaround time by 40%."
+            />
             <Suspense fallback={null}>
               <Routes>
                 {/* Public Routes */}

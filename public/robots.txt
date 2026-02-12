@@ -12,11 +12,17 @@ Disallow: /chat/
 Disallow: /demo-dashboard/
 Disallow: /user/
 Disallow: /ai-settings/
+Disallow: /admin/
+Disallow: /404
 
 # Allow crawling of valid content
 Allow: /blog/
 Allow: /docs/
 Allow: /about/
 Allow: /solutions/
+Allow: /contact/
+Allow: /terms-of-service/
+Allow: /privacy-policy/
+Allow: /cookie-policy/
 
 Sitemap: https://clerktree.com/sitemap.xml

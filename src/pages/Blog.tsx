@@ -7,6 +7,7 @@ import { getAllBlogPosts, getBlogPostsByTag, getAllTags } from '../data/blogPost
 import { useLanguage } from '../contexts/LanguageContext';
 import LanguageSwitcher from '../components/Layout/LanguageSwitcher';
 import Footer from '../components/Landing/Footer';
+import SEO from '../components/SEO/SEO';
 
 const formatDate = (date: string, language: string): string => {
   return new Date(date).toLocaleDateString(language === 'de' ? 'de-DE' : 'en-US', {
@@ -39,6 +40,11 @@ function BlogContent() {
 
   return (
     <div className="bg-[rgb(10,10,10)] min-h-screen relative overflow-x-hidden">
+      <SEO
+        title="Blog"
+        description="Latest insights on legal AI, claims automation, and the future of work. Stay updated with ClerkTree."
+        canonical="https://clerktree.com/blog"
+      />
       {/* Blue theme background accents */}
       <div className="fixed inset-0 bg-[rgb(10,10,10)] -z-10">
         <div
