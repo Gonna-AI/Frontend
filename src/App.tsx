@@ -16,8 +16,7 @@ import Careers from './pages/Careers';
 import Solutions from './pages/Solutions';
 import Blog from './pages/Blog';
 import BlogPost from './pages/BlogPost';
-import Arbor from './pages/Arbor';
-import Juris from './pages/Juris';
+
 import Bioflow from './pages/Bioflow';
 import DemoDashboard from './pages/DemoDashboard';
 import UserCall from './pages/UserCall';
@@ -71,8 +70,7 @@ function App() {
                   <AISettings />
                 </PrivateRoute>
               } />
-              <Route path="/arbor" element={<Arbor />} />
-              <Route path="/juris" element={<Juris />} />
+
               <Route path="/bioflow" element={<Bioflow />} />
 
               {/* Company Pages */}
