@@ -60,4 +60,14 @@ export default defineConfig({
     host: '0.0.0.0', // Expose on local network
     port: 5173,
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom', 'react-router-dom', 'react-helmet-async'],
+          ui: ['framer-motion', 'lucide-react'],
+        },
+      },
+    },
+  },
 });
