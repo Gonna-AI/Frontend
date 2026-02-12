@@ -142,6 +142,10 @@ export default function Solutions() {
             </p>
           </div>
 
+          <div className="mb-20">
+            <DitherShaderDemoDuotone />
+          </div>
+
           {/* Solutions Grid */}
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-20">
             {solutions.map((solution, index) => {
@@ -235,10 +239,6 @@ export default function Solutions() {
                 </button>
               </div>
             </div>
-          </div>
-
-          <div className="mt-20">
-            <DitherShaderDemoDuotone />
           </div>
         </div>
       </div>
