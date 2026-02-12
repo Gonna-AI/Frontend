@@ -1,170 +1,177 @@
-
 import { useState, useEffect } from 'react';
-import { Search, Menu, X, Check, Copy } from 'lucide-react';
+import { Search, Menu, X, Check, Copy, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import {
+    EndpointDoc, BASE_URL, chatEndpoints, callEndpoints,
+    dashboardEndpoints, errorCodes
+} from './docsContent';
 
-// Types
-type DocSection = 'intro' | 'auth' | 'arbor' | 'juris' | 'voice';
-
-interface NavItem {
-    id: string;
-    label: string;
-    section: DocSection;
-}
-
-interface NavGroup {
-    title: string;
-    items: NavItem[];
-}
+type DocSection = 'intro' | 'auth' | 'chat' | 'call' | 'dashboard' | 'webhooks';
+interface NavItem { id: string; label: string; section: DocSection; }
+interface NavGroup { title: string; items: NavItem[]; }
 
 const navGroups: NavGroup[] = [
     {
-        title: 'Get Started',
-        items: [
-            { id: 'welcome', label: 'Welcome to ClerkTree', section: 'intro' },
+        title: 'Get Started', items: [
+            { id: 'welcome', label: 'Introduction', section: 'intro' },
+            { id: 'quickstart', label: 'Quickstart', section: 'intro' },
             { id: 'auth', label: 'Authentication', section: 'auth' },
+            { id: 'rate-limits', label: 'Rate Limits', section: 'auth' },
+            { id: 'errors', label: 'Error Handling', section: 'auth' },
         ]
     },
     {
-        title: 'Arbor API',
-        items: [
-            { id: 'arbor-workflows', label: 'Workflows', section: 'arbor' },
-            { id: 'arbor-execution', label: 'Execute Workflow', section: 'arbor' },
+        title: 'Chat API', items: [
+            { id: 'chat-overview', label: 'Overview', section: 'chat' },
+            { id: 'chat-completions', label: 'Create Completion', section: 'chat' },
+            { id: 'chat-streaming', label: 'Streaming', section: 'chat' },
+            { id: 'chat-history', label: 'Conversation History', section: 'chat' },
         ]
     },
     {
-        title: 'Juris API',
-        items: [
-            { id: 'juris-analyze', label: 'Analyze Contract', section: 'juris' },
-            { id: 'juris-draft', label: 'Draft Clause', section: 'juris' },
+        title: 'Call API', items: [
+            { id: 'call-overview', label: 'Overview', section: 'call' },
+            { id: 'call-initiate', label: 'Initiate Call', section: 'call' },
+            { id: 'call-status', label: 'Get Call Status', section: 'call' },
+            { id: 'call-history', label: 'Call History', section: 'call' },
+            { id: 'call-recording', label: 'Get Recording', section: 'call' },
         ]
     },
     {
-        title: 'Voice API',
-        items: [
-            { id: 'voice-call', label: 'Initiate Call', section: 'voice' },
-            { id: 'voice-history', label: 'Call History', section: 'voice' },
+        title: 'Dashboard API', items: [
+            { id: 'dash-overview', label: 'Overview', section: 'dashboard' },
+            { id: 'dash-monitor', label: 'Live Monitor', section: 'dashboard' },
+            { id: 'dash-analytics', label: 'Sales Analytics', section: 'dashboard' },
+            { id: 'dash-leads', label: 'Leads', section: 'dashboard' },
+            { id: 'dash-usage', label: 'Usage & Credits', section: 'dashboard' },
+            { id: 'dash-keys', label: 'API Keys', section: 'dashboard' },
         ]
-    }
+    },
+    {
+        title: 'Real-time', items: [
+            { id: 'webhooks', label: 'Webhooks', section: 'webhooks' },
+            { id: 'websocket', label: 'WebSocket Stream', section: 'webhooks' },
+        ]
+    },
 ];
 
-// Code Block Component
 const CodeBlock = ({ code, language = 'bash' }: { code: string; language?: string }) => {
     const [copied, setCopied] = useState(false);
-
-    const handleCopy = () => {
-        navigator.clipboard.writeText(code);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
-    };
-
+    const handleCopy = () => { navigator.clipboard.writeText(code); setCopied(true); setTimeout(() => setCopied(false), 2000); };
     return (
-        <div className="relative group rounded-xl overflow-hidden bg-[#0A0A0A] border border-white/10 my-6 max-w-full">
+        <div className="relative group rounded-xl overflow-hidden bg-[#0A0A0A] border border-white/10 my-4 max-w-full">
             <div className="flex items-center justify-between px-4 py-2 bg-white/5 border-b border-white/5">
                 <span className="text-xs text-white/40 font-mono">{language}</span>
-                <button
-                    onClick={handleCopy}
-                    className="p-1.5 hover:bg-white/10 rounded-md transition-colors"
-                >
-                    {copied ? (
-                        <Check className="w-4 h-4 text-emerald-400" />
-                    ) : (
-                        <Copy className="w-4 h-4 text-white/40 group-hover:text-white/70" />
-                    )}
+                <button onClick={handleCopy} className="p-1.5 hover:bg-white/10 rounded-md transition-colors">
+                    {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4 text-white/40 group-hover:text-white/70" />}
                 </button>
             </div>
-            <div className="p-4 overflow-x-auto">
-                <pre className="text-sm font-mono text-white/80">
-                    <code>{code}</code>
-                </pre>
+            <div className="p-4 overflow-x-auto"><pre className="text-sm font-mono text-white/80"><code>{code}</code></pre></div>
+        </div>
+    );
+};
+
+const MethodBadge = ({ method, color }: { method: string; color: string }) => {
+    const colors: Record<string, string> = {
+        emerald: 'bg-emerald-500/20 text-emerald-400', pink: 'bg-pink-500/20 text-pink-400',
+        purple: 'bg-purple-500/20 text-purple-400', amber: 'bg-amber-500/20 text-amber-400',
+        blue: 'bg-blue-500/20 text-blue-400',
+    };
+    return <span className={`px-2 py-1 ${colors[color] || colors.emerald} rounded text-sm font-mono font-bold`}>{method}</span>;
+};
+
+const ParamTable = ({ params, title }: { params: EndpointDoc['params']; title?: string }) => {
+    if (!params || params.length === 0) return null;
+    return (
+        <div className="mt-6">
+            {title && <h4 className="text-sm font-semibold text-white/80 mb-3">{title}</h4>}
+            <div className="rounded-xl border border-white/10 overflow-hidden">
+                <table className="w-full text-sm">
+                    <thead><tr className="bg-white/5 text-left">
+                        <th className="px-4 py-3 text-white/60 font-medium">Parameter</th>
+                        <th className="px-4 py-3 text-white/60 font-medium">Type</th>
+                        <th className="px-4 py-3 text-white/60 font-medium">Required</th>
+                        <th className="px-4 py-3 text-white/60 font-medium">Description</th>
+                    </tr></thead>
+                    <tbody>
+                        {params.map((p, i) => (
+                            <tr key={i} className="border-t border-white/5">
+                                <td className="px-4 py-3 font-mono text-purple-300">{p.name}</td>
+                                <td className="px-4 py-3 text-white/50">{p.type}</td>
+                                <td className="px-4 py-3">{p.required ? <span className="text-amber-400 text-xs font-semibold">Required</span> : <span className="text-white/30 text-xs">Optional</span>}</td>
+                                <td className="px-4 py-3 text-white/60">{p.desc}</td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
             </div>
         </div>
     );
 };
+
+const EndpointSection = ({ ep }: { ep: EndpointDoc }) => (
+    <section id={ep.id} className="scroll-mt-24 space-y-4 py-8">
+        <h3 className="text-2xl font-semibold text-white">{ep.title}</h3>
+        <p className="text-white/60 leading-relaxed">{ep.description}</p>
+        <div className="flex items-center gap-3 text-sm font-mono mt-4">
+            <MethodBadge method={ep.method} color={ep.color} />
+            <span className="text-white/70">{BASE_URL}{ep.path}</span>
+        </div>
+        <ParamTable params={ep.params} title="Request Body Parameters" />
+        <ParamTable params={ep.queryParams} title="Query Parameters" />
+        {ep.requestBody && (<div className="mt-6"><h4 className="text-sm font-semibold text-white/80 mb-2">Request Example</h4><CodeBlock code={ep.requestBody} language="bash" /></div>)}
+        {ep.responseBody && (<div className="mt-6"><h4 className="text-sm font-semibold text-white/80 mb-2">Response</h4><CodeBlock code={ep.responseBody} language="json" /></div>)}
+    </section>
+);
 
 export default function DocsPage() {
     const [activeId, setActiveId] = useState('welcome');
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [isSearchOpen, setIsSearchOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
-
-    // Flatten nav items for search
-    const allNavItems = navGroups.flatMap(group => group.items);
-
-    const filteredItems = allNavItems.filter(item =>
-        item.label.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    const allNavItems = navGroups.flatMap(g => g.items);
+    const filteredItems = allNavItems.filter(item => item.label.toLowerCase().includes(searchQuery.toLowerCase()));
 
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
-            if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-                e.preventDefault();
-                setIsSearchOpen(prev => !prev);
-            }
-            if (e.key === 'Escape') {
-                setIsSearchOpen(false);
-            }
+            if ((e.metaKey || e.ctrlKey) && e.key === 'k') { e.preventDefault(); setIsSearchOpen(prev => !prev); }
+            if (e.key === 'Escape') setIsSearchOpen(false);
         };
-
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
     }, []);
 
-    // Helper to scroll to section
     const scrollToSection = (id: string) => {
         setActiveId(id);
-        const element = document.getElementById(id);
-        if (element) {
-            element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
+        document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
         setIsMobileMenuOpen(false);
         setIsSearchOpen(false);
     };
 
     return (
         <div className="min-h-screen bg-black text-white font-sans selection:bg-purple-500/30">
-            {/* Top Navigation Bar */}
+            {/* Header */}
             <header className="fixed top-0 left-0 right-0 z-50 bg-black/80 backdrop-blur-xl border-b border-white/10">
                 <div className="max-w-[1600px] mx-auto h-16 px-4 md:px-8 flex items-center justify-between">
                     <div className="flex items-center gap-8">
                         <Link to="/" className="flex items-center gap-2 group">
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                viewBox="0 0 464 468"
-                                className="w-8 h-8 opacity-90 group-hover:opacity-100 transition-opacity"
-                            >
-                                <path
-                                    fill="white"
-                                    d="M275.9 63.5c37.7 5.3 76.6 24.1 103.7 50.2 30 28.8 41.8 57.6 35.8 87.1-6.1 30.1-33.6 52.9-70.6 58.3-6 0.9-18.3 1-44.9 0.6l-36.6-0.7-0.5 17.8c-0.3 9.7-0.4 17.8-0.4 17.9 0.1 0.1 19.1 0.3 42.2 0.4 23.2 0 42.7 0.5 43.5 1 1.2 0.7 1.1 2.2-0.8 9.4-6 23-20.5 42.1-41.8 55-7.3 4.3-26.7 11.9-36 14.1-9 2-34 2-44.5 0-41.3-7.9-74.2-38-82.9-75.7-8.1-35.7 2.2-71.5 27.5-94.7 16.1-14.9 35.5-22.4 63.7-24.7l7.7-0.7v-34.1l-11.7 0.7c-22.2 1.3-37 5.3-56.4 15.2-28.7 14.6-49.7 39.3-59.9 70.2-9.6 29.3-9.3 62.6 0.8 91.4 3.3 9.2 12.2 25.6 18.3 33.8 11.3 14.9 30.6 30.8 48.7 39.9 19.9 10 49.2 15.9 73.2 14.7 26.5-1.3 52.5-9.6 74.2-23.9 26.9-17.6 47.2-47.9 53.3-79.7 1-5.2 2.3-10.1 2.8-10.8 0.8-0.9 6.9-1.2 27.1-1l26.1 0.3 0.3 3.8c1.2 14.6-10.9 52.1-23.9 74-17.8 30-43.2 54-75.9 71.5-20.9 11.2-38.3 16.5-67.2 20.7-27.6 3.9-47.9 3.1-75.8-3.1-36.9-8.3-67.8-25.6-97.1-54.6-23.6-23.2-44.8-61.9-51.7-93.8-5.1-23.7-5.5-28.1-4.9-48.8 1.7-63.2 23.4-111.8 67.7-152 28-25.4 60.4-41.3 99-48.8 18.5-3.6 46.1-4 67.9-0.9zm16.4 92.6c-6.3 2.4-12.8 8.5-15.4 14.5-2.6 6.1-2.6 18.3 0 23.9 5 11 20.2 17.7 32.3 14.1 11.9-3.4 19.8-14.3 19.8-27.1-0.1-19.9-18.2-32.5-36.7-25.4z"
-                                />
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 464 468" className="w-8 h-8 opacity-90 group-hover:opacity-100 transition-opacity">
+                                <path fill="white" d="M275.9 63.5c37.7 5.3 76.6 24.1 103.7 50.2 30 28.8 41.8 57.6 35.8 87.1-6.1 30.1-33.6 52.9-70.6 58.3-6 0.9-18.3 1-44.9 0.6l-36.6-0.7-0.5 17.8c-0.3 9.7-0.4 17.8-0.4 17.9 0.1 0.1 19.1 0.3 42.2 0.4 23.2 0 42.7 0.5 43.5 1 1.2 0.7 1.1 2.2-0.8 9.4-6 23-20.5 42.1-41.8 55-7.3 4.3-26.7 11.9-36 14.1-9 2-34 2-44.5 0-41.3-7.9-74.2-38-82.9-75.7-8.1-35.7 2.2-71.5 27.5-94.7 16.1-14.9 35.5-22.4 63.7-24.7l7.7-0.7v-34.1l-11.7 0.7c-22.2 1.3-37 5.3-56.4 15.2-28.7 14.6-49.7 39.3-59.9 70.2-9.6 29.3-9.3 62.6 0.8 91.4 3.3 9.2 12.2 25.6 18.3 33.8 11.3 14.9 30.6 30.8 48.7 39.9 19.9 10 49.2 15.9 73.2 14.7 26.5-1.3 52.5-9.6 74.2-23.9 26.9-17.6 47.2-47.9 53.3-79.7 1-5.2 2.3-10.1 2.8-10.8 0.8-0.9 6.9-1.2 27.1-1l26.1 0.3 0.3 3.8c1.2 14.6-10.9 52.1-23.9 74-17.8 30-43.2 54-75.9 71.5-20.9 11.2-38.3 16.5-67.2 20.7-27.6 3.9-47.9 3.1-75.8-3.1-36.9-8.3-67.8-25.6-97.1-54.6-23.6-23.2-44.8-61.9-51.7-93.8-5.1-23.7-5.5-28.1-4.9-48.8 1.7-63.2 23.4-111.8 67.7-152 28-25.4 60.4-41.3 99-48.8 18.5-3.6 46.1-4 67.9-0.9zm16.4 92.6c-6.3 2.4-12.8 8.5-15.4 14.5-2.6 6.1-2.6 18.3 0 23.9 5 11 20.2 17.7 32.3 14.1 11.9-3.4 19.8-14.3 19.8-27.1-0.1-19.9-18.2-32.5-36.7-25.4z" />
                             </svg>
                             <span className="font-semibold text-lg tracking-tight">ClerkTree Docs</span>
                         </Link>
-                        <div
-                            onClick={() => setIsSearchOpen(true)}
-                            className="hidden md:flex items-center gap-1 text-sm text-white/50 bg-white/5 px-3 py-1.5 rounded-full border border-white/5 hover:border-white/20 hover:text-white/80 transition-all cursor-pointer"
-                        >
-                            <Search className="w-4 h-4" />
-                            <span>Search documentation...</span>
+                        <div onClick={() => setIsSearchOpen(true)} className="hidden md:flex items-center gap-1 text-sm text-white/50 bg-white/5 px-3 py-1.5 rounded-full border border-white/5 hover:border-white/20 hover:text-white/80 transition-all cursor-pointer">
+                            <Search className="w-4 h-4" /><span>Search documentation...</span>
                             <kbd className="ml-2 px-1.5 py-0.5 text-xs bg-white/10 rounded text-white/60">⌘K</kbd>
                         </div>
                     </div>
                     <div className="flex items-center gap-3 md:gap-4">
-                        <button
-                            onClick={() => setIsSearchOpen(true)}
-                            className="md:hidden p-2 text-white/60 hover:text-white"
-                        >
-                            <Search className="w-5 h-5" />
-                        </button>
+                        <button onClick={() => setIsSearchOpen(true)} className="md:hidden p-2 text-white/60 hover:text-white"><Search className="w-5 h-5" /></button>
                         <Link to="/contact" className="hidden md:block text-sm text-white/60 hover:text-white transition-colors">Support</Link>
-                        <Link to="/" className="px-3 md:px-4 py-2 bg-white text-black text-xs md:text-sm font-medium rounded-lg hover:bg-neutral-200 transition-colors">
-                            <span className="md:hidden">Dashboard</span>
-                            <span className="hidden md:inline">Go to Dashboard</span>
+                        <Link to="/dashboard" className="px-3 md:px-4 py-2 bg-white text-black text-xs md:text-sm font-medium rounded-lg hover:bg-neutral-200 transition-colors">
+                            <span className="md:hidden">Dashboard</span><span className="hidden md:inline">Go to Dashboard</span>
                         </Link>
-                        <button
-                            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                            className="md:hidden p-2 text-white/60 hover:text-white"
-                        >
+                        <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="md:hidden p-2 text-white/60 hover:text-white">
                             {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
                         </button>
                     </div>
@@ -172,31 +179,15 @@ export default function DocsPage() {
             </header>
 
             <div className="max-w-[1600px] mx-auto pt-16 flex min-h-screen">
-                {/* Sidebar Navigation */}
-                <nav className={`
-          fixed inset-0 z-40 bg-black/95 backdrop-blur-xl md:static md:bg-transparent md:w-72 border-r border-white/10 pt-24 pb-12 px-6 overflow-y-auto
-          ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
-          transition-transform duration-300 ease-in-out
-        `}>
+                {/* Sidebar */}
+                <nav className={`fixed inset-0 z-40 bg-black/95 backdrop-blur-xl md:static md:bg-transparent md:w-72 border-r border-white/10 pt-24 pb-12 px-6 overflow-y-auto ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'} transition-transform duration-300 ease-in-out`}>
                     <div className="space-y-8">
                         {navGroups.map((group) => (
                             <div key={group.title}>
                                 <h3 className="text-sm font-semibold text-white/90 mb-3">{group.title}</h3>
                                 <ul className="space-y-1">
                                     {group.items.map((item) => (
-                                        <li key={item.id}>
-                                            <button
-                                                onClick={() => scrollToSection(item.id)}
-                                                className={`
-                          w-full text-left px-3 py-2 rounded-lg text-sm transition-all
-                          ${activeId === item.id
-                                                        ? 'bg-purple-500/10 text-purple-400 font-medium border border-purple-500/20'
-                                                        : 'text-white/50 hover:text-white/80 hover:bg-white/5'}
-                        `}
-                                            >
-                                                {item.label}
-                                            </button>
-                                        </li>
+                                        <li key={item.id}><button onClick={() => scrollToSection(item.id)} className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-all ${activeId === item.id ? 'bg-purple-500/10 text-purple-400 font-medium border border-purple-500/20' : 'text-white/50 hover:text-white/80 hover:bg-white/5'}`}>{item.label}</button></li>
                                     ))}
                                 </ul>
                             </div>
@@ -208,225 +199,225 @@ export default function DocsPage() {
                 <main className="flex-1 px-4 md:px-12 py-12 max-w-full md:max-w-5xl overflow-hidden">
                     <div className="space-y-16">
 
-                        {/* Intro Section */}
+                        {/* ─── INTRODUCTION ─── */}
                         <section id="welcome" className="scroll-mt-24 space-y-6">
                             <div className="space-y-4">
-                                <p className="text-purple-400 font-medium">Get Started</p>
-                                <h1 className="text-3xl md:text-5xl font-bold bg-gradient-to-r from-white to-white/50 bg-clip-text text-transparent">
-                                    Welcome to ClerkTree
-                                </h1>
+                                <p className="text-purple-400 font-medium">API Reference</p>
+                                <h1 className="text-3xl md:text-5xl font-bold bg-gradient-to-r from-white to-white/50 bg-clip-text text-transparent">ClerkTree API Documentation</h1>
                                 <p className="text-xl text-white/60 leading-relaxed max-w-3xl">
-                                    Build custom workflow agents, analyze complex legal documents, and deploy AI voice assistants — all through a unified, powerful interface.
+                                    Integrate AI-powered sales chat and voice calling into your product with a single API. ClerkTree provides blackbox AI models for chat and call — you send requests, we handle the intelligence.
                                 </p>
                             </div>
-
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8">
-                                <div className="p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-purple-500/30 transition-colors">
-                                    <h3 className="text-lg font-semibold text-white mb-2">Workflow Automation</h3>
-                                    <p className="text-white/50 text-sm">Automate business logic with our visual bioflow editor and API.</p>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
+                                <div className="p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-emerald-500/30 transition-colors">
+                                    <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center mb-4"><div className="w-5 h-5 bg-emerald-500 rounded-full" /></div>
+                                    <h3 className="text-lg font-semibold text-white mb-2">Chat API</h3>
+                                    <p className="text-white/50 text-sm">AI chat completions for sales conversations, support, and lead qualification.</p>
+                                </div>
+                                <div className="p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-pink-500/30 transition-colors">
+                                    <div className="w-10 h-10 rounded-xl bg-pink-500/10 flex items-center justify-center mb-4"><div className="w-5 h-5 bg-pink-500 rounded-full" /></div>
+                                    <h3 className="text-lg font-semibold text-white mb-2">Call API</h3>
+                                    <p className="text-white/50 text-sm">AI-powered voice calls with real-time transcription, sentiment analysis, and lead extraction.</p>
                                 </div>
                                 <div className="p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-purple-500/30 transition-colors">
-                                    <h3 className="text-lg font-semibold text-white mb-2">Legal Intelligence</h3>
-                                    <p className="text-white/50 text-sm">Analyze and draft contracts with Juris AI smart contract engine.</p>
+                                    <div className="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center mb-4"><div className="w-5 h-5 bg-purple-500 rounded-full" /></div>
+                                    <h3 className="text-lg font-semibold text-white mb-2">Dashboard API</h3>
+                                    <p className="text-white/50 text-sm">Access your sales analytics, leads, usage data, and manage API keys programmatically.</p>
                                 </div>
                             </div>
                         </section>
 
-                        {/* Auth Section */}
+                        {/* ─── QUICKSTART ─── */}
+                        <section id="quickstart" className="scroll-mt-24 space-y-6 border-t border-white/5 pt-12">
+                            <h2 className="text-3xl font-bold text-white">Quickstart</h2>
+                            <p className="text-white/60">Get up and running in under 2 minutes. All you need is an API key from your <Link to="/dashboard" className="text-purple-400 hover:text-purple-300 underline underline-offset-4">ClerkTree Dashboard</Link>.</p>
+                            <div className="space-y-4">
+                                <div className="flex items-start gap-3"><span className="flex-shrink-0 w-7 h-7 rounded-full bg-purple-500/20 text-purple-400 flex items-center justify-center text-sm font-bold">1</span><div><p className="text-white font-medium">Get your API key</p><p className="text-white/50 text-sm mt-1">Navigate to Dashboard → API Keys → Create New Key. Copy the generated token.</p></div></div>
+                                <div className="flex items-start gap-3"><span className="flex-shrink-0 w-7 h-7 rounded-full bg-purple-500/20 text-purple-400 flex items-center justify-center text-sm font-bold">2</span><div><p className="text-white font-medium">Make your first Chat request</p><CodeBlock code={`curl -X POST "https://api.clerktree.com/v1/chat/completions" \\
+  -H "Authorization: Bearer ct_live_YOUR_KEY" \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "model": "clerktree-sales-v1",
+    "messages": [
+      { "role": "user", "content": "Hello, what can you do?" }
+    ]
+  }'`} language="bash" /></div></div>
+                                <div className="flex items-start gap-3"><span className="flex-shrink-0 w-7 h-7 rounded-full bg-purple-500/20 text-purple-400 flex items-center justify-center text-sm font-bold">3</span><div><p className="text-white font-medium">Make your first Call request</p><CodeBlock code={`curl -X POST "https://api.clerktree.com/v1/calls" \\
+  -H "Authorization: Bearer ct_live_YOUR_KEY" \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "phone_number": "+14155551234",
+    "agent_id": "agent_sales_v2",
+    "context": { "customer_name": "Jane Doe" }
+  }'`} language="bash" /></div></div>
+                            </div>
+                        </section>
+
+                        {/* ─── AUTH ─── */}
                         <section id="auth" className="scroll-mt-24 space-y-6 border-t border-white/5 pt-12">
                             <h2 className="text-3xl font-bold text-white">Authentication</h2>
-                            <p className="text-white/60">
-                                The ClerkTree API uses API keys to authenticate requests. You can view and manage your API keys in the dashboard.
-                            </p>
-
+                            <p className="text-white/60">The ClerkTree API uses Bearer token authentication. Include your API key in every request.</p>
                             <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-4 text-amber-200/80 text-sm flex gap-3 items-start">
                                 <div className="mt-1">⚠️</div>
-                                <p>Your API keys carry many privileges, so be sure to keep them secure! Do not share your secret API keys in publicly accessible areas such as GitHub, client-side code, and so forth.</p>
+                                <p>Your API keys carry many privileges. Keep them secure! Never expose them in client-side code, public repositories, or browser applications. Use environment variables on your server.</p>
                             </div>
-
-                            <p className="text-white/60 break-words">
-                                All API requests should include your API key in an <code className="text-purple-300 bg-purple-500/10 px-1.5 py-0.5 rounded break-all">Authorization</code> header as follows:
-                            </p>
-
-                            <CodeBlock code={`Authorization: Bearer YOUR_API_KEY`} language="http" />
-                        </section>
-
-                        {/* Arbor API Section */}
-                        <section id="arbor-workflows" className="scroll-mt-24 space-y-6 border-t border-white/5 pt-12">
-                            <div className="flex items-center gap-3">
-                                <div className="p-2 bg-emerald-500/10 rounded-lg">
-                                    <div className="w-6 h-6 bg-emerald-500 rounded-full" />
-                                </div>
-                                <h2 className="text-3xl font-bold text-white">Arbor API</h2>
-                            </div>
-                            <p className="text-white/60">
-                                Programmatically manage and execute workflows defined in the Arbor editor.
-                            </p>
-                        </section>
-
-                        <section id="arbor-execution" className="scroll-mt-24 space-y-4">
-                            <h3 className="text-2xl font-semibold text-white">Execute Workflow</h3>
-                            <p className="text-white/60">
-                                Trigger a specific workflow run with input parameters.
-                            </p>
-
-                            <div className="flex items-center gap-3 text-sm font-mono mt-4">
-                                <span className="px-2 py-1 bg-emerald-500/20 text-emerald-400 rounded">POST</span>
-                                <span className="text-white/70">https://api.clerktree.com/v1/arbor/run</span>
-                            </div>
-
-                            <CodeBlock
-                                code={`curl -X POST "https://api.clerktree.com/v1/arbor/run" \\
-  -H "Authorization: Bearer YOUR_API_KEY" \\
-  -H "Content-Type: application/json" \\
-  -d '{
-    "workflow_id": "wf_123456789",
-    "inputs": {
-      "patient_id": "p_98765",
-      "priority": "high"
-    }
-  }'`}
-                                language="bash"
-                            />
-
-                            <div className="mt-6">
-                                <h4 className="text-sm font-semibold text-white/80 mb-2">Response</h4>
-                                <CodeBlock
-                                    code={`{
-  "run_id": "run_abc123",
-  "status": "queued",
-  "estimated_completion": "2s"
-}`}
-                                    language="json"
-                                />
+                            <p className="text-white/60">All requests must include the <code className="text-purple-300 bg-purple-500/10 px-1.5 py-0.5 rounded">Authorization</code> header:</p>
+                            <CodeBlock code={`Authorization: Bearer ct_live_YOUR_API_KEY`} language="http" />
+                            <p className="text-white/60">API keys are prefixed for easy identification:</p>
+                            <div className="rounded-xl border border-white/10 overflow-hidden">
+                                <table className="w-full text-sm"><tbody>
+                                    <tr className="border-b border-white/5"><td className="px-4 py-3 font-mono text-emerald-400">ct_live_*</td><td className="px-4 py-3 text-white/60">Production key — full access</td></tr>
+                                    <tr className="border-b border-white/5"><td className="px-4 py-3 font-mono text-amber-400">ct_test_*</td><td className="px-4 py-3 text-white/60">Test key — sandbox only, no real calls</td></tr>
+                                    <tr><td className="px-4 py-3 font-mono text-blue-400">ct_restrict_*</td><td className="px-4 py-3 text-white/60">Restricted key — limited scopes</td></tr>
+                                </tbody></table>
                             </div>
                         </section>
 
-                        {/* Juris API Section */}
-                        <section id="juris-analyze" className="scroll-mt-24 space-y-6 border-t border-white/5 pt-12">
-                            <div className="flex items-center gap-3">
-                                <div className="p-2 bg-indigo-500/10 rounded-lg">
-                                    <div className="w-6 h-6 bg-indigo-500 rounded-full" />
-                                </div>
-                                <h2 className="text-3xl font-bold text-white">Juris API</h2>
+                        {/* ─── RATE LIMITS ─── */}
+                        <section id="rate-limits" className="scroll-mt-24 space-y-6 border-t border-white/5 pt-12">
+                            <h2 className="text-3xl font-bold text-white">Rate Limits</h2>
+                            <p className="text-white/60">Rate limits vary by plan. Limits are applied per API key.</p>
+                            <div className="rounded-xl border border-white/10 overflow-hidden">
+                                <table className="w-full text-sm">
+                                    <thead><tr className="bg-white/5"><th className="px-4 py-3 text-left text-white/60">Plan</th><th className="px-4 py-3 text-left text-white/60">Chat</th><th className="px-4 py-3 text-left text-white/60">Calls</th><th className="px-4 py-3 text-left text-white/60">Dashboard</th></tr></thead>
+                                    <tbody>
+                                        <tr className="border-t border-white/5"><td className="px-4 py-3 text-white">Starter</td><td className="px-4 py-3 text-white/60">30 req/min</td><td className="px-4 py-3 text-white/60">5 concurrent</td><td className="px-4 py-3 text-white/60">60 req/min</td></tr>
+                                        <tr className="border-t border-white/5"><td className="px-4 py-3 text-white">Professional</td><td className="px-4 py-3 text-white/60">120 req/min</td><td className="px-4 py-3 text-white/60">20 concurrent</td><td className="px-4 py-3 text-white/60">120 req/min</td></tr>
+                                        <tr className="border-t border-white/5"><td className="px-4 py-3 text-white">Enterprise</td><td className="px-4 py-3 text-white/60">Custom</td><td className="px-4 py-3 text-white/60">Custom</td><td className="px-4 py-3 text-white/60">Custom</td></tr>
+                                    </tbody>
+                                </table>
                             </div>
-                            <p className="text-white/60">
-                                Leverage our legal AI models to analyze documents and draft smart contracts.
-                            </p>
+                            <p className="text-white/50 text-sm">Rate limit headers are included in every response: <code className="text-purple-300 bg-purple-500/10 px-1 rounded">X-RateLimit-Limit</code>, <code className="text-purple-300 bg-purple-500/10 px-1 rounded">X-RateLimit-Remaining</code>, <code className="text-purple-300 bg-purple-500/10 px-1 rounded">X-RateLimit-Reset</code></p>
+                        </section>
 
-                            <div className="mt-8">
-                                <h3 className="text-2xl font-semibold text-white">Analyze Document</h3>
-                                <p className="text-white/60 mt-2">
-                                    Upload a PDF or text document for legal risk analysis.
-                                </p>
-
-                                <div className="flex items-center gap-3 text-sm font-mono mt-4">
-                                    <span className="px-2 py-1 bg-indigo-500/20 text-indigo-400 rounded">POST</span>
-                                    <span className="text-white/70">https://api.clerktree.com/v1/juris/analyze</span>
-                                </div>
-
-                                <CodeBlock
-                                    code={`curl -X POST "https://api.clerktree.com/v1/juris/analyze" \\
-  -H "Authorization: Bearer YOUR_API_KEY" \\
-  -F "file=@/path/to/contract.pdf" \\
-  -F "mode=risk_assessment"`}
-                                    language="bash"
-                                />
+                        {/* ─── ERRORS ─── */}
+                        <section id="errors" className="scroll-mt-24 space-y-6 border-t border-white/5 pt-12">
+                            <h2 className="text-3xl font-bold text-white">Error Handling</h2>
+                            <p className="text-white/60">The ClerkTree API uses standard HTTP status codes. Errors return a consistent JSON body:</p>
+                            <CodeBlock code={`{
+  "error": {
+    "code": "invalid_api_key",
+    "message": "The API key provided is invalid or has been revoked.",
+    "status": 401,
+    "request_id": "req_abc123"
+  }
+}`} language="json" />
+                            <div className="rounded-xl border border-white/10 overflow-hidden">
+                                <table className="w-full text-sm">
+                                    <thead><tr className="bg-white/5"><th className="px-4 py-3 text-left text-white/60">Status</th><th className="px-4 py-3 text-left text-white/60">Meaning</th><th className="px-4 py-3 text-left text-white/60">What to do</th></tr></thead>
+                                    <tbody>{errorCodes.map(e => (
+                                        <tr key={e.code} className="border-t border-white/5"><td className="px-4 py-3 font-mono text-white">{e.code}</td><td className="px-4 py-3 text-white font-medium">{e.name}</td><td className="px-4 py-3 text-white/60">{e.desc}</td></tr>
+                                    ))}</tbody>
+                                </table>
                             </div>
                         </section>
 
-                        {/* Voice API Section */}
-                        <section id="voice-call" className="scroll-mt-24 space-y-6 border-t border-white/5 pt-12">
-                            <div className="flex items-center gap-3">
-                                <div className="p-2 bg-pink-500/10 rounded-lg">
-                                    <div className="w-6 h-6 bg-pink-500 rounded-full" />
-                                </div>
-                                <h2 className="text-3xl font-bold text-white">Voice API</h2>
-                            </div>
-                            <p className="text-white/60">
-                                Deploy AI voice agents to handle inbound and outbound calls.
-                            </p>
-
-                            <div className="mt-8">
-                                <h3 className="text-2xl font-semibold text-white">Initiate Outbound Call</h3>
-                                <p className="text-white/60 mt-2">
-                                    Trigger an AI voice agent to call a specific number.
-                                </p>
-
-                                <div className="flex items-center gap-3 text-sm font-mono mt-4">
-                                    <span className="px-2 py-1 bg-pink-500/20 text-pink-400 rounded">POST</span>
-                                    <span className="text-white/70">https://api.clerktree.com/v1/voice/call</span>
-                                </div>
-
-                                <CodeBlock
-                                    code={`curl -X POST "https://api.clerktree.com/v1/voice/call" \\
-  -H "Authorization: Bearer YOUR_API_KEY" \\
-  -H "Content-Type: application/json" \\
-  -d '{
-    "phone_number": "+15550123456",
-    "agent_id": "agent_support_v1",
-    "context": {
-      "customer_name": "Alice"
-    }
-  }'`}
-                                    language="bash"
-                                />
-                            </div>
+                        {/* ─── CHAT API ─── */}
+                        <section id="chat-overview" className="scroll-mt-24 space-y-6 border-t border-white/5 pt-12">
+                            <div className="flex items-center gap-3"><div className="p-2 bg-emerald-500/10 rounded-lg"><div className="w-6 h-6 bg-emerald-500 rounded-full" /></div><h2 className="text-3xl font-bold text-white">Chat API</h2></div>
+                            <p className="text-white/60 leading-relaxed">The ClerkTree Chat API provides a blackbox AI model for conversational interactions. Send messages and receive intelligent completions without managing model infrastructure. Ideal for sales chatbots, support agents, and lead qualification flows.</p>
+                            <p className="text-white/60">Base URL: <code className="text-purple-300 bg-purple-500/10 px-1.5 py-0.5 rounded">{BASE_URL}/chat</code></p>
                         </section>
-                        {/* Real-time Events Section */}
+                        {chatEndpoints.map(ep => <EndpointSection key={ep.id} ep={ep} />)}
+
+                        {/* ─── CALL API ─── */}
+                        <section id="call-overview" className="scroll-mt-24 space-y-6 border-t border-white/5 pt-12">
+                            <div className="flex items-center gap-3"><div className="p-2 bg-pink-500/10 rounded-lg"><div className="w-6 h-6 bg-pink-500 rounded-full" /></div><h2 className="text-3xl font-bold text-white">Call API</h2></div>
+                            <p className="text-white/60 leading-relaxed">The ClerkTree Call API lets you deploy AI voice agents that handle outbound and inbound calls. Each call is fully autonomous — the model handles conversation flow, objection handling, and data extraction. You get a full transcript, sentiment analysis, and extracted leads after every call.</p>
+                            <p className="text-white/60">Base URL: <code className="text-purple-300 bg-purple-500/10 px-1.5 py-0.5 rounded">{BASE_URL}/calls</code></p>
+                        </section>
+                        {callEndpoints.map(ep => <EndpointSection key={ep.id} ep={ep} />)}
+
+                        {/* ─── DASHBOARD API ─── */}
+                        <section id="dash-overview" className="scroll-mt-24 space-y-6 border-t border-white/5 pt-12">
+                            <div className="flex items-center gap-3"><div className="p-2 bg-purple-500/10 rounded-lg"><div className="w-6 h-6 bg-purple-500 rounded-full" /></div><h2 className="text-3xl font-bold text-white">Dashboard API</h2></div>
+                            <p className="text-white/60 leading-relaxed">Access all the data powering your ClerkTree Dashboard programmatically. Monitor live activity, pull sales analytics, manage leads, track usage and credits, and manage API keys — all via REST endpoints.</p>
+                            <p className="text-white/60">Base URL: <code className="text-purple-300 bg-purple-500/10 px-1.5 py-0.5 rounded">{BASE_URL}/dashboard</code></p>
+                        </section>
+                        {dashboardEndpoints.map(ep => <EndpointSection key={ep.id} ep={ep} />)}
+
+                        {/* ─── WEBHOOKS ─── */}
                         <section id="webhooks" className="scroll-mt-24 space-y-6 border-t border-white/5 pt-12">
-                            <div className="flex items-center gap-3">
-                                <div className="p-2 bg-amber-500/10 rounded-lg">
-                                    <div className="w-6 h-6 bg-amber-500 rounded-full" />
-                                </div>
-                                <h2 className="text-3xl font-bold text-white">Events & Real-time</h2>
+                            <div className="flex items-center gap-3"><div className="p-2 bg-amber-500/10 rounded-lg"><div className="w-6 h-6 bg-amber-500 rounded-full" /></div><h2 className="text-3xl font-bold text-white">Webhooks</h2></div>
+                            <p className="text-white/60">Subscribe to real-time events. ClerkTree sends POST requests to your configured webhook URL whenever key events occur.</p>
+                            <h3 className="text-xl font-semibold text-white mt-6">Available Events</h3>
+                            <div className="rounded-xl border border-white/10 overflow-hidden">
+                                <table className="w-full text-sm">
+                                    <thead><tr className="bg-white/5"><th className="px-4 py-3 text-left text-white/60">Event</th><th className="px-4 py-3 text-left text-white/60">Description</th></tr></thead>
+                                    <tbody>
+                                        <tr className="border-t border-white/5"><td className="px-4 py-3 font-mono text-emerald-400">call.started</td><td className="px-4 py-3 text-white/60">Call has been connected</td></tr>
+                                        <tr className="border-t border-white/5"><td className="px-4 py-3 font-mono text-emerald-400">call.completed</td><td className="px-4 py-3 text-white/60">Call ended with full transcript and analysis</td></tr>
+                                        <tr className="border-t border-white/5"><td className="px-4 py-3 font-mono text-emerald-400">call.failed</td><td className="px-4 py-3 text-white/60">Call could not be completed</td></tr>
+                                        <tr className="border-t border-white/5"><td className="px-4 py-3 font-mono text-emerald-400">lead.created</td><td className="px-4 py-3 text-white/60">New lead extracted from a call or chat</td></tr>
+                                        <tr className="border-t border-white/5"><td className="px-4 py-3 font-mono text-emerald-400">lead.updated</td><td className="px-4 py-3 text-white/60">Lead status or priority changed</td></tr>
+                                        <tr className="border-t border-white/5"><td className="px-4 py-3 font-mono text-emerald-400">usage.threshold</td><td className="px-4 py-3 text-white/60">Credit usage exceeded 80% or 95% threshold</td></tr>
+                                    </tbody>
+                                </table>
                             </div>
-                            <p className="text-white/60">
-                                Subscribe to asynchronous state changes and stream live audio/data via WebSocket.
-                            </p>
-
-                            <div className="mt-8">
-                                <h3 className="text-2xl font-semibold text-white">Webhook Configuration</h3>
-                                <p className="text-white/60 mt-2">
-                                    Receive POST callbacks for workflow completions, call milestones, and document analysis results.
-                                </p>
-
-                                <div className="flex items-center gap-3 text-sm font-mono mt-4">
-                                    <span className="px-2 py-1 bg-amber-500/20 text-amber-400 rounded">POST</span>
-                                    <span className="text-white/70">https://your-server.com/webhooks/clerktree</span>
-                                </div>
-
-                                <div className="mt-4">
-                                    <h4 className="text-sm font-semibold text-white/80 mb-2">Payload Example</h4>
-                                    <CodeBlock
-                                        code={`{
-  "event": "workflow.completed",
-  "workflow_id": "wf_123456789",
+                            <h4 className="text-sm font-semibold text-white/80 mt-6 mb-2">Webhook Payload Example</h4>
+                            <CodeBlock code={`{
+  "id": "evt_9a8b7c6d",
+  "type": "call.completed",
+  "created": "2025-03-15T10:05:00Z",
   "data": {
-    "output_variables": { ... },
-    "execution_time_ms": 1240
-  },
-  "timestamp": "2025-12-26T12:00:00Z"
-}`}
-                                        language="json"
-                                    />
-                                </div>
-                            </div>
+    "call_id": "call_a1b2c3d4",
+    "duration_seconds": 247,
+    "sentiment": "positive",
+    "lead": {
+      "id": "lead_8x92k",
+      "name": "John Smith",
+      "interest_level": 0.92
+    },
+    "action_items": ["Send revised quote", "Schedule follow-up"]
+  }
+}`} language="json" />
+                            <h4 className="text-sm font-semibold text-white/80 mt-6 mb-2">Verifying Webhook Signatures</h4>
+                            <p className="text-white/60 text-sm">Every webhook includes a <code className="text-purple-300 bg-purple-500/10 px-1 rounded">X-ClerkTree-Signature</code> header. Verify it using HMAC-SHA256 with your webhook secret:</p>
+                            <CodeBlock code={`const crypto = require('crypto');
 
-                            <div className="mt-12" id="websocket">
-                                <h3 className="text-2xl font-semibold text-white">WebSocket Stream</h3>
-                                <p className="text-white/60 mt-2">
-                                    Connect to a full-duplex WebSocket for real-time voice buffering and agent intervention.
-                                </p>
-
-                                <div className="flex items-center gap-3 text-sm font-mono mt-4">
-                                    <span className="px-2 py-1 bg-blue-500/20 text-blue-400 rounded">WSS</span>
-                                    <span className="text-white/70">wss://api.clerktree.com/v1/stream</span>
-                                </div>
-                            </div>
+function verifyWebhook(payload, signature, secret) {
+  const expected = crypto
+    .createHmac('sha256', secret)
+    .update(payload)
+    .digest('hex');
+  return crypto.timingSafeEqual(
+    Buffer.from(signature),
+    Buffer.from(expected)
+  );
+}`} language="javascript" />
                         </section>
+
+                        {/* ─── WEBSOCKET ─── */}
+                        <section id="websocket" className="scroll-mt-24 space-y-6 border-t border-white/5 pt-12">
+                            <h3 className="text-2xl font-semibold text-white">WebSocket Stream</h3>
+                            <p className="text-white/60">Connect to a full-duplex WebSocket for real-time call audio streaming and live transcript updates.</p>
+                            <div className="flex items-center gap-3 text-sm font-mono mt-4">
+                                <MethodBadge method="WSS" color="blue" />
+                                <span className="text-white/70">wss://api.clerktree.com/v1/stream</span>
+                            </div>
+                            <CodeBlock code={`const ws = new WebSocket(
+  "wss://api.clerktree.com/v1/stream",
+  { headers: { "Authorization": "Bearer ct_live_YOUR_KEY" } }
+);
+
+ws.onopen = () => {
+  ws.send(JSON.stringify({
+    type: "subscribe",
+    channels: ["call.call_a1b2c3d4.transcript"]
+  }));
+};
+
+ws.onmessage = (event) => {
+  const data = JSON.parse(event.data);
+  // data.type = "transcript.delta"
+  // data.content = "Sure, I can help with..."
+  console.log(data);
+};`} language="javascript" />
+                        </section>
+
                     </div>
 
+                    {/* Footer */}
                     <footer className="mt-24 pt-12 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-6 text-white/40 text-sm">
                         <p>&copy; {new Date().getFullYear()} ClerkTree Inc. All rights reserved.</p>
                         <div className="flex gap-6">
@@ -437,17 +428,13 @@ export default function DocsPage() {
                     </footer>
                 </main>
 
-                {/* Right Table of Contents (Hidden on mobile) */}
+                {/* Right Table of Contents */}
                 <aside className="hidden xl:block w-64 pt-24 px-6 border-l border-white/5 sticky top-0 h-screen overflow-y-auto">
                     <h4 className="text-sm font-semibold text-white/90 mb-4">On this page</h4>
                     <ul className="space-y-3 text-sm">
-                        <li><a href="#welcome" className="text-white/60 hover:text-white transition-colors">Welcome</a></li>
-                        <li><a href="#auth" className="text-white/60 hover:text-white transition-colors">Authentication</a></li>
-                        <li><a href="#arbor-execution" className="text-white/60 hover:text-white transition-colors">Arbor: Execute Workflow</a></li>
-                        <li><a href="#juris-analyze" className="text-white/60 hover:text-white transition-colors">Juris: Analyze Contract</a></li>
-                        <li><a href="#voice-call" className="text-white/60 hover:text-white transition-colors">Voice: Initiate Call</a></li>
-                        <li><a href="#webhooks" className="text-white/60 hover:text-white transition-colors">Webhooks</a></li>
-                        <li><a href="#websocket" className="text-white/60 hover:text-white transition-colors">WebSocket Stream</a></li>
+                        {allNavItems.map(item => (
+                            <li key={item.id}><a href={`#${item.id}`} onClick={(e) => { e.preventDefault(); scrollToSection(item.id); }} className={`transition-colors ${activeId === item.id ? 'text-purple-400' : 'text-white/60 hover:text-white'}`}>{item.label}</a></li>
+                        ))}
                     </ul>
                 </aside>
             </div>
@@ -455,47 +442,25 @@ export default function DocsPage() {
             {/* Search Modal */}
             {isSearchOpen && (
                 <div className="fixed inset-0 z-[60] flex items-start justify-center pt-12 md:pt-24 px-4">
-                    <div
-                        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-                        onClick={() => setIsSearchOpen(false)}
-                    />
+                    <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsSearchOpen(false)} />
                     <div className="relative w-full max-w-lg bg-[#0A0A0A] border border-white/10 rounded-xl shadow-2xl overflow-hidden">
                         <div className="flex items-center px-4 py-3 border-b border-white/5">
                             <Search className="w-5 h-5 text-white/40 mr-3" />
-                            <input
-                                type="text"
-                                placeholder="Search documentation..."
-                                className="flex-1 bg-transparent border-none outline-none text-white placeholder-white/40 text-base md:text-sm h-6"
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                autoFocus
-                            />
-                            <button
-                                onClick={() => setIsSearchOpen(false)}
-                                className="p-1 hover:bg-white/10 rounded text-white/40 hover:text-white"
-                            >
+                            <input type="text" placeholder="Search documentation..." className="flex-1 bg-transparent border-none outline-none text-white placeholder-white/40 text-base md:text-sm h-6" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} autoFocus />
+                            <button onClick={() => setIsSearchOpen(false)} className="p-1 hover:bg-white/10 rounded text-white/40 hover:text-white">
                                 <kbd className="text-xs bg-white/10 px-1.5 py-0.5 rounded">ESC</kbd>
                             </button>
                         </div>
                         <div className="max-h-[50vh] md:max-h-[60vh] overflow-y-auto py-2">
                             {filteredItems.length === 0 ? (
-                                <div className="px-4 py-8 text-center text-white/40 text-sm">
-                                    No results found for "{searchQuery}"
-                                </div>
+                                <div className="px-4 py-8 text-center text-white/40 text-sm">No results found for "{searchQuery}"</div>
                             ) : (
-                                <ul>
-                                    {filteredItems.map(item => (
-                                        <li key={item.id}>
-                                            <button
-                                                onClick={() => scrollToSection(item.id)}
-                                                className="w-full text-left px-4 py-3 hover:bg-white/5 flex items-center justify-between group"
-                                            >
-                                                <span className="text-sm text-white/80 group-hover:text-white">{item.label}</span>
-                                                <span className="text-xs text-white/30 uppercase tracking-wider">{item.section}</span>
-                                            </button>
-                                        </li>
-                                    ))}
-                                </ul>
+                                <ul>{filteredItems.map(item => (
+                                    <li key={item.id}><button onClick={() => scrollToSection(item.id)} className="w-full text-left px-4 py-3 hover:bg-white/5 flex items-center justify-between group">
+                                        <span className="text-sm text-white/80 group-hover:text-white">{item.label}</span>
+                                        <span className="text-xs text-white/30 uppercase tracking-wider">{item.section}</span>
+                                    </button></li>
+                                ))}</ul>
                             )}
                         </div>
                     </div>
