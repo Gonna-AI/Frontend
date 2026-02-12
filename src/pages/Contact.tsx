@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
 import LanguageSwitcher from '../components/Layout/LanguageSwitcher';
 import Footer from '../components/Landing/Footer';
+import SEO from '../components/SEO/SEO';
 
 const Contact = () => {
   const navigate = useNavigate();
@@ -76,6 +77,11 @@ const Contact = () => {
 
   return (
     <div className="bg-[rgb(10,10,10)] min-h-screen relative overflow-x-hidden">
+      <SEO
+        title="Contact Us"
+        description="Get in touch with ClerkTree. Speak with our team about automating your legal and claims operations."
+        canonical="https://clerktree.com/contact"
+      />
       {/* Red theme background accents */}
       <div className="fixed inset-0 bg-[rgb(10,10,10)] -z-10">
         <div

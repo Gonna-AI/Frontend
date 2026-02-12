@@ -9,6 +9,7 @@ import { useState } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
 import LanguageSwitcher from '../components/Layout/LanguageSwitcher';
 import Footer from '../components/Landing/Footer';
+import SEO from '../components/SEO/SEO';
 
 const formatDate = (date: string, language: string): string => {
   return new Date(date).toLocaleDateString(language === 'de' ? 'de-DE' : 'en-US', {
@@ -47,6 +48,27 @@ export default function BlogPost() {
     <div className="bg-[rgb(10,10,10)] min-h-screen relative overflow-x-hidden">
       {/* Blue theme background accents */}
       <div className="fixed inset-0 bg-[rgb(10,10,10)] -z-10">
+        <SEO
+          title={post.title}
+          description={post.description}
+          canonical={`https://clerktree.com/blog/${slug}`}
+          openGraph={{
+            type: 'article',
+            image: post.thumbnail
+          }}
+          structuredData={{
+            "@context": "https://schema.org",
+            "@type": "Article",
+            "headline": post.title,
+            "image": post.thumbnail ? [post.thumbnail] : [],
+            "datePublished": post.date,
+            "author": [{
+              "@type": "Person",
+              "name": post.author || "ClerkTree Team",
+              "url": "https://clerktree.com/about"
+            }]
+          }}
+        />
         <div
           className="absolute top-0 right-0 -translate-y-1/4 translate-x-1/4 w-96 md:w-[800px] h-96 md:h-[800px] opacity-40"
           style={{

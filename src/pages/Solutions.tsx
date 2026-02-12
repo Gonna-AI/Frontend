@@ -6,6 +6,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 import LanguageSwitcher from '../components/Layout/LanguageSwitcher';
 import Footer from '../components/Landing/Footer';
 import { NumberTicker } from '../components/ui/number-ticker';
+import SEO from '../components/SEO/SEO';
 
 // ─────────────────────────────────────
 // Scroll-triggered reveal
@@ -111,6 +112,11 @@ export default function Solutions() {
 
   return (
     <div className="bg-[#0A0A0A] min-h-screen relative overflow-x-hidden">
+      <SEO
+        title="Solutions"
+        description="Explore ClerkTree's AI-powered solutions for claims processing, legal automation, and document review. See how we can help your business."
+        canonical="https://clerktree.com/solutions"
+      />
       {/* ── Header ── */}
       <header className="fixed top-0 left-0 right-0 z-50 w-full py-3 px-4 sm:px-6 backdrop-blur-md bg-[#0A0A0A]/80 border-b border-white/[0.06]">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
@@ -301,8 +307,8 @@ export default function Solutions() {
                       key={idx}
                       onClick={() => setActiveSolution(idx)}
                       className={`relative flex items-center gap-3 px-4 py-3.5 rounded-xl text-left transition-all duration-200 ${isActive
-                          ? 'bg-white/[0.05] border border-white/[0.08]'
-                          : 'border border-transparent hover:bg-white/[0.02]'
+                        ? 'bg-white/[0.05] border border-white/[0.08]'
+                        : 'border border-transparent hover:bg-white/[0.02]'
                         }`}
                     >
                       {isActive && (

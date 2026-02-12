@@ -1,4 +1,5 @@
 import Hero from './Hero';
+import SEO from '../SEO/SEO';
 import AboutSection from './AboutSection';
 import ProductsSection from './ProductsSection';
 import Metrics from './Metrics';
@@ -54,6 +55,11 @@ export default function Landing() {
 
   return (
     <div className="min-h-screen overflow-hidden relative bg-[rgb(10,10,10)]">
+      <SEO
+        title="AI-Powered Workflow Automation"
+        description="Automate claims processing and back-office operations with ClerkTree. Reduce turnaround time by 40% with intelligent automation."
+        canonical="https://clerktree.com"
+      />
       {/* Announcement Banner */}
       <AnnouncementBanner onVisibilityChange={handleBannerVisibility} />
 
