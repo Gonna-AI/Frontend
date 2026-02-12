@@ -109,6 +109,19 @@ const ParamTable = ({ params, title }: { params: EndpointDoc['params']; title?: 
     );
 };
 
+const SectionHeader = ({ title, description, iconColor, iconClass }: { title: string; description: string; iconColor: string; iconClass: string }) => (
+    <div className={`p-8 rounded-3xl bg-gradient-to-br from-white/5 to-white/[0.02] border border-white/10 relative overflow-hidden group`}>
+        <div className={`absolute top-0 right-0 p-32 ${iconColor} opacity-[0.03] blur-3xl rounded-full translate-x-12 -translate-y-12 transition-opacity group-hover:opacity-[0.08]`} />
+        <div className="relative z-10">
+            <div className={`w-12 h-12 rounded-2xl ${iconClass} flex items-center justify-center mb-6 shadow-inner`}>
+                <div className={`w-6 h-6 rounded-full bg-current opacity-80`} />
+            </div>
+            <h2 className="text-3xl font-bold text-white mb-3 tracking-tight">{title}</h2>
+            <p className="text-white/60 leading-relaxed text-lg max-w-2xl">{description}</p>
+        </div>
+    </div>
+);
+
 const EndpointSection = ({ ep }: { ep: EndpointDoc }) => (
     <section id={ep.id} className="scroll-mt-24 space-y-4 py-8">
         <h3 className="text-2xl font-semibold text-white">{ep.title}</h3>
@@ -130,7 +143,19 @@ export default function DocsPage() {
     const [isSearchOpen, setIsSearchOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const allNavItems = navGroups.flatMap(g => g.items);
-    const filteredItems = allNavItems.filter(item => item.label.toLowerCase().includes(searchQuery.toLowerCase()));
+
+    // Combine nav items with actual API endpoints for search
+    const allSearchItems = [
+        ...allNavItems.map(item => ({ ...item, description: '' })),
+        ...chatEndpoints.map(ep => ({ id: ep.id, label: ep.title, section: 'chat' as DocSection, description: ep.description })),
+        ...callEndpoints.map(ep => ({ id: ep.id, label: ep.title, section: 'call' as DocSection, description: ep.description })),
+        ...dashboardEndpoints.map(ep => ({ id: ep.id, label: ep.title, section: 'dashboard' as DocSection, description: ep.description }))
+    ];
+
+    const filteredItems = allSearchItems.filter(item =>
+        item.label.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        item.description.toLowerCase().includes(searchQuery.toLowerCase())
+    );
 
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
@@ -313,34 +338,50 @@ export default function DocsPage() {
                         </section>
 
                         {/* ─── CHAT API ─── */}
-                        <section id="chat-overview" className="scroll-mt-24 space-y-6 border-t border-white/5 pt-12">
-                            <div className="flex items-center gap-3"><div className="p-2 bg-emerald-500/10 rounded-lg"><div className="w-6 h-6 bg-emerald-500 rounded-full" /></div><h2 className="text-3xl font-bold text-white">Chat API</h2></div>
-                            <p className="text-white/60 leading-relaxed">The ClerkTree Chat API provides a blackbox AI model for conversational interactions. Send messages and receive intelligent completions without managing model infrastructure. Ideal for sales chatbots, support agents, and lead qualification flows.</p>
-                            <p className="text-white/60">Base URL: <code className="text-purple-300 bg-purple-500/10 px-1.5 py-0.5 rounded">{BASE_URL}/chat</code></p>
+                        <section id="chat-overview" className="scroll-mt-24 space-y-8 border-t border-white/5 pt-16">
+                            <SectionHeader
+                                title="Chat API"
+                                description="The ClerkTree Chat API provides a blackbox AI model for conversational interactions. Send messages and receive intelligent completions without managing model infrastructure. Ideal for sales chatbots, support agents, and lead qualification flows."
+                                iconColor="bg-emerald-500"
+                                iconClass="bg-emerald-500/10 text-emerald-500"
+                            />
+                            <p className="text-white/60 px-2">Base URL: <code className="text-purple-300 bg-purple-500/10 px-1.5 py-0.5 rounded ml-2">{BASE_URL}/chat</code></p>
                         </section>
                         {chatEndpoints.map(ep => <EndpointSection key={ep.id} ep={ep} />)}
 
                         {/* ─── CALL API ─── */}
-                        <section id="call-overview" className="scroll-mt-24 space-y-6 border-t border-white/5 pt-12">
-                            <div className="flex items-center gap-3"><div className="p-2 bg-pink-500/10 rounded-lg"><div className="w-6 h-6 bg-pink-500 rounded-full" /></div><h2 className="text-3xl font-bold text-white">Call API</h2></div>
-                            <p className="text-white/60 leading-relaxed">The ClerkTree Call API lets you deploy AI voice agents that handle outbound and inbound calls. Each call is fully autonomous — the model handles conversation flow, objection handling, and data extraction. You get a full transcript, sentiment analysis, and extracted leads after every call.</p>
-                            <p className="text-white/60">Base URL: <code className="text-purple-300 bg-purple-500/10 px-1.5 py-0.5 rounded">{BASE_URL}/calls</code></p>
+                        <section id="call-overview" className="scroll-mt-24 space-y-8 border-t border-white/5 pt-16">
+                            <SectionHeader
+                                title="Call API"
+                                description="The ClerkTree Call API lets you deploy AI voice agents that handle outbound and inbound calls. Each call is fully autonomous — the model handles conversation flow, objection handling, and data extraction. You get a full transcript, sentiment analysis, and extracted leads after every call."
+                                iconColor="bg-pink-500"
+                                iconClass="bg-pink-500/10 text-pink-500"
+                            />
+                            <p className="text-white/60 px-2">Base URL: <code className="text-purple-300 bg-purple-500/10 px-1.5 py-0.5 rounded ml-2">{BASE_URL}/calls</code></p>
                         </section>
                         {callEndpoints.map(ep => <EndpointSection key={ep.id} ep={ep} />)}
 
                         {/* ─── DASHBOARD API ─── */}
-                        <section id="dash-overview" className="scroll-mt-24 space-y-6 border-t border-white/5 pt-12">
-                            <div className="flex items-center gap-3"><div className="p-2 bg-purple-500/10 rounded-lg"><div className="w-6 h-6 bg-purple-500 rounded-full" /></div><h2 className="text-3xl font-bold text-white">Dashboard API</h2></div>
-                            <p className="text-white/60 leading-relaxed">Access all the data powering your ClerkTree Dashboard programmatically. Monitor live activity, pull sales analytics, manage leads, track usage and credits, and manage API keys — all via REST endpoints.</p>
-                            <p className="text-white/60">Base URL: <code className="text-purple-300 bg-purple-500/10 px-1.5 py-0.5 rounded">{BASE_URL}/dashboard</code></p>
+                        <section id="dash-overview" className="scroll-mt-24 space-y-8 border-t border-white/5 pt-16">
+                            <SectionHeader
+                                title="Dashboard API"
+                                description="Access all the data powering your ClerkTree Dashboard programmatically. Monitor live activity, pull sales analytics, manage leads, track usage and credits, and manage API keys — all via REST endpoints."
+                                iconColor="bg-purple-500"
+                                iconClass="bg-purple-500/10 text-purple-500"
+                            />
+                            <p className="text-white/60 px-2">Base URL: <code className="text-purple-300 bg-purple-500/10 px-1.5 py-0.5 rounded ml-2">{BASE_URL}/dashboard</code></p>
                         </section>
                         {dashboardEndpoints.map(ep => <EndpointSection key={ep.id} ep={ep} />)}
 
                         {/* ─── WEBHOOKS ─── */}
-                        <section id="webhooks" className="scroll-mt-24 space-y-6 border-t border-white/5 pt-12">
-                            <div className="flex items-center gap-3"><div className="p-2 bg-amber-500/10 rounded-lg"><div className="w-6 h-6 bg-amber-500 rounded-full" /></div><h2 className="text-3xl font-bold text-white">Webhooks</h2></div>
-                            <p className="text-white/60">Subscribe to real-time events. ClerkTree sends POST requests to your configured webhook URL whenever key events occur.</p>
-                            <h3 className="text-xl font-semibold text-white mt-6">Available Events</h3>
+                        <section id="webhooks" className="scroll-mt-24 space-y-8 border-t border-white/5 pt-16">
+                            <SectionHeader
+                                title="Webhooks"
+                                description="Subscribe to real-time events. ClerkTree sends POST requests to your configured webhook URL whenever key events occur."
+                                iconColor="bg-amber-500"
+                                iconClass="bg-amber-500/10 text-amber-500"
+                            />
+                            <h3 className="text-xl font-semibold text-white mt-8 px-2">Available Events</h3>
                             <div className="rounded-xl border border-white/10 overflow-hidden">
                                 <table className="w-full text-sm">
                                     <thead><tr className="bg-white/5"><th className="px-4 py-3 text-left text-white/60">Event</th><th className="px-4 py-3 text-left text-white/60">Description</th></tr></thead>
@@ -456,10 +497,15 @@ ws.onmessage = (event) => {
                                 <div className="px-4 py-8 text-center text-white/40 text-sm">No results found for "{searchQuery}"</div>
                             ) : (
                                 <ul>{filteredItems.map(item => (
-                                    <li key={item.id}><button onClick={() => scrollToSection(item.id)} className="w-full text-left px-4 py-3 hover:bg-white/5 flex items-center justify-between group">
-                                        <span className="text-sm text-white/80 group-hover:text-white">{item.label}</span>
-                                        <span className="text-xs text-white/30 uppercase tracking-wider">{item.section}</span>
-                                    </button></li>
+                                    <li key={item.id}>
+                                        <button onClick={() => scrollToSection(item.id)} className="w-full text-left px-4 py-3 hover:bg-white/5 group border-b border-white/5 last:border-0 transition-colors">
+                                            <div className="flex items-center justify-between mb-1">
+                                                <span className="text-sm font-medium text-white/90 group-hover:text-purple-400 transition-colors">{item.label}</span>
+                                                <span className="text-[10px] text-white/30 uppercase tracking-widest bg-white/5 px-1.5 py-0.5 rounded">{item.section}</span>
+                                            </div>
+                                            {item.description && <p className="text-xs text-white/50 line-clamp-1 group-hover:text-white/70">{item.description}</p>}
+                                        </button>
+                                    </li>
                                 ))}</ul>
                             )}
                         </div>
