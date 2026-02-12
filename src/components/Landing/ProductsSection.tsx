@@ -1,9 +1,9 @@
-import { useState, useMemo, useCallback, memo } from 'react';
+import { useState, useMemo, useCallback, memo, lazy, Suspense } from 'react';
 import { ArrowRight, Volume2, VolumeX } from 'lucide-react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { useDeviceDetection } from '../../hooks/useDeviceDetection';
 import { Link } from 'react-router-dom';
-import WorkflowEditor from '../Bioflow/WorkflowEditor';
+const WorkflowEditor = lazy(() => import('../Bioflow/WorkflowEditor'));
 
 type ProductType = 'arbor' | 'juris';
 
@@ -102,7 +102,9 @@ const ArborContent = memo(({ isLowEnd, prefersReducedMotion }: { isLowEnd: boole
 
                 {/* Workflow Editor */}
                 <div className="relative h-[500px] md:h-[600px]">
-                    <WorkflowEditor initialUseCase="doctor" showInspector={true} />
+                    <Suspense fallback={<div className="h-full w-full bg-white/5 animate-pulse rounded-2xl" />}>
+                        <WorkflowEditor initialUseCase="doctor" showInspector={true} />
+                    </Suspense>
                 </div>
 
                 {/* Bottom info bar */}
