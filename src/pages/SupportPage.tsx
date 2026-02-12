@@ -136,10 +136,10 @@ const SupportPage = () => {
                         <div>
                             <h3 className="text-xs font-semibold text-white/40 uppercase tracking-wider mb-3 px-2">Support Resources</h3>
                             <nav className="space-y-0.5">
-                                <a href="#" className="flex items-center gap-2 px-3 py-2 rounded-lg bg-purple-500/10 text-purple-400 font-medium">
+                                <button type="button" className="flex items-center gap-2 px-3 py-2 rounded-lg bg-purple-500/10 text-purple-400 font-medium">
                                     <Ticket className="w-4 h-4" />
                                     <span>Submit Ticket</span>
-                                </a>
+                                </button>
                                 <Link to="/docs" className="flex items-center gap-2 px-3 py-2 rounded-lg text-white/60 hover:text-white hover:bg-white/5 transition-colors">
                                     <FileText className="w-4 h-4" />
                                     <span>Documentation</span>
@@ -237,8 +237,9 @@ const SupportPage = () => {
 
                                 <div className="grid md:grid-cols-2 gap-6">
                                     <div className="space-y-2">
-                                        <label className="block text-sm font-medium text-white/80">Full Name</label>
+                                        <label htmlFor="user_name" className="block text-sm font-medium text-white/80">Full Name</label>
                                         <input
+                                            id="user_name"
                                             type="text"
                                             name="user_name"
                                             required
@@ -249,8 +250,9 @@ const SupportPage = () => {
                                         />
                                     </div>
                                     <div className="space-y-2">
-                                        <label className="block text-sm font-medium text-white/80">Email Address</label>
+                                        <label htmlFor="user_email" className="block text-sm font-medium text-white/80">Email Address</label>
                                         <input
+                                            id="user_email"
                                             type="email"
                                             name="user_email"
                                             required
@@ -263,8 +265,9 @@ const SupportPage = () => {
                                 </div>
 
                                 <div className="space-y-2">
-                                    <label className="block text-sm font-medium text-white/80">Subject</label>
+                                    <label htmlFor="subject" className="block text-sm font-medium text-white/80">Subject</label>
                                     <input
+                                        id="subject"
                                         type="text"
                                         name="subject"
                                         required
@@ -277,9 +280,10 @@ const SupportPage = () => {
 
                                 <div className="grid md:grid-cols-2 gap-6">
                                     <div className="space-y-2">
-                                        <label className="block text-sm font-medium text-white/80">Category</label>
+                                        <label htmlFor="category" className="block text-sm font-medium text-white/80">Category</label>
                                         <div className="relative">
                                             <select
+                                                id="category"
                                                 name="category"
                                                 required
                                                 value={formData.category}
@@ -315,8 +319,9 @@ const SupportPage = () => {
                                 </div>
 
                                 <div className="space-y-2">
-                                    <label className="block text-sm font-medium text-white/80">Description</label>
+                                    <label htmlFor="description" className="block text-sm font-medium text-white/80">Description</label>
                                     <textarea
+                                        id="description"
                                         name="description"
                                         required
                                         rows={8}
