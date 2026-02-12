@@ -3,6 +3,7 @@ import { Zap, Brain, FileCheck, Clock, BarChart3, Shield, ArrowRight } from 'luc
 import { useLanguage } from '../contexts/LanguageContext';
 import LanguageSwitcher from '../components/Layout/LanguageSwitcher';
 import Footer from '../components/Landing/Footer';
+import DitherShaderDemoDuotone from '../components/ui/dither-shader-demo-duotone';
 
 export default function Solutions() {
   const navigate = useNavigate();
@@ -234,6 +235,10 @@ export default function Solutions() {
                 </button>
               </div>
             </div>
+          </div>
+
+          <div className="mt-20">
+            <DitherShaderDemoDuotone />
           </div>
         </div>
       </div>
