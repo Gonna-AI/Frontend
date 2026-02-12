@@ -27,6 +27,7 @@ import { PrivateRoute } from './components/Auth/PrivateRoute';
 import AISettings from './components/AISettings';
 import ScrollToTop from './components/ScrollToTop';
 import DocsPage from './pages/DocsPage';
+import SupportPage from './pages/SupportPage';
 import CanonicalLink from './components/SEO/CanonicalLink';
 import HreflangTags from './components/SEO/HreflangTags';
 import AuthPage from './pages/AuthPage';
@@ -78,6 +79,7 @@ function App() {
               <Route path="/careers" element={<Careers />} />
               <Route path="/solutions" element={<Solutions />} />
               <Route path="/contact" element={<Contact />} />
+              <Route path="/support" element={<SupportPage />} />
 
               {/* Blog */}
               <Route path="/blog" element={<Blog />} />
