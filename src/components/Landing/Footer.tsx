@@ -21,8 +21,6 @@ export default function Footer() {
     ],
     company: [
       { name: t('footer.aboutUs'), path: '/about' },
-      { name: t('footer.careers'), path: '/careers' },
-      { name: t('nav.contact'), path: '/contact' },
     ],
     legal: [
       { name: t('footer.privacy'), path: '/privacy-policy', icon: Lock },
