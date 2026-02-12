@@ -731,6 +731,7 @@ export function DemoCallProvider({ children, initialAgentId }: { children: React
       extractedFields: [],
       priority: 'medium',
     };
+    console.log('📞 Starting new call/session:', { id: newCall.id, type, requestedType: type });
     setCurrentCall(newCall);
     // Persist active call locally
     localStorage.setItem(ACTIVE_CALL_KEY, JSON.stringify(newCall));
@@ -1054,6 +1055,8 @@ export function DemoCallProvider({ children, initialAgentId }: { children: React
               follow_up_required: finalHistoryItem.summary.followUpRequired || false,
               user_id: user?.id
             };
+
+            console.log('💾 Saving final call history to Supabase:', { id: finalHistoryItem.id, type: finalHistoryItem.type });
 
             // Use upsert to UPDATE the existing record with the final summary
             const { error } = await supabase.from('call_history').upsert({

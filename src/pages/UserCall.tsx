@@ -182,7 +182,15 @@ function UserCallContent({ initialMode = 'select' }: UserCallContentProps) {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.1, duration: 0.4 }}
-                    onClick={() => setMode('chat')}
+                    onClick={async () => {
+                      // If switching to chat but we have an active VOICE call, end it first
+                      // so we start a clean text session
+                      if (currentCall?.status === 'active' && currentCall?.type === 'voice') {
+                        console.log('🔄 Ending active voice call before starting chat session...');
+                        await endCall();
+                      }
+                      setMode('chat');
+                    }}
                     className={cn(
                       "group relative p-6 md:p-10 rounded-[32px] overflow-hidden text-left w-full",
                       "border transition-all duration-500",
@@ -235,7 +243,15 @@ function UserCallContent({ initialMode = 'select' }: UserCallContentProps) {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.2, duration: 0.4 }}
-                    onClick={() => setMode('call')}
+                    onClick={async () => {
+                      // If switching to call but we have an active TEXT session, end it first
+                      // so we start a clean voice session
+                      if (currentCall?.status === 'active' && currentCall?.type === 'text') {
+                        console.log('🔄 Ending active text session before starting voice call...');
+                        await endCall();
+                      }
+                      setMode('call');
+                    }}
                     className={cn(
                       "group relative p-6 md:p-10 rounded-[32px] overflow-hidden text-left w-full",
                       "border transition-all duration-500",
