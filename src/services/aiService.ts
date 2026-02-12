@@ -513,7 +513,8 @@ class AIService {
 export const aiService = new AIService();
 
 // Initialize on import
-aiService.initialize().catch(console.error);
+// Initialize on import - REMOVED for performance
+// aiService.initialize().catch(console.error);
 
 // Export types
 export type { AIConfig };
