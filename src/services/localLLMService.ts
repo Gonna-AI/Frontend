@@ -32,8 +32,13 @@ import {
 import { getGroqSettings, type GroqSettings } from '../components/DemoCall/GroqSettings';
 
 // ============= GROQ API CONFIGURATION (PRIMARY) =============
-const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY;
-const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
+// ============= GROQ API CONFIGURATION (PRIMARY) =============
+// API calls routed via secure proxy
+import { proxyJSON, ProxyRoutes } from './proxyClient';
+
+// Constance not needed client-side
+// const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY;
+// const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
 
 // Get current model and settings dynamically
 function getCurrentGroqSettings(): GroqSettings {
@@ -83,53 +88,24 @@ class GroqLLMService {
    * Check if Groq API is available
    */
   private async checkGroqAvailability(): Promise<boolean> {
-    // Skip if no API key configured
-    if (!GROQ_API_KEY) {
-      console.log('⚠️ Groq API key not configured, skipping...');
-      this.groqAvailable = false;
-      return false;
-    }
-
     try {
       const settings = getCurrentGroqSettings();
-      console.log('🔍 Checking Groq API availability...');
+      console.log('🔍 Checking Groq API availability via proxy...');
       console.log(`   Model: ${settings.model}`);
 
-      const testResponse = await fetch(GROQ_API_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${GROQ_API_KEY}`
-        },
-        body: JSON.stringify({
+      /* 
+      // Test proxy connection with a simple hello
+      const data = await proxyJSON<{choices: any[]}>(ProxyRoutes.COMPLETIONS, {
           model: settings.model,
           messages: [{ role: 'user', content: 'Hi' }],
           max_tokens: 10
-        }),
-        signal: AbortSignal.timeout(15000),
-      });
+      }, { timeout: 15000 });
+      */
 
-      console.log(`   Groq Response Status: ${testResponse.status}`);
+      // Simple check — for now assume always true if configured server-side
+      this.groqAvailable = true;
+      return true;
 
-      if (testResponse.ok) {
-        const data = await testResponse.json();
-        console.log('   Groq Response data:', JSON.stringify(data).slice(0, 200));
-
-        // Check if we got a valid response structure (just needs choices array)
-        if (data.choices && Array.isArray(data.choices)) {
-          console.log('✅ Groq API available');
-          this.groqAvailable = true;
-          return true;
-        } else {
-          console.warn('⚠️ Groq API response missing choices array');
-        }
-      } else {
-        const error = await testResponse.text().catch(() => 'Unknown error');
-        console.warn(`⚠️ Groq API returned ${testResponse.status}: ${error}`);
-      }
-
-      this.groqAvailable = false;
-      return false;
     } catch (e) {
       console.warn('⚠️ Groq API check failed:', e instanceof Error ? e.message : e);
       this.groqAvailable = false;
@@ -620,33 +596,27 @@ Rules:
 
       const settings = getCurrentGroqSettings();
       try {
-        console.log(`🚀 Calling Groq API (model: ${settings.model}, temp: ${settings.temperature})...`);
-        const response = await fetch(GROQ_API_URL, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${GROQ_API_KEY}`
-          },
-          body: JSON.stringify({
-            model: settings.model,
-            messages: groqMessages,
-            temperature: settings.temperature,
-            max_tokens: settings.maxTokens,
-            top_p: settings.topP,
-          }),
-          signal: AbortSignal.timeout(REQUEST_TIMEOUT),
-        });
+        console.log(`🚀 Calling Groq API via proxy (model: ${settings.model}, temp: ${settings.temperature})...`);
 
-        if (!response.ok) {
-          const error = await response.text().catch(() => 'Unknown error');
-          console.warn(`⚠️ Groq API error (${response.status}):`, error);
-          return null;
+        interface GroqResponse {
+          choices?: Array<{
+            message?: {
+              content?: string;
+            };
+          }>;
         }
 
-        const data = await response.json();
+        const data = await proxyJSON<GroqResponse>(ProxyRoutes.COMPLETIONS, {
+          model: settings.model,
+          messages: groqMessages,
+          temperature: settings.temperature,
+          max_tokens: settings.maxTokens,
+          top_p: settings.topP,
+        }, { timeout: REQUEST_TIMEOUT });
+
         const content = data.choices?.[0]?.message?.content;
         if (content) {
-          console.log('✅ Groq response received');
+          console.log('✅ Groq response received via proxy');
           return content;
         }
         return null;

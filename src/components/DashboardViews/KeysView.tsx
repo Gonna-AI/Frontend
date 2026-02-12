@@ -86,7 +86,8 @@ export default function KeysView({ isDark = true }: { isDark?: boolean }) {
 
     const createKey = async () => {
         if (!user?.id) return;
-        const token = 'ct_live_' + Math.random().toString(36).substr(2, 8) + Math.random().toString(36).substr(2, 8) + Math.random().toString(36).substr(2, 8);
+        const randomBytes = crypto.getRandomValues(new Uint8Array(24));
+        const token = 'ct_live_' + Array.from(randomBytes).map(b => b.toString(16).padStart(2, '0')).join('');
 
         try {
             const { data, error } = await supabase

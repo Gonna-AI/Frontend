@@ -12,8 +12,12 @@
  */
 
 // Groq API Configuration
-const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY;
-const GROQ_TTS_URL = 'https://api.groq.com/openai/v1/audio/speech';
+// Groq API Configuration
+import { proxyBlob, ProxyRoutes } from './proxyClient';
+
+// Use proxy instead of direct key
+// const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY; 
+// const GROQ_TTS_URL = 'https://api.groq.com/openai/v1/audio/speech';
 const GROQ_TTS_MODEL = 'canopylabs/orpheus-v1-english'; // Orpheus TTS model
 
 // Orpheus TTS Voice options (from Groq API)
@@ -127,11 +131,14 @@ class GroqTTSService {
             window.addEventListener('keydown', this.unlockHandler);
         }
 
+        // Check if Groq TTS is available (always true via proxy if server configured)
+        /* 
         if (!GROQ_API_KEY) {
             console.warn('⚠️ Groq API key not configured for TTS');
             this.isAvailable = false;
             return false;
-        }
+        } 
+        */
 
         try {
             // Test with a minimal request to verify API access
@@ -373,11 +380,14 @@ class GroqTTSService {
         this.stop();
 
         // Check if Groq TTS is available
+        // Check if Groq TTS is available
+        /*
         if (!GROQ_API_KEY) {
             const error = new Error('Groq API key not configured');
             options?.onError?.(error);
             throw error;
         }
+        */
 
         try {
             // Chunk text if it exceeds 200 characters
@@ -518,24 +528,18 @@ class GroqTTSService {
                 console.log(`🎤 Synthesizing speech with Groq TTS (voice: ${voice}, direction: ${vocalDirection}, iOS: ${this.isIOS})`);
 
                 // Use MP3 format for better iOS Safari compatibility
-                const response = await fetch(GROQ_TTS_URL, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${GROQ_API_KEY}`,
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        model: GROQ_TTS_MODEL,
-                        input: processedText,
-                        voice: voice,
-                        response_format: 'wav', // Orpheus TTS only supports WAV format
-                        speed: speed,
-                    }),
-                    signal: abortController.signal,
-                });
+                const audioBlob = await proxyBlob(ProxyRoutes.TTS, {
+                    model: GROQ_TTS_MODEL,
+                    input: processedText,
+                    voice: voice,
+                    response_format: 'wav', // Orpheus TTS only supports WAV format
+                    speed: speed,
+                }, { signal: abortController.signal });
 
                 clearTimeout(timeoutId);
 
+                /* 
+                // Error handling is done inside proxyBlob
                 if (!response.ok) {
                     const errorData = await response.json().catch(() => ({}));
                     const errorMessage = errorData.error?.message || `HTTP ${response.status}`;
@@ -543,7 +547,8 @@ class GroqTTSService {
                 }
 
                 // Get audio blob
-                const audioBlob = await response.blob();
+                const audioBlob = await response.blob(); 
+                */
                 const audioUrl = URL.createObjectURL(audioBlob);
 
                 // On mobile, ensure audio is unlocked before creating element

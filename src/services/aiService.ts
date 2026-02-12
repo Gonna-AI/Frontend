@@ -2,7 +2,7 @@
  * AI Service Layer - Groq API
  * 
  * Uses Groq API for fast, powerful AI responses.
- * Primary model: configured via VITE_GROQ_API_KEY
+ * Primary model: configured via server-side proxy
  */
 
 import {
@@ -129,7 +129,7 @@ class AIService {
     if (this.groqAvailable) {
       console.log('✅ Groq AI service available');
     } else {
-      console.error('❌ Groq API not available. Check your VITE_GROQ_API_KEY');
+      console.error('❌ Groq API not available. Check server configuration.');
     }
   }
 
