@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Search, Menu, X, Check, Copy, ChevronRight } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import {
-    EndpointDoc, BASE_URL, chatEndpoints, callEndpoints,
+    EndpointDoc, BASE_URL, EDGE_FUNCTIONS_URL, chatEndpoints, callEndpoints,
     dashboardEndpoints, errorCodes
 } from './docsContent';
 
@@ -122,6 +122,83 @@ const SectionHeader = ({ title, description, iconColor, iconClass }: { title: st
     </div>
 );
 
+const TryItPanel = ({ ep }: { ep: EndpointDoc }) => {
+    const [apiKey, setApiKey] = useState('');
+    const [body, setBody] = useState(ep.tryItBody || '');
+    const [response, setResponse] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [statusCode, setStatusCode] = useState<number | null>(null);
+    const [isOpen, setIsOpen] = useState(false);
+
+    if (!ep.realUrl) return null;
+
+    const handleSend = async () => {
+        if (!apiKey) { setResponse('{"error": "Enter your API key above"}'); setStatusCode(401); return; }
+        setLoading(true); setResponse(''); setStatusCode(null);
+        try {
+            const method = ep.realMethod || ep.method;
+            const opts: RequestInit = {
+                method,
+                headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+            };
+            if (method === 'POST' && body) opts.body = body;
+            const res = await fetch(ep.realUrl!, opts);
+            setStatusCode(res.status);
+            const text = await res.text();
+            try { setResponse(JSON.stringify(JSON.parse(text), null, 2)); } catch { setResponse(text); }
+        } catch (err: any) {
+            setResponse(JSON.stringify({ error: 'Network error', message: err.message }, null, 2));
+            setStatusCode(0);
+        }
+        setLoading(false);
+    };
+
+    return (
+        <div className="mt-6">
+            <button onClick={() => setIsOpen(!isOpen)} className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-500/30 hover:border-purple-400/50 text-sm font-medium text-purple-300 hover:text-purple-200 transition-all group">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" /></svg>
+                {isOpen ? 'Hide' : 'Try It Live'}
+                <ChevronRight className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-90' : ''}`} />
+            </button>
+            {isOpen && (
+                <div className="mt-3 p-5 rounded-2xl bg-gradient-to-br from-white/[0.04] to-white/[0.01] border border-white/10 space-y-4">
+                    <div>
+                        <label className="text-xs text-white/50 font-medium block mb-1.5">API Key</label>
+                        <input type="password" placeholder="ct_live_..." value={apiKey} onChange={(e) => setApiKey(e.target.value)}
+                            className="w-full bg-black/60 border border-white/10 rounded-lg px-3 py-2 text-sm font-mono text-white placeholder-white/25 focus:outline-none focus:border-purple-500/50 transition-colors" />
+                    </div>
+                    {(ep.realMethod === 'POST' || ep.method === 'POST') && (
+                        <div>
+                            <label className="text-xs text-white/50 font-medium block mb-1.5">Request Body</label>
+                            <textarea value={body} onChange={(e) => setBody(e.target.value)} rows={Math.min(10, (body.split('\n').length || 3) + 1)}
+                                className="w-full bg-black/60 border border-white/10 rounded-lg px-3 py-2 text-sm font-mono text-white/80 focus:outline-none focus:border-purple-500/50 resize-y transition-colors" />
+                        </div>
+                    )}
+                    <button onClick={handleSend} disabled={loading}
+                        className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500/20 to-cyan-500/20 border border-emerald-500/30 hover:border-emerald-400/50 text-sm font-medium text-emerald-300 hover:text-emerald-200 transition-all disabled:opacity-50 disabled:cursor-not-allowed backdrop-blur-sm">
+                        {loading ? (
+                            <span className="flex items-center gap-2"><svg className="animate-spin w-4 h-4" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>Sending...</span>
+                        ) : <><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4"><path d="M3.105 2.289a.75.75 0 00-.826.95l1.414 4.925A1.5 1.5 0 005.135 9.25h6.115a.75.75 0 010 1.5H5.135a1.5 1.5 0 00-1.442 1.086l-1.414 4.926a.75.75 0 00.826.95 28.896 28.896 0 0015.293-7.154.75.75 0 000-1.115A28.897 28.897 0 003.105 2.289z" /></svg>Send Request</>}
+                    </button>
+                    {response && (
+                        <div>
+                            <div className="flex items-center gap-2 mb-2">
+                                <span className="text-xs text-white/50">Response</span>
+                                {statusCode !== null && (
+                                    <span className={`text-xs px-2 py-0.5 rounded-full font-mono font-bold ${statusCode >= 200 && statusCode < 300 ? 'bg-emerald-500/20 text-emerald-400' : statusCode >= 400 ? 'bg-red-500/20 text-red-400' : 'bg-amber-500/20 text-amber-400'}`}>
+                                        {statusCode}
+                                    </span>
+                                )}
+                            </div>
+                            <CodeBlock code={response} language="json" />
+                        </div>
+                    )}
+                </div>
+            )}
+        </div>
+    );
+};
+
 const EndpointSection = ({ ep }: { ep: EndpointDoc }) => (
     <section id={ep.id} className="scroll-mt-24 space-y-4 py-8">
         <h3 className="text-2xl font-semibold text-white">{ep.title}</h3>
@@ -134,6 +211,7 @@ const EndpointSection = ({ ep }: { ep: EndpointDoc }) => (
         <ParamTable params={ep.queryParams} title="Query Parameters" />
         {ep.requestBody && (<div className="mt-6"><h4 className="text-sm font-semibold text-white/80 mb-2">Request Example</h4><CodeBlock code={ep.requestBody} language="bash" /></div>)}
         {ep.responseBody && (<div className="mt-6"><h4 className="text-sm font-semibold text-white/80 mb-2">Response</h4><CodeBlock code={ep.responseBody} language="json" /></div>)}
+        <TryItPanel ep={ep} />
     </section>
 );
 
@@ -202,7 +280,9 @@ export default function DocsPage() {
                         </Link>
                         <div onClick={() => setIsSearchOpen(true)} className="hidden md:flex items-center gap-1 text-sm text-white/50 bg-white/5 px-3 py-1.5 rounded-full border border-white/5 hover:border-white/20 hover:text-white/80 transition-all cursor-pointer">
                             <Search className="w-4 h-4" /><span>Search documentation...</span>
-                            <kbd className="ml-2 px-1.5 py-0.5 text-xs bg-white/10 rounded text-white/60">⌘K</kbd>
+                            <div className="ml-2 pointer-events-none flex h-5 select-none items-center gap-1 rounded bg-white/10 px-1.5 font-mono text-[10px] font-medium text-white/50 opacity-100">
+                                <span className="text-xs leading-none mt-[1px]">⌘</span>K
+                            </div>
                         </div>
                     </div>
                     <div className="flex items-center gap-3 md:gap-4">
