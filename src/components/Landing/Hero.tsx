@@ -113,6 +113,10 @@ const Hero = () => {
               <img
                 src="/hero-dashboard-graphic.png"
                 alt="Hero Graphic"
+                fetchPriority="high"
+                loading="eager"
+                width="1200"
+                height="800"
                 className="w-full h-full object-contain scale-140"
                 style={{
                   filter: 'drop-shadow(0 25px 50px rgba(0,0,0,0.5))'
