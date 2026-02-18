@@ -65,6 +65,8 @@ interface TTSOptions {
     onError?: (error: Error) => void;
 }
 
+import log from '../utils/logger';
+
 class GroqTTSService {
     private config: GroqTTSConfig = {
         enabled: true,
@@ -109,7 +111,7 @@ class GroqTTSService {
             this.isMobile = this.isIOS || this.isAndroid || /mobile/.test(ua);
 
             if (this.isMobile) {
-                console.log(`📱 Mobile device detected (iOS: ${this.isIOS}, Android: ${this.isAndroid}), using mobile-specific audio handling`);
+                log.debug(`📱 Mobile device detected (iOS: ${this.isIOS}, Android: ${this.isAndroid}), using mobile-specific audio handling`);
             }
         }
 
@@ -135,16 +137,16 @@ class GroqTTSService {
 
         try {
             // Test with a minimal request to verify API access
-            console.log('🔍 Checking Groq TTS availability...');
+            log.debug('🔍 Checking Groq TTS availability...');
 
             // We'll verify by attempting a small synthesis
             // Instead of a health check, we'll just verify the API key is present
             // The actual availability will be confirmed on first use
             this.isAvailable = true;
-            console.log('✅ Groq TTS service initialized');
+            log.debug('✅ Groq TTS service initialized');
             return true;
         } catch (error) {
-            console.warn('⚠️ Groq TTS initialization failed:', error);
+            log.warn('⚠️ Groq TTS initialization failed:', error);
             this.isAvailable = false;
             return false;
         }
@@ -161,7 +163,7 @@ class GroqTTSService {
         this.isUnlocking = true;
 
         try {
-            console.log('🔊 Attempting to unlock audio (iOS-compatible)...');
+            log.debug('🔊 Attempting to unlock audio (iOS-compatible)...');
 
             // Create and resume AudioContext SYNCHRONOUSLY
             const AudioContextClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof window.AudioContext }).webkitAudioContext;
@@ -174,7 +176,7 @@ class GroqTTSService {
                 if (this.audioContext.state === 'suspended') {
                     // Don't await - just start the resume
                     this.audioContext.resume().then(() => {
-                        console.log('🔊 AudioContext resumed from suspended state');
+                        log.debug('🔊 AudioContext resumed from suspended state');
                     });
                 }
 
@@ -186,14 +188,14 @@ class GroqTTSService {
                     source.connect(this.audioContext.destination);
                     source.start(0);
                 } catch (e) {
-                    console.warn('⚠️ Could not play silent buffer:', e);
+                    log.warn('⚠️ Could not play silent buffer:', e);
                 }
             }
 
             // CRITICAL FOR iOS: Create and play audio element SYNCHRONOUSLY
             // Do NOT use await in this section - it breaks the user gesture context
             if (this.isMobile && !this.persistentMobileAudio) {
-                console.log('📱 Creating persistent mobile audio element SYNCHRONOUSLY...');
+                log.debug('📱 Creating persistent mobile audio element SYNCHRONOUSLY...');
 
                 const audio = new Audio();
                 audio.setAttribute('playsinline', 'true');
@@ -213,13 +215,13 @@ class GroqTTSService {
                 if (playPromise !== undefined) {
                     playPromise
                         .then(() => {
-                            console.log('📱 Persistent mobile audio unlocked successfully');
+                            log.debug('📱 Persistent mobile audio unlocked successfully');
                             audio.pause();
                             audio.currentTime = 0;
                             audio.volume = 1.0;
                         })
                         .catch((e) => {
-                            console.warn('⚠️ Mobile audio unlock play failed:', e);
+                            log.warn('⚠️ Mobile audio unlock play failed:', e);
                             // Still keep the element - it might work for src swap
                         });
                 }
@@ -241,18 +243,18 @@ class GroqTTSService {
                             audio.currentTime = 0;
                             audio.volume = 1.0;
                             this.unlockedAudioPool.push(audio);
-                            console.log(`🔊 Pre-unlocked desktop audio element ${i + 1}`);
+                            log.debug(`🔊 Pre-unlocked desktop audio element ${i + 1}`);
                         })
                         .catch((e) => {
-                            console.warn(`⚠️ Failed to pre-unlock desktop audio ${i + 1}:`, e);
+                            log.warn(`⚠️ Failed to pre-unlock desktop audio ${i + 1}:`, e);
                         });
                 }
             }
 
             this.audioUnlocked = true;
-            console.log('🔊 Audio unlock initiated');
+            log.debug('🔊 Audio unlock initiated');
         } catch (e) {
-            console.warn('⚠️ Could not unlock audio:', e);
+            log.warn('⚠️ Could not unlock audio:', e);
         } finally {
             this.isUnlocking = false;
         }
@@ -268,7 +270,7 @@ class GroqTTSService {
         // and new elements lose that unlock state
         if (this.isMobile) {
             if (this.persistentMobileAudio) {
-                console.log('📱 Reusing persistent mobile audio element (maintains unlock state)');
+                log.debug('📱 Reusing persistent mobile audio element (maintains unlock state)');
                 // Reset the element for new playback
                 this.persistentMobileAudio.pause();
                 this.persistentMobileAudio.currentTime = 0;
@@ -278,12 +280,12 @@ class GroqTTSService {
             // Fallback: try to get from pool
             const pooled = this.unlockedAudioPool.pop();
             if (pooled) {
-                console.log('📱 Using pooled audio element for mobile');
+                log.debug('📱 Using pooled audio element for mobile');
                 this.persistentMobileAudio = pooled; // Save for reuse
                 return pooled;
             }
             // Last resort: create new element (may not play on some mobile browsers)
-            console.warn('⚠️ Creating fresh audio element for mobile - may not play without user gesture');
+            log.warn('⚠️ Creating fresh audio element for mobile - may not play without user gesture');
             const audio = new Audio();
             audio.setAttribute('playsinline', 'true');
             audio.setAttribute('webkit-playsinline', 'true');
@@ -298,7 +300,7 @@ class GroqTTSService {
         // On desktop, try to get a pre-unlocked element from the pool
         const pooledAudio = this.unlockedAudioPool.pop();
         if (pooledAudio) {
-            console.log('🔊 Using pre-unlocked audio element from pool');
+            log.debug('🔊 Using pre-unlocked audio element from pool');
             return pooledAudio;
         }
 
@@ -391,7 +393,7 @@ class GroqTTSService {
                 await this.synthesizeAndPlay(chunks[0], voice, speed, vocalDirection, options);
             } else {
                 // Multiple chunks - play sequentially
-                console.log(`📝 Text chunked into ${chunks.length} parts for TTS`);
+                log.debug(`📝 Text chunked into ${chunks.length} parts for TTS`);
                 let isFirstChunk = true;
 
                 for (let i = 0; i < chunks.length; i++) {
@@ -408,7 +410,7 @@ class GroqTTSService {
                 }
             }
         } catch (error) {
-            console.error('Groq TTS error:', error);
+            log.error('Groq TTS error:', error);
             options?.onError?.(error as Error);
             throw error;
         }
@@ -508,7 +510,7 @@ class GroqTTSService {
             try {
                 // Ensure AudioContext is resumed (important for iOS)
                 if (this.audioContext && this.audioContext.state === 'suspended') {
-                    console.log('🔊 Resuming suspended AudioContext before playback...');
+                    log.debug('🔊 Resuming suspended AudioContext before playback...');
                     await this.audioContext.resume();
                 }
 
@@ -518,7 +520,7 @@ class GroqTTSService {
                 const formattedText = this.formatTextForTTS(text);
                 const processedText = directionPrefix ? `${directionPrefix} ${formattedText}` : formattedText;
 
-                console.log(`🎤 Synthesizing speech with Groq TTS (voice: ${voice}, direction: ${vocalDirection}, iOS: ${this.isIOS})`);
+                log.debug(`🎤 Synthesizing speech with Groq TTS (voice: ${voice}, direction: ${vocalDirection}, iOS: ${this.isIOS})`);
 
                 // Use MP3 format for better iOS Safari compatibility
                 const audioBlob = await proxyBlob(ProxyRoutes.TTS, {
@@ -546,7 +548,7 @@ class GroqTTSService {
 
                 // On mobile, ensure audio is unlocked before creating element
                 if (this.isMobile && !this.audioUnlocked) {
-                    console.log('📱 Mobile detected - ensuring audio is unlocked...');
+                    log.debug('📱 Mobile detected - ensuring audio is unlocked...');
                     await this.unlockAudio();
                 }
 
@@ -557,24 +559,24 @@ class GroqTTSService {
 
                 // Set up event handlers before loading
                 this.currentAudio.onloadeddata = () => {
-                    console.log('🔊 Audio loaded and ready to play');
+                    log.debug('🔊 Audio loaded and ready to play');
                 };
 
                 this.currentAudio.oncanplay = () => {
-                    console.log('🔊 Audio can play');
+                    log.debug('🔊 Audio can play');
                 };
 
                 this.currentAudio.oncanplaythrough = () => {
-                    console.log('🔊 Audio can play through');
+                    log.debug('🔊 Audio can play through');
                 };
 
                 this.currentAudio.onplay = () => {
-                    console.log('✅ Audio playback started');
+                    log.debug('✅ Audio playback started');
                     options?.onStart?.();
                 };
 
                 this.currentAudio.onended = () => {
-                    console.log('✅ Audio playback complete');
+                    log.debug('✅ Audio playback complete');
                     URL.revokeObjectURL(audioUrl);
                     this.currentAudio = null;
                     options?.onEnd?.();
@@ -582,7 +584,7 @@ class GroqTTSService {
                 };
 
                 this.currentAudio.onerror = (e) => {
-                    console.error('❌ Audio playback error:', e);
+                    log.error('❌ Audio playback error:', e);
                     URL.revokeObjectURL(audioUrl);
                     this.currentAudio = null;
                     const error = new Error('Audio playback failed');
@@ -594,7 +596,7 @@ class GroqTTSService {
                 try {
                     // For iOS, try Web Audio API FIRST - it's more reliable than HTMLAudioElement
                     if (this.isIOS && this.audioContext) {
-                        console.log('📱 iOS: Using Web Audio API for playback (more reliable)...');
+                        log.debug('📱 iOS: Using Web Audio API for playback (more reliable)...');
 
                         try {
                             // Ensure context is resumed
@@ -608,7 +610,7 @@ class GroqTTSService {
                             // Decode the audio data
                             const audioBuffer = await this.audioContext.decodeAudioData(arrayBuffer);
 
-                            console.log('🔊 Audio decoded successfully, playing...');
+                            log.debug('🔊 Audio decoded successfully, playing...');
 
                             // Create buffer source and play
                             const source = this.audioContext.createBufferSource();
@@ -616,7 +618,7 @@ class GroqTTSService {
                             source.connect(this.audioContext.destination);
 
                             source.onended = () => {
-                                console.log('✅ iOS Web Audio playback complete');
+                                log.debug('✅ iOS Web Audio playback complete');
                                 URL.revokeObjectURL(audioUrl);
                                 this.currentAudio = null;
                                 options?.onEnd?.();
@@ -626,17 +628,17 @@ class GroqTTSService {
                             options?.onStart?.();
                             source.start(0);
 
-                            console.log('✅ iOS Web Audio playback started');
+                            log.debug('✅ iOS Web Audio playback started');
                             return; // Success with Web Audio, exit early
                         } catch (webAudioError) {
-                            console.warn('⚠️ iOS Web Audio failed, falling back to HTMLAudioElement:', webAudioError);
+                            log.warn('⚠️ iOS Web Audio failed, falling back to HTMLAudioElement:', webAudioError);
                             // Fall through to HTMLAudioElement attempt
                         }
                     }
 
                     // For Android mobile or as iOS fallback
                     if (this.isMobile) {
-                        console.log('📱 Mobile: Setting src and playing with HTMLAudioElement...');
+                        log.debug('📱 Mobile: Setting src and playing with HTMLAudioElement...');
                         // Set src (this triggers loading)
                         this.currentAudio.src = audioUrl;
 
@@ -647,32 +649,32 @@ class GroqTTSService {
                         const playPromise = this.currentAudio.play();
                         if (playPromise !== undefined) {
                             await playPromise;
-                            console.log('✅ Mobile audio play() promise resolved');
+                            log.debug('✅ Mobile audio play() promise resolved');
                         } else {
-                            console.log('✅ Mobile audio play() called (no promise)');
+                            log.debug('✅ Mobile audio play() called (no promise)');
                         }
                     } else {
                         // Desktop: load first, then play
                         await this.currentAudio.load();
-                        console.log('🔊 Desktop: Audio loaded, calling play()...');
+                        log.debug('🔊 Desktop: Audio loaded, calling play()...');
 
                         const playPromise = this.currentAudio.play();
                         if (playPromise !== undefined) {
                             await playPromise;
-                            console.log('✅ Desktop audio play() promise resolved');
+                            log.debug('✅ Desktop audio play() promise resolved');
                             options?.onStart?.();
                         } else {
-                            console.log('✅ Desktop audio play() called (no promise)');
+                            log.debug('✅ Desktop audio play() called (no promise)');
                             options?.onStart?.();
                         }
                     }
                 } catch (playError) {
-                    console.error('❌ Audio play() failed:', playError);
+                    log.error('❌ Audio play() failed:', playError);
 
                     // On NotAllowedError, try Web Audio API fallback
                     // Web Audio API is more permissive once AudioContext is resumed
                     if (playError instanceof Error && playError.name === 'NotAllowedError') {
-                        console.warn('⚠️ HTMLAudioElement blocked - trying Web Audio API fallback...');
+                        log.warn('⚠️ HTMLAudioElement blocked - trying Web Audio API fallback...');
 
                         try {
                             // Use Web Audio API instead of HTMLAudioElement
@@ -682,7 +684,7 @@ class GroqTTSService {
                                     await this.audioContext.resume();
                                 }
 
-                                console.log('🔊 Decoding audio with Web Audio API...');
+                                log.debug('🔊 Decoding audio with Web Audio API...');
 
                                 // Get the audio data as ArrayBuffer
                                 const arrayBuffer = await audioBlob.arrayBuffer();
@@ -690,7 +692,7 @@ class GroqTTSService {
                                 // Decode the audio data
                                 const audioBuffer = await this.audioContext.decodeAudioData(arrayBuffer);
 
-                                console.log('🔊 Audio decoded, playing via Web Audio API...');
+                                log.debug('🔊 Audio decoded, playing via Web Audio API...');
 
                                 // Create buffer source and play
                                 const source = this.audioContext.createBufferSource();
@@ -698,7 +700,7 @@ class GroqTTSService {
                                 source.connect(this.audioContext.destination);
 
                                 source.onended = () => {
-                                    console.log('✅ Web Audio API playback complete');
+                                    log.debug('✅ Web Audio API playback complete');
                                     URL.revokeObjectURL(audioUrl);
                                     options?.onEnd?.();
                                     resolve();
@@ -707,11 +709,11 @@ class GroqTTSService {
                                 options?.onStart?.();
                                 source.start(0);
 
-                                console.log('✅ Web Audio API playback started');
+                                log.debug('✅ Web Audio API playback started');
                                 return; // Success, exit early
                             }
                         } catch (webAudioError) {
-                            console.error('❌ Web Audio API fallback also failed:', webAudioError);
+                            log.error('❌ Web Audio API fallback also failed:', webAudioError);
                         }
                     }
 

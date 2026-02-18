@@ -23,6 +23,8 @@ interface ElevenLabsTTSOptions {
     onError?: (error: Error) => void;
 }
 
+import log from '../utils/logger';
+
 class ElevenLabsTTSService {
     private audioContext: AudioContext | null = null;
     private isIOS: boolean = false;
@@ -114,8 +116,8 @@ class ElevenLabsTTSService {
         const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
 
         try {
-            console.log('🇩🇪 Synthesizing German speech with ElevenLabs TTS...');
-            console.log('   Text length:', formattedText.length, 'chars');
+            log.debug('🇩🇪 Synthesizing German speech with ElevenLabs TTS...');
+            log.debug('   Text length:', formattedText.length, 'chars');
 
             // Use streaming endpoint with latency optimization
             // optimize_streaming_latency: 3 = max latency optimization
@@ -153,11 +155,11 @@ class ElevenLabsTTSService {
             }
             */
 
-            console.log('🇩🇪 ElevenLabs response received, processing audio...');
+            log.debug('🇩🇪 ElevenLabs response received, processing audio...');
 
             // Audio blob is already returned by proxyBlob
             // const audioBlob = await response.blob(); 
-            console.log('🇩🇪 Audio blob size:', audioBlob.size, 'bytes');
+            log.debug('🇩🇪 Audio blob size:', audioBlob.size, 'bytes');
 
             // Use Web Audio API for playback (more reliable on mobile)
             await this.playWithWebAudio(audioBlob, options);
@@ -165,10 +167,10 @@ class ElevenLabsTTSService {
         } catch (error) {
             clearTimeout(timeoutId);
             if ((error as Error).name === 'AbortError') {
-                console.error('ElevenLabs TTS timeout after 30 seconds');
+                log.error('ElevenLabs TTS timeout after 30 seconds');
                 options?.onError?.(new Error('ElevenLabs TTS request timed out'));
             } else {
-                console.error('ElevenLabs TTS error:', error);
+                log.error('ElevenLabs TTS error:', error);
                 options?.onError?.(error as Error);
             }
             throw error;
@@ -190,7 +192,7 @@ class ElevenLabsTTSService {
         const arrayBuffer = await audioBlob.arrayBuffer();
         const audioBuffer = await this.audioContext.decodeAudioData(arrayBuffer);
 
-        console.log('🔊 ElevenLabs audio decoded, playing...');
+        log.debug('🔊 ElevenLabs audio decoded, playing...');
 
         return new Promise((resolve, reject) => {
             if (!this.audioContext) {
@@ -203,7 +205,7 @@ class ElevenLabsTTSService {
             source.connect(this.audioContext.destination);
 
             source.onended = () => {
-                console.log('✅ ElevenLabs playback complete');
+                log.debug('✅ ElevenLabs playback complete');
                 options?.onEnd?.();
                 resolve();
             };
@@ -211,7 +213,7 @@ class ElevenLabsTTSService {
             options?.onStart?.();
             source.start(0);
 
-            console.log('✅ ElevenLabs playback started');
+            log.debug('✅ ElevenLabs playback started');
         });
     }
 }
