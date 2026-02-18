@@ -788,7 +788,7 @@ class GroqTTSService {
      * Check if Groq TTS is available
      */
     isGroqTTSAvailable(): boolean {
-        return this.isAvailable === true && !!GROQ_API_KEY;
+        return this.isAvailable === true;
     }
 
     /**

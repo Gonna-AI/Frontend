@@ -69,6 +69,8 @@ export default function UnifiedChatInterface({ isDark = true, externalCallUI = f
     const inputRef = useRef<HTMLInputElement>(null);
     const recognitionRef = useRef<SpeechRecognitionInstance | null>(null);
     const pendingMessageRef = useRef<string | null>(null);
+    const lastSendTimeRef = useRef<number>(0);
+    const SEND_COOLDOWN_MS = 1500; // Minimum 1.5s between sends
 
     const messages = currentCall?.messages || [];
     const extractedFields = currentCall?.extractedFields || [];
@@ -178,6 +180,14 @@ export default function UnifiedChatInterface({ isDark = true, externalCallUI = f
 
     const handleSendMessage = useCallback(async (text: string, fromVoice = false) => {
         if (!text.trim() || isProcessing) return;
+
+        // Debounce: prevent rapid-fire sends within cooldown window
+        const now = Date.now();
+        if (now - lastSendTimeRef.current < SEND_COOLDOWN_MS) {
+            console.warn('⚡ Send throttled — too fast, please wait');
+            return;
+        }
+        lastSendTimeRef.current = now;
 
         // Start call if not active - store message as pending
         if (!isActive) {

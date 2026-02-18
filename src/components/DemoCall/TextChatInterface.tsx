@@ -32,6 +32,8 @@ export default function TextChatInterface({
   const [expandedReasonings, setExpandedReasonings] = useState<Set<number>>(new Set());
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const lastSendTimeRef = useRef<number>(0);
+  const SEND_COOLDOWN_MS = 1500; // Minimum 1.5s between sends
 
   const messages = currentCall?.messages || [];
   const extractedFields = currentCall?.extractedFields || [];
@@ -72,6 +74,14 @@ export default function TextChatInterface({
   // Handle user input and get AI response
   const handleSendMessage = useCallback(async (text: string) => {
     if (!text.trim() || isProcessing) return;
+
+    // Debounce: prevent rapid-fire sends within cooldown window
+    const now = Date.now();
+    if (now - lastSendTimeRef.current < SEND_COOLDOWN_MS) {
+      console.warn('⚡ Send throttled — too fast, please wait');
+      return;
+    }
+    lastSendTimeRef.current = now;
 
     // Add user message
     addMessage('user', text);

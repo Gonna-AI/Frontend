@@ -782,15 +782,32 @@ export function DemoCallProvider({ children, initialAgentId }: { children: React
     return () => clearInterval(heartbeatInterval);
   }, [currentCall?.id, currentCall?.status]);
 
+  // Cache the session token for use in beforeunload (async APIs don't work there)
+  const [cachedToken, setCachedToken] = useState<string | null>(null);
+  useEffect(() => {
+    const updateToken = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        setCachedToken(session?.access_token || null);
+      } catch {
+        // Silent fail
+      }
+    };
+    updateToken();
+    const interval = setInterval(updateToken, 60000); // Refresh every 60s
+    return () => clearInterval(interval);
+  }, []);
+
   // Cleanup session when tab/window closes
   useEffect(() => {
     const handleBeforeUnload = () => {
       if (currentCall?.status === 'active') {
         // Use sendBeacon for reliable delivery during page unload
         const url = `${import.meta.env.VITE_SUPABASE_URL}/rest/v1/active_sessions?id=eq.${currentCall.id}`;
+        const token = cachedToken || import.meta.env.VITE_SUPABASE_ANON_KEY || '';
         const headers = {
           'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY || '',
-          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY || ''}`,
+          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         };
 
@@ -805,7 +822,6 @@ export function DemoCallProvider({ children, initialAgentId }: { children: React
             headers,
             keepalive: true, // Allows request to outlive the page
           });
-          console.log('🚪 Session cleanup initiated on page unload');
         } catch (e) {
           // Silent fail - cleanup will happen via stale session cleanup
         }
@@ -814,7 +830,7 @@ export function DemoCallProvider({ children, initialAgentId }: { children: React
 
     window.addEventListener('beforeunload', handleBeforeUnload);
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
-  }, [currentCall?.id, currentCall?.status]);
+  }, [currentCall?.id, currentCall?.status, cachedToken]);
 
   // Helper to find caller name from various sources
   const findCallerName = (call: CallSession): string => {

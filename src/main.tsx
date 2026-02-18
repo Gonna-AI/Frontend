@@ -14,7 +14,7 @@ Sentry.init({
     Sentry.replayIntegration(),
   ],
   // Tracing
-  tracesSampleRate: 1.0, //  Capture 100% of the transactions (adjust for production)
+  tracesSampleRate: 0.1, // Capture 10% of transactions in production
   // Session Replay - DISABLED due to high overhead with SVG animations
   replaysSessionSampleRate: 0.0,
   replaysOnErrorSampleRate: 0.0,

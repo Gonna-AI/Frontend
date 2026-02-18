@@ -3,9 +3,9 @@
   X-Frame-Options: SAMEORIGIN
   X-Content-Type-Options: nosniff
   X-XSS-Protection: 1; mode=block
-  Permissions-Policy: accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()
+  Permissions-Policy: accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(self), payment=(), usb=()
   Referrer-Policy: strict-origin-when-cross-origin
-  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://app.termly.io; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https:; media-src 'self' data: blob: https:; connect-src 'self' https://xlzwfkgurrrspcdyqele.supabase.co wss://xlzwfkgurrrspcdyqele.supabase.co https://clerk-tts-production.up.railway.app wss://clerk-tts-production.up.railway.app https://ai.clerktree.com https://tts.clerktree.com https://app.termly.io https://api.groq.com https://backend-sq0u.onrender.com https://api.elevenlabs.io;
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://app.termly.io https://www.googletagmanager.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https:; media-src 'self' data: blob: https:; connect-src 'self' https://xlzwfkgurrrspcdyqele.supabase.co wss://xlzwfkgurrrspcdyqele.supabase.co https://clerk-tts-production.up.railway.app wss://clerk-tts-production.up.railway.app https://ai.clerktree.com https://tts.clerktree.com https://app.termly.io https://api.groq.com https://backend-sq0u.onrender.com https://api.elevenlabs.io https://www.google-analytics.com;
 
 /assets/*
   Cache-Control: public, max-age=31536000, immutable

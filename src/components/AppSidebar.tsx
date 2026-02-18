@@ -549,6 +549,23 @@ function AuthUserSection({ isDark, state }: { isDark: boolean; state: string }) 
         setShowConfirm(false);
         setIsSigningOut(true);
         try {
+            // Clear sensitive localStorage data before signing out
+            // These may contain PII (call transcripts, caller names, knowledge base configs)
+            const keysToRemove = [];
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && (
+                    key.includes('call_history') ||
+                    key.includes('knowledge_base') ||
+                    key.includes('active_call') ||
+                    key.includes('groq_settings') ||
+                    key.includes('clerktree')
+                )) {
+                    keysToRemove.push(key);
+                }
+            }
+            keysToRemove.forEach(key => localStorage.removeItem(key));
+
             await signOut();
             // Brief delay so the user sees the signing-out state
             await new Promise(resolve => setTimeout(resolve, 800));
