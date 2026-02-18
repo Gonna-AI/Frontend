@@ -736,22 +736,23 @@ export function DemoCallProvider({ children, initialAgentId }: { children: React
     // Persist active call locally
     localStorage.setItem(ACTIVE_CALL_KEY, JSON.stringify(newCall));
 
-    // Also register in Supabase for global visibility
+    // Also register via edge function for global visibility
     try {
-      const { error } = await supabase.from('active_sessions').upsert({
-        id: newCall.id,
-        session_type: type,
-        started_at: newCall.startTime.toISOString(),
-        status: 'active',
-        last_activity: new Date().toISOString(),
-        message_count: 0,
-        user_id: user?.id || null
+      const { data: { session: authSession } } = await supabase.auth.getSession();
+      await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/api-sessions`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${authSession?.access_token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          action: 'start',
+          id: newCall.id,
+          session_type: type,
+          started_at: newCall.startTime.toISOString()
+        })
       });
-      if (error) {
-        console.error('📡 Failed to register session:', error.message);
-      } else {
-        console.log('📡 Session registered for global sync:', newCall.id);
-      }
+      console.log('📡 Session registered for global sync:', newCall.id);
     } catch (e) {
       console.error('📡 Session registration error:', e);
     }
@@ -763,10 +764,18 @@ export function DemoCallProvider({ children, initialAgentId }: { children: React
 
     const updateHeartbeat = async () => {
       try {
-        await supabase
-          .from('active_sessions')
-          .update({ last_activity: new Date().toISOString() })
-          .eq('id', currentCall.id);
+        const { data: { session: authSession } } = await supabase.auth.getSession();
+        await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/api-sessions`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${authSession?.access_token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            action: 'heartbeat',
+            id: currentCall.id
+          })
+        });
         console.log('💓 Session heartbeat updated:', currentCall.id);
       } catch (e) {
         // Silently fail - not critical
@@ -802,25 +811,24 @@ export function DemoCallProvider({ children, initialAgentId }: { children: React
   useEffect(() => {
     const handleBeforeUnload = () => {
       if (currentCall?.status === 'active') {
-        // Use sendBeacon for reliable delivery during page unload
-        const url = `${import.meta.env.VITE_SUPABASE_URL}/rest/v1/active_sessions?id=eq.${currentCall.id}`;
-        const token = cachedToken || import.meta.env.VITE_SUPABASE_ANON_KEY || '';
-        const headers = {
-          'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY || '',
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        };
+        const token = cachedToken || '';
 
-        // sendBeacon doesn't support custom headers directly, so we fall back to sync fetch
         try {
           // Mark as ended first via localStorage so other tabs can see
           localStorage.removeItem(ACTIVE_CALL_KEY);
 
-          // Attempt delete - this may or may not complete
-          fetch(url, {
-            method: 'DELETE',
-            headers,
-            keepalive: true, // Allows request to outlive the page
+          // Attempt cleanup via edge function
+          fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/api-sessions`, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              action: 'end',
+              id: currentCall.id
+            }),
+            keepalive: true,
           });
         } catch (e) {
           // Silent fail - cleanup will happen via stale session cleanup
@@ -916,9 +924,20 @@ export function DemoCallProvider({ children, initialAgentId }: { children: React
       setCurrentCall(null);
       localStorage.removeItem(ACTIVE_CALL_KEY);
 
-      // Also remove from Supabase active_sessions
+      // Also remove from active_sessions via edge function
       try {
-        await supabase.from('active_sessions').delete().eq('id', endedCall.id);
+        const { data: { session: authSession } } = await supabase.auth.getSession();
+        await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/api-sessions`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${authSession?.access_token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            action: 'end',
+            id: endedCall.id
+          })
+        });
         console.log('📡 Session removed from global sync:', endedCall.id);
       } catch (e) {
         // Silently fail - table might not exist
@@ -982,8 +1001,16 @@ export function DemoCallProvider({ children, initialAgentId }: { children: React
               user_id: user?.id,
               agent_id: agentId || user?.id || null
             };
-            await supabase.from('call_history').insert(initialPayload);
-            console.log('📡 Call synced to Supabase for real-time updates');
+            const { data: { session: authSession } } = await supabase.auth.getSession();
+            await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/api-history`, {
+              method: 'POST',
+              headers: {
+                'Authorization': `Bearer ${authSession?.access_token}`,
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({ action: 'create', ...initialPayload })
+            });
+            console.log('📡 Call synced via edge function for real-time updates');
           } catch (syncError) {
             console.warn('Initial sync to Supabase failed:', syncError);
           }
@@ -1072,18 +1099,27 @@ export function DemoCallProvider({ children, initialAgentId }: { children: React
               user_id: user?.id
             };
 
-            console.log('💾 Saving final call history to Supabase:', { id: finalHistoryItem.id, type: finalHistoryItem.type });
+            console.log('💾 Saving final call history via edge function:', { id: finalHistoryItem.id, type: finalHistoryItem.type });
 
-            // Use upsert to UPDATE the existing record with the final summary
-            const { error } = await supabase.from('call_history').upsert({
-              ...basePayload,
-              type: finalHistoryItem.type
+            const { data: { session: authSession } } = await supabase.auth.getSession();
+            const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/api-history`, {
+              method: 'POST',
+              headers: {
+                'Authorization': `Bearer ${authSession?.access_token}`,
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                action: 'upsert',
+                ...basePayload,
+                type: finalHistoryItem.type
+              })
             });
 
-            if (error) {
-              console.error('Error updating call with summary:', error);
+            if (!res.ok) {
+              const errData = await res.json().catch(() => ({}));
+              console.error('Error updating call with summary:', errData);
             } else {
-              console.log('📡 Call updated with summary in Supabase');
+              console.log('📡 Call updated with summary via edge function');
             }
           } catch (error) {
             console.error('Error saving call to Supabase:', error);

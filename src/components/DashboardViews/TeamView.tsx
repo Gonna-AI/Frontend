@@ -25,19 +25,26 @@ export default function TeamView({ isDark = true }: { isDark?: boolean }) {
     const [members, setMembers] = useState<TeamMember[]>([]);
     const [isLoadingMembers, setIsLoadingMembers] = useState(true);
 
-    // Load team members from Supabase
+    const getAuthHeaders = async () => {
+        const { data: { session } } = await supabase.auth.getSession();
+        return {
+            'Authorization': `Bearer ${session?.access_token}`,
+            'Content-Type': 'application/json'
+        };
+    };
+
+    const apiBase = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/api-team`;
+
+    // Load team members via edge function
     const loadMembers = useCallback(async () => {
         if (!user?.id) return;
         setIsLoadingMembers(true);
         try {
-            const { data, error } = await supabase
-                .from('team_members')
-                .select('*')
-                .eq('owner_id', user.id)
-                .order('invited_at', { ascending: false });
-
-            if (!error && data) {
-                setMembers(data.map(m => ({
+            const headers = await getAuthHeaders();
+            const res = await fetch(apiBase, { headers });
+            const result = await res.json();
+            if (res.ok && result.members) {
+                setMembers(result.members.map((m: any) => ({
                     id: m.id,
                     email: m.email,
                     role: m.role,
@@ -74,18 +81,16 @@ export default function TeamView({ isDark = true }: { isDark?: boolean }) {
         setIsInviting(true);
 
         try {
-            const { data, error } = await supabase
-                .from('team_members')
-                .insert({
-                    owner_id: user.id,
-                    email,
-                    role,
-                    status: 'pending'
-                })
-                .select()
-                .single();
+            const headers = await getAuthHeaders();
+            const res = await fetch(apiBase, {
+                method: 'POST',
+                headers,
+                body: JSON.stringify({ email, role })
+            });
+            const result = await res.json();
 
-            if (!error && data) {
+            if (res.ok && result.member) {
+                const data = result.member;
                 const newMember: TeamMember = {
                     id: data.id,
                     email: data.email,
@@ -98,7 +103,7 @@ export default function TeamView({ isDark = true }: { isDark?: boolean }) {
                 setEmail('');
                 setTimeout(() => setInviteSuccess(false), 3000);
             } else {
-                console.error('Failed to invite member:', error);
+                console.error('Failed to invite member:', result.error);
             }
         } catch (err) {
             console.error('Failed to invite member:', err);
@@ -110,13 +115,13 @@ export default function TeamView({ isDark = true }: { isDark?: boolean }) {
     const handleRemoveMember = async (id: string) => {
         if (confirm('Are you sure you want to remove this member?')) {
             try {
-                const { error } = await supabase
-                    .from('team_members')
-                    .delete()
-                    .eq('id', id)
-                    .eq('owner_id', user?.id);
+                const headers = await getAuthHeaders();
+                const res = await fetch(`${apiBase}?id=${id}`, {
+                    method: 'DELETE',
+                    headers
+                });
 
-                if (!error) {
+                if (res.ok) {
                     setMembers(members.filter(m => m.id !== id));
                 }
             } catch (err) {

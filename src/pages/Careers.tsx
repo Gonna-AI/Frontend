@@ -4,7 +4,7 @@ import { ExternalLink, Upload, CheckCircle2 } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import LanguageSwitcher from '../components/Layout/LanguageSwitcher';
 import Footer from '../components/Landing/Footer';
-import { supabase } from '../config/supabase';
+
 
 export default function Careers() {
   const navigate = useNavigate();
@@ -42,47 +42,28 @@ export default function Careers() {
     setIsSubmitting(true);
 
     try {
-      let resumeUrl = '';
+      const body = new FormData();
+      body.append('fullName', formData.fullName);
+      body.append('email', formData.email);
+      body.append('phone', formData.phone);
+      body.append('linkedinProfile', formData.linkedinProfile);
+      body.append('currentPosition', formData.currentPosition);
+      body.append('yearsOfExperience', formData.yearsOfExperience);
+      body.append('positionApplyingFor', formData.positionApplyingFor);
+      body.append('coverLetter', formData.coverLetter);
+      body.append('portfolioWebsite', formData.portfolioWebsite);
+      if (formData.resume) body.append('resume', formData.resume);
 
-      if (formData.resume) {
-        const fileExt = formData.resume.name.split('.').pop();
-        const fileName = `${Math.random().toString(36).substring(2)}_${Date.now()}.${fileExt}`;
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/api-careers`,
+        { method: 'POST', body }
+      );
 
-        const { error: uploadError } = await supabase.storage
-          .from('resumes')
-          .upload(fileName, formData.resume);
-
-        if (uploadError) throw uploadError;
-
-        const { data: { publicUrl } } = supabase.storage
-          .from('resumes')
-          .getPublicUrl(fileName);
-
-        resumeUrl = publicUrl;
-      }
-
-      const { error: insertError } = await supabase
-        .from('career_applications')
-        .insert([
-          {
-            full_name: formData.fullName,
-            email: formData.email,
-            phone: formData.phone,
-            linkedin_profile: formData.linkedinProfile,
-            current_position: formData.currentPosition,
-            years_of_experience: formData.yearsOfExperience,
-            position_applying_for: formData.positionApplyingFor,
-            cover_letter: formData.coverLetter,
-            portfolio_website: formData.portfolioWebsite,
-            resume_url: resumeUrl,
-          }
-        ]);
-
-      if (insertError) throw insertError;
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || 'Submission failed');
 
       setSubmitted(true);
 
-      // Reset form after 3 seconds
       setTimeout(() => {
         setSubmitted(false);
         setFormData({

@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Phone, MapPin, CheckCircle2, Send, Mail } from 'lucide-react';
-import { supabase } from '../config/supabase';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
 import LanguageSwitcher from '../components/Layout/LanguageSwitcher';
@@ -27,27 +26,17 @@ const Contact = () => {
     setIsSubmitting(true);
 
     try {
-      console.log('Starting Supabase submission...', formData);
-      const { error } = await supabase
-        .from('contacts')
-        .insert([
-          {
-            full_name: formData.fullName,
-            company_name: formData.companyName,
-            email: formData.email,
-            phone: formData.phone,
-            interest: formData.interest,
-            employee_count: formData.employeeCount,
-            message: formData.message,
-          }
-        ]);
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/api-contacts`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(formData),
+        }
+      );
 
-      if (error) {
-        console.error('Supabase error:', error);
-        throw error;
-      }
-
-      console.log('Supabase submission successful!');
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || 'Submission failed');
 
       setSubmitStatus('success');
       setFormData({

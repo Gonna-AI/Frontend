@@ -50,19 +50,27 @@ export default function KeysView({ isDark = true }: { isDark?: boolean }) {
         resetForm();
     };
 
-    // Load keys from Supabase on mount
+    const getAuthHeaders = async () => {
+        const { data: { session } } = await supabase.auth.getSession();
+        return {
+            'Authorization': `Bearer ${session?.access_token}`,
+            'Content-Type': 'application/json'
+        };
+    };
+
+    const apiBase = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/api-keys`;
+
+    // Load keys via edge function
     const loadKeys = useCallback(async () => {
         if (!user?.id) return;
         setIsLoadingKeys(true);
         try {
-            const { data, error } = await supabase
-                .from('user_api_keys')
-                .select('*')
-                .eq('user_id', user.id)
-                .order('created_at', { ascending: false });
+            const headers = await getAuthHeaders();
+            const res = await fetch(apiBase, { headers });
+            const result = await res.json();
 
-            if (!error && data) {
-                setKeys(data.map(k => ({
+            if (res.ok && result.keys) {
+                setKeys(result.keys.map((k: any) => ({
                     id: k.id,
                     name: k.name,
                     token: k.token,
@@ -86,24 +94,22 @@ export default function KeysView({ isDark = true }: { isDark?: boolean }) {
 
     const createKey = async () => {
         if (!user?.id) return;
-        const randomBytes = crypto.getRandomValues(new Uint8Array(24));
-        const token = 'ct_live_' + Array.from(randomBytes).map(b => b.toString(16).padStart(2, '0')).join('');
 
         try {
-            const { data, error } = await supabase
-                .from('user_api_keys')
-                .insert({
-                    user_id: user.id,
+            const headers = await getAuthHeaders();
+            const res = await fetch(apiBase, {
+                method: 'POST',
+                headers,
+                body: JSON.stringify({
                     name: newKeyName,
-                    token: token,
                     permissions: newKeyPermissions,
-                    rate_limit: newKeyRateLimit,
-                    status: 'active'
+                    rate_limit: newKeyRateLimit
                 })
-                .select()
-                .single();
+            });
+            const result = await res.json();
 
-            if (!error && data) {
+            if (res.ok && result.key) {
+                const data = result.key;
                 const newKey: ApiKey = {
                     id: data.id,
                     name: data.name,
@@ -115,10 +121,10 @@ export default function KeysView({ isDark = true }: { isDark?: boolean }) {
                     rateLimit: data.rate_limit
                 };
                 setKeys([newKey, ...keys]);
-                setCreatedKeyToken(token);
+                setCreatedKeyToken(data.token);
                 setWizardStep('created');
             } else {
-                console.error('Failed to create API key:', error);
+                console.error('Failed to create API key:', result.error);
             }
         } catch (err) {
             console.error('Failed to create API key:', err);
@@ -128,13 +134,13 @@ export default function KeysView({ isDark = true }: { isDark?: boolean }) {
     const deleteKey = async (id: string) => {
         if (confirm('Are you sure you want to revoke this API key? This action cannot be undone.')) {
             try {
-                const { error } = await supabase
-                    .from('user_api_keys')
-                    .delete()
-                    .eq('id', id)
-                    .eq('user_id', user?.id);
+                const headers = await getAuthHeaders();
+                const res = await fetch(`${apiBase}?id=${id}`, {
+                    method: 'DELETE',
+                    headers
+                });
 
-                if (!error) {
+                if (res.ok) {
                     setKeys(keys.filter(k => k.id !== id));
                 }
             } catch (err) {
