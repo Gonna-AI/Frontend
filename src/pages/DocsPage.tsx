@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Search, Menu, X, Check, Copy, ChevronRight } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import {
@@ -221,6 +221,70 @@ export default function DocsPage() {
     const [isSearchOpen, setIsSearchOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const allNavItems = navGroups.flatMap(g => g.items);
+    const isManualScroll = useRef(false);
+
+    // Collect ALL observable section IDs (nav items + endpoint IDs)
+    const allSectionIds = [
+        ...allNavItems.map(item => item.id),
+        ...chatEndpoints.map(ep => ep.id),
+        ...callEndpoints.map(ep => ep.id),
+        ...dashboardEndpoints.map(ep => ep.id),
+    ];
+
+    // Scroll-spy: observe all sections and update activeId on scroll
+    useEffect(() => {
+        const observerCallback: IntersectionObserverCallback = (entries) => {
+            if (isManualScroll.current) return;
+
+            // Find all currently intersecting entries
+            const visibleEntries = entries.filter(entry => entry.isIntersecting);
+            if (visibleEntries.length === 0) return;
+
+            // Pick the entry closest to the top of the viewport
+            let closest: IntersectionObserverEntry | null = null;
+            let closestDistance = Infinity;
+            for (const entry of visibleEntries) {
+                const distance = Math.abs(entry.boundingClientRect.top);
+                if (distance < closestDistance) {
+                    closestDistance = distance;
+                    closest = entry;
+                }
+            }
+
+            if (closest) {
+                const id = closest.target.id;
+                // Map endpoint section IDs back to their parent nav item ID
+                const navItem = allNavItems.find(item => item.id === id);
+                if (navItem) {
+                    setActiveId(id);
+                } else {
+                    // For endpoint sections not in nav, find the closest parent nav item
+                    // by checking which nav group the endpoint belongs to
+                    const epInChat = chatEndpoints.find(ep => ep.id === id);
+                    const epInCall = callEndpoints.find(ep => ep.id === id);
+                    const epInDash = dashboardEndpoints.find(ep => ep.id === id);
+
+                    if (epInChat) setActiveId('chat-overview');
+                    else if (epInCall) setActiveId('call-overview');
+                    else if (epInDash) setActiveId('dash-overview');
+                    else setActiveId(id);
+                }
+            }
+        };
+
+        const observer = new IntersectionObserver(observerCallback, {
+            rootMargin: '-80px 0px -60% 0px',
+            threshold: [0, 0.1, 0.5],
+        });
+
+        // Observe all sections
+        for (const id of allSectionIds) {
+            const el = document.getElementById(id);
+            if (el) observer.observe(el);
+        }
+
+        return () => observer.disconnect();
+    }, []);
 
     // Combine nav items with actual API endpoints for search
     const allSearchItems = [
@@ -245,6 +309,8 @@ export default function DocsPage() {
     }, []);
 
     const scrollToSection = (id: string) => {
+        // Temporarily disable scroll-spy so it doesn't fight with smooth scroll
+        isManualScroll.current = true;
         setActiveId(id);
         const element = document.getElementById(id);
         if (element) {
@@ -252,6 +318,8 @@ export default function DocsPage() {
         }
         setIsMobileMenuOpen(false);
         setIsSearchOpen(false);
+        // Re-enable scroll-spy after the smooth scroll finishes
+        setTimeout(() => { isManualScroll.current = false; }, 1000);
     };
 
     const location = useLocation();
