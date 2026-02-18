@@ -9,33 +9,34 @@ import CanonicalLink from './components/SEO/CanonicalLink';
 import CookieConsent from './components/CookieConsent';
 import HreflangTags from './components/SEO/HreflangTags';
 import SEO from './components/SEO/SEO';
+import { lazyWithRetry } from './utils/lazyWithRetry';
 
 
-// Lazy load pages
-const Landing = React.lazy(() => import('./components/Landing'));
-const PrivacyPolicy = React.lazy(() => import('./components/Legal/PrivacyPolicy'));
-const TermsOfService = React.lazy(() => import('./components/Legal/TermsOfService'));
-const Security = React.lazy(() => import('./components/Legal/Security'));
-const CookiePolicy = React.lazy(() => import('./components/Legal/CookiePolicy'));
-const SmartContracts = React.lazy(() => import('./pages/SmartContracts'));
-const Documents = React.lazy(() => import('./pages/Documents'));
-const Contact = React.lazy(() => import('./pages/Contact'));
-const About = React.lazy(() => import('./pages/About'));
-const Careers = React.lazy(() => import('./pages/Careers'));
-const Solutions = React.lazy(() => import('./pages/Solutions'));
-const Blog = React.lazy(() => import('./pages/Blog'));
-const BlogPost = React.lazy(() => import('./pages/BlogPost'));
-const Bioflow = React.lazy(() => import('./pages/Bioflow'));
-const DemoDashboard = React.lazy(() => import('./pages/DemoDashboard'));
-const UserCall = React.lazy(() => import('./pages/UserCall'));
-const UserChat = React.lazy(() => import('./pages/UserChat'));
-const UserVoiceCall = React.lazy(() => import('./pages/UserVoiceCall'));
-const AISettings = React.lazy(() => import('./components/AISettings'));
-const DocsPage = React.lazy(() => import('./pages/DocsPage'));
-const SupportPage = React.lazy(() => import('./pages/SupportPage'));
-const AuthPage = React.lazy(() => import('./pages/AuthPage'));
-const AuthCallback = React.lazy(() => import('./pages/AuthCallback'));
-const InvitePage = React.lazy(() => import('./pages/InvitePage'));
+// Lazy load pages (with auto-retry on chunk load failure after deploys)
+const Landing = lazyWithRetry(() => import('./components/Landing'), 'Landing');
+const PrivacyPolicy = lazyWithRetry(() => import('./components/Legal/PrivacyPolicy'), 'PrivacyPolicy');
+const TermsOfService = lazyWithRetry(() => import('./components/Legal/TermsOfService'), 'TermsOfService');
+const Security = lazyWithRetry(() => import('./components/Legal/Security'), 'Security');
+const CookiePolicy = lazyWithRetry(() => import('./components/Legal/CookiePolicy'), 'CookiePolicy');
+const SmartContracts = lazyWithRetry(() => import('./pages/SmartContracts'), 'SmartContracts');
+const Documents = lazyWithRetry(() => import('./pages/Documents'), 'Documents');
+const Contact = lazyWithRetry(() => import('./pages/Contact'), 'Contact');
+const About = lazyWithRetry(() => import('./pages/About'), 'About');
+const Careers = lazyWithRetry(() => import('./pages/Careers'), 'Careers');
+const Solutions = lazyWithRetry(() => import('./pages/Solutions'), 'Solutions');
+const Blog = lazyWithRetry(() => import('./pages/Blog'), 'Blog');
+const BlogPost = lazyWithRetry(() => import('./pages/BlogPost'), 'BlogPost');
+const Bioflow = lazyWithRetry(() => import('./pages/Bioflow'), 'Bioflow');
+const DemoDashboard = lazyWithRetry(() => import('./pages/DemoDashboard'), 'DemoDashboard');
+const UserCall = lazyWithRetry(() => import('./pages/UserCall'), 'UserCall');
+const UserChat = lazyWithRetry(() => import('./pages/UserChat'), 'UserChat');
+const UserVoiceCall = lazyWithRetry(() => import('./pages/UserVoiceCall'), 'UserVoiceCall');
+const AISettings = lazyWithRetry(() => import('./components/AISettings'), 'AISettings');
+const DocsPage = lazyWithRetry(() => import('./pages/DocsPage'), 'DocsPage');
+const SupportPage = lazyWithRetry(() => import('./pages/SupportPage'), 'SupportPage');
+const AuthPage = lazyWithRetry(() => import('./pages/AuthPage'), 'AuthPage');
+const AuthCallback = lazyWithRetry(() => import('./pages/AuthCallback'), 'AuthCallback');
+const InvitePage = lazyWithRetry(() => import('./pages/InvitePage'), 'InvitePage');
 
 // Create a client
 const queryClient = new QueryClient();
