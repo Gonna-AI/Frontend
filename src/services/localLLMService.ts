@@ -36,6 +36,8 @@ import { getGroqSettings, type GroqSettings } from '../components/DemoCall/GroqS
 // API calls routed via secure proxy
 import { proxyJSON, ProxyRoutes } from './proxyClient';
 
+import log from '../utils/logger';
+
 
 
 // Get current model and settings dynamically
@@ -88,8 +90,8 @@ class GroqLLMService {
   private async checkGroqAvailability(): Promise<boolean> {
     try {
       const settings = getCurrentGroqSettings();
-      console.log('🔍 Checking Groq API availability via proxy...');
-      console.log(`   Model: ${settings.model}`);
+      log.debug('🔍 Checking Groq API availability via proxy...');
+      log.debug(`   Model: ${settings.model}`);
 
       /* 
       // Test proxy connection with a simple hello
@@ -105,7 +107,7 @@ class GroqLLMService {
       return true;
 
     } catch (e) {
-      console.warn('⚠️ Groq API check failed:', e instanceof Error ? e.message : e);
+      log.warn('⚠️ Groq API check failed:', e instanceof Error ? e.message : e);
       this.groqAvailable = false;
       return false;
     }
@@ -116,8 +118,8 @@ class GroqLLMService {
   /*
   private async checkLocalAvailability(): Promise<boolean> {
     try {
-      console.log('🔍 Checking Local LLM availability...');
-      console.log(`   URL: ${LOCAL_LLM_URL}`);
+      log.debug('🔍 Checking Local LLM availability...');
+      log.debug(`   URL: ${LOCAL_LLM_URL}`);
 
       const testResponse = await fetch(`${LOCAL_LLM_URL}/api/generate`, {
         method: 'POST',
@@ -135,12 +137,12 @@ class GroqLLMService {
         signal: AbortSignal.timeout(30000),
       });
 
-      console.log(`   Local Response Status: ${testResponse.status}`);
+      log.debug(`   Local Response Status: ${testResponse.status}`);
 
       if (testResponse.ok) {
         const testData = await testResponse.json();
         if (testData.response !== undefined) {
-          console.log(`✅ Local LLM available at ${LOCAL_LLM_URL}`);
+          log.debug(`✅ Local LLM available at ${LOCAL_LLM_URL}`);
           this.localAvailable = true;
           return true;
         }
@@ -149,7 +151,7 @@ class GroqLLMService {
       this.localAvailable = false;
       return false;
     } catch (e) {
-      console.warn('⚠️ Local LLM check failed:', e instanceof Error ? e.message : e);
+      log.warn('⚠️ Local LLM check failed:', e instanceof Error ? e.message : e);
       this.localAvailable = false;
       return false;
     }
@@ -165,9 +167,9 @@ class GroqLLMService {
     this.isAvailable = groqOk;
 
     if (groqOk) {
-      console.log('🚀 Using Groq API');
+      log.debug('🚀 Using Groq API');
     } else {
-      console.error('❌ Groq API not available! Check your VITE_GROQ_API_KEY');
+      log.error('❌ Groq API not available! Check your VITE_GROQ_API_KEY');
     }
 
     return this.isAvailable;
@@ -343,7 +345,7 @@ class GroqLLMService {
 
     // SAFETY: If cleaning resulted in empty but original had content
     if (!cleaned && text.trim()) {
-      console.warn('cleanFinalAnswer stripped all content, using original text');
+      log.warn('cleanFinalAnswer stripped all content, using original text');
       const firstSentence = text.match(/[^.!?]*[.!?]/);
       if (firstSentence && firstSentence[0].length > 20) {
         cleaned = firstSentence[0].trim();
@@ -482,14 +484,14 @@ class GroqLLMService {
           }
         }
 
-        console.log('Extracted metadata from model:', {
+        log.debug('Extracted metadata from model:', {
           fields: newFields.length - existingFields.length,
           priority: suggestedPriority,
           category: suggestedCategory?.name
         });
 
       } catch (e) {
-        console.warn('Failed to parse model JSON metadata:', e);
+        log.warn('Failed to parse model JSON metadata:', e);
         // JSON parsing failed, just clean the response
         cleanResponse = response.replace(/```json\s*[\s\S]*?\s*```/gi, '').trim();
       }
@@ -510,7 +512,7 @@ class GroqLLMService {
   ): Promise<LocalLLMResponse> {
     // Auto-initialize if not yet done
     if (this.isAvailable === null) {
-      console.log('🔄 Auto-initializing LLM service...');
+      log.debug('🔄 Auto-initializing LLM service...');
       await this.checkAvailability();
     }
 
@@ -594,7 +596,7 @@ Rules:
 
       const settings = getCurrentGroqSettings();
       try {
-        console.log(`🚀 Calling Groq API via proxy (model: ${settings.model}, temp: ${settings.temperature})...`);
+        log.debug(`🚀 Calling Groq API via proxy (model: ${settings.model}, temp: ${settings.temperature})...`);
 
         interface GroqResponse {
           choices?: Array<{
@@ -614,12 +616,12 @@ Rules:
 
         const content = data.choices?.[0]?.message?.content;
         if (content) {
-          console.log('✅ Groq response received via proxy');
+          log.debug('✅ Groq response received via proxy');
           return content;
         }
         return null;
       } catch (error) {
-        console.warn('⚠️ Groq request failed:', error instanceof Error ? error.message : error);
+        log.warn('⚠️ Groq request failed:', error instanceof Error ? error.message : error);
         return null;
       }
     };
@@ -632,20 +634,20 @@ Rules:
         throw new Error('Groq API failed - check your API key');
       }
 
-      console.log('📝 Raw response length:', rawResponse.length, 'chars');
+      log.debug('📝 Raw response length:', rawResponse.length, 'chars');
 
       // Parse reasoning/thinking if present
       const { reasoning, answer } = this.parseReasoningResponse(rawResponse);
 
-      console.log(' Reasoning extracted:', reasoning ? `${reasoning.length} chars` : 'none');
-      console.log(' Final answer:', answer ? `${answer.length} chars` : 'none');
+      log.debug(' Reasoning extracted:', reasoning ? `${reasoning.length} chars` : 'none');
+      log.debug(' Final answer:', answer ? `${answer.length} chars` : 'none');
 
       // Use answer if available, otherwise fall back to raw response
       const finalResponse = answer || rawResponse;
 
       if (!finalResponse || !finalResponse.trim()) {
-        console.error(' Empty response after parsing!');
-        console.error('   Raw response was:', rawResponse.substring(0, 500));
+        log.error(' Empty response after parsing!');
+        log.error('   Raw response was:', rawResponse.substring(0, 500));
         // Instead of throwing, return a helpful message
         return {
           response: "I apologize, I'm still warming up. Could you please repeat that?",
@@ -668,7 +670,7 @@ Rules:
       };
 
     } catch (error) {
-      console.error('Local LLM error:', error);
+      log.error('Local LLM error:', error);
       throw error;
     }
   }
@@ -707,7 +709,7 @@ Rules:
   }> {
     // Auto-initialize if not yet done
     if (this.isAvailable === null) {
-      console.log('🔄 Auto-initializing LLM service for summary...');
+      log.debug('🔄 Auto-initializing LLM service for summary...');
       await this.checkAvailability();
     }
 
@@ -792,7 +794,7 @@ Respond ONLY with valid JSON:
 {"summary": "...", "keyPoints": ["...", "..."], "callerIntent": "...", "sentiment": "...", "moodIndicators": ["...", "..."], "urgency": "...", "topics": ["...", "..."], "suggestions": ["...", "..."], "resolution": "...", "riskLevel": "...", "followUp": true/false, "estimatedPriority": "..."}`;
 
     try {
-      console.log('📝 Generating summary...');
+      log.debug('📝 Generating summary...');
 
       let rawResponse = '';
 
@@ -800,7 +802,7 @@ Respond ONLY with valid JSON:
       if (this.groqAvailable) {
         const settings = getCurrentGroqSettings();
         try {
-          console.log(`🚀 Using Groq for summary (model: ${settings.model})...`);
+          log.debug(`🚀 Using Groq for summary (model: ${settings.model})...`);
           const groqResponse = await proxyJSON<GroqResponse>(ProxyRoutes.COMPLETIONS, {
             model: settings.model,
             messages: [
@@ -813,17 +815,17 @@ Respond ONLY with valid JSON:
 
           if (groqResponse) {
             rawResponse = groqResponse.choices?.[0]?.message?.content || '';
-            console.log('✅ Groq summary received, length:', rawResponse.length);
+            log.debug('✅ Groq summary received, length:', rawResponse.length);
 
             // Log if response is empty
             if (!rawResponse) {
-              console.warn('⚠️ Groq returned empty content. Full response:', JSON.stringify(groqResponse).slice(0, 500));
+              log.warn('⚠️ Groq returned empty content. Full response:', JSON.stringify(groqResponse).slice(0, 500));
             }
           } else {
-            console.error('❌ Groq summary request failed');
+            log.error('❌ Groq summary request failed');
           }
         } catch (e) {
-          console.warn('⚠️ Groq summary failed:', e);
+          log.warn('⚠️ Groq summary failed:', e);
           throw new Error('Groq summary failed');
         }
       } else {
@@ -832,7 +834,7 @@ Respond ONLY with valid JSON:
 
       // Handle empty response with a simple fallback
       if (!rawResponse) {
-        console.log('⚠️ Empty response, generating simple summary...');
+        log.debug('⚠️ Empty response, generating simple summary...');
         // Create a simple fallback summary
         const fallbackSummary = {
           summary: `Call with ${callerName || 'Unknown Caller'}. ${extractedText || 'No additional details extracted.'}`,
@@ -851,7 +853,7 @@ Respond ONLY with valid JSON:
         rawResponse = JSON.stringify(fallbackSummary);
       }
 
-      console.log('📝 Summary raw response:', rawResponse.slice(0, 200));
+      log.debug('📝 Summary raw response:', rawResponse.slice(0, 200));
 
       // Attempt to parse enhanced JSON response
       let parsedSummary: Record<string, unknown> | null = null;
@@ -861,7 +863,7 @@ Respond ONLY with valid JSON:
           parsedSummary = JSON.parse(jsonMatch[0]);
         }
       } catch (e) {
-        console.log('Could not parse summary as JSON, using text fallback:', e);
+        log.debug('Could not parse summary as JSON, using text fallback:', e);
       }
 
       if (parsedSummary) {
@@ -881,7 +883,7 @@ Respond ONLY with valid JSON:
           keyPoints = [summaryText];
         }
 
-        console.log('📋 Parsed summary fields:', {
+        log.debug('📋 Parsed summary fields:', {
           summaryText: summaryText.slice(0, 50),
           keyPointsCount: keyPoints.length,
           hasCallerIntent: !!parsedSummary.callerIntent,
@@ -916,7 +918,7 @@ Respond ONLY with valid JSON:
           : 'medium';
         const followUp = parsedSummary.followUp === true || parsedSummary.followUpRequired === true;
 
-        console.log('✅ Comprehensive summary generated:', {
+        log.debug('✅ Comprehensive summary generated:', {
           keyPoints: keyPoints.length,
           suggestions: suggestions.length,
           moodIndicators: moodIndicators.length,
@@ -970,7 +972,7 @@ Respond ONLY with valid JSON:
       };
 
     } catch (error) {
-      console.error('Local LLM summary error:', error);
+      log.error('Local LLM summary error:', error);
 
       // Return a basic summary on error instead of throwing
       // This ensures the call still saves with at least basic info
@@ -1003,6 +1005,7 @@ Respond ONLY with valid JSON:
     return GROQ_API_URL;
   }
 }
+
 
 // Export singleton (keeping name for backwards compatibility)
 export const localLLMService = new GroqLLMService();
