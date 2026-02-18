@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
 import LanguageSwitcher from '../components/Layout/LanguageSwitcher';
 import Footer from '../components/Landing/Footer';
-import SEO from '../components/SEO/SEO';
+import SEO from '../components/SEO';
 
 const Contact = () => {
   const navigate = useNavigate();

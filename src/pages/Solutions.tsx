@@ -6,7 +6,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 import LanguageSwitcher from '../components/Layout/LanguageSwitcher';
 import Footer from '../components/Landing/Footer';
 import { NumberTicker } from '../components/ui/number-ticker';
-import SEO from '../components/SEO/SEO';
+import SEO from '../components/SEO';
 
 // ─────────────────────────────────────
 // Scroll-triggered reveal

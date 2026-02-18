@@ -9,7 +9,7 @@ import { useState } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
 import LanguageSwitcher from '../components/Layout/LanguageSwitcher';
 import Footer from '../components/Landing/Footer';
-import SEO from '../components/SEO/SEO';
+import SEO from '../components/SEO';
 
 const formatDate = (date: string, language: string): string => {
   return new Date(date).toLocaleDateString(language === 'de' ? 'de-DE' : 'en-US', {

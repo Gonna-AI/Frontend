@@ -1,5 +1,5 @@
 import Hero from './Hero';
-import SEO from '../SEO/SEO';
+import SEO from '../SEO';
 import AboutSection from './AboutSection';
 import ProductsSection from './ProductsSection';
 import Metrics from './Metrics';
