@@ -72,6 +72,8 @@ interface TTSConfig {
   vocalDirection: VocalDirection;
 }
 
+import log from '../utils/logger';
+
 class TTSService {
   private config: TTSConfig & { language: TTSLanguage } = {
     preferredBackend: 'groq',
@@ -94,20 +96,20 @@ class TTSService {
    * Initialize TTS service and check all backends
    */
   async initialize(): Promise<boolean> {
-    console.log('🎤 Initializing TTS Service...');
+    log.debug('🎤 Initializing TTS Service...');
 
     // Initialize Groq TTS
     try {
       this.groqAvailable = await groqTTSService.initialize();
-      console.log(`   Groq TTS: ${this.groqAvailable ? '✅ Available' : '❌ Not available'}`);
+      log.debug(`   Groq TTS: ${this.groqAvailable ? '✅ Available' : '❌ Not available'}`);
     } catch (error) {
-      console.warn('   Groq TTS: ❌ Failed to initialize', error);
+      log.warn('   Groq TTS: ❌ Failed to initialize', error);
       this.groqAvailable = false;
     }
 
     // Check ElevenLabs availability (for German TTS)
     const elevenLabsAvailable = elevenLabsTTSService.isAvailable();
-    console.log(`   ElevenLabs TTS: ${elevenLabsAvailable ? '✅ Available (German)' : '❌ Not available (No API Key)'}`);
+    log.debug(`   ElevenLabs TTS: ${elevenLabsAvailable ? '✅ Available (German)' : '❌ Not available (No API Key)'}`);
 
     // Kokoro TTS is disabled - skip initialization
     this.kokoroAvailable = false;
@@ -119,7 +121,7 @@ class TTSService {
       this.currentBackend = 'browser';
     }
 
-    console.log(`🔊 TTS Backend: ${this.currentBackend}`);
+    log.debug(`🔊 TTS Backend: ${this.currentBackend}`);
     return this.groqAvailable || true; // Browser is always available
   }
 
@@ -171,7 +173,7 @@ class TTSService {
    */
   setLanguage(language: TTSLanguage) {
     this.config.language = language;
-    console.log(`🌍 TTS language set to: ${TTS_LANGUAGES[language].name}`);
+    log.debug(`🌍 TTS language set to: ${TTS_LANGUAGES[language].name}`);
   }
 
   /**
@@ -234,7 +236,7 @@ class TTSService {
     if (language === 'de') {
       // German: Use ElevenLabs TTS
       try {
-        console.log('🇩🇪 Using ElevenLabs TTS for German...');
+        log.debug('🇩🇪 Using ElevenLabs TTS for German...');
         await elevenLabsTTSService.speak(text, {
           speed,
           onStart: options?.onStart,
@@ -244,7 +246,7 @@ class TTSService {
         this.currentBackend = 'groq'; // Reuse enum, represents ElevenLabs
         return;
       } catch (error) {
-        console.error('❌ ElevenLabs TTS failed:', error);
+        log.error('❌ ElevenLabs TTS failed:', error);
         options?.onError?.(error as Error);
         options?.onEnd?.();
         return;
@@ -254,7 +256,7 @@ class TTSService {
     // English: Use Groq TTS
     if (this.config.useGroqTTS && this.groqAvailable !== false) {
       try {
-        console.log('🎤 Using Groq TTS for English...');
+        log.debug('🎤 Using Groq TTS for English...');
         await groqTTSService.speak(text, {
           voice: orpheusVoice,
           speed,
@@ -266,7 +268,7 @@ class TTSService {
         this.currentBackend = 'groq';
         return;
       } catch (error) {
-        console.error('❌ Groq TTS failed:', error);
+        log.error('❌ Groq TTS failed:', error);
         options?.onError?.(error as Error);
         options?.onEnd?.();
         return;
@@ -274,7 +276,7 @@ class TTSService {
     }
 
     // If TTS is not available, just log and call onEnd
-    console.warn('⚠️ TTS not available, skipping speech');
+    log.warn('⚠️ TTS not available, skipping speech');
     options?.onError?.(new Error('TTS not available'));
     options?.onEnd?.();
   }
@@ -383,7 +385,7 @@ class TTSService {
         return;
       }
 
-      console.log('🎤 Using Browser TTS for:', text.substring(0, 50) + '...');
+      log.debug('🎤 Using Browser TTS for:', text.substring(0, 50) + '...');
 
       // Cancel any ongoing speech
       window.speechSynthesis.cancel();
@@ -412,12 +414,12 @@ class TTSService {
 
           if (matchingVoice) {
             utterance.voice = matchingVoice;
-            console.log('🔊 Selected voice:', matchingVoice.name);
+            log.debug('🔊 Selected voice:', matchingVoice.name);
           }
         }
 
         utterance.onstart = () => {
-          console.log('🔊 Browser TTS started speaking');
+          log.debug('🔊 Browser TTS started speaking');
           speechStarted = true;
           speechStartTime = Date.now();
           options?.onStart?.();
@@ -425,12 +427,12 @@ class TTSService {
 
         utterance.onend = () => {
           const duration = Date.now() - speechStartTime;
-          console.log('🔊 Browser TTS ended, duration:', duration, 'ms');
+          log.debug('🔊 Browser TTS ended, duration:', duration, 'ms');
 
           // Check if speech actually happened (minimum duration check)
           // If it ended too quickly, it might have failed silently
           if (!speechStarted || duration < 200) {
-            console.warn('⚠️ Speech may not have played correctly (too short or never started)');
+            log.warn('⚠️ Speech may not have played correctly (too short or never started)');
             // Still call onEnd to not block the flow
           }
 
@@ -439,7 +441,7 @@ class TTSService {
         };
 
         utterance.onerror = (e) => {
-          console.error('🔊 Browser TTS error:', e.error);
+          log.error('🔊 Browser TTS error:', e.error);
           const error = new Error(`Speech synthesis error: ${e.error}`);
           options?.onError?.(error);
           reject(error);
@@ -452,7 +454,7 @@ class TTSService {
         // Force a resume after a short delay
         setTimeout(() => {
           if (!speechStarted && window.speechSynthesis.paused) {
-            console.log('🔊 Resuming paused speech synthesis');
+            log.debug('🔊 Resuming paused speech synthesis');
             window.speechSynthesis.resume();
           }
         }, 100);
@@ -462,7 +464,7 @@ class TTSService {
       const voices = window.speechSynthesis.getVoices();
       if (voices.length === 0) {
         // Voices not loaded yet, wait for them
-        console.log('🔊 Waiting for voices to load...');
+        log.debug('🔊 Waiting for voices to load...');
         window.speechSynthesis.addEventListener('voiceschanged', speakWithVoice, { once: true });
         // Fallback: if voices don't load in 500ms, try anyway
         setTimeout(() => {
