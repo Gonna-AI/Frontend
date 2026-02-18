@@ -38,8 +38,19 @@ const AuthPage = lazyWithRetry(() => import('./pages/AuthPage'), 'AuthPage');
 const AuthCallback = lazyWithRetry(() => import('./pages/AuthCallback'), 'AuthCallback');
 const InvitePage = lazyWithRetry(() => import('./pages/InvitePage'), 'InvitePage');
 
+import NotFound from './pages/NotFound';
+import LoadingScreen from './components/LoadingScreen';
+
 // Create a client
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000,   // 5 min
+      retry: 2,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 function App() {
   return (
@@ -54,7 +65,7 @@ function App() {
               title="ClerkTree"
               description="AI-powered workflow automation for claims and back-office operations. Transform your operations with intelligent automation that reduces turnaround time by 40%."
             />
-            <Suspense fallback={null}>
+            <Suspense fallback={<LoadingScreen />}>
               <Routes>
                 {/* Public Routes */}
                 <Route path="/" element={<Landing />} />
@@ -106,7 +117,7 @@ function App() {
                 <Route path="/security" element={<Security />} />
 
                 {/* Catch all route */}
-                <Route path="*" element={<Navigate to="/" />} />
+                <Route path="*" element={<NotFound />} />
               </Routes>
             </Suspense>
             <CookieConsent />
@@ -116,5 +127,6 @@ function App() {
     </AuthProvider>
   );
 }
+
 
 export default App;

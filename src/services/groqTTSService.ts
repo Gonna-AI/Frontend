@@ -15,8 +15,7 @@
 // Groq API Configuration
 import { proxyBlob, ProxyRoutes } from './proxyClient';
 
-// Use proxy instead of direct key
-// const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY; 
+
 // const GROQ_TTS_URL = 'https://api.groq.com/openai/v1/audio/speech';
 const GROQ_TTS_MODEL = 'canopylabs/orpheus-v1-english'; // Orpheus TTS model
 
@@ -132,13 +131,7 @@ class GroqTTSService {
         }
 
         // Check if Groq TTS is available (always true via proxy if server configured)
-        /* 
-        if (!GROQ_API_KEY) {
-            console.warn('⚠️ Groq API key not configured for TTS');
-            this.isAvailable = false;
-            return false;
-        } 
-        */
+
 
         try {
             // Test with a minimal request to verify API access

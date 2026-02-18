@@ -253,6 +253,25 @@ export default function CookieConsent() {
         // Logic to re-apply consent if needed could go here
     }, []);
 
+const [gtagLoaded, setGtagLoaded] = useState(false);
+
+    const loadGtag = () => {
+        if (gtagLoaded) return;
+
+        const script = document.createElement('script');
+        script.src = 'https://www.googletagmanager.com/gtag/js?id=G-PXQGKPVN8H';
+        script.async = true;
+        document.head.appendChild(script);
+
+        script.onload = () => {
+            window.dataLayer = window.dataLayer || [];
+            function gtag() { dataLayer.push(arguments); }
+            gtag('js', new Date());
+            gtag('config', 'G-PXQGKPVN8H');
+            setGtagLoaded(true);
+        };
+    };
+    
     const dismiss = useCallback(() => {
         setAnimateIn(false);
         setTimeout(() => setVisible(false), 400);
@@ -271,6 +290,10 @@ export default function CookieConsent() {
             try {
                 localStorage.setItem(CONSENT_KEY, JSON.stringify(full));
 
+                if (full.analytics) {
+                    loadGtag();
+                }
+
                 // Update Google Analytics consent
                 if (typeof window !== 'undefined' && window.gtag) {
                     window.gtag('consent', 'update', {
@@ -288,7 +311,7 @@ export default function CookieConsent() {
 
             dismiss();
         },
-        [dismiss]
+        [dismiss, gtagLoaded]
     );
 
     const acceptAll = useCallback(() => {

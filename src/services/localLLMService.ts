@@ -36,9 +36,7 @@ import { getGroqSettings, type GroqSettings } from '../components/DemoCall/GroqS
 // API calls routed via secure proxy
 import { proxyJSON, ProxyRoutes } from './proxyClient';
 
-// Constance not needed client-side
-// const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY;
-// const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
+
 
 // Get current model and settings dynamically
 function getCurrentGroqSettings(): GroqSettings {
@@ -803,36 +801,26 @@ Respond ONLY with valid JSON:
         const settings = getCurrentGroqSettings();
         try {
           console.log(`🚀 Using Groq for summary (model: ${settings.model})...`);
-          const groqResponse = await fetch(GROQ_API_URL, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${GROQ_API_KEY}`
-            },
-            body: JSON.stringify({
-              model: settings.model,
-              messages: [
-                { role: 'system', content: 'You are a call summarization assistant. Always respond with valid JSON containing summary, keyPoints, sentiment, suggestions, etc.' },
-                { role: 'user', content: prompt }
-              ],
-              temperature: 0.4,
-              max_tokens: 1024,
-            }),
-            signal: AbortSignal.timeout(SUMMARY_TIMEOUT),
-          });
+          const groqResponse = await proxyJSON<GroqResponse>(ProxyRoutes.COMPLETIONS, {
+            model: settings.model,
+            messages: [
+              { role: 'system', content: 'You are a call summarization assistant. Always respond with valid JSON containing summary, keyPoints, sentiment, suggestions, etc.' },
+              { role: 'user', content: prompt }
+            ],
+            temperature: 0.4,
+            max_tokens: 1024,
+          }, { timeout: SUMMARY_TIMEOUT });
 
-          if (groqResponse.ok) {
-            const data = await groqResponse.json();
-            rawResponse = data.choices?.[0]?.message?.content || '';
+          if (groqResponse) {
+            rawResponse = groqResponse.choices?.[0]?.message?.content || '';
             console.log('✅ Groq summary received, length:', rawResponse.length);
 
             // Log if response is empty
             if (!rawResponse) {
-              console.warn('⚠️ Groq returned empty content. Full response:', JSON.stringify(data).slice(0, 500));
+              console.warn('⚠️ Groq returned empty content. Full response:', JSON.stringify(groqResponse).slice(0, 500));
             }
           } else {
-            const errorText = await groqResponse.text();
-            console.error('❌ Groq summary request failed:', groqResponse.status, errorText.slice(0, 200));
+            console.error('❌ Groq summary request failed');
           }
         } catch (e) {
           console.warn('⚠️ Groq summary failed:', e);

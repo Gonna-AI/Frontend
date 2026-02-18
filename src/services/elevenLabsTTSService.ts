@@ -9,7 +9,7 @@
 // ElevenLabs API Configuration
 import { proxyBlob, ProxyRoutes } from './proxyClient';
 
-// const ELEVENLABS_API_KEY = import.meta.env.VITE_ELEVENLABS_API_KEY;
+
 const ELEVENLABS_TTS_URL = 'https://api.elevenlabs.io/v1/text-to-speech';
 
 // German voice ID from ElevenLabs voice library
@@ -102,13 +102,7 @@ class ElevenLabsTTSService {
             return;
         }
 
-        /*
-        if (!ELEVENLABS_API_KEY) {
-            const error = new Error('ElevenLabs API key not configured');
-            options?.onError?.(error);
-            throw error;
-        }
-        */
+
 
         const voiceId = options?.voiceId || GERMAN_VOICE_ID;
 

@@ -35,7 +35,10 @@ jobs:
         run: npm ci
 
       - name: "Lint Check"
-        run: npm run lint || echo "Linting completed with warnings"
+        run: npm run lint
+
+      - name: "Run Tests"
+        run: npm test -- --run
 
       - name: "Type Check"
         run: npx tsc --noEmit
