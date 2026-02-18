@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useLanguage } from '../../contexts/LanguageContext';
 
 const STORAGE_KEY = 'clerktree-banner-dismissed';
 
@@ -11,6 +12,7 @@ interface AnnouncementBannerProps {
 
 export default function AnnouncementBanner({ onVisibilityChange }: AnnouncementBannerProps) {
     const navigate = useNavigate();
+    const { t } = useLanguage();
     const [isVisible, setIsVisible] = useState(() => {
         return localStorage.getItem(STORAGE_KEY) !== 'true';
     });
@@ -48,19 +50,19 @@ export default function AnnouncementBanner({ onVisibilityChange }: AnnouncementB
                         {/* Centered text + arrow */}
                         <button
                             onClick={handleArrowClick}
-                            className="flex items-center gap-2 group bg-transparent border-none outline-none cursor-pointer"
+                            className="flex items-center gap-2 group bg-transparent border-none outline-none cursor-pointer max-w-[calc(100%-3rem)]"
                         >
                             <span
-                                className="text-xs sm:text-sm font-medium"
+                                className="text-xs sm:text-sm font-medium text-center leading-snug"
                                 style={{ fontFamily: 'Urbanist, sans-serif' }}
                             >
                                 <span style={{ color: '#c8a250' }}>ClerkTree API</span>
                                 <span style={{ color: 'rgba(255, 255, 255, 0.6)' }}>
-                                    {' '}is now publicly available.
+                                    {' '}{t('announcement.apiAvailable')}
                                 </span>
                             </span>
                             <span
-                                className="text-sm transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+                                className="text-sm transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 flex-shrink-0"
                                 style={{ color: 'rgba(255, 255, 255, 0.5)' }}
                             >
                                 ↗

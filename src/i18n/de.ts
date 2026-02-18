@@ -598,6 +598,9 @@ export const de = {
     'monitor.status.live': 'Live',
     'monitor.detectedIntent': 'Erkannte Absicht',
 
+    // Announcement Banner
+    'announcement.apiAvailable': 'ist jetzt öffentlich verfügbar.',
+
     // Top Banner
     'banner.platformNotFound': 'Plattformzugang nicht gefunden',
     'banner.apiOnlyAccess': 'Sie haben derzeit nur Zugriff auf die API',

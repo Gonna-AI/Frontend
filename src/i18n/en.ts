@@ -601,6 +601,9 @@ export const en = {
     'monitor.status.live': 'Live',
     'monitor.detectedIntent': 'Detected Intent',
 
+    // Announcement Banner
+    'announcement.apiAvailable': 'is now publicly available.',
+
     // Top Banner
     'banner.platformNotFound': 'Platform access not found',
     'banner.apiOnlyAccess': 'You currently only have access to the API',

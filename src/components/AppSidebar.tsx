@@ -431,53 +431,99 @@ export function AppSidebar({ activeTab, setActiveTab, hasAccess = false, ...prop
                     </SidebarGroupContent>
                 </SidebarGroup>
 
+                {/* Dark mode & Language: show inside scrollable content on mobile */}
+                {isMobile && (
+                    <>
+                        <SidebarSeparator className={isDark ? "bg-white/10" : "bg-black/5"} />
+                        <SidebarGroup>
+                            <SidebarGroupLabel className={isDark ? "text-white/60" : "text-black/60"}>
+                                {t('sidebar.language')} & Theme
+                            </SidebarGroupLabel>
+                            <SidebarGroupContent>
+                                <SidebarMenu>
+                                    <SidebarMenuItem>
+                                        <SidebarMenuButton
+                                            onClick={toggleTheme}
+                                            className={cn(
+                                                isDark
+                                                    ? "text-white/70 hover:text-white hover:bg-white/10"
+                                                    : "text-black/70 hover:text-black hover:bg-black/5"
+                                            )}
+                                        >
+                                            {isDark ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
+                                            <span>{isDark ? "Dark Mode" : "Light Mode"}</span>
+                                        </SidebarMenuButton>
+                                    </SidebarMenuItem>
+                                    <SidebarMenuItem>
+                                        <div className="flex items-center justify-between px-2 py-2">
+                                            <span className={cn(
+                                                "text-sm font-medium",
+                                                isDark ? "text-white/70" : "text-black/70"
+                                            )}>
+                                                {t('sidebar.language')}
+                                            </span>
+                                            <div className="scale-90 origin-right">
+                                                <LanguageSwitcher isExpanded={true} forceDark={isDark} />
+                                            </div>
+                                        </div>
+                                    </SidebarMenuItem>
+                                </SidebarMenu>
+                            </SidebarGroupContent>
+                        </SidebarGroup>
+                    </>
+                )}
 
             </SidebarContent>
             <SidebarFooter>
                 <SidebarMenu>
-                    <SidebarMenuItem>
-                        <SidebarMenuButton
-                            onClick={toggleTheme}
-                            className={cn(
-                                isDark
-                                    ? "text-white/70 hover:text-white hover:bg-white/10"
-                                    : "text-black/70 hover:text-black hover:bg-black/5"
-                            )}
-                        >
-                            {isDark ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
-                            <span>{isDark ? "Dark Mode" : "Light Mode"}</span>
-                        </SidebarMenuButton>
-                    </SidebarMenuItem>
-                    <SidebarMenuItem>
-                        <div className={cn(
-                            "flex items-center transition-all duration-200",
-                            state === "collapsed" ? "justify-center py-2" : "justify-between px-2 py-2"
-                        )}>
-                            <span className={cn(
-                                "text-sm font-medium",
-                                isDark ? "text-white/70" : "text-black/70",
-                                state === "collapsed" && "hidden"
-                            )}>
-                                {t('sidebar.language')}
-                            </span>
-
-                            {state === "collapsed" ? (
-                                <button
-                                    onClick={() => setLanguage(language === 'en' ? 'de' : 'en')}
+                    {/* Dark mode & Language: show inside footer only on desktop */}
+                    {!isMobile && (
+                        <>
+                            <SidebarMenuItem>
+                                <SidebarMenuButton
+                                    onClick={toggleTheme}
                                     className={cn(
-                                        "flex h-8 w-8 items-center justify-center rounded-md text-xs font-bold transition-colors uppercase",
-                                        isDark ? "bg-white/5 text-white hover:bg-white/10" : "bg-black/5 text-black hover:bg-black/10"
+                                        isDark
+                                            ? "text-white/70 hover:text-white hover:bg-white/10"
+                                            : "text-black/70 hover:text-black hover:bg-black/5"
                                     )}
                                 >
-                                    {language}
-                                </button>
-                            ) : (
-                                <div className="scale-90 origin-right">
-                                    <LanguageSwitcher isExpanded={true} forceDark={isDark} />
+                                    {isDark ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
+                                    <span>{isDark ? "Dark Mode" : "Light Mode"}</span>
+                                </SidebarMenuButton>
+                            </SidebarMenuItem>
+                            <SidebarMenuItem>
+                                <div className={cn(
+                                    "flex items-center transition-all duration-200",
+                                    state === "collapsed" ? "justify-center py-2" : "justify-between px-2 py-2"
+                                )}>
+                                    <span className={cn(
+                                        "text-sm font-medium",
+                                        isDark ? "text-white/70" : "text-black/70",
+                                        state === "collapsed" && "hidden"
+                                    )}>
+                                        {t('sidebar.language')}
+                                    </span>
+
+                                    {state === "collapsed" ? (
+                                        <button
+                                            onClick={() => setLanguage(language === 'en' ? 'de' : 'en')}
+                                            className={cn(
+                                                "flex h-8 w-8 items-center justify-center rounded-md text-xs font-bold transition-colors uppercase",
+                                                isDark ? "bg-white/5 text-white hover:bg-white/10" : "bg-black/5 text-black hover:bg-black/10"
+                                            )}
+                                        >
+                                            {language}
+                                        </button>
+                                    ) : (
+                                        <div className="scale-90 origin-right">
+                                            <LanguageSwitcher isExpanded={true} forceDark={isDark} />
+                                        </div>
+                                    )}
                                 </div>
-                            )}
-                        </div>
-                    </SidebarMenuItem>
+                            </SidebarMenuItem>
+                        </>
+                    )}
                     <SidebarSeparator className={isDark ? "bg-white/10" : "bg-black/5"} />
                     <AuthUserSection isDark={isDark} state={state} />
                 </SidebarMenu>
