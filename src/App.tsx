@@ -5,10 +5,9 @@ import { LanguageProvider } from './contexts/LanguageContext';
 import { AuthProvider } from './contexts/AuthContext';
 import { PrivateRoute } from './components/Auth/PrivateRoute';
 import ScrollToTop from './components/ScrollToTop';
-import CanonicalLink from './components/SEO/CanonicalLink';
+import CanonicalLink from './components/CanonicalLink';
 import CookieConsent from './components/CookieConsent';
-import HreflangTags from './components/SEO/HreflangTags';
-import SEO from './components/SEO/SEO';
+import HreflangTags from './components/HreflangTags';
 import { lazyWithRetry } from './utils/lazyWithRetry';
 
 
@@ -61,10 +60,6 @@ function App() {
             <CanonicalLink />
             <HreflangTags />
             <ScrollToTop />
-            <SEO
-              title="ClerkTree"
-              description="AI-powered workflow automation for claims and back-office operations. Transform your operations with intelligent automation that reduces turnaround time by 40%."
-            />
             <Suspense fallback={<LoadingScreen />}>
               <Routes>
                 {/* Public Routes */}
