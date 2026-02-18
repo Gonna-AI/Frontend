@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useCallback, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useCallback, useEffect, useRef, ReactNode } from 'react';
 import { supabase } from '../config/supabase';
 import { aiService } from '../services/aiService';
 import { useAuth } from './AuthContext';
@@ -586,7 +586,15 @@ export function DemoCallProvider({ children, initialAgentId }: { children: React
       cleanupStaleSessions();
     }, 60 * 1000);
 
-    // Subscribe to changes
+    // Subscribe to changes (debounced to avoid UI thrashing under high load)
+    let debounceTimer: ReturnType<typeof setTimeout> | null = null;
+    const debouncedFetch = () => {
+      if (debounceTimer) clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        fetchActiveSessions();
+      }, 500); // Batch rapid-fire changes into a single refetch
+    };
+
     const subscription = supabase
       .channel('active_sessions_changes')
       .on(
@@ -594,8 +602,7 @@ export function DemoCallProvider({ children, initialAgentId }: { children: React
         { event: '*', schema: 'public', table: 'active_sessions' },
         (payload) => {
           console.log('📡 Active sessions change:', payload.eventType);
-          // Refetch on any change
-          fetchActiveSessions();
+          debouncedFetch();
         }
       )
       .subscribe((status) => {
@@ -604,6 +611,7 @@ export function DemoCallProvider({ children, initialAgentId }: { children: React
 
     return () => {
       clearInterval(cleanupInterval);
+      if (debounceTimer) clearTimeout(debounceTimer);
       subscription.unsubscribe();
     };
   }, []);

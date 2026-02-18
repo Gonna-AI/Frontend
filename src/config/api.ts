@@ -30,14 +30,41 @@ api.interceptors.request.use(async (config) => {
   return config;
 });
 
-// Add an interceptor to handle 401 responses
+// Add an interceptor to handle retries for 5xx / network errors + 401 redirects
+const MAX_RETRIES = 3;
+const BASE_DELAY = 500;
+
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      // Redirect to login page if unauthorized
-      window.location.href = '/login';
+  async (error) => {
+    const config = error.config;
+
+    // Don't retry if config is missing or already exceeded max retries
+    if (!config || config._retryCount >= MAX_RETRIES) {
+      if (error.response?.status === 401) {
+        window.location.href = '/login';
+      }
+      return Promise.reject(error);
     }
+
+    // Redirect on 401 immediately (no retry)
+    if (error.response?.status === 401) {
+      window.location.href = '/login';
+      return Promise.reject(error);
+    }
+
+    // Retry on 5xx or network errors
+    const isServerError = error.response?.status >= 500;
+    const isNetworkError = !error.response && error.code !== 'ERR_CANCELED';
+
+    if (isServerError || isNetworkError) {
+      config._retryCount = (config._retryCount || 0) + 1;
+      const delay = BASE_DELAY * Math.pow(2, config._retryCount - 1);
+      console.warn(`[api] Retrying request (attempt ${config._retryCount}/${MAX_RETRIES}) in ${delay}ms`);
+      await new Promise((resolve) => setTimeout(resolve, delay));
+      return api(config);
+    }
+
     return Promise.reject(error);
   }
 );

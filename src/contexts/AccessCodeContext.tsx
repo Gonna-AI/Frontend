@@ -29,23 +29,24 @@ export function AccessCodeProvider({ children }: { children: React.ReactNode }) 
         const checkAccess = async () => {
             setIsLoading(true);
             try {
-                const { data, error: fetchError } = await supabase
-                    .from('user_access')
-                    .select('id, is_active, expires_at')
-                    .eq('user_id', user.id)
-                    .eq('is_active', true)
-                    .maybeSingle();
-
-                if (fetchError) {
-                    console.error('Error checking access:', fetchError);
+                const { data: { session } } = await supabase.auth.getSession();
+                if (!session) {
                     setHasAccess(false);
-                } else if (data) {
-                    // Check if access hasn't expired
-                    const isExpired = data.expires_at && new Date(data.expires_at) < new Date();
-                    setHasAccess(!isExpired);
-                } else {
-                    setHasAccess(false);
+                    return;
                 }
+
+                const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/api-access`, {
+                    headers: {
+                        'Authorization': `Bearer ${session.access_token}`
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to check access');
+                }
+
+                const data = await response.json();
+                setHasAccess(!!data.hasAccess);
             } catch (err) {
                 console.error('Access check failed:', err);
                 setHasAccess(false);
@@ -66,21 +67,31 @@ export function AccessCodeProvider({ children }: { children: React.ReactNode }) 
         }
 
         try {
-            const { data, error: rpcError } = await supabase.rpc('validate_access_code', {
-                p_code: code.trim().toUpperCase(),
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) throw new Error('Not authenticated');
+
+            const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/api-access/validate`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${session.access_token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ code: code.trim().toUpperCase() })
             });
 
-            if (rpcError) {
-                setError('Failed to validate code. Please try again.');
+            const data = await response.json();
+
+            if (!response.ok || data.error) {
+                setError(data.error || 'Failed to validate code');
                 return false;
             }
 
-            if (data?.success) {
+            if (data.success) {
                 setHasAccess(true);
                 setError(null);
                 return true;
             } else {
-                setError(data?.error || 'Invalid or expired access code');
+                setError('Invalid or expired access code');
                 return false;
             }
         } catch (err) {
