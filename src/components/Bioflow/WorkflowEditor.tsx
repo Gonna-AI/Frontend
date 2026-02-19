@@ -214,6 +214,7 @@ const WorkflowEditorCore = ({ selectedUseCase, onUseCaseChange, showInspector = 
                                 key={id}
                                 onClick={() => switchUseCase(id as UseCaseId)}
                                 disabled={isRunning}
+                                aria-label={uc.name}
                                 className={`
                   flex items-center gap-1 px-2 py-1 md:px-3 md:py-1.5 rounded-md md:rounded-lg text-[10px] md:text-xs font-medium transition-all border
                   ${getUseCaseColor(id as UseCaseId, selectedUseCase === id)}

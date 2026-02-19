@@ -67,59 +67,61 @@ function App() {
               description="AI-powered workflow automation for claims and back-office operations. Transform your operations with intelligent automation that reduces turnaround time by 40%."
             />
             <Suspense fallback={<LoadingScreen />}>
-              <Routes>
-                {/* Public Routes */}
-                <Route path="/" element={<Landing />} />
+              <main className="flex-1 flex flex-col">
+                <Routes>
+                  {/* Public Routes */}
+                  <Route path="/" element={<Landing />} />
 
-                {/* Auth Routes */}
-                <Route path="/login" element={<AuthPage />} />
-                <Route path="/auth/callback" element={<AuthCallback />} />
-                <Route path="/invite" element={<InvitePage />} />
+                  {/* Auth Routes */}
+                  <Route path="/login" element={<AuthPage />} />
+                  <Route path="/auth/callback" element={<AuthCallback />} />
+                  <Route path="/invite" element={<InvitePage />} />
 
-                {/* Protected Dashboard */}
-                <Route path="/dashboard" element={
-                  <PrivateRoute>
-                    <DemoDashboard />
-                  </PrivateRoute>
-                } />
+                  {/* Protected Dashboard */}
+                  <Route path="/dashboard" element={
+                    <PrivateRoute>
+                      <DemoDashboard />
+                    </PrivateRoute>
+                  } />
 
-                {/* User Call */}
-                <Route path="/user" element={<UserCall />} />
-                <Route path="/user/chat" element={<UserChat />} />
-                <Route path="/user/call" element={<UserVoiceCall />} />
-                <Route path="/ai-settings" element={
-                  <PrivateRoute>
-                    <AISettings />
-                  </PrivateRoute>
-                } />
+                  {/* User Call */}
+                  <Route path="/user" element={<UserCall />} />
+                  <Route path="/user/chat" element={<UserChat />} />
+                  <Route path="/user/call" element={<UserVoiceCall />} />
+                  <Route path="/ai-settings" element={
+                    <PrivateRoute>
+                      <AISettings />
+                    </PrivateRoute>
+                  } />
 
-                <Route path="/bioflow" element={<Bioflow />} />
+                  <Route path="/bioflow" element={<Bioflow />} />
 
-                {/* Company Pages */}
-                <Route path="/about" element={<About />} />
-                <Route path="/careers" element={<Careers />} />
-                <Route path="/solutions" element={<Solutions />} />
-                <Route path="/contact" element={<Contact />} />
-                <Route path="/support" element={<SupportPage />} />
+                  {/* Company Pages */}
+                  <Route path="/about" element={<About />} />
+                  <Route path="/careers" element={<Careers />} />
+                  <Route path="/solutions" element={<Solutions />} />
+                  <Route path="/contact" element={<Contact />} />
+                  <Route path="/support" element={<SupportPage />} />
 
-                {/* Blog */}
-                <Route path="/blog" element={<Blog />} />
-                <Route path="/blog/:slug" element={<BlogPost />} />
+                  {/* Blog */}
+                  <Route path="/blog" element={<Blog />} />
+                  <Route path="/blog/:slug" element={<BlogPost />} />
 
-                {/* Documentation */}
-                <Route path="/docs" element={<DocsPage />} />
-                <Route path="/smart-contracts" element={<SmartContracts />} />
-                <Route path="/documents" element={<Documents />} />
+                  {/* Documentation */}
+                  <Route path="/docs" element={<DocsPage />} />
+                  <Route path="/smart-contracts" element={<SmartContracts />} />
+                  <Route path="/documents" element={<Documents />} />
 
-                {/* Legal */}
-                <Route path="/terms-of-service" element={<TermsOfService />} />
-                <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-                <Route path="/cookie-policy" element={<CookiePolicy />} />
-                <Route path="/security" element={<Security />} />
+                  {/* Legal */}
+                  <Route path="/terms-of-service" element={<TermsOfService />} />
+                  <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+                  <Route path="/cookie-policy" element={<CookiePolicy />} />
+                  <Route path="/security" element={<Security />} />
 
-                {/* Catch all route */}
-                <Route path="*" element={<NotFound />} />
-              </Routes>
+                  {/* Catch all route */}
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </main>
             </Suspense>
             <CookieConsent />
           </BrowserRouter>
