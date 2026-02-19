@@ -13,7 +13,7 @@ export const de = {
     // Landing - Hero
     'hero.revolutionizing': 'Echter Service.',
     'hero.bpoClaims': 'Keine Warteschleifen.',
-    'hero.description': 'Ihr autonomer KI-Mitarbeiter spart Ihnen €25.000 im Jahr und fängt jeden Anruf ab. Perfekt für das Gäubodenvolksfest-Chaos – 50% Bayern-Subventioniert durch Digitalbonus.',
+    'hero.description': 'Ihr autonomer KI-Mitarbeiter spart Ihnen €25.000 im Jahr und fängt jeden Anruf ab.\nPerfekt für das Gäubodenvolksfest-Chaos – 50% Bayern-Subventioniert durch Digitalbonus.',
 
     // Landing - About (Section)
     'about.future': 'Wir bauen die Zukunft der',
