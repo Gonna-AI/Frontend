@@ -1,17 +1,11 @@
-import { motion, useReducedMotion } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { cn } from '../../utils/cn';
-import { useDeviceDetection } from '../../hooks/useDeviceDetection';
 import { useLanguage } from '../../contexts/LanguageContext';
 
 
 const Hero = () => {
   const navigate = useNavigate();
-  const prefersReducedMotion = useReducedMotion();
-  const { isMobile } = useDeviceDetection();
   const { t } = useLanguage();
-
-  const shouldReduceMotion = prefersReducedMotion || isMobile;
 
   return (
     <div className="min-h-screen relative bg-[rgb(10,10,10)] overflow-x-hidden flex items-center">
@@ -98,10 +92,7 @@ const Hero = () => {
           </div>
 
           {/* Right Column: Image */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
+          <div
             className="relative hidden lg:block"
           >
             {/* 
@@ -123,7 +114,7 @@ const Hero = () => {
                 }}
               />
             </div>
-          </motion.div>
+          </div>
 
         </div>
       </div>
