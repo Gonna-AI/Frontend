@@ -3,7 +3,9 @@ export const de = {
     'nav.about': 'Über uns',
     'nav.blog': 'Blog',
     'nav.solutions': 'Lösungen',
-    'nav.contact': 'Anmelden',
+    'nav.contact': 'Kundenportal', // Adjusted legacy contact translation to match login behavior
+    'nav.login': 'Kundenportal',
+    'nav.docs': 'Dokumentation',
     'nav.bookDemo': 'Demo buchen',
     'nav.seeSolutions': 'Lösungen ansehen',
     'nav.language': 'Sprache',

@@ -42,8 +42,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
             if (savedLang === 'en' || savedLang === 'de') {
                 loadLanguage(savedLang);
             } else {
-                setLanguageState('en');
-                document.documentElement.lang = 'en';
+                loadLanguage('de'); // Changed default to German
             }
         }
     }, []);

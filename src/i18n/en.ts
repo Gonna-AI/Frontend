@@ -3,7 +3,9 @@ export const en = {
     'nav.about': 'About',
     'nav.blog': 'Blog',
     'nav.solutions': 'Solutions',
-    'nav.contact': 'Login',
+    'nav.contact': 'Login', // Contact is unused, we'll keep it for legacy safety but add explicit login
+    'nav.login': 'Login',
+    'nav.docs': 'Docs',
     'nav.bookDemo': 'Book Demo',
     'nav.seeSolutions': 'See Solutions',
     'nav.language': 'Language',

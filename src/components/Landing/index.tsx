@@ -143,7 +143,7 @@ export default function Landing() {
                 fontFamily: 'Urbanist, sans-serif',
               }}
             >
-              Docs
+              {t('nav.docs')}
             </button>
             <div className="w-px h-8 bg-white/10 mx-2" />
             {/* Login Button - dark bordered style */}
@@ -163,7 +163,7 @@ export default function Landing() {
                 e.currentTarget.style.background = 'rgba(255, 255, 255, 0.95)';
               }}
             >
-              Login
+              {t('nav.login')}
             </button>
             <div className="w-px h-8 bg-white/10 mx-2" />
             <div className="w-[100px]">
@@ -251,7 +251,7 @@ export default function Landing() {
                     }}
                     className="flex items-center justify-between px-4 py-3.5 rounded-xl text-white/90 hover:text-white hover:bg-white/10 transition-all group"
                   >
-                    <span className="text-base font-medium font-urbanist">Docs</span>
+                    <span className="text-base font-medium font-urbanist">{t('nav.docs')}</span>
                     <span className="text-white/20 group-hover:text-white/60 transition-colors">→</span>
                   </button>
 
@@ -275,7 +275,7 @@ export default function Landing() {
                       color: 'rgb(10, 10, 10)',
                     }}
                   >
-                    Login
+                    {t('nav.login')}
                   </button>
                 </nav>
               </div>
