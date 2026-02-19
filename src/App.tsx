@@ -12,8 +12,9 @@ import HreflangTags from './components/HreflangTags';
 import { lazyWithRetry } from './utils/lazyWithRetry';
 
 
+import Landing from './components/Landing';
+
 // Lazy load pages (with auto-retry on chunk load failure after deploys)
-const Landing = lazyWithRetry(() => import('./components/Landing'), 'Landing');
 const PrivacyPolicy = lazyWithRetry(() => import('./components/Legal/PrivacyPolicy'), 'PrivacyPolicy');
 const TermsOfService = lazyWithRetry(() => import('./components/Legal/TermsOfService'), 'TermsOfService');
 const Security = lazyWithRetry(() => import('./components/Legal/Security'), 'Security');
