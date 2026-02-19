@@ -246,6 +246,7 @@ const WorkflowEditorCore = ({ selectedUseCase, onUseCaseChange, showInspector = 
                             onClick={resetSimulation}
                             disabled={isRunning}
                             className="p-1.5 md:p-2 bg-[#0a0a0a]/80 border border-white/10 text-slate-400 hover:text-white hover:border-slate-600 rounded-lg md:rounded-xl transition-colors shadow-lg disabled:opacity-50"
+                            aria-label="Reset Demo"
                         >
                             <RotateCcw className="w-3 h-3" />
                         </button>

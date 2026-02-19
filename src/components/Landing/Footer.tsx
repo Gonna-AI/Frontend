@@ -70,7 +70,7 @@ export default function Footer() {
             viewport={{ once: true }}
             transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.4, delay: 0.05 }}
           >
-            <h4 className="text-white text-sm font-semibold mb-6 tracking-wide uppercase">{t('footer.product')}</h4>
+            <h3 className="text-white text-sm font-semibold mb-6 tracking-wide uppercase">{t('footer.product')}</h3>
             <ul className="space-y-4">
               {footerLinks.product.map((link) => (
                 <li key={link.path}>
@@ -92,7 +92,7 @@ export default function Footer() {
             viewport={{ once: true }}
             transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.4, delay: 0.1 }}
           >
-            <h4 className="text-white text-sm font-semibold mb-6 tracking-wide uppercase">{t('footer.company')}</h4>
+            <h3 className="text-white text-sm font-semibold mb-6 tracking-wide uppercase">{t('footer.company')}</h3>
             <ul className="space-y-4">
               {footerLinks.company.map((link) => (
                 <li key={link.path}>
@@ -114,7 +114,7 @@ export default function Footer() {
             viewport={{ once: true }}
             transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.4, delay: 0.15 }}
           >
-            <h4 className="text-white text-sm font-semibold mb-6 tracking-wide uppercase">{t('footer.contact')}</h4>
+            <h3 className="text-white text-sm font-semibold mb-6 tracking-wide uppercase">{t('footer.contact')}</h3>
             <div className="space-y-4">
               <a
                 href="mailto:team@clerktree.com"
@@ -168,7 +168,7 @@ export default function Footer() {
             viewport={{ once: true }}
             transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.4, delay: 0.2 }}
           >
-            <h4 className="text-white text-sm font-semibold mb-6 tracking-wide uppercase">{t('footer.legal')}</h4>
+            <h3 className="text-white text-sm font-semibold mb-6 tracking-wide uppercase">{t('footer.legal')}</h3>
             <ul className="space-y-4">
               {footerLinks.legal.map((link) => (
                 <li key={link.path}>

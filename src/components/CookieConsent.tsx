@@ -253,7 +253,7 @@ export default function CookieConsent() {
         // Logic to re-apply consent if needed could go here
     }, []);
 
-const [gtagLoaded, setGtagLoaded] = useState(false);
+    const [gtagLoaded, setGtagLoaded] = useState(false);
 
     const loadGtag = () => {
         if (gtagLoaded) return;
@@ -271,7 +271,7 @@ const [gtagLoaded, setGtagLoaded] = useState(false);
             setGtagLoaded(true);
         };
     };
-    
+
     const dismiss = useCallback(() => {
         setAnimateIn(false);
         setTimeout(() => setVisible(false), 400);
@@ -379,7 +379,7 @@ const [gtagLoaded, setGtagLoaded] = useState(false);
                                         We use cookies to ensure you get the best experience on our website.
                                         By clicking "Accept All", you consent to our use of cookies.
                                         Manage settings to choose which cookies to allow. {' '}
-                                        <Link to="/privacy-policy" className="text-white hover:underline underline-offset-2">
+                                        <Link to="/privacy-policy" className="underline text-white hover:text-white/80 underline-offset-2">
                                             Privacy Policy
                                         </Link>
                                     </p>
