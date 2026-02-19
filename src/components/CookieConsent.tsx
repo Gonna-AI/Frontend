@@ -1,10 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { Cookie, ChevronDown, ChevronRight, X, ExternalLink, Check, Info } from 'lucide-react';
+import { Cookie, ChevronDown, ChevronRight, X, ExternalLink, Check } from 'lucide-react';
 
 declare global {
     interface Window {
-        gtag?: (...args: unknown[]) => void;
+        dataLayer: any[];
+        gtag?: (...args: any[]) => void;
     }
 }
 
@@ -265,7 +266,7 @@ export default function CookieConsent() {
 
         script.onload = () => {
             window.dataLayer = window.dataLayer || [];
-            function gtag() { dataLayer.push(arguments); }
+            function gtag(..._args: any[]) { window.dataLayer.push(arguments); }
             gtag('js', new Date());
             gtag('config', 'G-PXQGKPVN8H');
             setGtagLoaded(true);
