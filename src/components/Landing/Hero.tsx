@@ -61,7 +61,7 @@ const Hero = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.2 }}
-              className="text-lg md:text-xl text-white max-w-xl mb-12 leading-relaxed font-normal text-left"
+              className="text-xl md:text-2xl text-white max-w-3xl mb-12 leading-relaxed font-normal text-left"
             >
               {t('hero.description')}
             </motion.p>
