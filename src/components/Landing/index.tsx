@@ -59,8 +59,8 @@ export default function Landing() {
   return (
     <div className="min-h-screen overflow-hidden relative bg-[rgb(10,10,10)]">
       <SEO
-        title="AI-Powered Workflow Automation"
-        description="Automate claims processing and back-office operations with ClerkTree. Reduce turnaround time by 40% with intelligent automation."
+        title="Autonomous AI Voice & Reception Agents"
+        description="Stop losing revenue to missed calls. ClerkTree provides autonomous, human-sounding AI Voice Agents that handle Gäubodenvolksfest crowds, reservations, and customer support. State-subsidized up to 50% for Bavarian SMEs."
         canonical="https://clerktree.com"
       />
       {/* Announcement Banner */}
