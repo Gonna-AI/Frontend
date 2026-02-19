@@ -7,18 +7,25 @@ import App from './App.tsx';
 import ErrorFallback from './components/ErrorFallback.tsx';
 import './index.css';
 
-Sentry.init({
-  dsn: import.meta.env.VITE_SENTRY_DSN, // DSN pulled from environment variable
-  integrations: [
-    Sentry.browserTracingIntegration(),
-    Sentry.replayIntegration(),
-  ],
-  // Tracing
-  tracesSampleRate: 0.1, // Capture 10% of transactions in production
-  // Session Replay - DISABLED due to high overhead with SVG animations
-  replaysSessionSampleRate: 0.0,
-  replaysOnErrorSampleRate: 0.0,
-});
+// Defer Sentry init to after first paint to reduce TBT
+const initSentry = () => {
+  Sentry.init({
+    dsn: import.meta.env.VITE_SENTRY_DSN,
+    integrations: [
+      Sentry.browserTracingIntegration(),
+      Sentry.replayIntegration(),
+    ],
+    tracesSampleRate: 0.1,
+    replaysSessionSampleRate: 0.0,
+    replaysOnErrorSampleRate: 0.0,
+  });
+};
+
+if (typeof window.requestIdleCallback === 'function') {
+  window.requestIdleCallback(initSentry);
+} else {
+  setTimeout(initSentry, 2000);
+}
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

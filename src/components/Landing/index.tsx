@@ -2,9 +2,7 @@ import Hero from './Hero';
 import SEO from '../SEO';
 import AboutSection from './AboutSection';
 import ProductsSection from './ProductsSection';
-import Metrics from './Metrics';
-import Features from './Features';
-import Conversation from './Conversation';
+import { lazy, Suspense } from 'react';
 import Footer from './Footer';
 import AnnouncementBanner from './AnnouncementBanner';
 import { useNavigate } from 'react-router-dom';
@@ -16,6 +14,11 @@ import LanguageSwitcher from '../Layout/LanguageSwitcher';
 import { useLanguage } from '../../contexts/LanguageContext';
 
 import { useDeviceDetection } from '../../hooks/useDeviceDetection';
+
+// Lazy-load below-the-fold sections to reduce initial JS bundle
+const Metrics = lazy(() => import('./Metrics'));
+const Features = lazy(() => import('./Features'));
+const Conversation = lazy(() => import('./Conversation'));
 
 export default function Landing() {
   const navigate = useNavigate();
@@ -287,10 +290,11 @@ export default function Landing() {
           <AboutSection />
         </div>
         <ProductsSection />
-        <Metrics />
-        <Features />
-
-        <Conversation />
+        <Suspense fallback={null}>
+          <Metrics />
+          <Features />
+          <Conversation />
+        </Suspense>
         <Footer />
       </div>
     </div>

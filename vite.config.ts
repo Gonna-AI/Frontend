@@ -61,11 +61,16 @@ export default defineConfig({
     port: 5173,
   },
   build: {
+    cssCodeSplit: true,
+    chunkSizeWarningLimit: 200, // Warn if any chunk exceeds 200KB
     rollupOptions: {
       output: {
         manualChunks: {
           vendor: ['react', 'react-dom', 'react-router-dom', 'react-helmet-async'],
-          ui: ['framer-motion', 'lucide-react'],
+          'framer-motion': ['framer-motion'],
+          icons: ['lucide-react'],
+          supabase: ['@supabase/supabase-js'],
+          sentry: ['@sentry/react'],
         },
       },
     },

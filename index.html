@@ -36,8 +36,7 @@
   <!-- Site Icon for Google Search (must be accessible at root) -->
   <link rel="icon" href="/favicon.svg" />
 
-  <!-- Preload Critical Hero Image -->
-  <link rel="preload" as="image" href="/hero-dashboard-graphic.png" fetchpriority="high" />
+  <!-- Hero image is loaded by the Landing page component; no need to preload here -->
 
   <!-- Open Graph / Facebook -->
   <meta property="og:type" content="website" />
@@ -65,11 +64,13 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <link rel="canonical" href="https://clerktree.com/" />
 
-  <!-- Google Fonts - Urbanist -->
+  <!-- Google Fonts - Urbanist (non-render-blocking) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@100;200;300;400;500;600;700;800;900&display=swap"
-    rel="stylesheet">
+  <link rel="preload" as="style"
+    href="https://fonts.googleapis.com/css2?family=Urbanist:wght@300;400;500;600;700;800;900&display=swap">
+  <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@300;400;500;600;700;800;900&display=swap"
+    rel="stylesheet" media="print" onload="this.media='all'">
 
   <!-- Structured Data for Google -->
   <script type="application/ld+json">

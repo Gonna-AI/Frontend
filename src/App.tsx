@@ -1,5 +1,5 @@
-import React, { Suspense } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { Suspense } from 'react';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { LanguageProvider } from './contexts/LanguageContext';
 import { AuthProvider } from './contexts/AuthContext';
@@ -38,7 +38,7 @@ const AuthPage = lazyWithRetry(() => import('./pages/AuthPage'), 'AuthPage');
 const AuthCallback = lazyWithRetry(() => import('./pages/AuthCallback'), 'AuthCallback');
 const InvitePage = lazyWithRetry(() => import('./pages/InvitePage'), 'InvitePage');
 
-import NotFound from './pages/NotFound';
+const NotFound = lazyWithRetry(() => import('./pages/NotFound'), 'NotFound');
 import LoadingScreen from './components/LoadingScreen';
 
 // Create a client
