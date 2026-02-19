@@ -1,7 +1,5 @@
 import Hero from './Hero';
 import SEO from '../SEO';
-import AboutSection from './AboutSection';
-import ProductsSection from './ProductsSection';
 import { lazy, Suspense } from 'react';
 import Footer from './Footer';
 import AnnouncementBanner from './AnnouncementBanner';
@@ -16,6 +14,8 @@ import { useLanguage } from '../../contexts/LanguageContext';
 import { useDeviceDetection } from '../../hooks/useDeviceDetection';
 
 // Lazy-load below-the-fold sections to reduce initial JS bundle
+const AboutSection = lazy(() => import('./AboutSection'));
+const ProductsSection = lazy(() => import('./ProductsSection'));
 const Metrics = lazy(() => import('./Metrics'));
 const Features = lazy(() => import('./Features'));
 const Conversation = lazy(() => import('./Conversation'));
@@ -286,11 +286,11 @@ export default function Landing() {
       <div className="relative z-10">
         <Hero />
 
-        <div id="about-section">
-          <AboutSection />
-        </div>
-        <ProductsSection />
         <Suspense fallback={null}>
+          <div id="about-section">
+            <AboutSection />
+          </div>
+          <ProductsSection />
           <Metrics />
           <Features />
           <Conversation />

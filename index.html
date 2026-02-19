@@ -13,7 +13,7 @@
     script-src 'self' 'unsafe-inline' https://www.googletagmanager.com;
     style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
     font-src 'self' https://fonts.gstatic.com;
-    img-src 'self' data: https://xlzwfkgurrrspcdyqele.supabase.co;
+    img-src 'self' data: blob: https:;
     connect-src 'self' https://xlzwfkgurrrspcdyqele.supabase.co wss://xlzwfkgurrrspcdyqele.supabase.co https://*.sentry.io;
     object-src 'none';
     frame-ancestors 'none';
@@ -36,8 +36,8 @@
   <!-- Site Icon for Google Search (must be accessible at root) -->
   <link rel="icon" href="/favicon.svg" />
 
-  <!-- Hero image is loaded by the Landing page component; no need to preload here -->
-
+  <!-- Preload Critical Hero Image for LCP -->
+  <link rel="preload" as="image" href="/hero-dashboard-graphic.png" fetchpriority="high" />
   <!-- Open Graph / Facebook -->
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://clerktree.com/" />
