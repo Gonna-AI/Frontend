@@ -9,9 +9,9 @@ export const de = {
     'nav.language': 'Sprache',
 
     // Landing - Hero
-    'hero.revolutionizing': 'Revolutionierung der',
-    'hero.bpoClaims': 'BPO-Schadensbearbeitung',
-    'hero.description': 'Transformieren Sie Ihren Prozess der Schadensbearbeitung mit KI-gesteuerter Automatisierung, intelligenter Rückrufplanung und Echtzeit-Sentimentanalyse',
+    'hero.revolutionizing': 'Echter Service.',
+    'hero.bpoClaims': 'Keine Warteschleifen.',
+    'hero.description': 'Ihr autonomer KI-Mitarbeiter spart Ihnen €25.000 im Jahr und fängt jeden Anruf ab. Perfekt für das Gäubodenvolksfest-Chaos – 50% Bayern-Subventioniert durch Digitalbonus.',
 
     // Landing - About (Section)
     'about.future': 'Wir bauen die Zukunft der',
@@ -40,10 +40,10 @@ export const de = {
     'faq.contactPage': 'team@clerktree.com',
 
     // FAQ Items
-    'faq.q1': 'Wie fange ich an?',
-    'faq.a1': 'Der Einstieg ist einfach! Buchen Sie eine Demo bei unserem Team per E-Mail an team@clerktree.com, und wir vereinbaren einen persönlichen Durchgang. Danach helfen wir Ihnen, eine auf Ihren Anwendungsfall zugeschnittene Testumgebung einzurichten.',
-    'faq.q2': 'Bieten Sie eine kostenlose Testversion an?',
-    'faq.a2': 'Ja, wir bieten eine 14-tägige kostenlose Testversion für qualifizierte Unternehmen an. Während der Testphase haben Sie Zugriff auf unsere Kernfunktionen und dedizierten Support, um die Plattform zu evaluieren.',
+    'faq.q1': 'Kann ich Digitalbonus Bayern für ClerkTree nutzen?',
+    'faq.a1': 'Ja, Sie erhalten bis zu 50% Zuschuss (bis zu 50.000€) für Straubinger KMU durch bayerische Förderprogramme. Kombinierbar mit kostenloser Trainings-Unterstützung durch das Zukunftszentrum Süd.',
+    'faq.q2': 'Wie geht die KI mit dem Gäubodenvolksfest-Ansturm um?',
+    'faq.a2': 'Unsere KI-Agenten können unbegrenzt viele Anrufe gleichzeitig entgegennehmen. Wenn 1,25 Millionen Besucher nach Straubing strömen, nimmt Ihr KI-Concierge autonom Reservierungen an, beantwortet FAQs und stellt sicher, dass Sie keine Buchung verpassen, während sich Ihr Personal auf den Service vor Ort konzentriert.',
     'faq.q3': 'Wie ist die Preisgestaltung von ClerkTree?',
     'faq.a3': 'Wir bieten flexible Preise basierend auf Ihrem Dokumentenvolumen, der Anzahl der Benutzer und den benötigten Funktionen an. Kontaktieren Sie unser Vertriebsteam für ein individuelles Angebot, das Ihren geschäftlichen Anforderungen entspricht.',
     'faq.q4': 'Wie lange dauert die Implementierung?',

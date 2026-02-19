@@ -19,6 +19,7 @@ const ProductsSection = lazy(() => import('./ProductsSection'));
 const Metrics = lazy(() => import('./Metrics'));
 const Features = lazy(() => import('./Features'));
 const Conversation = lazy(() => import('./Conversation'));
+const FAQ = lazy(() => import('./FAQ'));
 
 export default function Landing() {
   const navigate = useNavigate();
@@ -294,6 +295,7 @@ export default function Landing() {
           <Metrics />
           <Features />
           <Conversation />
+          <FAQ />
         </Suspense>
         <Footer />
       </div>

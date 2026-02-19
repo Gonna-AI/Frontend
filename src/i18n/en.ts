@@ -9,9 +9,9 @@ export const en = {
     'nav.language': 'Language',
 
     // Landing - Hero
-    'hero.revolutionizing': 'Revolutionizing',
-    'hero.bpoClaims': 'BPO Claims Processing',
-    'hero.description': 'Transform your claims processing workflow with AI-driven automation, intelligent callback scheduling, and real-time sentiment analysis',
+    'hero.revolutionizing': 'Your Autonomous Voice &',
+    'hero.bpoClaims': 'Digital AI Concierge',
+    'hero.description': 'Stop losing revenue to missed calls. ClerkTree provides autonomous, human-sounding AI Voice Agents that handle Gäubodenvolksfest crowds, reservations, and customer support. State-subsidized up to 50% for Bavarian SMEs.',
 
     // Landing - About (Section)
     'about.future': 'Building the Future of',
@@ -40,10 +40,10 @@ export const en = {
     'faq.contactPage': 'team@clerktree.com',
 
     // FAQ Items
-    'faq.q1': 'How do I get started?',
-    'faq.a1': "Getting started is easy! Book a demo with our team by emailing us at team@clerktree.com, and we'll schedule a personalized walkthrough. After that, we'll help you set up a trial environment tailored to your specific use case.",
-    'faq.q2': 'Do you offer a free trial?',
-    'faq.a2': "Yes, we offer a 14-day free trial for qualified businesses. During the trial, you'll have access to our core features and dedicated support to help you evaluate the platform.",
+    'faq.q1': 'Can I use the Digitalbonus Bayern for ClerkTree?',
+    'faq.a1': 'Yes, Bavarian SMEs can receive up to 50% funding (up to €50,000) for integrating our AI Voice Concierge. This can also be combined with free training support from Zukunftszentrum Süd.',
+    'faq.q2': 'How does the AI handle the Gäubodenvolksfest rush?',
+    'faq.a2': 'Our AI agents can handle unlimited concurrent calls simultaneously. When 1.25M visitors flood Straubing, your AI concierge will autonomously take reservations, answer FAQs, and ensure you never miss a booking while your staff focuses on in-person service.',
     'faq.q3': 'How is ClerkTree priced?',
     'faq.a3': 'We offer flexible pricing based on your volume of documents, number of users, and specific features required. Contact our sales team for a customized quote that fits your business needs.',
     'faq.q4': 'How long does implementation take?',
