@@ -246,20 +246,7 @@ interface SerializedExtractedField {
   extractedAt: string;
 }
 
-interface SerializedCallHistoryItem {
-  id: string;
-  callerName: string;
-  date: string;
-  duration: number;
-  type?: 'voice' | 'text'; // Optional for backwards compatibility with old data
-  messages: SerializedCallMessage[];
-  extractedFields: SerializedExtractedField[];
-  category?: CallCategory;
-  priority: PriorityLevel;
-  summary: CallSummary;
-  tags: string[];
-}
-
+// Removed unused interface SerializedCallHistoryItem
 export function DemoCallProvider({ children, initialAgentId }: { children: ReactNode; initialAgentId?: string }) {
   const { user } = useAuth();
   // agentId: the dashboard owner whose knowledge base this call is attributed to
