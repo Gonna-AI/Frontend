@@ -170,6 +170,12 @@ export default function MonitorView({ isDark = true }: { isDark?: boolean }) {
     const analytics = getAnalytics();
     const [activeSection, setActiveSection] = useState<'history' | 'live'>('live');
     const [chartRange, setChartRange] = useState<'week' | 'month' | 'all'>('month');
+    const [filterPriority, setFilterPriority] = useState<string>('all');
+    const [expandedLogId, setExpandedLogId] = useState<string | null>(null);
+
+    const filteredHistory = useMemo(() => {
+        return callHistory.filter(call => filterPriority === 'all' || call.priority === filterPriority);
+    }, [callHistory, filterPriority]);
 
     const formatDuration = (seconds: number) => {
         const mins = Math.floor(seconds / 60);
@@ -420,13 +426,20 @@ export default function MonitorView({ isDark = true }: { isDark?: boolean }) {
                     </div>
 
                     <div className="flex items-center gap-3">
-                        <button className={cn(
-                            "flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-xl border transition-colors",
-                            isDark ? "border-white/10 hover:bg-white/5 text-white/80" : "border-black/10 hover:bg-gray-50 text-gray-700"
-                        )}>
-                            <Filter className="w-4 h-4" />
-                            {t('monitor.filter')}
-                        </button>
+                        <select
+                            value={filterPriority}
+                            onChange={(e) => setFilterPriority(e.target.value)}
+                            className={cn(
+                                "bg-transparent flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-xl border transition-colors cursor-pointer focus:outline-none appearance-none",
+                                isDark ? "border-white/10 hover:bg-white/5 text-white/80" : "border-black/10 hover:bg-gray-50 text-gray-700"
+                            )}
+                        >
+                            <option value="all">All Priorities</option>
+                            <option value="critical">Critical</option>
+                            <option value="high">High</option>
+                            <option value="medium">Medium</option>
+                            <option value="low">Low</option>
+                        </select>
                     </div>
                 </div>
 
@@ -465,8 +478,8 @@ export default function MonitorView({ isDark = true }: { isDark?: boolean }) {
                                             <th className="px-6 py-5 text-right">{t('monitor.table.actions')}</th>
                                         </tr>
                                     </thead>
-                                    <tbody className="divide-y divide-gray-200 dark:divide-white/5">
-                                        {callHistory.length === 0 ? (
+                                    <tbody className={cn("divide-y", isDark ? "divide-white/5" : "divide-gray-200")}>
+                                        {filteredHistory.length === 0 ? (
                                             <tr>
                                                 <td colSpan={6} className={cn("px-6 py-12 text-center", isDark ? "text-white/40" : "text-gray-500")}>
                                                     <div className="flex flex-col items-center gap-3">
@@ -478,58 +491,97 @@ export default function MonitorView({ isDark = true }: { isDark?: boolean }) {
                                                 </td>
                                             </tr>
                                         ) : (
-                                            callHistory.slice(0, 8).map((call) => (
-                                                <tr key={call.id} className={cn("transition-colors group", isDark ? "hover:bg-white/5" : "hover:bg-gray-50")}>
-                                                    <td className={cn("px-8 py-5 font-medium", isDark ? "text-white" : "text-gray-900")}>
-                                                        <div className="flex items-center gap-3">
-                                                            <div className={cn(
-                                                                "w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold",
-                                                                isDark ? "bg-white/10 text-white" : "bg-black/5 text-black"
-                                                            )}>
-                                                                {call.callerName.substring(0, 2).toUpperCase()}
+                                            filteredHistory.slice(0, 8).map((call) => (
+                                                <React.Fragment key={call.id}>
+                                                    <tr className={cn("transition-colors group", isDark ? "hover:bg-white/5" : "hover:bg-gray-50")}>
+                                                        <td className={cn("px-8 py-5 font-medium", isDark ? "text-white" : "text-gray-900")}>
+                                                            <div className="flex items-center gap-3">
+                                                                <div className={cn(
+                                                                    "w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold",
+                                                                    isDark ? "bg-white/10 text-white" : "bg-black/5 text-black"
+                                                                )}>
+                                                                    {call.callerName.substring(0, 2).toUpperCase()}
+                                                                </div>
+                                                                {call.callerName}
                                                             </div>
-                                                            {call.callerName}
-                                                        </div>
-                                                    </td>
-                                                    <td className="px-6 py-5">
-                                                        <span className={cn(
-                                                            "px-2.5 py-1 rounded-full text-xs font-medium border shadow-sm",
-                                                            call.category
-                                                                ? `bg-${call.category.color}-500/10 text-${call.category.color}-500 border-${call.category.color}-500/20`
-                                                                : "bg-gray-500/10 text-gray-400 border-gray-500/20"
-                                                        )}>
-                                                            {call.category?.name || t('monitor.category.uncategorized')}
-                                                        </span>
-                                                    </td>
-                                                    <td className="px-6 py-5">
-                                                        <span className={cn(
-                                                            "flex items-center w-fit gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border shadow-sm",
-                                                            call.priority === 'critical' ? "bg-red-500/10 text-red-400 border-red-500/20" :
-                                                                call.priority === 'high' ? "bg-orange-500/10 text-orange-400 border-orange-500/20" :
-                                                                    "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
-                                                        )}>
-                                                            <div className={cn("w-1.5 h-1.5 rounded-full",
-                                                                call.priority === 'critical' ? "bg-red-400 font-bold animate-pulse" :
-                                                                    call.priority === 'high' ? "bg-orange-400" : "bg-emerald-400"
-                                                            )} />
-                                                            {call.priority === 'critical' ? t('monitor.status.critical') : call.priority === 'high' ? t('monitor.status.high') : t('monitor.status.resolved')}
-                                                        </span>
-                                                    </td>
-                                                    <td className={cn("px-6 py-5 font-mono text-xs", isDark ? "text-white/60" : "text-gray-600")}>
-                                                        {formatDuration(call.duration)}
-                                                    </td>
-                                                    <td className={cn("px-6 py-5 text-xs", isDark ? "text-white/60" : "text-gray-600")}>
-                                                        {new Date(call.date).toLocaleDateString()} <span className="opacity-50 ml-1">{new Date(call.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                                                    </td>
-                                                    <td className="px-6 py-5 text-right">
-                                                        <button className={cn(
-                                                            "p-2 rounded-lg transition-all opacity-0 group-hover:opacity-100",
-                                                            isDark ? "hover:bg-white/10 text-white/40 hover:text-white" : "hover:bg-gray-100 text-gray-400 hover:text-gray-900"
-                                                        )}>
-                                                            <MoreHorizontal className="w-4 h-4" />
-                                                        </button>
-                                                    </td>
-                                                </tr>
+                                                        </td>
+                                                        <td className="px-6 py-5">
+                                                            <span className={cn(
+                                                                "px-2.5 py-1 rounded-full text-xs font-medium border shadow-sm",
+                                                                call.category
+                                                                    ? `bg-${call.category.color}-500/10 text-${call.category.color}-500 border-${call.category.color}-500/20`
+                                                                    : "bg-gray-500/10 text-gray-400 border-gray-500/20"
+                                                            )}>
+                                                                {call.category?.name || t('monitor.category.uncategorized')}
+                                                            </span>
+                                                        </td>
+                                                        <td className="px-6 py-5">
+                                                            <span className={cn(
+                                                                "flex items-center w-fit gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border shadow-sm",
+                                                                call.priority === 'critical' ? "bg-red-500/10 text-red-400 border-red-500/20" :
+                                                                    call.priority === 'high' ? "bg-orange-500/10 text-orange-400 border-orange-500/20" :
+                                                                        "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                                                            )}>
+                                                                <div className={cn("w-1.5 h-1.5 rounded-full",
+                                                                    call.priority === 'critical' ? "bg-red-400 font-bold animate-pulse" :
+                                                                        call.priority === 'high' ? "bg-orange-400" : "bg-emerald-400"
+                                                                )} />
+                                                                {call.priority === 'critical' ? t('monitor.status.critical') : call.priority === 'high' ? t('monitor.status.high') : t('monitor.status.resolved')}
+                                                            </span>
+                                                        </td>
+                                                        <td className={cn("px-6 py-5 font-mono text-xs", isDark ? "text-white/60" : "text-gray-600")}>
+                                                            {formatDuration(call.duration)}
+                                                        </td>
+                                                        <td className={cn("px-6 py-5 text-xs", isDark ? "text-white/60" : "text-gray-600")}>
+                                                            {new Date(call.date).toLocaleDateString()} <span className="opacity-50 ml-1">{new Date(call.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                                                        </td>
+                                                        <td className="px-6 py-5 text-right">
+                                                            <button
+                                                                onClick={() => setExpandedLogId(expandedLogId === call.id ? null : call.id)}
+                                                                className={cn(
+                                                                    "p-2 rounded-lg transition-all",
+                                                                    expandedLogId === call.id
+                                                                        ? (isDark ? "bg-white/10 text-white" : "bg-gray-200 text-gray-900")
+                                                                        : (isDark ? "opacity-0 group-hover:opacity-100 hover:bg-white/10 text-white/40 hover:text-white" : "opacity-0 group-hover:opacity-100 hover:bg-gray-100 text-gray-400 hover:text-gray-900")
+                                                                )}>
+                                                                <MoreHorizontal className="w-4 h-4" />
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                    {expandedLogId === call.id && (
+                                                        <tr>
+                                                            <td colSpan={6} className={cn("px-8 py-6", isDark ? "bg-white/[0.02]" : "bg-black/[0.02]")}>
+                                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                                                    <div>
+                                                                        <h4 className={cn("text-xs font-semibold uppercase tracking-wider mb-2 flex items-center gap-1.5", isDark ? "text-white/40" : "text-black/40")}>
+                                                                            Summary
+                                                                        </h4>
+                                                                        <div className={cn("p-4 rounded-xl border", isDark ? "border-white/10 bg-black/20" : "border-black/5 bg-white")}>
+                                                                            <p className={cn("text-sm leading-relaxed", isDark ? "text-white/80" : "text-gray-700")}>
+                                                                                {call.summary.summaryText || "No summary available."}
+                                                                            </p>
+                                                                        </div>
+                                                                    </div>
+                                                                    {call.extractedFields.length > 0 && (
+                                                                        <div>
+                                                                            <h4 className={cn("text-xs font-semibold uppercase tracking-wider mb-2", isDark ? "text-white/40" : "text-black/40")}>Extracted Data</h4>
+                                                                            <div className={cn("rounded-xl border border-white/10", isDark ? "bg-black/20" : "bg-white")}>
+                                                                                <div className="space-y-1 p-3">
+                                                                                    {call.extractedFields.map(field => (
+                                                                                        <div key={field.id} className={cn("flex items-center justify-between text-sm py-1.5 px-2 rounded hover:bg-black/5 dark:hover:bg-white/5 transition-colors")}>
+                                                                                            <span className={cn("opacity-70", isDark ? "text-white" : "text-gray-900")}>{field.label}</span>
+                                                                                            <span className={cn("font-medium", isDark ? "text-white" : "text-gray-900")}>{field.value}</span>
+                                                                                        </div>
+                                                                                    ))}
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                    )}
+                                                </React.Fragment>
                                             ))
                                         )}
                                     </tbody>

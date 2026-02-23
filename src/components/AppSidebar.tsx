@@ -77,34 +77,6 @@ export function AppSidebar({ activeTab, setActiveTab, hasAccess = false, ...prop
     const { getCurrentUserId, switchSession, knowledgeBase, saveKnowledgeBase } = useDemoCall();
     const { isDark, toggleTheme } = useTheme();
 
-    const [currentModelName, setCurrentModelName] = useState<string>('');
-
-    useEffect(() => {
-        // Initial load
-        const loadSettings = () => {
-            const settings = getGroqSettings();
-            const model = GROQ_MODELS.find(m => m.id === settings.model);
-            if (model) {
-                // Shorten name if too long
-                const shortName = model.name.replace('Llama 3.3', 'Llama 3.3').replace('Versatile', '').replace('Instant', '').trim();
-                setCurrentModelName(shortName);
-            }
-        };
-        loadSettings();
-
-        // Listen for updates
-        const handleUpdate = (e: CustomEvent<GroqSettings>) => {
-            const model = GROQ_MODELS.find(m => m.id === e.detail.model);
-            if (model) {
-                const shortName = model.name.replace('Llama 3.3', 'Llama 3.3').replace('Versatile', '').replace('Instant', '').trim();
-                setCurrentModelName(shortName);
-            }
-        };
-
-        window.addEventListener('groq-settings-updated', handleUpdate as EventListener);
-        return () => window.removeEventListener('groq-settings-updated', handleUpdate as EventListener);
-    }, []);
-
     // Helper: returns disabled styles for locked tabs
     const getLockedStyles = (tabName: string) => {
         if (hasAccess || ALWAYS_ACCESSIBLE_TABS.includes(tabName)) return '';
@@ -233,11 +205,6 @@ export function AppSidebar({ activeTab, setActiveTab, hasAccess = false, ...prop
                                 >
                                     <Sparkles className="text-purple-400" />
                                     <span>{t('sidebar.groqAi')}</span>
-                                    {currentModelName && (
-                                        <SidebarMenuBadge className="bg-purple-500/20 text-purple-300">
-                                            {currentModelName}
-                                        </SidebarMenuBadge>
-                                    )}
                                 </SidebarMenuButton>
                             </SidebarMenuItem>
 
@@ -332,15 +299,6 @@ export function AppSidebar({ activeTab, setActiveTab, hasAccess = false, ...prop
                                 </SidebarMenuButton>
                             </SidebarMenuItem>
 
-                            {/* Save Action */}
-                            <SidebarMenuItem>
-                                <SidebarMenuButton
-                                    className="bg-green-500/10 text-green-400 hover:bg-green-500/20 hover:text-green-300 border border-green-500/20 mt-2"
-                                >
-                                    <Save />
-                                    <span>{t('sidebar.saveConfig')}</span>
-                                </SidebarMenuButton>
-                            </SidebarMenuItem>
                         </SidebarMenu>
                     </SidebarGroupContent>
                 </SidebarGroup>

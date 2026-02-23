@@ -259,7 +259,7 @@ export const de = {
     // Sidebar
     'sidebar.platform': 'Plattform',
     'sidebar.aiBehavior': 'KI-Verhalten konfigurieren',
-    'sidebar.groqAi': 'Groq KI',
+    'sidebar.groqAi': 'KI-Einstellungen',
     'sidebar.systemPrompt': 'System-Prompt',
     'sidebar.aiVoice': 'KI-Stimme',
     'sidebar.contextFields': 'Kontextfelder',

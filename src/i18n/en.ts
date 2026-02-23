@@ -259,7 +259,7 @@ export const en = {
     // Sidebar
     'sidebar.platform': 'Platform',
     'sidebar.aiBehavior': 'Configure AI Behavior',
-    'sidebar.groqAi': 'Groq AI',
+    'sidebar.groqAi': 'AI Settings',
     'sidebar.systemPrompt': 'System Prompt',
     'sidebar.aiVoice': 'AI Voice',
     'sidebar.contextFields': 'Context Fields',
