@@ -52,6 +52,7 @@ import { useLanguage } from "@/contexts/LanguageContext"
 import LanguageSwitcher from "./Layout/LanguageSwitcher"
 import { useDemoCall } from "@/contexts/DemoCallContext"
 import { useAuth } from "@/contexts/AuthContext"
+import { supabase } from "@/config/supabase"
 
 // Company Logo component
 const ClerkTreeLogo = ({ className, isDark = true }: { className?: string; isDark?: boolean }) => (
@@ -528,7 +529,7 @@ function AuthUserSection({ isDark, state }: { isDark: boolean; state: string }) 
         try {
             // Clear sensitive localStorage data before signing out
             // These may contain PII (call transcripts, caller names, knowledge base configs)
-            const keysToRemove = [];
+            const keysToRemove: string[] = [];
             for (let i = 0; i < localStorage.length; i++) {
                 const key = localStorage.key(i);
                 if (key && (
@@ -543,12 +544,18 @@ function AuthUserSection({ isDark, state }: { isDark: boolean; state: string }) 
             }
             keysToRemove.forEach(key => localStorage.removeItem(key));
 
-            await signOut();
+            // Attempt to sign out from Supabase
+            const { error } = await supabase.auth.signOut();
+            if (error) {
+                console.error('Sign out error:', error.message);
+            }
+        } catch (err) {
+            console.error('Sign out exception:', err);
+        } finally {
+            // ALWAYS redirect to login, even if signOut failed
             // Brief delay so the user sees the signing-out state
-            await new Promise(resolve => setTimeout(resolve, 800));
+            await new Promise(resolve => setTimeout(resolve, 600));
             window.location.href = '/login';
-        } catch {
-            setIsSigningOut(false);
         }
     };
 
