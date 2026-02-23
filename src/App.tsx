@@ -38,6 +38,7 @@ const SupportPage = lazyWithRetry(() => import('./pages/SupportPage'), 'SupportP
 const AuthPage = lazyWithRetry(() => import('./pages/AuthPage'), 'AuthPage');
 const AuthCallback = lazyWithRetry(() => import('./pages/AuthCallback'), 'AuthCallback');
 const InvitePage = lazyWithRetry(() => import('./pages/InvitePage'), 'InvitePage');
+const WhitePaper = lazyWithRetry(() => import('./pages/WhitePaper'), 'WhitePaper');
 
 const NotFound = lazyWithRetry(() => import('./pages/NotFound'), 'NotFound');
 import LoadingScreen from './components/LoadingScreen';
@@ -102,6 +103,7 @@ function App() {
                   <Route path="/solutions" element={<Solutions />} />
                   <Route path="/contact" element={<Contact />} />
                   <Route path="/support" element={<SupportPage />} />
+                  <Route path="/whitepaper" element={<WhitePaper />} />
 
                   {/* Blog */}
                   <Route path="/blog" element={<Blog />} />

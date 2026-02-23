@@ -21,6 +21,7 @@ export default function Footer() {
     ],
     company: [
       { name: t('footer.aboutUs'), path: '/about' },
+      { name: 'Whitepaper', path: '/whitepaper' },
     ],
     legal: [
       { name: t('footer.privacy'), path: '/privacy-policy', icon: Lock },
