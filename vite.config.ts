@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react';
 import viteCompression from 'vite-plugin-compression';
 import { VitePWA } from 'vite-plugin-pwa';
 import Sitemap from 'vite-plugin-sitemap';
+import netlifyPlugin from '@netlify/vite-plugin';
 import path from "path"
 import { blogPosts } from './src/data/blogPosts';
 
@@ -10,6 +11,7 @@ import { blogPosts } from './src/data/blogPosts';
 export default defineConfig({
   plugins: [
     react(),
+    netlifyPlugin(),
     viteCompression(),
     VitePWA({
       registerType: 'autoUpdate',
