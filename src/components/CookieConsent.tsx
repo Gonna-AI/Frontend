@@ -16,6 +16,7 @@ interface ConsentState {
     functional: boolean;
     analytics: boolean;
     marketing: boolean;
+    unclassified: boolean;
     timestamp: string;
 }
 
@@ -41,6 +42,10 @@ const COOKIE_CATEGORIES: CookieCategory[] = [
             { name: 'sb-refresh-token', provider: 'Supabase', purpose: 'Refresh authentication token', expiry: '7 days' },
             { name: 'clerktree_cookie_consent', provider: 'ClerkTree', purpose: 'Stores your cookie consent preferences', expiry: 'Persistent' },
             { name: 'sidebar_state', provider: 'ClerkTree', purpose: 'Remembers sidebar open/close state', expiry: '7 days' },
+            { name: 'clerktree_user_id', provider: 'ClerkTree', purpose: 'Stores active session user ID for demo functionality', expiry: 'Persistent' },
+            { name: 'ticketVerification', provider: 'ClerkTree', purpose: 'Stores verification state for secure document access', expiry: 'Session' },
+            { name: 'ticketCode', provider: 'ClerkTree', purpose: 'Stores active ticket ID for secure document access', expiry: 'Session' },
+            { name: 'chunk_retry_*', provider: 'ClerkTree', purpose: 'Prevents infinite reload loops during application updates', expiry: 'Session' },
         ],
     },
     {
@@ -51,8 +56,14 @@ const COOKIE_CATEGORIES: CookieCategory[] = [
         locked: false,
         defaultOn: true,
         cookies: [
-            { name: 'language_pref', provider: 'ClerkTree', purpose: 'Stores your chosen language (EN/DE)', expiry: 'Persistent' },
-            { name: 'theme_pref', provider: 'ClerkTree', purpose: 'Stores your theme preference', expiry: 'Persistent' },
+            { name: 'app-language', provider: 'ClerkTree', purpose: 'Stores your chosen language (EN/DE)', expiry: 'Persistent' },
+            { name: 'theme', provider: 'ClerkTree', purpose: 'Stores your application theme preference', expiry: 'Persistent' },
+            { name: 'clientChatTheme', provider: 'ClerkTree', purpose: 'Stores theme preference for the client chat window', expiry: 'Persistent' },
+            { name: 'clerktree-banner-dismissed', provider: 'ClerkTree', purpose: 'Tracks if the announcement banner was dismissed', expiry: 'Persistent' },
+            { name: 'clerktree_seen_welcome', provider: 'ClerkTree', purpose: 'Tracks if the onboarding welcome flow has been completed', expiry: 'Persistent' },
+            { name: 'clerktree_knowledge_base', provider: 'ClerkTree', purpose: 'Stores custom AI configuration for the session', expiry: 'Persistent' },
+            { name: 'clerktree_groq_settings_*', provider: 'ClerkTree', purpose: 'Stores personalized Groq AI model parameters', expiry: 'Persistent' },
+            { name: 'platform_access_banner_dismissed', provider: 'ClerkTree', purpose: 'Tracks if the platform access banner was dismissed', expiry: 'Session' },
         ],
     },
     {
@@ -80,6 +91,17 @@ const COOKIE_CATEGORIES: CookieCategory[] = [
             { name: 'NID', provider: 'Google', purpose: 'Stores visitor preferences and personalizes ads on Google sites', expiry: '6 months' },
             { name: '_gcl_au', provider: 'Google Ads', purpose: 'Stores and tracks conversions from ad clicks', expiry: '90 days' },
             { name: '__cf_bm', provider: 'Cloudflare', purpose: 'Bot management and security filtering', expiry: '30 minutes' },
+        ],
+    },
+    {
+        id: 'unclassified',
+        title: 'Unclassified',
+        description:
+            'Unclassified cookies are cookies that we are in the process of classifying, together with the providers of individual cookies.',
+        locked: false,
+        defaultOn: false,
+        cookies: [
+            { name: 'Unknown / pending', provider: 'Various', purpose: 'Pending classification', expiry: 'Unknown' },
         ],
     },
 ];
@@ -285,6 +307,7 @@ export default function CookieConsent() {
                 functional: state.functional ?? true,
                 analytics: state.analytics ?? false,
                 marketing: state.marketing ?? false,
+                unclassified: state.unclassified ?? false,
                 timestamp: new Date().toISOString(),
             };
 
