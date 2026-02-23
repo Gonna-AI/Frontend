@@ -58,10 +58,10 @@ function StatsCard({ title, value, change, trend, subtitle, icon, isDark, progre
             )} />
 
             <div className="relative z-10 flex flex-col h-full justify-between">
-                <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-3">
+                <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-center gap-3 min-w-0">
                         <div className={cn(
-                            "p-2 rounded-lg border",
+                            "p-2 rounded-lg border shrink-0",
                             isDark ? "bg-white/5 border-white/10" : "bg-black/5 border-black/5",
                             color === 'emerald' && isDark && "text-emerald-400 bg-emerald-500/10 border-emerald-500/20",
                             color === 'blue' && isDark && "text-blue-400 bg-blue-500/10 border-blue-500/20",
@@ -70,7 +70,7 @@ function StatsCard({ title, value, change, trend, subtitle, icon, isDark, progre
                         )}>
                             {icon}
                         </div>
-                        <h3 className={cn("text-sm font-medium",
+                        <h3 className={cn("text-sm font-medium truncate",
                             isDark
                                 ? (color === 'emerald' ? "text-emerald-400" :
                                     color === 'blue' ? "text-blue-400" :
@@ -86,7 +86,7 @@ function StatsCard({ title, value, change, trend, subtitle, icon, isDark, progre
                     </div>
                     {change && (
                         <div className={cn(
-                            "flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full border uppercase tracking-wider",
+                            "shrink-0 flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full border uppercase tracking-wider",
                             trend === 'up'
                                 ? (isDark ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-emerald-100 text-emerald-700 border-emerald-200")
                                 : trend === 'down'
@@ -169,6 +169,7 @@ export default function MonitorView({ isDark = true }: { isDark?: boolean }) {
     const { getAnalytics, callHistory, currentCall } = useDemoCall();
     const analytics = getAnalytics();
     const [activeSection, setActiveSection] = useState<'history' | 'live'>('live');
+    const [chartRange, setChartRange] = useState<'week' | 'month' | 'all'>('month');
 
     const formatDuration = (seconds: number) => {
         const mins = Math.floor(seconds / 60);
@@ -180,26 +181,52 @@ export default function MonitorView({ isDark = true }: { isDark?: boolean }) {
     const chartData = useMemo(() => {
         const data: { name: string; calls: number }[] = [];
         const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
-        // Show last 7 days
-        for (let i = 6; i >= 0; i--) {
-            const date = new Date();
-            date.setDate(date.getDate() - i);
-            const dayStart = new Date(date.setHours(0, 0, 0, 0));
-            const dayEnd = new Date(date.setHours(23, 59, 59, 999));
+        if (chartRange === 'week' || chartRange === 'month') {
+            const daysCount = chartRange === 'week' ? 7 : 30;
+            for (let i = daysCount - 1; i >= 0; i--) {
+                const date = new Date();
+                date.setDate(date.getDate() - i);
+                const dayStart = new Date(date.setHours(0, 0, 0, 0));
+                const dayEnd = new Date(date.setHours(23, 59, 59, 999));
 
-            const callCount = callHistory.filter(c =>
-                new Date(c.date) >= dayStart &&
-                new Date(c.date) <= dayEnd
-            ).length;
+                const callCount = callHistory.filter(c =>
+                    new Date(c.date) >= dayStart &&
+                    new Date(c.date) <= dayEnd
+                ).length;
 
-            data.push({
-                name: dayNames[new Date(dayStart).getDay()],
-                calls: callCount
-            });
+                const name = chartRange === 'week'
+                    ? dayNames[dayStart.getDay()]
+                    : `${dayStart.getDate()} ${monthNames[dayStart.getMonth()]}`;
+
+                data.push({
+                    name,
+                    calls: callCount
+                });
+            }
+        } else {
+            // 'all' -> Last 12 months
+            for (let i = 11; i >= 0; i--) {
+                const date = new Date();
+                date.setMonth(date.getMonth() - i);
+                const monthStart = new Date(date.getFullYear(), date.getMonth(), 1, 0, 0, 0, 0);
+                const monthEnd = new Date(date.getFullYear(), date.getMonth() + 1, 0, 23, 59, 59, 999);
+
+                const callCount = callHistory.filter(c =>
+                    new Date(c.date) >= monthStart &&
+                    new Date(c.date) <= monthEnd
+                ).length;
+
+                data.push({
+                    name: monthNames[monthStart.getMonth()],
+                    calls: callCount
+                });
+            }
         }
+
         return data;
-    }, [callHistory]);
+    }, [callHistory, chartRange]);
 
 
 
@@ -208,13 +235,15 @@ export default function MonitorView({ isDark = true }: { isDark?: boolean }) {
         if (active && payload && payload.length) {
             return (
                 <div className={cn(
-                    "p-3 rounded-lg border shadow-xl backdrop-blur-md",
-                    isDark ? "bg-black/80 border-white/10" : "bg-white/80 border-black/10"
+                    "px-4 py-3 rounded-xl border shadow-2xl backdrop-blur-xl",
+                    isDark ? "bg-[#18181B]/95 border-white/10" : "bg-white/95 border-black/10"
                 )}>
-                    <p className={cn("text-xs font-semibold mb-2", isDark ? "text-white" : "text-black")}>{label}</p>
-                    <div className="flex items-center gap-2 text-xs">
-                        <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
-                        <span className={isDark ? "text-gray-300" : "text-gray-600"}>{t('monitor.stats.totalCalls')}: {payload[0].value}</span>
+                    <p className={cn("text-[13px] font-medium mb-1.5", isDark ? "text-zinc-400" : "text-zinc-500")}>{label}</p>
+                    <div className="flex items-center gap-2">
+                        <div className="w-2.5 h-2.5 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.6)]" />
+                        <span className={cn("text-base font-semibold", isDark ? "text-white" : "text-gray-900")}>
+                            {payload[0].value} <span className="text-sm font-normal text-gray-500 ml-1">{t('monitor.stats.totalCalls')}</span>
+                        </span>
                     </div>
                 </div>
             );
@@ -273,19 +302,16 @@ export default function MonitorView({ isDark = true }: { isDark?: boolean }) {
                     isDark={isDark}
                 />
 
-                {/* Follow-ups Required Card - Real Data */}
+                {/* Follow-ups Required Card - Real Data, No Pending Pill */}
                 <StatsCard
                     title={t('monitor.stats.followUps')}
                     value={analytics.followUpRequired}
-                    change={analytics.followUpRequired > 0 ? 'PENDING' : undefined}
-                    trend={analytics.followUpRequired > 0 ? 'down' : undefined}
                     subtitle={t('monitor.stats.needsAction')}
                     icon={<AlertCircle className="w-5 h-5" />}
                     color="orange"
                     progress={analytics.totalCalls > 0 ? (analytics.followUpRequired / analytics.totalCalls) * 100 : 0}
                     isDark={isDark}
-                />
-            </motion.div>
+                />            </motion.div>
 
             {/* Main Chart Section */}
             <motion.div
@@ -303,20 +329,44 @@ export default function MonitorView({ isDark = true }: { isDark?: boolean }) {
                     isDark ? "bg-blue-500" : "bg-blue-300"
                 )} />
 
-                <div className="relative z-10 flex justify-between items-center mb-8">
+                <div className="relative z-10 flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4 sm:gap-0">
                     <div>
                         <h2 className={cn("text-xl font-bold", isDark ? "text-white" : "text-gray-900")}>{t('monitor.chart.title')}</h2>
                         <p className={cn("text-sm mt-1", isDark ? "text-gray-400" : "text-gray-500")}>{t('monitor.chart.subtitle')}</p>
                     </div>
+
+                    <div className={cn(
+                        "flex items-center p-1 rounded-lg border",
+                        isDark ? "bg-white/5 border-white/10" : "bg-black/5 border-black/10"
+                    )}>
+                        {(['week', 'month', 'all'] as const).map(range => (
+                            <button
+                                key={range}
+                                onClick={() => setChartRange(range)}
+                                className={cn(
+                                    "px-3 py-1.5 text-xs font-medium rounded-md transition-colors",
+                                    chartRange === range
+                                        ? isDark ? "bg-white/10 text-white" : "bg-white text-black shadow-sm"
+                                        : isDark ? "text-white/50 hover:text-white/80 hover:bg-white/5" : "text-black/50 hover:text-black/80 hover:bg-black/5"
+                                )}
+                            >
+                                {range === 'week' ? (t('monitor.filter.week') || 'Week') : range === 'month' ? (t('monitor.filter.month') || 'Month') : (t('monitor.filter.allTime') || 'All Time')}
+                            </button>
+                        ))}
+                    </div>
                 </div>
 
-                <div className="relative z-10 flex-1 w-full h-[300px]">
+                <div className="relative z-10 w-full h-[300px] min-h-[300px]">
                     <ResponsiveContainer width="100%" height="100%">
-                        <AreaChart data={chartData} margin={{ top: 10, right: 0, left: -20, bottom: 0 }}>
+                        <AreaChart data={chartData} margin={{ top: 10, right: 0, left: -20, bottom: 20 }}>
                             <defs>
                                 <linearGradient id="colorCalls" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
+                                    <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.4} />
                                     <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
+                                </linearGradient>
+                                <linearGradient id="lineGradient" x1="0" y1="0" x2="1" y2="0">
+                                    <stop offset="0%" stopColor="#8b5cf6" />
+                                    <stop offset="100%" stopColor="#3b82f6" />
                                 </linearGradient>
                             </defs>
                             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)"} />
@@ -324,22 +374,28 @@ export default function MonitorView({ isDark = true }: { isDark?: boolean }) {
                                 dataKey="name"
                                 axisLine={false}
                                 tickLine={false}
-                                tick={{ fill: isDark ? '#666' : '#999', fontSize: 12, fontWeight: 500 }}
-                                dy={10}
+                                tick={{ fill: isDark ? '#71717A' : '#A1A1AA', fontSize: 12, fontWeight: 500 }}
+                                dy={15}
+                                minTickGap={30}
                             />
                             <YAxis
                                 axisLine={false}
                                 tickLine={false}
-                                tick={{ fill: isDark ? '#666' : '#999', fontSize: 12 }}
+                                tick={{ fill: isDark ? '#71717A' : '#A1A1AA', fontSize: 12 }}
+                                allowDecimals={false}
+                                dx={-10}
+                                domain={[0, (dataMax: number) => Math.max(5, dataMax)]}
                             />
-                            <Tooltip content={<CustomTooltip />} />
+                            <Tooltip content={<CustomTooltip />} cursor={{ stroke: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)', strokeWidth: 1, strokeDasharray: '4 4' }} />
                             <Area
                                 type="monotone"
                                 dataKey="calls"
-                                stroke="#3b82f6"
-                                strokeWidth={3}
+                                stroke="url(#lineGradient)"
+                                strokeWidth={2.5}
                                 fillOpacity={1}
                                 fill="url(#colorCalls)"
+                                animationDuration={1000}
+                                activeDot={{ r: 6, fill: "#3b82f6", stroke: isDark ? "#18181B" : "#ffffff", strokeWidth: 2 }}
                             />
                         </AreaChart>
                     </ResponsiveContainer>

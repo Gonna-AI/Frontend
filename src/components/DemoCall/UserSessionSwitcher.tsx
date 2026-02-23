@@ -3,7 +3,6 @@ import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     Plus,
-    Check,
     X,
     ChevronDown,
     Settings,
@@ -63,7 +62,7 @@ export default function UserSessionSwitcher({
     const [isOpen, setIsOpen] = useState(false);
     const [showCreateDialog, setShowCreateDialog] = useState(false);
     const [showEditDialog, setShowEditDialog] = useState(false);
-    const [showWelcomePopup, setShowWelcomePopup] = useState(false);
+
     const [editingSession, setEditingSession] = useState<UserSession | null>(null);
     const [newSessionName, setNewSessionName] = useState('');
     const [newSessionDescription, setNewSessionDescription] = useState('');
@@ -84,7 +83,6 @@ export default function UserSessionSwitcher({
             if (session) {
                 setCurrentSession(session);
             }
-            // Logic for welcome popup moved to WelcomeManager to support mobile
         }
     }, [sessions, currentUserId, hasCheckedFirstTime]);
 
@@ -161,7 +159,7 @@ export default function UserSessionSwitcher({
             onSessionChange(newId, newConfig);
 
             setShowCreateDialog(false);
-            setShowWelcomePopup(false);
+
             setNewSessionName('');
             setNewSessionDescription('');
         } catch (error) {
@@ -245,7 +243,7 @@ export default function UserSessionSwitcher({
         onSessionChange(session.id, session.config);
         setCurrentSession(session);
         setIsOpen(false);
-        setShowWelcomePopup(false);
+
     };
 
     const openEditDialog = (session: UserSession, e: React.MouseEvent) => {
@@ -256,10 +254,7 @@ export default function UserSessionSwitcher({
         setShowEditDialog(true);
     };
 
-    const skipWelcome = () => {
-        localStorage.setItem('clerktree_seen_welcome', 'true');
-        setShowWelcomePopup(false);
-    };
+
 
     // Helper to get consistent color for session
     const getSessionColor = (id: string, isDark: boolean) => {
@@ -507,208 +502,7 @@ export default function UserSessionSwitcher({
                 document.body
             )}
 
-            {/* Welcome Popup (First Time) - Portaled */}
 
-
-            {/* Welcome Popup (First Time) - Portaled */}
-            {
-                typeof document !== 'undefined' && createPortal(
-                    <AnimatePresence>
-                        {showWelcomePopup && (
-                            <motion.div
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                exit={{ opacity: 0 }}
-                                className="fixed inset-0 z-[1000] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md"
-                            >
-                                <motion.div
-                                    initial={{ scale: 0.95, opacity: 0, y: 20 }}
-                                    animate={{ scale: 1, opacity: 1, y: 0 }}
-                                    exit={{ scale: 0.95, opacity: 0, y: 20 }}
-                                    className={cn(
-                                        "w-full max-w-2xl rounded-2xl overflow-hidden shadow-2xl relative",
-                                        "max-h-[85vh] overflow-y-auto md:overflow-hidden",
-                                        isDark ? "bg-[#0A0A0A]" : "bg-white"
-                                    )}
-                                >
-                                    {/* Window Bar */}
-                                    <div className={cn(
-                                        "h-10 px-4 flex items-center justify-between border-b select-none",
-                                        isDark ? "bg-white/5 border-white/10" : "bg-black/5 border-black/10"
-                                    )}>
-                                        <div className="flex gap-2">
-                                            <div className="w-3 h-3 rounded-full bg-red-500/80" />
-                                            <div className="w-3 h-3 rounded-full bg-yellow-500/80" />
-                                            <div className="w-3 h-3 rounded-full bg-green-500/80" />
-                                        </div>
-                                        <div className={cn(
-                                            "text-xs font-medium opacity-50",
-                                            isDark ? "text-white" : "text-black"
-                                        )}>
-                                            ClerkTree Session Manager
-                                        </div>
-                                        <div className="w-10" />
-                                    </div>
-
-                                    <div className="flex flex-col md:flex-row h-auto md:h-[500px]">
-                                        {/* Left Panel */}
-                                        <div className={cn(
-                                            "md:w-5/12 p-6 md:p-8 flex flex-col justify-between relative overflow-hidden shrink-0",
-                                            isDark
-                                                ? "bg-gradient-to-br from-blue-900/20 via-purple-900/20 to-black/50"
-                                                : "bg-gradient-to-br from-blue-50 via-purple-50 to-white"
-                                        )}>
-                                            <div className="relative z-10">
-                                                <div className={cn(
-                                                    "w-12 h-12 rounded-xl mb-6 flex items-center justify-center border",
-                                                    isDark
-                                                        ? "bg-white/10 border-white/10"
-                                                        : "bg-white border-black/5 shadow-sm"
-                                                )}>
-                                                    <ClerkTreeLogo className={cn("w-6 h-6", isDark ? "text-white" : "text-black")} isDark={isDark} />
-                                                </div>
-                                                <h2 className={cn(
-                                                    "text-2xl font-bold mb-4",
-                                                    isDark ? "text-white" : "text-black"
-                                                )}>
-                                                    Welcome to ClerkTree
-                                                </h2>
-                                                <p className={cn(
-                                                    "text-sm leading-relaxed",
-                                                    isDark ? "text-white/60" : "text-black/60"
-                                                )}>
-                                                    Create a personalized session for your AI workflow. Sessions allow you to maintain separate configurations and contexts.
-                                                </p>
-                                            </div>
-
-                                            <div className="relative z-10 space-y-3 mt-6 md:mt-0">
-                                                <div className={cn("flex items-center gap-3 text-xs", isDark ? "text-white/40" : "text-black/40")}>
-                                                    <Check className="w-4 h-4 shrink-0" />
-                                                    <span>Context-aware interactions</span>
-                                                </div>
-                                                <div className={cn("flex items-center gap-3 text-xs", isDark ? "text-white/40" : "text-black/40")}>
-                                                    <Check className="w-4 h-4 shrink-0" />
-                                                    <span>Persistent configuration</span>
-                                                </div>
-                                                <div className={cn("flex items-center gap-3 text-xs", isDark ? "text-white/40" : "text-black/40")}>
-                                                    <Check className="w-4 h-4 shrink-0" />
-                                                    <span>Secure data isolation</span>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        {/* Right Panel */}
-                                        <div className="md:w-7/12 p-6 md:p-8 flex flex-col justify-center">
-                                            <div className="space-y-6">
-                                                <div>
-                                                    <label className={cn(
-                                                        "block text-xs font-medium mb-1.5 uppercase tracking-wider",
-                                                        isDark ? "text-white/40" : "text-black/40"
-                                                    )}>
-                                                        Session Name
-                                                    </label>
-                                                    <input
-                                                        type="text"
-                                                        value={newSessionName}
-                                                        onChange={(e) => setNewSessionName(e.target.value)}
-                                                        placeholder="e.g., Medical Office"
-                                                        autoFocus
-                                                        className={cn(
-                                                            "w-full px-4 py-3 rounded-xl text-sm transition-all",
-                                                            "focus:outline-none focus:ring-1",
-                                                            isDark
-                                                                ? "bg-white/5 border border-white/10 text-white placeholder-white/20 focus:ring-white/20"
-                                                                : "bg-black/5 border border-black/10 text-black placeholder-black/20 focus:ring-black/20"
-                                                        )}
-                                                    />
-                                                </div>
-
-                                                <div>
-                                                    <label className={cn(
-                                                        "block text-xs font-medium mb-1.5 uppercase tracking-wider",
-                                                        isDark ? "text-white/40" : "text-black/40"
-                                                    )}>
-                                                        Description <span className="opacity-50">(optional)</span>
-                                                    </label>
-                                                    <textarea
-                                                        value={newSessionDescription}
-                                                        onChange={(e) => setNewSessionDescription(e.target.value)}
-                                                        placeholder="What is this session for?"
-                                                        rows={3}
-                                                        className={cn(
-                                                            "w-full px-4 py-3 rounded-xl text-sm transition-all resize-none",
-                                                            "focus:outline-none focus:ring-1",
-                                                            isDark
-                                                                ? "bg-white/5 border border-white/10 text-white placeholder-white/20 focus:ring-white/20"
-                                                                : "bg-black/5 border border-black/10 text-black placeholder-black/20 focus:ring-black/20"
-                                                        )}
-                                                    />
-                                                </div>
-
-                                                <div className="pt-4 flex gap-3">
-                                                    <button
-                                                        onClick={skipWelcome}
-                                                        className={cn(
-                                                            "flex-1 px-4 py-3 rounded-xl text-sm font-medium transition-colors",
-                                                            isDark
-                                                                ? "bg-white/5 hover:bg-white/10 text-white/70"
-                                                                : "bg-black/5 hover:bg-black/10 text-black/70"
-                                                        )}
-                                                    >
-                                                        Skip Setup
-                                                    </button>
-                                                    <button
-                                                        onClick={createNewSession}
-                                                        disabled={!newSessionName.trim() || isLoading}
-                                                        className={cn(
-                                                            "flex-1 px-4 py-3 rounded-xl text-sm font-medium transition-all",
-                                                            isDark
-                                                                ? "bg-white text-black hover:bg-white/90"
-                                                                : "bg-black text-white hover:bg-black/90",
-                                                            "disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
-                                                        )}
-                                                    >
-                                                        {isLoading ? 'Creating...' : 'Create Session'}
-                                                    </button>
-                                                </div>
-                                            </div>
-
-                                            {/* Existing Sessions Quick Link */}
-                                            {sessions.length > 0 && (
-                                                <div className="mt-8 pt-6 border-t border-dashed border-white/10">
-                                                    <p className={cn(
-                                                        "text-xs mb-3 text-center uppercase tracking-wider",
-                                                        isDark ? "text-white/30" : "text-black/30"
-                                                    )}>
-                                                        or continue with
-                                                    </p>
-                                                    <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide justify-center">
-                                                        {sessions.slice(0, 3).map(session => (
-                                                            <button
-                                                                key={session.id}
-                                                                onClick={() => switchToSession(session)}
-                                                                className={cn(
-                                                                    "px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap border",
-                                                                    isDark
-                                                                        ? "bg-white/5 border-white/10 hover:bg-white/10 text-white/70"
-                                                                        : "bg-black/5 border-black/10 hover:bg-black/10 text-black/70"
-                                                                )}
-                                                            >
-                                                                {session.name}
-                                                            </button>
-                                                        ))}
-                                                    </div>
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
-                                </motion.div>
-                            </motion.div>
-                        )}
-                    </AnimatePresence>,
-                    document.body
-                )
-            }
 
             {/* Create Dialog - Portaled */}
             {

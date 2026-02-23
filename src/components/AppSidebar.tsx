@@ -666,14 +666,16 @@ function AuthUserSection({ isDark, state }: { isDark: boolean; state: string }) 
                     state === "collapsed" && "justify-center"
                 )}>
                     {avatarUrl ? (
-                        <img
-                            src={avatarUrl}
-                            alt={displayName}
-                            className="w-7 h-7 rounded-full flex-shrink-0 ring-1 ring-white/10"
-                        />
+                        <div className="w-8 h-8 shrink-0 min-w-[32px] min-h-[32px] max-w-[32px] max-h-[32px] rounded-full overflow-hidden ring-1 ring-white/10 relative">
+                            <img
+                                src={avatarUrl}
+                                alt={displayName}
+                                className="absolute inset-0 w-full h-full object-cover"
+                            />
+                        </div>
                     ) : (
                         <div className={cn(
-                            "w-7 h-7 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-bold",
+                            "w-8 h-8 shrink-0 min-w-[32px] min-h-[32px] max-w-[32px] max-h-[32px] rounded-full flex items-center justify-center text-xs font-bold",
                             isDark ? "bg-white/10 text-white/70" : "bg-black/10 text-black/70"
                         )}>
                             {displayName.charAt(0).toUpperCase()}

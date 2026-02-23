@@ -1216,13 +1216,23 @@ export function DemoCallProvider({ children, initialAgentId }: { children: React
     const byCategory: Record<string, number> = {};
     let totalDuration = 0;
     let followUpCount = 0;
+    let validCalls = 0;
 
     callHistory.forEach(call => {
       byPriority[call.priority]++;
       if (call.category) {
         byCategory[call.category.id] = (byCategory[call.category.id] || 0) + 1;
       }
-      totalDuration += call.duration;
+
+      // Per call check logic: handle old db values recorded in ms (e.g. 500000 = 8 mins)
+      let parsedDuration = call.duration || 0;
+      if (parsedDuration > 10000) {
+        parsedDuration = Math.floor(parsedDuration / 1000);
+      }
+
+      totalDuration += parsedDuration;
+      validCalls++;
+
       if (call.summary.followUpRequired) followUpCount++;
     });
 
@@ -1230,7 +1240,7 @@ export function DemoCallProvider({ children, initialAgentId }: { children: React
       totalCalls: callHistory.length,
       byPriority,
       byCategory,
-      avgDuration: callHistory.length > 0 ? totalDuration / callHistory.length : 0,
+      avgDuration: validCalls > 0 ? totalDuration / validCalls : 0,
       followUpRequired: followUpCount,
     };
   }, [callHistory]);

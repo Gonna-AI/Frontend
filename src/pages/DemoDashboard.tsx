@@ -19,7 +19,7 @@ import KeysView from '../components/DashboardViews/KeysView';
 import TeamView from '../components/DashboardViews/TeamView';
 import MonitorView from '../components/DashboardViews/MonitorView';
 import IntegrationView from '../components/DashboardViews/IntegrationView';
-import WelcomeManager from '../components/DemoCall/WelcomeManager';
+
 import { AccessCodeProvider, useAccessCode } from '../contexts/AccessCodeContext';
 import AccessCodeDialog from '../components/AccessCodeDialog';
 
@@ -79,7 +79,7 @@ function DemoDashboardContent() {
           hasAccess={hasAccess}
         />
 
-        <WelcomeManager isDark={isDark} />
+
 
         <main className="flex-1 flex flex-col h-screen overflow-hidden relative">
           {/* Sticky Header Container */}
