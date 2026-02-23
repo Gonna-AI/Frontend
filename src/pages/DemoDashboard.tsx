@@ -5,6 +5,7 @@ import { DemoCallProvider } from '../contexts/DemoCallContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useTheme } from '../hooks/useTheme';
 import KnowledgeBase from '../components/DemoCall/KnowledgeBase';
+import OnboardingWizard from '../components/DemoCall/OnboardingWizard';
 import CallHistoryList from '../components/DemoCall/CallHistoryList';
 import GroqSettingsPage from '../components/DemoCall/GroqSettings';
 import TopBanner from '../components/Layout/TopBanner';
@@ -63,6 +64,7 @@ function DemoDashboardContent() {
       keys: t('sidebar.keys'),
       team: t('sidebar.team'),
       integrations: 'Integrations',
+      onboarding: t('onboarding.title'),
     };
     return labelMap[tab] || tab;
   };
@@ -165,6 +167,13 @@ function DemoDashboardContent() {
                   {activeTab === 'keys' && <KeysView isDark={isDark} />}
                   {activeTab === 'team' && <TeamView isDark={isDark} />}
                   {activeTab === 'integrations' && <IntegrationView isDark={isDark} />}
+
+                  {activeTab === 'onboarding' && (
+                    <OnboardingWizard
+                      isDark={isDark}
+                      onComplete={() => setActiveTab('monitor')}
+                    />
+                  )}
                 </motion.div>
               )}
             </div>

@@ -20,7 +20,8 @@ import {
     Moon,
     LogOut,
     User,
-    Users
+    Users,
+    Wand2
 } from "lucide-react"
 
 import { useTheme } from "@/hooks/useTheme"
@@ -191,6 +192,24 @@ export function AppSidebar({ activeTab, setActiveTab, hasAccess = false, ...prop
                     <SidebarGroupLabel className={isDark ? "text-white/60" : "text-black/60"}>{t('sidebar.aiBehavior')}</SidebarGroupLabel>
                     <SidebarGroupContent>
                         <SidebarMenu>
+                            {/* Setup Wizard */}
+                            <SidebarMenuItem>
+                                <SidebarMenuButton
+                                    isActive={activeTab === 'onboarding'}
+                                    onClick={() => handleTabClick('onboarding')}
+                                    tooltip="Setup Wizard"
+                                    className={cn(
+                                        "transition-colors",
+                                        isDark
+                                            ? "text-white/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-white/10 data-[active=true]:text-white"
+                                            : "text-gray-600 hover:text-gray-900 hover:bg-black/5 data-[active=true]:bg-black/5 data-[active=true]:text-black"
+                                    )}
+                                >
+                                    <Wand2 className="text-purple-400" />
+                                    <span>{t('onboarding.title')}</span>
+                                </SidebarMenuButton>
+                            </SidebarMenuItem>
+
                             {/* Model Selection */}
                             <SidebarMenuItem>
                                 <SidebarMenuButton

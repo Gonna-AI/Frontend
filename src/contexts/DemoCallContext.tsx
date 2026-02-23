@@ -326,25 +326,30 @@ export function DemoCallProvider({ children, initialAgentId }: { children: React
 
       // LOADING ORDER:
       // 1. Code defaults (already set via useState)
-      // 2. User's localStorage config (if they customized it)
-      // 3. Supabase for call_history only
+      // 2. Agent's config from Supabase (if agentId is present — user-facing pages)
+      // 3. User's own config from Supabase (if authenticated — dashboard)
+      // 4. localStorage as fallback
 
       try {
-        // Load user's custom knowledge base - prioritize Supabase for authenticated users
-        if (user?.id) {
+        // Determine which user's knowledge base to load:
+        // - If initialAgentId is set (visitor on /user/chat?agentId=X), load the AGENT's config
+        // - Otherwise load the authenticated user's own config
+        const configOwnerId = initialAgentId || user?.id;
+
+        if (configOwnerId) {
           // Load from Supabase first (source of truth)
           const { data: kbData, error: kbError } = await supabase
             .from('knowledge_base_config')
             .select('*')
-            .eq('user_id', user.id)
+            .eq('user_id', configOwnerId)
             .single();
 
           if (!kbError && kbData?.config) {
             setKnowledgeBase(prev => ({ ...prev, ...(kbData.config as KnowledgeBaseConfig) }));
             localStorage.setItem(KNOWLEDGE_BASE_KEY, JSON.stringify(kbData.config));
-            console.log('✅ Loaded user knowledge base from Supabase');
-          } else {
-            // Try user-scoped localStorage as fallback
+            console.log(`✅ Loaded knowledge base from Supabase for ${initialAgentId ? 'agent' : 'user'}:`, configOwnerId);
+          } else if (!initialAgentId) {
+            // Only fall back to localStorage for the user's own config (not for agent configs)
             const localKB = localStorage.getItem(KNOWLEDGE_BASE_KEY);
             if (localKB) {
               try {
@@ -433,7 +438,7 @@ export function DemoCallProvider({ children, initialAgentId }: { children: React
     };
 
     loadData();
-  }, [user?.id]);
+  }, [user?.id, initialAgentId]);
 
   // Real-time subscription for user-scoped sync across devices
   useEffect(() => {
@@ -670,28 +675,28 @@ export function DemoCallProvider({ children, initialAgentId }: { children: React
     }
   }, [knowledgeBase, getUserId]);
 
-  // Load user's knowledge base from Supabase (called when user explicitly loads)
+  // Load knowledge base from Supabase (uses agentId if on user-facing page, else own user)
   const loadKnowledgeBase = useCallback(async (): Promise<void> => {
     try {
-      const userId = getUserId();
-      if (userId === 'anonymous') return;
+      const configOwnerId = initialAgentId || getUserId();
+      if (configOwnerId === 'anonymous') return;
 
-      // Try to load user-specific config
+      // Load the config for the appropriate owner (agent or self)
       const { data, error } = await supabase
         .from('knowledge_base_config')
         .select('*')
-        .eq('user_id', userId)
+        .eq('user_id', configOwnerId)
         .single();
 
       if (!error && data?.config) {
         setKnowledgeBase(prev => ({ ...prev, ...(data.config as KnowledgeBaseConfig) }));
         localStorage.setItem(KNOWLEDGE_BASE_KEY, JSON.stringify(data.config));
-        console.log('✅ Loaded user knowledge base from Supabase');
+        console.log(`✅ Loaded knowledge base from Supabase for ${initialAgentId ? 'agent' : 'user'}:`, configOwnerId);
       }
     } catch (error) {
       console.error('Error loading knowledge base:', error);
     }
-  }, [getUserId]);
+  }, [getUserId, initialAgentId]);
 
   const addContextField = useCallback((field: ContextField) => {
     setKnowledgeBase(prev => ({

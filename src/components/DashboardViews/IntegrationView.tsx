@@ -1,10 +1,14 @@
 import React, { useState, useMemo } from 'react';
 import { cn } from '../../utils/cn';
-import { Copy, Check, Link, Code, Phone, MessageSquare, ExternalLink, Globe } from 'lucide-react';
+import { Copy, Check, Link, Code, Phone, MessageSquare, ExternalLink, Globe, Bot, Sparkles } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
+import { useDemoCall } from '../../contexts/DemoCallContext';
+import { useLanguage } from '../../contexts/LanguageContext';
 
 export default function IntegrationView({ isDark = true }: { isDark?: boolean }) {
     const { user } = useAuth();
+    const { knowledgeBase } = useDemoCall();
+    const { t } = useLanguage();
     const [copiedField, setCopiedField] = useState<string | null>(null);
 
     const agentId = user?.id || '';
@@ -101,6 +105,71 @@ export default function IntegrationView({ isDark = true }: { isDark?: boolean })
                         {agentId}
                     </code>
                     <CopyButton fieldId="agent-id" text={agentId} />
+                </div>
+            </div>
+
+            {/* Active Persona Card */}
+            <div className={cn(
+                "rounded-xl border p-5",
+                isDark ? "bg-white/[0.02] border-white/10" : "bg-white border-black/10"
+            )}>
+                <div className="flex items-center gap-3 mb-4">
+                    <div className={cn(
+                        "p-2 rounded-lg",
+                        isDark ? "bg-gradient-to-br from-purple-500/10 to-blue-500/10" : "bg-gradient-to-br from-purple-50 to-blue-50"
+                    )}>
+                        <Bot className="w-5 h-5 text-purple-400" />
+                    </div>
+                    <div>
+                        <h3 className={cn("font-semibold", isDark ? "text-white" : "text-gray-900")}>Active Persona</h3>
+                        <p className={cn("text-xs", isDark ? "text-white/40" : "text-gray-400")}>
+                            What visitors see when they use your integration links
+                        </p>
+                    </div>
+                </div>
+                <div className="space-y-3">
+                    <div>
+                        <span className={cn("text-xs font-medium", isDark ? "text-white/40" : "text-gray-400")}>Persona</span>
+                        <p className={cn("text-sm mt-0.5", isDark ? "text-white/80" : "text-gray-700")}>
+                            {knowledgeBase.persona || 'Default AI Assistant'}
+                        </p>
+                    </div>
+                    <div>
+                        <span className={cn("text-xs font-medium", isDark ? "text-white/40" : "text-gray-400")}>Greeting</span>
+                        <p className={cn("text-sm mt-0.5 italic", isDark ? "text-white/60" : "text-gray-500")}>
+                            "{knowledgeBase.greeting || 'Hello! How can I help you today?'}"
+                        </p>
+                    </div>
+                    {knowledgeBase.selectedVoiceId && (
+                        <div>
+                            <span className={cn("text-xs font-medium", isDark ? "text-white/40" : "text-gray-400")}>Voice</span>
+                            <p className={cn("text-sm mt-0.5", isDark ? "text-white/80" : "text-gray-700")}>
+                                {knowledgeBase.selectedVoiceId}
+                            </p>
+                        </div>
+                    )}
+                    {knowledgeBase.categories && knowledgeBase.categories.length > 0 && (
+                        <div>
+                            <span className={cn("text-xs font-medium", isDark ? "text-white/40" : "text-gray-400")}>Categories</span>
+                            <div className="flex flex-wrap gap-1.5 mt-1">
+                                {knowledgeBase.categories.slice(0, 6).map((cat) => (
+                                    <span key={cat.id} className={cn(
+                                        "px-2 py-0.5 rounded-full text-[11px] font-medium border",
+                                        isDark
+                                            ? "bg-white/5 border-white/10 text-white/60"
+                                            : "bg-gray-50 border-gray-200 text-gray-600"
+                                    )}>
+                                        {cat.name}
+                                    </span>
+                                ))}
+                                {knowledgeBase.categories.length > 6 && (
+                                    <span className={cn("text-[11px]", isDark ? "text-white/30" : "text-gray-400")}>
+                                        +{knowledgeBase.categories.length - 6} more
+                                    </span>
+                                )}
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
 
