@@ -14,6 +14,31 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.svg', 'robots.txt', 'sitemap.xml'],
+      workbox: {
+        // Remove outdated precached assets when deploying new builds
+        cleanupOutdatedCaches: true,
+        // Activate new SW immediately (don't wait for all tabs to close)
+        skipWaiting: true,
+        clientsClaim: true,
+        // Don't precache source maps
+        globIgnores: ['**/node_modules/**', '**/*.map'],
+        // Navigation routes should always go to network first to get fresh index.html
+        navigateFallback: '/index.html',
+        navigateFallbackAllowlist: [/^\/(?!\api)/],
+        runtimeCaching: [
+          {
+            urlPattern: /\.(?:js|css)$/,
+            handler: 'StaleWhileRevalidate',
+            options: {
+              cacheName: 'static-assets',
+              expiration: {
+                maxEntries: 100,
+                maxAgeSeconds: 60 * 60 * 24, // 1 day
+              },
+            },
+          },
+        ],
+      },
       manifest: {
         name: 'ClerkTree',
         short_name: 'ClerkTree',

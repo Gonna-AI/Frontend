@@ -2,14 +2,14 @@ import React from 'react';
 
 /**
  * A wrapper around React.lazy() that gracefully handles chunk loading failures.
- * 
+ *
  * After a deploy, old cached HTML may reference JS chunks that no longer exist.
- * The server returns index.html (text/html) instead, causing:
- *   "'text/html' is not a valid JavaScript MIME type"
- * 
+ * The server returns a 404 or stale index.html, causing:
+ *   "Failed to fetch dynamically imported module: ..."
+ *
  * This utility:
- * 1. Retries the dynamic import once
- * 2. If retry fails, force-reloads the page to get fresh HTML with new chunk hashes
+ * 1. Retries the dynamic import once with a cache-busting query param
+ * 2. If retry fails, clears SW caches and force-reloads to get fresh HTML
  * 3. Uses sessionStorage to prevent infinite reload loops
  */
 export function lazyWithRetry<T extends React.ComponentType<any>>(
@@ -27,11 +27,30 @@ export function lazyWithRetry<T extends React.ComponentType<any>>(
                 // Mark that we're about to reload so we don't loop infinitely
                 sessionStorage.setItem(storageKey, '1');
 
-                // Force reload from server (bypass cache)
-                window.location.reload();
+                // Clear service worker caches so the reload fetches fresh assets
+                if ('caches' in window) {
+                    caches.keys().then(names => {
+                        names.forEach(name => caches.delete(name));
+                    });
+                }
 
-                // Return a never-resolving promise to prevent React from rendering an error
-                // while the page is reloading
+                // Unregister service workers to prevent them from serving stale HTML
+                if ('serviceWorker' in navigator) {
+                    navigator.serviceWorker.getRegistrations().then(registrations => {
+                        registrations.forEach(reg => reg.unregister());
+                    });
+                }
+
+                // Small delay to let cache clearing complete, then hard reload
+                setTimeout(() => {
+                    // Force a cache-busting reload by navigating with a query param
+                    const url = new URL(window.location.href);
+                    url.searchParams.set('_cb', Date.now().toString());
+                    window.location.replace(url.toString());
+                }, 100);
+
+                // Return a never-resolving promise to prevent React from rendering
+                // an error while the page is reloading
                 return new Promise<{ default: T }>(() => { });
             }
 
