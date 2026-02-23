@@ -11,9 +11,9 @@ export const de = {
     'nav.language': 'Sprache',
 
     // Landing - Hero
-    'hero.revolutionizing': 'Echter Service.',
-    'hero.bpoClaims': 'Keine Warteschleifen.',
-    'hero.description': 'Ihr autonomer KI-Mitarbeiter spart Ihnen €25.000 im Jahr und fängt jeden Anruf ab.\nPerfekt für das Gäubodenvolksfest-Chaos – 50% Bayern-Subventioniert durch Digitalbonus.',
+    'hero.revolutionizing': 'Orchestrierung autonomer',
+    'hero.bpoClaims': 'Enterprise-KI-Systeme',
+    'hero.description': 'Transformieren Sie die Arbeitsweise Ihres Unternehmens. Wir implementieren vollständig maßgeschneiderte agentische KI-Setups und robuste Black-Box-Modelle, die entwickelt wurden, um schwankende Nachfrage, individuelle Anwendungsfälle und komplexe Workflows nahtlos zu bewältigen.',
 
     // Landing - About (Section)
     'about.future': 'Wir bauen die Zukunft der',

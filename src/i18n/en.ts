@@ -11,9 +11,9 @@ export const en = {
     'nav.language': 'Language',
 
     // Landing - Hero
-    'hero.revolutionizing': 'Your Autonomous Voice &',
-    'hero.bpoClaims': 'Digital AI Concierge',
-    'hero.description': 'Stop losing revenue to missed calls. ClerkTree provides autonomous, human-sounding AI Voice Agents that handle Gäubodenvolksfest crowds, reservations, and customer support. State-subsidized up to 50% for Bavarian SMEs.',
+    'hero.revolutionizing': 'Orchestrating Enterprise',
+    'hero.bpoClaims': 'Autonomous AI Systems',
+    'hero.description': 'Transform how your enterprise operates. We deploy fully customized agentic AI setups and robust black-box models designed to handle volatile demand, custom use cases, and complex workflows seamlessly.',
 
     // Landing - About (Section)
     'about.future': 'Building the Future of',
