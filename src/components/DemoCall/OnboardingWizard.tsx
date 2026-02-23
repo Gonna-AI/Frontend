@@ -14,9 +14,6 @@ import {
     Loader2,
     Wand2,
     ArrowRight,
-    Shield,
-    Zap,
-    MessageSquare,
 } from 'lucide-react';
 import { cn } from '@/utils/cn';
 import { useDemoCall, KnowledgeBaseConfig } from '@/contexts/DemoCallContext';
@@ -289,10 +286,6 @@ export default function OnboardingWizard({ isDark = true, onComplete }: Onboardi
     };
 
     // Styles
-    const glassBg = isDark
-        ? 'bg-white/[0.03] border-white/[0.06]'
-        : 'bg-black/[0.02] border-black/[0.06]';
-
     const textPrimary = isDark ? 'text-white' : 'text-gray-900';
     const textSecondary = isDark ? 'text-white/60' : 'text-gray-500';
     const textMuted = isDark ? 'text-white/40' : 'text-gray-400';

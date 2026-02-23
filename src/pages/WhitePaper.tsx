@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Search, Menu, X, ArrowUpRight, ChevronRight, FileText } from 'lucide-react';
+import { Search, Menu, X, ArrowUpRight, FileText } from 'lucide-react';
 
 export default function WhitePaper() {
     const [activeSection, setActiveSection] = useState('executive-summary');

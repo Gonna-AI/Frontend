@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useCallback, useEffect, useRef, ReactNode } from 'react';
+import { createContext, useContext, useState, useCallback, useEffect, ReactNode } from 'react';
 import { supabase } from '../config/supabase';
 import { aiService } from '../services/aiService';
 import { useAuth } from './AuthContext';
@@ -157,7 +157,6 @@ const DemoCallContext = createContext<DemoCallContextType | undefined>(undefined
 const KNOWLEDGE_BASE_KEY_PREFIX = 'clerktree_knowledge_base_';
 const CALL_HISTORY_KEY_PREFIX = 'clerktree_call_history_';
 const ACTIVE_CALL_KEY_PREFIX = 'active_call_session_';
-const GROQ_SETTINGS_KEY_PREFIX = 'clerktree_groq_settings_';
 
 // Default Knowledge Base configuration
 const defaultKnowledgeBase: KnowledgeBaseConfig = {
@@ -259,28 +258,6 @@ interface SerializedCallHistoryItem {
   priority: PriorityLevel;
   summary: CallSummary;
   tags: string[];
-}
-
-// Helper to deserialize dates from storage
-function deserializeCallHistory(data: string): CallHistoryItem[] {
-  try {
-    const parsed = JSON.parse(data) as SerializedCallHistoryItem[];
-    return parsed.map((item) => ({
-      ...item,
-      date: new Date(item.date),
-      type: item.type || 'text', // Default to 'text' for backwards compatibility
-      messages: item.messages.map((m) => ({
-        ...m,
-        timestamp: new Date(m.timestamp)
-      })),
-      extractedFields: item.extractedFields.map((f) => ({
-        ...f,
-        extractedAt: new Date(f.extractedAt)
-      }))
-    }));
-  } catch {
-    return [];
-  }
 }
 
 export function DemoCallProvider({ children, initialAgentId }: { children: ReactNode; initialAgentId?: string }) {

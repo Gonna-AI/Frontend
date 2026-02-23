@@ -7,7 +7,6 @@ import {
     ChevronDown,
     Settings,
     Trash2,
-    Edit2,
     Users
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
@@ -61,9 +60,7 @@ export default function UserSessionSwitcher({
     const [sessions, setSessions] = useState<UserSession[]>([]);
     const [isOpen, setIsOpen] = useState(false);
     const [showCreateDialog, setShowCreateDialog] = useState(false);
-    const [showEditDialog, setShowEditDialog] = useState(false);
 
-    const [editingSession, setEditingSession] = useState<UserSession | null>(null);
     const [newSessionName, setNewSessionName] = useState('');
     const [newSessionDescription, setNewSessionDescription] = useState('');
     const [isLoading, setIsLoading] = useState(false);
@@ -169,42 +166,6 @@ export default function UserSessionSwitcher({
         }
     };
 
-    const updateSession = async () => {
-        if (!editingSession || !newSessionName.trim()) return;
-
-        setIsLoading(true);
-        try {
-            const updatedConfig = {
-                ...editingSession.config,
-                sessionName: newSessionName.trim(),
-                sessionDescription: newSessionDescription.trim()
-            };
-
-            const { error } = await supabase
-                .from('knowledge_base_config')
-                .update({
-                    config: updatedConfig,
-                    updated_at: new Date().toISOString()
-                })
-                .eq('id', editingSession.id);
-
-            if (error) {
-                console.error('Error updating session:', error);
-                return;
-            }
-
-            await loadSessions();
-            setShowEditDialog(false);
-            setEditingSession(null);
-            setNewSessionName('');
-            setNewSessionDescription('');
-        } catch (error) {
-            console.error('Failed to update session:', error);
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
     const deleteSession = async (sessionId: string) => {
         if (sessionId === currentUserId) {
             alert('Cannot delete current session. Switch to another session first.');
@@ -245,16 +206,6 @@ export default function UserSessionSwitcher({
         setIsOpen(false);
 
     };
-
-    const openEditDialog = (session: UserSession, e: React.MouseEvent) => {
-        e.stopPropagation();
-        setEditingSession(session);
-        setNewSessionName(session.name);
-        setNewSessionDescription(session.description || '');
-        setShowEditDialog(true);
-    };
-
-
 
     // Helper to get consistent color for session
     const getSessionColor = (id: string, isDark: boolean) => {
@@ -375,17 +326,6 @@ export default function UserSessionSwitcher({
 
                                     {/* Actions - Visible on hover only */}
                                     <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                        <button
-                                            onClick={(e) => openEditDialog(session, e)}
-                                            className={cn(
-                                                "p-1.5 rounded-lg transition-colors",
-                                                isDark
-                                                    ? "hover:bg-white/20 text-white/50 hover:text-white"
-                                                    : "hover:bg-black/10 text-black/50 hover:text-black"
-                                            )}
-                                        >
-                                            <Edit2 className="w-3.5 h-3.5" />
-                                        </button>
                                         {session.id !== currentUserId && (
                                             <button
                                                 onClick={(e) => {
