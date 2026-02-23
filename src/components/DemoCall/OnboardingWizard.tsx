@@ -44,7 +44,7 @@ const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 
 export default function OnboardingWizard({ isDark = true, onComplete }: OnboardingWizardProps) {
     const { t } = useLanguage();
-    const { updateKnowledgeBase, saveKnowledgeBase } = useDemoCall();
+    const { knowledgeBase, updateKnowledgeBase, saveKnowledgeBase } = useDemoCall();
 
     const [messages, setMessages] = useState<ChatMessage[]>([]);
     const [input, setInput] = useState('');
@@ -200,8 +200,16 @@ export default function OnboardingWizard({ isDark = true, onComplete }: Onboardi
         setIsDeploying(true);
 
         try {
+            // Build the full merged config BEFORE saving
+            // This avoids the race condition where updateKnowledgeBase (setState)
+            // hasn't flushed yet when saveKnowledgeBase reads from its closure
             updateKnowledgeBase(generatedConfig);
-            const success = await saveKnowledgeBase();
+
+            // Merge generated config with current knowledgeBase to create full config
+            const fullConfig = { ...knowledgeBase, ...generatedConfig } as KnowledgeBaseConfig;
+
+            // Pass the merged config directly to save, bypassing the stale closure
+            const success = await saveKnowledgeBase(fullConfig);
             if (success) {
                 setDeployed(true);
                 setTimeout(() => {
@@ -213,7 +221,7 @@ export default function OnboardingWizard({ isDark = true, onComplete }: Onboardi
         }
 
         setIsDeploying(false);
-    }, [generatedConfig, updateKnowledgeBase, saveKnowledgeBase, onComplete]);
+    }, [generatedConfig, knowledgeBase, updateKnowledgeBase, saveKnowledgeBase, onComplete]);
 
     // Handle file upload
     const handleFileUpload = useCallback(async (file: File) => {
@@ -342,46 +350,24 @@ export default function OnboardingWizard({ isDark = true, onComplete }: Onboardi
                                 {t('onboarding.introDesc')}
                             </p>
 
-                            {/* Feature pills */}
-                            <div className="flex flex-wrap justify-center gap-3 mb-10">
-                                {[
-                                    { icon: MessageSquare, label: t('onboarding.feature1') },
-                                    { icon: Zap, label: t('onboarding.feature2') },
-                                    { icon: Shield, label: t('onboarding.feature3') },
-                                ].map((feature, i) => (
-                                    <motion.div
-                                        key={i}
-                                        initial={{ opacity: 0, y: 10 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        transition={{ delay: 0.4 + i * 0.1 }}
-                                        className={cn(
-                                            "flex items-center gap-2 px-4 py-2 rounded-full border text-sm font-medium",
-                                            isDark
-                                                ? "bg-white/5 border-white/10 text-white/70"
-                                                : "bg-white border-gray-200 text-gray-600"
-                                        )}
-                                    >
-                                        <feature.icon className="w-4 h-4" />
-                                        {feature.label}
-                                    </motion.div>
-                                ))}
-                            </div>
-
                             <motion.button
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
                                 transition={{ delay: 0.7 }}
                                 onClick={startConversation}
                                 className={cn(
-                                    "inline-flex items-center gap-3 px-8 py-4 rounded-2xl text-base font-semibold transition-all duration-300 cursor-pointer shadow-lg",
-                                    "bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-purple-500/25",
-                                    "hover:from-purple-500 hover:to-blue-500 hover:shadow-xl hover:shadow-purple-500/40 hover:-translate-y-0.5",
-                                    "active:translate-y-0"
+                                    "relative inline-flex items-center gap-3 px-8 py-4 rounded-2xl text-base font-semibold transition-all duration-300 cursor-pointer overflow-hidden",
+                                    "backdrop-blur-xl border",
+                                    isDark
+                                        ? "bg-white/10 hover:bg-white/20 border-white/20 text-white shadow-lg shadow-black/20 hover:shadow-white/10"
+                                        : "bg-black/5 hover:bg-black/10 border-black/10 text-black shadow-lg shadow-black/5 hover:shadow-black/10",
+                                    "hover:scale-[1.02] active:scale-[0.98]"
                                 )}
                             >
-                                <Sparkles className="w-5 h-5" />
-                                {t('onboarding.startButton')}
-                                <ArrowRight className="w-5 h-5" />
+                                <div className="absolute inset-0 bg-gradient-to-tr from-white/5 to-transparent pointer-events-none" />
+                                <Sparkles className="w-5 h-5 relative z-10" />
+                                <span className="relative z-10">{t('onboarding.startButton')}</span>
+                                <ArrowRight className="w-5 h-5 relative z-10" />
                             </motion.button>
                         </motion.div>
                     </div>
@@ -444,7 +430,7 @@ export default function OnboardingWizard({ isDark = true, onComplete }: Onboardi
                                             msg.role === 'user'
                                                 ? cn(
                                                     "rounded-br-md shadow-md",
-                                                    "bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-purple-600/10"
+                                                    "bg-gradient-to-r from-blue-600/90 to-blue-500/90 text-white border border-blue-400/20 shadow-blue-500/20"
                                                 )
                                                 : cn(
                                                     "rounded-bl-md border shadow-sm",

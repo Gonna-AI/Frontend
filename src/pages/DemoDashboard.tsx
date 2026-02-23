@@ -20,6 +20,7 @@ import KeysView from '../components/DashboardViews/KeysView';
 import TeamView from '../components/DashboardViews/TeamView';
 import MonitorView from '../components/DashboardViews/MonitorView';
 import IntegrationView from '../components/DashboardViews/IntegrationView';
+import InitialSetupDialog from '../components/DashboardViews/InitialSetupDialog';
 
 import { AccessCodeProvider, useAccessCode } from '../contexts/AccessCodeContext';
 import AccessCodeDialog from '../components/AccessCodeDialog';
@@ -44,6 +45,14 @@ function DemoDashboardContent() {
   const handleSetActiveTab = (tab: string) => {
     if (!hasAccess && !alwaysAccessibleTabs.includes(tab)) return;
     setActiveTab(tab);
+  };
+
+  const handleSetupAction = (action: 'ai' | 'manual' | 'dismiss') => {
+    if (action === 'ai') {
+      setActiveTab('onboarding');
+    } else if (action === 'manual') {
+      setActiveTab('knowledge');
+    }
   };
 
   // Get tab label using translation keys matching the sidebar
@@ -135,6 +144,14 @@ function DemoDashboardContent() {
                     <p className={cn("text-sm", isDark ? "text-white/50" : "text-gray-500")}>Checking access...</p>
                   </div>
                 </div>
+              )}
+
+              {/* Initial Setup Popup for new users */}
+              {hasAccess && (
+                <InitialSetupDialog
+                  isDark={isDark}
+                  onSelectAction={handleSetupAction}
+                />
               )}
 
               {/* Dynamically render content based on activeTab */}

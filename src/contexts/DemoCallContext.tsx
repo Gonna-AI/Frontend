@@ -105,7 +105,7 @@ interface DemoCallContextType {
   // Knowledge Base configuration
   knowledgeBase: KnowledgeBaseConfig;
   updateKnowledgeBase: (config: Partial<KnowledgeBaseConfig>) => void;
-  saveKnowledgeBase: () => Promise<boolean>;
+  saveKnowledgeBase: (configOverride?: KnowledgeBaseConfig) => Promise<boolean>;
   loadKnowledgeBase: () => Promise<void>;
   addContextField: (field: ContextField) => void;
   updateContextField: (id: string, field: Partial<ContextField>) => void;
@@ -341,8 +341,8 @@ export function DemoCallProvider({ children, initialAgentId }: { children: React
           const { data: kbData, error: kbError } = await supabase
             .from('knowledge_base_config')
             .select('*')
-            .eq('user_id', configOwnerId)
-            .single();
+            .eq('id', configOwnerId)
+            .maybeSingle();
 
           if (!kbError && kbData?.config) {
             setKnowledgeBase(prev => ({ ...prev, ...(kbData.config as KnowledgeBaseConfig) }));
@@ -639,12 +639,13 @@ export function DemoCallProvider({ children, initialAgentId }: { children: React
   }, []);
 
   // Save knowledge base - user-specific storage
-  const saveKnowledgeBase = useCallback(async (): Promise<boolean> => {
+  const saveKnowledgeBase = useCallback(async (configOverride?: KnowledgeBaseConfig): Promise<boolean> => {
     try {
       const userId = getUserId();
+      const configToSave = configOverride || knowledgeBase;
 
       // Save to localStorage first (always works, fast)
-      localStorage.setItem(KNOWLEDGE_BASE_KEY, JSON.stringify(knowledgeBase));
+      localStorage.setItem(KNOWLEDGE_BASE_KEY, JSON.stringify(configToSave));
       console.log('✅ Saved knowledge base to localStorage');
 
       if (userId === 'anonymous') {
@@ -657,7 +658,7 @@ export function DemoCallProvider({ children, initialAgentId }: { children: React
         .upsert({
           id: userId,  // User-specific ID
           user_id: userId,
-          config: knowledgeBase,
+          config: configToSave,
           updated_at: new Date().toISOString()
         });
 
@@ -685,8 +686,8 @@ export function DemoCallProvider({ children, initialAgentId }: { children: React
       const { data, error } = await supabase
         .from('knowledge_base_config')
         .select('*')
-        .eq('user_id', configOwnerId)
-        .single();
+        .eq('id', configOwnerId)
+        .maybeSingle();
 
       if (!error && data?.config) {
         setKnowledgeBase(prev => ({ ...prev, ...(data.config as KnowledgeBaseConfig) }));
