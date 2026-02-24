@@ -90,8 +90,8 @@ class RAGService {
     // A helper method to split large texts into overlapping chunks
     chunkText(text: string, maxWords: number = 250): string[] {
         const words = text.split(/\s+/);
-        const chunks = [];
-        let currentChunk = [];
+        const chunks: string[] = [];
+        let currentChunk: string[] = [];
 
         for (let i = 0; i < words.length; i++) {
             currentChunk.push(words[i]);

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Search, Menu, X, Github, Moon, Sun, ChevronRight, Hash, Copy, ExternalLink } from 'lucide-react';
+import { Search, Menu, X, Moon, Sun, ChevronRight, Hash, Copy } from 'lucide-react';
 import { useTheme } from '../hooks/useTheme';
 import { ScrollArea } from '@base-ui/react/scroll-area';
 import { Accordion } from '@base-ui/react/accordion';

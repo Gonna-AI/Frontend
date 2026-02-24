@@ -39,6 +39,14 @@ import { ragService } from './ragService';
 
 import log from '../utils/logger';
 
+interface GroqResponse {
+  choices?: Array<{
+    message?: {
+      content?: string;
+    };
+  }>;
+}
+
 
 
 // Get current model and settings dynamically
@@ -608,14 +616,6 @@ Rules:
       try {
         log.debug(`🚀 Calling Groq API via proxy (model: ${settings.model}, temp: ${settings.temperature})...`);
 
-        interface GroqResponse {
-          choices?: Array<{
-            message?: {
-              content?: string;
-            };
-          }>;
-        }
-
         const data = await proxyJSON<GroqResponse>(ProxyRoutes.COMPLETIONS, {
           model: settings.model,
           messages: groqMessages,
@@ -1012,7 +1012,7 @@ Respond ONLY with valid JSON:
    * Get the service URL being used
    */
   getServiceUrl(): string {
-    return GROQ_API_URL;
+    return 'Groq API (via Proxy)';
   }
 }
 
