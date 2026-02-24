@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { cn } from '../../utils/cn';
 import { CreditCard, Check, Zap, Star, Building2, Rocket, Coins, ArrowRight, ShieldCheck, Sparkles } from 'lucide-react';
 import { useDemoCall } from '../../contexts/DemoCallContext';
+import { supabase } from '../../config/supabase';
 
 // ClerkTree Credits System - synced with UsageView
 const TOTAL_CREDITS = 50;
@@ -29,6 +30,93 @@ interface Plan {
 export default function BillingView({ isDark = true }: { isDark?: boolean }) {
     const { callHistory } = useDemoCall();
     const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
+    const [isProcessing, setIsProcessing] = useState(false);
+
+    const handleCheckout = async (planName: string) => {
+        if (planName !== 'Pro') return;
+        setIsProcessing(true);
+
+        try {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) {
+                alert('Please sign in to upgrade.');
+                return;
+            }
+
+            // 1. Create order
+            const res = await fetch(`https://xlzwfkgurrrspcdyqele.supabase.co/functions/v1/api-billing/create-order`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${session.access_token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ plan: billingCycle })
+            });
+            const order = await res.json();
+
+            if (!res.ok) throw new Error(order.error || 'Failed to create order');
+
+            // 2. Open Razorpay
+            const options = {
+                key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+                amount: order.amount,
+                currency: order.currency,
+                name: "ClerkTree",
+                description: `Pro Plan - ${billingCycle}`,
+                order_id: order.id,
+                handler: async function (response: any) {
+                    try {
+                        const verifyRes = await fetch(`https://xlzwfkgurrrspcdyqele.supabase.co/functions/v1/api-billing/verify-payment`, {
+                            method: 'POST',
+                            headers: {
+                                'Authorization': `Bearer ${session.access_token}`,
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                razorpay_order_id: response.razorpay_order_id,
+                                razorpay_payment_id: response.razorpay_payment_id,
+                                razorpay_signature: response.razorpay_signature,
+                                plan: billingCycle
+                            })
+                        });
+
+                        const verifyData = await verifyRes.json();
+                        if (verifyRes.ok && verifyData.success) {
+                            alert('Payment successful! Your credits have been updated.');
+                            window.location.reload();
+                        } else {
+                            alert('Payment verification failed. Please contact support.');
+                        }
+                    } catch (e) {
+                        console.error(e);
+                        alert('An error occurred during verification.');
+                    } finally {
+                        setIsProcessing(false);
+                    }
+                },
+                modal: {
+                    ondismiss: function () {
+                        setIsProcessing(false);
+                    }
+                },
+                theme: {
+                    color: "#10b981"
+                }
+            };
+
+            const rzp = new (window as any).Razorpay(options);
+            rzp.on('payment.failed', function (response: any) {
+                alert('Payment Failed: ' + response.error.description);
+                setIsProcessing(false);
+            });
+            rzp.open();
+
+        } catch (error: any) {
+            console.error(error);
+            alert(error.message || 'Failed to initiate checkout.');
+            setIsProcessing(false);
+        }
+    };
 
     // Calculate actual usage from call history
     const usageStats = useMemo(() => {
@@ -326,7 +414,8 @@ export default function BillingView({ isDark = true }: { isDark?: boolean }) {
                         </div>
 
                         <button
-                            disabled={plan.current}
+                            disabled={plan.current || isProcessing}
+                            onClick={() => plan.name === 'Pro' ? handleCheckout(plan.name) : undefined}
                             className={cn(
                                 "w-full py-4 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2",
                                 plan.current
@@ -336,7 +425,7 @@ export default function BillingView({ isDark = true }: { isDark?: boolean }) {
                                         : (isDark ? "bg-white text-black hover:bg-gray-200 transform hover:-translate-y-0.5" : "bg-black text-white hover:bg-gray-800 transform hover:-translate-y-0.5")
                             )}
                         >
-                            {plan.cta}
+                            {plan.name === 'Pro' && isProcessing ? 'Processing...' : plan.cta}
                             {!plan.current && <ArrowRight className="w-4 h-4" />}
                         </button>
                     </div>
