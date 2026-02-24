@@ -35,6 +35,7 @@ import { getGroqSettings, type GroqSettings } from '../components/DemoCall/GroqS
 // ============= GROQ API CONFIGURATION (PRIMARY) =============
 // API calls routed via secure proxy
 import { proxyJSON, ProxyRoutes } from './proxyClient';
+import { ragService } from './ragService';
 
 import log from '../utils/logger';
 
@@ -548,7 +549,16 @@ class GroqLLMService {
       { hasPhone, hasEmail } // Pass contact info status
     );
 
-    let prompt = `System: ${systemPrompt}\n\n`;
+    let ragContext = '';
+    if (knowledgeBase.id) {
+      log.debug(`🔍 Fetching RAG context for KB ID ${knowledgeBase.id}...`);
+      const contextDocs = await ragService.searchRelevantContext(userMessage, knowledgeBase.id, 3);
+      if (contextDocs && contextDocs.length > 0) {
+        ragContext = `\n\n=== RELEVANT KNOWLEDGE BASE CONTEXT ===\n${contextDocs.join('\n\n')}\n=======================================\nUse the above information to help answer the user.`;
+      }
+    }
+
+    let prompt = `System: ${systemPrompt}${ragContext}\n\n`;
 
     // 2. Conversation History (last 8 messages for better context)
     const recentHistory = conversationHistory.slice(-8);
@@ -582,7 +592,7 @@ Rules:
 
     // Build messages array for Groq API (OpenAI format)
     const groqMessages = [
-      { role: 'system' as const, content: systemPrompt },
+      { role: 'system' as const, content: systemPrompt + ragContext },
       ...recentHistory.map(msg => ({
         role: msg.speaker === 'agent' ? 'assistant' as const : 'user' as const,
         content: msg.speaker === 'agent' ? this.cleanFinalAnswer(msg.text) : msg.text

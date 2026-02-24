@@ -90,6 +90,7 @@ export interface ContextField {
 }
 
 export interface KnowledgeBaseConfig {
+  id?: string;
   systemPrompt: string;
   persona: string;
   greeting: string;
@@ -309,8 +310,9 @@ export function DemoCallProvider({ children, initialAgentId }: { children: React
             .maybeSingle();
 
           if (!kbError && kbData?.config) {
-            setKnowledgeBase(prev => ({ ...prev, ...(kbData.config as KnowledgeBaseConfig) }));
-            localStorage.setItem(KNOWLEDGE_BASE_KEY, JSON.stringify(kbData.config));
+            const kbId = kbData.id as string;
+            setKnowledgeBase(prev => ({ ...prev, ...(kbData.config as KnowledgeBaseConfig), id: kbId }));
+            localStorage.setItem(KNOWLEDGE_BASE_KEY, JSON.stringify({ ...kbData.config, id: kbId }));
             console.log(`✅ Loaded knowledge base from Supabase for ${initialAgentId ? 'agent' : 'user'}:`, configOwnerId);
           } else if (!initialAgentId) {
             // Only fall back to localStorage for the user's own config (not for agent configs)
@@ -654,8 +656,9 @@ export function DemoCallProvider({ children, initialAgentId }: { children: React
         .maybeSingle();
 
       if (!error && data?.config) {
-        setKnowledgeBase(prev => ({ ...prev, ...(data.config as KnowledgeBaseConfig) }));
-        localStorage.setItem(KNOWLEDGE_BASE_KEY, JSON.stringify(data.config));
+        const dataId = data.id as string;
+        setKnowledgeBase(prev => ({ ...prev, ...(data.config as KnowledgeBaseConfig), id: dataId }));
+        localStorage.setItem(KNOWLEDGE_BASE_KEY, JSON.stringify({ ...data.config, id: dataId }));
         console.log(`✅ Loaded knowledge base from Supabase for ${initialAgentId ? 'agent' : 'user'}:`, configOwnerId);
       }
     } catch (error) {

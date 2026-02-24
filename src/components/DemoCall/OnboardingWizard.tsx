@@ -19,6 +19,7 @@ import { cn } from '@/utils/cn';
 import { useDemoCall, KnowledgeBaseConfig } from '@/contexts/DemoCallContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/config/supabase';
+import { ragService } from '@/services/ragService';
 
 interface OnboardingWizardProps {
     isDark?: boolean;
@@ -205,9 +206,27 @@ export default function OnboardingWizard({ isDark = true, onComplete }: Onboardi
             // Merge generated config with current knowledgeBase to create full config
             const fullConfig = { ...knowledgeBase, ...generatedConfig } as KnowledgeBaseConfig;
 
-            // Pass the merged config directly to save, bypassing the stale closure
             const success = await saveKnowledgeBase(fullConfig);
             if (success) {
+                if (uploadedDoc && uploadedDoc.text) {
+                    try {
+                        const { data: { session } } = await supabase.auth.getSession();
+                        const kbId = fullConfig.id || session?.user.id;
+                        if (kbId) {
+                            setIsDeploying(true); // Keep UI showing deploying
+                            const chunks = ragService.chunkText(uploadedDoc.text, 500); // 500 words per chunk roughly
+
+                            // To avoid rate-limiting or freezing, process them sequentially
+                            for (const chunk of chunks) {
+                                await ragService.storeDocument(kbId, chunk, { source: uploadedDoc.name });
+                            }
+                            console.log(`✅ Stored ${chunks.length} vectorized chunks for RAG.`);
+                        }
+                    } catch (e) {
+                        console.error('Failed to embed document:', e);
+                    }
+                }
+
                 setDeployed(true);
                 setTimeout(() => {
                     onComplete?.();
