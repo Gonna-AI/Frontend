@@ -22,19 +22,6 @@ interface AIConfig {
   fallbackToMock: boolean;
 }
 
-// Conversation state tracking
-interface ConversationState {
-  hasGreeted: boolean;
-  hasName: boolean;
-  callerName: string | null;
-  hasPurpose: boolean;
-  purpose: string | null;
-  hasAskedAnythingElse: boolean;
-  turnCount: number;
-  detectedUrgency: PriorityLevel | null;
-  detectedCategory: string | null;
-  isWrappingUp: boolean;
-}
 
 // Import function calling types
 import type { ConversationAnalysis, SeriousnessResult, IssueTopicsResult } from './localLLMService';
@@ -88,28 +75,13 @@ class AIService {
   };
   private knowledgeBase: KnowledgeBaseConfig | null = null;
   private groqAvailable: boolean | null = null;
-  private conversationState: ConversationState = this.resetConversationState();
 
-  private resetConversationState(): ConversationState {
-    return {
-      hasGreeted: false,
-      hasName: false,
-      callerName: null,
-      hasPurpose: false,
-      purpose: null,
-      hasAskedAnythingElse: false,
-      turnCount: 0,
-      detectedUrgency: null,
-      detectedCategory: null,
-      isWrappingUp: false,
-    };
-  }
 
   /**
    * Reset conversation state for new call
    */
   resetState() {
-    this.conversationState = this.resetConversationState();
+    // Currently no-op as localLLMService handles state through conversation history directly
   }
 
   /**
@@ -438,6 +410,9 @@ class AIService {
         actionItems,
         followUpRequired: priority === 'critical' || priority === 'high',
         notes,
+        summaryText: notes,
+        topics: tags,
+        suggestions: actionItems.map(a => a.text),
       },
       tags,
     };

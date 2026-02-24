@@ -386,7 +386,12 @@ export function DemoCallProvider({ children, initialAgentId }: { children: React
             category: item.category,
             priority: item.priority || 'medium',
             tags: item.tags || [],
-            summary: item.summary || { mainPoints: [], sentiment: 'neutral', actionItems: [], followUpRequired: false, notes: '' }
+            summary: item.summary ? {
+              ...item.summary,
+              summaryText: item.summary.summaryText || item.summary.notes || 'No summary available',
+              topics: item.summary.topics || item.tags || [],
+              suggestions: item.summary.suggestions || (item.summary.actionItems || []).map((a: any) => a.text || '')
+            } : { mainPoints: [], sentiment: 'neutral', actionItems: [], followUpRequired: false, notes: '', summaryText: 'No summary available', topics: [], suggestions: [] }
           })) as CallHistoryItem[];
           setCallHistory(formattedHistory);
           console.log('✅ Loaded', formattedHistory.length, 'calls from Supabase');
@@ -445,7 +450,12 @@ export function DemoCallProvider({ children, initialAgentId }: { children: React
               category: newItem.category,
               priority: newItem.priority || 'medium',
               tags: newItem.tags || [],
-              summary: newItem.summary || { mainPoints: [], sentiment: 'neutral', actionItems: [], followUpRequired: false, notes: '' }
+              summary: newItem.summary ? {
+                ...newItem.summary,
+                summaryText: newItem.summary.summaryText || newItem.summary.notes || 'No summary available',
+                topics: newItem.summary.topics || newItem.tags || [],
+                suggestions: newItem.summary.suggestions || (newItem.summary.actionItems || []).map((a: any) => a.text || '')
+              } : { mainPoints: [], sentiment: 'neutral', actionItems: [], followUpRequired: false, notes: '', summaryText: 'No summary available', topics: [], suggestions: [] }
             };
 
             setCallHistory(prev => {
@@ -477,7 +487,12 @@ export function DemoCallProvider({ children, initialAgentId }: { children: React
               category: updatedItem.category,
               priority: updatedItem.priority || 'medium',
               tags: updatedItem.tags || [],
-              summary: updatedItem.summary || { mainPoints: [], sentiment: 'neutral', actionItems: [], followUpRequired: false, notes: '' }
+              summary: updatedItem.summary ? {
+                ...updatedItem.summary,
+                summaryText: updatedItem.summary.summaryText || updatedItem.summary.notes || 'No summary available',
+                topics: updatedItem.summary.topics || updatedItem.tags || [],
+                suggestions: updatedItem.summary.suggestions || (updatedItem.summary.actionItems || []).map((a: any) => a.text || '')
+              } : { mainPoints: [], sentiment: 'neutral', actionItems: [], followUpRequired: false, notes: '', summaryText: 'No summary available', topics: [], suggestions: [] }
             };
 
             setCallHistory(prev => prev.map(c =>
@@ -938,6 +953,9 @@ export function DemoCallProvider({ children, initialAgentId }: { children: React
             actionItems: [],
             followUpRequired: endedCall.priority === 'high' || endedCall.priority === 'critical',
             notes: '⏳ Generating summary...',
+            summaryText: '⏳ Generating summary...',
+            topics: [],
+            suggestions: []
           };
 
           // Create initial history item with placeholder
