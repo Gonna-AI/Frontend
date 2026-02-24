@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { cn } from '../../utils/cn';
-import { Check, Building2, Rocket, Coins, ArrowRight, ShieldCheck, Sparkles } from 'lucide-react';
+import { Check, Building2, Rocket, Coins, ArrowRight, ShieldCheck, Sparkles, X, AlertCircle } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useRazorpay } from 'react-razorpay';
 import { useDemoCall } from '../../contexts/DemoCallContext';
 import { supabase } from '../../config/supabase';
@@ -33,40 +34,50 @@ export default function BillingView({ isDark = true }: { isDark?: boolean }) {
     const { error, isLoading, Razorpay } = useRazorpay();
     const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
     const [isProcessing, setIsProcessing] = useState(false);
+    const [paymentStatus, setPaymentStatus] = useState<'none' | 'success' | 'failed'>('none');
+    const [paymentError, setPaymentError] = useState('');
+
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 
     const handleCheckout = async (planName: string) => {
         if (planName !== 'Pro') return;
         setIsProcessing(true);
+        setPaymentStatus('none');
+        setPaymentError('');
 
         try {
             const razorpayKey = import.meta.env.VITE_RAZORPAY_KEY_ID;
             if (!razorpayKey) {
-                alert('Razorpay Key ID is missing! Please fetch it from Razorpay Dashboard > API Keys and add VITE_RAZORPAY_KEY_ID to your .env.local file.');
+                setPaymentError('Razorpay Key ID is missing! Please fetch it from Razorpay Dashboard > API Keys and add VITE_RAZORPAY_KEY_ID to your .env.local file.');
+                setPaymentStatus('failed');
                 setIsProcessing(false);
                 return;
             }
 
             if (isLoading) {
-                alert('Razorpay SDK is still loading. Please try again in a few seconds.');
+                setPaymentError('Razorpay SDK is still loading. Please try again in few seconds.');
+                setPaymentStatus('failed');
                 setIsProcessing(false);
                 return;
             }
 
             if (error || !Razorpay) {
-                alert(`Razorpay SDK failed to load. error: ${error}`);
+                setPaymentError(`Razorpay SDK failed to load. error: ${error}`);
+                setPaymentStatus('failed');
                 setIsProcessing(false);
                 return;
             }
 
             const { data: { session } } = await supabase.auth.getSession();
-
             if (!session) {
-                alert('Please sign in to upgrade.');
+                setPaymentError('Please sign in to upgrade.');
+                setPaymentStatus('failed');
+                setIsProcessing(false);
                 return;
             }
 
-            // 1. Create order
-            const res = await fetch(`https://xlzwfkgurrrspcdyqele.supabase.co/functions/v1/api-billing/create-order`, {
+            // 1. Create order securely from Edge Function
+            const res = await fetch(`${supabaseUrl}/functions/v1/api-billing/create-order`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${session.access_token}`,
@@ -78,7 +89,7 @@ export default function BillingView({ isDark = true }: { isDark?: boolean }) {
 
             if (!res.ok) throw new Error(order.error || 'Failed to create order');
 
-            // 2. Open Razorpay
+            // 2. Open Razorpay Inline Modal
             const options = {
                 key: import.meta.env.VITE_RAZORPAY_KEY_ID,
                 amount: order.amount,
@@ -86,9 +97,11 @@ export default function BillingView({ isDark = true }: { isDark?: boolean }) {
                 name: "ClerkTree",
                 description: `Pro Plan - ${billingCycle}`,
                 order_id: order.id,
+                callback_url: window.location.origin + "/dashboard/billing?status=success", // Fallback for external page redirect
                 handler: async function (response: any) {
+                    // Payment succeeded inline, verify mathematically on the server
                     try {
-                        const verifyRes = await fetch(`https://xlzwfkgurrrspcdyqele.supabase.co/functions/v1/api-billing/verify-payment`, {
+                        const verifyRes = await fetch(`${supabaseUrl}/functions/v1/api-billing/verify-payment`, {
                             method: 'POST',
                             headers: {
                                 'Authorization': `Bearer ${session.access_token}`,
@@ -104,14 +117,13 @@ export default function BillingView({ isDark = true }: { isDark?: boolean }) {
 
                         const verifyData = await verifyRes.json();
                         if (verifyRes.ok && verifyData.success) {
-                            alert('Payment successful! Your credits have been updated.');
-                            window.location.reload();
+                            setPaymentStatus('success');
                         } else {
-                            alert('Payment verification failed. Please contact support.');
+                            throw new Error(verifyData.error || 'Signature verification failed over server.');
                         }
-                    } catch (e) {
-                        console.error(e);
-                        alert('An error occurred during verification.');
+                    } catch (err: any) {
+                        setPaymentError(err.message || 'Verification completely failed. Contact support.');
+                        setPaymentStatus('failed');
                     } finally {
                         setIsProcessing(false);
                     }
@@ -128,14 +140,16 @@ export default function BillingView({ isDark = true }: { isDark?: boolean }) {
 
             const rzp = new Razorpay(options);
             rzp.on('payment.failed', function (response: any) {
-                alert('Payment Failed: ' + response.error.description);
+                setPaymentError('Payment Failed: ' + response.error.description);
+                setPaymentStatus('failed');
                 setIsProcessing(false);
             });
             rzp.open();
 
         } catch (error: any) {
-            console.error(error);
-            alert(error.message || 'Failed to initiate checkout.');
+            console.error('Checkout error:', error);
+            setPaymentError(error.message || 'An unexpected payment error occurred.');
+            setPaymentStatus('failed');
             setIsProcessing(false);
         }
     };
@@ -436,8 +450,11 @@ export default function BillingView({ isDark = true }: { isDark?: boolean }) {
                         </div>
 
                         <button
-                            disabled={plan.current || isProcessing}
-                            onClick={() => plan.name === 'Pro' ? handleCheckout(plan.name) : undefined}
+                            disabled={plan.current || (plan.name === 'Pro' && isProcessing)}
+                            onClick={() => {
+                                if (plan.name === 'Pro') handleCheckout(plan.name);
+                                else if (plan.name === 'Enterprise') window.location.href = 'mailto:sales@clerktree.com';
+                            }}
                             className={cn(
                                 "w-full py-4 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2",
                                 plan.current
@@ -472,10 +489,13 @@ export default function BillingView({ isDark = true }: { isDark?: boolean }) {
                     <p className={cn("text-sm mb-6 leading-relaxed", isDark ? "text-white/60" : "text-black/60")}>
                         We offer dedicated GPU instances, VPC peering, and custom fine-tuning for large scale deployments. Let's talk about your specific requirements.
                     </p>
-                    <button className={cn(
-                        "w-full py-3 rounded-xl text-sm font-medium border transition-colors",
-                        isDark ? "border-white/10 hover:bg-white/5 text-white" : "border-black/10 hover:bg-gray-50 text-black"
-                    )}>
+                    <button
+                        onClick={() => window.location.href = 'mailto:enterprise@clerktree.com'}
+                        className={cn(
+                            "w-full py-3 rounded-xl text-sm font-medium border transition-colors",
+                            isDark ? "border-white/10 hover:bg-white/5 text-white" : "border-black/10 hover:bg-gray-50 text-black"
+                        )}
+                    >
                         Contact Enterprise Sales
                     </button>
                 </div>
@@ -507,14 +527,91 @@ export default function BillingView({ isDark = true }: { isDark?: boolean }) {
                             <span className={isDark ? "text-white/60" : "text-black/60"}>GDPR & CCPA Ready</span>
                         </div>
                     </div>
-                    <button className={cn(
-                        "w-full py-3 rounded-xl text-sm font-medium border transition-colors",
-                        isDark ? "border-white/10 hover:bg-white/5 text-white" : "border-black/10 hover:bg-gray-50 text-black"
-                    )}>
+                    <button
+                        onClick={() => window.location.href = '/whitepaper'}
+                        className={cn(
+                            "w-full py-3 rounded-xl text-sm font-medium border transition-colors",
+                            isDark ? "border-white/10 hover:bg-white/5 text-white" : "border-black/10 hover:bg-gray-50 text-black"
+                        )}
+                    >
                         View Security Documentation
                     </button>
                 </div>
             </div>
+
+            {/* Payment Showcase Modals */}
+            <AnimatePresence>
+                {paymentStatus !== 'none' && (
+                    <>
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm"
+                            onClick={() => paymentStatus === 'success' ? window.location.reload() : setPaymentStatus('none')}
+                        />
+                        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
+                            <motion.div
+                                initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                                animate={{ opacity: 1, scale: 1, y: 0 }}
+                                exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                                className={cn(
+                                    "w-full max-w-sm overflow-hidden p-6 rounded-3xl shadow-2xl relative pointer-events-auto",
+                                    isDark ? "bg-[#0A0A0A] border border-white/10" : "bg-white border border-black/10"
+                                )}
+                            >
+                                <button
+                                    onClick={() => paymentStatus === 'success' ? window.location.reload() : setPaymentStatus('none')}
+                                    className="absolute top-4 right-4 p-2 rounded-full hover:bg-white/10 transition-colors"
+                                >
+                                    <X className={cn("w-4 h-4", isDark ? "text-white/60" : "text-black/60")} />
+                                </button>
+
+                                <div className="flex flex-col items-center text-center mt-4">
+                                    {paymentStatus === 'success' ? (
+                                        <>
+                                            <div className="w-16 h-16 rounded-full bg-emerald-500/10 flex items-center justify-center mb-6 border border-emerald-500/20 text-emerald-500 relative">
+                                                <div className="absolute inset-0 bg-emerald-500/20 blur-xl rounded-full animate-pulse" />
+                                                <Check className="w-8 h-8" />
+                                            </div>
+                                            <h3 className={cn("text-2xl font-bold mb-2", isDark ? "text-white" : "text-black")}>Payment Successful</h3>
+                                            <p className={cn("text-sm mb-6", isDark ? "text-white/60" : "text-black/60")}>
+                                                Your subscription has been upgraded. 500 Credits have been instantaneously deposited to your account.
+                                            </p>
+                                            <button
+                                                onClick={() => window.location.reload()}
+                                                className="w-full py-3 px-4 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl transition-colors shadow-lg shadow-emerald-500/25"
+                                            >
+                                                Start Building
+                                            </button>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <div className="w-16 h-16 rounded-full bg-rose-500/10 flex items-center justify-center mb-6 border border-rose-500/20 text-rose-500 relative">
+                                                <div className="absolute inset-0 bg-rose-500/20 blur-xl rounded-full" />
+                                                <AlertCircle className="w-8 h-8" />
+                                            </div>
+                                            <h3 className={cn("text-2xl font-bold mb-2", isDark ? "text-white" : "text-black")}>Payment Failed</h3>
+                                            <p className={cn("text-sm mb-6", isDark ? "text-white/60" : "text-black/60")}>
+                                                {paymentError || 'There was an issue processing your payment. Please try again or contact support.'}
+                                            </p>
+                                            <button
+                                                onClick={() => setPaymentStatus('none')}
+                                                className={cn(
+                                                    "w-full py-3 px-4 font-bold rounded-xl transition-colors",
+                                                    isDark ? "bg-white/10 hover:bg-white/20 text-white" : "bg-black/5 hover:bg-black/10 text-black"
+                                                )}
+                                            >
+                                                Oh no! Try Again
+                                            </button>
+                                        </>
+                                    )}
+                                </div>
+                            </motion.div>
+                        </div>
+                    </>
+                )}
+            </AnimatePresence>
         </div>
     );
 }
