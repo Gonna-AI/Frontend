@@ -61,13 +61,40 @@ export default function CallHistoryList({ isDark = true, showFilters = true }: C
     return configs[priority] || configs.medium;
   };
 
-  // Filter call history
   const filteredHistory = callHistory.filter(call => {
     if (filterPriority !== 'all' && call.priority !== filterPriority) return false;
     if (filterType !== 'all' && call.type !== filterType) return false;
     if (searchQuery && !call.callerName.toLowerCase().includes(searchQuery.toLowerCase()) && !call.summary.summaryText?.toLowerCase().includes(searchQuery.toLowerCase())) return false;
     return true;
   });
+
+  const handleExportCSV = () => {
+    if (filteredHistory.length === 0) return;
+
+    const headers = ['Date', 'Caller Name', 'Type', 'Duration (s)', 'Priority', 'Category', 'Sentiment', 'Summary'];
+
+    const rows = filteredHistory.map(call => {
+      return [
+        formatDate(call.date).replace(/,/g, ''),
+        `"${call.callerName}"`,
+        call.type || 'text',
+        call.duration || 0,
+        call.priority,
+        call.category?.name || 'N/A',
+        call.summary.sentiment || 'neutral',
+        `"${(call.summary.summaryText || call.summary.notes || '').replace(/"/g, '""')}"`
+      ].join(',');
+    });
+
+    const csvContent = "data:text/csv;charset=utf-8," + [headers.join(','), ...rows].join('\n');
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `clerktree_history_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   return (
     <div className="space-y-6 max-w-[1600px] mx-auto pb-10">
@@ -82,10 +109,15 @@ export default function CallHistoryList({ isDark = true, showFilters = true }: C
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <button className={cn(
-            "flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-lg border transition-colors",
-            isDark ? "border-white/10 hover:bg-white/5 text-gray-300" : "border-black/10 hover:bg-gray-50 text-gray-700"
-          )}>
+          <button
+            onClick={handleExportCSV}
+            disabled={filteredHistory.length === 0}
+            className={cn(
+              "flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-lg border transition-colors",
+              filteredHistory.length === 0 ? "opacity-50 cursor-not-allowed" : "",
+              isDark ? "border-white/10 hover:bg-white/5 text-gray-300" : "border-black/10 hover:bg-gray-50 text-gray-700"
+            )}
+          >
             <Download className="w-4 h-4" />
             Export CSV
           </button>

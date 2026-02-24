@@ -4,6 +4,7 @@ import { TrendingUp, MessageSquare, Mic, Coins } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { useDemoCall } from '../../contexts/DemoCallContext';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { supabase } from '../../config/supabase';
 import DateRangePicker from './DateRangePicker';
 
 interface StatsCardProps {
@@ -81,6 +82,57 @@ export default function UsageView({ isDark = true }: { isDark?: boolean }) {
     const { callHistory, getAnalytics } = useDemoCall();
     const analytics = getAnalytics();
 
+    const [liveCredits, setLiveCredits] = useState<number | null>(null);
+    const [isRedeeming, setIsRedeeming] = useState(false);
+    const [redeemCode, setRedeemCode] = useState('');
+    const [redeemMessage, setRedeemMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+
+    const fetchLiveBalance = async () => {
+        try {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) return;
+            const res = await fetch(`https://xlzwfkgurrrspcdyqele.supabase.co/functions/v1/api-billing/balance`, {
+                headers: { 'Authorization': `Bearer ${session.access_token}` }
+            });
+            if (res.ok) {
+                const data = await res.json();
+                setLiveCredits(Number(data.balance));
+            }
+        } catch (e) {
+            console.error('Failed to fetch live balance', e);
+        }
+    };
+
+    const handleRedeem = async () => {
+        if (!redeemCode) return;
+        setIsRedeeming(true);
+        setRedeemMessage(null);
+        try {
+            const { data: { session } } = await supabase.auth.getSession();
+            const res = await fetch(`https://xlzwfkgurrrspcdyqele.supabase.co/functions/v1/api-billing/redeem`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${session?.access_token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ code: redeemCode })
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || 'Failed to redeem');
+            setRedeemMessage({ type: 'success', text: `Redeemed! Added ${data.added_amount} credits.` });
+            setRedeemCode('');
+            fetchLiveBalance();
+        } catch (e: any) {
+            setRedeemMessage({ type: 'error', text: e.message || 'Invalid code' });
+        } finally {
+            setIsRedeeming(false);
+        }
+    };
+
+    useMemo(() => {
+        fetchLiveBalance();
+    }, []);
+
     const [dateRange, setDateRange] = useState({
         start: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), // 30 days ago
         end: new Date()
@@ -98,11 +150,13 @@ export default function UsageView({ isDark = true }: { isDark?: boolean }) {
         // Calculate text requests
         const totalTextRequests = textChats.reduce((acc, call) => acc + call.messages.filter(m => m.speaker === 'user').length, 0);
 
-        // Calculate credits used
+        // Calculate credits used locally purely for visualization (not enforced, rely on backend liveCredits)
         const voiceCreditsUsed = totalVoiceMinutes * VOICE_CREDITS_PER_MINUTE;
         const textCreditsUsed = Math.ceil(totalTextRequests / 10) * TEXT_CREDITS_PER_10_REQUESTS;
         const totalCreditsUsed = voiceCreditsUsed + textCreditsUsed;
-        const creditsRemaining = Math.max(0, TOTAL_CREDITS - totalCreditsUsed);
+        const fallbackCreditsRemaining = Math.max(0, TOTAL_CREDITS - totalCreditsUsed);
+
+        const creditsRemaining = liveCredits !== null ? liveCredits : fallbackCreditsRemaining;
 
         return {
             voiceCalls: voiceCalls.length,
@@ -113,9 +167,9 @@ export default function UsageView({ isDark = true }: { isDark?: boolean }) {
             textCreditsUsed,
             totalCreditsUsed,
             creditsRemaining,
-            creditsUsedPercent: (totalCreditsUsed / TOTAL_CREDITS) * 100
+            creditsUsedPercent: liveCredits !== null ? 100 : (totalCreditsUsed / TOTAL_CREDITS) * 100
         };
-    }, [callHistory]);
+    }, [callHistory, liveCredits]);
 
     // Use actual activity data for the chart, aggregated by day
     const chartData = useMemo(() => {
@@ -240,23 +294,31 @@ export default function UsageView({ isDark = true }: { isDark?: boolean }) {
                         </div>
                     </div>
 
-                    <div className="flex flex-col items-end gap-2 min-w-[200px]">
-                        <div className="flex justify-between w-full text-xs">
-                            <span className={isDark ? "text-white/40" : "text-black/40"}>{t('usage.title')}</span>
-                            <span className={isDark ? "text-white" : "text-black"}>{usageStats.totalCreditsUsed} / {TOTAL_CREDITS}</span>
+                    <div className="flex flex-col items-end gap-2 min-w-[300px]">
+
+                        <div className="relative w-full">
+                            <div className="flex bg-transparent rounded-lg border focus-within:ring-2 focus-within:ring-emerald-500 overflow-hidden w-full transition-all border-black/10 dark:border-white/10">
+                                <input
+                                    type="text"
+                                    placeholder="Got a code?"
+                                    value={redeemCode}
+                                    onChange={e => setRedeemCode(e.target.value)}
+                                    className="px-3 py-1.5 bg-transparent border-none text-sm w-full outline-none dark:text-white"
+                                />
+                                <button
+                                    onClick={handleRedeem}
+                                    disabled={isRedeeming}
+                                    className="bg-emerald-500 text-white px-3 text-xs font-bold whitespace-nowrap"
+                                >
+                                    {isRedeeming ? '...' : 'REDEEM'}
+                                </button>
+                            </div>
+                            {redeemMessage && (
+                                <p className={cn("text-xs mt-1 absolute", redeemMessage.type === 'error' ? 'text-rose-500' : 'text-emerald-500')}>
+                                    {redeemMessage.text}
+                                </p>
+                            )}
                         </div>
-                        <div className={cn("w-full h-2 rounded-full overflow-hidden", isDark ? "bg-white/10" : "bg-black/5")}>
-                            <div
-                                className={cn(
-                                    "h-full rounded-full transition-all duration-500",
-                                    usageStats.creditsUsedPercent > 100 ? "bg-rose-500" : usageStats.creditsUsedPercent > 80 ? "bg-orange-500" : "bg-emerald-500"
-                                )}
-                                style={{ width: `${Math.min(usageStats.creditsUsedPercent, 100)}%` }}
-                            />
-                        </div>
-                        <a href="#billing" className={cn("text-xs font-medium hover:underline", isDark ? "text-white/60 hover:text-white" : "text-black/60 hover:text-black")}>
-                            {t('usage.upgradeCredits')} →
-                        </a>
                     </div>
                 </div>
             </div>
