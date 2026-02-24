@@ -37,6 +37,23 @@ export default function BillingView({ isDark = true }: { isDark?: boolean }) {
         setIsProcessing(true);
 
         try {
+            // Guarantee Razorpay SDK is loaded
+            if (!(window as any).Razorpay) {
+                await new Promise((resolve) => {
+                    const script = document.createElement('script');
+                    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+                    script.onload = () => resolve(true);
+                    script.onerror = () => resolve(false);
+                    document.body.appendChild(script);
+                });
+            }
+
+            if (!(window as any).Razorpay) {
+                alert('Razorpay SDK failed to load. Please check your internet connection or disable adblockers.');
+                setIsProcessing(false);
+                return;
+            }
+
             const { data: { session } } = await supabase.auth.getSession();
             if (!session) {
                 alert('Please sign in to upgrade.');
