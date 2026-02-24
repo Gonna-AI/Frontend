@@ -720,14 +720,13 @@ export function DemoCallProvider({ children, initialAgentId }: { children: React
     // Also register via edge function for global visibility
     try {
       const { data: { session: authSession } } = await supabase.auth.getSession();
-      await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/api-sessions`, {
+      await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/api-sessions/start`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${authSession?.access_token}`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          action: 'start',
           id: newCall.id,
           session_type: type,
           started_at: newCall.startTime.toISOString()
@@ -746,18 +745,17 @@ export function DemoCallProvider({ children, initialAgentId }: { children: React
     const updateHeartbeat = async () => {
       try {
         const { data: { session: authSession } } = await supabase.auth.getSession();
-        await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/api-sessions`, {
+        await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/api-sessions/heartbeat`, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${authSession?.access_token}`,
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({
-            action: 'heartbeat',
             id: currentCall.id
-          })
-        });
-        console.log('💓 Session heartbeat updated:', currentCall.id);
+          }),
+          keepalive: true,
+        }); console.log('💓 Session heartbeat updated:', currentCall.id);
       } catch (e) {
         // Silently fail - not critical
       }
@@ -799,14 +797,13 @@ export function DemoCallProvider({ children, initialAgentId }: { children: React
           localStorage.removeItem(ACTIVE_CALL_KEY);
 
           // Attempt cleanup via edge function
-          fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/api-sessions`, {
+          fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/api-sessions/end`, {
             method: 'POST',
             headers: {
               'Authorization': `Bearer ${token}`,
               'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-              action: 'end',
               id: currentCall.id
             }),
             keepalive: true,
@@ -908,14 +905,13 @@ export function DemoCallProvider({ children, initialAgentId }: { children: React
       // Also remove from active_sessions via edge function
       try {
         const { data: { session: authSession } } = await supabase.auth.getSession();
-        await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/api-sessions`, {
+        await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/api-sessions/end`, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${authSession?.access_token}`,
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({
-            action: 'end',
             id: endedCall.id
           })
         });
@@ -989,7 +985,7 @@ export function DemoCallProvider({ children, initialAgentId }: { children: React
                 'Authorization': `Bearer ${authSession?.access_token}`,
                 'Content-Type': 'application/json'
               },
-              body: JSON.stringify({ action: 'create', ...initialPayload })
+              body: JSON.stringify({ ...initialPayload })
             });
             console.log('📡 Call synced via edge function for real-time updates');
           } catch (syncError) {
@@ -1084,13 +1080,12 @@ export function DemoCallProvider({ children, initialAgentId }: { children: React
 
             const { data: { session: authSession } } = await supabase.auth.getSession();
             const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/api-history`, {
-              method: 'POST',
+              method: 'PUT',
               headers: {
                 'Authorization': `Bearer ${authSession?.access_token}`,
                 'Content-Type': 'application/json'
               },
               body: JSON.stringify({
-                action: 'upsert',
                 ...basePayload,
                 type: finalHistoryItem.type
               })

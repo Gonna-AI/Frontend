@@ -88,6 +88,7 @@ export default defineConfig({
     port: 5173,
   },
   build: {
+    modulePreload: false,
     cssCodeSplit: true,
     chunkSizeWarningLimit: 200, // Warn if any chunk exceeds 200KB
     rollupOptions: {
