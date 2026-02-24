@@ -11,8 +11,8 @@
   <meta http-equiv="Content-Security-Policy" content="
     default-src 'self';
     script-src 'self' 'unsafe-inline' https://www.googletagmanager.com;
-    style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
-    font-src 'self' https://fonts.gstatic.com;
+    style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://api.fontshare.com;
+    font-src 'self' https://fonts.gstatic.com https://cdn.fontshare.com;
     img-src 'self' data: blob: https:;
     media-src 'self' data: blob: https:;
     connect-src 'self' https://xlzwfkgurrrspcdyqele.supabase.co wss://xlzwfkgurrrspcdyqele.supabase.co https://*.sentry.io;
@@ -62,13 +62,9 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <link rel="canonical" href="https://clerktree.com/" />
 
-  <!-- Google Fonts - Urbanist (non-render-blocking) -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="preload" as="style"
-    href="https://fonts.googleapis.com/css2?family=Urbanist:wght@300;400;500;600;700;800;900&display=swap">
-  <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@300;400;500;600;700;800;900&display=swap"
-    rel="stylesheet" media="print" onload="this.media='all'">
+  <!-- Fontshare - Satoshi (10 Styles + Variable) -->
+  <link href="https://api.fontshare.com/v2/css?f[]=satoshi@1,2,900,700,500,300,400,901,701,501,301,401&display=swap"
+    rel="stylesheet">
 
   <!-- Structured Data for Google -->
   <script type="application/ld+json">

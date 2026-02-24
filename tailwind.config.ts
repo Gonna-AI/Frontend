@@ -10,7 +10,9 @@ module.exports = {
 	theme: {
 		extend: {
 			fontFamily: {
-				urbanist: ['Urbanist', 'sans-serif'],
+				sans: ['Satoshi', 'sans-serif'],
+				satoshi: ['Satoshi', 'sans-serif'],
+				urbanist: ['Satoshi', 'sans-serif'], // fallback for existing classes
 			},
 			colors: {
 				background: 'hsl(var(--background))',
