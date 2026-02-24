@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { cn } from '../../utils/cn';
 import { Check, Building2, Rocket, Coins, ArrowRight, ShieldCheck, Sparkles } from 'lucide-react';
+import { useRazorpay } from 'react-razorpay';
 import { useDemoCall } from '../../contexts/DemoCallContext';
 import { supabase } from '../../config/supabase';
 
@@ -29,6 +30,7 @@ interface Plan {
 
 export default function BillingView({ isDark = true }: { isDark?: boolean }) {
     const { callHistory } = useDemoCall();
+    const { error, isLoading, Razorpay } = useRazorpay();
     const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
     const [isProcessing, setIsProcessing] = useState(false);
 
@@ -37,24 +39,27 @@ export default function BillingView({ isDark = true }: { isDark?: boolean }) {
         setIsProcessing(true);
 
         try {
-            // Guarantee Razorpay SDK is loaded
-            if (!(window as any).Razorpay) {
-                await new Promise((resolve) => {
-                    const script = document.createElement('script');
-                    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
-                    script.onload = () => resolve(true);
-                    script.onerror = () => resolve(false);
-                    document.body.appendChild(script);
-                });
+            const razorpayKey = import.meta.env.VITE_RAZORPAY_KEY_ID;
+            if (!razorpayKey) {
+                alert('Razorpay Key ID is missing! Please fetch it from Razorpay Dashboard > API Keys and add VITE_RAZORPAY_KEY_ID to your .env.local file.');
+                setIsProcessing(false);
+                return;
             }
 
-            if (!(window as any).Razorpay) {
-                alert('Razorpay SDK failed to load. Please check your internet connection or disable adblockers.');
+            if (isLoading) {
+                alert('Razorpay SDK is still loading. Please try again in a few seconds.');
+                setIsProcessing(false);
+                return;
+            }
+
+            if (error || !Razorpay) {
+                alert(`Razorpay SDK failed to load. error: ${error}`);
                 setIsProcessing(false);
                 return;
             }
 
             const { data: { session } } = await supabase.auth.getSession();
+
             if (!session) {
                 alert('Please sign in to upgrade.');
                 return;
@@ -121,7 +126,7 @@ export default function BillingView({ isDark = true }: { isDark?: boolean }) {
                 }
             };
 
-            const rzp = new (window as any).Razorpay(options);
+            const rzp = new Razorpay(options);
             rzp.on('payment.failed', function (response: any) {
                 alert('Payment Failed: ' + response.error.description);
                 setIsProcessing(false);
