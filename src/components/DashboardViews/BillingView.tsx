@@ -277,7 +277,7 @@ export default function BillingView({ isDark = true }: { isDark?: boolean }) {
                 }
             };
 
-            const rzp = new Razorpay(options);
+            const rzp = Razorpay(options);
             rzp.on('payment.failed', function (response: any) {
                 setPaymentError('Payment Failed: ' + response.error.description);
                 setPaymentStatus('failed');
