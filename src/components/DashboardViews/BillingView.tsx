@@ -1,10 +1,90 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import { cn } from '../../utils/cn';
 import { Check, Building2, Rocket, Coins, ArrowRight, ShieldCheck, Sparkles, X, AlertCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useRazorpay } from 'react-razorpay';
 import { useDemoCall } from '../../contexts/DemoCallContext';
 import { supabase } from '../../config/supabase';
+
+// Custom Razorpay hook — replaces buggy react-razorpay library
+// The library's useRazorpay hook has a bug: if the checkout script is already
+// loaded (e.g. after navigating away and back), isLoading is set to true but
+// never reset, permanently blocking payments.
+declare global {
+    interface Window {
+        Razorpay: any;
+    }
+}
+
+const RAZORPAY_SCRIPT_URL = 'https://checkout.razorpay.com/v1/checkout.js';
+
+function useRazorpay() {
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState<string | undefined>();
+    const scriptLoadedRef = useRef(false);
+
+    useEffect(() => {
+        // Already available on window (previous mount loaded it)
+        if (typeof window !== 'undefined' && window.Razorpay) {
+            setIsLoading(false);
+            setError(undefined);
+            scriptLoadedRef.current = true;
+            return;
+        }
+
+        // Check if script tag already exists but hasn't finished loading
+        const existingScript = document.querySelector(
+            `script[src="${RAZORPAY_SCRIPT_URL}"]`
+        ) as HTMLScriptElement | null;
+
+        if (existingScript) {
+            // Script tag exists, wait for it to load
+            const onLoad = () => {
+                setIsLoading(false);
+                setError(undefined);
+                scriptLoadedRef.current = true;
+            };
+            const onError = () => {
+                setIsLoading(false);
+                setError('Failed to load Razorpay SDK');
+            };
+            // If it already fired, window.Razorpay would be set (handled above)
+            existingScript.addEventListener('load', onLoad);
+            existingScript.addEventListener('error', onError);
+            return () => {
+                existingScript.removeEventListener('load', onLoad);
+                existingScript.removeEventListener('error', onError);
+            };
+        }
+
+        // Load fresh
+        setIsLoading(true);
+        const script = document.createElement('script');
+        script.src = RAZORPAY_SCRIPT_URL;
+        script.async = true;
+        script.onload = () => {
+            setIsLoading(false);
+            setError(undefined);
+            scriptLoadedRef.current = true;
+        };
+        script.onerror = () => {
+            setIsLoading(false);
+            setError('Failed to load Razorpay SDK');
+        };
+        document.body.appendChild(script);
+    }, []);
+
+    const RazorpayClass = useCallback(
+        (options: any) => {
+            if (typeof window === 'undefined' || !window.Razorpay) {
+                throw new Error('Razorpay SDK not loaded');
+            }
+            return new window.Razorpay(options);
+        },
+        []
+    );
+
+    return { error, isLoading, Razorpay: scriptLoadedRef.current || (!isLoading && !error) ? RazorpayClass : null };
+}
 
 // ClerkTree Credits System - synced with UsageView
 const TOTAL_CREDITS = 50;
