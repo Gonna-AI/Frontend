@@ -50,9 +50,11 @@ export default function AuthPage() {
                 const { error } = await signIn(email, password);
                 if (error) {
                     if (error.message.includes('Email not confirmed')) {
-                        setError('Please confirm your email before signing in.');
+                        setError('Please confirm your email before signing in. Check your inbox (and spam folder) for the confirmation link.');
                     } else if (error.message.includes('Invalid login credentials')) {
                         setError('Invalid email or password.');
+                    } else if (error.message.toLowerCase().includes('load failed') || error.message.toLowerCase().includes('failed to fetch') || error.message.toLowerCase().includes('networkerror')) {
+                        setError('Network error connecting to authentication server. Please try clearing your browser cache and cookies, then try again.');
                     } else {
                         setError(error.message);
                     }

@@ -26,8 +26,15 @@ export default defineConfig({
         globIgnores: ['**/node_modules/**', '**/*.map'],
         // Navigation routes should always go to network first to get fresh index.html
         navigateFallback: '/index.html',
-        navigateFallbackAllowlist: [/^\/(?!\api)/],
+        navigateFallbackAllowlist: [/^\/(?!api)/],
+        // Prevent the service worker from handling auth callback routes
+        navigateFallbackDenylist: [/^\/auth\//, /^\/api\//],
         runtimeCaching: [
+          {
+            // NEVER cache Supabase API calls — always go to network
+            urlPattern: /^https:\/\/.*\.supabase\.co\/.*/i,
+            handler: 'NetworkOnly',
+          },
           {
             urlPattern: /\.(?:js|css)$/,
             handler: 'StaleWhileRevalidate',
