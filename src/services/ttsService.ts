@@ -294,73 +294,75 @@ class TTSService {
       onError?: (error: Error) => void;
     }
   ): Promise<void> {
-    return new Promise(async (resolve, reject) => {
+    return new Promise((resolve, reject) => {
       const abortController = new AbortController();
       const timeoutId = setTimeout(() => abortController.abort(), 120000); // 120 second timeout
 
-      try {
-        // Call TTS API
-        const response = await fetch(`${TTS_API_URL}/speak`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            text,
-            voice,
-            speed,
-          }),
-          signal: abortController.signal,
-        });
+      (async () => {
+        try {
+          // Call TTS API
+          const response = await fetch(`${TTS_API_URL}/speak`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              text,
+              voice,
+              speed,
+            }),
+            signal: abortController.signal,
+          });
 
-        clearTimeout(timeoutId);
+          clearTimeout(timeoutId);
 
-        if (!response.ok) {
-          const error = await response.json();
-          throw new Error(error.error || 'TTS API error');
+          if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.error || 'TTS API error');
+          }
+
+          // Get audio blob
+          const audioBlob = await response.blob();
+          const audioUrl = URL.createObjectURL(audioBlob);
+
+          // Create audio element
+          this.currentAudio = new Audio(audioUrl);
+
+          this.currentAudio.onloadeddata = () => {
+            options?.onStart?.();
+          };
+
+          this.currentAudio.onended = () => {
+            URL.revokeObjectURL(audioUrl);
+            this.currentAudio = null;
+            options?.onEnd?.();
+            resolve();
+          };
+
+          this.currentAudio.onerror = () => {
+            URL.revokeObjectURL(audioUrl);
+            this.currentAudio = null;
+            const error = new Error('Audio playback failed');
+            options?.onError?.(error);
+            reject(error);
+          };
+
+          // Play audio
+          await this.currentAudio.play();
+
+        } catch (error) {
+          clearTimeout(timeoutId);
+          // Check if it's an abort error
+          if (error instanceof Error && error.name === 'AbortError') {
+            const abortError = new Error('TTS request timed out or was aborted');
+            options?.onError?.(abortError);
+            reject(abortError);
+          } else {
+            options?.onError?.(error as Error);
+            reject(error);
+          }
         }
-
-        // Get audio blob
-        const audioBlob = await response.blob();
-        const audioUrl = URL.createObjectURL(audioBlob);
-
-        // Create audio element
-        this.currentAudio = new Audio(audioUrl);
-
-        this.currentAudio.onloadeddata = () => {
-          options?.onStart?.();
-        };
-
-        this.currentAudio.onended = () => {
-          URL.revokeObjectURL(audioUrl);
-          this.currentAudio = null;
-          options?.onEnd?.();
-          resolve();
-        };
-
-        this.currentAudio.onerror = () => {
-          URL.revokeObjectURL(audioUrl);
-          this.currentAudio = null;
-          const error = new Error('Audio playback failed');
-          options?.onError?.(error);
-          reject(error);
-        };
-
-        // Play audio
-        await this.currentAudio.play();
-
-      } catch (error) {
-        clearTimeout(timeoutId);
-        // Check if it's an abort error
-        if (error instanceof Error && error.name === 'AbortError') {
-          const abortError = new Error('TTS request timed out or was aborted');
-          options?.onError?.(abortError);
-          reject(abortError);
-        } else {
-          options?.onError?.(error as Error);
-          reject(error);
-        }
-      }
+      })();
     });
   }
 

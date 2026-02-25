@@ -426,7 +426,7 @@ class GroqTTSService {
 
         // Format phone number patterns (7+ consecutive digits with optional separators)
         // Matches patterns like: 123-456-7890, (123) 456-7890, +1 234 567 8901, etc.
-        formatted = formatted.replace(/(\+?\d[\d\s\-\(\)]{6,}\d)/g, (match) => {
+        formatted = formatted.replace(/(\+?\d[\d\s\-()]{6,}\d)/g, (match) => {
             // Extract just the digits
             const digits = match.replace(/\D/g, '');
             // Space-separate each digit for TTS
@@ -503,35 +503,36 @@ class GroqTTSService {
         vocalDirection: VocalDirection,
         options?: TTSOptions
     ): Promise<void> {
-        return new Promise(async (resolve, reject) => {
+        return new Promise((resolve, reject) => {
             const abortController = new AbortController();
             const timeoutId = setTimeout(() => abortController.abort(), 60000); // 60 second timeout
 
-            try {
-                // Ensure AudioContext is resumed (important for iOS)
-                if (this.audioContext && this.audioContext.state === 'suspended') {
-                    log.debug('🔊 Resuming suspended AudioContext before playback...');
-                    await this.audioContext.resume();
-                }
+            (async () => {
+                try {
+                    // Ensure AudioContext is resumed (important for iOS)
+                    if (this.audioContext && this.audioContext.state === 'suspended') {
+                        log.debug('🔊 Resuming suspended AudioContext before playback...');
+                        await this.audioContext.resume();
+                    }
 
-                // Prepend vocal direction if specified
-                const directionPrefix = VOCAL_DIRECTIONS[vocalDirection];
-                // Format text for better pronunciation (phone numbers, etc.)
-                const formattedText = this.formatTextForTTS(text);
-                const processedText = directionPrefix ? `${directionPrefix} ${formattedText}` : formattedText;
+                    // Prepend vocal direction if specified
+                    const directionPrefix = VOCAL_DIRECTIONS[vocalDirection];
+                    // Format text for better pronunciation (phone numbers, etc.)
+                    const formattedText = this.formatTextForTTS(text);
+                    const processedText = directionPrefix ? `${directionPrefix} ${formattedText}` : formattedText;
 
-                log.debug(`🎤 Synthesizing speech with Groq TTS (voice: ${voice}, direction: ${vocalDirection}, iOS: ${this.isIOS})`);
+                    log.debug(`🎤 Synthesizing speech with Groq TTS (voice: ${voice}, direction: ${vocalDirection}, iOS: ${this.isIOS})`);
 
-                // Use MP3 format for better iOS Safari compatibility
-                const audioBlob = await proxyBlob(ProxyRoutes.TTS, {
-                    model: GROQ_TTS_MODEL,
-                    input: processedText,
-                    voice: voice,
-                    response_format: 'wav', // Orpheus TTS only supports WAV format
-                    speed: speed,
-                }, { signal: abortController.signal });
+                    // Use MP3 format for better iOS Safari compatibility
+                    const audioBlob = await proxyBlob(ProxyRoutes.TTS, {
+                        model: GROQ_TTS_MODEL,
+                        input: processedText,
+                        voice: voice,
+                        response_format: 'wav', // Orpheus TTS only supports WAV format
+                        speed: speed,
+                    }, { signal: abortController.signal });
 
-                clearTimeout(timeoutId);
+                    clearTimeout(timeoutId);
 
                 /* 
                 // Error handling is done inside proxyBlob
@@ -723,18 +724,19 @@ class GroqTTSService {
                     reject(playError);
                 }
 
-            } catch (error) {
-                clearTimeout(timeoutId);
+                } catch (error) {
+                    clearTimeout(timeoutId);
 
-                if (error instanceof Error && error.name === 'AbortError') {
-                    const abortError = new Error('TTS request timed out');
-                    options?.onError?.(abortError);
-                    reject(abortError);
-                } else {
-                    options?.onError?.(error as Error);
-                    reject(error);
+                    if (error instanceof Error && error.name === 'AbortError') {
+                        const abortError = new Error('TTS request timed out');
+                        options?.onError?.(abortError);
+                        reject(abortError);
+                    } else {
+                        options?.onError?.(error as Error);
+                        reject(error);
+                    }
                 }
-            }
+            })();
         });
     }
 

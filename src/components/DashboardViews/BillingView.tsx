@@ -11,11 +11,55 @@ import { useLanguage } from '../../contexts/LanguageContext';
 // ────────────────────────────────────────────────────────────────
 declare global {
     interface Window {
-        Razorpay: any;
+        Razorpay?: RazorpayConstructor;
     }
 }
 
 const RAZORPAY_SCRIPT_URL = 'https://checkout.razorpay.com/v1/checkout.js';
+
+interface RazorpayPaymentSuccessResponse {
+    razorpay_order_id: string;
+    razorpay_payment_id: string;
+    razorpay_signature: string;
+}
+
+interface RazorpayPaymentFailedResponse {
+    error?: {
+        description?: string;
+    };
+}
+
+interface RazorpayOptions {
+    key: string;
+    amount: number;
+    currency: string;
+    name: string;
+    description: string;
+    order_id: string;
+    handler: (response: RazorpayPaymentSuccessResponse) => void | Promise<void>;
+    modal?: {
+        ondismiss?: () => void;
+    };
+    theme?: {
+        color?: string;
+    };
+}
+
+interface RazorpayInstance {
+    on: (eventName: 'payment.failed', handler: (response: RazorpayPaymentFailedResponse) => void) => void;
+    open: () => void;
+}
+
+interface RazorpayConstructor {
+    new (options: RazorpayOptions): RazorpayInstance;
+}
+
+const getErrorMessage = (error: unknown, fallback: string): string => {
+    if (error instanceof Error && error.message) {
+        return error.message;
+    }
+    return fallback;
+};
 
 function useRazorpay() {
     const [isLoading, setIsLoading] = useState(true);
@@ -52,7 +96,7 @@ function useRazorpay() {
     }, []);
 
     const RazorpayClass = useCallback(
-        (options: any) => {
+        (options: RazorpayOptions): RazorpayInstance => {
             if (typeof window === 'undefined' || !window.Razorpay) throw new Error('Razorpay SDK not loaded');
             return new window.Razorpay(options);
         },
@@ -111,6 +155,11 @@ export default function BillingView({ isDark = true }: { isDark?: boolean }) {
 
     // ── Fetch live subscription info from backend ──
     const fetchSubscriptionInfo = useCallback(async () => {
+        if (!supabaseUrl) {
+            setSubLoading(false);
+            return;
+        }
+
         try {
             const { data: { session } } = await supabase.auth.getSession();
             if (!session) return;
@@ -196,6 +245,13 @@ export default function BillingView({ isDark = true }: { isDark?: boolean }) {
                 return;
             }
 
+            if (!supabaseUrl) {
+                setPaymentError('Billing endpoint is not configured.');
+                setPaymentStatus('failed');
+                setIsProcessing(false);
+                return;
+            }
+
             if (isLoading) {
                 setPaymentError(t('billing.error.gatewayLoading'));
                 setPaymentStatus('failed');
@@ -238,7 +294,7 @@ export default function BillingView({ isDark = true }: { isDark?: boolean }) {
                 name: "ClerkTree",
                 description: `Pro Plan - ${billingCycle}`,
                 order_id: order.id,
-                handler: async function (response: any) {
+                handler: async function (response: RazorpayPaymentSuccessResponse) {
                     try {
                         const verifyRes = await fetch(`${supabaseUrl}/functions/v1/api-billing/verify-payment`, {
                             method: 'POST',
@@ -249,8 +305,7 @@ export default function BillingView({ isDark = true }: { isDark?: boolean }) {
                             body: JSON.stringify({
                                 razorpay_order_id: response.razorpay_order_id,
                                 razorpay_payment_id: response.razorpay_payment_id,
-                                razorpay_signature: response.razorpay_signature,
-                                plan: billingCycle
+                                razorpay_signature: response.razorpay_signature
                             })
                         });
 
@@ -262,8 +317,8 @@ export default function BillingView({ isDark = true }: { isDark?: boolean }) {
                         } else {
                             throw new Error(verifyData.error || t('billing.error.signatureFailed'));
                         }
-                    } catch (err: any) {
-                        setPaymentError(err.message || t('billing.error.verificationFailed'));
+                    } catch (err: unknown) {
+                        setPaymentError(getErrorMessage(err, t('billing.error.verificationFailed')));
                         setPaymentStatus('failed');
                     } finally {
                         setIsProcessing(false);
@@ -280,16 +335,17 @@ export default function BillingView({ isDark = true }: { isDark?: boolean }) {
             };
 
             const rzp = Razorpay(options);
-            rzp.on('payment.failed', function (response: any) {
-                setPaymentError('Payment Failed: ' + response.error.description);
+            rzp.on('payment.failed', function (response: RazorpayPaymentFailedResponse) {
+                const reason = response.error?.description || 'Unknown error';
+                setPaymentError('Payment Failed: ' + reason);
                 setPaymentStatus('failed');
                 setIsProcessing(false);
             });
             rzp.open();
 
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error('Checkout error:', error);
-            setPaymentError(error.message || 'An unexpected payment error occurred.');
+            setPaymentError(getErrorMessage(error, 'An unexpected payment error occurred.'));
             setPaymentStatus('failed');
             setIsProcessing(false);
         }

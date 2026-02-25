@@ -219,7 +219,7 @@ export default function BlogPost() {
                           <em {...props} className="italic text-white/90" />
                         ),
                         a: (props: any) => (
-                          <a {...props} target="_blank" rel="noreferrer" className="text-blue-400 hover:text-blue-300 underline decoration-dotted" />
+                          <a {...props} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:text-blue-300 underline decoration-dotted" />
                         ),
                         img: (props: any) => (
                           <img {...props} className="rounded-xl shadow-lg my-4 max-w-full" />
@@ -310,4 +310,3 @@ export default function BlogPost() {
     </div>
   );
 }
-

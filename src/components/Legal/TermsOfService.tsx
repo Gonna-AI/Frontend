@@ -1,9 +1,12 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { ArrowLeft } from 'lucide-react';
-// @ts-ignore
+import { sanitizeTrustedHtml } from '../../utils/sanitizeHtml';
+// @ts-expect-error - Vite raw import for static legal HTML content.
 import termsHtml from '../../terms&conditions/t&c.html?raw';
 
 const TermsOfService = () => {
+  const sanitizedTermsHtml = useMemo(() => sanitizeTrustedHtml(termsHtml), []);
+
   const cn = (...classes: (string | undefined | null | false)[]) => {
     return classes.filter(Boolean).join(' ');
   };
@@ -55,7 +58,7 @@ const TermsOfService = () => {
               className={cn(
                 "prose max-w-none",
               )}
-              dangerouslySetInnerHTML={{ __html: termsHtml }}
+              dangerouslySetInnerHTML={{ __html: sanitizedTermsHtml }}
             />
           </GlassContainer>
         </div>

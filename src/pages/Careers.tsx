@@ -5,6 +5,8 @@ import { useLanguage } from '../contexts/LanguageContext';
 import LanguageSwitcher from '../components/Layout/LanguageSwitcher';
 import Footer from '../components/Landing/Footer';
 
+const MAX_RESUME_SIZE_BYTES = 5 * 1024 * 1024; // 5 MB
+const ALLOWED_RESUME_EXTENSIONS = /\.(pdf|doc|docx)$/i;
 
 export default function Careers() {
   const navigate = useNavigate();
@@ -23,6 +25,7 @@ export default function Careers() {
   });
   const [submitted, setSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formError, setFormError] = useState('');
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -31,7 +34,23 @@ export default function Careers() {
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      setFormData(prev => ({ ...prev, resume: e.target.files![0] }));
+      const file = e.target.files[0];
+      const isAllowedExtension = ALLOWED_RESUME_EXTENSIONS.test(file.name);
+
+      if (!isAllowedExtension) {
+        setFormError('Please upload a PDF, DOC, or DOCX file.');
+        e.target.value = '';
+        return;
+      }
+
+      if (file.size > MAX_RESUME_SIZE_BYTES) {
+        setFormError('Resume must be 5 MB or smaller.');
+        e.target.value = '';
+        return;
+      }
+
+      setFormError('');
+      setFormData(prev => ({ ...prev, resume: file }));
     }
   };
 
@@ -39,7 +58,27 @@ export default function Careers() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setFormError('');
+
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL?.trim();
+    if (!supabaseUrl) {
+      setFormError('Application service is not configured. Please try again later.');
+      return;
+    }
+
+    if (!formData.resume) {
+      setFormError('Please upload your resume before submitting.');
+      return;
+    }
+
+    if (formData.resume.size > MAX_RESUME_SIZE_BYTES) {
+      setFormError('Resume must be 5 MB or smaller.');
+      return;
+    }
+
     setIsSubmitting(true);
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000);
 
     try {
       const body = new FormData();
@@ -55,8 +94,8 @@ export default function Careers() {
       if (formData.resume) body.append('resume', formData.resume);
 
       const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/api-careers`,
-        { method: 'POST', body }
+        `${supabaseUrl}/functions/v1/api-careers`,
+        { method: 'POST', body, signal: controller.signal }
       );
 
       const result = await response.json();
@@ -81,9 +120,14 @@ export default function Careers() {
       }, 3000);
 
     } catch (error) {
+      if (error instanceof Error && error.name === 'AbortError') {
+        setFormError('Request timed out. Please try again.');
+      } else {
+        setFormError('Failed to submit application. Please check your connection and try again.');
+      }
       console.error('Error submitting application:', error);
-      alert('Failed to submit application. Please check your connection and try again.');
     } finally {
+      clearTimeout(timeoutId);
       setIsSubmitting(false);
     }
   };
@@ -192,6 +236,11 @@ export default function Careers() {
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-6">
+                {formError ? (
+                  <div className="rounded-lg border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-200">
+                    {formError}
+                  </div>
+                ) : null}
                 {/* Full Name */}
                 <div>
                   <label htmlFor="fullName" className="block text-sm font-medium text-white/80 mb-2">
@@ -398,4 +447,3 @@ export default function Careers() {
     </div>
   );
 }
-

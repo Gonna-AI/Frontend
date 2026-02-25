@@ -10,8 +10,6 @@
 import { proxyBlob, ProxyRoutes } from './proxyClient';
 
 
-const ELEVENLABS_TTS_URL = 'https://api.elevenlabs.io/v1/text-to-speech';
-
 // German voice ID from ElevenLabs voice library
 const GERMAN_VOICE_ID = 'j46AY0iVY3oHcnZbgEJg';
 
@@ -75,7 +73,7 @@ class ElevenLabsTTSService {
         let formatted = text;
 
         // Format phone number patterns (7+ consecutive digits with optional separators)
-        formatted = formatted.replace(/(\+?\d[\d\s\-\(\)]{6,}\d)/g, (match) => {
+        formatted = formatted.replace(/(\+?\d[\d\s\-()]{6,}\d)/g, (match) => {
             // Extract just the digits
             const digits = match.replace(/\D/g, '');
             // Space-separate each digit for TTS

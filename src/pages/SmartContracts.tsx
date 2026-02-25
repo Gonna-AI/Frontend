@@ -3,35 +3,6 @@ import { FileCheck, Upload, CheckCircle, XCircle, Activity, User, Clock, FileTex
 import { documentApi, ticketApi, setTicketHeader } from '../config/api';
 import LanguageSwitcher from '../components/Layout/LanguageSwitcher';
 
-// Add a type for the AI analysis response
-interface AIAnalysis {
-  documentCompleteness?: {
-    missingInformation: string[];
-    clarificationNeeded: string[];
-  };
-  requiredActions?: {
-    specificItems: string[];
-    additionalDocuments: string[];
-  };
-  recommendations?: {
-    improvements: string[];
-    nextSteps: string[];
-  };
-  // For the older format
-  "Document Completeness"?: {
-    "Missing Information": string[];
-    "Clarification Needed": string[];
-  };
-  "Required Actions"?: {
-    "Specific Items": string[];
-    "Additional Documents": string[];
-  };
-  "Recommendations"?: {
-    "Improvements": string[];
-    "Next Steps": string[];
-  };
-}
-
 // Add new interface for blockchain verification
 interface BlockchainVerification {
   exists: boolean;
@@ -53,27 +24,10 @@ const DocumentVerification = () => {
   const [userInfo, setUserInfo] = useState(null);
   const [showTicketModal, setShowTicketModal] = useState(true);
   const [showUserDetails, setShowUserDetails] = useState(false);
-  const [aiProcessing, setAiProcessing] = useState(false);
   const [aiSuggestion, setAiSuggestion] = useState(null);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [documents, setDocuments] = useState([]);
   const [uploadStatus, setUploadStatus] = useState('');
-
-  // State for recent verifications
-  const [recentVerifications, setRecentVerifications] = useState([
-    {
-      documentName: "Medical_Report_123.pdf",
-      status: "Verified",
-      timestamp: "2024-12-30 14:30",
-      hash: "0x1234...5678",
-    },
-    {
-      documentName: "Insurance_Claim_456.pdf",
-      status: "Processing",
-      timestamp: "2024-12-30 14:25",
-      hash: "0x5678...9012",
-    }
-  ]);
 
   // Add new state for document stats
   const [documentStats, setDocumentStats] = useState({
@@ -85,6 +39,9 @@ const DocumentVerification = () => {
   const [blockchainProcessing, setBlockchainProcessing] = useState(false);
   const [blockchainResult, setBlockchainResult] = useState<BlockchainVerification | null>(null);
   const [documentHash, setDocumentHash] = useState('');
+  const [showHashVerification, setShowHashVerification] = useState(false);
+  const [showAIAlert, setShowAIAlert] = useState(true);
+  const [showHashAlert, setShowHashAlert] = useState(true);
 
   // Fetch documents on component mount and after operations
   const fetchDocuments = async () => {
@@ -118,7 +75,7 @@ const DocumentVerification = () => {
       // Cleanup interval on unmount
       return () => clearInterval(interval);
     }
-  }, []); // Empty dependency array
+  }, [userInfo]);
 
   // Add useEffect to fetch verification status
   useEffect(() => {
@@ -141,31 +98,6 @@ const DocumentVerification = () => {
       fetchVerificationStatus();
     }
   }, [userInfo]);
-
-  const simulateAiProcessing = async (file) => {
-    setAiProcessing(true);
-    try {
-      await new Promise(resolve => setTimeout(resolve, 2000));
-
-      const suggestion = {
-        documentType: "Medical Report",
-        confidence: 92,
-        sensitive: true,
-        recommendations: [
-          "Contains sensitive medical information",
-          "Properly formatted medical report",
-          "Digital signatures present"
-        ]
-      };
-
-      setAiSuggestion(suggestion);
-      setShowConfirmation(true);
-    } catch (error) {
-      console.error('AI processing failed:', error);
-    } finally {
-      setAiProcessing(false);
-    }
-  };
 
   const handleFileSelect = async (event) => {
     const file = event.target.files[0];
@@ -406,18 +338,6 @@ const DocumentVerification = () => {
       );
     }
 
-    if (aiProcessing) {
-      return (
-        <div className="flex flex-col items-center space-y-3 animate-pulse">
-          <div className="p-4 bg-purple-600/20 rounded-full">
-            <Activity className="h-8 w-8 text-purple-400" />
-          </div>
-          <span className="text-lg text-gray-300">Processing document...</span>
-          <span className="text-sm text-gray-500">AI analyzing content and security</span>
-        </div>
-      );
-    }
-
     if (aiSuggestion && showConfirmation) {
       // Handle both new and old response formats
       const analysis = {
@@ -490,7 +410,11 @@ const DocumentVerification = () => {
     }
 
     return (
-      <label htmlFor="fileInput" className="cursor-pointer">
+      <button
+        type="button"
+        onClick={() => document.getElementById('fileInput')?.click()}
+        className="w-full cursor-pointer"
+      >
         <div className="flex flex-col items-center space-y-3">
           <div className="p-4 bg-purple-600/20 rounded-full">
             <Upload className="h-8 w-8 text-purple-400" />
@@ -502,7 +426,7 @@ const DocumentVerification = () => {
             Support for PDF, DOC, DOCX, JPG, JPEG, PNG
           </span>
         </div>
-      </label>
+      </button>
     );
   };
 
@@ -551,10 +475,6 @@ const DocumentVerification = () => {
   );
 
   const renderBlockchainBox = () => {
-    const [showHashVerification, setShowHashVerification] = useState(false);
-    const [showAIAlert, setShowAIAlert] = useState(true);
-    const [showHashAlert, setShowHashAlert] = useState(true);
-
     return (
       <div className="bg-black/40 backdrop-blur-xl border border-blue-500/20 rounded-xl overflow-hidden shadow-xl mt-6">
         <div className="p-4 sm:p-8">
@@ -697,7 +617,7 @@ const DocumentVerification = () => {
                 </button>
               </div>
             ) : (
-              <label htmlFor="blockchainFileInput" className="cursor-pointer">
+              <>
                 <input
                   type="file"
                   id="blockchainFileInput"
@@ -710,6 +630,11 @@ const DocumentVerification = () => {
                   className="hidden"
                   accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
                 />
+                <button
+                  type="button"
+                  onClick={() => document.getElementById('blockchainFileInput')?.click()}
+                  className="w-full cursor-pointer"
+                >
                 <div className="flex flex-col items-center space-y-3">
                   <div className="p-4 bg-blue-600/20 rounded-full">
                     <Upload className="h-8 w-8 text-blue-400" />
@@ -721,7 +646,8 @@ const DocumentVerification = () => {
                     Secure, immutable verification with blockchain technology
                   </span>
                 </div>
-              </label>
+                </button>
+              </>
             )}
           </div>
         </div>

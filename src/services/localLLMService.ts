@@ -178,7 +178,7 @@ class GroqLLMService {
     if (groqOk) {
       log.debug('🚀 Using Groq API');
     } else {
-      log.error('❌ Groq API not available! Check your VITE_GROQ_API_KEY');
+      log.error('❌ Groq API not available! Check server-side proxy/edge function configuration.');
     }
 
     return this.isAvailable;
@@ -527,7 +527,7 @@ class GroqLLMService {
 
     // Check if Groq is available
     if (!this.groqAvailable) {
-      throw new Error('Groq API not available - check VITE_GROQ_API_KEY');
+      throw new Error('Groq API not available - check server-side proxy configuration.');
     }
 
     // Build the enhanced prompt string
@@ -566,37 +566,8 @@ class GroqLLMService {
       }
     }
 
-    let prompt = `System: ${systemPrompt}${ragContext}\n\n`;
-
     // 2. Conversation History (last 8 messages for better context)
     const recentHistory = conversationHistory.slice(-8);
-    for (const msg of recentHistory) {
-      const role = msg.speaker === 'agent' ? 'Assistant' : 'User';
-      // Clean previous agent messages to avoid feeding back garbage
-      const content = msg.speaker === 'agent' ? this.cleanFinalAnswer(msg.text) : msg.text;
-      if (content.trim() && content.length < 500) { // Limit length to avoid context stuffing
-        prompt += `${role}: ${content}\n`;
-      }
-    }
-
-    // 3. Current User Message with inline extraction instructions
-    prompt += `User: ${userMessage}\n`;
-    prompt += `\nRespond naturally to the caller, then AFTER your response, add a JSON block with any new information extracted.
-
-Format your response EXACTLY like this:
-[Your natural response to the caller here]
-
-\`\`\`json
-{"extracted": {"name": "caller name or null", "email": "email or null", "phone": "phone or null", "company": "company or null", "appointment_date": "date or null", "appointment_time": "time or null", "appointment_purpose": "purpose or null"}, "priority": "low|medium|high|critical", "category": "inquiry|support|complaint|appointment|other"}
-\`\`\`
-
-Rules:
-- Your spoken response comes FIRST (no internal notes!)
-- The JSON block comes AFTER, separated by a blank line
-- Only include fields that were mentioned in THIS message
-- Use null for fields not mentioned
-`;
-    prompt += `Assistant:`;
 
     // Build messages array for Groq API (OpenAI format)
     const groqMessages = [
@@ -693,8 +664,8 @@ Rules:
   async summarizeCall(
     messages: CallMessage[],
     extractedFields: ExtractedField[],
-    _category?: CallCategory,
-    _priority?: PriorityLevel
+    category?: CallCategory,
+    priority?: PriorityLevel
   ): Promise<{
     summary: string;
     mainPoints: string[];
@@ -738,6 +709,8 @@ Rules:
     ).join('\n');
 
     const extractedText = extractedFields.map(f => `${f.label}: ${f.value}`).join(', ');
+    const categoryHint = category ? `\nCategory Hint: ${category.name} (${category.id})` : '';
+    const priorityHint = priority ? `\nPriority Hint: ${priority}` : '';
 
     // Try to find caller name from extracted fields first
     let callerName = extractedFields.find(f => f.id === 'name')?.value;
@@ -774,7 +747,7 @@ Rules:
 TRANSCRIPT:
 ${transcript}
 
-${callerName ? `Caller: ${callerName}` : ''}${extractedText ? `\nExtracted Info: ${extractedText}` : ''}
+${callerName ? `Caller: ${callerName}` : ''}${extractedText ? `\nExtracted Info: ${extractedText}` : ''}${categoryHint}${priorityHint}
 
 Generate a detailed JSON response with:
 1. "summary": A 2-3 sentence overview of what happened in the call
