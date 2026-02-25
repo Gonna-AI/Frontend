@@ -25,18 +25,6 @@ import log from '../utils/logger';
 
 class ElevenLabsTTSService {
     private audioContext: AudioContext | null = null;
-    private isIOS: boolean = false;
-    private isMobile: boolean = false;
-
-    constructor() {
-        // Detect mobile devices
-        if (typeof window !== 'undefined' && typeof navigator !== 'undefined') {
-            const ua = navigator.userAgent.toLowerCase();
-            this.isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
-                (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-            this.isMobile = this.isIOS || /android/.test(ua) || /mobile/.test(ua);
-        }
-    }
 
     /**
      * Initialize AudioContext (should be called during user gesture)

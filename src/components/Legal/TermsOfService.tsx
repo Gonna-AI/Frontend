@@ -1,7 +1,6 @@
 import React, { useMemo } from 'react';
 import { ArrowLeft } from 'lucide-react';
 import { sanitizeTrustedHtml } from '../../utils/sanitizeHtml';
-// @ts-expect-error - Vite raw import for static legal HTML content.
 import termsHtml from '../../terms&conditions/t&c.html?raw';
 
 const TermsOfService = () => {
