@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
+import { useLanguage } from '../contexts/LanguageContext';
 import { Cookie, ChevronDown, ChevronRight, X, ExternalLink, Check } from 'lucide-react';
 
 declare global {
@@ -32,9 +33,8 @@ interface CookieCategory {
 const COOKIE_CATEGORIES: CookieCategory[] = [
     {
         id: 'necessary',
-        title: 'Strictly Necessary',
-        description:
-            'These cookies are essential for the website to function and cannot be switched off. They are usually set in response to actions you take such as logging in, setting your privacy preferences, or filling in forms. Without these cookies, the site cannot function properly.',
+        title: 'cookies.cat.necessary.title',
+        description: 'cookies.cat.necessary.desc',
         locked: true,
         defaultOn: true,
         cookies: [
@@ -50,9 +50,8 @@ const COOKIE_CATEGORIES: CookieCategory[] = [
     },
     {
         id: 'functional',
-        title: 'Functional',
-        description:
-            'These cookies enable enhanced functionality and personalization, such as remembering your language preference, region, and display settings. If you do not allow these cookies, some or all of these features may not function properly.',
+        title: 'cookies.cat.functional.title',
+        description: 'cookies.cat.functional.desc',
         locked: false,
         defaultOn: true,
         cookies: [
@@ -68,9 +67,8 @@ const COOKIE_CATEGORIES: CookieCategory[] = [
     },
     {
         id: 'analytics',
-        title: 'Analytics & Performance',
-        description:
-            'These cookies allow us to count visits and traffic sources so we can measure and improve the performance of our site. They help us understand which pages are the most and least popular and see how visitors move around the site. All information these cookies collect is aggregated and anonymous.',
+        title: 'cookies.cat.analytics.title',
+        description: 'cookies.cat.analytics.desc',
         locked: false,
         defaultOn: true,
         cookies: [
@@ -82,9 +80,8 @@ const COOKIE_CATEGORIES: CookieCategory[] = [
     },
     {
         id: 'marketing',
-        title: 'Marketing & Advertising',
-        description:
-            'These cookies may be set through our site by our advertising partners. They are used to build a profile of your interests and show you relevant advertisements on other sites. They do not directly store personal information but uniquely identify your browser and device.',
+        title: 'cookies.cat.marketing.title',
+        description: 'cookies.cat.marketing.desc',
         locked: false,
         defaultOn: false,
         cookies: [
@@ -95,9 +92,8 @@ const COOKIE_CATEGORIES: CookieCategory[] = [
     },
     {
         id: 'unclassified',
-        title: 'Unclassified',
-        description:
-            'Unclassified cookies are cookies that we are in the process of classifying, together with the providers of individual cookies.',
+        title: 'cookies.cat.unclassified.title',
+        description: 'cookies.cat.unclassified.desc',
         locked: false,
         defaultOn: false,
         cookies: [
@@ -152,12 +148,14 @@ function CategoryAccordion({
     expanded,
     onToggle,
     onExpand,
+    t,
 }: {
     cat: CookieCategory;
     checked: boolean;
     expanded: boolean;
     onToggle: () => void;
     onExpand: () => void;
+    t: (key: string) => string;
 }) {
     return (
         <div className="border border-neutral-800/60 rounded-xl overflow-hidden bg-neutral-900/20 transition-colors duration-200 hover:border-neutral-700/60">
@@ -168,7 +166,7 @@ function CategoryAccordion({
                     type="button"
                     onClick={onExpand}
                     className="p-1 -ml-1 text-neutral-500 hover:text-neutral-300 transition-colors flex-shrink-0"
-                    aria-label={expanded ? 'Collapse' : 'Expand'}
+                    aria-label={expanded ? t('common.collapse') || 'Collapse' : t('common.expand') || 'Expand'}
                 >
                     {expanded ? (
                         <ChevronDown className="w-5 h-5" />
@@ -182,14 +180,14 @@ function CategoryAccordion({
                     onClick={onExpand}
                     className="flex-1 text-left flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 min-w-0 cursor-pointer"
                 >
-                    <span className="text-sm font-medium text-white">{cat.title}</span>
+                    <span className="text-sm font-medium text-white">{t(cat.title)}</span>
                     <div className="flex items-center gap-2">
                         <span className="text-[11px] text-neutral-500 font-mono hidden sm:inline-block">
-                            {cat.cookies.length} cookie{cat.cookies.length !== 1 ? 's' : ''}
+                            {cat.cookies.length} {cat.cookies.length === 1 ? t('cookies.count').replace('{count}', '') : t('cookies.count_plural').replace('{count}', '')}
                         </span>
                         {cat.locked && (
                             <span className="text-[10px] text-neutral-400 bg-neutral-800 border border-neutral-700 px-1.5 py-0.5 roundedElement font-medium tracking-wide uppercase">
-                                Required
+                                {t('cookies.required')}
                             </span>
                         )}
                     </div>
@@ -213,7 +211,7 @@ function CategoryAccordion({
                     <div className="px-4 pb-4 pt-0 sm:px-5 sm:pb-5 space-y-4">
                         {/* Description */}
                         <p className="text-xs text-neutral-400 leading-relaxed pl-1 sm:pl-8 border-l-2 border-neutral-800 ml-1.5 sm:ml-0">
-                            {cat.description}
+                            {t(cat.description)}
                         </p>
 
                         {/* Cookie table */}
@@ -221,10 +219,10 @@ function CategoryAccordion({
                             <table className="w-full text-xs min-w-[500px]">
                                 <thead>
                                     <tr className="bg-neutral-900/80 border-b border-neutral-800">
-                                        <th className="text-left px-3 py-2 text-neutral-500 font-medium w-1/4">Name</th>
-                                        <th className="text-left px-3 py-2 text-neutral-500 font-medium w-1/4">Provider</th>
-                                        <th className="text-left px-3 py-2 text-neutral-500 font-medium w-1/3">Purpose</th>
-                                        <th className="text-left px-3 py-2 text-neutral-500 font-medium w-1/6">Expiry</th>
+                                        <th className="text-left px-3 py-2 text-neutral-500 font-medium w-1/4">{t('cookies.tableName')}</th>
+                                        <th className="text-left px-3 py-2 text-neutral-500 font-medium w-1/4">{t('cookies.tableProvider')}</th>
+                                        <th className="text-left px-3 py-2 text-neutral-500 font-medium w-1/3">{t('cookies.tablePurpose')}</th>
+                                        <th className="text-left px-3 py-2 text-neutral-500 font-medium w-1/6">{t('cookies.tableExpiry')}</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-neutral-800/50">
@@ -248,6 +246,7 @@ function CategoryAccordion({
 
 /* ─── Main Component ─── */
 export default function CookieConsent() {
+    const { t } = useLanguage();
     const [visible, setVisible] = useState(false);
     const [animateIn, setAnimateIn] = useState(false);
     const [view, setView] = useState<'banner' | 'preferences'>('banner');
@@ -397,14 +396,12 @@ export default function CookieConsent() {
                                 <div className="flex-1">
                                     <div className="flex items-center gap-2 mb-2 text-white font-medium">
                                         <Cookie className="w-4 h-4" />
-                                        <span>Cookie Preferences</span>
+                                        <span>{t('cookies.bannerTitle')}</span>
                                     </div>
                                     <p className="text-neutral-400 text-sm leading-relaxed max-w-3xl">
-                                        We use cookies to ensure you get the best experience on our website.
-                                        By clicking "Accept All", you consent to our use of cookies.
-                                        Manage settings to choose which cookies to allow. {' '}
+                                        {t('cookies.bannerDesc')} {' '}
                                         <Link to="/privacy-policy" className="underline text-white hover:text-white/80 underline-offset-2">
-                                            Privacy Policy
+                                            {t('cookies.privacyPolicy')}
                                         </Link>
                                     </p>
                                 </div>
@@ -415,19 +412,19 @@ export default function CookieConsent() {
                                         onClick={() => setView('preferences')}
                                         className="order-2 sm:order-1 px-4 py-2.5 rounded-lg border border-neutral-700 hover:border-neutral-500 text-neutral-300 hover:text-white text-sm font-medium transition-colors"
                                     >
-                                        Preferences
+                                        {t('cookies.preferences')}
                                     </button>
                                     <button
                                         onClick={rejectAll}
                                         className="order-3 sm:order-2 px-4 py-2.5 rounded-lg hover:bg-neutral-800 text-neutral-400 hover:text-white text-sm font-medium transition-colors"
                                     >
-                                        Reject All
+                                        {t('cookies.rejectAll')}
                                     </button>
                                     <button
                                         onClick={acceptAll}
                                         className="order-1 sm:order-3 px-6 py-2.5 rounded-lg bg-white hover:bg-neutral-200 text-black text-sm font-medium transition-colors shadow-lg shadow-white/5"
                                     >
-                                        Accept All
+                                        {t('cookies.acceptAll')}
                                     </button>
                                 </div>
                             </div>
@@ -455,7 +452,7 @@ export default function CookieConsent() {
                         <div>
                             <h2 className="text-lg font-semibold text-white flex items-center gap-2">
                                 <Cookie className="w-5 h-5" />
-                                Cookie Preferences
+                                {t('cookies.bannerTitle')}
                             </h2>
                         </div>
                         <button
@@ -472,16 +469,14 @@ export default function CookieConsent() {
                         <div className="py-4 space-y-6">
                             <div className="bg-neutral-900/30 p-4 rounded-xl border border-neutral-800/50">
                                 <p className="text-sm text-neutral-400 leading-relaxed">
-                                    Customise your preferences for cookies and similar technologies.
-                                    We respect your privacy and give you control over which cookies you accept.
-                                    Some are essential for the site to work, while others help us improve your experience.
+                                    {t('cookies.customiseDesc')}
                                 </p>
                                 <div className="mt-3 flex gap-4 text-xs">
                                     <Link to="/privacy-policy" className="flex items-center gap-1 text-white hover:text-neutral-300 transition-colors">
-                                        Privacy Policy <ExternalLink className="w-3 h-3" />
+                                        {t('cookies.privacyPolicy')} <ExternalLink className="w-3 h-3" />
                                     </Link>
                                     <Link to="/cookie-policy" className="flex items-center gap-1 text-white hover:text-neutral-300 transition-colors">
-                                        Cookie Policy <ExternalLink className="w-3 h-3" />
+                                        {t('cookies.cookiePolicy')} <ExternalLink className="w-3 h-3" />
                                     </Link>
                                 </div>
                             </div>
@@ -491,6 +486,7 @@ export default function CookieConsent() {
                                     <CategoryAccordion
                                         key={cat.id}
                                         cat={cat}
+                                        t={t}
                                         checked={cat.locked ? true : (consent[cat.id] ?? cat.defaultOn)}
                                         expanded={expandedCat === cat.id}
                                         onToggle={() =>
@@ -512,20 +508,20 @@ export default function CookieConsent() {
                                 onClick={rejectAll}
                                 className="w-full sm:w-auto px-5 py-2.5 rounded-lg border border-neutral-700 hover:border-neutral-500 text-neutral-400 hover:text-white font-medium transition-colors text-sm"
                             >
-                                Reject All
+                                {t('cookies.rejectAll')}
                             </button>
                             <div className="flex-1 hidden sm:block" />
                             <button
                                 onClick={savePreferences}
                                 className="w-full sm:w-auto px-5 py-2.5 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-white font-medium transition-colors text-sm"
                             >
-                                Save Preferences
+                                {t('cookies.savePreferences')}
                             </button>
                             <button
                                 onClick={acceptAll}
                                 className="w-full sm:w-auto px-6 py-2.5 rounded-lg bg-white hover:bg-neutral-200 text-black font-medium transition-colors shadow-lg shadow-white/10 text-sm"
                             >
-                                Accept All
+                                {t('cookies.acceptAll')}
                             </button>
                         </div>
                     </div>

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon } from 'lucide-react';
 import { cn } from '../../utils/cn';
+import { useLanguage } from '../../contexts/LanguageContext';
 
 interface DateRangePickerProps {
     startDate: Date;
@@ -10,6 +11,7 @@ interface DateRangePickerProps {
 }
 
 export default function DateRangePicker({ startDate, endDate, onChange, isDark = true }: DateRangePickerProps) {
+    const { language, t } = useLanguage();
     const [isOpen, setIsOpen] = useState(false);
     const [selection, setSelection] = useState<{ start: Date | null; end: Date | null }>({ start: startDate, end: endDate });
     const [viewDate, setViewDate] = useState(new Date(startDate)); // Month to show (1st of 2)
@@ -36,11 +38,13 @@ export default function DateRangePicker({ startDate, endDate, onChange, isDark =
     };
 
     const formatDate = (date: Date) => {
-        return new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', year: 'numeric' }).format(date);
+        const locale = language === 'de' ? 'de-DE' : 'en-US';
+        return new Intl.DateTimeFormat(locale, { month: 'short', day: 'numeric', year: 'numeric' }).format(date);
     };
 
     const formatMonthYear = (date: Date) => {
-        return new Intl.DateTimeFormat('en-US', { month: 'long', year: 'numeric' }).format(date);
+        const locale = language === 'de' ? 'de-DE' : 'en-US';
+        return new Intl.DateTimeFormat(locale, { month: 'long', year: 'numeric' }).format(date);
     };
 
     const handleDateClick = (date: Date) => {
@@ -115,7 +119,15 @@ export default function DateRangePicker({ startDate, endDate, onChange, isDark =
         let week = [];
 
         // Headers
-        const weekDays = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
+        const weekDays = [
+            t('dateRange.su'),
+            t('dateRange.mo'),
+            t('dateRange.tu'),
+            t('dateRange.we'),
+            t('dateRange.th'),
+            t('dateRange.fr'),
+            t('dateRange.sa')
+        ];
 
         return (
             <div className="w-[300px] p-2">

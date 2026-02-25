@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Database, Bot, MessageSquare, CheckCircle, Plus, Trash2, Save, Edit2, Check, X } from 'lucide-react';
 import { useTheme } from '../hooks/useTheme';
+import { useLanguage } from '../contexts/LanguageContext';
 import { cn } from '../utils/cn';
 import api from '../config/api';
 
@@ -29,13 +30,13 @@ interface SettingsData {
   };
 }
 
-const EditableInput = ({ 
-  value, 
-  onChange, 
-  onSave, 
-  isDark 
-}: { 
-  value: string; 
+const EditableInput = ({
+  value,
+  onChange,
+  onSave,
+  isDark
+}: {
+  value: string;
   onChange: (value: string) => void;
   onSave: () => void;
   isDark: boolean;
@@ -74,6 +75,7 @@ const EditableInput = ({
 
 export default function AISettings() {
   const { isDark } = useTheme();
+  const { t } = useLanguage();
   const [aiName, setAiName] = useState('');
   const [tone, setTone] = useState('Professional');
   const [length, setLength] = useState('Moderate');
@@ -131,13 +133,13 @@ export default function AISettings() {
       try {
         const response = await api.get<SettingsData>('/api/knowledge');
         const data = response.data;
-        
+
         // Update states with received values
         setAiName(data.ai_name || '');
         setTone(data.tone_of_voice || '');
         setLength(data.response_length || '');
         setEnableFollowUp(data.enable_follow_up);
-        
+
         // Handle knowledge base data
         const knowledge = data.custom_knowledge;
         const entries: KnowledgeBaseEntry[] = Object.entries(knowledge).map(([category, description]) => ({
@@ -146,11 +148,11 @@ export default function AISettings() {
           description,
           selected: false
         }));
-        
+
         setKnowledgeBase(entries);
       } catch (error) {
         setShowError(true);
-        setErrorMessage('Failed to fetch settings');
+        setErrorMessage(t('ai.fetchFailed'));
       }
     };
 
@@ -160,8 +162,8 @@ export default function AISettings() {
   const GlassContainer = ({ children, className }: { children: React.ReactNode, className?: string }) => (
     <div className={cn(
       "p-4 sm:p-6 rounded-2xl border transition-all",
-      isDark 
-        ? "bg-black/40 border-white/10" 
+      isDark
+        ? "bg-black/40 border-white/10"
         : "bg-black/5 border-black/10",
       className
     )}>
@@ -195,13 +197,13 @@ export default function AISettings() {
             selected: false
           }
         ]);
-        
+
         setNewCategory('');
         setNewDescription('');
         categoryInputRef.current?.focus();
       } catch (error) {
         setShowError(true);
-        setErrorMessage('Failed to add knowledge entry');
+        setErrorMessage(t('ai.addFailed'));
       }
     }
   };
@@ -222,7 +224,7 @@ export default function AISettings() {
       setShowDeleteWarning(null);
     } catch (error) {
       setShowError(true);
-      setErrorMessage('Failed to delete knowledge entry');
+      setErrorMessage(t('ai.deleteFailed'));
     }
   };
 
@@ -247,12 +249,12 @@ export default function AISettings() {
             ? { ...entry, description: editingValue }
             : entry
         ));
-        
+
         setEditingId(null);
         setEditingValue('');
       } catch (error) {
         setShowError(true);
-        setErrorMessage('Failed to update knowledge entry');
+        setErrorMessage(t('ai.updateFailed'));
       }
     }
   };
@@ -279,7 +281,7 @@ export default function AISettings() {
     const selectedEntries = knowledgeBase.filter(entry => entry.selected);
     if (selectedEntries.length === 0) {
       setShowError(true);
-      setErrorMessage('Error: No entry selected');
+      setErrorMessage(t('ai.noSelectionError'));
     } else {
       setShowSelectedDialog(true);
       setAllSelected(false);
@@ -294,7 +296,7 @@ export default function AISettings() {
       setShowMultipleDeleteWarning(true);
     } else {
       setShowError(true);
-      setErrorMessage('Error: No entries selected for deletion');
+      setErrorMessage(t('ai.noDeleteSelectionError'));
     }
   };
 
@@ -316,7 +318,7 @@ export default function AISettings() {
       setShowSelectAllText(false);
     } catch (error) {
       setShowError(true);
-      setErrorMessage('Failed to delete selected entries');
+      setErrorMessage(t('ai.multiDeleteFailed'));
     }
   };
 
@@ -337,7 +339,7 @@ export default function AISettings() {
       window.location.reload();
     } catch (error) {
       setShowError(true);
-      setErrorMessage('Failed to update settings');
+      setErrorMessage(t('ai.settingsUpdateFailed'));
     }
   };
 
@@ -365,14 +367,14 @@ export default function AISettings() {
       <div className={cn(
         "fixed top-0 left-0 right-0 h-[40vh] pointer-events-none",
         isDark ? "bg-gradient-to-b from-purple-500/20 via-blue-500/10 to-transparent"
-             : "bg-gradient-to-b from-blue-900/40 via-purple-200/30 to-transparent"
+          : "bg-gradient-to-b from-blue-900/40 via-purple-200/30 to-transparent"
       )} />
 
       <div className={`min-h-screen ${theme.text} p-6 transition-colors duration-200 relative z-10`}>
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-3">
-            <span className={`text-2xl font-bold ${theme.text}`}>Assistant Customisation</span>
+            <span className={`text-2xl font-bold ${theme.text}`}>{t('ai.customisation')}</span>
           </div>
         </div>
 
@@ -385,7 +387,7 @@ export default function AISettings() {
                 <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isDark ? "bg-black/40" : "bg-black/5"}`}>
                   <Database className={isDark ? "text-blue-400" : "text-blue-600"} />
                 </div>
-                <h2 className="text-lg font-semibold">Knowledge Base</h2>
+                <h2 className="text-lg font-semibold">{t('ai.knowledgeBase')}</h2>
               </div>
 
               {/* Add Entry Form */}
@@ -395,38 +397,35 @@ export default function AISettings() {
                   type="text"
                   value={newCategory}
                   onChange={(e) => setNewCategory(e.target.value)}
-                  placeholder="Category"
-                  className={`w-full p-4 rounded-xl transition-all focus:outline-none focus:ring-2 ${
-                    isDark
+                  placeholder={t('ai.categoryPlaceholder')}
+                  className={`w-full p-4 rounded-xl transition-all focus:outline-none focus:ring-2 ${isDark
                       ? "bg-black/40 border border-white/10 text-white placeholder-white/30 focus:ring-white/20"
                       : "bg-black/5 border border-black/10 text-black placeholder-black/30 focus:ring-black/20"
-                  }`}
+                    }`}
                 />
                 <input
                   ref={descriptionInputRef}
                   type="text"
                   value={newDescription}
                   onChange={(e) => setNewDescription(e.target.value)}
-                  placeholder="Description"
-                  className={`w-full p-4 rounded-xl transition-all focus:outline-none focus:ring-2 ${
-                    isDark
+                  placeholder={t('ai.descriptionPlaceholder')}
+                  className={`w-full p-4 rounded-xl transition-all focus:outline-none focus:ring-2 ${isDark
                       ? "bg-black/40 border border-white/10 text-white placeholder-white/30 focus:ring-white/20"
                       : "bg-black/5 border border-black/10 text-black placeholder-black/30 focus:ring-black/20"
-                  }`}
+                    }`}
                 />
               </div>
 
               {/* Add Entry Button */}
               <button
                 onClick={handleAddEntry}
-                className={`w-full p-4 rounded-xl mb-6 transition-colors flex items-center justify-center gap-2 ${
-                  isDark
+                className={`w-full p-4 rounded-xl mb-6 transition-colors flex items-center justify-center gap-2 ${isDark
                     ? "bg-white/10 hover:bg-white/20 text-white"
                     : "bg-black/10 hover:bg-black/20 text-black"
-                }`}
+                  }`}
               >
                 <Plus className="w-5 h-5" />
-                Add Entry
+                {t('ai.addEntry')}
               </button>
 
               {/* Select All and Confirm Selection Buttons */}
@@ -434,40 +433,37 @@ export default function AISettings() {
                 {showSelectAll && (
                   <button
                     onClick={handleSelectAllClick}
-                    className={`p-2 rounded-lg transition-colors flex items-center gap-2 ${
-                      isDark
+                    className={`p-2 rounded-lg transition-colors flex items-center gap-2 ${isDark
                         ? "bg-white/10 hover:bg-white/20 text-white"
                         : "bg-black/10 hover:bg-black/20 text-black"
-                    }`}
+                      }`}
                   >
                     {allSelected ? <X className="w-5 h-5" /> : <Check className="w-5 h-5" />}
-                    {showSelectAllText && "Select All"}
+                    {showSelectAllText && t('ai.selectAll')}
                   </button>
                 )}
                 {showConfirmSelection && (
                   <button
                     onClick={handleConfirmSelection}
-                    className={`p-2 rounded-lg transition-colors flex items-center gap-2 ${
-                      isDark
+                    className={`p-2 rounded-lg transition-colors flex items-center gap-2 ${isDark
                         ? "bg-white/10 hover:bg-white/20 text-white"
                         : "bg-black/10 hover:bg-black/20 text-black"
-                    }`}
+                      }`}
                   >
                     <Check className="w-5 h-5" />
-                    Confirm Selection
+                    {t('ai.confirmSelection')}
                   </button>
                 )}
                 {showConfirmSelection && (
                   <button
                     onClick={handleMultipleDelete}
-                    className={`p-2 rounded-lg transition-colors flex items-center gap-2 ${
-                      isDark
+                    className={`p-2 rounded-lg transition-colors flex items-center gap-2 ${isDark
                         ? "bg-red-500/20 hover:bg-red-500/30 text-red-300"
                         : "bg-red-500/10 hover:bg-red-500/20 text-red-600"
-                    }`}
+                      }`}
                   >
                     <Trash2 className="w-5 h-5" />
-                    Delete Selected
+                    {t('ai.deleteSelected')}
                   </button>
                 )}
               </div>
@@ -477,29 +473,27 @@ export default function AISettings() {
                 {knowledgeBase.map((entry) => (
                   <div
                     key={entry.id}
-                    className={`p-4 rounded-xl transition-all ${
-                      isDark
+                    className={`p-4 rounded-xl transition-all ${isDark
                         ? "bg-black/40 border border-white/10"
                         : "bg-black/5 border border-black/10"
-                    }`}
+                      }`}
                   >
                     <div className="grid grid-cols-1 md:grid-cols-[auto,1fr,auto] gap-4 items-center">
-                      <div 
-                        className={`w-6 h-6 rounded-md border flex items-center justify-center cursor-pointer ${
-                          entry.selected
+                      <div
+                        className={`w-6 h-6 rounded-md border flex items-center justify-center cursor-pointer ${entry.selected
                             ? isDark
                               ? "bg-white border-white"
                               : "bg-black border-black"
                             : isDark
                               ? "border-white/30"
                               : "border-black/30"
-                        }`}
+                          }`}
                         onClick={() => handleCheckboxChange(entry.id)}
                       >
                         {entry.selected && (
-                          <Check 
-                            className={`${isDark ? "text-black" : "text-white"}`} 
-                            size={16} 
+                          <Check
+                            className={`${isDark ? "text-black" : "text-white"}`}
+                            size={16}
                           />
                         )}
                       </div>
@@ -526,22 +520,20 @@ export default function AISettings() {
                         <>
                           <button
                             onClick={() => confirmDelete(entry.id)}
-                            className={`p-2 rounded-lg transition-colors ${
-                              isDark
+                            className={`p-2 rounded-lg transition-colors ${isDark
                                 ? "bg-red-500/20 hover:bg-red-500/30 text-red-300"
                                 : "bg-red-500/10 hover:bg-red-500/20 text-red-600"
-                            }`}
-                          >Confirm
+                              }`}
+                          >{t('ai.deleteConfirm')}
                           </button>
                           <button
                             onClick={cancelDelete}
-                            className={`p-2 rounded-lg transition-colors ${
-                              isDark
+                            className={`p-2 rounded-lg transition-colors ${isDark
                                 ? "bg-white/10 hover:bg-white/20 text-white"
                                 : "bg-black/10 hover:bg-black/20 text-black"
-                            }`}
+                              }`}
                           >
-                            Cancel
+                            {t('ai.deleteCancel')}
                           </button>
                         </>
                       ) : (
@@ -554,11 +546,10 @@ export default function AISettings() {
                                 handleStartEdit(entry);
                               }
                             }}
-                            className={`p-2 rounded-lg transition-colors ${
-                              isDark
+                            className={`p-2 rounded-lg transition-colors ${isDark
                                 ? "hover:bg-white/10 text-white"
                                 : "hover:bg-black/10 text-black"
-                            }`}
+                              }`}
                           >
                             {editingId === entry.id ? (
                               <Save className="w-5 h-5" />
@@ -568,11 +559,10 @@ export default function AISettings() {
                           </button>
                           <button
                             onClick={() => handleDeleteEntry(entry.id)}
-                            className={`p-2 rounded-lg transition-colors ${
-                              isDark
+                            className={`p-2 rounded-lg transition-colors ${isDark
                                 ? "hover:bg-white/10 text-white"
                                 : "hover:bg-black/10 text-black"
-                            }`}
+                              }`}
                           >
                             <Trash2 className="w-5 h-5" />
                           </button>
@@ -583,56 +573,51 @@ export default function AISettings() {
                 ))}
               </div>
               {showSelectedDialog && (
-                <div 
-                  className={`mt-6 p-4 rounded-xl text-center font-medium transition-opacity duration-300 ${
-                    isDark
+                <div
+                  className={`mt-6 p-4 rounded-xl text-center font-medium transition-opacity duration-300 ${isDark
                       ? "bg-green-500/20 text-green-300"
                       : "bg-green-500/20 text-green-700"
-                  }`}
+                    }`}
                 >
-                  Selected
+                  {t('ai.selected')}
                 </div>
               )}
               {showError && (
-                <div 
-                  className={`mt-6 p-4 rounded-xl text-center font-medium transition-opacity duration-300 ${
-                    isDark
+                <div
+                  className={`mt-6 p-4 rounded-xl text-center font-medium transition-opacity duration-300 ${isDark
                       ? "bg-red-500/20 text-red-300"
                       : "bg-red-500/20 text-red-700"
-                  }`}
+                    }`}
                 >
                   {errorMessage}
                 </div>
               )}
               {showMultipleDeleteWarning && (
-                <div 
-                  className={`mt-6 p-4 rounded-xl text-center font-medium transition-opacity duration-300 ${
-                    isDark
+                <div
+                  className={`mt-6 p-4 rounded-xl text-center font-medium transition-opacity duration-300 ${isDark
                       ? "bg-red-500/20 text-red-300"
                       : "bg-red-500/20 text-red-700"
-                  }`}
+                    }`}
                 >
-                  Are you sure you want to delete the selected entries?
+                  {t('ai.deleteWarning')}
                   <div className="mt-4 flex justify-center gap-4">
                     <button
                       onClick={confirmMultipleDelete}
-                      className={`p-2 rounded-lg transition-colors ${
-                        isDark
+                      className={`p-2 rounded-lg transition-colors ${isDark
                           ? "bg-red-500/20 hover:bg-red-500/30 text-red-300"
                           : "bg-red-500/10 hover:bg-red-500/20 text-red-600"
-                      }`}
+                        }`}
                     >
-                      Confirm Delete
+                      {t('ai.deleteSelectedConfirm')}
                     </button>
                     <button
                       onClick={() => setShowMultipleDeleteWarning(false)}
-                      className={`p-2 rounded-lg transition-colors ${
-                        isDark
+                      className={`p-2 rounded-lg transition-colors ${isDark
                           ? "bg-white/10 hover:bg-white/20 text-white"
                           : "bg-black/10 hover:bg-black/20 text-black"
-                      }`}
+                        }`}
                     >
-                      Cancel
+                      {t('ai.deleteCancel')}
                     </button>
                   </div>
                 </div>
@@ -648,48 +633,46 @@ export default function AISettings() {
                 <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isDark ? "bg-black/40" : "bg-black/5"}`}>
                   <Bot className={isDark ? "text-purple-400" : "text-purple-600"} />
                 </div>
-                <h2 className="text-lg font-semibold">Personality Settings</h2>
+                <h2 className="text-lg font-semibold">{t('ai.personality')}</h2>
               </div>
 
               {/* AI Name Input */}
               <div className="space-y-4">
                 <div>
                   <label className={`block text-sm font-medium mb-2 ${theme.secondaryText}`}>
-                    AI Name
+                    {t('ai.nameLabel')}
                   </label>
                   <input
                     type="text"
                     value={aiName}
                     onChange={(e) => setAiName(e.target.value)}
-                    className={`w-full p-4 rounded-xl transition-all focus:outline-none focus:ring-2 ${
-                      isDark
+                    className={`w-full p-4 rounded-xl transition-all focus:outline-none focus:ring-2 ${isDark
                         ? "bg-black/40 border border-white/10 text-white placeholder-white/30 focus:ring-white/20"
                         : "bg-black/5 border border-black/10 text-black placeholder-black/30 focus:ring-black/20"
-                    }`}
+                      }`}
                   />
                 </div>
 
                 {/* Tone Selection */}
                 <div>
                   <label className={`block text-sm font-medium mb-2 ${theme.secondaryText}`}>
-                    Tone of Voice
+                    {t('ai.toneLabel')}
                   </label>
                   <div className="grid grid-cols-2 gap-2">
                     {['Professional', 'Friendly', 'Casual', 'Formal'].map((option) => (
                       <button
                         key={option}
                         onClick={() => setTone(option)}
-                        className={`p-3 rounded-xl border text-sm font-medium transition-all ${
-                          tone === option 
+                        className={`p-3 rounded-xl border text-sm font-medium transition-all ${tone === option
                             ? isDark
                               ? "bg-black/60 border-white/20 text-white"
                               : "bg-black/10 border-black/20 text-black"
                             : isDark
                               ? "bg-black/40 border-white/10 text-white/60 hover:bg-black/50"
                               : "bg-black/5 border-black/10 text-black/60 hover:bg-black/10"
-                        }`}
+                          }`}
                       >
-                        {option}
+                        {t(`ai.tone.${option.toLowerCase()}`)}
                       </button>
                     ))}
                   </div>
@@ -703,30 +686,29 @@ export default function AISettings() {
                 <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isDark ? "bg-black/40" : "bg-black/5"}`}>
                   <MessageSquare className={isDark ? "text-emerald-400" : "text-emerald-600"} />
                 </div>
-                <h2 className="text-lg font-semibold">Response Settings</h2>
+                <h2 className="text-lg font-semibold">{t('ai.responseSettings')}</h2>
               </div>
 
               <div className="space-y-6">
                 <div>
                   <label className={`block text-sm font-medium mb-3 ${theme.secondaryText}`}>
-                    Response Length
+                    {t('ai.lengthLabel')}
                   </label>
                   <div className="flex flex-col sm:flex-row gap-3">
                     {['Concise', 'Moderate', 'Detailed'].map((option) => (
                       <button
                         key={option}
                         onClick={() => setLength(option)}
-                        className={`flex-1 p-3 rounded-xl border text-sm font-medium transition-all ${
-                          length === option 
+                        className={`flex-1 p-3 rounded-xl border text-sm font-medium transition-all ${length === option
                             ? isDark
                               ? "bg-black/60 border-white/20 text-white"
                               : "bg-black/10 border-black/20 text-black"
                             : isDark
                               ? "bg-black/40 border-white/10 text-white/60 hover:bg-black/50"
                               : "bg-black/5 border-black/10 text-black/60 hover:bg-black/10"
-                        }`}
+                          }`}
                       >
-                        {option}
+                        {t(`ai.length.${option.toLowerCase()}`)}
                       </button>
                     ))}
                   </div>
@@ -734,24 +716,22 @@ export default function AISettings() {
                 <div>
                   <button
                     onClick={() => setEnableFollowUp(!enableFollowUp)}
-                    className={`flex items-center gap-2 p-3 rounded-xl border transition-all w-full sm:w-auto ${
-                      enableFollowUp
+                    className={`flex items-center gap-2 p-3 rounded-xl border transition-all w-full sm:w-auto ${enableFollowUp
                         ? isDark
                           ? "bg-black/60 border-white/20 text-white"
                           : "bg-black/10 border-black/20 text-black"
                         : isDark
                           ? "bg-black/40 border-white/10 text-white/60"
                           : "bg-black/5 border-black/10 text-black/60"
-                    }`}
+                      }`}
                   >
-                    <CheckCircle className={`w-5 h-5 ${
-                      enableFollowUp 
-                        ? isDark 
-                          ? "text-white" 
+                    <CheckCircle className={`w-5 h-5 ${enableFollowUp
+                        ? isDark
+                          ? "text-white"
                           : "text-black"
                         : "opacity-0"
-                    }`} />
-                    <span>Enable follow-up questions</span>
+                      }`} />
+                    <span>{t('ai.enableFollowUp')}</span>
                   </button>
                 </div>
               </div>
@@ -760,13 +740,12 @@ export default function AISettings() {
             {/* Save Button */}
             <button
               onClick={handleSaveSettings}
-              className={`w-full py-3 px-4 rounded-xl transition-all font-medium ${
-                isDark
+              className={`w-full py-3 px-4 rounded-xl transition-all font-medium ${isDark
                   ? "bg-purple-500/20 hover:bg-purple-500/30 text-purple-300"
                   : "bg-purple-100 hover:bg-purple-200 text-purple-600"
-              }`}
+                }`}
             >
-              Save Settings
+              {t('ai.saveSettings')}
             </button>
           </div>
         </div>

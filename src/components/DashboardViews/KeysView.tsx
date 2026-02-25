@@ -3,6 +3,7 @@ import { cn } from '../../utils/cn';
 import { Plus, Copy, Trash2, Key, Shield, Check, ArrowRight, ArrowLeft, X, Eye, EyeOff, AlertTriangle, Zap, MessageSquare, Mic, Loader2 } from 'lucide-react';
 import { supabase } from '../../config/supabase';
 import { useAuth } from '../../contexts/AuthContext';
+import { useLanguage } from '../../contexts/LanguageContext';
 
 interface ApiKey {
     id: string;
@@ -18,6 +19,7 @@ interface ApiKey {
 type WizardStep = 'name' | 'permissions' | 'limits' | 'confirm' | 'created';
 
 export default function KeysView({ isDark = true }: { isDark?: boolean }) {
+    const { t } = useLanguage();
     const { user } = useAuth();
     const [keys, setKeys] = useState<ApiKey[]>([]);
     const [isLoadingKeys, setIsLoadingKeys] = useState(true);
@@ -132,7 +134,7 @@ export default function KeysView({ isDark = true }: { isDark?: boolean }) {
     };
 
     const deleteKey = async (id: string) => {
-        if (confirm('Are you sure you want to revoke this API key? This action cannot be undone.')) {
+        if (confirm(t('keys.revokeConfirm'))) {
             try {
                 const headers = await getAuthHeaders();
                 const res = await fetch(`${apiBase}?id=${id}`, {
@@ -219,14 +221,20 @@ export default function KeysView({ isDark = true }: { isDark?: boolean }) {
         }
     };
 
+    const translatedPermissions = (perm: string) => {
+        if (perm === 'voice') return t('keys.modal.voiceTitle');
+        if (perm === 'text') return t('keys.modal.textTitle');
+        return perm;
+    };
+
     return (
         <div className="space-y-6 max-w-[1600px] mx-auto pb-10">
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h1 className={cn("text-2xl font-bold", isDark ? "text-white" : "text-black")}>API Keys</h1>
+                    <h1 className={cn("text-2xl font-bold", isDark ? "text-white" : "text-black")}>{t('keys.title')}</h1>
                     <p className={cn("text-sm mt-1", isDark ? "text-white/60" : "text-black/60")}>
-                        Manage API keys for authenticating your applications
+                        {t('keys.subtitle')}
                     </p>
                 </div>
                 <div className="flex items-center gap-3">
@@ -237,7 +245,7 @@ export default function KeysView({ isDark = true }: { isDark?: boolean }) {
                             isDark ? "border-white/10 hover:bg-white/5 text-white" : "border-black/10 hover:bg-gray-50 text-black"
                         )}
                     >
-                        View Documentation
+                        {t('keys.viewDocs')}
                     </a>
                     <button
                         onClick={openCreateModal}
@@ -246,7 +254,7 @@ export default function KeysView({ isDark = true }: { isDark?: boolean }) {
                             isDark ? "bg-white text-black hover:bg-white/90" : "bg-black text-white hover:bg-black/90"
                         )}>
                         <Plus className="w-4 h-4" />
-                        Create API Key
+                        {t('keys.createKey')}
                     </button>
                 </div>
             </div>
@@ -261,11 +269,10 @@ export default function KeysView({ isDark = true }: { isDark?: boolean }) {
                 </div>
                 <div>
                     <h3 className={cn("text-sm font-medium", isDark ? "text-orange-400" : "text-orange-700")}>
-                        Keep Your API Keys Secure
+                        {t('keys.keepSecure')}
                     </h3>
                     <p className={cn("text-sm mt-1", isDark ? "text-orange-400/70" : "text-orange-600/80")}>
-                        Never share your API keys publicly or commit them to version control.
-                        Use environment variables to store keys securely in your applications.
+                        {t('keys.secureDesc')}
                     </p>
                 </div>
             </div>
@@ -284,10 +291,10 @@ export default function KeysView({ isDark = true }: { isDark?: boolean }) {
                             <Key className={cn("w-8 h-8", isDark ? "text-white/20" : "text-gray-300")} />
                         </div>
                         <h3 className={cn("text-lg font-semibold mb-1", isDark ? "text-white" : "text-black")}>
-                            No API Keys Yet
+                            {t('keys.noKeys')}
                         </h3>
                         <p className={cn("text-sm mb-6 max-w-sm mx-auto", isDark ? "text-white/60" : "text-black/60")}>
-                            Create your first API key to start integrating ClerkTree into your applications.
+                            {t('keys.noKeysDesc')}
                         </p>
                         <button
                             onClick={openCreateModal}
@@ -296,7 +303,7 @@ export default function KeysView({ isDark = true }: { isDark?: boolean }) {
                                 isDark ? "bg-white text-black hover:bg-white/90" : "bg-black text-white hover:bg-black/90"
                             )}>
                             <Plus className="w-4 h-4" />
-                            Create Your First Key
+                            {t('keys.createFirst')}
                         </button>
                     </div>
                 ) : (
@@ -306,11 +313,11 @@ export default function KeysView({ isDark = true }: { isDark?: boolean }) {
                             "grid grid-cols-12 px-6 py-3 border-b text-xs font-semibold uppercase tracking-wider",
                             isDark ? "bg-white/5 border-white/10 text-white/50" : "bg-gray-50 border-black/5 text-gray-500"
                         )}>
-                            <div className="col-span-3">Name</div>
-                            <div className="col-span-3">Key</div>
-                            <div className="col-span-2">Permissions</div>
-                            <div className="col-span-2">Created</div>
-                            <div className="col-span-2 text-right">Actions</div>
+                            <div className="col-span-3">{t('keys.table.name')}</div>
+                            <div className="col-span-3">{t('keys.table.key')}</div>
+                            <div className="col-span-2">{t('keys.table.permissions')}</div>
+                            <div className="col-span-2">{t('keys.table.created')}</div>
+                            <div className="col-span-2 text-right">{t('keys.table.actions')}</div>
                         </div>
 
                         {keys.map((key) => (
@@ -328,7 +335,7 @@ export default function KeysView({ isDark = true }: { isDark?: boolean }) {
                                         </div>
                                         <div>
                                             <p className={cn("font-medium text-sm", isDark ? "text-white" : "text-black")}>{key.name}</p>
-                                            <p className={cn("text-xs", isDark ? "text-white/40" : "text-gray-500")}>Rate limit: {key.rateLimit} req/min</p>
+                                            <p className={cn("text-xs", isDark ? "text-white/40" : "text-gray-500")}>{t('keys.rateLimitPrefix')} {key.rateLimit} {t('keys.rateLimitUnit')}</p>
                                         </div>
                                     </div>
                                 </div>
@@ -364,7 +371,7 @@ export default function KeysView({ isDark = true }: { isDark?: boolean }) {
                                 </div>
                                 <div className="col-span-2">
                                     <p className={cn("text-sm", isDark ? "text-white/80" : "text-gray-700")}>{key.created}</p>
-                                    <p className={cn("text-xs", isDark ? "text-white/40" : "text-gray-500")}>Last used: {key.lastUsed}</p>
+                                    <p className={cn("text-xs", isDark ? "text-white/40" : "text-gray-500")}>{t('keys.lastUsedPrefix')} {key.lastUsed}</p>
                                 </div>
                                 <div className="col-span-2 flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                     <button
@@ -373,7 +380,7 @@ export default function KeysView({ isDark = true }: { isDark?: boolean }) {
                                             "p-2 rounded-lg transition-colors border",
                                             isDark ? "border-white/10 hover:bg-white/10 text-white/60" : "border-gray-200 hover:bg-gray-100 text-gray-500"
                                         )}
-                                        title="Copy Key"
+                                        title={t('keys.copyKey')}
                                     >
                                         {copiedId === key.id ? <Check className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4" />}
                                     </button>
@@ -383,7 +390,7 @@ export default function KeysView({ isDark = true }: { isDark?: boolean }) {
                                             "p-2 rounded-lg transition-colors",
                                             isDark ? "hover:bg-red-500/10 text-white/40 hover:text-red-400" : "hover:bg-red-50 text-gray-400 hover:text-red-600"
                                         )}
-                                        title="Revoke Key"
+                                        title={t('keys.revokeKey')}
                                     >
                                         <Trash2 className="w-4 h-4" />
                                     </button>
@@ -408,11 +415,11 @@ export default function KeysView({ isDark = true }: { isDark?: boolean }) {
                         )}>
                             <div>
                                 <h2 className={cn("text-lg font-semibold", isDark ? "text-white" : "text-black")}>
-                                    Create API Key
+                                    {t('keys.modal.title')}
                                 </h2>
                                 {wizardStep !== 'created' && (
                                     <p className={cn("text-xs mt-0.5", isDark ? "text-white/40" : "text-black/40")}>
-                                        Step {getStepNumber()} of 4
+                                        {t('keys.stepOf').replace('{step}', getStepNumber().toString())}
                                     </p>
                                 )}
                             </div>
@@ -441,16 +448,16 @@ export default function KeysView({ isDark = true }: { isDark?: boolean }) {
                                 <div className="space-y-4">
                                     <div>
                                         <label className={cn("text-sm font-medium", isDark ? "text-white/80" : "text-gray-700")}>
-                                            Key Name
+                                            {t('keys.modal.nameLabel')}
                                         </label>
                                         <p className={cn("text-xs mt-1 mb-3", isDark ? "text-white/40" : "text-gray-500")}>
-                                            Give your API key a descriptive name to identify it later.
+                                            {t('keys.modal.nameDesc')}
                                         </p>
                                         <input
                                             type="text"
                                             value={newKeyName}
                                             onChange={(e) => setNewKeyName(e.target.value)}
-                                            placeholder="e.g., Production API Key"
+                                            placeholder={t('keys.modal.namePlaceholder')}
                                             className={cn(
                                                 "w-full px-4 py-3 rounded-lg text-sm border focus:outline-none focus:ring-2",
                                                 isDark
@@ -459,7 +466,7 @@ export default function KeysView({ isDark = true }: { isDark?: boolean }) {
                                             )}
                                         />
                                         {newKeyName.length > 0 && newKeyName.length < 3 && (
-                                            <p className="text-xs text-rose-400 mt-2">Name must be at least 3 characters</p>
+                                            <p className="text-xs text-rose-400 mt-2">{t('keys.modal.nameError')}</p>
                                         )}
                                     </div>
                                 </div>
@@ -470,10 +477,10 @@ export default function KeysView({ isDark = true }: { isDark?: boolean }) {
                                 <div className="space-y-4">
                                     <div>
                                         <label className={cn("text-sm font-medium", isDark ? "text-white/80" : "text-gray-700")}>
-                                            Permissions
+                                            {t('keys.modal.permLabel')}
                                         </label>
                                         <p className={cn("text-xs mt-1 mb-4", isDark ? "text-white/40" : "text-gray-500")}>
-                                            Select which services this API key can access.
+                                            {t('keys.modal.permDesc')}
                                         </p>
                                     </div>
 
@@ -499,8 +506,8 @@ export default function KeysView({ isDark = true }: { isDark?: boolean }) {
                                                 )} />
                                             </div>
                                             <div className="flex-1">
-                                                <p className={cn("font-medium text-sm", isDark ? "text-white" : "text-black")}>Voice API</p>
-                                                <p className={cn("text-xs", isDark ? "text-white/40" : "text-gray-500")}>Access to voice calls and TTS</p>
+                                                <p className={cn("font-medium text-sm", isDark ? "text-white" : "text-black")}>{t('keys.modal.voiceTitle')}</p>
+                                                <p className={cn("text-xs", isDark ? "text-white/40" : "text-gray-500")}>{t('keys.modal.voiceDesc')}</p>
                                             </div>
                                             <div className={cn(
                                                 "w-5 h-5 rounded-full border-2 flex items-center justify-center",
@@ -533,8 +540,8 @@ export default function KeysView({ isDark = true }: { isDark?: boolean }) {
                                                 )} />
                                             </div>
                                             <div className="flex-1">
-                                                <p className={cn("font-medium text-sm", isDark ? "text-white" : "text-black")}>Text API</p>
-                                                <p className={cn("text-xs", isDark ? "text-white/40" : "text-gray-500")}>Access to chat and text completions</p>
+                                                <p className={cn("font-medium text-sm", isDark ? "text-white" : "text-black")}>{t('keys.modal.textTitle')}</p>
+                                                <p className={cn("text-xs", isDark ? "text-white/40" : "text-gray-500")}>{t('keys.modal.textDesc')}</p>
                                             </div>
                                             <div className={cn(
                                                 "w-5 h-5 rounded-full border-2 flex items-center justify-center",
@@ -548,7 +555,7 @@ export default function KeysView({ isDark = true }: { isDark?: boolean }) {
                                     </div>
 
                                     {newKeyPermissions.length === 0 && (
-                                        <p className="text-xs text-rose-400">Select at least one permission</p>
+                                        <p className="text-xs text-rose-400">{t('keys.modal.permError')}</p>
                                     )}
                                 </div>
                             )}
@@ -558,10 +565,10 @@ export default function KeysView({ isDark = true }: { isDark?: boolean }) {
                                 <div className="space-y-4">
                                     <div>
                                         <label className={cn("text-sm font-medium", isDark ? "text-white/80" : "text-gray-700")}>
-                                            Rate Limit
+                                            {t('keys.modal.limitLabel')}
                                         </label>
                                         <p className={cn("text-xs mt-1 mb-4", isDark ? "text-white/40" : "text-gray-500")}>
-                                            Maximum requests per minute for this API key.
+                                            {t('keys.modal.limitDesc')}
                                         </p>
                                     </div>
 
@@ -576,9 +583,9 @@ export default function KeysView({ isDark = true }: { isDark?: boolean }) {
                                             className="w-full"
                                         />
                                         <div className="flex items-center justify-between">
-                                            <span className={cn("text-xs", isDark ? "text-white/40" : "text-gray-500")}>10 req/min</span>
-                                            <span className={cn("text-lg font-bold", isDark ? "text-white" : "text-black")}>{newKeyRateLimit} req/min</span>
-                                            <span className={cn("text-xs", isDark ? "text-white/40" : "text-gray-500")}>1000 req/min</span>
+                                            <span className={cn("text-xs", isDark ? "text-white/40" : "text-gray-500")}>10 {t('keys.rateLimitUnit')}</span>
+                                            <span className={cn("text-lg font-bold", isDark ? "text-white" : "text-black")}>{newKeyRateLimit} {t('keys.rateLimitUnit')}</span>
+                                            <span className={cn("text-xs", isDark ? "text-white/40" : "text-gray-500")}>1000 {t('keys.rateLimitUnit')}</span>
                                         </div>
                                     </div>
 
@@ -588,7 +595,7 @@ export default function KeysView({ isDark = true }: { isDark?: boolean }) {
                                     )}>
                                         <AlertTriangle className={cn("w-4 h-4 mt-0.5", isDark ? "text-orange-400" : "text-orange-500")} />
                                         <p className={cn("text-xs", isDark ? "text-white/60" : "text-gray-600")}>
-                                            Higher rate limits consume more credits. Free plan supports up to 100 req/min.
+                                            {t('keys.modal.limitWarning')}
                                         </p>
                                     </div>
                                 </div>
@@ -598,7 +605,7 @@ export default function KeysView({ isDark = true }: { isDark?: boolean }) {
                             {wizardStep === 'confirm' && (
                                 <div className="space-y-4">
                                     <p className={cn("text-sm", isDark ? "text-white/60" : "text-gray-600")}>
-                                        Review your API key configuration before creating.
+                                        {t('keys.modal.confirmDesc')}
                                     </p>
 
                                     <div className={cn(
@@ -606,11 +613,11 @@ export default function KeysView({ isDark = true }: { isDark?: boolean }) {
                                         isDark ? "bg-white/5 border-white/10 divide-white/10" : "bg-gray-50 border-gray-200 divide-gray-200"
                                     )}>
                                         <div className="p-4 flex justify-between">
-                                            <span className={cn("text-sm", isDark ? "text-white/60" : "text-gray-500")}>Name</span>
+                                            <span className={cn("text-sm", isDark ? "text-white/60" : "text-gray-500")}>{t('keys.table.name')}</span>
                                             <span className={cn("text-sm font-medium", isDark ? "text-white" : "text-black")}>{newKeyName}</span>
                                         </div>
                                         <div className="p-4 flex justify-between items-center">
-                                            <span className={cn("text-sm", isDark ? "text-white/60" : "text-gray-500")}>Permissions</span>
+                                            <span className={cn("text-sm", isDark ? "text-white/60" : "text-gray-500")}>{t('keys.table.permissions')}</span>
                                             <div className="flex gap-1">
                                                 {newKeyPermissions.map(p => (
                                                     <span key={p} className={cn(
@@ -625,8 +632,8 @@ export default function KeysView({ isDark = true }: { isDark?: boolean }) {
                                             </div>
                                         </div>
                                         <div className="p-4 flex justify-between">
-                                            <span className={cn("text-sm", isDark ? "text-white/60" : "text-gray-500")}>Rate Limit</span>
-                                            <span className={cn("text-sm font-medium", isDark ? "text-white" : "text-black")}>{newKeyRateLimit} req/min</span>
+                                            <span className={cn("text-sm", isDark ? "text-white/60" : "text-gray-500")}>{t('keys.modal.limitLabel')}</span>
+                                            <span className={cn("text-sm font-medium", isDark ? "text-white" : "text-black")}>{newKeyRateLimit} {t('keys.rateLimitUnit')}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -639,9 +646,9 @@ export default function KeysView({ isDark = true }: { isDark?: boolean }) {
                                         <div className="w-12 h-12 rounded-full bg-emerald-500/10 mx-auto mb-3 flex items-center justify-center">
                                             <Check className="w-6 h-6 text-emerald-500" />
                                         </div>
-                                        <h3 className={cn("text-lg font-semibold", isDark ? "text-white" : "text-black")}>API Key Created!</h3>
+                                        <h3 className={cn("text-lg font-semibold", isDark ? "text-white" : "text-black")}>{t('keys.modal.successTitle')}</h3>
                                         <p className={cn("text-sm mt-1", isDark ? "text-white/60" : "text-gray-500")}>
-                                            Copy your key now. You won't be able to see it again.
+                                            {t('keys.modal.successDesc')}
                                         </p>
                                     </div>
 
@@ -676,7 +683,7 @@ export default function KeysView({ isDark = true }: { isDark?: boolean }) {
                                     )}>
                                         <AlertTriangle className={cn("w-4 h-4 mt-0.5", isDark ? "text-rose-400" : "text-rose-500")} />
                                         <p className={cn("text-xs", isDark ? "text-rose-400/80" : "text-rose-600")}>
-                                            This is the only time you'll see this key. Store it securely!
+                                            {t('keys.modal.warningSecret')}
                                         </p>
                                     </div>
                                 </div>
@@ -696,7 +703,7 @@ export default function KeysView({ isDark = true }: { isDark?: boolean }) {
                                         isDark ? "bg-white text-black hover:bg-white/90" : "bg-black text-white hover:bg-black/90"
                                     )}
                                 >
-                                    Done
+                                    {t('keys.modal.done')}
                                 </button>
                             ) : (
                                 <>
@@ -709,7 +716,7 @@ export default function KeysView({ isDark = true }: { isDark?: boolean }) {
                                             )}
                                         >
                                             <ArrowLeft className="w-4 h-4" />
-                                            Back
+                                            {t('keys.modal.back')}
                                         </button>
                                     )}
                                     <button
@@ -722,7 +729,7 @@ export default function KeysView({ isDark = true }: { isDark?: boolean }) {
                                                 : (isDark ? "bg-white/10 text-white/30 cursor-not-allowed" : "bg-gray-100 text-gray-400 cursor-not-allowed")
                                         )}
                                     >
-                                        {wizardStep === 'confirm' ? 'Create Key' : 'Continue'}
+                                        {wizardStep === 'confirm' ? t('keys.createKey') : t('keys.modal.continue')}
                                         <ArrowRight className="w-4 h-4" />
                                     </button>
                                 </>

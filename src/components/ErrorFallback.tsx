@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { AlertTriangle, RefreshCcw } from 'lucide-react';
+import { useLanguage } from '../contexts/LanguageContext';
 
 interface ErrorFallbackProps {
     error: Error;
@@ -47,6 +48,7 @@ async function hardReload() {
 }
 
 const ErrorFallback: React.FC<ErrorFallbackProps> = ({ error, resetErrorBoundary }) => {
+    const { t } = useLanguage();
     const [autoReloading, setAutoReloading] = useState(false);
 
     // Auto-reload once for chunk load errors (deploy mismatch)
@@ -71,7 +73,7 @@ const ErrorFallback: React.FC<ErrorFallbackProps> = ({ error, resetErrorBoundary
             <div className="min-h-screen flex flex-col items-center justify-center bg-black text-white p-4">
                 <div className="max-w-md w-full text-center">
                     <div className="animate-spin w-8 h-8 border-2 border-white border-t-transparent rounded-full mx-auto mb-4" />
-                    <p className="text-zinc-400">Updating to the latest version…</p>
+                    <p className="text-zinc-400">{t('error.updating')}</p>
                 </div>
             </div>
         );
@@ -89,12 +91,12 @@ const ErrorFallback: React.FC<ErrorFallbackProps> = ({ error, resetErrorBoundary
                 </div>
 
                 <h1 className="text-2xl font-bold mb-2 text-white">
-                    {chunkError ? 'New Update Available' : 'Something went wrong'}
+                    {chunkError ? t('error.updateAvailable') : t('error.somethingWrong')}
                 </h1>
                 <p className="text-zinc-400 mb-6">
                     {chunkError
-                        ? 'A new version of the app has been deployed. Please reload to get the latest version.'
-                        : 'We apologize for the inconvenience. The application encountered an unexpected error.'}
+                        ? t('error.updateDesc')
+                        : t('error.unexpectedDesc')}
                 </p>
 
                 {!chunkError && (
@@ -110,7 +112,7 @@ const ErrorFallback: React.FC<ErrorFallbackProps> = ({ error, resetErrorBoundary
                     className="w-full py-3 px-4 bg-white text-black font-semibold rounded-lg hover:bg-zinc-200 transition-colors flex items-center justify-center gap-2"
                 >
                     <RefreshCcw className="w-4 h-4" />
-                    {chunkError ? 'Reload Page' : 'Try Again'}
+                    {chunkError ? t('error.reloadPage') : t('error.tryAgain')}
                 </button>
             </div>
         </div>

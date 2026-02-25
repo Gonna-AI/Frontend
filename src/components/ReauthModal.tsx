@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Lock, Loader2, X } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { useLanguage } from '../contexts/LanguageContext';
 import { cn } from '../utils/cn';
 
 interface ReauthModalProps {
@@ -13,6 +14,7 @@ interface ReauthModalProps {
 
 export default function ReauthModal({ isOpen, onClose, onSuccess, isDark = true }: ReauthModalProps) {
     const { reauthenticate } = useAuth();
+    const { t } = useLanguage();
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -24,7 +26,7 @@ export default function ReauthModal({ isOpen, onClose, onSuccess, isDark = true 
 
         const { error: authError } = await reauthenticate(password);
         if (authError) {
-            setError('Incorrect password. Please try again.');
+            setError(t('reauth.incorrectPassword'));
             setLoading(false);
         } else {
             setLoading(false);
@@ -65,10 +67,10 @@ export default function ReauthModal({ isOpen, onClose, onSuccess, isDark = true 
                         </div>
                         <div className="text-center">
                             <h2 className={cn("text-xl font-semibold", isDark ? "text-white" : "text-black")}>
-                                Verify it's you
+                                {t('reauth.title')}
                             </h2>
                             <p className={cn("text-sm mt-1", isDark ? "text-white/60" : "text-black/60")}>
-                                Please enter your password to continue
+                                {t('reauth.desc')}
                             </p>
                         </div>
                     </div>
@@ -76,7 +78,7 @@ export default function ReauthModal({ isOpen, onClose, onSuccess, isDark = true 
                     <form onSubmit={handleSubmit} className="space-y-4">
                         <div className="space-y-2">
                             <label className={cn("text-sm font-medium", isDark ? "text-white/80" : "text-black/80")}>
-                                Password
+                                {t('reauth.passwordLabel')}
                             </label>
                             <input
                                 type="password"
@@ -88,7 +90,7 @@ export default function ReauthModal({ isOpen, onClose, onSuccess, isDark = true 
                                         ? "bg-white/5 border-white/10 text-white focus:border-white/20"
                                         : "bg-gray-50 border-gray-200 text-black focus:border-gray-300"
                                 )}
-                                placeholder="Enter your password"
+                                placeholder={t('reauth.passwordPlaceholder')}
                                 required
                             />
                         </div>
@@ -110,7 +112,7 @@ export default function ReauthModal({ isOpen, onClose, onSuccess, isDark = true 
                                         : "bg-gray-100 hover:bg-gray-200 text-black"
                                 )}
                             >
-                                Cancel
+                                {t('sidebar.cancel')}
                             </button>
                             <button
                                 type="submit"
@@ -123,7 +125,7 @@ export default function ReauthModal({ isOpen, onClose, onSuccess, isDark = true 
                                     loading && "opacity-50 cursor-not-allowed"
                                 )}
                             >
-                                {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Verify"}
+                                {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : t('reauth.verify')}
                             </button>
                         </div>
                     </form>

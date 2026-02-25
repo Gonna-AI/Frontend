@@ -60,7 +60,7 @@ export default function IntegrationView({ isDark = true }: { isDark?: boolean })
         return (
             <div className="flex items-center justify-center min-h-[60vh]">
                 <p className={cn("text-sm", isDark ? "text-white/50" : "text-gray-500")}>
-                    Please log in to view your integration details.
+                    {t('integration.loginRequired')}
                 </p>
             </div>
         );
@@ -71,10 +71,10 @@ export default function IntegrationView({ isDark = true }: { isDark?: boolean })
             {/* Header */}
             <div>
                 <h2 className={cn("text-2xl font-bold", isDark ? "text-white" : "text-gray-900")}>
-                    Integrations
+                    {t('integration.title')}
                 </h2>
                 <p className={cn("mt-1 text-sm", isDark ? "text-white/50" : "text-gray-500")}>
-                    Share your AI receptionist with clients and embed it on your website.
+                    {t('integration.subtitle')}
                 </p>
             </div>
 
@@ -91,9 +91,9 @@ export default function IntegrationView({ isDark = true }: { isDark?: boolean })
                         <Globe className="w-5 h-5 text-purple-400" />
                     </div>
                     <div>
-                        <h3 className={cn("font-semibold", isDark ? "text-white" : "text-gray-900")}>Agent ID</h3>
+                        <h3 className={cn("font-semibold", isDark ? "text-white" : "text-gray-900")}>{t('integration.agentIdTitle')}</h3>
                         <p className={cn("text-xs", isDark ? "text-white/40" : "text-gray-400")}>
-                            Your unique identifier — used in all integration links
+                            {t('integration.agentIdDesc')}
                         </p>
                     </div>
                 </div>
@@ -121,28 +121,28 @@ export default function IntegrationView({ isDark = true }: { isDark?: boolean })
                         <Bot className="w-5 h-5 text-purple-400" />
                     </div>
                     <div>
-                        <h3 className={cn("font-semibold", isDark ? "text-white" : "text-gray-900")}>Active Persona</h3>
+                        <h3 className={cn("font-semibold", isDark ? "text-white" : "text-gray-900")}>{t('integration.personaTitle')}</h3>
                         <p className={cn("text-xs", isDark ? "text-white/40" : "text-gray-400")}>
-                            What visitors see when they use your integration links
+                            {t('integration.personaDesc')}
                         </p>
                     </div>
                 </div>
                 <div className="space-y-3">
                     <div>
-                        <span className={cn("text-xs font-medium", isDark ? "text-white/40" : "text-gray-400")}>Persona</span>
+                        <span className={cn("text-xs font-medium", isDark ? "text-white/40" : "text-gray-400")}>{t('integration.personaLabel')}</span>
                         <p className={cn("text-sm mt-0.5", isDark ? "text-white/80" : "text-gray-700")}>
-                            {knowledgeBase.persona || 'Default AI Assistant'}
+                            {knowledgeBase.persona || t('integration.personaDefault')}
                         </p>
                     </div>
                     <div>
-                        <span className={cn("text-xs font-medium", isDark ? "text-white/40" : "text-gray-400")}>Greeting</span>
+                        <span className={cn("text-xs font-medium", isDark ? "text-white/40" : "text-gray-400")}>{t('integration.greetingLabel')}</span>
                         <p className={cn("text-sm mt-0.5 italic", isDark ? "text-white/60" : "text-gray-500")}>
-                            "{knowledgeBase.greeting || 'Hello! How can I help you today?'}"
+                            "{knowledgeBase.greeting || t('integration.greetingDefault')}"
                         </p>
                     </div>
                     {knowledgeBase.selectedVoiceId && (
                         <div>
-                            <span className={cn("text-xs font-medium", isDark ? "text-white/40" : "text-gray-400")}>Voice</span>
+                            <span className={cn("text-xs font-medium", isDark ? "text-white/40" : "text-gray-400")}>{t('integration.voiceLabel')}</span>
                             <p className={cn("text-sm mt-0.5", isDark ? "text-white/80" : "text-gray-700")}>
                                 {knowledgeBase.selectedVoiceId}
                             </p>
@@ -150,7 +150,7 @@ export default function IntegrationView({ isDark = true }: { isDark?: boolean })
                     )}
                     {knowledgeBase.categories && knowledgeBase.categories.length > 0 && (
                         <div>
-                            <span className={cn("text-xs font-medium", isDark ? "text-white/40" : "text-gray-400")}>Categories</span>
+                            <span className={cn("text-xs font-medium", isDark ? "text-white/40" : "text-gray-400")}>{t('integration.categoriesLabel')}</span>
                             <div className="flex flex-wrap gap-1.5 mt-1">
                                 {knowledgeBase.categories.slice(0, 6).map((cat) => (
                                     <span key={cat.id} className={cn(
@@ -164,7 +164,7 @@ export default function IntegrationView({ isDark = true }: { isDark?: boolean })
                                 ))}
                                 {knowledgeBase.categories.length > 6 && (
                                     <span className={cn("text-[11px]", isDark ? "text-white/30" : "text-gray-400")}>
-                                        +{knowledgeBase.categories.length - 6} more
+                                        {t('integration.moreCount').replace('{count}', (knowledgeBase.categories.length - 6).toString())}
                                     </span>
                                 )}
                             </div>
@@ -188,9 +188,9 @@ export default function IntegrationView({ isDark = true }: { isDark?: boolean })
                             <MessageSquare className="w-5 h-5 text-blue-400" />
                         </div>
                         <div>
-                            <h3 className={cn("font-semibold", isDark ? "text-white" : "text-gray-900")}>Chat Link</h3>
+                            <h3 className={cn("font-semibold", isDark ? "text-white" : "text-gray-900")}>{t('integration.chatLinkTitle')}</h3>
                             <p className={cn("text-xs", isDark ? "text-white/40" : "text-gray-400")}>
-                                Text-based AI receptionist
+                                {t('integration.chatLinkDesc')}
                             </p>
                         </div>
                     </div>
@@ -216,7 +216,7 @@ export default function IntegrationView({ isDark = true }: { isDark?: boolean })
                             )}
                         >
                             <ExternalLink className="w-3 h-3" />
-                            Open
+                            {t('integration.openAction')}
                         </a>
                     </div>
                 </div>
@@ -234,9 +234,9 @@ export default function IntegrationView({ isDark = true }: { isDark?: boolean })
                             <Phone className="w-5 h-5 text-green-400" />
                         </div>
                         <div>
-                            <h3 className={cn("font-semibold", isDark ? "text-white" : "text-gray-900")}>Voice Call Link</h3>
+                            <h3 className={cn("font-semibold", isDark ? "text-white" : "text-gray-900")}>{t('integration.callLinkTitle')}</h3>
                             <p className={cn("text-xs", isDark ? "text-white/40" : "text-gray-400")}>
-                                Voice-based AI receptionist
+                                {t('integration.callLinkDesc')}
                             </p>
                         </div>
                     </div>
@@ -282,9 +282,9 @@ export default function IntegrationView({ isDark = true }: { isDark?: boolean })
                             <Code className="w-5 h-5 text-orange-400" />
                         </div>
                         <div>
-                            <h3 className={cn("font-semibold", isDark ? "text-white" : "text-gray-900")}>Embed Code</h3>
+                            <h3 className={cn("font-semibold", isDark ? "text-white" : "text-gray-900")}>{t('integration.embedTitle')}</h3>
                             <p className={cn("text-xs", isDark ? "text-white/40" : "text-gray-400")}>
-                                Add the chat widget to your website
+                                {t('integration.embedDesc')}
                             </p>
                         </div>
                     </div>
@@ -305,8 +305,7 @@ export default function IntegrationView({ isDark = true }: { isDark?: boolean })
             )}>
                 <Link className={cn("w-4 h-4 mt-0.5 shrink-0", isDark ? "text-blue-400" : "text-blue-500")} />
                 <p className={cn("text-xs leading-relaxed", isDark ? "text-blue-300/80" : "text-blue-700")}>
-                    Anyone with these links can interact with your AI receptionist using <strong>your</strong> knowledge base configuration.
-                    All conversations will appear in your <strong>Call History</strong> tab, tagged with the caller's information.
+                    {t('integration.infoNote')}
                 </p>
             </div>
         </div>

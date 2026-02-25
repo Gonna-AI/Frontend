@@ -4,10 +4,12 @@ import { cn } from '../utils/cn';
 import { useTheme } from '../hooks/useTheme';
 import { ArrowRight, CheckCircle2, Loader2, AlertCircle, ShieldCheck } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useLanguage } from '../contexts/LanguageContext';
 
 type DialogState = 'input' | 'validating' | 'success' | 'error';
 
 export default function AccessCodeDialog() {
+    const { t } = useLanguage();
     const { validateCode, error, clearError } = useAccessCode();
     const { isDark } = useTheme();
     const [code, setCode] = useState('');
@@ -82,7 +84,7 @@ export default function AccessCodeDialog() {
                             <ShieldCheck className={cn("w-5 h-5", isDark ? "text-white/70" : "text-gray-700")} />
                         </div>
                         <span className={cn("text-xl font-bold tracking-tight", isDark ? "text-white" : "text-gray-900")}>
-                            Access Code
+                            {t('access.title')}
                         </span>
                     </div>
 
@@ -102,19 +104,19 @@ export default function AccessCodeDialog() {
                                     <CheckCircle2 className="w-8 h-8" />
                                 </div>
                                 <h1 className={cn("text-3xl font-bold mb-2 tracking-tight text-center", isDark ? "text-white" : "text-gray-900")}>
-                                    Access Granted
+                                    {t('access.granted')}
                                 </h1>
                                 <p className={cn("text-sm text-center", isDark ? "text-zinc-400" : "text-gray-500")}>
-                                    Your dashboard is being unlocked...
+                                    {t('access.unlocking')}
                                 </p>
                             </motion.div>
                         ) : (
                             <motion.div key="input-text" className="mb-8">
                                 <h1 className={cn("text-3xl font-bold mb-2 tracking-tight", isDark ? "text-white" : "text-gray-900")}>
-                                    Unlock Dashboard
+                                    {t('access.unlockTitle')}
                                 </h1>
                                 <p className={cn("text-sm", isDark ? "text-zinc-400" : "text-gray-500")}>
-                                    Enter the access code provided by your administrator.
+                                    {t('access.unlockDesc')}
                                 </p>
                             </motion.div>
                         )}
@@ -125,7 +127,7 @@ export default function AccessCodeDialog() {
                         <form onSubmit={handleSubmit} className="space-y-5">
                             <div className="space-y-1.5">
                                 <label className={cn("text-sm font-medium", isDark ? "text-zinc-300" : "text-gray-700")}>
-                                    Access Code
+                                    {t('access.codeLabel')}
                                 </label>
                                 <input
                                     ref={inputRef}
@@ -187,7 +189,7 @@ export default function AccessCodeDialog() {
                                     <Loader2 className="w-4 h-4 animate-spin" />
                                 ) : (
                                     <>
-                                        <span>Enter</span>
+                                        <span>{t('access.enter')}</span>
                                         <ArrowRight className="w-4 h-4" />
                                     </>
                                 )}

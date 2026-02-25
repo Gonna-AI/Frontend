@@ -4,6 +4,7 @@ import { Check, Building2, Rocket, Coins, ArrowRight, ShieldCheck, Sparkles, X, 
 import { motion, AnimatePresence } from 'framer-motion';
 import { useDemoCall } from '../../contexts/DemoCallContext';
 import { supabase } from '../../config/supabase';
+import { useLanguage } from '../../contexts/LanguageContext';
 
 // ────────────────────────────────────────────────────────────────
 // Custom Razorpay hook — replaces buggy react-razorpay library
@@ -94,6 +95,7 @@ interface SubscriptionInfo {
 // Component
 // ────────────────────────────────────────────────────────────────
 export default function BillingView({ isDark = true }: { isDark?: boolean }) {
+    const { t } = useLanguage();
     const { callHistory } = useDemoCall();
     const { error, isLoading, Razorpay } = useRazorpay();
     const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
@@ -169,7 +171,7 @@ export default function BillingView({ isDark = true }: { isDark?: boolean }) {
     const nextResetDate = useMemo(() => {
         const now = new Date();
         const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
-        return nextMonth.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        return nextMonth.toLocaleDateString(navigator.language === 'de-DE' ? 'de-DE' : 'en-US', { month: 'short', day: 'numeric' });
     }, []);
 
     // ── Scroll to pricing section ──
@@ -188,21 +190,21 @@ export default function BillingView({ isDark = true }: { isDark?: boolean }) {
         try {
             const razorpayKey = import.meta.env.VITE_RAZORPAY_KEY_ID;
             if (!razorpayKey) {
-                setPaymentError('Razorpay Key ID is missing! Add VITE_RAZORPAY_KEY_ID to your .env.local file.');
+                setPaymentError(t('billing.error.keyMissing'));
                 setPaymentStatus('failed');
                 setIsProcessing(false);
                 return;
             }
 
             if (isLoading) {
-                setPaymentError('Payment gateway is loading. Please try again in a few seconds.');
+                setPaymentError(t('billing.error.gatewayLoading'));
                 setPaymentStatus('failed');
                 setIsProcessing(false);
                 return;
             }
 
             if (error || !Razorpay) {
-                setPaymentError(`Payment gateway failed to load: ${error || 'Unknown error'}`);
+                setPaymentError(t('billing.error.gatewayFailed').replace('{error}', error || 'Unknown error'));
                 setPaymentStatus('failed');
                 setIsProcessing(false);
                 return;
@@ -210,7 +212,7 @@ export default function BillingView({ isDark = true }: { isDark?: boolean }) {
 
             const { data: { session } } = await supabase.auth.getSession();
             if (!session) {
-                setPaymentError('Please sign in to upgrade.');
+                setPaymentError(t('billing.error.signInRequired'));
                 setPaymentStatus('failed');
                 setIsProcessing(false);
                 return;
@@ -258,10 +260,10 @@ export default function BillingView({ isDark = true }: { isDark?: boolean }) {
                             // Refresh subscription info to reflect upgrade
                             await fetchSubscriptionInfo();
                         } else {
-                            throw new Error(verifyData.error || 'Signature verification failed.');
+                            throw new Error(verifyData.error || t('billing.error.signatureFailed'));
                         }
                     } catch (err: any) {
-                        setPaymentError(err.message || 'Verification failed. Contact support.');
+                        setPaymentError(err.message || t('billing.error.verificationFailed'));
                         setPaymentStatus('failed');
                     } finally {
                         setIsProcessing(false);
@@ -298,62 +300,62 @@ export default function BillingView({ isDark = true }: { isDark?: boolean }) {
         {
             name: 'Free',
             price: '$0',
-            period: 'forever',
-            description: 'Perfect to explore and build prototypes.',
+            period: t('billing.forever'),
+            description: t('billing.freeDesc'),
             credits: 50,
             current: currentPlan === 'free',
-            cta: currentPlan === 'free' ? 'Current Plan' : 'Downgrade',
+            cta: currentPlan === 'free' ? t('billing.currentPlan') : t('billing.downgrade'),
             features: [
-                { text: '50 ClerkTree Credits / month', included: true, highlight: true },
-                { text: 'Standard voice quality', included: true },
-                { text: '500 text requests included', included: true },
-                { text: 'Basic community support', included: true },
-                { text: '1 active project', included: true },
-                { text: 'Custom voice cloning', included: false },
-                { text: 'API Access', included: false },
+                { text: t('billing.features.free.credits'), included: true, highlight: true },
+                { text: t('billing.features.free.voice'), included: true },
+                { text: t('billing.features.free.text'), included: true },
+                { text: t('billing.features.free.support'), included: true },
+                { text: t('billing.features.free.project'), included: true },
+                { text: t('billing.features.free.cloning'), included: false },
+                { text: t('billing.features.free.api'), included: false },
             ]
         },
         {
             name: 'Pro',
             price: billingCycle === 'monthly' ? '$49' : '$39',
-            period: billingCycle === 'monthly' ? '/ month' : '/ month, billed yearly',
-            description: 'For startups and growing teams needing power.',
+            period: billingCycle === 'monthly' ? t('billing.perMonth') : t('billing.perMonthYearly'),
+            description: t('billing.proDesc'),
             credits: 500,
             popular: true,
             current: currentPlan === 'pro',
-            cta: currentPlan === 'pro' ? 'Current Plan' : 'Upgrade to Pro',
+            cta: currentPlan === 'pro' ? t('billing.currentPlan') : t('billing.upgradeToPro'),
             features: [
-                { text: '500 ClerkTree Credits / month', included: true, highlight: true },
-                { text: 'Premium ultra-low latency voice', included: true, highlight: true },
-                { text: '5,000 text requests included', included: true },
-                { text: 'Priority email support', included: true },
-                { text: 'Unlimited projects', included: true },
-                { text: 'Custom voice cloning (3 voices)', included: true },
-                { text: 'Full API Access', included: true },
+                { text: t('billing.features.pro.credits'), included: true, highlight: true },
+                { text: t('billing.features.pro.voice'), included: true, highlight: true },
+                { text: t('billing.features.pro.text'), included: true },
+                { text: t('billing.features.pro.support'), included: true },
+                { text: t('billing.features.pro.unlimitedProjects'), included: true },
+                { text: t('billing.features.pro.cloning'), included: true },
+                { text: t('billing.features.pro.api'), included: true },
             ]
         },
         {
             name: 'Enterprise',
             price: 'Custom',
-            period: 'contact sales',
-            description: 'For large organizations with custom needs.',
+            period: t('billing.contactSales'),
+            description: t('billing.enterpriseDesc'),
             credits: -1,
             current: currentPlan === 'enterprise',
-            cta: currentPlan === 'enterprise' ? 'Current Plan' : 'Contact Sales',
+            cta: currentPlan === 'enterprise' ? t('billing.currentPlan') : t('billing.contactSales'),
             features: [
-                { text: 'Unlimited ClerkTree Credits', included: true, highlight: true },
-                { text: 'Dedicated GPU infrastructure', included: true },
-                { text: 'Unlimited custom voices', included: true },
-                { text: '24/7 dedicated support channel', included: true },
-                { text: 'SSO & Advanced Security', included: true },
-                { text: 'SLA Guarantees', included: true },
-                { text: 'On-premise deployment option', included: true },
+                { text: t('billing.features.enterprise.credits'), included: true, highlight: true },
+                { text: t('billing.features.enterprise.gpu'), included: true },
+                { text: t('billing.features.enterprise.unlimitedVoices'), included: true },
+                { text: t('billing.features.enterprise.support'), included: true },
+                { text: t('billing.features.enterprise.sso'), included: true },
+                { text: t('billing.features.enterprise.sla'), included: true },
+                { text: t('billing.features.enterprise.onprem'), included: true },
             ]
         }
     ];
 
     // ── Plan display name ──
-    const planDisplayName = isPro ? 'Pro' : isEnterprise ? 'Enterprise' : 'Free Research Preview';
+    const planDisplayName = isPro ? t('billing.plan.pro') : isEnterprise ? t('billing.plan.enterprise') : t('billing.plan.free');
     const planIcon = isPro ? Crown : Rocket;
     const PlanIcon = planIcon;
 
@@ -362,9 +364,9 @@ export default function BillingView({ isDark = true }: { isDark?: boolean }) {
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h1 className={cn("text-2xl font-bold", isDark ? "text-white" : "text-black")}>Billing & Plans</h1>
+                    <h1 className={cn("text-2xl font-bold", isDark ? "text-white" : "text-black")}>{t('billing.title')}</h1>
                     <p className={cn("text-sm mt-1", isDark ? "text-white/60" : "text-black/60")}>
-                        Manage your subscription, credits, and payment methods
+                        {t('billing.subtitle')}
                     </p>
                 </div>
             </div>
@@ -399,7 +401,7 @@ export default function BillingView({ isDark = true }: { isDark?: boolean }) {
                             <div className="space-y-2">
                                 <div className="flex items-center gap-3">
                                     <h3 className={cn("text-xl font-bold", isDark ? "text-white" : "text-black")}>
-                                        {subLoading ? 'Loading...' : planDisplayName}
+                                        {subLoading ? t('billing.plan.loading') : planDisplayName}
                                     </h3>
                                     <span className={cn(
                                         "px-2.5 py-0.5 rounded-full text-[10px] uppercase font-bold tracking-wider",
@@ -407,15 +409,14 @@ export default function BillingView({ isDark = true }: { isDark?: boolean }) {
                                             ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/20"
                                             : (isDark ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/20" : "bg-emerald-100 text-emerald-700 border border-emerald-200")
                                     )}>
-                                        {subInfo?.subscription_status === 'active' ? 'Active' : (subInfo?.subscription_status ?? 'Active')}
+                                        {subInfo?.subscription_status === 'active' ? t('billing.activePlan') : (subInfo?.subscription_status ?? t('billing.activePlan'))}
                                     </span>
                                 </div>
                                 <p className={cn("text-sm max-w-lg leading-relaxed", isDark ? "text-white/60" : "text-black/60")}>
                                     {isPro ? (
-                                        <>You are on the <span className="font-semibold text-emerald-500">Pro</span> plan. Enjoy premium voice quality, higher limits, and priority support.</>
+                                        t('billing.proDesc')
                                     ) : (
-                                        <>You are currently on the Free plan. Great for prototypes and testing.
-                                            Upgrade to <span className="font-semibold text-emerald-500">Pro</span> for production-ready latency and higher limits.</>
+                                        t('billing.freeDesc')
                                     )}
                                 </p>
                             </div>
@@ -430,7 +431,7 @@ export default function BillingView({ isDark = true }: { isDark?: boolean }) {
                                         : "bg-black text-white hover:bg-gray-800 shadow-[0_0_20px_rgba(0,0,0,0.1)]"
                                 )}
                             >
-                                Upgrade Plan
+                                {t('billing.upgradeButton')}
                             </button>
                         )}
                     </div>
@@ -459,10 +460,10 @@ export default function BillingView({ isDark = true }: { isDark?: boolean }) {
                                 <span className={cn(
                                     "text-sm font-medium",
                                     usageStats.creditsRemaining === 0 ? "text-rose-500" : (isDark ? "text-emerald-400" : "text-emerald-600")
-                                )}>Available Credits</span>
+                                )}>{t('billing.availableCredits')}</span>
                             </div>
                             <span className={cn("text-xs font-mono opacity-50", isDark ? "text-white" : "text-black")}>
-                                Resets: {nextResetDate}
+                                {t('billing.resetsPrefix')} {nextResetDate}
                             </span>
                         </div>
 
@@ -492,7 +493,7 @@ export default function BillingView({ isDark = true }: { isDark?: boolean }) {
                                 ? "text-rose-400"
                                 : (isDark ? "text-white/40" : "text-black/40")
                         )}>
-                            Refills automatically on billing cycle reset.
+                            {t('billing.refillDesc')}
                         </p>
                     </div>
                 </div>
@@ -501,7 +502,7 @@ export default function BillingView({ isDark = true }: { isDark?: boolean }) {
             {/* Billing Cycle Toggle */}
             <div ref={pricingRef} className="py-8 flex flex-col items-center justify-center space-y-4">
                 <h2 className={cn("text-2xl font-bold text-center", isDark ? "text-white" : "text-black")}>
-                    Simple, transparent pricing
+                    {t('billing.simplePricing')}
                 </h2>
                 <div className={cn(
                     "p-1 rounded-full flex items-center gap-1 border",
@@ -516,7 +517,7 @@ export default function BillingView({ isDark = true }: { isDark?: boolean }) {
                                 : (isDark ? "text-white/60 hover:text-white" : "text-black/60 hover:text-black")
                         )}
                     >
-                        Monthly
+                        {t('billing.monthly')}
                     </button>
                     <button
                         onClick={() => setBillingCycle('yearly')}
@@ -527,7 +528,7 @@ export default function BillingView({ isDark = true }: { isDark?: boolean }) {
                                 : (isDark ? "text-white/60 hover:text-white" : "text-black/60 hover:text-black")
                         )}
                     >
-                        Yearly
+                        {t('billing.yearly')}
                         <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-500 text-white">
                             -20%
                         </span>
@@ -554,7 +555,7 @@ export default function BillingView({ isDark = true }: { isDark?: boolean }) {
                                     "px-4 py-1.5 rounded-full text-xs font-bold flex items-center gap-1.5 shadow-lg uppercase tracking-wider",
                                     isDark ? "bg-emerald-500 text-white" : "bg-black text-white"
                                 )}>
-                                    <Sparkles className="w-3 h-3 fill-current" /> Most Popular
+                                    <Sparkles className="w-3 h-3 fill-current" /> {t('billing.popular')}
                                 </span>
                             </div>
                         )}
@@ -564,7 +565,7 @@ export default function BillingView({ isDark = true }: { isDark?: boolean }) {
                                     "px-4 py-1.5 rounded-full text-xs font-bold flex items-center gap-1.5 shadow-lg uppercase tracking-wider",
                                     "bg-emerald-500 text-white"
                                 )}>
-                                    <Check className="w-3 h-3" /> Your Plan
+                                    <Check className="w-3 h-3" /> {t('billing.yourPlan')}
                                 </span>
                             </div>
                         )}
@@ -622,7 +623,7 @@ export default function BillingView({ isDark = true }: { isDark?: boolean }) {
                             )}
                         >
                             {plan.name === 'Pro' && isProcessing ? (
-                                <><Loader2 className="w-4 h-4 animate-spin" /> Processing...</>
+                                <><Loader2 className="w-4 h-4 animate-spin" /> {t('billing.processing')}</>
                             ) : plan.cta}
                             {!plan.current && <ArrowRight className="w-4 h-4" />}
                         </button>
@@ -641,12 +642,12 @@ export default function BillingView({ isDark = true }: { isDark?: boolean }) {
                             <Building2 className="w-6 h-6" />
                         </div>
                         <div>
-                            <h3 className={cn("font-bold text-lg", isDark ? "text-white" : "text-black")}>Enterprise Needs?</h3>
-                            <p className={cn("text-sm", isDark ? "text-white/60" : "text-black/60")}>Custom deployment & SLAs</p>
+                            <h3 className={cn("font-bold text-lg", isDark ? "text-white" : "text-black")}>{t('billing.enterpriseNeeds')}</h3>
+                            <p className={cn("text-sm", isDark ? "text-white/60" : "text-black/60")}>{t('billing.customDeployment')}</p>
                         </div>
                     </div>
                     <p className={cn("text-sm mb-6 leading-relaxed", isDark ? "text-white/60" : "text-black/60")}>
-                        We offer dedicated GPU instances, VPC peering, and custom fine-tuning for large scale deployments. Let's talk about your specific requirements.
+                        {t('billing.enterpriseDesc')}
                     </p>
                     <button
                         onClick={() => window.location.href = 'mailto:enterprise@clerktree.com'}
@@ -655,7 +656,7 @@ export default function BillingView({ isDark = true }: { isDark?: boolean }) {
                             isDark ? "border-white/10 hover:bg-white/5 text-white" : "border-black/10 hover:bg-gray-50 text-black"
                         )}
                     >
-                        Contact Enterprise Sales
+                        {t('billing.contactEnterprise')}
                     </button>
                 </div>
 
@@ -668,22 +669,22 @@ export default function BillingView({ isDark = true }: { isDark?: boolean }) {
                             <ShieldCheck className="w-6 h-6" />
                         </div>
                         <div>
-                            <h3 className={cn("font-bold text-lg", isDark ? "text-white" : "text-black")}>Secure & Compliant</h3>
-                            <p className={cn("text-sm", isDark ? "text-white/60" : "text-black/60")}>Enterprise-grade security</p>
+                            <h3 className={cn("font-bold text-lg", isDark ? "text-white" : "text-black")}>{t('billing.secureCompliant')}</h3>
+                            <p className={cn("text-sm", isDark ? "text-white/60" : "text-black/60")}>{t('billing.enterpriseSecurity')}</p>
                         </div>
                     </div>
                     <div className="space-y-3 mb-6">
                         <div className="flex items-center gap-2 text-sm">
                             <Check className="w-4 h-4 text-emerald-500" />
-                            <span className={isDark ? "text-white/60" : "text-black/60"}>SOC2 Type II Compliant</span>
+                            <span className={isDark ? "text-white/60" : "text-black/60"}>{t('billing.soc2')}</span>
                         </div>
                         <div className="flex items-center gap-2 text-sm">
                             <Check className="w-4 h-4 text-emerald-500" />
-                            <span className={isDark ? "text-white/60" : "text-black/60"}>Data Encryption at Rest & Transit</span>
+                            <span className={isDark ? "text-white/60" : "text-black/60"}>{t('billing.encryption')}</span>
                         </div>
                         <div className="flex items-center gap-2 text-sm">
                             <Check className="w-4 h-4 text-emerald-500" />
-                            <span className={isDark ? "text-white/60" : "text-black/60"}>GDPR & CCPA Ready</span>
+                            <span className={isDark ? "text-white/60" : "text-black/60"}>{t('billing.gdpr')}</span>
                         </div>
                     </div>
                     <button
@@ -693,7 +694,7 @@ export default function BillingView({ isDark = true }: { isDark?: boolean }) {
                             isDark ? "border-white/10 hover:bg-white/5 text-white" : "border-black/10 hover:bg-gray-50 text-black"
                         )}
                     >
-                        View Security Documentation
+                        {t('billing.viewSecurityDocs')}
                     </button>
                 </div>
             </div>
@@ -733,15 +734,15 @@ export default function BillingView({ isDark = true }: { isDark?: boolean }) {
                                                 <div className="absolute inset-0 bg-emerald-500/20 blur-xl rounded-full animate-pulse" />
                                                 <Check className="w-8 h-8" />
                                             </div>
-                                            <h3 className={cn("text-2xl font-bold mb-2", isDark ? "text-white" : "text-black")}>Welcome to Pro! 🎉</h3>
+                                            <h3 className={cn("text-2xl font-bold mb-2", isDark ? "text-white" : "text-black")}>{t('billing.welcomePro')}</h3>
                                             <p className={cn("text-sm mb-6", isDark ? "text-white/60" : "text-black/60")}>
-                                                Your subscription has been upgraded. 500 Credits have been deposited to your account. Enjoy premium voice quality and higher limits!
+                                                {t('billing.successMsg')}
                                             </p>
                                             <button
                                                 onClick={() => setPaymentStatus('none')}
                                                 className="w-full py-3 px-4 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl transition-colors shadow-lg shadow-emerald-500/25"
                                             >
-                                                Start Building
+                                                {t('billing.startBuilding')}
                                             </button>
                                         </>
                                     ) : (
@@ -750,9 +751,9 @@ export default function BillingView({ isDark = true }: { isDark?: boolean }) {
                                                 <div className="absolute inset-0 bg-rose-500/20 blur-xl rounded-full" />
                                                 <AlertCircle className="w-8 h-8" />
                                             </div>
-                                            <h3 className={cn("text-2xl font-bold mb-2", isDark ? "text-white" : "text-black")}>Payment Failed</h3>
+                                            <h3 className={cn("text-2xl font-bold mb-2", isDark ? "text-white" : "text-black")}>{t('billing.paymentFailed')}</h3>
                                             <p className={cn("text-sm mb-6", isDark ? "text-white/60" : "text-black/60")}>
-                                                {paymentError || 'There was an issue processing your payment. Please try again or contact support.'}
+                                                {paymentError || t('billing.failedMsg')}
                                             </p>
                                             <button
                                                 onClick={() => setPaymentStatus('none')}
@@ -761,7 +762,7 @@ export default function BillingView({ isDark = true }: { isDark?: boolean }) {
                                                     isDark ? "bg-white/10 hover:bg-white/20 text-white" : "bg-black/5 hover:bg-black/10 text-black"
                                                 )}
                                             >
-                                                Try Again
+                                                {t('billing.tryAgain')}
                                             </button>
                                         </>
                                     )}

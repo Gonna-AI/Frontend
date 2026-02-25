@@ -78,7 +78,7 @@ function StatsCard({ title, value, change, trend, subtitle, isDark, progress }: 
 }
 
 export default function UsageView({ isDark = true }: { isDark?: boolean }) {
-    const { t } = useLanguage();
+    const { t, language } = useLanguage();
     const { callHistory, getAnalytics } = useDemoCall();
     const analytics = getAnalytics();
 
@@ -118,12 +118,12 @@ export default function UsageView({ isDark = true }: { isDark?: boolean }) {
                 body: JSON.stringify({ code: redeemCode })
             });
             const data = await res.json();
-            if (!res.ok) throw new Error(data.error || 'Failed to redeem');
-            setRedeemMessage({ type: 'success', text: `Redeemed! Added ${data.added_amount} credits.` });
+            if (!res.ok) throw new Error(data.error || t('usage.redeemError'));
+            setRedeemMessage({ type: 'success', text: t('usage.redeemSuccess').replace('{count}', data.added_amount.toString()) });
             setRedeemCode('');
             fetchLiveBalance();
         } catch (e: any) {
-            setRedeemMessage({ type: 'error', text: e.message || 'Invalid code' });
+            setRedeemMessage({ type: 'error', text: e.message || t('usage.redeemError') });
         } finally {
             setIsRedeeming(false);
         }
@@ -174,7 +174,8 @@ export default function UsageView({ isDark = true }: { isDark?: boolean }) {
     // Use actual activity data for the chart, aggregated by day
     const chartData = useMemo(() => {
         const data: { name: string; voice: number; text: number }[] = [];
-        const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        const locale = language === 'de' ? 'de-DE' : 'en-US';
+        const dayFormatter = new Intl.DateTimeFormat(locale, { weekday: 'short' });
 
         // Show last 7 days
         for (let i = 6; i >= 0; i--) {
@@ -196,7 +197,7 @@ export default function UsageView({ isDark = true }: { isDark?: boolean }) {
             ).length;
 
             data.push({
-                name: dayNames[new Date(dayStart).getDay()],
+                name: dayFormatter.format(dayStart),
                 voice: voiceCount * 5, // Scale for visibility if needed, or keeping real
                 text: textCount
             });
@@ -300,7 +301,7 @@ export default function UsageView({ isDark = true }: { isDark?: boolean }) {
                             <div className="flex bg-transparent rounded-lg border focus-within:ring-2 focus-within:ring-emerald-500 overflow-hidden w-full transition-all border-black/10 dark:border-white/10">
                                 <input
                                     type="text"
-                                    placeholder="Got a code?"
+                                    placeholder={t('usage.redeemPlaceholder')}
                                     value={redeemCode}
                                     onChange={e => setRedeemCode(e.target.value)}
                                     className="px-3 py-1.5 bg-transparent border-none text-sm w-full outline-none dark:text-white"
@@ -310,7 +311,7 @@ export default function UsageView({ isDark = true }: { isDark?: boolean }) {
                                     disabled={isRedeeming}
                                     className="bg-emerald-500 text-white px-3 text-xs font-bold whitespace-nowrap"
                                 >
-                                    {isRedeeming ? '...' : 'REDEEM'}
+                                    {isRedeeming ? '...' : t('usage.redeemAction')}
                                 </button>
                             </div>
                             {redeemMessage && (

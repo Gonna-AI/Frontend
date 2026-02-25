@@ -118,7 +118,7 @@ export function AppSidebar({ activeTab, setActiveTab, hasAccess = false, ...prop
                                 <SidebarMenuButton
                                     isActive={activeTab === 'monitor'}
                                     onClick={() => handleTabClick('monitor')}
-                                    tooltip="Monitor"
+                                    tooltip={t('dashboard.tab.monitor')}
                                     className={cn(
                                         "transition-colors",
                                         isDark
@@ -134,7 +134,7 @@ export function AppSidebar({ activeTab, setActiveTab, hasAccess = false, ...prop
                                 <SidebarMenuButton
                                     isActive={activeTab === 'knowledge'}
                                     onClick={() => handleTabClick('knowledge')}
-                                    tooltip="Configuration"
+                                    tooltip={t('dashboard.tab.config')}
                                     className={cn(
                                         "transition-colors",
                                         isDark
@@ -150,7 +150,7 @@ export function AppSidebar({ activeTab, setActiveTab, hasAccess = false, ...prop
                                 <SidebarMenuButton
                                     isActive={activeTab === 'history'}
                                     onClick={() => handleTabClick('history')}
-                                    tooltip="History"
+                                    tooltip={t('dashboard.tab.history')}
                                     className={cn(
                                         "transition-colors",
                                         isDark
@@ -178,7 +178,7 @@ export function AppSidebar({ activeTab, setActiveTab, hasAccess = false, ...prop
                                 <SidebarMenuButton
                                     isActive={activeTab === 'onboarding'}
                                     onClick={() => handleTabClick('onboarding')}
-                                    tooltip="Setup Wizard"
+                                    tooltip={t('onboarding.title')}
                                     className={cn(
                                         "transition-colors",
                                         isDark
@@ -307,13 +307,14 @@ export function AppSidebar({ activeTab, setActiveTab, hasAccess = false, ...prop
 
                 {/* Account Group */}
                 <SidebarGroup>
-                    <SidebarGroupLabel className={isDark ? "text-white/60" : "text-black/60"}>Account</SidebarGroupLabel>
+                    <SidebarGroupLabel className={isDark ? "text-white/60" : "text-black/60"}>{t('sidebar.account')}</SidebarGroupLabel>
                     <SidebarGroupContent>
                         <SidebarMenu>
                             <SidebarMenuItem className={getLockedStyles('usage')}>
                                 <SidebarMenuButton
                                     isActive={activeTab === 'usage'}
                                     onClick={() => handleTabClick('usage')}
+                                    tooltip={t('sidebar.usage')}
                                     className={cn(
                                         "transition-colors",
                                         isDark
@@ -322,13 +323,14 @@ export function AppSidebar({ activeTab, setActiveTab, hasAccess = false, ...prop
                                     )}
                                 >
                                     <BarChart />
-                                    <span>Usage</span>
+                                    <span>{t('sidebar.usage')}</span>
                                 </SidebarMenuButton>
                             </SidebarMenuItem>
                             <SidebarMenuItem>
                                 <SidebarMenuButton
                                     isActive={activeTab === 'billing'}
                                     onClick={() => handleTabClick('billing')}
+                                    tooltip={t('sidebar.billing')}
                                     className={cn(
                                         "transition-colors",
                                         isDark
@@ -337,13 +339,14 @@ export function AppSidebar({ activeTab, setActiveTab, hasAccess = false, ...prop
                                     )}
                                 >
                                     <CreditCard />
-                                    <span>Billing</span>
+                                    <span>{t('sidebar.billing')}</span>
                                 </SidebarMenuButton>
                             </SidebarMenuItem>
                             <SidebarMenuItem>
                                 <SidebarMenuButton
                                     isActive={activeTab === 'keys'}
                                     onClick={() => handleTabClick('keys')}
+                                    tooltip={t('sidebar.keys')}
                                     className={cn(
                                         "transition-colors",
                                         isDark
@@ -352,13 +355,14 @@ export function AppSidebar({ activeTab, setActiveTab, hasAccess = false, ...prop
                                     )}
                                 >
                                     <Key />
-                                    <span>Keys</span>
+                                    <span>{t('sidebar.keys')}</span>
                                 </SidebarMenuButton>
                             </SidebarMenuItem>
                             <SidebarMenuItem>
                                 <SidebarMenuButton
                                     isActive={activeTab === 'team'}
                                     onClick={() => handleTabClick('team')}
+                                    tooltip={t('sidebar.team')}
                                     className={cn(
                                         "transition-colors",
                                         isDark
@@ -374,6 +378,7 @@ export function AppSidebar({ activeTab, setActiveTab, hasAccess = false, ...prop
                                 <SidebarMenuButton
                                     isActive={activeTab === 'integrations'}
                                     onClick={() => handleTabClick('integrations')}
+                                    tooltip={t('sidebar.integrations')}
                                     className={cn(
                                         "transition-colors",
                                         isDark
@@ -382,7 +387,7 @@ export function AppSidebar({ activeTab, setActiveTab, hasAccess = false, ...prop
                                     )}
                                 >
                                     <Link2 />
-                                    <span>Integrations</span>
+                                    <span>{t('sidebar.integrations')}</span>
                                 </SidebarMenuButton>
                             </SidebarMenuItem>
                         </SidebarMenu>
@@ -409,7 +414,7 @@ export function AppSidebar({ activeTab, setActiveTab, hasAccess = false, ...prop
                                             )}
                                         >
                                             {isDark ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
-                                            <span>{isDark ? "Dark Mode" : "Light Mode"}</span>
+                                            <span>{isDark ? t('sidebar.darkMode') : t('sidebar.lightMode')}</span>
                                         </SidebarMenuButton>
                                     </SidebarMenuItem>
                                     <SidebarMenuItem>
@@ -447,7 +452,7 @@ export function AppSidebar({ activeTab, setActiveTab, hasAccess = false, ...prop
                                     )}
                                 >
                                     {isDark ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
-                                    <span>{isDark ? "Dark Mode" : "Light Mode"}</span>
+                                    <span>{isDark ? t('sidebar.darkMode') : t('sidebar.lightMode')}</span>
                                 </SidebarMenuButton>
                             </SidebarMenuItem>
                             <SidebarMenuItem>
@@ -493,6 +498,7 @@ export function AppSidebar({ activeTab, setActiveTab, hasAccess = false, ...prop
 
 // Separate component to use useAuth inside sidebar
 function AuthUserSection({ isDark, state }: { isDark: boolean; state: string }) {
+    const { t } = useLanguage();
     const { user } = useAuth();
     const [showConfirm, setShowConfirm] = useState(false);
     const [isSigningOut, setIsSigningOut] = useState(false);
@@ -552,8 +558,8 @@ function AuthUserSection({ isDark, state }: { isDark: boolean; state: string }) 
                             <div className="absolute inset-2 rounded-full border-[2px] border-transparent border-b-red-400 animate-spin" style={{ animationDirection: 'reverse', animationDuration: '0.8s' }} />
                         </div>
                         <div className="text-center">
-                            <p className="text-white text-lg font-semibold tracking-tight">Signing out...</p>
-                            <p className="text-white/50 text-sm mt-1">Clearing your session</p>
+                            <p className="text-white text-lg font-semibold tracking-tight">{t('sidebar.signingOut')}</p>
+                            <p className="text-white/50 text-sm mt-1">{t('sidebar.clearingSession')}</p>
                         </div>
                     </div>
                 </div>,
@@ -590,13 +596,13 @@ function AuthUserSection({ isDark, state }: { isDark: boolean; state: string }) 
                             "text-center text-lg font-bold mb-1.5 tracking-tight",
                             isDark ? "text-white" : "text-gray-900"
                         )}>
-                            Sign out?
+                            {t('sidebar.confirmSignOutTitle')}
                         </h3>
                         <p className={cn(
                             "text-center text-sm mb-7",
                             isDark ? "text-zinc-400" : "text-gray-500"
                         )}>
-                            You'll need to sign in again to access your dashboard.
+                            {t('sidebar.confirmSignOutMessage')}
                         </p>
 
                         {/* Actions */}
@@ -610,13 +616,13 @@ function AuthUserSection({ isDark, state }: { isDark: boolean; state: string }) 
                                         : "bg-gray-50 hover:bg-gray-100 text-gray-600 hover:text-gray-800 border-gray-200"
                                 )}
                             >
-                                Cancel
+                                {t('sidebar.cancel')}
                             </button>
                             <button
                                 onClick={handleSignOut}
                                 className="flex-1 px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-200 cursor-pointer bg-red-500/80 backdrop-blur-sm hover:bg-red-500 text-white shadow-lg shadow-red-500/20 hover:shadow-red-500/30 hover:-translate-y-0.5"
                             >
-                                Sign out
+                                {t('sidebar.signOut')}
                             </button>
                         </div>
                     </div>
@@ -666,7 +672,7 @@ function AuthUserSection({ isDark, state }: { isDark: boolean; state: string }) 
                                 : "text-black/40 hover:text-red-500 hover:bg-red-500/10",
                             state === "collapsed" && "hidden"
                         )}
-                        title="Sign out"
+                        title={t('sidebar.signOut')}
                     >
                         <LogOut className="w-3.5 h-3.5" />
                     </button>

@@ -101,7 +101,7 @@ export default function InitialSetupDialog({
                 isDark ? "text-gray-400" : "text-gray-500",
               )}
             >
-              Setup
+              {t('setup.windowTitle')}
             </div>
             <div className="w-16" /> {/* Spacer for centering */}
           </div>
@@ -126,7 +126,7 @@ export default function InitialSetupDialog({
             </div>
 
             <h2 className="text-2xl font-bold mb-3 text-center">
-              Welcome to ClerkTree Dashboard
+              {t('setup.welcomeTitle')}
             </h2>
             <p
               className={cn(
@@ -134,8 +134,7 @@ export default function InitialSetupDialog({
                 isDark ? "text-gray-400" : "text-gray-600",
               )}
             >
-              Set up your AI receptionist to start handling calls and chats
-              automatically. You can always change these settings later.
+              {t('setup.welcomeDesc')}
             </p>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
@@ -163,19 +162,18 @@ export default function InitialSetupDialog({
                 >
                   <Sparkles className="w-5 h-5" />
                 </div>
-                <h3 className="font-semibold text-lg mb-1">Use AI Wizard</h3>
+                <h3 className="font-semibold text-lg mb-1">{t('setup.aiTitle')}</h3>
                 <p
                   className={cn(
                     "text-sm",
                     isDark ? "text-gray-400" : "text-gray-500",
                   )}
                 >
-                  Fastest way. Chat with our AI to generate a complete
-                  configuration instantly.
+                  {t('setup.aiDesc')}
                 </p>
 
                 <div className="mt-auto pt-4 flex items-center gap-2 font-medium text-purple-500 text-sm opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all">
-                  Start AI Setup <ArrowRight className="w-4 h-4" />
+                  {t('setup.aiAction')} <ArrowRight className="w-4 h-4" />
                 </div>
               </button>
 
@@ -203,15 +201,14 @@ export default function InitialSetupDialog({
                 >
                   <Settings className="w-5 h-5" />
                 </div>
-                <h3 className="font-semibold text-lg mb-1">Manual Setup</h3>
+                <h3 className="font-semibold text-lg mb-1">{t('setup.manualTitle')}</h3>
                 <p
                   className={cn(
                     "text-sm",
                     isDark ? "text-gray-400" : "text-gray-500",
                   )}
                 >
-                  Configure your knowledge base, priority rules, and context
-                  fields step by step.
+                  {t('setup.manualDesc')}
                 </p>
 
                 <div
@@ -220,7 +217,7 @@ export default function InitialSetupDialog({
                     isDark ? "text-gray-300" : "text-gray-600",
                   )}
                 >
-                  Go to Settings <ArrowRight className="w-4 h-4" />
+                  {t('setup.manualAction')} <ArrowRight className="w-4 h-4" />
                 </div>
               </button>
             </div>
@@ -234,7 +231,7 @@ export default function InitialSetupDialog({
                   : "text-gray-400 hover:text-gray-600",
               )}
             >
-              Skip, I'll do this later
+              {t('setup.skip')}
             </button>
           </div>
         </motion.div>

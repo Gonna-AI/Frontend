@@ -165,7 +165,7 @@ function SectionTab({ active, onClick, children, isDark }: { active: boolean, on
 }
 
 export default function MonitorView({ isDark = true }: { isDark?: boolean }) {
-    const { t } = useLanguage();
+    const { t, language } = useLanguage();
     const { getAnalytics, callHistory, currentCall } = useDemoCall();
     const analytics = getAnalytics();
     const [activeSection, setActiveSection] = useState<'history' | 'live'>('live');
@@ -186,8 +186,9 @@ export default function MonitorView({ isDark = true }: { isDark?: boolean }) {
     // Compute chart data from real callHistory aggregated by day
     const chartData = useMemo(() => {
         const data: { name: string; calls: number }[] = [];
-        const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-        const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        const locale = language === 'de' ? 'de-DE' : 'en-US';
+        const dayFormatter = new Intl.DateTimeFormat(locale, { weekday: 'short' });
+        const monthFormatter = new Intl.DateTimeFormat(locale, { month: 'short' });
 
         if (chartRange === 'week' || chartRange === 'month') {
             const daysCount = chartRange === 'week' ? 7 : 30;
@@ -203,8 +204,8 @@ export default function MonitorView({ isDark = true }: { isDark?: boolean }) {
                 ).length;
 
                 const name = chartRange === 'week'
-                    ? dayNames[dayStart.getDay()]
-                    : `${dayStart.getDate()} ${monthNames[dayStart.getMonth()]}`;
+                    ? dayFormatter.format(dayStart)
+                    : `${dayStart.getDate()} ${monthFormatter.format(dayStart)}`;
 
                 data.push({
                     name,
@@ -225,7 +226,7 @@ export default function MonitorView({ isDark = true }: { isDark?: boolean }) {
                 ).length;
 
                 data.push({
-                    name: monthNames[monthStart.getMonth()],
+                    name: monthFormatter.format(monthStart),
                     calls: callCount
                 });
             }
@@ -434,11 +435,11 @@ export default function MonitorView({ isDark = true }: { isDark?: boolean }) {
                                 isDark ? "border-white/10 hover:bg-white/5 text-white/80" : "border-black/10 hover:bg-gray-50 text-gray-700"
                             )}
                         >
-                            <option value="all">All Priorities</option>
-                            <option value="critical">Critical</option>
-                            <option value="high">High</option>
-                            <option value="medium">Medium</option>
-                            <option value="low">Low</option>
+                            <option value="all">{t('monitor.filter.allPriorities')}</option>
+                            <option value="critical">{t('monitor.filter.critical')}</option>
+                            <option value="high">{t('monitor.filter.high')}</option>
+                            <option value="medium">{t('monitor.filter.medium')}</option>
+                            <option value="low">{t('monitor.filter.low')}</option>
                         </select>
                     </div>
                 </div>
@@ -533,7 +534,7 @@ export default function MonitorView({ isDark = true }: { isDark?: boolean }) {
                                                             {formatDuration(call.duration)}
                                                         </td>
                                                         <td className={cn("px-6 py-5 text-xs", isDark ? "text-white/60" : "text-gray-600")}>
-                                                            {new Date(call.date).toLocaleDateString()} <span className="opacity-50 ml-1">{new Date(call.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                                                            {new Date(call.date).toLocaleDateString(language === 'de' ? 'de-DE' : 'en-US')} <span className="opacity-50 ml-1">{new Date(call.date).toLocaleTimeString(language === 'de' ? 'de-DE' : 'en-US', { hour: '2-digit', minute: '2-digit' })}</span>
                                                         </td>
                                                         <td className="px-6 py-5 text-right">
                                                             <button
@@ -554,17 +555,17 @@ export default function MonitorView({ isDark = true }: { isDark?: boolean }) {
                                                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                                                     <div>
                                                                         <h4 className={cn("text-xs font-semibold uppercase tracking-wider mb-2 flex items-center gap-1.5", isDark ? "text-white/40" : "text-black/40")}>
-                                                                            Summary
+                                                                            {t('monitor.detail.summary')}
                                                                         </h4>
                                                                         <div className={cn("p-4 rounded-xl border", isDark ? "border-white/10 bg-black/20" : "border-black/5 bg-white")}>
                                                                             <p className={cn("text-sm leading-relaxed", isDark ? "text-white/80" : "text-gray-700")}>
-                                                                                {call.summary.summaryText || "No summary available."}
+                                                                                {call.summary.summaryText || t('monitor.detail.noSummary')}
                                                                             </p>
                                                                         </div>
                                                                     </div>
                                                                     {call.extractedFields.length > 0 && (
                                                                         <div>
-                                                                            <h4 className={cn("text-xs font-semibold uppercase tracking-wider mb-2", isDark ? "text-white/40" : "text-black/40")}>Extracted Data</h4>
+                                                                            <h4 className={cn("text-xs font-semibold uppercase tracking-wider mb-2", isDark ? "text-white/40" : "text-black/40")}>{t('monitor.detail.extractedData')}</h4>
                                                                             <div className={cn("rounded-xl border border-white/10", isDark ? "bg-black/20" : "bg-white")}>
                                                                                 <div className="space-y-1 p-3">
                                                                                     {call.extractedFields.map(field => (

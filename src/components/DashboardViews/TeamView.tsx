@@ -67,11 +67,11 @@ export default function TeamView({ isDark = true }: { isDark?: boolean }) {
     const getRelativeTime = (date: Date) => {
         const diff = Date.now() - date.getTime();
         const minutes = Math.floor(diff / 60000);
-        if (minutes < 1) return 'Just now';
-        if (minutes < 60) return `${minutes} min ago`;
+        if (minutes < 1) return t('team.justNow');
+        if (minutes < 60) return t('team.minAgo').replace('{count}', minutes.toString());
         const hours = Math.floor(minutes / 60);
-        if (hours < 24) return `${hours} hours ago`;
-        return `${Math.floor(hours / 24)} days ago`;
+        if (hours < 24) return t('team.hoursAgo').replace('{count}', hours.toString());
+        return t('team.daysAgo').replace('{count}', Math.floor(hours / 24).toString());
     };
 
     const handleInvite = async (e: React.FormEvent) => {
@@ -113,7 +113,7 @@ export default function TeamView({ isDark = true }: { isDark?: boolean }) {
     };
 
     const handleRemoveMember = async (id: string) => {
-        if (confirm('Are you sure you want to remove this member?')) {
+        if (confirm(t('team.removeConfirm'))) {
             try {
                 const headers = await getAuthHeaders();
                 const res = await fetch(`${apiBase}?id=${id}`, {
@@ -157,7 +157,7 @@ export default function TeamView({ isDark = true }: { isDark?: boolean }) {
                     <form onSubmit={handleInvite} className="flex flex-col md:flex-row gap-4 items-end">
                         <div className="flex-1 space-y-2 w-full">
                             <label className={cn("text-xs font-medium uppercase tracking-wider", isDark ? "text-white/40" : "text-black/40")}>
-                                Email Address
+                                {t('team.emailLabel')}
                             </label>
                             <div className="relative">
                                 <Mail className={cn("absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4", isDark ? "text-white/40" : "text-black/40")} />
@@ -214,7 +214,7 @@ export default function TeamView({ isDark = true }: { isDark?: boolean }) {
                             ) : inviteSuccess ? (
                                 <>
                                     <Check className="w-4 h-4" />
-                                    <span>Sent!</span>
+                                    <span>{t('team.sent')}</span>
                                 </>
                             ) : (
                                 <>
@@ -245,11 +245,11 @@ export default function TeamView({ isDark = true }: { isDark?: boolean }) {
                             isDark ? "bg-white/5 text-gray-400" : "bg-gray-50 text-gray-600"
                         )}>
                             <tr>
-                                <th className="px-6 py-4">User</th>
-                                <th className="px-6 py-4">Role</th>
-                                <th className="px-6 py-4">Status</th>
-                                <th className="px-6 py-4">Activity</th>
-                                <th className="px-6 py-4 text-right">Actions</th>
+                                <th className="px-6 py-4">{t('team.table.user')}</th>
+                                <th className="px-6 py-4">{t('team.table.role')}</th>
+                                <th className="px-6 py-4">{t('team.table.status')}</th>
+                                <th className="px-6 py-4">{t('team.table.activity')}</th>
+                                <th className="px-6 py-4 text-right">{t('team.table.actions')}</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-200 dark:divide-white/5">
@@ -287,7 +287,7 @@ export default function TeamView({ isDark = true }: { isDark?: boolean }) {
                                                     ? (isDark ? "bg-purple-500/10 text-purple-400 border border-purple-500/20" : "bg-purple-50 text-purple-600 border border-purple-200")
                                                     : (isDark ? "bg-white/5 text-white/60 border border-white/10" : "bg-gray-100 text-gray-600 border border-gray-200")
                                             )}>
-                                                {member.role}
+                                                {member.role === 'admin' ? t('team.role.admin') : t('team.role.member')}
                                             </span>
                                         </td>
                                         <td className="px-6 py-4">
@@ -307,11 +307,11 @@ export default function TeamView({ isDark = true }: { isDark?: boolean }) {
                                         <td className="px-6 py-4">
                                             <div className="flex flex-col">
                                                 <span className={cn("text-xs", isDark ? "text-white/60" : "text-black/60")}>
-                                                    Added: {member.dateAdded}
+                                                    {t('team.added').replace('{date}', member.dateAdded)}
                                                 </span>
                                                 {member.lastActive && (
                                                     <span className={cn("text-xs", isDark ? "text-white/40" : "text-black/40")}>
-                                                        Last active: {member.lastActive}
+                                                        {t('team.lastActive').replace('{time}', member.lastActive)}
                                                     </span>
                                                 )}
                                             </div>
@@ -325,7 +325,7 @@ export default function TeamView({ isDark = true }: { isDark?: boolean }) {
                                                         ? "hover:bg-red-500/10 text-white/40 hover:text-red-400"
                                                         : "hover:bg-red-50 text-black/40 hover:text-red-600"
                                                 )}
-                                                title="Remove member"
+                                                title={t('team.removeTitle')}
                                             >
                                                 <Trash2 className="w-4 h-4" />
                                             </button>
