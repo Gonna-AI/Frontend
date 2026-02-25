@@ -268,6 +268,16 @@ export const de = {
     'sidebar.instructions': 'Anweisungen',
     'sidebar.saveConfig': 'Konfig. speichern',
     'sidebar.setupWizard': 'Einrichtungsassistent',
+    'sidebar.account': 'Konto',
+    'sidebar.integrations': 'Integrationen',
+    'sidebar.darkMode': 'Dunkelmodus',
+    'sidebar.lightMode': 'Heller Modus',
+    'sidebar.confirmSignOutTitle': 'Abmelden',
+    'sidebar.confirmSignOutMessage': 'Sind Sie sicher, dass Sie sich abmelden möchten? Ihre Sitzungsdaten werden aus diesem Browser gelöscht.',
+    'sidebar.cancel': 'Abbrechen',
+    'sidebar.signOut': 'Abmelden',
+    'sidebar.signingOut': 'Abmeldung...',
+    'sidebar.clearingSession': 'Ihre Sitzungsdaten werden sicher gelöscht',
 
     // Onboarding Wizard
     'onboarding.title': 'KI-Einrichtungsassistent',
@@ -306,6 +316,20 @@ export const de = {
     'team.role.member': 'Mitglied',
     'team.dateAdded': 'Hinzugefügt am',
     'team.lastActive': 'Zuletzt aktiv',
+    'team.emailLabel': 'E-Mail-Adresse',
+    'team.sent': 'Gesendet!',
+    'team.removeConfirm': 'Sind Sie sicher, dass Sie dieses Teammitglied entfernen möchten?',
+    'team.removeTitle': 'Mitglied entfernen',
+    'team.added': 'Hinzugefügt am {date}',
+    'team.justNow': 'Gerade eben',
+    'team.minAgo': 'vor {count} Min.',
+    'team.hoursAgo': 'vor {count} Std.',
+    'team.daysAgo': 'vor {count} Tagen',
+    'team.table.user': 'Benutzer',
+    'team.table.role': 'Rolle',
+    'team.table.status': 'Status',
+    'team.table.activity': 'Aktivität',
+    'team.table.actions': 'Aktionen',
 
     // Invite Page
     'invite.support': 'Support',
@@ -632,6 +656,10 @@ export const de = {
     // Usage View
     'usage.title': 'Nutzung',
     'usage.subtitle': 'API-Verbrauch und Credits verfolgen',
+    'usage.redeemAction': 'Einlösen',
+    'usage.redeemPlaceholder': 'Promo-Code eingeben',
+    'usage.redeemError': 'Ungültiger oder abgelaufener Code',
+    'usage.redeemSuccess': '{count} Credits erfolgreich hinzugefügt!',
     'usage.freePlanStatus': 'Kostenloser Plan Status',
     'usage.active': 'Aktiv',
     'usage.limitReached': 'Limit erreicht',
@@ -835,6 +863,7 @@ export const de = {
     'access.granted': 'Zugriff gewährt',
     'access.unlocking': 'Ihr Dashboard wird freigeschaltet...',
     'access.enter': 'Bestätigen',
+    'access.checking': 'Zugriff wird geprüft...',
 
     // Cookie Consent
     'cookies.bannerTitle': 'Cookie-Einstellungen',

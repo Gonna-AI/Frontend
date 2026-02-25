@@ -72,7 +72,7 @@ function DemoDashboardContent() {
       billing: t('sidebar.billing'),
       keys: t('sidebar.keys'),
       team: t('sidebar.team'),
-      integrations: 'Integrations',
+      integrations: t('sidebar.integrations'),
       onboarding: t('onboarding.title'),
     };
     return labelMap[tab] || tab;
@@ -141,7 +141,7 @@ function DemoDashboardContent() {
                 <div className="flex items-center justify-center w-full min-h-[60vh]">
                   <div className="flex flex-col items-center gap-4">
                     <div className="w-8 h-8 border-2 border-white/20 border-t-purple-500 rounded-full animate-spin" />
-                    <p className={cn("text-sm", isDark ? "text-white/50" : "text-gray-500")}>Checking access...</p>
+                    <p className={cn("text-sm", isDark ? "text-white/50" : "text-gray-500")}>{t('access.checking')}</p>
                   </div>
                 </div>
               )}

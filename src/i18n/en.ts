@@ -268,6 +268,16 @@ export const en = {
     'sidebar.instructions': 'Instructions',
     'sidebar.saveConfig': 'Save Config',
     'sidebar.setupWizard': 'Setup Wizard',
+    'sidebar.account': 'Account',
+    'sidebar.integrations': 'Integrations',
+    'sidebar.darkMode': 'Dark Mode',
+    'sidebar.lightMode': 'Light Mode',
+    'sidebar.confirmSignOutTitle': 'Sign Out',
+    'sidebar.confirmSignOutMessage': 'Are you sure you want to sign out? Your session data will be cleared from this browser.',
+    'sidebar.cancel': 'Cancel',
+    'sidebar.signOut': 'Sign Out',
+    'sidebar.signingOut': 'Signing out...',
+    'sidebar.clearingSession': 'Clearing your session data safely',
 
     // Onboarding Wizard
     'onboarding.title': 'AI Setup Wizard',
@@ -307,6 +317,20 @@ export const en = {
     'team.role.member': 'Member',
     'team.dateAdded': 'Date Added',
     'team.lastActive': 'Last Active',
+    'team.emailLabel': 'Email Address',
+    'team.sent': 'Sent!',
+    'team.removeConfirm': 'Are you sure you want to remove this team member?',
+    'team.removeTitle': 'Remove member',
+    'team.added': 'Added on {date}',
+    'team.justNow': 'Just now',
+    'team.minAgo': '{count}m ago',
+    'team.hoursAgo': '{count}h ago',
+    'team.daysAgo': '{count}d ago',
+    'team.table.user': 'User',
+    'team.table.role': 'Role',
+    'team.table.status': 'Status',
+    'team.table.activity': 'Activity',
+    'team.table.actions': 'Actions',
 
     // Invite Page
     'invite.support': 'Support',
@@ -635,6 +659,10 @@ export const en = {
     // Usage View
     'usage.title': 'Usage',
     'usage.subtitle': 'Track api consumption and credits',
+    'usage.redeemAction': 'Redeem',
+    'usage.redeemPlaceholder': 'Enter promo code',
+    'usage.redeemError': 'Invalid or expired code',
+    'usage.redeemSuccess': 'Succesfully added {count} credits!',
     'usage.freePlanStatus': 'Free Plan Status',
     'usage.active': 'Active',
     'usage.limitReached': 'Limit Reached',
@@ -838,6 +866,7 @@ export const en = {
     'access.granted': 'Access Granted',
     'access.unlocking': 'Your dashboard is being unlocked...',
     'access.enter': 'Enter',
+    'access.checking': 'Checking access...',
 
     // Cookie Consent
     'cookies.bannerTitle': 'Cookie Preferences',
