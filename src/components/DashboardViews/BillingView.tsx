@@ -1,14 +1,13 @@
 import { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import { cn } from '../../utils/cn';
-import { Check, Building2, Rocket, Coins, ArrowRight, ShieldCheck, Sparkles, X, AlertCircle } from 'lucide-react';
+import { Check, Building2, Rocket, Coins, ArrowRight, ShieldCheck, Sparkles, X, AlertCircle, Crown, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useDemoCall } from '../../contexts/DemoCallContext';
 import { supabase } from '../../config/supabase';
 
+// ────────────────────────────────────────────────────────────────
 // Custom Razorpay hook — replaces buggy react-razorpay library
-// The library's useRazorpay hook has a bug: if the checkout script is already
-// loaded (e.g. after navigating away and back), isLoading is set to true but
-// never reset, permanently blocking payments.
+// ────────────────────────────────────────────────────────────────
 declare global {
     interface Window {
         Razorpay: any;
@@ -23,7 +22,6 @@ function useRazorpay() {
     const scriptLoadedRef = useRef(false);
 
     useEffect(() => {
-        // Already available on window (previous mount loaded it)
         if (typeof window !== 'undefined' && window.Razorpay) {
             setIsLoading(false);
             setError(undefined);
@@ -31,66 +29,41 @@ function useRazorpay() {
             return;
         }
 
-        // Check if script tag already exists but hasn't finished loading
         const existingScript = document.querySelector(
             `script[src="${RAZORPAY_SCRIPT_URL}"]`
         ) as HTMLScriptElement | null;
 
         if (existingScript) {
-            // Script tag exists, wait for it to load
-            const onLoad = () => {
-                setIsLoading(false);
-                setError(undefined);
-                scriptLoadedRef.current = true;
-            };
-            const onError = () => {
-                setIsLoading(false);
-                setError('Failed to load Razorpay SDK');
-            };
-            // If it already fired, window.Razorpay would be set (handled above)
+            const onLoad = () => { setIsLoading(false); setError(undefined); scriptLoadedRef.current = true; };
+            const onError = () => { setIsLoading(false); setError('Failed to load Razorpay SDK'); };
             existingScript.addEventListener('load', onLoad);
             existingScript.addEventListener('error', onError);
-            return () => {
-                existingScript.removeEventListener('load', onLoad);
-                existingScript.removeEventListener('error', onError);
-            };
+            return () => { existingScript.removeEventListener('load', onLoad); existingScript.removeEventListener('error', onError); };
         }
 
-        // Load fresh
         setIsLoading(true);
         const script = document.createElement('script');
         script.src = RAZORPAY_SCRIPT_URL;
         script.async = true;
-        script.onload = () => {
-            setIsLoading(false);
-            setError(undefined);
-            scriptLoadedRef.current = true;
-        };
-        script.onerror = () => {
-            setIsLoading(false);
-            setError('Failed to load Razorpay SDK');
-        };
+        script.onload = () => { setIsLoading(false); setError(undefined); scriptLoadedRef.current = true; };
+        script.onerror = () => { setIsLoading(false); setError('Failed to load Razorpay SDK'); };
         document.body.appendChild(script);
     }, []);
 
     const RazorpayClass = useCallback(
         (options: any) => {
-            if (typeof window === 'undefined' || !window.Razorpay) {
-                throw new Error('Razorpay SDK not loaded');
-            }
+            if (typeof window === 'undefined' || !window.Razorpay) throw new Error('Razorpay SDK not loaded');
             return new window.Razorpay(options);
         },
         []
     );
 
-    return { error, isLoading, Razorpay: scriptLoadedRef.current || (!isLoading && !error) ? RazorpayClass : null };
+    return { error, isLoading, Razorpay: (scriptLoadedRef.current || (!isLoading && !error)) ? RazorpayClass : null };
 }
 
-// ClerkTree Credits System - synced with UsageView
-const TOTAL_CREDITS = 50;
-const VOICE_CREDITS_PER_MINUTE = 1;
-const TEXT_CREDITS_PER_10_REQUESTS = 1;
-
+// ────────────────────────────────────────────────────────────────
+// Types
+// ────────────────────────────────────────────────────────────────
 interface PlanFeature {
     text: string;
     included: boolean;
@@ -109,6 +82,17 @@ interface Plan {
     cta: string;
 }
 
+interface SubscriptionInfo {
+    balance: number;
+    subscription_type: 'free' | 'pro' | 'enterprise';
+    subscription_status: 'active' | 'cancelled' | 'past_due';
+    total_credits: number;
+    last_updated: string | null;
+}
+
+// ────────────────────────────────────────────────────────────────
+// Component
+// ────────────────────────────────────────────────────────────────
 export default function BillingView({ isDark = true }: { isDark?: boolean }) {
     const { callHistory } = useDemoCall();
     const { error, isLoading, Razorpay } = useRazorpay();
@@ -117,8 +101,84 @@ export default function BillingView({ isDark = true }: { isDark?: boolean }) {
     const [paymentStatus, setPaymentStatus] = useState<'none' | 'success' | 'failed'>('none');
     const [paymentError, setPaymentError] = useState('');
 
+    // Live subscription data from backend
+    const [subInfo, setSubInfo] = useState<SubscriptionInfo | null>(null);
+    const [subLoading, setSubLoading] = useState(true);
+
     const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 
+    // ── Fetch live subscription info from backend ──
+    const fetchSubscriptionInfo = useCallback(async () => {
+        try {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) return;
+
+            const res = await fetch(`${supabaseUrl}/functions/v1/api-billing/balance`, {
+                headers: { 'Authorization': `Bearer ${session.access_token}` }
+            });
+
+            if (res.ok) {
+                const data = await res.json();
+                setSubInfo({
+                    balance: Number(data.balance),
+                    subscription_type: data.subscription_type || 'free',
+                    subscription_status: data.subscription_status || 'active',
+                    total_credits: data.total_credits || 50,
+                    last_updated: data.last_updated || null,
+                });
+            }
+        } catch (e) {
+            console.error('Failed to fetch subscription info:', e);
+        } finally {
+            setSubLoading(false);
+        }
+    }, [supabaseUrl]);
+
+    useEffect(() => {
+        fetchSubscriptionInfo();
+    }, [fetchSubscriptionInfo]);
+
+    // ── Derived values ──
+    const currentPlan = subInfo?.subscription_type ?? 'free';
+    const isPro = currentPlan === 'pro';
+    const isEnterprise = currentPlan === 'enterprise';
+    const totalCredits = subInfo?.total_credits ?? 50;
+    const creditsBalance = subInfo?.balance ?? 50;
+
+    // Calculate actual credits used from call history (fallback if backend balance not yet loaded)
+    const usageStats = useMemo(() => {
+        const voiceCalls = callHistory.filter(c => c.type === 'voice');
+        const textChats = callHistory.filter(c => c.type === 'text');
+        const totalVoiceSeconds = voiceCalls.reduce((acc, call) => acc + (call.duration || 0), 0);
+        const totalVoiceMinutes = Math.ceil(totalVoiceSeconds / 60);
+        const totalTextRequests = textChats.reduce((acc, call) => acc + call.messages.filter(m => m.speaker === 'user').length, 0);
+        const voiceCreditsUsed = totalVoiceMinutes * 1;
+        const textCreditsUsed = Math.ceil(totalTextRequests / 10) * 1;
+        const totalCreditsUsed = voiceCreditsUsed + textCreditsUsed;
+
+        // Use live balance if available, otherwise fall back to local calculation
+        const creditsRemaining = subInfo ? creditsBalance : Math.max(0, 50 - totalCreditsUsed);
+        const creditsUsedPercent = subInfo
+            ? ((totalCredits - creditsBalance) / totalCredits) * 100
+            : (totalCreditsUsed / 50) * 100;
+
+        return { totalCreditsUsed, creditsRemaining, creditsUsedPercent };
+    }, [callHistory, subInfo, creditsBalance, totalCredits]);
+
+    // Calculate next billing reset date (1st of next month)
+    const nextResetDate = useMemo(() => {
+        const now = new Date();
+        const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+        return nextMonth.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    }, []);
+
+    // ── Scroll to pricing section ──
+    const pricingRef = useRef<HTMLDivElement>(null);
+    const scrollToPricing = () => {
+        pricingRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
+
+    // ── Checkout handler ──
     const handleCheckout = async (planName: string) => {
         if (planName !== 'Pro') return;
         setIsProcessing(true);
@@ -128,21 +188,21 @@ export default function BillingView({ isDark = true }: { isDark?: boolean }) {
         try {
             const razorpayKey = import.meta.env.VITE_RAZORPAY_KEY_ID;
             if (!razorpayKey) {
-                setPaymentError('Razorpay Key ID is missing! Please fetch it from Razorpay Dashboard > API Keys and add VITE_RAZORPAY_KEY_ID to your .env.local file.');
+                setPaymentError('Razorpay Key ID is missing! Add VITE_RAZORPAY_KEY_ID to your .env.local file.');
                 setPaymentStatus('failed');
                 setIsProcessing(false);
                 return;
             }
 
             if (isLoading) {
-                setPaymentError('Razorpay SDK is still loading. Please try again in few seconds.');
+                setPaymentError('Payment gateway is loading. Please try again in a few seconds.');
                 setPaymentStatus('failed');
                 setIsProcessing(false);
                 return;
             }
 
             if (error || !Razorpay) {
-                setPaymentError(`Razorpay SDK failed to load. error: ${error}`);
+                setPaymentError(`Payment gateway failed to load: ${error || 'Unknown error'}`);
                 setPaymentStatus('failed');
                 setIsProcessing(false);
                 return;
@@ -166,20 +226,17 @@ export default function BillingView({ isDark = true }: { isDark?: boolean }) {
                 body: JSON.stringify({ plan: billingCycle })
             });
             const order = await res.json();
-
             if (!res.ok) throw new Error(order.error || 'Failed to create order');
 
             // 2. Open Razorpay Inline Modal
             const options = {
-                key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+                key: razorpayKey,
                 amount: order.amount,
                 currency: order.currency,
                 name: "ClerkTree",
                 description: `Pro Plan - ${billingCycle}`,
                 order_id: order.id,
-                callback_url: window.location.origin + "/dashboard/billing?status=success", // Fallback for external page redirect
                 handler: async function (response: any) {
-                    // Payment succeeded inline, verify mathematically on the server
                     try {
                         const verifyRes = await fetch(`${supabaseUrl}/functions/v1/api-billing/verify-payment`, {
                             method: 'POST',
@@ -198,11 +255,13 @@ export default function BillingView({ isDark = true }: { isDark?: boolean }) {
                         const verifyData = await verifyRes.json();
                         if (verifyRes.ok && verifyData.success) {
                             setPaymentStatus('success');
+                            // Refresh subscription info to reflect upgrade
+                            await fetchSubscriptionInfo();
                         } else {
-                            throw new Error(verifyData.error || 'Signature verification failed over server.');
+                            throw new Error(verifyData.error || 'Signature verification failed.');
                         }
                     } catch (err: any) {
-                        setPaymentError(err.message || 'Verification completely failed. Contact support.');
+                        setPaymentError(err.message || 'Verification failed. Contact support.');
                         setPaymentStatus('failed');
                     } finally {
                         setIsProcessing(false);
@@ -234,27 +293,7 @@ export default function BillingView({ isDark = true }: { isDark?: boolean }) {
         }
     };
 
-    // Calculate actual usage from call history
-    const usageStats = useMemo(() => {
-        const voiceCalls = callHistory.filter(c => c.type === 'voice');
-        const textChats = callHistory.filter(c => c.type === 'text');
-
-        const totalVoiceSeconds = voiceCalls.reduce((acc, call) => acc + (call.duration || 0), 0);
-        const totalVoiceMinutes = Math.ceil(totalVoiceSeconds / 60);
-        const totalTextRequests = textChats.reduce((acc, call) => acc + call.messages.filter(m => m.speaker === 'user').length, 0);
-
-        const voiceCreditsUsed = totalVoiceMinutes * VOICE_CREDITS_PER_MINUTE;
-        const textCreditsUsed = Math.ceil(totalTextRequests / 10) * TEXT_CREDITS_PER_10_REQUESTS;
-        const totalCreditsUsed = voiceCreditsUsed + textCreditsUsed;
-        const creditsRemaining = Math.max(0, TOTAL_CREDITS - totalCreditsUsed);
-
-        return {
-            totalCreditsUsed,
-            creditsRemaining,
-            creditsUsedPercent: (totalCreditsUsed / TOTAL_CREDITS) * 100
-        };
-    }, [callHistory]);
-
+    // ── Plan definitions — dynamic based on current subscription ──
     const plans: Plan[] = [
         {
             name: 'Free',
@@ -262,8 +301,8 @@ export default function BillingView({ isDark = true }: { isDark?: boolean }) {
             period: 'forever',
             description: 'Perfect to explore and build prototypes.',
             credits: 50,
-            current: true,
-            cta: 'Current Plan',
+            current: currentPlan === 'free',
+            cta: currentPlan === 'free' ? 'Current Plan' : 'Downgrade',
             features: [
                 { text: '50 ClerkTree Credits / month', included: true, highlight: true },
                 { text: 'Standard voice quality', included: true },
@@ -281,7 +320,8 @@ export default function BillingView({ isDark = true }: { isDark?: boolean }) {
             description: 'For startups and growing teams needing power.',
             credits: 500,
             popular: true,
-            cta: 'Upgrade to Pro',
+            current: currentPlan === 'pro',
+            cta: currentPlan === 'pro' ? 'Current Plan' : 'Upgrade to Pro',
             features: [
                 { text: '500 ClerkTree Credits / month', included: true, highlight: true },
                 { text: 'Premium ultra-low latency voice', included: true, highlight: true },
@@ -297,8 +337,9 @@ export default function BillingView({ isDark = true }: { isDark?: boolean }) {
             price: 'Custom',
             period: 'contact sales',
             description: 'For large organizations with custom needs.',
-            credits: -1, // Unlimited
-            cta: 'Contact Sales',
+            credits: -1,
+            current: currentPlan === 'enterprise',
+            cta: currentPlan === 'enterprise' ? 'Current Plan' : 'Contact Sales',
             features: [
                 { text: 'Unlimited ClerkTree Credits', included: true, highlight: true },
                 { text: 'Dedicated GPU infrastructure', included: true },
@@ -310,6 +351,11 @@ export default function BillingView({ isDark = true }: { isDark?: boolean }) {
             ]
         }
     ];
+
+    // ── Plan display name ──
+    const planDisplayName = isPro ? 'Pro' : isEnterprise ? 'Enterprise' : 'Free Research Preview';
+    const planIcon = isPro ? Crown : Rocket;
+    const PlanIcon = planIcon;
 
     return (
         <div className="space-y-8 max-w-[1600px] mx-auto pb-10">
@@ -333,41 +379,60 @@ export default function BillingView({ isDark = true }: { isDark?: boolean }) {
                     {/* Background decoration */}
                     <div className={cn(
                         "absolute top-0 right-0 w-[400px] h-[400px] rounded-full blur-[120px] opacity-10 pointer-events-none -translate-y-1/2 translate-x-1/2",
-                        isDark ? "bg-white" : "bg-black"
+                        isPro ? "bg-emerald-500" : (isDark ? "bg-white" : "bg-black")
                     )} />
 
                     <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
                         <div className="flex items-start gap-6">
                             <div className={cn(
                                 "w-16 h-16 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-lg",
-                                isDark ? "bg-white/5 border border-white/10" : "bg-black/5 border border-black/5"
+                                isPro
+                                    ? "bg-emerald-500/10 border border-emerald-500/20"
+                                    : (isDark ? "bg-white/5 border border-white/10" : "bg-black/5 border border-black/5")
                             )}>
-                                <Rocket className={cn("w-8 h-8", isDark ? "text-white" : "text-black")} />
+                                {subLoading ? (
+                                    <Loader2 className={cn("w-8 h-8 animate-spin", isDark ? "text-white/40" : "text-black/40")} />
+                                ) : (
+                                    <PlanIcon className={cn("w-8 h-8", isPro ? "text-emerald-500" : (isDark ? "text-white" : "text-black"))} />
+                                )}
                             </div>
                             <div className="space-y-2">
                                 <div className="flex items-center gap-3">
-                                    <h3 className={cn("text-xl font-bold", isDark ? "text-white" : "text-black")}>Free Research Preview</h3>
+                                    <h3 className={cn("text-xl font-bold", isDark ? "text-white" : "text-black")}>
+                                        {subLoading ? 'Loading...' : planDisplayName}
+                                    </h3>
                                     <span className={cn(
                                         "px-2.5 py-0.5 rounded-full text-[10px] uppercase font-bold tracking-wider",
-                                        isDark ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/20" : "bg-emerald-100 text-emerald-700 border border-emerald-200"
+                                        isPro
+                                            ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/20"
+                                            : (isDark ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/20" : "bg-emerald-100 text-emerald-700 border border-emerald-200")
                                     )}>
-                                        Active
+                                        {subInfo?.subscription_status === 'active' ? 'Active' : (subInfo?.subscription_status ?? 'Active')}
                                     </span>
                                 </div>
                                 <p className={cn("text-sm max-w-lg leading-relaxed", isDark ? "text-white/60" : "text-black/60")}>
-                                    You are currently on the Free plan. Great for prototypes and testing.
-                                    Upgrade to <span className="font-semibold text-emerald-500">Pro</span> for production-ready latency and higher limits.
+                                    {isPro ? (
+                                        <>You are on the <span className="font-semibold text-emerald-500">Pro</span> plan. Enjoy premium voice quality, higher limits, and priority support.</>
+                                    ) : (
+                                        <>You are currently on the Free plan. Great for prototypes and testing.
+                                            Upgrade to <span className="font-semibold text-emerald-500">Pro</span> for production-ready latency and higher limits.</>
+                                    )}
                                 </p>
                             </div>
                         </div>
-                        <button className={cn(
-                            "hidden md:flex px-5 py-2.5 rounded-xl text-sm font-semibold transition-all hover:scale-105 active:scale-95",
-                            isDark
-                                ? "bg-white text-black hover:bg-gray-200 shadow-[0_0_20px_rgba(255,255,255,0.1)]"
-                                : "bg-black text-white hover:bg-gray-800 shadow-[0_0_20px_rgba(0,0,0,0.1)]"
-                        )}>
-                            Upgrade Plan
-                        </button>
+                        {!isPro && !isEnterprise && (
+                            <button
+                                onClick={scrollToPricing}
+                                className={cn(
+                                    "hidden md:flex px-5 py-2.5 rounded-xl text-sm font-semibold transition-all hover:scale-105 active:scale-95",
+                                    isDark
+                                        ? "bg-white text-black hover:bg-gray-200 shadow-[0_0_20px_rgba(255,255,255,0.1)]"
+                                        : "bg-black text-white hover:bg-gray-800 shadow-[0_0_20px_rgba(0,0,0,0.1)]"
+                                )}
+                            >
+                                Upgrade Plan
+                            </button>
+                        )}
                     </div>
                 </div>
 
@@ -396,7 +461,9 @@ export default function BillingView({ isDark = true }: { isDark?: boolean }) {
                                     usageStats.creditsRemaining === 0 ? "text-rose-500" : (isDark ? "text-emerald-400" : "text-emerald-600")
                                 )}>Available Credits</span>
                             </div>
-                            <span className={cn("text-xs font-mono opacity-50", isDark ? "text-white" : "text-black")}>Monthly Reset: Nov 1</span>
+                            <span className={cn("text-xs font-mono opacity-50", isDark ? "text-white" : "text-black")}>
+                                Resets: {nextResetDate}
+                            </span>
                         </div>
 
                         <div className="flex items-baseline gap-1 mt-2 mb-4">
@@ -404,9 +471,9 @@ export default function BillingView({ isDark = true }: { isDark?: boolean }) {
                                 "text-5xl font-bold tracking-tight",
                                 isDark ? "text-white" : "text-black"
                             )}>
-                                {usageStats.creditsRemaining}
+                                {subLoading ? '—' : Math.round(usageStats.creditsRemaining)}
                             </span>
-                            <span className={cn("text-lg", isDark ? "text-white/40" : "text-black/40")}> / {TOTAL_CREDITS}</span>
+                            <span className={cn("text-lg", isDark ? "text-white/40" : "text-black/40")}> / {totalCredits}</span>
                         </div>
 
                         <div className={cn("w-full h-2 rounded-full overflow-hidden mb-2", isDark ? "bg-white/10" : "bg-black/5")}>
@@ -415,7 +482,7 @@ export default function BillingView({ isDark = true }: { isDark?: boolean }) {
                                     "h-full rounded-full transition-all duration-500",
                                     usageStats.creditsUsedPercent >= 100 ? "bg-rose-500" : "bg-emerald-500"
                                 )}
-                                style={{ width: `${Math.min(usageStats.creditsUsedPercent, 100)}%` }}
+                                style={{ width: `${Math.min(Math.max(usageStats.creditsUsedPercent, 0), 100)}%` }}
                             />
                         </div>
 
@@ -432,7 +499,7 @@ export default function BillingView({ isDark = true }: { isDark?: boolean }) {
             </div>
 
             {/* Billing Cycle Toggle */}
-            <div className="py-8 flex flex-col items-center justify-center space-y-4">
+            <div ref={pricingRef} className="py-8 flex flex-col items-center justify-center space-y-4">
                 <h2 className={cn("text-2xl font-bold text-center", isDark ? "text-white" : "text-black")}>
                     Simple, transparent pricing
                 </h2>
@@ -481,13 +548,23 @@ export default function BillingView({ isDark = true }: { isDark?: boolean }) {
                             plan.current && "ring-1 ring-emerald-500/50"
                         )}
                     >
-                        {plan.popular && (
+                        {plan.popular && !plan.current && (
                             <div className="absolute -top-4 left-1/2 -translate-x-1/2">
                                 <span className={cn(
                                     "px-4 py-1.5 rounded-full text-xs font-bold flex items-center gap-1.5 shadow-lg uppercase tracking-wider",
                                     isDark ? "bg-emerald-500 text-white" : "bg-black text-white"
                                 )}>
                                     <Sparkles className="w-3 h-3 fill-current" /> Most Popular
+                                </span>
+                            </div>
+                        )}
+                        {plan.current && (
+                            <div className="absolute -top-4 left-1/2 -translate-x-1/2">
+                                <span className={cn(
+                                    "px-4 py-1.5 rounded-full text-xs font-bold flex items-center gap-1.5 shadow-lg uppercase tracking-wider",
+                                    "bg-emerald-500 text-white"
+                                )}>
+                                    <Check className="w-3 h-3" /> Your Plan
                                 </span>
                             </div>
                         )}
@@ -532,8 +609,8 @@ export default function BillingView({ isDark = true }: { isDark?: boolean }) {
                         <button
                             disabled={plan.current || (plan.name === 'Pro' && isProcessing)}
                             onClick={() => {
-                                if (plan.name === 'Pro') handleCheckout(plan.name);
-                                else if (plan.name === 'Enterprise') window.location.href = 'mailto:sales@clerktree.com';
+                                if (plan.name === 'Pro' && !plan.current) handleCheckout(plan.name);
+                                else if (plan.name === 'Enterprise' && !plan.current) window.location.href = 'mailto:sales@clerktree.com';
                             }}
                             className={cn(
                                 "w-full py-4 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2",
@@ -544,7 +621,9 @@ export default function BillingView({ isDark = true }: { isDark?: boolean }) {
                                         : (isDark ? "bg-white text-black hover:bg-gray-200 transform hover:-translate-y-0.5" : "bg-black text-white hover:bg-gray-800 transform hover:-translate-y-0.5")
                             )}
                         >
-                            {plan.name === 'Pro' && isProcessing ? 'Processing...' : plan.cta}
+                            {plan.name === 'Pro' && isProcessing ? (
+                                <><Loader2 className="w-4 h-4 animate-spin" /> Processing...</>
+                            ) : plan.cta}
                             {!plan.current && <ArrowRight className="w-4 h-4" />}
                         </button>
                     </div>
@@ -619,7 +698,7 @@ export default function BillingView({ isDark = true }: { isDark?: boolean }) {
                 </div>
             </div>
 
-            {/* Payment Showcase Modals */}
+            {/* Payment Status Modals */}
             <AnimatePresence>
                 {paymentStatus !== 'none' && (
                     <>
@@ -628,7 +707,7 @@ export default function BillingView({ isDark = true }: { isDark?: boolean }) {
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
                             className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm"
-                            onClick={() => paymentStatus === 'success' ? window.location.reload() : setPaymentStatus('none')}
+                            onClick={() => paymentStatus === 'success' ? fetchSubscriptionInfo() : setPaymentStatus('none')}
                         />
                         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
                             <motion.div
@@ -641,7 +720,7 @@ export default function BillingView({ isDark = true }: { isDark?: boolean }) {
                                 )}
                             >
                                 <button
-                                    onClick={() => paymentStatus === 'success' ? window.location.reload() : setPaymentStatus('none')}
+                                    onClick={() => paymentStatus === 'success' ? setPaymentStatus('none') : setPaymentStatus('none')}
                                     className="absolute top-4 right-4 p-2 rounded-full hover:bg-white/10 transition-colors"
                                 >
                                     <X className={cn("w-4 h-4", isDark ? "text-white/60" : "text-black/60")} />
@@ -654,12 +733,12 @@ export default function BillingView({ isDark = true }: { isDark?: boolean }) {
                                                 <div className="absolute inset-0 bg-emerald-500/20 blur-xl rounded-full animate-pulse" />
                                                 <Check className="w-8 h-8" />
                                             </div>
-                                            <h3 className={cn("text-2xl font-bold mb-2", isDark ? "text-white" : "text-black")}>Payment Successful</h3>
+                                            <h3 className={cn("text-2xl font-bold mb-2", isDark ? "text-white" : "text-black")}>Welcome to Pro! 🎉</h3>
                                             <p className={cn("text-sm mb-6", isDark ? "text-white/60" : "text-black/60")}>
-                                                Your subscription has been upgraded. 500 Credits have been instantaneously deposited to your account.
+                                                Your subscription has been upgraded. 500 Credits have been deposited to your account. Enjoy premium voice quality and higher limits!
                                             </p>
                                             <button
-                                                onClick={() => window.location.reload()}
+                                                onClick={() => setPaymentStatus('none')}
                                                 className="w-full py-3 px-4 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl transition-colors shadow-lg shadow-emerald-500/25"
                                             >
                                                 Start Building
@@ -682,7 +761,7 @@ export default function BillingView({ isDark = true }: { isDark?: boolean }) {
                                                     isDark ? "bg-white/10 hover:bg-white/20 text-white" : "bg-black/5 hover:bg-black/10 text-black"
                                                 )}
                                             >
-                                                Oh no! Try Again
+                                                Try Again
                                             </button>
                                         </>
                                     )}
