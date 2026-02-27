@@ -1,8 +1,9 @@
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Check, Filter, Search } from 'lucide-react';
+import { Check, Filter, Loader2, Pause, Play, Search } from 'lucide-react';
 import { cn } from '../../utils/cn';
-import { AVAILABLE_VOICES, normalizeVoiceId } from '../../config/voiceConfig';
+import { AVAILABLE_VOICES, normalizeVoiceId, type OrpheusVoiceId } from '../../config/voiceConfig';
+import { ttsService } from '../../services/ttsService';
 
 interface VoiceSelectorProps {
   isDark?: boolean;
@@ -20,6 +21,10 @@ export default function VoiceSelector({
 }: VoiceSelectorProps) {
   const [genderFilter, setGenderFilter] = useState<'all' | 'male' | 'female'>('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [loadingVoiceId, setLoadingVoiceId] = useState<OrpheusVoiceId | null>(null);
+  const [playingVoiceId, setPlayingVoiceId] = useState<OrpheusVoiceId | null>(null);
+  const previewRequestIdRef = useRef(0);
+  const PREVIEW_TEXT = 'Hello, this is a sample of this Groq voice.';
 
   const normalizedSelectedVoiceId = normalizeVoiceId(selectedVoiceId);
 
@@ -39,6 +44,66 @@ export default function VoiceSelector({
       );
     });
   }, [genderFilter, searchQuery]);
+
+  const stopVoicePreview = useCallback(() => {
+    previewRequestIdRef.current += 1;
+    ttsService.stop();
+    setLoadingVoiceId(null);
+    setPlayingVoiceId(null);
+  }, []);
+
+  const playVoicePreview = useCallback(
+    async (voiceId: OrpheusVoiceId) => {
+      if (loadingVoiceId === voiceId || playingVoiceId === voiceId) {
+        stopVoicePreview();
+        return;
+      }
+
+      stopVoicePreview();
+      const requestId = previewRequestIdRef.current;
+      setLoadingVoiceId(voiceId);
+
+      try {
+        await ttsService.unlockAudio();
+      } catch {
+        // Best-effort unlock; playback may still succeed.
+      }
+
+      try {
+        await ttsService.speak(PREVIEW_TEXT, {
+          language: 'en',
+          orpheusVoice: voiceId,
+          speed: 1.0,
+          onStart: () => {
+            if (previewRequestIdRef.current !== requestId) return;
+            setLoadingVoiceId(null);
+            setPlayingVoiceId(voiceId);
+          },
+          onEnd: () => {
+            if (previewRequestIdRef.current !== requestId) return;
+            setLoadingVoiceId(null);
+            setPlayingVoiceId(null);
+          },
+          onError: () => {
+            if (previewRequestIdRef.current !== requestId) return;
+            setLoadingVoiceId(null);
+            setPlayingVoiceId(null);
+          },
+        });
+      } catch {
+        if (previewRequestIdRef.current !== requestId) return;
+        setLoadingVoiceId(null);
+        setPlayingVoiceId(null);
+      }
+    },
+    [loadingVoiceId, playingVoiceId, stopVoicePreview],
+  );
+
+  useEffect(() => {
+    return () => {
+      stopVoicePreview();
+    };
+  }, [stopVoicePreview]);
 
   return (
     <div
@@ -124,16 +189,25 @@ export default function VoiceSelector({
             <AnimatePresence mode="popLayout">
               {filteredVoices.map((voice) => {
                 const isSelected = normalizedSelectedVoiceId === voice.id;
+                const isLoading = loadingVoiceId === voice.id;
+                const isPlaying = playingVoiceId === voice.id;
 
                 return (
-                  <motion.button
-                    type="button"
+                  <motion.div
                     key={voice.id}
                     layout
                     initial={{ opacity: 0, scale: 0.98 }}
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.98 }}
                     onClick={() => onVoiceSelect(voice.id)}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(event) => {
+                      if (event.key === 'Enter' || event.key === ' ') {
+                        event.preventDefault();
+                        onVoiceSelect(voice.id);
+                      }
+                    }}
                     className={cn(
                       'relative group rounded-xl p-4 transition-all border text-left',
                       isSelected
@@ -184,8 +258,33 @@ export default function VoiceSelector({
                           </span>
                         </div>
                       </div>
+
+                      <button
+                        type="button"
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          void playVoicePreview(voice.id);
+                        }}
+                        className={cn(
+                          'w-9 h-9 rounded-full border flex items-center justify-center transition-colors',
+                          isPlaying
+                            ? 'bg-rose-500/20 border-rose-500/30 text-rose-400'
+                            : isDark
+                              ? 'bg-white/5 border-white/10 text-white/80 hover:bg-white/10'
+                              : 'bg-gray-100 border-gray-200 text-gray-700 hover:bg-gray-200',
+                        )}
+                        aria-label={isPlaying ? `Stop ${voice.name} preview` : `Play ${voice.name} preview`}
+                      >
+                        {isLoading ? (
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : isPlaying ? (
+                          <Pause className="w-4 h-4" />
+                        ) : (
+                          <Play className="w-4 h-4 ml-0.5" />
+                        )}
+                      </button>
                     </div>
-                  </motion.button>
+                  </motion.div>
                 );
               })}
             </AnimatePresence>
