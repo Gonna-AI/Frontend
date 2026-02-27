@@ -9,39 +9,12 @@ export const GROQ_VOICE_DEFINITIONS = {
 
 export type OrpheusVoiceId = keyof typeof GROQ_VOICE_DEFINITIONS;
 
-type LegacyVoiceId =
-  | 'af_nova'
-  | 'af_sky'
-  | 'af_bella'
-  | 'af_nicole'
-  | 'af_sarah'
-  | 'bf_emma'
-  | 'bf_isabella'
-  | 'am_adam'
-  | 'am_michael'
-  | 'bm_george'
-  | 'bm_lewis';
-
 export interface VoiceConfig {
   id: OrpheusVoiceId;
   name: string;
   gender: 'male' | 'female';
   description: string;
 }
-
-const LEGACY_TO_ORPHEUS_VOICE_MAP: Record<LegacyVoiceId, OrpheusVoiceId> = {
-  af_nova: 'autumn',
-  af_sky: 'diana',
-  af_bella: 'hannah',
-  af_nicole: 'autumn',
-  af_sarah: 'diana',
-  bf_emma: 'hannah',
-  bf_isabella: 'diana',
-  am_adam: 'austin',
-  am_michael: 'daniel',
-  bm_george: 'troy',
-  bm_lewis: 'austin',
-};
 
 const ORPHEUS_VOICE_IDS = Object.keys(GROQ_VOICE_DEFINITIONS) as OrpheusVoiceId[];
 const ORPHEUS_VOICE_ID_SET = new Set<string>(ORPHEUS_VOICE_IDS);
@@ -56,21 +29,21 @@ export const AVAILABLE_VOICES: VoiceConfig[] = ORPHEUS_VOICE_IDS.map((id) => ({
   description: GROQ_VOICE_DEFINITIONS[id].description,
 }));
 
-export const toOrpheusVoiceId = (voiceId?: string | null): OrpheusVoiceId | null => {
+const parseOrpheusVoiceId = (voiceId?: string | null): OrpheusVoiceId | null => {
   if (!voiceId) {
     return null;
   }
   if (ORPHEUS_VOICE_ID_SET.has(voiceId)) {
     return voiceId as OrpheusVoiceId;
   }
-  return LEGACY_TO_ORPHEUS_VOICE_MAP[voiceId as LegacyVoiceId] || null;
+  return null;
 };
 
 export const normalizeVoiceId = (
   voiceId?: string | null,
   fallback: OrpheusVoiceId = DEFAULT_VOICE_ID,
 ): OrpheusVoiceId => {
-  return toOrpheusVoiceId(voiceId) || fallback;
+  return parseOrpheusVoiceId(voiceId) || fallback;
 };
 
 export const getVoiceById = (id: string): VoiceConfig | undefined => {
