@@ -40,7 +40,7 @@ function DemoDashboardContent() {
   }, [hasAccess, activeTab]);
 
   // Tabs that are always accessible without an access code
-  const alwaysAccessibleTabs = ['billing', 'keys', 'team', 'usage', 'integrations'];
+  const alwaysAccessibleTabs = ['billing', 'keys', 'usage'];
 
   const handleSetActiveTab = (tab: string) => {
     if (!hasAccess && !alwaysAccessibleTabs.includes(tab)) return;
@@ -179,9 +179,9 @@ function DemoDashboardContent() {
                   {activeTab === 'groq_settings' && <GroqSettingsPage isDark={isDark} />}
 
                   {/* New Account Sections */}
-                  {activeTab === 'usage' && <UsageView isDark={isDark} />}
-                  {activeTab === 'billing' && <BillingView isDark={isDark} />}
-                  {activeTab === 'keys' && <KeysView isDark={isDark} />}
+                  {activeTab === 'usage' && <UsageView isDark={isDark} hasAccess={hasAccess} />}
+                  {activeTab === 'billing' && <BillingView isDark={isDark} hasAccess={hasAccess} />}
+                  {activeTab === 'keys' && <KeysView isDark={isDark} hasAccess={hasAccess} />}
                   {activeTab === 'team' && <TeamView isDark={isDark} />}
                   {activeTab === 'integrations' && <IntegrationView isDark={isDark} />}
 

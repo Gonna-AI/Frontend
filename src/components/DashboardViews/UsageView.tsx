@@ -77,7 +77,7 @@ function StatsCard({ title, value, change, trend, subtitle, isDark, progress }: 
     );
 }
 
-export default function UsageView({ isDark = true }: { isDark?: boolean }) {
+export default function UsageView({ isDark = true, hasAccess = false }: { isDark?: boolean; hasAccess?: boolean }) {
     const { t, language } = useLanguage();
     const { callHistory, getAnalytics } = useDemoCall();
     const analytics = getAnalytics();
@@ -252,6 +252,26 @@ export default function UsageView({ isDark = true }: { isDark?: boolean }) {
                     />
                 </div>
             </div>
+
+            {/* No Access Code Notice */}
+            {!hasAccess && (
+                <div className={cn(
+                    "p-4 rounded-xl border flex items-start gap-4",
+                    isDark ? "bg-amber-500/5 border-amber-500/20" : "bg-amber-50 border-amber-200"
+                )}>
+                    <div className={cn("p-2 rounded-lg flex-shrink-0", isDark ? "bg-amber-500/10" : "bg-amber-100")}>
+                        <Coins className={cn("w-5 h-5", isDark ? "text-amber-400" : "text-amber-600")} />
+                    </div>
+                    <div>
+                        <h3 className={cn("text-sm font-semibold", isDark ? "text-amber-400" : "text-amber-700")}>
+                            Viewing Demo Usage Data
+                        </h3>
+                        <p className={cn("text-sm mt-1", isDark ? "text-amber-400/70" : "text-amber-600/80")}>
+                            You are seeing your session credits (50 free credits). Enter an access code on the dashboard home screen to unlock full usage history and additional credits.
+                        </p>
+                    </div>
+                </div>
+            )}
 
             {/* Credits Banner */}
             <div className={cn(

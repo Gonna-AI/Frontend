@@ -51,7 +51,7 @@ interface RazorpayInstance {
 }
 
 interface RazorpayConstructor {
-    new (options: RazorpayOptions): RazorpayInstance;
+    new(options: RazorpayOptions): RazorpayInstance;
 }
 
 const getErrorMessage = (error: unknown, fallback: string): string => {
@@ -138,7 +138,7 @@ interface SubscriptionInfo {
 // ────────────────────────────────────────────────────────────────
 // Component
 // ────────────────────────────────────────────────────────────────
-export default function BillingView({ isDark = true }: { isDark?: boolean }) {
+export default function BillingView({ isDark = true, hasAccess = false }: { isDark?: boolean; hasAccess?: boolean }) {
     const { t } = useLanguage();
     const { callHistory } = useDemoCall();
     const { error, isLoading, Razorpay } = useRazorpay();
@@ -426,6 +426,26 @@ export default function BillingView({ isDark = true }: { isDark?: boolean }) {
                     </p>
                 </div>
             </div>
+
+            {/* No Access Code Notice */}
+            {!hasAccess && (
+                <div className={cn(
+                    "p-4 rounded-xl border flex items-start gap-4",
+                    isDark ? "bg-amber-500/5 border-amber-500/20" : "bg-amber-50 border-amber-200"
+                )}>
+                    <div className={cn("p-2 rounded-lg flex-shrink-0", isDark ? "bg-amber-500/10" : "bg-amber-100")}>
+                        <AlertCircle className={cn("w-5 h-5", isDark ? "text-amber-400" : "text-amber-600")} />
+                    </div>
+                    <div>
+                        <h3 className={cn("text-sm font-semibold", isDark ? "text-amber-400" : "text-amber-700")}>
+                            No Access Code Activated
+                        </h3>
+                        <p className={cn("text-sm mt-1", isDark ? "text-amber-400/70" : "text-amber-600/80")}>
+                            You are on the free tier with 50 session credits. Enter an access code from the dashboard home screen to unlock your full plan and credits.
+                        </p>
+                    </div>
+                </div>
+            )}
 
             {/* Current Plan & Credits Status */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

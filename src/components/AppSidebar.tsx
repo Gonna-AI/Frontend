@@ -52,7 +52,7 @@ interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
 }
 
 // Tabs that are always accessible without an access code
-const ALWAYS_ACCESSIBLE_TABS = ['billing', 'keys'];
+const ALWAYS_ACCESSIBLE_TABS = ['billing', 'keys', 'usage'];
 
 export function AppSidebar({ activeTab, setActiveTab, hasAccess = false, ...props }: AppSidebarProps) {
     const { t, language, setLanguage } = useLanguage();
@@ -358,7 +358,7 @@ export function AppSidebar({ activeTab, setActiveTab, hasAccess = false, ...prop
                                     <span>{t('sidebar.keys')}</span>
                                 </SidebarMenuButton>
                             </SidebarMenuItem>
-                            <SidebarMenuItem>
+                            <SidebarMenuItem className={getLockedStyles('team')}>
                                 <SidebarMenuButton
                                     isActive={activeTab === 'team'}
                                     onClick={() => handleTabClick('team')}
@@ -374,7 +374,7 @@ export function AppSidebar({ activeTab, setActiveTab, hasAccess = false, ...prop
                                     <span>{t('sidebar.team')}</span>
                                 </SidebarMenuButton>
                             </SidebarMenuItem>
-                            <SidebarMenuItem>
+                            <SidebarMenuItem className={getLockedStyles('integrations')}>
                                 <SidebarMenuButton
                                     isActive={activeTab === 'integrations'}
                                     onClick={() => handleTabClick('integrations')}
@@ -568,18 +568,20 @@ function AuthUserSection({ isDark, state }: { isDark: boolean; state: string }) 
 
             {/* Sign Out Confirmation Dialog */}
             {showConfirm && createPortal(
-                <div
-                    className="fixed inset-0 z-[100000] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fade-in"
-                    onClick={() => setShowConfirm(false)}
-                >
+                <div className="fixed inset-0 z-[100000] flex items-center justify-center animate-fade-in">
+                    {/* Backdrop — separate element so its click doesn't bubble into dialog */}
+                    <div
+                        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+                        onClick={() => setShowConfirm(false)}
+                    />
+                    {/* Dialog — elevated above backdrop */}
                     <div
                         className={cn(
-                            "relative w-[380px] rounded-[28px] p-8 shadow-2xl border animate-scale-in transition-all duration-500",
+                            "relative z-10 w-[380px] rounded-[28px] p-8 shadow-2xl border animate-scale-in",
                             isDark
                                 ? "bg-[#121214] border-white/5 shadow-black/50"
                                 : "bg-white border-gray-200/50 shadow-xl shadow-gray-200/50"
                         )}
-                        onClick={(e) => e.stopPropagation()}
                     >
                         {/* Icon */}
                         <div className="flex justify-center mb-5">
@@ -619,7 +621,7 @@ function AuthUserSection({ isDark, state }: { isDark: boolean; state: string }) 
                                 {t('sidebar.cancel')}
                             </button>
                             <button
-                                onClick={handleSignOut}
+                                onClick={(e) => { e.stopPropagation(); handleSignOut(); }}
                                 className="flex-1 px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-200 cursor-pointer bg-red-500/80 backdrop-blur-sm hover:bg-red-500 text-white shadow-lg shadow-red-500/20 hover:shadow-red-500/30 hover:-translate-y-0.5"
                             >
                                 {t('sidebar.signOut')}
@@ -669,8 +671,7 @@ function AuthUserSection({ isDark, state }: { isDark: boolean; state: string }) 
                             "p-1.5 rounded-md transition-colors flex-shrink-0",
                             isDark
                                 ? "text-white/40 hover:text-red-400 hover:bg-red-500/10"
-                                : "text-black/40 hover:text-red-500 hover:bg-red-500/10",
-                            state === "collapsed" && "hidden"
+                                : "text-black/40 hover:text-red-500 hover:bg-red-500/10"
                         )}
                         title={t('sidebar.signOut')}
                     >

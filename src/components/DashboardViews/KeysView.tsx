@@ -18,7 +18,7 @@ interface ApiKey {
 
 type WizardStep = 'name' | 'permissions' | 'limits' | 'confirm' | 'created';
 
-export default function KeysView({ isDark = true }: { isDark?: boolean }) {
+export default function KeysView({ isDark = true, hasAccess = false }: { isDark?: boolean; hasAccess?: boolean }) {
     const { t } = useLanguage();
     const { user } = useAuth();
     const [keys, setKeys] = useState<ApiKey[]>([]);
@@ -256,6 +256,50 @@ export default function KeysView({ isDark = true }: { isDark?: boolean }) {
                         <Plus className="w-4 h-4" />
                         {t('keys.createKey')}
                     </button>
+                </div>
+            </div>
+
+            {/* Access Status Notice */}
+            <div className={cn(
+                "p-4 rounded-xl border flex items-start gap-4",
+                hasAccess
+                    ? (isDark ? "bg-emerald-500/5 border-emerald-500/20" : "bg-emerald-50 border-emerald-200")
+                    : (isDark ? "bg-amber-500/5 border-amber-500/20" : "bg-amber-50 border-amber-200")
+            )}>
+                <div className={cn("p-2 rounded-lg", hasAccess
+                    ? (isDark ? "bg-emerald-500/10" : "bg-emerald-100")
+                    : (isDark ? "bg-amber-500/10" : "bg-amber-100")
+                )}>
+                    <Key className={cn("w-5 h-5", hasAccess
+                        ? (isDark ? "text-emerald-400" : "text-emerald-600")
+                        : (isDark ? "text-amber-400" : "text-amber-600")
+                    )} />
+                </div>
+                <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                        <h3 className={cn("text-sm font-semibold", hasAccess
+                            ? (isDark ? "text-emerald-400" : "text-emerald-700")
+                            : (isDark ? "text-amber-400" : "text-amber-700")
+                        )}>
+                            {hasAccess ? 'Full Access Account' : 'No Access Code Activated'}
+                        </h3>
+                        <span className={cn(
+                            "text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider",
+                            hasAccess
+                                ? (isDark ? "bg-emerald-500/20 text-emerald-400" : "bg-emerald-100 text-emerald-700")
+                                : (isDark ? "bg-amber-500/20 text-amber-400" : "bg-amber-100 text-amber-700")
+                        )}>
+                            {hasAccess ? '✓ Active' : 'Limited'}
+                        </span>
+                    </div>
+                    <p className={cn("text-sm mt-1", hasAccess
+                        ? (isDark ? "text-emerald-400/70" : "text-emerald-600/80")
+                        : (isDark ? "text-amber-400/70" : "text-amber-600/80")
+                    )}>
+                        {hasAccess
+                            ? 'Your API keys have full access to all ClerkTree features including voice calls and text AI.'
+                            : 'You are viewing in read-only mode. Enter an access code from the dashboard home screen to create and manage API keys with full feature access.'}
+                    </p>
                 </div>
             </div>
 
