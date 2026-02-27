@@ -4,7 +4,7 @@ import { Phone, PhoneOff, Mic, MicOff, Volume2, VolumeX } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { useDemoCall } from '../../contexts/DemoCallContext';
 import { aiService } from '../../services/aiService';
-import { ttsService, KokoroVoiceId } from '../../services/ttsService';
+import { ttsService } from '../../services/ttsService';
 
 interface VoiceCallInterfaceProps {
   isDark?: boolean;
@@ -259,7 +259,7 @@ export default function VoiceCallInterface({
     }
 
     // Get the selected voice from knowledge base
-    const selectedVoice = (knowledgeBase.selectedVoiceId || 'af_nova') as KokoroVoiceId;
+    const selectedVoice = ttsService.resolveOrpheusVoiceId(knowledgeBase.selectedVoiceId);
 
     // Stop recognition before speaking to avoid conflicts
     stopRecognition();
@@ -273,7 +273,7 @@ export default function VoiceCallInterface({
     try {
       // Always try to speak - the TTS service will handle speaker state
       await ttsService.speak(text, {
-        voice: selectedVoice,
+        orpheusVoice: selectedVoice,
         speed: 1.0,
         onStart: () => {
           console.log('✅ TTS started speaking');

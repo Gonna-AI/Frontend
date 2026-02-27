@@ -1,4 +1,3 @@
-/* eslint-disable @next/next/no-img-element */
 import { type Author } from "@/lib/authors";
 import { cn } from "@/lib/utils";
 

@@ -4,6 +4,7 @@ import { Copy, Check, Link, Code, Phone, MessageSquare, ExternalLink, Globe, Bot
 import { useAuth } from '../../contexts/AuthContext';
 import { useDemoCall } from '../../contexts/DemoCallContext';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { getVoiceById, normalizeVoiceId } from '../../config/voiceConfig';
 
 export default function IntegrationView({ isDark = true }: { isDark?: boolean }) {
     const { user } = useAuth();
@@ -21,6 +22,7 @@ export default function IntegrationView({ isDark = true }: { isDark?: boolean })
 
     const chatLink = `${baseUrl}/user/chat?agentId=${agentId}`;
     const callLink = `${baseUrl}/user/call?agentId=${agentId}`;
+    const selectedVoice = getVoiceById(normalizeVoiceId(knowledgeBase.selectedVoiceId));
 
     const embedSnippet = `<iframe
   src="${chatLink}&embed=true"
@@ -144,7 +146,7 @@ export default function IntegrationView({ isDark = true }: { isDark?: boolean })
                         <div>
                             <span className={cn("text-xs font-medium", isDark ? "text-white/40" : "text-gray-400")}>{t('integration.voiceLabel')}</span>
                             <p className={cn("text-sm mt-0.5", isDark ? "text-white/80" : "text-gray-700")}>
-                                {knowledgeBase.selectedVoiceId}
+                                {selectedVoice ? `${selectedVoice.name} (${selectedVoice.id})` : normalizeVoiceId(knowledgeBase.selectedVoiceId)}
                             </p>
                         </div>
                     )}

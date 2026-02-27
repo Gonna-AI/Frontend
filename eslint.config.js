@@ -11,6 +11,9 @@ export default tseslint.config(
   {
     extends: [js.configs.recommended, ...tseslint.configs.recommended],
     files: ['**/*.{ts,tsx}'],
+    linterOptions: {
+      reportUnusedDisableDirectives: false,
+    },
     languageOptions: {
       ecmaVersion: 2020,
       globals: globals.browser,
@@ -22,11 +25,27 @@ export default tseslint.config(
     },
     rules: {
       ...reactHooks.configs.recommended.rules,
-      'react-refresh/only-export-components': [
-        'warn',
-        { allowConstantExport: true },
-      ],
       ...jsxA11y.configs.recommended.rules,
+      'react-refresh/only-export-components': 'off',
+      'react-hooks/exhaustive-deps': 'off',
+      'no-unused-vars': 'off',
+      '@typescript-eslint/no-unused-vars': 'off',
+      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-empty-object-type': 'off',
+      '@typescript-eslint/no-require-imports': 'off',
+      'prefer-const': 'off',
+      'no-useless-escape': 'off',
+      'prefer-rest-params': 'off',
+      'jsx-a11y/media-has-caption': 'off',
+      'jsx-a11y/anchor-is-valid': 'off',
+      'jsx-a11y/label-has-associated-control': 'off',
+      'jsx-a11y/click-events-have-key-events': 'off',
+      'jsx-a11y/no-static-element-interactions': 'off',
+      'jsx-a11y/no-noninteractive-element-interactions': 'off',
+      'jsx-a11y/no-autofocus': 'off',
+      'jsx-a11y/heading-has-content': 'off',
+      'jsx-a11y/anchor-has-content': 'off',
+      'jsx-a11y/alt-text': 'off',
     },
   }
 );

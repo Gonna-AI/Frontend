@@ -19,6 +19,7 @@ import VoiceSelector from './VoiceSelector';
 import { useDemoCall, ContextField } from '../../contexts/DemoCallContext';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { localLLMService } from '../../services/localLLMService';
+import { DEFAULT_VOICE_ID, normalizeVoiceId } from '../../config/voiceConfig';
 
 // Define the tabs structure
 type ActiveTab = 'prompt' | 'voice' | 'fields' | 'categories' | 'rules' | 'instructions';
@@ -65,7 +66,7 @@ export default function KnowledgeBase({ isDark = true, activeSection }: Knowledg
     priorityRules: [],
     customInstructions: [],
     responseGuidelines: '',
-    aiVoice: 'af_nova'
+    aiVoice: DEFAULT_VOICE_ID
   });
 
   const [isSaving, setIsSaving] = useState(false);
@@ -101,7 +102,7 @@ export default function KnowledgeBase({ isDark = true, activeSection }: Knowledg
         priorityRules: contextKB.priorityRules || [],
         customInstructions: contextKB.customInstructions || [],
         responseGuidelines: contextKB.responseGuidelines || '',
-        aiVoice: contextKB.selectedVoiceId || 'af_nova'
+        aiVoice: normalizeVoiceId(contextKB.selectedVoiceId, DEFAULT_VOICE_ID)
       });
     }
   }, [contextKB]);
@@ -136,7 +137,7 @@ export default function KnowledgeBase({ isDark = true, activeSection }: Knowledg
     setKnowledgeBase(prev => {
       const newState = { ...prev, ...updates };
       // Sync to context immediately
-      if (updates.aiVoice) updateContextKB({ selectedVoiceId: updates.aiVoice });
+      if (updates.aiVoice) updateContextKB({ selectedVoiceId: normalizeVoiceId(updates.aiVoice, DEFAULT_VOICE_ID) });
       if (updates.systemPrompt) updateContextKB({ systemPrompt: updates.systemPrompt });
       if (updates.persona) updateContextKB({ persona: updates.persona });
       if (updates.greeting) updateContextKB({ greeting: updates.greeting });

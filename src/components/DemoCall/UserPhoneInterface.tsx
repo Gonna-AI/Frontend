@@ -4,7 +4,7 @@ import { Phone, PhoneOff, Volume2, VolumeX, Minimize2, Maximize2, Globe, ArrowLe
 import { cn } from '../../utils/cn';
 import { useDemoCall } from '../../contexts/DemoCallContext';
 import { aiService } from '../../services/aiService';
-import { ttsService, KokoroVoiceId, TTSLanguage, TTS_LANGUAGES } from '../../services/ttsService';
+import { ttsService, TTSLanguage, TTS_LANGUAGES } from '../../services/ttsService';
 
 interface UserPhoneInterfaceProps {
     isDark?: boolean;
@@ -320,13 +320,13 @@ export default function UserPhoneInterface({
         }
 
         // Get the selected voice from knowledge base
-        const selectedVoice = (knowledgeBase.selectedVoiceId || 'af_nova') as KokoroVoiceId;
+        const selectedVoice = ttsService.resolveOrpheusVoiceId(knowledgeBase.selectedVoiceId);
 
         // Stop recognition before speaking to avoid conflicts
         stopRecognition();
 
         return ttsService.speak(text, {
-            voice: selectedVoice,
+            orpheusVoice: selectedVoice,
             speed: 1.0,
             language, // Use selected language (en = Groq, de = ElevenLabs)
             onStart: () => setAgentStatus('speaking'),
@@ -420,10 +420,10 @@ export default function UserPhoneInterface({
         // Use TTS for the greeting (Groq for English, ElevenLabs for German)
         try {
             // Get selected voice
-            const selectedVoice = (knowledgeBase.selectedVoiceId || 'af_nova') as KokoroVoiceId;
+            const selectedVoice = ttsService.resolveOrpheusVoiceId(knowledgeBase.selectedVoiceId);
 
             await ttsService.speak(greeting, {
-                voice: selectedVoice,
+                orpheusVoice: selectedVoice,
                 speed: 1.0,
                 language, // Use selected language
                 onStart: () => {

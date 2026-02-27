@@ -2,6 +2,7 @@ import { createContext, useContext, useState, useCallback, useEffect, ReactNode 
 import { supabase } from '../config/supabase';
 import { aiService } from '../services/aiService';
 import { useAuth } from './AuthContext';
+import { DEFAULT_VOICE_ID, normalizeVoiceId } from '../config/voiceConfig';
 
 // Types for dynamic context extraction
 export interface ExtractedField {
@@ -159,6 +160,13 @@ const KNOWLEDGE_BASE_KEY_PREFIX = 'clerktree_knowledge_base_';
 const CALL_HISTORY_KEY_PREFIX = 'clerktree_call_history_';
 const ACTIVE_CALL_KEY_PREFIX = 'active_call_session_';
 
+const normalizeKnowledgeBaseConfig = (
+  config: Partial<KnowledgeBaseConfig>,
+): Partial<KnowledgeBaseConfig> => ({
+  ...config,
+  selectedVoiceId: normalizeVoiceId(config.selectedVoiceId, DEFAULT_VOICE_ID),
+});
+
 // Default Knowledge Base configuration
 const defaultKnowledgeBase: KnowledgeBaseConfig = {
   systemPrompt: `You are an intelligent call agent for ClerkTree. Your role is to:
@@ -212,7 +220,7 @@ Always be empathetic, clear, and efficient in your communication.`,
 - Avoid technical jargon unless the caller uses it
 - Offer alternatives when the primary solution isn't available`,
 
-  selectedVoiceId: 'af_nova', // Default voice
+  selectedVoiceId: DEFAULT_VOICE_ID, // Default voice
 };
 
 // Helper to serialize dates for storage
@@ -276,9 +284,9 @@ export function DemoCallProvider({ children, initialAgentId }: { children: React
       // Update knowledge base with new config
       setKnowledgeBase({
         ...defaultKnowledgeBase,  // Start with defaults
-        ...config as Partial<KnowledgeBaseConfig>  // Override with session config
+        ...normalizeKnowledgeBaseConfig(config as Partial<KnowledgeBaseConfig>)  // Override with session config
       } as KnowledgeBaseConfig);
-      localStorage.setItem(KNOWLEDGE_BASE_KEY, JSON.stringify(config));
+      localStorage.setItem(KNOWLEDGE_BASE_KEY, JSON.stringify(normalizeKnowledgeBaseConfig(config as Partial<KnowledgeBaseConfig>)));
       console.log('✅ Switched to session:', sessionId);
     }
   }, []);
@@ -311,8 +319,9 @@ export function DemoCallProvider({ children, initialAgentId }: { children: React
 
           if (!kbError && kbData?.config) {
             const kbId = kbData.id as string;
-            setKnowledgeBase(prev => ({ ...prev, ...(kbData.config as KnowledgeBaseConfig), id: kbId }));
-            localStorage.setItem(KNOWLEDGE_BASE_KEY, JSON.stringify({ ...kbData.config, id: kbId }));
+            const normalizedConfig = normalizeKnowledgeBaseConfig(kbData.config as KnowledgeBaseConfig);
+            setKnowledgeBase(prev => ({ ...prev, ...normalizedConfig, id: kbId }));
+            localStorage.setItem(KNOWLEDGE_BASE_KEY, JSON.stringify({ ...normalizedConfig, id: kbId }));
             console.log(`✅ Loaded knowledge base from Supabase for ${initialAgentId ? 'agent' : 'user'}:`, configOwnerId);
           } else if (!initialAgentId) {
             // Only fall back to localStorage for the user's own config (not for agent configs)
@@ -320,7 +329,7 @@ export function DemoCallProvider({ children, initialAgentId }: { children: React
             if (localKB) {
               try {
                 const parsed = JSON.parse(localKB);
-                setKnowledgeBase(prev => ({ ...prev, ...parsed }));
+                setKnowledgeBase(prev => ({ ...prev, ...normalizeKnowledgeBaseConfig(parsed) }));
                 console.log('✅ Loaded user knowledge base from localStorage');
               } catch (e) {
                 console.warn('Failed to parse localStorage knowledge base:', e);
@@ -611,8 +620,12 @@ export function DemoCallProvider({ children, initialAgentId }: { children: React
 
   // Knowledge Base updates
   const updateKnowledgeBase = useCallback((config: Partial<KnowledgeBaseConfig>) => {
+    const normalizedConfig = Object.prototype.hasOwnProperty.call(config, 'selectedVoiceId')
+      ? { ...config, selectedVoiceId: normalizeVoiceId(config.selectedVoiceId, DEFAULT_VOICE_ID) }
+      : config;
+
     setKnowledgeBase(prev => {
-      const updated = { ...prev, ...config };
+      const updated = { ...prev, ...normalizedConfig };
       // Also save to localStorage immediately for backup
       localStorage.setItem(KNOWLEDGE_BASE_KEY, JSON.stringify(updated));
       return updated;
@@ -623,7 +636,7 @@ export function DemoCallProvider({ children, initialAgentId }: { children: React
   const saveKnowledgeBase = useCallback(async (configOverride?: KnowledgeBaseConfig): Promise<boolean> => {
     try {
       const userId = getUserId();
-      const configToSave = configOverride || knowledgeBase;
+      const configToSave = normalizeKnowledgeBaseConfig(configOverride || knowledgeBase) as KnowledgeBaseConfig;
 
       // Save to localStorage first (always works, fast)
       localStorage.setItem(KNOWLEDGE_BASE_KEY, JSON.stringify(configToSave));
@@ -672,8 +685,9 @@ export function DemoCallProvider({ children, initialAgentId }: { children: React
 
       if (!error && data?.config) {
         const dataId = data.id as string;
-        setKnowledgeBase(prev => ({ ...prev, ...(data.config as KnowledgeBaseConfig), id: dataId }));
-        localStorage.setItem(KNOWLEDGE_BASE_KEY, JSON.stringify({ ...data.config, id: dataId }));
+        const normalizedConfig = normalizeKnowledgeBaseConfig(data.config as KnowledgeBaseConfig);
+        setKnowledgeBase(prev => ({ ...prev, ...normalizedConfig, id: dataId }));
+        localStorage.setItem(KNOWLEDGE_BASE_KEY, JSON.stringify({ ...normalizedConfig, id: dataId }));
         console.log(`✅ Loaded knowledge base from Supabase for ${initialAgentId ? 'agent' : 'user'}:`, configOwnerId);
       }
     } catch (error) {

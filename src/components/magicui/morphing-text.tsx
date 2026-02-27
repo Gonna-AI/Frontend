@@ -138,4 +138,4 @@ const MorphingText: React.FC<MorphingTextProps> = ({ texts, className }) => (
   </div>
 );
 
-export MorphingText;
+export default MorphingText;

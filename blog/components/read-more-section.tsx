@@ -1,4 +1,3 @@
-/* eslint-disable @next/next/no-img-element */
 import { docs, meta } from "@/.source";
 import { loader } from "fumadocs-core/source";
 import { createMDXSource } from "fumadocs-mdx";

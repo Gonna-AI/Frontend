@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { aiService } from '../../services/aiService';
-import { ttsService, KokoroVoiceId } from '../../services/ttsService';
+import { ttsService } from '../../services/ttsService';
 import { useDemoCall } from '../../contexts/DemoCallContext';
 import { useLanguage } from '../../contexts/LanguageContext';
 
@@ -155,10 +155,10 @@ export default function UnifiedChatInterface({ isDark = true, externalCallUI = f
     const speakText = useCallback((text: string): Promise<void> => {
         if (!isSpeakerOn || !isVoiceMode) return Promise.resolve();
 
-        const selectedVoice = (knowledgeBase.selectedVoiceId || 'af_nova') as KokoroVoiceId;
+        const selectedVoice = ttsService.resolveOrpheusVoiceId(knowledgeBase.selectedVoiceId);
 
         return ttsService.speak(text, {
-            voice: selectedVoice,
+            orpheusVoice: selectedVoice,
             speed: 1.0,
             onStart: () => setAgentStatus('speaking'),
             onEnd: () => {
