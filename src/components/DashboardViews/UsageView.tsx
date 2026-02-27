@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { TrendingUp, MessageSquare, Mic, Coins } from 'lucide-react';
 import { cn } from '../../utils/cn';
@@ -15,6 +15,16 @@ interface StatsCardProps {
     subtitle: string;
     isDark: boolean;
     progress?: number;
+}
+
+interface UsageTooltipPayloadItem {
+    value: number;
+}
+
+interface UsageTooltipProps {
+    active?: boolean;
+    payload?: UsageTooltipPayloadItem[];
+    label?: string;
 }
 
 const TOTAL_CREDITS = 50;
@@ -81,17 +91,23 @@ export default function UsageView({ isDark = true, hasAccess = false }: { isDark
     const { t, language } = useLanguage();
     const { callHistory, getAnalytics } = useDemoCall();
     const analytics = getAnalytics();
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL?.trim();
+    const billingApiBase = supabaseUrl ? `${supabaseUrl}/functions/v1/api-billing` : null;
 
     const [liveCredits, setLiveCredits] = useState<number | null>(null);
     const [isRedeeming, setIsRedeeming] = useState(false);
     const [redeemCode, setRedeemCode] = useState('');
     const [redeemMessage, setRedeemMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
 
-    const fetchLiveBalance = async () => {
+    const fetchLiveBalance = useCallback(async () => {
+        if (!billingApiBase) {
+            return;
+        }
+
         try {
             const { data: { session } } = await supabase.auth.getSession();
             if (!session) return;
-            const res = await fetch(`https://xlzwfkgurrrspcdyqele.supabase.co/functions/v1/api-billing/balance`, {
+            const res = await fetch(`${billingApiBase}/balance`, {
                 headers: { 'Authorization': `Bearer ${session.access_token}` }
             });
             if (res.ok) {
@@ -101,18 +117,27 @@ export default function UsageView({ isDark = true, hasAccess = false }: { isDark
         } catch (e) {
             console.error('Failed to fetch live balance', e);
         }
-    };
+    }, [billingApiBase]);
 
     const handleRedeem = async () => {
         if (!redeemCode) return;
         setIsRedeeming(true);
         setRedeemMessage(null);
+
         try {
+            if (!billingApiBase) {
+                throw new Error('Billing service is not configured.');
+            }
+
             const { data: { session } } = await supabase.auth.getSession();
-            const res = await fetch(`https://xlzwfkgurrrspcdyqele.supabase.co/functions/v1/api-billing/redeem`, {
+            if (!session?.access_token) {
+                throw new Error('Please sign in to redeem credits.');
+            }
+
+            const res = await fetch(`${billingApiBase}/redeem`, {
                 method: 'POST',
                 headers: {
-                    'Authorization': `Bearer ${session?.access_token}`,
+                    'Authorization': `Bearer ${session.access_token}`,
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({ code: redeemCode })
@@ -122,16 +147,17 @@ export default function UsageView({ isDark = true, hasAccess = false }: { isDark
             setRedeemMessage({ type: 'success', text: t('usage.redeemSuccess').replace('{count}', data.added_amount.toString()) });
             setRedeemCode('');
             fetchLiveBalance();
-        } catch (e: any) {
-            setRedeemMessage({ type: 'error', text: e.message || t('usage.redeemError') });
+        } catch (e: unknown) {
+            const message = e instanceof Error ? e.message : t('usage.redeemError');
+            setRedeemMessage({ type: 'error', text: message });
         } finally {
             setIsRedeeming(false);
         }
     };
 
-    useMemo(() => {
-        fetchLiveBalance();
-    }, []);
+    useEffect(() => {
+        void fetchLiveBalance();
+    }, [fetchLiveBalance]);
 
     const [dateRange, setDateRange] = useState({
         start: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), // 30 days ago
@@ -157,6 +183,9 @@ export default function UsageView({ isDark = true, hasAccess = false }: { isDark
         const fallbackCreditsRemaining = Math.max(0, TOTAL_CREDITS - totalCreditsUsed);
 
         const creditsRemaining = liveCredits !== null ? liveCredits : fallbackCreditsRemaining;
+        const creditsUsedPercent = liveCredits !== null
+            ? ((TOTAL_CREDITS - creditsRemaining) / TOTAL_CREDITS) * 100
+            : (totalCreditsUsed / TOTAL_CREDITS) * 100;
 
         return {
             voiceCalls: voiceCalls.length,
@@ -167,7 +196,7 @@ export default function UsageView({ isDark = true, hasAccess = false }: { isDark
             textCreditsUsed,
             totalCreditsUsed,
             creditsRemaining,
-            creditsUsedPercent: liveCredits !== null ? 100 : (totalCreditsUsed / TOTAL_CREDITS) * 100
+            creditsUsedPercent: Math.max(0, Math.min(100, creditsUsedPercent))
         };
     }, [callHistory, liveCredits]);
 
@@ -203,10 +232,10 @@ export default function UsageView({ isDark = true, hasAccess = false }: { isDark
             });
         }
         return data;
-    }, [callHistory]);
+    }, [callHistory, language]);
 
     // Custom Tooltip for Chart
-    const CustomTooltip = ({ active, payload, label }: any) => {
+    const CustomTooltip = ({ active, payload, label }: UsageTooltipProps) => {
         if (active && payload && payload.length) {
             return (
                 <div className={cn(

@@ -278,7 +278,11 @@ Deno.serve(async (req: Request) => {
         return jsonResponse(req, 400, { error: 'Payment does not match order.' });
       }
 
-      if (order.notes?.user_id && order.notes.user_id !== user.id) {
+      if (!order.notes?.user_id) {
+        return jsonResponse(req, 400, { error: 'Order is missing ownership metadata.' });
+      }
+
+      if (order.notes.user_id !== user.id) {
         return jsonResponse(req, 403, { error: 'Order does not belong to authenticated user.' });
       }
 
@@ -297,6 +301,11 @@ Deno.serve(async (req: Request) => {
       const derivedPlan = AMOUNT_TO_PLAN.get(order.amount);
       if (!derivedPlan) {
         return jsonResponse(req, 400, { error: 'Unsupported payment amount.' });
+      }
+
+      const orderPlan = parsePlan(order.notes?.plan);
+      if (!orderPlan || orderPlan !== derivedPlan) {
+        return jsonResponse(req, 400, { error: 'Order metadata does not match payment plan.' });
       }
 
       if (claimedPlan && claimedPlan !== derivedPlan) {

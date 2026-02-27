@@ -1,8 +1,7 @@
 import { useState } from 'react';
-import { Send, CheckCircle2, Ticket, AlertTriangle, HelpCircle, FileText, MessageSquare, Search, Menu, X, ArrowLeft } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
+import { CheckCircle2, Ticket, AlertTriangle, FileText, MessageSquare, Menu, X, ArrowLeft } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { supabase } from '../config/supabase';
-import Footer from '../components/Landing/Footer';
 
 const CATEGORIES = [
     { value: 'technical', label: 'Technical Issue' },
@@ -29,7 +28,7 @@ interface TicketForm {
 }
 
 const SupportPage = () => {
-    const navigate = useNavigate();
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL?.trim();
     const [formData, setFormData] = useState<TicketForm>({
         user_name: '',
         user_email: '',
@@ -57,16 +56,22 @@ const SupportPage = () => {
         setErrorMessage('');
 
         try {
+            if (!supabaseUrl) {
+                throw new Error('Support service is not configured.');
+            }
+
             const { data: { session } } = await supabase.auth.getSession();
+            if (!session?.access_token) {
+                throw new Error('Please sign in to submit a support ticket.');
+            }
 
             const response = await fetch(
-                `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/create-support-ticket`,
+                `${supabaseUrl}/functions/v1/create-support-ticket`,
                 {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${session?.access_token || import.meta.env.VITE_SUPABASE_ANON_KEY}`,
-                        'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
+                        'Authorization': `Bearer ${session.access_token}`,
                     },
                     body: JSON.stringify(formData),
                 }
@@ -299,8 +304,8 @@ const SupportPage = () => {
                                         </div>
                                     </div>
                                     <div className="space-y-2">
-                                        <label className="block text-sm font-medium text-white/80">Priority</label>
-                                        <div className="grid grid-cols-4 gap-2">
+                                        <p id="priority-label" className="block text-sm font-medium text-white/80">Priority</p>
+                                        <div role="radiogroup" aria-labelledby="priority-label" className="grid grid-cols-4 gap-2">
                                             {PRIORITIES.map(p => (
                                                 <button
                                                     key={p.value}
