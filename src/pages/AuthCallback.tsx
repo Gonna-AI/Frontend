@@ -27,6 +27,22 @@ export default function AuthCallback() {
                     const { error } = await supabase.auth.exchangeCodeForSession(code);
                     if (error) {
                         console.error('Code exchange error:', error);
+                        // PKCE verifier lost (different tab, cleared storage, etc.)
+                        // Try to recover by checking if there's already a valid session
+                        if (
+                            error.message?.toLowerCase().includes('pkce') ||
+                            error.message?.toLowerCase().includes('code verifier')
+                        ) {
+                            const { data: { session } } = await supabase.auth.getSession();
+                            if (session) {
+                                // User is already signed in, just redirect
+                                navigate('/dashboard', { replace: true });
+                                return;
+                            }
+                            // Ask user to try signing in again — clear stale state first
+                            navigate('/login?message=Sign-in%20session%20expired.%20Please%20try%20signing%20in%20again.', { replace: true });
+                            return;
+                        }
                         navigate(`/login?message=${encodeURIComponent(error.message)}`, { replace: true });
                         return;
                     }
