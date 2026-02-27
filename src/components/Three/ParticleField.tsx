@@ -1,8 +1,8 @@
-import React, { useRef, useMemo } from 'react';
-import { useFrame } from '@react-three/fiber';
-import { Points, PointMaterial } from '@react-three/drei';
-import * as THREE from 'three';
-import { useTheme } from '../../hooks/useTheme';
+import React, { useRef, useMemo } from "react";
+import { useFrame } from "@react-three/fiber";
+import { Points, PointMaterial } from "@react-three/drei";
+import * as THREE from "three";
+import { useTheme } from "../../hooks/useTheme";
 
 export default function ParticleField() {
   const { isDark } = useTheme();
@@ -40,7 +40,7 @@ export default function ParticleField() {
         sizeAttenuation={true}
         depthWrite={false}
         opacity={0.6}
-        color={isDark ? '#8b5cf6' : '#6366f1'}
+        color={isDark ? "#8b5cf6" : "#6366f1"}
         blending={THREE.AdditiveBlending}
       />
       <bufferGeometry>

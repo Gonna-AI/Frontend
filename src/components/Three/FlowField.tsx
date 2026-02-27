@@ -1,51 +1,57 @@
-import React, { useRef, useMemo } from 'react';
-import { useFrame } from '@react-three/fiber';
-import { Points, PointMaterial } from '@react-three/drei';
-import * as THREE from 'three';
+import React, { useRef, useMemo } from "react";
+import { useFrame } from "@react-three/fiber";
+import { Points, PointMaterial } from "@react-three/drei";
+import * as THREE from "three";
 
 export default function FlowField() {
   const points = useRef();
-  
+
   // Reduce particle count for better performance
-  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+  const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
   const count = isMobile ? 1000 : 3000; // Reduced from 5000
   const sep = 3;
-  
+
   const positions = useMemo(() => {
     const positions = new Float32Array(count * 3);
-    
+
     for (let i = 0; i < count; i++) {
       const x = (Math.random() - 0.5) * 100;
       const y = (Math.random() - 0.5) * 100;
       const z = (Math.random() - 0.5) * 50;
-      
+
       positions[i * 3] = x;
       positions[i * 3 + 1] = y;
       positions[i * 3 + 2] = z;
     }
-    
+
     return positions;
   }, []);
 
   useFrame((state) => {
     const time = state.clock.getElapsedTime();
-    const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+    const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
     const speed = isMobile ? 0.05 : 0.1; // Slower animation on mobile
-    
+
     for (let i = 0; i < count; i++) {
       const x = points.current.geometry.attributes.position.array[i * 3];
       const y = points.current.geometry.attributes.position.array[i * 3 + 1];
       const z = points.current.geometry.attributes.position.array[i * 3 + 2];
 
       // Flow field animation - reduced intensity
-      points.current.geometry.attributes.position.array[i * 3] += Math.sin(y * 0.1 + time * 0.1) * speed;
-      points.current.geometry.attributes.position.array[i * 3 + 1] += Math.cos(x * 0.1 + time * 0.1) * speed;
-      points.current.geometry.attributes.position.array[i * 3 + 2] += Math.sin(time * 0.1) * speed;
+      points.current.geometry.attributes.position.array[i * 3] +=
+        Math.sin(y * 0.1 + time * 0.1) * speed;
+      points.current.geometry.attributes.position.array[i * 3 + 1] +=
+        Math.cos(x * 0.1 + time * 0.1) * speed;
+      points.current.geometry.attributes.position.array[i * 3 + 2] +=
+        Math.sin(time * 0.1) * speed;
 
       // Keep particles within bounds
-      if (Math.abs(x) > 50) points.current.geometry.attributes.position.array[i * 3] *= -0.95;
-      if (Math.abs(y) > 50) points.current.geometry.attributes.position.array[i * 3 + 1] *= -0.95;
-      if (Math.abs(z) > 25) points.current.geometry.attributes.position.array[i * 3 + 2] *= -0.95;
+      if (Math.abs(x) > 50)
+        points.current.geometry.attributes.position.array[i * 3] *= -0.95;
+      if (Math.abs(y) > 50)
+        points.current.geometry.attributes.position.array[i * 3 + 1] *= -0.95;
+      if (Math.abs(z) > 25)
+        points.current.geometry.attributes.position.array[i * 3 + 2] *= -0.95;
     }
 
     points.current.geometry.attributes.position.needsUpdate = true;

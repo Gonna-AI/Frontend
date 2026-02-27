@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { cn } from '../../utils/cn';
+import React, { useState, useEffect } from "react";
+import { cn } from "../../utils/cn";
 
 export default function WaitlistForm() {
   const [email, setEmail] = useState("");
@@ -18,7 +18,7 @@ export default function WaitlistForm() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!email) return;
-    
+
     console.log("Submitted email:", email);
     setIsSubmitted(true);
   };
@@ -43,7 +43,9 @@ export default function WaitlistForm() {
           </button>
         </div>
       ) : (
-        <p className="text-white text-center">Thank you for joining the waitlist!</p>
+        <p className="text-white text-center">
+          Thank you for joining the waitlist!
+        </p>
       )}
     </form>
   );

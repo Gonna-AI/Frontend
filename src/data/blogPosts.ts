@@ -16,13 +16,15 @@ export const blogPosts: BlogPost[] = [
   {
     slug: "juris-comprehensive-case-study",
     title: "Juris: Case Study Analysis",
-    description: "An analysis of Juris, production-ready, multi-modal legal AI system achieving 92% precision@5 — outperforming state-of-the-art systems by 12-33%.",
+    description:
+      "An analysis of Juris, production-ready, multi-modal legal AI system achieving 92% precision@5 — outperforming state-of-the-art systems by 12-33%.",
     date: "2025-06-15",
     tags: ["AI", "Legal Tech", "Case Study", "Machine Learning"],
     featured: true,
     readTime: "8 min read",
     author: "arghya",
-    thumbnail: "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=1200&h=630&fit=crop&q=80",
+    thumbnail:
+      "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=1200&h=630&fit=crop&q=80",
     content: `
 
 
@@ -230,12 +232,12 @@ Based on Feng et al.'s survey and recent workshops, key gaps addressed by Juris:
 
 ## 6. References
 
-This comprehensive case study analysis draws upon extensive research in legal AI and information retrieval systems. Key references include product documentation for Juris, legal case retrieval surveys by Feng et al. (2024), state-of-the-art system implementations including Dhani et al. (2021), Hier-SPCNet (Bhattacharya et al., 2022), Kalamkar et al. (2022), CaseGNN (Tang et al., 2023), and Chen et al. (2024). Additional references cover Gemini embeddings performance benchmarks, production system gap analyses, and comprehensive surveys of the legal AI landscape. Detailed comparison data files, feature matrices, and performance improvement metrics support the findings presented throughout this analysis.`
+This comprehensive case study analysis draws upon extensive research in legal AI and information retrieval systems. Key references include product documentation for Juris, legal case retrieval surveys by Feng et al. (2024), state-of-the-art system implementations including Dhani et al. (2021), Hier-SPCNet (Bhattacharya et al., 2022), Kalamkar et al. (2022), CaseGNN (Tang et al., 2023), and Chen et al. (2024). Additional references cover Gemini embeddings performance benchmarks, production system gap analyses, and comprehensive surveys of the legal AI landscape. Detailed comparison data files, feature matrices, and performance improvement metrics support the findings presented throughout this analysis.`,
   },
 ];
 
 export function getBlogPost(slug: string): BlogPost | undefined {
-  return blogPosts.find(post => post.slug === slug);
+  return blogPosts.find((post) => post.slug === slug);
 }
 
 export function getAllBlogPosts(): BlogPost[] {
@@ -250,14 +252,13 @@ export function getBlogPostsByTag(tag: string): BlogPost[] {
   if (tag === "All") {
     return getAllBlogPosts();
   }
-  return getAllBlogPosts().filter(post => post.tags?.includes(tag));
+  return getAllBlogPosts().filter((post) => post.tags?.includes(tag));
 }
 
 export function getAllTags(): string[] {
   const tags = new Set<string>();
-  blogPosts.forEach(post => {
-    post.tags?.forEach(tag => tags.add(tag));
+  blogPosts.forEach((post) => {
+    post.tags?.forEach((tag) => tags.add(tag));
   });
   return Array.from(tags).sort();
 }
-

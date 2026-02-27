@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect } from "react";
 
 interface BorderBeamProps {
   size?: number;
@@ -6,7 +6,11 @@ interface BorderBeamProps {
   delay?: number;
 }
 
-export function BorderBeam({ size = 250, duration = 12, delay = 9 }: BorderBeamProps) {
+export function BorderBeam({
+  size = 250,
+  duration = 12,
+  delay = 9,
+}: BorderBeamProps) {
   const beamRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -14,13 +18,13 @@ export function BorderBeam({ size = 250, duration = 12, delay = 9 }: BorderBeamP
     if (!beam) return;
 
     const animate = () => {
-      beam.style.transform = 'translateX(-100%)';
+      beam.style.transform = "translateX(-100%)";
       setTimeout(() => {
-        beam.style.transition = 'none';
-        beam.style.transform = 'translateX(100%)';
+        beam.style.transition = "none";
+        beam.style.transform = "translateX(100%)";
         setTimeout(() => {
           beam.style.transition = `transform ${duration}s linear`;
-          beam.style.transform = 'translateX(-100%)';
+          beam.style.transform = "translateX(-100%)";
         }, 50);
       }, duration * 1000);
     };

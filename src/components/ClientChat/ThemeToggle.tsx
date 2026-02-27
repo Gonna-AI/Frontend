@@ -1,6 +1,6 @@
-import React from 'react';
-import { Sun, Moon } from 'lucide-react';
-import { cn } from '../../utils/cn';
+import React from "react";
+import { Sun, Moon } from "lucide-react";
+import { cn } from "../../utils/cn";
 
 interface ThemeToggleProps {
   isDark: boolean;
@@ -18,7 +18,7 @@ export default function ThemeToggle({ isDark, onToggle }: ThemeToggleProps) {
           ? "bg-white/10 hover:bg-white/20 text-white"
           : "bg-black/5 hover:bg-black/10 text-black",
         "border",
-        isDark ? "border-white/10" : "border-black/10"
+        isDark ? "border-white/10" : "border-black/10",
       )}
     >
       {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}

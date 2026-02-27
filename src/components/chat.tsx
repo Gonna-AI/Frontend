@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
-import axios from 'axios';
-import { API_BASE_URL } from '../config/api';
+import React, { useState, useEffect, useRef } from "react";
+import axios from "axios";
+import { API_BASE_URL } from "../config/api";
 
 interface Message {
   text: string;
@@ -9,7 +9,7 @@ interface Message {
 
 const Chat: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([]);
-  const [inputMessage, setInputMessage] = useState('');
+  const [inputMessage, setInputMessage] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<null | HTMLDivElement>(null);
 
@@ -24,20 +24,30 @@ const Chat: React.FC = () => {
     if (!inputMessage.trim()) return;
 
     const userMessage: Message = { text: inputMessage, isUser: true };
-    setMessages(prevMessages => [...prevMessages, userMessage]);
-    setInputMessage('');
+    setMessages((prevMessages) => [...prevMessages, userMessage]);
+    setInputMessage("");
     setIsTyping(true);
 
     try {
-      const response = await axios.post(`${API_BASE_URL}/api/chat`, { message: inputMessage }, {
-        withCredentials: true
-      });
-      const aiMessage: Message = { text: response.data.response, isUser: false };
-      setMessages(prevMessages => [...prevMessages, aiMessage]);
+      const response = await axios.post(
+        `${API_BASE_URL}/api/chat`,
+        { message: inputMessage },
+        {
+          withCredentials: true,
+        },
+      );
+      const aiMessage: Message = {
+        text: response.data.response,
+        isUser: false,
+      };
+      setMessages((prevMessages) => [...prevMessages, aiMessage]);
     } catch (error) {
-      console.error('Error sending message:', error);
-      const errorMessage: Message = { text: 'Error: Unable to get response from AI.', isUser: false };
-      setMessages(prevMessages => [...prevMessages, errorMessage]);
+      console.error("Error sending message:", error);
+      const errorMessage: Message = {
+        text: "Error: Unable to get response from AI.",
+        isUser: false,
+      };
+      setMessages((prevMessages) => [...prevMessages, errorMessage]);
     } finally {
       setIsTyping(false);
     }
@@ -49,11 +59,14 @@ const Chat: React.FC = () => {
         {messages.map((message, index) => (
           <div
             key={index}
-            className={`mb-4 ${message.isUser ? 'text-right' : 'text-left'}`}
+            className={`mb-4 ${message.isUser ? "text-right" : "text-left"}`}
           >
             <span
-              className={`inline-block p-2 rounded-lg ${message.isUser ? 'bg-blue-500 text-white' : 'bg-white/10 text-white'
-                }`}
+              className={`inline-block p-2 rounded-lg ${
+                message.isUser
+                  ? "bg-blue-500 text-white"
+                  : "bg-white/10 text-white"
+              }`}
             >
               {message.text}
             </span>
@@ -91,4 +104,3 @@ const Chat: React.FC = () => {
 };
 
 export default Chat;
-

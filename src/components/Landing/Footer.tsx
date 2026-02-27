@@ -1,9 +1,9 @@
-import { useNavigate } from 'react-router-dom';
-import { useMemo } from 'react';
-import { motion, useReducedMotion } from 'framer-motion';
-import { Shield, Lock, Phone, Mail } from 'lucide-react';
-import { useDeviceDetection } from '../../hooks/useDeviceDetection';
-import { useLanguage } from '../../contexts/LanguageContext';
+import { useNavigate } from "react-router-dom";
+import { useMemo } from "react";
+import { motion, useReducedMotion } from "framer-motion";
+import { Shield, Lock, Phone, Mail } from "lucide-react";
+import { useDeviceDetection } from "../../hooks/useDeviceDetection";
+import { useLanguage } from "../../contexts/LanguageContext";
 
 export default function Footer() {
   const navigate = useNavigate();
@@ -14,30 +14,37 @@ export default function Footer() {
 
   const shouldReduceMotion = prefersReducedMotion || isMobile;
 
-  const footerLinks = useMemo(() => ({
-    product: [
-      { name: t('nav.solutions'), path: '/solutions' },
-      { name: t('footer.docs'), path: '/docs' },
-    ],
-    company: [
-      { name: t('footer.aboutUs'), path: '/about' },
-      { name: 'Whitepaper', path: '/whitepaper' },
-    ],
-    legal: [
-      { name: t('footer.privacy'), path: '/privacy-policy', icon: Lock },
-      { name: t('footer.terms'), path: '/terms-of-service', icon: Shield },
-      { name: t('footer.cookiePolicy'), path: '/cookie-policy', icon: Shield },
-    ],
-  }), [t]);
+  const footerLinks = useMemo(
+    () => ({
+      product: [
+        { name: t("nav.solutions"), path: "/solutions" },
+        { name: t("footer.docs"), path: "/docs" },
+      ],
+      company: [
+        { name: t("footer.aboutUs"), path: "/about" },
+        { name: "Whitepaper", path: "/whitepaper" },
+      ],
+      legal: [
+        { name: t("footer.privacy"), path: "/privacy-policy", icon: Lock },
+        { name: t("footer.terms"), path: "/terms-of-service", icon: Shield },
+        {
+          name: t("footer.cookiePolicy"),
+          path: "/cookie-policy",
+          icon: Shield,
+        },
+      ],
+    }),
+    [t],
+  );
 
   const handleNavigation = (path: string) => {
-    if (path.startsWith('/#')) {
+    if (path.startsWith("/#")) {
       const elementId = path.substring(2);
-      navigate('/');
+      navigate("/");
       setTimeout(() => {
         const element = document.getElementById(elementId);
         if (element) {
-          element.scrollIntoView({ behavior: 'smooth' });
+          element.scrollIntoView({ behavior: "smooth" });
         }
       }, 100);
     } else {
@@ -69,9 +76,15 @@ export default function Footer() {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.4, delay: 0.05 }}
+            transition={
+              shouldReduceMotion
+                ? { duration: 0 }
+                : { duration: 0.4, delay: 0.05 }
+            }
           >
-            <h2 className="text-white text-sm font-semibold mb-6 tracking-wide uppercase">{t('footer.product')}</h2>
+            <h2 className="text-white text-sm font-semibold mb-6 tracking-wide uppercase">
+              {t("footer.product")}
+            </h2>
             <ul className="space-y-4">
               {footerLinks.product.map((link) => (
                 <li key={link.path}>
@@ -91,9 +104,15 @@ export default function Footer() {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.4, delay: 0.1 }}
+            transition={
+              shouldReduceMotion
+                ? { duration: 0 }
+                : { duration: 0.4, delay: 0.1 }
+            }
           >
-            <h2 className="text-white text-sm font-semibold mb-6 tracking-wide uppercase">{t('footer.company')}</h2>
+            <h2 className="text-white text-sm font-semibold mb-6 tracking-wide uppercase">
+              {t("footer.company")}
+            </h2>
             <ul className="space-y-4">
               {footerLinks.company.map((link) => (
                 <li key={link.path}>
@@ -113,9 +132,15 @@ export default function Footer() {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.4, delay: 0.15 }}
+            transition={
+              shouldReduceMotion
+                ? { duration: 0 }
+                : { duration: 0.4, delay: 0.15 }
+            }
           >
-            <h2 className="text-white text-sm font-semibold mb-6 tracking-wide uppercase">{t('footer.contact')}</h2>
+            <h2 className="text-white text-sm font-semibold mb-6 tracking-wide uppercase">
+              {t("footer.contact")}
+            </h2>
             <div className="space-y-4">
               <a
                 href="mailto:team@clerktree.com"
@@ -131,7 +156,7 @@ export default function Footer() {
                 aria-label="Phone"
               >
                 <Phone className="w-4 h-4 group-hover:scale-110 transition-transform" />
-                <span>{t('footer.phone')}</span>
+                <span>{t("footer.phone")}</span>
               </a>
               <a
                 href="https://www.linkedin.com/company/clerktree"
@@ -140,10 +165,14 @@ export default function Footer() {
                 className="flex items-center gap-2 text-neutral-400 hover:text-white transition-colors text-sm font-medium group"
                 aria-label="LinkedIn"
               >
-                <svg className="w-4 h-4 group-hover:scale-110 transition-transform" fill="currentColor" viewBox="0 0 24 24">
+                <svg
+                  className="w-4 h-4 group-hover:scale-110 transition-transform"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                >
                   <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" />
                 </svg>
-                <span>{t('footer.linkedin')}</span>
+                <span>{t("footer.linkedin")}</span>
               </a>
               <a
                 href="https://x.com/teamclerktree"
@@ -152,7 +181,11 @@ export default function Footer() {
                 className="flex items-center gap-2 text-neutral-400 hover:text-white transition-colors text-sm font-medium group"
                 aria-label="X (Twitter)"
               >
-                <svg className="w-4 h-4 group-hover:scale-110 transition-transform" fill="currentColor" viewBox="0 0 24 24">
+                <svg
+                  className="w-4 h-4 group-hover:scale-110 transition-transform"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                >
                   <path d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z" />
                 </svg>
                 <span>X</span>
@@ -167,9 +200,15 @@ export default function Footer() {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.4, delay: 0.2 }}
+            transition={
+              shouldReduceMotion
+                ? { duration: 0 }
+                : { duration: 0.4, delay: 0.2 }
+            }
           >
-            <h2 className="text-white text-sm font-semibold mb-6 tracking-wide uppercase">{t('footer.legal')}</h2>
+            <h2 className="text-white text-sm font-semibold mb-6 tracking-wide uppercase">
+              {t("footer.legal")}
+            </h2>
             <ul className="space-y-4">
               {footerLinks.legal.map((link) => (
                 <li key={link.path}>
@@ -183,7 +222,6 @@ export default function Footer() {
               ))}
             </ul>
           </motion.div>
-
         </div>
 
         {/* Bottom Bar */}
@@ -191,22 +229,25 @@ export default function Footer() {
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
-          transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.4, delay: 0.2 }}
+          transition={
+            shouldReduceMotion ? { duration: 0 } : { duration: 0.4, delay: 0.2 }
+          }
           className="pt-8 flex flex-col md:flex-row justify-between items-center gap-4"
         >
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-yellow-400/10 flex items-center justify-center">
-              <img src="/favicon.svg" alt="Logo" className="w-5 h-5 opacity-80" />
+              <img
+                src="/favicon.svg"
+                alt="Logo"
+                className="w-5 h-5 opacity-80"
+              />
             </div>
             <p className="text-neutral-500 text-xs">
               © {currentYear} ClerkTree Inc.
             </p>
           </div>
-
-
         </motion.div>
       </div>
     </footer>
   );
 }
-

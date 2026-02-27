@@ -1,5 +1,5 @@
-import UserCall from './UserCall';
+import UserCall from "./UserCall";
 
 export default function UserChat() {
-    return <UserCall initialMode="chat" />;
+  return <UserCall initialMode="chat" />;
 }

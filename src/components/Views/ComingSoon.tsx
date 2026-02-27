@@ -1,7 +1,7 @@
-import React from 'react';
-import { useTheme } from '../../hooks/useTheme';
-import { cn } from '../../utils/cn';
-import { Sparkles, Clock } from 'lucide-react';
+import React from "react";
+import { useTheme } from "../../hooks/useTheme";
+import { cn } from "../../utils/cn";
+import { Sparkles, Clock } from "lucide-react";
 
 interface ComingSoonProps {
   feature: string;
@@ -9,24 +9,26 @@ interface ComingSoonProps {
 
 export default function ComingSoon({ feature }: ComingSoonProps) {
   const { isDark } = useTheme();
-  
+
   return (
     <div className="flex items-center justify-center h-[calc(100vh-4rem)]">
       <div className="relative">
         {/* Background Gradients */}
         <div className="absolute top-0 right-0 w-[35rem] h-[35rem] bg-gradient-to-bl from-blue-500/20 via-purple-500/5 to-transparent blur-3xl pointer-events-none" />
         <div className="absolute bottom-0 left-0 w-[35rem] h-[35rem] bg-gradient-to-tr from-purple-500/10 to-transparent blur-3xl pointer-events-none" />
-        
-        <div className={cn(
-          "relative z-10",
-          "p-8 md:p-12",
-          "rounded-3xl",
-          "bg-gradient-to-br from-white/10 via-white/5 to-transparent",
-          "border border-white/20",
-          "backdrop-blur-xl",
-          "text-center",
-          "overflow-hidden"
-        )}>
+
+        <div
+          className={cn(
+            "relative z-10",
+            "p-8 md:p-12",
+            "rounded-3xl",
+            "bg-gradient-to-br from-white/10 via-white/5 to-transparent",
+            "border border-white/20",
+            "backdrop-blur-xl",
+            "text-center",
+            "overflow-hidden",
+          )}
+        >
           {/* Sparkle effects */}
           <div className="absolute top-0 right-0 opacity-50">
             <Sparkles className="w-6 h-6 text-blue-400" />
@@ -43,17 +45,21 @@ export default function ComingSoon({ feature }: ComingSoonProps) {
           </div>
 
           {/* Content */}
-          <h2 className={cn(
-            "text-3xl font-bold mb-4",
-            isDark ? "text-white" : "text-black"
-          )}>
+          <h2
+            className={cn(
+              "text-3xl font-bold mb-4",
+              isDark ? "text-white" : "text-black",
+            )}
+          >
             {feature}
           </h2>
-          
-          <p className={cn(
-            "text-lg mb-6",
-            isDark ? "text-white/60" : "text-black/60"
-          )}>
+
+          <p
+            className={cn(
+              "text-lg mb-6",
+              isDark ? "text-white/60" : "text-black/60",
+            )}
+          >
             We're working on something amazing
           </p>
 

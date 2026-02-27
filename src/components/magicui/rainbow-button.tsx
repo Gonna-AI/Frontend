@@ -46,11 +46,11 @@ export function RainbowButton({
         "[--speed:2s]",
         "animate-[rainbow_2s_linear_infinite]",
 
-        className
+        className,
       )}
       {...props}
     >
       <span className="relative z-10">{children}</span>
     </button>
   );
-} 
+}

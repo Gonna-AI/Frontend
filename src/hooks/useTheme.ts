@@ -1,4 +1,4 @@
-import { create } from 'zustand';
+import { create } from "zustand";
 
 interface ThemeState {
   isDark: boolean;
@@ -7,16 +7,16 @@ interface ThemeState {
 
 // Calculate initial theme state
 const getInitialTheme = () => {
-  if (typeof window === 'undefined') return true; // SSR fallback
-  const stored = localStorage.getItem('theme');
-  if (stored) return stored === 'dark';
-  return window.matchMedia('(prefers-color-scheme: dark)').matches;
+  if (typeof window === "undefined") return true; // SSR fallback
+  const stored = localStorage.getItem("theme");
+  if (stored) return stored === "dark";
+  return window.matchMedia("(prefers-color-scheme: dark)").matches;
 };
 
 // Initialize theme class on document
 const initializeThemeClass = (isDark: boolean) => {
-  if (typeof document !== 'undefined') {
-    document.documentElement.classList.toggle('dark', isDark);
+  if (typeof document !== "undefined") {
+    document.documentElement.classList.toggle("dark", isDark);
   }
 };
 
@@ -29,8 +29,8 @@ export const useTheme = create<ThemeState>((set) => ({
   toggleTheme: () => {
     set((state) => {
       const newTheme = !state.isDark;
-      localStorage.setItem('theme', newTheme ? 'dark' : 'light');
-      document.documentElement.classList.toggle('dark', newTheme);
+      localStorage.setItem("theme", newTheme ? "dark" : "light");
+      document.documentElement.classList.toggle("dark", newTheme);
       return { isDark: newTheme };
     });
   },

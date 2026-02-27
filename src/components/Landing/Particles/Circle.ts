@@ -11,7 +11,11 @@ export interface Circle {
   magnetism: number;
 }
 
-export const createCircle = (canvasWidth: number, canvasHeight: number, size: number): Circle => {
+export const createCircle = (
+  canvasWidth: number,
+  canvasHeight: number,
+  size: number,
+): Circle => {
   const x = Math.floor(Math.random() * canvasWidth);
   const y = Math.floor(Math.random() * canvasHeight);
   const translateX = 0;
@@ -22,7 +26,7 @@ export const createCircle = (canvasWidth: number, canvasHeight: number, size: nu
   const dx = (Math.random() - 0.5) * 0.1;
   const dy = (Math.random() - 0.5) * 0.1;
   const magnetism = 0.1 + Math.random() * 4;
-  
+
   return {
     x,
     y,
@@ -35,4 +39,4 @@ export const createCircle = (canvasWidth: number, canvasHeight: number, size: nu
     dy,
     magnetism,
   };
-}
+};

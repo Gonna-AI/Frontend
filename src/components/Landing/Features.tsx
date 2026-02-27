@@ -1,12 +1,15 @@
-'use client'
+"use client";
 
 export default function Features() {
-
   return (
     <section className="py-24 relative bg-[rgb(10,10,10)]">
       {/* Curved decoration lines */}
       <div className="absolute inset-0 overflow-hidden">
-        <svg className="w-full h-full opacity-20" viewBox="0 0 1000 1000" preserveAspectRatio="none">
+        <svg
+          className="w-full h-full opacity-20"
+          viewBox="0 0 1000 1000"
+          preserveAspectRatio="none"
+        >
           <path
             d="M0,500 Q250,400 500,500 T1000,500"
             fill="none"
@@ -22,8 +25,7 @@ export default function Features() {
         </svg>
       </div>
 
-      <div className="relative max-w-7xl mx-auto px-4">
-      </div>
+      <div className="relative max-w-7xl mx-auto px-4"></div>
     </section>
-  )
+  );
 }

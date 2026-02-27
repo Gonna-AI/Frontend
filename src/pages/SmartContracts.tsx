@@ -1,7 +1,19 @@
-import React, { useState, useEffect } from 'react';
-import { FileCheck, Upload, CheckCircle, XCircle, Activity, User, Clock, FileText, X, AlertCircle, Loader2 } from 'lucide-react';
-import { documentApi, ticketApi, setTicketHeader } from '../config/api';
-import LanguageSwitcher from '../components/Layout/LanguageSwitcher';
+import React, { useState, useEffect } from "react";
+import {
+  FileCheck,
+  Upload,
+  CheckCircle,
+  XCircle,
+  Activity,
+  User,
+  Clock,
+  FileText,
+  X,
+  AlertCircle,
+  Loader2,
+} from "lucide-react";
+import { documentApi, ticketApi, setTicketHeader } from "../config/api";
+import LanguageSwitcher from "../components/Layout/LanguageSwitcher";
 
 // Add new interface for blockchain verification
 interface BlockchainVerification {
@@ -19,26 +31,27 @@ interface BlockchainVerification {
 const DocumentVerification = () => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [verificationStatus, setVerificationStatus] = useState('pending');
-  const [ticketId, setTicketId] = useState('');
+  const [verificationStatus, setVerificationStatus] = useState("pending");
+  const [ticketId, setTicketId] = useState("");
   const [userInfo, setUserInfo] = useState(null);
   const [showTicketModal, setShowTicketModal] = useState(true);
   const [showUserDetails, setShowUserDetails] = useState(false);
   const [aiSuggestion, setAiSuggestion] = useState(null);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [documents, setDocuments] = useState([]);
-  const [uploadStatus, setUploadStatus] = useState('');
+  const [uploadStatus, setUploadStatus] = useState("");
 
   // Add new state for document stats
   const [documentStats, setDocumentStats] = useState({
     total: 0,
-    status: 'pending' // can be 'pending', 'verified', or 'rejected'
+    status: "pending", // can be 'pending', 'verified', or 'rejected'
   });
 
   // Add new state for blockchain verification
   const [blockchainProcessing, setBlockchainProcessing] = useState(false);
-  const [blockchainResult, setBlockchainResult] = useState<BlockchainVerification | null>(null);
-  const [documentHash, setDocumentHash] = useState('');
+  const [blockchainResult, setBlockchainResult] =
+    useState<BlockchainVerification | null>(null);
+  const [documentHash, setDocumentHash] = useState("");
   const [showHashVerification, setShowHashVerification] = useState(false);
   const [showAIAlert, setShowAIAlert] = useState(true);
   const [showHashAlert, setShowHashAlert] = useState(true);
@@ -50,16 +63,21 @@ const DocumentVerification = () => {
       setDocuments(response.data.documents);
 
       // Update stats separately
-      const verified = response.data.documents.filter(doc => doc.is_submitted && doc.is_verified).length;
-      const pending = response.data.documents.filter(doc => doc.is_submitted && !doc.is_verified).length;
+      const verified = response.data.documents.filter(
+        (doc) => doc.is_submitted && doc.is_verified,
+      ).length;
+      const pending = response.data.documents.filter(
+        (doc) => doc.is_submitted && !doc.is_verified,
+      ).length;
       const total = response.data.documents.length;
 
       setDocumentStats({
         total,
-        status: pending > 0 ? 'pending' : verified > 0 ? 'verified' : 'rejected'
+        status:
+          pending > 0 ? "pending" : verified > 0 ? "verified" : "rejected",
       });
     } catch (error) {
-      console.error('Error fetching documents:', error);
+      console.error("Error fetching documents:", error);
     }
   };
 
@@ -85,12 +103,12 @@ const DocumentVerification = () => {
         setVerificationStatus(response.data.status);
 
         // Update document stats with the new status
-        setDocumentStats(prev => ({
+        setDocumentStats((prev) => ({
           ...prev,
-          status: response.data.status
+          status: response.data.status,
         }));
       } catch (error) {
-        console.error('Error fetching verification status:', error);
+        console.error("Error fetching verification status:", error);
       }
     };
 
@@ -107,11 +125,11 @@ const DocumentVerification = () => {
       setAiSuggestion(null);
       setShowConfirmation(false);
 
-      setUploadStatus('uploading');
+      setUploadStatus("uploading");
       try {
         // Upload the document first
         const uploadResponse = await documentApi.uploadDocument(file);
-        setUploadStatus('analyzing');
+        setUploadStatus("analyzing");
 
         // Use the document_id from the upload response
         const documentId = uploadResponse.data.document_id;
@@ -122,48 +140,52 @@ const DocumentVerification = () => {
           document_name: file.name,
           is_submitted: true,
           is_verified: false,
-          uploaded_at: new Date().toISOString()
+          uploaded_at: new Date().toISOString(),
         };
 
         // Update documents list with the new document at the top
-        setDocuments(prevDocs => [newDocument, ...prevDocs]);
+        setDocuments((prevDocs) => [newDocument, ...prevDocs]);
 
         // Store the document ID from the upload response
         setSelectedFile({
           ...file,
-          document_id: documentId  // Store the same ID here
+          document_id: documentId, // Store the same ID here
         });
 
         const analysisResponse = await documentApi.analyzeDocuments();
 
         // Parse the JSON string from the analysis
-        const parsedAnalysis = JSON.parse(analysisResponse.data.documents[0].analysis.replace(/```json\n|\n```/g, ''));
+        const parsedAnalysis = JSON.parse(
+          analysisResponse.data.documents[0].analysis.replace(
+            /```json\n|\n```/g,
+            "",
+          ),
+        );
 
         setAiSuggestion(parsedAnalysis);
         setShowConfirmation(true);
-        setUploadStatus('');
+        setUploadStatus("");
 
         // Set verification status with the same document ID
         setVerificationStatus({
           success: true,
           message: "Document submitted for verification successfully",
-          documentId: documentId,  // Use the same ID here
-          timestamp: new Date().toISOString()
+          documentId: documentId, // Use the same ID here
+          timestamp: new Date().toISOString(),
         });
 
         // Fetch updated documents to ensure consistency
         await fetchDocuments();
-
       } catch (error) {
-        console.error('Error processing document:', error);
-        setUploadStatus('error');
+        console.error("Error processing document:", error);
+        setUploadStatus("error");
       }
     }
   };
 
   const handleVerification = async () => {
     if (!selectedFile || !selectedFile.document_id) {
-      console.error('No valid document ID found');
+      console.error("No valid document ID found");
       return;
     }
 
@@ -177,7 +199,7 @@ const DocumentVerification = () => {
         success: true,
         message: "Document submitted for verification successfully",
         documentId: selectedFile.document_id,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
 
       // Add the new document to the documents list immediately
@@ -186,26 +208,25 @@ const DocumentVerification = () => {
         document_name: selectedFile.name,
         is_submitted: true,
         is_verified: false,
-        uploaded_at: new Date().toISOString()
+        uploaded_at: new Date().toISOString(),
       };
 
-      setDocuments(prevDocs => [newDocument, ...prevDocs]);
+      setDocuments((prevDocs) => [newDocument, ...prevDocs]);
 
       // Update document stats
-      setDocumentStats(prev => ({
+      setDocumentStats((prev) => ({
         ...prev,
         total: prev.total + 1,
-        pending: prev.pending + 1
+        pending: prev.pending + 1,
       }));
 
       // Refresh full document list
       await fetchDocuments();
-
     } catch (error) {
-      console.error('Verification error:', error);
+      console.error("Verification error:", error);
       setVerificationStatus({
         success: false,
-        error: "Submission failed. Please try again."
+        error: "Submission failed. Please try again.",
       });
     } finally {
       setIsLoading(false);
@@ -226,16 +247,16 @@ const DocumentVerification = () => {
 
       if (response.data) {
         setUserInfo({
-          name: response.data.user || 'Anonymous',
-          email: response.data.email || 'Email: N/A',
-          phone: response.data.phone || 'Phone: N/A',
-          ticketStatus: 'Active',
+          name: response.data.user || "Anonymous",
+          email: response.data.email || "Email: N/A",
+          phone: response.data.phone || "Phone: N/A",
+          ticketStatus: "Active",
           ticketId: ticketId,
           createdAt: response.data.timestamp,
           totalDocuments: 15,
           verifiedDocuments: 12,
           pendingDocuments: 3,
-          lastActivity: '2024-12-30 15:45'
+          lastActivity: "2024-12-30 15:45",
         });
         setShowTicketModal(false);
 
@@ -243,7 +264,7 @@ const DocumentVerification = () => {
         await fetchDocuments();
       }
     } catch (error) {
-      console.error('Ticket verification failed:', error);
+      console.error("Ticket verification failed:", error);
       setUserInfo(null);
       setTicketHeader(null);
     } finally {
@@ -258,14 +279,14 @@ const DocumentVerification = () => {
   };
 
   const redirectToChatInterface = () => {
-    window.location.href = '/chat';
+    window.location.href = "/chat";
   };
 
   const handleBlockchainVerification = async (file: File) => {
     setBlockchainProcessing(true);
     try {
       const formData = new FormData();
-      formData.append('file', file);
+      formData.append("file", file);
 
       // First store the document and get its hash
       const response = await documentApi.processBlockchain(formData);
@@ -281,17 +302,19 @@ const DocumentVerification = () => {
         uploaded_at: new Date().toISOString(),
         document_hash: documentHash,
         blockchain_verified: false, // Document starts as unverified on blockchain
-        metadata: response.data.metadata || {}
+        metadata: response.data.metadata || {},
       };
 
       // Update documents list
-      setDocuments(prevDocs => {
-        const existingDocIndex = prevDocs.findIndex(doc => doc.document_hash === documentHash);
+      setDocuments((prevDocs) => {
+        const existingDocIndex = prevDocs.findIndex(
+          (doc) => doc.document_hash === documentHash,
+        );
         if (existingDocIndex >= 0) {
           const updatedDocs = [...prevDocs];
           updatedDocs[existingDocIndex] = {
             ...updatedDocs[existingDocIndex],
-            ...newDocument
+            ...newDocument,
           };
           return updatedDocs;
         }
@@ -301,14 +324,14 @@ const DocumentVerification = () => {
       setBlockchainResult({
         exists: false,
         document_hash: documentHash,
-        message: "Document successfully stored. Awaiting verification by admin."
+        message:
+          "Document successfully stored. Awaiting verification by admin.",
       });
-
     } catch (error) {
-      console.error('Error Uploading Document:', error);
+      console.error("Error Uploading Document:", error);
       setBlockchainResult({
         exists: false,
-        error: "Failed to store document"
+        error: "Failed to store document",
       });
     } finally {
       setBlockchainProcessing(false);
@@ -316,7 +339,7 @@ const DocumentVerification = () => {
   };
 
   const renderUploadContent = () => {
-    if (uploadStatus === 'uploading') {
+    if (uploadStatus === "uploading") {
       return (
         <div className="flex flex-col items-center space-y-3">
           <div className="p-4 bg-purple-600/20 rounded-full">
@@ -327,7 +350,7 @@ const DocumentVerification = () => {
       );
     }
 
-    if (uploadStatus === 'analyzing') {
+    if (uploadStatus === "analyzing") {
       return (
         <div className="flex flex-col items-center space-y-3">
           <div className="p-4 bg-purple-600/20 rounded-full">
@@ -341,12 +364,18 @@ const DocumentVerification = () => {
     if (aiSuggestion && showConfirmation) {
       // Handle both new and old response formats
       const analysis = {
-        missing: aiSuggestion.documentCompleteness?.missingInformation ||
-          aiSuggestion["Document Completeness"]?.["Missing Information"] || [],
-        actions: aiSuggestion.requiredActions?.specificItems ||
-          aiSuggestion["Required Actions"]?.["Specific Items"] || [],
-        improvements: aiSuggestion.recommendations?.improvements ||
-          aiSuggestion["Recommendations"]?.["Improvements"] || []
+        missing:
+          aiSuggestion.documentCompleteness?.missingInformation ||
+          aiSuggestion["Document Completeness"]?.["Missing Information"] ||
+          [],
+        actions:
+          aiSuggestion.requiredActions?.specificItems ||
+          aiSuggestion["Required Actions"]?.["Specific Items"] ||
+          [],
+        improvements:
+          aiSuggestion.recommendations?.improvements ||
+          aiSuggestion["Recommendations"]?.["Improvements"] ||
+          [],
       };
 
       return (
@@ -355,14 +384,20 @@ const DocumentVerification = () => {
             <AlertCircle className="h-8 w-8 text-purple-400" />
           </div>
           <div className="text-center space-y-2">
-            <h3 className="text-lg font-medium text-white">AI Analysis Results</h3>
+            <h3 className="text-lg font-medium text-white">
+              AI Analysis Results
+            </h3>
 
             {analysis.missing.length > 0 && (
               <div className="mt-4">
-                <h4 className="text-purple-400 font-medium">Missing Information:</h4>
+                <h4 className="text-purple-400 font-medium">
+                  Missing Information:
+                </h4>
                 <ul className="text-sm text-gray-400">
                   {analysis.missing.map((item, index) => (
-                    <li key={index} className="mt-1">• {item}</li>
+                    <li key={index} className="mt-1">
+                      • {item}
+                    </li>
                   ))}
                 </ul>
               </div>
@@ -370,10 +405,14 @@ const DocumentVerification = () => {
 
             {analysis.actions.length > 0 && (
               <div className="mt-4">
-                <h4 className="text-purple-400 font-medium">Required Actions:</h4>
+                <h4 className="text-purple-400 font-medium">
+                  Required Actions:
+                </h4>
                 <ul className="text-sm text-gray-400">
                   {analysis.actions.map((item, index) => (
-                    <li key={index} className="mt-1">• {item}</li>
+                    <li key={index} className="mt-1">
+                      • {item}
+                    </li>
                   ))}
                 </ul>
               </div>
@@ -381,10 +420,14 @@ const DocumentVerification = () => {
 
             {analysis.improvements.length > 0 && (
               <div className="mt-4">
-                <h4 className="text-purple-400 font-medium">Recommendations:</h4>
+                <h4 className="text-purple-400 font-medium">
+                  Recommendations:
+                </h4>
                 <ul className="text-sm text-gray-400">
                   {analysis.improvements.map((item, index) => (
-                    <li key={index} className="mt-1">• {item}</li>
+                    <li key={index} className="mt-1">
+                      • {item}
+                    </li>
                   ))}
                 </ul>
               </div>
@@ -412,7 +455,7 @@ const DocumentVerification = () => {
     return (
       <button
         type="button"
-        onClick={() => document.getElementById('fileInput')?.click()}
+        onClick={() => document.getElementById("fileInput")?.click()}
         className="w-full cursor-pointer"
       >
         <div className="flex flex-col items-center space-y-3">
@@ -444,7 +487,9 @@ const DocumentVerification = () => {
               ) : (
                 <Loader2 className="w-5 h-5 text-yellow-400 animate-spin" />
               )}
-              <span className="text-gray-300 font-medium">{doc.document_name}</span>
+              <span className="text-gray-300 font-medium">
+                {doc.document_name}
+              </span>
             </div>
             <div className="flex items-center gap-2">
               {doc.blockchain_verified && (
@@ -452,21 +497,32 @@ const DocumentVerification = () => {
                   Blockchain
                 </span>
               )}
-              <span className={`px-3 py-1 rounded-full text-sm font-medium ${doc.is_verified
-                ? 'bg-green-500/20 text-green-400'
-                : 'bg-yellow-500/20 text-yellow-400'
-                }`}>
-                {doc.is_verified ? 'Verified' : 'Processing'}
+              <span
+                className={`px-3 py-1 rounded-full text-sm font-medium ${
+                  doc.is_verified
+                    ? "bg-green-500/20 text-green-400"
+                    : "bg-yellow-500/20 text-yellow-400"
+                }`}
+              >
+                {doc.is_verified ? "Verified" : "Processing"}
               </span>
             </div>
           </div>
           <div className="text-sm space-y-1 text-gray-400">
-            <p>Document ID: <span className="text-gray-300">{doc.document_id}</span></p>
-            <p>Uploaded: <span className="text-gray-300">
-              {new Date(doc.uploaded_at).toLocaleString()}
-            </span></p>
+            <p>
+              Document ID:{" "}
+              <span className="text-gray-300">{doc.document_id}</span>
+            </p>
+            <p>
+              Uploaded:{" "}
+              <span className="text-gray-300">
+                {new Date(doc.uploaded_at).toLocaleString()}
+              </span>
+            </p>
             {(doc.document_hash || doc.blockchain_verified) && (
-              <p>Hash: <span className="text-gray-300">{doc.document_hash}</span></p>
+              <p>
+                Hash: <span className="text-gray-300">{doc.document_hash}</span>
+              </p>
             )}
           </div>
         </div>
@@ -480,7 +536,9 @@ const DocumentVerification = () => {
         <div className="p-4 sm:p-8">
           {/* Header - Made responsive */}
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
-            <h2 className="text-xl sm:text-2xl font-semibold text-white">Upload on Blockchain</h2>
+            <h2 className="text-xl sm:text-2xl font-semibold text-white">
+              Upload on Blockchain
+            </h2>
             <button
               onClick={() => setShowHashVerification(!showHashVerification)}
               className="flex items-center justify-center gap-2 w-full sm:w-auto px-4 py-2 bg-blue-500/20 text-blue-400 rounded-lg hover:bg-blue-500/30 transition-colors"
@@ -497,7 +555,9 @@ const DocumentVerification = () => {
                 <div className="flex items-start gap-2">
                   <AlertCircle className="w-5 h-5 text-yellow-400 shrink-0 mt-0.5" />
                   <p className="text-sm text-yellow-200">
-                    Note: AI analysis is not available for blockchain verification. This process only verifies document existence and authenticity.
+                    Note: AI analysis is not available for blockchain
+                    verification. This process only verifies document existence
+                    and authenticity.
                   </p>
                 </div>
                 <button
@@ -514,7 +574,9 @@ const DocumentVerification = () => {
                 <div className="flex items-start gap-2">
                   <AlertCircle className="w-5 h-5 text-blue-400 shrink-0 mt-0.5" />
                   <p className="text-sm text-blue-200">
-                    Important: Please save your document hash after verification. You'll need it to verify your document in the future.
+                    Important: Please save your document hash after
+                    verification. You'll need it to verify your document in the
+                    future.
                   </p>
                 </div>
                 <button
@@ -530,7 +592,9 @@ const DocumentVerification = () => {
           {/* Hash Verification Section - Made responsive */}
           {showHashVerification && (
             <div className="mb-8 border border-blue-500/30 rounded-xl p-4 sm:p-6 animate-fadeIn">
-              <h3 className="text-lg font-medium text-white mb-4">Verify Document Hash</h3>
+              <h3 className="text-lg font-medium text-white mb-4">
+                Verify Document Hash
+              </h3>
               <div className="flex flex-col sm:flex-row gap-3">
                 <input
                   type="text"
@@ -544,10 +608,11 @@ const DocumentVerification = () => {
                     if (!documentHash) return;
                     setBlockchainProcessing(true);
                     try {
-                      const response = await documentApi.verifyBlockchain(documentHash);
+                      const response =
+                        await documentApi.verifyBlockchain(documentHash);
                       setBlockchainResult(response.data);
                     } catch (error) {
-                      console.error('Verification failed:', error);
+                      console.error("Verification failed:", error);
                     } finally {
                       setBlockchainProcessing(false);
                     }
@@ -568,7 +633,9 @@ const DocumentVerification = () => {
                 <div className="p-4 bg-blue-600/20 rounded-full">
                   <Activity className="h-8 w-8 text-blue-400 animate-pulse" />
                 </div>
-                <span className="text-lg text-gray-300">Processing on Blockchain...</span>
+                <span className="text-lg text-gray-300">
+                  Processing on Blockchain...
+                </span>
               </div>
             ) : blockchainResult ? (
               <div className="space-y-4">
@@ -587,19 +654,24 @@ const DocumentVerification = () => {
 
                   <div className="bg-blue-500/5 border border-blue-500/20 rounded-lg p-4 space-y-2 overflow-x-auto">
                     <p className="text-gray-300 break-all">
-                      <span className="text-blue-400">Document Hash:</span> {documentHash}
+                      <span className="text-blue-400">Document Hash:</span>{" "}
+                      {documentHash}
                     </p>
                     <p className="text-gray-300">
-                      <span className="text-blue-400">Status:</span>{' '}
+                      <span className="text-blue-400">Status:</span>{" "}
                       {blockchainResult.exists ? (
-                        <span className="text-green-400">Verified on Blockchain</span>
+                        <span className="text-green-400">
+                          Verified on Blockchain
+                        </span>
                       ) : (
-                        <span className="text-blue-400">Stored Successfully - Awaiting Verification</span>
+                        <span className="text-blue-400">
+                          Stored Successfully - Awaiting Verification
+                        </span>
                       )}
                     </p>
                     {blockchainResult.message && (
                       <p className="text-gray-300">
-                        <span className="text-blue-400">Message:</span>{' '}
+                        <span className="text-blue-400">Message:</span>{" "}
                         {blockchainResult.message}
                       </p>
                     )}
@@ -609,7 +681,7 @@ const DocumentVerification = () => {
                 <button
                   onClick={() => {
                     setBlockchainResult(null);
-                    setDocumentHash('');
+                    setDocumentHash("");
                   }}
                   className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors mt-4"
                 >
@@ -632,20 +704,22 @@ const DocumentVerification = () => {
                 />
                 <button
                   type="button"
-                  onClick={() => document.getElementById('blockchainFileInput')?.click()}
+                  onClick={() =>
+                    document.getElementById("blockchainFileInput")?.click()
+                  }
                   className="w-full cursor-pointer"
                 >
-                <div className="flex flex-col items-center space-y-3">
-                  <div className="p-4 bg-blue-600/20 rounded-full">
-                    <Upload className="h-8 w-8 text-blue-400" />
+                  <div className="flex flex-col items-center space-y-3">
+                    <div className="p-4 bg-blue-600/20 rounded-full">
+                      <Upload className="h-8 w-8 text-blue-400" />
+                    </div>
+                    <span className="text-lg text-gray-300">
+                      Click to verify document on blockchain
+                    </span>
+                    <span className="text-sm text-gray-500">
+                      Secure, immutable verification with blockchain technology
+                    </span>
                   </div>
-                  <span className="text-lg text-gray-300">
-                    Click to verify document on blockchain
-                  </span>
-                  <span className="text-sm text-gray-500">
-                    Secure, immutable verification with blockchain technology
-                  </span>
-                </div>
                 </button>
               </>
             )}
@@ -657,22 +731,26 @@ const DocumentVerification = () => {
 
   const renderStatusBadge = () => {
     switch (verificationStatus) {
-      case 'verified':
-        return <p className="text-3xl font-semibold text-green-400">Verified</p>;
-      case 'rejected':
+      case "verified":
+        return (
+          <p className="text-3xl font-semibold text-green-400">Verified</p>
+        );
+      case "rejected":
         return <p className="text-3xl font-semibold text-red-400">Rejected</p>;
-      case 'pending':
+      case "pending":
       default:
-        return <p className="text-3xl font-semibold text-yellow-400">Pending Review</p>;
+        return (
+          <p className="text-3xl font-semibold text-yellow-400">
+            Pending Review
+          </p>
+        );
     }
   };
 
   const renderYourDocuments = () => (
     <div className="p-6 rounded-xl bg-purple-500/5 border border-purple-500/20 backdrop-blur-sm">
       <p className="text-gray-400 mb-2">Profile Status</p>
-      <div className="flex items-center gap-2">
-        {renderStatusBadge()}
-      </div>
+      <div className="flex items-center gap-2">{renderStatusBadge()}</div>
     </div>
   );
 
@@ -682,8 +760,9 @@ const DocumentVerification = () => {
       <div
         className="absolute inset-0 opacity-40"
         style={{
-          background: 'radial-gradient(circle at top, rgba(147,51,234,0.3) 0%, rgba(147,51,234,0.1) 40%, transparent 100%), radial-gradient(circle at bottom, rgba(88,28,135,0.2) 0%, transparent 100%)',
-          filter: 'blur(60px)',
+          background:
+            "radial-gradient(circle at top, rgba(147,51,234,0.3) 0%, rgba(147,51,234,0.1) 40%, transparent 100%), radial-gradient(circle at bottom, rgba(88,28,135,0.2) 0%, transparent 100%)",
+          filter: "blur(60px)",
         }}
       />
 
@@ -693,7 +772,10 @@ const DocumentVerification = () => {
           <div className="p-6 space-y-4">
             <div className="flex justify-between items-center">
               <h3 className="text-lg font-semibold text-white">User Details</h3>
-              <button onClick={() => setShowUserDetails(false)} className="text-gray-400 hover:text-white">
+              <button
+                onClick={() => setShowUserDetails(false)}
+                className="text-gray-400 hover:text-white"
+              >
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -706,7 +788,9 @@ const DocumentVerification = () => {
               </div>
               <div className="space-y-1">
                 <p className="text-gray-400 text-sm">Account Status</p>
-                <p className="text-green-400 font-medium">{userInfo.ticketStatus}</p>
+                <p className="text-green-400 font-medium">
+                  {userInfo.ticketStatus}
+                </p>
               </div>
 
               <div className="space-y-1">
@@ -733,7 +817,9 @@ const DocumentVerification = () => {
               <X className="w-5 h-5" />
             </button>
 
-            <h2 className="text-2xl font-semibold text-white mb-6">Verify Your Ticket</h2>
+            <h2 className="text-2xl font-semibold text-white mb-6">
+              Verify Your Ticket
+            </h2>
 
             <div className="space-y-6">
               <div className="flex gap-3">
@@ -779,15 +865,14 @@ const DocumentVerification = () => {
                 fill="white"
                 d="M275.9 63.5c37.7 5.3 76.6 24.1 103.7 50.2 30 28.8 41.8 57.6 35.8 87.1-6.1 30.1-33.6 52.9-70.6 58.3-6 0.9-18.3 1-44.9 0.6l-36.6-0.7-0.5 17.8c-0.3 9.7-0.4 17.8-0.4 17.9 0.1 0.1 19.1 0.3 42.2 0.4 23.2 0 42.7 0.5 43.5 1 1.2 0.7 1.1 2.2-0.8 9.4-6 23-20.5 42.1-41.8 55-7.3 4.3-26.7 11.9-36 14.1-9 2-34 2-44.5 0-41.3-7.9-74.2-38-82.9-75.7-8.1-35.7 2.2-71.5 27.5-94.7 16.1-14.9 35.5-22.4 63.7-24.7l7.7-0.7v-34.1l-11.7 0.7c-22.2 1.3-37 5.3-56.4 15.2-28.7 14.6-49.7 39.3-59.9 70.2-9.6 29.3-9.3 62.6 0.8 91.4 3.3 9.2 12.2 25.6 18.3 33.8 11.3 14.9 30.6 30.8 48.7 39.9 19.9 10 49.2 15.9 73.2 14.7 26.5-1.3 52.5-9.6 74.2-23.9 26.9-17.6 47.2-47.9 53.3-79.7 1-5.2 2.3-10.1 2.8-10.8 0.8-0.9 6.9-1.2 27.1-1l26.1 0.3 0.3 3.8c1.2 14.6-10.9 52.1-23.9 74-17.8 30-43.2 54-75.9 71.5-20.9 11.2-38.3 16.5-67.2 20.7-27.6 3.9-47.9 3.1-75.8-3.1-36.9-8.3-67.8-25.6-97.1-54.6-23.6-23.2-44.8-61.9-51.7-93.8-5.1-23.7-5.5-28.1-4.9-48.8 1.7-63.2 23.4-111.8 67.7-152 28-25.4 60.4-41.3 99-48.8 18.5-3.6 46.1-4 67.9-0.9zm16.4 92.6c-6.3 2.4-12.8 8.5-15.4 14.5-2.6 6.1-2.6 18.3 0 23.9 5 11 20.2 17.7 32.3 14.1 11.9-3.4 19.8-14.3 19.8-27.1-0.1-19.9-18.2-32.5-36.7-25.4z"
               />
-
             </svg>
             <div className="flex flex-col">
               <span className="text-2xl font-bold text-white">ClerkTree</span>
-              <span className="text-sm text-gray-400">Document Verification System</span>
+              <span className="text-sm text-gray-400">
+                Document Verification System
+              </span>
             </div>
           </div>
-
-
 
           <div className="flex items-center gap-4">
             <LanguageSwitcher isExpanded={true} forceDark={true} />
@@ -801,21 +886,26 @@ const DocumentVerification = () => {
                   <User className="h-4 w-4 sm:h-5 sm:w-5" />
                 </div>
                 <div className="text-left hidden xs:block">
-                  <h3 className="text-sm sm:text-base text-white font-medium">{userInfo.name}</h3>
+                  <h3 className="text-sm sm:text-base text-white font-medium">
+                    {userInfo.name}
+                  </h3>
                   <p className="text-xs sm:text-sm text-gray-400">
-                    Ticket: {userInfo.ticketId} • {userInfo.verifiedDocuments} verified
+                    Ticket: {userInfo.ticketId} • {userInfo.verifiedDocuments}{" "}
+                    verified
                   </p>
                 </div>
               </button>
             )}
           </div>
-        </div >
+        </div>
 
         <div className="grid gap-6">
           {/* Upload Section */}
           <div className="bg-black/40 backdrop-blur-xl border border-purple-500/20 rounded-xl overflow-hidden shadow-xl">
             <div className="p-8">
-              <h2 className="text-2xl font-semibold text-white mb-6">Upload Document</h2>
+              <h2 className="text-2xl font-semibold text-white mb-6">
+                Upload Document
+              </h2>
 
               <div className="border-2 border-dashed border-purple-500/30 rounded-xl p-10 text-center transition-colors hover:border-purple-500/50">
                 <input
@@ -829,25 +919,44 @@ const DocumentVerification = () => {
               </div>
 
               {verificationStatus && verificationStatus.message && (
-                <div className={`mt-6 p-6 rounded-xl backdrop-blur-sm ${verificationStatus.success
-                    ? 'bg-green-500/10 border border-green-500/30'
-                    : 'bg-red-500/10 border border-red-500/30'
-                  }`}>
+                <div
+                  className={`mt-6 p-6 rounded-xl backdrop-blur-sm ${
+                    verificationStatus.success
+                      ? "bg-green-500/10 border border-green-500/30"
+                      : "bg-red-500/10 border border-red-500/30"
+                  }`}
+                >
                   {verificationStatus.success ? (
                     <div className="flex flex-col gap-3">
                       <div className="flex items-center gap-2 text-green-400">
                         <CheckCircle className="w-5 h-5" />
-                        <span className="font-medium">Verification Successful</span>
+                        <span className="font-medium">
+                          Verification Successful
+                        </span>
                       </div>
                       <div className="space-y-2 text-sm text-gray-400">
-                        <p>Document ID: <span className="text-gray-300">{verificationStatus.documentId}</span></p>
-                        <p>Timestamp: <span className="text-gray-300">{new Date(verificationStatus.timestamp).toLocaleString()}</span></p>
+                        <p>
+                          Document ID:{" "}
+                          <span className="text-gray-300">
+                            {verificationStatus.documentId}
+                          </span>
+                        </p>
+                        <p>
+                          Timestamp:{" "}
+                          <span className="text-gray-300">
+                            {new Date(
+                              verificationStatus.timestamp,
+                            ).toLocaleString()}
+                          </span>
+                        </p>
                       </div>
                     </div>
                   ) : (
                     <div className="flex items-center gap-2 text-red-400">
                       <XCircle className="w-5 h-5" />
-                      <span className="font-medium">{verificationStatus.error}</span>
+                      <span className="font-medium">
+                        {verificationStatus.error}
+                      </span>
                     </div>
                   )}
                 </div>
@@ -864,7 +973,9 @@ const DocumentVerification = () => {
               <div className="p-8">
                 <div className="flex items-center gap-3 mb-6">
                   <Activity className="w-6 h-6 text-purple-400" />
-                  <h2 className="text-2xl font-semibold text-white">Recent Verifications</h2>
+                  <h2 className="text-2xl font-semibold text-white">
+                    Recent Verifications
+                  </h2>
                 </div>
 
                 {renderRecentVerifications()}
@@ -876,14 +987,18 @@ const DocumentVerification = () => {
               <div className="p-8">
                 <div className="flex items-center gap-3 mb-6">
                   <FileText className="w-6 h-6 text-purple-400" />
-                  <h2 className="text-2xl font-semibold text-white">Your Documents</h2>
+                  <h2 className="text-2xl font-semibold text-white">
+                    Your Documents
+                  </h2>
                 </div>
 
                 {userInfo ? (
                   <div className="grid gap-4">
                     <div className="p-6 rounded-xl bg-purple-500/5 border border-purple-500/20 backdrop-blur-sm">
                       <p className="text-gray-400 mb-2">Total Documents</p>
-                      <p className="text-3xl font-semibold text-white">{documentStats.total}</p>
+                      <p className="text-3xl font-semibold text-white">
+                        {documentStats.total}
+                      </p>
                     </div>
                     {renderYourDocuments()}
                     <div className="p-6 rounded-xl bg-purple-500/5 border border-purple-500/20 backdrop-blur-sm">
@@ -908,8 +1023,8 @@ const DocumentVerification = () => {
         <div className="text-center text-sm text-gray-400 mt-8">
           Clerktree • All documents are encrypted and verified
         </div>
-      </div >
-    </div >
+      </div>
+    </div>
   );
 };
 

@@ -1,5 +1,5 @@
-import React from 'react';
-import Scene from '../Three/Scene';
+import React from "react";
+import Scene from "../Three/Scene";
 
 export default function ThreeBackground() {
   return (

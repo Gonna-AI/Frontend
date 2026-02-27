@@ -1,6 +1,6 @@
-import { create } from 'zustand';
-import { adminApi } from '../config/api';
-import { useState, useEffect } from 'react';
+import { create } from "zustand";
+import { adminApi } from "../config/api";
+import { useState, useEffect } from "react";
 
 interface CalendarState {
   selectedDates: Set<string>;
@@ -27,7 +27,7 @@ export const useCalendar = () => {
         const busyDates = new Set(response.data.busy_dates);
         setSelectedDates(busyDates);
       } catch (err) {
-        setError('Failed to fetch busy dates.');
+        setError("Failed to fetch busy dates.");
         console.error(err);
       } finally {
         setIsLoading(false);
@@ -82,7 +82,7 @@ export const useCalendar = () => {
 
       setError(null);
     } catch (err) {
-      setError('Failed to save dates.');
+      setError("Failed to save dates.");
       console.error(err);
     } finally {
       setIsLoading(false);

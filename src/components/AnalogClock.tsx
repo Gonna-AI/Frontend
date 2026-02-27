@@ -1,5 +1,5 @@
-import React from 'react';
-import { useTheme } from '../hooks/useTheme';
+import React from "react";
+import { useTheme } from "../hooks/useTheme";
 
 interface AnalogClockProps {
   time: Date;
@@ -13,7 +13,8 @@ export default function AnalogClock({ time, size = 24 }: AnalogClockProps) {
 
   // Calculate hand angles
   const minuteAngle = ((time.getMinutes() + time.getSeconds() / 60) * 360) / 60;
-  const hourAngle = ((time.getHours() % 12 + time.getMinutes() / 60) * 360) / 12;
+  const hourAngle =
+    (((time.getHours() % 12) + time.getMinutes() / 60) * 360) / 12;
 
   // Calculate hand lengths
   const hourLength = size * 0.35;
@@ -52,4 +53,4 @@ export default function AnalogClock({ time, size = 24 }: AnalogClockProps) {
       />
     </svg>
   );
-} 
+}

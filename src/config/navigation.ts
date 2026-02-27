@@ -1,22 +1,22 @@
-import { Home, MessageSquare, LayoutDashboard } from 'lucide-react';
+import { Home, MessageSquare, LayoutDashboard } from "lucide-react";
 
 export const menuItems = [
   {
-    id: 'home',
+    id: "home",
     icon: Home,
-    label: 'Home',
-    path: '/'
+    label: "Home",
+    path: "/",
   },
   {
-    id: 'dashboard',
+    id: "dashboard",
     icon: LayoutDashboard,
-    label: 'Dashboard',
-    path: '/dashboard'
+    label: "Dashboard",
+    path: "/dashboard",
   },
   {
-    id: 'chatbot',
+    id: "chatbot",
     icon: MessageSquare,
-    label: 'Chatbot',
-    path: '/user'
-  }
+    label: "Chatbot",
+    path: "/user",
+  },
 ] as const;

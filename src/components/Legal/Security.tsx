@@ -1,12 +1,12 @@
-import React from 'react';
-import { ArrowLeft, Sun, Moon, ShieldCheck, ChevronDown } from 'lucide-react';
+import React from "react";
+import { ArrowLeft, Sun, Moon, ShieldCheck, ChevronDown } from "lucide-react";
 
 const Security = () => {
   const [isDark, setIsDark] = React.useState(false);
   const [expandedSection, setExpandedSection] = React.useState(null);
-  
+
   const cn = (...classes) => {
-    return classes.filter(Boolean).join(' ');
+    return classes.filter(Boolean).join(" ");
   };
 
   const sections = [
@@ -49,7 +49,7 @@ const Security = () => {
     (ii) Container image scanning and vulnerability assessment
     (iii) Runtime security monitoring
     (iv) Network policy enforcement
-    (v) Secrets management with HashiCorp Vault`
+    (v) Secrets management with HashiCorp Vault`,
     },
     {
       title: "2. DATA ENCRYPTION AND PROTECTION",
@@ -106,7 +106,7 @@ const Security = () => {
     (ii) Format-preserving encryption for structured data
     (iii) Tokenization for payment card information
     (iv) Pseudonymization for personal identifiable information
-    (v) Anonymization for analytics and testing data`
+    (v) Anonymization for analytics and testing data`,
     },
     {
       title: "3. ACCESS CONTROL AND AUTHENTICATION",
@@ -172,7 +172,7 @@ const Security = () => {
     (ii) Progressive delays for subsequent failed attempts
     (iii) CAPTCHA implementation for suspicious activities
     (iv) Geolocation-based anomaly detection
-    (v) Device fingerprinting for known device tracking`
+    (v) Device fingerprinting for known device tracking`,
     },
     {
       title: "4. APPLICATION SECURITY",
@@ -237,7 +237,7 @@ const Security = () => {
     (ii) Encrypted inter-service communications
     (iii) API gateway for centralized security enforcement
     (iv) Message queue security and encryption
-    (v) Webhook signature verification`
+    (v) Webhook signature verification`,
     },
     {
       title: "5. AI AND DATA PROCESSING SECURITY",
@@ -301,7 +301,7 @@ const Security = () => {
     (ii) Secure feature stores
     (iii) Data validation at each pipeline stage
     (iv) Pipeline execution audit trails
-    (v) Automated pipeline security scanning`
+    (v) Automated pipeline security scanning`,
     },
     {
       title: "6. MONITORING AND INCIDENT RESPONSE",
@@ -372,7 +372,7 @@ const Security = () => {
     (ii) Status page for service availability
     (iii) Customer communication protocols
     (iv) Media relations procedures
-    (v) Regulatory notification procedures`
+    (v) Regulatory notification procedures`,
     },
     {
       title: "7. COMPLIANCE AND GOVERNANCE",
@@ -443,7 +443,7 @@ const Security = () => {
     (ii) Right-to-audit clauses in vendor contracts
     (iii) Continuous vendor risk monitoring
     (iv) Vendor incident notification requirements
-    (v) Vendor security certification verification`
+    (v) Vendor security certification verification`,
     },
     {
       title: "8. EMPLOYEE SECURITY AND TRAINING",
@@ -508,7 +508,7 @@ const Security = () => {
     (ii) Forensic capabilities for insider incidents
     (iii) Coordination with HR and legal teams
     (iv) Evidence preservation and chain of custody
-    (v) Post-incident analysis and improvements`
+    (v) Post-incident analysis and improvements`,
     },
     {
       title: "9. PHYSICAL AND ENVIRONMENTAL SECURITY",
@@ -556,7 +556,7 @@ const Security = () => {
     (ii) Device encryption requirements
     (iii) Mobile device management (MDM)
     (iv) Secure disposal of electronic equipment
-    (v) Equipment loan and return procedures`
+    (v) Equipment loan and return procedures`,
     },
     {
       title: "10. CONTACT AND REPORTING",
@@ -626,31 +626,35 @@ We are committed to continuously improving our security posture:
 Last Updated: November 14, 2025
 Next Review Date: May 14, 2026
 
-This Security and Data Handling document is reviewed and updated regularly to reflect our current security practices and emerging threats.`
-    }
+This Security and Data Handling document is reviewed and updated regularly to reflect our current security practices and emerging threats.`,
+    },
   ];
 
   const GlassContainer = ({ children, className }) => (
-    <div className={cn(
-      "relative overflow-hidden",
-      "rounded-xl p-6",
-      isDark 
-        ? "bg-black/20 border border-white/10" 
-        : "bg-white/60 border border-black/5",
-      "transition-all duration-200",
-      className
-    )}>
+    <div
+      className={cn(
+        "relative overflow-hidden",
+        "rounded-xl p-6",
+        isDark
+          ? "bg-black/20 border border-white/10"
+          : "bg-white/60 border border-black/5",
+        "transition-all duration-200",
+        className,
+      )}
+    >
       {children}
     </div>
   );
 
   const IconContainer = ({ children }) => (
-    <div className={cn(
-      "w-12 h-12 rounded-xl flex items-center justify-center",
-      isDark 
-        ? "bg-black/20 border border-white/10" 
-        : "bg-white/60 border border-black/5"
-    )}>
+    <div
+      className={cn(
+        "w-12 h-12 rounded-xl flex items-center justify-center",
+        isDark
+          ? "bg-black/20 border border-white/10"
+          : "bg-white/60 border border-black/5",
+      )}
+    >
       {children}
     </div>
   );
@@ -665,10 +669,12 @@ This Security and Data Handling document is reviewed and updated regularly to re
       </div>
 
       {/* Main Content */}
-      <div className={cn(
-        "relative min-h-screen p-4 md:p-6 backdrop-blur-sm transition-colors duration-300",
-        isDark ? "bg-black/50" : "bg-white/50"
-      )}>
+      <div
+        className={cn(
+          "relative min-h-screen p-4 md:p-6 backdrop-blur-sm transition-colors duration-300",
+          isDark ? "bg-black/50" : "bg-white/50",
+        )}
+      >
         <div className="max-w-4xl mx-auto space-y-6">
           {/* Header Controls */}
           <div className="flex items-center justify-between">
@@ -676,9 +682,9 @@ This Security and Data Handling document is reviewed and updated regularly to re
               onClick={() => window.history.back()}
               className={cn(
                 "flex items-center gap-2 px-4 py-2 rounded-xl transition-all duration-200",
-                isDark 
-                  ? "bg-black/20 hover:bg-black/30 text-white border border-white/10" 
-                  : "bg-white/60 hover:bg-white/70 text-black border border-black/5"
+                isDark
+                  ? "bg-black/20 hover:bg-black/30 text-white border border-white/10"
+                  : "bg-white/60 hover:bg-white/70 text-black border border-black/5",
               )}
             >
               <ArrowLeft className="w-4 h-4" />
@@ -689,12 +695,16 @@ This Security and Data Handling document is reviewed and updated regularly to re
               onClick={() => setIsDark(!isDark)}
               className={cn(
                 "p-3 rounded-xl transition-all duration-200",
-                isDark 
-                  ? "bg-black/20 hover:bg-black/30 text-white border border-white/10" 
-                  : "bg-white/60 hover:bg-white/70 text-black border border-black/5"
+                isDark
+                  ? "bg-black/20 hover:bg-black/30 text-white border border-white/10"
+                  : "bg-white/60 hover:bg-white/70 text-black border border-black/5",
               )}
             >
-              {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+              {isDark ? (
+                <Sun className="w-5 h-5" />
+              ) : (
+                <Moon className="w-5 h-5" />
+              )}
             </button>
           </div>
 
@@ -703,16 +713,20 @@ This Security and Data Handling document is reviewed and updated regularly to re
             {/* Header */}
             <div className="flex items-center space-x-4 mb-8">
               <IconContainer>
-                <ShieldCheck className={cn(
-                  "w-6 h-6",
-                  isDark ? "text-purple-400" : "text-purple-600"
-                )} />
+                <ShieldCheck
+                  className={cn(
+                    "w-6 h-6",
+                    isDark ? "text-purple-400" : "text-purple-600",
+                  )}
+                />
               </IconContainer>
               <div>
-                <h1 className={cn(
-                  "text-2xl font-semibold",
-                  isDark ? "text-white" : "text-black"
-                )}>
+                <h1
+                  className={cn(
+                    "text-2xl font-semibold",
+                    isDark ? "text-white" : "text-black",
+                  )}
+                >
                   Security & Data Handling
                 </h1>
                 <p className={isDark ? "text-white/60" : "text-black/60"}>
@@ -722,17 +736,23 @@ This Security and Data Handling document is reviewed and updated regularly to re
             </div>
 
             {/* Legal Notice */}
-            <div className={cn(
-              "p-4 rounded-xl mb-6",
-              isDark 
-                ? "bg-green-500/20 border border-green-500/20" 
-                : "bg-green-500/10 border border-green-500/10"
-            )}>
-              <p className={cn(
-                "text-sm",
-                isDark ? "text-green-200" : "text-green-700"
-              )}>
-                This document describes our comprehensive security measures and data handling practices to protect your information and ensure compliance with industry standards and regulations.
+            <div
+              className={cn(
+                "p-4 rounded-xl mb-6",
+                isDark
+                  ? "bg-green-500/20 border border-green-500/20"
+                  : "bg-green-500/10 border border-green-500/10",
+              )}
+            >
+              <p
+                className={cn(
+                  "text-sm",
+                  isDark ? "text-green-200" : "text-green-700",
+                )}
+              >
+                This document describes our comprehensive security measures and
+                data handling practices to protect your information and ensure
+                compliance with industry standards and regulations.
               </p>
             </div>
 
@@ -743,35 +763,43 @@ This Security and Data Handling document is reviewed and updated regularly to re
                   key={index}
                   className={cn(
                     "rounded-xl transition-all duration-200",
-                    isDark 
-                      ? "bg-black/20 hover:bg-black/30 border border-white/10" 
-                      : "bg-white/60 hover:bg-white/70 border border-black/5"
+                    isDark
+                      ? "bg-black/20 hover:bg-black/30 border border-white/10"
+                      : "bg-white/60 hover:bg-white/70 border border-black/5",
                   )}
                 >
                   <button
-                    onClick={() => setExpandedSection(expandedSection === index ? null : index)}
+                    onClick={() =>
+                      setExpandedSection(
+                        expandedSection === index ? null : index,
+                      )
+                    }
                     className="w-full px-4 py-4 flex items-center justify-between"
                   >
-                    <h2 className={cn(
-                      "text-lg font-semibold text-left",
-                      isDark ? "text-white" : "text-black"
-                    )}>
+                    <h2
+                      className={cn(
+                        "text-lg font-semibold text-left",
+                        isDark ? "text-white" : "text-black",
+                      )}
+                    >
                       {section.title}
                     </h2>
-                    <ChevronDown 
+                    <ChevronDown
                       className={cn(
                         "w-5 h-5 transition-transform",
                         isDark ? "text-white/60" : "text-black/60",
-                        expandedSection === index ? "transform rotate-180" : ""
-                      )} 
+                        expandedSection === index ? "transform rotate-180" : "",
+                      )}
                     />
                   </button>
                   {expandedSection === index && (
-                    <div className={cn(
-                      "px-4 pb-4",
-                      "font-mono text-sm whitespace-pre-wrap",
-                      isDark ? "text-white/60" : "text-black/60"
-                    )}>
+                    <div
+                      className={cn(
+                        "px-4 pb-4",
+                        "font-mono text-sm whitespace-pre-wrap",
+                        isDark ? "text-white/60" : "text-black/60",
+                      )}
+                    >
                       {section.content}
                     </div>
                   )}
@@ -780,26 +808,35 @@ This Security and Data Handling document is reviewed and updated regularly to re
             </div>
 
             {/* Footer */}
-            <div className={cn(
-              "mt-8 pt-6 border-t",
-              isDark ? "border-white/10" : "border-black/5"
-            )}>
-              <p className={cn(
-                "text-center text-sm",
-                isDark ? "text-white/40" : "text-black/40"
-              )}>
-                WE ARE COMMITTED TO MAINTAINING THE HIGHEST STANDARDS OF SECURITY AND DATA PROTECTION TO SAFEGUARD YOUR INFORMATION.
+            <div
+              className={cn(
+                "mt-8 pt-6 border-t",
+                isDark ? "border-white/10" : "border-black/5",
+              )}
+            >
+              <p
+                className={cn(
+                  "text-center text-sm",
+                  isDark ? "text-white/40" : "text-black/40",
+                )}
+              >
+                WE ARE COMMITTED TO MAINTAINING THE HIGHEST STANDARDS OF
+                SECURITY AND DATA PROTECTION TO SAFEGUARD YOUR INFORMATION.
               </p>
-              <p className={cn(
-                "text-center mt-4",
-                isDark ? "text-white/60" : "text-black/60"
-              )}>
-                For security inquiries, please contact us: {' '}
-                <a 
+              <p
+                className={cn(
+                  "text-center mt-4",
+                  isDark ? "text-white/60" : "text-black/60",
+                )}
+              >
+                For security inquiries, please contact us:{" "}
+                <a
                   href="mailto:security@clerktree.com"
                   className={cn(
                     "underline hover:no-underline transition-all duration-200",
-                    isDark ? "text-purple-400 hover:text-purple-300" : "text-purple-600 hover:text-purple-700"
+                    isDark
+                      ? "text-purple-400 hover:text-purple-300"
+                      : "text-purple-600 hover:text-purple-700",
                   )}
                 >
                   security@clerktree.com
@@ -814,4 +851,3 @@ This Security and Data Handling document is reviewed and updated regularly to re
 };
 
 export default Security;
-

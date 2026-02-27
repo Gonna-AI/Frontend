@@ -1,6 +1,6 @@
 export interface EndpointDoc {
   id: string;
-  method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'WSS';
+  method: "GET" | "POST" | "PUT" | "DELETE" | "WSS";
   path: string;
   title: string;
   description: string;
@@ -8,36 +8,84 @@ export interface EndpointDoc {
   params?: { name: string; type: string; required: boolean; desc: string }[];
   requestBody?: string;
   responseBody?: string;
-  queryParams?: { name: string; type: string; required: boolean; desc: string }[];
+  queryParams?: {
+    name: string;
+    type: string;
+    required: boolean;
+    desc: string;
+  }[];
   /** Real Supabase edge function URL for Try It playground */
   realUrl?: string;
   /** Real HTTP method for Try It playground (may differ from documented path) */
-  realMethod?: 'GET' | 'POST' | 'PUT' | 'DELETE';
+  realMethod?: "GET" | "POST" | "PUT" | "DELETE";
   /** Default request body JSON for Try It playground */
   tryItBody?: string;
 }
 
-export const BASE_URL = 'https://api.clerktree.com/v1';
-export const EDGE_FUNCTIONS_URL = 'https://xlzwfkgurrrspcdyqele.supabase.co/functions/v1';
+export const BASE_URL = "https://api.clerktree.com/v1";
+export const EDGE_FUNCTIONS_URL =
+  "https://xlzwfkgurrrspcdyqele.supabase.co/functions/v1";
 
 export const chatEndpoints: EndpointDoc[] = [
   {
-    id: 'chat-completions',
-    method: 'POST',
-    path: '/chat/completions',
+    id: "chat-completions",
+    method: "POST",
+    path: "/chat/completions",
     realUrl: `${EDGE_FUNCTIONS_URL}/api-chat`,
-    realMethod: 'POST',
-    tryItBody: JSON.stringify({ model: 'clerktree-sales-v1', messages: [{ role: 'user', content: 'Hello, what services do you offer?' }], temperature: 0.7, max_tokens: 256 }, null, 2),
-    title: 'Create Chat Completion',
-    color: 'emerald',
-    description: 'Send a message to the ClerkTree Chat model and receive an AI-generated response. The model acts as a blackbox — you provide messages and receive completions without managing model internals.',
+    realMethod: "POST",
+    tryItBody: JSON.stringify(
+      {
+        model: "clerktree-sales-v1",
+        messages: [
+          { role: "user", content: "Hello, what services do you offer?" },
+        ],
+        temperature: 0.7,
+        max_tokens: 256,
+      },
+      null,
+      2,
+    ),
+    title: "Create Chat Completion",
+    color: "emerald",
+    description:
+      "Send a message to the ClerkTree Chat model and receive an AI-generated response. The model acts as a blackbox — you provide messages and receive completions without managing model internals.",
     params: [
-      { name: 'model', type: 'string', required: true, desc: 'Model ID to use. Currently available: "clerktree-sales-v1", "clerktree-support-v1"' },
-      { name: 'messages', type: 'array', required: true, desc: 'Array of message objects with role ("system" | "user" | "assistant") and content (string)' },
-      { name: 'temperature', type: 'number', required: false, desc: 'Sampling temperature between 0 and 2. Higher values make output more random. Default: 0.7' },
-      { name: 'max_tokens', type: 'integer', required: false, desc: 'Maximum number of tokens to generate. Default: 1024' },
-      { name: 'stream', type: 'boolean', required: false, desc: 'If true, partial message deltas will be sent as server-sent events. Default: false' },
-      { name: 'metadata', type: 'object', required: false, desc: 'Optional key-value pairs for tracking. Returned in response and webhooks.' },
+      {
+        name: "model",
+        type: "string",
+        required: true,
+        desc: 'Model ID to use. Currently available: "clerktree-sales-v1", "clerktree-support-v1"',
+      },
+      {
+        name: "messages",
+        type: "array",
+        required: true,
+        desc: 'Array of message objects with role ("system" | "user" | "assistant") and content (string)',
+      },
+      {
+        name: "temperature",
+        type: "number",
+        required: false,
+        desc: "Sampling temperature between 0 and 2. Higher values make output more random. Default: 0.7",
+      },
+      {
+        name: "max_tokens",
+        type: "integer",
+        required: false,
+        desc: "Maximum number of tokens to generate. Default: 1024",
+      },
+      {
+        name: "stream",
+        type: "boolean",
+        required: false,
+        desc: "If true, partial message deltas will be sent as server-sent events. Default: false",
+      },
+      {
+        name: "metadata",
+        type: "object",
+        required: false,
+        desc: "Optional key-value pairs for tracking. Returned in response and webhooks.",
+      },
     ],
     requestBody: `curl -X POST "${BASE_URL}/chat/completions" \\
   -H "Authorization: Bearer ct_live_abc123" \\
@@ -89,15 +137,24 @@ export const chatEndpoints: EndpointDoc[] = [
 }`,
   },
   {
-    id: 'chat-streaming',
-    method: 'POST',
-    path: '/chat/completions',
+    id: "chat-streaming",
+    method: "POST",
+    path: "/chat/completions",
     realUrl: `${EDGE_FUNCTIONS_URL}/api-chat`,
-    realMethod: 'POST',
-    tryItBody: JSON.stringify({ model: 'clerktree-sales-v1', messages: [{ role: 'user', content: 'Explain your product' }], stream: true }, null, 2),
-    title: 'Streaming Completions',
-    color: 'emerald',
-    description: 'When stream is set to true, the API returns Server-Sent Events (SSE). Each event contains a partial delta of the response, allowing you to display tokens in real-time.',
+    realMethod: "POST",
+    tryItBody: JSON.stringify(
+      {
+        model: "clerktree-sales-v1",
+        messages: [{ role: "user", content: "Explain your product" }],
+        stream: true,
+      },
+      null,
+      2,
+    ),
+    title: "Streaming Completions",
+    color: "emerald",
+    description:
+      "When stream is set to true, the API returns Server-Sent Events (SSE). Each event contains a partial delta of the response, allowing you to display tokens in real-time.",
     requestBody: `curl -N -X POST "${BASE_URL}/chat/completions" \\
   -H "Authorization: Bearer ct_live_abc123" \\
   -H "Content-Type: application/json" \\
@@ -117,18 +174,34 @@ data: {"id":"chatcmpl_7kZ3x9Qm","choices":[{"delta":{"content":" offers"},"index
 data: [DONE]`,
   },
   {
-    id: 'chat-history',
-    method: 'GET',
-    path: '/chat/conversations/{conversation_id}/messages',
+    id: "chat-history",
+    method: "GET",
+    path: "/chat/conversations/{conversation_id}/messages",
     realUrl: `${EDGE_FUNCTIONS_URL}/api-chat/history`,
-    realMethod: 'GET',
-    title: 'Retrieve Conversation History',
-    color: 'emerald',
-    description: 'Fetch the full message history for a specific conversation. Useful for loading previous context or auditing interactions.',
+    realMethod: "GET",
+    title: "Retrieve Conversation History",
+    color: "emerald",
+    description:
+      "Fetch the full message history for a specific conversation. Useful for loading previous context or auditing interactions.",
     queryParams: [
-      { name: 'limit', type: 'integer', required: false, desc: 'Number of messages to return (max 100). Default: 50' },
-      { name: 'before', type: 'string', required: false, desc: 'Cursor for pagination. Return messages before this message ID.' },
-      { name: 'order', type: 'string', required: false, desc: '"asc" or "desc". Default: "desc"' },
+      {
+        name: "limit",
+        type: "integer",
+        required: false,
+        desc: "Number of messages to return (max 100). Default: 50",
+      },
+      {
+        name: "before",
+        type: "string",
+        required: false,
+        desc: "Cursor for pagination. Return messages before this message ID.",
+      },
+      {
+        name: "order",
+        type: "string",
+        required: false,
+        desc: '"asc" or "desc". Default: "desc"',
+      },
     ],
     requestBody: `curl "${BASE_URL}/chat/conversations/conv_12abc/messages?limit=20&order=desc" \\
   -H "Authorization: Bearer ct_live_abc123"`,
@@ -158,23 +231,68 @@ data: [DONE]`,
 
 export const callEndpoints: EndpointDoc[] = [
   {
-    id: 'call-initiate',
-    method: 'POST',
-    path: '/calls',
+    id: "call-initiate",
+    method: "POST",
+    path: "/calls",
     realUrl: `${EDGE_FUNCTIONS_URL}/api-calls`,
-    realMethod: 'POST',
-    tryItBody: JSON.stringify({ phone_number: '+14155551234', context: { customer_name: 'Demo User' }, voice_id: 'nova', record: true }, null, 2),
-    title: 'Initiate Outbound Call',
-    color: 'pink',
-    description: 'Launch an AI-powered outbound voice call to a phone number. The ClerkTree Call model handles the conversation autonomously using your configured agent persona and knowledge base.',
+    realMethod: "POST",
+    tryItBody: JSON.stringify(
+      {
+        phone_number: "+14155551234",
+        context: { customer_name: "Demo User" },
+        voice_id: "nova",
+        record: true,
+      },
+      null,
+      2,
+    ),
+    title: "Initiate Outbound Call",
+    color: "pink",
+    description:
+      "Launch an AI-powered outbound voice call to a phone number. The ClerkTree Call model handles the conversation autonomously using your configured agent persona and knowledge base.",
     params: [
-      { name: 'phone_number', type: 'string', required: true, desc: 'E.164 formatted phone number to call (e.g. "+14155551234")' },
-      { name: 'agent_id', type: 'string', required: true, desc: 'ID of the AI agent configuration to use for this call' },
-      { name: 'context', type: 'object', required: false, desc: 'Key-value context injected into the agent prompt (e.g. customer_name, deal_stage)' },
-      { name: 'voice_id', type: 'string', required: false, desc: 'Override the default voice. Options: "alloy", "echo", "nova", "shimmer"' },
-      { name: 'max_duration_seconds', type: 'integer', required: false, desc: 'Maximum call duration in seconds. Default: 300 (5 min)' },
-      { name: 'record', type: 'boolean', required: false, desc: 'Whether to record the call audio. Default: true' },
-      { name: 'webhook_url', type: 'string', required: false, desc: 'URL to receive call lifecycle events (ringing, answered, completed)' },
+      {
+        name: "phone_number",
+        type: "string",
+        required: true,
+        desc: 'E.164 formatted phone number to call (e.g. "+14155551234")',
+      },
+      {
+        name: "agent_id",
+        type: "string",
+        required: true,
+        desc: "ID of the AI agent configuration to use for this call",
+      },
+      {
+        name: "context",
+        type: "object",
+        required: false,
+        desc: "Key-value context injected into the agent prompt (e.g. customer_name, deal_stage)",
+      },
+      {
+        name: "voice_id",
+        type: "string",
+        required: false,
+        desc: 'Override the default voice. Options: "alloy", "echo", "nova", "shimmer"',
+      },
+      {
+        name: "max_duration_seconds",
+        type: "integer",
+        required: false,
+        desc: "Maximum call duration in seconds. Default: 300 (5 min)",
+      },
+      {
+        name: "record",
+        type: "boolean",
+        required: false,
+        desc: "Whether to record the call audio. Default: true",
+      },
+      {
+        name: "webhook_url",
+        type: "string",
+        required: false,
+        desc: "URL to receive call lifecycle events (ringing, answered, completed)",
+      },
     ],
     requestBody: `curl -X POST "${BASE_URL}/calls" \\
   -H "Authorization: Bearer ct_live_abc123" \\
@@ -205,14 +323,15 @@ export const callEndpoints: EndpointDoc[] = [
 }`,
   },
   {
-    id: 'call-status',
-    method: 'GET',
-    path: '/calls/{call_id}',
+    id: "call-status",
+    method: "GET",
+    path: "/calls/{call_id}",
     realUrl: `${EDGE_FUNCTIONS_URL}/api-calls`,
-    realMethod: 'GET',
-    title: 'Get Call Status',
-    color: 'pink',
-    description: 'Retrieve the real-time status and details of an active or completed call, including duration, sentiment analysis, and extracted data.',
+    realMethod: "GET",
+    title: "Get Call Status",
+    color: "pink",
+    description:
+      "Retrieve the real-time status and details of an active or completed call, including duration, sentiment analysis, and extracted data.",
     requestBody: `curl "${BASE_URL}/calls/call_a1b2c3d4" \\
   -H "Authorization: Bearer ct_live_abc123"`,
     responseBody: `{
@@ -240,22 +359,58 @@ export const callEndpoints: EndpointDoc[] = [
 }`,
   },
   {
-    id: 'call-history',
-    method: 'GET',
-    path: '/calls',
+    id: "call-history",
+    method: "GET",
+    path: "/calls",
     realUrl: `${EDGE_FUNCTIONS_URL}/api-calls`,
-    realMethod: 'GET',
-    title: 'List Call History',
-    color: 'pink',
-    description: 'Retrieve a paginated list of all calls made through your account. Filter by status, date range, agent, or sentiment.',
+    realMethod: "GET",
+    title: "List Call History",
+    color: "pink",
+    description:
+      "Retrieve a paginated list of all calls made through your account. Filter by status, date range, agent, or sentiment.",
     queryParams: [
-      { name: 'status', type: 'string', required: false, desc: 'Filter by status: "queued", "ringing", "in_progress", "completed", "failed"' },
-      { name: 'agent_id', type: 'string', required: false, desc: 'Filter by agent configuration ID' },
-      { name: 'from', type: 'string', required: false, desc: 'ISO 8601 start date filter' },
-      { name: 'to', type: 'string', required: false, desc: 'ISO 8601 end date filter' },
-      { name: 'sentiment', type: 'string', required: false, desc: 'Filter by sentiment: "positive", "neutral", "negative"' },
-      { name: 'limit', type: 'integer', required: false, desc: 'Results per page (max 100). Default: 25' },
-      { name: 'cursor', type: 'string', required: false, desc: 'Pagination cursor from previous response' },
+      {
+        name: "status",
+        type: "string",
+        required: false,
+        desc: 'Filter by status: "queued", "ringing", "in_progress", "completed", "failed"',
+      },
+      {
+        name: "agent_id",
+        type: "string",
+        required: false,
+        desc: "Filter by agent configuration ID",
+      },
+      {
+        name: "from",
+        type: "string",
+        required: false,
+        desc: "ISO 8601 start date filter",
+      },
+      {
+        name: "to",
+        type: "string",
+        required: false,
+        desc: "ISO 8601 end date filter",
+      },
+      {
+        name: "sentiment",
+        type: "string",
+        required: false,
+        desc: 'Filter by sentiment: "positive", "neutral", "negative"',
+      },
+      {
+        name: "limit",
+        type: "integer",
+        required: false,
+        desc: "Results per page (max 100). Default: 25",
+      },
+      {
+        name: "cursor",
+        type: "string",
+        required: false,
+        desc: "Pagination cursor from previous response",
+      },
     ],
     requestBody: `curl "${BASE_URL}/calls?status=completed&from=2025-01-01T00:00:00Z&limit=10" \\
   -H "Authorization: Bearer ct_live_abc123"`,
@@ -278,14 +433,15 @@ export const callEndpoints: EndpointDoc[] = [
 }`,
   },
   {
-    id: 'call-recording',
-    method: 'GET',
-    path: '/calls/{call_id}/recording',
+    id: "call-recording",
+    method: "GET",
+    path: "/calls/{call_id}/recording",
     realUrl: `${EDGE_FUNCTIONS_URL}/api-calls`,
-    realMethod: 'GET',
-    title: 'Get Call Recording',
-    color: 'pink',
-    description: 'Download or stream the audio recording of a completed call. Returns a signed URL valid for 1 hour.',
+    realMethod: "GET",
+    title: "Get Call Recording",
+    color: "pink",
+    description:
+      "Download or stream the audio recording of a completed call. Returns a signed URL valid for 1 hour.",
     requestBody: `curl "${BASE_URL}/calls/call_a1b2c3d4/recording" \\
   -H "Authorization: Bearer ct_live_abc123"`,
     responseBody: `{
@@ -302,16 +458,22 @@ export const callEndpoints: EndpointDoc[] = [
 
 export const dashboardEndpoints: EndpointDoc[] = [
   {
-    id: 'dash-monitor',
-    method: 'GET',
-    path: '/dashboard/monitor',
+    id: "dash-monitor",
+    method: "GET",
+    path: "/dashboard/monitor",
     realUrl: `${EDGE_FUNCTIONS_URL}/api-dashboard/monitor`,
-    realMethod: 'GET',
-    title: 'Live Monitor Data',
-    color: 'purple',
-    description: 'Retrieve real-time monitoring data for active calls and chats, including live call count, average handle time, queue depth, and agent availability.',
+    realMethod: "GET",
+    title: "Live Monitor Data",
+    color: "purple",
+    description:
+      "Retrieve real-time monitoring data for active calls and chats, including live call count, average handle time, queue depth, and agent availability.",
     queryParams: [
-      { name: 'granularity', type: 'string', required: false, desc: 'Time granularity for chart data: "1m", "5m", "1h", "1d". Default: "5m"' },
+      {
+        name: "granularity",
+        type: "string",
+        required: false,
+        desc: 'Time granularity for chart data: "1m", "5m", "1h", "1d". Default: "5m"',
+      },
     ],
     requestBody: `curl "${BASE_URL}/dashboard/monitor?granularity=5m" \\
   -H "Authorization: Bearer ct_live_abc123"`,
@@ -338,18 +500,34 @@ export const dashboardEndpoints: EndpointDoc[] = [
 }`,
   },
   {
-    id: 'dash-analytics',
-    method: 'GET',
-    path: '/dashboard/analytics/sales',
+    id: "dash-analytics",
+    method: "GET",
+    path: "/dashboard/analytics/sales",
     realUrl: `${EDGE_FUNCTIONS_URL}/api-dashboard/analytics/sales`,
-    realMethod: 'GET',
-    title: 'Sales Analytics',
-    color: 'purple',
-    description: 'Retrieve comprehensive sales analytics including conversion rates, revenue pipeline, top-performing agents, and call/chat outcome breakdowns.',
+    realMethod: "GET",
+    title: "Sales Analytics",
+    color: "purple",
+    description:
+      "Retrieve comprehensive sales analytics including conversion rates, revenue pipeline, top-performing agents, and call/chat outcome breakdowns.",
     queryParams: [
-      { name: 'from', type: 'string', required: false, desc: 'ISO 8601 start date. Default: 30 days ago' },
-      { name: 'to', type: 'string', required: false, desc: 'ISO 8601 end date. Default: now' },
-      { name: 'group_by', type: 'string', required: false, desc: '"day", "week", "month". Default: "day"' },
+      {
+        name: "from",
+        type: "string",
+        required: false,
+        desc: "ISO 8601 start date. Default: 30 days ago",
+      },
+      {
+        name: "to",
+        type: "string",
+        required: false,
+        desc: "ISO 8601 end date. Default: now",
+      },
+      {
+        name: "group_by",
+        type: "string",
+        required: false,
+        desc: '"day", "week", "month". Default: "day"',
+      },
     ],
     requestBody: `curl "${BASE_URL}/dashboard/analytics/sales?from=2025-02-01&to=2025-03-01&group_by=week" \\
   -H "Authorization: Bearer ct_live_abc123"`,
@@ -375,19 +553,40 @@ export const dashboardEndpoints: EndpointDoc[] = [
 }`,
   },
   {
-    id: 'dash-leads',
-    method: 'GET',
-    path: '/dashboard/leads',
+    id: "dash-leads",
+    method: "GET",
+    path: "/dashboard/leads",
     realUrl: `${EDGE_FUNCTIONS_URL}/api-dashboard/leads`,
-    realMethod: 'GET',
-    title: 'List Leads',
-    color: 'purple',
-    description: 'Retrieve all leads captured and enriched through AI call and chat interactions. Each lead includes auto-extracted contact info, sentiment, interest level, and recommended next actions.',
+    realMethod: "GET",
+    title: "List Leads",
+    color: "purple",
+    description:
+      "Retrieve all leads captured and enriched through AI call and chat interactions. Each lead includes auto-extracted contact info, sentiment, interest level, and recommended next actions.",
     queryParams: [
-      { name: 'status', type: 'string', required: false, desc: '"new", "contacted", "qualified", "converted", "lost"' },
-      { name: 'priority', type: 'string', required: false, desc: '"high", "medium", "low"' },
-      { name: 'from', type: 'string', required: false, desc: 'ISO 8601 date filter' },
-      { name: 'limit', type: 'integer', required: false, desc: 'Results per page. Default: 25' },
+      {
+        name: "status",
+        type: "string",
+        required: false,
+        desc: '"new", "contacted", "qualified", "converted", "lost"',
+      },
+      {
+        name: "priority",
+        type: "string",
+        required: false,
+        desc: '"high", "medium", "low"',
+      },
+      {
+        name: "from",
+        type: "string",
+        required: false,
+        desc: "ISO 8601 date filter",
+      },
+      {
+        name: "limit",
+        type: "integer",
+        required: false,
+        desc: "Results per page. Default: 25",
+      },
     ],
     requestBody: `curl "${BASE_URL}/dashboard/leads?status=qualified&priority=high&limit=10" \\
   -H "Authorization: Bearer ct_live_abc123"`,
@@ -417,17 +616,28 @@ export const dashboardEndpoints: EndpointDoc[] = [
 }`,
   },
   {
-    id: 'dash-usage',
-    method: 'GET',
-    path: '/dashboard/usage',
+    id: "dash-usage",
+    method: "GET",
+    path: "/dashboard/usage",
     realUrl: `${EDGE_FUNCTIONS_URL}/api-dashboard/usage`,
-    realMethod: 'GET',
-    title: 'Usage & Credits',
-    color: 'purple',
-    description: 'Retrieve your current billing period usage data, including credits consumed, remaining balance, and per-service breakdown.',
+    realMethod: "GET",
+    title: "Usage & Credits",
+    color: "purple",
+    description:
+      "Retrieve your current billing period usage data, including credits consumed, remaining balance, and per-service breakdown.",
     queryParams: [
-      { name: 'from', type: 'string', required: false, desc: 'ISO 8601 start date for usage window' },
-      { name: 'to', type: 'string', required: false, desc: 'ISO 8601 end date for usage window' },
+      {
+        name: "from",
+        type: "string",
+        required: false,
+        desc: "ISO 8601 start date for usage window",
+      },
+      {
+        name: "to",
+        type: "string",
+        required: false,
+        desc: "ISO 8601 end date for usage window",
+      },
     ],
     requestBody: `curl "${BASE_URL}/dashboard/usage?from=2025-03-01&to=2025-03-15" \\
   -H "Authorization: Bearer ct_live_abc123"`,
@@ -457,20 +667,45 @@ export const dashboardEndpoints: EndpointDoc[] = [
 }`,
   },
   {
-    id: 'dash-keys',
-    method: 'POST',
-    path: '/dashboard/keys',
+    id: "dash-keys",
+    method: "POST",
+    path: "/dashboard/keys",
     realUrl: `${EDGE_FUNCTIONS_URL}/api-keys`,
-    realMethod: 'POST',
-    tryItBody: JSON.stringify({ name: 'My Test Key', permissions: ['text', 'voice'], rate_limit: 60 }, null, 2),
-    title: 'Create API Key',
-    color: 'purple',
-    description: 'Generate a new API key with specific permissions and rate limit settings. Keys can be scoped to specific services (chat, calls, dashboard).',
+    realMethod: "POST",
+    tryItBody: JSON.stringify(
+      { name: "My Test Key", permissions: ["text", "voice"], rate_limit: 60 },
+      null,
+      2,
+    ),
+    title: "Create API Key",
+    color: "purple",
+    description:
+      "Generate a new API key with specific permissions and rate limit settings. Keys can be scoped to specific services (chat, calls, dashboard).",
     params: [
-      { name: 'name', type: 'string', required: true, desc: 'Human-readable name for this key (e.g. "Production Backend")' },
-      { name: 'permissions', type: 'array', required: true, desc: 'Scopes: ["chat", "calls", "dashboard", "admin"]' },
-      { name: 'rate_limit', type: 'integer', required: false, desc: 'Requests per minute. Default: 60' },
-      { name: 'expires_at', type: 'string', required: false, desc: 'ISO 8601 expiration date. Null = never expires' },
+      {
+        name: "name",
+        type: "string",
+        required: true,
+        desc: 'Human-readable name for this key (e.g. "Production Backend")',
+      },
+      {
+        name: "permissions",
+        type: "array",
+        required: true,
+        desc: 'Scopes: ["chat", "calls", "dashboard", "admin"]',
+      },
+      {
+        name: "rate_limit",
+        type: "integer",
+        required: false,
+        desc: "Requests per minute. Default: 60",
+      },
+      {
+        name: "expires_at",
+        type: "string",
+        required: false,
+        desc: "ISO 8601 expiration date. Null = never expires",
+      },
     ],
     requestBody: `curl -X POST "${BASE_URL}/dashboard/keys" \\
   -H "Authorization: Bearer ct_live_abc123" \\
@@ -496,10 +731,34 @@ export const dashboardEndpoints: EndpointDoc[] = [
 ];
 
 export const errorCodes = [
-  { code: 400, name: 'Bad Request', desc: 'The request body is malformed or missing required fields.' },
-  { code: 401, name: 'Unauthorized', desc: 'Invalid or missing API key in the Authorization header.' },
-  { code: 403, name: 'Forbidden', desc: 'Your API key does not have permission for this resource.' },
-  { code: 404, name: 'Not Found', desc: 'The requested resource does not exist.' },
-  { code: 429, name: 'Rate Limited', desc: 'Too many requests. Retry after the time in the Retry-After header.' },
-  { code: 500, name: 'Server Error', desc: 'An unexpected error occurred on our end. Contact support if persistent.' },
+  {
+    code: 400,
+    name: "Bad Request",
+    desc: "The request body is malformed or missing required fields.",
+  },
+  {
+    code: 401,
+    name: "Unauthorized",
+    desc: "Invalid or missing API key in the Authorization header.",
+  },
+  {
+    code: 403,
+    name: "Forbidden",
+    desc: "Your API key does not have permission for this resource.",
+  },
+  {
+    code: 404,
+    name: "Not Found",
+    desc: "The requested resource does not exist.",
+  },
+  {
+    code: 429,
+    name: "Rate Limited",
+    desc: "Too many requests. Retry after the time in the Retry-After header.",
+  },
+  {
+    code: 500,
+    name: "Server Error",
+    desc: "An unexpected error occurred on our end. Contact support if persistent.",
+  },
 ];

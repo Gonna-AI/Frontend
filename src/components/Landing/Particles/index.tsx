@@ -1,8 +1,8 @@
-import React, { useRef, useEffect, useMemo } from 'react';
-import { useMousePosition } from './MousePosition';
-import { Circle, createCircle } from './Circle';
-import { hexToRgb, remapValue } from './utils';
-import { cn } from '../../../utils/cn';
+import React, { useRef, useEffect, useMemo } from "react";
+import { useMousePosition } from "./MousePosition";
+import { Circle, createCircle } from "./Circle";
+import { hexToRgb, remapValue } from "./utils";
+import { cn } from "../../../utils/cn";
 
 interface ParticlesProps {
   className?: string;
@@ -32,9 +32,10 @@ export function Particles({
   const mousePosition = useMousePosition();
   const mouse = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
   const canvasSize = useRef<{ w: number; h: number }>({ w: 0, h: 0 });
-  const dpr = typeof window !== "undefined" ? Math.min(window.devicePixelRatio, 1.5) : 1; // Cap DPR for performance
+  const dpr =
+    typeof window !== "undefined" ? Math.min(window.devicePixelRatio, 1.5) : 1; // Cap DPR for performance
   const rgb = useMemo(() => hexToRgb(color), [color]);
-  
+
   // Reduce quantity on mobile devices
   const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
   const adjustedQuantity = isMobile ? Math.floor(quantity * 0.4) : quantity; // 60% reduction on mobile
@@ -119,7 +120,11 @@ export function Particles({
     clearContext();
     const particleCount = adjustedQuantity;
     for (let i = 0; i < particleCount; i++) {
-      const circle = createCircle(canvasSize.current.w, canvasSize.current.h, size);
+      const circle = createCircle(
+        canvasSize.current.w,
+        canvasSize.current.h,
+        size,
+      );
       drawCircle(circle);
     }
   };
@@ -128,7 +133,7 @@ export function Particles({
     clearContext();
     const frameSkip = isMobile ? 2 : 1; // Skip frames on mobile for better performance
     let frameCount = 0;
-    
+
     circles.current.forEach((circle: Circle, i: number) => {
       frameCount++;
       if (isMobile && frameCount % frameSkip !== 0) {
@@ -136,7 +141,7 @@ export function Particles({
         drawCircle(circle, true);
         return;
       }
-      
+
       const edge = [
         circle.x + circle.translateX - circle.size,
         canvasSize.current.w - circle.x - circle.translateX - circle.size,
@@ -173,7 +178,11 @@ export function Particles({
         circle.y > canvasSize.current.h + circle.size
       ) {
         circles.current.splice(i, 1);
-        const newCircle = createCircle(canvasSize.current.w, canvasSize.current.h, size);
+        const newCircle = createCircle(
+          canvasSize.current.w,
+          canvasSize.current.h,
+          size,
+        );
         drawCircle(newCircle);
       }
     });
@@ -181,7 +190,10 @@ export function Particles({
   };
 
   return (
-    <div className={cn("pointer-events-none", className)} ref={canvasContainerRef}>
+    <div
+      className={cn("pointer-events-none", className)}
+      ref={canvasContainerRef}
+    >
       <canvas ref={canvasRef} className="size-full" />
     </div>
   );

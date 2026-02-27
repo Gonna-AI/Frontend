@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { cn } from '../utils/cn';
-import { useTheme } from '../hooks/useTheme';
-import { useCalendar } from '../hooks/useCalendar';
-import CalendarHeader from './Calendar/CalendarHeader';
-import MonthNavigator from './Calendar/MonthNavigator';
-import CalendarGrid from './Calendar/CalendarGrid';
-import { Loader2 } from 'lucide-react';
+import React, { useState, useEffect } from "react";
+import { cn } from "../utils/cn";
+import { useTheme } from "../hooks/useTheme";
+import { useCalendar } from "../hooks/useCalendar";
+import CalendarHeader from "./Calendar/CalendarHeader";
+import MonthNavigator from "./Calendar/MonthNavigator";
+import CalendarGrid from "./Calendar/CalendarGrid";
+import { Loader2 } from "lucide-react";
 
 interface DatePickerProps {
   onClose: () => void;
@@ -15,14 +15,11 @@ export default function DatePicker({ onClose }: DatePickerProps) {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [isEditing, setIsEditing] = useState(false);
   const { isDark } = useTheme();
-  const { 
-    selectedDates, 
-    toggleDate, 
-    isLoading, 
-    error, 
-    saveDates 
-  } = useCalendar();
-  const [tempSelectedDates, setTempSelectedDates] = useState<Set<string>>(new Set());
+  const { selectedDates, toggleDate, isLoading, error, saveDates } =
+    useCalendar();
+  const [tempSelectedDates, setTempSelectedDates] = useState<Set<string>>(
+    new Set(),
+  );
   const [isCalendarLoading, setIsCalendarLoading] = useState(true);
 
   // Add useEffect to simulate loading
@@ -38,8 +35,12 @@ export default function DatePicker({ onClose }: DatePickerProps) {
   const handleEditToggle = () => {
     if (isEditing) {
       // Calculate dates to add and remove
-      const datesToAdd = [...tempSelectedDates].filter(date => !selectedDates.has(date));
-      const datesToRemove = [...selectedDates].filter(date => !tempSelectedDates.has(date));
+      const datesToAdd = [...tempSelectedDates].filter(
+        (date) => !selectedDates.has(date),
+      );
+      const datesToRemove = [...selectedDates].filter(
+        (date) => !tempSelectedDates.has(date),
+      );
 
       saveDates(datesToAdd, datesToRemove);
       onClose();
@@ -79,13 +80,15 @@ export default function DatePicker({ onClose }: DatePickerProps) {
         isEditing={isEditing}
         onDateSelect={handleDateSelect}
       />
-      
+
       {isCalendarLoading && (
-        <div className={cn(
-          "absolute inset-0 flex items-center justify-center",
-          "bg-black/20 backdrop-blur-[1px] rounded-xl",
-          "z-50"
-        )}>
+        <div
+          className={cn(
+            "absolute inset-0 flex items-center justify-center",
+            "bg-black/20 backdrop-blur-[1px] rounded-xl",
+            "z-50",
+          )}
+        >
           <div className="flex items-center gap-2">
             <Loader2 className="w-5 h-5 animate-spin text-white" />
             <span className="text-white font-medium">Loading calendar...</span>

@@ -1,8 +1,8 @@
-import React, { Suspense } from 'react';
-import { Canvas } from '@react-three/fiber';
-import { OrbitControls, Preload } from '@react-three/drei';
-import FlowField from './FlowField';
-import { useDeviceDetection } from '../../hooks/useDeviceDetection';
+import React, { Suspense } from "react";
+import { Canvas } from "@react-three/fiber";
+import { OrbitControls, Preload } from "@react-three/drei";
+import FlowField from "./FlowField";
+import { useDeviceDetection } from "../../hooks/useDeviceDetection";
 
 export default function Scene() {
   const { isLowEnd } = useDeviceDetection();
@@ -16,12 +16,12 @@ export default function Scene() {
     <Canvas
       camera={{ position: [0, 0, 50], fov: 75 }}
       style={{
-        position: 'fixed',
+        position: "fixed",
         top: 0,
         left: 0,
-        width: '100vw',
-        height: '100vh',
-        pointerEvents: 'none',
+        width: "100vw",
+        height: "100vh",
+        pointerEvents: "none",
       }}
       dpr={[1, 1.5]} // Reduced from [1, 2] for better performance
       performance={{ min: 0.5 }} // Lower performance threshold

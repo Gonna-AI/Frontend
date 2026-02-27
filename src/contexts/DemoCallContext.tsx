@@ -1,7 +1,14 @@
-import { createContext, useContext, useState, useCallback, useEffect, ReactNode } from 'react';
-import { supabase } from '../config/supabase';
-import { aiService } from '../services/aiService';
-import { useAuth } from './AuthContext';
+import {
+  createContext,
+  useContext,
+  useState,
+  useCallback,
+  useEffect,
+  ReactNode,
+} from "react";
+import { supabase } from "../config/supabase";
+import { aiService } from "../services/aiService";
+import { useAuth } from "./AuthContext";
 
 // Types for dynamic context extraction
 export interface ExtractedField {
@@ -19,7 +26,7 @@ export interface CallCategory {
   description: string;
 }
 
-export type PriorityLevel = 'critical' | 'high' | 'medium' | 'low';
+export type PriorityLevel = "critical" | "high" | "medium" | "low";
 
 export interface ActionItem {
   id: string;
@@ -30,7 +37,7 @@ export interface ActionItem {
 
 export interface CallMessage {
   id: string;
-  speaker: 'user' | 'agent';
+  speaker: "user" | "agent";
   text: string;
   timestamp: Date;
 }
@@ -38,7 +45,17 @@ export interface CallMessage {
 export interface CallSummary {
   mainPoints: string[];
   // Expanded sentiment types for detailed analysis
-  sentiment: 'very_positive' | 'positive' | 'slightly_positive' | 'neutral' | 'mixed' | 'slightly_negative' | 'negative' | 'very_negative' | 'anxious' | 'urgent';
+  sentiment:
+    | "very_positive"
+    | "positive"
+    | "slightly_positive"
+    | "neutral"
+    | "mixed"
+    | "slightly_negative"
+    | "negative"
+    | "very_negative"
+    | "anxious"
+    | "urgent";
   actionItems: ActionItem[];
   followUpRequired: boolean;
   notes: string;
@@ -46,7 +63,7 @@ export interface CallSummary {
   summaryText?: string; // Clean summary text for preview
   suggestions?: string[];
   callerIntent?: string;
-  moodIndicators?: string[]
+  moodIndicators?: string[];
   topics?: string[];
   resolution?: string;
   riskLevel?: string;
@@ -57,8 +74,8 @@ export interface CallSession {
   id: string;
   startTime: Date;
   endTime?: Date;
-  status: 'idle' | 'connecting' | 'active' | 'ended';
-  type: 'voice' | 'text';
+  status: "idle" | "connecting" | "active" | "ended";
+  type: "voice" | "text";
   messages: CallMessage[];
   extractedFields: ExtractedField[];
   category?: CallCategory;
@@ -70,7 +87,7 @@ export interface CallHistoryItem {
   callerName: string;
   date: Date;
   duration: number;
-  type: 'voice' | 'text'; // Distinguish between voice calls and text chats
+  type: "voice" | "text"; // Distinguish between voice calls and text chats
   messages: CallMessage[];
   extractedFields: ExtractedField[];
   category?: CallCategory;
@@ -85,7 +102,7 @@ export interface ContextField {
   name: string;
   description: string;
   required: boolean;
-  type: 'text' | 'number' | 'date' | 'select' | 'boolean';
+  type: "text" | "number" | "date" | "select" | "boolean";
   options?: string[]; // For select type
 }
 
@@ -116,9 +133,9 @@ interface DemoCallContextType {
 
   // Current call session
   currentCall: CallSession | null;
-  startCall: (type?: 'voice' | 'text') => void;
+  startCall: (type?: "voice" | "text") => void;
   endCall: () => Promise<void>;
-  addMessage: (speaker: 'user' | 'agent', text: string) => void;
+  addMessage: (speaker: "user" | "agent", text: string) => void;
   updateExtractedField: (field: ExtractedField) => void;
   setCallPriority: (priority: PriorityLevel) => void;
   setCallCategory: (category: CallCategory) => void;
@@ -152,12 +169,14 @@ interface DemoCallContextType {
   isLoading: boolean;
 }
 
-const DemoCallContext = createContext<DemoCallContextType | undefined>(undefined);
+const DemoCallContext = createContext<DemoCallContextType | undefined>(
+  undefined,
+);
 
 // Storage keys - made user-scoped via helper functions
-const KNOWLEDGE_BASE_KEY_PREFIX = 'clerktree_knowledge_base_';
-const CALL_HISTORY_KEY_PREFIX = 'clerktree_call_history_';
-const ACTIVE_CALL_KEY_PREFIX = 'active_call_session_';
+const KNOWLEDGE_BASE_KEY_PREFIX = "clerktree_knowledge_base_";
+const CALL_HISTORY_KEY_PREFIX = "clerktree_call_history_";
+const ACTIVE_CALL_KEY_PREFIX = "active_call_session_";
 
 // Default Knowledge Base configuration
 const defaultKnowledgeBase: KnowledgeBaseConfig = {
@@ -170,39 +189,100 @@ const defaultKnowledgeBase: KnowledgeBaseConfig = {
 
 Always be empathetic, clear, and efficient in your communication.`,
 
-  persona: 'Professional, empathetic, and efficient AI assistant',
+  persona: "Professional, empathetic, and efficient AI assistant",
 
-  greeting: 'Hello! How can I help you today?',
+  greeting: "Hello! How can I help you today?",
 
   contextFields: [
-    { id: 'name', name: 'Caller Name', description: 'Full name of the caller', required: true, type: 'text' },
-    { id: 'contact', name: 'Contact Info', description: 'Phone or email for follow-up', required: false, type: 'text' },
-    { id: 'purpose', name: 'Call Purpose', description: 'Main reason for calling', required: true, type: 'text' },
-    { id: 'urgency', name: 'Urgency Level', description: 'How urgent is the matter', required: false, type: 'select', options: ['Not Urgent', 'Somewhat Urgent', 'Very Urgent', 'Emergency'] },
-    { id: 'previousContact', name: 'Previous Contact', description: 'Have they contacted before', required: false, type: 'boolean' },
+    {
+      id: "name",
+      name: "Caller Name",
+      description: "Full name of the caller",
+      required: true,
+      type: "text",
+    },
+    {
+      id: "contact",
+      name: "Contact Info",
+      description: "Phone or email for follow-up",
+      required: false,
+      type: "text",
+    },
+    {
+      id: "purpose",
+      name: "Call Purpose",
+      description: "Main reason for calling",
+      required: true,
+      type: "text",
+    },
+    {
+      id: "urgency",
+      name: "Urgency Level",
+      description: "How urgent is the matter",
+      required: false,
+      type: "select",
+      options: ["Not Urgent", "Somewhat Urgent", "Very Urgent", "Emergency"],
+    },
+    {
+      id: "previousContact",
+      name: "Previous Contact",
+      description: "Have they contacted before",
+      required: false,
+      type: "boolean",
+    },
   ],
 
   categories: [
-    { id: 'inquiry', name: 'General Inquiry', color: 'blue', description: 'General questions and information requests' },
-    { id: 'support', name: 'Support Request', color: 'orange', description: 'Technical or service support needed' },
-    { id: 'complaint', name: 'Complaint', color: 'red', description: 'Issues or complaints to address' },
-    { id: 'appointment', name: 'Appointment', color: 'green', description: 'Scheduling or appointment related' },
-    { id: 'feedback', name: 'Feedback', color: 'purple', description: 'Customer feedback and suggestions' },
-    { id: 'sales', name: 'Sales Inquiry', color: 'emerald', description: 'Sales and pricing questions' },
+    {
+      id: "inquiry",
+      name: "General Inquiry",
+      color: "blue",
+      description: "General questions and information requests",
+    },
+    {
+      id: "support",
+      name: "Support Request",
+      color: "orange",
+      description: "Technical or service support needed",
+    },
+    {
+      id: "complaint",
+      name: "Complaint",
+      color: "red",
+      description: "Issues or complaints to address",
+    },
+    {
+      id: "appointment",
+      name: "Appointment",
+      color: "green",
+      description: "Scheduling or appointment related",
+    },
+    {
+      id: "feedback",
+      name: "Feedback",
+      color: "purple",
+      description: "Customer feedback and suggestions",
+    },
+    {
+      id: "sales",
+      name: "Sales Inquiry",
+      color: "emerald",
+      description: "Sales and pricing questions",
+    },
   ],
 
   priorityRules: [
-    'Mark as CRITICAL if caller mentions emergency, urgent medical issue, or safety concern',
-    'Mark as HIGH if caller is frustrated, has waited long, or has time-sensitive request',
-    'Mark as MEDIUM for standard requests that need follow-up',
-    'Mark as LOW for general inquiries with no time pressure',
+    "Mark as CRITICAL if caller mentions emergency, urgent medical issue, or safety concern",
+    "Mark as HIGH if caller is frustrated, has waited long, or has time-sensitive request",
+    "Mark as MEDIUM for standard requests that need follow-up",
+    "Mark as LOW for general inquiries with no time pressure",
   ],
 
   customInstructions: [
-    'Always confirm the caller\'s name early in the conversation',
-    'Ask clarifying questions if the purpose is unclear',
-    'Offer to schedule follow-up if needed',
-    'Summarize the conversation before ending the call',
+    "Always confirm the caller's name early in the conversation",
+    "Ask clarifying questions if the purpose is unclear",
+    "Offer to schedule follow-up if needed",
+    "Summarize the conversation before ending the call",
   ],
 
   responseGuidelines: `Guidelines for responses:
@@ -212,29 +292,31 @@ Always be empathetic, clear, and efficient in your communication.`,
 - Avoid technical jargon unless the caller uses it
 - Offer alternatives when the primary solution isn't available`,
 
-  selectedVoiceId: 'af_nova', // Default voice
+  selectedVoiceId: "af_nova", // Default voice
 };
 
 // Helper to serialize dates for storage
 function serializeCallHistory(history: CallHistoryItem[]): string {
-  return JSON.stringify(history.map(item => ({
-    ...item,
-    date: item.date.toISOString(),
-    messages: item.messages.map(m => ({
-      ...m,
-      timestamp: m.timestamp.toISOString()
+  return JSON.stringify(
+    history.map((item) => ({
+      ...item,
+      date: item.date.toISOString(),
+      messages: item.messages.map((m) => ({
+        ...m,
+        timestamp: m.timestamp.toISOString(),
+      })),
+      extractedFields: item.extractedFields.map((f) => ({
+        ...f,
+        extractedAt: f.extractedAt.toISOString(),
+      })),
     })),
-    extractedFields: item.extractedFields.map(f => ({
-      ...f,
-      extractedAt: f.extractedAt.toISOString()
-    }))
-  })));
+  );
 }
 
 // Types for serialized data (with string dates)
 interface SerializedCallMessage {
   id: string;
-  speaker: 'user' | 'agent';
+  speaker: "user" | "agent";
   text: string;
   timestamp: string;
 }
@@ -248,41 +330,59 @@ interface SerializedExtractedField {
 }
 
 // Removed unused interface SerializedCallHistoryItem
-export function DemoCallProvider({ children, initialAgentId }: { children: ReactNode; initialAgentId?: string }) {
+export function DemoCallProvider({
+  children,
+  initialAgentId,
+}: {
+  children: ReactNode;
+  initialAgentId?: string;
+}) {
   const { user } = useAuth();
   // agentId: the dashboard owner whose knowledge base this call is attributed to
   const agentId = initialAgentId || user?.id || null;
-  const [knowledgeBase, setKnowledgeBase] = useState<KnowledgeBaseConfig>(defaultKnowledgeBase);
+  const [knowledgeBase, setKnowledgeBase] =
+    useState<KnowledgeBaseConfig>(defaultKnowledgeBase);
   const [currentCall, setCurrentCall] = useState<CallSession | null>(null);
   const [callHistory, setCallHistory] = useState<CallHistoryItem[]>([]); // Start with empty - real data only
   const [isLoading, setIsLoading] = useState(true);
-  const [globalActiveSessions, setGlobalActiveSessions] = useState<{ voice: number; text: number }>({ voice: 0, text: 0 });
+  const [globalActiveSessions, setGlobalActiveSessions] = useState<{
+    voice: number;
+    text: number;
+  }>({ voice: 0, text: 0 });
 
-  const ACTIVE_CALL_KEY = user?.id ? `${ACTIVE_CALL_KEY_PREFIX}${user.id}` : 'active_call_session';
-  const KNOWLEDGE_BASE_KEY = user?.id ? `${KNOWLEDGE_BASE_KEY_PREFIX}${user.id}` : 'clerktree_knowledge_base';
-  const CALL_HISTORY_KEY = user?.id ? `${CALL_HISTORY_KEY_PREFIX}${user.id}` : 'clerktree_call_history';
+  const ACTIVE_CALL_KEY = user?.id
+    ? `${ACTIVE_CALL_KEY_PREFIX}${user.id}`
+    : "active_call_session";
+  const KNOWLEDGE_BASE_KEY = user?.id
+    ? `${KNOWLEDGE_BASE_KEY_PREFIX}${user.id}`
+    : "clerktree_knowledge_base";
+  const CALL_HISTORY_KEY = user?.id
+    ? `${CALL_HISTORY_KEY_PREFIX}${user.id}`
+    : "clerktree_call_history";
 
   // Get the authenticated user's ID for user-specific data
   const getUserId = useCallback(() => {
-    return user?.id || 'anonymous';
+    return user?.id || "anonymous";
   }, [user]);
 
   // Switch to a different session
-  const switchSession = useCallback((sessionId: string, config?: Record<string, unknown>) => {
-    // Update localStorage with new session ID
-    localStorage.setItem('clerktree_user_id', sessionId);
+  const switchSession = useCallback(
+    (sessionId: string, config?: Record<string, unknown>) => {
+      // Update localStorage with new session ID
+      localStorage.setItem("clerktree_user_id", sessionId);
 
-    if (config) {
-      // Update knowledge base with new config
-      setKnowledgeBase({
-        ...defaultKnowledgeBase,  // Start with defaults
-        ...config as Partial<KnowledgeBaseConfig>  // Override with session config
-      } as KnowledgeBaseConfig);
-      localStorage.setItem(KNOWLEDGE_BASE_KEY, JSON.stringify(config));
-      console.log('✅ Switched to session:', sessionId);
-    }
-  }, []);
-
+      if (config) {
+        // Update knowledge base with new config
+        setKnowledgeBase({
+          ...defaultKnowledgeBase, // Start with defaults
+          ...(config as Partial<KnowledgeBaseConfig>), // Override with session config
+        } as KnowledgeBaseConfig);
+        localStorage.setItem(KNOWLEDGE_BASE_KEY, JSON.stringify(config));
+        console.log("✅ Switched to session:", sessionId);
+      }
+    },
+    [],
+  );
 
   // Load knowledge base and call history on mount
   useEffect(() => {
@@ -304,26 +404,36 @@ export function DemoCallProvider({ children, initialAgentId }: { children: React
         if (configOwnerId) {
           // Load from Supabase first (source of truth)
           const { data: kbData, error: kbError } = await supabase
-            .from('knowledge_base_config')
-            .select('*')
-            .eq('id', configOwnerId)
+            .from("knowledge_base_config")
+            .select("*")
+            .eq("id", configOwnerId)
             .maybeSingle();
 
           if (!kbError && kbData?.config) {
             const kbId = kbData.id as string;
-            setKnowledgeBase(prev => ({ ...prev, ...(kbData.config as KnowledgeBaseConfig), id: kbId }));
-            localStorage.setItem(KNOWLEDGE_BASE_KEY, JSON.stringify({ ...kbData.config, id: kbId }));
-            console.log(`✅ Loaded knowledge base from Supabase for ${initialAgentId ? 'agent' : 'user'}:`, configOwnerId);
+            setKnowledgeBase((prev) => ({
+              ...prev,
+              ...(kbData.config as KnowledgeBaseConfig),
+              id: kbId,
+            }));
+            localStorage.setItem(
+              KNOWLEDGE_BASE_KEY,
+              JSON.stringify({ ...kbData.config, id: kbId }),
+            );
+            console.log(
+              `✅ Loaded knowledge base from Supabase for ${initialAgentId ? "agent" : "user"}:`,
+              configOwnerId,
+            );
           } else if (!initialAgentId) {
             // Only fall back to localStorage for the user's own config (not for agent configs)
             const localKB = localStorage.getItem(KNOWLEDGE_BASE_KEY);
             if (localKB) {
               try {
                 const parsed = JSON.parse(localKB);
-                setKnowledgeBase(prev => ({ ...prev, ...parsed }));
-                console.log('✅ Loaded user knowledge base from localStorage');
+                setKnowledgeBase((prev) => ({ ...prev, ...parsed }));
+                console.log("✅ Loaded user knowledge base from localStorage");
               } catch (e) {
-                console.warn('Failed to parse localStorage knowledge base:', e);
+                console.warn("Failed to parse localStorage knowledge base:", e);
               }
             }
           }
@@ -336,19 +446,22 @@ export function DemoCallProvider({ children, initialAgentId }: { children: React
             const parsedCall = JSON.parse(storedCall);
             // Rehydrate dates
             parsedCall.startTime = new Date(parsedCall.startTime);
-            if (parsedCall.endTime) parsedCall.endTime = new Date(parsedCall.endTime);
+            if (parsedCall.endTime)
+              parsedCall.endTime = new Date(parsedCall.endTime);
             parsedCall.messages = parsedCall.messages.map((m: any) => ({
               ...m,
-              timestamp: new Date(m.timestamp)
+              timestamp: new Date(m.timestamp),
             }));
-            parsedCall.extractedFields = parsedCall.extractedFields.map((f: any) => ({
-              ...f,
-              extractedAt: new Date(f.extractedAt)
-            }));
+            parsedCall.extractedFields = parsedCall.extractedFields.map(
+              (f: any) => ({
+                ...f,
+                extractedAt: new Date(f.extractedAt),
+              }),
+            );
             setCurrentCall(parsedCall);
-            console.log('✅ Restored active call session');
+            console.log("✅ Restored active call session");
           } catch (e) {
-            console.error('Failed to restore active call:', e);
+            console.error("Failed to restore active call:", e);
             localStorage.removeItem(ACTIVE_CALL_KEY);
           }
         }
@@ -361,46 +474,71 @@ export function DemoCallProvider({ children, initialAgentId }: { children: React
         }
 
         const { data: historyData, error: historyError } = await supabase
-          .from('call_history')
-          .select('*')
-          .eq('user_id', user.id)
-          .order('date', { ascending: false });
+          .from("call_history")
+          .select("*")
+          .eq("user_id", user.id)
+          .order("date", { ascending: false });
 
         if (!historyError && historyData && historyData.length > 0) {
           // Map Supabase snake_case to app camelCase
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const formattedHistory = historyData.map((item: any) => ({
             id: item.id,
-            callerName: item.caller_name || 'Unknown Caller',  // snake_case from Supabase
+            callerName: item.caller_name || "Unknown Caller", // snake_case from Supabase
             date: new Date(item.date),
             duration: item.duration,
-            type: item.type || 'text', // Default to 'text' if not specified
+            type: item.type || "text", // Default to 'text' if not specified
             messages: (item.messages || []).map((m: SerializedCallMessage) => ({
               ...m,
-              timestamp: new Date(m.timestamp)
+              timestamp: new Date(m.timestamp),
             })),
-            extractedFields: (item.extracted_fields || []).map((f: SerializedExtractedField) => ({  // snake_case
-              ...f,
-              extractedAt: new Date(f.extractedAt)
-            })),
+            extractedFields: (item.extracted_fields || []).map(
+              (f: SerializedExtractedField) => ({
+                // snake_case
+                ...f,
+                extractedAt: new Date(f.extractedAt),
+              }),
+            ),
             category: item.category,
-            priority: item.priority || 'medium',
+            priority: item.priority || "medium",
             tags: item.tags || [],
-            summary: item.summary ? {
-              ...item.summary,
-              summaryText: item.summary.summaryText || item.summary.notes || 'No summary available',
-              topics: item.summary.topics || item.tags || [],
-              suggestions: item.summary.suggestions || (item.summary.actionItems || []).map((a: any) => a.text || '')
-            } : { mainPoints: [], sentiment: 'neutral', actionItems: [], followUpRequired: false, notes: '', summaryText: 'No summary available', topics: [], suggestions: [] }
+            summary: item.summary
+              ? {
+                  ...item.summary,
+                  summaryText:
+                    item.summary.summaryText ||
+                    item.summary.notes ||
+                    "No summary available",
+                  topics: item.summary.topics || item.tags || [],
+                  suggestions:
+                    item.summary.suggestions ||
+                    (item.summary.actionItems || []).map(
+                      (a: any) => a.text || "",
+                    ),
+                }
+              : {
+                  mainPoints: [],
+                  sentiment: "neutral",
+                  actionItems: [],
+                  followUpRequired: false,
+                  notes: "",
+                  summaryText: "No summary available",
+                  topics: [],
+                  suggestions: [],
+                },
           })) as CallHistoryItem[];
           setCallHistory(formattedHistory);
-          console.log('✅ Loaded', formattedHistory.length, 'calls from Supabase');
+          console.log(
+            "✅ Loaded",
+            formattedHistory.length,
+            "calls from Supabase",
+          );
         } else {
           // No data for this user — start fresh (do NOT fall back to localStorage which may contain other users' data)
           setCallHistory([]);
         }
       } catch (error) {
-        console.error('Error loading data:', error);
+        console.error("Error loading data:", error);
         // Do NOT fall back to localStorage for user-scoped data
         setCallHistory([]);
       }
@@ -419,97 +557,148 @@ export function DemoCallProvider({ children, initialAgentId }: { children: React
     const subscription = supabase
       .channel(`call_history_changes_${user.id}`)
       .on(
-        'postgres_changes',
+        "postgres_changes",
         {
-          event: '*', // Listen for all changes (INSERT, UPDATE, DELETE)
-          schema: 'public',
-          table: 'call_history',
-          filter: `user_id=eq.${user.id}`
+          event: "*", // Listen for all changes (INSERT, UPDATE, DELETE)
+          schema: "public",
+          table: "call_history",
+          filter: `user_id=eq.${user.id}`,
         },
         (payload) => {
-          console.log('📡 Real-time update received:', payload.eventType);
+          console.log("📡 Real-time update received:", payload.eventType);
 
-          if (payload.eventType === 'INSERT' && payload.new) {
+          if (payload.eventType === "INSERT" && payload.new) {
             // New call added - add to local state if not already present
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const newItem = payload.new as any;
             const formattedItem: CallHistoryItem = {
               id: newItem.id,
-              callerName: newItem.caller_name || 'Unknown Caller',
+              callerName: newItem.caller_name || "Unknown Caller",
               date: new Date(newItem.date),
               duration: newItem.duration || 0,
-              type: newItem.type || 'text',
-              messages: (newItem.messages || []).map((m: SerializedCallMessage) => ({
-                ...m,
-                timestamp: new Date(m.timestamp)
-              })),
-              extractedFields: (newItem.extracted_fields || []).map((f: SerializedExtractedField) => ({
-                ...f,
-                extractedAt: new Date(f.extractedAt)
-              })),
+              type: newItem.type || "text",
+              messages: (newItem.messages || []).map(
+                (m: SerializedCallMessage) => ({
+                  ...m,
+                  timestamp: new Date(m.timestamp),
+                }),
+              ),
+              extractedFields: (newItem.extracted_fields || []).map(
+                (f: SerializedExtractedField) => ({
+                  ...f,
+                  extractedAt: new Date(f.extractedAt),
+                }),
+              ),
               category: newItem.category,
-              priority: newItem.priority || 'medium',
+              priority: newItem.priority || "medium",
               tags: newItem.tags || [],
-              summary: newItem.summary ? {
-                ...newItem.summary,
-                summaryText: newItem.summary.summaryText || newItem.summary.notes || 'No summary available',
-                topics: newItem.summary.topics || newItem.tags || [],
-                suggestions: newItem.summary.suggestions || (newItem.summary.actionItems || []).map((a: any) => a.text || '')
-              } : { mainPoints: [], sentiment: 'neutral', actionItems: [], followUpRequired: false, notes: '', summaryText: 'No summary available', topics: [], suggestions: [] }
+              summary: newItem.summary
+                ? {
+                    ...newItem.summary,
+                    summaryText:
+                      newItem.summary.summaryText ||
+                      newItem.summary.notes ||
+                      "No summary available",
+                    topics: newItem.summary.topics || newItem.tags || [],
+                    suggestions:
+                      newItem.summary.suggestions ||
+                      (newItem.summary.actionItems || []).map(
+                        (a: any) => a.text || "",
+                      ),
+                  }
+                : {
+                    mainPoints: [],
+                    sentiment: "neutral",
+                    actionItems: [],
+                    followUpRequired: false,
+                    notes: "",
+                    summaryText: "No summary available",
+                    topics: [],
+                    suggestions: [],
+                  },
             };
 
-            setCallHistory(prev => {
+            setCallHistory((prev) => {
               // Check if already exists
-              if (prev.some(c => c.id === formattedItem.id)) {
+              if (prev.some((c) => c.id === formattedItem.id)) {
                 return prev;
               }
-              console.log('📡 Adding new call from real-time sync:', formattedItem.callerName);
+              console.log(
+                "📡 Adding new call from real-time sync:",
+                formattedItem.callerName,
+              );
               return [formattedItem, ...prev];
             });
-          } else if (payload.eventType === 'UPDATE' && payload.new) {
+          } else if (payload.eventType === "UPDATE" && payload.new) {
             // Call updated (e.g., summary generated) - update in local state
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const updatedItem = payload.new as any;
             const formattedItem: CallHistoryItem = {
               id: updatedItem.id,
-              callerName: updatedItem.caller_name || 'Unknown Caller',
+              callerName: updatedItem.caller_name || "Unknown Caller",
               date: new Date(updatedItem.date),
               duration: updatedItem.duration || 0,
-              type: updatedItem.type || 'text',
-              messages: (updatedItem.messages || []).map((m: SerializedCallMessage) => ({
-                ...m,
-                timestamp: new Date(m.timestamp)
-              })),
-              extractedFields: (updatedItem.extracted_fields || []).map((f: SerializedExtractedField) => ({
-                ...f,
-                extractedAt: new Date(f.extractedAt)
-              })),
+              type: updatedItem.type || "text",
+              messages: (updatedItem.messages || []).map(
+                (m: SerializedCallMessage) => ({
+                  ...m,
+                  timestamp: new Date(m.timestamp),
+                }),
+              ),
+              extractedFields: (updatedItem.extracted_fields || []).map(
+                (f: SerializedExtractedField) => ({
+                  ...f,
+                  extractedAt: new Date(f.extractedAt),
+                }),
+              ),
               category: updatedItem.category,
-              priority: updatedItem.priority || 'medium',
+              priority: updatedItem.priority || "medium",
               tags: updatedItem.tags || [],
-              summary: updatedItem.summary ? {
-                ...updatedItem.summary,
-                summaryText: updatedItem.summary.summaryText || updatedItem.summary.notes || 'No summary available',
-                topics: updatedItem.summary.topics || updatedItem.tags || [],
-                suggestions: updatedItem.summary.suggestions || (updatedItem.summary.actionItems || []).map((a: any) => a.text || '')
-              } : { mainPoints: [], sentiment: 'neutral', actionItems: [], followUpRequired: false, notes: '', summaryText: 'No summary available', topics: [], suggestions: [] }
+              summary: updatedItem.summary
+                ? {
+                    ...updatedItem.summary,
+                    summaryText:
+                      updatedItem.summary.summaryText ||
+                      updatedItem.summary.notes ||
+                      "No summary available",
+                    topics:
+                      updatedItem.summary.topics || updatedItem.tags || [],
+                    suggestions:
+                      updatedItem.summary.suggestions ||
+                      (updatedItem.summary.actionItems || []).map(
+                        (a: any) => a.text || "",
+                      ),
+                  }
+                : {
+                    mainPoints: [],
+                    sentiment: "neutral",
+                    actionItems: [],
+                    followUpRequired: false,
+                    notes: "",
+                    summaryText: "No summary available",
+                    topics: [],
+                    suggestions: [],
+                  },
             };
 
-            setCallHistory(prev => prev.map(c =>
-              c.id === formattedItem.id ? formattedItem : c
-            ));
-            console.log('📡 Call updated from real-time sync:', formattedItem.callerName);
-          } else if (payload.eventType === 'DELETE' && payload.old) {
+            setCallHistory((prev) =>
+              prev.map((c) => (c.id === formattedItem.id ? formattedItem : c)),
+            );
+            console.log(
+              "📡 Call updated from real-time sync:",
+              formattedItem.callerName,
+            );
+          } else if (payload.eventType === "DELETE" && payload.old) {
             // Call deleted - remove from local state
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const oldItem = payload.old as any;
-            setCallHistory(prev => prev.filter(c => c.id !== oldItem.id));
+            setCallHistory((prev) => prev.filter((c) => c.id !== oldItem.id));
           }
-        }
+        },
       )
       .subscribe((status) => {
-        if (status === 'SUBSCRIBED') {
-          console.log('📡 Real-time sync enabled for user:', user.id);
+        if (status === "SUBSCRIBED") {
+          console.log("📡 Real-time sync enabled for user:", user.id);
         }
       });
 
@@ -523,44 +712,50 @@ export function DemoCallProvider({ children, initialAgentId }: { children: React
     // Clean up stale sessions (older than 5 minutes without activity)
     const cleanupStaleSessions = async () => {
       try {
-        const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
+        const fiveMinutesAgo = new Date(
+          Date.now() - 5 * 60 * 1000,
+        ).toISOString();
         const { error, count } = await supabase
-          .from('active_sessions')
+          .from("active_sessions")
           .delete()
-          .eq('status', 'active')
-          .lt('last_activity', fiveMinutesAgo);
+          .eq("status", "active")
+          .lt("last_activity", fiveMinutesAgo);
 
         if (!error && count && count > 0) {
           console.log(`🧹 Cleaned up ${count} stale sessions`);
         }
       } catch (e) {
-        console.error('🧹 Stale session cleanup error:', e);
+        console.error("🧹 Stale session cleanup error:", e);
       }
     };
 
     // Fetch initial count (only sessions with recent activity - within last 5 min)
     const fetchActiveSessions = async () => {
       try {
-        const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
+        const fiveMinutesAgo = new Date(
+          Date.now() - 5 * 60 * 1000,
+        ).toISOString();
         const { data, error } = await supabase
-          .from('active_sessions')
-          .select('session_type')
-          .eq('status', 'active')
-          .gte('last_activity', fiveMinutesAgo);
+          .from("active_sessions")
+          .select("session_type")
+          .eq("status", "active")
+          .gte("last_activity", fiveMinutesAgo);
 
         if (error) {
-          console.log('📡 Active sessions query error:', error.message);
+          console.log("📡 Active sessions query error:", error.message);
           return;
         }
 
         if (data) {
-          const voice = data.filter(s => s.session_type === 'voice').length;
-          const text = data.filter(s => s.session_type === 'text').length;
-          console.log(`📡 Global active sessions: ${voice} calls, ${text} chats`);
+          const voice = data.filter((s) => s.session_type === "voice").length;
+          const text = data.filter((s) => s.session_type === "text").length;
+          console.log(
+            `📡 Global active sessions: ${voice} calls, ${text} chats`,
+          );
           setGlobalActiveSessions({ voice, text });
         }
       } catch (e) {
-        console.error('📡 Active sessions fetch error:', e);
+        console.error("📡 Active sessions fetch error:", e);
       }
     };
 
@@ -582,17 +777,17 @@ export function DemoCallProvider({ children, initialAgentId }: { children: React
     };
 
     const subscription = supabase
-      .channel('active_sessions_changes')
+      .channel("active_sessions_changes")
       .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'active_sessions' },
+        "postgres_changes",
+        { event: "*", schema: "public", table: "active_sessions" },
         (payload) => {
-          console.log('📡 Active sessions change:', payload.eventType);
+          console.log("📡 Active sessions change:", payload.eventType);
           debouncedFetch();
-        }
+        },
       )
       .subscribe((status) => {
-        console.log('📡 Active sessions subscription:', status);
+        console.log("📡 Active sessions subscription:", status);
       });
 
     return () => {
@@ -610,167 +805,204 @@ export function DemoCallProvider({ children, initialAgentId }: { children: React
   }, [callHistory]);
 
   // Knowledge Base updates
-  const updateKnowledgeBase = useCallback((config: Partial<KnowledgeBaseConfig>) => {
-    setKnowledgeBase(prev => {
-      const updated = { ...prev, ...config };
-      // Also save to localStorage immediately for backup
-      localStorage.setItem(KNOWLEDGE_BASE_KEY, JSON.stringify(updated));
-      return updated;
-    });
-  }, []);
+  const updateKnowledgeBase = useCallback(
+    (config: Partial<KnowledgeBaseConfig>) => {
+      setKnowledgeBase((prev) => {
+        const updated = { ...prev, ...config };
+        // Also save to localStorage immediately for backup
+        localStorage.setItem(KNOWLEDGE_BASE_KEY, JSON.stringify(updated));
+        return updated;
+      });
+    },
+    [],
+  );
 
   // Save knowledge base - user-specific storage
-  const saveKnowledgeBase = useCallback(async (configOverride?: KnowledgeBaseConfig): Promise<boolean> => {
-    try {
-      const userId = getUserId();
-      const configToSave = configOverride || knowledgeBase;
+  const saveKnowledgeBase = useCallback(
+    async (configOverride?: KnowledgeBaseConfig): Promise<boolean> => {
+      try {
+        const userId = getUserId();
+        const configToSave = configOverride || knowledgeBase;
 
-      // Save to localStorage first (always works, fast)
-      localStorage.setItem(KNOWLEDGE_BASE_KEY, JSON.stringify(configToSave));
-      console.log('✅ Saved knowledge base to localStorage');
+        // Save to localStorage first (always works, fast)
+        localStorage.setItem(KNOWLEDGE_BASE_KEY, JSON.stringify(configToSave));
+        console.log("✅ Saved knowledge base to localStorage");
 
-      if (userId === 'anonymous') {
-        return true; // Not logged in, localStorage only
-      }
+        if (userId === "anonymous") {
+          return true; // Not logged in, localStorage only
+        }
 
-      // Try to save to Supabase with user ID
-      const { error } = await supabase
-        .from('knowledge_base_config')
-        .upsert({
-          id: userId,  // User-specific ID
+        // Try to save to Supabase with user ID
+        const { error } = await supabase.from("knowledge_base_config").upsert({
+          id: userId, // User-specific ID
           user_id: userId,
           config: configToSave,
-          updated_at: new Date().toISOString()
+          updated_at: new Date().toISOString(),
         });
 
-      if (error) {
-        console.warn('Supabase save failed (localStorage still saved):', error.message);
-      } else {
-        console.log('✅ Saved knowledge base to Supabase for user:', userId);
-      }
+        if (error) {
+          console.warn(
+            "Supabase save failed (localStorage still saved):",
+            error.message,
+          );
+        } else {
+          console.log("✅ Saved knowledge base to Supabase for user:", userId);
+        }
 
-      return true;
-    } catch (error) {
-      console.error('Error saving knowledge base:', error);
-      // localStorage save already done
-      return true;
-    }
-  }, [knowledgeBase, getUserId]);
+        return true;
+      } catch (error) {
+        console.error("Error saving knowledge base:", error);
+        // localStorage save already done
+        return true;
+      }
+    },
+    [knowledgeBase, getUserId],
+  );
 
   // Load knowledge base from Supabase (uses agentId if on user-facing page, else own user)
   const loadKnowledgeBase = useCallback(async (): Promise<void> => {
     try {
       const configOwnerId = initialAgentId || getUserId();
-      if (configOwnerId === 'anonymous') return;
+      if (configOwnerId === "anonymous") return;
 
       // Load the config for the appropriate owner (agent or self)
       const { data, error } = await supabase
-        .from('knowledge_base_config')
-        .select('*')
-        .eq('id', configOwnerId)
+        .from("knowledge_base_config")
+        .select("*")
+        .eq("id", configOwnerId)
         .maybeSingle();
 
       if (!error && data?.config) {
         const dataId = data.id as string;
-        setKnowledgeBase(prev => ({ ...prev, ...(data.config as KnowledgeBaseConfig), id: dataId }));
-        localStorage.setItem(KNOWLEDGE_BASE_KEY, JSON.stringify({ ...data.config, id: dataId }));
-        console.log(`✅ Loaded knowledge base from Supabase for ${initialAgentId ? 'agent' : 'user'}:`, configOwnerId);
+        setKnowledgeBase((prev) => ({
+          ...prev,
+          ...(data.config as KnowledgeBaseConfig),
+          id: dataId,
+        }));
+        localStorage.setItem(
+          KNOWLEDGE_BASE_KEY,
+          JSON.stringify({ ...data.config, id: dataId }),
+        );
+        console.log(
+          `✅ Loaded knowledge base from Supabase for ${initialAgentId ? "agent" : "user"}:`,
+          configOwnerId,
+        );
       }
     } catch (error) {
-      console.error('Error loading knowledge base:', error);
+      console.error("Error loading knowledge base:", error);
     }
   }, [getUserId, initialAgentId]);
 
   const addContextField = useCallback((field: ContextField) => {
-    setKnowledgeBase(prev => ({
+    setKnowledgeBase((prev) => ({
       ...prev,
       contextFields: [...prev.contextFields, field],
     }));
   }, []);
 
-  const updateContextField = useCallback((id: string, updates: Partial<ContextField>) => {
-    setKnowledgeBase(prev => ({
-      ...prev,
-      contextFields: prev.contextFields.map(f => f.id === id ? { ...f, ...updates } : f),
-    }));
-  }, []);
+  const updateContextField = useCallback(
+    (id: string, updates: Partial<ContextField>) => {
+      setKnowledgeBase((prev) => ({
+        ...prev,
+        contextFields: prev.contextFields.map((f) =>
+          f.id === id ? { ...f, ...updates } : f,
+        ),
+      }));
+    },
+    [],
+  );
 
   const removeContextField = useCallback((id: string) => {
-    setKnowledgeBase(prev => ({
+    setKnowledgeBase((prev) => ({
       ...prev,
-      contextFields: prev.contextFields.filter(f => f.id !== id),
+      contextFields: prev.contextFields.filter((f) => f.id !== id),
     }));
   }, []);
 
   const addCategory = useCallback((category: CallCategory) => {
-    setKnowledgeBase(prev => ({
+    setKnowledgeBase((prev) => ({
       ...prev,
       categories: [...prev.categories, category],
     }));
   }, []);
 
   const removeCategory = useCallback((id: string) => {
-    setKnowledgeBase(prev => ({
+    setKnowledgeBase((prev) => ({
       ...prev,
-      categories: prev.categories.filter(c => c.id !== id),
+      categories: prev.categories.filter((c) => c.id !== id),
     }));
   }, []);
 
   // Call session management
-  const startCall = useCallback(async (type: 'voice' | 'text' = 'text') => {
+  const startCall = useCallback(async (type: "voice" | "text" = "text") => {
     const newCall: CallSession = {
       id: `call-${Date.now()}`,
       startTime: new Date(),
-      status: 'active',
+      status: "active",
       type,
       messages: [],
       extractedFields: [],
-      priority: 'medium',
+      priority: "medium",
     };
-    console.log('📞 Starting new call/session:', { id: newCall.id, type, requestedType: type });
+    console.log("📞 Starting new call/session:", {
+      id: newCall.id,
+      type,
+      requestedType: type,
+    });
     setCurrentCall(newCall);
     // Persist active call locally
     localStorage.setItem(ACTIVE_CALL_KEY, JSON.stringify(newCall));
 
     // Also register via edge function for global visibility
     try {
-      const { data: { session: authSession } } = await supabase.auth.getSession();
-      await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/api-sessions/start`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${authSession?.access_token}`,
-          'Content-Type': 'application/json'
+      const {
+        data: { session: authSession },
+      } = await supabase.auth.getSession();
+      await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/api-sessions/start`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${authSession?.access_token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            id: newCall.id,
+            session_type: type,
+            started_at: newCall.startTime.toISOString(),
+          }),
         },
-        body: JSON.stringify({
-          id: newCall.id,
-          session_type: type,
-          started_at: newCall.startTime.toISOString()
-        })
-      });
-      console.log('📡 Session registered for global sync:', newCall.id);
+      );
+      console.log("📡 Session registered for global sync:", newCall.id);
     } catch (e) {
-      console.error('📡 Session registration error:', e);
+      console.error("📡 Session registration error:", e);
     }
   }, []);
 
   // Heartbeat: Update last_activity while call is active to prevent stale session cleanup
   useEffect(() => {
-    if (!currentCall || currentCall.status !== 'active') return;
+    if (!currentCall || currentCall.status !== "active") return;
 
     const updateHeartbeat = async () => {
       try {
-        const { data: { session: authSession } } = await supabase.auth.getSession();
-        await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/api-sessions/heartbeat`, {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${authSession?.access_token}`,
-            'Content-Type': 'application/json'
+        const {
+          data: { session: authSession },
+        } = await supabase.auth.getSession();
+        await fetch(
+          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/api-sessions/heartbeat`,
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${authSession?.access_token}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              id: currentCall.id,
+            }),
+            keepalive: true,
           },
-          body: JSON.stringify({
-            id: currentCall.id
-          }),
-          keepalive: true,
-        }); console.log('💓 Session heartbeat updated:', currentCall.id);
+        );
+        console.log("💓 Session heartbeat updated:", currentCall.id);
       } catch (e) {
         // Silently fail - not critical
       }
@@ -790,7 +1022,9 @@ export function DemoCallProvider({ children, initialAgentId }: { children: React
   useEffect(() => {
     const updateToken = async () => {
       try {
-        const { data: { session } } = await supabase.auth.getSession();
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
         setCachedToken(session?.access_token || null);
       } catch {
         // Silent fail
@@ -804,53 +1038,98 @@ export function DemoCallProvider({ children, initialAgentId }: { children: React
   // Cleanup session when tab/window closes
   useEffect(() => {
     const handleBeforeUnload = () => {
-      if (currentCall?.status === 'active') {
-        const token = cachedToken || '';
+      if (currentCall?.status === "active") {
+        const token = cachedToken || "";
 
         try {
           // Mark as ended first via localStorage so other tabs can see
           localStorage.removeItem(ACTIVE_CALL_KEY);
 
           // Attempt cleanup via edge function
-          fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/api-sessions/end`, {
-            method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'application/json'
+          fetch(
+            `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/api-sessions/end`,
+            {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                id: currentCall.id,
+              }),
+              keepalive: true,
             },
-            body: JSON.stringify({
-              id: currentCall.id
-            }),
-            keepalive: true,
-          });
+          );
         } catch (e) {
           // Silent fail - cleanup will happen via stale session cleanup
         }
       }
     };
 
-    window.addEventListener('beforeunload', handleBeforeUnload);
-    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
   }, [currentCall?.id, currentCall?.status, cachedToken]);
 
   // Helper to find caller name from various sources
   const findCallerName = (call: CallSession): string => {
     // First try extracted fields (most reliable)
-    const nameField = call.extractedFields.find(f =>
-      f.id === 'name' ||
-      f.label.toLowerCase().includes('name') ||
-      f.label.toLowerCase().includes('caller')
+    const nameField = call.extractedFields.find(
+      (f) =>
+        f.id === "name" ||
+        f.label.toLowerCase().includes("name") ||
+        f.label.toLowerCase().includes("caller"),
     );
-    if (nameField?.value && nameField.value.trim() && nameField.value !== 'Unknown Caller') {
-      console.log('✅ Found caller name from extracted fields:', nameField.value);
+    if (
+      nameField?.value &&
+      nameField.value.trim() &&
+      nameField.value !== "Unknown Caller"
+    ) {
+      console.log(
+        "✅ Found caller name from extracted fields:",
+        nameField.value,
+      );
       return nameField.value.trim();
     }
 
     // Common words to filter out as false positives
-    const commonWords = ['hello', 'hi', 'hey', 'yes', 'no', 'okay', 'sure', 'thanks', 'thank', 'you', 'the', 'a', 'an', 'how', 'can', 'help', 'may', 'please', 'need', 'want', 'have', 'for', 'reaching', 'out', 'your', 'this', 'that', 'with', 'about', 'today', 'there', 'got', 'it'];
+    const commonWords = [
+      "hello",
+      "hi",
+      "hey",
+      "yes",
+      "no",
+      "okay",
+      "sure",
+      "thanks",
+      "thank",
+      "you",
+      "the",
+      "a",
+      "an",
+      "how",
+      "can",
+      "help",
+      "may",
+      "please",
+      "need",
+      "want",
+      "have",
+      "for",
+      "reaching",
+      "out",
+      "your",
+      "this",
+      "that",
+      "with",
+      "about",
+      "today",
+      "there",
+      "got",
+      "it",
+    ];
 
     // Try to find name in messages where user introduced themselves
-    const userMessages = call.messages.filter(m => m.speaker === 'user');
+    const userMessages = call.messages.filter((m) => m.speaker === "user");
     for (const msg of userMessages) {
       // Common patterns: "My name is X", "I'm X", "This is X", "I am X", "Hi, I'm X", "Hello, this is X"
       const patterns = [
@@ -869,7 +1148,7 @@ export function DemoCallProvider({ children, initialAgentId }: { children: React
           const name = match[1].trim();
           // Filter out common false positives
           if (!commonWords.includes(name.toLowerCase()) && name.length > 2) {
-            console.log('✅ Found caller name from message pattern:', name);
+            console.log("✅ Found caller name from message pattern:", name);
             return name;
           }
         }
@@ -877,7 +1156,7 @@ export function DemoCallProvider({ children, initialAgentId }: { children: React
     }
 
     // Try agent messages that might reference the caller's name
-    const agentMessages = call.messages.filter(m => m.speaker === 'agent');
+    const agentMessages = call.messages.filter((m) => m.speaker === "agent");
     for (const msg of agentMessages) {
       const patterns = [
         /(?:hi|hello),?\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)/i,
@@ -892,7 +1171,7 @@ export function DemoCallProvider({ children, initialAgentId }: { children: React
         if (match?.[1]) {
           const name = match[1].trim();
           if (!commonWords.includes(name.toLowerCase()) && name.length > 2) {
-            console.log('✅ Found caller name from agent message:', name);
+            console.log("✅ Found caller name from agent message:", name);
             return name;
           }
         }
@@ -900,7 +1179,7 @@ export function DemoCallProvider({ children, initialAgentId }: { children: React
     }
 
     console.log('⚠️ Could not find caller name, using "Unknown Caller"');
-    return 'Unknown Caller';
+    return "Unknown Caller";
   };
 
   const endCall = useCallback(async () => {
@@ -909,9 +1188,11 @@ export function DemoCallProvider({ children, initialAgentId }: { children: React
       const endedCall: CallSession = {
         ...currentCall,
         endTime: new Date(),
-        status: 'ended',
+        status: "ended",
       };
-      const duration = Math.floor((new Date().getTime() - endedCall.startTime.getTime()) / 1000);
+      const duration = Math.floor(
+        (new Date().getTime() - endedCall.startTime.getTime()) / 1000,
+      );
 
       // 2. Clear UI immediately (Optimistic update)
       setCurrentCall(null);
@@ -919,18 +1200,23 @@ export function DemoCallProvider({ children, initialAgentId }: { children: React
 
       // Also remove from active_sessions via edge function
       try {
-        const { data: { session: authSession } } = await supabase.auth.getSession();
-        await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/api-sessions/end`, {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${authSession?.access_token}`,
-            'Content-Type': 'application/json'
+        const {
+          data: { session: authSession },
+        } = await supabase.auth.getSession();
+        await fetch(
+          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/api-sessions/end`,
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${authSession?.access_token}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              id: endedCall.id,
+            }),
           },
-          body: JSON.stringify({
-            id: endedCall.id
-          })
-        });
-        console.log('📡 Session removed from global sync:', endedCall.id);
+        );
+        console.log("📡 Session removed from global sync:", endedCall.id);
       } catch (e) {
         // Silently fail - table might not exist
       }
@@ -942,20 +1228,22 @@ export function DemoCallProvider({ children, initialAgentId }: { children: React
           // Get initial caller name from various sources
           let callerName = findCallerName(endedCall);
 
-          let finalCategory = endedCall.category;
-          let finalPriority = endedCall.priority;
+          const finalCategory = endedCall.category;
+          const finalPriority = endedCall.priority;
 
           // Create history item immediately with placeholder summary
           const historyId = `history-${Date.now()}`;
           const placeholderSummary: CallSummary = {
-            mainPoints: ['Call completed'],
-            sentiment: 'neutral',
+            mainPoints: ["Call completed"],
+            sentiment: "neutral",
             actionItems: [],
-            followUpRequired: endedCall.priority === 'high' || endedCall.priority === 'critical',
-            notes: '⏳ Generating summary...',
-            summaryText: '⏳ Generating summary...',
+            followUpRequired:
+              endedCall.priority === "high" ||
+              endedCall.priority === "critical",
+            notes: "⏳ Generating summary...",
+            summaryText: "⏳ Generating summary...",
             topics: [],
-            suggestions: []
+            suggestions: [],
           };
 
           // Create initial history item with placeholder
@@ -974,8 +1262,8 @@ export function DemoCallProvider({ children, initialAgentId }: { children: React
           };
 
           // Add to history IMMEDIATELY so user sees it
-          setCallHistory(prev => [initialHistoryItem, ...prev]);
-          console.log('📝 Call added to history immediately:', historyId);
+          setCallHistory((prev) => [initialHistoryItem, ...prev]);
+          console.log("📝 Call added to history immediately:", historyId);
 
           // IMMEDIATELY save to Supabase so real-time sync works across tabs/pages
           try {
@@ -985,29 +1273,42 @@ export function DemoCallProvider({ children, initialAgentId }: { children: React
               date: initialHistoryItem.date.toISOString(),
               duration: initialHistoryItem.duration,
               type: initialHistoryItem.type,
-              messages: initialHistoryItem.messages.map(m => ({ ...m, timestamp: m.timestamp.toISOString() })),
-              extracted_fields: initialHistoryItem.extractedFields.map(f => ({ ...f, extractedAt: f.extractedAt.toISOString() })),
+              messages: initialHistoryItem.messages.map((m) => ({
+                ...m,
+                timestamp: m.timestamp.toISOString(),
+              })),
+              extracted_fields: initialHistoryItem.extractedFields.map((f) => ({
+                ...f,
+                extractedAt: f.extractedAt.toISOString(),
+              })),
               category: initialHistoryItem.category,
               priority: initialHistoryItem.priority,
               tags: initialHistoryItem.tags,
               summary: initialHistoryItem.summary,
-              sentiment: 'neutral',
+              sentiment: "neutral",
               follow_up_required: initialHistoryItem.summary.followUpRequired,
               user_id: user?.id,
-              agent_id: agentId || user?.id || null
+              agent_id: agentId || user?.id || null,
             };
-            const { data: { session: authSession } } = await supabase.auth.getSession();
-            await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/api-history`, {
-              method: 'POST',
-              headers: {
-                'Authorization': `Bearer ${authSession?.access_token}`,
-                'Content-Type': 'application/json'
+            const {
+              data: { session: authSession },
+            } = await supabase.auth.getSession();
+            await fetch(
+              `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/api-history`,
+              {
+                method: "POST",
+                headers: {
+                  Authorization: `Bearer ${authSession?.access_token}`,
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ ...initialPayload }),
               },
-              body: JSON.stringify({ ...initialPayload })
-            });
-            console.log('📡 Call synced via edge function for real-time updates');
+            );
+            console.log(
+              "📡 Call synced via edge function for real-time updates",
+            );
           } catch (syncError) {
-            console.warn('Initial sync to Supabase failed:', syncError);
+            console.warn("Initial sync to Supabase failed:", syncError);
           }
 
           // Now generate summary in background and update
@@ -1016,41 +1317,51 @@ export function DemoCallProvider({ children, initialAgentId }: { children: React
 
           try {
             if (endedCall.messages.length > 0) {
-              console.log('🤖 Generating AI summary in background...');
+              console.log("🤖 Generating AI summary in background...");
 
               // Wrap in a timeout promise to prevent hanging
               const summaryPromise = aiService.generateSummary(
                 endedCall.messages,
                 endedCall.extractedFields,
                 endedCall.category,
-                endedCall.priority
+                endedCall.priority,
               );
 
               // Race against a 45-second timeout
               const timeoutPromise = new Promise<never>((_, reject) =>
-                setTimeout(() => reject(new Error('Notes generation timed out after 35s')), 35000)
+                setTimeout(
+                  () =>
+                    reject(new Error("Notes generation timed out after 35s")),
+                  35000,
+                ),
               );
 
-              const summaryResponse = await Promise.race([summaryPromise, timeoutPromise]);
+              const summaryResponse = await Promise.race([
+                summaryPromise,
+                timeoutPromise,
+              ]);
 
               finalSummary = summaryResponse.summary;
               tags = summaryResponse.tags;
 
-              if (summaryResponse.callerName && callerName === 'Unknown Caller') {
+              if (
+                summaryResponse.callerName &&
+                callerName === "Unknown Caller"
+              ) {
                 callerName = summaryResponse.callerName;
               }
-              console.log('✅ AI summary generated successfully');
+              console.log("✅ AI summary generated successfully");
             }
           } catch (error) {
-            console.error('❌ Error generating AI summary:', error);
+            console.error("❌ Error generating AI summary:", error);
             // Keep placeholder summary but update the note
             finalSummary = {
               ...placeholderSummary,
-              notes: `Summary generation failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+              notes: `Summary generation failed: ${error instanceof Error ? error.message : "Unknown error"}`,
             };
           }
 
-          if (callerName === 'Unknown Caller') {
+          if (callerName === "Unknown Caller") {
             callerName = findCallerName(endedCall);
           }
 
@@ -1070,10 +1381,12 @@ export function DemoCallProvider({ children, initialAgentId }: { children: React
           };
 
           // Update history with the final summary
-          setCallHistory(prev => prev.map(item =>
-            item.id === historyId ? finalHistoryItem : item
-          ));
-          console.log('📝 Call history updated with summary:', historyId);
+          setCallHistory((prev) =>
+            prev.map((item) =>
+              item.id === historyId ? finalHistoryItem : item,
+            ),
+          );
+          console.log("📝 Call history updated with summary:", historyId);
 
           // Save to Supabase
           try {
@@ -1083,55 +1396,73 @@ export function DemoCallProvider({ children, initialAgentId }: { children: React
               caller_name: finalHistoryItem.callerName,
               date: finalHistoryItem.date.toISOString(),
               duration: finalHistoryItem.duration,
-              messages: finalHistoryItem.messages.map(m => ({ ...m, timestamp: m.timestamp.toISOString() })),
-              extracted_fields: finalHistoryItem.extractedFields.map(f => ({ ...f, extractedAt: f.extractedAt.toISOString() })),
+              messages: finalHistoryItem.messages.map((m) => ({
+                ...m,
+                timestamp: m.timestamp.toISOString(),
+              })),
+              extracted_fields: finalHistoryItem.extractedFields.map((f) => ({
+                ...f,
+                extractedAt: f.extractedAt.toISOString(),
+              })),
               category: finalHistoryItem.category,
               priority: finalHistoryItem.priority,
               tags: finalHistoryItem.tags,
               summary: finalHistoryItem.summary,
-              sentiment: finalHistoryItem.summary.sentiment || 'neutral',
-              follow_up_required: finalHistoryItem.summary.followUpRequired || false,
-              user_id: user?.id
+              sentiment: finalHistoryItem.summary.sentiment || "neutral",
+              follow_up_required:
+                finalHistoryItem.summary.followUpRequired || false,
+              user_id: user?.id,
             };
 
-            console.log('💾 Saving final call history via edge function:', { id: finalHistoryItem.id, type: finalHistoryItem.type });
-
-            const { data: { session: authSession } } = await supabase.auth.getSession();
-            const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/api-history`, {
-              method: 'PUT',
-              headers: {
-                'Authorization': `Bearer ${authSession?.access_token}`,
-                'Content-Type': 'application/json'
-              },
-              body: JSON.stringify({
-                ...basePayload,
-                type: finalHistoryItem.type
-              })
+            console.log("💾 Saving final call history via edge function:", {
+              id: finalHistoryItem.id,
+              type: finalHistoryItem.type,
             });
+
+            const {
+              data: { session: authSession },
+            } = await supabase.auth.getSession();
+            const res = await fetch(
+              `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/api-history`,
+              {
+                method: "PUT",
+                headers: {
+                  Authorization: `Bearer ${authSession?.access_token}`,
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  ...basePayload,
+                  type: finalHistoryItem.type,
+                }),
+              },
+            );
 
             if (!res.ok) {
               const errData = await res.json().catch(() => ({}));
-              console.error('Error updating call with summary:', errData);
+              console.error("Error updating call with summary:", errData);
             } else {
-              console.log('📡 Call updated with summary via edge function');
+              console.log("📡 Call updated with summary via edge function");
             }
           } catch (error) {
-            console.error('Error saving call to Supabase:', error);
+            console.error("Error saving call to Supabase:", error);
           }
-          console.log('✅ Background call processing complete for:', historyId);
+          console.log("✅ Background call processing complete for:", historyId);
         } catch (bgError) {
-          console.error('❌ Background processing error:', bgError);
+          console.error("❌ Background processing error:", bgError);
         }
       })();
     }
   }, [currentCall, knowledgeBase, getUserId]); // Ensure check dependencies
 
-  const addMessage = useCallback((speaker: 'user' | 'agent', text: string) => {
+  const addMessage = useCallback((speaker: "user" | "agent", text: string) => {
     // Use functional update to avoid stale closure issues
     // The message will be added if there's an active call in the current state
-    setCurrentCall(prev => {
+    setCurrentCall((prev) => {
       if (!prev) {
-        console.warn('⚠️ addMessage called but no active call session. Message:', text.substring(0, 50));
+        console.warn(
+          "⚠️ addMessage called but no active call session. Message:",
+          text.substring(0, 50),
+        );
         return null;
       }
       const message: CallMessage = {
@@ -1140,7 +1471,10 @@ export function DemoCallProvider({ children, initialAgentId }: { children: React
         text,
         timestamp: new Date(),
       };
-      console.log(`📨 Adding ${speaker} message to call:`, text.substring(0, 50) + '...');
+      console.log(
+        `📨 Adding ${speaker} message to call:`,
+        text.substring(0, 50) + "...",
+      );
       const updated = {
         ...prev,
         messages: [...prev.messages, message],
@@ -1151,45 +1485,62 @@ export function DemoCallProvider({ children, initialAgentId }: { children: React
     });
   }, []);
 
-  const updateExtractedField = useCallback((field: ExtractedField) => {
-    if (currentCall) {
-      setCurrentCall(prev => {
-        if (!prev) return null;
-        const existingIndex = prev.extractedFields.findIndex(f => f.id === field.id);
-        if (existingIndex >= 0) {
-          const updated = [...prev.extractedFields];
-          updated[existingIndex] = field;
-          return { ...prev, extractedFields: updated };
-        }
-        return { ...prev, extractedFields: [...prev.extractedFields, field] };
-      });
-    }
-  }, [currentCall]);
+  const updateExtractedField = useCallback(
+    (field: ExtractedField) => {
+      if (currentCall) {
+        setCurrentCall((prev) => {
+          if (!prev) return null;
+          const existingIndex = prev.extractedFields.findIndex(
+            (f) => f.id === field.id,
+          );
+          if (existingIndex >= 0) {
+            const updated = [...prev.extractedFields];
+            updated[existingIndex] = field;
+            return { ...prev, extractedFields: updated };
+          }
+          return { ...prev, extractedFields: [...prev.extractedFields, field] };
+        });
+      }
+    },
+    [currentCall],
+  );
 
-  const setCallPriority = useCallback((priority: PriorityLevel) => {
-    if (currentCall) {
-      setCurrentCall(prev => prev ? { ...prev, priority } : null);
-    }
-  }, [currentCall]);
+  const setCallPriority = useCallback(
+    (priority: PriorityLevel) => {
+      if (currentCall) {
+        setCurrentCall((prev) => (prev ? { ...prev, priority } : null));
+      }
+    },
+    [currentCall],
+  );
 
-  const setCallCategory = useCallback((category: CallCategory) => {
-    if (currentCall) {
-      setCurrentCall(prev => prev ? { ...prev, category } : null);
-    }
-  }, [currentCall]);
+  const setCallCategory = useCallback(
+    (category: CallCategory) => {
+      if (currentCall) {
+        setCurrentCall((prev) => (prev ? { ...prev, category } : null));
+      }
+    },
+    [currentCall],
+  );
 
   const addToCallHistory = useCallback((item: CallHistoryItem) => {
-    setCallHistory(prev => [item, ...prev]);
+    setCallHistory((prev) => [item, ...prev]);
   }, []);
 
   // Query helpers
-  const getCallsByPriority = useCallback((priority: PriorityLevel) => {
-    return callHistory.filter(c => c.priority === priority);
-  }, [callHistory]);
+  const getCallsByPriority = useCallback(
+    (priority: PriorityLevel) => {
+      return callHistory.filter((c) => c.priority === priority);
+    },
+    [callHistory],
+  );
 
-  const getCallsByCategory = useCallback((categoryId: string) => {
-    return callHistory.filter(c => c.category?.id === categoryId);
-  }, [callHistory]);
+  const getCallsByCategory = useCallback(
+    (categoryId: string) => {
+      return callHistory.filter((c) => c.category?.id === categoryId);
+    },
+    [callHistory],
+  );
 
   const getAnalytics = useCallback(() => {
     const byPriority: Record<PriorityLevel, number> = {
@@ -1204,7 +1555,7 @@ export function DemoCallProvider({ children, initialAgentId }: { children: React
     let followUpCount = 0;
     let validCalls = 0;
 
-    callHistory.forEach(call => {
+    callHistory.forEach((call) => {
       byPriority[call.priority]++;
       if (call.category) {
         byCategory[call.category.id] = (byCategory[call.category.id] || 0) + 1;
@@ -1270,7 +1621,7 @@ export function DemoCallProvider({ children, initialAgentId }: { children: React
 export function useDemoCall() {
   const context = useContext(DemoCallContext);
   if (context === undefined) {
-    throw new Error('useDemoCall must be used within a DemoCallProvider');
+    throw new Error("useDemoCall must be used within a DemoCallProvider");
   }
   return context;
 }

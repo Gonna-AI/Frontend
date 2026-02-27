@@ -1,14 +1,14 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Phone, PhoneOff, Mic, MicOff, Volume2, VolumeX } from 'lucide-react';
-import { cn } from '../../utils/cn';
-import { useDemoCall } from '../../contexts/DemoCallContext';
-import { aiService } from '../../services/aiService';
-import { ttsService, KokoroVoiceId } from '../../services/ttsService';
+import React, { useState, useEffect, useRef, useCallback } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Phone, PhoneOff, Mic, MicOff, Volume2, VolumeX } from "lucide-react";
+import { cn } from "../../utils/cn";
+import { useDemoCall } from "../../contexts/DemoCallContext";
+import { aiService } from "../../services/aiService";
+import { ttsService, KokoroVoiceId } from "../../services/ttsService";
 
 interface VoiceCallInterfaceProps {
   isDark?: boolean;
-  onTranscript?: (text: string, speaker: 'user' | 'agent') => void;
+  onTranscript?: (text: string, speaker: "user" | "agent") => void;
   compact?: boolean;
 }
 
@@ -59,7 +59,7 @@ declare global {
 export default function VoiceCallInterface({
   isDark = true,
   onTranscript,
-  compact = false
+  compact = false,
 }: VoiceCallInterfaceProps) {
   const {
     currentCall,
@@ -70,32 +70,40 @@ export default function VoiceCallInterface({
     updateExtractedField,
     setCallPriority,
     setCallCategory,
-    globalActiveSessions
+    globalActiveSessions,
   } = useDemoCall();
 
   const [callDuration, setCallDuration] = useState(0);
   const [isMuted, setIsMuted] = useState(false);
   const [isSpeakerOn, setIsSpeakerOn] = useState(true);
-  const [currentTranscript, setCurrentTranscript] = useState('');
-  const [agentStatus, setAgentStatus] = useState<'idle' | 'speaking' | 'listening' | 'processing'>('idle');
-  const [language, setLanguage] = useState<'en-US' | 'de-DE'>('en-US');
+  const [currentTranscript, setCurrentTranscript] = useState("");
+  const [agentStatus, setAgentStatus] = useState<
+    "idle" | "speaking" | "listening" | "processing"
+  >("idle");
+  const [language, setLanguage] = useState<"en-US" | "de-DE">("en-US");
 
   const recognitionRef = useRef<SpeechRecognitionInstance | null>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const isRecognitionRunningRef = useRef(false);
   const silenceTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const pendingTranscriptRef = useRef<string>('');
+  const pendingTranscriptRef = useRef<string>("");
   const lastFinalResultTimeRef = useRef<number>(0);
 
   // Refs to avoid stale closures in speech recognition callbacks
   const currentCallRef = useRef(currentCall);
   const agentStatusRef = useRef(agentStatus);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const handleUserInputRef = useRef<((text: string) => Promise<void>) | null>(null);
+
+  const handleUserInputRef = useRef<((text: string) => Promise<void>) | null>(
+    null,
+  );
 
   // Keep refs in sync with state
-  useEffect(() => { currentCallRef.current = currentCall; }, [currentCall]);
-  useEffect(() => { agentStatusRef.current = agentStatus; }, [agentStatus]);
+  useEffect(() => {
+    currentCallRef.current = currentCall;
+  }, [currentCall]);
+  useEffect(() => {
+    agentStatusRef.current = agentStatus;
+  }, [agentStatus]);
 
   const messages = currentCall?.messages || [];
   const extractedFields = currentCall?.extractedFields || [];
@@ -107,9 +115,9 @@ export default function VoiceCallInterface({
 
   // Timer for call duration
   useEffect(() => {
-    if (currentCall?.status === 'active') {
+    if (currentCall?.status === "active") {
       timerRef.current = setInterval(() => {
-        setCallDuration(prev => prev + 1);
+        setCallDuration((prev) => prev + 1);
       }, 1000);
     } else {
       if (timerRef.current) {
@@ -128,15 +136,15 @@ export default function VoiceCallInterface({
   // Helper functions for starting/stopping recognition safely
   const startRecognition = useCallback(() => {
     if (!recognitionRef.current || isRecognitionRunningRef.current) {
-      console.log('🎤 Recognition already running or not available');
+      console.log("🎤 Recognition already running or not available");
       return;
     }
     try {
-      console.log('🎤 Starting speech recognition...');
+      console.log("🎤 Starting speech recognition...");
       recognitionRef.current.start();
       isRecognitionRunningRef.current = true;
     } catch (e) {
-      console.error('Error starting recognition:', e);
+      console.error("Error starting recognition:", e);
       isRecognitionRunningRef.current = false;
     }
   }, []);
@@ -147,13 +155,14 @@ export default function VoiceCallInterface({
       recognitionRef.current.stop();
       isRecognitionRunningRef.current = false;
     } catch (e) {
-      console.error('Error stopping recognition:', e);
+      console.error("Error stopping recognition:", e);
     }
   }, []);
 
   // Initialize speech recognition
   useEffect(() => {
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const SpeechRecognition =
+      window.SpeechRecognition || window.webkitSpeechRecognition;
     if (SpeechRecognition) {
       const recognition: SpeechRecognitionInstance = new SpeechRecognition();
       recognition.continuous = true;
@@ -170,54 +179,61 @@ export default function VoiceCallInterface({
           // Store the final transcript
           pendingTranscriptRef.current = transcriptText.trim();
           lastFinalResultTimeRef.current = Date.now();
-          
+
           // Clear any existing silence timer
           if (silenceTimerRef.current) {
             clearTimeout(silenceTimerRef.current);
           }
-          
+
           // Wait for silence period (800ms) to ensure user has finished speaking
           // This prevents the AI from responding too quickly
           silenceTimerRef.current = setTimeout(() => {
             const transcript = pendingTranscriptRef.current;
-            const timeSinceLastResult = Date.now() - lastFinalResultTimeRef.current;
-            
+            const timeSinceLastResult =
+              Date.now() - lastFinalResultTimeRef.current;
+
             // Only process if we have text and enough time has passed
             if (transcript && timeSinceLastResult >= 800) {
-              console.log('🎤 User finished speaking, processing:', transcript);
+              console.log("🎤 User finished speaking, processing:", transcript);
               handleUserInputRef.current?.(transcript);
-              pendingTranscriptRef.current = '';
+              pendingTranscriptRef.current = "";
             }
           }, 800); // Wait 800ms of silence before processing
         }
       };
 
       recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
-        console.error('Speech recognition error:', event.error);
+        console.error("Speech recognition error:", event.error);
         isRecognitionRunningRef.current = false;
-        if (event.error !== 'aborted') {
-          setAgentStatus('idle');
+        if (event.error !== "aborted") {
+          setAgentStatus("idle");
         }
       };
 
       recognition.onend = () => {
         isRecognitionRunningRef.current = false;
         // Restart if still in call and listening - use refs for latest values
-        const isActive = currentCallRef.current?.status === 'active';
+        const isActive = currentCallRef.current?.status === "active";
         const status = agentStatusRef.current;
 
-        console.log('🎤 Speech recognition ended, checking restart:', { isActive, status });
+        console.log("🎤 Speech recognition ended, checking restart:", {
+          isActive,
+          status,
+        });
 
-        if (isActive && status === 'listening') {
+        if (isActive && status === "listening") {
           // Small delay to prevent rapid restart issues
           setTimeout(() => {
-            if (currentCallRef.current?.status === 'active' && agentStatusRef.current === 'listening') {
+            if (
+              currentCallRef.current?.status === "active" &&
+              agentStatusRef.current === "listening"
+            ) {
               try {
-                console.log('🎤 Restarting speech recognition...');
+                console.log("🎤 Restarting speech recognition...");
                 recognitionRef.current?.start();
                 isRecognitionRunningRef.current = true;
               } catch (e) {
-                console.error('Error restarting recognition:', e);
+                console.error("Error restarting recognition:", e);
                 isRecognitionRunningRef.current = false;
               }
             }
@@ -240,165 +256,200 @@ export default function VoiceCallInterface({
   const formatDuration = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
-    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
   };
 
-  const speakText = useCallback(async (text: string) => {
-    if (!text || !text.trim()) {
-      console.warn('⚠️ Empty text provided to speakText');
-      setAgentStatus('listening');
-      startRecognition();
-      return;
-    }
+  const speakText = useCallback(
+    async (text: string) => {
+      if (!text || !text.trim()) {
+        console.warn("⚠️ Empty text provided to speakText");
+        setAgentStatus("listening");
+        startRecognition();
+        return;
+      }
 
-    console.log('🔊 Speaking text:', text.substring(0, 50) + '...', 'Speaker on:', isSpeakerOn);
-
-    // Check if speaker is on - if not, log warning but still try to speak
-    if (!isSpeakerOn) {
-      console.warn('⚠️ Speaker is off, but attempting to speak anyway');
-    }
-
-    // Get the selected voice from knowledge base
-    const selectedVoice = (knowledgeBase.selectedVoiceId || 'af_nova') as KokoroVoiceId;
-
-    // Stop recognition before speaking to avoid conflicts
-    stopRecognition();
-
-    // Clear any pending silence timers
-    if (silenceTimerRef.current) {
-      clearTimeout(silenceTimerRef.current);
-      silenceTimerRef.current = null;
-    }
-
-    try {
-      // Always try to speak - the TTS service will handle speaker state
-      await ttsService.speak(text, {
-        voice: selectedVoice,
-        speed: 1.0,
-        onStart: () => {
-          console.log('✅ TTS started speaking');
-          setAgentStatus('speaking');
-        },
-        onEnd: () => {
-          console.log('✅ TTS finished speaking');
-          setAgentStatus('listening');
-          // Start listening after speaking with a small delay
-          setTimeout(() => {
-            if (currentCallRef.current?.status === 'active' && !isMuted) {
-              console.log('🎤 Restarting recognition after TTS ended');
-              startRecognition();
-            }
-          }, 300);
-        },
-        onError: (error) => {
-          console.error('❌ TTS error:', error);
-          setAgentStatus('listening');
-          // Try to restart listening even on error
-          setTimeout(() => {
-            if (currentCallRef.current?.status === 'active' && !isMuted) {
-              console.log('🎤 Restarting recognition after TTS error');
-              startRecognition();
-            }
-          }, 300);
-        }
-      });
-    } catch (error) {
-      console.error('❌ Failed to speak text:', error);
-      setAgentStatus('listening');
-      // Restart listening on error
-      setTimeout(() => {
-        if (currentCallRef.current?.status === 'active' && !isMuted) {
-          console.log('🎤 Restarting recognition after speak error');
-          startRecognition();
-        }
-      }, 300);
-    }
-  }, [knowledgeBase.selectedVoiceId, isSpeakerOn, startRecognition, stopRecognition, isMuted]);
-
-  const handleUserInput = useCallback(async (text: string) => {
-    if (!text.trim()) {
-      console.warn('⚠️ Empty text in handleUserInput');
-      return;
-    }
-
-    console.log('💬 Processing user input:', text);
-
-    // Clear pending transcript
-    pendingTranscriptRef.current = '';
-    if (silenceTimerRef.current) {
-      clearTimeout(silenceTimerRef.current);
-      silenceTimerRef.current = null;
-    }
-
-    addMessage('user', text);
-    onTranscript?.(text, 'user');
-    setCurrentTranscript('');
-    setAgentStatus('processing');
-
-    // Stop recognition while processing
-    stopRecognition();
-
-    try {
-      // Use AI service to generate response
-      console.log('🤖 Generating AI response...');
-      const response = await aiService.generateResponse(
-        text,
-        messages,
-        extractedFields
+      console.log(
+        "🔊 Speaking text:",
+        text.substring(0, 50) + "...",
+        "Speaker on:",
+        isSpeakerOn,
       );
 
-      console.log('✅ AI response received:', response.text?.substring(0, 50) + '...');
+      // Check if speaker is on - if not, log warning but still try to speak
+      if (!isSpeakerOn) {
+        console.warn("⚠️ Speaker is off, but attempting to speak anyway");
+      }
 
-      // Update extracted fields
-      if (response.extractedFields) {
-        response.extractedFields.forEach(field => {
-          updateExtractedField(field);
+      // Get the selected voice from knowledge base
+      const selectedVoice = (knowledgeBase.selectedVoiceId ||
+        "af_nova") as KokoroVoiceId;
+
+      // Stop recognition before speaking to avoid conflicts
+      stopRecognition();
+
+      // Clear any pending silence timers
+      if (silenceTimerRef.current) {
+        clearTimeout(silenceTimerRef.current);
+        silenceTimerRef.current = null;
+      }
+
+      try {
+        // Always try to speak - the TTS service will handle speaker state
+        await ttsService.speak(text, {
+          voice: selectedVoice,
+          speed: 1.0,
+          onStart: () => {
+            console.log("✅ TTS started speaking");
+            setAgentStatus("speaking");
+          },
+          onEnd: () => {
+            console.log("✅ TTS finished speaking");
+            setAgentStatus("listening");
+            // Start listening after speaking with a small delay
+            setTimeout(() => {
+              if (currentCallRef.current?.status === "active" && !isMuted) {
+                console.log("🎤 Restarting recognition after TTS ended");
+                startRecognition();
+              }
+            }, 300);
+          },
+          onError: (error) => {
+            console.error("❌ TTS error:", error);
+            setAgentStatus("listening");
+            // Try to restart listening even on error
+            setTimeout(() => {
+              if (currentCallRef.current?.status === "active" && !isMuted) {
+                console.log("🎤 Restarting recognition after TTS error");
+                startRecognition();
+              }
+            }, 300);
+          },
         });
+      } catch (error) {
+        console.error("❌ Failed to speak text:", error);
+        setAgentStatus("listening");
+        // Restart listening on error
+        setTimeout(() => {
+          if (currentCallRef.current?.status === "active" && !isMuted) {
+            console.log("🎤 Restarting recognition after speak error");
+            startRecognition();
+          }
+        }, 300);
+      }
+    },
+    [
+      knowledgeBase.selectedVoiceId,
+      isSpeakerOn,
+      startRecognition,
+      stopRecognition,
+      isMuted,
+    ],
+  );
+
+  const handleUserInput = useCallback(
+    async (text: string) => {
+      if (!text.trim()) {
+        console.warn("⚠️ Empty text in handleUserInput");
+        return;
       }
 
-      // Update priority if suggested
-      if (response.suggestedPriority) {
-        setCallPriority(response.suggestedPriority);
+      console.log("💬 Processing user input:", text);
+
+      // Clear pending transcript
+      pendingTranscriptRef.current = "";
+      if (silenceTimerRef.current) {
+        clearTimeout(silenceTimerRef.current);
+        silenceTimerRef.current = null;
       }
 
-      // Update category if suggested
-      if (response.suggestedCategory) {
-        setCallCategory(response.suggestedCategory);
-      }
+      addMessage("user", text);
+      onTranscript?.(text, "user");
+      setCurrentTranscript("");
+      setAgentStatus("processing");
 
-      addMessage('agent', response.text);
-      onTranscript?.(response.text, 'agent');
-      
-      // Always try to speak the response
-      console.log('🔊 Speaking AI response...');
-      await speakText(response.text);
-    } catch (error) {
-      console.error('❌ Error processing user input:', error);
-      setAgentStatus('listening');
-      // Restart listening on error
-      setTimeout(() => {
-        if (currentCallRef.current?.status === 'active' && !isMuted) {
-          startRecognition();
+      // Stop recognition while processing
+      stopRecognition();
+
+      try {
+        // Use AI service to generate response
+        console.log("🤖 Generating AI response...");
+        const response = await aiService.generateResponse(
+          text,
+          messages,
+          extractedFields,
+        );
+
+        console.log(
+          "✅ AI response received:",
+          response.text?.substring(0, 50) + "...",
+        );
+
+        // Update extracted fields
+        if (response.extractedFields) {
+          response.extractedFields.forEach((field) => {
+            updateExtractedField(field);
+          });
         }
-      }, 500);
-    }
-  }, [addMessage, onTranscript, messages, extractedFields, updateExtractedField, setCallPriority, setCallCategory, speakText, stopRecognition, startRecognition, isMuted]);
+
+        // Update priority if suggested
+        if (response.suggestedPriority) {
+          setCallPriority(response.suggestedPriority);
+        }
+
+        // Update category if suggested
+        if (response.suggestedCategory) {
+          setCallCategory(response.suggestedCategory);
+        }
+
+        addMessage("agent", response.text);
+        onTranscript?.(response.text, "agent");
+
+        // Always try to speak the response
+        console.log("🔊 Speaking AI response...");
+        await speakText(response.text);
+      } catch (error) {
+        console.error("❌ Error processing user input:", error);
+        setAgentStatus("listening");
+        // Restart listening on error
+        setTimeout(() => {
+          if (currentCallRef.current?.status === "active" && !isMuted) {
+            startRecognition();
+          }
+        }, 500);
+      }
+    },
+    [
+      addMessage,
+      onTranscript,
+      messages,
+      extractedFields,
+      updateExtractedField,
+      setCallPriority,
+      setCallCategory,
+      speakText,
+      stopRecognition,
+      startRecognition,
+      isMuted,
+    ],
+  );
 
   // Keep handleUserInputRef in sync (must be after handleUserInput is defined)
-  useEffect(() => { handleUserInputRef.current = handleUserInput; }, [handleUserInput]);
+  useEffect(() => {
+    handleUserInputRef.current = handleUserInput;
+  }, [handleUserInput]);
 
   const handleStartCall = useCallback(async () => {
     try {
-      console.log('🟢 Start call button clicked');
-      
+      console.log("🟢 Start call button clicked");
+
       // CRITICAL: Unlock audio playback FIRST (required by browser autoplay policies)
       // This MUST happen during the user gesture (click/tap) - especially important for mobile
-      console.log('🔓 Unlocking audio (critical for mobile)...');
+      console.log("🔓 Unlocking audio (critical for mobile)...");
       try {
         await ttsService.unlockAudio();
-        console.log('✅ Audio unlocked successfully');
+        console.log("✅ Audio unlocked successfully");
       } catch (unlockError) {
-        console.error('⚠️ Audio unlock warning (may still work):', unlockError);
+        console.error("⚠️ Audio unlock warning (may still work):", unlockError);
         // Continue anyway - some browsers may still allow playback
       }
 
@@ -406,38 +457,38 @@ export default function VoiceCallInterface({
       aiService.resetState();
 
       // Clear any pending transcripts
-      pendingTranscriptRef.current = '';
+      pendingTranscriptRef.current = "";
       if (silenceTimerRef.current) {
         clearTimeout(silenceTimerRef.current);
         silenceTimerRef.current = null;
       }
 
       // Start the call
-      console.log('📞 Starting call...');
-      startCall('voice');
-      setAgentStatus('listening');
+      console.log("📞 Starting call...");
+      startCall("voice");
+      setAgentStatus("listening");
 
       // Start speech recognition immediately when call begins
       // Small delay to ensure state is updated
       setTimeout(() => {
-        console.log('🎤 Starting speech recognition after call start...');
+        console.log("🎤 Starting speech recognition after call start...");
         startRecognition();
       }, 200);
     } catch (error) {
-      console.error('❌ Error starting call:', error);
-      setAgentStatus('idle');
+      console.error("❌ Error starting call:", error);
+      setAgentStatus("idle");
     }
   }, [startCall, startRecognition]);
 
   const handleEndCall = useCallback(async () => {
-    console.log('🔴 End call button pressed');
+    console.log("🔴 End call button pressed");
 
     // Clear any pending silence timers
     if (silenceTimerRef.current) {
       clearTimeout(silenceTimerRef.current);
       silenceTimerRef.current = null;
     }
-    pendingTranscriptRef.current = '';
+    pendingTranscriptRef.current = "";
 
     // Stop all TTS immediately
     ttsService.stop();
@@ -454,12 +505,12 @@ export default function VoiceCallInterface({
       isRecognitionRunningRef.current = false;
     }
 
-    setAgentStatus('idle');
+    setAgentStatus("idle");
 
     // Wait for AI summary to be generated before ending
     await endCall();
 
-    setCurrentTranscript('');
+    setCurrentTranscript("");
 
     // Final TTS cleanup after a short delay
     setTimeout(() => {
@@ -471,8 +522,8 @@ export default function VoiceCallInterface({
   const toggleMute = useCallback(() => {
     if (isMuted) {
       // Unmute - start listening
-      if (currentCall?.status === 'active') {
-        setAgentStatus('listening');
+      if (currentCall?.status === "active") {
+        setAgentStatus("listening");
         startRecognition();
       }
     } else {
@@ -482,16 +533,18 @@ export default function VoiceCallInterface({
     setIsMuted(!isMuted);
   }, [isMuted, currentCall?.status, startRecognition, stopRecognition]);
 
-  const isActive = currentCall?.status === 'active';
+  const isActive = currentCall?.status === "active";
 
   // Return the original Card-like UI
   return (
-    <div className={cn(
-      "flex flex-col items-center justify-center p-4 md:p-8 rounded-2xl md:rounded-3xl relative overflow-hidden",
-      isDark
-        ? "bg-black/20 border border-white/10 backdrop-blur-md"
-        : "bg-white/80 border border-black/10 backdrop-blur-md"
-    )}>
+    <div
+      className={cn(
+        "flex flex-col items-center justify-center p-4 md:p-8 rounded-2xl md:rounded-3xl relative overflow-hidden",
+        isDark
+          ? "bg-black/20 border border-white/10 backdrop-blur-md"
+          : "bg-white/80 border border-black/10 backdrop-blur-md",
+      )}
+    >
       {/* Background gradients */}
       <div className="absolute top-0 right-0 w-40 md:w-64 h-40 md:h-64 bg-gradient-to-bl from-blue-500/10 via-purple-500/5 to-transparent blur-3xl pointer-events-none" />
       <div className="absolute bottom-0 left-0 w-40 md:w-64 h-40 md:h-64 bg-gradient-to-tr from-purple-500/10 to-transparent blur-3xl pointer-events-none" />
@@ -501,15 +554,19 @@ export default function VoiceCallInterface({
         animate={{
           scale: isActive ? [1, 1.05, 1] : 1,
           boxShadow: isActive
-            ? ['0 0 0 0 rgba(59, 130, 246, 0)', '0 0 0 15px rgba(59, 130, 246, 0.1)', '0 0 0 0 rgba(59, 130, 246, 0)']
-            : 'none'
+            ? [
+                "0 0 0 0 rgba(59, 130, 246, 0)",
+                "0 0 0 15px rgba(59, 130, 246, 0.1)",
+                "0 0 0 0 rgba(59, 130, 246, 0)",
+              ]
+            : "none",
         }}
         transition={{ duration: 2, repeat: isActive ? Infinity : 0 }}
         className={cn(
           "w-16 h-16 md:w-24 md:h-24 rounded-xl md:rounded-2xl flex items-center justify-center mb-4 md:mb-6",
           isDark
             ? "bg-black/30 border border-white/20"
-            : "bg-white border border-black/10"
+            : "bg-white border border-black/10",
         )}
       >
         <svg
@@ -525,10 +582,12 @@ export default function VoiceCallInterface({
       </motion.div>
 
       {/* Title and Status */}
-      <h2 className={cn(
-        "text-lg md:text-2xl font-semibold mb-1 md:mb-2",
-        isDark ? "text-white" : "text-black"
-      )}>
+      <h2
+        className={cn(
+          "text-lg md:text-2xl font-semibold mb-1 md:mb-2",
+          isDark ? "text-white" : "text-black",
+        )}
+      >
         AI Call Agent
       </h2>
 
@@ -541,19 +600,27 @@ export default function VoiceCallInterface({
             exit={{ opacity: 0, y: -10 }}
             className="text-center"
           >
-            <p className={cn(
-              "text-2xl md:text-3xl font-mono mb-1 md:mb-2",
-              isDark ? "text-white" : "text-black"
-            )}>
+            <p
+              className={cn(
+                "text-2xl md:text-3xl font-mono mb-1 md:mb-2",
+                isDark ? "text-white" : "text-black",
+              )}
+            >
               {formatDuration(callDuration)}
             </p>
-            <p className={cn(
-              "text-xs md:text-sm capitalize px-2 md:px-3 py-0.5 md:py-1 rounded-full inline-block",
-              agentStatus === 'speaking' && "bg-blue-500/20 text-blue-400",
-              agentStatus === 'listening' && "bg-green-500/20 text-green-400",
-              agentStatus === 'processing' && "bg-yellow-500/20 text-yellow-400",
-              agentStatus === 'idle' && (isDark ? "bg-white/10 text-white/60" : "bg-black/10 text-black/60"),
-            )}>
+            <p
+              className={cn(
+                "text-xs md:text-sm capitalize px-2 md:px-3 py-0.5 md:py-1 rounded-full inline-block",
+                agentStatus === "speaking" && "bg-blue-500/20 text-blue-400",
+                agentStatus === "listening" && "bg-green-500/20 text-green-400",
+                agentStatus === "processing" &&
+                  "bg-yellow-500/20 text-yellow-400",
+                agentStatus === "idle" &&
+                  (isDark
+                    ? "bg-white/10 text-white/60"
+                    : "bg-black/10 text-black/60"),
+              )}
+            >
               {agentStatus}
             </p>
           </motion.div>
@@ -565,7 +632,7 @@ export default function VoiceCallInterface({
             exit={{ opacity: 0, y: -10 }}
             className={cn(
               "text-sm md:text-base",
-              isDark ? "text-white/60" : "text-black/60"
+              isDark ? "text-white/60" : "text-black/60",
             )}
           >
             Ready to start a call
@@ -580,10 +647,12 @@ export default function VoiceCallInterface({
           animate={{ opacity: 1, y: 0 }}
           className={cn(
             "mt-3 md:mt-4 p-2 md:p-3 rounded-lg md:rounded-xl text-xs md:text-sm max-w-md text-center",
-            isDark ? "bg-white/5 text-white/80" : "bg-black/5 text-black/80"
+            isDark ? "bg-white/5 text-white/80" : "bg-black/5 text-black/80",
           )}
         >
-          <span className="text-[10px] md:text-xs opacity-60 block mb-0.5 md:mb-1">Listening...</span>
+          <span className="text-[10px] md:text-xs opacity-60 block mb-0.5 md:mb-1">
+            Listening...
+          </span>
           {currentTranscript}
         </motion.div>
       )}
@@ -602,10 +671,14 @@ export default function VoiceCallInterface({
                     : "bg-blue-500/20 border border-blue-500/30 text-blue-400 hover:bg-blue-500/30"
                   : isMuted
                     ? "bg-red-500/10 border border-red-500/20 text-red-600 hover:bg-red-500/20"
-                    : "bg-blue-500/10 border border-blue-500/20 text-blue-600 hover:bg-blue-500/20"
+                    : "bg-blue-500/10 border border-blue-500/20 text-blue-600 hover:bg-blue-500/20",
               )}
             >
-              {isMuted ? <MicOff className="w-5 h-5 md:w-6 md:h-6" /> : <Mic className="w-5 h-5 md:w-6 md:h-6" />}
+              {isMuted ? (
+                <MicOff className="w-5 h-5 md:w-6 md:h-6" />
+              ) : (
+                <Mic className="w-5 h-5 md:w-6 md:h-6" />
+              )}
             </button>
 
             <button
@@ -618,10 +691,14 @@ export default function VoiceCallInterface({
                     : "bg-gray-500/20 border border-gray-500/30 text-gray-400 hover:bg-gray-500/30"
                   : isSpeakerOn
                     ? "bg-green-500/10 border border-green-500/20 text-green-600 hover:bg-green-500/20"
-                    : "bg-gray-500/10 border border-gray-500/20 text-gray-600 hover:bg-gray-500/20"
+                    : "bg-gray-500/10 border border-gray-500/20 text-gray-600 hover:bg-gray-500/20",
               )}
             >
-              {isSpeakerOn ? <Volume2 className="w-5 h-5 md:w-6 md:h-6" /> : <VolumeX className="w-5 h-5 md:w-6 md:h-6" />}
+              {isSpeakerOn ? (
+                <Volume2 className="w-5 h-5 md:w-6 md:h-6" />
+              ) : (
+                <VolumeX className="w-5 h-5 md:w-6 md:h-6" />
+              )}
             </button>
           </>
         )}
@@ -636,23 +713,29 @@ export default function VoiceCallInterface({
                 : "bg-red-500/10 border border-red-500/20 text-red-600 hover:bg-red-500/20"
               : isDark
                 ? "bg-green-500/20 border border-green-500/30 text-green-400 hover:bg-green-500/30"
-                : "bg-green-500/10 border border-green-500/20 text-green-600 hover:bg-green-500/20"
+                : "bg-green-500/10 border border-green-500/20 text-green-600 hover:bg-green-500/20",
           )}
         >
-          {isActive ? <PhoneOff className="w-6 h-6 md:w-8 md:h-8" /> : <Phone className="w-6 h-6 md:w-8 md:h-8" />}
+          {isActive ? (
+            <PhoneOff className="w-6 h-6 md:w-8 md:h-8" />
+          ) : (
+            <Phone className="w-6 h-6 md:w-8 md:h-8" />
+          )}
         </button>
 
         {isActive && (
           <button
-            onClick={() => setLanguage(prev => prev === 'en-US' ? 'de-DE' : 'en-US')}
+            onClick={() =>
+              setLanguage((prev) => (prev === "en-US" ? "de-DE" : "en-US"))
+            }
             className={cn(
               "px-3 md:px-4 py-2 md:py-3 rounded-lg md:rounded-xl text-xs md:text-sm font-medium transition-all",
               isDark
                 ? "bg-purple-500/20 border border-purple-500/30 text-purple-400 hover:bg-purple-500/30"
-                : "bg-purple-500/10 border border-purple-500/20 text-purple-600 hover:bg-purple-500/20"
+                : "bg-purple-500/10 border border-purple-500/20 text-purple-600 hover:bg-purple-500/20",
             )}
           >
-            {language === 'en-US' ? 'DE' : 'EN'}
+            {language === "en-US" ? "DE" : "EN"}
           </button>
         )}
       </div>

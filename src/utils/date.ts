@@ -17,8 +17,8 @@ export function getAppointmentsForDate(date: Date): number {
 }
 
 export function getAppointmentColor(count: number): string {
-  if (count >= 5) return 'bg-red-500';
-  if (count >= 3) return 'bg-yellow-500';
-  if (count >= 1) return 'bg-green-500';
-  return '';
+  if (count >= 5) return "bg-red-500";
+  if (count >= 3) return "bg-yellow-500";
+  if (count >= 1) return "bg-green-500";
+  return "";
 }

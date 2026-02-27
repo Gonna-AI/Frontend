@@ -1,42 +1,42 @@
-import { Node, Edge } from 'reactflow';
+import { Node, Edge } from "reactflow";
 
 export enum NodeStatus {
-    IDLE = 'IDLE',
-    PROCESSING = 'PROCESSING',
-    COMPLETED = 'COMPLETED',
-    ERROR = 'ERROR',
+  IDLE = "IDLE",
+  PROCESSING = "PROCESSING",
+  COMPLETED = "COMPLETED",
+  ERROR = "ERROR",
 }
 
-export type NodeCategory = 'trigger' | 'agent' | 'tool' | 'action';
+export type NodeCategory = "trigger" | "agent" | "tool" | "action";
 
 export interface LogEntry {
-    timestamp: string;
-    level: 'info' | 'warn' | 'success';
-    message: string;
+  timestamp: string;
+  level: "info" | "warn" | "success";
+  message: string;
 }
 
 export interface NodeMetadata {
-    model?: string;
-    tokens?: number;
-    confidence?: number;
-    executionTime?: string;
-    version?: string;
-    cost?: string;
+  model?: string;
+  tokens?: number;
+  confidence?: number;
+  executionTime?: string;
+  version?: string;
+  cost?: string;
 }
 
 export interface NodeData {
-    label: string;
-    subline?: string;
-    icon?: string;
-    category: NodeCategory;
-    status: NodeStatus;
-    logs: LogEntry[];
-    metadata?: NodeMetadata;
-    // Technical IO
-    inputType?: string;
-    outputType?: string;
-    inputs?: Record<string, any>;
-    outputs?: Record<string, any>;
+  label: string;
+  subline?: string;
+  icon?: string;
+  category: NodeCategory;
+  status: NodeStatus;
+  logs: LogEntry[];
+  metadata?: NodeMetadata;
+  // Technical IO
+  inputType?: string;
+  outputType?: string;
+  inputs?: Record<string, any>;
+  outputs?: Record<string, any>;
 }
 
 export type AppNode = Node<NodeData>;

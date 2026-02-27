@@ -1,15 +1,15 @@
 /**
  * LLM Service for ClerkTree
- * 
+ *
  * Primary: Groq API (fast, powerful)
- * 
+ *
  * Key Features:
  * - Function calling for structured data extraction
  * - Seriousness/Priority assessment (critical, high, medium, low)
  * - Sentiment analysis and topic identification
  * - Caller information extraction
  * - Conversation summarization
- * 
+ *
  * Groq API: https://api.groq.com/openai/v1/chat/completions
  */
 
@@ -18,26 +18,29 @@ import {
   ExtractedField,
   CallCategory,
   PriorityLevel,
-  KnowledgeBaseConfig
-} from '../contexts/DemoCallContext';
+  KnowledgeBaseConfig,
+} from "../contexts/DemoCallContext";
 
 import {
   ConversationAnalysis,
   generateFunctionCallingSystemPrompt,
   SeriousnessResult,
-  IssueTopicsResult
-} from './functionCallingTools';
+  IssueTopicsResult,
+} from "./functionCallingTools";
 
 // Import Groq settings for dynamic configuration
-import { getGroqSettings, type GroqSettings } from '../components/DemoCall/GroqSettings';
+import {
+  getGroqSettings,
+  type GroqSettings,
+} from "../components/DemoCall/GroqSettings";
 
 // ============= GROQ API CONFIGURATION (PRIMARY) =============
 // ============= GROQ API CONFIGURATION (PRIMARY) =============
 // API calls routed via secure proxy
-import { proxyJSON, ProxyRoutes } from './proxyClient';
-import { ragService } from './ragService';
+import { proxyJSON, ProxyRoutes } from "./proxyClient";
+import { ragService } from "./ragService";
 
-import log from '../utils/logger';
+import log from "../utils/logger";
 
 interface GroqResponse {
   choices?: Array<{
@@ -46,8 +49,6 @@ interface GroqResponse {
     };
   }>;
 }
-
-
 
 // Get current model and settings dynamically
 function getCurrentGroqSettings(): GroqSettings {
@@ -81,11 +82,11 @@ export interface ToolCallResult {
 // Sentiment card for UI display
 export interface SentimentCard {
   id: string;
-  type: 'sentiment' | 'urgency' | 'topic' | 'caller' | 'summary';
+  type: "sentiment" | "urgency" | "topic" | "caller" | "summary";
   title: string;
   value: string;
   icon: string;
-  color: 'red' | 'orange' | 'yellow' | 'green' | 'blue' | 'purple' | 'gray';
+  color: "red" | "orange" | "yellow" | "green" | "blue" | "purple" | "gray";
   details?: string;
 }
 
@@ -99,7 +100,7 @@ class GroqLLMService {
   private async checkGroqAvailability(): Promise<boolean> {
     try {
       const settings = getCurrentGroqSettings();
-      log.debug('🔍 Checking Groq API availability via proxy...');
+      log.debug("🔍 Checking Groq API availability via proxy...");
       log.debug(`   Model: ${settings.model}`);
 
       /* 
@@ -114,9 +115,8 @@ class GroqLLMService {
       // Simple check — for now assume always true if configured server-side
       this.groqAvailable = true;
       return true;
-
     } catch (e) {
-      log.warn('⚠️ Groq API check failed:', e instanceof Error ? e.message : e);
+      log.warn("⚠️ Groq API check failed:", e instanceof Error ? e.message : e);
       this.groqAvailable = false;
       return false;
     }
@@ -176,9 +176,11 @@ class GroqLLMService {
     this.isAvailable = groqOk;
 
     if (groqOk) {
-      log.debug('🚀 Using Groq API');
+      log.debug("🚀 Using Groq API");
     } else {
-      log.error('❌ Groq API not available! Check server-side proxy/edge function configuration.');
+      log.error(
+        "❌ Groq API not available! Check server-side proxy/edge function configuration.",
+      );
     }
 
     return this.isAvailable;
@@ -211,10 +213,13 @@ class GroqLLMService {
    * This function is largely deprecated with /api/generate and thinking: false,
    * but kept for robustness if models still output tags.
    */
-  private parseReasoningResponse(text: string): { reasoning: string; answer: string } {
-    if (!text) return { reasoning: '', answer: '' };
+  private parseReasoningResponse(text: string): {
+    reasoning: string;
+    answer: string;
+  } {
+    if (!text) return { reasoning: "", answer: "" };
 
-    let reasoning = '';
+    let reasoning = "";
     let answer = text;
 
     // Common reasoning tag patterns used by different models
@@ -231,11 +236,11 @@ class GroqLLMService {
       let match;
       while ((match = pattern.exec(text)) !== null) {
         if (match[1]) {
-          reasoning += (reasoning ? '\n\n' : '') + match[1].trim();
+          reasoning += (reasoning ? "\n\n" : "") + match[1].trim();
         }
       }
       // Remove reasoning from answer
-      answer = answer.replace(pattern, '');
+      answer = answer.replace(pattern, "");
     }
 
     // Also handle unclosed tags (model got cutoff mid-reasoning)
@@ -248,8 +253,9 @@ class GroqLLMService {
     for (const pattern of unclosedPatterns) {
       const match = answer.match(pattern);
       if (match && match[1]) {
-        reasoning += (reasoning ? '\n\n' : '') + match[1].trim() + ' [truncated]';
-        answer = answer.replace(pattern, '');
+        reasoning +=
+          (reasoning ? "\n\n" : "") + match[1].trim() + " [truncated]";
+        answer = answer.replace(pattern, "");
       }
     }
 
@@ -274,8 +280,8 @@ class GroqLLMService {
 
     // Clean up reasoning for display
     reasoning = reasoning
-      .replace(/^\s*\n+/g, '')
-      .replace(/\n{3,}/g, '\n\n')
+      .replace(/^\s*\n+/g, "")
+      .replace(/\n{3,}/g, "\n\n")
       .trim();
 
     return { reasoning, answer };
@@ -285,76 +291,110 @@ class GroqLLMService {
    * Clean the final response text
    */
   private cleanFinalAnswer(text: string): string {
-    if (!text) return '';
+    if (!text) return "";
     let cleaned = text;
 
     // Remove "Assistant:" prefix if present (common in completion models)
-    cleaned = cleaned.replace(/^(?:Assistant|AI):\s*/i, '');
+    cleaned = cleaned.replace(/^(?:Assistant|AI):\s*/i, "");
 
     // Remove only specific template placeholders (be conservative)
     cleaned = cleaned
-      .replace(/\[Write assistant's response here\]/gi, '')
-      .replace(/\[Your response here\]/gi, '')
-      .replace(/\[To be filled\]/gi, '');
+      .replace(/\[Write assistant's response here\]/gi, "")
+      .replace(/\[Your response here\]/gi, "")
+      .replace(/\[To be filled\]/gi, "");
 
     // Remove only known reasoning/thinking tags, NOT all XML-like content
-    const tagsToRemove = ['think', 'thinking', 'reasoning', 'thought', 'internal_monologue', 'answer', 'response', 'output', 'final'];
+    const tagsToRemove = [
+      "think",
+      "thinking",
+      "reasoning",
+      "thought",
+      "internal_monologue",
+      "answer",
+      "response",
+      "output",
+      "final",
+    ];
     for (const tag of tagsToRemove) {
-      cleaned = cleaned.replace(new RegExp(`<${tag}>[\\s\\S]*?</${tag}>`, 'gi'), '');
-      cleaned = cleaned.replace(new RegExp(`<${tag}>`, 'gi'), '');
-      cleaned = cleaned.replace(new RegExp(`</${tag}>`, 'gi'), '');
+      cleaned = cleaned.replace(
+        new RegExp(`<${tag}>[\\s\\S]*?</${tag}>`, "gi"),
+        "",
+      );
+      cleaned = cleaned.replace(new RegExp(`<${tag}>`, "gi"), "");
+      cleaned = cleaned.replace(new RegExp(`</${tag}>`, "gi"), "");
     }
 
     // Remove "Response:", "Answer:", "Persona:", "System:" prefixes only at the very start
-    cleaned = cleaned.replace(/^(?:Response|Answer|Output|Persona|System|Instructions?):\s*/i, '');
+    cleaned = cleaned.replace(
+      /^(?:Response|Answer|Output|Persona|System|Instructions?):\s*/i,
+      "",
+    );
 
     // Remove internal analysis/reasoning text that shouldn't be shown to users
     // Patterns like: *(Internally: ...), [Internal Analysis], (Internal:), etc.
-    cleaned = cleaned.replace(/\*?\(Internally:[^)]*\)\*?/gi, '');
-    cleaned = cleaned.replace(/\*?\[Internally:[^\]]*\]\*?/gi, '');
-    cleaned = cleaned.replace(/\(Internal:[^)]*\)/gi, '');
-    cleaned = cleaned.replace(/\[Internal Analysis[^\]]*\]/gi, '');
-    cleaned = cleaned.replace(/\[Internal:[^\]]*\]/gi, '');
-    cleaned = cleaned.replace(/\*\(.*?internal.*?\)\*/gi, '');
-    cleaned = cleaned.replace(/\n*\*?\(Note to self:[^)]*\)\*?\n*/gi, '');
-    cleaned = cleaned.replace(/\n*---\s*Internal[^-]*---\n*/gi, '');
+    cleaned = cleaned.replace(/\*?\(Internally:[^)]*\)\*?/gi, "");
+    cleaned = cleaned.replace(/\*?\[Internally:[^\]]*\]\*?/gi, "");
+    cleaned = cleaned.replace(/\(Internal:[^)]*\)/gi, "");
+    cleaned = cleaned.replace(/\[Internal Analysis[^\]]*\]/gi, "");
+    cleaned = cleaned.replace(/\[Internal:[^\]]*\]/gi, "");
+    cleaned = cleaned.replace(/\*\(.*?internal.*?\)\*/gi, "");
+    cleaned = cleaned.replace(/\n*\*?\(Note to self:[^)]*\)\*?\n*/gi, "");
+    cleaned = cleaned.replace(/\n*---\s*Internal[^-]*---\n*/gi, "");
     // Remove markdown italics containing "Internally" or "Internal"
-    cleaned = cleaned.replace(/\*[^*]*(?:Internally|Internal)[^*]*\*/gi, '');
+    cleaned = cleaned.replace(/\*[^*]*(?:Internally|Internal)[^*]*\*/gi, "");
     // Remove parenthetical internal notes
-    cleaned = cleaned.replace(/\n*\([^)]*(?:no name|no contact|need to|should ask|internally)[^)]*\)\n*/gi, '');
+    cleaned = cleaned.replace(
+      /\n*\([^)]*(?:no name|no contact|need to|should ask|internally)[^)]*\)\n*/gi,
+      "",
+    );
 
     // Remove any echoed persona content - patterns like "Persona: I'm working on..."
-    cleaned = cleaned.replace(/\n*Persona:\s*[^\n]+(?:\n(?![A-Z][a-z]*:)[^\n]+)*/gi, '');
+    cleaned = cleaned.replace(
+      /\n*Persona:\s*[^\n]+(?:\n(?![A-Z][a-z]*:)[^\n]+)*/gi,
+      "",
+    );
 
     // Remove any echoed system prompt patterns at the start of response
-    cleaned = cleaned.replace(/^(?:I am|I'm|You are|You're)\s+(?:a\s+)?(?:helpful\s+)?(?:AI|assistant|helper|bot)[^.]*\./i, '');
+    cleaned = cleaned.replace(
+      /^(?:I am|I'm|You are|You're)\s+(?:a\s+)?(?:helpful\s+)?(?:AI|assistant|helper|bot)[^.]*\./i,
+      "",
+    );
 
     // Remove garbage patterns that indicate model confusion
-    cleaned = cleaned.replace(/BEGININPUT\*?[\s\S]*?\*?ENDINPUT\*?/gi, '');
-    cleaned = cleaned.replace(/BEGINCONTEXT[\s\S]*?ENDCONTEXT/gi, '');
-    cleaned = cleaned.replace(/BEGININPUT\s*/gi, '');
-    cleaned = cleaned.replace(/\s*ENDINPUT/gi, '');
-    cleaned = cleaned.replace(/BEGINCONTEXT\s*/gi, '');
-    cleaned = cleaned.replace(/\s*ENDCONTEXT/gi, '');
+    cleaned = cleaned.replace(/BEGININPUT\*?[\s\S]*?\*?ENDINPUT\*?/gi, "");
+    cleaned = cleaned.replace(/BEGINCONTEXT[\s\S]*?ENDCONTEXT/gi, "");
+    cleaned = cleaned.replace(/BEGININPUT\s*/gi, "");
+    cleaned = cleaned.replace(/\s*ENDINPUT/gi, "");
+    cleaned = cleaned.replace(/BEGINCONTEXT\s*/gi, "");
+    cleaned = cleaned.replace(/\s*ENDCONTEXT/gi, "");
 
     // Remove special tokens that models use internally like <|assistant|>, <|end|>, etc.
-    cleaned = cleaned.replace(/<\|[^|]+\|>/g, '');
+    cleaned = cleaned.replace(/<\|[^|]+\|>/g, "");
 
     // Remove training data markers
-    cleaned = cleaned.replace(/Test instruction \d+[\s\S]*?(?=(?:Test instruction|\n\n|$))/gi, '');
-    cleaned = cleaned.replace(/^User:\s*I am a robot[\s\S]*/gim, '');
-    cleaned = cleaned.replace(/^(?:User|Human|Assistant):\s*$/gim, '');
-    cleaned = cleaned.replace(/(?:Human|User|Assistant):\s*\n+(?:Human|User|Assistant):/gi, '');
+    cleaned = cleaned.replace(
+      /Test instruction \d+[\s\S]*?(?=(?:Test instruction|\n\n|$))/gi,
+      "",
+    );
+    cleaned = cleaned.replace(/^User:\s*I am a robot[\s\S]*/gim, "");
+    cleaned = cleaned.replace(/^(?:User|Human|Assistant):\s*$/gim, "");
+    cleaned = cleaned.replace(
+      /(?:Human|User|Assistant):\s*\n+(?:Human|User|Assistant):/gi,
+      "",
+    );
 
     // Remove placeholder brackets
-    cleaned = cleaned.replace(/\[.*?\]/g, '');
+    cleaned = cleaned.replace(/\[.*?\]/g, "");
 
     // Clean up whitespace
-    cleaned = cleaned.replace(/^\s*\n+/g, '').replace(/\n{3,}/g, '\n\n').trim();
+    cleaned = cleaned
+      .replace(/^\s*\n+/g, "")
+      .replace(/\n{3,}/g, "\n\n")
+      .trim();
 
     // SAFETY: If cleaning resulted in empty but original had content
     if (!cleaned && text.trim()) {
-      log.warn('cleanFinalAnswer stripped all content, using original text');
+      log.warn("cleanFinalAnswer stripped all content, using original text");
       const firstSentence = text.match(/[^.!?]*[.!?]/);
       if (firstSentence && firstSentence[0].length > 20) {
         cleaned = firstSentence[0].trim();
@@ -370,7 +410,11 @@ class GroqLLMService {
    * Parse extracted metadata from model response
    * Looks for JSON block at end of response
    */
-  private parseExtractedMetadata(response: string, config: KnowledgeBaseConfig, existingFields: ExtractedField[]): {
+  private parseExtractedMetadata(
+    response: string,
+    config: KnowledgeBaseConfig,
+    existingFields: ExtractedField[],
+  ): {
     cleanResponse: string;
     extractedFields: ExtractedField[];
     suggestedCategory?: { id: string; name: string; confidence: number };
@@ -379,7 +423,9 @@ class GroqLLMService {
     let cleanResponse = response;
     const newFields: ExtractedField[] = [...existingFields];
     let suggestedPriority: PriorityLevel | undefined;
-    let suggestedCategory: { id: string; name: string; confidence: number } | undefined;
+    let suggestedCategory:
+      | { id: string; name: string; confidence: number }
+      | undefined;
     const now = new Date();
 
     // Look for JSON block in response
@@ -389,7 +435,9 @@ class GroqLLMService {
         const metadata = JSON.parse(jsonMatch[1]);
 
         // Remove JSON block from response for the spoken part
-        cleanResponse = response.replace(/```json\s*[\s\S]*?\s*```/gi, '').trim();
+        cleanResponse = response
+          .replace(/```json\s*[\s\S]*?\s*```/gi, "")
+          .trim();
 
         // Extract fields from metadata
         if (metadata.extracted) {
@@ -397,116 +445,150 @@ class GroqLLMService {
 
           // Helper to check if value is valid (not null, "null", empty)
           const isValid = (val: unknown): val is string =>
-            val !== null && val !== 'null' && val !== '' && typeof val === 'string';
+            val !== null &&
+            val !== "null" &&
+            val !== "" &&
+            typeof val === "string";
 
           // Add caller name if found and not already present
-          if (isValid(ext.name) && !existingFields.find(f => f.id === 'name')) {
+          if (
+            isValid(ext.name) &&
+            !existingFields.find((f) => f.id === "name")
+          ) {
             newFields.push({
-              id: 'name',
-              label: 'Caller Name',
+              id: "name",
+              label: "Caller Name",
               value: ext.name,
               confidence: 0.95,
-              extractedAt: now
+              extractedAt: now,
             });
           }
 
           // Add email if found
-          if (isValid(ext.email) && !existingFields.find(f => f.id === 'email')) {
+          if (
+            isValid(ext.email) &&
+            !existingFields.find((f) => f.id === "email")
+          ) {
             newFields.push({
-              id: 'email',
-              label: 'Email',
+              id: "email",
+              label: "Email",
               value: ext.email,
               confidence: 0.95,
-              extractedAt: now
+              extractedAt: now,
             });
           }
 
           // Add phone if found
-          if (isValid(ext.phone) && !existingFields.find(f => f.id === 'phone')) {
+          if (
+            isValid(ext.phone) &&
+            !existingFields.find((f) => f.id === "phone")
+          ) {
             newFields.push({
-              id: 'phone',
-              label: 'Phone',
+              id: "phone",
+              label: "Phone",
               value: ext.phone,
               confidence: 0.95,
-              extractedAt: now
+              extractedAt: now,
             });
           }
 
           // Add company if found
-          if (isValid(ext.company) && !existingFields.find(f => f.id === 'company')) {
+          if (
+            isValid(ext.company) &&
+            !existingFields.find((f) => f.id === "company")
+          ) {
             newFields.push({
-              id: 'company',
-              label: 'Company',
+              id: "company",
+              label: "Company",
               value: ext.company,
               confidence: 0.9,
-              extractedAt: now
+              extractedAt: now,
             });
           }
 
           // Add appointment date if found
-          if (isValid(ext.appointment_date) && !existingFields.find(f => f.id === 'appt_date')) {
+          if (
+            isValid(ext.appointment_date) &&
+            !existingFields.find((f) => f.id === "appt_date")
+          ) {
             newFields.push({
-              id: 'appt_date',
-              label: 'Appointment Date',
+              id: "appt_date",
+              label: "Appointment Date",
               value: ext.appointment_date,
               confidence: 0.9,
-              extractedAt: now
+              extractedAt: now,
             });
           }
 
           // Add appointment time if found
-          if (isValid(ext.appointment_time) && !existingFields.find(f => f.id === 'appt_time')) {
+          if (
+            isValid(ext.appointment_time) &&
+            !existingFields.find((f) => f.id === "appt_time")
+          ) {
             newFields.push({
-              id: 'appt_time',
-              label: 'Appointment Time',
+              id: "appt_time",
+              label: "Appointment Time",
               value: ext.appointment_time,
               confidence: 0.9,
-              extractedAt: now
+              extractedAt: now,
             });
           }
 
           // Add purpose if found (legacy field)
-          if (isValid(ext.purpose) && !existingFields.find(f => f.id === 'purpose')) {
+          if (
+            isValid(ext.purpose) &&
+            !existingFields.find((f) => f.id === "purpose")
+          ) {
             newFields.push({
-              id: 'purpose',
-              label: 'Call Purpose',
+              id: "purpose",
+              label: "Call Purpose",
               value: ext.purpose,
               confidence: 0.85,
-              extractedAt: now
+              extractedAt: now,
             });
           }
         }
 
         // Get priority
-        if (metadata.priority && ['critical', 'high', 'medium', 'low'].includes(metadata.priority)) {
+        if (
+          metadata.priority &&
+          ["critical", "high", "medium", "low"].includes(metadata.priority)
+        ) {
           suggestedPriority = metadata.priority as PriorityLevel;
         }
 
         // Get category
         if (metadata.category && config.categories) {
-          const cat = config.categories.find(c =>
-            c.id === metadata.category ||
-            c.name.toLowerCase() === metadata.category.toLowerCase()
+          const cat = config.categories.find(
+            (c) =>
+              c.id === metadata.category ||
+              c.name.toLowerCase() === metadata.category.toLowerCase(),
           );
           if (cat) {
             suggestedCategory = { ...cat, confidence: 0.85 };
           }
         }
 
-        log.debug('Extracted metadata from model:', {
+        log.debug("Extracted metadata from model:", {
           fields: newFields.length - existingFields.length,
           priority: suggestedPriority,
-          category: suggestedCategory?.name
+          category: suggestedCategory?.name,
         });
-
       } catch (e) {
-        log.warn('Failed to parse model JSON metadata:', e);
+        log.warn("Failed to parse model JSON metadata:", e);
         // JSON parsing failed, just clean the response
-        cleanResponse = response.replace(/```json\s*[\s\S]*?\s*```/gi, '').trim();
+        cleanResponse = response
+          .replace(/```json\s*[\s\S]*?\s*```/gi, "")
+          .trim();
       }
     }
 
-    return { cleanResponse, extractedFields: newFields, suggestedCategory, suggestedPriority };
+    return {
+      cleanResponse,
+      extractedFields: newFields,
+      suggestedCategory,
+      suggestedPriority,
+    };
   }
 
   /**
@@ -517,52 +599,63 @@ class GroqLLMService {
     userMessage: string,
     conversationHistory: CallMessage[],
     knowledgeBase: KnowledgeBaseConfig,
-    existingFields: ExtractedField[]
+    existingFields: ExtractedField[],
   ): Promise<LocalLLMResponse> {
     // Auto-initialize if not yet done
     if (this.isAvailable === null) {
-      log.debug('🔄 Auto-initializing LLM service...');
+      log.debug("🔄 Auto-initializing LLM service...");
       await this.checkAvailability();
     }
 
     // Check if Groq is available
     if (!this.groqAvailable) {
-      throw new Error('Groq API not available - check server-side proxy configuration.');
+      throw new Error(
+        "Groq API not available - check server-side proxy configuration.",
+      );
     }
 
     // Build the enhanced prompt string
     // Using function calling system prompt structure
 
     // 1. Enhanced System Prompt with function calling context
-    const knownInfo = existingFields.length > 0
-      ? existingFields.map(f => `${f.label}: ${f.value}`).join(', ')
-      : '';
+    const knownInfo =
+      existingFields.length > 0
+        ? existingFields.map((f) => `${f.label}: ${f.value}`).join(", ")
+        : "";
 
     const toolNames = [
-      'extract_caller_info - Get caller name, contact, company',
-      'assess_seriousness - Determine priority (critical/high/medium/low)',
-      'analyze_sentiment - Detect caller emotion and mood',
-      'identify_issue_topics - Categorize the main issue',
-      'extract_appointment - Get date, time, and purpose for appointments'
+      "extract_caller_info - Get caller name, contact, company",
+      "assess_seriousness - Determine priority (critical/high/medium/low)",
+      "analyze_sentiment - Detect caller emotion and mood",
+      "identify_issue_topics - Categorize the main issue",
+      "extract_appointment - Get date, time, and purpose for appointments",
     ];
 
     // Check what contact info we already have
-    const hasPhone = existingFields.some(f => f.id === 'phone' || f.label.toLowerCase().includes('phone'));
-    const hasEmail = existingFields.some(f => f.id === 'email' || f.label.toLowerCase().includes('email'));
-
-    const systemPrompt = generateFunctionCallingSystemPrompt(
-      knowledgeBase.persona || 'Professional AI Receptionist',
-      knownInfo,
-      toolNames,
-      { hasPhone, hasEmail } // Pass contact info status
+    const hasPhone = existingFields.some(
+      (f) => f.id === "phone" || f.label.toLowerCase().includes("phone"),
+    );
+    const hasEmail = existingFields.some(
+      (f) => f.id === "email" || f.label.toLowerCase().includes("email"),
     );
 
-    let ragContext = '';
+    const systemPrompt = generateFunctionCallingSystemPrompt(
+      knowledgeBase.persona || "Professional AI Receptionist",
+      knownInfo,
+      toolNames,
+      { hasPhone, hasEmail }, // Pass contact info status
+    );
+
+    let ragContext = "";
     if (knowledgeBase.id) {
       log.debug(`🔍 Fetching RAG context for KB ID ${knowledgeBase.id}...`);
-      const contextDocs = await ragService.searchRelevantContext(userMessage, knowledgeBase.id, 3);
+      const contextDocs = await ragService.searchRelevantContext(
+        userMessage,
+        knowledgeBase.id,
+        3,
+      );
       if (contextDocs && contextDocs.length > 0) {
-        ragContext = `\n\n=== RELEVANT KNOWLEDGE BASE CONTEXT ===\n${contextDocs.join('\n\n')}\n=======================================\nUse the above information to help answer the user.`;
+        ragContext = `\n\n=== RELEVANT KNOWLEDGE BASE CONTEXT ===\n${contextDocs.join("\n\n")}\n=======================================\nUse the above information to help answer the user.`;
       }
     }
 
@@ -571,12 +664,17 @@ class GroqLLMService {
 
     // Build messages array for Groq API (OpenAI format)
     const groqMessages = [
-      { role: 'system' as const, content: systemPrompt + ragContext },
-      ...recentHistory.map(msg => ({
-        role: msg.speaker === 'agent' ? 'assistant' as const : 'user' as const,
-        content: msg.speaker === 'agent' ? this.cleanFinalAnswer(msg.text) : msg.text
+      { role: "system" as const, content: systemPrompt + ragContext },
+      ...recentHistory.map((msg) => ({
+        role:
+          msg.speaker === "agent" ? ("assistant" as const) : ("user" as const),
+        content:
+          msg.speaker === "agent" ? this.cleanFinalAnswer(msg.text) : msg.text,
       })),
-      { role: 'user' as const, content: `${userMessage}\n\nRespond naturally to the caller, then AFTER your response, add a JSON block with extracted information.\n\nFormat:\n[Your response]\n\n\`\`\`json\n{"extracted": {"name": "caller name or null", "email": "email or null", "phone": "phone or null", "company": "company or null"}, "priority": "low|medium|high|critical", "category": "inquiry|support|complaint|appointment|other"}\n\`\`\`` }
+      {
+        role: "user" as const,
+        content: `${userMessage}\n\nRespond naturally to the caller, then AFTER your response, add a JSON block with extracted information.\n\nFormat:\n[Your response]\n\n\`\`\`json\n{"extracted": {"name": "caller name or null", "email": "email or null", "phone": "phone or null", "company": "company or null"}, "priority": "low|medium|high|critical", "category": "inquiry|support|complaint|appointment|other"}\n\`\`\``,
+      },
     ];
 
     // Helper function for Groq API request
@@ -585,24 +683,33 @@ class GroqLLMService {
 
       const settings = getCurrentGroqSettings();
       try {
-        log.debug(`🚀 Calling Groq API via proxy (model: ${settings.model}, temp: ${settings.temperature})...`);
+        log.debug(
+          `🚀 Calling Groq API via proxy (model: ${settings.model}, temp: ${settings.temperature})...`,
+        );
 
-        const data = await proxyJSON<GroqResponse>(ProxyRoutes.COMPLETIONS, {
-          model: settings.model,
-          messages: groqMessages,
-          temperature: settings.temperature,
-          max_tokens: settings.maxTokens,
-          top_p: settings.topP,
-        }, { timeout: REQUEST_TIMEOUT });
+        const data = await proxyJSON<GroqResponse>(
+          ProxyRoutes.COMPLETIONS,
+          {
+            model: settings.model,
+            messages: groqMessages,
+            temperature: settings.temperature,
+            max_tokens: settings.maxTokens,
+            top_p: settings.topP,
+          },
+          { timeout: REQUEST_TIMEOUT },
+        );
 
         const content = data.choices?.[0]?.message?.content;
         if (content) {
-          log.debug('✅ Groq response received via proxy');
+          log.debug("✅ Groq response received via proxy");
           return content;
         }
         return null;
       } catch (error) {
-        log.warn('⚠️ Groq request failed:', error instanceof Error ? error.message : error);
+        log.warn(
+          "⚠️ Groq request failed:",
+          error instanceof Error ? error.message : error,
+        );
         return null;
       }
     };
@@ -612,32 +719,40 @@ class GroqLLMService {
       const rawResponse = await makeGroqRequest();
 
       if (!rawResponse) {
-        throw new Error('Groq API failed - check your API key');
+        throw new Error("Groq API failed - check your API key");
       }
 
-      log.debug('📝 Raw response length:', rawResponse.length, 'chars');
+      log.debug("📝 Raw response length:", rawResponse.length, "chars");
 
       // Parse reasoning/thinking if present
       const { reasoning, answer } = this.parseReasoningResponse(rawResponse);
 
-      log.debug(' Reasoning extracted:', reasoning ? `${reasoning.length} chars` : 'none');
-      log.debug(' Final answer:', answer ? `${answer.length} chars` : 'none');
+      log.debug(
+        " Reasoning extracted:",
+        reasoning ? `${reasoning.length} chars` : "none",
+      );
+      log.debug(" Final answer:", answer ? `${answer.length} chars` : "none");
 
       // Use answer if available, otherwise fall back to raw response
       const finalResponse = answer || rawResponse;
 
       if (!finalResponse || !finalResponse.trim()) {
-        log.error(' Empty response after parsing!');
-        log.error('   Raw response was:', rawResponse.substring(0, 500));
+        log.error(" Empty response after parsing!");
+        log.error("   Raw response was:", rawResponse.substring(0, 500));
         // Instead of throwing, return a helpful message
         return {
-          response: "I apologize, I'm still warming up. Could you please repeat that?",
-          extractedFields: []
+          response:
+            "I apologize, I'm still warming up. Could you please repeat that?",
+          extractedFields: [],
         };
       }
 
       // Parse any metadata if the model outputted JSON
-      const extracted = this.parseExtractedMetadata(finalResponse, knowledgeBase, existingFields);
+      const extracted = this.parseExtractedMetadata(
+        finalResponse,
+        knowledgeBase,
+        existingFields,
+      );
 
       // Return response IMMEDIATELY - don't wait for AI analysis
       // The analysis was causing delays and double API calls
@@ -649,13 +764,11 @@ class GroqLLMService {
         suggestedCategory: extracted.suggestedCategory,
         suggestedPriority: extracted.suggestedPriority,
       };
-
     } catch (error) {
-      log.error('Local LLM error:', error);
+      log.error("Local LLM error:", error);
       throw error;
     }
   }
-
 
   /**
    * Generate comprehensive call summary using function calling approach
@@ -665,7 +778,7 @@ class GroqLLMService {
     messages: CallMessage[],
     extractedFields: ExtractedField[],
     category?: CallCategory,
-    priority?: PriorityLevel
+    priority?: PriorityLevel,
   ): Promise<{
     summary: string;
     mainPoints: string[];
@@ -690,13 +803,13 @@ class GroqLLMService {
   }> {
     // Auto-initialize if not yet done
     if (this.isAvailable === null) {
-      log.debug('🔄 Auto-initializing LLM service for summary...');
+      log.debug("🔄 Auto-initializing LLM service for summary...");
       await this.checkAvailability();
     }
 
     // Check if Groq is available
     if (!this.groqAvailable) {
-      throw new Error('Groq API not available for summary');
+      throw new Error("Groq API not available for summary");
     }
 
     // Quick timeout for fast notes generation (30 seconds)
@@ -704,21 +817,28 @@ class GroqLLMService {
 
     // Format transcript concisely - limit to last 8 messages for faster processing
     const recentMessages = messages.slice(-8);
-    const transcript = recentMessages.map(m =>
-      `${m.speaker === 'agent' ? 'AI' : 'Caller'}: ${m.text.slice(0, 150)}`
-    ).join('\n');
+    const transcript = recentMessages
+      .map(
+        (m) =>
+          `${m.speaker === "agent" ? "AI" : "Caller"}: ${m.text.slice(0, 150)}`,
+      )
+      .join("\n");
 
-    const extractedText = extractedFields.map(f => `${f.label}: ${f.value}`).join(', ');
-    const categoryHint = category ? `\nCategory Hint: ${category.name} (${category.id})` : '';
-    const priorityHint = priority ? `\nPriority Hint: ${priority}` : '';
+    const extractedText = extractedFields
+      .map((f) => `${f.label}: ${f.value}`)
+      .join(", ");
+    const categoryHint = category
+      ? `\nCategory Hint: ${category.name} (${category.id})`
+      : "";
+    const priorityHint = priority ? `\nPriority Hint: ${priority}` : "";
 
     // Try to find caller name from extracted fields first
-    let callerName = extractedFields.find(f => f.id === 'name')?.value;
+    let callerName = extractedFields.find((f) => f.id === "name")?.value;
 
     // If no name in fields, try to extract from messages
     if (!callerName) {
       for (const msg of messages) {
-        if (msg.speaker === 'user') {
+        if (msg.speaker === "user") {
           // Look for name patterns - enhanced for all cultures
           const patterns = [
             /(?:my name is|i'?m|this is|i am)\s+([A-Za-z][A-Za-z]+(?:\s+[A-Za-z][A-Za-z]+)?)/i,
@@ -729,7 +849,27 @@ class GroqLLMService {
             const match = msg.text.match(pattern);
             if (match?.[1] && match[1].length > 2) {
               const name = match[1].trim();
-              const commonWords = ['hello', 'hi', 'hey', 'yes', 'no', 'okay', 'sure', 'thanks', 'thank', 'you', 'the', 'help', 'need', 'want', 'thing', 'calling', 'good', 'fine', 'here'];
+              const commonWords = [
+                "hello",
+                "hi",
+                "hey",
+                "yes",
+                "no",
+                "okay",
+                "sure",
+                "thanks",
+                "thank",
+                "you",
+                "the",
+                "help",
+                "need",
+                "want",
+                "thing",
+                "calling",
+                "good",
+                "fine",
+                "here",
+              ];
               if (!commonWords.includes(name.toLowerCase())) {
                 callerName = name;
                 break;
@@ -747,7 +887,7 @@ class GroqLLMService {
 TRANSCRIPT:
 ${transcript}
 
-${callerName ? `Caller: ${callerName}` : ''}${extractedText ? `\nExtracted Info: ${extractedText}` : ''}${categoryHint}${priorityHint}
+${callerName ? `Caller: ${callerName}` : ""}${extractedText ? `\nExtracted Info: ${extractedText}` : ""}${categoryHint}${priorityHint}
 
 Generate a detailed JSON response with:
 1. "summary": A 2-3 sentence overview of what happened in the call
@@ -777,66 +917,80 @@ Respond ONLY with valid JSON:
 {"summary": "...", "keyPoints": ["...", "..."], "callerIntent": "...", "sentiment": "...", "moodIndicators": ["...", "..."], "urgency": "...", "topics": ["...", "..."], "suggestions": ["...", "..."], "resolution": "...", "riskLevel": "...", "followUp": true/false, "estimatedPriority": "..."}`;
 
     try {
-      log.debug('📝 Generating summary...');
+      log.debug("📝 Generating summary...");
 
-      let rawResponse = '';
+      let rawResponse = "";
 
       // Try Groq first for faster summary (it's much faster)
       if (this.groqAvailable) {
         const settings = getCurrentGroqSettings();
         try {
           log.debug(`🚀 Using Groq for summary (model: ${settings.model})...`);
-          const groqResponse = await proxyJSON<GroqResponse>(ProxyRoutes.COMPLETIONS, {
-            model: settings.model,
-            messages: [
-              { role: 'system', content: 'You are a call summarization assistant. Always respond with valid JSON containing summary, keyPoints, sentiment, suggestions, etc.' },
-              { role: 'user', content: prompt }
-            ],
-            temperature: 0.4,
-            max_tokens: 1024,
-          }, { timeout: SUMMARY_TIMEOUT });
+          const groqResponse = await proxyJSON<GroqResponse>(
+            ProxyRoutes.COMPLETIONS,
+            {
+              model: settings.model,
+              messages: [
+                {
+                  role: "system",
+                  content:
+                    "You are a call summarization assistant. Always respond with valid JSON containing summary, keyPoints, sentiment, suggestions, etc.",
+                },
+                { role: "user", content: prompt },
+              ],
+              temperature: 0.4,
+              max_tokens: 1024,
+            },
+            { timeout: SUMMARY_TIMEOUT },
+          );
 
           if (groqResponse) {
-            rawResponse = groqResponse.choices?.[0]?.message?.content || '';
-            log.debug('✅ Groq summary received, length:', rawResponse.length);
+            rawResponse = groqResponse.choices?.[0]?.message?.content || "";
+            log.debug("✅ Groq summary received, length:", rawResponse.length);
 
             // Log if response is empty
             if (!rawResponse) {
-              log.warn('⚠️ Groq returned empty content. Full response:', JSON.stringify(groqResponse).slice(0, 500));
+              log.warn(
+                "⚠️ Groq returned empty content. Full response:",
+                JSON.stringify(groqResponse).slice(0, 500),
+              );
             }
           } else {
-            log.error('❌ Groq summary request failed');
+            log.error("❌ Groq summary request failed");
           }
         } catch (e) {
-          log.warn('⚠️ Groq summary failed:', e);
-          throw new Error('Groq summary failed');
+          log.warn("⚠️ Groq summary failed:", e);
+          throw new Error("Groq summary failed");
         }
       } else {
-        throw new Error('Groq not available for summary');
+        throw new Error("Groq not available for summary");
       }
 
       // Handle empty response with a simple fallback
       if (!rawResponse) {
-        log.debug('⚠️ Empty response, generating simple summary...');
+        log.debug("⚠️ Empty response, generating simple summary...");
         // Create a simple fallback summary
         const fallbackSummary = {
-          summary: `Call with ${callerName || 'Unknown Caller'}. ${extractedText || 'No additional details extracted.'}`,
-          keyPoints: ['Call completed', extractedText || 'No details provided'].filter(Boolean),
-          callerIntent: 'General inquiry',
-          sentiment: 'neutral',
+          summary: `Call with ${callerName || "Unknown Caller"}. ${extractedText || "No additional details extracted."}`,
+          keyPoints: [
+            "Call completed",
+            extractedText || "No details provided",
+          ].filter(Boolean),
+          callerIntent: "General inquiry",
+          sentiment: "neutral",
           moodIndicators: [],
-          urgency: 'low',
+          urgency: "low",
           topics: [],
-          suggestions: ['Review call recording if available'],
-          resolution: 'unresolved',
-          riskLevel: 'low',
+          suggestions: ["Review call recording if available"],
+          resolution: "unresolved",
+          riskLevel: "low",
           followUp: false,
-          estimatedPriority: 'low'
+          estimatedPriority: "low",
         };
         rawResponse = JSON.stringify(fallbackSummary);
       }
 
-      log.debug('📝 Summary raw response:', rawResponse.slice(0, 200));
+      log.debug("📝 Summary raw response:", rawResponse.slice(0, 200));
 
       // Attempt to parse enhanced JSON response
       let parsedSummary: Record<string, unknown> | null = null;
@@ -846,89 +1000,131 @@ Respond ONLY with valid JSON:
           parsedSummary = JSON.parse(jsonMatch[0]);
         }
       } catch (e) {
-        log.debug('Could not parse summary as JSON, using text fallback:', e);
+        log.debug("Could not parse summary as JSON, using text fallback:", e);
       }
 
       if (parsedSummary) {
         // Enhanced format: detailed summary with suggestions
-        const summaryText = (parsedSummary.summary as string) || '';
+        const summaryText = (parsedSummary.summary as string) || "";
 
         // Try multiple possible field names for key points
         let keyPoints: string[] = [];
-        if (Array.isArray(parsedSummary.keyPoints) && parsedSummary.keyPoints.length > 0) {
+        if (
+          Array.isArray(parsedSummary.keyPoints) &&
+          parsedSummary.keyPoints.length > 0
+        ) {
           keyPoints = parsedSummary.keyPoints as string[];
-        } else if (Array.isArray(parsedSummary.key_points) && parsedSummary.key_points.length > 0) {
+        } else if (
+          Array.isArray(parsedSummary.key_points) &&
+          parsedSummary.key_points.length > 0
+        ) {
           keyPoints = parsedSummary.key_points as string[];
-        } else if (Array.isArray(parsedSummary.notes) && parsedSummary.notes.length > 0) {
+        } else if (
+          Array.isArray(parsedSummary.notes) &&
+          parsedSummary.notes.length > 0
+        ) {
           keyPoints = parsedSummary.notes as string[];
         } else if (summaryText) {
           // If no keyPoints but we have summary, split summary into points
           keyPoints = [summaryText];
         }
 
-        log.debug('📋 Parsed summary fields:', {
+        log.debug("📋 Parsed summary fields:", {
           summaryText: summaryText.slice(0, 50),
           keyPointsCount: keyPoints.length,
           hasCallerIntent: !!parsedSummary.callerIntent,
-          hasSuggestions: Array.isArray(parsedSummary.suggestions)
+          hasSuggestions: Array.isArray(parsedSummary.suggestions),
         });
 
-        const callerIntent = (parsedSummary.callerIntent as string) || (parsedSummary.caller_intent as string) || '';
+        const callerIntent =
+          (parsedSummary.callerIntent as string) ||
+          (parsedSummary.caller_intent as string) ||
+          "";
         const suggestions = Array.isArray(parsedSummary.suggestions)
-          ? parsedSummary.suggestions as string[]
+          ? (parsedSummary.suggestions as string[])
           : [];
         const moodIndicators = Array.isArray(parsedSummary.moodIndicators)
-          ? parsedSummary.moodIndicators as string[]
+          ? (parsedSummary.moodIndicators as string[])
           : [];
         const topics = Array.isArray(parsedSummary.topics)
-          ? parsedSummary.topics as string[]
+          ? (parsedSummary.topics as string[])
           : [];
-        const resolution = (parsedSummary.resolution as string) || 'unresolved';
-        const riskLevel = (parsedSummary.riskLevel as string) || 'low';
-        const estimatedPriority = (parsedSummary.estimatedPriority as string) || 'medium';
+        const resolution = (parsedSummary.resolution as string) || "unresolved";
+        const riskLevel = (parsedSummary.riskLevel as string) || "low";
+        const estimatedPriority =
+          (parsedSummary.estimatedPriority as string) || "medium";
 
         // Support all 10 sentiment types
         const validSentiments = [
-          'very_positive', 'positive', 'slightly_positive', 'neutral', 'mixed',
-          'slightly_negative', 'negative', 'very_negative', 'anxious', 'urgent'
+          "very_positive",
+          "positive",
+          "slightly_positive",
+          "neutral",
+          "mixed",
+          "slightly_negative",
+          "negative",
+          "very_negative",
+          "anxious",
+          "urgent",
         ];
-        const sentiment = validSentiments.includes(parsedSummary.sentiment as string)
+        const sentiment = validSentiments.includes(
+          parsedSummary.sentiment as string,
+        )
           ? (parsedSummary.sentiment as string)
-          : 'neutral';
+          : "neutral";
 
-        const urgency = ['none', 'low', 'medium', 'high', 'critical', 'emergency'].includes(parsedSummary.urgency as string)
+        const urgency = [
+          "none",
+          "low",
+          "medium",
+          "high",
+          "critical",
+          "emergency",
+        ].includes(parsedSummary.urgency as string)
           ? (parsedSummary.urgency as string)
-          : 'medium';
-        const followUp = parsedSummary.followUp === true || parsedSummary.followUpRequired === true;
+          : "medium";
+        const followUp =
+          parsedSummary.followUp === true ||
+          parsedSummary.followUpRequired === true;
 
-        log.debug('✅ Comprehensive summary generated:', {
+        log.debug("✅ Comprehensive summary generated:", {
           keyPoints: keyPoints.length,
           suggestions: suggestions.length,
           moodIndicators: moodIndicators.length,
           topics: topics.length,
           sentiment,
           urgency,
-          resolution
+          resolution,
         });
 
         // Build detailed notes string with all info
         const notesArray = [
-          summaryText ? `📋 ${summaryText}` : '',
-          callerIntent ? `🎯 Intent: ${callerIntent}` : '',
-          keyPoints.length > 0 ? `\n📌 Key Points:\n• ${keyPoints.join('\n• ')}` : '',
-          topics.length > 0 ? `\n🏷️ Topics: ${topics.join(', ')}` : '',
-          moodIndicators.length > 0 ? `\n😊 Mood: ${moodIndicators.join(', ')}` : '',
-          suggestions.length > 0 ? `\n💡 Suggestions:\n• ${suggestions.join('\n• ')}` : '',
-          `\n📊 Status: ${resolution.replace('_', ' ')} | Risk: ${riskLevel}`,
-          urgency !== 'none' && urgency !== 'low' ? `\n⚠️ Urgency: ${urgency.toUpperCase()}` : ''
-        ].filter(Boolean).join('\n');
+          summaryText ? `📋 ${summaryText}` : "",
+          callerIntent ? `🎯 Intent: ${callerIntent}` : "",
+          keyPoints.length > 0
+            ? `\n📌 Key Points:\n• ${keyPoints.join("\n• ")}`
+            : "",
+          topics.length > 0 ? `\n🏷️ Topics: ${topics.join(", ")}` : "",
+          moodIndicators.length > 0
+            ? `\n😊 Mood: ${moodIndicators.join(", ")}`
+            : "",
+          suggestions.length > 0
+            ? `\n💡 Suggestions:\n• ${suggestions.join("\n• ")}`
+            : "",
+          `\n📊 Status: ${resolution.replace("_", " ")} | Risk: ${riskLevel}`,
+          urgency !== "none" && urgency !== "low"
+            ? `\n⚠️ Urgency: ${urgency.toUpperCase()}`
+            : "",
+        ]
+          .filter(Boolean)
+          .join("\n");
 
         return {
-          summary: summaryText || keyPoints.join(' • ') || 'Call completed',
-          mainPoints: keyPoints.length > 0 ? keyPoints : ['Call completed'],
+          summary: summaryText || keyPoints.join(" • ") || "Call completed",
+          mainPoints: keyPoints.length > 0 ? keyPoints : ["Call completed"],
           sentiment,
           followUpRequired: followUp,
-          notes: notesArray || 'Call completed',
+          notes: notesArray || "Call completed",
           callerName: callerName,
           // Enhanced fields
           suggestions: suggestions,
@@ -943,33 +1139,36 @@ Respond ONLY with valid JSON:
       }
 
       // Fallback: extract summary from text
-      const summary = rawResponse.split('.')[0] || rawResponse.slice(0, 200) || 'Call completed';
+      const summary =
+        rawResponse.split(".")[0] ||
+        rawResponse.slice(0, 200) ||
+        "Call completed";
 
       return {
         summary: summary,
         mainPoints: [summary],
-        sentiment: 'neutral',
+        sentiment: "neutral",
         followUpRequired: false,
         notes: rawResponse,
-        callerName: callerName
+        callerName: callerName,
       };
-
     } catch (error) {
-      log.error('Local LLM summary error:', error);
+      log.error("Local LLM summary error:", error);
 
       // Return a basic summary on error instead of throwing
       // This ensures the call still saves with at least basic info
-      const basicSummary = messages.length > 0
-        ? `Conversation with ${messages.filter(m => m.speaker === 'user').length} user messages`
-        : 'Call completed';
+      const basicSummary =
+        messages.length > 0
+          ? `Conversation with ${messages.filter((m) => m.speaker === "user").length} user messages`
+          : "Call completed";
 
       return {
         summary: basicSummary,
         mainPoints: [basicSummary],
-        sentiment: 'neutral',
+        sentiment: "neutral",
         followUpRequired: false,
-        notes: `Summary generation failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
-        callerName: callerName
+        notes: `Summary generation failed: ${error instanceof Error ? error.message : "Unknown error"}`,
+        callerName: callerName,
       };
     }
   }
@@ -985,10 +1184,9 @@ Respond ONLY with valid JSON:
    * Get the service URL being used
    */
   getServiceUrl(): string {
-    return 'Groq API (via Proxy)';
+    return "Groq API (via Proxy)";
   }
 }
-
 
 // Export singleton (keeping name for backwards compatibility)
 export const localLLMService = new GroqLLMService();
@@ -997,7 +1195,15 @@ export const localLLMService = new GroqLLMService();
 localLLMService.initialize();
 
 // Re-export function calling types for use in other components
-export type { ConversationAnalysis, SeriousnessResult, IssueTopicsResult } from './functionCallingTools';
-export { conversationTools, mapToExtractedFields, generateFunctionCallingSystemPrompt } from './functionCallingTools';
+export type {
+  ConversationAnalysis,
+  SeriousnessResult,
+  IssueTopicsResult,
+} from "./functionCallingTools";
+export {
+  conversationTools,
+  mapToExtractedFields,
+  generateFunctionCallingSystemPrompt,
+} from "./functionCallingTools";
 
 export default localLLMService;

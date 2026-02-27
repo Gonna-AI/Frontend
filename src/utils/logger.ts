@@ -1,7 +1,7 @@
-import log from 'loglevel';
+import log from "loglevel";
 
-const isProduction = process.env.NODE_ENV === 'production';
+const isProduction = process.env.NODE_ENV === "production";
 
-log.setLevel(isProduction ? 'warn' : 'debug');
+log.setLevel(isProduction ? "warn" : "debug");
 
 export default log;

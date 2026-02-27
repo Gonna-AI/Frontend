@@ -1,5 +1,5 @@
-import React from 'react';
-import { LucideIcon } from 'lucide-react';
+import React from "react";
+import { LucideIcon } from "lucide-react";
 
 const NewViewIcon: LucideIcon = (props) => (
   <svg {...props} viewBox="0 0 24 24">
@@ -8,5 +8,5 @@ const NewViewIcon: LucideIcon = (props) => (
   </svg>
 );
 
-NewViewIcon.displayName = 'NewViewIcon';
-export default NewViewIcon; 
+NewViewIcon.displayName = "NewViewIcon";
+export default NewViewIcon;

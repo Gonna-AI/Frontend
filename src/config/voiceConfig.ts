@@ -4,8 +4,8 @@
 export interface VoiceConfig {
   id: string;
   name: string;
-  gender: 'male' | 'female';
-  accent: 'American' | 'British';
+  gender: "male" | "female";
+  accent: "American" | "British";
   description: string;
   sampleUrl: string;
 }
@@ -17,7 +17,8 @@ export const AVAILABLE_VOICES: VoiceConfig[] = [
     gender: "female",
     accent: "American",
     description: "Default female voice - clear and professional",
-    sampleUrl: "https://xlzwfkgurrrspcdyqele.supabase.co/storage/v1/object/public/voice-samples/voice_af_nova.wav",
+    sampleUrl:
+      "https://xlzwfkgurrrspcdyqele.supabase.co/storage/v1/object/public/voice-samples/voice_af_nova.wav",
   },
   {
     id: "af_sky",
@@ -25,7 +26,8 @@ export const AVAILABLE_VOICES: VoiceConfig[] = [
     gender: "female",
     accent: "American",
     description: "Bright and friendly female voice",
-    sampleUrl: "https://xlzwfkgurrrspcdyqele.supabase.co/storage/v1/object/public/voice-samples/voice_af_sky.wav",
+    sampleUrl:
+      "https://xlzwfkgurrrspcdyqele.supabase.co/storage/v1/object/public/voice-samples/voice_af_sky.wav",
   },
   {
     id: "af_bella",
@@ -33,7 +35,8 @@ export const AVAILABLE_VOICES: VoiceConfig[] = [
     gender: "female",
     accent: "American",
     description: "Warm and conversational female voice",
-    sampleUrl: "https://xlzwfkgurrrspcdyqele.supabase.co/storage/v1/object/public/voice-samples/voice_af_bella.wav",
+    sampleUrl:
+      "https://xlzwfkgurrrspcdyqele.supabase.co/storage/v1/object/public/voice-samples/voice_af_bella.wav",
   },
   {
     id: "af_nicole",
@@ -41,7 +44,8 @@ export const AVAILABLE_VOICES: VoiceConfig[] = [
     gender: "female",
     accent: "American",
     description: "Calm and reassuring female voice",
-    sampleUrl: "https://xlzwfkgurrrspcdyqele.supabase.co/storage/v1/object/public/voice-samples/voice_af_nicole.wav",
+    sampleUrl:
+      "https://xlzwfkgurrrspcdyqele.supabase.co/storage/v1/object/public/voice-samples/voice_af_nicole.wav",
   },
   {
     id: "af_sarah",
@@ -49,7 +53,8 @@ export const AVAILABLE_VOICES: VoiceConfig[] = [
     gender: "female",
     accent: "American",
     description: "Energetic and upbeat female voice",
-    sampleUrl: "https://xlzwfkgurrrspcdyqele.supabase.co/storage/v1/object/public/voice-samples/voice_af_sarah.wav",
+    sampleUrl:
+      "https://xlzwfkgurrrspcdyqele.supabase.co/storage/v1/object/public/voice-samples/voice_af_sarah.wav",
   },
   {
     id: "bf_emma",
@@ -57,7 +62,8 @@ export const AVAILABLE_VOICES: VoiceConfig[] = [
     gender: "female",
     accent: "British",
     description: "Sophisticated British female voice",
-    sampleUrl: "https://xlzwfkgurrrspcdyqele.supabase.co/storage/v1/object/public/voice-samples/voice_bf_emma.wav",
+    sampleUrl:
+      "https://xlzwfkgurrrspcdyqele.supabase.co/storage/v1/object/public/voice-samples/voice_bf_emma.wav",
   },
   {
     id: "bf_isabella",
@@ -65,7 +71,8 @@ export const AVAILABLE_VOICES: VoiceConfig[] = [
     gender: "female",
     accent: "British",
     description: "Elegant British female voice",
-    sampleUrl: "https://xlzwfkgurrrspcdyqele.supabase.co/storage/v1/object/public/voice-samples/voice_bf_isabella.wav",
+    sampleUrl:
+      "https://xlzwfkgurrrspcdyqele.supabase.co/storage/v1/object/public/voice-samples/voice_bf_isabella.wav",
   },
   {
     id: "am_adam",
@@ -73,7 +80,8 @@ export const AVAILABLE_VOICES: VoiceConfig[] = [
     gender: "male",
     accent: "American",
     description: "Default male voice - authoritative and clear",
-    sampleUrl: "https://xlzwfkgurrrspcdyqele.supabase.co/storage/v1/object/public/voice-samples/voice_am_adam.wav",
+    sampleUrl:
+      "https://xlzwfkgurrrspcdyqele.supabase.co/storage/v1/object/public/voice-samples/voice_am_adam.wav",
   },
   {
     id: "am_michael",
@@ -81,7 +89,8 @@ export const AVAILABLE_VOICES: VoiceConfig[] = [
     gender: "male",
     accent: "American",
     description: "Deep and professional male voice",
-    sampleUrl: "https://xlzwfkgurrrspcdyqele.supabase.co/storage/v1/object/public/voice-samples/voice_am_michael.wav",
+    sampleUrl:
+      "https://xlzwfkgurrrspcdyqele.supabase.co/storage/v1/object/public/voice-samples/voice_am_michael.wav",
   },
   {
     id: "bm_george",
@@ -89,7 +98,8 @@ export const AVAILABLE_VOICES: VoiceConfig[] = [
     gender: "male",
     accent: "British",
     description: "Distinguished British male voice",
-    sampleUrl: "https://xlzwfkgurrrspcdyqele.supabase.co/storage/v1/object/public/voice-samples/voice_bm_george.wav",
+    sampleUrl:
+      "https://xlzwfkgurrrspcdyqele.supabase.co/storage/v1/object/public/voice-samples/voice_bm_george.wav",
   },
   {
     id: "bm_lewis",
@@ -97,7 +107,8 @@ export const AVAILABLE_VOICES: VoiceConfig[] = [
     gender: "male",
     accent: "British",
     description: "Friendly British male voice",
-    sampleUrl: "https://xlzwfkgurrrspcdyqele.supabase.co/storage/v1/object/public/voice-samples/voice_bm_lewis.wav",
+    sampleUrl:
+      "https://xlzwfkgurrrspcdyqele.supabase.co/storage/v1/object/public/voice-samples/voice_bm_lewis.wav",
   },
 ];
 
@@ -105,22 +116,27 @@ export const DEFAULT_VOICE = "af_nova";
 export const DEFAULT_VOICE_ID = "af_nova";
 
 // Supabase storage bucket for voice samples
-export const VOICE_SAMPLES_BUCKET = 'voice-samples';
+export const VOICE_SAMPLES_BUCKET = "voice-samples";
 
 // Helper functions
 export const getVoiceById = (id: string): VoiceConfig | undefined => {
-  return AVAILABLE_VOICES.find(v => v.id === id);
+  return AVAILABLE_VOICES.find((v) => v.id === id);
 };
 
-export const getVoicesByGender = (gender: 'male' | 'female'): VoiceConfig[] => {
-  return AVAILABLE_VOICES.filter(v => v.gender === gender);
+export const getVoicesByGender = (gender: "male" | "female"): VoiceConfig[] => {
+  return AVAILABLE_VOICES.filter((v) => v.gender === gender);
 };
 
-export const getVoicesByAccent = (accent: 'American' | 'British'): VoiceConfig[] => {
-  return AVAILABLE_VOICES.filter(v => v.accent === accent);
+export const getVoicesByAccent = (
+  accent: "American" | "British",
+): VoiceConfig[] => {
+  return AVAILABLE_VOICES.filter((v) => v.accent === accent);
 };
 
 // Get the sample audio URL for a voice
-export const getVoiceSampleUrl = (voiceId: string, supabaseUrl: string): string => {
+export const getVoiceSampleUrl = (
+  voiceId: string,
+  supabaseUrl: string,
+): string => {
   return `${supabaseUrl}/storage/v1/object/public/${VOICE_SAMPLES_BUCKET}/voice_${voiceId}.wav`;
 };

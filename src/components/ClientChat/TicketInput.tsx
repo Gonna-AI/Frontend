@@ -1,10 +1,19 @@
-import React, { useState } from 'react';
-import { Ticket, ArrowRight, Copy, RefreshCw, User, Phone, Mail, UserCog2 } from 'lucide-react';
-import { ticketApi } from '../../config/api';
+import React, { useState } from "react";
+import {
+  Ticket,
+  ArrowRight,
+  Copy,
+  RefreshCw,
+  User,
+  Phone,
+  Mail,
+  UserCog2,
+} from "lucide-react";
+import { ticketApi } from "../../config/api";
 
 // Utility function to combine class names
 const cn = (...classes: (string | boolean | undefined)[]) => {
-  return classes.filter(Boolean).join(' ');
+  return classes.filter(Boolean).join(" ");
 };
 
 interface TicketInputProps {
@@ -57,30 +66,34 @@ const styles = `
   }
 `;
 
-const TicketInput: React.FC<TicketInputProps> = ({ onSubmit, error, isDark }) => {
-  const [code, setCode] = useState('');
-  const [agentId, setAgentId] = useState('');
-  const [userName, setUserName] = useState('');
-  const [mobileNumber, setMobileNumber] = useState('');
-  const [email, setEmail] = useState('');
-  const [generatedTicket, setGeneratedTicket] = useState('');
+const TicketInput: React.FC<TicketInputProps> = ({
+  onSubmit,
+  error,
+  isDark,
+}) => {
+  const [code, setCode] = useState("");
+  const [agentId, setAgentId] = useState("");
+  const [userName, setUserName] = useState("");
+  const [mobileNumber, setMobileNumber] = useState("");
+  const [email, setEmail] = useState("");
+  const [generatedTicket, setGeneratedTicket] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [isCopying, setIsCopying] = useState(false);
   const [hasGenerated, setHasGenerated] = useState(false);
   const [showNameInput, setShowNameInput] = useState(false);
-  const [nameError, setNameError] = useState('');
-  const [mobileError, setMobileError] = useState('');
-  const [emailError, setEmailError] = useState('');
-  const [contactError, setContactError] = useState('');
-  const [agentIdError, setAgentIdError] = useState('');
+  const [nameError, setNameError] = useState("");
+  const [mobileError, setMobileError] = useState("");
+  const [emailError, setEmailError] = useState("");
+  const [contactError, setContactError] = useState("");
+  const [agentIdError, setAgentIdError] = useState("");
 
   const handleGenerateClick = () => {
     setShowNameInput(true);
-    setNameError('');
-    setMobileError('');
-    setEmailError('');
-    setContactError('');
-    setAgentIdError('');
+    setNameError("");
+    setMobileError("");
+    setEmailError("");
+    setContactError("");
+    setAgentIdError("");
   };
 
   const validateMobileNumber = (number: string) => {
@@ -97,31 +110,31 @@ const TicketInput: React.FC<TicketInputProps> = ({ onSubmit, error, isDark }) =>
 
   const generateTicket = async () => {
     if (hasGenerated) return;
-    
+
     let hasError = false;
 
     if (!userName.trim()) {
-      setNameError('Please enter your name');
+      setNameError("Please enter your name");
       hasError = true;
     }
 
     if (mobileNumber && !validateMobileNumber(mobileNumber)) {
-      setMobileError('Please enter a valid mobile number');
+      setMobileError("Please enter a valid mobile number");
       hasError = true;
     }
 
     if (email && !validateEmail(email)) {
-      setEmailError('Please enter a valid email address');
+      setEmailError("Please enter a valid email address");
       hasError = true;
     }
 
     if (!mobileNumber && !email) {
-      setContactError('Please provide either a mobile number or email address');
+      setContactError("Please provide either a mobile number or email address");
       hasError = true;
     }
 
     if (!agentId.trim()) {
-      setAgentIdError('Please enter an agent ID');
+      setAgentIdError("Please enter an agent ID");
       hasError = true;
     }
 
@@ -133,13 +146,13 @@ const TicketInput: React.FC<TicketInputProps> = ({ onSubmit, error, isDark }) =>
         name: userName,
         mobile: mobileNumber || undefined,
         email: email || undefined,
-        agent_id: agentId || undefined
+        agent_id: agentId || undefined,
       });
       setGeneratedTicket(response.data.ticket_id);
       setHasGenerated(true);
       setShowNameInput(false);
     } catch (err) {
-      console.error('Failed to generate ticket:', err);
+      console.error("Failed to generate ticket:", err);
     } finally {
       setIsGenerating(false);
     }
@@ -151,7 +164,7 @@ const TicketInput: React.FC<TicketInputProps> = ({ onSubmit, error, isDark }) =>
       setIsCopying(true);
       setTimeout(() => setIsCopying(false), 1000);
     } catch (err) {
-      console.error('Failed to copy text: ', err);
+      console.error("Failed to copy text: ", err);
     }
   };
 
@@ -166,16 +179,18 @@ const TicketInput: React.FC<TicketInputProps> = ({ onSubmit, error, isDark }) =>
     <>
       <style>{styles}</style>
       <form onSubmit={handleSubmit} className="space-y-6">
-        <div className={cn(
-          "p-4 rounded-xl transition-all duration-300",
-          isDark ? "bg-white/5" : "bg-black/5"
-        )}>
+        <div
+          className={cn(
+            "p-4 rounded-xl transition-all duration-300",
+            isDark ? "bg-white/5" : "bg-black/5",
+          )}
+        >
           <div className="flex items-center gap-3 mb-4">
-            <RefreshCw 
+            <RefreshCw
               className={cn(
                 "w-5 h-5 transition-transform duration-700",
                 isDark ? "text-emerald-400" : "text-emerald-600",
-                isGenerating && "animate-spin"
+                isGenerating && "animate-spin",
               )}
             />
             <span className={isDark ? "text-white/60" : "text-black/60"}>
@@ -188,11 +203,15 @@ const TicketInput: React.FC<TicketInputProps> = ({ onSubmit, error, isDark }) =>
               <div className="animate-fadeIn space-y-4">
                 <div>
                   <div className="flex items-center gap-3 mb-2">
-                    <User className={cn(
-                      "w-4 h-4",
-                      isDark ? "text-emerald-400" : "text-emerald-600"
-                    )} />
-                    <span className={isDark ? "text-white/60" : "text-black/60"}>
+                    <User
+                      className={cn(
+                        "w-4 h-4",
+                        isDark ? "text-emerald-400" : "text-emerald-600",
+                      )}
+                    />
+                    <span
+                      className={isDark ? "text-white/60" : "text-black/60"}
+                    >
                       Enter your name
                     </span>
                   </div>
@@ -201,7 +220,7 @@ const TicketInput: React.FC<TicketInputProps> = ({ onSubmit, error, isDark }) =>
                     value={userName}
                     onChange={(e) => {
                       setUserName(e.target.value);
-                      setNameError('');
+                      setNameError("");
                     }}
                     placeholder="Your full name"
                     className={cn(
@@ -210,7 +229,7 @@ const TicketInput: React.FC<TicketInputProps> = ({ onSubmit, error, isDark }) =>
                       "focus:outline-none focus:ring-2",
                       isDark
                         ? "bg-black/40 border border-white/10 text-white placeholder-white/30 focus:ring-emerald-500/30"
-                        : "bg-white/40 border border-black/10 text-black placeholder-black/30 focus:ring-emerald-500/30"
+                        : "bg-white/40 border border-black/10 text-black placeholder-black/30 focus:ring-emerald-500/30",
                     )}
                   />
                   {nameError && (
@@ -220,11 +239,15 @@ const TicketInput: React.FC<TicketInputProps> = ({ onSubmit, error, isDark }) =>
 
                 <div>
                   <div className="flex items-center gap-3 mb-2">
-                    <Mail className={cn(
-                      "w-4 h-4",
-                      isDark ? "text-emerald-400" : "text-emerald-600"
-                    )} />
-                    <span className={isDark ? "text-white/60" : "text-black/60"}>
+                    <Mail
+                      className={cn(
+                        "w-4 h-4",
+                        isDark ? "text-emerald-400" : "text-emerald-600",
+                      )}
+                    />
+                    <span
+                      className={isDark ? "text-white/60" : "text-black/60"}
+                    >
                       Email address
                     </span>
                   </div>
@@ -233,8 +256,8 @@ const TicketInput: React.FC<TicketInputProps> = ({ onSubmit, error, isDark }) =>
                     value={email}
                     onChange={(e) => {
                       setEmail(e.target.value);
-                      setEmailError('');
-                      setContactError('');
+                      setEmailError("");
+                      setContactError("");
                     }}
                     placeholder="Enter email address"
                     className={cn(
@@ -243,7 +266,7 @@ const TicketInput: React.FC<TicketInputProps> = ({ onSubmit, error, isDark }) =>
                       "focus:outline-none focus:ring-2",
                       isDark
                         ? "bg-black/40 border border-white/10 text-white placeholder-white/30 focus:ring-emerald-500/30"
-                        : "bg-white/40 border border-black/10 text-black placeholder-black/30 focus:ring-emerald-500/30"
+                        : "bg-white/40 border border-black/10 text-black placeholder-black/30 focus:ring-emerald-500/30",
                     )}
                   />
                   {emailError && (
@@ -253,11 +276,15 @@ const TicketInput: React.FC<TicketInputProps> = ({ onSubmit, error, isDark }) =>
 
                 <div>
                   <div className="flex items-center gap-3 mb-2">
-                    <Phone className={cn(
-                      "w-4 h-4",
-                      isDark ? "text-emerald-400" : "text-emerald-600"
-                    )} />
-                    <span className={isDark ? "text-white/60" : "text-black/60"}>
+                    <Phone
+                      className={cn(
+                        "w-4 h-4",
+                        isDark ? "text-emerald-400" : "text-emerald-600",
+                      )}
+                    />
+                    <span
+                      className={isDark ? "text-white/60" : "text-black/60"}
+                    >
                       Mobile number
                     </span>
                   </div>
@@ -266,8 +293,8 @@ const TicketInput: React.FC<TicketInputProps> = ({ onSubmit, error, isDark }) =>
                     value={mobileNumber}
                     onChange={(e) => {
                       setMobileNumber(e.target.value);
-                      setMobileError('');
-                      setContactError('');
+                      setMobileError("");
+                      setContactError("");
                     }}
                     placeholder="Enter mobile number"
                     className={cn(
@@ -276,7 +303,7 @@ const TicketInput: React.FC<TicketInputProps> = ({ onSubmit, error, isDark }) =>
                       "focus:outline-none focus:ring-2",
                       isDark
                         ? "bg-black/40 border border-white/10 text-white placeholder-white/30 focus:ring-emerald-500/30"
-                        : "bg-white/40 border border-black/10 text-black placeholder-black/30 focus:ring-emerald-500/30"
+                        : "bg-white/40 border border-black/10 text-black placeholder-black/30 focus:ring-emerald-500/30",
                     )}
                   />
                   {mobileError && (
@@ -289,12 +316,16 @@ const TicketInput: React.FC<TicketInputProps> = ({ onSubmit, error, isDark }) =>
                 )}
 
                 <div>
-                <div className="flex items-center gap-3 mb-2">
-                    <UserCog2 className={cn(
-                      "w-4 h-4",
-                      isDark ? "text-emerald-400" : "text-emerald-600"
-                    )} />
-                    <span className={isDark ? "text-white/60" : "text-black/60"}>
+                  <div className="flex items-center gap-3 mb-2">
+                    <UserCog2
+                      className={cn(
+                        "w-4 h-4",
+                        isDark ? "text-emerald-400" : "text-emerald-600",
+                      )}
+                    />
+                    <span
+                      className={isDark ? "text-white/60" : "text-black/60"}
+                    >
                       Agent number
                     </span>
                   </div>
@@ -309,13 +340,15 @@ const TicketInput: React.FC<TicketInputProps> = ({ onSubmit, error, isDark }) =>
                       "focus:outline-none focus:ring-2",
                       isDark
                         ? "bg-black/40 border border-white/10 text-white placeholder-white/30 focus:ring-purple-500/30"
-                        : "bg-white/40 border border-black/10 text-black placeholder-black/30 focus:ring-purple-500/30"
+                        : "bg-white/40 border border-black/10 text-black placeholder-black/30 focus:ring-purple-500/30",
                     )}
                   />
                 </div>
-                
+
                 {error && (
-                  <p className="mt-2 text-sm text-red-400 animate-fadeIn">{error}</p>
+                  <p className="mt-2 text-sm text-red-400 animate-fadeIn">
+                    {error}
+                  </p>
                 )}
 
                 <button
@@ -329,7 +362,7 @@ const TicketInput: React.FC<TicketInputProps> = ({ onSubmit, error, isDark }) =>
                     isDark
                       ? "bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 border border-emerald-500/30"
                       : "bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 border border-emerald-500/20",
-                    isGenerating && "opacity-50 cursor-not-allowed"
+                    isGenerating && "opacity-50 cursor-not-allowed",
                   )}
                 >
                   {isGenerating ? "Generating..." : "Generate"}
@@ -345,24 +378,26 @@ const TicketInput: React.FC<TicketInputProps> = ({ onSubmit, error, isDark }) =>
                   "flex items-center justify-center gap-2",
                   isDark
                     ? "bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 border border-emerald-500/30"
-                    : "bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 border border-emerald-500/20"
+                    : "bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 border border-emerald-500/20",
                 )}
               >
                 Generate New Ticket
               </button>
             ) : (
-              <div 
+              <div
                 className={cn(
                   "flex items-center gap-2 p-3 rounded-lg animate-fadeIn",
                   isDark ? "bg-black/40" : "bg-white/40",
                   "border",
-                  isDark ? "border-white/10" : "border-black/10"
+                  isDark ? "border-white/10" : "border-black/10",
                 )}
               >
-                <span className={cn(
-                  "flex-1 font-mono",
-                  isDark ? "text-white" : "text-black"
-                )}>
+                <span
+                  className={cn(
+                    "flex-1 font-mono",
+                    isDark ? "text-white" : "text-black",
+                  )}
+                >
                   {generatedTicket}
                 </span>
                 <button
@@ -372,14 +407,14 @@ const TicketInput: React.FC<TicketInputProps> = ({ onSubmit, error, isDark }) =>
                     "p-2 rounded-lg transition-all duration-300 relative",
                     isDark
                       ? "hover:bg-white/10 text-white/60"
-                      : "hover:bg-black/10 text-black/60"
+                      : "hover:bg-black/10 text-black/60",
                   )}
                 >
-                  <Copy 
+                  <Copy
                     className={cn(
                       "w-4 h-4 transition-all duration-300",
-                      isCopying && "scale-125 text-emerald-400"
-                    )} 
+                      isCopying && "scale-125 text-emerald-400",
+                    )}
                   />
                   {isCopying && (
                     <span className="absolute -top-8 left-1/2 -translate-x-1/2 text-xs text-emerald-400 whitespace-nowrap animate-fadeOut">
@@ -392,20 +427,21 @@ const TicketInput: React.FC<TicketInputProps> = ({ onSubmit, error, isDark }) =>
           </div>
         </div>
 
-        <div className={cn(
-          "p-4 rounded-xl",
-          isDark ? "bg-white/5" : "bg-black/5"
-        )}>
+        <div
+          className={cn("p-4 rounded-xl", isDark ? "bg-white/5" : "bg-black/5")}
+        >
           <div className="flex items-center gap-3 mb-4">
-            <Ticket className={cn(
-              "w-5 h-5",
-              isDark ? "text-purple-400" : "text-purple-600"
-            )} />
+            <Ticket
+              className={cn(
+                "w-5 h-5",
+                isDark ? "text-purple-400" : "text-purple-600",
+              )}
+            />
             <span className={isDark ? "text-white/60" : "text-black/60"}>
               Support Ticket
             </span>
           </div>
-          
+
           <div className="space-y-3">
             <input
               type="text"
@@ -418,11 +454,11 @@ const TicketInput: React.FC<TicketInputProps> = ({ onSubmit, error, isDark }) =>
                 "focus:outline-none focus:ring-2",
                 isDark
                   ? "bg-black/40 border border-white/10 text-white placeholder-white/30 focus:ring-purple-500/30"
-                  : "bg-white/40 border border-black/10 text-black placeholder-black/30 focus:ring-purple-500/30"
+                  : "bg-white/40 border border-black/10 text-black placeholder-black/30 focus:ring-purple-500/30",
               )}
             />
           </div>
-          
+
           {error && (
             <p className="mt-2 text-sm text-red-400 animate-fadeIn">{error}</p>
           )}
@@ -439,7 +475,7 @@ const TicketInput: React.FC<TicketInputProps> = ({ onSubmit, error, isDark }) =>
               ? "from-purple-500/20 to-blue-500/20 hover:from-purple-500/30 hover:to-blue-500/30 text-white"
               : "from-purple-500/10 to-blue-500/10 hover:from-purple-500/20 hover:to-blue-500/20 text-black",
             "border",
-            isDark ? "border-white/10" : "border-black/10"
+            isDark ? "border-white/10" : "border-black/10",
           )}
         >
           <span>Continue to Chat</span>

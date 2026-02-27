@@ -1,5 +1,5 @@
-import UserCall from './UserCall';
+import UserCall from "./UserCall";
 
 export default function UserVoiceCall() {
-    return <UserCall initialMode="call" />;
+  return <UserCall initialMode="call" />;
 }

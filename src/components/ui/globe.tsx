@@ -43,7 +43,10 @@ export function Globe({ className, config = {} }: GlobeProps) {
             ...config,
           });
         } catch (e) {
-          console.warn("Unable to initialize Globe. WebGL may not be supported by this device/browser.", e);
+          console.warn(
+            "Unable to initialize Globe. WebGL may not be supported by this device/browser.",
+            e,
+          );
         }
       }
     };
@@ -60,7 +63,10 @@ export function Globe({ className, config = {} }: GlobeProps) {
   }, [config]);
 
   return (
-    <div ref={containerRef} className={cn("relative w-full h-full min-h-[600px]", className)}>
+    <div
+      ref={containerRef}
+      className={cn("relative w-full h-full min-h-[600px]", className)}
+    >
       <canvas
         ref={canvasRef}
         className="w-full h-full"
@@ -69,4 +75,3 @@ export function Globe({ className, config = {} }: GlobeProps) {
     </div>
   );
 }
-

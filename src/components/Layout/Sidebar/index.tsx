@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import { ViewType } from '../../../types/navigation';
-import DesktopSidebar from './DesktopSidebar';
-import MobileSidebar from './MobileSidebar';
+import React, { useState } from "react";
+import { ViewType } from "../../../types/navigation";
+import DesktopSidebar from "./DesktopSidebar";
+import MobileSidebar from "./MobileSidebar";
 
 interface SidebarProps {
   currentView: ViewType;
@@ -18,7 +18,7 @@ export default function Sidebar({
   onSignOut,
   isOpen,
   onClose,
-  onExpandedChange
+  onExpandedChange,
 }: SidebarProps) {
   const [isExpanded, setIsExpanded] = useState(false);
 

@@ -7,13 +7,13 @@ export default function LoadingScreen() {
   return (
     <div
       style={{
-        position: 'fixed',
+        position: "fixed",
         inset: 0,
         zIndex: 9999,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        background: '#0a0a0a',
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        background: "#0a0a0a",
       }}
     >
       {/* Simple pulsing spinner using inline styles – zero extra CSS / JS */}
@@ -21,10 +21,10 @@ export default function LoadingScreen() {
         style={{
           width: 36,
           height: 36,
-          borderRadius: '50%',
-          border: '3px solid rgba(255,255,255,0.1)',
-          borderTopColor: 'rgba(255,255,255,0.7)',
-          animation: 'ct-spin 0.7s linear infinite',
+          borderRadius: "50%",
+          border: "3px solid rgba(255,255,255,0.1)",
+          borderTopColor: "rgba(255,255,255,0.7)",
+          animation: "ct-spin 0.7s linear infinite",
         }}
       />
       {/* Inject the keyframe once */}
