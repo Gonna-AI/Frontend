@@ -512,9 +512,16 @@ function AuthUserSection({ isDark, state }: { isDark: boolean; state: string }) 
     const handleSignOut = async () => {
         setShowConfirm(false);
         setIsSigningOut(true);
+
+        // ─── schedule a hard redirect as a safety net ───────────────
+        // If anything below hangs or the component unmounts, this
+        // guarantees the user lands on /login within 4 seconds.
+        const safetyTimer = setTimeout(() => {
+            window.location.href = '/login';
+        }, 4000);
+
         try {
-            // Clear sensitive localStorage data before signing out
-            // These may contain PII (call transcripts, caller names, knowledge base configs)
+            // 1. Clear app-specific localStorage data (PII, configs)
             const keysToRemove: string[] = [];
             for (let i = 0; i < localStorage.length; i++) {
                 const key = localStorage.key(i);
@@ -530,17 +537,44 @@ function AuthUserSection({ isDark, state }: { isDark: boolean; state: string }) 
             }
             keysToRemove.forEach(key => localStorage.removeItem(key));
 
-            // Attempt to sign out from Supabase
-            const { error } = await supabase.auth.signOut();
-            if (error) {
-                console.error('Sign out error:', error.message);
+            // 2. Attempt to sign out from Supabase — with a 3s timeout
+            //    so we don't hang forever on slow/dead network
+            try {
+                await Promise.race([
+                    supabase.auth.signOut(),
+                    new Promise((_, reject) =>
+                        setTimeout(() => reject(new Error('Sign-out timed out')), 3000)
+                    ),
+                ]);
+            } catch (err) {
+                console.warn('Sign out API call failed/timed out, clearing session locally:', err);
+            }
+
+            // 3. Nuke ALL Supabase auth keys from storage to guarantee
+            //    the session is fully destroyed locally
+            const authKeysToRemove: string[] = [];
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && (key.startsWith('sb-') || key.includes('supabase'))) {
+                    authKeysToRemove.push(key);
+                }
+            }
+            authKeysToRemove.forEach(key => localStorage.removeItem(key));
+
+            // Also clear sessionStorage (PKCE code verifiers, etc.)
+            for (let i = sessionStorage.length - 1; i >= 0; i--) {
+                const key = sessionStorage.key(i);
+                if (key && (key.startsWith('sb-') || key.includes('supabase'))) {
+                    sessionStorage.removeItem(key);
+                }
             }
         } catch (err) {
             console.error('Sign out exception:', err);
         } finally {
-            // ALWAYS redirect to login, even if signOut failed
-            // Brief delay so the user sees the signing-out state
-            await new Promise(resolve => setTimeout(resolve, 600));
+            // Cancel the safety timer — we're redirecting now
+            clearTimeout(safetyTimer);
+            // Brief visual delay so the user sees the spinner
+            await new Promise(resolve => setTimeout(resolve, 400));
             window.location.href = '/login';
         }
     };
