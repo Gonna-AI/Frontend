@@ -22,11 +22,15 @@ export default defineConfig({
         // Activate new SW immediately (don't wait for all tabs to close)
         skipWaiting: true,
         clientsClaim: true,
+        // ⚠️ CRITICAL: Do NOT precache build assets — this was causing stale content
+        // Precaching stores the entire app shell at install time, so new deploys
+        // would NOT appear until the SW updated AND the user reloaded twice.
+        globPatterns: [],
         // Don't precache source maps
         globIgnores: ['**/node_modules/**', '**/*.map'],
-        // Navigation routes should always go to network first to get fresh index.html
-        navigateFallback: '/index.html',
-        navigateFallbackAllowlist: [/^\/(?!api)/],
+        // Disable navigateFallback so the SW doesn't serve cached index.html
+        // for navigation requests — let the network handle it
+        navigateFallback: null,
         // Prevent the service worker from handling auth callback routes
         navigateFallbackDenylist: [/^\/auth\//, /^\/api\//],
         runtimeCaching: [
@@ -36,13 +40,52 @@ export default defineConfig({
             handler: 'NetworkOnly',
           },
           {
+            // HTML pages: always fetch from network first, fall back to cache only if offline
+            urlPattern: ({ request }) => request.mode === 'navigate',
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'pages',
+              expiration: {
+                maxEntries: 50,
+                maxAgeSeconds: 60 * 60, // 1 hour
+              },
+              networkTimeoutSeconds: 5,
+            },
+          },
+          {
+            // JS and CSS: always fetch from network first to get fresh deploys
             urlPattern: /\.(?:js|css)$/,
-            handler: 'StaleWhileRevalidate',
+            handler: 'NetworkFirst',
             options: {
               cacheName: 'static-assets',
               expiration: {
                 maxEntries: 100,
                 maxAgeSeconds: 60 * 60 * 24, // 1 day
+              },
+              networkTimeoutSeconds: 5,
+            },
+          },
+          {
+            // Images: cache-first is fine since they rarely change
+            urlPattern: /\.(?:png|jpg|jpeg|svg|gif|webp|ico)$/,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'images',
+              expiration: {
+                maxEntries: 100,
+                maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
+              },
+            },
+          },
+          {
+            // Fonts: cache-first since they basically never change
+            urlPattern: /\.(?:woff|woff2|ttf|eot|otf)$/,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'fonts',
+              expiration: {
+                maxEntries: 30,
+                maxAgeSeconds: 60 * 60 * 24 * 365, // 1 year
               },
             },
           },
