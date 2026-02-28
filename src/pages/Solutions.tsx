@@ -7,6 +7,7 @@ import LanguageSwitcher from '../components/Layout/LanguageSwitcher';
 import Footer from '../components/Landing/Footer';
 import { NumberTicker } from '../components/ui/number-ticker';
 import SEO from '../components/SEO';
+import ProductsSection from '../components/Landing/ProductsSection';
 
 // ─────────────────────────────────────
 // Scroll-triggered reveal
@@ -222,6 +223,11 @@ export default function Solutions() {
           </Reveal>
         </div>
       </section>
+
+      {/* ════════════════════════════
+           PRODUCTS SECTION
+         ════════════════════════════ */}
+      <ProductsSection />
 
       {/* ════════════════════════════
            SOLUTIONS GRID

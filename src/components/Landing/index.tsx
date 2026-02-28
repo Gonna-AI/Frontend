@@ -15,7 +15,7 @@ import { useDeviceDetection } from '../../hooks/useDeviceDetection';
 
 // Lazy-load below-the-fold sections to reduce initial JS bundle
 const AboutSection = lazy(() => import('./AboutSection'));
-const ProductsSection = lazy(() => import('./ProductsSection'));
+const CodeDemoSection = lazy(() => import('./CodeDemoSection'));
 const Metrics = lazy(() => import('./Metrics'));
 const Features = lazy(() => import('./Features'));
 const Conversation = lazy(() => import('./Conversation'));
@@ -291,7 +291,7 @@ export default function Landing() {
           <div id="about-section">
             <AboutSection />
           </div>
-          <ProductsSection />
+          <CodeDemoSection />
           <Metrics />
           <Features />
           <Conversation />
