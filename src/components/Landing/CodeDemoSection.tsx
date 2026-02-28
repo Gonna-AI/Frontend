@@ -40,11 +40,11 @@ export default function CodeDemoSection() {
     };
 
     return (
-        <section className="relative px-6 py-20 bg-[rgb(10,10,10)]">
-            <div className="max-w-[1100px] mx-auto">
+        <section className="relative px-4 sm:px-8 py-24 md:py-32 bg-transparent overflow-hidden">
+            <div className="max-w-[1360px] w-full mx-auto relative z-10">
 
                 {/* Outer Container */}
-                <div className="rounded-2xl border border-white/[0.08] bg-[#121214] overflow-hidden shadow-2xl p-1.5 sm:p-2">
+                <div className="rounded-2xl border border-white/[0.06] bg-[#0c0c0e] shadow-2xl p-1.5 sm:p-2 relative overflow-hidden">
 
                     {/* Top Nav Bar */}
                     <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-3 sm:p-4 mb-2">
@@ -62,8 +62,8 @@ export default function CodeDemoSection() {
                             <button
                                 onClick={() => setActiveTab('curl')}
                                 className={`flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-semibold transition-all duration-300 ${activeTab === 'curl'
-                                        ? 'bg-[#FFB86C] text-[#121214] shadow-[0_2px_8px_rgba(255,184,108,0.25)]'
-                                        : 'text-neutral-400 hover:text-white hover:bg-white/5'
+                                    ? 'bg-[#FFB86C] text-[#121214] shadow-[0_2px_8px_rgba(255,184,108,0.25)]'
+                                    : 'text-neutral-400 hover:text-white hover:bg-white/5'
                                     }`}
                             >
                                 <Terminal className="w-4 h-4" /> cURL API
@@ -71,8 +71,8 @@ export default function CodeDemoSection() {
                             <button
                                 onClick={() => setActiveTab('dashboard')}
                                 className={`flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-semibold transition-all duration-300 ${activeTab === 'dashboard'
-                                        ? 'bg-[#FFB86C] text-[#121214] shadow-[0_2px_8px_rgba(255,184,108,0.25)]'
-                                        : 'text-neutral-400 hover:text-white hover:bg-white/5'
+                                    ? 'bg-[#FFB86C] text-[#121214] shadow-[0_2px_8px_rgba(255,184,108,0.25)]'
+                                    : 'text-neutral-400 hover:text-white hover:bg-white/5'
                                     }`}
                             >
                                 <LayoutDashboard className="w-4 h-4" /> Dashboard
@@ -82,15 +82,17 @@ export default function CodeDemoSection() {
 
                     <div className="flex flex-col lg:flex-row gap-2 sm:gap-4 p-1">
                         {/* Code / Content Area (Left) */}
-                        <div className="relative flex-[1.5] bg-[#0A0A0C] border border-white/[0.04] rounded-xl p-8 overflow-x-auto min-h-[400px]">
+                        <div className={`relative bg-[#0A0A0C] border border-white/[0.04] rounded-xl overflow-hidden ${activeTab === 'curl' ? 'flex-[1.5] p-8 min-h-[400px]' : 'w-full p-0 flex-1'}`}>
 
-                            <button
-                                onClick={handleCopy}
-                                className="absolute top-6 right-6 flex items-center gap-2 px-3 py-2 bg-[#1A1A1C] hover:bg-[#252528] text-white/70 hover:text-white rounded-lg transition-colors text-xs font-semibold border border-white/10"
-                            >
-                                {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
-                                {copied ? 'Copied' : 'Copy Code'}
-                            </button>
+                            {activeTab === 'curl' && (
+                                <button
+                                    onClick={handleCopy}
+                                    className="absolute top-6 right-6 flex items-center gap-2 px-3 py-2 bg-[#1A1A1C] hover:bg-[#252528] text-white/70 hover:text-white rounded-lg transition-colors text-xs font-semibold border border-white/10 z-20"
+                                >
+                                    {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
+                                    {copied ? 'Copied' : 'Copy Code'}
+                                </button>
+                            )}
 
                             <AnimatePresence mode="wait">
                                 <motion.div
@@ -99,7 +101,7 @@ export default function CodeDemoSection() {
                                     animate={{ opacity: 1, y: 0 }}
                                     exit={{ opacity: 0, y: -5 }}
                                     transition={{ duration: 0.2 }}
-                                    className="font-mono text-[14px] leading-[1.7] mt-12 sm:mt-8"
+                                    className={activeTab === 'curl' ? "font-mono text-[14px] leading-[1.7] mt-12 sm:mt-8 overflow-x-auto" : "w-full h-auto flex"}
                                 >
                                     {activeTab === 'curl' ? (
                                         <pre className="text-[#F8F8F2] whitespace-pre-wrap">
@@ -114,44 +116,39 @@ export default function CodeDemoSection() {
   }'`}</span>
                                         </pre>
                                     ) : (
-                                        <pre className="text-[#F8F8F2] whitespace-pre-wrap">
-                                            <span className="text-[#FF79C6]">{"{"}</span>
-                                            <br />  <span className="text-[#50FA7B]">"agent_id"</span>: <span className="text-[#F1FA8C]">"agt_live_93j2a"</span>,
-                                            <br />  <span className="text-[#50FA7B]">"status"</span>: <span className="text-[#F1FA8C]">"active"</span>,
-                                            <br />  <span className="text-[#50FA7B]">"recent_calls"</span>: <span className="text-[#BD93F9]">142</span>,
-                                            <br />  <span className="text-[#50FA7B]">"success_rate"</span>: <span className="text-[#F1FA8C]">"98.4%"</span>,
-                                            <br />  <span className="text-[#50FA7B]">"latest_transcript"</span>: <span className="text-[#FF79C6]">{"["}</span>
-                                            <br />    <span className="text-[#F1FA8C]">  "user: I'd like to book a table for 4"</span>,
-                                            <br />    <span className="text-[#F1FA8C]">  "agent: Certainly, for what time?"</span>,
-                                            <br />    <span className="text-[#F1FA8C]">  "user: 7 PM tonight"</span>,
-                                            <br />    <span className="text-[#F1FA8C]">  "agent: Perfect, your table is booked."</span>
-                                            <br />  <span className="text-[#FF79C6]">]</span>
-                                            <br /><span className="text-[#FF79C6]">{"}"}</span>
-                                        </pre>
+                                        <div className="w-full h-auto flex items-center justify-center bg-[#0c0c0e]">
+                                            <img
+                                                src="https://xlzwfkgurrrspcdyqele.supabase.co/storage/v1/object/public/buck/dashboard.png"
+                                                alt="ClerkTree Dashboard"
+                                                className="w-full h-auto object-contain"
+                                            />
+                                        </div>
                                     )}
                                 </motion.div>
                             </AnimatePresence>
                         </div>
 
                         {/* Explanation Area (Right) */}
-                        <div className="flex-1 shrink-0 bg-[#0A0A0C] border border-white/[0.04] rounded-xl p-8 flex flex-col justify-start">
-                            <div className="font-mono text-[14px] leading-[1.8] text-[#6272A4]">
-                                <p># ClerkTree Platform</p>
-                                <br />
-                                <p># AI agents query ClerkTree to retrieve relevant context from your knowledge base and act on live systems in a single phone call.</p>
-                                <br />
-                                <p># Integration</p>
-                                <br />
-                                <p># To connect your backend with ClerkTree Voice Agents, you can seamlessly plug our webhook into your system or sync files securely onto our EU servers.</p>
-                                <br />
-                                <p className="mt-8 flex items-center gap-2 text-[#8BE9FD] group">
-                                    <span className="text-xl leading-none transition-transform group-hover:translate-x-1">→</span>
-                                    <a href="/docs" className="hover:underline underline-offset-4 cursor-pointer">
-                                        Read more on docs.clerktree.com
-                                    </a>
-                                </p>
+                        {activeTab === 'curl' && (
+                            <div className="flex-1 shrink-0 bg-[#0A0A0C] border border-white/[0.04] rounded-xl p-8 flex flex-col justify-start">
+                                <div className="font-mono text-[14px] leading-[1.8] text-[#6272A4]">
+                                    <p># ClerkTree Platform</p>
+                                    <br />
+                                    <p># AI agents query ClerkTree to retrieve relevant context from your knowledge base and act on live systems in a single phone call.</p>
+                                    <br />
+                                    <p># Integration</p>
+                                    <br />
+                                    <p># To connect your backend with ClerkTree Voice Agents, you can seamlessly plug our webhook into your system or sync files securely onto our EU servers.</p>
+                                    <br />
+                                    <p className="mt-8 flex items-center gap-2 text-[#8BE9FD] group">
+                                        <span className="text-xl leading-none transition-transform group-hover:translate-x-1">→</span>
+                                        <a href="/docs" className="hover:underline underline-offset-4 cursor-pointer">
+                                            Read more on docs.clerktree.com
+                                        </a>
+                                    </p>
+                                </div>
                             </div>
-                        </div>
+                        )}
                     </div>
                 </div>
             </div >
