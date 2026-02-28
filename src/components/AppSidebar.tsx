@@ -530,7 +530,10 @@ function AuthUserSection({ isDark, state }: { isDark: boolean; state: string }) 
                     key.includes('knowledge_base') ||
                     key.includes('active_call') ||
                     key.includes('groq_settings') ||
-                    key.includes('clerktree')
+                    (key.includes('clerktree') &&
+                        !key.includes('cookie_consent') &&
+                        !key.includes('banner-dismissed') &&
+                        !key.includes('seen_welcome'))
                 )) {
                     keysToRemove.push(key);
                 }
