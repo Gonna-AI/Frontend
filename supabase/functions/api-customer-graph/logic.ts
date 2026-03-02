@@ -12,8 +12,6 @@ import {
     NormalizedHistoryItem,
     SimilarityBreakdown,
     SimilarityEdge,
-    ClusterCopilotEvidenceMetric,
-    ClusterCopilotScoreCard,
 } from './types.ts';
 
 const DEFAULT_CATEGORY: NormalizedCategory = {
@@ -30,7 +28,6 @@ const DEFAULT_OPTIONS: GraphBuildOptions = {
     semanticTimeoutMs: 4000,
 };
 
-const DAY_IN_MS = 24 * 60 * 60 * 1000;
 const COPILOT_ALGORITHM_VERSION = 'cluster-copilot-groq-v1';
 
 const STOP_WORDS = new Set([
@@ -49,10 +46,6 @@ const PRIORITY_RISK: Record<string, number> = {
 
 const POSITIVE_SENTIMENTS = new Set(['very_positive', 'positive', 'slightly_positive']);
 const NEGATIVE_SENTIMENTS = new Set(['very_negative', 'negative', 'slightly_negative', 'anxious', 'urgent']);
-
-const RISK_INTENT_HINTS = ['refund', 'cancel', 'outage', 'downtime', 'complaint', 'escalation', 'frustrated', 'broken', 'chargeback', 'unresolved', 'churn', 'urgent'];
-const UPSELL_INTENT_HINTS = ['upgrade', 'enterprise', 'premium', 'pricing', 'add-on', 'expansion', 'annual', 'plan', 'seat', 'bundle', 'feature', 'purchase'];
-const REENGAGE_INTENT_HINTS = ['followup', 'follow-up', 'trial', 'inactive', 'reconnect', 'nudge', 'checkin', 'reminder', 'revisit', 'paused', 'cold', 'return'];
 
 function isRecord(value: unknown): value is Record<string, unknown> {
     return typeof value === 'object' && value !== null;
@@ -137,43 +130,12 @@ function clamp(value: number, min: number, max: number): number {
     return Math.max(min, Math.min(max, value));
 }
 
-function average(values: number[]): number {
-    if (!values.length) return 0;
-    return values.reduce((acc, value) => acc + value, 0) / values.length;
-}
-
 function hashString(input: string): string {
     let hash = 5381;
     for (let i = 0; i < input.length; i += 1) {
         hash = (hash * 33) ^ input.charCodeAt(i);
     }
     return Math.abs(hash >>> 0).toString(36);
-}
-
-function keywordSignalScore(values: string[], hints: string[]): number {
-    if (!values.length) return 0;
-    const normalized = values.map((value) => normalizeTag(value)).filter(Boolean);
-    if (!normalized.length) return 0;
-    let hits = 0;
-    for (const hint of hints) {
-        if (normalized.some((value) => value.includes(hint))) hits += 1;
-    }
-    return clamp(hits / Math.max(4, Math.min(8, hints.length)), 0, 1);
-}
-
-function formatPercent(value: number): string {
-    return `${Math.round(clamp(value, 0, 1) * 100)}%`;
-}
-
-function formatSignedPercent(value: number): string {
-    const bounded = clamp(value, -1, 1);
-    const raw = Math.round(Math.abs(bounded) * 100);
-    if (raw === 0) return '0%';
-    return `${bounded > 0 ? '+' : '-'}${raw}%`;
-}
-
-function formatDays(value: number): string {
-    return `${Math.max(0, Math.round(value))}d`;
 }
 
 function resolveCategory(value: unknown): NormalizedCategory {
@@ -221,7 +183,7 @@ function resolveContact(extractedFieldsValue: unknown, summaryText: string) {
         if (emailMatch?.[0]) email = normalizeEmail(emailMatch[0]);
     }
     if (!phone && summaryText) {
-        const phoneMatch = summaryText.match(/\\+?[0-9][0-9\\s\\-()]{6,}[0-9]/);
+        const phoneMatch = summaryText.match(/\+?[0-9][0-9\s()-]{6,}[0-9]/);
         if (phoneMatch?.[0]) phone = normalizePhone(phoneMatch[0]);
     }
     return { ...(email ? { email } : {}), ...(phone ? { phone } : {}) };
@@ -698,9 +660,9 @@ Rules:
             nurture: toUnitScore(parsed.scoreCard?.nurture, 0),
         };
 
-        const rationale = Array.isArray(parsed.rationale) ? parsed.rationale.filter((entry): entry is string => typeof entry === 'string' && entry.trim().length > 0).slice(0, 4) : [];
-        const playbook = Array.isArray(parsed.playbook) ? parsed.playbook.filter((entry): entry is string => typeof entry === 'string' && entry.trim().length > 0).slice(0, 4) : [];
-        const evidence = Array.isArray(parsed.evidence) ? parsed.evidence.filter((entry) => entry && typeof entry === 'object').slice(0, 5).map((entry, index) => {
+        const rationale = Array.isArray(parsed.rationale) ? parsed.rationale.filter((entry: any): entry is string => typeof entry === 'string' && entry.trim().length > 0).slice(0, 4) : [];
+        const playbook = Array.isArray(parsed.playbook) ? parsed.playbook.filter((entry: any): entry is string => typeof entry === 'string' && entry.trim().length > 0).slice(0, 4) : [];
+        const evidence = Array.isArray(parsed.evidence) ? parsed.evidence.filter((entry: any) => entry && typeof entry === 'object').slice(0, 5).map((entry: any, index: number) => {
             const value = toUnitScore(entry.value, 0);
             return { id: entry.id || `metric-${index + 1}`, label: entry.label || `Metric ${index + 1}`, value, formattedValue: entry.formattedValue || toFormattedPercent(value), direction: entry.direction === 'up' || entry.direction === 'down' ? entry.direction : 'neutral' as 'up' | 'down' | 'neutral' };
         }) : [];

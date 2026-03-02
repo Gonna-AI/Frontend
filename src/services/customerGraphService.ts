@@ -2,7 +2,7 @@ import { supabase } from '../config/supabase';
 import type { CustomerGraphFilters, CustomerGraphModel, GraphBuildOptions } from '../types/customerGraph';
 
 export async function buildGraphModel(
-  callHistory: unknown[],
+  _callHistory: unknown[],
   filters: CustomerGraphFilters,
   options: Partial<GraphBuildOptions> = {},
 ): Promise<CustomerGraphModel> {
