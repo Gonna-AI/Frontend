@@ -89,6 +89,41 @@ export interface SimilarityEdge {
   breakdown: SimilarityBreakdown;
 }
 
+export type ClusterCopilotAction = 'save_at_risk' | 'upsell' | 're_engage' | 'nurture';
+
+export interface ClusterCopilotScoreCard {
+  save_at_risk: number;
+  upsell: number;
+  re_engage: number;
+  nurture: number;
+}
+
+export interface ClusterCopilotEvidenceMetric {
+  id: string;
+  label: string;
+  value: number;
+  formattedValue: string;
+  direction: 'up' | 'down' | 'neutral';
+}
+
+export interface ClusterCopilotPlan {
+  clusterId: string;
+  primaryAction: ClusterCopilotAction;
+  secondaryAction?: ClusterCopilotAction;
+  confidence: number;
+  scoreCard: ClusterCopilotScoreCard;
+  rationale: string[];
+  playbook: string[];
+  evidence: ClusterCopilotEvidenceMetric[];
+  summary: string;
+  expectedOutcome: {
+    metric: 'retention' | 'revenue' | 'engagement';
+    lift: number;
+    windowDays: number;
+  };
+  algorithmVersion: string;
+}
+
 export interface CustomerCluster {
   id: string;
   label: string;
@@ -97,6 +132,7 @@ export interface CustomerCluster {
   riskScore: number;
   opportunityScore: number;
   sharedSignals: string[];
+  copilot?: ClusterCopilotPlan;
 }
 
 export interface CustomerGraphFilters {

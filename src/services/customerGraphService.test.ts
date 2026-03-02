@@ -164,4 +164,70 @@ describe('customerGraphService', () => {
     expect(model.stats.totalCustomers).toBeGreaterThanOrEqual(2);
     expect(model.profiles.length).toBe(model.stats.totalCustomers);
   });
+
+  it('builds clusters without copilot plans before AI enrichment', async () => {
+    const model = await buildGraphModel([
+      {
+        id: 'risk-call-1',
+        callerName: 'Anita',
+        date: '2026-02-10T10:00:00.000Z',
+        type: 'voice',
+        priority: 'critical',
+        tags: ['refund', 'outage', 'complaint'],
+        summary: { summaryText: 'Service outage and refund escalation requested urgently', topics: ['refund', 'outage'] },
+      },
+      {
+        id: 'risk-call-2',
+        callerName: 'Marco',
+        date: '2026-02-11T10:00:00.000Z',
+        type: 'text',
+        priority: 'high',
+        tags: ['refund', 'cancel', 'escalation'],
+        summary: { summaryText: 'Considering cancel after unresolved billing outage', topics: ['refund', 'cancel'] },
+      },
+    ], {
+      ...baseFilters,
+      minSimilarity: 0.2,
+    }, {
+      semanticEnabled: false,
+      cacheMode: 'off',
+    });
+
+    const targetCluster = model.clusters[0];
+    expect(targetCluster).toBeDefined();
+    expect(targetCluster.copilot).toBeUndefined();
+  });
+
+  it('keeps graph generation stable for stale low-activity clusters', async () => {
+    const model = await buildGraphModel([
+      {
+        id: 'reengage-call-1',
+        callerName: 'Liam',
+        date: '2024-11-01T09:00:00.000Z',
+        type: 'text',
+        priority: 'low',
+        tags: ['followup', 'trial'],
+        summary: { summaryText: 'Trial followup request from inactive user', topics: ['followup', 'trial'] },
+      },
+      {
+        id: 'reengage-call-2',
+        callerName: 'Nina',
+        date: '2024-11-03T09:00:00.000Z',
+        type: 'voice',
+        priority: 'low',
+        tags: ['checkin', 'reconnect'],
+        summary: { summaryText: 'Customer asked to reconnect later after pause', topics: ['checkin', 'reconnect'] },
+      },
+    ], {
+      ...baseFilters,
+      minSimilarity: 0.2,
+    }, {
+      semanticEnabled: false,
+      cacheMode: 'off',
+    });
+
+    const targetCluster = model.clusters[0];
+    expect(targetCluster).toBeDefined();
+    expect(targetCluster.memberCount).toBeGreaterThan(0);
+  });
 });

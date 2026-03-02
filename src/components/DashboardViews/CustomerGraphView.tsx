@@ -1,10 +1,14 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type ComponentType, type ReactNode } from 'react';
 import {
+  Activity,
   AlertCircle,
+  ArrowUpRight,
   Brain,
+  Loader2,
   LocateFixed,
   Network,
   RefreshCcw,
+  Repeat2,
   ShieldAlert,
   Sparkles,
   UserRound,
@@ -23,8 +27,10 @@ import {
 import { cn } from '../../utils/cn';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useDemoCall } from '../../contexts/DemoCallContext';
+import { enrichGraphWithAICopilot } from '../../services/customerGraphCopilotAIService';
 import { buildGraphModel } from '../../services/customerGraphService';
 import type {
+  ClusterCopilotAction,
   CustomerCluster,
   CustomerGraphFilters,
   CustomerGraphModel,
@@ -95,6 +101,10 @@ function clampScale(scale: number): number {
   return scale;
 }
 
+function formatLift(value: number): string {
+  return `+${Math.round(value * 100)}%`;
+}
+
 export default function CustomerGraphView({ isDark = true }: CustomerGraphViewProps) {
   const { t } = useLanguage();
   const { callHistory } = useDemoCall();
@@ -103,6 +113,10 @@ export default function CustomerGraphView({ isDark = true }: CustomerGraphViewPr
   const [interactionType, setInteractionType] = useState<(typeof TYPE_OPTIONS)[number]>('all');
   const [minSimilarity, setMinSimilarity] = useState(0.58);
   const [refreshNonce, setRefreshNonce] = useState(0);
+  const [aiInsightsLoading, setAiInsightsLoading] = useState(false);
+  const [aiInsightsProgress, setAiInsightsProgress] = useState({ completed: 0, total: 0 });
+  const [aiInsightsError, setAiInsightsError] = useState<string | null>(null);
+  const [aiInsightsGeneratedAt, setAiInsightsGeneratedAt] = useState<string | null>(null);
 
   const [model, setModel] = useState<CustomerGraphModel | null>(null);
   const [loading, setLoading] = useState(false);
@@ -279,6 +293,55 @@ export default function CustomerGraphView({ isDark = true }: CustomerGraphViewPr
   const selectedCluster = selectedClusterId
     ? model?.clusters.find((cluster) => cluster.id === selectedClusterId) || null
     : null;
+  const selectedCopilot = selectedCluster?.copilot || null;
+
+  const copilotActionMeta = useMemo<Record<ClusterCopilotAction, {
+    label: string;
+    icon: ComponentType<{ className?: string }>;
+    activeClassName: string;
+    subtleClassName: string;
+  }>>(() => ({
+    save_at_risk: {
+      label: t('customerGraph.copilot.action.saveAtRisk'),
+      icon: ShieldAlert,
+      activeClassName: isDark
+        ? 'border-rose-500/35 bg-rose-500/12 text-rose-300'
+        : 'border-rose-200 bg-rose-50 text-rose-700',
+      subtleClassName: isDark
+        ? 'bg-rose-500/8 text-rose-300'
+        : 'bg-rose-100 text-rose-700',
+    },
+    upsell: {
+      label: t('customerGraph.copilot.action.upsell'),
+      icon: ArrowUpRight,
+      activeClassName: isDark
+        ? 'border-emerald-500/35 bg-emerald-500/12 text-emerald-300'
+        : 'border-emerald-200 bg-emerald-50 text-emerald-700',
+      subtleClassName: isDark
+        ? 'bg-emerald-500/8 text-emerald-300'
+        : 'bg-emerald-100 text-emerald-700',
+    },
+    re_engage: {
+      label: t('customerGraph.copilot.action.reengage'),
+      icon: Repeat2,
+      activeClassName: isDark
+        ? 'border-cyan-500/35 bg-cyan-500/12 text-cyan-300'
+        : 'border-cyan-200 bg-cyan-50 text-cyan-700',
+      subtleClassName: isDark
+        ? 'bg-cyan-500/8 text-cyan-300'
+        : 'bg-cyan-100 text-cyan-700',
+    },
+    nurture: {
+      label: t('customerGraph.copilot.action.nurture'),
+      icon: Activity,
+      activeClassName: isDark
+        ? 'border-white/20 bg-white/10 text-white/85'
+        : 'border-black/15 bg-black/5 text-black/75',
+      subtleClassName: isDark
+        ? 'bg-white/8 text-white/75'
+        : 'bg-black/8 text-black/70',
+    },
+  }), [isDark, t]);
 
   const selectedProfileEdges: SimilarityEdge[] = useMemo(() => {
     if (!model || !selectedProfile) return [];
@@ -295,6 +358,13 @@ export default function CustomerGraphView({ isDark = true }: CustomerGraphViewPr
       .filter((profile): profile is CustomerProfile => !!profile)
       .sort((a, b) => b.interactionCount - a.interactionCount);
   }, [profileById, selectedCluster]);
+  const selectedCopilotMeta = selectedCopilot
+    ? copilotActionMeta[selectedCopilot.primaryAction]
+    : null;
+  const selectedCopilotScoreRows = selectedCopilot
+    ? (Object.entries(selectedCopilot.scoreCard) as Array<[ClusterCopilotAction, number]>)
+      .sort((a, b) => b[1] - a[1])
+    : [];
   const selectedClusterMemberIdSet = useMemo(() => {
     if (!selectedCluster) return new Set<string>();
     return new Set(selectedCluster.memberIds);
@@ -416,6 +486,55 @@ export default function CustomerGraphView({ isDark = true }: CustomerGraphViewPr
     fitToNodeIds(cluster.memberIds);
   };
 
+  const handleGenerateAIInsights = useCallback(async () => {
+    setAiInsightsLoading(true);
+    setAiInsightsError(null);
+    setAiInsightsProgress({ completed: 0, total: 0 });
+
+    try {
+      const refreshedModel = await buildGraphModel(callHistory, filters, {
+        semanticEnabled: true,
+        minScore: minSimilarity,
+        cacheMode: 'refresh',
+        maxNeighbors: 4,
+        semanticTimeoutMs: 3500,
+        cacheTtlMs: 4 * 60 * 1000,
+      });
+
+      setModel(refreshedModel);
+      if (!selectedProfileId && refreshedModel.profiles[0]) {
+        setSelectedProfileId(refreshedModel.profiles[0].id);
+      }
+
+      const enrichedModel = await enrichGraphWithAICopilot(refreshedModel, {
+        onProgress: (progress) => {
+          setAiInsightsProgress(progress);
+        },
+        timeoutMs: 45000,
+      });
+
+      setModel(enrichedModel);
+      setAiInsightsGeneratedAt(new Date().toISOString());
+
+      if (selectedClusterId && !enrichedModel.clusters.find((cluster) => cluster.id === selectedClusterId)) {
+        setSelectedClusterId(enrichedModel.clusters[0]?.id || null);
+      }
+      if (!selectedClusterId) {
+        const firstCluster = enrichedModel.clusters[0];
+        setSelectedClusterId(firstCluster?.id || null);
+        const firstMemberId = firstCluster?.memberIds[0] || null;
+        if (firstMemberId) setSelectedProfileId(firstMemberId);
+      }
+    } catch (loadError: unknown) {
+      const message = loadError instanceof Error
+        ? loadError.message
+        : t('customerGraph.copilot.generateError');
+      setAiInsightsError(message);
+    } finally {
+      setAiInsightsLoading(false);
+    }
+  }, [callHistory, filters, minSimilarity, selectedClusterId, selectedProfileId, t]);
+
   useEffect(() => {
     if (!model || renderedNodes.length === 0) return;
 
@@ -469,6 +588,27 @@ export default function CustomerGraphView({ isDark = true }: CustomerGraphViewPr
 
           <div className="flex flex-wrap items-center gap-2">
             <button
+              onClick={handleGenerateAIInsights}
+              disabled={aiInsightsLoading || loading}
+              className={cn(
+                'inline-flex items-center gap-2 px-3.5 py-2 rounded-lg border text-sm font-medium transition-all',
+                aiInsightsLoading
+                  ? (isDark
+                    ? 'bg-cyan-500/12 border-cyan-500/25 text-cyan-300'
+                    : 'bg-cyan-50 border-cyan-200 text-cyan-700')
+                  : (isDark
+                    ? 'bg-cyan-500/10 border-cyan-500/25 text-cyan-200 hover:bg-cyan-500/15'
+                    : 'bg-cyan-50 border-cyan-200 text-cyan-700 hover:bg-cyan-100'),
+                (aiInsightsLoading || loading) && 'cursor-not-allowed opacity-90',
+              )}
+            >
+              {aiInsightsLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Brain className="w-4 h-4" />}
+              {aiInsightsLoading
+                ? `${t('customerGraph.controls.generatingInsights')} ${aiInsightsProgress.completed}/${aiInsightsProgress.total || model?.clusters.length || 0}`
+                : t('customerGraph.controls.generateInsights')}
+            </button>
+
+            <button
               onClick={() => setRefreshNonce((prev) => prev + 1)}
               className={cn(
                 'inline-flex items-center gap-2 px-3.5 py-2 rounded-lg border text-sm font-medium transition-all',
@@ -494,6 +634,19 @@ export default function CustomerGraphView({ isDark = true }: CustomerGraphViewPr
               {t('customerGraph.controls.resetView')}
             </button>
           </div>
+        </div>
+
+        <div className="relative z-10 mt-3 min-h-5">
+          {aiInsightsError && (
+            <p className={cn('text-xs', isDark ? 'text-rose-300' : 'text-rose-700')}>
+              {aiInsightsError}
+            </p>
+          )}
+          {!aiInsightsError && aiInsightsGeneratedAt && (
+            <p className={cn('text-xs', isDark ? 'text-white/55' : 'text-black/55')}>
+              {t('customerGraph.copilot.generatedAt')} {new Date(aiInsightsGeneratedAt).toLocaleTimeString()}
+            </p>
+          )}
         </div>
       </section>
 
@@ -639,10 +792,10 @@ export default function CustomerGraphView({ isDark = true }: CustomerGraphViewPr
             />
           )}
 
-          <div className="grid grid-cols-1 xl:grid-cols-4 gap-4 items-start">
+          <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_minmax(380px,430px)] gap-5 xl:gap-6 items-start">
             <section
               className={cn(
-                'xl:col-span-3 rounded-2xl border overflow-hidden',
+                'rounded-2xl border overflow-hidden',
                 isDark ? 'bg-[#09090B] border-white/10' : 'bg-white border-black/10',
               )}
             >
@@ -843,7 +996,7 @@ export default function CustomerGraphView({ isDark = true }: CustomerGraphViewPr
 
             <section
               className={cn(
-                'rounded-2xl border p-4 space-y-4 sticky top-24',
+                'rounded-2xl border p-4 space-y-4 sticky top-24 xl:ml-1',
                 isDark ? 'bg-[#09090B] border-white/10' : 'bg-white border-black/10',
               )}
             >
@@ -868,6 +1021,148 @@ export default function CustomerGraphView({ isDark = true }: CustomerGraphViewPr
                       </div>
                     </div>
                   </div>
+
+                  {selectedCluster && (
+                    <>
+                      {selectedCopilot && selectedCopilotMeta ? (
+                        <div className={cn(
+                          'rounded-xl border p-3.5 space-y-3',
+                          isDark ? 'border-white/10 bg-white/[0.03]' : 'border-black/10 bg-black/[0.03]',
+                        )}>
+                          <div className="flex items-start justify-between gap-3">
+                            <div>
+                              <p className={cn('text-[11px] uppercase tracking-wider', isDark ? 'text-white/45' : 'text-black/45')}>
+                                {t('customerGraph.copilot.title')}
+                              </p>
+                              <div className="flex items-center gap-2 mt-1.5">
+                                <span
+                                  className={cn(
+                                    'inline-flex items-center gap-1.5 text-[11px] px-2 py-1 rounded-full border',
+                                    selectedCopilotMeta.activeClassName,
+                                  )}
+                                >
+                                  <selectedCopilotMeta.icon className="w-3.5 h-3.5" />
+                                  {selectedCopilotMeta.label}
+                                </span>
+                                <span className={cn(
+                                  'text-[11px] font-semibold px-2 py-1 rounded-full border',
+                                  isDark ? 'border-white/10 bg-white/5 text-white/80' : 'border-black/10 bg-black/5 text-black/75',
+                                )}>
+                                  {Math.round(selectedCopilot.confidence * 100)}% {t('customerGraph.copilot.confidence')}
+                                </span>
+                              </div>
+                            </div>
+
+                            <div className={cn(
+                              'text-right text-[11px] px-2 py-1 rounded-lg border',
+                              isDark ? 'border-white/10 bg-white/5 text-white/80' : 'border-black/10 bg-black/5 text-black/75',
+                            )}>
+                              <p className={isDark ? 'text-white/45' : 'text-black/45'}>
+                                {t(`customerGraph.copilot.metric.${selectedCopilot.expectedOutcome.metric}`)}
+                              </p>
+                              <p className={cn('font-semibold text-sm mt-0.5', isDark ? 'text-cyan-300' : 'text-cyan-700')}>
+                                {formatLift(selectedCopilot.expectedOutcome.lift)}
+                              </p>
+                            </div>
+                          </div>
+
+                          <p className={cn('text-xs leading-relaxed', isDark ? 'text-white/70' : 'text-black/70')}>
+                            {selectedCopilot.summary}
+                          </p>
+
+                          <div className="space-y-1.5">
+                            {selectedCopilotScoreRows.map(([action, score]) => {
+                              const meta = copilotActionMeta[action];
+                              return (
+                                <div key={action} className="flex items-center gap-2">
+                                  <span className={cn('text-[11px] w-[98px] truncate', isDark ? 'text-white/55' : 'text-black/55')}>
+                                    {meta.label}
+                                  </span>
+                                  <div className={cn(
+                                    'h-1.5 rounded-full flex-1 overflow-hidden',
+                                    isDark ? 'bg-white/10' : 'bg-black/10',
+                                  )}>
+                                    <div
+                                      className={cn(
+                                        'h-full rounded-full',
+                                        action === selectedCopilot.primaryAction
+                                          ? (isDark ? 'bg-cyan-400' : 'bg-cyan-500')
+                                          : (isDark ? 'bg-white/40' : 'bg-black/35'),
+                                      )}
+                                      style={{ width: `${Math.max(4, Math.round(score * 100))}%` }}
+                                    />
+                                  </div>
+                                  <span className={cn('text-[11px] font-medium w-8 text-right', isDark ? 'text-white/65' : 'text-black/65')}>
+                                    {Math.round(score * 100)}
+                                  </span>
+                                </div>
+                              );
+                            })}
+                          </div>
+
+                          <div>
+                            <p className={cn('text-[11px] uppercase tracking-wider mb-1.5', isDark ? 'text-white/45' : 'text-black/45')}>
+                              {t('customerGraph.copilot.why')}
+                            </p>
+                            <div className="space-y-1.5">
+                              {selectedCopilot.rationale.map((line, index) => (
+                                <p key={`${selectedCopilot.clusterId}-why-${index}`} className={cn('text-[11px] leading-relaxed', isDark ? 'text-white/70' : 'text-black/70')}>
+                                  {line}
+                                </p>
+                              ))}
+                            </div>
+                          </div>
+
+                          <div>
+                            <p className={cn('text-[11px] uppercase tracking-wider mb-1.5', isDark ? 'text-white/45' : 'text-black/45')}>
+                              {t('customerGraph.copilot.playbook')}
+                            </p>
+                            <div className="space-y-1.5">
+                              {selectedCopilot.playbook.map((step, stepIndex) => (
+                                <div key={`${selectedCopilot.clusterId}-step-${stepIndex}`} className="flex items-start gap-2">
+                                  <span className={cn(
+                                    'inline-flex items-center justify-center w-4 h-4 rounded-full text-[10px] font-semibold mt-0.5',
+                                    selectedCopilotMeta.subtleClassName,
+                                  )}>
+                                    {stepIndex + 1}
+                                  </span>
+                                  <p className={cn('text-[11px] leading-relaxed', isDark ? 'text-white/70' : 'text-black/70')}>
+                                    {step}
+                                  </p>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className={cn(
+                          'rounded-xl border p-3.5 space-y-3',
+                          isDark ? 'border-white/10 bg-white/[0.03]' : 'border-black/10 bg-black/[0.03]',
+                        )}>
+                          <p className={cn('text-[11px] uppercase tracking-wider', isDark ? 'text-white/45' : 'text-black/45')}>
+                            {t('customerGraph.copilot.title')}
+                          </p>
+                          <p className={cn('text-xs leading-relaxed', isDark ? 'text-white/70' : 'text-black/70')}>
+                            {t('customerGraph.copilot.emptyPrompt')}
+                          </p>
+                          <button
+                            onClick={handleGenerateAIInsights}
+                            disabled={aiInsightsLoading}
+                            className={cn(
+                              'inline-flex items-center gap-2 px-3 py-2 rounded-lg border text-xs font-medium transition-all',
+                              isDark
+                                ? 'border-cyan-500/25 bg-cyan-500/10 text-cyan-300 hover:bg-cyan-500/15'
+                                : 'border-cyan-200 bg-cyan-50 text-cyan-700 hover:bg-cyan-100',
+                              aiInsightsLoading && 'cursor-not-allowed opacity-85',
+                            )}
+                          >
+                            {aiInsightsLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Brain className="w-3.5 h-3.5" />}
+                            {aiInsightsLoading ? t('customerGraph.controls.generatingInsights') : t('customerGraph.controls.generateInsights')}
+                          </button>
+                        </div>
+                      )}
+                    </>
+                  )}
 
                   <div>
                     <p className={cn('text-[11px] uppercase tracking-wider mb-2', isDark ? 'text-white/45' : 'text-black/45')}>
@@ -960,6 +1255,7 @@ export default function CustomerGraphView({ isDark = true }: CustomerGraphViewPr
                     <th className="px-4 py-3 text-left">{t('customerGraph.clusterTable.members')}</th>
                     <th className="px-4 py-3 text-left">{t('customerGraph.clusterTable.risk')}</th>
                     <th className="px-4 py-3 text-left">{t('customerGraph.clusterTable.opportunity')}</th>
+                    <th className="px-4 py-3 text-left">{t('customerGraph.clusterTable.nextAction')}</th>
                     <th className="px-4 py-3 text-left">{t('customerGraph.clusterTable.signals')}</th>
                   </tr>
                 </thead>
@@ -1001,6 +1297,27 @@ export default function CustomerGraphView({ isDark = true }: CustomerGraphViewPr
                         )}>
                           {formatPercent(cluster.opportunityScore)}
                         </span>
+                      </td>
+                      <td className="px-4 py-3">
+                        {cluster.copilot ? (
+                          <div className="flex flex-col gap-1">
+                            <span className={cn(
+                              'inline-flex items-center gap-1.5 w-fit text-[11px] px-2 py-1 rounded-full border',
+                              copilotActionMeta[cluster.copilot.primaryAction].activeClassName,
+                            )}>
+                              {(() => {
+                                const ActionIcon = copilotActionMeta[cluster.copilot.primaryAction].icon;
+                                return <ActionIcon className="w-3.5 h-3.5" />;
+                              })()}
+                              {copilotActionMeta[cluster.copilot.primaryAction].label}
+                            </span>
+                            <span className={cn('text-[11px]', isDark ? 'text-white/55' : 'text-black/55')}>
+                              {Math.round(cluster.copilot.confidence * 100)}% {t('customerGraph.copilot.confidence')}
+                            </span>
+                          </div>
+                        ) : (
+                          <span className={isDark ? 'text-white/45' : 'text-black/45'}>-</span>
+                        )}
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex flex-wrap gap-1">

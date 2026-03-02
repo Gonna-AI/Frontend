@@ -1,5 +1,9 @@
 import { ragService } from './ragService';
 import type {
+  ClusterCopilotAction,
+  ClusterCopilotEvidenceMetric,
+  ClusterCopilotPlan,
+  ClusterCopilotScoreCard,
   CustomerCluster,
   CustomerGraphFilters,
   CustomerGraphModel,
@@ -29,8 +33,10 @@ const DEFAULT_OPTIONS: GraphBuildOptions = {
   cacheMode: 'default',
 };
 
-const CACHE_KEY_PREFIX = 'clerktree_customer_graph_cache_v1';
+const CACHE_KEY_PREFIX = 'clerktree_customer_graph_cache_v2';
 const MEMORY_CACHE = new Map<string, { expiresAt: number; data: CustomerGraphModel }>();
+const DAY_IN_MS = 24 * 60 * 60 * 1000;
+const COPILOT_ALGORITHM_VERSION = 'cluster-copilot-v1.0.0';
 
 const STOP_WORDS = new Set([
   'a', 'an', 'and', 'are', 'as', 'at', 'be', 'by', 'for', 'from', 'has', 'have', 'he', 'her', 'here', 'his',
@@ -48,6 +54,51 @@ const PRIORITY_RISK: Record<string, number> = {
 
 const POSITIVE_SENTIMENTS = new Set(['very_positive', 'positive', 'slightly_positive']);
 const NEGATIVE_SENTIMENTS = new Set(['very_negative', 'negative', 'slightly_negative', 'anxious', 'urgent']);
+
+const RISK_INTENT_HINTS = [
+  'refund',
+  'cancel',
+  'outage',
+  'downtime',
+  'complaint',
+  'escalation',
+  'frustrated',
+  'broken',
+  'chargeback',
+  'unresolved',
+  'churn',
+  'urgent',
+];
+
+const UPSELL_INTENT_HINTS = [
+  'upgrade',
+  'enterprise',
+  'premium',
+  'pricing',
+  'add-on',
+  'expansion',
+  'annual',
+  'plan',
+  'seat',
+  'bundle',
+  'feature',
+  'purchase',
+];
+
+const REENGAGE_INTENT_HINTS = [
+  'followup',
+  'follow-up',
+  'trial',
+  'inactive',
+  'reconnect',
+  'nudge',
+  'checkin',
+  'reminder',
+  'revisit',
+  'paused',
+  'cold',
+  'return',
+];
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null;
@@ -165,12 +216,52 @@ function clamp(value: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, value));
 }
 
+function average(values: number[]): number {
+  if (!values.length) return 0;
+  return values.reduce((acc, value) => acc + value, 0) / values.length;
+}
+
 function hashString(input: string): string {
   let hash = 5381;
   for (let i = 0; i < input.length; i += 1) {
     hash = (hash * 33) ^ input.charCodeAt(i);
   }
   return Math.abs(hash >>> 0).toString(36);
+}
+
+function keywordSignalScore(values: string[], hints: string[]): number {
+  if (!values.length) return 0;
+
+  const normalized = values
+    .map((value) => normalizeTag(value))
+    .filter(Boolean);
+
+  if (!normalized.length) return 0;
+
+  let hits = 0;
+  for (const hint of hints) {
+    if (normalized.some((value) => value.includes(hint))) {
+      hits += 1;
+    }
+  }
+
+  return clamp(hits / Math.max(4, Math.min(8, hints.length)), 0, 1);
+}
+
+function formatPercent(value: number): string {
+  return `${Math.round(clamp(value, 0, 1) * 100)}%`;
+}
+
+function formatSignedPercent(value: number): string {
+  const bounded = clamp(value, -1, 1);
+  const raw = Math.round(Math.abs(bounded) * 100);
+  if (raw === 0) return '0%';
+  return `${bounded > 0 ? '+' : '-'}${raw}%`;
+}
+
+function formatDays(value: number): string {
+  const rounded = Math.max(0, Math.round(value));
+  return `${rounded}d`;
 }
 
 function resolveCategory(value: unknown): NormalizedCategory {
@@ -888,6 +979,464 @@ export function clusterProfiles(
   }
 
   return clusters.sort((a, b) => b.memberCount - a.memberCount);
+}
+
+type CopilotFeatureKey =
+  | 'risk'
+  | 'opportunity'
+  | 'negativeSentiment'
+  | 'positiveSentiment'
+  | 'neutralSentiment'
+  | 'criticalPriority'
+  | 'downwardMomentum'
+  | 'upwardMomentum'
+  | 'staleness'
+  | 'recentActivity'
+  | 'cohesion'
+  | 'influence'
+  | 'riskIntent'
+  | 'upsellIntent'
+  | 'reengageIntent'
+  | 'highValue'
+  | 'size'
+  | 'riskInverse';
+
+type CopilotFeatures = Record<CopilotFeatureKey, number>;
+
+interface CopilotScoreResult {
+  action: ClusterCopilotAction;
+  score: number;
+  contributions: Array<{ key: CopilotFeatureKey; value: number; contribution: number }>;
+}
+
+const COPILOT_WEIGHTS: Record<ClusterCopilotAction, Partial<Record<CopilotFeatureKey, number>>> = {
+  save_at_risk: {
+    risk: 0.3,
+    negativeSentiment: 0.16,
+    criticalPriority: 0.12,
+    downwardMomentum: 0.13,
+    riskIntent: 0.1,
+    staleness: 0.09,
+    size: 0.05,
+    cohesion: 0.05,
+  },
+  upsell: {
+    opportunity: 0.32,
+    positiveSentiment: 0.14,
+    upsellIntent: 0.17,
+    upwardMomentum: 0.13,
+    cohesion: 0.08,
+    highValue: 0.08,
+    influence: 0.05,
+    recentActivity: 0.03,
+  },
+  re_engage: {
+    staleness: 0.28,
+    downwardMomentum: 0.2,
+    neutralSentiment: 0.1,
+    reengageIntent: 0.12,
+    opportunity: 0.12,
+    positiveSentiment: 0.04,
+    recentActivity: 0.1,
+    size: 0.04,
+  },
+  nurture: {
+    recentActivity: 0.22,
+    cohesion: 0.2,
+    positiveSentiment: 0.18,
+    opportunity: 0.16,
+    riskInverse: 0.12,
+    influence: 0.12,
+  },
+};
+
+function scoreCopilotAction(
+  action: ClusterCopilotAction,
+  features: CopilotFeatures,
+): CopilotScoreResult {
+  const weights = COPILOT_WEIGHTS[action];
+  let score = 0;
+  const contributions: Array<{ key: CopilotFeatureKey; value: number; contribution: number }> = [];
+
+  for (const [key, weight] of Object.entries(weights) as Array<[CopilotFeatureKey, number]>) {
+    const value = clamp(features[key] || 0, 0, 1);
+    const contribution = value * weight;
+    score += contribution;
+    contributions.push({ key, value, contribution });
+  }
+
+  contributions.sort((a, b) => b.contribution - a.contribution);
+
+  return {
+    action,
+    score: clamp(score, 0, 1),
+    contributions,
+  };
+}
+
+function resolveCopilotRationale(
+  action: ClusterCopilotAction,
+  contributions: Array<{ key: CopilotFeatureKey; value: number; contribution: number }>,
+  momentum: number,
+  daysSinceLastInteraction: number,
+): string[] {
+  const reasons: string[] = [];
+
+  for (const { key, value, contribution } of contributions) {
+    if (contribution < 0.035) continue;
+
+    switch (key) {
+      case 'risk':
+        reasons.push(`Risk pressure is elevated at ${formatPercent(value)} across this cluster.`);
+        break;
+      case 'opportunity':
+        reasons.push(`Expansion potential is strong at ${formatPercent(value)} based on recent interactions.`);
+        break;
+      case 'negativeSentiment':
+        reasons.push(`Negative sentiment concentration is high (${formatPercent(value)}), indicating churn risk.`);
+        break;
+      case 'positiveSentiment':
+        reasons.push(`Positive sentiment remains healthy (${formatPercent(value)}), enabling proactive growth motions.`);
+        break;
+      case 'neutralSentiment':
+        reasons.push(`Many interactions are neutral (${formatPercent(value)}), making reactivation messaging effective.`);
+        break;
+      case 'criticalPriority':
+        reasons.push(`High-priority signals are frequent (${formatPercent(value)} of interactions).`);
+        break;
+      case 'downwardMomentum':
+        reasons.push(`Momentum declined ${formatSignedPercent(momentum)} versus the prior 14-day window.`);
+        break;
+      case 'upwardMomentum':
+        reasons.push(`Momentum improved ${formatSignedPercent(momentum)} in the latest 14-day window.`);
+        break;
+      case 'staleness':
+        reasons.push(`Last touchpoint is ${formatDays(daysSinceLastInteraction)} ago, so urgency to act is rising.`);
+        break;
+      case 'recentActivity':
+        reasons.push(`Recent activity intensity is ${formatPercent(value)}, giving a strong execution window.`);
+        break;
+      case 'cohesion':
+        reasons.push(`Cluster cohesion is ${formatPercent(value)}, so one playbook can scale across members.`);
+        break;
+      case 'influence':
+        reasons.push(`Network influence is ${formatPercent(value)}, so this cluster can amplify downstream outcomes.`);
+        break;
+      case 'riskIntent':
+        reasons.push('Language signals show refund/cancellation/escalation intent across multiple members.');
+        break;
+      case 'upsellIntent':
+        reasons.push('Pricing and upgrade intent terms are recurring, indicating commercial readiness.');
+        break;
+      case 'reengageIntent':
+        reasons.push('Follow-up and reactivation intent terms suggest a re-engagement campaign will land well.');
+        break;
+      case 'highValue':
+        reasons.push(`High-value member concentration is ${formatPercent(value)} within this segment.`);
+        break;
+      case 'size':
+        reasons.push(`Cluster size (${formatPercent(value)} normalized) makes this action materially impactful.`);
+        break;
+      case 'riskInverse':
+        reasons.push(`Risk is currently controlled (${formatPercent(value)} stable baseline).`);
+        break;
+      default:
+        break;
+    }
+
+    if (reasons.length >= 3) break;
+  }
+
+  if (!reasons.length) {
+    const fallbackByAction: Record<ClusterCopilotAction, string> = {
+      save_at_risk: 'Signals indicate elevated retention risk that should be addressed immediately.',
+      upsell: 'Signals indicate this cluster is likely to convert with value-led expansion.',
+      re_engage: 'Signals indicate this cluster needs a structured reactivation motion.',
+      nurture: 'Signals indicate this cluster should stay in a low-friction nurture stream.',
+    };
+    reasons.push(fallbackByAction[action]);
+  }
+
+  return reasons;
+}
+
+function buildCopilotPlaybook(action: ClusterCopilotAction, sharedSignals: string[]): string[] {
+  const signalHint = sharedSignals[0] || 'primary cluster signal';
+
+  if (action === 'save_at_risk') {
+    return [
+      `Route top-risk members to a retention queue in under 2 hours, keyed on "${signalHint}".`,
+      'Send a resolution-first outreach with owner + ETA, then confirm value recovery path.',
+      'Escalate unresolved accounts after one follow-up and monitor 7-day sentiment delta.',
+      'Track save-rate, time-to-resolution, and repeat-contact reduction weekly.',
+    ];
+  }
+
+  if (action === 'upsell') {
+    return [
+      `Prioritize members with pricing/feature intent, starting with "${signalHint}" narratives.`,
+      'Run value-proven outreach: ROI proof, plan comparison, and frictionless upgrade path.',
+      'Offer a 14-day pilot or scoped add-on to reduce decision friction.',
+      'Track conversion rate, expansion ARR, and sales-cycle compression.',
+    ];
+  }
+
+  if (action === 're_engage') {
+    return [
+      `Launch a reactivation sequence referencing "${signalHint}" and last known context.`,
+      'Use a 3-step cadence: reminder, value recap, final incentive within 10 days.',
+      'Push warm responders to assisted onboarding or success-call scheduling.',
+      'Track reactivation rate, reply rate, and next-touch conversion.',
+    ];
+  }
+
+  return [
+    'Keep this segment on a low-friction nurture cadence with educational touchpoints.',
+    `Refresh messaging around "${signalHint}" every 2 weeks based on new interactions.`,
+    'Promote success stories and lightweight check-ins to preserve engagement.',
+    'Track engagement consistency and migration into upsell-ready cohorts.',
+  ];
+}
+
+function buildCopilotOutcome(
+  action: ClusterCopilotAction,
+  score: number,
+): ClusterCopilotPlan['expectedOutcome'] {
+  if (action === 'save_at_risk') {
+    return {
+      metric: 'retention',
+      lift: clamp(0.06 + score * 0.18, 0.06, 0.26),
+      windowDays: 21,
+    };
+  }
+
+  if (action === 'upsell') {
+    return {
+      metric: 'revenue',
+      lift: clamp(0.08 + score * 0.22, 0.08, 0.3),
+      windowDays: 30,
+    };
+  }
+
+  if (action === 're_engage') {
+    return {
+      metric: 'engagement',
+      lift: clamp(0.1 + score * 0.2, 0.1, 0.3),
+      windowDays: 14,
+    };
+  }
+
+  return {
+    metric: 'engagement',
+    lift: clamp(0.05 + score * 0.12, 0.05, 0.18),
+    windowDays: 28,
+  };
+}
+
+export function computeClusterCopilotPlans(
+  clusters: CustomerCluster[],
+  profiles: CustomerProfile[],
+  edges: SimilarityEdge[],
+): CustomerCluster[] {
+  if (!clusters.length) return clusters;
+
+  const profileById = new Map(profiles.map((profile) => [profile.id, profile]));
+  const clusterByMemberId = new Map<string, string>();
+  const degreeByProfileId = new Map<string, number>();
+  const internalEdgesByCluster = new Map<string, SimilarityEdge[]>();
+
+  for (const cluster of clusters) {
+    for (const memberId of cluster.memberIds) {
+      clusterByMemberId.set(memberId, cluster.id);
+    }
+    internalEdgesByCluster.set(cluster.id, []);
+  }
+
+  for (const edge of edges) {
+    degreeByProfileId.set(edge.source, (degreeByProfileId.get(edge.source) || 0) + edge.score);
+    degreeByProfileId.set(edge.target, (degreeByProfileId.get(edge.target) || 0) + edge.score);
+
+    const sourceClusterId = clusterByMemberId.get(edge.source);
+    const targetClusterId = clusterByMemberId.get(edge.target);
+    if (sourceClusterId && sourceClusterId === targetClusterId) {
+      internalEdgesByCluster.get(sourceClusterId)?.push(edge);
+    }
+  }
+
+  const maxInfluence = Math.max(1, ...Array.from(degreeByProfileId.values()));
+  const referenceTimestamp = Math.max(
+    Date.now(),
+    ...profiles.map((profile) => profile.lastSeen.getTime()).filter((value) => !Number.isNaN(value)),
+  );
+
+  return clusters.map((cluster) => {
+    const members = cluster.memberIds
+      .map((memberId) => profileById.get(memberId))
+      .filter((profile): profile is CustomerProfile => !!profile);
+
+    if (!members.length) {
+      return cluster;
+    }
+
+    const allInteractions = members.flatMap((member) => member.interactions);
+    const sentimentTotal = Math.max(1, allInteractions.length);
+    const negativeSentimentRatio = allInteractions.filter((entry) => NEGATIVE_SENTIMENTS.has(entry.sentiment)).length / sentimentTotal;
+    const positiveSentimentRatio = allInteractions.filter((entry) => POSITIVE_SENTIMENTS.has(entry.sentiment)).length / sentimentTotal;
+    const neutralSentimentRatio = clamp(1 - negativeSentimentRatio - positiveSentimentRatio, 0, 1);
+    const criticalPriorityRatio = allInteractions.filter((entry) => entry.priority === 'critical' || entry.priority === 'high').length / sentimentTotal;
+
+    let recentCount = 0;
+    let previousCount = 0;
+    for (const interaction of allInteractions) {
+      const ageDays = (referenceTimestamp - interaction.date.getTime()) / DAY_IN_MS;
+      if (ageDays <= 14) {
+        recentCount += 1;
+      } else if (ageDays <= 28) {
+        previousCount += 1;
+      }
+    }
+
+    const momentum = clamp((recentCount - previousCount) / Math.max(1, previousCount + 1), -1, 1);
+    const recentActivityNorm = clamp(recentCount / Math.max(1, members.length * 2), 0, 1);
+
+    const latestSeenTimestamp = Math.max(...members.map((member) => member.lastSeen.getTime()));
+    const daysSinceLastInteraction = Math.max(0, (referenceTimestamp - latestSeenTimestamp) / DAY_IN_MS);
+    const staleness = clamp(daysSinceLastInteraction / 60, 0, 1);
+
+    const signalUniverse = unique([
+      ...members.flatMap((member) => member.signal.topics),
+      ...members.flatMap((member) => member.signal.tags),
+      ...members.flatMap((member) => member.signal.intentTokens),
+    ]);
+
+    const riskIntent = keywordSignalScore(signalUniverse, RISK_INTENT_HINTS);
+    const upsellIntent = keywordSignalScore(signalUniverse, UPSELL_INTENT_HINTS);
+    const reengageIntent = keywordSignalScore(signalUniverse, REENGAGE_INTENT_HINTS);
+    const highValueRatio = members.filter((member) => member.opportunityScore >= 0.65).length / members.length;
+
+    const internalEdges = internalEdgesByCluster.get(cluster.id) || [];
+    const cohesion = average(internalEdges.map((edge) => edge.score));
+    const influence = average(members.map((member) => (degreeByProfileId.get(member.id) || 0) / maxInfluence));
+    const size = clamp(Math.log2(cluster.memberCount + 1) / 5, 0, 1);
+
+    const features: CopilotFeatures = {
+      risk: cluster.riskScore,
+      opportunity: cluster.opportunityScore,
+      negativeSentiment: negativeSentimentRatio,
+      positiveSentiment: positiveSentimentRatio,
+      neutralSentiment: neutralSentimentRatio,
+      criticalPriority: criticalPriorityRatio,
+      downwardMomentum: clamp(-momentum, 0, 1),
+      upwardMomentum: clamp(momentum, 0, 1),
+      staleness,
+      recentActivity: recentActivityNorm,
+      cohesion,
+      influence,
+      riskIntent,
+      upsellIntent,
+      reengageIntent,
+      highValue: highValueRatio,
+      size,
+      riskInverse: clamp(1 - cluster.riskScore, 0, 1),
+    };
+
+    const results: CopilotScoreResult[] = [
+      scoreCopilotAction('save_at_risk', features),
+      scoreCopilotAction('upsell', features),
+      scoreCopilotAction('re_engage', features),
+      scoreCopilotAction('nurture', features),
+    ].sort((a, b) => b.score - a.score);
+
+    const top = results[0];
+    const second = results[1];
+    const softmaxTemperature = 0.23;
+    const softmaxDenominator = results
+      .map((entry) => Math.exp(entry.score / softmaxTemperature))
+      .reduce((acc, value) => acc + value, 0);
+    const topProbability = softmaxDenominator > 0
+      ? Math.exp(top.score / softmaxTemperature) / softmaxDenominator
+      : 0.5;
+
+    const confidence = clamp(
+      0.42 + topProbability * 0.42 + (top.score - second.score) * 0.24,
+      0.42,
+      0.97,
+    );
+
+    const scoreCard: ClusterCopilotScoreCard = {
+      save_at_risk: results.find((entry) => entry.action === 'save_at_risk')?.score || 0,
+      upsell: results.find((entry) => entry.action === 'upsell')?.score || 0,
+      re_engage: results.find((entry) => entry.action === 're_engage')?.score || 0,
+      nurture: results.find((entry) => entry.action === 'nurture')?.score || 0,
+    };
+
+    const rationale = resolveCopilotRationale(
+      top.action,
+      top.contributions,
+      momentum,
+      daysSinceLastInteraction,
+    );
+
+    const evidence: ClusterCopilotEvidenceMetric[] = [
+      {
+        id: 'risk',
+        label: 'Risk pressure',
+        value: clamp(cluster.riskScore, 0, 1),
+        formattedValue: formatPercent(cluster.riskScore),
+        direction: 'up',
+      },
+      {
+        id: 'opportunity',
+        label: 'Expansion potential',
+        value: clamp(cluster.opportunityScore, 0, 1),
+        formattedValue: formatPercent(cluster.opportunityScore),
+        direction: 'up',
+      },
+      {
+        id: 'momentum',
+        label: '14-day momentum',
+        value: clamp(Math.abs(momentum), 0, 1),
+        formattedValue: formatSignedPercent(momentum),
+        direction: momentum > 0 ? 'up' : momentum < 0 ? 'down' : 'neutral',
+      },
+      {
+        id: 'staleness',
+        label: 'Last interaction age',
+        value: staleness,
+        formattedValue: formatDays(daysSinceLastInteraction),
+        direction: daysSinceLastInteraction > 21 ? 'up' : 'neutral',
+      },
+      {
+        id: 'cohesion',
+        label: 'Cluster cohesion',
+        value: cohesion,
+        formattedValue: formatPercent(cohesion),
+        direction: 'up',
+      },
+    ];
+
+    const expectedOutcome = buildCopilotOutcome(top.action, top.score);
+    const summary = `${top.action.replaceAll('_', ' ')} · ${formatPercent(confidence)} confidence. ${rationale[0]}`;
+
+    const copilot: ClusterCopilotPlan = {
+      clusterId: cluster.id,
+      primaryAction: top.action,
+      secondaryAction: second?.action,
+      confidence,
+      scoreCard,
+      rationale,
+      playbook: buildCopilotPlaybook(top.action, cluster.sharedSignals),
+      evidence,
+      summary,
+      expectedOutcome,
+      algorithmVersion: COPILOT_ALGORITHM_VERSION,
+    };
+
+    return {
+      ...cluster,
+      copilot,
+    };
+  });
 }
 
 export async function buildGraphModel(
