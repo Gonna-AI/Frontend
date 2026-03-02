@@ -3,6 +3,7 @@ import { createPortal } from "react-dom"
 import {
     Phone,
     History,
+    Network,
     Mic,
     Database,
     ListOrdered,
@@ -160,6 +161,22 @@ export function AppSidebar({ activeTab, setActiveTab, hasAccess = false, ...prop
                                 >
                                     <History />
                                     <span>{t('dashboard.tab.history')}</span>
+                                </SidebarMenuButton>
+                            </SidebarMenuItem>
+                            <SidebarMenuItem>
+                                <SidebarMenuButton
+                                    isActive={activeTab === 'customer_graph'}
+                                    onClick={() => handleTabClick('customer_graph')}
+                                    tooltip={t('sidebar.customerGraph')}
+                                    className={cn(
+                                        "transition-colors",
+                                        isDark
+                                            ? "text-white/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-white/10 data-[active=true]:text-white"
+                                            : "text-gray-600 hover:text-gray-900 hover:bg-black/5 data-[active=true]:bg-black/5 data-[active=true]:text-black"
+                                    )}
+                                >
+                                    <Network />
+                                    <span>{t('sidebar.customerGraph')}</span>
                                 </SidebarMenuButton>
                             </SidebarMenuItem>
                         </SidebarMenu>

@@ -20,6 +20,7 @@ import KeysView from '../components/DashboardViews/KeysView';
 import TeamView from '../components/DashboardViews/TeamView';
 import MonitorView from '../components/DashboardViews/MonitorView';
 import IntegrationView from '../components/DashboardViews/IntegrationView';
+import CustomerGraphView from '../components/DashboardViews/CustomerGraphView';
 import InitialSetupDialog from '../components/DashboardViews/InitialSetupDialog';
 
 import { AccessCodeProvider, useAccessCode } from '../contexts/AccessCodeContext';
@@ -60,6 +61,7 @@ function DemoDashboardContent() {
     const labelMap: Record<string, string> = {
       monitor: t('dashboard.tab.monitor'),
       history: t('history.title'),
+      customer_graph: t('sidebar.customerGraph'),
       knowledge: t('config.title'),
       system_prompt: t('sidebar.systemPrompt'),
       ai_voice: t('sidebar.aiVoice'),
@@ -166,6 +168,7 @@ function DemoDashboardContent() {
                   {activeTab === 'monitor' && <MonitorView isDark={isDark} />}
 
                   {activeTab === 'history' && <CallHistoryList isDark={isDark} />}
+                  {activeTab === 'customer_graph' && <CustomerGraphView isDark={isDark} />}
 
                   {/* Knowledge Base Sections */}
                   {activeTab === 'knowledge' && <KnowledgeBase isDark={isDark} activeSection="prompt" />}
