@@ -1,8 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import CustomerGraphView from './CustomerGraphView';
-import type { CustomerGraphModel, CustomerProfile } from '../../types/customerGraph';
+import type { CustomerGraphAlert, CustomerGraphModel, CustomerProfile } from '../../types/customerGraph';
 import { buildGraphModel } from '../../services/customerGraphService';
+import { evaluateRealtimeGraphAlerts } from '../../services/customerGraphAlertService';
 
 let mockCallHistory: unknown[] = [];
 
@@ -21,6 +22,10 @@ vi.mock('../../contexts/LanguageContext', () => ({
 
 vi.mock('../../services/customerGraphService', () => ({
   buildGraphModel: vi.fn(),
+}));
+
+vi.mock('../../services/customerGraphAlertService', () => ({
+  evaluateRealtimeGraphAlerts: vi.fn(() => []),
 }));
 
 function createProfile(id: string, name: string): CustomerProfile {
@@ -100,6 +105,7 @@ describe('CustomerGraphView', () => {
   beforeEach(() => {
     mockCallHistory = [];
     vi.clearAllMocks();
+    vi.mocked(evaluateRealtimeGraphAlerts).mockReturnValue([]);
   });
 
   it('shows no-data empty state when graph has no profiles', async () => {
@@ -175,7 +181,70 @@ describe('CustomerGraphView', () => {
       expect(screen.getByText('cluster-2')).toBeInTheDocument();
     });
 
-    fireEvent.click(screen.getByText('cluster-2'));
+    const table = screen.getByRole('table');
+    const rowCell = within(table).getByText('cluster-2');
+    fireEvent.click(rowCell);
+
+    await waitFor(() => {
+      expect(screen.getAllByText('Bob Jones').length).toBeGreaterThan(0);
+    });
+  });
+
+  it('renders realtime trigger cards and focuses cluster when clicked', async () => {
+    const alpha = createProfile('cust-1', 'Alice Smith');
+    const beta = createProfile('cust-2', 'Bob Jones');
+    const model = {
+      ...createModel([alpha, beta]),
+      clusters: [
+        {
+          id: 'cluster-1',
+          label: 'support',
+          memberIds: [alpha.id],
+          memberCount: 1,
+          riskScore: alpha.riskScore,
+          opportunityScore: alpha.opportunityScore,
+          sharedSignals: alpha.signal.topics.slice(0, 2),
+        },
+        {
+          id: 'cluster-2',
+          label: 'renewal',
+          memberIds: [beta.id],
+          memberCount: 1,
+          riskScore: beta.riskScore,
+          opportunityScore: beta.opportunityScore,
+          sharedSignals: beta.signal.topics.slice(0, 2),
+        },
+      ],
+    } satisfies CustomerGraphModel;
+
+    const alerts: CustomerGraphAlert[] = [
+      {
+        id: 'alert-1',
+        type: 'risk_spike',
+        severity: 'warning',
+        clusterId: 'cluster-2',
+        clusterLabel: 'renewal',
+        generatedAt: model.generatedAt,
+        delta: 0.18,
+        currentValue: 0.62,
+        previousValue: 0.44,
+      },
+    ];
+
+    vi.mocked(buildGraphModel).mockResolvedValue(model);
+    vi.mocked(evaluateRealtimeGraphAlerts).mockReturnValue(alerts);
+
+    render(<CustomerGraphView isDark={false} />);
+
+    await waitFor(() => {
+      expect(screen.getByText('customerGraph.alerts.title')).toBeInTheDocument();
+      expect(screen.getByText('customerGraph.alerts.riskSpikeTitle')).toBeInTheDocument();
+      expect(screen.getAllByText('renewal').length).toBeGreaterThan(0);
+    });
+
+    const alertButton = screen.getByText('customerGraph.alerts.riskSpikeTitle').closest('button');
+    expect(alertButton).not.toBeNull();
+    fireEvent.click(alertButton!);
 
     await waitFor(() => {
       expect(screen.getAllByText('Bob Jones').length).toBeGreaterThan(0);

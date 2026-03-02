@@ -124,6 +124,22 @@ export interface ClusterCopilotPlan {
   algorithmVersion: string;
 }
 
+export type CustomerGraphAlertType = 'risk_spike' | 'new_high_opportunity_segment';
+
+export type CustomerGraphAlertSeverity = 'critical' | 'warning' | 'positive';
+
+export interface CustomerGraphAlert {
+  id: string;
+  type: CustomerGraphAlertType;
+  severity: CustomerGraphAlertSeverity;
+  clusterId: string;
+  clusterLabel: string;
+  generatedAt: string;
+  delta: number;
+  currentValue: number;
+  previousValue: number;
+}
+
 export interface CustomerCluster {
   id: string;
   label: string;

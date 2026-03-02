@@ -27,10 +27,12 @@ import {
 import { cn } from '../../utils/cn';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useDemoCall } from '../../contexts/DemoCallContext';
+import { evaluateRealtimeGraphAlerts } from '../../services/customerGraphAlertService';
 import { enrichGraphWithAICopilot } from '../../services/customerGraphCopilotAIService';
 import { buildGraphModel } from '../../services/customerGraphService';
 import type {
   ClusterCopilotAction,
+  CustomerGraphAlert,
   CustomerCluster,
   CustomerGraphFilters,
   CustomerGraphModel,
@@ -115,6 +117,12 @@ function formatLift(value: number): string {
   return `+${Math.round(value * 100)}%`;
 }
 
+function formatSignedPercent(value: number): string {
+  const rounded = Math.round(value * 100);
+  if (rounded === 0) return '0%';
+  return `${rounded > 0 ? '+' : ''}${rounded}%`;
+}
+
 export default function CustomerGraphView({ isDark = true }: CustomerGraphViewProps) {
   const { t } = useLanguage();
   const { callHistory } = useDemoCall();
@@ -127,6 +135,7 @@ export default function CustomerGraphView({ isDark = true }: CustomerGraphViewPr
   const [aiInsightsProgress, setAiInsightsProgress] = useState({ completed: 0, total: 0 });
   const [aiInsightsError, setAiInsightsError] = useState<string | null>(null);
   const [aiInsightsGeneratedAt, setAiInsightsGeneratedAt] = useState<string | null>(null);
+  const [realtimeAlerts, setRealtimeAlerts] = useState<CustomerGraphAlert[]>([]);
 
   const [model, setModel] = useState<CustomerGraphModel | null>(null);
   const [loading, setLoading] = useState(false);
@@ -214,6 +223,21 @@ export default function CustomerGraphView({ isDark = true }: CustomerGraphViewPr
       setSelectedClusterId(null);
     }
   }, [model, selectedClusterId, selectedProfileId]);
+
+  useEffect(() => {
+    if (!model) {
+      setRealtimeAlerts([]);
+      return;
+    }
+
+    const alerts = evaluateRealtimeGraphAlerts(model, {
+      riskSpikeThreshold: 0.18,
+      highOpportunityThreshold: 0.7,
+      maxAlerts: 4,
+    });
+
+    setRealtimeAlerts(alerts);
+  }, [model]);
 
   const profileById = useMemo(() => {
     if (!model) return new Map<string, CustomerProfile>();
@@ -407,6 +431,34 @@ export default function CustomerGraphView({ isDark = true }: CustomerGraphViewPr
 
     return ids;
   }, [hasSelectedCluster, model, selectedClusterMemberIdSet]);
+  const alertMeta = useMemo<Record<CustomerGraphAlert['type'], {
+    title: string;
+    icon: ComponentType<{ className?: string }>;
+    chipClassName: string;
+  }>>(() => ({
+    risk_spike: {
+      title: t('customerGraph.alerts.riskSpikeTitle'),
+      icon: ShieldAlert,
+      chipClassName: isDark
+        ? 'border-rose-500/30 bg-rose-500/12 text-rose-300'
+        : 'border-rose-200 bg-rose-50 text-rose-700',
+    },
+    new_high_opportunity_segment: {
+      title: t('customerGraph.alerts.newOpportunityTitle'),
+      icon: ArrowUpRight,
+      chipClassName: isDark
+        ? 'border-emerald-500/30 bg-emerald-500/12 text-emerald-300'
+        : 'border-emerald-200 bg-emerald-50 text-emerald-700',
+    },
+  }), [isDark, t]);
+
+  const getAlertBody = useCallback((alert: CustomerGraphAlert): string => {
+    if (alert.type === 'risk_spike') {
+      return `${t('customerGraph.alerts.riskSpikeBody')} ${formatPercent(alert.previousValue)} → ${formatPercent(alert.currentValue)} (${formatSignedPercent(alert.delta)}).`;
+    }
+
+    return `${t('customerGraph.alerts.newOpportunityBody')} ${formatPercent(alert.currentValue)} (${formatSignedPercent(alert.delta)}).`;
+  }, [t]);
   const clusterOutlines = useMemo<ClusterOutline[]>(() => {
     if (!model || renderedNodes.length === 0) return [];
 
@@ -733,6 +785,73 @@ export default function CustomerGraphView({ isDark = true }: CustomerGraphViewPr
           isDark={isDark}
         />
       </div>
+
+      <section className={cn(
+        'rounded-2xl border p-4 md:p-5',
+        isDark ? 'bg-[#09090B] border-white/10' : 'bg-white border-black/10',
+      )}>
+        <div className="flex items-center justify-between gap-3">
+          <h3 className={cn('text-sm font-semibold tracking-wide', isDark ? 'text-white' : 'text-black')}>
+            {t('customerGraph.alerts.title')}
+          </h3>
+          <span className={cn(
+            'text-[11px] px-2 py-1 rounded-full border',
+            isDark ? 'border-white/10 bg-white/5 text-white/65' : 'border-black/10 bg-black/5 text-black/60',
+          )}>
+            {realtimeAlerts.length}
+          </span>
+        </div>
+
+        {realtimeAlerts.length === 0 ? (
+          <p className={cn('text-sm mt-2', isDark ? 'text-white/55' : 'text-black/55')}>
+            {t('customerGraph.alerts.empty')}
+          </p>
+        ) : (
+          <div className="mt-3 grid grid-cols-1 lg:grid-cols-2 gap-3">
+            {realtimeAlerts.map((alert) => {
+              const meta = alertMeta[alert.type];
+              const AlertIcon = meta.icon;
+
+              return (
+                <button
+                  key={alert.id}
+                  onClick={() => {
+                    setSelectedClusterId(alert.clusterId);
+                    const cluster = model?.clusters.find((candidate) => candidate.id === alert.clusterId);
+                    const focusMember = cluster?.memberIds.find((memberId) => profileById.has(memberId)) || null;
+                    if (focusMember) setSelectedProfileId(focusMember);
+                    if (cluster) fitToNodeIds(cluster.memberIds);
+                  }}
+                  className={cn(
+                    'rounded-xl border p-3 text-left transition-colors',
+                    isDark ? 'border-white/10 bg-white/[0.03] hover:bg-white/8' : 'border-black/10 bg-black/[0.03] hover:bg-black/8',
+                  )}
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <span className={cn(
+                      'inline-flex items-center gap-1.5 text-[11px] px-2 py-1 rounded-full border',
+                      meta.chipClassName,
+                    )}>
+                      <AlertIcon className="w-3.5 h-3.5" />
+                      {meta.title}
+                    </span>
+                    <span className={cn('text-xs font-semibold', isDark ? 'text-white/80' : 'text-black/80')}>
+                      {formatSignedPercent(alert.delta)}
+                    </span>
+                  </div>
+
+                  <p className={cn('text-sm font-medium mt-2', isDark ? 'text-white' : 'text-black')}>
+                    {alert.clusterLabel}
+                  </p>
+                  <p className={cn('text-xs mt-1 leading-relaxed', isDark ? 'text-white/68' : 'text-black/70')}>
+                    {getAlertBody(alert)}
+                  </p>
+                </button>
+              );
+            })}
+          </div>
+        )}
+      </section>
 
       <section
         className={cn(

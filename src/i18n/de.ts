@@ -368,6 +368,12 @@ export const de = {
     'customerGraph.copilot.emptyPrompt': 'Starten Sie KI-Insights, um eine live Copilot-Strategie aus echten Interaktionsdaten zu erzeugen.',
     'customerGraph.copilot.generatedAt': 'KI-Insights aktualisiert um',
     'customerGraph.copilot.generateError': 'KI-Insights konnten nicht generiert werden. Bitte erneut versuchen.',
+    'customerGraph.alerts.title': 'Echtzeit-Trigger',
+    'customerGraph.alerts.empty': 'Aktuell keine neuen Cluster-Trigger.',
+    'customerGraph.alerts.riskSpikeTitle': 'Risikoanstieg heute',
+    'customerGraph.alerts.newOpportunityTitle': 'High-Opportunity Segment',
+    'customerGraph.alerts.riskSpikeBody': 'Risiko stieg gegenüber dem vorherigen Snapshot:',
+    'customerGraph.alerts.newOpportunityBody': 'Chance hat den hohen Schwellenwert überschritten:',
 
     // Team Management
     'team.title': 'Teamverwaltung',

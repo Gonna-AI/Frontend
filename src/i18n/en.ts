@@ -369,6 +369,12 @@ export const en = {
     'customerGraph.copilot.emptyPrompt': 'Run AI Insights to generate live copilot strategy for this cluster from real interaction data.',
     'customerGraph.copilot.generatedAt': 'AI insights updated at',
     'customerGraph.copilot.generateError': 'Unable to generate AI insights right now. Please retry.',
+    'customerGraph.alerts.title': 'Realtime Triggers',
+    'customerGraph.alerts.empty': 'No new cluster-level triggers right now.',
+    'customerGraph.alerts.riskSpikeTitle': 'Risk spike today',
+    'customerGraph.alerts.newOpportunityTitle': 'High-opportunity segment',
+    'customerGraph.alerts.riskSpikeBody': 'Risk rose versus previous snapshot:',
+    'customerGraph.alerts.newOpportunityBody': 'Opportunity crossed the high threshold:',
 
     // Team Management
     'team.title': 'Team Management',
