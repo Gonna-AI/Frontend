@@ -58,6 +58,16 @@ interface VisualLink extends SimulationLinkDatum<VisualNode> {
   evidence: string[];
 }
 
+interface ClusterOutline {
+  id: string;
+  label: string;
+  color: string;
+  x: number;
+  y: number;
+  radius: number;
+  memberCount: number;
+}
+
 const CLUSTER_COLORS = [
   '#22d3ee',
   '#60a5fa',
@@ -397,6 +407,42 @@ export default function CustomerGraphView({ isDark = true }: CustomerGraphViewPr
 
     return ids;
   }, [hasSelectedCluster, model, selectedClusterMemberIdSet]);
+  const clusterOutlines = useMemo<ClusterOutline[]>(() => {
+    if (!model || renderedNodes.length === 0) return [];
+
+    const nodeById = new Map(renderedNodes.map((node) => [node.id, node]));
+
+    return model.clusters
+      .map((cluster, clusterIndex) => {
+        const positionedMembers = cluster.memberIds
+          .map((memberId) => nodeById.get(memberId))
+          .filter((node): node is VisualNode => !!node && typeof node.x === 'number' && typeof node.y === 'number');
+
+        if (!positionedMembers.length) return null;
+
+        const x = positionedMembers.reduce((acc, node) => acc + (node.x as number), 0) / positionedMembers.length;
+        const y = positionedMembers.reduce((acc, node) => acc + (node.y as number), 0) / positionedMembers.length;
+
+        const measuredRadius = positionedMembers.reduce((max, node) => {
+          const dx = (node.x as number) - x;
+          const dy = (node.y as number) - y;
+          const distance = Math.sqrt(dx * dx + dy * dy);
+          return Math.max(max, distance + node.size + 18);
+        }, 0);
+
+        return {
+          id: cluster.id,
+          label: cluster.label || t('customerGraph.clusterLabel'),
+          color: CLUSTER_COLORS[clusterIndex % CLUSTER_COLORS.length],
+          x,
+          y,
+          radius: Math.max(measuredRadius, cluster.memberCount > 1 ? 62 : 42),
+          memberCount: cluster.memberCount,
+        };
+      })
+      .filter((outline): outline is ClusterOutline => !!outline)
+      .sort((a, b) => b.radius - a.radius);
+  }, [model, renderedNodes, t]);
 
   const handleWheelZoom = (event: React.WheelEvent<SVGSVGElement>) => {
     event.preventDefault();
@@ -807,57 +853,46 @@ export default function CustomerGraphView({ isDark = true }: CustomerGraphViewPr
                   {t('customerGraph.canvasHint')}
                 </p>
 
-                <div className="flex items-center gap-2">
-                  <div className="hidden xl:flex items-center gap-2">
-                    {CLUSTER_COLORS.slice(0, 4).map((color, index) => (
-                      <span key={color} className="inline-flex items-center gap-1.5 text-[11px]">
-                        <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: color }} />
-                        <span className={isDark ? 'text-white/50' : 'text-black/50'}>{`${t('customerGraph.clusterLabel')} ${index + 1}`}</span>
-                      </span>
-                    ))}
-                  </div>
-
-                  <div className="flex items-center gap-1">
-                    <button
-                      onClick={() => handleZoomStep('out')}
-                      aria-label={t('customerGraph.controls.zoomOut')}
-                      title={t('customerGraph.controls.zoomOut')}
-                      className={cn(
-                        'inline-flex items-center justify-center w-8 h-8 rounded-md border transition-colors',
-                        isDark
-                          ? 'border-white/10 bg-white/5 text-white/80 hover:bg-white/10'
-                          : 'border-black/10 bg-black/5 text-black/80 hover:bg-black/10',
-                      )}
-                    >
-                      <ZoomOut className="w-4 h-4" />
-                    </button>
-                    <button
-                      onClick={() => handleZoomStep('in')}
-                      aria-label={t('customerGraph.controls.zoomIn')}
-                      title={t('customerGraph.controls.zoomIn')}
-                      className={cn(
-                        'inline-flex items-center justify-center w-8 h-8 rounded-md border transition-colors',
-                        isDark
-                          ? 'border-white/10 bg-white/5 text-white/80 hover:bg-white/10'
-                          : 'border-black/10 bg-black/5 text-black/80 hover:bg-black/10',
-                      )}
-                    >
-                      <ZoomIn className="w-4 h-4" />
-                    </button>
-                    <button
-                      onClick={fitToAllNodes}
-                      aria-label={t('customerGraph.controls.fitGraph')}
-                      title={t('customerGraph.controls.fitGraph')}
-                      className={cn(
-                        'inline-flex items-center justify-center w-8 h-8 rounded-md border transition-colors',
-                        isDark
-                          ? 'border-white/10 bg-white/5 text-white/80 hover:bg-white/10'
-                          : 'border-black/10 bg-black/5 text-black/80 hover:bg-black/10',
-                      )}
-                    >
-                      <LocateFixed className="w-4 h-4" />
-                    </button>
-                  </div>
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={() => handleZoomStep('out')}
+                    aria-label={t('customerGraph.controls.zoomOut')}
+                    title={t('customerGraph.controls.zoomOut')}
+                    className={cn(
+                      'inline-flex items-center justify-center w-8 h-8 rounded-md border transition-colors',
+                      isDark
+                        ? 'border-white/10 bg-white/5 text-white/80 hover:bg-white/10'
+                        : 'border-black/10 bg-black/5 text-black/80 hover:bg-black/10',
+                    )}
+                  >
+                    <ZoomOut className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => handleZoomStep('in')}
+                    aria-label={t('customerGraph.controls.zoomIn')}
+                    title={t('customerGraph.controls.zoomIn')}
+                    className={cn(
+                      'inline-flex items-center justify-center w-8 h-8 rounded-md border transition-colors',
+                      isDark
+                        ? 'border-white/10 bg-white/5 text-white/80 hover:bg-white/10'
+                        : 'border-black/10 bg-black/5 text-black/80 hover:bg-black/10',
+                    )}
+                  >
+                    <ZoomIn className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={fitToAllNodes}
+                    aria-label={t('customerGraph.controls.fitGraph')}
+                    title={t('customerGraph.controls.fitGraph')}
+                    className={cn(
+                      'inline-flex items-center justify-center w-8 h-8 rounded-md border transition-colors',
+                      isDark
+                        ? 'border-white/10 bg-white/5 text-white/80 hover:bg-white/10'
+                        : 'border-black/10 bg-black/5 text-black/80 hover:bg-black/10',
+                    )}
+                  >
+                    <LocateFixed className="w-4 h-4" />
+                  </button>
                 </div>
               </div>
 
@@ -894,6 +929,40 @@ export default function CustomerGraphView({ isDark = true }: CustomerGraphViewPr
                   }}
                 >
                   <g transform={`translate(${viewX} ${viewY}) scale(${viewScale})`}>
+                    {clusterOutlines.map((outline) => {
+                      const isSelected = selectedClusterId === outline.id;
+                      const dimByCluster = hasSelectedCluster && !isSelected;
+
+                      return (
+                        <g key={`outline-${outline.id}`} className="pointer-events-none">
+                          <circle
+                            cx={outline.x}
+                            cy={outline.y}
+                            r={outline.radius}
+                            fill={outline.color}
+                            fillOpacity={dimByCluster ? 0.015 : (isSelected ? 0.08 : 0.04)}
+                            stroke={outline.color}
+                            strokeOpacity={dimByCluster ? 0.14 : (isSelected ? 0.68 : 0.36)}
+                            strokeWidth={isSelected ? 2.2 : 1.4}
+                            strokeDasharray="7 6"
+                          />
+                          <text
+                            x={outline.x}
+                            y={outline.y - outline.radius - 9}
+                            textAnchor="middle"
+                            fontSize={11}
+                            fontWeight={600}
+                            fill={dimByCluster ? (isDark ? '#a1a1aa' : '#6b7280') : (isDark ? '#e4e4e7' : '#1f2937')}
+                            stroke={isDark ? 'rgba(9,9,11,0.92)' : 'rgba(255,255,255,0.9)'}
+                            strokeWidth={3}
+                            paintOrder="stroke"
+                          >
+                            {outline.label}
+                          </text>
+                        </g>
+                      );
+                    })}
+
                     {renderedLinks.map((link) => {
                       const source = safeNode(link.source);
                       const target = safeNode(link.target);
