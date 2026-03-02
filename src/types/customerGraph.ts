@@ -167,6 +167,7 @@ export interface GraphBuildOptions {
   cacheTtlMs: number;
   cacheMode?: 'default' | 'refresh' | 'off';
   embeddingProvider?: (text: string) => Promise<number[]>;
+  enrichWithAI?: boolean;
 }
 
 export interface CustomerGraphStats {

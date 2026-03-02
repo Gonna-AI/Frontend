@@ -28,7 +28,6 @@ import { cn } from '../../utils/cn';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useDemoCall } from '../../contexts/DemoCallContext';
 import { evaluateRealtimeGraphAlerts } from '../../services/customerGraphAlertService';
-import { enrichGraphWithAICopilot } from '../../services/customerGraphCopilotAIService';
 import { buildGraphModel } from '../../services/customerGraphService';
 import type {
   ClusterCopilotAction,
@@ -590,28 +589,21 @@ export default function CustomerGraphView({ isDark = true }: CustomerGraphViewPr
     setAiInsightsProgress({ completed: 0, total: 0 });
 
     try {
-      const refreshedModel = await buildGraphModel(callHistory, filters, {
+      const enrichedModel = await buildGraphModel(callHistory, filters, {
         semanticEnabled: true,
         minScore: minSimilarity,
         cacheMode: 'refresh',
         maxNeighbors: 4,
         semanticTimeoutMs: 3500,
         cacheTtlMs: 4 * 60 * 1000,
-      });
-
-      setModel(refreshedModel);
-      if (!selectedProfileId && refreshedModel.profiles[0]) {
-        setSelectedProfileId(refreshedModel.profiles[0].id);
-      }
-
-      const enrichedModel = await enrichGraphWithAICopilot(refreshedModel, {
-        onProgress: (progress) => {
-          setAiInsightsProgress(progress);
-        },
-        timeoutMs: 45000,
+        enrichWithAI: true,
       });
 
       setModel(enrichedModel);
+      if (!selectedProfileId && enrichedModel.profiles[0]) {
+        setSelectedProfileId(enrichedModel.profiles[0].id);
+      }
+
       setAiInsightsGeneratedAt(new Date().toISOString());
 
       if (selectedClusterId && !enrichedModel.clusters.find((cluster) => cluster.id === selectedClusterId)) {
