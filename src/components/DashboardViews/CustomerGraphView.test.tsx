@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import CustomerGraphView from './CustomerGraphView';
 import type { CustomerGraphModel, CustomerProfile } from '../../types/customerGraph';
 import { buildGraphModel } from '../../services/customerGraphService';
@@ -23,9 +23,9 @@ vi.mock('../../services/customerGraphService', () => ({
   buildGraphModel: vi.fn(),
 }));
 
-function createProfile(name: string): CustomerProfile {
+function createProfile(id: string, name: string): CustomerProfile {
   return {
-    id: 'cust-1',
+    id,
     displayName: name,
     normalizedName: name.toLowerCase(),
     interactionCount: 2,
@@ -113,7 +113,7 @@ describe('CustomerGraphView', () => {
   });
 
   it('renders customer labels directly and hides optional toggles', async () => {
-    vi.mocked(buildGraphModel).mockResolvedValue(createModel([createProfile('Alice Smith')]));
+    vi.mocked(buildGraphModel).mockResolvedValue(createModel([createProfile('cust-1', 'Alice Smith')]));
 
     render(<CustomerGraphView isDark={false} />);
 
@@ -123,10 +123,13 @@ describe('CustomerGraphView', () => {
 
     expect(screen.queryByText('customerGraph.controls.semantic')).not.toBeInTheDocument();
     expect(screen.queryByText('customerGraph.controls.anonymize')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'customerGraph.controls.zoomOut' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'customerGraph.controls.zoomIn' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'customerGraph.controls.fitGraph' })).toBeInTheDocument();
   });
 
   it('always requests semantic matching by default', async () => {
-    vi.mocked(buildGraphModel).mockResolvedValue(createModel([createProfile('Alice Smith')]));
+    vi.mocked(buildGraphModel).mockResolvedValue(createModel([createProfile('cust-1', 'Alice Smith')]));
 
     render(<CustomerGraphView isDark={false} />);
 
@@ -136,5 +139,46 @@ describe('CustomerGraphView', () => {
 
     const call = vi.mocked(buildGraphModel).mock.calls[0];
     expect(call?.[2]).toMatchObject({ semanticEnabled: true });
+  });
+
+  it('clicking a cluster row focuses that cluster member in details', async () => {
+    const alpha = createProfile('cust-1', 'Alice Smith');
+    const beta = createProfile('cust-2', 'Bob Jones');
+
+    vi.mocked(buildGraphModel).mockResolvedValue({
+      ...createModel([alpha, beta]),
+      clusters: [
+        {
+          id: 'cluster-1',
+          label: 'cluster-1',
+          memberIds: [alpha.id],
+          memberCount: 1,
+          riskScore: alpha.riskScore,
+          opportunityScore: alpha.opportunityScore,
+          sharedSignals: alpha.signal.topics.slice(0, 2),
+        },
+        {
+          id: 'cluster-2',
+          label: 'cluster-2',
+          memberIds: [beta.id],
+          memberCount: 1,
+          riskScore: beta.riskScore,
+          opportunityScore: beta.opportunityScore,
+          sharedSignals: beta.signal.topics.slice(0, 2),
+        },
+      ],
+    });
+
+    render(<CustomerGraphView isDark={false} />);
+
+    await waitFor(() => {
+      expect(screen.getByText('cluster-2')).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByText('cluster-2'));
+
+    await waitFor(() => {
+      expect(screen.getAllByText('Bob Jones').length).toBeGreaterThan(0);
+    });
   });
 });

@@ -1,13 +1,15 @@
-import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import {
   AlertCircle,
   Brain,
+  LocateFixed,
   Network,
   RefreshCcw,
   ShieldAlert,
   Sparkles,
   UserRound,
   ZoomIn,
+  ZoomOut,
 } from 'lucide-react';
 import {
   forceCenter,
@@ -88,8 +90,8 @@ function safeNode(endpoint: string | VisualNode): VisualNode | null {
 
 function clampScale(scale: number): number {
   if (Number.isNaN(scale)) return 1;
-  if (scale < 0.55) return 0.55;
-  if (scale > 2.4) return 2.4;
+  if (scale < 0.25) return 0.25;
+  if (scale > 2.6) return 2.6;
   return scale;
 }
 
@@ -121,6 +123,7 @@ export default function CustomerGraphView({ isDark = true }: CustomerGraphViewPr
     lastX: 0,
     lastY: 0,
   });
+  const autoFitKeyRef = useRef<string>('');
 
   const startDate = useMemo(() => {
     if (dateRangePreset === 'all') return null;
@@ -183,8 +186,8 @@ export default function CustomerGraphView({ isDark = true }: CustomerGraphViewPr
       setSelectedProfileId(model.profiles[0]?.id || null);
     }
 
-    if (!model.clusters.find((cluster) => cluster.id === selectedClusterId)) {
-      setSelectedClusterId(model.clusters[0]?.id || null);
+    if (selectedClusterId && !model.clusters.find((cluster) => cluster.id === selectedClusterId)) {
+      setSelectedClusterId(null);
     }
   }, [model, selectedClusterId, selectedProfileId]);
 
@@ -292,6 +295,11 @@ export default function CustomerGraphView({ isDark = true }: CustomerGraphViewPr
       .filter((profile): profile is CustomerProfile => !!profile)
       .sort((a, b) => b.interactionCount - a.interactionCount);
   }, [profileById, selectedCluster]);
+  const selectedClusterMemberIdSet = useMemo(() => {
+    if (!selectedCluster) return new Set<string>();
+    return new Set(selectedCluster.memberIds);
+  }, [selectedCluster]);
+  const hasSelectedCluster = selectedClusterMemberIdSet.size > 0;
 
   const focusedNodeId = hoveredProfileId || selectedProfileId;
 
@@ -307,6 +315,18 @@ export default function CustomerGraphView({ isDark = true }: CustomerGraphViewPr
 
     return ids;
   }, [focusedNodeId, model]);
+  const selectedClusterEdgeIds = useMemo(() => {
+    const ids = new Set<string>();
+    if (!model || !hasSelectedCluster) return ids;
+
+    for (const edge of model.edges) {
+      if (selectedClusterMemberIdSet.has(edge.source) && selectedClusterMemberIdSet.has(edge.target)) {
+        ids.add(edge.id);
+      }
+    }
+
+    return ids;
+  }, [hasSelectedCluster, model, selectedClusterMemberIdSet]);
 
   const handleWheelZoom = (event: React.WheelEvent<SVGSVGElement>) => {
     event.preventDefault();
@@ -340,11 +360,87 @@ export default function CustomerGraphView({ isDark = true }: CustomerGraphViewPr
     panState.current.panning = false;
   };
 
+  const fitToNodes = useCallback((nodesToFit: VisualNode[]) => {
+    const positionedNodes = nodesToFit.filter(
+      (node) => typeof node.x === 'number' && typeof node.y === 'number',
+    );
+    if (!positionedNodes.length) {
+      setViewScale(1);
+      setViewX(0);
+      setViewY(0);
+      return;
+    }
+
+    const xValues = positionedNodes.map((node) => node.x as number);
+    const yValues = positionedNodes.map((node) => node.y as number);
+    const minX = Math.min(...xValues);
+    const maxX = Math.max(...xValues);
+    const minY = Math.min(...yValues);
+    const maxY = Math.max(...yValues);
+
+    const width = Math.max(maxX - minX, 80);
+    const height = Math.max(maxY - minY, 80);
+    const centerX = minX + width / 2;
+    const centerY = minY + height / 2;
+    const targetScale = clampScale(
+      Math.min((GRAPH_WIDTH - 180) / width, (GRAPH_HEIGHT - 180) / height),
+    );
+
+    setViewScale(targetScale);
+    setViewX(GRAPH_WIDTH / 2 - centerX * targetScale);
+    setViewY(GRAPH_HEIGHT / 2 - centerY * targetScale);
+  }, []);
+
+  const fitToNodeIds = useCallback((nodeIds: string[]) => {
+    if (nodeIds.length === 0) return;
+    const memberIds = new Set(nodeIds);
+    fitToNodes(renderedNodes.filter((node) => memberIds.has(node.id)));
+  }, [fitToNodes, renderedNodes]);
+
+  const fitToAllNodes = useCallback(() => {
+    fitToNodes(renderedNodes);
+  }, [fitToNodes, renderedNodes]);
+
   const resetViewport = () => {
-    setViewScale(1);
-    setViewX(0);
-    setViewY(0);
+    fitToAllNodes();
   };
+
+  const handleZoomStep = (direction: 'in' | 'out') => {
+    setViewScale((prev) => clampScale(prev + (direction === 'in' ? 0.16 : -0.16)));
+  };
+
+  const handleClusterSelect = (cluster: CustomerCluster) => {
+    setSelectedClusterId(cluster.id);
+    const primaryMemberId = cluster.memberIds.find((id) => profileById.has(id)) || null;
+    setSelectedProfileId(primaryMemberId);
+    fitToNodeIds(cluster.memberIds);
+  };
+
+  useEffect(() => {
+    if (!model || renderedNodes.length === 0) return;
+
+    const key = [
+      model.generatedAt,
+      model.stats.totalCustomers,
+      model.stats.totalEdges,
+      dateRangePreset,
+      interactionType,
+      minSimilarity.toFixed(2),
+      refreshNonce,
+    ].join(':');
+    if (autoFitKeyRef.current === key) return;
+
+    autoFitKeyRef.current = key;
+    fitToAllNodes();
+  }, [
+    dateRangePreset,
+    fitToAllNodes,
+    interactionType,
+    minSimilarity,
+    model,
+    refreshNonce,
+    renderedNodes.length,
+  ]);
 
   const hasRenderableData = !!model && model.profiles.length > 0;
   const noEdgesAtThreshold = !!model && model.profiles.length > 1 && model.edges.length === 0;
@@ -394,7 +490,7 @@ export default function CustomerGraphView({ isDark = true }: CustomerGraphViewPr
                   : 'bg-black/5 border-black/10 text-black hover:bg-black/10 hover:border-black/20',
               )}
             >
-              <ZoomIn className="w-4 h-4" />
+              <LocateFixed className="w-4 h-4" />
               {t('customerGraph.controls.resetView')}
             </button>
           </div>
@@ -559,12 +655,56 @@ export default function CustomerGraphView({ isDark = true }: CustomerGraphViewPr
                 </p>
 
                 <div className="flex items-center gap-2">
-                  {CLUSTER_COLORS.slice(0, 4).map((color, index) => (
-                    <span key={color} className="inline-flex items-center gap-1.5 text-[11px]">
-                      <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: color }} />
-                      <span className={isDark ? 'text-white/50' : 'text-black/50'}>{`${t('customerGraph.clusterLabel')} ${index + 1}`}</span>
-                    </span>
-                  ))}
+                  <div className="hidden xl:flex items-center gap-2">
+                    {CLUSTER_COLORS.slice(0, 4).map((color, index) => (
+                      <span key={color} className="inline-flex items-center gap-1.5 text-[11px]">
+                        <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: color }} />
+                        <span className={isDark ? 'text-white/50' : 'text-black/50'}>{`${t('customerGraph.clusterLabel')} ${index + 1}`}</span>
+                      </span>
+                    ))}
+                  </div>
+
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={() => handleZoomStep('out')}
+                      aria-label={t('customerGraph.controls.zoomOut')}
+                      title={t('customerGraph.controls.zoomOut')}
+                      className={cn(
+                        'inline-flex items-center justify-center w-8 h-8 rounded-md border transition-colors',
+                        isDark
+                          ? 'border-white/10 bg-white/5 text-white/80 hover:bg-white/10'
+                          : 'border-black/10 bg-black/5 text-black/80 hover:bg-black/10',
+                      )}
+                    >
+                      <ZoomOut className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => handleZoomStep('in')}
+                      aria-label={t('customerGraph.controls.zoomIn')}
+                      title={t('customerGraph.controls.zoomIn')}
+                      className={cn(
+                        'inline-flex items-center justify-center w-8 h-8 rounded-md border transition-colors',
+                        isDark
+                          ? 'border-white/10 bg-white/5 text-white/80 hover:bg-white/10'
+                          : 'border-black/10 bg-black/5 text-black/80 hover:bg-black/10',
+                      )}
+                    >
+                      <ZoomIn className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={fitToAllNodes}
+                      aria-label={t('customerGraph.controls.fitGraph')}
+                      title={t('customerGraph.controls.fitGraph')}
+                      className={cn(
+                        'inline-flex items-center justify-center w-8 h-8 rounded-md border transition-colors',
+                        isDark
+                          ? 'border-white/10 bg-white/5 text-white/80 hover:bg-white/10'
+                          : 'border-black/10 bg-black/5 text-black/80 hover:bg-black/10',
+                      )}
+                    >
+                      <LocateFixed className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
               </div>
 
@@ -609,10 +749,16 @@ export default function CustomerGraphView({ isDark = true }: CustomerGraphViewPr
                       }
 
                       const isFocused = focusedEdgeIds.has(link.id);
-                      const baseOpacity = isFocused ? 0.82 : isDark ? 0.3 : 0.26;
+                      const isClusterEdge = hasSelectedCluster && selectedClusterEdgeIds.has(link.id);
+                      const dimByCluster = hasSelectedCluster && !isClusterEdge;
+                      const baseOpacity = dimByCluster
+                        ? 0.08
+                        : (isFocused ? 0.88 : (isClusterEdge ? 0.66 : (isDark ? 0.3 : 0.26)));
                       const strokeColor = isFocused
                         ? '#22d3ee'
-                        : (isDark ? 'rgba(148,163,184,0.45)' : 'rgba(71,85,105,0.35)');
+                        : (isClusterEdge
+                          ? '#38bdf8'
+                          : (isDark ? 'rgba(148,163,184,0.45)' : 'rgba(71,85,105,0.35)'));
 
                       return (
                         <line
@@ -623,7 +769,7 @@ export default function CustomerGraphView({ isDark = true }: CustomerGraphViewPr
                           y2={target.y}
                           stroke={strokeColor}
                           strokeOpacity={baseOpacity}
-                          strokeWidth={Math.max(0.9, link.score * 3.5)}
+                          strokeWidth={Math.max(0.9, link.score * 3.5 + (isClusterEdge ? 0.25 : 0))}
                         />
                       );
                     })}
@@ -633,7 +779,9 @@ export default function CustomerGraphView({ isDark = true }: CustomerGraphViewPr
 
                       const isSelected = selectedProfileId === node.id;
                       const isHovered = hoveredProfileId === node.id;
-                      const showLabel = isSelected || isHovered || viewScale > 1.35;
+                      const inSelectedCluster = hasSelectedCluster && selectedClusterMemberIdSet.has(node.id);
+                      const dimByCluster = hasSelectedCluster && !inSelectedCluster;
+                      const showLabel = isSelected || isHovered || (inSelectedCluster && viewScale > 0.92) || viewScale > 1.35;
 
                       return (
                         <g
@@ -652,20 +800,21 @@ export default function CustomerGraphView({ isDark = true }: CustomerGraphViewPr
                           <circle
                             r={node.size + 8}
                             fill={node.color}
-                            opacity={isSelected ? 0.2 : 0.11}
+                            opacity={isSelected ? 0.2 : (inSelectedCluster ? 0.14 : (dimByCluster ? 0.05 : 0.1))}
                           />
 
                           <circle
                             r={node.size + 3.5}
                             fill="transparent"
-                            stroke={isSelected ? '#f97316' : (isHovered ? '#22d3ee' : 'transparent')}
-                            strokeWidth={2}
+                            stroke={isSelected ? '#f97316' : (isHovered ? '#22d3ee' : (inSelectedCluster ? node.color : 'transparent'))}
+                            strokeWidth={isSelected || isHovered ? 2 : 1.3}
+                            opacity={dimByCluster ? 0.38 : 1}
                           />
 
                           <circle
                             r={node.size}
                             fill={node.color}
-                            opacity={isDark ? 0.94 : 0.9}
+                            opacity={dimByCluster ? 0.35 : (isDark ? 0.94 : 0.9)}
                             stroke={isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.15)'}
                             strokeWidth={1.2}
                           />
@@ -676,7 +825,7 @@ export default function CustomerGraphView({ isDark = true }: CustomerGraphViewPr
                               y={4}
                               fontSize={11}
                               fontWeight={500}
-                              fill={isDark ? '#e4e4e7' : '#1f2937'}
+                              fill={dimByCluster ? (isDark ? '#a1a1aa' : '#6b7280') : (isDark ? '#e4e4e7' : '#1f2937')}
                               stroke={isDark ? 'rgba(9,9,11,0.9)' : 'rgba(255,255,255,0.85)'}
                               strokeWidth={2.2}
                               paintOrder="stroke"
@@ -763,7 +912,10 @@ export default function CustomerGraphView({ isDark = true }: CustomerGraphViewPr
                               'w-full text-left rounded-lg border px-2.5 py-2 transition-colors',
                               isDark ? 'border-white/10 bg-white/5 hover:bg-white/10' : 'border-black/10 bg-black/5 hover:bg-black/10',
                             )}
-                            onClick={() => setSelectedProfileId(other.id)}
+                            onClick={() => {
+                              setSelectedProfileId(other.id);
+                              setSelectedClusterId(clusterByMember.get(other.id)?.id || null);
+                            }}
                           >
                             <div className="flex items-center justify-between gap-2">
                               <p className={cn('text-xs font-medium', isDark ? 'text-white' : 'text-black')}>
@@ -820,7 +972,7 @@ export default function CustomerGraphView({ isDark = true }: CustomerGraphViewPr
                         isDark ? 'border-white/10 hover:bg-white/5' : 'border-black/10 hover:bg-black/5',
                         selectedClusterId === cluster.id && (isDark ? 'bg-white/5' : 'bg-black/5'),
                       )}
-                      onClick={() => setSelectedClusterId(cluster.id)}
+                      onClick={() => handleClusterSelect(cluster)}
                     >
                       <td className="px-4 py-3">
                         <span
