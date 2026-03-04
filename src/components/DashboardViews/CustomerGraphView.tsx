@@ -656,7 +656,9 @@ export default function CustomerGraphView({ isDark = true }: CustomerGraphViewPr
       if (typeof event.currentTarget.releasePointerCapture === 'function' && event.currentTarget.hasPointerCapture(event.pointerId)) {
         try {
           event.currentTarget.releasePointerCapture(event.pointerId);
-        } catch { }
+        } catch {
+          // Ignore release pointer errors
+        }
       }
     } else {
       panState.current.activePointers.clear();
