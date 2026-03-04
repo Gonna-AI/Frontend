@@ -150,8 +150,9 @@ export default function CustomerGraphView({ isDark = true }: CustomerGraphViewPr
   const [viewX, setViewX] = useState(0);
   const [viewY, setViewY] = useState(0);
 
-  const panState = useRef<{ panning: boolean; lastX: number; lastY: number }>({
+  const panState = useRef<{ panning: boolean; pointerId: number | null; lastX: number; lastY: number }>({
     panning: false,
+    pointerId: null,
     lastX: 0,
     lastY: 0,
   });
@@ -501,17 +502,32 @@ export default function CustomerGraphView({ isDark = true }: CustomerGraphViewPr
     setViewScale(nextScale);
   };
 
-  const handlePointerDown = (event: React.MouseEvent<SVGSVGElement>) => {
-    if ((event.target as HTMLElement).closest('[data-node="true"]')) return;
+  const handlePointerDown = (event: React.PointerEvent<SVGSVGElement>) => {
+    const target = event.target as Element | null;
+    if (target?.closest('[data-node="true"]')) return;
+    if (event.pointerType === 'mouse' && event.button !== 0) return;
+
+    event.preventDefault();
     panState.current = {
       panning: true,
+      pointerId: event.pointerId,
       lastX: event.clientX,
       lastY: event.clientY,
     };
+
+    if (typeof event.currentTarget.setPointerCapture === 'function') {
+      try {
+        event.currentTarget.setPointerCapture(event.pointerId);
+      } catch {
+        // Pointer capture can fail in some browsers for synthetic/test events.
+      }
+    }
   };
 
-  const handlePointerMove = (event: React.MouseEvent<SVGSVGElement>) => {
-    if (!panState.current.panning) return;
+  const handlePointerMove = (event: React.PointerEvent<SVGSVGElement>) => {
+    if (!panState.current.panning || panState.current.pointerId !== event.pointerId) return;
+
+    event.preventDefault();
 
     const dx = event.clientX - panState.current.lastX;
     const dy = event.clientY - panState.current.lastY;
@@ -523,8 +539,22 @@ export default function CustomerGraphView({ isDark = true }: CustomerGraphViewPr
     panState.current.lastY = event.clientY;
   };
 
-  const stopPanning = () => {
-    panState.current.panning = false;
+  const stopPanning = (event?: React.PointerEvent<SVGSVGElement>) => {
+    if (event && panState.current.pointerId !== event.pointerId) return;
+
+    const activePointerId = panState.current.pointerId;
+    if (event && activePointerId !== null && typeof event.currentTarget.hasPointerCapture === 'function') {
+      if (event.currentTarget.hasPointerCapture(activePointerId)) {
+        event.currentTarget.releasePointerCapture(activePointerId);
+      }
+    }
+
+    panState.current = {
+      panning: false,
+      pointerId: null,
+      lastX: 0,
+      lastY: 0,
+    };
   };
 
   const fitToNodes = useCallback((nodesToFit: VisualNode[]) => {
@@ -1030,12 +1060,20 @@ export default function CustomerGraphView({ isDark = true }: CustomerGraphViewPr
                 <svg
                   className={cn('w-full h-full relative z-10 select-none', panState.current.panning ? 'cursor-grabbing' : 'cursor-grab')}
                   viewBox={`0 0 ${GRAPH_WIDTH} ${GRAPH_HEIGHT}`}
+                  style={{ touchAction: 'none' }}
                   onWheel={handleWheelZoom}
-                  onMouseDown={handlePointerDown}
-                  onMouseMove={handlePointerMove}
-                  onMouseUp={stopPanning}
-                  onMouseLeave={() => {
-                    stopPanning();
+                  onPointerDown={handlePointerDown}
+                  onPointerMove={handlePointerMove}
+                  onPointerUp={stopPanning}
+                  onPointerCancel={stopPanning}
+                  onPointerLeave={(event) => {
+                    if (panState.current.panning) {
+                      const activePointerId = panState.current.pointerId;
+                      const hasCapture = activePointerId !== null
+                        && typeof event.currentTarget.hasPointerCapture === 'function'
+                        && event.currentTarget.hasPointerCapture(activePointerId);
+                      if (!hasCapture) stopPanning();
+                    }
                     setHoveredProfileId(null);
                   }}
                 >

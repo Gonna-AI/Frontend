@@ -147,6 +147,31 @@ describe('CustomerGraphView', () => {
     expect(call?.[2]).toMatchObject({ semanticEnabled: true });
   });
 
+  it('supports pointer-based panning on the graph canvas for mobile interactions', async () => {
+    vi.mocked(buildGraphModel).mockResolvedValue(createModel([createProfile('cust-1', 'Alice Smith')]));
+
+    const { container } = render(<CustomerGraphView isDark={false} />);
+
+    await waitFor(() => {
+      expect(screen.getAllByText('Alice Smith').length).toBeGreaterThan(0);
+    });
+
+    const svg = container.querySelector('svg[viewBox="0 0 1240 660"]');
+    expect(svg).not.toBeNull();
+
+    const viewportGroup = svg?.querySelector('g[transform]');
+    expect(viewportGroup).not.toBeNull();
+    const beforeTransform = viewportGroup?.getAttribute('transform');
+
+    fireEvent.pointerDown(svg!, { pointerId: 5, pointerType: 'touch', clientX: 120, clientY: 140 });
+    fireEvent.pointerMove(svg!, { pointerId: 5, pointerType: 'touch', clientX: 168, clientY: 182 });
+    fireEvent.pointerUp(svg!, { pointerId: 5, pointerType: 'touch', clientX: 168, clientY: 182 });
+
+    await waitFor(() => {
+      expect(viewportGroup?.getAttribute('transform')).not.toEqual(beforeTransform);
+    });
+  });
+
   it('clicking a cluster row focuses that cluster member in details', async () => {
     const alpha = createProfile('cust-1', 'Alice Smith');
     const beta = createProfile('cust-2', 'Bob Jones');
