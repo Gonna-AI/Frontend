@@ -3,6 +3,8 @@ import { supabase } from '../config/supabase';
 import { aiService } from '../services/aiService';
 import { useAuth } from './AuthContext';
 import { DEFAULT_VOICE_ID, normalizeVoiceId } from '../config/voiceConfig';
+import type { RescueEngineSettings, RescuePlaybookTemplate } from '../types/rescuePlaybook';
+import { DEFAULT_RESCUE_PLAYBOOKS, DEFAULT_RESCUE_SETTINGS } from '../types/rescuePlaybook';
 
 // Types for dynamic context extraction
 export interface ExtractedField {
@@ -101,6 +103,8 @@ export interface KnowledgeBaseConfig {
   customInstructions: string[];
   responseGuidelines: string;
   selectedVoiceId: string; // Selected AI voice
+  rescuePlaybooks: RescuePlaybookTemplate[];
+  rescueSettings: RescueEngineSettings;
 }
 
 interface DemoCallContextType {
@@ -221,6 +225,8 @@ Always be empathetic, clear, and efficient in your communication.`,
 - Offer alternatives when the primary solution isn't available`,
 
   selectedVoiceId: DEFAULT_VOICE_ID, // Default voice
+  rescuePlaybooks: DEFAULT_RESCUE_PLAYBOOKS,
+  rescueSettings: DEFAULT_RESCUE_SETTINGS,
 };
 
 // Helper to serialize dates for storage

@@ -6,6 +6,61 @@ import { buildGraphModel } from '../../services/customerGraphService';
 import { evaluateRealtimeGraphAlerts } from '../../services/customerGraphAlertService';
 
 let mockCallHistory: unknown[] = [];
+const mockRescueCenter = {
+  opportunities: [],
+  dismissedOpportunityIds: [],
+  dismissOpportunity: vi.fn(),
+  clearDismissedOpportunities: vi.fn(),
+  playbooks: [
+    {
+      id: 'goodwill-credit-whatsapp',
+      name: '15% Goodwill Credit + WhatsApp Apology',
+      description: 'Default',
+      channels: ['whatsapp'],
+      messageTemplate: 'Hi {{customer_name}}',
+      voiceScript: 'Hi',
+      creditAmountInr: 1500,
+      discountPercent: 15,
+      successCriteria: 'retained',
+      enabled: true,
+      abTestEnabled: false,
+      versions: [],
+    },
+  ],
+  settings: {
+    riskThreshold: 0.7,
+    growthThreshold: 0.2,
+    automationLevel: 'manual',
+    planTier: 'pro',
+    avgMonthlyRevenuePerCustomerInr: 12000,
+    autoRescueMaxPotentialLossInr: 200000,
+    successFeePercent: 10,
+    rescueInsuranceEnabled: false,
+    compliance: {
+      maxCustomersPerRescue: 500,
+      maxRescuesPerCustomerPerMonth: 2,
+      requireManagerApprovalAboveInr: 500000,
+      optedOutCustomerIds: [],
+    },
+  },
+  actionsWithResults: [],
+  audits: [],
+  reports: [],
+  setGraphModelFromView: vi.fn(),
+  runRescueAction: vi.fn(() => ({ ok: true, message: 'ok' })),
+  approveRescueAction: vi.fn(() => ({ ok: true, message: 'ok' })),
+  cancelPendingClusterActions: vi.fn(() => ({ ok: true, message: 'ok' })),
+  downloadConsentProof: vi.fn(),
+  exportReportCsv: vi.fn(),
+  exportReportPdf: vi.fn(),
+  forwardReportByEmail: vi.fn(),
+  capability: {
+    detectionEnabled: true,
+    automationEnabled: false,
+    reportEnabled: false,
+    successFeeEnabled: false,
+  },
+};
 
 vi.mock('../../contexts/DemoCallContext', () => ({
   useDemoCall: () => ({
@@ -26,6 +81,10 @@ vi.mock('../../services/customerGraphService', () => ({
 
 vi.mock('../../services/customerGraphAlertService', () => ({
   evaluateRealtimeGraphAlerts: vi.fn(() => []),
+}));
+
+vi.mock('../../contexts/RescueCenterContext', () => ({
+  useRescueCenter: () => mockRescueCenter,
 }));
 
 function createProfile(id: string, name: string): CustomerProfile {

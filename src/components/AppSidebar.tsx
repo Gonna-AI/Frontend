@@ -20,7 +20,8 @@ import {
     Moon,
     LogOut,
     Users,
-    Wand2
+    Wand2,
+    ShieldCheck
 } from "lucide-react"
 
 import { useTheme } from "@/hooks/useTheme"
@@ -57,7 +58,7 @@ const ALWAYS_ACCESSIBLE_TABS = ['billing', 'keys', 'usage'];
 
 export function AppSidebar({ activeTab, setActiveTab, hasAccess = false, ...props }: AppSidebarProps) {
     const { t, language, setLanguage } = useLanguage();
-    const { state, isMobile } = useSidebar();
+    const { state, isMobile, setOpenMobile } = useSidebar();
     const { isDark, toggleTheme } = useTheme();
 
     // Helper: returns disabled styles for locked tabs
@@ -69,6 +70,9 @@ export function AppSidebar({ activeTab, setActiveTab, hasAccess = false, ...prop
     const handleTabClick = (tabName: string) => {
         if (!hasAccess && !ALWAYS_ACCESSIBLE_TABS.includes(tabName)) return;
         setActiveTab(tabName);
+        if (isMobile) {
+            setOpenMobile(false);
+        }
     };
 
     return (
@@ -238,6 +242,21 @@ export function AppSidebar({ activeTab, setActiveTab, hasAccess = false, ...prop
                                 >
                                     <Terminal />
                                     <span>{t('sidebar.systemPrompt')}</span>
+                                </SidebarMenuButton>
+                            </SidebarMenuItem>
+                            <SidebarMenuItem>
+                                <SidebarMenuButton
+                                    isActive={activeTab === 'rescue_playbooks'}
+                                    onClick={() => handleTabClick('rescue_playbooks')}
+                                    className={cn(
+                                        "transition-colors",
+                                        isDark
+                                            ? "text-white/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-white/10 data-[active=true]:text-white"
+                                            : "text-gray-600 hover:text-gray-900 hover:bg-black/5 data-[active=true]:bg-black/5 data-[active=true]:text-black"
+                                    )}
+                                >
+                                    <ShieldCheck className="text-emerald-400" />
+                                    <span>{t('sidebar.rescuePlaybooks')}</span>
                                 </SidebarMenuButton>
                             </SidebarMenuItem>
                             <SidebarMenuItem>

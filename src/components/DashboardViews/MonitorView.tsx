@@ -2,9 +2,11 @@ import React, { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useDemoCall } from '../../contexts/DemoCallContext';
+
 import { ArrowUpRight, ArrowDownRight, MoreHorizontal, Phone, Clock, Activity, AlertCircle, Radio } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { LiveCallMonitor } from '../DemoCall';
+
 import {
     AreaChart,
     Area,
@@ -167,6 +169,7 @@ function SectionTab({ active, onClick, children, isDark }: { active: boolean, on
 export default function MonitorView({ isDark = true }: { isDark?: boolean }) {
     const { t, language } = useLanguage();
     const { getAnalytics, callHistory, currentCall } = useDemoCall();
+
     const analytics = getAnalytics();
     const [activeSection, setActiveSection] = useState<'history' | 'live'>('live');
     const [chartRange, setChartRange] = useState<'week' | 'month' | 'all'>('month');
@@ -260,6 +263,7 @@ export default function MonitorView({ isDark = true }: { isDark?: boolean }) {
 
     return (
         <div className="space-y-8 max-w-[1600px] mx-auto pb-10">
+
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>

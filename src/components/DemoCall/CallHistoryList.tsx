@@ -22,6 +22,7 @@ import { cn } from '../../utils/cn';
 import { useDemoCall, PriorityLevel } from '../../contexts/DemoCallContext';
 import { useLanguage } from '../../contexts/LanguageContext';
 
+
 interface CallHistoryListProps {
   isDark?: boolean;
   showFilters?: boolean;
@@ -30,6 +31,7 @@ interface CallHistoryListProps {
 export default function CallHistoryList({ isDark = true, showFilters = true }: CallHistoryListProps) {
   const { t } = useLanguage();
   const { callHistory } = useDemoCall();
+
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'summary' | 'transcript' | 'details'>('summary');
   const [filterPriority, setFilterPriority] = useState<PriorityLevel | 'all'>('all');
@@ -71,33 +73,36 @@ export default function CallHistoryList({ isDark = true, showFilters = true }: C
   const handleExportCSV = () => {
     if (filteredHistory.length === 0) return;
 
+    const esc = (v: string) => `"${String(v).replace(/"/g, '""').replace(/\n/g, ' ')}"`;
+
     const headers = ['Date', 'Caller Name', 'Type', 'Duration (s)', 'Priority', 'Category', 'Sentiment', 'Summary'];
 
-    const rows = filteredHistory.map(call => {
-      return [
-        formatDate(call.date).replace(/,/g, ''),
-        `"${call.callerName}"`,
-        call.type || 'text',
-        call.duration || 0,
-        call.priority,
-        call.category?.name || 'N/A',
-        call.summary.sentiment || 'neutral',
-        `"${(call.summary.summaryText || call.summary.notes || '').replace(/"/g, '""')}"`
-      ].join(',');
-    });
+    const rows = filteredHistory.map(call => [
+      esc(formatDate(call.date)),
+      esc(call.callerName),
+      call.type || 'text',
+      call.duration || 0,
+      call.priority,
+      esc(call.category?.name || 'N/A'),
+      call.summary.sentiment || 'neutral',
+      esc(call.summary.summaryText || ''),
+    ].join(','));
 
-    const csvContent = "data:text/csv;charset=utf-8," + [headers.join(','), ...rows].join('\n');
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `clerktree_history_${new Date().toISOString().split('T')[0]}.csv`);
+    const csv = [headers.join(','), ...rows].join('\r\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `clerktree_history_${new Date().toISOString().split('T')[0]}.csv`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   };
 
   return (
     <div className="space-y-6 max-w-[1600px] mx-auto pb-10">
+
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
@@ -244,6 +249,14 @@ export default function CallHistoryList({ isDark = true, showFilters = true }: C
                               {priority.label}
                             </span>
                             <span className={cn("text-xs", isDark ? "text-white/40" : "text-gray-400")}>{item.category?.name}</span>
+                            {item.tags?.includes('rescue_action') && (
+                              <span className={cn(
+                                "inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded-full font-medium border",
+                                isDark ? "bg-emerald-500/10 text-emerald-300 border-emerald-500/20" : "bg-emerald-50 text-emerald-700 border-emerald-200"
+                              )}>
+                                Rescue Action
+                              </span>
+                            )}
                           </div>
                         </div>
                       </div>

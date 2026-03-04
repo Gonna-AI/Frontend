@@ -22,6 +22,7 @@ import MonitorView from '../components/DashboardViews/MonitorView';
 import IntegrationView from '../components/DashboardViews/IntegrationView';
 import CustomerGraphView from '../components/DashboardViews/CustomerGraphView';
 import InitialSetupDialog from '../components/DashboardViews/InitialSetupDialog';
+import { RescueCenterProvider } from '../contexts/RescueCenterContext';
 
 import { AccessCodeProvider, useAccessCode } from '../contexts/AccessCodeContext';
 import AccessCodeDialog from '../components/AccessCodeDialog';
@@ -48,6 +49,19 @@ function DemoDashboardContent() {
     setActiveTab(tab);
   };
 
+  useEffect(() => {
+    const handleDashboardSwitch = (event: Event) => {
+      const customEvent = event as CustomEvent<string>;
+      if (typeof customEvent.detail !== 'string') return;
+      handleSetActiveTab(customEvent.detail);
+    };
+
+    window.addEventListener('dashboard-switch-tab', handleDashboardSwitch as EventListener);
+    return () => {
+      window.removeEventListener('dashboard-switch-tab', handleDashboardSwitch as EventListener);
+    };
+  }, [hasAccess]);
+
   const handleSetupAction = (action: 'ai' | 'manual' | 'dismiss') => {
     if (action === 'ai') {
       setActiveTab('onboarding');
@@ -64,6 +78,7 @@ function DemoDashboardContent() {
       customer_graph: t('sidebar.customerGraph'),
       knowledge: t('config.title'),
       system_prompt: t('sidebar.systemPrompt'),
+      rescue_playbooks: t('sidebar.rescuePlaybooks'),
       ai_voice: t('sidebar.aiVoice'),
       context_fields: t('sidebar.contextFields'),
       categories: t('sidebar.categories'),
@@ -173,6 +188,7 @@ function DemoDashboardContent() {
                   {/* Knowledge Base Sections */}
                   {activeTab === 'knowledge' && <KnowledgeBase isDark={isDark} activeSection="prompt" />}
                   {activeTab === 'system_prompt' && <KnowledgeBase isDark={isDark} activeSection="prompt" />}
+                  {activeTab === 'rescue_playbooks' && <KnowledgeBase isDark={isDark} activeSection="rescue_playbooks" />}
                   {activeTab === 'ai_voice' && <KnowledgeBase isDark={isDark} activeSection="voice" />}
                   {activeTab === 'context_fields' && <KnowledgeBase isDark={isDark} activeSection="fields" />}
                   {activeTab === 'categories' && <KnowledgeBase isDark={isDark} activeSection="categories" />}
@@ -207,9 +223,11 @@ function DemoDashboardContent() {
 export default function DemoDashboard() {
   return (
     <DemoCallProvider>
-      <AccessCodeProvider>
-        <DemoDashboardContent />
-      </AccessCodeProvider>
+      <RescueCenterProvider>
+        <AccessCodeProvider>
+          <DemoDashboardContent />
+        </AccessCodeProvider>
+      </RescueCenterProvider>
     </DemoCallProvider>
   );
 }

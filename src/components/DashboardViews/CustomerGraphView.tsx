@@ -3,15 +3,25 @@ import {
   Activity,
   AlertCircle,
   ArrowUpRight,
+  BadgeIndianRupee,
   Brain,
+  CalendarClock,
+  CheckCircle2,
+  Clock3,
+  FileDown,
+  Lock,
   Loader2,
+  Mail,
   LocateFixed,
   Network,
   RefreshCcw,
   Repeat2,
+  Send,
   ShieldAlert,
+  ShieldCheck,
   Sparkles,
   UserRound,
+  XCircle,
   ZoomIn,
   ZoomOut,
 } from 'lucide-react';
@@ -27,8 +37,13 @@ import {
 import { cn } from '../../utils/cn';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useDemoCall } from '../../contexts/DemoCallContext';
+import { useRescueCenter } from '../../contexts/RescueCenterContext';
 import { evaluateRealtimeGraphAlerts } from '../../services/customerGraphAlertService';
 import { buildGraphModel } from '../../services/customerGraphService';
+import {
+  formatInrCompact,
+  formatPercent as formatRescuePercent,
+} from '../../services/rescuePlaybookService';
 import type {
   ClusterCopilotAction,
   CustomerGraphAlert,
@@ -38,6 +53,7 @@ import type {
   CustomerProfile,
   SimilarityEdge,
 } from '../../types/customerGraph';
+
 
 interface CustomerGraphViewProps {
   isDark?: boolean;
@@ -125,6 +141,23 @@ function formatSignedPercent(value: number): string {
 export default function CustomerGraphView({ isDark = true }: CustomerGraphViewProps) {
   const { t } = useLanguage();
   const { callHistory } = useDemoCall();
+  const {
+    dismissOpportunity,
+    playbooks,
+    settings,
+    actionsWithResults,
+    audits,
+    reports,
+    setGraphModelFromView,
+    runRescueAction,
+    approveRescueAction,
+    cancelPendingClusterActions,
+    downloadConsentProof,
+    exportReportCsv,
+    exportReportPdf,
+    forwardReportByEmail,
+    capability,
+  } = useRescueCenter();
 
   const [dateRangePreset, setDateRangePreset] = useState<(typeof RANGE_OPTIONS)[number]>('30d');
   const [interactionType, setInteractionType] = useState<(typeof TYPE_OPTIONS)[number]>('all');
@@ -135,6 +168,12 @@ export default function CustomerGraphView({ isDark = true }: CustomerGraphViewPr
   const [aiInsightsError, setAiInsightsError] = useState<string | null>(null);
   const [aiInsightsGeneratedAt, setAiInsightsGeneratedAt] = useState<string | null>(null);
   const [realtimeAlerts, setRealtimeAlerts] = useState<CustomerGraphAlert[]>([]);
+  const [selectedOpportunityId, setSelectedOpportunityId] = useState<string | null>(null);
+  const [selectedPlaybookId, setSelectedPlaybookId] = useState<string>('');
+  const [rescueModalStep, setRescueModalStep] = useState<1 | 2 | 3>(1);
+  const [rescueModalOpen, setRescueModalOpen] = useState(false);
+  const [scheduledForTomorrow, setScheduledForTomorrow] = useState(false);
+  const [rescueFeedback, setRescueFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
   const [model, setModel] = useState<CustomerGraphModel | null>(null);
   const [loading, setLoading] = useState(false);
@@ -150,11 +189,12 @@ export default function CustomerGraphView({ isDark = true }: CustomerGraphViewPr
   const [viewX, setViewX] = useState(0);
   const [viewY, setViewY] = useState(0);
 
-  const panState = useRef<{ panning: boolean; pointerId: number | null; lastX: number; lastY: number }>({
-    panning: false,
-    pointerId: null,
-    lastX: 0,
-    lastY: 0,
+  const panState = useRef<{
+    activePointers: Map<number, { x: number; y: number }>;
+    lastDistance: number | null;
+  }>({
+    activePointers: new Map(),
+    lastDistance: null,
   });
   const autoFitKeyRef = useRef<string>('');
 
@@ -238,6 +278,22 @@ export default function CustomerGraphView({ isDark = true }: CustomerGraphViewPr
 
     setRealtimeAlerts(alerts);
   }, [model]);
+
+  useEffect(() => {
+    if (!model) return;
+    setGraphModelFromView(model);
+  }, [model, setGraphModelFromView]);
+
+  useEffect(() => {
+    if (selectedPlaybookId || playbooks.length === 0) return;
+    setSelectedPlaybookId(playbooks[0].id);
+  }, [playbooks, selectedPlaybookId]);
+
+  useEffect(() => {
+    if (!rescueFeedback) return;
+    const timer = window.setTimeout(() => setRescueFeedback(null), 4500);
+    return () => window.clearTimeout(timer);
+  }, [rescueFeedback]);
 
   const profileById = useMemo(() => {
     if (!model) return new Map<string, CustomerProfile>();
@@ -404,6 +460,43 @@ export default function CustomerGraphView({ isDark = true }: CustomerGraphViewPr
     return new Set(selectedCluster.memberIds);
   }, [selectedCluster]);
   const hasSelectedCluster = selectedClusterMemberIdSet.size > 0;
+  const highRiskClusters = useMemo(() => {
+    if (!model) return [];
+    return model.clusters
+      .filter((c) => c.riskScore >= settings.riskThreshold)
+      .sort((a, b) => b.riskScore - a.riskScore)
+      .slice(0, 8);
+  }, [model, settings.riskThreshold]);
+  const latestRescueByCluster = useMemo(() => {
+    const map = new Map<string, (typeof actionsWithResults)[number]>();
+    for (const action of actionsWithResults) {
+      if (!map.has(action.clusterId)) {
+        map.set(action.clusterId, action);
+      }
+    }
+    return map;
+  }, [actionsWithResults]);
+  const pendingApprovals = useMemo(
+    () => actionsWithResults.filter((action) => action.status === 'requires_approval'),
+    [actionsWithResults],
+  );
+  const selectedOpportunity = useMemo(
+    () => highRiskClusters.find((c) => c.id === selectedOpportunityId) || null,
+    [highRiskClusters, selectedOpportunityId],
+  );
+  const selectedPlaybook = useMemo(
+    () => playbooks.find((playbook) => playbook.id === selectedPlaybookId) || null,
+    [playbooks, selectedPlaybookId],
+  );
+  const previewEstimatedCost = useMemo(() => {
+    if (!selectedOpportunity || !selectedPlaybook) return 0;
+    const credit = selectedPlaybook.creditAmountInr * selectedOpportunity.memberCount;
+    const discount = settings.avgMonthlyRevenuePerCustomerInr
+      * selectedOpportunity.memberCount
+      * (selectedPlaybook.discountPercent / 100)
+      * 0.25;
+    return Math.round(credit + discount);
+  }, [selectedOpportunity, selectedPlaybook, settings.avgMonthlyRevenuePerCustomerInr]);
 
   const focusedNodeId = hoveredProfileId || selectedProfileId;
 
@@ -508,12 +601,12 @@ export default function CustomerGraphView({ isDark = true }: CustomerGraphViewPr
     if (event.pointerType === 'mouse' && event.button !== 0) return;
 
     event.preventDefault();
-    panState.current = {
-      panning: true,
-      pointerId: event.pointerId,
-      lastX: event.clientX,
-      lastY: event.clientY,
-    };
+    panState.current.activePointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+
+    if (panState.current.activePointers.size === 2) {
+      const pts = Array.from(panState.current.activePointers.values());
+      panState.current.lastDistance = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
+    }
 
     if (typeof event.currentTarget.setPointerCapture === 'function') {
       try {
@@ -525,36 +618,53 @@ export default function CustomerGraphView({ isDark = true }: CustomerGraphViewPr
   };
 
   const handlePointerMove = (event: React.PointerEvent<SVGSVGElement>) => {
-    if (!panState.current.panning || panState.current.pointerId !== event.pointerId) return;
-
+    if (!panState.current.activePointers.has(event.pointerId)) return;
     event.preventDefault();
 
-    const dx = event.clientX - panState.current.lastX;
-    const dy = event.clientY - panState.current.lastY;
+    const previousPoints = Array.from(panState.current.activePointers.values());
+    panState.current.activePointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+    const currentPoints = Array.from(panState.current.activePointers.values());
 
-    setViewX((prev) => prev + dx);
-    setViewY((prev) => prev + dy);
+    if (currentPoints.length === 1) {
+      const dx = currentPoints[0].x - previousPoints[0].x;
+      const dy = currentPoints[0].y - previousPoints[0].y;
+      setViewX((prev) => prev + dx);
+      setViewY((prev) => prev + dy);
+    } else if (currentPoints.length === 2 && panState.current.lastDistance !== null) {
+      const newDistance = Math.hypot(currentPoints[0].x - currentPoints[1].x, currentPoints[0].y - currentPoints[1].y);
+      const scaleChange = newDistance / panState.current.lastDistance;
 
-    panState.current.lastX = event.clientX;
-    panState.current.lastY = event.clientY;
+      const midX = (currentPoints[0].x + currentPoints[1].x) / 2;
+      const midY = (currentPoints[0].y + currentPoints[1].y) / 2;
+      const prevMidX = (previousPoints[0].x + previousPoints[1].x) / 2;
+      const prevMidY = (previousPoints[0].y + previousPoints[1].y) / 2;
+
+      const dx = midX - prevMidX;
+      const dy = midY - prevMidY;
+
+      setViewScale((prev) => clampScale(prev * scaleChange));
+      setViewX((prev) => prev + dx);
+      setViewY((prev) => prev + dy);
+
+      panState.current.lastDistance = newDistance;
+    }
   };
 
   const stopPanning = (event?: React.PointerEvent<SVGSVGElement>) => {
-    if (event && panState.current.pointerId !== event.pointerId) return;
-
-    const activePointerId = panState.current.pointerId;
-    if (event && activePointerId !== null && typeof event.currentTarget.hasPointerCapture === 'function') {
-      if (event.currentTarget.hasPointerCapture(activePointerId)) {
-        event.currentTarget.releasePointerCapture(activePointerId);
+    if (event) {
+      panState.current.activePointers.delete(event.pointerId);
+      if (typeof event.currentTarget.releasePointerCapture === 'function' && event.currentTarget.hasPointerCapture(event.pointerId)) {
+        try {
+          event.currentTarget.releasePointerCapture(event.pointerId);
+        } catch { }
       }
+    } else {
+      panState.current.activePointers.clear();
     }
 
-    panState.current = {
-      panning: false,
-      pointerId: null,
-      lastX: 0,
-      lastY: 0,
-    };
+    if (panState.current.activePointers.size < 2) {
+      panState.current.lastDistance = null;
+    }
   };
 
   const fitToNodes = useCallback((nodesToFit: VisualNode[]) => {
@@ -611,6 +721,55 @@ export default function CustomerGraphView({ isDark = true }: CustomerGraphViewPr
     const primaryMemberId = cluster.memberIds.find((id) => profileById.has(id)) || null;
     setSelectedProfileId(primaryMemberId);
     fitToNodeIds(cluster.memberIds);
+  };
+
+  const handleViewOpportunityCluster = (cluster: CustomerCluster) => {
+    handleClusterSelect(cluster);
+  };
+
+  const openRescueModal = (opportunityId: string) => {
+    setSelectedOpportunityId(opportunityId);
+    setRescueModalStep(1);
+    setScheduledForTomorrow(false);
+    setRescueModalOpen(true);
+  };
+
+  const closeRescueModal = () => {
+    setRescueModalOpen(false);
+    setRescueModalStep(1);
+    setScheduledForTomorrow(false);
+  };
+
+  const executeRescue = () => {
+    if (!selectedOpportunity || !selectedPlaybook) {
+      setRescueFeedback({ type: 'error', message: 'Choose an opportunity and playbook first.' });
+      return;
+    }
+
+    const scheduleDate = scheduledForTomorrow
+      ? (() => {
+        const target = new Date();
+        target.setDate(target.getDate() + 1);
+        target.setHours(10, 0, 0, 0);
+        return target.toISOString();
+      })()
+      : undefined;
+
+    const result = runRescueAction({
+      opportunityId: selectedOpportunity.id,
+      playbookId: selectedPlaybook.id,
+      scheduledFor: scheduleDate,
+      createdBy: 'user',
+    });
+
+    setRescueFeedback({
+      type: result.ok ? 'success' : 'error',
+      message: result.message,
+    });
+
+    if (result.ok) {
+      setRescueModalStep(3);
+    }
   };
 
   const handleGenerateAIInsights = useCallback(async () => {
@@ -875,6 +1034,273 @@ export default function CustomerGraphView({ isDark = true }: CustomerGraphViewPr
         )}
       </section>
 
+      {rescueFeedback && (
+        <div className={cn(
+          'rounded-xl border p-3 text-sm',
+          rescueFeedback.type === 'success'
+            ? (isDark ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-200' : 'border-emerald-200 bg-emerald-50 text-emerald-700')
+            : (isDark ? 'border-rose-500/30 bg-rose-500/10 text-rose-200' : 'border-rose-200 bg-rose-50 text-rose-700'),
+        )}>
+          {rescueFeedback.message}
+        </div>
+      )}
+
+      <section className={cn(
+        'rounded-2xl border p-4 md:p-5',
+        isDark ? 'bg-[#09090B] border-white/10' : 'bg-white border-black/10',
+      )}>
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <h3 className={cn('text-sm font-semibold tracking-wide', isDark ? 'text-white' : 'text-black')}>
+              High-Risk Clusters
+            </h3>
+            <p className={cn('text-xs mt-1', isDark ? 'text-white/60' : 'text-black/60')}>
+              Clusters with risk ≥{Math.round(settings.riskThreshold * 100)}% from the customer graph.
+            </p>
+          </div>
+          <span className={cn(
+            'text-[11px] px-2 py-1 rounded-full border',
+            isDark ? 'border-white/10 bg-white/5 text-white/70' : 'border-black/10 bg-black/5 text-black/70',
+          )}>
+            {highRiskClusters.length} found
+          </span>
+        </div>
+
+        {highRiskClusters.length === 0 ? (
+          <p className={cn('text-sm mt-3', isDark ? 'text-white/55' : 'text-black/55')}>
+            No clusters above {Math.round(settings.riskThreshold * 100)}% risk detected. This section updates automatically from the customer graph.
+          </p>
+        ) : (
+          <div className="mt-4 grid grid-cols-1 lg:grid-cols-2 gap-3">
+            {highRiskClusters.map((cluster) => {
+              const riskPct = Math.round(cluster.riskScore * 100);
+              const riskLevel = riskPct >= 75 ? 'critical' : riskPct >= 60 ? 'high' : 'moderate';
+              const riskColors = {
+                critical: isDark ? 'border-rose-400/40 bg-rose-500/20 text-rose-200' : 'border-rose-300 bg-rose-100 text-rose-800',
+                high: isDark ? 'border-amber-400/40 bg-amber-500/20 text-amber-200' : 'border-amber-300 bg-amber-100 text-amber-800',
+                moderate: isDark ? 'border-yellow-400/30 bg-yellow-500/15 text-yellow-200' : 'border-yellow-300 bg-yellow-50 text-yellow-800',
+              };
+              const members = cluster.memberIds
+                .map((id) => profileById.get(id))
+                .filter((p): p is CustomerProfile => !!p);
+              const knownNames = members
+                .map((m) => m.displayName)
+                .filter((n) => !n.toLowerCase().startsWith('unknown caller'));
+              const latestAction = latestRescueByCluster.get(cluster.id);
+
+              return (
+                <div
+                  key={cluster.id}
+                  className={cn(
+                    'rounded-xl border p-3.5 space-y-3',
+                    isDark ? 'border-white/10 bg-white/[0.03]' : 'border-black/10 bg-black/[0.02]',
+                  )}
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <p className={cn('text-sm font-semibold', isDark ? 'text-white' : 'text-black')}>
+                          {cluster.label}
+                        </p>
+                        <span className={cn('text-[10px] font-bold px-2 py-0.5 rounded-full border', riskColors[riskLevel])}>
+                          {riskPct}% risk
+                        </span>
+                      </div>
+                      <p className={cn('text-xs mt-1', isDark ? 'text-white/65' : 'text-black/65')}>
+                        {cluster.memberCount} customer{cluster.memberCount !== 1 ? 's' : ''}{knownNames.length > 0 ? ` · ${knownNames.slice(0, 3).join(', ')}${knownNames.length > 3 ? ` +${knownNames.length - 3}` : ''}` : ''}
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => dismissOpportunity(cluster.id)}
+                      className={cn(
+                        'p-1 rounded-md',
+                        isDark ? 'text-white/55 hover:bg-white/10' : 'text-black/55 hover:bg-black/10',
+                      )}
+                    >
+                      <XCircle className="w-4 h-4" />
+                    </button>
+                  </div>
+
+                  {cluster.sharedSignals.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5">
+                      {cluster.sharedSignals.slice(0, 5).map((signal) => (
+                        <span
+                          key={signal}
+                          className={cn(
+                            'text-[10px] px-2 py-0.5 rounded-full border',
+                            isDark ? 'border-white/10 bg-white/5 text-white/60' : 'border-black/10 bg-black/5 text-black/60',
+                          )}
+                        >
+                          {signal}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+
+                  {latestAction?.result && (
+                    <div className={cn(
+                      'rounded-lg border p-2 text-xs',
+                      isDark ? 'border-emerald-500/20 bg-emerald-500/10 text-emerald-200' : 'border-emerald-200 bg-emerald-50 text-emerald-700',
+                    )}>
+                      Rescue results: {formatInrCompact(latestAction.result.revenueProtectedInr)} protected, {formatRescuePercent(latestAction.result.retentionRate)} retained.
+                    </div>
+                  )}
+
+                  <div className="flex flex-wrap items-center gap-2">
+                    <button
+                      onClick={() => handleViewOpportunityCluster(cluster)}
+                      className={cn(
+                        'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium',
+                        isDark ? 'border-white/10 bg-white/5 text-white/80 hover:bg-white/10' : 'border-black/10 bg-black/5 text-black/80 hover:bg-black/10',
+                      )}
+                    >
+                      <Network className="w-3.5 h-3.5" />
+                      View Cluster
+                    </button>
+                    <button
+                      onClick={() => openRescueModal(cluster.id)}
+                      className={cn(
+                        'inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold border',
+                        isDark ? 'border-emerald-400/35 bg-emerald-500/20 text-emerald-200 hover:bg-emerald-500/30' : 'border-emerald-300 bg-emerald-100 text-emerald-800 hover:bg-emerald-200',
+                      )}
+                    >
+                      <ShieldCheck className="w-3.5 h-3.5" />
+                      Rescue This Cluster
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </section>
+
+      {pendingApprovals.length > 0 && (
+        <section className={cn(
+          'rounded-2xl border p-4 md:p-5',
+          isDark ? 'bg-[#09090B] border-white/10' : 'bg-white border-black/10',
+        )}>
+          <h3 className={cn('text-sm font-semibold tracking-wide', isDark ? 'text-white' : 'text-black')}>
+            Manager Approval Queue
+          </h3>
+          <div className="mt-3 space-y-2">
+            {pendingApprovals.slice(0, 4).map((action) => (
+              <div
+                key={action.id}
+                className={cn(
+                  'rounded-lg border p-3 flex flex-wrap items-center justify-between gap-3',
+                  isDark ? 'border-white/10 bg-white/[0.03]' : 'border-black/10 bg-black/[0.02]',
+                )}
+              >
+                <div>
+                  <p className={cn('text-sm font-medium', isDark ? 'text-white' : 'text-black')}>
+                    {action.clusterLabel} · {action.playbookName}
+                  </p>
+                  <p className={cn('text-xs mt-1', isDark ? 'text-white/60' : 'text-black/60')}>
+                    Estimated cost {formatInrCompact(action.estimatedCostInr)} · Approval threshold {formatInrCompact(settings.compliance.requireManagerApprovalAboveInr)}
+                  </p>
+                </div>
+                <button
+                  onClick={() => {
+                    const result = approveRescueAction(action.id);
+                    setRescueFeedback({
+                      type: result.ok ? 'success' : 'error',
+                      message: result.message,
+                    });
+                  }}
+                  className={cn(
+                    'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium',
+                    isDark ? 'border-cyan-400/30 bg-cyan-500/15 text-cyan-200 hover:bg-cyan-500/25' : 'border-cyan-200 bg-cyan-50 text-cyan-700 hover:bg-cyan-100',
+                  )}
+                >
+                  <Lock className="w-3.5 h-3.5" />
+                  Approve & Execute
+                </button>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {reports.length > 0 && (
+        <section className={cn(
+          'rounded-2xl border p-4 md:p-5',
+          isDark ? 'bg-[#09090B] border-white/10' : 'bg-white border-black/10',
+        )}>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h3 className={cn('text-sm font-semibold tracking-wide', isDark ? 'text-white' : 'text-black')}>
+                Protected Revenue Report
+              </h3>
+              <p className={cn('text-xs mt-1', isDark ? 'text-white/60' : 'text-black/60')}>
+                Auto-generated monthly. {capability.reportEnabled ? 'Enterprise mode active.' : 'Upgrade to Enterprise for full auto reporting.'}
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => exportReportCsv(reports[0].id)}
+                className={cn(
+                  'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium',
+                  isDark ? 'border-white/10 bg-white/5 text-white/80 hover:bg-white/10' : 'border-black/10 bg-black/5 text-black/80 hover:bg-black/10',
+                )}
+              >
+                <FileDown className="w-3.5 h-3.5" />
+                Export CSV
+              </button>
+              <button
+                onClick={() => exportReportPdf(reports[0].id)}
+                className={cn(
+                  'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium',
+                  isDark ? 'border-white/10 bg-white/5 text-white/80 hover:bg-white/10' : 'border-black/10 bg-black/5 text-black/80 hover:bg-black/10',
+                )}
+              >
+                <BadgeIndianRupee className="w-3.5 h-3.5" />
+                Export PDF
+              </button>
+              <button
+                onClick={() => forwardReportByEmail(reports[0].id)}
+                className={cn(
+                  'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium',
+                  isDark ? 'border-emerald-400/30 bg-emerald-500/15 text-emerald-200 hover:bg-emerald-500/25' : 'border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100',
+                )}
+              >
+                <Mail className="w-3.5 h-3.5" />
+                Forward to client
+              </button>
+            </div>
+          </div>
+
+          <p className={cn('text-sm mt-3 font-medium', isDark ? 'text-white' : 'text-black')}>
+            {reports[0].headline}
+          </p>
+
+          <div className="mt-3 overflow-x-auto">
+            <table className="w-full text-xs">
+              <thead className={cn(isDark ? 'text-white/60' : 'text-black/60')}>
+                <tr>
+                  <th className="text-left px-2 py-1.5">Cluster</th>
+                  <th className="text-left px-2 py-1.5">Customers</th>
+                  <th className="text-left px-2 py-1.5">Rescue Type</th>
+                  <th className="text-left px-2 py-1.5">INR Protected</th>
+                  <th className="text-left px-2 py-1.5">Retention</th>
+                </tr>
+              </thead>
+              <tbody>
+                {reports[0].rows.map((row) => (
+                  <tr key={`${reports[0].id}-${row.cluster}-${row.rescueType}`} className={cn(isDark ? 'border-white/5' : 'border-black/5')}>
+                    <td className="px-2 py-1.5">{row.cluster}</td>
+                    <td className="px-2 py-1.5">{row.customers}</td>
+                    <td className="px-2 py-1.5">{row.rescueType}</td>
+                    <td className="px-2 py-1.5">{formatInrCompact(row.revenueProtectedInr)}</td>
+                    <td className="px-2 py-1.5">{formatRescuePercent(row.retentionRate)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      )}
+
       <section
         className={cn(
           'rounded-2xl border p-4 md:p-5 space-y-4',
@@ -1058,7 +1484,7 @@ export default function CustomerGraphView({ isDark = true }: CustomerGraphViewPr
                 />
 
                 <svg
-                  className={cn('w-full h-full relative z-10 select-none', panState.current.panning ? 'cursor-grabbing' : 'cursor-grab')}
+                  className={cn('w-full h-full relative z-10 select-none', panState.current.activePointers.size > 0 ? 'cursor-grabbing' : 'cursor-grab')}
                   viewBox={`0 0 ${GRAPH_WIDTH} ${GRAPH_HEIGHT}`}
                   style={{ touchAction: 'none' }}
                   onWheel={handleWheelZoom}
@@ -1067,13 +1493,7 @@ export default function CustomerGraphView({ isDark = true }: CustomerGraphViewPr
                   onPointerUp={stopPanning}
                   onPointerCancel={stopPanning}
                   onPointerLeave={(event) => {
-                    if (panState.current.panning) {
-                      const activePointerId = panState.current.pointerId;
-                      const hasCapture = activePointerId !== null
-                        && typeof event.currentTarget.hasPointerCapture === 'function'
-                        && event.currentTarget.hasPointerCapture(activePointerId);
-                      if (!hasCapture) stopPanning();
-                    }
+                    stopPanning(event);
                     setHoveredProfileId(null);
                   }}
                 >
@@ -1587,7 +2007,334 @@ export default function CustomerGraphView({ isDark = true }: CustomerGraphViewPr
               </div>
             )}
           </section>
+
+          <section className={cn(
+            'rounded-2xl border p-4 md:p-5 space-y-4',
+            isDark ? 'bg-[#09090B] border-white/10' : 'bg-white border-black/10',
+          )}>
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <h3 className={cn('text-sm font-semibold tracking-wide', isDark ? 'text-white' : 'text-black')}>
+                Rescue Execution Log
+              </h3>
+              <span className={cn(
+                'text-[11px] px-2 py-1 rounded-full border',
+                isDark ? 'border-white/10 bg-white/5 text-white/70' : 'border-black/10 bg-black/5 text-black/70',
+              )}>
+                {actionsWithResults.length} actions tracked
+              </span>
+            </div>
+
+            {actionsWithResults.length === 0 ? (
+              <p className={cn('text-sm', isDark ? 'text-white/55' : 'text-black/55')}>
+                No rescues executed yet. Trigger a rescue from the opportunities card.
+              </p>
+            ) : (
+              <div className="space-y-2">
+                {actionsWithResults.slice(0, 6).map((action) => (
+                  <div
+                    key={action.id}
+                    className={cn(
+                      'rounded-lg border p-3',
+                      isDark ? 'border-white/10 bg-white/[0.03]' : 'border-black/10 bg-black/[0.02]',
+                    )}
+                  >
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <div>
+                        <p className={cn('text-sm font-medium', isDark ? 'text-white' : 'text-black')}>
+                          {action.clusterLabel} · {action.playbookName}
+                        </p>
+                        <p className={cn('text-xs mt-1', isDark ? 'text-white/60' : 'text-black/60')}>
+                          {action.memberCount} customers · cost {formatInrCompact(action.estimatedCostInr)} · potential {formatInrCompact(action.potentialLossInr)}
+                        </p>
+                      </div>
+                      <span className={cn(
+                        'inline-flex items-center gap-1.5 text-[11px] px-2 py-1 rounded-full border',
+                        action.status === 'completed'
+                          ? (isDark ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300' : 'border-emerald-200 bg-emerald-50 text-emerald-700')
+                          : action.status === 'requires_approval'
+                            ? (isDark ? 'border-orange-500/30 bg-orange-500/10 text-orange-300' : 'border-orange-200 bg-orange-50 text-orange-700')
+                            : action.status === 'scheduled'
+                              ? (isDark ? 'border-cyan-500/30 bg-cyan-500/10 text-cyan-300' : 'border-cyan-200 bg-cyan-50 text-cyan-700')
+                              : (isDark ? 'border-white/10 bg-white/5 text-white/70' : 'border-black/10 bg-black/5 text-black/70'),
+                      )}>
+                        {action.status === 'completed' && <CheckCircle2 className="w-3.5 h-3.5" />}
+                        {action.status === 'scheduled' && <CalendarClock className="w-3.5 h-3.5" />}
+                        {action.status === 'requires_approval' && <Lock className="w-3.5 h-3.5" />}
+                        {action.status}
+                      </span>
+                    </div>
+
+                    <div className="mt-2 grid grid-cols-1 md:grid-cols-3 gap-2 text-xs">
+                      <div className={cn('rounded-md border px-2 py-1.5', isDark ? 'border-white/10 bg-black/20 text-white/75' : 'border-black/10 bg-white text-black/75')}>
+                        Retention {formatRescuePercent(action.result.retentionRate)} vs control {formatRescuePercent(action.result.controlGroupRetentionRate)}
+                      </div>
+                      <div className={cn('rounded-md border px-2 py-1.5', isDark ? 'border-white/10 bg-black/20 text-white/75' : 'border-black/10 bg-white text-black/75')}>
+                        Revenue protected {formatInrCompact(action.result.revenueProtectedInr)}
+                      </div>
+                      <div className={cn('rounded-md border px-2 py-1.5', isDark ? 'border-white/10 bg-black/20 text-white/75' : 'border-black/10 bg-white text-black/75')}>
+                        Churn avoided {formatInrCompact(action.result.churnAvoidedInr)}
+                      </div>
+                    </div>
+
+                    <div className="mt-2 flex flex-wrap items-center gap-2">
+                      <button
+                        onClick={() => downloadConsentProof(action.id)}
+                        className={cn(
+                          'inline-flex items-center gap-1.5 text-[11px] px-2.5 py-1 rounded-lg border',
+                          isDark ? 'border-white/10 bg-white/5 text-white/80 hover:bg-white/10' : 'border-black/10 bg-black/5 text-black/80 hover:bg-black/10',
+                        )}
+                      >
+                        <FileDown className="w-3.5 h-3.5" />
+                        Download consent proof
+                      </button>
+                      {(action.status === 'scheduled' || action.status === 'requires_approval') && (
+                        <button
+                          onClick={() => {
+                            const result = cancelPendingClusterActions(action.clusterId);
+                            setRescueFeedback({
+                              type: result.ok ? 'success' : 'error',
+                              message: result.message,
+                            });
+                          }}
+                          className={cn(
+                            'inline-flex items-center gap-1.5 text-[11px] px-2.5 py-1 rounded-lg border',
+                            isDark ? 'border-rose-500/30 bg-rose-500/10 text-rose-300 hover:bg-rose-500/20' : 'border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100',
+                          )}
+                        >
+                          <XCircle className="w-3.5 h-3.5" />
+                          Cancel pending credits
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {audits.length > 0 && (
+              <div>
+                <h4 className={cn('text-xs uppercase tracking-wider mb-2', isDark ? 'text-white/45' : 'text-black/45')}>
+                  Full audit trail
+                </h4>
+                <div className="space-y-1.5">
+                  {audits.slice(0, 8).map((audit) => (
+                    <div
+                      key={audit.id}
+                      className={cn(
+                        'rounded-md border px-2.5 py-2 text-xs',
+                        isDark ? 'border-white/10 bg-white/[0.02] text-white/75' : 'border-black/10 bg-black/[0.02] text-black/75',
+                      )}
+                    >
+                      <p className="font-medium">{audit.action}</p>
+                      <p className={cn('mt-1', isDark ? 'text-white/60' : 'text-black/60')}>{audit.details}</p>
+                      <p className={cn('mt-1', isDark ? 'text-white/45' : 'text-black/45')}>
+                        {new Date(audit.at).toLocaleString()} · {audit.actor}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </section>
         </>
+      )}
+
+      {rescueModalOpen && selectedOpportunity && (
+        <div className="fixed inset-0 z-[260] flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-black/70"
+            onClick={closeRescueModal}
+          />
+
+          <div className={cn(
+            'relative z-10 w-full max-w-2xl rounded-2xl border p-5',
+            isDark ? 'bg-[#09090B] border-white/10 text-white' : 'bg-white border-black/10 text-black',
+          )}>
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <h3 className="text-lg font-semibold">Rescue This Cluster</h3>
+                <p className={cn('text-sm mt-1', isDark ? 'text-white/60' : 'text-black/60')}>
+                  {selectedOpportunity.label} · {Math.round(selectedOpportunity.riskScore * 100)}% risk
+                </p>
+              </div>
+              <button
+                onClick={closeRescueModal}
+                className={cn('p-1.5 rounded-md', isDark ? 'hover:bg-white/10' : 'hover:bg-black/10')}
+              >
+                <XCircle className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="flex items-center gap-2 mt-4">
+              {[1, 2, 3].map((step) => (
+                <div key={`rescue-step-${step}`} className="flex items-center gap-2">
+                  <span className={cn(
+                    'inline-flex items-center justify-center w-6 h-6 rounded-full text-xs border',
+                    rescueModalStep >= step
+                      ? (isDark ? 'border-cyan-400/40 bg-cyan-500/20 text-cyan-200' : 'border-cyan-200 bg-cyan-50 text-cyan-700')
+                      : (isDark ? 'border-white/15 bg-white/5 text-white/60' : 'border-black/10 bg-black/5 text-black/60'),
+                  )}>
+                    {step}
+                  </span>
+                  {step < 3 && (
+                    <span className={cn('w-6 h-px', isDark ? 'bg-white/20' : 'bg-black/20')} />
+                  )}
+                </div>
+              ))}
+            </div>
+
+            {rescueModalStep === 1 && (
+              <div className="mt-4 space-y-3">
+                <p className={cn('text-sm', isDark ? 'text-white/75' : 'text-black/75')}>
+                  Step 1: Choose a playbook template.
+                </p>
+                <div className="space-y-2 max-h-64 overflow-y-auto">
+                  {playbooks.map((playbook) => (
+                    <button
+                      key={playbook.id}
+                      onClick={() => setSelectedPlaybookId(playbook.id)}
+                      className={cn(
+                        'w-full text-left rounded-lg border p-3 transition-colors',
+                        selectedPlaybookId === playbook.id
+                          ? (isDark ? 'border-emerald-400/35 bg-emerald-500/15' : 'border-emerald-200 bg-emerald-50')
+                          : (isDark ? 'border-white/10 bg-white/[0.03] hover:bg-white/10' : 'border-black/10 bg-black/[0.02] hover:bg-black/5'),
+                      )}
+                    >
+                      <p className="text-sm font-medium">{playbook.name}</p>
+                      <p className={cn('text-xs mt-1', isDark ? 'text-white/65' : 'text-black/65')}>
+                        {playbook.description}
+                      </p>
+                      <p className={cn('text-xs mt-1', isDark ? 'text-white/55' : 'text-black/55')}>
+                        Channels: {playbook.channels.join(', ')} · Credit {formatInrCompact(playbook.creditAmountInr)}
+                      </p>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {rescueModalStep === 2 && selectedPlaybook && (
+              <div className="mt-4 space-y-3">
+                <p className={cn('text-sm', isDark ? 'text-white/75' : 'text-black/75')}>
+                  Step 2: Preview outreach and execution cost.
+                </p>
+                <div className={cn(
+                  'rounded-lg border p-3 text-sm',
+                  isDark ? 'border-white/10 bg-white/[0.03]' : 'border-black/10 bg-black/[0.02]',
+                )}>
+                  <p className="font-medium mb-1">Message preview</p>
+                  <p className={cn('text-xs leading-relaxed', isDark ? 'text-white/70' : 'text-black/70')}>
+                    {selectedPlaybook.messageTemplate
+                      .replace('{{customer_name}}', (() => { const first = selectedOpportunity.memberIds.map((id) => profileById.get(id)).find((p) => p && !p.displayName.toLowerCase().startsWith('unknown')); return first?.displayName || 'Customer'; })())
+                      .replace('{{credit_percent}}', String(selectedPlaybook.discountPercent || 0))
+                      .replace('{{callback_slot}}', 'tomorrow 10:00 AM')}
+                  </p>
+                </div>
+                <div className="grid grid-cols-2 gap-2 text-xs">
+                  <div className={cn('rounded-lg border p-2', isDark ? 'border-white/10 bg-black/20' : 'border-black/10 bg-white')}>
+                    <p className={cn(isDark ? 'text-white/60' : 'text-black/60')}>Customers in cluster</p>
+                    <p className="font-semibold text-sm">{selectedOpportunity.memberCount}</p>
+                  </div>
+                  <div className={cn('rounded-lg border p-2', isDark ? 'border-white/10 bg-black/20' : 'border-black/10 bg-white')}>
+                    <p className={cn(isDark ? 'text-white/60' : 'text-black/60')}>Estimated cost</p>
+                    <p className="font-semibold text-sm">{formatInrCompact(previewEstimatedCost)}</p>
+                  </div>
+                  <div className={cn('rounded-lg border p-2', isDark ? 'border-white/10 bg-black/20' : 'border-black/10 bg-white')}>
+                    <p className={cn(isDark ? 'text-white/60' : 'text-black/60')}>Consent status</p>
+                    <p className="font-semibold text-sm">Verified</p>
+                  </div>
+                  <div className={cn('rounded-lg border p-2', isDark ? 'border-white/10 bg-black/20' : 'border-black/10 bg-white')}>
+                    <p className={cn(isDark ? 'text-white/60' : 'text-black/60')}>Risk score</p>
+                    <p className="font-semibold text-sm">{Math.round(selectedOpportunity.riskScore * 100)}%</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setScheduledForTomorrow((previous) => !previous)}
+                  className={cn(
+                    'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium',
+                    scheduledForTomorrow
+                      ? (isDark ? 'border-cyan-400/35 bg-cyan-500/20 text-cyan-200' : 'border-cyan-200 bg-cyan-50 text-cyan-700')
+                      : (isDark ? 'border-white/10 bg-white/5 text-white/70' : 'border-black/10 bg-black/5 text-black/70'),
+                  )}
+                >
+                  <CalendarClock className="w-3.5 h-3.5" />
+                  {scheduledForTomorrow ? 'Scheduled for tomorrow 10:00 AM' : 'One-click schedule for tomorrow 10:00 AM'}
+                </button>
+              </div>
+            )}
+
+            {rescueModalStep === 3 && (
+              <div className="mt-4 space-y-3">
+                <div className={cn(
+                  'rounded-lg border p-3',
+                  isDark ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-200' : 'border-emerald-200 bg-emerald-50 text-emerald-700',
+                )}>
+                  <p className="text-sm font-medium">Step 3 complete</p>
+                  <p className="text-xs mt-1">
+                    Rescue execution has been submitted and logged in History with compliance proof.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            <div className="mt-5 flex items-center justify-between gap-2">
+              <button
+                onClick={() => setRescueModalStep((previous) => (previous > 1 ? ((previous - 1) as 1 | 2 | 3) : previous))}
+                disabled={rescueModalStep === 1}
+                className={cn(
+                  'px-3 py-1.5 rounded-lg text-xs border',
+                  rescueModalStep === 1
+                    ? 'opacity-50 cursor-not-allowed'
+                    : '',
+                  isDark ? 'border-white/10 bg-white/5 text-white/75' : 'border-black/10 bg-black/5 text-black/75',
+                )}
+              >
+                Back
+              </button>
+
+              {rescueModalStep < 2 && (
+                <button
+                  onClick={() => setRescueModalStep(2)}
+                  disabled={!selectedPlaybook}
+                  className={cn(
+                    'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border',
+                    !selectedPlaybook
+                      ? 'opacity-50 cursor-not-allowed'
+                      : '',
+                    isDark ? 'border-cyan-400/35 bg-cyan-500/20 text-cyan-200' : 'border-cyan-200 bg-cyan-50 text-cyan-700',
+                  )}
+                >
+                  Next
+                </button>
+              )}
+
+              {rescueModalStep === 2 && (
+                <button
+                  onClick={executeRescue}
+                  className={cn(
+                    'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border',
+                    isDark ? 'border-emerald-400/35 bg-emerald-500/20 text-emerald-200' : 'border-emerald-200 bg-emerald-50 text-emerald-700',
+                  )}
+                >
+                  {scheduledForTomorrow ? <Clock3 className="w-3.5 h-3.5" /> : <Send className="w-3.5 h-3.5" />}
+                  {scheduledForTomorrow ? 'Schedule Rescue' : 'Rescue Now'}
+                </button>
+              )}
+
+              {rescueModalStep === 3 && (
+                <button
+                  onClick={closeRescueModal}
+                  className={cn(
+                    'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border',
+                    isDark ? 'border-emerald-400/35 bg-emerald-500/20 text-emerald-200' : 'border-emerald-200 bg-emerald-50 text-emerald-700',
+                  )}
+                >
+                  Done
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

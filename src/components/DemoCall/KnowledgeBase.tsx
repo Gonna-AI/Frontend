@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Save,
@@ -12,7 +12,11 @@ import {
   CloudOff,
   Monitor,
   Loader2,
-  Database
+  Database,
+  ShieldCheck,
+  FlaskConical,
+  Clock3,
+  Inbox
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import VoiceSelector from './VoiceSelector';
@@ -20,9 +24,11 @@ import { useDemoCall, ContextField } from '../../contexts/DemoCallContext';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { localLLMService } from '../../services/localLLMService';
 import { DEFAULT_VOICE_ID, normalizeVoiceId } from '../../config/voiceConfig';
+import { useRescueCenter } from '../../contexts/RescueCenterContext';
+import type { RescueChannel, RescuePlaybookTemplate } from '../../types/rescuePlaybook';
 
 // Define the tabs structure
-type ActiveTab = 'prompt' | 'voice' | 'fields' | 'categories' | 'rules' | 'instructions';
+type ActiveTab = 'prompt' | 'voice' | 'fields' | 'categories' | 'rules' | 'instructions' | 'rescue_playbooks';
 
 interface KnowledgeBaseProps {
   isDark?: boolean;
@@ -51,6 +57,11 @@ export default function KnowledgeBase({ isDark = true, activeSection }: Knowledg
     addCategory,
     removeCategory
   } = useDemoCall();
+  const {
+    playbooks,
+    settings,
+    setPlaybooks,
+  } = useRescueCenter();
 
   const { t } = useLanguage();
 
@@ -89,6 +100,16 @@ export default function KnowledgeBase({ isDark = true, activeSection }: Knowledg
 
   const [isAddingInstruction, setIsAddingInstruction] = useState(false);
   const [newInstruction, setNewInstruction] = useState('');
+  const [isAddingPlaybook, setIsAddingPlaybook] = useState(false);
+  const [newPlaybook, setNewPlaybook] = useState({
+    name: '',
+    description: '',
+    channels: ['whatsapp', 'email'] as RescueChannel[],
+    messageTemplate: '',
+    creditAmountInr: 500,
+    discountPercent: 10,
+    successCriteria: '',
+  });
 
   // Sync with context on mount/update
   useEffect(() => {
@@ -217,6 +238,97 @@ export default function KnowledgeBase({ isDark = true, activeSection }: Knowledg
     updateKnowledgeBase({ customInstructions: newInstructions });
   };
 
+  const handleUpdatePlaybook = (playbookId: string, updates: Partial<RescuePlaybookTemplate>) => {
+    const next = playbooks.map((playbook) => {
+      if (playbook.id !== playbookId) return playbook;
+      const updated: RescuePlaybookTemplate = {
+        ...playbook,
+        ...updates,
+      };
+
+      if (
+        updates.messageTemplate !== undefined
+        || updates.creditAmountInr !== undefined
+        || updates.discountPercent !== undefined
+        || updates.successCriteria !== undefined
+      ) {
+        const latestVersion = {
+          id: `v${playbook.versions.length + 1}`,
+          createdAt: new Date().toISOString(),
+          messageTemplate: updated.messageTemplate,
+          creditAmountInr: updated.creditAmountInr,
+          discountPercent: updated.discountPercent,
+          successCriteria: updated.successCriteria,
+          note: 'Updated from Rescue Playbooks manager',
+        };
+        updated.versions = [...playbook.versions, latestVersion].slice(-10);
+      }
+
+      return updated;
+    });
+
+    setPlaybooks(next);
+  };
+
+  const handleAddPlaybook = () => {
+    if (!newPlaybook.name.trim() || !newPlaybook.messageTemplate.trim()) return;
+
+    const playbook: RescuePlaybookTemplate = {
+      id: newPlaybook.name.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+      name: newPlaybook.name.trim(),
+      description: newPlaybook.description.trim(),
+      channels: newPlaybook.channels,
+      messageTemplate: newPlaybook.messageTemplate.trim(),
+      voiceScript: newPlaybook.messageTemplate.trim(),
+      creditAmountInr: Math.max(0, newPlaybook.creditAmountInr),
+      discountPercent: Math.max(0, newPlaybook.discountPercent),
+      successCriteria: newPlaybook.successCriteria.trim() || 'Customer retained within 30 days.',
+      enabled: true,
+      abTestEnabled: false,
+      versions: [
+        {
+          id: 'v1',
+          createdAt: new Date().toISOString(),
+          messageTemplate: newPlaybook.messageTemplate.trim(),
+          creditAmountInr: Math.max(0, newPlaybook.creditAmountInr),
+          discountPercent: Math.max(0, newPlaybook.discountPercent),
+          successCriteria: newPlaybook.successCriteria.trim() || 'Customer retained within 30 days.',
+          note: 'Created by operator',
+        },
+      ],
+    };
+
+    setPlaybooks([...playbooks, playbook]);
+    setNewPlaybook({
+      name: '',
+      description: '',
+      channels: ['whatsapp', 'email'],
+      messageTemplate: '',
+      creditAmountInr: 500,
+      discountPercent: 10,
+      successCriteria: '',
+    });
+    setIsAddingPlaybook(false);
+  };
+
+  const handleDeletePlaybook = (playbookId: string) => {
+    if (playbooks.length <= 1) return;
+    setPlaybooks(playbooks.filter((playbook) => playbook.id !== playbookId));
+  };
+
+  const handleToggleNewPlaybookChannel = (channel: RescueChannel) => {
+    setNewPlaybook((previous) => {
+      const hasChannel = previous.channels.includes(channel);
+      const nextChannels = hasChannel
+        ? previous.channels.filter((item) => item !== channel)
+        : [...previous.channels, channel];
+      return {
+        ...previous,
+        channels: nextChannels.length ? nextChannels : previous.channels,
+      };
+    });
+  };
+
 
   const tabInfo = {
     prompt: { label: t('sidebar.systemPrompt'), icon: Terminal, description: "Define the core identity and behavior of your AI agent." },
@@ -224,7 +336,8 @@ export default function KnowledgeBase({ isDark = true, activeSection }: Knowledg
     fields: { label: t('sidebar.contextFields'), icon: Database, description: "Structured data to extract from every conversation." },
     categories: { label: t('sidebar.categories'), icon: Settings, description: "Call classification buckets for analytics." },
     rules: { label: t('sidebar.priorityRules'), icon: AlertTriangle, description: "Logic for determining call priority levels." },
-    instructions: { label: t('sidebar.instructions'), icon: Lightbulb, description: "Specific behavioral guidelines for the agent." }
+    instructions: { label: t('sidebar.instructions'), icon: Lightbulb, description: "Specific behavioral guidelines for the agent." },
+    rescue_playbooks: { label: t('sidebar.rescuePlaybooks'), icon: ShieldCheck, description: "Configure cluster rescue templates, automation, and compliance." },
   };
 
   const currentTabInfo = tabInfo[activeTab];
@@ -604,6 +717,187 @@ export default function KnowledgeBase({ isDark = true, activeSection }: Knowledg
                     <p className={cn("text-center py-8 text-sm italic", isDark ? "text-white/20" : "text-black/20")}>No custom instructions defined.</p>
                   )}
                 </div>
+              </motion.div>
+            )}
+
+            {activeTab === 'rescue_playbooks' && (
+              <motion.div key="rescue_playbooks" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
+                <p className={cn("text-sm", isDark ? "text-white/50" : "text-black/50")}>
+                  Rescue playbooks target high-risk customer clusters (risk {'>'} {Math.round(settings.riskThreshold * 100)}%). Create, edit, or remove playbooks below — all changes are saved to the API automatically.
+                </p>
+
+                <div className={cn("flex justify-between items-center pb-2 border-b", isDark ? "border-white/10" : "border-gray-100")}>
+                  <h3 className={cn("text-lg font-semibold", isDark ? "text-white" : "text-gray-900")}>Rescue Playbook Templates</h3>
+                  <button
+                    onClick={() => setIsAddingPlaybook(true)}
+                    className={cn(
+                      "px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors",
+                      isDark ? "bg-white text-black hover:bg-white/90" : "bg-black text-white hover:bg-black/90"
+                    )}
+                  >
+                    Add Playbook
+                  </button>
+                </div>
+
+                <AnimatePresence>
+                  {isAddingPlaybook && (
+                    <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}>
+                      <div className={cn(
+                        "rounded-xl border p-4 space-y-3",
+                        isDark ? "border-white/10 bg-white/[0.03]" : "border-black/10 bg-black/[0.02]"
+                      )}>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                          <input
+                            value={newPlaybook.name}
+                            onChange={(event) => setNewPlaybook({ ...newPlaybook, name: event.target.value })}
+                            placeholder="Playbook name"
+                            className={cn(
+                              "rounded-lg px-3 py-2 text-sm border bg-transparent focus:outline-none",
+                              isDark ? "border-white/10 text-white" : "border-black/10 text-black"
+                            )}
+                          />
+                          <input
+                            value={newPlaybook.description}
+                            onChange={(event) => setNewPlaybook({ ...newPlaybook, description: event.target.value })}
+                            placeholder="Description"
+                            className={cn(
+                              "rounded-lg px-3 py-2 text-sm border bg-transparent focus:outline-none",
+                              isDark ? "border-white/10 text-white" : "border-black/10 text-black"
+                            )}
+                          />
+                        </div>
+                        <textarea
+                          value={newPlaybook.messageTemplate}
+                          onChange={(event) => setNewPlaybook({ ...newPlaybook, messageTemplate: event.target.value })}
+                          rows={3}
+                          placeholder="Message template with variables: {{customer_name}}, {{credit_percent}}, {{callback_slot}}"
+                          className={cn(
+                            "w-full rounded-lg px-3 py-2 text-sm border bg-transparent resize-none focus:outline-none",
+                            isDark ? "border-white/10 text-white" : "border-black/10 text-black"
+                          )}
+                        />
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                          <input
+                            type="number"
+                            value={newPlaybook.creditAmountInr}
+                            onChange={(event) => setNewPlaybook({ ...newPlaybook, creditAmountInr: Number(event.target.value) })}
+                            placeholder="Credit amount"
+                            className={cn(
+                              "rounded-lg px-3 py-2 text-sm border bg-transparent focus:outline-none",
+                              isDark ? "border-white/10 text-white" : "border-black/10 text-black"
+                            )}
+                          />
+                          <input
+                            type="number"
+                            value={newPlaybook.discountPercent}
+                            onChange={(event) => setNewPlaybook({ ...newPlaybook, discountPercent: Number(event.target.value) })}
+                            placeholder="Discount %"
+                            className={cn(
+                              "rounded-lg px-3 py-2 text-sm border bg-transparent focus:outline-none",
+                              isDark ? "border-white/10 text-white" : "border-black/10 text-black"
+                            )}
+                          />
+                          <input
+                            value={newPlaybook.successCriteria}
+                            onChange={(event) => setNewPlaybook({ ...newPlaybook, successCriteria: event.target.value })}
+                            placeholder="Success criteria"
+                            className={cn(
+                              "rounded-lg px-3 py-2 text-sm border bg-transparent focus:outline-none",
+                              isDark ? "border-white/10 text-white" : "border-black/10 text-black"
+                            )}
+                          />
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          {(['whatsapp', 'voice', 'email', 'in_app'] as RescueChannel[]).map((channel) => {
+                            const active = newPlaybook.channels.includes(channel);
+                            return (
+                              <button
+                                key={channel}
+                                onClick={() => handleToggleNewPlaybookChannel(channel)}
+                                className={cn(
+                                  "px-2.5 py-1 rounded-full text-xs border",
+                                  active
+                                    ? (isDark ? "border-cyan-400/40 bg-cyan-500/15 text-cyan-200" : "border-cyan-200 bg-cyan-50 text-cyan-700")
+                                    : (isDark ? "border-white/10 bg-white/5 text-white/70" : "border-black/10 bg-black/5 text-black/70")
+                                )}
+                              >
+                                {channel}
+                              </button>
+                            );
+                          })}
+                        </div>
+                        <div className="flex justify-end gap-2">
+                          <button onClick={() => setIsAddingPlaybook(false)} className={cn("text-xs px-3 py-1.5 rounded", isDark ? "text-white/60 hover:bg-white/10" : "text-black/60 hover:bg-black/10")}>Cancel</button>
+                          <button onClick={handleAddPlaybook} className="text-xs font-semibold px-3 py-1.5 rounded bg-white text-black">Save Playbook</button>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                {/* Playbook cards — empty / list */}
+                {playbooks.length === 0 ? (
+                  <div className={cn("rounded-xl border p-10 text-center space-y-4", isDark ? "border-white/10 bg-white/[0.02]" : "border-black/10 bg-black/[0.02]")}>
+                    <div className="mx-auto w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-500/20 to-cyan-500/20 flex items-center justify-center">
+                      <Inbox className={cn("w-7 h-7", isDark ? "text-emerald-300" : "text-emerald-600")} />
+                    </div>
+                    <h4 className={cn("text-base font-semibold", isDark ? "text-white" : "text-black")}>No rescue playbooks yet</h4>
+                    <p className={cn("text-sm max-w-md mx-auto leading-relaxed", isDark ? "text-white/50" : "text-black/50")}>
+                      Playbooks define how your AI rescues at-risk customers — the channels, messaging, credits, and success criteria.
+                      Create your first one or they'll be auto-seeded on next API sync.
+                    </p>
+                    <button
+                      onClick={() => setIsAddingPlaybook(true)}
+                      className={cn("inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium border transition-colors", isDark ? "bg-white text-black hover:bg-white/90" : "bg-black text-white hover:bg-black/90")}
+                    >
+                      Create First Playbook
+                    </button>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {playbooks.map((playbook) => (
+                      <div key={playbook.id} className={cn("rounded-xl border p-4 space-y-3", isDark ? "border-white/10 bg-white/[0.03]" : "border-black/10 bg-black/[0.02]")}>
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="space-y-1 flex-1">
+                            <div className="flex items-center gap-2">
+                              <input value={playbook.name} onChange={(event) => handleUpdatePlaybook(playbook.id, { name: event.target.value })} className={cn("text-sm font-semibold bg-transparent border-b focus:outline-none", isDark ? "text-white border-white/10" : "text-black border-black/10")} />
+                              <span className={cn("text-[10px] px-1.5 py-0.5 rounded border", isDark ? "border-white/10 text-white/35" : "border-black/10 text-black/35")}>API</span>
+                              {playbook.enabled && <span className={cn("text-[10px] px-1.5 py-0.5 rounded", isDark ? "bg-emerald-500/15 text-emerald-300" : "bg-emerald-50 text-emerald-700")}>Active</span>}
+                            </div>
+                            <input value={playbook.description} onChange={(event) => handleUpdatePlaybook(playbook.id, { description: event.target.value })} className={cn("w-full text-xs bg-transparent border-b focus:outline-none", isDark ? "text-white/65 border-white/10" : "text-black/65 border-black/10")} />
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <button onClick={() => handleUpdatePlaybook(playbook.id, { enabled: !playbook.enabled })} className={cn("inline-flex items-center gap-1 text-[11px] px-2 py-1 rounded-full border", playbook.enabled ? (isDark ? "border-emerald-400/35 bg-emerald-500/15 text-emerald-200" : "border-emerald-200 bg-emerald-50 text-emerald-700") : (isDark ? "border-white/10 bg-white/5 text-white/50" : "border-black/10 bg-black/5 text-black/50"))}>
+                              {playbook.enabled ? 'On' : 'Off'}
+                            </button>
+                            <button onClick={() => handleUpdatePlaybook(playbook.id, { abTestEnabled: !playbook.abTestEnabled })} className={cn("inline-flex items-center gap-1.5 text-[11px] px-2 py-1 rounded-full border", playbook.abTestEnabled ? (isDark ? "border-purple-400/35 bg-purple-500/15 text-purple-200" : "border-purple-200 bg-purple-50 text-purple-700") : (isDark ? "border-white/10 bg-white/5 text-white/70" : "border-black/10 bg-black/5 text-black/70"))}>
+                              <FlaskConical className="w-3 h-3" /> A/B
+                            </button>
+                            <button onClick={() => handleDeletePlaybook(playbook.id)} className={cn("p-1.5 rounded-md", isDark ? "text-rose-300 hover:bg-rose-500/15" : "text-rose-700 hover:bg-rose-50")}>
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </div>
+                        <textarea value={playbook.messageTemplate} onChange={(event) => handleUpdatePlaybook(playbook.id, { messageTemplate: event.target.value, voiceScript: event.target.value })} rows={3} className={cn("w-full rounded-lg px-3 py-2 text-sm border resize-none focus:outline-none", isDark ? "border-white/10 bg-black/20 text-white" : "border-black/10 bg-white text-black")} />
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                          <label className="space-y-1"><span className={cn("text-[11px] uppercase tracking-wide", isDark ? "text-white/45" : "text-black/45")}>Credit (INR)</span><input type="number" value={playbook.creditAmountInr} onChange={(event) => handleUpdatePlaybook(playbook.id, { creditAmountInr: Number(event.target.value) })} className={cn("w-full rounded-lg px-2.5 py-1.5 text-sm border bg-transparent focus:outline-none", isDark ? "border-white/10 text-white" : "border-black/10 text-black")} /></label>
+                          <label className="space-y-1"><span className={cn("text-[11px] uppercase tracking-wide", isDark ? "text-white/45" : "text-black/45")}>Discount (%)</span><input type="number" value={playbook.discountPercent} onChange={(event) => handleUpdatePlaybook(playbook.id, { discountPercent: Number(event.target.value) })} className={cn("w-full rounded-lg px-2.5 py-1.5 text-sm border bg-transparent focus:outline-none", isDark ? "border-white/10 text-white" : "border-black/10 text-black")} /></label>
+                          <label className="space-y-1"><span className={cn("text-[11px] uppercase tracking-wide", isDark ? "text-white/45" : "text-black/45")}>Success Criteria</span><input value={playbook.successCriteria} onChange={(event) => handleUpdatePlaybook(playbook.id, { successCriteria: event.target.value })} className={cn("w-full rounded-lg px-2.5 py-1.5 text-sm border bg-transparent focus:outline-none", isDark ? "border-white/10 text-white" : "border-black/10 text-black")} /></label>
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          {(['whatsapp', 'voice', 'email', 'in_app'] as RescueChannel[]).map((channel) => {
+                            const active = playbook.channels.includes(channel);
+                            return (<button key={`${playbook.id}-${channel}`} onClick={() => { const channels = active ? playbook.channels.filter((item) => item !== channel) : [...playbook.channels, channel]; handleUpdatePlaybook(playbook.id, { channels: channels.length ? channels : playbook.channels }); }} className={cn("px-2.5 py-1 rounded-full text-xs border", active ? (isDark ? "border-emerald-400/35 bg-emerald-500/15 text-emerald-200" : "border-emerald-200 bg-emerald-50 text-emerald-700") : (isDark ? "border-white/10 bg-white/5 text-white/70" : "border-black/10 bg-black/5 text-black/70"))}>{channel}</button>);
+                          })}
+                        </div>
+                        <div className={cn("rounded-lg border px-3 py-2 text-xs", isDark ? "border-white/10 bg-black/20 text-white/70" : "border-black/10 bg-white text-black/70")}>
+                          <div className="flex items-center gap-1.5 mb-1"><Clock3 className="w-3.5 h-3.5" /> Version history</div>
+                          <p>Latest versions: {playbook.versions.slice(-3).map((version) => version.id).join(', ') || 'v1'}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </motion.div>
             )}
           </AnimatePresence>

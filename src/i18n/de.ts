@@ -261,6 +261,7 @@ export const de = {
     'sidebar.aiBehavior': 'KI-Verhalten konfigurieren',
     'sidebar.groqAi': 'KI-Einstellungen',
     'sidebar.systemPrompt': 'System-Prompt',
+    'sidebar.rescuePlaybooks': 'Rescue-Playbooks',
     'sidebar.aiVoice': 'KI-Stimme',
     'sidebar.contextFields': 'Kontextfelder',
     'sidebar.categories': 'Kategorien',
