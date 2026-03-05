@@ -234,18 +234,18 @@ export default function WhitePaper() {
                         The Future of Operations Intelligence (OpsIntel) & Hyper-Local AI. Unveiling our vision for bridging the gap between complex operations and frontier AI.
                     </p>
 
-                    <div className={`w - full h - px mb - 12 ${isDark ? 'bg-[#1E2530]' : 'bg-[#E5EAF2]'} `} />
+                    <div className={`w-full h-px mb-12 ${isDark ? 'bg-[#1E2530]' : 'bg-[#E5EAF2]'}`} />
 
                     <div className="space-y-16">
 
                         <section id="executive-summary" className="scroll-mt-24 group">
-                            <h2 className={`text - 2xl md: text - [28px] font - bold tracking - tight mb - 4 flex items - center - ml - 6 pl - 6 relative ${isDark ? 'text-white' : 'text-[#1C2025]'} `}>
-                                <a href="#executive-summary" className={`absolute left - 0 opacity - 0 group - hover: opacity - 100 transition - opacity ${isDark ? 'text-[#338EF7]' : 'text-[#006FEE]'} `}>
+                            <h2 className={`text-2xl md:text-[28px] font-bold tracking-tight mb-4 flex items-center -ml-6 pl-6 relative ${isDark ? 'text-white' : 'text-[#1C2025]'}`}>
+                                <a href="#executive-summary" className={`absolute left-0 opacity-0 group-hover:opacity-100 transition-opacity ${isDark ? 'text-[#338EF7]' : 'text-[#006FEE]'}`}>
                                     <Hash className="w-5 h-5 -mt-0.5" />
                                 </a>
                                 1. Executive Summary
                             </h2>
-                            <div className={`text - [16px] leading - relaxed space - y - 6 ${isDark ? 'text-[#B2BAC2]' : 'text-slate-700'} `}>
+                            <div className={`text-[16px] leading-relaxed space-y-6 ${isDark ? 'text-[#B2BAC2]' : 'text-slate-700'}`}>
                                 <p>
                                     <strong>ClerkTree</strong> is conceptually engineered as an Enterprise AI Platform that aims to obliterate the long-standing chasm between deeply complex backend operations—such as legal case management, dense medical claims processing, and intensive chronological document review—and the fluid, instantaneous demands of frontend customer engagement, characteristic of hyper-local business operations. In the contemporary, hyper-accelerated business environment, the structural inability to fluently connect internal cognitive labor with exterior customer touchpoints creates compounding, systemic inefficiencies that rapidly drain both capital and human morale.
                                 </p>
@@ -259,13 +259,13 @@ export default function WhitePaper() {
                         </section>
 
                         <section id="operational-disconnect" className="scroll-mt-24 group">
-                            <h2 className={`text - 2xl md: text - [28px] font - bold tracking - tight mb - 4 flex items - center - ml - 6 pl - 6 relative ${isDark ? 'text-white' : 'text-[#1C2025]'} `}>
-                                <a href="#operational-disconnect" className={`absolute left - 0 opacity - 0 group - hover: opacity - 100 transition - opacity ${isDark ? 'text-[#338EF7]' : 'text-[#006FEE]'} `}>
+                            <h2 className={`text-2xl md:text-[28px] font-bold tracking-tight mb-4 flex items-center -ml-6 pl-6 relative ${isDark ? 'text-white' : 'text-[#1C2025]'}`}>
+                                <a href="#operational-disconnect" className={`absolute left-0 opacity-0 group-hover:opacity-100 transition-opacity ${isDark ? 'text-[#338EF7]' : 'text-[#006FEE]'}`}>
                                     <Hash className="w-5 h-5 -mt-0.5" />
                                 </a>
                                 2. The Operational Disconnect
                             </h2>
-                            <div className={`text - [16px] leading - relaxed space - y - 6 ${isDark ? 'text-[#B2BAC2]' : 'text-slate-700'} `}>
+                            <div className={`text-[16px] leading-relaxed space-y-6 ${isDark ? 'text-[#B2BAC2]' : 'text-slate-700'}`}>
                                 <p>
                                     The contemporary commercial infrastructure is hampered by two mutually reinforcing failure vectors: the exhaustion of analytical backend resources traversing unstructured data, and the brittle, unresponsive nature of frontend communication layers. These elements are traditionally isolated from one another in distinct operational silos, forcing a highly inefficient human translation layer.
                                 </p>
@@ -278,16 +278,16 @@ export default function WhitePaper() {
                             </div>
                         </section>
 
-                        <hr className={`border - t ${isDark ? 'border-[#1E2530]' : 'border-[#E5EAF2]'} `} />
+                        <hr className={`border-t ${isDark ? 'border-[#1E2530]' : 'border-[#E5EAF2]'}`} />
 
                         <section id="edge-compute-paradigm" className="scroll-mt-24 group">
-                            <h2 className={`text - 2xl md: text - [28px] font - bold tracking - tight mb - 4 flex items - center - ml - 6 pl - 6 relative ${isDark ? 'text-white' : 'text-[#1C2025]'} `}>
-                                <a href="#edge-compute-paradigm" className={`absolute left - 0 opacity - 0 group - hover: opacity - 100 transition - opacity ${isDark ? 'text-[#338EF7]' : 'text-[#006FEE]'} `}>
+                            <h2 className={`text-2xl md:text-[28px] font-bold tracking-tight mb-4 flex items-center -ml-6 pl-6 relative ${isDark ? 'text-white' : 'text-[#1C2025]'}`}>
+                                <a href="#edge-compute-paradigm" className={`absolute left-0 opacity-0 group-hover:opacity-100 transition-opacity ${isDark ? 'text-[#338EF7]' : 'text-[#006FEE]'}`}>
                                     <Hash className="w-5 h-5 -mt-0.5" />
                                 </a>
                                 3. Edge Computing Paradigm
                             </h2>
-                            <div className={`text - [16px] leading - relaxed space - y - 6 ${isDark ? 'text-[#B2BAC2]' : 'text-slate-700'} `}>
+                            <div className={`text-[16px] leading-relaxed space-y-6 ${isDark ? 'text-[#B2BAC2]' : 'text-slate-700'}`}>
                                 <p>
                                     ClerkTree subverts centralized, latent computational topologies by deploying execution logic directly to globally distributed edge nodes. This architecture is emphatically not an aesthetic decision, but a fundamental physiological necessity if artificial intelligence is to operate at the fluid cadence of human conversation. By positioning conversational acoustic modeling, speech-to-text mapping, and linguistic cognitive generation mere milliseconds structurally away from the client connection, we eradicate the uncanny pause inherent in standard cloud infrastructures.
                                 </p>
@@ -300,16 +300,16 @@ export default function WhitePaper() {
                             </div>
                         </section>
 
-                        <hr className={`border - t ${isDark ? 'border-[#1E2530]' : 'border-[#E5EAF2]'} `} />
+                        <hr className={`border-t ${isDark ? 'border-[#1E2530]' : 'border-[#E5EAF2]'}`} />
 
                         <section id="the-clerktree-methodology" className="scroll-mt-24 group">
-                            <h2 className={`text - 2xl md: text - [28px] font - bold tracking - tight mb - 4 flex items - center - ml - 6 pl - 6 relative ${isDark ? 'text-white' : 'text-[#1C2025]'} `}>
-                                <a href="#the-clerktree-methodology" className={`absolute left - 0 opacity - 0 group - hover: opacity - 100 transition - opacity ${isDark ? 'text-[#338EF7]' : 'text-[#006FEE]'} `}>
+                            <h2 className={`text-2xl md:text-[28px] font-bold tracking-tight mb-4 flex items-center -ml-6 pl-6 relative ${isDark ? 'text-white' : 'text-[#1C2025]'}`}>
+                                <a href="#the-clerktree-methodology" className={`absolute left-0 opacity-0 group-hover:opacity-100 transition-opacity ${isDark ? 'text-[#338EF7]' : 'text-[#006FEE]'}`}>
                                     <Hash className="w-5 h-5 -mt-0.5" />
                                 </a>
                                 4. Methodological Approach
                             </h2>
-                            <div className={`text - [16px] leading - relaxed space - y - 6 ${isDark ? 'text-[#B2BAC2]' : 'text-slate-700'} `}>
+                            <div className={`text-[16px] leading-relaxed space-y-6 ${isDark ? 'text-[#B2BAC2]' : 'text-slate-700'}`}>
                                 <p>
                                     ClerkTree differentiates itself fundamentally not simply via technical velocity, but via a methodological commitment to the absolute eradication of technological friction. This is accomplished via a dual-pronged philosophy: maintaining an uncompromising, brutally robust developer extensibility matrix, perfectly obscured by an interface demanding absolute zero technical fluency from business operators.
                                 </p>
@@ -322,21 +322,21 @@ export default function WhitePaper() {
                             </div>
                         </section>
 
-                        <hr className={`border - t ${isDark ? 'border-[#1E2530]' : 'border-[#E5EAF2]'} `} />
+                        <hr className={`border-t ${isDark ? 'border-[#1E2530]' : 'border-[#E5EAF2]'}`} />
 
                         <section id="autonomous-closed-loop" className="scroll-mt-24 group">
-                            <h2 className={`text - 2xl md: text - [28px] font - bold tracking - tight mb - 4 flex items - center - ml - 6 pl - 6 relative ${isDark ? 'text-white' : 'text-[#1C2025]'} `}>
-                                <a href="#autonomous-closed-loop" className={`absolute left - 0 opacity - 0 group - hover: opacity - 100 transition - opacity ${isDark ? 'text-[#338EF7]' : 'text-[#006FEE]'} `}>
+                            <h2 className={`text-2xl md:text-[28px] font-bold tracking-tight mb-4 flex items-center -ml-6 pl-6 relative ${isDark ? 'text-white' : 'text-[#1C2025]'}`}>
+                                <a href="#autonomous-closed-loop" className={`absolute left-0 opacity-0 group-hover:opacity-100 transition-opacity ${isDark ? 'text-[#338EF7]' : 'text-[#006FEE]'}`}>
                                     <Hash className="w-5 h-5 -mt-0.5" />
                                 </a>
                                 5. Autonomous Closed-Loop Future
                             </h2>
-                            <div className={`text - [16px] leading - relaxed space - y - 6 ${isDark ? 'text-[#B2BAC2]' : 'text-slate-700'} `}>
+                            <div className={`text-[16px] leading-relaxed space-y-6 ${isDark ? 'text-[#B2BAC2]' : 'text-slate-700'}`}>
                                 <p>
                                     Preserving systemic advantage mandates our aggressive evolution from deterministic interaction towards autonomous, closed-loop operational workflows—a trajectory defined over our immediate 12-24 month operational timeline. The architecture will expand from passively waiting for inquiries into initiating <strong>Proactive Engagement and Rescue</strong> algorithms. If telemetry detects a customer abandoning a highly complex intake form or scheduling process, the engine will autonomously trigger sympathetic outbound SMS or Voice interventions, seamlessly reconstituting the user's abandoned context directly into a conversational interface to achieve conversion finality.
                                 </p>
                                 <div id="multi-agent-collaboration">
-                                    <h4 className={`text - [18px] font - bold tracking - tight mb - 3 mt - 8 ${isDark ? 'text-white' : 'text-[#1C2025]'} `}>
+                                    <h4 className={`text-[18px] font-bold tracking-tight mb-3 mt-8 ${isDark ? 'text-white' : 'text-[#1C2025]'}`}>
                                         Multi-Agent Symbiosis & Shadow Analytics
                                     </h4>
                                     <p>
@@ -352,43 +352,43 @@ export default function WhitePaper() {
                     </div>
 
                     {/* Pagination / Next Steps Base UI Style */}
-                    <div className={`mt - 20 flex gap - 4 ${isDark ? 'text-[#338EF7]' : 'text-[#006FEE]'} `}>
-                        <a href="#" className={`flex - 1 p - 4 rounded - xl border transition - colors flex flex - col items - start ${isDark ? 'border-[#1E2530] hover:border-[#338EF7] hover:bg-[#11141C]' : 'border-[#E5EAF2] hover:border-[#006FEE] hover:bg-slate-50'
-                            } `}>
-                            <span className={`text - [13px] font - medium mb - 1 ${isDark ? 'text-[#B2BAC2]' : 'text-slate-500'} `}>Previous</span>
+                    <div className={`mt-20 flex gap-4 ${isDark ? 'text-[#338EF7]' : 'text-[#006FEE]'}`}>
+                        <a href="#" className={`flex-1 p-4 rounded-xl border transition-colors flex flex-col items-start ${isDark ? 'border-[#1E2530] hover:border-[#338EF7] hover:bg-[#11141C]' : 'border-[#E5EAF2] hover:border-[#006FEE] hover:bg-slate-50'
+                            }`}>
+                            <span className={`text-[13px] font-medium mb-1 ${isDark ? 'text-[#B2BAC2]' : 'text-slate-500'}`}>Previous</span>
                             <span className="font-semibold">Dashboard Views</span>
                         </a>
-                        <a href="#" className={`flex - 1 p - 4 rounded - xl border transition - colors flex flex - col items - end text - right justify - between ${isDark ? 'border-[#1E2530] hover:border-[#338EF7] hover:bg-[#11141C]' : 'border-[#E5EAF2] hover:border-[#006FEE] hover:bg-slate-50'
-                            } `}>
-                            <span className={`text - [13px] font - medium mb - 1 ${isDark ? 'text-[#B2BAC2]' : 'text-slate-500'} `}>Next</span>
+                        <a href="#" className={`flex-1 p-4 rounded-xl border transition-colors flex flex-col items-end text-right justify-between ${isDark ? 'border-[#1E2530] hover:border-[#338EF7] hover:bg-[#11141C]' : 'border-[#E5EAF2] hover:border-[#006FEE] hover:bg-slate-50'
+                            }`}>
+                            <span className={`text-[13px] font-medium mb-1 ${isDark ? 'text-[#B2BAC2]' : 'text-slate-500'}`}>Next</span>
                             <span className="font-semibold">Get Started</span>
                         </a>
                     </div>
                 </main>
 
                 {/* Right Table of Contents (Desktop) */}
-                <aside className={`hidden xl:block w - [240px] sticky top - 14 h - [calc(100vh - 3.5rem)] px - 2 ${isDark ? 'text-[#B2BAC2]' : 'text-[#434D5B]'} `}>
+                <aside className={`hidden xl:block w-[240px] sticky top-14 h-[calc(100vh-3.5rem)] px-2 ${isDark ? 'text-[#B2BAC2]' : 'text-[#434D5B]'}`}>
                     <ScrollArea.Root className="w-full h-full overflow-hidden">
                         <ScrollArea.Viewport className="w-full h-full outline-none pt-10 pb-20 px-4">
-                            <h4 className={`text - [12px] font - bold uppercase tracking - widest mb - 3 ${isDark ? 'text-white' : 'text-[#1C2025]'} `}>On this page</h4>
+                            <h4 className={`text-[12px] font-bold uppercase tracking-widest mb-3 ${isDark ? 'text-white' : 'text-[#1C2025]'}`}>On this page</h4>
                             <ul className="space-y-0.5 border-l-[1px] relative">
                                 {/* Active line indicator */}
-                                <div className={`absolute left - [-1px] transition - all duration - 300 w - [1px] ${isDark ? 'bg-[#338EF7]' : 'bg-[#006FEE]'} `}
+                                <div className={`absolute left-[-1px] transition-all duration-300 w-[1px] ${isDark ? 'bg-[#338EF7]' : 'bg-[#006FEE]'}`}
                                     style={{
-                                        top: `${Math.max(0, flatSections.findIndex(s => s.id === activeSection) * 26)} px`,
+                                        top: `${Math.max(0, flatSections.findIndex(s => s.id === activeSection) * 26)}px`,
                                         height: '24px'
                                     }}
                                 />
                                 {flatSections.map((s) => {
                                     const isActive = activeSection === s.id;
                                     return (
-                                        <li key={`toc - ${s.id} `} className="min-h-[26px] flex items-center">
+                                        <li key={`toc-${s.id}`} className="min-h-[26px] flex items-center">
                                             <button
                                                 onClick={() => scrollTo(s.id)}
-                                                className={`text - left w - full pl - 4 text - [13px] transition - colors leading - tight ${s.level === 2 ? 'pl-6' : ''} ${isActive
+                                                className={`text-left w-full pl-4 text-[13px] transition-colors leading-tight ${s.level === 2 ? 'pl-6' : ''} ${isActive
                                                     ? (isDark ? 'text-[#338EF7] font-medium' : 'text-[#006FEE] font-medium')
                                                     : (isDark ? 'hover:text-white border-[#1E2530]' : 'hover:text-[#1C2025] border-[#E5EAF2]')
-                                                    } `}
+                                                    }`}
                                             >
                                                 {s.title}
                                             </button>
@@ -397,8 +397,8 @@ export default function WhitePaper() {
                                 })}
                             </ul>
                         </ScrollArea.Viewport>
-                        <ScrollArea.Scrollbar orientation="vertical" className={`flex w - 2 touch - none select - none border - l p - [1px] transition - all hover: w - 2.5 ${isDark ? 'border-[#1E2530]' : 'border-transparent'} `}>
-                            <ScrollArea.Thumb className={`flex - 1 rounded - full relative ${isDark ? 'bg-white/20 hover:bg-white/30' : 'bg-black/20 hover:bg-black/30'} `} />
+                        <ScrollArea.Scrollbar orientation="vertical" className={`flex w-2 touch-none select-none border-l p-[1px] transition-all hover:w-2.5 ${isDark ? 'border-[#1E2530]' : 'border-transparent'}`}>
+                            <ScrollArea.Thumb className={`flex-1 rounded-full relative ${isDark ? 'bg-white/20 hover:bg-white/30' : 'bg-black/20 hover:bg-black/30'}`} />
                         </ScrollArea.Scrollbar>
                     </ScrollArea.Root>
                 </aside>
