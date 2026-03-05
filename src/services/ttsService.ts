@@ -176,10 +176,10 @@ class TTSService {
    * Stop any currently playing audio
    */
   stop() {
-    // Stop Groq TTS
+    // Stop all TTS backends
     groqTTSService.stop();
-    // Stop DeAPI TTS
     deapiTTSService.stop();
+    elevenLabsTTSService.stop();
   }
 
   /**

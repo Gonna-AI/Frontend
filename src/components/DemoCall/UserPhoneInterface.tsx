@@ -470,18 +470,8 @@ export default function UserPhoneInterface({
         }
     }, [startCall, startRecognition, language, addMessage, onTranscript]);
 
-    // Auto-start call when autoStart prop is true (fullscreen mode)
-    const autoStartRef = useRef(false);
-    useEffect(() => {
-        if (autoStart && !autoStartRef.current && mode === 'fullscreen' && !currentCall) {
-            autoStartRef.current = true;
-            // Small delay to ensure everything is ready
-            const timer = setTimeout(() => {
-                handleStartCall();
-            }, 300);
-            return () => clearTimeout(timer);
-        }
-    }, [autoStart, mode, currentCall, handleStartCall]);
+    // No longer auto-start — we show a "Start Call" button instead
+    // to ensure AudioContext is created during a real user gesture
 
     const handleEndCall = useCallback(async () => {
         console.log('🔴 End call button pressed');
@@ -725,7 +715,7 @@ export default function UserPhoneInterface({
         );
     }
 
-    // Fullscreen Connecting State - Show while auto-starting
+    // Fullscreen "Start Call" state — user must tap to initiate (satisfies AudioContext user-gesture rule)
     if (mode === 'fullscreen' && autoStart && !isActive && !isEnding) {
         return (
             <div className="fixed inset-0 z-50 flex flex-col bg-black text-white overflow-hidden">
@@ -733,7 +723,7 @@ export default function UserPhoneInterface({
                 <motion.div
                     className="absolute inset-0 z-0 pointer-events-none"
                     animate={{
-                        background: 'radial-gradient(circle at center, rgba(59, 130, 246, 0.15) 0%, transparent 80%)'
+                        background: 'radial-gradient(circle at center, rgba(16, 185, 129, 0.12) 0%, transparent 80%)'
                     }}
                     transition={{ duration: 0.8, ease: "easeInOut" }}
                 />
@@ -753,54 +743,63 @@ export default function UserPhoneInterface({
 
                 {/* Main Content Area */}
                 <div className="flex-1 flex flex-col items-center justify-center relative px-6 z-10 w-full max-w-lg mx-auto">
-                    {/* Avatar / Visualizer - Pulsing */}
+                    {/* Avatar */}
                     <div className="relative mb-12">
                         <motion.div
                             animate={{
-                                scale: [1, 1.1, 1],
+                                scale: [1, 1.05, 1],
                             }}
-                            transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-                            className="w-40 h-40 rounded-full flex items-center justify-center text-5xl shadow-2xl border-4 border-white/10 bg-white/5 backdrop-blur-sm relative z-10 text-white"
+                            transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+                            className="w-40 h-40 rounded-full flex items-center justify-center text-5xl shadow-2xl border-4 border-emerald-500/20 bg-emerald-500/5 backdrop-blur-sm relative z-10 text-white"
                         >
                             <span className="font-bold">AI</span>
                         </motion.div>
 
-                        {/* Connection Rings */}
-                        <motion.div
-                            initial={{ opacity: 0, scale: 1 }}
-                            animate={{ opacity: [0, 0.5, 0], scale: [1, 1.5, 1.5] }}
-                            transition={{ duration: 2, repeat: Infinity, ease: "easeOut" }}
-                            className="absolute inset-0 rounded-full border-2 border-blue-500/50"
-                        />
-                        <motion.div
-                            initial={{ opacity: 0, scale: 1 }}
-                            animate={{ opacity: [0, 0.3, 0], scale: [1, 1.8, 1.8] }}
-                            transition={{ duration: 2, repeat: Infinity, ease: "easeOut", delay: 0.5 }}
-                            className="absolute inset-0 rounded-full border-2 border-blue-500/30"
-                        />
-
-                        <div className="absolute -inset-4 rounded-full border-2 animate-[spin_4s_linear_infinite] border-t-blue-500/50 border-r-transparent border-b-blue-500/50 border-l-transparent" />
+                        {/* Ambient ring */}
+                        <div className="absolute -inset-4 rounded-full border-2 animate-[spin_6s_linear_infinite] border-t-emerald-500/30 border-r-transparent border-b-emerald-500/30 border-l-transparent" />
                     </div>
 
-                    {/* Connecting Status */}
+                    {/* Ready Status */}
                     <div className="text-center space-y-2 mb-10">
                         <h2 className="text-3xl font-semibold text-white tracking-tight">
-                            Connecting...
+                            Ready to Connect
                         </h2>
                         <p className="font-mono text-sm text-white/50 tracking-wider uppercase">
-                            Preparing AI Agent
+                            AI Agent Standing By
                         </p>
                     </div>
+
+                    {/* Start Call Button */}
+                    <motion.button
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.2, duration: 0.4 }}
+                        onClick={handleStartCall}
+                        className="group relative w-20 h-20 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 shadow-[0_0_40px_rgba(16,185,129,0.4)] hover:shadow-[0_0_60px_rgba(16,185,129,0.6)] transition-shadow duration-300 flex items-center justify-center mb-8"
+                    >
+                        <Phone className="w-8 h-8 text-white group-hover:scale-110 transition-transform" />
+                        {/* Pulse ring */}
+                        <motion.div
+                            animate={{ scale: [1, 1.5, 1.5], opacity: [0.6, 0, 0] }}
+                            transition={{ duration: 2, repeat: Infinity, ease: "easeOut" }}
+                            className="absolute inset-0 rounded-full border-2 border-emerald-400"
+                        />
+                    </motion.button>
+
+                    <p className="text-sm text-white/40">
+                        Tap to start your voice call
+                    </p>
 
                     {/* Info Box */}
                     <motion.div
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="w-full p-6 rounded-3xl bg-black/60 backdrop-blur-xl border border-white/10 shadow-2xl text-center"
+                        transition={{ delay: 0.4, duration: 0.4 }}
+                        className="w-full mt-8 p-5 rounded-3xl bg-black/60 backdrop-blur-xl border border-white/10 shadow-2xl text-center"
                     >
-                        <p className="text-xs uppercase tracking-widest font-bold opacity-40 mb-2 text-blue-400">Please Wait</p>
-                        <p className="text-lg font-medium leading-relaxed text-white/80">
-                            Initializing voice connection...
+                        <p className="text-xs uppercase tracking-widest font-bold opacity-40 mb-2 text-emerald-400">Voice Call</p>
+                        <p className="text-base font-medium leading-relaxed text-white/70">
+                            Speak naturally with our AI agent. Your microphone will be activated when the call starts.
                         </p>
                     </motion.div>
                 </div>

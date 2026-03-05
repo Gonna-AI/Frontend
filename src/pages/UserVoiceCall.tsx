@@ -1,5 +1,7 @@
 import UserCall from './UserCall';
 
 export default function UserVoiceCall() {
-    return <UserCall initialMode="call" />;
+    // Always show selection screen first (not auto-call)
+    // This ensures AudioContext is created during a real user gesture
+    return <UserCall />;
 }

@@ -25,6 +25,7 @@ import log from '../utils/logger';
 
 class ElevenLabsTTSService {
     private audioContext: AudioContext | null = null;
+    private currentSource: AudioBufferSourceNode | null = null;
 
     /**
      * Initialize AudioContext (should be called during user gesture)
@@ -47,7 +48,20 @@ class ElevenLabsTTSService {
      */
     isAvailable(): boolean {
         return true; // Configured server-side
-        // return !!ELEVENLABS_API_KEY;
+    }
+
+    /**
+     * Stop any currently playing audio
+     */
+    stop() {
+        if (this.currentSource) {
+            try {
+                this.currentSource.stop();
+            } catch (_e) {
+                // Ignore errors from already-stopped sources
+            }
+            this.currentSource = null;
+        }
     }
 
     /**
@@ -190,8 +204,12 @@ class ElevenLabsTTSService {
             source.buffer = audioBuffer;
             source.connect(this.audioContext.destination);
 
+            // Store reference so stop() can halt it
+            this.currentSource = source;
+
             source.onended = () => {
                 log.debug('✅ ElevenLabs playback complete');
+                this.currentSource = null;
                 options?.onEnd?.();
                 resolve();
             };
