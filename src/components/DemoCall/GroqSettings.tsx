@@ -61,9 +61,9 @@ export const VOICE_PROVIDERS = [
     },
     {
         id: 'elevenlabs' as const,
-        name: 'ElevenLabs Conversational AI',
-        description: 'Full AI agent — handles speech recognition, AI reasoning, and voice synthesis',
-        features: ['End-to-end AI', 'Natural turn-taking', '32+ languages'],
+        name: 'ElevenLabs TTS',
+        description: 'Uses browser speech recognition + Groq AI + ElevenLabs text-to-speech',
+        features: ['Premium voices', 'Multi-language', 'Natural speech'],
     },
 ];
 

@@ -237,6 +237,24 @@ class TTSService {
       }
     }
 
+    // Check if ElevenLabs is the selected voice provider (for all languages)
+    if (this.config.voiceProvider === 'elevenlabs') {
+      try {
+        log.debug('🎤 Using ElevenLabs TTS (selected provider)...');
+        await elevenLabsTTSService.speak(text, {
+          speed,
+          onStart: options?.onStart,
+          onEnd: options?.onEnd,
+          onError: options?.onError,
+        });
+        this.currentBackend = 'elevenlabs';
+        return;
+      } catch (error) {
+        log.error('❌ ElevenLabs TTS failed, falling back to Groq:', error);
+        // Fall through to Groq TTS as fallback
+      }
+    }
+
     // Check if DeAPI is the selected voice provider
     if (this.config.voiceProvider === 'deapi') {
       try {

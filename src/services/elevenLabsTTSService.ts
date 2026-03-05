@@ -1,17 +1,17 @@
 /**
  * ElevenLabs TTS Service for ClerkTree
  * 
- * Used for German text-to-speech as Groq TTS only supports English.
- * Uses the ElevenLabs API with a German voice.
+ * Used for text-to-speech via the ElevenLabs API.
+ * Supports German (Chris Norddeutscher) and English (Jessica) voices.
  */
 
 // ElevenLabs API Configuration
-// ElevenLabs API Configuration
 import { proxyBlob, ProxyRoutes } from './proxyClient';
 
-
-// German voice ID from ElevenLabs voice library
-const GERMAN_VOICE_ID = 'j46AY0iVY3oHcnZbgEJg';
+// Default voice IDs from the ElevenLabs account
+const GERMAN_VOICE_ID = 'j46AY0iVY3oHcnZbgEJg';  // Chris Norddeutscher
+const ENGLISH_VOICE_ID = 'cgSgspJ2msm6clMCkdW9'; // Jessica - Playful, Bright, Warm
+const DEFAULT_VOICE_ID = ENGLISH_VOICE_ID;
 
 interface ElevenLabsTTSOptions {
     voiceId?: string;
@@ -92,7 +92,7 @@ class ElevenLabsTTSService {
 
 
 
-        const voiceId = options?.voiceId || GERMAN_VOICE_ID;
+        const voiceId = options?.voiceId || DEFAULT_VOICE_ID;
 
         // Format text for better pronunciation
         const formattedText = this.formatTextForTTS(text);
