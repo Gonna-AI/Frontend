@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { ChevronRight, Hash, Moon, Sun, X } from 'lucide-react';
+import { ChevronRight, Hash, Moon, Sun, X, Menu, Search } from 'lucide-react';
 import { useTheme } from '../hooks/useTheme';
 import { ScrollArea } from '@base-ui/react/scroll-area';
 import { Accordion } from '@base-ui/react/accordion';
@@ -79,21 +79,21 @@ export default function WhitePaper() {
     // Dark Mode: bg #0B0D14, text #B2BAC2, borders #1E2530, blue #338EF7
 
     return (
-        <div className={`min - h - screen font - sans selection: bg - blue - 500 / 30 ${isDark ? 'bg-[#0B0D14] text-[#B2BAC2]' : 'bg-white text-[#1C2025]'} `}>
+        <div className={`min-h-screen font-sans selection:bg-blue-500/30 ${isDark ? 'bg-[#0B0D14] text-[#B2BAC2]' : 'bg-white text-[#1C2025]'}`}>
 
             {/* Header - Base UI Style EXACT */}
-            <header className={`fixed top - 0 left - 0 right - 0 h - 14 z - 50 flex items - center justify - between border - b px - 4 md: px - 6 backdrop - blur - [8px] transition - colors ${isDark ? 'bg-[#0B0D14]/80 border-[#1E2530]' : 'bg-white/80 border-[#E5EAF2]'
-                } `}>
+            <header className={`fixed top-0 left-0 right-0 h-14 z-50 flex items-center justify-between border-b px-4 md:px-6 backdrop-blur-[8px] transition-colors ${isDark ? 'bg-[#0B0D14]/80 border-[#1E2530]' : 'bg-white/80 border-[#E5EAF2]'
+                }`}>
                 <div className="flex items-center gap-6">
                     <button
                         onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                        className={`md:hidden p - 1.5 - ml - 1.5 rounded - md ${isDark ? 'hover:bg-white/10 text-white' : 'hover:bg-slate-100 text-[#1C2025]'} `}
+                        className={`md:hidden p-1.5 -ml-1.5 rounded-md ${isDark ? 'hover:bg-white/10 text-white' : 'hover:bg-slate-100 text-[#1C2025]'}`}
                     >
                         {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
                     </button>
 
                     {/* Logo Area */}
-                    <Link to="/" className={`flex items - center gap - 2 font - bold text - base tracking - tight ${isDark ? 'text-white' : 'text-[#1C2025]'} `}>
+                    <Link to="/" className={`flex items-center gap-2 font-bold text-base tracking-tight ${isDark ? 'text-white' : 'text-[#1C2025]'}`}>
                         <div className="w-6 h-6 bg-[#006FEE] rounded flex items-center justify-center">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M12 2L2 22H22L12 2Z" fill="white" />
@@ -104,12 +104,12 @@ export default function WhitePaper() {
 
                     {/* Desktop Main Links */}
                     <nav className="hidden md:flex items-center gap-1 ml-4 text-[14px] font-medium">
-                        <Link to="/" className={`px - 2.5 py - 1.5 rounded - md transition - colors ${isDark ? 'text-[#338EF7] bg-[#006FEE]/10' : 'text-[#006FEE] bg-blue-50'
-                            } `}>
+                        <Link to="/" className={`px-2.5 py-1.5 rounded-md transition-colors ${isDark ? 'text-[#338EF7] bg-[#006FEE]/10' : 'text-[#006FEE] bg-blue-50'
+                            }`}>
                             Docs
                         </Link>
-                        <Link to="/dashboard" className={`px - 2.5 py - 1.5 rounded - md transition - colors ${isDark ? 'text-[#B2BAC2] hover:text-white hover:bg-white/5' : 'text-slate-600 hover:text-[#1C2025] hover:bg-slate-50'
-                            } `}>
+                        <Link to="/dashboard" className={`px-2.5 py-1.5 rounded-md transition-colors ${isDark ? 'text-[#B2BAC2] hover:text-white hover:bg-white/5' : 'text-slate-600 hover:text-[#1C2025] hover:bg-slate-50'
+                            }`}>
                             App
                         </Link>
                     </nav>
@@ -117,34 +117,34 @@ export default function WhitePaper() {
 
                 <div className="flex items-center gap-2 md:gap-4">
                     {/* Search Bar */}
-                    <button className={`hidden lg:flex items - center gap - 2 px - 2.5 py - 1.5 w - [200px] xl: w - [240px] rounded - md border text - [14px] transition - all shadow - sm ${isDark
-                            ? 'bg-[#11141C] border-[#1E2530] hover:border-[#338EF7]/50 text-[#6B7A90]'
-                            : 'bg-white border-[#E5EAF2] hover:border-blue-400 text-slate-400'
-                        } `}>
+                    <button className={`hidden lg:flex items-center gap-2 px-2.5 py-1.5 w-[200px] xl:w-[240px] rounded-md border text-[14px] transition-all shadow-sm ${isDark
+                        ? 'bg-[#11141C] border-[#1E2530] hover:border-[#338EF7]/50 text-[#6B7A90]'
+                        : 'bg-white border-[#E5EAF2] hover:border-blue-400 text-slate-400'
+                        }`}>
                         <Search className="w-4 h-4" />
                         <span className="flex-1 text-left">Search</span>
-                        <div className={`px - 1.5 py - [1px] text - [11px] font - medium rounded border ${isDark ? 'bg-[#1E2530] border-[#2A3441] text-[#B2BAC2]' : 'bg-slate-50 border-slate-200 text-slate-500'
-                            } `}>
+                        <div className={`px-1.5 py-[1px] text-[11px] font-medium rounded border ${isDark ? 'bg-[#1E2530] border-[#2A3441] text-[#B2BAC2]' : 'bg-slate-50 border-slate-200 text-slate-500'
+                            }`}>
                             ⌘K
                         </div>
                     </button>
 
-                    <div className={`w - px h - 5 mx - 1 hidden md:block ${isDark ? 'bg-[#1E2530]' : 'bg-[#E5EAF2]'} `}></div>
+                    <div className={`w-px h-5 mx-1 hidden md:block ${isDark ? 'bg-[#1E2530]' : 'bg-[#E5EAF2]'}`}></div>
 
                     <Tooltip.Provider delay={200}>
                         <div className="flex items-center gap-0.5">
                             <Tooltip.Root>
                                 <Tooltip.Trigger
                                     onClick={toggleTheme}
-                                    className={`p - 1.5 md: p - 2 rounded - md transition - colors border border - transparent ${isDark ? 'text-[#B2BAC2] hover:bg-[#1E2530]' : 'text-slate-500 hover:bg-slate-100'
-                                        } `}
+                                    className={`p-1.5 md:p-2 rounded-md transition-colors border border-transparent ${isDark ? 'text-[#B2BAC2] hover:bg-[#1E2530]' : 'text-slate-500 hover:bg-slate-100'
+                                        }`}
                                 >
                                     {isDark ? <Sun className="w-[18px] h-[18px]" /> : <Moon className="w-[18px] h-[18px]" />}
                                 </Tooltip.Trigger>
                                 <Tooltip.Portal>
                                     <Tooltip.Positioner>
-                                        <Tooltip.Popup className={`px - 2 py - 1 text - xs rounded z - [60] shadow - md animate -in fade -in zoom -in -95 duration - 200 ${isDark ? 'bg-white text-black' : 'bg-gray-900 text-white'
-                                            } `}>
+                                        <Tooltip.Popup className={`px-2 py-1 text-xs rounded z-[60] shadow-md animate-in fade-in zoom-in-95 duration-200 ${isDark ? 'bg-white text-black' : 'bg-gray-900 text-white'
+                                            }`}>
                                             <Tooltip.Arrow className={isDark ? 'fill-white' : 'fill-gray-900'} />
                                             Toggle theme
                                         </Tooltip.Popup>
@@ -159,8 +159,8 @@ export default function WhitePaper() {
             <div className="flex max-w-[1440px] mx-auto pt-14">
 
                 {/* Left Navigation Sidebar - Base UI Accordion */}
-                <aside className={`fixed md:sticky top - 14 left - 0 h - [calc(100vh - 3.5rem)] z - 40 w - [240px] md: w - [260px] border - r transform transition - transform duration - 300 ease -in -out md: translate - x - 0 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
-                    } ${isDark ? 'bg-[#0B0D14] border-[#1E2530]' : 'bg-white border-[#E5EAF2]'} `}>
+                <aside className={`fixed md:sticky top-14 left-0 h-[calc(100vh-3.5rem)] z-40 w-[240px] md:w-[260px] border-r transform transition-transform duration-300 ease-in-out md:translate-x-0 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
+                    } ${isDark ? 'bg-[#0B0D14] border-[#1E2530]' : 'bg-white border-[#E5EAF2]'}`}>
 
                     <ScrollArea.Root className="w-full h-full overflow-hidden">
                         <ScrollArea.Viewport className="w-full h-full outline-none pt-6 pb-20">
@@ -169,8 +169,8 @@ export default function WhitePaper() {
                                     {sections.map((sectionGroup) => (
                                         <Accordion.Item key={sectionGroup.group} value={sectionGroup.group} className="mb-1">
                                             <Accordion.Header>
-                                                <Accordion.Trigger className={`w - full flex items - center justify - between px - 2 py - 1.5 text - [13px] font - semibold tracking - wide transition - colors ${isDark ? 'text-white hover:bg-white/5' : 'text-[#1C2025] hover:bg-slate-50'
-                                                    } rounded - md group`}>
+                                                <Accordion.Trigger className={`w-full flex items-center justify-between px-2 py-1.5 text-[13px] font-semibold tracking-wide transition-colors ${isDark ? 'text-white hover:bg-white/5' : 'text-[#1C2025] hover:bg-slate-50'
+                                                    } rounded-md group`}>
                                                     {sectionGroup.group}
                                                     <ChevronRight className="w-3.5 h-3.5 opacity-50 transition-transform duration-200 group-data-[panel-open]:rotate-90" />
                                                 </Accordion.Trigger>
@@ -183,13 +183,13 @@ export default function WhitePaper() {
                                                             <button
                                                                 key={item.id}
                                                                 onClick={() => scrollTo(item.id)}
-                                                                className={`w - full text - left px - 3 py - 1.5 ml - 1 my - 0.5 rounded - md text - [14px] transition - colors relative ${isActive
-                                                                        ? (isDark ? 'bg-[#006FEE]/10 text-[#338EF7] font-medium' : 'bg-blue-50 text-[#006FEE] font-medium')
-                                                                        : (isDark ? 'text-[#B2BAC2] hover:text-white hover:bg-white/5' : 'text-slate-600 hover:text-[#1C2025] hover:bg-slate-50')
+                                                                className={`w-full text-left px-3 py-1.5 ml-1 my-0.5 rounded-md text-[14px] transition-colors relative ${isActive
+                                                                    ? (isDark ? 'bg-[#006FEE]/10 text-[#338EF7] font-medium' : 'bg-blue-50 text-[#006FEE] font-medium')
+                                                                    : (isDark ? 'text-[#B2BAC2] hover:text-white hover:bg-white/5' : 'text-slate-600 hover:text-[#1C2025] hover:bg-slate-50')
                                                                     } `}
                                                             >
                                                                 {isActive && (
-                                                                    <span className={`absolute left - 0 top - 1 / 2 - translate - y - 1 / 2 w - [3px] h - [16px] rounded - r - full ${isDark ? 'bg-[#338EF7]' : 'bg-[#006FEE]'} `} />
+                                                                    <span className={`absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-[16px] rounded-r-full ${isDark ? 'bg-[#338EF7]' : 'bg-[#006FEE]'}`} />
                                                                 )}
                                                                 {item.title}
                                                             </button>
@@ -202,8 +202,8 @@ export default function WhitePaper() {
                                 </Accordion.Root>
                             </div>
                         </ScrollArea.Viewport>
-                        <ScrollArea.Scrollbar orientation="vertical" className={`flex w - 2 touch - none select - none border - l p - [1px] transition - all hover: w - 2.5 ${isDark ? 'border-[#1E2530]' : 'border-transparent'} `}>
-                            <ScrollArea.Thumb className={`flex - 1 rounded - full relative ${isDark ? 'bg-white/20 hover:bg-white/30' : 'bg-black/20 hover:bg-black/30'} `} />
+                        <ScrollArea.Scrollbar orientation="vertical" className={`flex w-2 touch-none select-none border-l p-[1px] transition-all hover:w-2.5 ${isDark ? 'border-[#1E2530]' : 'border-transparent'}`}>
+                            <ScrollArea.Thumb className={`flex-1 rounded-full relative ${isDark ? 'bg-white/20 hover:bg-white/30' : 'bg-black/20 hover:bg-black/30'}`} />
                         </ScrollArea.Scrollbar>
                     </ScrollArea.Root>
                 </aside>
@@ -220,17 +220,17 @@ export default function WhitePaper() {
                 <main className="flex-1 min-w-0 px-5 md:px-10 lg:px-16 py-8 md:py-12 max-w-[860px]">
 
                     {/* Breadcrumbs */}
-                    <nav className={`flex items - center text - [14px] font - medium mb - 4 ${isDark ? 'text-[#338EF7]' : 'text-[#006FEE]'} `}>
+                    <nav className={`flex items-center text-[14px] font-medium mb-4 ${isDark ? 'text-[#338EF7]' : 'text-[#006FEE]'}`}>
                         <span className="hover:underline cursor-pointer tracking-tight">ClerkTree</span>
                         <ChevronRight className="w-4 h-4 mx-1 opacity-50" />
                         <span className="hover:underline cursor-pointer tracking-tight">Whitepaper</span>
                     </nav>
 
-                    <h1 className={`text - 4xl md: text - [40px] font - extrabold tracking - tight mb - 4 leading - tight ${isDark ? 'text-white' : 'text-[#1C2025]'} `}>
+                    <h1 className={`text-4xl md:text-[40px] font-extrabold tracking-tight mb-4 leading-tight ${isDark ? 'text-white' : 'text-[#1C2025]'}`}>
                         ClerkTree Whitepaper
                     </h1>
 
-                    <p className={`text - [17px] md: text - [19px] leading - relaxed mb - 12 font - medium tracking - tight ${isDark ? 'text-[#B2BAC2]' : 'text-slate-600'} `}>
+                    <p className={`text-[17px] md:text-[19px] leading-relaxed mb-12 font-medium tracking-tight ${isDark ? 'text-[#B2BAC2]' : 'text-slate-600'}`}>
                         The Future of Operations Intelligence (OpsIntel) & Hyper-Local AI. Unveiling our vision for bridging the gap between complex operations and frontier AI.
                     </p>
 
@@ -386,8 +386,8 @@ export default function WhitePaper() {
                                             <button
                                                 onClick={() => scrollTo(s.id)}
                                                 className={`text - left w - full pl - 4 text - [13px] transition - colors leading - tight ${s.level === 2 ? 'pl-6' : ''} ${isActive
-                                                        ? (isDark ? 'text-[#338EF7] font-medium' : 'text-[#006FEE] font-medium')
-                                                        : (isDark ? 'hover:text-white border-[#1E2530]' : 'hover:text-[#1C2025] border-[#E5EAF2]')
+                                                    ? (isDark ? 'text-[#338EF7] font-medium' : 'text-[#006FEE] font-medium')
+                                                    : (isDark ? 'hover:text-white border-[#1E2530]' : 'hover:text-[#1C2025] border-[#E5EAF2]')
                                                     } `}
                                             >
                                                 {s.title}
