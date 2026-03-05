@@ -53,9 +53,9 @@ export default async (req: Request, _context: Context) => {
     }
 
     // Call ElevenLabs streaming endpoint
-    const url = `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}/stream?optimize_streaming_latency=3&output_format=${outputFormat}`;
+    const elUrl = `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}/stream?optimize_streaming_latency=3&output_format=${outputFormat}`;
 
-    const elResponse = await fetch(url, {
+    const elResponse = await fetch(elUrl, {
       method: "POST",
       headers: {
         Accept: "audio/mpeg",

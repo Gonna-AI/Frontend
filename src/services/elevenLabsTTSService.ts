@@ -8,7 +8,7 @@
 // ElevenLabs TTS — uses Netlify streaming proxy at /api/elevenlabs-tts-stream
 
 // Default voice IDs from the ElevenLabs account
-const GERMAN_VOICE_ID = 'j46AY0iVY3oHcnZbgEJg';  // Chris Norddeutscher
+
 const ENGLISH_VOICE_ID = 'cgSgspJ2msm6clMCkdW9'; // Jessica - Playful, Bright, Warm
 const DEFAULT_VOICE_ID = ENGLISH_VOICE_ID;
 

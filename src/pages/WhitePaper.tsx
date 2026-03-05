@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { ChevronRight, Hash, Moon, Sun, X, Menu, Search } from 'lucide-react';
+import { ChevronRight, Hash } from 'lucide-react';
 import { useTheme } from '../hooks/useTheme';
 import { ScrollArea } from '@base-ui/react/scroll-area';
 import { Accordion } from '@base-ui/react/accordion';
-import { Tooltip } from '@base-ui/react/tooltip';
+
+import SharedHeader from '../components/Layout/SharedHeader';
 
 export default function WhitePaper() {
-    const { isDark, toggleTheme } = useTheme();
+    const { isDark } = useTheme();
     const [activeSection, setActiveSection] = useState('executive-summary');
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -81,80 +81,7 @@ export default function WhitePaper() {
     return (
         <div className={`min-h-screen font-sans selection:bg-blue-500/30 ${isDark ? 'bg-[#0B0D14] text-[#B2BAC2]' : 'bg-white text-[#1C2025]'}`}>
 
-            {/* Header - Base UI Style EXACT */}
-            <header className={`fixed top-0 left-0 right-0 h-14 z-50 flex items-center justify-between border-b px-4 md:px-6 backdrop-blur-[8px] transition-colors ${isDark ? 'bg-[#0B0D14]/80 border-[#1E2530]' : 'bg-white/80 border-[#E5EAF2]'
-                }`}>
-                <div className="flex items-center gap-6">
-                    <button
-                        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                        className={`md:hidden p-1.5 -ml-1.5 rounded-md ${isDark ? 'hover:bg-white/10 text-white' : 'hover:bg-slate-100 text-[#1C2025]'}`}
-                    >
-                        {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-                    </button>
-
-                    {/* Logo Area */}
-                    <Link to="/" className={`flex items-center gap-2 font-bold text-base tracking-tight ${isDark ? 'text-white' : 'text-[#1C2025]'}`}>
-                        <div className="w-6 h-6 bg-[#006FEE] rounded flex items-center justify-center">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M12 2L2 22H22L12 2Z" fill="white" />
-                            </svg>
-                        </div>
-                        ClerkTree
-                    </Link>
-
-                    {/* Desktop Main Links */}
-                    <nav className="hidden md:flex items-center gap-1 ml-4 text-[14px] font-medium">
-                        <Link to="/" className={`px-2.5 py-1.5 rounded-md transition-colors ${isDark ? 'text-[#338EF7] bg-[#006FEE]/10' : 'text-[#006FEE] bg-blue-50'
-                            }`}>
-                            Docs
-                        </Link>
-                        <Link to="/dashboard" className={`px-2.5 py-1.5 rounded-md transition-colors ${isDark ? 'text-[#B2BAC2] hover:text-white hover:bg-white/5' : 'text-slate-600 hover:text-[#1C2025] hover:bg-slate-50'
-                            }`}>
-                            App
-                        </Link>
-                    </nav>
-                </div>
-
-                <div className="flex items-center gap-2 md:gap-4">
-                    {/* Search Bar */}
-                    <button className={`hidden lg:flex items-center gap-2 px-2.5 py-1.5 w-[200px] xl:w-[240px] rounded-md border text-[14px] transition-all shadow-sm ${isDark
-                        ? 'bg-[#11141C] border-[#1E2530] hover:border-[#338EF7]/50 text-[#6B7A90]'
-                        : 'bg-white border-[#E5EAF2] hover:border-blue-400 text-slate-400'
-                        }`}>
-                        <Search className="w-4 h-4" />
-                        <span className="flex-1 text-left">Search</span>
-                        <div className={`px-1.5 py-[1px] text-[11px] font-medium rounded border ${isDark ? 'bg-[#1E2530] border-[#2A3441] text-[#B2BAC2]' : 'bg-slate-50 border-slate-200 text-slate-500'
-                            }`}>
-                            ⌘K
-                        </div>
-                    </button>
-
-                    <div className={`w-px h-5 mx-1 hidden md:block ${isDark ? 'bg-[#1E2530]' : 'bg-[#E5EAF2]'}`}></div>
-
-                    <Tooltip.Provider delay={200}>
-                        <div className="flex items-center gap-0.5">
-                            <Tooltip.Root>
-                                <Tooltip.Trigger
-                                    onClick={toggleTheme}
-                                    className={`p-1.5 md:p-2 rounded-md transition-colors border border-transparent ${isDark ? 'text-[#B2BAC2] hover:bg-[#1E2530]' : 'text-slate-500 hover:bg-slate-100'
-                                        }`}
-                                >
-                                    {isDark ? <Sun className="w-[18px] h-[18px]" /> : <Moon className="w-[18px] h-[18px]" />}
-                                </Tooltip.Trigger>
-                                <Tooltip.Portal>
-                                    <Tooltip.Positioner>
-                                        <Tooltip.Popup className={`px-2 py-1 text-xs rounded z-[60] shadow-md animate-in fade-in zoom-in-95 duration-200 ${isDark ? 'bg-white text-black' : 'bg-gray-900 text-white'
-                                            }`}>
-                                            <Tooltip.Arrow className={isDark ? 'fill-white' : 'fill-gray-900'} />
-                                            Toggle theme
-                                        </Tooltip.Popup>
-                                    </Tooltip.Positioner>
-                                </Tooltip.Portal>
-                            </Tooltip.Root>
-                        </div>
-                    </Tooltip.Provider>
-                </div>
-            </header>
+            <SharedHeader />
 
             <div className="flex max-w-[1440px] mx-auto pt-14">
 

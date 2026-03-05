@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Phone, PhoneOff, Volume2, VolumeX, Minimize2, Maximize2, Globe, ArrowLeft } from 'lucide-react';
 import { cn } from '../../utils/cn';
@@ -34,7 +34,7 @@ export default function UserPhoneInterface({
     isDark = true,
     onTranscript,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    compact = false,
+    
     mode = 'standalone',
     autoStart = false,
     onBack
@@ -58,7 +58,7 @@ export default function UserPhoneInterface({
     const [language, setLanguage] = useState<TTSLanguage>('en');
     const [isMinimized, setIsMinimized] = useState(false);
     const [isEnding, setIsEnding] = useState(false);
-    const [voiceProvider, setVoiceProvider] = useState<VoiceProviderType>(() => getGroqSettings().voiceProvider);
+    const [, setVoiceProvider] = useState<VoiceProviderType>(() => getGroqSettings().voiceProvider);
 
     const recognitionRef = useRef<SpeechRecognitionInstance | null>(null);
     const timerRef = useRef<NodeJS.Timeout | null>(null);

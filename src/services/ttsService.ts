@@ -173,7 +173,6 @@ class TTSService {
   }
 
   // Cancellation flag for sentence-level streaming
-  private cancelled = false;
 
   /**
    * Stop audio playback on all backends (without cancelling streaming loop)
@@ -188,7 +187,6 @@ class TTSService {
    * Stop any currently playing audio and cancel queued playback
    */
   stop() {
-    this.cancelled = true;
     this.stopAudio();
   }
 
@@ -214,8 +212,6 @@ class TTSService {
       options?.onEnd?.();
       return Promise.resolve();
     }
-
-    this.cancelled = false;
 
     // Directly use native TTS provider streaming instead of custom sentence splitting
     return this.speak(text, options);
@@ -305,7 +301,7 @@ class TTSService {
         await deapiTTSService.speak(text, {
           voice: this.config.deapiVoice,
           speed,
-          lang: language === 'de' ? 'German' : 'English',
+          lang: 'English',
           onStart: options?.onStart,
           onEnd: options?.onEnd,
           onError: options?.onError,
