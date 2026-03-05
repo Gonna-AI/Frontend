@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Search, Menu, X, Moon, Sun, ChevronRight, Hash, Copy } from 'lucide-react';
+import { ChevronRight, Hash, Moon, Sun, X } from 'lucide-react';
 import { useTheme } from '../hooks/useTheme';
 import { ScrollArea } from '@base-ui/react/scroll-area';
 import { Accordion } from '@base-ui/react/accordion';
@@ -13,39 +13,29 @@ export default function WhitePaper() {
 
     const sections = [
         {
-            group: 'Overview',
+            group: 'Core Thesis',
             items: [
                 { id: 'executive-summary', title: 'Executive Summary', level: 1 },
-                { id: 'problem-statement', title: 'The Problem', level: 1 },
-                { id: 'how-are-we-novel', title: 'How Are We Novel?', level: 1 },
-                { id: 'proposed-ideas', title: 'Proposed Ideas', level: 1 },
+                { id: 'operational-disconnect', title: 'The Operational Disconnect', level: 2 },
             ]
         },
         {
-            group: 'Core Problems',
+            group: 'The ClerkTree Architecture',
             items: [
-                { id: 'backend-inefficiencies', title: 'Backend Inefficiencies', level: 2 },
-                { id: 'frontend-gaps', title: 'Frontend Gaps', level: 2 },
-                { id: 'barrier-to-ai', title: 'AI Barriers', level: 2 },
+                { id: 'edge-compute-paradigm', title: 'Edge Computing Paradigm', level: 1 },
             ]
         },
         {
-            group: 'Technological Novelty',
+            group: 'Methodology & Novelty',
             items: [
-                { id: 'dev-api', title: 'Developer API & Edge', level: 2 },
-                { id: 'onboarding-wizard', title: 'Onboarding Wizard', level: 2 },
-                { id: 'analytics', title: 'Real-Time Analytics', level: 2 },
+                { id: 'the-clerktree-methodology', title: 'Methodological Approach', level: 1 },
             ]
         },
         {
-            group: 'Advanced Integration Ideas',
+            group: 'Evolutionary Trajectory',
             items: [
-                { id: 'proactive-engagement', title: 'Proactive Engagement', level: 2 },
-                { id: 'sentiment-routing', title: 'Sentiment Routing', level: 2 },
-                { id: 'action-integrations', title: 'Action Integrations', level: 2 },
-                { id: 'shadow-mode', title: 'Shadow Mode Algorithm', level: 2 },
-                { id: 'multi-agent', title: 'Multi-Agent Collaboration', level: 2 },
-                { id: 'voice-cloning', title: 'Voice Cloning', level: 2 },
+                { id: 'autonomous-closed-loop', title: 'Autonomous Closed-Loop Future', level: 1 },
+                { id: 'multi-agent-collaboration', title: 'Multi-Agent Symbiosis', level: 2 },
             ]
         }
     ];
@@ -89,21 +79,21 @@ export default function WhitePaper() {
     // Dark Mode: bg #0B0D14, text #B2BAC2, borders #1E2530, blue #338EF7
 
     return (
-        <div className={`min-h-screen font-sans selection:bg-blue-500/30 ${isDark ? 'bg-[#0B0D14] text-[#B2BAC2]' : 'bg-white text-[#1C2025]'}`}>
+        <div className={`min - h - screen font - sans selection: bg - blue - 500 / 30 ${isDark ? 'bg-[#0B0D14] text-[#B2BAC2]' : 'bg-white text-[#1C2025]'} `}>
 
             {/* Header - Base UI Style EXACT */}
-            <header className={`fixed top-0 left-0 right-0 h-14 z-50 flex items-center justify-between border-b px-4 md:px-6 backdrop-blur-[8px] transition-colors ${isDark ? 'bg-[#0B0D14]/80 border-[#1E2530]' : 'bg-white/80 border-[#E5EAF2]'
-                }`}>
+            <header className={`fixed top - 0 left - 0 right - 0 h - 14 z - 50 flex items - center justify - between border - b px - 4 md: px - 6 backdrop - blur - [8px] transition - colors ${isDark ? 'bg-[#0B0D14]/80 border-[#1E2530]' : 'bg-white/80 border-[#E5EAF2]'
+                } `}>
                 <div className="flex items-center gap-6">
                     <button
                         onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                        className={`md:hidden p-1.5 -ml-1.5 rounded-md ${isDark ? 'hover:bg-white/10 text-white' : 'hover:bg-slate-100 text-[#1C2025]'}`}
+                        className={`md:hidden p - 1.5 - ml - 1.5 rounded - md ${isDark ? 'hover:bg-white/10 text-white' : 'hover:bg-slate-100 text-[#1C2025]'} `}
                     >
                         {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
                     </button>
 
                     {/* Logo Area */}
-                    <Link to="/" className={`flex items-center gap-2 font-bold text-base tracking-tight ${isDark ? 'text-white' : 'text-[#1C2025]'}`}>
+                    <Link to="/" className={`flex items - center gap - 2 font - bold text - base tracking - tight ${isDark ? 'text-white' : 'text-[#1C2025]'} `}>
                         <div className="w-6 h-6 bg-[#006FEE] rounded flex items-center justify-center">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M12 2L2 22H22L12 2Z" fill="white" />
@@ -114,12 +104,12 @@ export default function WhitePaper() {
 
                     {/* Desktop Main Links */}
                     <nav className="hidden md:flex items-center gap-1 ml-4 text-[14px] font-medium">
-                        <Link to="/" className={`px-2.5 py-1.5 rounded-md transition-colors ${isDark ? 'text-[#338EF7] bg-[#006FEE]/10' : 'text-[#006FEE] bg-blue-50'
-                            }`}>
+                        <Link to="/" className={`px - 2.5 py - 1.5 rounded - md transition - colors ${isDark ? 'text-[#338EF7] bg-[#006FEE]/10' : 'text-[#006FEE] bg-blue-50'
+                            } `}>
                             Docs
                         </Link>
-                        <Link to="/dashboard" className={`px-2.5 py-1.5 rounded-md transition-colors ${isDark ? 'text-[#B2BAC2] hover:text-white hover:bg-white/5' : 'text-slate-600 hover:text-[#1C2025] hover:bg-slate-50'
-                            }`}>
+                        <Link to="/dashboard" className={`px - 2.5 py - 1.5 rounded - md transition - colors ${isDark ? 'text-[#B2BAC2] hover:text-white hover:bg-white/5' : 'text-slate-600 hover:text-[#1C2025] hover:bg-slate-50'
+                            } `}>
                             App
                         </Link>
                     </nav>
@@ -127,34 +117,34 @@ export default function WhitePaper() {
 
                 <div className="flex items-center gap-2 md:gap-4">
                     {/* Search Bar */}
-                    <button className={`hidden lg:flex items-center gap-2 px-2.5 py-1.5 w-[200px] xl:w-[240px] rounded-md border text-[14px] transition-all shadow-sm ${isDark
-                        ? 'bg-[#11141C] border-[#1E2530] hover:border-[#338EF7]/50 text-[#6B7A90]'
-                        : 'bg-white border-[#E5EAF2] hover:border-blue-400 text-slate-400'
-                        }`}>
+                    <button className={`hidden lg:flex items - center gap - 2 px - 2.5 py - 1.5 w - [200px] xl: w - [240px] rounded - md border text - [14px] transition - all shadow - sm ${isDark
+                            ? 'bg-[#11141C] border-[#1E2530] hover:border-[#338EF7]/50 text-[#6B7A90]'
+                            : 'bg-white border-[#E5EAF2] hover:border-blue-400 text-slate-400'
+                        } `}>
                         <Search className="w-4 h-4" />
                         <span className="flex-1 text-left">Search</span>
-                        <div className={`px-1.5 py-[1px] text-[11px] font-medium rounded border ${isDark ? 'bg-[#1E2530] border-[#2A3441] text-[#B2BAC2]' : 'bg-slate-50 border-slate-200 text-slate-500'
-                            }`}>
+                        <div className={`px - 1.5 py - [1px] text - [11px] font - medium rounded border ${isDark ? 'bg-[#1E2530] border-[#2A3441] text-[#B2BAC2]' : 'bg-slate-50 border-slate-200 text-slate-500'
+                            } `}>
                             ⌘K
                         </div>
                     </button>
 
-                    <div className={`w-px h-5 mx-1 hidden md:block ${isDark ? 'bg-[#1E2530]' : 'bg-[#E5EAF2]'}`}></div>
+                    <div className={`w - px h - 5 mx - 1 hidden md:block ${isDark ? 'bg-[#1E2530]' : 'bg-[#E5EAF2]'} `}></div>
 
                     <Tooltip.Provider delay={200}>
                         <div className="flex items-center gap-0.5">
                             <Tooltip.Root>
                                 <Tooltip.Trigger
                                     onClick={toggleTheme}
-                                    className={`p-1.5 md:p-2 rounded-md transition-colors border border-transparent ${isDark ? 'text-[#B2BAC2] hover:bg-[#1E2530]' : 'text-slate-500 hover:bg-slate-100'
-                                        }`}
+                                    className={`p - 1.5 md: p - 2 rounded - md transition - colors border border - transparent ${isDark ? 'text-[#B2BAC2] hover:bg-[#1E2530]' : 'text-slate-500 hover:bg-slate-100'
+                                        } `}
                                 >
                                     {isDark ? <Sun className="w-[18px] h-[18px]" /> : <Moon className="w-[18px] h-[18px]" />}
                                 </Tooltip.Trigger>
                                 <Tooltip.Portal>
                                     <Tooltip.Positioner>
-                                        <Tooltip.Popup className={`px-2 py-1 text-xs rounded z-[60] shadow-md animate-in fade-in zoom-in-95 duration-200 ${isDark ? 'bg-white text-black' : 'bg-gray-900 text-white'
-                                            }`}>
+                                        <Tooltip.Popup className={`px - 2 py - 1 text - xs rounded z - [60] shadow - md animate -in fade -in zoom -in -95 duration - 200 ${isDark ? 'bg-white text-black' : 'bg-gray-900 text-white'
+                                            } `}>
                                             <Tooltip.Arrow className={isDark ? 'fill-white' : 'fill-gray-900'} />
                                             Toggle theme
                                         </Tooltip.Popup>
@@ -169,8 +159,8 @@ export default function WhitePaper() {
             <div className="flex max-w-[1440px] mx-auto pt-14">
 
                 {/* Left Navigation Sidebar - Base UI Accordion */}
-                <aside className={`fixed md:sticky top-14 left-0 h-[calc(100vh-3.5rem)] z-40 w-[240px] md:w-[260px] border-r transform transition-transform duration-300 ease-in-out md:translate-x-0 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
-                    } ${isDark ? 'bg-[#0B0D14] border-[#1E2530]' : 'bg-white border-[#E5EAF2]'}`}>
+                <aside className={`fixed md:sticky top - 14 left - 0 h - [calc(100vh - 3.5rem)] z - 40 w - [240px] md: w - [260px] border - r transform transition - transform duration - 300 ease -in -out md: translate - x - 0 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
+                    } ${isDark ? 'bg-[#0B0D14] border-[#1E2530]' : 'bg-white border-[#E5EAF2]'} `}>
 
                     <ScrollArea.Root className="w-full h-full overflow-hidden">
                         <ScrollArea.Viewport className="w-full h-full outline-none pt-6 pb-20">
@@ -179,8 +169,8 @@ export default function WhitePaper() {
                                     {sections.map((sectionGroup) => (
                                         <Accordion.Item key={sectionGroup.group} value={sectionGroup.group} className="mb-1">
                                             <Accordion.Header>
-                                                <Accordion.Trigger className={`w-full flex items-center justify-between px-2 py-1.5 text-[13px] font-semibold tracking-wide transition-colors ${isDark ? 'text-white hover:bg-white/5' : 'text-[#1C2025] hover:bg-slate-50'
-                                                    } rounded-md group`}>
+                                                <Accordion.Trigger className={`w - full flex items - center justify - between px - 2 py - 1.5 text - [13px] font - semibold tracking - wide transition - colors ${isDark ? 'text-white hover:bg-white/5' : 'text-[#1C2025] hover:bg-slate-50'
+                                                    } rounded - md group`}>
                                                     {sectionGroup.group}
                                                     <ChevronRight className="w-3.5 h-3.5 opacity-50 transition-transform duration-200 group-data-[panel-open]:rotate-90" />
                                                 </Accordion.Trigger>
@@ -193,13 +183,13 @@ export default function WhitePaper() {
                                                             <button
                                                                 key={item.id}
                                                                 onClick={() => scrollTo(item.id)}
-                                                                className={`w-full text-left px-3 py-1.5 ml-1 my-0.5 rounded-md text-[14px] transition-colors relative ${isActive
-                                                                    ? (isDark ? 'bg-[#006FEE]/10 text-[#338EF7] font-medium' : 'bg-blue-50 text-[#006FEE] font-medium')
-                                                                    : (isDark ? 'text-[#B2BAC2] hover:text-white hover:bg-white/5' : 'text-slate-600 hover:text-[#1C2025] hover:bg-slate-50')
-                                                                    }`}
+                                                                className={`w - full text - left px - 3 py - 1.5 ml - 1 my - 0.5 rounded - md text - [14px] transition - colors relative ${isActive
+                                                                        ? (isDark ? 'bg-[#006FEE]/10 text-[#338EF7] font-medium' : 'bg-blue-50 text-[#006FEE] font-medium')
+                                                                        : (isDark ? 'text-[#B2BAC2] hover:text-white hover:bg-white/5' : 'text-slate-600 hover:text-[#1C2025] hover:bg-slate-50')
+                                                                    } `}
                                                             >
                                                                 {isActive && (
-                                                                    <span className={`absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-[16px] rounded-r-full ${isDark ? 'bg-[#338EF7]' : 'bg-[#006FEE]'}`} />
+                                                                    <span className={`absolute left - 0 top - 1 / 2 - translate - y - 1 / 2 w - [3px] h - [16px] rounded - r - full ${isDark ? 'bg-[#338EF7]' : 'bg-[#006FEE]'} `} />
                                                                 )}
                                                                 {item.title}
                                                             </button>
@@ -212,8 +202,8 @@ export default function WhitePaper() {
                                 </Accordion.Root>
                             </div>
                         </ScrollArea.Viewport>
-                        <ScrollArea.Scrollbar orientation="vertical" className={`flex w-2 touch-none select-none border-l p-[1px] transition-all hover:w-2.5 ${isDark ? 'border-[#1E2530]' : 'border-transparent'}`}>
-                            <ScrollArea.Thumb className={`flex-1 rounded-full relative ${isDark ? 'bg-white/20 hover:bg-white/30' : 'bg-black/20 hover:bg-black/30'}`} />
+                        <ScrollArea.Scrollbar orientation="vertical" className={`flex w - 2 touch - none select - none border - l p - [1px] transition - all hover: w - 2.5 ${isDark ? 'border-[#1E2530]' : 'border-transparent'} `}>
+                            <ScrollArea.Thumb className={`flex - 1 rounded - full relative ${isDark ? 'bg-white/20 hover:bg-white/30' : 'bg-black/20 hover:bg-black/30'} `} />
                         </ScrollArea.Scrollbar>
                     </ScrollArea.Root>
                 </aside>
@@ -230,200 +220,130 @@ export default function WhitePaper() {
                 <main className="flex-1 min-w-0 px-5 md:px-10 lg:px-16 py-8 md:py-12 max-w-[860px]">
 
                     {/* Breadcrumbs */}
-                    <nav className={`flex items-center text-[14px] font-medium mb-4 ${isDark ? 'text-[#338EF7]' : 'text-[#006FEE]'}`}>
+                    <nav className={`flex items - center text - [14px] font - medium mb - 4 ${isDark ? 'text-[#338EF7]' : 'text-[#006FEE]'} `}>
                         <span className="hover:underline cursor-pointer tracking-tight">ClerkTree</span>
                         <ChevronRight className="w-4 h-4 mx-1 opacity-50" />
                         <span className="hover:underline cursor-pointer tracking-tight">Whitepaper</span>
                     </nav>
 
-                    <h1 className={`text-4xl md:text-[40px] font-extrabold tracking-tight mb-4 leading-tight ${isDark ? 'text-white' : 'text-[#1C2025]'}`}>
+                    <h1 className={`text - 4xl md: text - [40px] font - extrabold tracking - tight mb - 4 leading - tight ${isDark ? 'text-white' : 'text-[#1C2025]'} `}>
                         ClerkTree Whitepaper
                     </h1>
 
-                    <p className={`text-[17px] md:text-[19px] leading-relaxed mb-12 font-medium tracking-tight ${isDark ? 'text-[#B2BAC2]' : 'text-slate-600'}`}>
+                    <p className={`text - [17px] md: text - [19px] leading - relaxed mb - 12 font - medium tracking - tight ${isDark ? 'text-[#B2BAC2]' : 'text-slate-600'} `}>
                         The Future of Operations Intelligence (OpsIntel) & Hyper-Local AI. Unveiling our vision for bridging the gap between complex operations and frontier AI.
                     </p>
 
-                    <div className={`w-full h-px mb-12 ${isDark ? 'bg-[#1E2530]' : 'bg-[#E5EAF2]'}`} />
+                    <div className={`w - full h - px mb - 12 ${isDark ? 'bg-[#1E2530]' : 'bg-[#E5EAF2]'} `} />
 
                     <div className="space-y-16">
 
                         <section id="executive-summary" className="scroll-mt-24 group">
-                            <h2 className={`text-2xl md:text-[28px] font-bold tracking-tight mb-4 flex items-center -ml-6 pl-6 relative ${isDark ? 'text-white' : 'text-[#1C2025]'}`}>
-                                <a href="#executive-summary" className={`absolute left-0 opacity-0 group-hover:opacity-100 transition-opacity ${isDark ? 'text-[#338EF7]' : 'text-[#006FEE]'}`}>
+                            <h2 className={`text - 2xl md: text - [28px] font - bold tracking - tight mb - 4 flex items - center - ml - 6 pl - 6 relative ${isDark ? 'text-white' : 'text-[#1C2025]'} `}>
+                                <a href="#executive-summary" className={`absolute left - 0 opacity - 0 group - hover: opacity - 100 transition - opacity ${isDark ? 'text-[#338EF7]' : 'text-[#006FEE]'} `}>
                                     <Hash className="w-5 h-5 -mt-0.5" />
                                 </a>
                                 1. Executive Summary
                             </h2>
-                            <div className={`text-[16px] leading-7 space-y-4 ${isDark ? 'text-[#B2BAC2]' : 'text-slate-700'}`}>
+                            <div className={`text - [16px] leading - relaxed space - y - 6 ${isDark ? 'text-[#B2BAC2]' : 'text-slate-700'} `}>
                                 <p>
-                                    ClerkTree is an Enterprise AI Platform designed to bridge the gap between complex backend operations (legal, claims processing, document review) and frontend customer engagement (hyper-local business operations).
+                                    <strong>ClerkTree</strong> is conceptually engineered as an Enterprise AI Platform that aims to obliterate the long-standing chasm between deeply complex backend operations—such as legal case management, dense medical claims processing, and intensive chronological document review—and the fluid, instantaneous demands of frontend customer engagement, characteristic of hyper-local business operations. In the contemporary, hyper-accelerated business environment, the structural inability to fluently connect internal cognitive labor with exterior customer touchpoints creates compounding, systemic inefficiencies that rapidly drain both capital and human morale.
                                 </p>
                                 <p>
-                                    By leveraging advanced Operations Intelligence (OpsIntel), ClerkTree empowers businesses to automate routine tasks, achieve faster processing times (up to 40%), and deliver 24/7 human-like conversational voice and chat support. Our mission is to transform how organizations handle their internal operations and external communications through intelligent, accessible automation.
+                                    By leveraging a sophisticated orchestration layer we term <strong>Operations Intelligence (OpsIntel)</strong>, ClerkTree empowers businesses of variable scales to achieve autonomous, probabilistic routine task execution. This architectural thesis posits that by correctly structuring unstructured data on ingest, we can accelerate processing cycles by up to 40% while simultaneously achieving a statistical reduction in human fatigue-induced error rates. Furthermore, by seamlessly extending these localized intelligence models into the communication layer, we deliver 24/7 human-like conversational voice, SMS, and chat scaffolding that integrates intrinsically into legacy operations mapping without rewriting underlying CRMs.
+                                </p>
+                                <p>
+                                    Through a radically novel combination of autonomous <strong>LLM-driven workflow execution</strong> embedded onto an inherently low-latency <strong>edge-deployed infrastructure</strong>, ClerkTree operates securely, rapidly, and autonomously. This whitepaper systematically deconstructs our core operational philosophy, examining the deeply rooted systemic structural paradoxes we aim to resolve, articulating our technical architectural heuristics, and delineating the strategic roadmap defining the evolutionary trajectory of the ClerkTree hyper-local intelligence network.
                                 </p>
                             </div>
                         </section>
 
-                        <section id="problem-statement" className="scroll-mt-24 group">
-                            <h2 className={`text-2xl md:text-[28px] font-bold tracking-tight mb-4 flex items-center -ml-6 pl-6 relative ${isDark ? 'text-white' : 'text-[#1C2025]'}`}>
-                                <a href="#problem-statement" className={`absolute left-0 opacity-0 group-hover:opacity-100 transition-opacity ${isDark ? 'text-[#338EF7]' : 'text-[#006FEE]'}`}>
+                        <section id="operational-disconnect" className="scroll-mt-24 group">
+                            <h2 className={`text - 2xl md: text - [28px] font - bold tracking - tight mb - 4 flex items - center - ml - 6 pl - 6 relative ${isDark ? 'text-white' : 'text-[#1C2025]'} `}>
+                                <a href="#operational-disconnect" className={`absolute left - 0 opacity - 0 group - hover: opacity - 100 transition - opacity ${isDark ? 'text-[#338EF7]' : 'text-[#006FEE]'} `}>
                                     <Hash className="w-5 h-5 -mt-0.5" />
                                 </a>
-                                2. The Problem We Are Solving
+                                2. The Operational Disconnect
                             </h2>
-                            <p className={`text-[16px] leading-7 mb-6 ${isDark ? 'text-[#B2BAC2]' : 'text-slate-700'}`}>
-                                Businesses today face major bottlenecks that severely impact ROI and customer satisfaction:
-                            </p>
-
-                            <div className="space-y-8">
-                                <div id="backend-inefficiencies" className="scroll-mt-24">
-                                    <h3 className={`text-[19px] font-bold tracking-tight mb-2 ${isDark ? 'text-white' : 'text-[#1C2025]'}`}>1. Backend Inefficiencies</h3>
-                                    <p className={`text-[16px] leading-7 ${isDark ? 'text-[#B2BAC2]' : 'text-slate-700'}`}>
-                                        Legal and claims operations are notoriously burdened by manual document review, leading to slow processing times, high error rates, and astronomical operational costs.
-                                    </p>
-                                </div>
-
-                                <div id="frontend-gaps" className="scroll-mt-24">
-                                    <h3 className={`text-[19px] font-bold tracking-tight mb-2 ${isDark ? 'text-white' : 'text-[#1C2025]'}`}>2. Frontend Communication Gaps</h3>
-                                    <p className={`text-[16px] leading-7 ${isDark ? 'text-[#B2BAC2]' : 'text-slate-700'}`}>
-                                        Local businesses (retail, restaurants, sales, salons) constantly miss calls and leads due to staff unavailability. Traditional receptionists are expensive, turnover is high, and rigid IVR (Interactive Voice Response) systems frustrate.
-                                    </p>
-                                </div>
-
-                                <div id="barrier-to-ai" className="scroll-mt-24">
-                                    <h3 className={`text-[19px] font-bold tracking-tight mb-2 ${isDark ? 'text-white' : 'text-[#1C2025]'}`}>3. High Barrier to Entry for AI</h3>
-                                    <p className={`text-[16px] leading-7 ${isDark ? 'text-[#B2BAC2]' : 'text-slate-700'}`}>
-                                        Setting up a functional, knowledgeable AI agent requires prompt engineering, knowledge graph construction, and deep technical expertise that most small business owners inherently lack.
-                                    </p>
-                                </div>
+                            <div className={`text - [16px] leading - relaxed space - y - 6 ${isDark ? 'text-[#B2BAC2]' : 'text-slate-700'} `}>
+                                <p>
+                                    The contemporary commercial infrastructure is hampered by two mutually reinforcing failure vectors: the exhaustion of analytical backend resources traversing unstructured data, and the brittle, unresponsive nature of frontend communication layers. These elements are traditionally isolated from one another in distinct operational silos, forcing a highly inefficient human translation layer.
+                                </p>
+                                <p>
+                                    Operations fundamentally reliant on extensive knowledge work—such as legal discovery, insurance claims forensics, and complex local scheduling algorithms—are notoriously burdened by manual document handling. Highly skilled, high-salary employees are consistently relegated to the monotonous extraction of rigid variables from fluid documents. This manual parsing of unstructured language results in extreme cognitive load, generating a high statistical probability of cumulative fatigue errors while mathematically preventing non-linear scaling. The business becomes physiologically bound by the exact sum of its employees' conscious working hours.
+                                </p>
+                                <p>
+                                    Conversely, on the customer-facing periphery, businesses endure devastating opportunity costs. Ranging from dense enterprise legal firms to localized clinical salons, organizations hemorrhage incoming sales potential when staff are distracted or after-hours constraints apply. Legacy, deterministic IVR (Interactive Voice Response) architectures ("Press 1 for Sales...") are fundamentally hostile to modern consumer neuropsychology, which strictly demands instantaneous, conversational parity. Attempting to augment this gap via entry-level cognitive labor generates extremely high turnover and training overhead. Furthermore, establishing a functional, generative AI agent traditionally necessitates an impenetrable barrier of vector database management, complex orchestration engineering, and rigid systemic integrations—a barrier strictly insurmountable for the mid-market operational managers that require the technology most urgently.
+                                </p>
                             </div>
                         </section>
 
-                        <hr className={`border-t ${isDark ? 'border-[#1E2530]' : 'border-[#E5EAF2]'}`} />
+                        <hr className={`border - t ${isDark ? 'border-[#1E2530]' : 'border-[#E5EAF2]'} `} />
 
-                        <section id="how-are-we-novel" className="scroll-mt-24 group">
-                            <h2 className={`text-2xl md:text-[28px] font-bold tracking-tight mb-4 flex items-center -ml-6 pl-6 relative ${isDark ? 'text-white' : 'text-[#1C2025]'}`}>
-                                <a href="#how-are-we-novel" className={`absolute left-0 opacity-0 group-hover:opacity-100 transition-opacity ${isDark ? 'text-[#338EF7]' : 'text-[#006FEE]'}`}>
+                        <section id="edge-compute-paradigm" className="scroll-mt-24 group">
+                            <h2 className={`text - 2xl md: text - [28px] font - bold tracking - tight mb - 4 flex items - center - ml - 6 pl - 6 relative ${isDark ? 'text-white' : 'text-[#1C2025]'} `}>
+                                <a href="#edge-compute-paradigm" className={`absolute left - 0 opacity - 0 group - hover: opacity - 100 transition - opacity ${isDark ? 'text-[#338EF7]' : 'text-[#006FEE]'} `}>
                                     <Hash className="w-5 h-5 -mt-0.5" />
                                 </a>
-                                3. How Are We Novel?
+                                3. Edge Computing Paradigm
                             </h2>
-                            <p className={`text-[16px] leading-7 mb-6 ${isDark ? 'text-[#B2BAC2]' : 'text-slate-700'}`}>
-                                ClerkTree's novelty lies in its dual-pronged approach, robust developer API, and focus on extreme accessibility for business owners.
-                            </p>
-
-                            {/* Base UI style info boxes (Callouts) */}
-                            <div className="space-y-4">
-                                <div id="dev-api" className={`scroll-mt-24 p-5 rounded-lg border flex gap-3 items-start ${isDark ? 'bg-[#0B1527] border-[#153460]' : 'bg-[#F0F7FF] border-[#CCE3FD]'}`}>
-                                    <div className={`mt-0.5 rounded p-1 ${isDark ? 'bg-[#153460] text-[#338EF7]' : 'bg-[#CCE3FD] text-[#006FEE]'}`}>
-                                        <Copy className="w-4 h-4" />
-                                    </div>
-                                    <div>
-                                        <h3 className={`text-[15px] font-bold mb-1 ${isDark ? 'text-white' : 'text-[#004493]'}`}>
-                                            Comprehensive Developer API & Edge Infrastructure
-                                        </h3>
-                                        <p className={`text-[14px] leading-6 ${isDark ? 'text-[#8492A6]' : 'text-[#0059B2]'}`}>
-                                            Built on high-performance Supabase Edge Functions, ClerkTree offers a rich set of APIs for both developers and enterprise use cases.
-                                        </p>
-                                    </div>
-                                </div>
-
-                                <div id="onboarding-wizard" className={`scroll-mt-24 p-5 rounded-lg border flex gap-3 items-start ${isDark ? 'bg-[#121B10] border-[#1C3A16]' : 'bg-[#F3FAF0] border-[#D0F2C2]'}`}>
-                                    <div className={`mt-0.5 rounded p-1 ${isDark ? 'bg-[#1C3A16] text-[#45D483]' : 'bg-[#D0F2C2] text-[#127F3B]'}`}>
-                                        <Search className="w-4 h-4" />
-                                    </div>
-                                    <div>
-                                        <h3 className={`text-[15px] font-bold mb-1 ${isDark ? 'text-white' : 'text-[#0D5F2A]'}`}>
-                                            Conversational AI Onboarding Wizard
-                                        </h3>
-                                        <p className={`text-[14px] leading-6 ${isDark ? 'text-[#8AA181]' : 'text-[#127F3B]'}`}>
-                                            We completely remove the technical friction of deploying AI. Our unique "Onboarding Wizard" allows non-technical business owners to configure their AI simply by chatting.
-                                        </p>
-                                    </div>
-                                </div>
-
-                                <div id="analytics" className={`scroll-mt-24 p-5 rounded-lg border flex gap-3 items-start ${isDark ? 'bg-[#21160D] border-[#4A260F]' : 'bg-[#FFF8F0] border-[#FCE1B6]'}`}>
-                                    <div className={`mt-0.5 rounded p-1 ${isDark ? 'bg-[#4A260F] text-[#F5A524]' : 'bg-[#FCE1B6] text-[#B85D09]'}`}>
-                                        <Menu className="w-4 h-4" />
-                                    </div>
-                                    <div>
-                                        <h3 className={`text-[15px] font-bold mb-1 ${isDark ? 'text-white' : 'text-[#8F4806]'}`}>
-                                            Real-Time Analytics & Lead Enrichment
-                                        </h3>
-                                        <p className={`text-[14px] leading-6 ${isDark ? 'text-[#A88C78]' : 'text-[#B85D09]'}`}>
-                                            Our platform automatically enriches every interaction. Calls and chats are transcribed and analyzed in real-time, outputting structured data.
-                                        </p>
-                                    </div>
-                                </div>
+                            <div className={`text - [16px] leading - relaxed space - y - 6 ${isDark ? 'text-[#B2BAC2]' : 'text-slate-700'} `}>
+                                <p>
+                                    ClerkTree subverts centralized, latent computational topologies by deploying execution logic directly to globally distributed edge nodes. This architecture is emphatically not an aesthetic decision, but a fundamental physiological necessity if artificial intelligence is to operate at the fluid cadence of human conversation. By positioning conversational acoustic modeling, speech-to-text mapping, and linguistic cognitive generation mere milliseconds structurally away from the client connection, we eradicate the uncanny pause inherent in standard cloud infrastructures.
+                                </p>
+                                <p>
+                                    This proximity to the ingestion point empowers our auditory engine to intelligently replicate the micro-dynamics of human vocal interaction—allowing the AI to autonomously identify user interruption cues, implement conversational back-channeling ("mhmm," "I see"), and instantaneously halt generation threads to process a user's sudden change in topic. This low-latency topology operates harmoniously beneath a layer of incredibly rigid secure enclaves. Because ClerkTree handles highly sensitive data, every enterprise deployment initializes isolated Vector Retrieval-Augmented Generation (RAG) pipelines specific to individual architectural tenants.
+                                </p>
+                                <p>
+                                    Our proprietary Omnichannel Routing Layer synthesizes this immense computational velocity. Whether a user initiates contact via high-definition SIP telephony networks, SMS, or async web protocols, the routing matrix translates the interaction into fundamentally universal, stateless JSON representations of context. This generates true spatial continuity for the customer; an AI agent operating over voice telephony intrinsically comprehends the nuance of an email sent by the same user seventy-two hours prior.
+                                </p>
                             </div>
                         </section>
 
-                        <hr className={`border-t ${isDark ? 'border-[#1E2530]' : 'border-[#E5EAF2]'}`} />
+                        <hr className={`border - t ${isDark ? 'border-[#1E2530]' : 'border-[#E5EAF2]'} `} />
 
-                        <section id="proposed-ideas" className="scroll-mt-24 group">
-                            <h2 className={`text-2xl md:text-[28px] font-bold tracking-tight mb-4 flex items-center -ml-6 pl-6 relative ${isDark ? 'text-white' : 'text-[#1C2025]'}`}>
-                                <a href="#proposed-ideas" className={`absolute left-0 opacity-0 group-hover:opacity-100 transition-opacity ${isDark ? 'text-[#338EF7]' : 'text-[#006FEE]'}`}>
+                        <section id="the-clerktree-methodology" className="scroll-mt-24 group">
+                            <h2 className={`text - 2xl md: text - [28px] font - bold tracking - tight mb - 4 flex items - center - ml - 6 pl - 6 relative ${isDark ? 'text-white' : 'text-[#1C2025]'} `}>
+                                <a href="#the-clerktree-methodology" className={`absolute left - 0 opacity - 0 group - hover: opacity - 100 transition - opacity ${isDark ? 'text-[#338EF7]' : 'text-[#006FEE]'} `}>
                                     <Hash className="w-5 h-5 -mt-0.5" />
                                 </a>
-                                4. Proposed Novel Ideas
+                                4. Methodological Approach
                             </h2>
-                            <p className={`text-[16px] leading-7 mb-8 ${isDark ? 'text-[#B2BAC2]' : 'text-slate-700'}`}>
-                                To further differentiate ClerkTree and solidify its unique market position, we should explore integrating the following advanced AI features into our receptionist and operations pipeline:
-                            </p>
+                            <div className={`text - [16px] leading - relaxed space - y - 6 ${isDark ? 'text-[#B2BAC2]' : 'text-slate-700'} `}>
+                                <p>
+                                    ClerkTree differentiates itself fundamentally not simply via technical velocity, but via a methodological commitment to the absolute eradication of technological friction. This is accomplished via a dual-pronged philosophy: maintaining an uncompromising, brutally robust developer extensibility matrix, perfectly obscured by an interface demanding absolute zero technical fluency from business operators.
+                                </p>
+                                <p>
+                                    For the enterprise deployment tier, the ClerkTree Developer API represents unrestricted architectural latitude. Rejecting the inherently brittle nature of closed SaaS logic chains, enterprise engineers are provided hyper-granular controls, capable of injecting complex, arbitrary Python and Typescript logic dynamically into the generation steps of our underlying agents. Telemetry feeds, real-time localized extraction logs, and webhook subscriptions allow large scale networks to operate ClerkTree not simply as an application layer, but as a foundational infrastructure primitive.
+                                </p>
+                                <p>
+                                    In stark juxtaposition, the Onboarding Wizard constitutes our meta-cognition layer aimed solely at the layman business owner. It entirely obfuscates the reality of prompt engineering, schema classification, and context window mapping. Instead, the owner interacts conversationally with an architect AI, detailing their business policies, scheduling paradigms, and brand voice via natural language. The system autonomously translates this narrative into highly optimized system prompts, constructs an invisible topological knowledge map, and structurally tests the logic pathways—effectively birthing a highly competent production agent without the business owner ever perceiving a single technical mechanism. Furthermore, this agent acts dynamically as an analytical sponge; absorbing real-time communications, classifying the severity, urgency, and core topic in milliseconds, and piping highly structured, enriched JSON payloads into existing CRMs with zero intervention.
+                                </p>
+                            </div>
+                        </section>
 
-                            <div className="space-y-8">
-                                <div id="proactive-engagement" className="scroll-mt-24">
-                                    <h4 className={`text-[18px] font-bold tracking-tight mb-2 ${isDark ? 'text-white' : 'text-[#1C2025]'}`}>
-                                        A. Proactive Engagement
+                        <hr className={`border - t ${isDark ? 'border-[#1E2530]' : 'border-[#E5EAF2]'} `} />
+
+                        <section id="autonomous-closed-loop" className="scroll-mt-24 group">
+                            <h2 className={`text - 2xl md: text - [28px] font - bold tracking - tight mb - 4 flex items - center - ml - 6 pl - 6 relative ${isDark ? 'text-white' : 'text-[#1C2025]'} `}>
+                                <a href="#autonomous-closed-loop" className={`absolute left - 0 opacity - 0 group - hover: opacity - 100 transition - opacity ${isDark ? 'text-[#338EF7]' : 'text-[#006FEE]'} `}>
+                                    <Hash className="w-5 h-5 -mt-0.5" />
+                                </a>
+                                5. Autonomous Closed-Loop Future
+                            </h2>
+                            <div className={`text - [16px] leading - relaxed space - y - 6 ${isDark ? 'text-[#B2BAC2]' : 'text-slate-700'} `}>
+                                <p>
+                                    Preserving systemic advantage mandates our aggressive evolution from deterministic interaction towards autonomous, closed-loop operational workflows—a trajectory defined over our immediate 12-24 month operational timeline. The architecture will expand from passively waiting for inquiries into initiating <strong>Proactive Engagement and Rescue</strong> algorithms. If telemetry detects a customer abandoning a highly complex intake form or scheduling process, the engine will autonomously trigger sympathetic outbound SMS or Voice interventions, seamlessly reconstituting the user's abandoned context directly into a conversational interface to achieve conversion finality.
+                                </p>
+                                <div id="multi-agent-collaboration">
+                                    <h4 className={`text - [18px] font - bold tracking - tight mb - 3 mt - 8 ${isDark ? 'text-white' : 'text-[#1C2025]'} `}>
+                                        Multi-Agent Symbiosis & Shadow Analytics
                                     </h4>
-                                    <p className={`text-[16px] leading-7 ${isDark ? 'text-[#B2BAC2]' : 'text-slate-700'}`}>
-                                        Instead of just answering calls, the AI Receptionist can engage proactively. Implement an SMS/Voice fallback that automatically reaches out to customers who abandoned a booking form.
+                                    <p>
+                                        We are actively dissolving the archaic concept of singular monolithic AI processing in favor of distributed, hyper-specialized swarm architectures. As an operational query ingests, a lightweight acoustic/conversational agent acts exclusively as the empathy and routing front door. Should the query necessitate deep legal or policy extraction, it probabilistically spins up and interrogates a secondary "Data Retrieval Micro-Agent" operating purely in the backend, communicating synthetically across sub-cognitive pathways, before translating the ultimate determination back through the vocalization edge interface in real-time.
                                     </p>
-                                </div>
-
-                                <div id="sentiment-routing" className="scroll-mt-24">
-                                    <h4 className={`text-[18px] font-bold tracking-tight mb-2 ${isDark ? 'text-white' : 'text-[#1C2025]'}`}>
-                                        B. Empathy-Driven Sentiment Routing
-                                    </h4>
-                                    <p className={`text-[16px] leading-7 ${isDark ? 'text-[#B2BAC2]' : 'text-slate-700'}`}>
-                                        ClerkTree already analyzes sentiment post-call. We should integrate real-time emotion/sentiment detection during voice calls (via acoustic and linguistic cues).
-                                    </p>
-                                </div>
-
-                                <div id="action-integrations" className="scroll-mt-24">
-                                    <h4 className={`text-[18px] font-bold tracking-tight mb-2 ${isDark ? 'text-white' : 'text-[#1C2025]'}`}>
-                                        C. Action Integrations
-                                    </h4>
-                                    <p className={`text-[16px] leading-7 ${isDark ? 'text-[#B2BAC2]' : 'text-slate-700'}`}>
-                                        Go beyond just syncing with a calendar or CRM. Enable "Action Hooks" in our Edge Functions where the AI Receptionist can securely process payments.
-                                    </p>
-                                </div>
-
-                                <div id="shadow-mode" className="scroll-mt-24">
-                                    <h4 className={`text-[18px] font-bold tracking-tight mb-2 ${isDark ? 'text-white' : 'text-[#1C2025]'}`}>
-                                        D. Shadow Mode Learning Algorithm
-                                    </h4>
-                                    <p className={`text-[16px] leading-7 ${isDark ? 'text-[#B2BAC2]' : 'text-slate-700'}`}>
-                                        For claims and legal operations, implement a "Shadow Mode." The AI runs silently alongside human workers, predicting the human's classification or decision on documents.
-                                    </p>
-                                </div>
-
-                                <div id="multi-agent" className="scroll-mt-24">
-                                    <h4 className={`text-[18px] font-bold tracking-tight mb-2 ${isDark ? 'text-white' : 'text-[#1C2025]'}`}>
-                                        E. Multi-Agent Collaboration
-                                    </h4>
-                                    <p className={`text-[16px] leading-7 ${isDark ? 'text-[#B2BAC2]' : 'text-slate-700'}`}>
-                                        Create specialized micro-agents forming a swarm architecture. The primitive "Receptionist Agent" answers the phone and qualifies the lead, then seamlessly transfers the context to a hyper-specialized "Booking Agent".
-                                    </p>
-                                </div>
-
-                                <div id="voice-cloning" className="scroll-mt-24">
-                                    <h4 className={`text-[18px] font-bold tracking-tight mb-2 ${isDark ? 'text-white' : 'text-[#1C2025]'}`}>
-                                        F. Hyper-Local Voice Cloning
-                                    </h4>
-                                    <p className={`text-[16px] leading-7 ${isDark ? 'text-[#B2BAC2]' : 'text-slate-700'}`}>
-                                        Since ClerkTree targets local operations, allow business owners to lightly clone their own voice to preserve the deeply personal "local" touch.
+                                    <p className="mt-4">
+                                        Critically, for stringent sectors like legal underwriting or dense claims calculation, we will deploy these capabilities initially strictly beneath a <strong>"Shadow Mode" Algorithm</strong>. The intelligence framework operates concurrently alongside human professionals, silently scoring its generative logic against the eventual human conclusion. Management interfaces subsequently render quantifiable statistical proofs—demonstrating phenomenally high accuracy congruence over thousands of parallel instances—before stakeholders consciously authorize full autonomous execution rights. Ultimately, synthesized with predictive regional scaling models and localized voice-cloning capabilities, ClerkTree will definitively merge the massive computational leverage of advanced AI networks with the deeply empathetic, hyper-specific nuance of localized human commerce.
                                     </p>
                                 </div>
                             </div>
@@ -432,43 +352,43 @@ export default function WhitePaper() {
                     </div>
 
                     {/* Pagination / Next Steps Base UI Style */}
-                    <div className={`mt-20 flex gap-4 ${isDark ? 'text-[#338EF7]' : 'text-[#006FEE]'}`}>
-                        <a href="#" className={`flex-1 p-4 rounded-xl border transition-colors flex flex-col items-start ${isDark ? 'border-[#1E2530] hover:border-[#338EF7] hover:bg-[#11141C]' : 'border-[#E5EAF2] hover:border-[#006FEE] hover:bg-slate-50'
-                            }`}>
-                            <span className={`text-[13px] font-medium mb-1 ${isDark ? 'text-[#B2BAC2]' : 'text-slate-500'}`}>Previous</span>
+                    <div className={`mt - 20 flex gap - 4 ${isDark ? 'text-[#338EF7]' : 'text-[#006FEE]'} `}>
+                        <a href="#" className={`flex - 1 p - 4 rounded - xl border transition - colors flex flex - col items - start ${isDark ? 'border-[#1E2530] hover:border-[#338EF7] hover:bg-[#11141C]' : 'border-[#E5EAF2] hover:border-[#006FEE] hover:bg-slate-50'
+                            } `}>
+                            <span className={`text - [13px] font - medium mb - 1 ${isDark ? 'text-[#B2BAC2]' : 'text-slate-500'} `}>Previous</span>
                             <span className="font-semibold">Dashboard Views</span>
                         </a>
-                        <a href="#" className={`flex-1 p-4 rounded-xl border transition-colors flex flex-col items-end text-right justify-between ${isDark ? 'border-[#1E2530] hover:border-[#338EF7] hover:bg-[#11141C]' : 'border-[#E5EAF2] hover:border-[#006FEE] hover:bg-slate-50'
-                            }`}>
-                            <span className={`text-[13px] font-medium mb-1 ${isDark ? 'text-[#B2BAC2]' : 'text-slate-500'}`}>Next</span>
+                        <a href="#" className={`flex - 1 p - 4 rounded - xl border transition - colors flex flex - col items - end text - right justify - between ${isDark ? 'border-[#1E2530] hover:border-[#338EF7] hover:bg-[#11141C]' : 'border-[#E5EAF2] hover:border-[#006FEE] hover:bg-slate-50'
+                            } `}>
+                            <span className={`text - [13px] font - medium mb - 1 ${isDark ? 'text-[#B2BAC2]' : 'text-slate-500'} `}>Next</span>
                             <span className="font-semibold">Get Started</span>
                         </a>
                     </div>
                 </main>
 
                 {/* Right Table of Contents (Desktop) */}
-                <aside className={`hidden xl:block w-[240px] sticky top-14 h-[calc(100vh-3.5rem)] px-2 ${isDark ? 'text-[#B2BAC2]' : 'text-[#434D5B]'}`}>
+                <aside className={`hidden xl:block w - [240px] sticky top - 14 h - [calc(100vh - 3.5rem)] px - 2 ${isDark ? 'text-[#B2BAC2]' : 'text-[#434D5B]'} `}>
                     <ScrollArea.Root className="w-full h-full overflow-hidden">
                         <ScrollArea.Viewport className="w-full h-full outline-none pt-10 pb-20 px-4">
-                            <h4 className={`text-[12px] font-bold uppercase tracking-widest mb-3 ${isDark ? 'text-white' : 'text-[#1C2025]'}`}>On this page</h4>
+                            <h4 className={`text - [12px] font - bold uppercase tracking - widest mb - 3 ${isDark ? 'text-white' : 'text-[#1C2025]'} `}>On this page</h4>
                             <ul className="space-y-0.5 border-l-[1px] relative">
                                 {/* Active line indicator */}
-                                <div className={`absolute left-[-1px] transition-all duration-300 w-[1px] ${isDark ? 'bg-[#338EF7]' : 'bg-[#006FEE]'}`}
+                                <div className={`absolute left - [-1px] transition - all duration - 300 w - [1px] ${isDark ? 'bg-[#338EF7]' : 'bg-[#006FEE]'} `}
                                     style={{
-                                        top: `${Math.max(0, flatSections.findIndex(s => s.id === activeSection) * 26)}px`,
+                                        top: `${Math.max(0, flatSections.findIndex(s => s.id === activeSection) * 26)} px`,
                                         height: '24px'
                                     }}
                                 />
                                 {flatSections.map((s) => {
                                     const isActive = activeSection === s.id;
                                     return (
-                                        <li key={`toc-${s.id}`} className="min-h-[26px] flex items-center">
+                                        <li key={`toc - ${s.id} `} className="min-h-[26px] flex items-center">
                                             <button
                                                 onClick={() => scrollTo(s.id)}
-                                                className={`text-left w-full pl-4 text-[13px] transition-colors leading-tight ${s.level === 2 ? 'pl-6' : ''} ${isActive
-                                                    ? (isDark ? 'text-[#338EF7] font-medium' : 'text-[#006FEE] font-medium')
-                                                    : (isDark ? 'hover:text-white border-[#1E2530]' : 'hover:text-[#1C2025] border-[#E5EAF2]')
-                                                    }`}
+                                                className={`text - left w - full pl - 4 text - [13px] transition - colors leading - tight ${s.level === 2 ? 'pl-6' : ''} ${isActive
+                                                        ? (isDark ? 'text-[#338EF7] font-medium' : 'text-[#006FEE] font-medium')
+                                                        : (isDark ? 'hover:text-white border-[#1E2530]' : 'hover:text-[#1C2025] border-[#E5EAF2]')
+                                                    } `}
                                             >
                                                 {s.title}
                                             </button>
@@ -477,8 +397,8 @@ export default function WhitePaper() {
                                 })}
                             </ul>
                         </ScrollArea.Viewport>
-                        <ScrollArea.Scrollbar orientation="vertical" className={`flex w-2 touch-none select-none border-l p-[1px] transition-all hover:w-2.5 ${isDark ? 'border-[#1E2530]' : 'border-transparent'}`}>
-                            <ScrollArea.Thumb className={`flex-1 rounded-full relative ${isDark ? 'bg-white/20 hover:bg-white/30' : 'bg-black/20 hover:bg-black/30'}`} />
+                        <ScrollArea.Scrollbar orientation="vertical" className={`flex w - 2 touch - none select - none border - l p - [1px] transition - all hover: w - 2.5 ${isDark ? 'border-[#1E2530]' : 'border-transparent'} `}>
+                            <ScrollArea.Thumb className={`flex - 1 rounded - full relative ${isDark ? 'bg-white/20 hover:bg-white/30' : 'bg-black/20 hover:bg-black/30'} `} />
                         </ScrollArea.Scrollbar>
                     </ScrollArea.Root>
                 </aside>
