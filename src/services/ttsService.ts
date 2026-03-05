@@ -185,7 +185,7 @@ class TTSService {
   }
 
   /**
-   * Stop any currently playing audio and cancel queued sentences
+   * Stop any currently playing audio and cancel queued playback
    */
   stop() {
     this.cancelled = true;
@@ -193,44 +193,9 @@ class TTSService {
   }
 
   /**
-   * Split text into speakable sentence chunks.
-   * Splits on sentence-ending punctuation while keeping the punctuation attached.
-   */
-  private splitIntoSentences(text: string): string[] {
-    // Split on sentence boundaries (.!?) followed by space or end of string
-    // Keep short fragments together to avoid tiny TTS calls
-    const raw = text.match(/[^.!?]+[.!?]+[\s]*/g) || [text];
-    const sentences: string[] = [];
-    let buffer = '';
-
-    for (const chunk of raw) {
-      buffer += chunk;
-      // Only split if the buffer is long enough (>20 chars) to avoid tiny fragments
-      if (buffer.trim().length >= 20) {
-        sentences.push(buffer.trim());
-        buffer = '';
-      }
-    }
-    // Push any remaining buffer
-    if (buffer.trim()) {
-      if (sentences.length > 0) {
-        // Attach short trailing fragment to last sentence
-        sentences[sentences.length - 1] += ' ' + buffer.trim();
-      } else {
-        sentences.push(buffer.trim());
-      }
-    }
-
-    return sentences.filter(s => s.length > 0);
-  }
-
-  /**
-   * Speak text using sentence-level streaming for low latency.
-   * Splits the text into sentences, speaks the first one immediately,
-   * and queues the rest to play sequentially.
-   * 
-   * onStart fires when the first sentence starts playing.
-   * onEnd fires when the last sentence finishes.
+   * Speak text using native streaming for lowest latency.
+   * Passes the full text natively to the underlying TTS provider's streaming API
+   * (e.g. ElevenLabs chunked REST API).
    */
   async speakStreaming(
     text: string,
@@ -245,60 +210,15 @@ class TTSService {
       onError?: (error: Error) => void;
     }
   ): Promise<void> {
-    const sentences = this.splitIntoSentences(text);
-
-    if (sentences.length === 0) {
+    if (!text || text.trim().length === 0) {
       options?.onEnd?.();
-      return;
+      return Promise.resolve();
     }
 
-    // If only one sentence, just use normal speak (no overhead)
-    if (sentences.length === 1) {
-      return this.speak(text, options);
-    }
-
-    // Reset cancellation
     this.cancelled = false;
 
-    log.debug(`📝 Sentence streaming: ${sentences.length} chunks`, sentences.map(s => s.substring(0, 40) + '...'));
-
-    let started = false;
-
-    for (let i = 0; i < sentences.length; i++) {
-      if (this.cancelled) {
-        log.debug('⏹️ Sentence streaming cancelled');
-        break;
-      }
-
-      const isFirst = i === 0;
-      const isLast = i === sentences.length - 1;
-      const sentence = sentences[i];
-
-      try {
-        await this.speak(sentence, {
-          ...options,
-          onStart: () => {
-            if (!started) {
-              started = true;
-              options?.onStart?.();
-            }
-          },
-          onEnd: isLast ? options?.onEnd : undefined,
-          onError: undefined, // Handle errors below
-        });
-      } catch (error) {
-        log.error(`❌ Sentence ${i + 1}/${sentences.length} failed:`, error);
-        // Skip this sentence and continue with the next
-        if (isLast) {
-          options?.onEnd?.();
-        }
-      }
-    }
-
-    // If cancelled before any sentence played, still fire onEnd
-    if (this.cancelled && !started) {
-      options?.onEnd?.();
-    }
+    // Directly use native TTS provider streaming instead of custom sentence splitting
+    return this.speak(text, options);
   }
 
   /**
