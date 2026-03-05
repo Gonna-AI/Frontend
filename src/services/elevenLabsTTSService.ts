@@ -106,89 +106,66 @@ class ElevenLabsTTSService {
         const voiceId = options?.voiceId || DEFAULT_VOICE_ID;
         const formattedText = this.formatTextForTTS(text);
 
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 30000);
-
         try {
             log.debug('🔊 ElevenLabs TTS: synthesizing', formattedText.length, 'chars...');
-
-            // Use the Netlify streaming proxy for lowest latency
-            const response = await fetch('/api/elevenlabs-tts-stream', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    text: formattedText,
-                    voiceId,
-                }),
-                signal: controller.signal,
+            
+            // Build the URL for the GET request
+            const params = new URLSearchParams({
+                text: formattedText,
+                voiceId: voiceId
             });
-
-            clearTimeout(timeoutId);
-
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => ({}));
-                throw new Error(`ElevenLabs TTS error: ${response.status} - ${JSON.stringify(errorData)}`);
-            }
-
-            const audioBlob = await response.blob();
-            log.debug('🔊 ElevenLabs audio received:', audioBlob.size, 'bytes');
-
-            await this.playWithWebAudio(audioBlob, options);
+            const streamUrl = `/api/elevenlabs-tts-stream?${params.toString()}`;
+            
+            // We use direct HTML Audio streaming to get immediate playback
+            await this.playStreamingAudio(streamUrl, options);
 
         } catch (error) {
-            clearTimeout(timeoutId);
-            if ((error as Error).name === 'AbortError') {
-                log.error('ElevenLabs TTS timeout after 30 seconds');
-                options?.onError?.(new Error('ElevenLabs TTS request timed out'));
-            } else {
-                log.error('ElevenLabs TTS error:', error);
-                options?.onError?.(error as Error);
-            }
+            log.error('ElevenLabs TTS error:', error);
+            options?.onError?.(error as Error);
             throw error;
         }
     }
 
     /**
-     * Play audio using Web Audio API (more reliable on iOS)
+     * Play audio directly via an HTMLAudioElement stream for zero latency
      */
-    private async playWithWebAudio(audioBlob: Blob, options?: ElevenLabsTTSOptions): Promise<void> {
-        // Ensure AudioContext is initialized
-        await this.initAudioContext();
-
-        if (!this.audioContext) {
-            throw new Error('AudioContext not available');
-        }
-
-        // Decode the audio data
-        const arrayBuffer = await audioBlob.arrayBuffer();
-        const audioBuffer = await this.audioContext.decodeAudioData(arrayBuffer);
-
-        log.debug('🔊 ElevenLabs audio decoded, playing...');
-
+    private async playStreamingAudio(streamUrl: string, options?: ElevenLabsTTSOptions): Promise<void> {
         return new Promise((resolve, reject) => {
-            if (!this.audioContext) {
-                reject(new Error('AudioContext not available'));
-                return;
-            }
+            const audio = new Audio();
+            audio.setAttribute('playsinline', 'true');
+            audio.setAttribute('webkit-playsinline', 'true');
+            audio.crossOrigin = 'anonymous';
+            audio.src = streamUrl;
 
-            const source = this.audioContext.createBufferSource();
-            source.buffer = audioBuffer;
-            source.connect(this.audioContext.destination);
+            // Trigger load to begin buffering the stream immediately
+            audio.load();
 
-            // Store reference so stop() can halt it
-            this.currentSource = source;
+            audio.onplay = () => {
+                log.debug('✅ ElevenLabs streaming playback started');
+                options?.onStart?.();
+            };
 
-            source.onended = () => {
-                log.debug('✅ ElevenLabs playback complete');
-                this.currentSource = null;
+            audio.onended = () => {
+                log.debug('✅ ElevenLabs streaming playback complete');
                 options?.onEnd?.();
                 resolve();
             };
 
-            options?.onStart?.();
-            source.start(0);
+            audio.onerror = (e) => {
+                log.error('❌ ElevenLabs streaming audio error:', e);
+                options?.onError?.(new Error('Audio streaming failed'));
+                reject(new Error('Audio streaming failed'));
+            };
 
-            log.debug('✅ ElevenLabs playback started');
+            // Play as soon as enough data is buffered
+            const playPromise = audio.play();
+            if (playPromise !== undefined) {
+                playPromise.catch(e => {
+                    log.error('❌ ElevenLabs audio play() failed:', e);
+                    options?.onError?.(e);
+                    reject(e);
+                });
+            }
         });
     }
 }

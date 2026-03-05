@@ -7,7 +7,9 @@ import type { Context, Config } from "@netlify/functions";
  * Returns chunked audio directly to the client for low-latency playback.
  */
 export default async (req: Request, _context: Context) => {
-  if (req.method !== "POST") {
+  const url = new URL(req.url);
+  
+  if (req.method !== "GET" && req.method !== "POST") {
     return new Response(JSON.stringify({ error: "Method not allowed" }), {
       status: 405,
       headers: { "Content-Type": "application/json" },
@@ -28,13 +30,20 @@ export default async (req: Request, _context: Context) => {
   }
 
   try {
-    const body = await req.json();
-    const {
-      text,
-      voiceId = "cgSgspJ2msm6clMCkdW9", // Jessica default
-      modelId = "eleven_flash_v2_5",
-      outputFormat = "mp3_22050_32",
-    } = body;
+    let text, voiceId, modelId, outputFormat;
+    
+    if (req.method === "POST") {
+      const body = await req.json();
+      text = body.text;
+      voiceId = body.voiceId || "cgSgspJ2msm6clMCkdW9";
+      modelId = body.modelId || "eleven_flash_v2_5";
+      outputFormat = body.outputFormat || "mp3_22050_32";
+    } else {
+      text = url.searchParams.get("text");
+      voiceId = url.searchParams.get("voiceId") || "cgSgspJ2msm6clMCkdW9";
+      modelId = url.searchParams.get("modelId") || "eleven_flash_v2_5";
+      outputFormat = url.searchParams.get("outputFormat") || "mp3_22050_32";
+    }
 
     if (!text?.trim()) {
       return new Response(
