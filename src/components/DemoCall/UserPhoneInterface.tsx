@@ -5,6 +5,8 @@ import { cn } from '../../utils/cn';
 import { useDemoCall } from '../../contexts/DemoCallContext';
 import { aiService } from '../../services/aiService';
 import { ttsService, TTSLanguage, TTS_LANGUAGES } from '../../services/ttsService';
+import { getGroqSettings, type VoiceProviderType } from './GroqSettings';
+import { elevenlabsConversationService } from '../../services/elevenlabsConversationService';
 
 interface UserPhoneInterfaceProps {
     isDark?: boolean;
@@ -57,6 +59,9 @@ export default function UserPhoneInterface({
     const [language, setLanguage] = useState<TTSLanguage>('en');
     const [isMinimized, setIsMinimized] = useState(false);
     const [isEnding, setIsEnding] = useState(false);
+    const [voiceProvider, setVoiceProvider] = useState<VoiceProviderType>(() => getGroqSettings().voiceProvider);
+    const isElevenLabsMode = voiceProvider === 'elevenlabs';
+    const elevenLabsActiveRef = useRef(false);
 
     const recognitionRef = useRef<SpeechRecognitionInstance | null>(null);
     const timerRef = useRef<NodeJS.Timeout | null>(null);
@@ -76,10 +81,26 @@ export default function UserPhoneInterface({
     const messages = currentCall?.messages || [];
     const extractedFields = currentCall?.extractedFields || [];
 
-    // Initialize AI service with knowledge base
+    // Initialize AI service with knowledge base and sync voice provider
     useEffect(() => {
         aiService.setKnowledgeBase(knowledgeBase);
     }, [knowledgeBase]);
+
+    // Sync voice provider from settings changes
+    useEffect(() => {
+        const handleSettingsChange = (e: Event) => {
+            const detail = (e as CustomEvent).detail;
+            if (detail?.voiceProvider) {
+                setVoiceProvider(detail.voiceProvider);
+                ttsService.setVoiceProvider(detail.voiceProvider);
+            }
+        };
+        window.addEventListener('groq-settings-updated', handleSettingsChange);
+        // Sync on mount
+        const settings = getGroqSettings();
+        ttsService.setVoiceProvider(settings.voiceProvider);
+        return () => window.removeEventListener('groq-settings-updated', handleSettingsChange);
+    }, []);
 
     // Timer for call duration
     useEffect(() => {
@@ -398,6 +419,60 @@ export default function UserPhoneInterface({
 
         startCall('voice');
 
+        //
+        // === ElevenLabs Conversational AI Mode ===
+        //
+        if (isElevenLabsMode) {
+            console.log('📞 Starting ElevenLabs Conversational AI session...');
+            setAgentStatus('processing');
+            setLastAgentMessage('Connecting to AI agent...');
+
+            try {
+                await elevenlabsConversationService.startSession({
+                    onConnect: () => {
+                        console.log('📞 ElevenLabs connected');
+                        elevenLabsActiveRef.current = true;
+                        setAgentStatus('listening');
+                        setLastAgentMessage('Connected — speak now!');
+                    },
+                    onDisconnect: () => {
+                        console.log('📞 ElevenLabs disconnected');
+                        elevenLabsActiveRef.current = false;
+                        setAgentStatus('idle');
+                    },
+                    onMessage: (message) => {
+                        if (message.source === 'ai') {
+                            addMessage('agent', message.message);
+                            setLastAgentMessage(message.message);
+                            onTranscript?.(message.message, 'agent');
+                        } else if (message.source === 'user') {
+                            addMessage('user', message.message);
+                            onTranscript?.(message.message, 'user');
+                        }
+                    },
+                    onError: (error) => {
+                        console.error('📞 ElevenLabs error:', error);
+                        setLastAgentMessage('Connection error — please try again');
+                    },
+                    onModeChange: (mode) => {
+                        if (mode.mode === 'speaking') {
+                            setAgentStatus('speaking');
+                        } else if (mode.mode === 'listening') {
+                            setAgentStatus('listening');
+                        }
+                    },
+                });
+            } catch (error) {
+                console.error('📞 Failed to start ElevenLabs session:', error);
+                setLastAgentMessage('Failed to connect to AI agent');
+                setAgentStatus('idle');
+            }
+            return;
+        }
+
+        //
+        // === DeAPI Mode (Browser STT → Groq LLM → DeAPI/Groq TTS) ===
+        //
         // Speak a greeting based on selected language
         const greeting = language === 'de'
             ? 'Hallo! Wie kann ich Ihnen helfen?'
@@ -417,7 +492,7 @@ export default function UserPhoneInterface({
             return;
         }
 
-        // Use TTS for the greeting (Groq for English, ElevenLabs for German)
+        // Use TTS for the greeting
         try {
             // Get selected voice
             const selectedVoice = ttsService.resolveOrpheusVoiceId(knowledgeBase.selectedVoiceId);
@@ -445,7 +520,7 @@ export default function UserPhoneInterface({
             setAgentStatus('listening');
             startRecognition();
         }
-    }, [startCall, startRecognition, language, addMessage]);
+    }, [startCall, startRecognition, language, addMessage, isElevenLabsMode, onTranscript]);
 
     // Auto-start call when autoStart prop is true (fullscreen mode)
     const autoStartRef = useRef(false);
@@ -463,6 +538,12 @@ export default function UserPhoneInterface({
     const handleEndCall = useCallback(async () => {
         console.log('🔴 End call button pressed');
         setIsEnding(true);
+
+        // Stop ElevenLabs session if active
+        if (elevenLabsActiveRef.current) {
+            await elevenlabsConversationService.endSession();
+            elevenLabsActiveRef.current = false;
+        }
 
         // Stop all TTS immediately
         ttsService.stop();

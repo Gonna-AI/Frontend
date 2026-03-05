@@ -4,7 +4,8 @@ import {
     Zap,
     Check,
     AlertCircle,
-    Loader2
+    Loader2,
+    Phone
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { supabase } from '../../config/supabase';
@@ -50,6 +51,24 @@ export const GROQ_MODELS = [
     }
 ];
 
+// Available voice providers for the /call endpoint
+export const VOICE_PROVIDERS = [
+    {
+        id: 'deapi' as const,
+        name: 'DeAPI (Qwen3 TTS)',
+        description: 'Uses browser speech recognition + Groq AI + DeAPI text-to-speech',
+        features: ['Custom voices', 'Multi-language', 'Low latency'],
+    },
+    {
+        id: 'elevenlabs' as const,
+        name: 'ElevenLabs Conversational AI',
+        description: 'Full AI agent — handles speech recognition, AI reasoning, and voice synthesis',
+        features: ['End-to-end AI', 'Natural turn-taking', '32+ languages'],
+    },
+];
+
+export type VoiceProviderType = 'deapi' | 'elevenlabs';
+
 export interface GroqSettings {
     model: string;
     temperature: number;
@@ -58,6 +77,7 @@ export interface GroqSettings {
     frequencyPenalty: number;
     presencePenalty: number;
     systemPromptEnabled: boolean;
+    voiceProvider: VoiceProviderType;
 }
 
 const DEFAULT_SETTINGS: GroqSettings = {
@@ -67,7 +87,8 @@ const DEFAULT_SETTINGS: GroqSettings = {
     topP: 1.0,
     frequencyPenalty: 0,
     presencePenalty: 0,
-    systemPromptEnabled: true
+    systemPromptEnabled: true,
+    voiceProvider: 'deapi',
 };
 
 const STORAGE_KEY_PREFIX = 'clerktree_groq_settings_';
@@ -303,6 +324,70 @@ export default function GroqSettingsPage({ isDark = true, onSettingsChange }: Gr
                                 )}
                             />
                         </div>
+                    </div>
+                </div>
+
+                {/* Voice Provider Selection Card */}
+                <div className={cn(
+                    "p-6 rounded-xl border md:col-span-2",
+                    isDark ? "bg-[#09090B] border-white/10 text-white" : "bg-white border-black/10 text-black"
+                )}>
+                    <div className="flex items-center gap-3 mb-1">
+                        <Phone className={cn("w-5 h-5", isDark ? "text-emerald-400" : "text-emerald-600")} />
+                        <h3 className={cn("text-lg font-semibold", isDark ? "text-white" : "text-black")}>
+                            Voice Call Provider
+                        </h3>
+                    </div>
+                    <p className={cn("text-sm mb-6", isDark ? "text-white/40" : "text-black/40")}>
+                        Choose the AI model that powers voice calls on /call
+                    </p>
+
+                    <div className="grid md:grid-cols-2 gap-4">
+                        {VOICE_PROVIDERS.map((provider) => (
+                            <button
+                                key={provider.id}
+                                onClick={() => saveSettings({ ...settings, voiceProvider: provider.id })}
+                                className={cn(
+                                    "w-full text-left rounded-lg transition-all p-5 border",
+                                    settings.voiceProvider === provider.id
+                                        ? isDark
+                                            ? "bg-emerald-500/10 border-emerald-500/30 ring-1 ring-emerald-500/30"
+                                            : "bg-emerald-50 border-emerald-200 ring-1 ring-emerald-500/20"
+                                        : isDark
+                                            ? "bg-transparent border-white/5 hover:bg-white/5 hover:border-white/10"
+                                            : "bg-transparent border-black/5 hover:bg-black/5 hover:border-black/10"
+                                )}
+                            >
+                                <div className="flex items-center justify-between mb-2">
+                                    <span className={cn("font-semibold", isDark ? "text-white" : "text-black")}>
+                                        {provider.name}
+                                    </span>
+                                    {settings.voiceProvider === provider.id && (
+                                        <div className="bg-emerald-500/20 rounded-full p-0.5">
+                                            <Check className={cn("w-3 h-3", isDark ? "text-emerald-400" : "text-emerald-600")} />
+                                        </div>
+                                    )}
+                                </div>
+                                <p className={cn("text-xs opacity-60 mb-3", isDark ? "text-white" : "text-black")}>
+                                    {provider.description}
+                                </p>
+                                <div className="flex flex-wrap gap-1.5">
+                                    {provider.features.map((f) => (
+                                        <span
+                                            key={f}
+                                            className={cn(
+                                                "text-[10px] px-2 py-0.5 rounded-full font-medium",
+                                                settings.voiceProvider === provider.id
+                                                    ? isDark ? "bg-emerald-500/20 text-emerald-300" : "bg-emerald-100 text-emerald-700"
+                                                    : isDark ? "bg-white/5 text-white/40" : "bg-black/5 text-black/40"
+                                            )}
+                                        >
+                                            {f}
+                                        </span>
+                                    ))}
+                                </div>
+                            </button>
+                        ))}
                     </div>
                 </div>
             </div>

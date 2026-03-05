@@ -10,6 +10,7 @@
 
 import { groqTTSService, OrpheusVoiceId, ORPHEUS_VOICES, VocalDirection } from './groqTTSService';
 import { elevenLabsTTSService } from './elevenLabsTTSService';
+import { deapiTTSService, DeAPIVoiceId } from './deapiTTSService';
 import { normalizeVoiceId } from '../config/voiceConfig';
 
 // Supported languages
@@ -24,7 +25,10 @@ export const TTS_LANGUAGES = {
 export type { OrpheusVoiceId, VocalDirection };
 export { ORPHEUS_VOICES };
 
-type TTSBackend = 'groq' | 'elevenlabs' | 'browser';
+type TTSBackend = 'groq' | 'elevenlabs' | 'deapi' | 'browser';
+
+// Voice provider for the /call endpoint (selected in dashboard)
+export type VoiceProvider = 'deapi' | 'elevenlabs';
 
 interface TTSConfig {
   preferredBackend: TTSBackend;
@@ -33,6 +37,8 @@ interface TTSConfig {
   defaultOrpheusVoice: OrpheusVoiceId;
   speed: number;
   vocalDirection: VocalDirection;
+  voiceProvider: VoiceProvider;
+  deapiVoice: DeAPIVoiceId;
 }
 
 import log from '../utils/logger';
@@ -46,6 +52,8 @@ class TTSService {
     speed: 1.0,
     vocalDirection: 'professional',
     language: 'en',
+    voiceProvider: 'deapi',
+    deapiVoice: 'Vivian',
   };
 
   private groqAvailable: boolean | null = null;
@@ -145,11 +153,33 @@ class TTSService {
   }
 
   /**
+   * Get/set the voice provider for the /call endpoint
+   */
+  getVoiceProvider(): VoiceProvider {
+    return this.config.voiceProvider;
+  }
+
+  setVoiceProvider(provider: VoiceProvider) {
+    this.config.voiceProvider = provider;
+    log.debug(`🔊 Voice provider set to: ${provider}`);
+  }
+
+  setDeAPIVoice(voice: DeAPIVoiceId) {
+    this.config.deapiVoice = voice;
+  }
+
+  getDeAPIVoice(): DeAPIVoiceId {
+    return this.config.deapiVoice;
+  }
+
+  /**
    * Stop any currently playing audio
    */
   stop() {
     // Stop Groq TTS
     groqTTSService.stop();
+    // Stop DeAPI TTS
+    deapiTTSService.stop();
   }
 
   /**
@@ -204,6 +234,26 @@ class TTSService {
         options?.onError?.(error as Error);
         options?.onEnd?.();
         return;
+      }
+    }
+
+    // Check if DeAPI is the selected voice provider
+    if (this.config.voiceProvider === 'deapi') {
+      try {
+        log.debug('🎤 Using DeAPI TTS...');
+        await deapiTTSService.speak(text, {
+          voice: this.config.deapiVoice,
+          speed,
+          lang: language === 'de' ? 'German' : 'English',
+          onStart: options?.onStart,
+          onEnd: options?.onEnd,
+          onError: options?.onError,
+        });
+        this.currentBackend = 'deapi';
+        return;
+      } catch (error) {
+        log.error('❌ DeAPI TTS failed, falling back to Groq:', error);
+        // Fall through to Groq TTS as fallback
       }
     }
 
