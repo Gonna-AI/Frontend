@@ -12,10 +12,10 @@ export default async (req: Request, _context: Context) => {
     });
   }
 
-  const apiKey = Netlify.env.get("DEAPI_API_KEY");
+  const apiKey = Netlify.env.get("VITE_DEAPI_API_KEY") || Netlify.env.get("DEAPI_API_KEY") || process.env.VITE_DEAPI_API_KEY || process.env.DEAPI_API_KEY;
   if (!apiKey) {
     return new Response(
-      JSON.stringify({ error: "DEAPI_API_KEY not configured" }),
+      JSON.stringify({ error: "DEAPI_API_KEY or VITE_DEAPI_API_KEY not configured" }),
       { status: 500, headers: { "Content-Type": "application/json" } }
     );
   }

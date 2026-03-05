@@ -187,7 +187,11 @@ class TTSService {
    * This is required by browser autoplay policies
    */
   async unlockAudio(): Promise<void> {
-    await groqTTSService.unlockAudio();
+    await Promise.all([
+      groqTTSService.unlockAudio(),
+      deapiTTSService.initAudioContext(),
+      elevenLabsTTSService.initAudioContext()
+    ]);
   }
 
   /**
