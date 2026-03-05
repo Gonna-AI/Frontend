@@ -5,8 +5,7 @@
  * Supports German (Chris Norddeutscher) and English (Jessica) voices.
  */
 
-// ElevenLabs API Configuration
-import { proxyBlob, ProxyRoutes } from './proxyClient';
+// ElevenLabs TTS — uses Netlify streaming proxy at /api/elevenlabs-tts-stream
 
 // Default voice IDs from the ElevenLabs account
 const GERMAN_VOICE_ID = 'j46AY0iVY3oHcnZbgEJg';  // Chris Norddeutscher
@@ -97,71 +96,43 @@ class ElevenLabsTTSService {
     }
 
     /**
-     * Speak text using ElevenLabs TTS (German) with streaming for low latency
+     * Speak text using ElevenLabs TTS with low-latency streaming
      */
     async speak(text: string, options?: ElevenLabsTTSOptions): Promise<void> {
         if (!text.trim()) {
             return;
         }
 
-
-
         const voiceId = options?.voiceId || DEFAULT_VOICE_ID;
-
-        // Format text for better pronunciation
         const formattedText = this.formatTextForTTS(text);
 
-        // AbortController for timeout
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+        const timeoutId = setTimeout(() => controller.abort(), 30000);
 
         try {
-            log.debug('🇩🇪 Synthesizing German speech with ElevenLabs TTS...');
-            log.debug('   Text length:', formattedText.length, 'chars');
+            log.debug('🔊 ElevenLabs TTS: synthesizing', formattedText.length, 'chars...');
 
-            // Use streaming endpoint with latency optimization
-            // optimize_streaming_latency: 3 = max latency optimization
-            // output_format: mp3_22050_32 = smaller file, faster transfer
-            // Use streaming endpoint with latency optimization
-            // optimize_streaming_latency: 3 = max latency optimization
-            // output_format: mp3_22050_32 = smaller file, faster transfer
-
-            /*
-            const url = new URL(`${ELEVENLABS_TTS_URL}/${voiceId}/stream`);
-            url.searchParams.set('optimize_streaming_latency', '3');
-            url.searchParams.set('output_format', 'mp3_22050_32');
-            */
-
-            const audioBlob = await proxyBlob(ProxyRoutes.TTS_ALT, {
-                text: formattedText,
-                voiceId: voiceId,
-                model_id: 'eleven_flash_v2_5', // Fastest model with good quality
-                optimize_streaming_latency: '3',
-                output_format: 'mp3_22050_32',
-                voice_settings: {
-                    stability: 0.5,
-                    similarity_boost: 0.75,
-                    style: 0.0,
-                    use_speaker_boost: true
-                }
-            }, { signal: controller.signal });
+            // Use the Netlify streaming proxy for lowest latency
+            const response = await fetch('/api/elevenlabs-tts-stream', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    text: formattedText,
+                    voiceId,
+                }),
+                signal: controller.signal,
+            });
 
             clearTimeout(timeoutId);
 
-            /*
             if (!response.ok) {
-                const errorText = await response.text();
-                throw new Error(`ElevenLabs API error: ${response.status} - ${errorText}`);
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(`ElevenLabs TTS error: ${response.status} - ${JSON.stringify(errorData)}`);
             }
-            */
 
-            log.debug('🇩🇪 ElevenLabs response received, processing audio...');
+            const audioBlob = await response.blob();
+            log.debug('🔊 ElevenLabs audio received:', audioBlob.size, 'bytes');
 
-            // Audio blob is already returned by proxyBlob
-            // const audioBlob = await response.blob(); 
-            log.debug('🇩🇪 Audio blob size:', audioBlob.size, 'bytes');
-
-            // Use Web Audio API for playback (more reliable on mobile)
             await this.playWithWebAudio(audioBlob, options);
 
         } catch (error) {

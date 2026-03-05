@@ -343,7 +343,7 @@ export default function UserPhoneInterface({
         // Stop recognition before speaking to avoid conflicts
         stopRecognition();
 
-        return ttsService.speak(text, {
+        return ttsService.speakStreaming(text, {
             orpheusVoice: selectedVoice,
             speed: 1.0,
             language, // Use selected language (en = Groq, de = ElevenLabs)
