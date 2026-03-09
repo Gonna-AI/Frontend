@@ -439,11 +439,11 @@ export default function MonitorView({ isDark = true }: { isDark?: boolean }) {
                                 isDark ? "border-white/10 hover:bg-white/5 text-white/80" : "border-black/10 hover:bg-gray-50 text-gray-700"
                             )}
                         >
-                            <option value="all">{t('monitor.filter.allPriorities')}</option>
-                            <option value="critical">{t('monitor.filter.critical')}</option>
-                            <option value="high">{t('monitor.filter.high')}</option>
-                            <option value="medium">{t('monitor.filter.medium')}</option>
-                            <option value="low">{t('monitor.filter.low')}</option>
+                            <option value="all">{t('history.filter.allPriorities')}</option>
+                            <option value="critical">{t('dashboard.priority.critical')}</option>
+                            <option value="high">{t('dashboard.priority.high')}</option>
+                            <option value="medium">{t('dashboard.priority.medium')}</option>
+                            <option value="low">{t('dashboard.priority.low')}</option>
                         </select>
                     </div>
                 </div>
@@ -559,17 +559,17 @@ export default function MonitorView({ isDark = true }: { isDark?: boolean }) {
                                                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                                                     <div>
                                                                         <h4 className={cn("text-xs font-semibold uppercase tracking-wider mb-2 flex items-center gap-1.5", isDark ? "text-white/40" : "text-black/40")}>
-                                                                            {t('monitor.detail.summary')}
+                                                                            {t('history.intent')}
                                                                         </h4>
                                                                         <div className={cn("p-4 rounded-xl border", isDark ? "border-white/10 bg-black/20" : "border-black/5 bg-white")}>
                                                                             <p className={cn("text-sm leading-relaxed", isDark ? "text-white/80" : "text-gray-700")}>
-                                                                                {call.summary.summaryText || t('monitor.detail.noSummary')}
+                                                                                {call.summary.summaryText || t('history.noTranscript')}
                                                                             </p>
                                                                         </div>
                                                                     </div>
                                                                     {call.extractedFields.length > 0 && (
                                                                         <div>
-                                                                            <h4 className={cn("text-xs font-semibold uppercase tracking-wider mb-2", isDark ? "text-white/40" : "text-black/40")}>{t('monitor.detail.extractedData')}</h4>
+                                                                            <h4 className={cn("text-xs font-semibold uppercase tracking-wider mb-2", isDark ? "text-white/40" : "text-black/40")}>{t('history.extractedInfo')}</h4>
                                                                             <div className={cn("rounded-xl border border-white/10", isDark ? "bg-black/20" : "bg-white")}>
                                                                                 <div className="space-y-1 p-3">
                                                                                     {call.extractedFields.map(field => (
