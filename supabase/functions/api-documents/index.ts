@@ -10,104 +10,31 @@ const corsBaseHeaders = {
 const DEFAULT_ALLOWED_ORIGINS = new Set<string>([
   'https://clerktree.com',
   'https://www.clerktree.com',
+  'https://clerktree.netlify.app',
   'http://localhost:5173',
   'http://127.0.0.1:5173',
 ]);
 
-const EXTRA_ALLOWED_ORIGINS = (Deno.env.get('ALLOWED_ORIGINS') ?? '')
-  .split(',')
-  .map((o) => o.trim())
-  .filter(Boolean);
-
-for (const origin of EXTRA_ALLOWED_ORIGINS) {
-  DEFAULT_ALLOWED_ORIGINS.add(origin);
-}
-
 function getCorsHeaders(req: Request) {
-  const origin = req.headers.get('origin') ?? '';
-  const headers: Record<string, string> = { ...corsBaseHeaders };
-  if (DEFAULT_ALLOWED_ORIGINS.has(origin)) {
-    headers['Access-Control-Allow-Origin'] = origin;
-  }
-  return headers;
+  const origin = req.headers.get('origin');
+  const allowedOrigin = origin && DEFAULT_ALLOWED_ORIGINS.has(origin)
+    ? origin
+    : 'https://clerktree.com';
+  return {
+    ...corsBaseHeaders,
+    'Access-Control-Allow-Origin': allowedOrigin,
+  };
 }
 
-function jsonResponse(data: unknown, status = 200, req?: Request) {
+function jsonResponse(data: unknown, status: number, corsHeaders: Record<string, string>) {
   return new Response(JSON.stringify(data), {
     status,
-    headers: {
-      'Content-Type': 'application/json',
-      ...(req ? getCorsHeaders(req) : corsBaseHeaders),
-    },
+    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
   });
 }
 
-function getSupabaseClients(req: Request) {
-  const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-  const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-  const authHeader = req.headers.get('Authorization') ?? '';
-
-  // Admin client for privileged operations
-  const adminClient = createClient(supabaseUrl, supabaseServiceKey);
-
-  // User client scoped to authenticated user
-  const userClient = createClient(supabaseUrl, supabaseServiceKey, {
-    global: { headers: { Authorization: authHeader } },
-  });
-
-  return { adminClient, userClient };
-}
-
-async function getUserId(req: Request): Promise<string | null> {
-  const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-  const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
-  const authHeader = req.headers.get('Authorization') ?? '';
-
-  const client = createClient(supabaseUrl, supabaseAnonKey, {
-    global: { headers: { Authorization: authHeader } },
-  });
-
-  const { data: { user }, error } = await client.auth.getUser();
-  if (error || !user) return null;
-  return user.id;
-}
-
-// ─── Extract text from a file stored in Supabase Storage ───────────
-async function extractTextFromStorage(
-  adminClient: ReturnType<typeof createClient>,
-  storagePath: string,
-  fileType: string,
-): Promise<{ text: string; wordCount: number }> {
-  // Download file from storage
-  const { data, error } = await adminClient.storage
-    .from('kb-documents')
-    .download(storagePath);
-
-  if (error || !data) {
-    throw new Error(`Failed to download file: ${error?.message ?? 'No data'}`);
-  }
-
-  let text = '';
-
-  if (['txt', 'md', 'csv'].includes(fileType)) {
-    text = await data.text();
-  } else if (fileType === 'pdf') {
-    // For PDFs, use a basic text extraction approach
-    // Read as array buffer and try to extract text content
-    const arrayBuffer = await data.arrayBuffer();
-    text = extractTextFromPDFBuffer(new Uint8Array(arrayBuffer));
-  } else {
-    // For other types, try reading as text
-    text = await data.text();
-  }
-
-  const wordCount = text.split(/\s+/).filter(Boolean).length;
-  return { text, wordCount };
-}
-
-// Basic PDF text extraction (extracts raw text streams)
+// ─── Extract text from a PDF binary buffer ──────────────────────
 function extractTextFromPDFBuffer(bytes: Uint8Array): string {
-  // Convert to string for parsing
   const raw = new TextDecoder('latin1').decode(bytes);
   const textParts: string[] = [];
 
@@ -117,31 +44,29 @@ function extractTextFromPDFBuffer(bytes: Uint8Array): string {
 
   while ((match = btEtRegex.exec(raw)) !== null) {
     const block = match[1];
-    // Extract text from Tj and TJ operators
+
+    // Tj operator: (text) Tj
     const tjRegex = /\(([^)]*)\)\s*Tj/g;
     let tjMatch;
     while ((tjMatch = tjRegex.exec(block)) !== null) {
       textParts.push(tjMatch[1]);
     }
 
-    // Extract from TJ arrays
+    // TJ operator: [(text) ...] TJ
     const tjArrayRegex = /\[([^\]]*)\]\s*TJ/g;
     let tjArrMatch;
     while ((tjArrMatch = tjArrayRegex.exec(block)) !== null) {
-      const parts = tjArrMatch[1];
       const stringRegex = /\(([^)]*)\)/g;
       let strMatch;
-      while ((strMatch = stringRegex.exec(parts)) !== null) {
+      while ((strMatch = stringRegex.exec(tjArrMatch[1])) !== null) {
         textParts.push(strMatch[1]);
       }
     }
   }
 
-  // If we couldn't extract structured text, try a fallback
+  // Fallback: extract readable ASCII sequences
   if (textParts.length === 0) {
-    // Fallback: extract any readable text sequences
-    const readable = raw.replace(/[^\x20-\x7E\n\r\t]/g, ' ');
-    return readable.replace(/\s+/g, ' ').trim().substring(0, 50000);
+    return raw.replace(/[^\x20-\x7E\n\r\t]/g, ' ').replace(/\s+/g, ' ').trim().substring(0, 50000);
   }
 
   return textParts
@@ -152,120 +77,139 @@ function extractTextFromPDFBuffer(bytes: Uint8Array): string {
     .trim();
 }
 
-// ─── Route Handler ─────────────────────────────────────────────────
+// ─── Main handler ────────────────────────────────────────────────
 Deno.serve(async (req: Request) => {
-  // CORS preflight
+  const corsHeaders = getCorsHeaders(req);
+
+  // Handle CORS preflight
   if (req.method === 'OPTIONS') {
-    return new Response(null, { status: 204, headers: getCorsHeaders(req) });
+    return new Response(null, { status: 204, headers: corsHeaders });
   }
 
   try {
-    const userId = await getUserId(req);
-    if (!userId) {
-      return jsonResponse({ error: 'Unauthorized' }, 401, req);
+    // Authenticate user
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
+    const authHeader = req.headers.get('Authorization') ?? '';
+
+    const anonClient = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: authHeader } },
+    });
+    const { data: { user }, error: authError } = await anonClient.auth.getUser();
+    if (authError || !user) {
+      return jsonResponse({ error: 'Unauthorized' }, 401, corsHeaders);
     }
 
-    const url = new URL(req.url);
-    const path = url.pathname.replace(/^\/api-documents\/?/, '').replace(/^\//, '');
-    const { adminClient, userClient } = getSupabaseClients(req);
+    const adminClient = createClient(supabaseUrl, supabaseServiceKey);
 
-    // ─── POST /extract-text ──────────────────────────────────────
-    if (req.method === 'POST' && path === 'extract-text') {
+    // Path routing — use last segment(s) to determine action
+    const url = new URL(req.url);
+    const pathParts = url.pathname.split('/').filter(Boolean);
+    const last = pathParts[pathParts.length - 1] || '';
+    const secondLast = pathParts[pathParts.length - 2] || '';
+
+    // ─── POST extract-text ────────────────────────────────────
+    if (req.method === 'POST' && last === 'extract-text') {
       const body = await req.json();
-      const { storagePath, fileType } = body;
+      const { storagePath, fileType } = body as { storagePath: string; fileType: string };
 
       if (!storagePath || !fileType) {
-        return jsonResponse({ error: 'storagePath and fileType are required' }, 400, req);
+        return jsonResponse({ error: 'storagePath and fileType are required' }, 400, corsHeaders);
       }
 
-      const result = await extractTextFromStorage(adminClient, storagePath, fileType);
-      return jsonResponse(result, 200, req);
-    }
+      // Download file from Supabase Storage
+      const { data: fileData, error: dlError } = await adminClient.storage
+        .from('kb-documents')
+        .download(storagePath);
 
-    // ─── GET /documents ──────────────────────────────────────────
-    if (req.method === 'GET' && (path === 'documents' || path === '')) {
-      const { data, error } = await userClient
-        .from('kb_uploaded_documents')
-        .select('*')
-        .eq('user_id', userId)
-        .order('created_at', { ascending: false });
-
-      if (error) {
-        return jsonResponse({ error: error.message }, 500, req);
+      if (dlError || !fileData) {
+        return jsonResponse({ error: `Download failed: ${dlError?.message ?? 'No data'}` }, 500, corsHeaders);
       }
 
-      return jsonResponse({ documents: data ?? [] }, 200, req);
+      let text = '';
+      if (['txt', 'md', 'csv'].includes(fileType)) {
+        text = await fileData.text();
+      } else if (fileType === 'pdf') {
+        const arrayBuffer = await fileData.arrayBuffer();
+        text = extractTextFromPDFBuffer(new Uint8Array(arrayBuffer));
+      } else {
+        text = await fileData.text();
+      }
+
+      const wordCount = text.split(/\s+/).filter(Boolean).length;
+      return jsonResponse({ text, wordCount }, 200, corsHeaders);
     }
 
-    // ─── GET /documents/:id/chunks ───────────────────────────────
-    if (req.method === 'GET' && path.match(/^documents\/[^/]+\/chunks$/)) {
-      const docId = path.split('/')[1];
+    // ─── GET chunks for a document ───────────────────────────
+    if (req.method === 'GET' && last === 'chunks') {
+      const docId = secondLast; // path: .../documents/{docId}/chunks
+      if (!docId) {
+        return jsonResponse({ error: 'Document ID required' }, 400, corsHeaders);
+      }
 
-      const { data, error } = await userClient
+      const { data, error } = await adminClient
         .from('kb_documents')
         .select('id, content, metadata, chunk_index, created_at')
         .eq('document_id', docId)
-        .eq('user_id', userId)
+        .eq('user_id', user.id)
         .order('chunk_index', { ascending: true });
 
-      if (error) {
-        return jsonResponse({ error: error.message }, 500, req);
-      }
-
-      return jsonResponse({ chunks: data ?? [] }, 200, req);
+      if (error) return jsonResponse({ error: error.message }, 500, corsHeaders);
+      return jsonResponse({ chunks: data ?? [] }, 200, corsHeaders);
     }
 
-    // ─── DELETE /documents/:id ───────────────────────────────────
-    if (req.method === 'DELETE' && path.match(/^documents\/[^/]+$/)) {
-      const docId = path.split('/')[1];
+    // ─── DELETE a document ────────────────────────────────────
+    if (req.method === 'DELETE' && last !== 'documents' && secondLast === 'documents') {
+      const docId = last; // path: .../documents/{docId}
 
-      // Get document to find storage path
-      const { data: doc, error: fetchErr } = await userClient
+      const { data: doc } = await adminClient
         .from('kb_uploaded_documents')
         .select('storage_path')
         .eq('id', docId)
-        .eq('user_id', userId)
+        .eq('user_id', user.id)
         .single();
 
-      if (fetchErr || !doc) {
-        return jsonResponse({ error: 'Document not found' }, 404, req);
-      }
+      if (!doc) return jsonResponse({ error: 'Document not found' }, 404, corsHeaders);
 
-      // Delete chunks (cascade handles this, but be explicit)
-      await adminClient
-        .from('kb_documents')
-        .delete()
-        .eq('document_id', docId);
+      // Delete chunks
+      await adminClient.from('kb_documents').delete().eq('document_id', docId);
 
       // Delete from storage
       if (doc.storage_path) {
-        await adminClient.storage
-          .from('kb-documents')
-          .remove([doc.storage_path]);
+        await adminClient.storage.from('kb-documents').remove([doc.storage_path]);
       }
 
-      // Delete the parent document record
-      const { error: delErr } = await userClient
+      // Delete parent record
+      const { error: delErr } = await adminClient
         .from('kb_uploaded_documents')
         .delete()
         .eq('id', docId)
-        .eq('user_id', userId);
+        .eq('user_id', user.id);
 
-      if (delErr) {
-        return jsonResponse({ error: delErr.message }, 500, req);
-      }
-
-      return jsonResponse({ success: true }, 200, req);
+      if (delErr) return jsonResponse({ error: delErr.message }, 500, corsHeaders);
+      return jsonResponse({ success: true }, 200, corsHeaders);
     }
 
-    return jsonResponse({ error: 'Not found' }, 404, req);
+    // ─── GET documents list ───────────────────────────────────
+    if (req.method === 'GET' && (last === 'documents' || last === 'api-documents')) {
+      const { data, error } = await adminClient
+        .from('kb_uploaded_documents')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+
+      if (error) return jsonResponse({ error: error.message }, 500, corsHeaders);
+      return jsonResponse({ documents: data ?? [] }, 200, corsHeaders);
+    }
+
+    return jsonResponse({ error: 'Not found', path: url.pathname }, 404, corsHeaders);
 
   } catch (err) {
     console.error('api-documents error:', err);
-    return jsonResponse(
-      { error: err instanceof Error ? err.message : 'Internal server error' },
-      500,
-      req,
+    return new Response(
+      JSON.stringify({ error: err instanceof Error ? err.message : 'Internal server error' }),
+      { status: 500, headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' } },
     );
   }
 });
