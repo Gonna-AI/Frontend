@@ -27,15 +27,12 @@ export default function AboutSection() {
             </div>
           </div>
 
-          <div className="relative z-10">
-            <h2 className="text-5xl md:text-7xl font-bold tracking-tight mb-6">
-              <span className="bg-gradient-to-r from-white via-white/95 to-white/90 text-transparent bg-clip-text">
-                {t('about.future')}
-              </span>
-              <br />
-              <span className="bg-gradient-to-r from-indigo-400 via-purple-400 to-indigo-600 text-transparent bg-clip-text">
-                {t('about.opsIntel')}
-              </span>
+          <div className="relative z-10 mx-auto max-w-5xl text-center">
+            <p className="text-xs font-semibold uppercase tracking-[0.28em] text-[#FF8A5B] sm:text-sm">
+              {t('about.future')}
+            </p>
+            <h2 className="mt-6 text-balance text-4xl font-semibold tracking-[-0.04em] text-white sm:text-6xl md:text-7xl lg:text-[5.25rem] lg:leading-[0.98]">
+              {t('about.opsIntel')}
             </h2>
           </div>
         </div>
@@ -43,4 +40,3 @@ export default function AboutSection() {
     </div>
   );
 }
-
