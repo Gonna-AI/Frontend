@@ -63,6 +63,13 @@ export async function fetchElevenLabsSignedUrl(): Promise<string> {
       });
 
       if (response.status === 404) {
+        // Check if the 404 body contains an actual upstream error (old behavior)
+        // vs. a genuine "endpoint not found".
+        const body = await response.text().catch(() => '');
+        if (body.includes('ElevenLabs') || body.includes('upstream')) {
+          // This is an upstream error proxied through our function — don't try more endpoints
+          throw new Error(`${endpoint}: ${body}`);
+        }
         errors.push(`${endpoint}: HTTP 404`);
         continue;
       }

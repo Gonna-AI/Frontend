@@ -51,12 +51,19 @@ export default async (req: Request, _context: Context) => {
     if (!response.ok) {
       const errorText = await response.text();
       console.error("ElevenLabs signed URL error:", response.status, errorText);
+      // Return 502 (Bad Gateway) instead of passing through ElevenLabs' status code.
+      // This prevents a 404 from ElevenLabs (e.g. invalid agent ID) from looking
+      // like the Netlify function itself is missing.
+      const proxyStatus = response.status >= 400 && response.status < 500 ? 502 : response.status;
       return new Response(
         JSON.stringify({
-          error: `ElevenLabs error: ${response.status}`,
+          error: `ElevenLabs upstream error (HTTP ${response.status})`,
           details: errorText,
+          hint: response.status === 404
+            ? "The ElevenLabs agent ID may be invalid or deleted. Check ELEVENLABS_AGENT_ID env var."
+            : undefined,
         }),
-        { status: response.status, headers: { "Content-Type": "application/json" } }
+        { status: proxyStatus, headers: { "Content-Type": "application/json" } }
       );
     }
 
