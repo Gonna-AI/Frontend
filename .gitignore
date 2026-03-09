@@ -6,3 +6,6 @@ dist
 
 # Local Netlify folder
 .netlify
+
+# Claude local data
+.claude
