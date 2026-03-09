@@ -13,6 +13,7 @@
 
 import { Conversation } from '@11labs/client';
 import log from '../utils/logger';
+import { fetchElevenLabsSignedUrl } from './elevenlabsSignedUrl';
 
 export interface ElevenLabsCallbacks {
   onConnect?: () => void;
@@ -30,25 +31,7 @@ class ElevenLabsConversationService {
    * Get a signed URL from the Netlify function
    */
   private async getSignedUrl(): Promise<string> {
-    log.debug('🔑 Fetching ElevenLabs signed URL...');
-
-    const response = await fetch('/api/elevenlabs-signed-url', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({ error: `HTTP ${response.status}` }));
-      throw new Error(`Failed to get signed URL: ${errorData.error || response.status}`);
-    }
-
-    const data = await response.json();
-    if (!data.signed_url) {
-      throw new Error('No signed_url in response');
-    }
-
-    log.debug('🔑 Signed URL obtained');
-    return data.signed_url;
+    return fetchElevenLabsSignedUrl();
   }
 
   /**

@@ -4,6 +4,7 @@ import { Phone, PhoneOff, Volume2, VolumeX, Minimize2, Maximize2, ArrowLeft } fr
 import { useConversation } from '@elevenlabs/react';
 import { cn } from '../../utils/cn';
 import { useDemoCall } from '../../contexts/DemoCallContext';
+import { fetchElevenLabsSignedUrl } from '../../services/elevenlabsSignedUrl';
 
 interface UserPhoneInterfaceProps {
     isDark?: boolean;
@@ -116,22 +117,7 @@ export default function UserPhoneInterface({
 
     // Fetch signed URL from our Netlify function (keeps API key server-side)
     const getSignedUrl = useCallback(async (): Promise<string> => {
-        const response = await fetch('/api/elevenlabs-signed-url', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-        });
-
-        if (!response.ok) {
-            const errorData = await response.json().catch(() => ({ error: `HTTP ${response.status}` }));
-            throw new Error(errorData.error || `HTTP ${response.status}`);
-        }
-
-        const data = await response.json();
-        if (!data.signed_url) {
-            throw new Error('No signed_url in response');
-        }
-
-        return data.signed_url;
+        return fetchElevenLabsSignedUrl();
     }, []);
 
     const handleStartCall = useCallback(async () => {
