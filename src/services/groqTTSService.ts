@@ -806,7 +806,4 @@ class GroqTTSService {
 // Export singleton instance
 export const groqTTSService = new GroqTTSService();
 
-// Initialize on import
-groqTTSService.initialize().catch(console.error);
-
 export default groqTTSService;
