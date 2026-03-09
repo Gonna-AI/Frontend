@@ -22,6 +22,7 @@ export function NumberTicker({
     className,
 }: NumberTickerProps) {
     const ref = useRef<HTMLSpanElement>(null);
+    const hasAnimatedRef = useRef(false);
     const motionValue = useMotionValue(direction === "down" ? value : startValue);
     const springValue = useSpring(motionValue, {
         damping: 60,
@@ -29,13 +30,27 @@ export function NumberTicker({
     });
     const isInView = useInView(ref, { once: true, margin: "-100px" });
 
+    const animateToTarget = () => {
+        if (hasAnimatedRef.current) return;
+        hasAnimatedRef.current = true;
+        motionValue.set(direction === "down" ? startValue : value);
+    };
+
     useEffect(() => {
         if (isInView) {
-            setTimeout(() => {
-                motionValue.set(direction === "down" ? startValue : value);
-            }, delay * 1000);
+            const timer = window.setTimeout(animateToTarget, delay * 1000);
+            return () => window.clearTimeout(timer);
         }
-    }, [motionValue, isInView, delay, value, direction, startValue]);
+    }, [isInView, delay, value, direction, startValue, motionValue]);
+
+    useEffect(() => {
+        const fallbackTimer = window.setTimeout(
+            animateToTarget,
+            Math.max(delay * 1000 + 900, 900)
+        );
+
+        return () => window.clearTimeout(fallbackTimer);
+    }, [delay, value, direction, startValue, motionValue]);
 
     useEffect(
         () =>
