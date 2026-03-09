@@ -1,11 +1,9 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Phone, PhoneOff, Volume2, VolumeX, Minimize2, Maximize2, Globe, ArrowLeft } from 'lucide-react';
+import { Phone, PhoneOff, Volume2, VolumeX, Minimize2, Maximize2, ArrowLeft } from 'lucide-react';
+import { useConversation } from '@elevenlabs/react';
 import { cn } from '../../utils/cn';
 import { useDemoCall } from '../../contexts/DemoCallContext';
-import { aiService } from '../../services/aiService';
-import { ttsService, TTSLanguage, TTS_LANGUAGES } from '../../services/ttsService';
-import { getGroqSettings, type VoiceProviderType } from './GroqSettings';
 
 interface UserPhoneInterfaceProps {
     isDark?: boolean;
@@ -16,25 +14,9 @@ interface UserPhoneInterfaceProps {
     onBack?: () => void;
 }
 
-// Speech Recognition types - use any to avoid conflicts with other declarations
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type SpeechRecognitionInstance = any;
-
-interface SpeechRecognitionEvent {
-    resultIndex: number;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    results: any;
-}
-
-interface SpeechRecognitionErrorEvent {
-    error: string;
-}
-
 export default function UserPhoneInterface({
     isDark = true,
     onTranscript,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    
     mode = 'standalone',
     autoStart = false,
     onBack
@@ -44,10 +26,6 @@ export default function UserPhoneInterface({
         startCall,
         endCall,
         addMessage,
-        knowledgeBase,
-        updateExtractedField,
-        setCallPriority,
-        setCallCategory
     } = useDemoCall();
 
     const [callDuration, setCallDuration] = useState(0);
@@ -55,49 +33,50 @@ export default function UserPhoneInterface({
     const [currentTranscript, setCurrentTranscript] = useState('');
     const [lastAgentMessage, setLastAgentMessage] = useState('');
     const [agentStatus, setAgentStatus] = useState<'idle' | 'speaking' | 'listening' | 'processing'>('idle');
-    const [language, setLanguage] = useState<TTSLanguage>('en');
     const [isMinimized, setIsMinimized] = useState(false);
     const [isEnding, setIsEnding] = useState(false);
-    const [, setVoiceProvider] = useState<VoiceProviderType>(() => getGroqSettings().voiceProvider);
+    const [connectionError, setConnectionError] = useState<string | null>(null);
 
-    const recognitionRef = useRef<SpeechRecognitionInstance | null>(null);
     const timerRef = useRef<NodeJS.Timeout | null>(null);
-    const isRecognitionRunningRef = useRef(false);
 
-    // Refs to avoid stale closures in speech recognition callbacks
-    const currentCallRef = useRef(currentCall);
-    const agentStatusRef = useRef(agentStatus);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const handleUserInputRef = useRef<((text: string) => Promise<void>) | null>(null);
-
-    // Keep refs in sync with state
-    useEffect(() => { currentCallRef.current = currentCall; }, [currentCall]);
-    useEffect(() => { agentStatusRef.current = agentStatus; }, [agentStatus]);
-    // Note: handleUserInputRef is synced after handleUserInput is defined below
-
-    const messages = currentCall?.messages || [];
-    const extractedFields = currentCall?.extractedFields || [];
-
-    // Initialize AI service with knowledge base and sync voice provider
-    useEffect(() => {
-        aiService.setKnowledgeBase(knowledgeBase);
-    }, [knowledgeBase]);
-
-    // Sync voice provider from settings changes
-    useEffect(() => {
-        const handleSettingsChange = (e: Event) => {
-            const detail = (e as CustomEvent).detail;
-            if (detail?.voiceProvider) {
-                setVoiceProvider(detail.voiceProvider);
-                ttsService.setVoiceProvider(detail.voiceProvider);
+    // ElevenLabs Conversational AI — handles STT + LLM + TTS in one WebSocket
+    const conversation = useConversation({
+        onConnect: () => {
+            console.log('📞 ElevenLabs Conversational AI connected');
+            setConnectionError(null);
+            setAgentStatus('listening');
+        },
+        onDisconnect: () => {
+            console.log('📞 ElevenLabs Conversational AI disconnected');
+            setAgentStatus('idle');
+        },
+        onMessage: (message: { source: string; message: string }) => {
+            console.log(`📞 [${message.source}]: ${message.message}`);
+            if (message.source === 'user') {
+                setCurrentTranscript(message.message);
+                addMessage('user', message.message);
+                onTranscript?.(message.message, 'user');
+            } else if (message.source === 'ai') {
+                setCurrentTranscript('');
+                setLastAgentMessage(message.message);
+                addMessage('agent', message.message);
+                onTranscript?.(message.message, 'agent');
             }
-        };
-        window.addEventListener('groq-settings-updated', handleSettingsChange);
-        // Sync on mount
-        const settings = getGroqSettings();
-        ttsService.setVoiceProvider(settings.voiceProvider);
-        return () => window.removeEventListener('groq-settings-updated', handleSettingsChange);
-    }, []);
+        },
+        onError: (error: string) => {
+            console.error('📞 ElevenLabs error:', error);
+            setConnectionError(typeof error === 'string' ? error : 'Connection error');
+        },
+        onModeChange: (mode: { mode: string }) => {
+            console.log('📞 Mode:', mode.mode);
+            if (mode.mode === 'speaking') {
+                setAgentStatus('speaking');
+                setCurrentTranscript('');
+            } else if (mode.mode === 'listening') {
+                setAgentStatus('listening');
+            }
+        },
+    });
 
     // Timer for call duration
     useEffect(() => {
@@ -120,151 +99,13 @@ export default function UserPhoneInterface({
         };
     }, [currentCall?.status]);
 
-    // Auto-start recognition when call becomes active (for overlay mode when started externally)
+    // Sync volume with speaker toggle
     useEffect(() => {
-        if (currentCall?.status === 'active' && currentCall?.type === 'voice' && mode === 'overlay') {
-            // Small delay to ensure component is ready
-            const timer = setTimeout(() => {
-                if (agentStatus === 'idle') {
-                    console.log('📞 Call started externally, starting recognition in overlay mode');
-                    setAgentStatus('listening');
-                }
-                if (!isRecognitionRunningRef.current) {
-                    try {
-                        recognitionRef.current?.start();
-                        isRecognitionRunningRef.current = true;
-                        console.log('🎤 Recognition started for external call');
-                    } catch (e) {
-                        console.error('Error auto-starting recognition:', e);
-                    }
-                }
-            }, 200);
-            return () => clearTimeout(timer);
+        if (conversation.status === 'connected') {
+            conversation.setVolume({ volume: isSpeakerOn ? 1 : 0 });
         }
-    }, [currentCall?.status, currentCall?.type, mode, agentStatus]);
+    }, [isSpeakerOn, conversation.status]);
 
-    // Helper functions for starting/stopping recognition safely
-    const startRecognition = useCallback(() => {
-        if (!recognitionRef.current || isRecognitionRunningRef.current) {
-            console.log('🎤 Recognition already running or not available');
-            return;
-        }
-        try {
-            console.log('🎤 Starting speech recognition...');
-            recognitionRef.current.start();
-            isRecognitionRunningRef.current = true;
-        } catch (e) {
-            console.error('Error starting recognition:', e);
-            isRecognitionRunningRef.current = false;
-        }
-    }, []);
-
-    const stopRecognition = useCallback(() => {
-        if (!recognitionRef.current) return;
-        try {
-            recognitionRef.current.stop();
-            isRecognitionRunningRef.current = false;
-        } catch (e) {
-            console.error('Error stopping recognition:', e);
-        }
-    }, []);
-
-    // Initialize speech recognition
-    useEffect(() => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-        if (SpeechRecognition) {
-            // Cleanup previous instance if it exists
-            if (recognitionRef.current) {
-                try {
-                    recognitionRef.current.abort();
-                } catch (e) {
-                    // Ignore
-                }
-            }
-
-            console.log(`🎤 Initializing speech recognition for language: ${language} (${TTS_LANGUAGES[language].code})`);
-
-            const recognition = new SpeechRecognition();
-            recognition.continuous = true;
-            recognition.interimResults = true;
-            recognition.lang = TTS_LANGUAGES[language].code;
-            recognitionRef.current = recognition;
-
-            recognition.onresult = (event: SpeechRecognitionEvent) => {
-                const current = event.resultIndex;
-                const transcriptText = event.results[current][0].transcript;
-                setCurrentTranscript(transcriptText);
-
-                if (event.results[current].isFinal) {
-                    // Use ref to get latest handleUserInput callback
-                    handleUserInputRef.current?.(transcriptText);
-                }
-            };
-
-            recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
-                if (event.error !== 'no-speech' && event.error !== 'aborted') {
-                    console.error('Speech recognition error:', event.error);
-                }
-
-                isRecognitionRunningRef.current = false;
-
-                if (event.error === 'not-allowed') {
-                    setAgentStatus('idle');
-                    alert('Please allow microphone access.');
-                }
-            };
-
-            recognition.onend = () => {
-                isRecognitionRunningRef.current = false;
-                // Restart if still in call and listening - use refs for latest values
-                const isActive = currentCallRef.current?.status === 'active';
-                const status = agentStatusRef.current;
-
-                console.log('🎤 Speech recognition ended:', { isActive, status, language });
-
-                if (isActive && status === 'listening') {
-                    // Small delay to prevent rapid restart issues
-                    setTimeout(() => {
-                        if (currentCallRef.current?.status === 'active' && agentStatusRef.current === 'listening') {
-                            try {
-                                console.log('🎤 Restarting speech recognition...');
-                                recognitionRef.current?.start();
-                                isRecognitionRunningRef.current = true;
-                            } catch (e) {
-                                console.error('Error restarting recognition:', e);
-                                isRecognitionRunningRef.current = false;
-                            }
-                        }
-                    }, 300);
-                }
-            };
-
-            // If we are already in listening mode (e.g. after language switch), restart immediately
-            if (agentStatus === 'listening') {
-                try {
-                    console.log('🎤 Auto-restarting recognition after language switch');
-                    recognition.start();
-                    isRecognitionRunningRef.current = true;
-                } catch (e) {
-                    console.warn('Could not auto-start recognition:', e);
-                }
-            }
-        }
-
-        return () => {
-            if (recognitionRef.current) {
-                try {
-                    recognitionRef.current.abort();
-                } catch (e) {
-                    // Ignore
-                }
-                isRecognitionRunningRef.current = false;
-            }
-        };
-    }, [language]);
-
-    // Helper for time formatting
     const formatDuration = (seconds: number) => {
         const mins = Math.floor(seconds / 60);
         const secs = seconds % 60;
@@ -273,237 +114,72 @@ export default function UserPhoneInterface({
 
     const isActive = currentCall?.status === 'active';
 
-    // System Status Checks
-    const [systemChecks, setSystemChecks] = useState<{ label: string; status: 'pending' | 'success' | 'warning' | 'error' }[]>([]);
-
-    useEffect(() => {
-        const runChecks = async () => {
-            // Initial state
-            setSystemChecks([
-                { label: 'Initializing Neural Engine', status: 'pending' },
-            ]);
-
-            await new Promise(r => setTimeout(r, 600));
-
-            setSystemChecks(prev => [
-                { ...prev[0], status: 'success' },
-                { label: 'Connecting to Knowledge Base', status: 'pending' }
-            ]);
-
-            await new Promise(r => setTimeout(r, 800));
-
-            // Check ElevenLabs
-            const elevenLabsAvailable = ttsService.isElevenLabsAvailable();
-
-            setSystemChecks(prev => [
-                prev[0],
-                { ...prev[1], status: 'success' },
-                { label: 'Verifying Voice Synthesis (DE)', status: 'pending' }
-            ]);
-
-            await new Promise(r => setTimeout(r, 800));
-
-            setSystemChecks(prev => [
-                prev[0],
-                prev[1],
-                {
-                    label: elevenLabsAvailable ? 'Voice Synthesis Active (ElevenLabs)' : 'German Voice Unavailable (No Key)',
-                    status: elevenLabsAvailable ? 'success' : 'warning'
-                },
-                { label: 'System Ready', status: 'success' }
-            ]);
-        };
-
-        if (!isActive) {
-            runChecks();
-        }
-    }, [isActive]);
-
-
-    const speakText = useCallback((text: string) => {
-        if (!isSpeakerOn) return Promise.resolve();
-
-        // Check if German is requested but unavailable
-        if (language === 'de' && !ttsService.isElevenLabsAvailable()) {
-            console.warn('🇩🇪 German TTS unavailable (Missing API Key). Skipping audio.');
-
-            // Just simulate the timing of speech or jump straight to listening
-            setAgentStatus('speaking');
-            setTimeout(() => {
-                setAgentStatus('listening');
-                startRecognition();
-            }, 1000);
-
-            return Promise.resolve();
-        }
-
-        // Get the selected voice from knowledge base
-        const selectedVoice = ttsService.resolveOrpheusVoiceId(knowledgeBase.selectedVoiceId);
-
-        // Stop recognition before speaking to avoid conflicts
-        stopRecognition();
-
-        return ttsService.speakStreaming(text, {
-            orpheusVoice: selectedVoice,
-            speed: 1.0,
-            language, // Use selected language (en = Groq, de = ElevenLabs)
-            onStart: () => setAgentStatus('speaking'),
-            onEnd: () => {
-                setAgentStatus('listening');
-                // Start listening after speaking
-                startRecognition();
-            },
-            onError: (error) => {
-                console.error('TTS error:', error);
-                setAgentStatus('listening');
-                startRecognition();
-            }
+    // Fetch signed URL from our Netlify function (keeps API key server-side)
+    const getSignedUrl = useCallback(async (): Promise<string> => {
+        const response = await fetch('/api/elevenlabs-signed-url', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
         });
-    }, [knowledgeBase.selectedVoiceId, isSpeakerOn, language, startRecognition, stopRecognition]);
 
-    const handleUserInput = useCallback(async (text: string) => {
-        if (!text.trim()) return;
-
-        addMessage('user', text);
-        // ... (rest of function is fine)
-        onTranscript?.(text, 'user');
-        setCurrentTranscript('');
-        setAgentStatus('processing');
-
-        // Stop recognition while processing
-        stopRecognition();
-
-        // Use AI service to generate response
-        const response = await aiService.generateResponse(
-            text,
-            messages,
-            extractedFields
-        );
-
-        // Update extracted fields
-        if (response.extractedFields) {
-            response.extractedFields.forEach(field => {
-                updateExtractedField(field);
-            });
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({ error: `HTTP ${response.status}` }));
+            throw new Error(errorData.error || `HTTP ${response.status}`);
         }
 
-        // Update priority if suggested
-        if (response.suggestedPriority) {
-            setCallPriority(response.suggestedPriority);
+        const data = await response.json();
+        if (!data.signed_url) {
+            throw new Error('No signed_url in response');
         }
 
-        // Update category if suggested
-        if (response.suggestedCategory) {
-            setCallCategory(response.suggestedCategory);
-        }
-
-        addMessage('agent', response.text);
-        setLastAgentMessage(response.text);
-        onTranscript?.(response.text, 'agent');
-        await speakText(response.text);
-    }, [addMessage, onTranscript, messages, extractedFields, updateExtractedField, setCallPriority, setCallCategory, speakText, stopRecognition]);
-
-    // Keep handleUserInputRef in sync (must be after handleUserInput is defined)
-    useEffect(() => { handleUserInputRef.current = handleUserInput; }, [handleUserInput]);
+        return data.signed_url;
+    }, []);
 
     const handleStartCall = useCallback(async () => {
-        // Unlock audio playback (required by browser autoplay policies)
-        // This must happen during the user gesture (click)
-        await ttsService.unlockAudio();
-
-        // Reset AI conversation state for new call
-        aiService.resetState();
-
+        setConnectionError(null);
+        setIsEnding(false);
         startCall('voice');
+        setAgentStatus('processing');
 
-        //
-        // Both DeAPI and ElevenLabs use the same flow:
-        // Browser Speech Recognition → Groq LLM → selected TTS provider
-        // The ttsService.speak() routes to the correct TTS backend automatically
-        //
-        // Speak a greeting based on selected language
-        const greeting = language === 'de'
-            ? 'Hallo! Wie kann ich Ihnen helfen?'
-            : 'Hello! How can I help you today?';
-
-        setLastAgentMessage(greeting);
-        addMessage('agent', greeting);
-        setAgentStatus('speaking');
-
-        // Check if we can speak German
-        if (language === 'de' && !ttsService.isElevenLabsAvailable()) {
-            // Fake it for the greeting if key missing
-            setTimeout(() => {
-                setAgentStatus('listening');
-                startRecognition();
-            }, 1000);
-            return;
-        }
-
-        // Use TTS for the greeting
         try {
-            // Get selected voice
-            const selectedVoice = ttsService.resolveOrpheusVoiceId(knowledgeBase.selectedVoiceId);
+            // Get signed URL from our server (keeps API key safe)
+            const signedUrl = await getSignedUrl();
 
-            await ttsService.speak(greeting, {
-                orpheusVoice: selectedVoice,
-                speed: 1.0,
-                language, // Use selected language
-                onStart: () => {
-                    console.log('🔊 TTS greeting started');
-                },
-                onEnd: () => {
-                    console.log('🔊 Initial greeting finished, starting recognition');
-                    setAgentStatus('listening');
-                    startRecognition();
-                },
-                onError: (error) => {
-                    console.error('🔊 Greeting TTS error:', error);
-                    setAgentStatus('listening');
-                    startRecognition();
-                }
+            // Start ElevenLabs Conversational AI session
+            // This single WebSocket connection handles STT + LLM + TTS
+            await conversation.startSession({
+                signedUrl,
             });
         } catch (error) {
-            console.error('🔊 Greeting TTS failed:', error);
-            setAgentStatus('listening');
-            startRecognition();
+            console.error('📞 Failed to start ElevenLabs session:', error);
+            setConnectionError(error instanceof Error ? error.message : 'Failed to connect');
+            setAgentStatus('idle');
         }
-    }, [startCall, startRecognition, language, addMessage, onTranscript]);
-
-    // No longer auto-start — we show a "Start Call" button instead
-    // to ensure AudioContext is created during a real user gesture
+    }, [startCall, getSignedUrl, conversation]);
 
     const handleEndCall = useCallback(async () => {
         console.log('🔴 End call button pressed');
         setIsEnding(true);
 
-        // Stop all TTS immediately
-        ttsService.stop();
-
-        // Stop speech recognition
-        stopRecognition();
-        if (recognitionRef.current) {
-            recognitionRef.current.abort();
-            isRecognitionRunningRef.current = false;
-        }
+        // End ElevenLabs session
+        await conversation.endSession();
 
         setAgentStatus('idle');
-
-        // Wait for AI summary to be generated before ending
         await endCall();
 
         setCurrentTranscript('');
         setLastAgentMessage('');
+    }, [endCall, conversation]);
 
-        // Final TTS cleanup after a short delay
-        setTimeout(() => {
-            ttsService.stop();
-        }, 100);
-    }, [endCall, stopRecognition]);
+    // Cleanup on unmount
+    useEffect(() => {
+        return () => {
+            if (conversation.status === 'connected') {
+                conversation.endSession();
+            }
+        };
+    }, []);
 
-
-
-    // ... (Compact View - Unchanged)
+    // Compact minimized view
     if (isActive && isMinimized && currentCall?.type === 'voice') {
         return (
             <div className="fixed bottom-4 right-4 z-50">
@@ -546,9 +222,8 @@ export default function UserPhoneInterface({
         );
     }
 
-    // ... (Full Screen View - Unchanged mainly)
+    // Full screen active call view
     if (isActive && currentCall?.type === 'voice') {
-        // ... (existing code)
         return (
             <div className="fixed inset-0 z-50 flex flex-col bg-black text-white overflow-hidden">
                 {/* Background Layer */}
@@ -607,7 +282,7 @@ export default function UserPhoneInterface({
                             <span className="font-bold">AI</span>
                         </motion.div>
 
-                        {/* Status Rings - Simplified and aligned */}
+                        {/* Status Rings */}
                         {agentStatus === 'listening' && (
                             <motion.div
                                 initial={{ opacity: 0, scale: 1 }}
@@ -635,7 +310,7 @@ export default function UserPhoneInterface({
                         </p>
                     </div>
 
-                    {/* Caption Box - Darker Glassy */}
+                    {/* Caption Box */}
                     <div className="w-full mb-8 min-h-[100px] flex items-center justify-center">
                         <AnimatePresence mode="wait">
                             {(currentTranscript || lastAgentMessage) && (
@@ -663,26 +338,9 @@ export default function UserPhoneInterface({
                     </div>
                 </div>
 
-                {/* Bottom Controls - Fully aligned */}
+                {/* Bottom Controls */}
                 <div className="p-8 pb-12 w-full z-20 bg-gradient-to-t from-black via-black/80 to-transparent">
                     <div className="flex items-center justify-center gap-6 max-w-lg mx-auto">
-
-                        {/* Language Toggle */}
-                        <button
-                            onClick={() => {
-                                const newLang = language === 'en' ? 'de' : 'en';
-                                setLanguage(newLang);
-                                ttsService.setLanguage(newLang);
-                            }}
-                            className="w-14 h-14 rounded-full flex items-center justify-center bg-white/10 hover:bg-white/20 backdrop-blur-md transition-all border border-white/5 relative"
-                        >
-                            <Globe className="w-4 h-4 text-white mr-1" />
-                            <span className="text-sm font-bold text-white">{language === 'en' ? 'EN' : 'DE'}</span>
-                            {/* Warning dot if German selected but unavailable */}
-                            {language === 'de' && !ttsService.isElevenLabsAvailable() && (
-                                <div className="absolute top-1 right-1 w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-                            )}
-                        </button>
 
                         {/* Speaker */}
                         <button
@@ -697,7 +355,7 @@ export default function UserPhoneInterface({
                             {isSpeakerOn ? <Volume2 className="w-6 h-6" /> : <VolumeX className="w-6 h-6" />}
                         </button>
 
-                        {/* End Call - Glassy Red */}
+                        {/* End Call */}
                         <button
                             onClick={async () => {
                                 await handleEndCall();
@@ -715,7 +373,7 @@ export default function UserPhoneInterface({
         );
     }
 
-    // Fullscreen "Start Call" state — user must tap to initiate (satisfies AudioContext user-gesture rule)
+    // Fullscreen "Start Call" state
     if (mode === 'fullscreen' && autoStart && !isActive && !isEnding) {
         return (
             <div className="fixed inset-0 z-50 flex flex-col bg-black text-white overflow-hidden">
@@ -790,6 +448,18 @@ export default function UserPhoneInterface({
                         Tap to start your voice call
                     </p>
 
+                    {/* Connection Error */}
+                    {connectionError && (
+                        <motion.div
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="w-full mt-4 p-4 rounded-2xl bg-red-500/10 border border-red-500/20 text-center"
+                        >
+                            <p className="text-sm text-red-400">{connectionError}</p>
+                            <p className="text-xs text-white/40 mt-1">Check your ElevenLabs configuration</p>
+                        </motion.div>
+                    )}
+
                     {/* Info Box */}
                     <motion.div
                         initial={{ opacity: 0, y: 10 }}
@@ -850,34 +520,24 @@ export default function UserPhoneInterface({
                 </p>
             </div>
 
-            {/* System Checks (Conversational Style) */}
-            {systemChecks.length > 0 && (
-                <div className="w-full max-w-xs space-y-2 relative z-10 bg-black/5 p-3 rounded-xl border border-white/5">
-                    {systemChecks.map((check, i) => (
-                        <motion.div
-                            key={i}
-                            initial={{ opacity: 0, x: -10 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            className="flex items-center justify-between text-[11px] font-mono"
-                        >
-                            <span className={cn("opacity-70", isDark ? "text-white" : "text-black")}>
-                                {check.label}
-                            </span>
-                            <span className={cn(
-                                "font-bold",
-                                check.status === 'success' ? "text-green-500" :
-                                    check.status === 'warning' ? "text-orange-500" :
-                                        check.status === 'error' ? "text-red-500" :
-                                            "text-blue-400 animate-pulse"
-                            )}>
-                                {check.status === 'success' ? 'OK' :
-                                    check.status === 'warning' ? 'MISSING' :
-                                        check.status === 'pending' ? '...' : 'ERR'}
-                            </span>
-                        </motion.div>
-                    ))}
+            {/* Connection Error */}
+            {connectionError && (
+                <div className="w-full max-w-xs p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-center relative z-10">
+                    <p className="text-xs text-red-400">{connectionError}</p>
                 </div>
             )}
+
+            {/* Status indicator */}
+            <div className="w-full max-w-xs space-y-2 relative z-10 bg-black/5 p-3 rounded-xl border border-white/5">
+                <div className="flex items-center justify-between text-[11px] font-mono">
+                    <span className={cn("opacity-70", isDark ? "text-white" : "text-black")}>
+                        ElevenLabs Conversational AI
+                    </span>
+                    <span className="font-bold text-green-500">
+                        READY
+                    </span>
+                </div>
+            </div>
         </div>
     );
 }
