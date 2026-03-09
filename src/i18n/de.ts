@@ -33,6 +33,17 @@ export const de = {
     // Landing - Conversation
     'conversation.title': 'Intelligente Anrufe, Klügere Agenten.',
 
+    // Landing - Wobble Cards
+    'wobble.card1.eyebrow': 'Operations Intelligence',
+    'wobble.card1.title': 'Steuern Sie Ihre Workflows mit autonomen KI-Systemen.',
+    'wobble.card1.description': 'ClerkTree koordiniert Dokumente, Entscheidungen und Folgeaktionen in einer operativen Schicht für volatile Enterprise-Nachfrage.',
+    'wobble.card2.eyebrow': 'Voice Agents',
+    'wobble.card2.title': 'Verpassen Sie keinen eingehenden High-Intent-Call.',
+    'wobble.card2.description': 'Setzen Sie natürlich klingende KI-Agenten ein, die Gespräche rund um die Uhr qualifizieren, weiterleiten und lösen.',
+    'wobble.card3.eyebrow': 'Custom Deployment',
+    'wobble.card3.title': 'Starten Sie einen maßgeschneiderten KI-Stack für Calls, Claims und Backoffice-Abläufe.',
+    'wobble.card3.description': 'Wir entwickeln agentische Setups, Black-Box-Modelle und Integrationsschichten, die sich an Ihre Prozesse anpassen, statt Template-Automation aufzuzwingen.',
+
     // Landing - FAQ
     'faq.title': 'FAQ',
     'faq.title1': 'Häufig gestellte',

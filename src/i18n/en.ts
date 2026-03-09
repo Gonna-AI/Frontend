@@ -33,6 +33,17 @@ export const en = {
     // Landing - Conversation
     'conversation.title': 'Smart Calls, Smarter Agents.',
 
+    // Landing - Wobble Cards
+    'wobble.card1.eyebrow': 'Operations Intelligence',
+    'wobble.card1.title': 'Command your workflows with autonomous AI systems.',
+    'wobble.card1.description': 'ClerkTree coordinates documents, decisions, and downstream actions in one operational layer built for volatile enterprise demand.',
+    'wobble.card2.eyebrow': 'Voice Agents',
+    'wobble.card2.title': 'Never miss a high-intent call.',
+    'wobble.card2.description': 'Deploy human-sounding AI agents that qualify, route, and resolve conversations around the clock.',
+    'wobble.card3.eyebrow': 'Custom Deployment',
+    'wobble.card3.title': 'Launch a tailored AI stack across calls, claims, and back-office ops.',
+    'wobble.card3.description': 'We design custom agentic setups, black-box models, and integration layers that fit your workflows instead of forcing template automation.',
+
     // Landing - FAQ
     'faq.title': 'FAQ',
     'faq.title1': 'Frequently Asked',
