@@ -9,7 +9,6 @@ export default async (req: Request, _context: Context) => {
   }
 
   const apiKey = Netlify.env.get("VITE_ELEVENLABS_API_KEY") || Netlify.env.get("ELEVENLABS_API_KEY") || process.env.VITE_ELEVENLABS_API_KEY || process.env.ELEVENLABS_API_KEY;
-  const agentId = Netlify.env.get("VITE_ELEVENLABS_AGENT_ID") || Netlify.env.get("ELEVENLABS_AGENT_ID") || process.env.VITE_ELEVENLABS_AGENT_ID || process.env.ELEVENLABS_AGENT_ID;
 
   if (!apiKey) {
     return new Response(
@@ -18,15 +17,27 @@ export default async (req: Request, _context: Context) => {
     );
   }
 
+  // Agent ID: accept from request body (for multi-client) or fall back to env var
+  let agentId: string | undefined;
+  try {
+    const body = await req.json();
+    agentId = body.agentId;
+  } catch {
+    // No body or invalid JSON — fall back to env var
+  }
+
+  if (!agentId) {
+    agentId = Netlify.env.get("VITE_ELEVENLABS_AGENT_ID") || Netlify.env.get("ELEVENLABS_AGENT_ID") || process.env.VITE_ELEVENLABS_AGENT_ID || process.env.ELEVENLABS_AGENT_ID;
+  }
+
   if (!agentId) {
     return new Response(
-      JSON.stringify({ error: "ELEVENLABS_AGENT_ID not configured" }),
+      JSON.stringify({ error: "ELEVENLABS_AGENT_ID not configured. Set it as an env var or pass agentId in the request body." }),
       { status: 500, headers: { "Content-Type": "application/json" } }
     );
   }
 
   try {
-    // Get a signed URL for the ElevenLabs Conversational AI agent
     const response = await fetch(
       `https://api.elevenlabs.io/v1/convai/conversation/get_signed_url?agent_id=${agentId}`,
       {

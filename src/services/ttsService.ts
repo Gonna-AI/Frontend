@@ -374,7 +374,4 @@ class TTSService {
 // Export singleton instance
 export const ttsService = new TTSService();
 
-// Initialize on import
-ttsService.initialize().catch(console.error);
-
 export default ttsService;
