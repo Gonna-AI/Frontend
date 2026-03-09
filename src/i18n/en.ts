@@ -349,6 +349,20 @@ export const en = {
     'sidebar.docs': 'Docs',
     'sidebar.team': 'Team',
     'sidebar.customerGraph': 'Customer Graph',
+    'sidebar.kbDocuments': 'Documents',
+
+    // Knowledge Base Documents
+    'kbDocs.title': 'Knowledge Base Documents',
+    'kbDocs.description': 'Upload documents to give your AI assistant more context and knowledge.',
+    'kbDocs.upload': 'Upload Document',
+    'kbDocs.dropzone': 'Drop files here or click to upload',
+    'kbDocs.processing': 'Processing',
+    'kbDocs.ready': 'Ready',
+    'kbDocs.error': 'Error',
+    'kbDocs.chunks': 'chunks',
+    'kbDocs.deleteConfirm': 'Are you sure you want to delete this document?',
+    'kbDocs.empty': 'No documents uploaded yet',
+    'kbDocs.viewChunks': 'View Chunks',
 
     // Customer Graph
     'customerGraph.title': 'Customer Similarity Graph',

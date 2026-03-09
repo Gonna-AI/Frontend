@@ -21,6 +21,7 @@ import TeamView from '../components/DashboardViews/TeamView';
 import MonitorView from '../components/DashboardViews/MonitorView';
 import IntegrationView from '../components/DashboardViews/IntegrationView';
 import CustomerGraphView from '../components/DashboardViews/CustomerGraphView';
+import DocumentsView from '../components/DashboardViews/DocumentsView';
 import InitialSetupDialog from '../components/DashboardViews/InitialSetupDialog';
 import { RescueCenterProvider } from '../contexts/RescueCenterContext';
 
@@ -85,6 +86,7 @@ function DemoDashboardContent() {
       priority_rules: t('sidebar.priorityRules'),
       instructions: t('sidebar.instructions'),
       groq_settings: t('sidebar.groqAi'),
+      kb_documents: t('sidebar.kbDocuments'),
       usage: t('sidebar.usage'),
       billing: t('sidebar.billing'),
       keys: t('sidebar.keys'),
@@ -195,6 +197,7 @@ function DemoDashboardContent() {
                   {activeTab === 'priority_rules' && <KnowledgeBase isDark={isDark} activeSection="rules" />}
                   {activeTab === 'instructions' && <KnowledgeBase isDark={isDark} activeSection="instructions" />}
 
+                  {activeTab === 'kb_documents' && <DocumentsView isDark={isDark} />}
                   {activeTab === 'groq_settings' && <GroqSettingsPage isDark={isDark} />}
 
                   {/* New Account Sections */}

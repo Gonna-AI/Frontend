@@ -348,6 +348,20 @@ export const de = {
     'sidebar.docs': 'Dokumentation',
     'sidebar.team': 'Team',
     'sidebar.customerGraph': 'Kundengraph',
+    'sidebar.kbDocuments': 'Dokumente',
+
+    // Knowledge Base Documents
+    'kbDocs.title': 'Wissensdatenbank-Dokumente',
+    'kbDocs.description': 'Laden Sie Dokumente hoch, um Ihrem KI-Assistenten mehr Kontext und Wissen zu geben.',
+    'kbDocs.upload': 'Dokument hochladen',
+    'kbDocs.dropzone': 'Dateien hier ablegen oder klicken zum Hochladen',
+    'kbDocs.processing': 'Verarbeitung',
+    'kbDocs.ready': 'Bereit',
+    'kbDocs.error': 'Fehler',
+    'kbDocs.chunks': 'Abschnitte',
+    'kbDocs.deleteConfirm': 'Möchten Sie dieses Dokument wirklich löschen?',
+    'kbDocs.empty': 'Noch keine Dokumente hochgeladen',
+    'kbDocs.viewChunks': 'Abschnitte anzeigen',
 
     // Customer Graph
     'customerGraph.title': 'Kunden-Ähnlichkeitsgraph',
