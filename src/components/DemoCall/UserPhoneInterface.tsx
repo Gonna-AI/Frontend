@@ -211,7 +211,7 @@ export default function UserPhoneInterface({
     // Full screen active call view
     if (isActive && currentCall?.type === 'voice') {
         return (
-            <div className="fixed inset-0 z-50 flex flex-col bg-black text-white overflow-hidden">
+            <div className="fixed inset-0 h-[100dvh] z-50 flex flex-col bg-black text-white overflow-hidden">
                 {/* Background Layer */}
                 <motion.div
                     className="absolute inset-0 z-0 pointer-events-none"
@@ -325,7 +325,7 @@ export default function UserPhoneInterface({
                 </div>
 
                 {/* Bottom Controls */}
-                <div className="p-8 pb-12 w-full z-20 bg-gradient-to-t from-black via-black/80 to-transparent">
+                <div className="p-8 pb-[max(2rem,env(safe-area-inset-bottom))] w-full z-20 bg-gradient-to-t from-black via-black/80 to-transparent">
                     <div className="flex items-center justify-center gap-6 max-w-lg mx-auto">
 
                         {/* Speaker */}
@@ -362,7 +362,7 @@ export default function UserPhoneInterface({
     // Fullscreen "Start Call" state
     if (mode === 'fullscreen' && autoStart && !isActive && !isEnding) {
         return (
-            <div className="fixed inset-0 z-50 flex flex-col bg-black text-white overflow-hidden">
+            <div className="fixed inset-0 h-[100dvh] z-50 flex flex-col bg-black text-white overflow-hidden">
                 {/* Background Layer */}
                 <motion.div
                     className="absolute inset-0 z-0 pointer-events-none"

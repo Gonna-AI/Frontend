@@ -583,7 +583,7 @@ export default function UnifiedChatInterface({ isDark = true, externalCallUI = f
 
             {/* Input Area - Premium Glassmorphic */}
             <div className={cn(
-                "p-4 md:p-6 pb-6 md:pb-8 flex justify-center",
+                "p-4 md:p-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] flex justify-center",
             )}>
                 {/* Glassmorphic Input Container - symmetrical corners with inner input */}
                 <div className={cn(

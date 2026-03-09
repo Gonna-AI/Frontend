@@ -44,7 +44,7 @@ function UserCallContent({ initialMode = 'select' }: UserCallContentProps) {
 
   return (
     <div className={cn(
-      "h-screen w-screen flex flex-col overflow-hidden",
+      "h-[100dvh] w-screen flex flex-col overflow-hidden",
       isDark
         ? "bg-black"
         : "bg-white"
@@ -228,7 +228,7 @@ function UserCallContent({ initialMode = 'select' }: UserCallContentProps) {
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 1.05 }}
               transition={{ duration: 0.2 }}
-              className="absolute inset-0 w-full flex flex-col pt-16"
+              className="absolute inset-0 w-full flex flex-col pt-4 md:pt-16"
             >
               <UnifiedChatInterface isDark={isDark} chatOnly={true} />
             </motion.div>
