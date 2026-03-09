@@ -7,11 +7,25 @@ import { useLanguage } from '../../contexts/LanguageContext';
 
 interface SharedHeaderProps {
     bannerVisible?: boolean;
+    onMobileMenuToggle?: () => void;
+    isMobileMenuOpenExternal?: boolean;
+    rightActions?: React.ReactNode;
 }
 
-export default function SharedHeader({ bannerVisible = false }: SharedHeaderProps) {
+export default function SharedHeader({ bannerVisible = false, onMobileMenuToggle, isMobileMenuOpenExternal, rightActions }: SharedHeaderProps) {
     const navigate = useNavigate();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+    // Use external state if provided, otherwise fallback to local state
+    const isOpen = isMobileMenuOpenExternal !== undefined ? isMobileMenuOpenExternal : isMobileMenuOpen;
+    const toggleMenu = () => {
+        if (onMobileMenuToggle) {
+            onMobileMenuToggle();
+        } else {
+            setIsMobileMenuOpen(!isMobileMenuOpen);
+        }
+    };
+
     const [isScrolled, setIsScrolled] = useState(false);
     const { t } = useLanguage();
 
@@ -97,6 +111,8 @@ export default function SharedHeader({ bannerVisible = false }: SharedHeaderProp
 
                     {/* Right: Actions */}
                     <div className="flex items-center justify-end gap-3 md:gap-5 shrink-0">
+                        {rightActions}
+
                         {/* Language Switcher */}
                         <div className="hidden md:block w-[75px] scale-100 origin-right">
                             <LanguageSwitcher isExpanded={true} forceDark={true} />
@@ -116,11 +132,11 @@ export default function SharedHeader({ bannerVisible = false }: SharedHeaderProp
 
                         {/* Mobile Hamburger Menu Button */}
                         <button
-                            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                            onClick={toggleMenu}
                             className="md:hidden p-2 text-white/80 hover:text-white transition-colors ml-1"
                             aria-label="Toggle menu"
                         >
-                            {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+                            {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
                         </button>
                     </div>
                 </div>
@@ -128,7 +144,7 @@ export default function SharedHeader({ bannerVisible = false }: SharedHeaderProp
 
             {/* Mobile Menu Overlay */}
             <AnimatePresence>
-                {isMobileMenuOpen && (
+                {isOpen && !onMobileMenuToggle && (
                     <>
                         {/* Backdrop */}
                         <motion.div

@@ -337,7 +337,19 @@ export default function DocsPage() {
 
     return (
         <div className="min-h-screen bg-black text-white font-sans selection:bg-purple-500/30">
-            <SharedHeader />
+            <SharedHeader
+                onMobileMenuToggle={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                isMobileMenuOpenExternal={isMobileMenuOpen}
+                rightActions={
+                    <div className="flex items-center gap-2">
+                        <button onClick={() => setIsSearchOpen(true)} className="md:hidden p-2 text-white/60 hover:text-white"><Search className="w-5 h-5" /></button>
+                        <Link to="/support" className="hidden md:block text-sm text-white/60 hover:text-white transition-colors">Support</Link>
+                        <Link to="/dashboard" className="hidden md:inline-block px-3 py-2 bg-white text-black text-xs font-medium rounded-lg hover:bg-neutral-200 transition-colors">
+                            Dashboard
+                        </Link>
+                    </div>
+                }
+            />
 
             <div className="max-w-[1600px] mx-auto pt-16 flex min-h-screen">
                 {/* Sidebar */}

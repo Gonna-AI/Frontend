@@ -97,7 +97,18 @@ const SupportPage = () => {
 
     return (
         <div className="bg-[#0A0A0A] min-h-screen text-white/80 font-sans selection:bg-purple-500/30">
-            <SharedHeader />
+            <SharedHeader
+                onMobileMenuToggle={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                isMobileMenuOpenExternal={isMobileMenuOpen}
+                rightActions={
+                    <div className="flex items-center gap-2">
+                        <Link to="/docs" className="hidden md:block text-sm text-white/60 hover:text-white transition-colors">Documentation</Link>
+                        <Link to="/dashboard" className="hidden md:inline-block px-3 py-2 bg-white text-black text-xs font-medium rounded-lg hover:bg-neutral-200 transition-colors">
+                            Dashboard
+                        </Link>
+                    </div>
+                }
+            />
 
             <div className="pt-16 max-w-[1600px] mx-auto flex min-h-[calc(100vh-64px)]">
 
