@@ -79,7 +79,7 @@ function DemoDashboardContent() {
       knowledge: t('config.title'),
       system_prompt: t('sidebar.systemPrompt'),
       rescue_playbooks: t('sidebar.rescuePlaybooks'),
-      ai_voice: t('sidebar.aiVoice'),
+
       context_fields: t('sidebar.contextFields'),
       categories: t('sidebar.categories'),
       priority_rules: t('sidebar.priorityRules'),
@@ -189,7 +189,7 @@ function DemoDashboardContent() {
                   {activeTab === 'knowledge' && <KnowledgeBase isDark={isDark} activeSection="prompt" />}
                   {activeTab === 'system_prompt' && <KnowledgeBase isDark={isDark} activeSection="prompt" />}
                   {activeTab === 'rescue_playbooks' && <KnowledgeBase isDark={isDark} activeSection="rescue_playbooks" />}
-                  {activeTab === 'ai_voice' && <KnowledgeBase isDark={isDark} activeSection="voice" />}
+
                   {activeTab === 'context_fields' && <KnowledgeBase isDark={isDark} activeSection="fields" />}
                   {activeTab === 'categories' && <KnowledgeBase isDark={isDark} activeSection="categories" />}
                   {activeTab === 'priority_rules' && <KnowledgeBase isDark={isDark} activeSection="rules" />}

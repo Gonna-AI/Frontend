@@ -259,21 +259,7 @@ export function AppSidebar({ activeTab, setActiveTab, hasAccess = false, ...prop
                                     <span>{t('sidebar.rescuePlaybooks')}</span>
                                 </SidebarMenuButton>
                             </SidebarMenuItem>
-                            <SidebarMenuItem>
-                                <SidebarMenuButton
-                                    isActive={activeTab === 'ai_voice'}
-                                    onClick={() => handleTabClick('ai_voice')}
-                                    className={cn(
-                                        "transition-colors",
-                                        isDark
-                                            ? "text-white/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-white/10 data-[active=true]:text-white"
-                                            : "text-gray-600 hover:text-gray-900 hover:bg-black/5 data-[active=true]:bg-black/5 data-[active=true]:text-black"
-                                    )}
-                                >
-                                    <Mic />
-                                    <span>{t('sidebar.aiVoice')}</span>
-                                </SidebarMenuButton>
-                            </SidebarMenuItem>
+
                             <SidebarMenuItem>
                                 <SidebarMenuButton
                                     isActive={activeTab === 'context_fields'}
