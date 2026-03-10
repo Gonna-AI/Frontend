@@ -195,7 +195,7 @@ class RAGService {
         return chunks;
     }
 
-    // ─── Full document processing pipeline ──────────────────────────
+    // ─── Full document processing pipeline (server-side via Edge Function) ──
     async processDocument(
         file: File,
         kbId: string,
@@ -237,117 +237,57 @@ class RAGService {
             if (docErr || !docData) throw new Error(`Record creation failed: ${docErr?.message}`);
             documentRecord = docData as UploadedDocument;
 
-            // Stage 3: Extract text
-            onProgress?.({ stage: 'extracting', current: 0, total: 1, message: 'Extracting text...' });
+            // Stage 3: Process server-side (extract → chunk → embed → store)
+            onProgress?.({ stage: 'embedding', current: 0, total: 1, message: 'Processing document on server...' });
 
-            let text = '';
-
-            if (['txt', 'md', 'csv'].includes(fileType)) {
-                // Client-side text reading for simple formats
-                text = await file.text();
-            } else {
-                // Use Edge Function for PDF and other complex formats
-                const { data: { session } } = await supabase.auth.getSession();
-                if (!session?.access_token) {
-                    throw new Error('No active session — please sign in again');
-                }
-
-                const response = await fetch(`${SUPABASE_URL}/functions/v1/api-documents/extract-text`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${session.access_token}`,
-                    },
-                    body: JSON.stringify({ storagePath, fileType }),
-                });
-
-                // Read response body as text first to safely handle non-JSON responses
-                const responseText = await response.text();
-
-                let parsed: any;
-                try {
-                    parsed = JSON.parse(responseText);
-                } catch {
-                    console.error('Edge function returned non-JSON:', responseText.substring(0, 200));
-                    throw new Error(`Text extraction failed: server returned an unexpected response (status ${response.status})`);
-                }
-
-                if (!response.ok) {
-                    throw new Error(`Text extraction failed: ${parsed.error || response.statusText}`);
-                }
-
-                text = parsed.text;
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session?.access_token) {
+                throw new Error('No active session — please sign in again');
             }
 
-            if (!text || text.trim().length === 0) {
-                throw new Error('No text content could be extracted from the file');
+            const response = await fetch(`${SUPABASE_URL}/functions/v1/api-documents/process-document`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${session.access_token}`,
+                },
+                body: JSON.stringify({
+                    documentId: documentRecord.id,
+                    storagePath,
+                    fileType,
+                    fileName: file.name,
+                    kbId,
+                }),
+            });
+
+            // Parse response safely
+            const responseText = await response.text();
+            let result: any;
+            try {
+                result = JSON.parse(responseText);
+            } catch {
+                console.error('Edge function returned non-JSON:', responseText.substring(0, 200));
+                throw new Error(`Server returned an unexpected response (status ${response.status})`);
             }
 
-            // Stage 4: Smart chunking
-            onProgress?.({ stage: 'chunking', current: 0, total: 1, message: 'Splitting into chunks...' });
-            const chunks = this.smartChunkText(text, 300, 50);
-            const totalTokens = text.split(/\s+/).length;
-
-            // Stage 5: Generate embeddings and store chunks
-            onProgress?.({ stage: 'embedding', current: 0, total: chunks.length, message: `Embedding 0/${chunks.length} chunks...` });
-
-            for (let i = 0; i < chunks.length; i++) {
-                onProgress?.({
-                    stage: 'embedding',
-                    current: i + 1,
-                    total: chunks.length,
-                    message: `Embedding ${i + 1}/${chunks.length} chunks...`,
-                });
-
-                const embedding = await this.generateEmbedding(chunks[i]);
-
-                const { error: insertErr } = await supabase
-                    .from('kb_documents')
-                    .insert({
-                        kb_id: kbId,
-                        content: chunks[i],
-                        metadata: {
-                            source: file.name,
-                            document_id: documentRecord.id,
-                            chunk_index: i,
-                            total_chunks: chunks.length,
-                        },
-                        embedding,
-                        user_id: userId,
-                        document_id: documentRecord.id,
-                        chunk_index: i,
-                    });
-
-                if (insertErr) {
-                    console.error(`Failed to store chunk ${i}:`, insertErr);
-                    // If the first chunk fails, surface the error immediately
-                    // (likely a FK or RLS issue that will affect all chunks)
-                    if (i === 0) {
-                        throw new Error(`Failed to store chunk: ${insertErr.message}`);
-                    }
-                }
+            if (!response.ok) {
+                throw new Error(result.error || `Processing failed (status ${response.status})`);
             }
 
-            // Stage 6: Update document record with final status
-            onProgress?.({ stage: 'storing', current: chunks.length, total: chunks.length, message: 'Finalizing...' });
+            // Stage 4: Done
+            onProgress?.({
+                stage: 'done',
+                current: result.chunk_count || 0,
+                total: result.total_chunks || 0,
+                message: `Processed ${result.chunk_count} chunks successfully`,
+            });
 
-            const { data: updatedDoc, error: updateErr } = await supabase
+            // Refresh the document record
+            const { data: updatedDoc } = await supabase
                 .from('kb_uploaded_documents')
-                .update({
-                    status: 'ready',
-                    chunk_count: chunks.length,
-                    total_tokens: totalTokens,
-                    updated_at: new Date().toISOString(),
-                })
+                .select('*')
                 .eq('id', documentRecord.id)
-                .select()
                 .single();
-
-            if (updateErr) {
-                console.error('Failed to update document status:', updateErr);
-            }
-
-            onProgress?.({ stage: 'done', current: chunks.length, total: chunks.length, message: 'Document processed successfully' });
 
             return (updatedDoc as UploadedDocument) || documentRecord;
 
