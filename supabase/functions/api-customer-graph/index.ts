@@ -27,6 +27,13 @@ function getCorsHeaders(req: Request) {
   };
 }
 
+function jsonResponse(data: unknown, status: number, cors: Record<string, string>) {
+  return new Response(JSON.stringify(data), {
+    status,
+    headers: { ...cors, 'Content-Type': 'application/json' },
+  });
+}
+
 Deno.serve(async (req) => {
   const corsHeaders = getCorsHeaders(req);
 
@@ -35,13 +42,17 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-      {
-        global: { headers: { Authorization: req.headers.get('Authorization')! } },
-      }
-    );
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const anonKey = Deno.env.get('SUPABASE_ANON_KEY');
+
+    if (!supabaseUrl || !anonKey) {
+      console.error('Missing SUPABASE_URL or SUPABASE_ANON_KEY environment variables');
+      return jsonResponse({ error: 'Server configuration error' }, 500, corsHeaders);
+    }
+
+    const supabaseClient = createClient(supabaseUrl, anonKey, {
+      global: { headers: { Authorization: req.headers.get('Authorization')! } },
+    });
 
     const {
       data: { user },
@@ -49,54 +60,93 @@ Deno.serve(async (req) => {
     } = await supabaseClient.auth.getUser();
 
     if (userError || !user) {
-      console.error('Auth error:', userError);
-      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-        status: 401,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
+      return jsonResponse({ error: 'Unauthorized' }, 401, corsHeaders);
     }
 
-    const body = await req.json();
+    let body: Record<string, unknown> = {};
+    try {
+      body = await req.json();
+    } catch {
+      return jsonResponse({ error: 'Invalid JSON body' }, 400, corsHeaders);
+    }
+
     const { filters, enrichWithAI = false } = body;
 
-    // Fetch user's call history
+    // Fetch user's call history from database
     const { data: callHistoryData, error: fetchError } = await supabaseClient
       .from('call_history')
       .select('*')
       .eq('user_id', user.id)
-      .order('date', { ascending: false });
+      .order('date', { ascending: false })
+      .limit(1000);
 
     if (fetchError) {
-      console.error('Fetch error:', fetchError);
-      return new Response(JSON.stringify({ error: 'Failed to fetch call history' }), {
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
+      console.error('call_history fetch error:', fetchError);
+
+      // Distinguish between "table doesn't exist" and other errors
+      if (fetchError.message?.includes('does not exist') || fetchError.code === '42P01') {
+        return jsonResponse({
+          error: 'Call history table not found. Please ensure your database is set up correctly.',
+          code: 'TABLE_NOT_FOUND',
+        }, 500, corsHeaders);
+      }
+
+      return jsonResponse({
+        error: `Failed to fetch call history: ${fetchError.message}`,
+      }, 500, corsHeaders);
     }
 
     const callHistory = callHistoryData || [];
 
+    // Return empty model if no call history exists
+    if (callHistory.length === 0) {
+      return jsonResponse({
+        generatedAt: new Date().toISOString(),
+        profiles: [],
+        edges: [],
+        clusters: [],
+        stats: {
+          totalCustomers: 0,
+          totalEdges: 0,
+          totalClusters: 0,
+          highRiskClusters: 0,
+          opportunityClusters: 0,
+        },
+        _meta: { source: 'empty', callHistoryCount: 0 },
+      }, 200, corsHeaders);
+    }
+
     // Provide default filters if not passed
-    const activeFilters = filters || {
+    const activeFilters = {
       interactionType: 'all',
       minSimilarity: 0.58,
       anonymize: false,
+      startDate: null,
+      endDate: null,
+      ...(filters || {}),
     };
 
     const groqApiKey = Deno.env.get('GROQ_API_KEY');
 
-    const graphModel = await buildGraphModel(callHistory, activeFilters, enrichWithAI, groqApiKey);
+    const graphModel = await buildGraphModel(
+      callHistory,
+      activeFilters,
+      enrichWithAI === true,
+      groqApiKey,
+    );
 
-    return new Response(JSON.stringify(graphModel), {
-      status: 200,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+    return jsonResponse({
+      ...graphModel,
+      _meta: {
+        source: 'database',
+        callHistoryCount: callHistory.length,
+        enrichedWithAI: enrichWithAI === true && !!groqApiKey,
+      },
+    }, 200, corsHeaders);
 
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Internal Server Error';
     console.error('Error generating graph:', error);
-    return new Response(JSON.stringify({ error: error.message || 'Internal Server Error' }), {
-      status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+    return jsonResponse({ error: message }, 500, corsHeaders);
   }
 });
