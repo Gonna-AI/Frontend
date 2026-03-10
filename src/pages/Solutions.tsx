@@ -1,4 +1,4 @@
-import { type ReactNode, useRef } from 'react';
+import { type ReactNode, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   type LucideIcon,
@@ -12,12 +12,13 @@ import {
   Shield,
   Zap,
 } from 'lucide-react';
-import { motion, useInView } from 'framer-motion';
+import { AnimatePresence, motion, useInView } from 'framer-motion';
 import { useLanguage } from '../contexts/LanguageContext';
 import SharedHeader from '../components/Layout/SharedHeader';
 import Footer from '../components/Landing/Footer';
 import SEO from '../components/SEO';
 import { NumberTicker } from '../components/ui/number-ticker';
+import { cn } from '../lib/utils';
 
 function Reveal({
   children,
@@ -64,6 +65,7 @@ type Capability = {
 export default function Solutions() {
   const navigate = useNavigate();
   const { t } = useLanguage();
+  const [activeCapability, setActiveCapability] = useState<number | null>(null);
 
   const stats = [
     {
@@ -449,14 +451,40 @@ export default function Solutions() {
             <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
               {capabilities.map((capability, index) => {
                 const Icon = capability.icon;
+                const isOpen = activeCapability === index;
                 return (
                   <Reveal key={capability.title} delay={index * 0.05}>
-                    <article className="group h-full rounded-[1.75rem] border border-white/10 bg-[linear-gradient(145deg,#141414_0%,#0C0C0C_100%)] p-6 transition-all duration-300 hover:border-white/15 hover:bg-white/[0.03] sm:p-7">
+                    <article
+                      role="button"
+                      tabIndex={0}
+                      aria-expanded={isOpen}
+                      onClick={() => setActiveCapability(isOpen ? null : index)}
+                      onKeyDown={(event) => {
+                        if (event.key === 'Enter' || event.key === ' ') {
+                          event.preventDefault();
+                          setActiveCapability(isOpen ? null : index);
+                        }
+                      }}
+                      className={cn(
+                        'group h-full cursor-pointer rounded-[1.75rem] border bg-[linear-gradient(145deg,#141414_0%,#0C0C0C_100%)] p-6 transition-all duration-300 hover:border-white/20 hover:bg-white/[0.04] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#FF8A5B]/60 sm:p-7',
+                        isOpen ? 'border-white/25 bg-white/[0.06]' : 'border-white/10'
+                      )}
+                    >
                       <div className="flex items-start justify-between gap-4">
                         <div className={`flex h-12 w-12 items-center justify-center rounded-2xl ${capability.accentSurface}`}>
                           <Icon className={`h-5 w-5 ${capability.accentClass}`} />
                         </div>
-                        <ChevronRight className="mt-1 h-4 w-4 text-white/20 transition-transform group-hover:translate-x-0.5 group-hover:text-white/45" />
+                        <div className={cn(
+                          'flex h-8 w-8 items-center justify-center rounded-full border transition-all',
+                          isOpen ? 'border-white/25 bg-white/10' : 'border-white/10 bg-white/[0.03]'
+                        )}>
+                          <ChevronRight
+                            className={cn(
+                              'h-4 w-4 text-white/30 transition-transform duration-300',
+                              isOpen ? 'rotate-90 text-white/70' : 'group-hover:translate-x-0.5 group-hover:text-white/55'
+                            )}
+                          />
+                        </div>
                       </div>
 
                       <h3 className="mt-5 text-lg font-semibold tracking-[-0.02em] text-white sm:mt-6 sm:text-xl">
@@ -466,14 +494,26 @@ export default function Solutions() {
                         {capability.description}
                       </p>
 
-                      <div className="mt-7 space-y-3 border-t border-white/8 pt-6">
-                        {capability.features.map((feature) => (
-                          <div key={feature} className="flex items-start gap-3">
-                            <CheckCircle2 className={`mt-0.5 h-4 w-4 shrink-0 ${capability.accentClass}`} />
-                            <span className="text-sm text-white/62">{feature}</span>
-                          </div>
-                        ))}
-                      </div>
+                      <AnimatePresence initial={false}>
+                        {isOpen && (
+                          <motion.div
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: 'auto', opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            transition={{ duration: 0.25, ease: 'easeOut' }}
+                            className="overflow-hidden"
+                          >
+                            <div className="mt-7 space-y-3 border-t border-white/8 pt-6">
+                              {capability.features.map((feature) => (
+                                <div key={feature} className="flex items-start gap-3">
+                                  <CheckCircle2 className={`mt-0.5 h-4 w-4 shrink-0 ${capability.accentClass}`} />
+                                  <span className="text-sm text-white/62">{feature}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
                     </article>
                   </Reveal>
                 );
