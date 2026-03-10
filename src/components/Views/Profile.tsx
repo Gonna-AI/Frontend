@@ -179,7 +179,7 @@ export default function AgentProfile() {
                 ? "bg-black/20 border border-white/10" 
                 : "bg-white/10 border border-black/10"
             )}>
-              {claimsData?.slice(0, 5).map((claim, index) => (
+              {(claimsData ?? []).slice(0, 5).map((claim, index) => (
                 <div key={index} className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
                   <div className="flex items-center gap-3 sm:w-32">
                     <Calendar className={cn(

@@ -208,11 +208,11 @@ export function RescueCenterProvider({ children }: { children: ReactNode }) {
           loadedAudits,
           loadedReports,
         ] = await Promise.all([
-          fetchPlaybooks().catch(() => null),
-          fetchSettings().catch(() => null),
-          fetchActions().catch(() => []),
-          fetchAudits().catch(() => []),
-          fetchReports().catch(() => []),
+          fetchPlaybooks().catch((e) => { console.warn('Failed to load playbooks:', e); return null; }),
+          fetchSettings().catch((e) => { console.warn('Failed to load settings:', e); return null; }),
+          fetchActions().catch((e) => { console.warn('Failed to load actions:', e); return []; }),
+          fetchAudits().catch((e) => { console.warn('Failed to load audits:', e); return []; }),
+          fetchReports().catch((e) => { console.warn('Failed to load reports:', e); return []; }),
         ]);
 
         if (!isMounted) return;
