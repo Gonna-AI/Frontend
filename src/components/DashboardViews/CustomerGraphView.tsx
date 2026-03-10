@@ -3,7 +3,6 @@ import {
   Activity,
   AlertCircle,
   ArrowUpRight,
-  BadgeIndianRupee,
   Brain,
   CalendarClock,
   CheckCircle2,
@@ -42,10 +41,6 @@ import { useDemoCall } from '../../contexts/DemoCallContext';
 import { useRescueCenter } from '../../contexts/RescueCenterContext';
 import { evaluateRealtimeGraphAlerts } from '../../services/customerGraphAlertService';
 import { buildGraphModel } from '../../services/customerGraphService';
-import {
-  formatInrCompact,
-  formatPercent as formatRescuePercent,
-} from '../../services/rescuePlaybookService';
 import type {
   ClusterCopilotAction,
   CustomerGraphAlert,
@@ -538,15 +533,7 @@ export default function CustomerGraphView({ isDark = true }: CustomerGraphViewPr
     () => playbooks.find((playbook) => playbook.id === selectedPlaybookId) || null,
     [playbooks, selectedPlaybookId],
   );
-  const previewEstimatedCost = useMemo(() => {
-    if (!selectedOpportunity || !selectedPlaybook) return 0;
-    const credit = selectedPlaybook.creditAmountInr * selectedOpportunity.memberCount;
-    const discount = settings.avgMonthlyRevenuePerCustomerInr
-      * selectedOpportunity.memberCount
-      * (selectedPlaybook.discountPercent / 100)
-      * 0.25;
-    return Math.round(credit + discount);
-  }, [selectedOpportunity, selectedPlaybook, settings.avgMonthlyRevenuePerCustomerInr]);
+  const [actionNote, setActionNote] = useState('');
 
   const focusedNodeId = hoveredProfileId || selectedProfileId;
 
@@ -1109,10 +1096,10 @@ export default function CustomerGraphView({ isDark = true }: CustomerGraphViewPr
         <div className="flex items-center justify-between gap-3">
           <div>
             <h3 className={cn('text-sm font-semibold tracking-wide', isDark ? 'text-white' : 'text-black')}>
-              High-Risk Clusters
+              At-Risk Clusters
             </h3>
             <p className={cn('text-xs mt-1', isDark ? 'text-white/60' : 'text-black/60')}>
-              Clusters with risk ≥{Math.round(settings.riskThreshold * 100)}% from the customer graph.
+              Clusters with risk &ge;{Math.round(settings.riskThreshold * 100)}%. Take action on clusters that need attention.
             </p>
           </div>
           <span className={cn(
@@ -1125,7 +1112,7 @@ export default function CustomerGraphView({ isDark = true }: CustomerGraphViewPr
 
         {highRiskClusters.length === 0 ? (
           <p className={cn('text-sm mt-3', isDark ? 'text-white/55' : 'text-black/55')}>
-            No clusters above {Math.round(settings.riskThreshold * 100)}% risk detected. This section updates automatically from the customer graph.
+            No clusters above {Math.round(settings.riskThreshold * 100)}% risk detected. This updates automatically from the customer graph.
           </p>
         ) : (
           <div className="mt-4 grid grid-cols-1 lg:grid-cols-2 gap-3">
@@ -1143,6 +1130,12 @@ export default function CustomerGraphView({ isDark = true }: CustomerGraphViewPr
               const knownNames = members
                 .map((m) => m.displayName)
                 .filter((n) => !n.toLowerCase().startsWith('unknown caller'));
+              const contactEmails = members
+                .map((m) => m.contact.email)
+                .filter((e): e is string => !!e);
+              const contactPhones = members
+                .map((m) => m.contact.phone)
+                .filter((p): p is string => !!p);
               const latestAction = latestRescueByCluster.get(cluster.id);
 
               return (
@@ -1162,10 +1155,24 @@ export default function CustomerGraphView({ isDark = true }: CustomerGraphViewPr
                         <span className={cn('text-[10px] font-bold px-2 py-0.5 rounded-full border', riskColors[riskLevel])}>
                           {riskPct}% risk
                         </span>
+                        {cluster.opportunityScore >= 0.6 && (
+                          <span className={cn('text-[10px] font-bold px-2 py-0.5 rounded-full border',
+                            isDark ? 'border-emerald-400/30 bg-emerald-500/15 text-emerald-200' : 'border-emerald-200 bg-emerald-50 text-emerald-700',
+                          )}>
+                            {Math.round(cluster.opportunityScore * 100)}% opportunity
+                          </span>
+                        )}
                       </div>
                       <p className={cn('text-xs mt-1', isDark ? 'text-white/65' : 'text-black/65')}>
                         {cluster.memberCount} customer{cluster.memberCount !== 1 ? 's' : ''}{knownNames.length > 0 ? ` · ${knownNames.slice(0, 3).join(', ')}${knownNames.length > 3 ? ` +${knownNames.length - 3}` : ''}` : ''}
                       </p>
+                      {(contactEmails.length > 0 || contactPhones.length > 0) && (
+                        <p className={cn('text-[11px] mt-1', isDark ? 'text-white/45' : 'text-black/45')}>
+                          {contactEmails.length > 0 && `${contactEmails.length} email${contactEmails.length !== 1 ? 's' : ''}`}
+                          {contactEmails.length > 0 && contactPhones.length > 0 && ' · '}
+                          {contactPhones.length > 0 && `${contactPhones.length} phone${contactPhones.length !== 1 ? 's' : ''}`}
+                        </p>
+                      )}
                     </div>
                     <button
                       onClick={() => dismissOpportunity(cluster.id)}
@@ -1194,12 +1201,14 @@ export default function CustomerGraphView({ isDark = true }: CustomerGraphViewPr
                     </div>
                   )}
 
-                  {latestAction?.result && (
+                  {latestAction && (
                     <div className={cn(
                       'rounded-lg border p-2 text-xs',
-                      isDark ? 'border-emerald-500/20 bg-emerald-500/10 text-emerald-200' : 'border-emerald-200 bg-emerald-50 text-emerald-700',
+                      latestAction.status === 'completed'
+                        ? (isDark ? 'border-emerald-500/20 bg-emerald-500/10 text-emerald-200' : 'border-emerald-200 bg-emerald-50 text-emerald-700')
+                        : (isDark ? 'border-cyan-500/20 bg-cyan-500/10 text-cyan-200' : 'border-cyan-200 bg-cyan-50 text-cyan-700'),
                     )}>
-                      Rescue results: {formatInrCompact(latestAction.result.revenueProtectedInr)} protected, {formatRescuePercent(latestAction.result.retentionRate)} retained.
+                      Last action: {latestAction.playbookName} · {latestAction.status}
                     </div>
                   )}
 
@@ -1212,151 +1221,43 @@ export default function CustomerGraphView({ isDark = true }: CustomerGraphViewPr
                       )}
                     >
                       <Network className="w-3.5 h-3.5" />
-                      View Cluster
+                      View in Graph
                     </button>
                     <button
                       onClick={() => openRescueModal(cluster.id)}
                       className={cn(
                         'inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold border',
-                        isDark ? 'border-emerald-400/35 bg-emerald-500/20 text-emerald-200 hover:bg-emerald-500/30' : 'border-emerald-300 bg-emerald-100 text-emerald-800 hover:bg-emerald-200',
+                        isDark ? 'border-cyan-400/35 bg-cyan-500/20 text-cyan-200 hover:bg-cyan-500/30' : 'border-cyan-300 bg-cyan-100 text-cyan-800 hover:bg-cyan-200',
                       )}
                     >
                       <ShieldCheck className="w-3.5 h-3.5" />
-                      Rescue This Cluster
+                      Create Action
                     </button>
+                    {contactEmails.length > 0 && (
+                      <button
+                        onClick={() => {
+                          const emails = contactEmails.join(', ');
+                          window.navigator.clipboard.writeText(emails).then(() => {
+                            setRescueFeedback({ type: 'success', message: `Copied ${contactEmails.length} email${contactEmails.length !== 1 ? 's' : ''} to clipboard.` });
+                          }).catch(() => {
+                            setRescueFeedback({ type: 'error', message: 'Failed to copy to clipboard.' });
+                          });
+                        }}
+                        className={cn(
+                          'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium',
+                          isDark ? 'border-white/10 bg-white/5 text-white/80 hover:bg-white/10' : 'border-black/10 bg-black/5 text-black/80 hover:bg-black/10',
+                        )}
+                      >
+                        <Mail className="w-3.5 h-3.5" />
+                        Copy Emails
+                      </button>
+                    )}
                   </div>
                 </div>
               );
             })}
           </div>
         )}
-      </section>
-
-      {pendingApprovals.length > 0 && (
-        <section className={cn(
-          'rounded-2xl border p-4 md:p-5',
-          isDark ? 'bg-[#09090B] border-white/10' : 'bg-white border-black/10',
-        )}>
-          <h3 className={cn('text-sm font-semibold tracking-wide', isDark ? 'text-white' : 'text-black')}>
-            Manager Approval Queue
-          </h3>
-          <div className="mt-3 space-y-2">
-            {pendingApprovals.slice(0, 4).map((action) => (
-              <div
-                key={action.id}
-                className={cn(
-                  'rounded-lg border p-3 flex flex-wrap items-center justify-between gap-3',
-                  isDark ? 'border-white/10 bg-white/[0.03]' : 'border-black/10 bg-black/[0.02]',
-                )}
-              >
-                <div>
-                  <p className={cn('text-sm font-medium', isDark ? 'text-white' : 'text-black')}>
-                    {action.clusterLabel} · {action.playbookName}
-                  </p>
-                  <p className={cn('text-xs mt-1', isDark ? 'text-white/60' : 'text-black/60')}>
-                    Estimated cost {formatInrCompact(action.estimatedCostInr)} · Approval threshold {formatInrCompact(settings.compliance.requireManagerApprovalAboveInr)}
-                  </p>
-                </div>
-                <button
-                  onClick={() => {
-                    const result = approveRescueAction(action.id);
-                    setRescueFeedback({
-                      type: result.ok ? 'success' : 'error',
-                      message: result.message,
-                    });
-                  }}
-                  className={cn(
-                    'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium',
-                    isDark ? 'border-cyan-400/30 bg-cyan-500/15 text-cyan-200 hover:bg-cyan-500/25' : 'border-cyan-200 bg-cyan-50 text-cyan-700 hover:bg-cyan-100',
-                  )}
-                >
-                  <Lock className="w-3.5 h-3.5" />
-                  Approve & Execute
-                </button>
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {reports.length > 0 && (
-        <section className={cn(
-          'rounded-2xl border p-4 md:p-5',
-          isDark ? 'bg-[#09090B] border-white/10' : 'bg-white border-black/10',
-        )}>
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <h3 className={cn('text-sm font-semibold tracking-wide', isDark ? 'text-white' : 'text-black')}>
-                Protected Revenue Report
-              </h3>
-              <p className={cn('text-xs mt-1', isDark ? 'text-white/60' : 'text-black/60')}>
-                Auto-generated monthly. {capability.reportEnabled ? 'Enterprise mode active.' : 'Upgrade to Enterprise for full auto reporting.'}
-              </p>
-            </div>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => exportReportCsv(reports[0].id)}
-                className={cn(
-                  'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium',
-                  isDark ? 'border-white/10 bg-white/5 text-white/80 hover:bg-white/10' : 'border-black/10 bg-black/5 text-black/80 hover:bg-black/10',
-                )}
-              >
-                <FileDown className="w-3.5 h-3.5" />
-                Export CSV
-              </button>
-              <button
-                onClick={() => exportReportPdf(reports[0].id)}
-                className={cn(
-                  'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium',
-                  isDark ? 'border-white/10 bg-white/5 text-white/80 hover:bg-white/10' : 'border-black/10 bg-black/5 text-black/80 hover:bg-black/10',
-                )}
-              >
-                <BadgeIndianRupee className="w-3.5 h-3.5" />
-                Export PDF
-              </button>
-              <button
-                onClick={() => forwardReportByEmail(reports[0].id)}
-                className={cn(
-                  'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium',
-                  isDark ? 'border-emerald-400/30 bg-emerald-500/15 text-emerald-200 hover:bg-emerald-500/25' : 'border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100',
-                )}
-              >
-                <Mail className="w-3.5 h-3.5" />
-                Forward to client
-              </button>
-            </div>
-          </div>
-
-          <p className={cn('text-sm mt-3 font-medium', isDark ? 'text-white' : 'text-black')}>
-            {reports[0].headline}
-          </p>
-
-          <div className="mt-3 overflow-x-auto">
-            <table className="w-full text-xs">
-              <thead className={cn(isDark ? 'text-white/60' : 'text-black/60')}>
-                <tr>
-                  <th className="text-left px-2 py-1.5">Cluster</th>
-                  <th className="text-left px-2 py-1.5">Customers</th>
-                  <th className="text-left px-2 py-1.5">Rescue Type</th>
-                  <th className="text-left px-2 py-1.5">INR Protected</th>
-                  <th className="text-left px-2 py-1.5">Retention</th>
-                </tr>
-              </thead>
-              <tbody>
-                {reports[0].rows.map((row) => (
-                  <tr key={`${reports[0].id}-${row.cluster}-${row.rescueType}`} className={cn(isDark ? 'border-white/5' : 'border-black/5')}>
-                    <td className="px-2 py-1.5">{row.cluster}</td>
-                    <td className="px-2 py-1.5">{row.customers}</td>
-                    <td className="px-2 py-1.5">{row.rescueType}</td>
-                    <td className="px-2 py-1.5">{formatInrCompact(row.revenueProtectedInr)}</td>
-                    <td className="px-2 py-1.5">{formatRescuePercent(row.retentionRate)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </section>
-      )}
 
       <section
         className={cn(
@@ -2111,19 +2012,19 @@ export default function CustomerGraphView({ isDark = true }: CustomerGraphViewPr
           )}>
             <div className="flex flex-wrap items-center justify-between gap-3">
               <h3 className={cn('text-sm font-semibold tracking-wide', isDark ? 'text-white' : 'text-black')}>
-                Rescue Execution Log
+                Action Tracker
               </h3>
               <span className={cn(
                 'text-[11px] px-2 py-1 rounded-full border',
                 isDark ? 'border-white/10 bg-white/5 text-white/70' : 'border-black/10 bg-black/5 text-black/70',
               )}>
-                {actionsWithResults.length} actions tracked
+                {actionsWithResults.length} action{actionsWithResults.length !== 1 ? 's' : ''}
               </span>
             </div>
 
             {actionsWithResults.length === 0 ? (
               <p className={cn('text-sm', isDark ? 'text-white/55' : 'text-black/55')}>
-                No rescues executed yet. Trigger a rescue from the opportunities card.
+                No actions created yet. Create actions from the at-risk clusters above.
               </p>
             ) : (
               <div className="space-y-2">
@@ -2141,50 +2042,41 @@ export default function CustomerGraphView({ isDark = true }: CustomerGraphViewPr
                           {action.clusterLabel} · {action.playbookName}
                         </p>
                         <p className={cn('text-xs mt-1', isDark ? 'text-white/60' : 'text-black/60')}>
-                          {action.memberCount} customers · cost {formatInrCompact(action.estimatedCostInr)} · potential {formatInrCompact(action.potentialLossInr)}
+                          {action.memberCount} customer{action.memberCount !== 1 ? 's' : ''} · Created {new Date(action.triggerAt).toLocaleDateString()}
                         </p>
                       </div>
                       <span className={cn(
                         'inline-flex items-center gap-1.5 text-[11px] px-2 py-1 rounded-full border',
                         action.status === 'completed'
                           ? (isDark ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300' : 'border-emerald-200 bg-emerald-50 text-emerald-700')
-                          : action.status === 'requires_approval'
-                            ? (isDark ? 'border-orange-500/30 bg-orange-500/10 text-orange-300' : 'border-orange-200 bg-orange-50 text-orange-700')
-                            : action.status === 'scheduled'
-                              ? (isDark ? 'border-cyan-500/30 bg-cyan-500/10 text-cyan-300' : 'border-cyan-200 bg-cyan-50 text-cyan-700')
-                              : (isDark ? 'border-white/10 bg-white/5 text-white/70' : 'border-black/10 bg-black/5 text-black/70'),
+                          : action.status === 'scheduled'
+                            ? (isDark ? 'border-cyan-500/30 bg-cyan-500/10 text-cyan-300' : 'border-cyan-200 bg-cyan-50 text-cyan-700')
+                            : (isDark ? 'border-white/10 bg-white/5 text-white/70' : 'border-black/10 bg-black/5 text-black/70'),
                       )}>
                         {action.status === 'completed' && <CheckCircle2 className="w-3.5 h-3.5" />}
                         {action.status === 'scheduled' && <CalendarClock className="w-3.5 h-3.5" />}
-                        {action.status === 'requires_approval' && <Lock className="w-3.5 h-3.5" />}
                         {action.status}
                       </span>
                     </div>
 
-                    <div className="mt-2 grid grid-cols-1 md:grid-cols-3 gap-2 text-xs">
-                      <div className={cn('rounded-md border px-2 py-1.5', isDark ? 'border-white/10 bg-black/20 text-white/75' : 'border-black/10 bg-white text-black/75')}>
-                        Retention {formatRescuePercent(action.result.retentionRate)} vs control {formatRescuePercent(action.result.controlGroupRetentionRate)}
-                      </div>
-                      <div className={cn('rounded-md border px-2 py-1.5', isDark ? 'border-white/10 bg-black/20 text-white/75' : 'border-black/10 bg-white text-black/75')}>
-                        Revenue protected {formatInrCompact(action.result.revenueProtectedInr)}
-                      </div>
-                      <div className={cn('rounded-md border px-2 py-1.5', isDark ? 'border-white/10 bg-black/20 text-white/75' : 'border-black/10 bg-white text-black/75')}>
-                        Churn avoided {formatInrCompact(action.result.churnAvoidedInr)}
-                      </div>
-                    </div>
-
-                    <div className="mt-2 flex flex-wrap items-center gap-2">
-                      <button
-                        onClick={() => downloadConsentProof(action.id)}
-                        className={cn(
-                          'inline-flex items-center gap-1.5 text-[11px] px-2.5 py-1 rounded-lg border',
-                          isDark ? 'border-white/10 bg-white/5 text-white/80 hover:bg-white/10' : 'border-black/10 bg-black/5 text-black/80 hover:bg-black/10',
-                        )}
-                      >
-                        <FileDown className="w-3.5 h-3.5" />
-                        Download consent proof
-                      </button>
-                      {(action.status === 'scheduled' || action.status === 'requires_approval') && (
+                    {(action.status === 'scheduled' || action.status === 'requires_approval') && (
+                      <div className="mt-2 flex flex-wrap items-center gap-2">
+                        <button
+                          onClick={() => {
+                            const result = approveRescueAction(action.id);
+                            setRescueFeedback({
+                              type: result.ok ? 'success' : 'error',
+                              message: result.ok ? 'Action marked as completed.' : result.message,
+                            });
+                          }}
+                          className={cn(
+                            'inline-flex items-center gap-1.5 text-[11px] px-2.5 py-1 rounded-lg border',
+                            isDark ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300 hover:bg-emerald-500/20' : 'border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100',
+                          )}
+                        >
+                          <CheckCircle2 className="w-3.5 h-3.5" />
+                          Mark Complete
+                        </button>
                         <button
                           onClick={() => {
                             const result = cancelPendingClusterActions(action.clusterId);
@@ -2199,10 +2091,10 @@ export default function CustomerGraphView({ isDark = true }: CustomerGraphViewPr
                           )}
                         >
                           <XCircle className="w-3.5 h-3.5" />
-                          Cancel pending credits
+                          Cancel
                         </button>
-                      )}
-                    </div>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
@@ -2211,7 +2103,7 @@ export default function CustomerGraphView({ isDark = true }: CustomerGraphViewPr
             {audits.length > 0 && (
               <div>
                 <h4 className={cn('text-xs uppercase tracking-wider mb-2', isDark ? 'text-white/45' : 'text-black/45')}>
-                  Full audit trail
+                  Activity log
                 </h4>
                 <div className="space-y-1.5">
                   {audits.slice(0, 8).map((audit) => (
@@ -2249,9 +2141,9 @@ export default function CustomerGraphView({ isDark = true }: CustomerGraphViewPr
           )}>
             <div className="flex items-start justify-between gap-3">
               <div>
-                <h3 className="text-lg font-semibold">Rescue This Cluster</h3>
+                <h3 className="text-lg font-semibold">Create Action</h3>
                 <p className={cn('text-sm mt-1', isDark ? 'text-white/60' : 'text-black/60')}>
-                  {selectedOpportunity.label} · {Math.round(selectedOpportunity.riskScore * 100)}% risk
+                  {selectedOpportunity.label} · {Math.round(selectedOpportunity.riskScore * 100)}% risk · {selectedOpportunity.memberCount} customers
                 </p>
               </div>
               <button
@@ -2262,89 +2154,76 @@ export default function CustomerGraphView({ isDark = true }: CustomerGraphViewPr
               </button>
             </div>
 
-            <div className="flex items-center gap-2 mt-4">
-              {[1, 2, 3].map((step) => (
-                <div key={`rescue-step-${step}`} className="flex items-center gap-2">
-                  <span className={cn(
-                    'inline-flex items-center justify-center w-6 h-6 rounded-full text-xs border',
-                    rescueModalStep >= step
-                      ? (isDark ? 'border-cyan-400/40 bg-cyan-500/20 text-cyan-200' : 'border-cyan-200 bg-cyan-50 text-cyan-700')
-                      : (isDark ? 'border-white/15 bg-white/5 text-white/60' : 'border-black/10 bg-black/5 text-black/60'),
-                  )}>
-                    {step}
-                  </span>
-                  {step < 3 && (
-                    <span className={cn('w-6 h-px', isDark ? 'bg-white/20' : 'bg-black/20')} />
-                  )}
-                </div>
-              ))}
-            </div>
-
-            {rescueModalStep === 1 && (
-              <div className="mt-4 space-y-3">
-                <p className={cn('text-sm', isDark ? 'text-white/75' : 'text-black/75')}>
-                  Step 1: Choose a playbook template.
-                </p>
-                <div className="space-y-2 max-h-64 overflow-y-auto">
-                  {playbooks.map((playbook) => (
-                    <button
-                      key={playbook.id}
-                      onClick={() => setSelectedPlaybookId(playbook.id)}
-                      className={cn(
-                        'w-full text-left rounded-lg border p-3 transition-colors',
-                        selectedPlaybookId === playbook.id
-                          ? (isDark ? 'border-emerald-400/35 bg-emerald-500/15' : 'border-emerald-200 bg-emerald-50')
-                          : (isDark ? 'border-white/10 bg-white/[0.03] hover:bg-white/10' : 'border-black/10 bg-black/[0.02] hover:bg-black/5'),
-                      )}
-                    >
-                      <p className="text-sm font-medium">{playbook.name}</p>
-                      <p className={cn('text-xs mt-1', isDark ? 'text-white/65' : 'text-black/65')}>
-                        {playbook.description}
-                      </p>
-                      <p className={cn('text-xs mt-1', isDark ? 'text-white/55' : 'text-black/55')}>
-                        Channels: {playbook.channels.join(', ')} · Credit {formatInrCompact(playbook.creditAmountInr)}
-                      </p>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {rescueModalStep === 2 && selectedPlaybook && (
-              <div className="mt-4 space-y-3">
-                <p className={cn('text-sm', isDark ? 'text-white/75' : 'text-black/75')}>
-                  Step 2: Preview outreach and execution cost.
-                </p>
-                <div className={cn(
-                  'rounded-lg border p-3 text-sm',
-                  isDark ? 'border-white/10 bg-white/[0.03]' : 'border-black/10 bg-black/[0.02]',
-                )}>
-                  <p className="font-medium mb-1">Message preview</p>
-                  <p className={cn('text-xs leading-relaxed', isDark ? 'text-white/70' : 'text-black/70')}>
-                    {selectedPlaybook.messageTemplate
-                      .replace('{{customer_name}}', (() => { const first = selectedOpportunity.memberIds.map((id) => profileById.get(id)).find((p) => p && !p.displayName.toLowerCase().startsWith('unknown')); return first?.displayName || 'Customer'; })())
-                      .replace('{{credit_percent}}', String(selectedPlaybook.discountPercent || 0))
-                      .replace('{{callback_slot}}', 'tomorrow 10:00 AM')}
+            {rescueModalStep !== 3 && (
+              <div className="mt-4 space-y-4">
+                {/* Action template selection */}
+                <div className="space-y-2">
+                  <p className={cn('text-xs uppercase tracking-wider font-medium', isDark ? 'text-white/50' : 'text-black/50')}>
+                    Action template
                   </p>
+                  <div className="space-y-2 max-h-48 overflow-y-auto">
+                    {playbooks.map((playbook) => (
+                      <button
+                        key={playbook.id}
+                        onClick={() => setSelectedPlaybookId(playbook.id)}
+                        className={cn(
+                          'w-full text-left rounded-lg border p-3 transition-colors',
+                          selectedPlaybookId === playbook.id
+                            ? (isDark ? 'border-cyan-400/35 bg-cyan-500/10' : 'border-cyan-200 bg-cyan-50')
+                            : (isDark ? 'border-white/10 bg-white/[0.03] hover:bg-white/10' : 'border-black/10 bg-black/[0.02] hover:bg-black/5'),
+                        )}
+                      >
+                        <div className="flex items-center justify-between">
+                          <p className="text-sm font-medium">{playbook.name}</p>
+                          <span className={cn(
+                            'text-[10px] px-1.5 py-0.5 rounded border',
+                            isDark ? 'border-white/10 text-white/40' : 'border-black/10 text-black/40',
+                          )}>
+                            {playbook.channels.join(', ')}
+                          </span>
+                        </div>
+                        <p className={cn('text-xs mt-1', isDark ? 'text-white/55' : 'text-black/55')}>
+                          {playbook.description}
+                        </p>
+                      </button>
+                    ))}
+                  </div>
                 </div>
-                <div className="grid grid-cols-2 gap-2 text-xs">
+
+                {/* Cluster summary */}
+                <div className="grid grid-cols-3 gap-2 text-xs">
                   <div className={cn('rounded-lg border p-2', isDark ? 'border-white/10 bg-black/20' : 'border-black/10 bg-white')}>
-                    <p className={cn(isDark ? 'text-white/60' : 'text-black/60')}>Customers in cluster</p>
+                    <p className={cn(isDark ? 'text-white/50' : 'text-black/50')}>Customers</p>
                     <p className="font-semibold text-sm">{selectedOpportunity.memberCount}</p>
                   </div>
                   <div className={cn('rounded-lg border p-2', isDark ? 'border-white/10 bg-black/20' : 'border-black/10 bg-white')}>
-                    <p className={cn(isDark ? 'text-white/60' : 'text-black/60')}>Estimated cost</p>
-                    <p className="font-semibold text-sm">{formatInrCompact(previewEstimatedCost)}</p>
-                  </div>
-                  <div className={cn('rounded-lg border p-2', isDark ? 'border-white/10 bg-black/20' : 'border-black/10 bg-white')}>
-                    <p className={cn(isDark ? 'text-white/60' : 'text-black/60')}>Consent status</p>
-                    <p className="font-semibold text-sm">Verified</p>
-                  </div>
-                  <div className={cn('rounded-lg border p-2', isDark ? 'border-white/10 bg-black/20' : 'border-black/10 bg-white')}>
-                    <p className={cn(isDark ? 'text-white/60' : 'text-black/60')}>Risk score</p>
+                    <p className={cn(isDark ? 'text-white/50' : 'text-black/50')}>Risk score</p>
                     <p className="font-semibold text-sm">{Math.round(selectedOpportunity.riskScore * 100)}%</p>
                   </div>
+                  <div className={cn('rounded-lg border p-2', isDark ? 'border-white/10 bg-black/20' : 'border-black/10 bg-white')}>
+                    <p className={cn(isDark ? 'text-white/50' : 'text-black/50')}>Similarity</p>
+                    <p className="font-semibold text-sm">{Math.round(selectedOpportunity.similarityScore * 100)}%</p>
+                  </div>
                 </div>
+
+                {/* Note */}
+                <div className="space-y-1.5">
+                  <p className={cn('text-xs uppercase tracking-wider font-medium', isDark ? 'text-white/50' : 'text-black/50')}>
+                    Note (optional)
+                  </p>
+                  <textarea
+                    value={actionNote}
+                    onChange={(e) => setActionNote(e.target.value)}
+                    rows={2}
+                    placeholder="Add context for this action..."
+                    className={cn(
+                      'w-full rounded-lg px-3 py-2 text-sm border bg-transparent resize-none focus:outline-none',
+                      isDark ? 'border-white/10 text-white placeholder:text-white/30' : 'border-black/10 text-black placeholder:text-black/30',
+                    )}
+                  />
+                </div>
+
+                {/* Schedule toggle */}
                 <button
                   onClick={() => setScheduledForTomorrow((previous) => !previous)}
                   className={cn(
@@ -2355,8 +2234,12 @@ export default function CustomerGraphView({ isDark = true }: CustomerGraphViewPr
                   )}
                 >
                   <CalendarClock className="w-3.5 h-3.5" />
-                  {scheduledForTomorrow ? 'Scheduled for tomorrow 10:00 AM' : 'One-click schedule for tomorrow 10:00 AM'}
+                  {scheduledForTomorrow ? 'Scheduled for tomorrow 10:00 AM' : 'Schedule for tomorrow'}
                 </button>
+
+                {rescueFeedback && rescueFeedback.type === 'error' && (
+                  <p className={cn('text-xs', isDark ? 'text-rose-300' : 'text-rose-600')}>{rescueFeedback.message}</p>
+                )}
               </div>
             )}
 
@@ -2366,9 +2249,11 @@ export default function CustomerGraphView({ isDark = true }: CustomerGraphViewPr
                   'rounded-lg border p-3',
                   isDark ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-200' : 'border-emerald-200 bg-emerald-50 text-emerald-700',
                 )}>
-                  <p className="text-sm font-medium">Step 3 complete</p>
+                  <p className="text-sm font-medium">Action created</p>
                   <p className="text-xs mt-1">
-                    Rescue execution has been submitted and logged in History with compliance proof.
+                    {scheduledForTomorrow
+                      ? 'Action has been scheduled and will appear in the Action Tracker.'
+                      : 'Action has been logged in the Action Tracker. Mark it complete when done.'}
                   </p>
                 </div>
               </div>
@@ -2376,45 +2261,27 @@ export default function CustomerGraphView({ isDark = true }: CustomerGraphViewPr
 
             <div className="mt-5 flex items-center justify-between gap-2">
               <button
-                onClick={() => setRescueModalStep((previous) => (previous > 1 ? ((previous - 1) as 1 | 2 | 3) : previous))}
-                disabled={rescueModalStep === 1}
+                onClick={closeRescueModal}
                 className={cn(
                   'px-3 py-1.5 rounded-lg text-xs border',
-                  rescueModalStep === 1
-                    ? 'opacity-50 cursor-not-allowed'
-                    : '',
                   isDark ? 'border-white/10 bg-white/5 text-white/75' : 'border-black/10 bg-black/5 text-black/75',
                 )}
               >
-                Back
+                Cancel
               </button>
 
-              {rescueModalStep < 2 && (
+              {rescueModalStep !== 3 && (
                 <button
-                  onClick={() => setRescueModalStep(2)}
+                  onClick={executeRescue}
                   disabled={!selectedPlaybook}
                   className={cn(
                     'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border',
-                    !selectedPlaybook
-                      ? 'opacity-50 cursor-not-allowed'
-                      : '',
+                    !selectedPlaybook ? 'opacity-50 cursor-not-allowed' : '',
                     isDark ? 'border-cyan-400/35 bg-cyan-500/20 text-cyan-200' : 'border-cyan-200 bg-cyan-50 text-cyan-700',
                   )}
                 >
-                  Next
-                </button>
-              )}
-
-              {rescueModalStep === 2 && (
-                <button
-                  onClick={executeRescue}
-                  className={cn(
-                    'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border',
-                    isDark ? 'border-emerald-400/35 bg-emerald-500/20 text-emerald-200' : 'border-emerald-200 bg-emerald-50 text-emerald-700',
-                  )}
-                >
-                  {scheduledForTomorrow ? <Clock3 className="w-3.5 h-3.5" /> : <Send className="w-3.5 h-3.5" />}
-                  {scheduledForTomorrow ? 'Schedule Rescue' : 'Rescue Now'}
+                  <Send className="w-3.5 h-3.5" />
+                  {scheduledForTomorrow ? 'Schedule Action' : 'Create Action'}
                 </button>
               )}
 

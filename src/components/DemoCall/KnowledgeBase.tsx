@@ -14,8 +14,6 @@ import {
   Loader2,
   Database,
   ShieldCheck,
-  FlaskConical,
-  Clock3,
   Inbox
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
@@ -723,11 +721,11 @@ export default function KnowledgeBase({ isDark = true, activeSection }: Knowledg
             {activeTab === 'rescue_playbooks' && (
               <motion.div key="rescue_playbooks" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
                 <p className={cn("text-sm", isDark ? "text-white/50" : "text-black/50")}>
-                  Rescue playbooks target high-risk customer clusters (risk {'>'} {Math.round(settings.riskThreshold * 100)}%). Create, edit, or remove playbooks below — all changes are saved to the API automatically.
+                  Action templates define how you respond to at-risk customer clusters (risk {'>'} {Math.round(settings.riskThreshold * 100)}%). Create, edit, or remove templates below — all changes are saved automatically.
                 </p>
 
                 <div className={cn("flex justify-between items-center pb-2 border-b", isDark ? "border-white/10" : "border-gray-100")}>
-                  <h3 className={cn("text-lg font-semibold", isDark ? "text-white" : "text-gray-900")}>Rescue Playbook Templates</h3>
+                  <h3 className={cn("text-lg font-semibold", isDark ? "text-white" : "text-gray-900")}>Action Templates</h3>
                   <button
                     onClick={() => setIsAddingPlaybook(true)}
                     className={cn(
@@ -735,7 +733,7 @@ export default function KnowledgeBase({ isDark = true, activeSection }: Knowledg
                       isDark ? "bg-white text-black hover:bg-white/90" : "bg-black text-white hover:bg-black/90"
                     )}
                   >
-                    Add Playbook
+                    Add Template
                   </button>
                 </div>
 
@@ -750,7 +748,7 @@ export default function KnowledgeBase({ isDark = true, activeSection }: Knowledg
                           <input
                             value={newPlaybook.name}
                             onChange={(event) => setNewPlaybook({ ...newPlaybook, name: event.target.value })}
-                            placeholder="Playbook name"
+                            placeholder="Template name"
                             className={cn(
                               "rounded-lg px-3 py-2 text-sm border bg-transparent focus:outline-none",
                               isDark ? "border-white/10 text-white" : "border-black/10 text-black"
@@ -770,87 +768,60 @@ export default function KnowledgeBase({ isDark = true, activeSection }: Knowledg
                           value={newPlaybook.messageTemplate}
                           onChange={(event) => setNewPlaybook({ ...newPlaybook, messageTemplate: event.target.value })}
                           rows={3}
-                          placeholder="Message template with variables: {{customer_name}}, {{credit_percent}}, {{callback_slot}}"
+                          placeholder="Action notes or message template (use {{customer_name}} for personalization)"
                           className={cn(
                             "w-full rounded-lg px-3 py-2 text-sm border bg-transparent resize-none focus:outline-none",
                             isDark ? "border-white/10 text-white" : "border-black/10 text-black"
                           )}
                         />
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                          <input
-                            type="number"
-                            value={newPlaybook.creditAmountInr}
-                            onChange={(event) => setNewPlaybook({ ...newPlaybook, creditAmountInr: Number(event.target.value) })}
-                            placeholder="Credit amount"
-                            className={cn(
-                              "rounded-lg px-3 py-2 text-sm border bg-transparent focus:outline-none",
-                              isDark ? "border-white/10 text-white" : "border-black/10 text-black"
-                            )}
-                          />
-                          <input
-                            type="number"
-                            value={newPlaybook.discountPercent}
-                            onChange={(event) => setNewPlaybook({ ...newPlaybook, discountPercent: Number(event.target.value) })}
-                            placeholder="Discount %"
-                            className={cn(
-                              "rounded-lg px-3 py-2 text-sm border bg-transparent focus:outline-none",
-                              isDark ? "border-white/10 text-white" : "border-black/10 text-black"
-                            )}
-                          />
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                           <input
                             value={newPlaybook.successCriteria}
                             onChange={(event) => setNewPlaybook({ ...newPlaybook, successCriteria: event.target.value })}
-                            placeholder="Success criteria"
+                            placeholder="Success criteria (e.g. customer responds within 48h)"
                             className={cn(
                               "rounded-lg px-3 py-2 text-sm border bg-transparent focus:outline-none",
                               isDark ? "border-white/10 text-white" : "border-black/10 text-black"
                             )}
                           />
-                        </div>
-                        <div className="flex flex-wrap gap-2">
-                          {(['whatsapp', 'voice', 'email', 'in_app'] as RescueChannel[]).map((channel) => {
-                            const active = newPlaybook.channels.includes(channel);
-                            return (
-                              <button
-                                key={channel}
-                                onClick={() => handleToggleNewPlaybookChannel(channel)}
-                                className={cn(
-                                  "px-2.5 py-1 rounded-full text-xs border",
-                                  active
-                                    ? (isDark ? "border-cyan-400/40 bg-cyan-500/15 text-cyan-200" : "border-cyan-200 bg-cyan-50 text-cyan-700")
-                                    : (isDark ? "border-white/10 bg-white/5 text-white/70" : "border-black/10 bg-black/5 text-black/70")
-                                )}
-                              >
-                                {channel}
-                              </button>
-                            );
-                          })}
+                          <select
+                            value={newPlaybook.channels[0] || 'email'}
+                            onChange={(event) => setNewPlaybook({ ...newPlaybook, channels: [event.target.value as RescueChannel] })}
+                            className={cn(
+                              "rounded-lg px-3 py-2 text-sm border bg-transparent focus:outline-none",
+                              isDark ? "border-white/10 text-white [&>option]:bg-[#09090B]" : "border-black/10 text-black"
+                            )}
+                          >
+                            <option value="voice">Voice</option>
+                            <option value="email">Email</option>
+                            <option value="in_app">In-app</option>
+                          </select>
                         </div>
                         <div className="flex justify-end gap-2">
                           <button onClick={() => setIsAddingPlaybook(false)} className={cn("text-xs px-3 py-1.5 rounded", isDark ? "text-white/60 hover:bg-white/10" : "text-black/60 hover:bg-black/10")}>Cancel</button>
-                          <button onClick={handleAddPlaybook} className="text-xs font-semibold px-3 py-1.5 rounded bg-white text-black">Save Playbook</button>
+                          <button onClick={handleAddPlaybook} className="text-xs font-semibold px-3 py-1.5 rounded bg-white text-black">Save Template</button>
                         </div>
                       </div>
                     </motion.div>
                   )}
                 </AnimatePresence>
 
-                {/* Playbook cards — empty / list */}
+                {/* Template cards — empty / list */}
                 {playbooks.length === 0 ? (
                   <div className={cn("rounded-xl border p-10 text-center space-y-4", isDark ? "border-white/10 bg-white/[0.02]" : "border-black/10 bg-black/[0.02]")}>
                     <div className="mx-auto w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-500/20 to-cyan-500/20 flex items-center justify-center">
                       <Inbox className={cn("w-7 h-7", isDark ? "text-emerald-300" : "text-emerald-600")} />
                     </div>
-                    <h4 className={cn("text-base font-semibold", isDark ? "text-white" : "text-black")}>No rescue playbooks yet</h4>
+                    <h4 className={cn("text-base font-semibold", isDark ? "text-white" : "text-black")}>No action templates yet</h4>
                     <p className={cn("text-sm max-w-md mx-auto leading-relaxed", isDark ? "text-white/50" : "text-black/50")}>
-                      Playbooks define how your AI rescues at-risk customers — the channels, messaging, credits, and success criteria.
-                      Create your first one or they'll be auto-seeded on next API sync.
+                      Templates define how you respond to at-risk customers — the channel, messaging, and success criteria.
+                      Create your first one or they'll be auto-seeded on next sync.
                     </p>
                     <button
                       onClick={() => setIsAddingPlaybook(true)}
                       className={cn("inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium border transition-colors", isDark ? "bg-white text-black hover:bg-white/90" : "bg-black text-white hover:bg-black/90")}
                     >
-                      Create First Playbook
+                      Create First Template
                     </button>
                   </div>
                 ) : (
@@ -861,7 +832,7 @@ export default function KnowledgeBase({ isDark = true, activeSection }: Knowledg
                           <div className="space-y-1 flex-1">
                             <div className="flex items-center gap-2">
                               <input value={playbook.name} onChange={(event) => handleUpdatePlaybook(playbook.id, { name: event.target.value })} className={cn("text-sm font-semibold bg-transparent border-b focus:outline-none", isDark ? "text-white border-white/10" : "text-black border-black/10")} />
-                              <span className={cn("text-[10px] px-1.5 py-0.5 rounded border", isDark ? "border-white/10 text-white/35" : "border-black/10 text-black/35")}>API</span>
+                              <span className={cn("text-[10px] px-1.5 py-0.5 rounded border", isDark ? "border-white/10 text-white/35" : "border-black/10 text-black/35")}>{playbook.channels.join(', ')}</span>
                               {playbook.enabled && <span className={cn("text-[10px] px-1.5 py-0.5 rounded", isDark ? "bg-emerald-500/15 text-emerald-300" : "bg-emerald-50 text-emerald-700")}>Active</span>}
                             </div>
                             <input value={playbook.description} onChange={(event) => handleUpdatePlaybook(playbook.id, { description: event.target.value })} className={cn("w-full text-xs bg-transparent border-b focus:outline-none", isDark ? "text-white/65 border-white/10" : "text-black/65 border-black/10")} />
@@ -870,29 +841,21 @@ export default function KnowledgeBase({ isDark = true, activeSection }: Knowledg
                             <button onClick={() => handleUpdatePlaybook(playbook.id, { enabled: !playbook.enabled })} className={cn("inline-flex items-center gap-1 text-[11px] px-2 py-1 rounded-full border", playbook.enabled ? (isDark ? "border-emerald-400/35 bg-emerald-500/15 text-emerald-200" : "border-emerald-200 bg-emerald-50 text-emerald-700") : (isDark ? "border-white/10 bg-white/5 text-white/50" : "border-black/10 bg-black/5 text-black/50"))}>
                               {playbook.enabled ? 'On' : 'Off'}
                             </button>
-                            <button onClick={() => handleUpdatePlaybook(playbook.id, { abTestEnabled: !playbook.abTestEnabled })} className={cn("inline-flex items-center gap-1.5 text-[11px] px-2 py-1 rounded-full border", playbook.abTestEnabled ? (isDark ? "border-purple-400/35 bg-purple-500/15 text-purple-200" : "border-purple-200 bg-purple-50 text-purple-700") : (isDark ? "border-white/10 bg-white/5 text-white/70" : "border-black/10 bg-black/5 text-black/70"))}>
-                              <FlaskConical className="w-3 h-3" /> A/B
-                            </button>
                             <button onClick={() => handleDeletePlaybook(playbook.id)} className={cn("p-1.5 rounded-md", isDark ? "text-rose-300 hover:bg-rose-500/15" : "text-rose-700 hover:bg-rose-50")}>
                               <Trash2 className="w-4 h-4" />
                             </button>
                           </div>
                         </div>
                         <textarea value={playbook.messageTemplate} onChange={(event) => handleUpdatePlaybook(playbook.id, { messageTemplate: event.target.value, voiceScript: event.target.value })} rows={3} className={cn("w-full rounded-lg px-3 py-2 text-sm border resize-none focus:outline-none", isDark ? "border-white/10 bg-black/20 text-white" : "border-black/10 bg-white text-black")} />
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                          <label className="space-y-1"><span className={cn("text-[11px] uppercase tracking-wide", isDark ? "text-white/45" : "text-black/45")}>Credit (INR)</span><input type="number" value={playbook.creditAmountInr} onChange={(event) => handleUpdatePlaybook(playbook.id, { creditAmountInr: Number(event.target.value) })} className={cn("w-full rounded-lg px-2.5 py-1.5 text-sm border bg-transparent focus:outline-none", isDark ? "border-white/10 text-white" : "border-black/10 text-black")} /></label>
-                          <label className="space-y-1"><span className={cn("text-[11px] uppercase tracking-wide", isDark ? "text-white/45" : "text-black/45")}>Discount (%)</span><input type="number" value={playbook.discountPercent} onChange={(event) => handleUpdatePlaybook(playbook.id, { discountPercent: Number(event.target.value) })} className={cn("w-full rounded-lg px-2.5 py-1.5 text-sm border bg-transparent focus:outline-none", isDark ? "border-white/10 text-white" : "border-black/10 text-black")} /></label>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                           <label className="space-y-1"><span className={cn("text-[11px] uppercase tracking-wide", isDark ? "text-white/45" : "text-black/45")}>Success Criteria</span><input value={playbook.successCriteria} onChange={(event) => handleUpdatePlaybook(playbook.id, { successCriteria: event.target.value })} className={cn("w-full rounded-lg px-2.5 py-1.5 text-sm border bg-transparent focus:outline-none", isDark ? "border-white/10 text-white" : "border-black/10 text-black")} /></label>
-                        </div>
-                        <div className="flex flex-wrap gap-2">
-                          {(['whatsapp', 'voice', 'email', 'in_app'] as RescueChannel[]).map((channel) => {
-                            const active = playbook.channels.includes(channel);
-                            return (<button key={`${playbook.id}-${channel}`} onClick={() => { const channels = active ? playbook.channels.filter((item) => item !== channel) : [...playbook.channels, channel]; handleUpdatePlaybook(playbook.id, { channels: channels.length ? channels : playbook.channels }); }} className={cn("px-2.5 py-1 rounded-full text-xs border", active ? (isDark ? "border-emerald-400/35 bg-emerald-500/15 text-emerald-200" : "border-emerald-200 bg-emerald-50 text-emerald-700") : (isDark ? "border-white/10 bg-white/5 text-white/70" : "border-black/10 bg-black/5 text-black/70"))}>{channel}</button>);
-                          })}
-                        </div>
-                        <div className={cn("rounded-lg border px-3 py-2 text-xs", isDark ? "border-white/10 bg-black/20 text-white/70" : "border-black/10 bg-white text-black/70")}>
-                          <div className="flex items-center gap-1.5 mb-1"><Clock3 className="w-3.5 h-3.5" /> Version history</div>
-                          <p>Latest versions: {playbook.versions.slice(-3).map((version) => version.id).join(', ') || 'v1'}</p>
+                          <label className="space-y-1"><span className={cn("text-[11px] uppercase tracking-wide", isDark ? "text-white/45" : "text-black/45")}>Channel</span>
+                            <select value={playbook.channels[0] || 'email'} onChange={(event) => handleUpdatePlaybook(playbook.id, { channels: [event.target.value as RescueChannel] })} className={cn("w-full rounded-lg px-2.5 py-1.5 text-sm border bg-transparent focus:outline-none", isDark ? "border-white/10 text-white [&>option]:bg-[#09090B]" : "border-black/10 text-black")}>
+                              <option value="voice">Voice</option>
+                              <option value="email">Email</option>
+                              <option value="in_app">In-app</option>
+                            </select>
+                          </label>
                         </div>
                       </div>
                     ))}
