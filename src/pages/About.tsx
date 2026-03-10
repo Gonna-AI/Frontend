@@ -18,20 +18,37 @@ export default function About() {
         description="Learn about ClerkTree's mission to transform legal and claims operations with intelligent automation. Meet our team and see our vision."
         canonical="https://clerktree.com/about"
       />
-      {/* Blue theme background accents */}
+      {/* Orange/warm theme background accents matching main landing page */}
       <div className="fixed inset-0 bg-[rgb(10,10,10)] -z-10">
+        {/* Core warm light source top-right */}
         <div
-          className="absolute top-0 right-0 -translate-y-1/4 translate-x-1/4 w-96 md:w-[800px] h-96 md:h-[800px] opacity-40"
+          className="absolute top-[-10%] right-[-10%] w-[80%] h-[100%] pointer-events-none"
           style={{
-            background: 'radial-gradient(circle, rgba(59,130,246,0.6) 0%, rgba(59,130,246,0.25) 40%, transparent 100%)',
+            background: 'radial-gradient(circle at 70% 30%, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.06) 30%, transparent 60%)',
+            filter: 'blur(40px)',
+          }}
+        />
+        {/* Diagonal ray wash */}
+        <div
+          className="absolute top-0 right-0 w-full h-full pointer-events-none"
+          style={{
+            background: 'linear-gradient(215deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.015) 40%, transparent 65%)',
+          }}
+        />
+        {/* Subtle orange ambient glow */}
+        <div
+          className="absolute bottom-0 left-0 translate-y-1/4 -translate-x-1/4 w-72 md:w-[600px] h-72 md:h-[600px] opacity-20"
+          style={{
+            background: 'radial-gradient(circle, rgba(255,138,91,0.4) 0%, rgba(255,138,91,0.15) 40%, transparent 100%)',
             filter: 'blur(80px)',
           }}
         />
+        {/* Grainy noise overlay */}
         <div
-          className="absolute bottom-0 left-0 translate-y-1/4 -translate-x-1/4 w-72 md:w-[600px] h-72 md:h-[600px] opacity-30"
+          className="absolute inset-0 opacity-[0.035] pointer-events-none"
           style={{
-            background: 'radial-gradient(circle, rgba(29,78,216,0.5) 0%, rgba(29,78,216,0.2) 40%, transparent 100%)',
-            filter: 'blur(80px)',
+            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
+            backgroundSize: '128px 128px',
           }}
         />
       </div>
@@ -43,12 +60,11 @@ export default function About() {
 
           {/* Header */}
           <div className="text-center mb-20">
+            <p className="text-xs font-semibold uppercase tracking-[0.28em] text-[#FF8A5B] sm:text-sm mb-6">
+              {t('about.future')}
+            </p>
             <h1 className="text-5xl md:text-7xl font-bold tracking-tight">
               <span className="bg-gradient-to-r from-white via-white/95 to-white/90 text-transparent bg-clip-text">
-                {t('about.future')}
-              </span>
-              <br />
-              <span className="bg-gradient-to-r from-blue-400 via-cyan-400 to-blue-600 text-transparent bg-clip-text">
                 {t('about.opsIntel')}
               </span>
             </h1>
@@ -59,10 +75,10 @@ export default function About() {
             <div className="w-full max-w-5xl">
               <h2 className="text-4xl md:text-5xl font-bold text-white tracking-tight mb-12 text-center">{t('about.whyTitle')}</h2>
               <div>
-                <p className="text-lg md:text-xl text-white leading-relaxed">
+                <p className="text-lg md:text-xl text-white/80 leading-relaxed">
                   {t('about.whyDesc1')}
                 </p>
-                <p className="text-lg md:text-xl text-white leading-relaxed mt-6">
+                <p className="text-lg md:text-xl text-white/80 leading-relaxed mt-6">
                   {t('about.whyDesc2')}
                 </p>
               </div>
@@ -73,7 +89,7 @@ export default function About() {
           <div className="mb-20 flex justify-center">
             <div className="w-full max-w-5xl">
               <h3 className="text-4xl md:text-5xl font-bold text-white tracking-tight mb-12 text-center">{t('about.missionTitle')}</h3>
-              <p className="text-lg md:text-xl text-white leading-relaxed">
+              <p className="text-lg md:text-xl text-white/80 leading-relaxed">
                 {t('about.missionDesc')}
               </p>
             </div>
@@ -82,7 +98,7 @@ export default function About() {
           {/* Team Section */}
           <div className="mb-32 relative">
             {/* Background elements for modern feel */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-full bg-blue-500/5 blur-[120px] -z-10 rounded-full" />
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-full bg-[#FF8A5B]/5 blur-[120px] -z-10 rounded-full" />
 
             <div className="text-center mb-16 relative z-10">
               <h2 className="text-4xl md:text-5xl font-bold text-white tracking-tight mb-4">
@@ -147,9 +163,9 @@ export default function About() {
               ].map((member, index) => (
                 <div
                   key={index}
-                  className="group relative w-full sm:w-[calc(50%-2rem)] lg:w-[calc(33.33%-2rem)] xl:w-[calc(30%-2rem)] min-w-[320px] max-w-md grow rounded-3xl bg-white/5 border border-white/10 hover:border-blue-500/30 transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_0_30px_-5px_rgba(59,130,246,0.15)] overflow-hidden flex flex-col"
+                  className="group relative w-full sm:w-[calc(50%-2rem)] lg:w-[calc(33.33%-2rem)] xl:w-[calc(30%-2rem)] min-w-[320px] max-w-md grow rounded-3xl bg-white/5 border border-white/10 hover:border-[#FF8A5B]/30 transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_0_30px_-5px_rgba(255,138,91,0.15)] overflow-hidden flex flex-col"
                 >
-                  <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[#FF8A5B]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
                   {/* LinkedIn Icon - Top Right */}
                   {member.linkedin && (
@@ -172,7 +188,7 @@ export default function About() {
                   )}
 
                   <div className="p-6 flex flex-col items-center h-full relative z-10">
-                    <div className="w-28 h-28 mb-6 rounded-full p-[2px] bg-gradient-to-br from-white/10 to-white/5 group-hover:from-blue-500/50 group-hover:to-cyan-500/50 transition-all duration-500">
+                    <div className="w-28 h-28 mb-6 rounded-full p-[2px] bg-gradient-to-br from-white/10 to-white/5 group-hover:from-[#FF8A5B]/50 group-hover:to-orange-400/50 transition-all duration-500">
                       <div className="w-full h-full rounded-full overflow-hidden bg-black/50">
                         <img
                           src={member.image}
@@ -188,13 +204,13 @@ export default function About() {
                       </div>
                     </div>
 
-                    <h3 className="text-lg font-bold text-white mb-3 text-center tracking-tight group-hover:text-blue-200 transition-colors">
+                    <h3 className="text-lg font-bold text-white mb-3 text-center tracking-tight group-hover:text-[#FF8A5B] transition-colors">
                       {member.name}
                     </h3>
 
                     <div className="flex-grow flex items-start justify-center">
                       {member.description ? (
-                        <p className="text-sm text-white text-center leading-relaxed font-medium transition-colors">
+                        <p className="text-sm text-white/80 text-center leading-relaxed font-medium transition-colors">
                           {member.description}
                         </p>
                       ) : (
@@ -211,8 +227,8 @@ export default function About() {
 
 
           {/* CTA */}
-          <div className="text-center py-16 rounded-2xl border border-blue-500/20 bg-gradient-to-br from-blue-500/5 to-cyan-500/5 backdrop-blur-sm">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4 bg-gradient-to-r from-blue-400 to-cyan-400 text-transparent bg-clip-text">
+          <div className="text-center py-16 rounded-2xl border border-[#FF8A5B]/20 bg-gradient-to-br from-[#FF8A5B]/5 to-orange-500/5 backdrop-blur-sm">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 bg-gradient-to-r from-[#FF8A5B] to-orange-400 text-transparent bg-clip-text">
               {t('about.joinTitle')}
             </h2>
             <p className="text-white/60 mb-8 max-w-2xl mx-auto">
@@ -221,7 +237,7 @@ export default function About() {
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <button
                 onClick={() => navigate('/contact')}
-                className="px-8 py-4 rounded-xl bg-gradient-to-r from-blue-500/20 to-cyan-500/20 border-2 border-blue-500/30 text-white font-semibold hover:from-blue-500/30 hover:to-cyan-500/30 hover:border-blue-500/50 transition-all duration-300"
+                className="px-8 py-4 rounded-xl bg-[#E5E5E5] hover:bg-white text-black font-semibold transition-all duration-300"
               >
                 {t('about.getInTouch')}
               </button>
@@ -247,4 +263,3 @@ export default function About() {
     </div>
   );
 }
-
