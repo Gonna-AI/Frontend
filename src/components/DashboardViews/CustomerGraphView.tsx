@@ -1258,6 +1258,7 @@ export default function CustomerGraphView({ isDark = true }: CustomerGraphViewPr
             })}
           </div>
         )}
+      </section>
 
       <section
         className={cn(

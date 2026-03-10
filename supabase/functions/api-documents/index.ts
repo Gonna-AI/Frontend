@@ -192,10 +192,15 @@ Deno.serve(async (req: Request) => {
       let storedCount = 0;
       for (let i = 0; i < chunks.length; i++) {
         try {
-          const embedding = await embeddingModel.run(chunks[i], {
+          const embeddingResult = await embeddingModel.run(chunks[i], {
             mean_pool: true,
             normalize: true,
           });
+
+          // Ensure embedding is a plain array (not a stringified JSON)
+          const embedding = Array.isArray(embeddingResult)
+            ? embeddingResult
+            : Array.from(embeddingResult as Iterable<number>);
 
           const { error: insertErr } = await admin
             .from('kb_documents')
@@ -208,7 +213,7 @@ Deno.serve(async (req: Request) => {
                 chunk_index: i,
                 total_chunks: chunks.length,
               },
-              embedding: JSON.stringify(embedding),
+              embedding,
               user_id: user.id,
               document_id: documentId,
               chunk_index: i,
