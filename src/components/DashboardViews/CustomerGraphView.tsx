@@ -20,6 +20,8 @@ import {
   ShieldAlert,
   ShieldCheck,
   Sparkles,
+  TrendingDown,
+  TrendingUp,
   UserRound,
   XCircle,
   ZoomIn,
@@ -105,6 +107,35 @@ const GRAPH_HEIGHT = 660;
 const RANGE_OPTIONS = ['7d', '30d', '90d', 'all'] as const;
 const TYPE_OPTIONS = ['all', 'voice', 'text'] as const;
 
+const STATS_SNAPSHOT_KEY = 'clerktree_customer_graph_stats_snapshot_v1';
+
+interface StatsSnapshot {
+  totalCustomers: number;
+  totalEdges: number;
+  totalClusters: number;
+  highRiskClusters: number;
+  opportunityClusters: number;
+  capturedAt: string;
+}
+
+function loadStatsSnapshot(): StatsSnapshot | null {
+  try {
+    const raw = window.localStorage.getItem(STATS_SNAPSHOT_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw) as StatsSnapshot;
+  } catch {
+    return null;
+  }
+}
+
+function saveStatsSnapshot(stats: StatsSnapshot): void {
+  try {
+    window.localStorage.setItem(STATS_SNAPSHOT_KEY, JSON.stringify(stats));
+  } catch {
+    // Ignore storage failures.
+  }
+}
+
 function formatPercent(value: number): string {
   return `${Math.round(value * 100)}%`;
 }
@@ -182,6 +213,7 @@ export default function CustomerGraphView({ isDark = true }: CustomerGraphViewPr
   const [selectedClusterId, setSelectedClusterId] = useState<string | null>(null);
   const [hoveredProfileId, setHoveredProfileId] = useState<string | null>(null);
 
+  const [previousStats, setPreviousStats] = useState<StatsSnapshot | null>(null);
   const [renderedNodes, setRenderedNodes] = useState<VisualNode[]>([]);
   const [renderedLinks, setRenderedLinks] = useState<VisualLink[]>([]);
 
@@ -283,6 +315,24 @@ export default function CustomerGraphView({ isDark = true }: CustomerGraphViewPr
     if (!model) return;
     setGraphModelFromView(model);
   }, [model, setGraphModelFromView]);
+
+  useEffect(() => {
+    const prev = loadStatsSnapshot();
+    if (prev) setPreviousStats(prev);
+  }, []);
+
+  useEffect(() => {
+    if (!model) return;
+    const snapshot: StatsSnapshot = {
+      totalCustomers: model.stats.totalCustomers,
+      totalEdges: model.stats.totalEdges,
+      totalClusters: model.stats.totalClusters,
+      highRiskClusters: model.stats.highRiskClusters,
+      opportunityClusters: model.stats.opportunityClusters,
+      capturedAt: model.generatedAt,
+    };
+    saveStatsSnapshot(snapshot);
+  }, [model]);
 
   useEffect(() => {
     if (selectedPlaybookId || playbooks.length === 0) return;
@@ -935,6 +985,7 @@ export default function CustomerGraphView({ isDark = true }: CustomerGraphViewPr
         <MetricCard
           title={t('customerGraph.kpi.customers')}
           value={model?.stats.totalCustomers ?? 0}
+          previousValue={previousStats?.totalCustomers}
           icon={<UserRound className="w-4 h-4" />}
           color="cyan"
           isDark={isDark}
@@ -942,6 +993,7 @@ export default function CustomerGraphView({ isDark = true }: CustomerGraphViewPr
         <MetricCard
           title={t('customerGraph.kpi.clusters')}
           value={model?.stats.totalClusters ?? 0}
+          previousValue={previousStats?.totalClusters}
           icon={<Network className="w-4 h-4" />}
           color="blue"
           isDark={isDark}
@@ -949,6 +1001,7 @@ export default function CustomerGraphView({ isDark = true }: CustomerGraphViewPr
         <MetricCard
           title={t('customerGraph.kpi.edges')}
           value={model?.stats.totalEdges ?? 0}
+          previousValue={previousStats?.totalEdges}
           icon={<Sparkles className="w-4 h-4" />}
           color="purple"
           isDark={isDark}
@@ -956,6 +1009,7 @@ export default function CustomerGraphView({ isDark = true }: CustomerGraphViewPr
         <MetricCard
           title={t('customerGraph.kpi.risk')}
           value={model?.stats.highRiskClusters ?? 0}
+          previousValue={previousStats?.highRiskClusters}
           icon={<ShieldAlert className="w-4 h-4" />}
           color="orange"
           isDark={isDark}
@@ -963,6 +1017,7 @@ export default function CustomerGraphView({ isDark = true }: CustomerGraphViewPr
         <MetricCard
           title={t('customerGraph.kpi.opportunity')}
           value={model?.stats.opportunityClusters ?? 0}
+          previousValue={previousStats?.opportunityClusters}
           icon={<Brain className="w-4 h-4" />}
           color="emerald"
           isDark={isDark}
@@ -1650,6 +1705,11 @@ export default function CustomerGraphView({ isDark = true }: CustomerGraphViewPr
                     <p className={cn('text-sm font-semibold', isDark ? 'text-white' : 'text-black')}>
                       {getLabel(selectedProfile)}
                     </p>
+                    {selectedProfile.contact.email && (
+                      <p className={cn('text-[11px] mt-1', isDark ? 'text-white/50' : 'text-black/50')}>
+                        {selectedProfile.contact.email}
+                      </p>
+                    )}
                     <div className={cn('grid grid-cols-2 gap-2 mt-2 text-[11px]', isDark ? 'text-white/60' : 'text-black/60')}>
                       <div>
                         <p>{t('customerGraph.details.interactions')}</p>
@@ -1658,6 +1718,41 @@ export default function CustomerGraphView({ isDark = true }: CustomerGraphViewPr
                       <div>
                         <p>{t('customerGraph.details.lastSeen')}</p>
                         <p className={cn('font-semibold text-sm mt-0.5', isDark ? 'text-white' : 'text-black')}>{formatDate(selectedProfile.lastSeen)}</p>
+                      </div>
+                      <div>
+                        <p>Risk</p>
+                        <div className="flex items-center gap-1.5 mt-0.5">
+                          <div className={cn('h-1.5 rounded-full flex-1 overflow-hidden', isDark ? 'bg-white/10' : 'bg-black/10')}>
+                            <div
+                              className={cn(
+                                'h-full rounded-full',
+                                selectedProfile.riskScore >= 0.65
+                                  ? 'bg-rose-400'
+                                  : selectedProfile.riskScore >= 0.4
+                                    ? 'bg-amber-400'
+                                    : 'bg-emerald-400',
+                              )}
+                              style={{ width: `${Math.max(4, Math.round(selectedProfile.riskScore * 100))}%` }}
+                            />
+                          </div>
+                          <span className={cn('font-semibold text-xs', isDark ? 'text-white' : 'text-black')}>
+                            {Math.round(selectedProfile.riskScore * 100)}%
+                          </span>
+                        </div>
+                      </div>
+                      <div>
+                        <p>Opportunity</p>
+                        <div className="flex items-center gap-1.5 mt-0.5">
+                          <div className={cn('h-1.5 rounded-full flex-1 overflow-hidden', isDark ? 'bg-white/10' : 'bg-black/10')}>
+                            <div
+                              className="h-full rounded-full bg-cyan-400"
+                              style={{ width: `${Math.max(4, Math.round(selectedProfile.opportunityScore * 100))}%` }}
+                            />
+                          </div>
+                          <span className={cn('font-semibold text-xs', isDark ? 'text-white' : 'text-black')}>
+                            {Math.round(selectedProfile.opportunityScore * 100)}%
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -2345,16 +2440,28 @@ export default function CustomerGraphView({ isDark = true }: CustomerGraphViewPr
 function MetricCard({
   title,
   value,
+  previousValue,
   icon,
   color,
   isDark,
 }: {
   title: string;
   value: number;
+  previousValue?: number;
   icon: ReactNode;
   color: 'cyan' | 'blue' | 'purple' | 'orange' | 'emerald';
   isDark: boolean;
 }) {
+  const delta = previousValue !== undefined && previousValue !== 0
+    ? value - previousValue
+    : null;
+  const deltaPercent = delta !== null && previousValue
+    ? Math.round((delta / previousValue) * 100)
+    : null;
+  const isUp = delta !== null && delta > 0;
+  const isDown = delta !== null && delta < 0;
+  const isNeutral = delta === null || delta === 0;
+
   return (
     <div className={cn(
       'relative overflow-hidden rounded-xl border p-4',
@@ -2380,9 +2487,34 @@ function MetricCard({
           </span>
         </div>
 
-        <p className={cn('text-3xl font-semibold mt-2', isDark ? 'text-white' : 'text-black')}>
-          {value}
-        </p>
+        <div className="flex items-end gap-2 mt-2">
+          <p className={cn('text-3xl font-semibold', isDark ? 'text-white' : 'text-black')}>
+            {value}
+          </p>
+          {!isNeutral && deltaPercent !== null && (
+            <span className={cn(
+              'inline-flex items-center gap-0.5 text-[11px] font-semibold px-1.5 py-0.5 rounded-md mb-1',
+              isUp
+                ? (color === 'orange'
+                  ? (isDark ? 'bg-rose-500/15 text-rose-300' : 'bg-rose-50 text-rose-600')
+                  : (isDark ? 'bg-emerald-500/15 text-emerald-300' : 'bg-emerald-50 text-emerald-600'))
+                : (color === 'orange'
+                  ? (isDark ? 'bg-emerald-500/15 text-emerald-300' : 'bg-emerald-50 text-emerald-600')
+                  : (isDark ? 'bg-rose-500/15 text-rose-300' : 'bg-rose-50 text-rose-600')),
+            )}>
+              {isUp ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+              {isUp ? '+' : ''}{deltaPercent}%
+            </span>
+          )}
+          {isNeutral && previousValue !== undefined && (
+            <span className={cn(
+              'inline-flex items-center gap-0.5 text-[11px] font-medium px-1.5 py-0.5 rounded-md mb-1',
+              isDark ? 'bg-white/5 text-white/45' : 'bg-black/5 text-black/45',
+            )}>
+              -
+            </span>
+          )}
+        </div>
       </div>
     </div>
   );
