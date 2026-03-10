@@ -15,6 +15,7 @@ import {
     Layers,
     X,
     UploadCloud,
+    RotateCcw,
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useLanguage } from '../../contexts/LanguageContext';
@@ -69,6 +70,7 @@ export default function DocumentsView({ isDark = true }: { isDark?: boolean }) {
     const [processingProgress, setProcessingProgress] = useState<ProcessingProgress | null>(null);
     const [isDragging, setIsDragging] = useState(false);
     const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+    const [retryingDocId, setRetryingDocId] = useState<string | null>(null);
 
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -173,6 +175,32 @@ export default function DocumentsView({ isDark = true }: { isDark?: boolean }) {
         }
         setDeleteConfirmId(null);
     };
+
+    // ─── Retry failed document ────────────────────────────────
+    const handleRetry = useCallback(async (docId: string) => {
+        if (!user?.id || retryingDocId) return;
+
+        setRetryingDocId(docId);
+        setProcessingProgress({
+            stage: 'embedding',
+            current: 0,
+            total: 1,
+            message: 'Retrying document processing...',
+        });
+
+        const result = await ragService.retryDocument(
+            docId,
+            user.id,
+            (progress) => setProcessingProgress(progress),
+        );
+
+        if (result) {
+            await loadDocuments();
+        }
+
+        setRetryingDocId(null);
+        setTimeout(() => setProcessingProgress(null), 3000);
+    }, [user?.id, retryingDocId, loadDocuments]);
 
     // ─── Styles ───────────────────────────────────────────────
     const cardBg = isDark ? 'bg-[#121214] border-white/10' : 'bg-white border-gray-200';
@@ -396,13 +424,27 @@ export default function DocumentsView({ isDark = true }: { isDark?: boolean }) {
                                             </span>
                                         )}
                                         {doc.status === 'error' && (
-                                            <span className={cn(
-                                                "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium",
-                                                "bg-red-500/10 text-red-400 border border-red-500/20"
-                                            )}>
-                                                <AlertCircle className="w-3 h-3" />
-                                                {t('kbDocs.error')}
-                                            </span>
+                                            <div className="flex items-center gap-2">
+                                                <span className={cn(
+                                                    "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium",
+                                                    "bg-red-500/10 text-red-400 border border-red-500/20"
+                                                )}>
+                                                    <AlertCircle className="w-3 h-3" />
+                                                    {t('kbDocs.error')}
+                                                </span>
+                                                <button
+                                                    onClick={(e) => { e.stopPropagation(); handleRetry(doc.id); }}
+                                                    disabled={retryingDocId === doc.id}
+                                                    className={cn(
+                                                        "inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium transition-colors cursor-pointer",
+                                                        "bg-purple-500/10 text-purple-400 border border-purple-500/20 hover:bg-purple-500/20",
+                                                        "disabled:opacity-50 disabled:pointer-events-none"
+                                                    )}
+                                                >
+                                                    <RotateCcw className={cn("w-3 h-3", retryingDocId === doc.id && "animate-spin")} />
+                                                    Retry
+                                                </button>
+                                            </div>
                                         )}
 
                                         {/* Delete button */}

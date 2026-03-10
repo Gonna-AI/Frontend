@@ -195,6 +195,59 @@ class RAGService {
         return chunks;
     }
 
+    // ─── Friendly error messages for non-standard status codes ──
+    private getProcessingErrorMessage(status: number, serverError?: string): string {
+        if (serverError) return serverError;
+
+        switch (true) {
+            case status === 546:
+                return 'Document processing timed out — the file may be too large. Try a smaller document.';
+            case status >= 500 && status < 600:
+                return 'Server encountered an error while processing your document. Please try again.';
+            case status === 422:
+                return 'No text content could be extracted from this file.';
+            case status === 413:
+                return 'File is too large for the server to process.';
+            default:
+                return `Processing failed (status ${status})`;
+        }
+    }
+
+    // ─── Call edge function with retry for transient failures ──
+    private async callProcessEndpoint(
+        url: string,
+        headers: Record<string, string>,
+        body: string,
+        maxRetries: number = 2,
+    ): Promise<Response> {
+        const retryableStatuses = new Set([546, 502, 503, 504]);
+        let lastResponse: Response | null = null;
+
+        for (let attempt = 0; attempt <= maxRetries; attempt++) {
+            try {
+                lastResponse = await fetch(url, { method: 'POST', headers, body });
+
+                if (lastResponse.ok || !retryableStatuses.has(lastResponse.status)) {
+                    return lastResponse;
+                }
+
+                console.warn(
+                    `Edge function returned ${lastResponse.status}, retrying (${attempt + 1}/${maxRetries})...`,
+                );
+            } catch (networkErr) {
+                console.warn(`Network error on attempt ${attempt + 1}:`, networkErr);
+                if (attempt === maxRetries) throw networkErr;
+            }
+
+            // Exponential backoff: 2s, 4s
+            if (attempt < maxRetries) {
+                await new Promise((resolve) => setTimeout(resolve, 2000 * Math.pow(2, attempt)));
+            }
+        }
+
+        return lastResponse!;
+    }
+
     // ─── Full document processing pipeline (server-side via Edge Function) ──
     async processDocument(
         file: File,
@@ -245,20 +298,20 @@ class RAGService {
                 throw new Error('No active session — please sign in again');
             }
 
-            const response = await fetch(`${SUPABASE_URL}/functions/v1/api-documents/process-document`, {
-                method: 'POST',
-                headers: {
+            const response = await this.callProcessEndpoint(
+                `${SUPABASE_URL}/functions/v1/api-documents/process-document`,
+                {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${session.access_token}`,
                 },
-                body: JSON.stringify({
+                JSON.stringify({
                     documentId: documentRecord.id,
                     storagePath,
                     fileType,
                     fileName: file.name,
                     kbId,
                 }),
-            });
+            );
 
             // Parse response safely
             const responseText = await response.text();
@@ -267,11 +320,11 @@ class RAGService {
                 result = JSON.parse(responseText);
             } catch {
                 console.error('Edge function returned non-JSON:', responseText.substring(0, 200));
-                throw new Error(`Server returned an unexpected response (status ${response.status})`);
+                throw new Error(this.getProcessingErrorMessage(response.status));
             }
 
             if (!response.ok) {
-                throw new Error(result.error || `Processing failed (status ${response.status})`);
+                throw new Error(this.getProcessingErrorMessage(response.status, result.error));
             }
 
             // Stage 4: Done
@@ -311,6 +364,105 @@ class RAGService {
                 current: 0,
                 total: 0,
                 message: error instanceof Error ? error.message : 'Processing failed',
+            });
+
+            return null;
+        }
+    }
+
+    // ─── Retry processing for a failed document ──────────────────
+    async retryDocument(
+        documentId: string,
+        userId: string,
+        onProgress?: (progress: ProcessingProgress) => void,
+    ): Promise<UploadedDocument | null> {
+        try {
+            // Fetch the existing document record
+            const { data: doc, error: fetchErr } = await supabase
+                .from('kb_uploaded_documents')
+                .select('*')
+                .eq('id', documentId)
+                .eq('user_id', userId)
+                .single();
+
+            if (fetchErr || !doc) throw new Error('Document not found');
+            if (doc.status !== 'error') throw new Error('Document is not in error state');
+
+            // Reset status to processing
+            await supabase
+                .from('kb_uploaded_documents')
+                .update({ status: 'processing', error_message: null, updated_at: new Date().toISOString() })
+                .eq('id', documentId);
+
+            onProgress?.({ stage: 'embedding', current: 0, total: 1, message: 'Retrying document processing...' });
+
+            // Delete any previously stored chunks for this document
+            await supabase.from('kb_documents').delete().eq('document_id', documentId);
+
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session?.access_token) {
+                throw new Error('No active session — please sign in again');
+            }
+
+            const response = await this.callProcessEndpoint(
+                `${SUPABASE_URL}/functions/v1/api-documents/process-document`,
+                {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${session.access_token}`,
+                },
+                JSON.stringify({
+                    documentId: doc.id,
+                    storagePath: doc.storage_path,
+                    fileType: doc.file_type,
+                    fileName: doc.file_name,
+                    kbId: doc.kb_id,
+                }),
+            );
+
+            const responseText = await response.text();
+            let result: any;
+            try {
+                result = JSON.parse(responseText);
+            } catch {
+                throw new Error(this.getProcessingErrorMessage(response.status));
+            }
+
+            if (!response.ok) {
+                throw new Error(this.getProcessingErrorMessage(response.status, result.error));
+            }
+
+            onProgress?.({
+                stage: 'done',
+                current: result.chunk_count || 0,
+                total: result.total_chunks || 0,
+                message: `Processed ${result.chunk_count} chunks successfully`,
+            });
+
+            const { data: updatedDoc } = await supabase
+                .from('kb_uploaded_documents')
+                .select('*')
+                .eq('id', documentId)
+                .single();
+
+            return (updatedDoc as UploadedDocument) || null;
+
+        } catch (error) {
+            console.error('Document retry failed:', error);
+
+            await supabase
+                .from('kb_uploaded_documents')
+                .update({
+                    status: 'error',
+                    error_message: error instanceof Error ? error.message : 'Retry failed',
+                    updated_at: new Date().toISOString(),
+                })
+                .eq('id', documentId);
+
+            onProgress?.({
+                stage: 'error',
+                current: 0,
+                total: 0,
+                message: error instanceof Error ? error.message : 'Retry failed',
             });
 
             return null;

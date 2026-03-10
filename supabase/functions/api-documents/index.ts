@@ -185,8 +185,15 @@ Deno.serve(async (req: Request) => {
       }
 
       // 3. Chunk
-      const chunks = smartChunkText(text, 300, 50);
+      const allChunks = smartChunkText(text, 300, 50);
       const totalTokens = text.split(/\s+/).length;
+
+      // Cap chunks to prevent edge function timeouts (each embedding takes ~200-500ms)
+      const MAX_CHUNKS = 50;
+      const chunks = allChunks.slice(0, MAX_CHUNKS);
+      if (allChunks.length > MAX_CHUNKS) {
+        console.warn(`Document ${documentId}: truncated from ${allChunks.length} to ${MAX_CHUNKS} chunks to prevent timeout`);
+      }
 
       // 4. Embed + store each chunk
       let storedCount = 0;
@@ -306,9 +313,10 @@ Deno.serve(async (req: Request) => {
 
   } catch (err) {
     console.error('api-documents error:', err);
+    const message = err instanceof Error ? err.message : 'Internal server error';
     return new Response(
-      JSON.stringify({ error: err instanceof Error ? err.message : 'Internal server error' }),
-      { status: 500, headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' } },
+      JSON.stringify({ error: message }),
+      { status: 500, headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' } },
     );
   }
 });
