@@ -94,8 +94,9 @@ export default function Footer() {
         </svg>
       </div>
 
-      <div className="relative z-10 max-w-7xl mx-auto px-6 py-32">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-16">
+      <div className="relative z-10 px-6">
+        <div className="max-w-7xl mx-auto pt-32">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-16">
           {/* Product Links */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -219,12 +220,14 @@ export default function Footer() {
         </div>
 
         {/* Bottom Bar */}
+        </div>
+
         <motion.div
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
           transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.4, delay: 0.2 }}
-          className="pt-8 flex flex-col md:flex-row justify-between items-center gap-4"
+          className="pb-12 flex w-full items-center justify-center md:justify-end"
         >
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg relative overflow-hidden border border-white/10 bg-[#0C0C0C] flex items-center justify-center">
@@ -237,7 +240,6 @@ export default function Footer() {
               © {currentYear} ClerkTree Inc.
             </p>
           </div>
-
 
         </motion.div>
       </div>
