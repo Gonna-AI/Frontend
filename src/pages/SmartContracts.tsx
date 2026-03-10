@@ -137,7 +137,13 @@ const DocumentVerification = () => {
         const analysisResponse = await documentApi.analyzeDocuments();
 
         // Parse the JSON string from the analysis
-        const parsedAnalysis = JSON.parse(analysisResponse.data.documents[0].analysis.replace(/```json\n|\n```/g, ''));
+        let parsedAnalysis;
+        try {
+          parsedAnalysis = JSON.parse(analysisResponse.data.documents[0].analysis.replace(/```json\n|\n```/g, ''));
+        } catch {
+          console.error('Failed to parse document analysis JSON');
+          parsedAnalysis = null;
+        }
 
         setAiSuggestion(parsedAnalysis);
         setShowConfirmation(true);

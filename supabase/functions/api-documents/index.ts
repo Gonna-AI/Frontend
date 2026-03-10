@@ -29,8 +29,23 @@ function jsonResponse(data: unknown, status: number, cors: Record<string, string
   });
 }
 
-// ─── Embedding model (built-in, no external deps) ────────────────
-const embeddingModel = new Supabase.ai.Session('gte-small');
+// ─── Embedding model (lazy-init to avoid 546 boot crash) ─────────
+// Creating a Supabase.ai.Session at module scope crashes the function
+// if the AI runtime isn't available, producing a 546 before any
+// request is handled.  Deferring to first use fixes this.
+let _embeddingModel: any = null;
+
+function getEmbeddingModel() {
+  if (!_embeddingModel) {
+    if (typeof (globalThis as any).Supabase === 'undefined' || !(globalThis as any).Supabase?.ai?.Session) {
+      throw new Error(
+        'Supabase AI runtime is not available. Ensure the edge function is deployed to a project that supports Supabase.ai.',
+      );
+    }
+    _embeddingModel = new (globalThis as any).Supabase.ai.Session('gte-small');
+  }
+  return _embeddingModel;
+}
 
 // ─── Smart sentence-aware chunking ───────────────────────────────
 function smartChunkText(text: string, maxWords = 300, overlapWords = 50): string[] {
@@ -192,7 +207,7 @@ Deno.serve(async (req: Request) => {
       let storedCount = 0;
       for (let i = 0; i < chunks.length; i++) {
         try {
-          const embeddingResult = await embeddingModel.run(chunks[i], {
+          const embeddingResult = await getEmbeddingModel().run(chunks[i], {
             mean_pool: true,
             normalize: true,
           });

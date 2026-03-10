@@ -406,7 +406,7 @@ const AdminDashboard = () => {
           doc.priority,
           doc.type,
           new Date(doc.submittedAt).toLocaleString(),
-          doc.documents?.map(d => d.document_name).join(';')
+          (doc.documents ?? []).map(d => d.document_name).join(';')
         ].join(','))
       ].join('\n');
 
