@@ -248,22 +248,35 @@ class RAGService {
             } else {
                 // Use Edge Function for PDF and other complex formats
                 const { data: { session } } = await supabase.auth.getSession();
+                if (!session?.access_token) {
+                    throw new Error('No active session — please sign in again');
+                }
+
                 const response = await fetch(`${SUPABASE_URL}/functions/v1/api-documents/extract-text`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${session?.access_token}`,
+                        'Authorization': `Bearer ${session.access_token}`,
                     },
                     body: JSON.stringify({ storagePath, fileType }),
                 });
 
-                if (!response.ok) {
-                    const err = await response.json().catch(() => ({}));
-                    throw new Error(`Text extraction failed: ${(err as any).error || response.statusText}`);
+                // Read response body as text first to safely handle non-JSON responses
+                const responseText = await response.text();
+
+                let parsed: any;
+                try {
+                    parsed = JSON.parse(responseText);
+                } catch {
+                    console.error('Edge function returned non-JSON:', responseText.substring(0, 200));
+                    throw new Error(`Text extraction failed: server returned an unexpected response (status ${response.status})`);
                 }
 
-                const result = await response.json();
-                text = result.text;
+                if (!response.ok) {
+                    throw new Error(`Text extraction failed: ${parsed.error || response.statusText}`);
+                }
+
+                text = parsed.text;
             }
 
             if (!text || text.trim().length === 0) {
@@ -307,6 +320,11 @@ class RAGService {
 
                 if (insertErr) {
                     console.error(`Failed to store chunk ${i}:`, insertErr);
+                    // If the first chunk fails, surface the error immediately
+                    // (likely a FK or RLS issue that will affect all chunks)
+                    if (i === 0) {
+                        throw new Error(`Failed to store chunk: ${insertErr.message}`);
+                    }
                 }
             }
 
