@@ -1,7 +1,6 @@
 import { AlertTriangle, Sparkles, X } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import type { RescueOpportunity } from '../../types/rescuePlaybook';
-import { formatInrCompact } from '../../services/rescuePlaybookService';
 
 interface RescueAlertBannerProps {
   opportunities: RescueOpportunity[];
@@ -35,11 +34,11 @@ export default function RescueAlertBanner({
               <div className="flex items-center gap-2">
                 <AlertTriangle className="w-4 h-4" />
                 <p className="text-sm font-semibold">
-                  Rescue alert: {opportunity.generatedClusterName}
+                  At-risk cluster: {opportunity.generatedClusterName}
                 </p>
               </div>
               <p className={cn('text-xs', isDark ? 'text-orange-100/85' : 'text-orange-900/85')}>
-                Potential loss {formatInrCompact(opportunity.potentialLossInr)} · Risk {Math.round(opportunity.riskScore * 100)}% · Similarity {Math.round(opportunity.similarityScore * 100)}%
+                {opportunity.memberCount} customers · Risk {Math.round(opportunity.riskScore * 100)}% · Similarity {Math.round(opportunity.similarityScore * 100)}%
               </p>
               <div className="flex flex-wrap items-center gap-2 pt-1">
                 {onOpenGraph && (
@@ -65,7 +64,7 @@ export default function RescueAlertBanner({
                 'rounded-md p-1.5 transition-colors',
                 isDark ? 'hover:bg-white/10' : 'hover:bg-black/5',
               )}
-              aria-label="Dismiss rescue alert"
+              aria-label="Dismiss alert"
             >
               <X className="w-4 h-4" />
             </button>
