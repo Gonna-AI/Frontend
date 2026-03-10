@@ -3,7 +3,7 @@ import { Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../hooks/useTheme';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowRight, CheckCircle2, AlertCircle, Loader2, Moon, Sun, ArrowLeft } from 'lucide-react';
+import { ArrowRight, CheckCircle2, AlertCircle, Loader2, ArrowLeft } from 'lucide-react';
 import { cn } from '../lib/utils';
 
 type AuthView = 'signin' | 'signup' | 'forgot_password';
@@ -50,7 +50,7 @@ const AuthShell = ({ isDark, children }: { isDark: boolean; children: ReactNode 
 
 export default function AuthPage() {
     const { session, loading, signIn, signUp, signInWithGoogle, resetPassword } = useAuth();
-    const { isDark, toggleTheme } = useTheme();
+    const { isDark } = useTheme();
     const navigate = useNavigate();
 
     const [searchParams] = useSearchParams();
@@ -197,75 +197,8 @@ export default function AuthPage() {
     return (
         <AuthShell isDark={isDark}>
 
-            {/* Back to Home */}
-            <button
-                onClick={() => navigate('/')}
-                className={cn(
-                    "absolute top-6 left-6 z-50 inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-medium transition-all",
-                    isDark
-                        ? "border-white/10 bg-white/5 text-white/70 hover:text-white hover:border-white/20"
-                        : "border-black/10 bg-white/70 text-gray-700 hover:text-gray-900"
-                )}
-            >
-                <ArrowLeft className="w-3.5 h-3.5" />
-                Back to home
-            </button>
-
-            {/* Theme Toggle */}
-            <button
-                onClick={toggleTheme}
-                className={cn(
-                    "absolute top-6 right-6 z-50 p-2 rounded-full transition-all duration-300",
-                    isDark ? "bg-white/10 text-white hover:bg-white/20" : "bg-black/5 text-gray-700 hover:bg-black/10"
-                )}
-            >
-                {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-            </button>
-
             {/* Main Container */}
-            <div className="mx-auto flex min-h-screen w-full max-w-6xl flex-col items-center justify-start gap-10 px-4 py-12 sm:px-6 lg:flex-row lg:items-stretch lg:justify-center lg:py-16">
-
-                {/* Brand Panel */}
-                <div className="hidden lg:flex w-full max-w-sm flex-col justify-center">
-                    <div className={cn(
-                        "relative overflow-hidden rounded-3xl border p-8 shadow-[0_30px_80px_rgba(0,0,0,0.45)]",
-                        isDark
-                            ? "border-white/10 bg-[linear-gradient(135deg,#151515_0%,#0f0f0f_100%)]"
-                            : "border-gray-200 bg-white shadow-xl"
-                    )}>
-                        {isDark && (
-                            <>
-                                <div className="absolute inset-0 bg-[radial-gradient(120%_120%_at_top,rgba(255,77,0,0.08),transparent)]" />
-                                <GrainOverlay className="opacity-[0.18]" />
-                            </>
-                        )}
-                        <div className="relative z-10 space-y-6">
-                            <p className={cn("font-semibold uppercase tracking-[0.35em] text-xs", isDark ? "text-[#FF8A5B]" : "text-orange-500")}>
-                                ClerkTree
-                            </p>
-                            <h2 className={cn("text-3xl font-bold font-urbanist", isDark ? "text-white" : "text-gray-900")}>
-                                Autonomous ops, elegant UX.
-                            </h2>
-                            <p className={cn("text-sm leading-relaxed", isDark ? "text-white/60" : "text-gray-600")}>
-                                Access workflows, analytics, and API keys with the same premium look you see across the home and docs experience.
-                            </p>
-                            <div className="grid grid-cols-2 gap-3">
-                                <div className={cn("rounded-2xl border px-4 py-3", isDark ? "border-white/10 bg-white/5" : "border-gray-200 bg-gray-50")}>
-                                    <p className={cn("text-xs", isDark ? "text-white/40" : "text-gray-500")}>Latency</p>
-                                    <p className={cn("font-semibold", isDark ? "text-white" : "text-gray-900")}>120ms</p>
-                                </div>
-                                <div className={cn("rounded-2xl border px-4 py-3", isDark ? "border-white/10 bg-white/5" : "border-gray-200 bg-gray-50")}>
-                                    <p className={cn("text-xs", isDark ? "text-white/40" : "text-gray-500")}>Uptime</p>
-                                    <p className={cn("font-semibold", isDark ? "text-white" : "text-gray-900")}>99.98%</p>
-                                </div>
-                            </div>
-                            <div className={cn("flex items-center gap-2 text-xs", isDark ? "text-white/50" : "text-gray-500")}>
-                                <span className={cn("inline-flex h-2 w-2 rounded-full", isDark ? "bg-emerald-400" : "bg-emerald-500")} />
-                                Secure, audited infrastructure
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            <div className="mx-auto flex min-h-screen w-full max-w-2xl items-center justify-center px-4 py-12 sm:px-6">
 
                 {/* Card Wrapper */}
                 <motion.div
@@ -273,7 +206,7 @@ export default function AuthPage() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5 }}
                     className={cn(
-                        "relative w-full max-w-[520px] overflow-hidden rounded-[28px] border p-6 shadow-[0_30px_80px_rgba(0,0,0,0.45)] sm:p-8",
+                        "relative w-full max-w-md overflow-hidden rounded-[28px] border p-6 shadow-[0_30px_80px_rgba(0,0,0,0.45)] sm:p-8",
                         isDark
                             ? "bg-[linear-gradient(180deg,#141414_0%,#0b0b0b_100%)] border-white/10"
                             : "bg-white border-gray-200 shadow-xl"
@@ -290,7 +223,7 @@ export default function AuthPage() {
                     <div className="relative z-10 flex w-full flex-col">
 
                         {/* Logo */}
-                        <div className="flex items-center gap-3 mb-8">
+                        <div className="flex items-center justify-center gap-3 mb-8">
                             <div className={cn(
                                 "w-10 h-10 rounded-xl flex items-center justify-center border shadow-sm transition-all duration-300",
                                 isDark ? "bg-white/5 border-white/10" : "bg-white border-gray-200"
@@ -303,12 +236,9 @@ export default function AuthPage() {
                                     )}
                                 />
                             </div>
-                            <div>
-                                <p className={cn("text-[10px] uppercase tracking-[0.3em]", isDark ? "text-[#FF8A5B]" : "text-orange-500")}>ClerkTree</p>
-                                <span className={cn("text-lg font-semibold tracking-tight", isDark ? "text-white" : "text-gray-900")}>
-                                    Secure access
-                                </span>
-                            </div>
+                            <span className={cn("text-lg font-semibold tracking-tight", isDark ? "text-white" : "text-gray-900")}>
+                                ClerkTree
+                            </span>
                         </div>
 
                         {/* Header Text */}
