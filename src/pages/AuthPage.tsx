@@ -1,12 +1,52 @@
-import { useState, FormEvent } from 'react';
+import { useState, FormEvent, ReactNode } from 'react';
 import { Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../hooks/useTheme';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Mail, Lock, User, ArrowRight, CheckCircle2, AlertCircle, Loader2, Moon, Sun, ArrowLeft } from 'lucide-react';
+import { ArrowRight, CheckCircle2, AlertCircle, Loader2, Moon, Sun, ArrowLeft } from 'lucide-react';
 import { cn } from '../lib/utils';
 
 type AuthView = 'signin' | 'signup' | 'forgot_password';
+
+const GrainOverlay = ({ className = '' }: { className?: string }) => (
+    <div
+        className={cn(
+            'pointer-events-none absolute inset-0 opacity-[0.12] [mask-image:radial-gradient(ellipse_at_center,#fff,transparent_70%)]',
+            className
+        )}
+        style={{ backgroundImage: 'url(/noise.webp)', backgroundSize: '30%' }}
+    />
+);
+
+const AuthShell = ({ isDark, children }: { isDark: boolean; children: ReactNode }) => (
+    <div
+        className={cn(
+            'relative min-h-screen w-full overflow-x-hidden font-urbanist transition-colors duration-500',
+            isDark ? 'bg-[rgb(10,10,10)] text-white' : 'bg-[#f7f4f2] text-neutral-900'
+        )}
+    >
+        {isDark ? (
+            <>
+                <div
+                    className="pointer-events-none absolute top-[-10%] right-[-10%] w-[80%] h-[100%] opacity-90"
+                    style={{
+                        background: 'radial-gradient(circle at 70% 30%, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0.08) 30%, transparent 60%)',
+                        filter: 'blur(40px)',
+                    }}
+                />
+                <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(80%_60%_at_80%_0%,rgba(255,255,255,0.12),transparent)]" />
+                <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(215deg,rgba(255,255,255,0.08)_0%,rgba(255,255,255,0.02)_40%,transparent_70%)]" />
+                <div className="pointer-events-none absolute inset-0 opacity-[0.07]" style={{ backgroundImage: 'url(/noise.webp)', backgroundSize: '35%' }} />
+            </>
+        ) : (
+            <>
+                <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(80%_60%_at_80%_0%,rgba(255,77,0,0.12),transparent)]" />
+                <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(215deg,rgba(0,0,0,0.06)_0%,transparent_60%)]" />
+            </>
+        )}
+        <div className="relative z-10">{children}</div>
+    </div>
+);
 
 export default function AuthPage() {
     const { session, loading, signIn, signUp, signInWithGoogle, resetPassword } = useAuth();
@@ -86,56 +126,96 @@ export default function AuthPage() {
 
     if (loading) {
         return (
-            <div className={cn("min-h-screen flex items-center justify-center transition-colors duration-300", isDark ? "bg-[#09090B]" : "bg-gray-50")}>
-                <Loader2 className={cn("w-6 h-6 animate-spin", isDark ? "text-white/40" : "text-black/40")} />
-            </div>
+            <AuthShell isDark={isDark}>
+                <div className="flex min-h-screen items-center justify-center px-4">
+                    <div className={cn(
+                        "flex items-center gap-3 rounded-2xl border px-5 py-4",
+                        isDark ? "bg-black/60 border-white/10 text-white/70" : "bg-white border-gray-200 text-gray-600"
+                    )}>
+                        <Loader2 className={cn("w-5 h-5 animate-spin", isDark ? "text-white/60" : "text-gray-500")} />
+                        <span className="text-sm font-medium">Loading…</span>
+                    </div>
+                </div>
+            </AuthShell>
         );
     }
 
     // Success state (Email confirmation or Reset link sent)
     if (successMessage) {
         return (
-            <div className={cn("min-h-screen flex items-center justify-center p-4 transition-colors duration-300", isDark ? "bg-[#09090B]" : "bg-gray-50")}>
-                <motion.div
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    className={cn("w-full max-w-md p-8 rounded-2xl shadow-xl text-center border",
-                        isDark ? "bg-[#18181B] border-white/10" : "bg-white border-gray-100"
-                    )}
-                >
-                    <div className={cn("w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6",
-                        isDark ? "bg-emerald-500/10 text-emerald-400" : "bg-emerald-50 text-emerald-500"
-                    )}>
-                        <CheckCircle2 className="w-8 h-8" />
-                    </div>
-                    <h2 className={cn("text-2xl font-bold mb-2", isDark ? "text-white" : "text-gray-900")}>Check your email</h2>
-                    <p className={cn("text-sm mb-6", isDark ? "text-zinc-400" : "text-gray-500")}>
-                        {successMessage}
-                    </p>
-                    <button
-                        onClick={() => {
-                            setSuccessMessage('');
-                            setView('signin');
-                            setPassword('');
-                        }}
-                        className={cn("w-full py-2.5 rounded-lg text-sm font-medium transition-colors",
-                            isDark ? "bg-white text-black hover:bg-gray-200" : "bg-black text-white hover:bg-gray-800"
+            <AuthShell isDark={isDark}>
+                <div className="flex min-h-screen items-center justify-center p-4">
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className={cn(
+                            "relative w-full max-w-md overflow-hidden rounded-[28px] border p-8 text-center shadow-[0_30px_80px_rgba(0,0,0,0.45)]",
+                            isDark
+                                ? "bg-[linear-gradient(180deg,#141414_0%,#0b0b0b_100%)] border-white/10"
+                                : "bg-white border-gray-200 shadow-xl"
                         )}
                     >
-                        Back to Sign In
-                    </button>
-                </motion.div>
-            </div>
+                        {isDark && (
+                            <>
+                                <div className="absolute inset-0 bg-[radial-gradient(120%_120%_at_top,rgba(255,77,0,0.12),transparent)]" />
+                                <GrainOverlay className="opacity-[0.16]" />
+                            </>
+                        )}
+                        <div className="relative z-10">
+                            <div className={cn(
+                                "w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6",
+                                isDark ? "bg-emerald-500/10 text-emerald-400" : "bg-emerald-50 text-emerald-500"
+                            )}>
+                                <CheckCircle2 className="w-8 h-8" />
+                            </div>
+                            <h2 className={cn("text-2xl font-bold mb-2", isDark ? "text-white" : "text-gray-900")}>Check your email</h2>
+                            <p className={cn("text-sm mb-6", isDark ? "text-white/60" : "text-gray-500")}>
+                                {successMessage}
+                            </p>
+                            <button
+                                onClick={() => {
+                                    setSuccessMessage('');
+                                    setView('signin');
+                                    setPassword('');
+                                }}
+                                className={cn(
+                                    "w-full py-2.5 rounded-xl text-sm font-semibold transition-colors",
+                                    isDark
+                                        ? "bg-gradient-to-r from-[#FF4D00] to-[#FF8A5B] text-white hover:from-[#FF6A2A] hover:to-[#FF9B74]"
+                                        : "bg-black text-white hover:bg-gray-800"
+                                )}
+                            >
+                                Back to Sign In
+                            </button>
+                        </div>
+                    </motion.div>
+                </div>
+            </AuthShell>
         );
     }
 
     return (
-        <div className={cn("min-h-screen w-full flex transition-colors duration-500", isDark ? "bg-[#09090B]" : "bg-gray-50")}>
+        <AuthShell isDark={isDark}>
+
+            {/* Back to Home */}
+            <button
+                onClick={() => navigate('/')}
+                className={cn(
+                    "absolute top-6 left-6 z-50 inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-medium transition-all",
+                    isDark
+                        ? "border-white/10 bg-white/5 text-white/70 hover:text-white hover:border-white/20"
+                        : "border-black/10 bg-white/70 text-gray-700 hover:text-gray-900"
+                )}
+            >
+                <ArrowLeft className="w-3.5 h-3.5" />
+                Back to home
+            </button>
 
             {/* Theme Toggle */}
             <button
                 onClick={toggleTheme}
-                className={cn("absolute top-6 right-6 z-50 p-2 rounded-full transition-all duration-300",
+                className={cn(
+                    "absolute top-6 right-6 z-50 p-2 rounded-full transition-all duration-300",
                     isDark ? "bg-white/10 text-white hover:bg-white/20" : "bg-black/5 text-gray-700 hover:bg-black/10"
                 )}
             >
@@ -143,24 +223,76 @@ export default function AuthPage() {
             </button>
 
             {/* Main Container */}
-            <div className="flex w-full max-w-[500px] mx-auto min-h-screen lg:p-4 items-center justify-center">
+            <div className="mx-auto flex min-h-screen w-full max-w-6xl flex-col items-center justify-start gap-10 px-4 py-12 sm:px-6 lg:flex-row lg:items-stretch lg:justify-center lg:py-16">
+
+                {/* Brand Panel */}
+                <div className="hidden lg:flex w-full max-w-sm flex-col justify-center">
+                    <div className={cn(
+                        "relative overflow-hidden rounded-3xl border p-8 shadow-[0_30px_80px_rgba(0,0,0,0.45)]",
+                        isDark
+                            ? "border-white/10 bg-[linear-gradient(135deg,#151515_0%,#0f0f0f_100%)]"
+                            : "border-gray-200 bg-white shadow-xl"
+                    )}>
+                        {isDark && (
+                            <>
+                                <div className="absolute inset-0 bg-[radial-gradient(120%_120%_at_top,rgba(255,77,0,0.08),transparent)]" />
+                                <GrainOverlay className="opacity-[0.18]" />
+                            </>
+                        )}
+                        <div className="relative z-10 space-y-6">
+                            <p className={cn("font-semibold uppercase tracking-[0.35em] text-xs", isDark ? "text-[#FF8A5B]" : "text-orange-500")}>
+                                ClerkTree
+                            </p>
+                            <h2 className={cn("text-3xl font-bold font-urbanist", isDark ? "text-white" : "text-gray-900")}>
+                                Autonomous ops, elegant UX.
+                            </h2>
+                            <p className={cn("text-sm leading-relaxed", isDark ? "text-white/60" : "text-gray-600")}>
+                                Access workflows, analytics, and API keys with the same premium look you see across the home and docs experience.
+                            </p>
+                            <div className="grid grid-cols-2 gap-3">
+                                <div className={cn("rounded-2xl border px-4 py-3", isDark ? "border-white/10 bg-white/5" : "border-gray-200 bg-gray-50")}>
+                                    <p className={cn("text-xs", isDark ? "text-white/40" : "text-gray-500")}>Latency</p>
+                                    <p className={cn("font-semibold", isDark ? "text-white" : "text-gray-900")}>120ms</p>
+                                </div>
+                                <div className={cn("rounded-2xl border px-4 py-3", isDark ? "border-white/10 bg-white/5" : "border-gray-200 bg-gray-50")}>
+                                    <p className={cn("text-xs", isDark ? "text-white/40" : "text-gray-500")}>Uptime</p>
+                                    <p className={cn("font-semibold", isDark ? "text-white" : "text-gray-900")}>99.98%</p>
+                                </div>
+                            </div>
+                            <div className={cn("flex items-center gap-2 text-xs", isDark ? "text-white/50" : "text-gray-500")}>
+                                <span className={cn("inline-flex h-2 w-2 rounded-full", isDark ? "bg-emerald-400" : "bg-emerald-500")} />
+                                Secure, audited infrastructure
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
                 {/* Card Wrapper */}
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5 }}
-                    className={cn("w-full overflow-hidden rounded-[32px] border shadow-2xl transition-all duration-500",
-                        isDark ? "bg-[#121214] border-white/5 shadow-black/50" : "bg-white border-gray-200/50 shadow-xl shadow-gray-200/50"
+                    className={cn(
+                        "relative w-full max-w-[520px] overflow-hidden rounded-[28px] border p-6 shadow-[0_30px_80px_rgba(0,0,0,0.45)] sm:p-8",
+                        isDark
+                            ? "bg-[linear-gradient(180deg,#141414_0%,#0b0b0b_100%)] border-white/10"
+                            : "bg-white border-gray-200 shadow-xl"
                     )}
                 >
+                    {isDark && (
+                        <>
+                            <div className="absolute inset-0 bg-[radial-gradient(120%_120%_at_top,rgba(255,77,0,0.12),transparent)]" />
+                            <GrainOverlay className="opacity-[0.16]" />
+                        </>
+                    )}
 
                     {/* Form Container */}
-                    <div className="w-full flex flex-col justify-center p-8 md:p-10 relative bg-transparent z-10">
+                    <div className="relative z-10 flex w-full flex-col">
 
                         {/* Logo */}
-                        <div className="flex items-center gap-3 mb-10">
-                            <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center border shadow-sm transition-all duration-300",
+                        <div className="flex items-center gap-3 mb-8">
+                            <div className={cn(
+                                "w-10 h-10 rounded-xl flex items-center justify-center border shadow-sm transition-all duration-300",
                                 isDark ? "bg-white/5 border-white/10" : "bg-white border-gray-200"
                             )}>
                                 <img
@@ -171,9 +303,12 @@ export default function AuthPage() {
                                     )}
                                 />
                             </div>
-                            <span className={cn("text-xl font-bold tracking-tight", isDark ? "text-white" : "text-gray-900")}>
-                                ClerkTree
-                            </span>
+                            <div>
+                                <p className={cn("text-[10px] uppercase tracking-[0.3em]", isDark ? "text-[#FF8A5B]" : "text-orange-500")}>ClerkTree</p>
+                                <span className={cn("text-lg font-semibold tracking-tight", isDark ? "text-white" : "text-gray-900")}>
+                                    Secure access
+                                </span>
+                            </div>
                         </div>
 
                         {/* Header Text */}
@@ -181,7 +316,7 @@ export default function AuthPage() {
                             <h1 className={cn("text-3xl font-bold mb-2 tracking-tight", isDark ? "text-white" : "text-gray-900")}>
                                 {view === 'signup' ? 'Create an account' : view === 'forgot_password' ? 'Reset password' : 'Welcome back'}
                             </h1>
-                            <p className={cn("text-sm", isDark ? "text-zinc-400" : "text-gray-500")}>
+                            <p className={cn("text-sm", isDark ? "text-white/60" : "text-gray-500")}>
                                 {view === 'signup' ? 'Enter your details to get started.' : view === 'forgot_password' ? 'Enter your email to receive instructions.' : 'Login to your ClerkTree account.'}
                             </p>
                         </div>
@@ -191,17 +326,18 @@ export default function AuthPage() {
 
                             {view === 'signup' && (
                                 <div className="space-y-1.5">
-                                    <label className={cn("text-sm font-medium", isDark ? "text-zinc-300" : "text-gray-700")}>Full Name</label>
+                                    <label className={cn("text-sm font-medium", isDark ? "text-white/70" : "text-gray-700")}>Full Name</label>
                                     <div className="relative">
                                         <input
                                             type="text"
                                             value={fullName}
                                             onChange={(e) => setFullName(e.target.value)}
                                             placeholder="John Doe"
-                                            className={cn("w-full px-4 py-3 rounded-xl text-sm border focus:ring-2 focus:ring-offset-0 outline-none transition-all duration-200",
+                                            className={cn(
+                                                "w-full px-4 py-3 rounded-xl text-sm border focus:ring-2 focus:ring-offset-0 outline-none transition-all duration-200",
                                                 isDark
-                                                    ? "bg-zinc-900/50 border-zinc-800 text-white placeholder-zinc-500 focus:border-zinc-700 focus:ring-zinc-800"
-                                                    : "bg-gray-50 border-gray-200 text-gray-900 placeholder-gray-400 focus:border-gray-300 focus:ring-gray-100"
+                                                    ? "bg-black/60 border-white/10 text-white placeholder-white/30 focus:border-[#FF4D00]/50 focus:ring-[#FF4D00]/20"
+                                                    : "bg-white border-gray-200 text-gray-900 placeholder-gray-400 focus:border-orange-300 focus:ring-orange-100"
                                             )}
                                         />
                                     </div>
@@ -209,7 +345,7 @@ export default function AuthPage() {
                             )}
 
                             <div className="space-y-1.5">
-                                <label className={cn("text-sm font-medium", isDark ? "text-zinc-300" : "text-gray-700")}>Email</label>
+                                <label className={cn("text-sm font-medium", isDark ? "text-white/70" : "text-gray-700")}>Email</label>
                                 <div className="relative">
                                     <input
                                         type="email"
@@ -217,10 +353,11 @@ export default function AuthPage() {
                                         onChange={(e) => setEmail(e.target.value)}
                                         placeholder="name@example.com"
                                         required
-                                        className={cn("w-full px-4 py-3 rounded-xl text-sm border focus:ring-2 focus:ring-offset-0 outline-none transition-all duration-200",
+                                        className={cn(
+                                            "w-full px-4 py-3 rounded-xl text-sm border focus:ring-2 focus:ring-offset-0 outline-none transition-all duration-200",
                                             isDark
-                                                ? "bg-zinc-900/50 border-zinc-800 text-white placeholder-zinc-500 focus:border-zinc-700 focus:ring-zinc-800"
-                                                : "bg-gray-50 border-gray-200 text-gray-900 placeholder-gray-400 focus:border-gray-300 focus:ring-gray-100"
+                                                ? "bg-black/60 border-white/10 text-white placeholder-white/30 focus:border-[#FF4D00]/50 focus:ring-[#FF4D00]/20"
+                                                : "bg-white border-gray-200 text-gray-900 placeholder-gray-400 focus:border-orange-300 focus:ring-orange-100"
                                         )}
                                     />
                                 </div>
@@ -229,7 +366,7 @@ export default function AuthPage() {
                             {view !== 'forgot_password' && (
                                 <div className="space-y-1.5">
                                     <div className="flex items-center justify-between">
-                                        <label className={cn("text-sm font-medium", isDark ? "text-zinc-300" : "text-gray-700")}>Password</label>
+                                        <label className={cn("text-sm font-medium", isDark ? "text-white/70" : "text-gray-700")}>Password</label>
                                         {view === 'signin' && (
                                             <button
                                                 type="button"
@@ -237,7 +374,7 @@ export default function AuthPage() {
                                                     setView('forgot_password');
                                                     setError('');
                                                 }}
-                                                className={cn("text-xs font-medium hover:underline", isDark ? "text-zinc-400 hover:text-white" : "text-gray-500 hover:text-gray-900")}
+                                                className={cn("text-xs font-medium hover:underline", isDark ? "text-white/50 hover:text-white" : "text-gray-500 hover:text-gray-900")}
                                             >
                                                 Forgot your password?
                                             </button>
@@ -251,10 +388,11 @@ export default function AuthPage() {
                                             placeholder={view === 'signup' ? "Create a password" : "Enter your password"}
                                             required
                                             minLength={6}
-                                            className={cn("w-full px-4 py-3 rounded-xl text-sm border focus:ring-2 focus:ring-offset-0 outline-none transition-all duration-200",
+                                            className={cn(
+                                                "w-full px-4 py-3 rounded-xl text-sm border focus:ring-2 focus:ring-offset-0 outline-none transition-all duration-200",
                                                 isDark
-                                                    ? "bg-zinc-900/50 border-zinc-800 text-white placeholder-zinc-500 focus:border-zinc-700 focus:ring-zinc-800"
-                                                    : "bg-gray-50 border-gray-200 text-gray-900 placeholder-gray-400 focus:border-gray-300 focus:ring-gray-100"
+                                                    ? "bg-black/60 border-white/10 text-white placeholder-white/30 focus:border-[#FF4D00]/50 focus:ring-[#FF4D00]/20"
+                                                    : "bg-white border-gray-200 text-gray-900 placeholder-gray-400 focus:border-orange-300 focus:ring-orange-100"
                                             )}
                                         />
                                     </div>
@@ -268,8 +406,9 @@ export default function AuthPage() {
                                         initial={{ opacity: 0, height: 0 }}
                                         animate={{ opacity: 1, height: 'auto' }}
                                         exit={{ opacity: 0, height: 0 }}
-                                        className={cn("text-xs flex items-center gap-2 p-3 rounded-lg border",
-                                            isDark ? "bg-blue-500/10 border-blue-500/20 text-blue-400" : "bg-blue-50 border-blue-200 text-blue-600"
+                                        className={cn(
+                                            "text-xs flex items-center gap-2 p-3 rounded-lg border",
+                                            isDark ? "bg-[#FF4D00]/10 border-[#FF4D00]/20 text-[#FFB286]" : "bg-orange-50 border-orange-200 text-orange-600"
                                         )}
                                     >
                                         <CheckCircle2 className="w-4 h-4" />
@@ -281,8 +420,9 @@ export default function AuthPage() {
                                         initial={{ opacity: 0, height: 0 }}
                                         animate={{ opacity: 1, height: 'auto' }}
                                         exit={{ opacity: 0, height: 0 }}
-                                        className={cn("text-xs flex items-center gap-2 p-3 rounded-lg border",
-                                            isDark ? "bg-red-500/10 border-red-500/20 text-red-400" : "bg-red-50 border-red-200 text-red-600"
+                                        className={cn(
+                                            "text-xs flex items-center gap-2 p-3 rounded-lg border",
+                                            isDark ? "bg-red-500/10 border-red-500/20 text-red-300" : "bg-red-50 border-red-200 text-red-600"
                                         )}
                                     >
                                         <AlertCircle className="w-4 h-4" />
@@ -295,9 +435,10 @@ export default function AuthPage() {
                             <button
                                 type="submit"
                                 disabled={submitting}
-                                className={cn("w-full py-3 rounded-xl text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none",
+                                className={cn(
+                                    "w-full py-3 rounded-xl text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none",
                                     isDark
-                                        ? "bg-white text-black hover:bg-gray-100 shadow-white/5"
+                                        ? "bg-gradient-to-r from-[#FF4D00] to-[#FF8A5B] text-white hover:from-[#FF6A2A] hover:to-[#FF9B74] shadow-[#FF4D00]/20"
                                         : "bg-black text-white hover:bg-gray-800 shadow-black/10"
                                 )}
                             >
@@ -320,8 +461,9 @@ export default function AuthPage() {
                                         setView('signin');
                                         setError('');
                                     }}
-                                    className={cn("w-full flex items-center justify-center gap-2 text-sm transition-colors",
-                                        isDark ? "text-zinc-400 hover:text-white" : "text-gray-500 hover:text-gray-900"
+                                    className={cn(
+                                        "w-full flex items-center justify-center gap-2 text-sm transition-colors",
+                                        isDark ? "text-white/50 hover:text-white" : "text-gray-500 hover:text-gray-900"
                                     )}
                                 >
                                     <ArrowLeft className="w-4 h-4" />
@@ -337,7 +479,7 @@ export default function AuthPage() {
                                         <div className={cn("w-full border-t", isDark ? "border-white/10" : "border-gray-200")} />
                                     </div>
                                     <div className="relative flex justify-center text-xs uppercase">
-                                        <span className={cn("px-2 font-medium tracking-wider", isDark ? "bg-[#121214] text-zinc-500" : "bg-white text-gray-400")}>
+                                        <span className={cn("px-2 font-medium tracking-wider", isDark ? "bg-[#0f0f0f] text-white/40" : "bg-white text-gray-400")}>
                                             Or continue with
                                         </span>
                                     </div>
@@ -345,7 +487,8 @@ export default function AuthPage() {
 
                                 <button
                                     onClick={handleGoogleSignIn}
-                                    className={cn("w-full flex items-center justify-center gap-3 px-4 py-3 rounded-xl border transition-all duration-200 hover:bg-opacity-50",
+                                    className={cn(
+                                        "w-full flex items-center justify-center gap-3 px-4 py-3 rounded-xl border transition-all duration-200 hover:bg-opacity-50",
                                         isDark
                                             ? "bg-white/5 border-white/10 hover:bg-white/10 text-white"
                                             : "bg-white border-gray-200 hover:bg-gray-50 text-gray-700"
@@ -361,7 +504,7 @@ export default function AuthPage() {
                                 </button>
 
                                 <div className="mt-8 text-center text-sm">
-                                    <span className={cn(isDark ? "text-zinc-500" : "text-gray-500")}>
+                                    <span className={cn(isDark ? "text-white/50" : "text-gray-500")}>
                                         {view === 'signup' ? "Already have an account?" : "Don't have an account?"}
                                     </span>
                                     {' '}
@@ -379,7 +522,7 @@ export default function AuthPage() {
                         )}
 
                         {/* Legal Links Footer */}
-                        <div className="mt-auto pt-8 flex justify-center gap-6 text-xs text-opacity-50">
+                        <div className="mt-10 flex justify-center gap-6 text-xs text-opacity-50">
                             <a href="/terms" className={cn("hover:underline", isDark ? "text-white/40 hover:text-white" : "text-gray-400 hover:text-gray-600")}>Terms</a>
                             <a href="/privacy" className={cn("hover:underline", isDark ? "text-white/40 hover:text-white" : "text-gray-400 hover:text-gray-600")}>Privacy</a>
                         </div>
@@ -390,6 +533,6 @@ export default function AuthPage() {
 
                 </motion.div>
             </div>
-        </div>
+        </AuthShell>
     );
 }
