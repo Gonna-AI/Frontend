@@ -245,33 +245,65 @@ class RAGService {
                 throw new Error('No active session — please sign in again');
             }
 
-            const response = await fetch(`${SUPABASE_URL}/functions/v1/api-documents/process-document`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${session.access_token}`,
-                },
-                body: JSON.stringify({
-                    documentId: documentRecord.id,
-                    storagePath,
-                    fileType,
-                    fileName: file.name,
-                    kbId,
-                }),
+            const requestBody = JSON.stringify({
+                documentId: documentRecord.id,
+                storagePath,
+                fileType,
+                fileName: file.name,
+                kbId,
             });
 
-            // Parse response safely
-            const responseText = await response.text();
+            // Retry logic for transient edge function errors (e.g. 546 boot failures)
+            const MAX_RETRIES = 3;
+            let response: Response | null = null;
             let result: any;
-            try {
-                result = JSON.parse(responseText);
-            } catch {
-                console.error('Edge function returned non-JSON:', responseText.substring(0, 200));
-                throw new Error(`Server returned an unexpected response (status ${response.status})`);
+
+            for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+                try {
+                    response = await fetch(`${SUPABASE_URL}/functions/v1/api-documents/process-document`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${session.access_token}`,
+                        },
+                        body: requestBody,
+                    });
+
+                    // Parse response safely
+                    const responseText = await response.text();
+                    try {
+                        result = JSON.parse(responseText);
+                    } catch {
+                        console.error('Edge function returned non-JSON:', responseText.substring(0, 200));
+                        // Retry on non-JSON responses (boot failures return HTML/text)
+                        if (attempt < MAX_RETRIES - 1) {
+                            console.warn(`Retrying edge function call (attempt ${attempt + 2}/${MAX_RETRIES})...`);
+                            await new Promise(r => setTimeout(r, 2000 * (attempt + 1)));
+                            continue;
+                        }
+                        throw new Error(`Server returned an unexpected response (status ${response.status})`);
+                    }
+
+                    // Retry on 5xx errors (including 546 boot failures)
+                    if (response.status >= 500 && attempt < MAX_RETRIES - 1) {
+                        console.warn(`Edge function returned ${response.status}, retrying (attempt ${attempt + 2}/${MAX_RETRIES})...`);
+                        await new Promise(r => setTimeout(r, 2000 * (attempt + 1)));
+                        continue;
+                    }
+
+                    break; // Success or non-retryable error
+                } catch (fetchErr) {
+                    if (attempt < MAX_RETRIES - 1) {
+                        console.warn(`Fetch failed, retrying (attempt ${attempt + 2}/${MAX_RETRIES})...`, fetchErr);
+                        await new Promise(r => setTimeout(r, 2000 * (attempt + 1)));
+                        continue;
+                    }
+                    throw fetchErr;
+                }
             }
 
-            if (!response.ok) {
-                throw new Error(result.error || `Processing failed (status ${response.status})`);
+            if (!response || !response.ok) {
+                throw new Error(result?.error || `Processing failed (status ${response?.status})`);
             }
 
             // Stage 4: Done

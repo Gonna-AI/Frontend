@@ -32,24 +32,48 @@ async function apiFetch<T>(
     Object.entries(queryParams).forEach(([key, value]) => url.searchParams.set(key, value));
   }
 
-  const response = await fetch(url.toString(), {
-    method,
-    headers,
-    ...(body ? { body: JSON.stringify(body) } : {}),
-  });
+  const MAX_RETRIES = 2;
+  let lastError: Error | null = null;
 
-  if (!response.ok) {
-    let errorMessage = `API error: ${response.status}`;
+  for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
     try {
-      const errorData = await response.json();
-      if (errorData.error) errorMessage = errorData.error;
-    } catch {
-      // ignore
+      const response = await fetch(url.toString(), {
+        method,
+        headers,
+        ...(body ? { body: JSON.stringify(body) } : {}),
+      });
+
+      // Retry on 5xx (edge function boot failures)
+      if (response.status >= 500 && attempt < MAX_RETRIES) {
+        console.warn(`Rescue API ${resource} returned ${response.status}, retrying (${attempt + 1}/${MAX_RETRIES})...`);
+        await new Promise((r) => setTimeout(r, 1500 * (attempt + 1)));
+        continue;
+      }
+
+      if (!response.ok) {
+        let errorMessage = `API error: ${response.status}`;
+        try {
+          const errorData = await response.json();
+          if (errorData.error) errorMessage = errorData.error;
+        } catch {
+          // ignore
+        }
+        throw new Error(errorMessage);
+      }
+
+      return await response.json();
+    } catch (err) {
+      lastError = err instanceof Error ? err : new Error(String(err));
+      if (attempt < MAX_RETRIES && !(lastError.message.startsWith('API error'))) {
+        console.warn(`Rescue API ${resource} fetch failed, retrying (${attempt + 1}/${MAX_RETRIES})...`);
+        await new Promise((r) => setTimeout(r, 1500 * (attempt + 1)));
+        continue;
+      }
+      throw lastError;
     }
-    throw new Error(errorMessage);
   }
 
-  return response.json();
+  throw lastError || new Error(`Failed to fetch ${resource}`);
 }
 
 // ────── Playbooks ──────

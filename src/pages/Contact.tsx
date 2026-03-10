@@ -71,20 +71,37 @@ const Contact = () => {
         description="Get in touch with ClerkTree. Speak with our team about automating your legal and claims operations."
         canonical="https://clerktree.com/contact"
       />
-      {/* Red theme background accents */}
+      {/* Orange/warm theme background accents matching main landing page */}
       <div className="fixed inset-0 bg-[rgb(10,10,10)] -z-10">
+        {/* Core warm light source top-right */}
         <div
-          className="absolute top-0 right-0 -translate-y-1/4 translate-x-1/4 w-96 md:w-[800px] h-96 md:h-[800px] opacity-40"
+          className="absolute top-[-10%] right-[-10%] w-[80%] h-[100%] pointer-events-none"
           style={{
-            background: 'radial-gradient(circle, rgba(239,68,68,0.6) 0%, rgba(239,68,68,0.25) 40%, transparent 100%)',
+            background: 'radial-gradient(circle at 70% 30%, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.06) 30%, transparent 60%)',
+            filter: 'blur(40px)',
+          }}
+        />
+        {/* Diagonal ray wash */}
+        <div
+          className="absolute top-0 right-0 w-full h-full pointer-events-none"
+          style={{
+            background: 'linear-gradient(215deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.015) 40%, transparent 65%)',
+          }}
+        />
+        {/* Subtle orange ambient glow */}
+        <div
+          className="absolute bottom-0 left-0 translate-y-1/4 -translate-x-1/4 w-72 md:w-[600px] h-72 md:h-[600px] opacity-20"
+          style={{
+            background: 'radial-gradient(circle, rgba(255,138,91,0.4) 0%, rgba(255,138,91,0.15) 40%, transparent 100%)',
             filter: 'blur(80px)',
           }}
         />
+        {/* Grainy noise overlay */}
         <div
-          className="absolute bottom-0 left-0 translate-y-1/4 -translate-x-1/4 w-72 md:w-[600px] h-72 md:h-[600px] opacity-30"
+          className="absolute inset-0 opacity-[0.035] pointer-events-none"
           style={{
-            background: 'radial-gradient(circle, rgba(185,28,28,0.5) 0%, rgba(185,28,28,0.2) 40%, transparent 100%)',
-            filter: 'blur(80px)',
+            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
+            backgroundSize: '128px 128px',
           }}
         />
       </div>
@@ -97,12 +114,11 @@ const Contact = () => {
 
           {/* Header */}
           <div className="text-center mb-16">
+            <p className="text-xs font-semibold uppercase tracking-[0.28em] text-[#FF8A5B] sm:text-sm mb-6">
+              {t('contact.title1')}
+            </p>
             <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-6">
               <span className="bg-gradient-to-r from-white via-white/95 to-white/90 text-transparent bg-clip-text">
-                {t('contact.title1')}
-              </span>
-              <br />
-              <span className="bg-gradient-to-r from-red-400 via-rose-400 to-red-600 text-transparent bg-clip-text">
                 {t('contact.title2')}
               </span>
             </h1>
@@ -113,30 +129,30 @@ const Contact = () => {
 
           {/* Contact Info Cards */}
           <div className="grid md:grid-cols-3 gap-6 mb-16 max-w-5xl mx-auto">
-            <div className="group rounded-3xl border border-white/10 bg-white/[0.02] backdrop-blur-xl p-6 hover:border-red-500/30 hover:bg-white/[0.04] transition-all duration-300 text-center">
-              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-red-500/10 to-rose-500/10 border border-red-500/20 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
-                <Phone className="w-6 h-6 text-red-400" />
+            <div className="group rounded-3xl border border-white/10 bg-white/[0.02] backdrop-blur-xl p-6 hover:border-[#FF8A5B]/30 hover:bg-white/[0.04] transition-all duration-300 text-center">
+              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#FF8A5B]/10 to-orange-500/10 border border-[#FF8A5B]/20 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
+                <Phone className="w-6 h-6 text-[#FF8A5B]" />
               </div>
               <h3 className="font-semibold mb-2 text-white/90 text-lg">{t('contact.phone')}</h3>
-              <a href="tel:+4917683075116" className="text-white/60 hover:text-red-400 transition-colors text-sm block">
+              <a href="tel:+4917683075116" className="text-white/60 hover:text-[#FF8A5B] transition-colors text-sm block">
                 +49 176 83075116
               </a>
             </div>
-            <div className="group rounded-3xl border border-white/10 bg-white/[0.02] backdrop-blur-xl p-6 hover:border-red-500/30 hover:bg-white/[0.04] transition-all duration-300 text-center">
-              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-red-500/10 to-rose-500/10 border border-red-500/20 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
-                <MapPin className="w-6 h-6 text-red-400" />
+            <div className="group rounded-3xl border border-white/10 bg-white/[0.02] backdrop-blur-xl p-6 hover:border-[#FF8A5B]/30 hover:bg-white/[0.04] transition-all duration-300 text-center">
+              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#FF8A5B]/10 to-orange-500/10 border border-[#FF8A5B]/20 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
+                <MapPin className="w-6 h-6 text-[#FF8A5B]" />
               </div>
               <h3 className="font-semibold mb-2 text-white/90 text-lg">{t('contact.location')}</h3>
               <p className="text-white/60 text-sm">
                 Industriestraße 2<br />94315 Straubing, Germany
               </p>
             </div>
-            <div className="group rounded-3xl border border-white/10 bg-white/[0.02] backdrop-blur-xl p-6 hover:border-red-500/30 hover:bg-white/[0.04] transition-all duration-300 text-center">
-              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-red-500/10 to-rose-500/10 border border-red-500/20 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
-                <Mail className="w-6 h-6 text-red-400" />
+            <div className="group rounded-3xl border border-white/10 bg-white/[0.02] backdrop-blur-xl p-6 hover:border-[#FF8A5B]/30 hover:bg-white/[0.04] transition-all duration-300 text-center">
+              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#FF8A5B]/10 to-orange-500/10 border border-[#FF8A5B]/20 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
+                <Mail className="w-6 h-6 text-[#FF8A5B]" />
               </div>
               <h3 className="font-semibold mb-2 text-white/90 text-lg">{t('contact.email')}</h3>
-              <a href="mailto:team@clerktree.com" className="text-white/60 hover:text-red-400 transition-colors text-sm block">
+              <a href="mailto:team@clerktree.com" className="text-white/60 hover:text-[#FF8A5B] transition-colors text-sm block">
                 team@clerktree.com
               </a>
             </div>
@@ -145,7 +161,7 @@ const Contact = () => {
           {/* Contact Form */}
           <div className="max-w-3xl mx-auto rounded-3xl border border-white/10 bg-white/[0.02] backdrop-blur-xl p-8 md:p-12 shadow-2xl shadow-black/50 relative overflow-hidden">
             {/* Decorative gradient glow */}
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-1 bg-gradient-to-r from-transparent via-red-500/50 to-transparent" />
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-1 bg-gradient-to-r from-transparent via-[#FF8A5B]/50 to-transparent" />
 
             <div className="text-center mb-10">
               <h2 className="text-3xl md:text-4xl font-bold mb-4 bg-gradient-to-r from-white via-white/90 to-white/70 text-transparent bg-clip-text">
@@ -158,8 +174,8 @@ const Contact = () => {
 
             {submitStatus === 'success' ? (
               <div className="text-center py-16 animate-in fade-in zoom-in duration-500">
-                <div className="w-20 h-20 bg-green-500/10 rounded-full flex items-center justify-center mx-auto mb-6 border border-green-500/20">
-                  <CheckCircle2 className="w-10 h-10 text-green-500" />
+                <div className="w-20 h-20 bg-emerald-500/10 rounded-full flex items-center justify-center mx-auto mb-6 border border-emerald-500/20">
+                  <CheckCircle2 className="w-10 h-10 text-emerald-500" />
                 </div>
                 <h3 className="text-2xl font-bold text-white mb-3">{t('contact.successTitle')}</h3>
                 <p className="text-white/60">{t('contact.successDesc')}</p>
@@ -170,7 +186,7 @@ const Contact = () => {
                 <div className="grid md:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <label htmlFor="fullName" className="text-sm font-medium text-white/70 ml-1">
-                      {t('contact.fullName')} <span className="text-red-500">*</span>
+                      {t('contact.fullName')} <span className="text-[#FF8A5B]">*</span>
                     </label>
                     <input
                       type="text"
@@ -179,13 +195,13 @@ const Contact = () => {
                       required
                       value={formData.fullName}
                       onChange={handleChange}
-                      className="w-full px-5 py-3.5 rounded-xl bg-white/[0.03] border border-white/10 text-white placeholder-white/20 focus:outline-none focus:border-red-500/50 focus:bg-white/[0.05] focus:ring-4 focus:ring-red-500/10 transition-all duration-300"
+                      className="w-full px-5 py-3.5 rounded-xl bg-white/[0.03] border border-white/10 text-white placeholder-white/20 focus:outline-none focus:border-[#FF8A5B]/50 focus:bg-white/[0.05] focus:ring-4 focus:ring-[#FF8A5B]/10 transition-all duration-300"
                       placeholder="John Doe"
                     />
                   </div>
                   <div className="space-y-2">
                     <label htmlFor="companyName" className="text-sm font-medium text-white/70 ml-1">
-                      {t('contact.companyName')} <span className="text-red-500">*</span>
+                      {t('contact.companyName')} <span className="text-[#FF8A5B]">*</span>
                     </label>
                     <input
                       type="text"
@@ -194,7 +210,7 @@ const Contact = () => {
                       required
                       value={formData.companyName}
                       onChange={handleChange}
-                      className="w-full px-5 py-3.5 rounded-xl bg-white/[0.03] border border-white/10 text-white placeholder-white/20 focus:outline-none focus:border-red-500/50 focus:bg-white/[0.05] focus:ring-4 focus:ring-red-500/10 transition-all duration-300"
+                      className="w-full px-5 py-3.5 rounded-xl bg-white/[0.03] border border-white/10 text-white placeholder-white/20 focus:outline-none focus:border-[#FF8A5B]/50 focus:bg-white/[0.05] focus:ring-4 focus:ring-[#FF8A5B]/10 transition-all duration-300"
                       placeholder="Your Company"
                     />
                   </div>
@@ -204,7 +220,7 @@ const Contact = () => {
                 <div className="grid md:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <label htmlFor="email" className="text-sm font-medium text-white/70 ml-1">
-                      {t('contact.email')} <span className="text-red-500">*</span>
+                      {t('contact.email')} <span className="text-[#FF8A5B]">*</span>
                     </label>
                     <input
                       type="email"
@@ -213,13 +229,13 @@ const Contact = () => {
                       required
                       value={formData.email}
                       onChange={handleChange}
-                      className="w-full px-5 py-3.5 rounded-xl bg-white/[0.03] border border-white/10 text-white placeholder-white/20 focus:outline-none focus:border-red-500/50 focus:bg-white/[0.05] focus:ring-4 focus:ring-red-500/10 transition-all duration-300"
+                      className="w-full px-5 py-3.5 rounded-xl bg-white/[0.03] border border-white/10 text-white placeholder-white/20 focus:outline-none focus:border-[#FF8A5B]/50 focus:bg-white/[0.05] focus:ring-4 focus:ring-[#FF8A5B]/10 transition-all duration-300"
                       placeholder="you@company.com"
                     />
                   </div>
                   <div className="space-y-2">
                     <label htmlFor="phone" className="text-sm font-medium text-white/70 ml-1">
-                      {t('contact.phoneNumber')} <span className="text-red-500">*</span>
+                      {t('contact.phoneNumber')} <span className="text-[#FF8A5B]">*</span>
                     </label>
                     <input
                       type="tel"
@@ -228,7 +244,7 @@ const Contact = () => {
                       required
                       value={formData.phone}
                       onChange={handleChange}
-                      className="w-full px-5 py-3.5 rounded-xl bg-white/[0.03] border border-white/10 text-white placeholder-white/20 focus:outline-none focus:border-red-500/50 focus:bg-white/[0.05] focus:ring-4 focus:ring-red-500/10 transition-all duration-300"
+                      className="w-full px-5 py-3.5 rounded-xl bg-white/[0.03] border border-white/10 text-white placeholder-white/20 focus:outline-none focus:border-[#FF8A5B]/50 focus:bg-white/[0.05] focus:ring-4 focus:ring-[#FF8A5B]/10 transition-all duration-300"
                       placeholder="+1 (555) 000-0000"
                     />
                   </div>
@@ -238,7 +254,7 @@ const Contact = () => {
                 <div className="grid md:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <label htmlFor="interest" className="text-sm font-medium text-white/70 ml-1">
-                      {t('contact.interest')} <span className="text-red-500">*</span>
+                      {t('contact.interest')} <span className="text-[#FF8A5B]">*</span>
                     </label>
                     <div className="relative">
                       <select
@@ -247,7 +263,7 @@ const Contact = () => {
                         required
                         value={formData.interest}
                         onChange={handleChange}
-                        className="w-full px-5 py-3.5 rounded-xl bg-white/[0.03] border border-white/10 text-white focus:outline-none focus:border-red-500/50 focus:bg-white/[0.05] focus:ring-4 focus:ring-red-500/10 transition-all duration-300 appearance-none"
+                        className="w-full px-5 py-3.5 rounded-xl bg-white/[0.03] border border-white/10 text-white focus:outline-none focus:border-[#FF8A5B]/50 focus:bg-white/[0.05] focus:ring-4 focus:ring-[#FF8A5B]/10 transition-all duration-300 appearance-none"
                       >
                         <option value="" className="bg-neutral-900">{t('contact.selectInterest')}</option>
                         <option value="enterprise" className="bg-neutral-900">{t('contact.intEnterprise')}</option>
@@ -264,7 +280,7 @@ const Contact = () => {
                   </div>
                   <div className="space-y-2">
                     <label htmlFor="employeeCount" className="text-sm font-medium text-white/70 ml-1">
-                      {t('contact.employees')} <span className="text-red-500">*</span>
+                      {t('contact.employees')} <span className="text-[#FF8A5B]">*</span>
                     </label>
                     <div className="relative">
                       <select
@@ -273,7 +289,7 @@ const Contact = () => {
                         required
                         value={formData.employeeCount}
                         onChange={handleChange}
-                        className="w-full px-5 py-3.5 rounded-xl bg-white/[0.03] border border-white/10 text-white focus:outline-none focus:border-red-500/50 focus:bg-white/[0.05] focus:ring-4 focus:ring-red-500/10 transition-all duration-300 appearance-none"
+                        className="w-full px-5 py-3.5 rounded-xl bg-white/[0.03] border border-white/10 text-white focus:outline-none focus:border-[#FF8A5B]/50 focus:bg-white/[0.05] focus:ring-4 focus:ring-[#FF8A5B]/10 transition-all duration-300 appearance-none"
                       >
                         <option value="" className="bg-neutral-900">{t('contact.selectRange')}</option>
                         <option value="1-10" className="bg-neutral-900">1-10</option>
@@ -291,10 +307,9 @@ const Contact = () => {
                 </div>
 
                 {/* Message */}
-                {/* Message */}
                 <div className="space-y-2">
                   <label htmlFor="message" className="text-sm font-medium text-white/70 ml-1">
-                    {t('contact.message')} <span className="text-red-500">*</span>
+                    {t('contact.message')} <span className="text-[#FF8A5B]">*</span>
                   </label>
                   <div className="relative group">
                     <textarea
@@ -308,12 +323,12 @@ const Contact = () => {
                       placeholder={t('contact.messagePlaceholder')}
                     />
                     {/* Animated Border Gradient on Focus */}
-                    <div className="absolute inset-0 rounded-xl border border-red-500/50 opacity-0 peer-focus:opacity-100 transition-opacity duration-300 pointer-events-none shadow-[0_0_20px_rgba(239,68,68,0.15)]" />
+                    <div className="absolute inset-0 rounded-xl border border-[#FF8A5B]/50 opacity-0 peer-focus:opacity-100 transition-opacity duration-300 pointer-events-none shadow-[0_0_20px_rgba(255,138,91,0.15)]" />
                   </div>
                 </div>
 
                 {submitStatus === 'error' && (
-                  <div className="p-4 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-center text-sm animate-in fade-in slide-in-from-top-2">
+                  <div className="p-4 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-400 text-center text-sm animate-in fade-in slide-in-from-top-2">
                     {t('contact.error')}
                   </div>
                 )}
@@ -323,12 +338,10 @@ const Contact = () => {
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="group relative w-full overflow-hidden rounded-xl bg-gradient-to-r from-red-600 to-red-500 p-[1px] focus:outline-none focus:ring-4 focus:ring-red-500/20 disabled:opacity-50 disabled:cursor-not-allowed shadow-xl shadow-red-600/10 transition-all duration-300 hover:shadow-red-500/30 hover:scale-[1.01] active:scale-[0.99]"
+                    className="group relative w-full overflow-hidden rounded-xl bg-[#E5E5E5] p-[1px] focus:outline-none focus:ring-4 focus:ring-[#FF8A5B]/20 disabled:opacity-50 disabled:cursor-not-allowed shadow-xl transition-all duration-300 hover:shadow-[#FF8A5B]/20 hover:scale-[1.01] active:scale-[0.99]"
                   >
-                    <div className="relative h-full w-full rounded-xl bg-gradient-to-r from-red-600 to-red-500 px-8 py-4 transition-all duration-300 group-hover:bg-opacity-0">
-                      <div className="absolute inset-0 bg-gradient-to-r from-red-500 to-rose-500 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-
-                      <div className="relative flex items-center justify-center gap-3 text-white font-bold text-lg">
+                    <div className="relative h-full w-full rounded-xl bg-[#E5E5E5] hover:bg-white px-8 py-4 transition-all duration-300">
+                      <div className="relative flex items-center justify-center gap-3 text-black font-bold text-lg">
                         {isSubmitting ? (
                           <>
                             <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
