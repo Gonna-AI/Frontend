@@ -3,7 +3,7 @@ import { createClient } from "jsr:@supabase/supabase-js@2";
 
 const corsBaseHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Access-Control-Allow-Methods': 'POST, GET, DELETE, OPTIONS',
+  'Access-Control-Allow-Methods': 'POST, GET, DELETE, PATCH, OPTIONS',
   'Access-Control-Max-Age': '86400',
 };
 
@@ -59,6 +59,8 @@ function jsonResponse(req: Request, status: number, payload: Record<string, unkn
   });
 }
 
+const VALID_ROLES = ['owner', 'admin', 'member', 'viewer'] as const;
+
 Deno.serve(async (req: Request) => {
   if (!isAllowedOrigin(req.headers.get('Origin'))) {
     return jsonResponse(req, 403, { error: 'Origin not allowed' });
@@ -90,6 +92,7 @@ Deno.serve(async (req: Request) => {
     const adminClient = createClient(supabaseUrl, supabaseServiceRoleKey);
     const url = new URL(req.url);
     const params = url.searchParams;
+    const action = url.pathname.replace(/\/+$/, '').split('/').pop() || '';
 
     // ─── GET: List team members ──────────────────────────────
     if (req.method === 'GET') {
@@ -104,11 +107,55 @@ Deno.serve(async (req: Request) => {
       return jsonResponse(req, 200, { members: data ?? [] });
     }
 
+    // ─── POST /resend: Resend invitation ─────────────────────
+    if (req.method === 'POST' && action === 'resend') {
+      const body = await req.json().catch(() => ({})) as Record<string, unknown>;
+      const memberId = typeof body.id === 'string' ? body.id : '';
+
+      if (!memberId) {
+        return jsonResponse(req, 400, { error: 'Missing member id.' });
+      }
+
+      // Verify the member belongs to this owner and is pending
+      const { data: member, error: fetchError } = await adminClient
+        .from('team_members')
+        .select('*')
+        .eq('id', memberId)
+        .eq('owner_id', user.id)
+        .maybeSingle();
+
+      if (fetchError) throw fetchError;
+
+      if (!member) {
+        return jsonResponse(req, 404, { error: 'Member not found.' });
+      }
+
+      if (member.status !== 'pending') {
+        return jsonResponse(req, 400, { error: 'Can only resend invitations for pending members.' });
+      }
+
+      // Update invited_at to simulate resending the invite
+      const { data: updated, error: updateError } = await adminClient
+        .from('team_members')
+        .update({ invited_at: new Date().toISOString() })
+        .eq('id', memberId)
+        .eq('owner_id', user.id)
+        .select()
+        .single();
+
+      if (updateError) throw updateError;
+
+      return jsonResponse(req, 200, { success: true, member: updated });
+    }
+
     // ─── POST: Invite a team member ─────────────────────────
     if (req.method === 'POST') {
       const body = await req.json().catch(() => ({})) as Record<string, unknown>;
       const email = typeof body.email === 'string' ? body.email.trim().toLowerCase() : '';
-      const role = body.role === 'admin' ? 'admin' : 'member';
+      const roleInput = typeof body.role === 'string' ? body.role : 'member';
+      const role = VALID_ROLES.includes(roleInput as typeof VALID_ROLES[number])
+        ? roleInput
+        : 'member';
 
       if (!email || !email.includes('@')) {
         return jsonResponse(req, 400, { error: 'Valid email is required.' });
@@ -117,6 +164,11 @@ Deno.serve(async (req: Request) => {
       // Prevent self-invite
       if (email === user.email) {
         return jsonResponse(req, 400, { error: 'You cannot invite yourself.' });
+      }
+
+      // Cannot invite as owner
+      if (role === 'owner') {
+        return jsonResponse(req, 400, { error: 'Cannot assign owner role to invited members.' });
       }
 
       // Check for duplicate
@@ -156,6 +208,51 @@ Deno.serve(async (req: Request) => {
       if (error) throw error;
 
       return jsonResponse(req, 201, { member: data });
+    }
+
+    // ─── PATCH: Update member role ───────────────────────────
+    if (req.method === 'PATCH') {
+      const body = await req.json().catch(() => ({})) as Record<string, unknown>;
+      const memberId = typeof body.id === 'string' ? body.id : '';
+      const newRole = typeof body.role === 'string' ? body.role : '';
+
+      if (!memberId) {
+        return jsonResponse(req, 400, { error: 'Missing member id.' });
+      }
+
+      if (!newRole || !VALID_ROLES.includes(newRole as typeof VALID_ROLES[number])) {
+        return jsonResponse(req, 400, { error: `Invalid role. Must be one of: ${VALID_ROLES.join(', ')}` });
+      }
+
+      if (newRole === 'owner') {
+        return jsonResponse(req, 400, { error: 'Cannot assign owner role to team members.' });
+      }
+
+      // Verify the member belongs to this owner
+      const { data: member, error: fetchError } = await adminClient
+        .from('team_members')
+        .select('id')
+        .eq('id', memberId)
+        .eq('owner_id', user.id)
+        .maybeSingle();
+
+      if (fetchError) throw fetchError;
+
+      if (!member) {
+        return jsonResponse(req, 404, { error: 'Member not found.' });
+      }
+
+      const { data: updated, error: updateError } = await adminClient
+        .from('team_members')
+        .update({ role: newRole })
+        .eq('id', memberId)
+        .eq('owner_id', user.id)
+        .select()
+        .single();
+
+      if (updateError) throw updateError;
+
+      return jsonResponse(req, 200, { member: updated });
     }
 
     // ─── DELETE: Remove a team member ────────────────────────
