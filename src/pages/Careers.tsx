@@ -133,22 +133,26 @@ export default function Careers() {
   };
 
   return (
-    <div className="bg-[rgb(10,10,10)] min-h-screen relative overflow-x-hidden">
-      {/* Emerald theme background accents */}
+    <div className="bg-[rgb(10,10,10)] min-h-screen relative overflow-x-hidden text-white">
+      {/* Theme background accents */}
       <div className="fixed inset-0 bg-[rgb(10,10,10)] -z-10">
         <div
           className="absolute top-0 right-0 -translate-y-1/4 translate-x-1/4 w-96 md:w-[800px] h-96 md:h-[800px] opacity-40"
           style={{
-            background: 'radial-gradient(circle, rgba(16,185,129,0.6) 0%, rgba(16,185,129,0.25) 40%, transparent 100%)',
-            filter: 'blur(80px)',
+            background: 'radial-gradient(circle, rgba(255,138,91,0.55) 0%, rgba(255,138,91,0.22) 40%, transparent 100%)',
+            filter: 'blur(90px)',
           }}
         />
         <div
-          className="absolute bottom-0 left-0 translate-y-1/4 -translate-x-1/4 w-72 md:w-[600px] h-72 md:h-[600px] opacity-30"
+          className="absolute bottom-0 left-0 translate-y-1/4 -translate-x-1/4 w-72 md:w-[600px] h-72 md:h-[600px] opacity-25"
           style={{
-            background: 'radial-gradient(circle, rgba(5,150,105,0.5) 0%, rgba(5,150,105,0.2) 40%, transparent 100%)',
-            filter: 'blur(80px)',
+            background: 'radial-gradient(circle, rgba(255,178,134,0.45) 0%, rgba(255,178,134,0.18) 40%, transparent 100%)',
+            filter: 'blur(90px)',
           }}
+        />
+        <div
+          className="absolute inset-0 opacity-[0.06]"
+          style={{ backgroundImage: 'url(/noise.webp)', backgroundSize: '35%' }}
         />
       </div>
 
@@ -164,7 +168,7 @@ export default function Careers() {
                 {t('careers.title1')}
               </span>
               <br />
-              <span className="bg-gradient-to-r from-emerald-400 via-teal-400 to-emerald-600 text-transparent bg-clip-text">
+              <span className="bg-gradient-to-r from-[#FF8A5B] via-[#FFB286] to-[#FF8A5B] text-transparent bg-clip-text">
                 {t('careers.title2')}
               </span>
             </h1>
@@ -179,7 +183,7 @@ export default function Careers() {
               href="https://www.linkedin.com/company/clerktree/jobs"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-3 px-8 py-4 rounded-xl bg-gradient-to-br from-emerald-500/10 to-teal-500/10 border border-emerald-500/20 backdrop-blur-sm text-emerald-400 hover:from-emerald-500/20 hover:to-teal-500/20 hover:border-emerald-500/40 hover:text-emerald-300 transition-all duration-300 font-medium text-lg group"
+              className="inline-flex items-center gap-3 px-8 py-4 rounded-full bg-[linear-gradient(120deg,rgba(255,138,91,0.2),rgba(255,138,91,0.05))] border border-[#FF8A5B]/25 backdrop-blur-sm text-[#FFB286] hover:border-[#FF8A5B]/45 hover:text-white transition-all duration-300 font-medium text-lg group shadow-[0_18px_60px_rgba(0,0,0,0.45)]"
             >
               <span>{t('careers.linkedin')}</span>
               <ExternalLink className="w-5 h-5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
@@ -194,8 +198,8 @@ export default function Careers() {
           </div>
 
           {/* CV Submission Form */}
-          <div className="rounded-2xl border border-emerald-500/20 bg-gradient-to-br from-white/[0.02] via-white/[0.01] to-transparent backdrop-blur-sm p-8 md:p-12">
-            <h2 className="text-2xl md:text-3xl font-bold mb-2 bg-gradient-to-r from-emerald-400 to-emerald-600 text-transparent bg-clip-text">
+          <div className="rounded-[1.75rem] border border-white/10 bg-[linear-gradient(145deg,#141414_0%,#0C0C0C_100%)] backdrop-blur-sm p-8 md:p-12 shadow-[0_30px_80px_rgba(0,0,0,0.45)]">
+            <h2 className="text-2xl md:text-3xl font-bold mb-2 bg-gradient-to-r from-[#FF8A5B] to-[#FFB286] text-transparent bg-clip-text">
               {t('careers.formTitle')}
             </h2>
             <p className="text-white/60 mb-8">
@@ -204,7 +208,7 @@ export default function Careers() {
 
             {submitted ? (
               <div className="text-center py-12">
-                <CheckCircle2 className="w-16 h-16 text-emerald-500 mx-auto mb-4" />
+                <CheckCircle2 className="w-16 h-16 text-[#FF8A5B] mx-auto mb-4" />
                 <h3 className="text-2xl font-semibold text-white mb-2">{t('careers.successTitle')}</h3>
                 <p className="text-white/70">{t('careers.successDesc')}</p>
               </div>
@@ -218,7 +222,7 @@ export default function Careers() {
                 {/* Full Name */}
                 <div>
                   <label htmlFor="fullName" className="block text-sm font-medium text-white/80 mb-2">
-                    {t('careers.fullName')} <span className="text-emerald-500">*</span>
+                    {t('careers.fullName')} <span className="text-[#FF8A5B]">*</span>
                   </label>
                   <input
                     type="text"
@@ -227,7 +231,7 @@ export default function Careers() {
                     required
                     value={formData.fullName}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white placeholder-white/40 focus:outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20 transition-all"
+                    className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white placeholder-white/40 focus:outline-none focus:border-[#FF8A5B]/50 focus:ring-2 focus:ring-[#FF8A5B]/20 transition-all"
                     placeholder="John Doe"
                   />
                 </div>
@@ -236,7 +240,7 @@ export default function Careers() {
                 <div className="grid md:grid-cols-2 gap-6">
                   <div>
                     <label htmlFor="email" className="block text-sm font-medium text-white/80 mb-2">
-                      {t('careers.email')} <span className="text-emerald-500">*</span>
+                      {t('careers.email')} <span className="text-[#FF8A5B]">*</span>
                     </label>
                     <input
                       type="email"
@@ -245,13 +249,13 @@ export default function Careers() {
                       required
                       value={formData.email}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white placeholder-white/40 focus:outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20 transition-all"
+                      className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white placeholder-white/40 focus:outline-none focus:border-[#FF8A5B]/50 focus:ring-2 focus:ring-[#FF8A5B]/20 transition-all"
                       placeholder="john@example.com"
                     />
                   </div>
                   <div>
                     <label htmlFor="phone" className="block text-sm font-medium text-white/80 mb-2">
-                      {t('careers.phone')} <span className="text-emerald-500">*</span>
+                      {t('careers.phone')} <span className="text-[#FF8A5B]">*</span>
                     </label>
                     <input
                       type="tel"
@@ -260,7 +264,7 @@ export default function Careers() {
                       required
                       value={formData.phone}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white placeholder-white/40 focus:outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20 transition-all"
+                      className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white placeholder-white/40 focus:outline-none focus:border-[#FF8A5B]/50 focus:ring-2 focus:ring-[#FF8A5B]/20 transition-all"
                       placeholder="+1 (555) 000-0000"
                     />
                   </div>
@@ -270,7 +274,7 @@ export default function Careers() {
                 <div className="grid md:grid-cols-2 gap-6">
                   <div>
                     <label htmlFor="currentPosition" className="block text-sm font-medium text-white/80 mb-2">
-                      {t('careers.currentPos')} <span className="text-emerald-500">*</span>
+                      {t('careers.currentPos')} <span className="text-[#FF8A5B]">*</span>
                     </label>
                     <input
                       type="text"
@@ -279,13 +283,13 @@ export default function Careers() {
                       required
                       value={formData.currentPosition}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white placeholder-white/40 focus:outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20 transition-all"
+                      className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white placeholder-white/40 focus:outline-none focus:border-[#FF8A5B]/50 focus:ring-2 focus:ring-[#FF8A5B]/20 transition-all"
                       placeholder="Senior Software Engineer"
                     />
                   </div>
                   <div>
                     <label htmlFor="yearsOfExperience" className="block text-sm font-medium text-white/80 mb-2">
-                      {t('careers.experience')} <span className="text-emerald-500">*</span>
+                      {t('careers.experience')} <span className="text-[#FF8A5B]">*</span>
                     </label>
                     <select
                       id="yearsOfExperience"
@@ -293,7 +297,7 @@ export default function Careers() {
                       required
                       value={formData.yearsOfExperience}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white focus:outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20 transition-all"
+                      className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white focus:outline-none focus:border-[#FF8A5B]/50 focus:ring-2 focus:ring-[#FF8A5B]/20 transition-all"
                     >
                       <option value="" className="bg-gray-900">{t('careers.select')}</option>
                       <option value="0-1" className="bg-gray-900">0-1 {t('careers.years') || 'years'}</option>
@@ -308,7 +312,7 @@ export default function Careers() {
                 {/* Position Applying For */}
                 <div>
                   <label htmlFor="positionApplyingFor" className="block text-sm font-medium text-white/80 mb-2">
-                    {t('careers.position')} <span className="text-emerald-500">*</span>
+                    {t('careers.position')} <span className="text-[#FF8A5B]">*</span>
                   </label>
                   <select
                     id="positionApplyingFor"
@@ -316,7 +320,7 @@ export default function Careers() {
                     required
                     value={formData.positionApplyingFor}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white focus:outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20 transition-all"
+                    className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white focus:outline-none focus:border-[#FF8A5B]/50 focus:ring-2 focus:ring-[#FF8A5B]/20 transition-all"
                   >
                     <option value="" className="bg-gray-900">{t('careers.selectPos')}</option>
                     <option value="senior-frontend" className="bg-gray-900">{t('careers.pos1')}</option>
@@ -337,7 +341,7 @@ export default function Careers() {
                     name="linkedinProfile"
                     value={formData.linkedinProfile}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white placeholder-white/40 focus:outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20 transition-all"
+                    className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white placeholder-white/40 focus:outline-none focus:border-[#FF8A5B]/50 focus:ring-2 focus:ring-[#FF8A5B]/20 transition-all"
                     placeholder="https://linkedin.com/in/yourprofile"
                   />
                 </div>
@@ -353,7 +357,7 @@ export default function Careers() {
                     name="portfolioWebsite"
                     value={formData.portfolioWebsite}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white placeholder-white/40 focus:outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20 transition-all"
+                    className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white placeholder-white/40 focus:outline-none focus:border-[#FF8A5B]/50 focus:ring-2 focus:ring-[#FF8A5B]/20 transition-all"
                     placeholder="https://yourportfolio.com"
                   />
                 </div>
@@ -361,7 +365,7 @@ export default function Careers() {
                 {/* Cover Letter */}
                 <div>
                   <label htmlFor="coverLetter" className="block text-sm font-medium text-white/80 mb-2">
-                    {t('careers.coverLetter')} <span className="text-emerald-500">*</span>
+                    {t('careers.coverLetter')} <span className="text-[#FF8A5B]">*</span>
                   </label>
                   <textarea
                     id="coverLetter"
@@ -370,7 +374,7 @@ export default function Careers() {
                     rows={6}
                     value={formData.coverLetter}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white placeholder-white/40 focus:outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20 transition-all resize-none"
+                    className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white placeholder-white/40 focus:outline-none focus:border-[#FF8A5B]/50 focus:ring-2 focus:ring-[#FF8A5B]/20 transition-all resize-none"
                     placeholder="Tell us about yourself and why you're interested in joining ClerkTree..."
                   />
                 </div>
@@ -392,7 +396,7 @@ export default function Careers() {
                     />
                     <label
                       htmlFor="resume"
-                      className="flex items-center justify-center gap-3 w-full px-4 py-4 rounded-lg bg-white/5 border border-white/10 text-white/70 hover:bg-white/10 hover:border-emerald-500/50 cursor-pointer transition-all"
+                      className="flex items-center justify-center gap-3 w-full px-4 py-4 rounded-lg bg-white/5 border border-white/10 text-white/70 hover:bg-white/10 hover:border-[#FF8A5B]/50 cursor-pointer transition-all"
                     >
                       <Upload className="w-5 h-5" />
                       <span>
@@ -407,7 +411,7 @@ export default function Careers() {
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="w-full px-8 py-4 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 text-white font-semibold hover:from-emerald-600 hover:to-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg shadow-emerald-500/25"
+                    className="w-full px-8 py-4 rounded-xl bg-gradient-to-r from-[#FF8A5B] via-[#FF9E6C] to-[#FFB286] text-white font-semibold hover:from-[#FF9E6C] hover:via-[#FF8A5B] hover:to-[#FFB286] focus:outline-none focus:ring-2 focus:ring-[#FF8A5B]/50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg shadow-[#FF8A5B]/25"
                   >
                     {isSubmitting ? t('careers.submitting') : t('careers.submit')}
                   </button>
