@@ -151,7 +151,7 @@ export default function Careers() {
           }}
         />
         <div
-          className="absolute inset-0 opacity-[0.06]"
+          className="absolute inset-0 opacity-[0.12] mix-blend-soft-light pointer-events-none"
           style={{ backgroundImage: 'url(/noise.webp)', backgroundSize: '35%' }}
         />
       </div>

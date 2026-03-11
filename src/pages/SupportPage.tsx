@@ -96,14 +96,23 @@ const SupportPage = () => {
     };
 
     return (
-        <div className="bg-[#0A0A0A] min-h-screen text-white/80 font-sans selection:bg-purple-500/30">
+        <div className="bg-[#0A0A0A] min-h-screen text-white/80 font-sans selection:bg-[#FF8A5B]/30 relative overflow-hidden">
+            <div className="pointer-events-none absolute inset-0 -z-10">
+                <div className="absolute left-[-12rem] top-[14rem] h-[26rem] w-[26rem] rounded-full bg-[#FF8A5B]/12 blur-[140px]" />
+                <div className="absolute right-[-10rem] top-[8rem] h-[22rem] w-[22rem] rounded-full bg-white/6 blur-[120px]" />
+                <div className="absolute bottom-[-8rem] left-1/2 h-[22rem] w-[36rem] -translate-x-1/2 rounded-full bg-[#FF8A5B]/10 blur-[120px]" />
+                <div
+                    className="absolute inset-0 opacity-[0.12] mix-blend-soft-light"
+                    style={{ backgroundImage: 'url(/noise.webp)', backgroundSize: '30%' }}
+                />
+            </div>
             <SharedHeader
                 onMobileMenuToggle={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                 isMobileMenuOpenExternal={isMobileMenuOpen}
                 rightActions={
                     <div className="flex items-center gap-2">
                         <Link to="/docs" className="hidden md:block text-sm text-white/60 hover:text-white transition-colors">Documentation</Link>
-                        <Link to="/dashboard" className="hidden md:inline-block px-3 py-2 bg-white text-black text-xs font-medium rounded-lg hover:bg-neutral-200 transition-colors">
+                        <Link to="/dashboard" className="hidden md:inline-flex items-center px-4 py-2 rounded-full border border-white/10 bg-white/5 text-xs font-semibold uppercase tracking-[0.2em] text-white/70 hover:text-white hover:bg-white/10 transition-colors">
                             Dashboard
                         </Link>
                     </div>
@@ -118,7 +127,7 @@ const SupportPage = () => {
                         <div>
                             <h3 className="text-xs font-semibold text-white/40 uppercase tracking-wider mb-3 px-2">Support Resources</h3>
                             <nav className="space-y-0.5">
-                                <button type="button" className="flex items-center gap-2 px-3 py-2 rounded-lg bg-purple-500/10 text-purple-400 font-medium">
+                                <button type="button" className="flex items-center gap-2 px-3 py-2 rounded-lg bg-[#FF8A5B]/10 text-[#FFB286] font-medium">
                                     <Ticket className="w-4 h-4" />
                                     <span>Submit Ticket</span>
                                 </button>
@@ -149,7 +158,7 @@ const SupportPage = () => {
                     <div className="max-w-3xl">
 
                         <div className="mb-10">
-                            <div className="flex items-center gap-2 text-sm text-purple-400 mb-2 font-mono">
+                            <div className="flex items-center gap-2 text-sm text-[#FF8A5B] mb-2 font-mono">
                                 <span>Support</span>
                                 <span>/</span>
                                 <span>New Ticket</span>
@@ -162,9 +171,9 @@ const SupportPage = () => {
 
                         {/* Status Message */}
                         {submitStatus === 'success' ? (
-                            <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-8 animate-in fade-in slide-in-from-bottom-4">
+                            <div className="rounded-xl border border-[#FF8A5B]/25 bg-[#FF8A5B]/10 p-8 animate-in fade-in slide-in-from-bottom-4">
                                 <div className="flex items-start gap-4">
-                                    <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-400">
+                                    <div className="p-2 rounded-lg bg-[#FF8A5B]/10 text-[#FF8A5B]">
                                         <CheckCircle2 className="w-6 h-6" />
                                     </div>
                                     <div className="flex-1">
@@ -176,7 +185,7 @@ const SupportPage = () => {
                                         <div className="rounded-lg border border-white/10 bg-[#0A0A0A] p-4 font-mono text-sm mb-6 flex items-center justify-between group">
                                             <span className="text-white/40">Ticket ID</span>
                                             <div className="flex items-center gap-2">
-                                                <span className="text-purple-400 font-bold text-lg">{ticketId}</span>
+                                                <span className="text-[#FF8A5B] font-bold text-lg">{ticketId}</span>
                                             </div>
                                         </div>
 
@@ -227,7 +236,7 @@ const SupportPage = () => {
                                             required
                                             value={formData.user_name}
                                             onChange={handleChange}
-                                            className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white placeholder-white/20 focus:outline-none focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/50 transition-all font-mono text-sm"
+                                            className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white placeholder-white/20 focus:outline-none focus:border-[#FF8A5B]/50 focus:ring-1 focus:ring-[#FF8A5B]/50 transition-all font-mono text-sm"
                                             placeholder="Jane Doe"
                                         />
                                     </div>
@@ -240,7 +249,7 @@ const SupportPage = () => {
                                             required
                                             value={formData.user_email}
                                             onChange={handleChange}
-                                            className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white placeholder-white/20 focus:outline-none focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/50 transition-all font-mono text-sm"
+                                            className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white placeholder-white/20 focus:outline-none focus:border-[#FF8A5B]/50 focus:ring-1 focus:ring-[#FF8A5B]/50 transition-all font-mono text-sm"
                                             placeholder="jane@company.com"
                                         />
                                     </div>
@@ -255,7 +264,7 @@ const SupportPage = () => {
                                         required
                                         value={formData.subject}
                                         onChange={handleChange}
-                                        className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white placeholder-white/20 focus:outline-none focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/50 transition-all font-mono text-sm"
+                                        className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white placeholder-white/20 focus:outline-none focus:border-[#FF8A5B]/50 focus:ring-1 focus:ring-[#FF8A5B]/50 transition-all font-mono text-sm"
                                         placeholder="API Rate Limit Issues..."
                                     />
                                 </div>
@@ -270,7 +279,7 @@ const SupportPage = () => {
                                                 required
                                                 value={formData.category}
                                                 onChange={handleChange}
-                                                className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/50 transition-all appearance-none font-mono text-sm"
+                                                className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-[#FF8A5B]/50 focus:ring-1 focus:ring-[#FF8A5B]/50 transition-all appearance-none font-mono text-sm"
                                             >
                                                 <option value="" className="bg-[#0A0A0A]">Select Category...</option>
                                                 {CATEGORIES.map(cat => (
@@ -309,7 +318,7 @@ const SupportPage = () => {
                                         rows={8}
                                         value={formData.description}
                                         onChange={handleChange}
-                                        className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-white/20 focus:outline-none focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/50 transition-all font-mono text-sm leading-relaxed"
+                                        className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-white/20 focus:outline-none focus:border-[#FF8A5B]/50 focus:ring-1 focus:ring-[#FF8A5B]/50 transition-all font-mono text-sm leading-relaxed"
                                         placeholder={`Steps to reproduce:\n1. ...\n\nExpected behavior:\n...\n\nActual behavior:\n...`}
                                     />
                                     <p className="text-xs text-white/30">Please include any relevant error codes or request IDs.</p>
@@ -322,11 +331,11 @@ const SupportPage = () => {
                                     <button
                                         type="submit"
                                         disabled={isSubmitting}
-                                        className="px-6 py-2.5 rounded-lg bg-white text-black font-semibold text-sm hover:bg-neutral-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+                                        className="px-6 py-2.5 rounded-full bg-gradient-to-r from-[#FF8A5B] via-[#FF9E6C] to-[#FFB286] text-white font-semibold text-sm hover:from-[#FF9E6C] hover:via-[#FF8A5B] hover:to-[#FFB286] disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2 shadow-lg shadow-[#FF8A5B]/30"
                                     >
                                         {isSubmitting ? (
                                             <>
-                                                <div className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" />
+                                                <div className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
                                                 <span>Processing...</span>
                                             </>
                                         ) : (
