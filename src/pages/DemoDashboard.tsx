@@ -22,6 +22,11 @@ import MonitorView from '../components/DashboardViews/MonitorView';
 import IntegrationView from '../components/DashboardViews/IntegrationView';
 import CustomerGraphView from '../components/DashboardViews/CustomerGraphView';
 import DocumentsView from '../components/DashboardViews/DocumentsView';
+import AnalyticsView from '../components/DashboardViews/AnalyticsView';
+import SettingsView from '../components/DashboardViews/SettingsView';
+import ActivityLogView from '../components/DashboardViews/ActivityLogView';
+import WebhooksView from '../components/DashboardViews/WebhooksView';
+import NotificationCenter from '../components/DashboardViews/NotificationCenter';
 import InitialSetupDialog from '../components/DashboardViews/InitialSetupDialog';
 import { RescueCenterProvider } from '../contexts/RescueCenterContext';
 
@@ -43,7 +48,7 @@ function DemoDashboardContent() {
   }, [hasAccess, activeTab]);
 
   // Tabs that are always accessible without an access code
-  const alwaysAccessibleTabs = ['billing', 'keys', 'usage'];
+  const alwaysAccessibleTabs = ['billing', 'keys', 'usage', 'settings'];
 
   const handleSetActiveTab = (tab: string) => {
     if (!hasAccess && !alwaysAccessibleTabs.includes(tab)) return;
@@ -92,6 +97,10 @@ function DemoDashboardContent() {
       keys: t('sidebar.keys'),
       team: t('sidebar.team'),
       integrations: t('sidebar.integrations'),
+      analytics: t('sidebar.analytics'),
+      activity_log: t('sidebar.activityLog'),
+      webhooks: t('sidebar.webhooks'),
+      settings: t('sidebar.settings'),
       onboarding: t('onboarding.title'),
     };
     return labelMap[tab] || tab;
@@ -135,15 +144,18 @@ function DemoDashboardContent() {
                   <RotateCcw className="w-4 h-4" />
                 </button>
               </div>
-              <a
-                href="/docs"
-                className={cn(
-                  "text-sm font-medium transition-colors",
-                  isDark ? "text-white/60 hover:text-white" : "text-black/60 hover:text-black"
-                )}
-              >
-                {t('sidebar.docs')}
-              </a>
+              <div className="flex items-center gap-2">
+                <NotificationCenter isDark={isDark} />
+                <a
+                  href="/docs"
+                  className={cn(
+                    "text-sm font-medium transition-colors",
+                    isDark ? "text-white/60 hover:text-white" : "text-black/60 hover:text-black"
+                  )}
+                >
+                  {t('sidebar.docs')}
+                </a>
+              </div>
             </div>
           </div>
 
@@ -206,6 +218,10 @@ function DemoDashboardContent() {
                   {activeTab === 'keys' && <KeysView isDark={isDark} hasAccess={hasAccess} />}
                   {activeTab === 'team' && <TeamView isDark={isDark} />}
                   {activeTab === 'integrations' && <IntegrationView isDark={isDark} />}
+                  {activeTab === 'analytics' && <AnalyticsView isDark={isDark} />}
+                  {activeTab === 'activity_log' && <ActivityLogView isDark={isDark} />}
+                  {activeTab === 'webhooks' && <WebhooksView isDark={isDark} />}
+                  {activeTab === 'settings' && <SettingsView isDark={isDark} />}
 
                   {activeTab === 'onboarding' && (
                     <OnboardingWizard

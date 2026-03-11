@@ -350,6 +350,36 @@ export const en = {
     'sidebar.team': 'Team',
     'sidebar.customerGraph': 'Customer Graph',
     'sidebar.kbDocuments': 'Documents',
+    'sidebar.analytics': 'Analytics',
+    'sidebar.activityLog': 'Activity Log',
+    'sidebar.webhooks': 'Webhooks',
+    'sidebar.settings': 'Settings',
+
+    // Analytics
+    'analytics.title': 'Analytics',
+    'analytics.subtitle': 'Deep insights into your AI agent performance',
+    'analytics.callVolume': 'Call Volume Trend',
+    'analytics.sentimentTrend': 'Sentiment Trend',
+    'analytics.categoryDist': 'Category Distribution',
+    'analytics.priorityDist': 'Priority Breakdown',
+    'analytics.topTopics': 'Top Topics',
+    'analytics.sentimentDist': 'Sentiment Distribution',
+
+    // Activity Log
+    'activityLog.title': 'Activity Log',
+    'activityLog.subtitle': 'Track all account actions and events',
+
+    // Webhooks
+    'webhooks.title': 'Webhooks',
+    'webhooks.subtitle': 'Push real-time events to your applications',
+
+    // Settings
+    'settings.title': 'Settings',
+    'settings.subtitle': 'Manage your account, notifications, and privacy',
+    'settings.profile': 'Profile',
+    'settings.notifications': 'Notifications',
+    'settings.security': 'Security',
+    'settings.data': 'Data & Privacy',
 
     // Knowledge Base Documents
     'kbDocs.title': 'Knowledge Base Documents',
