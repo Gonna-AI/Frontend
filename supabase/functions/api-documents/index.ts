@@ -93,33 +93,179 @@ function smartChunkText(text: string, maxWords = 300, overlapWords = 50): string
   return chunks;
 }
 
-// ─── PDF text extraction ─────────────────────────────────────────
+// ─── PDF text extraction (multi-strategy) ────────────────────────
+// Strategy 1: BT/ET blocks (works for simple PDFs)
+// Strategy 2: Decompress FlateDecode streams, then extract text
+// Strategy 3: Raw printable ASCII extraction + Groq cleanup
 function extractTextFromPDF(bytes: Uint8Array): string {
   const raw = new TextDecoder('latin1').decode(bytes);
+
+  // Strategy 1: Standard BT/ET text operator extraction
   const textParts: string[] = [];
   const btEtRegex = /BT\s([\s\S]*?)ET/g;
   let match;
 
   while ((match = btEtRegex.exec(raw)) !== null) {
     const block = match[1];
+
+    // Tj operator: (text) Tj
     const tjRegex = /\(([^)]*)\)\s*Tj/g;
     let tjMatch;
-    while ((tjMatch = tjRegex.exec(block)) !== null) textParts.push(tjMatch[1]);
+    while ((tjMatch = tjRegex.exec(block)) !== null) {
+      const decoded = decodePdfString(tjMatch[1]);
+      if (decoded.trim()) textParts.push(decoded);
+    }
 
+    // TJ operator: [(text) kern (text)] TJ
     const tjArrayRegex = /\[([^\]]*)\]\s*TJ/g;
     let tjArrMatch;
     while ((tjArrMatch = tjArrayRegex.exec(block)) !== null) {
       const strRegex = /\(([^)]*)\)/g;
       let strMatch;
-      while ((strMatch = strRegex.exec(tjArrMatch[1])) !== null) textParts.push(strMatch[1]);
+      const words: string[] = [];
+      while ((strMatch = strRegex.exec(tjArrMatch[1])) !== null) {
+        const decoded = decodePdfString(strMatch[1]);
+        if (decoded.trim()) words.push(decoded);
+      }
+      if (words.length > 0) textParts.push(words.join(''));
     }
   }
 
-  if (textParts.length === 0) {
-    return raw.replace(/[^\x20-\x7E\n\r\t]/g, ' ').replace(/\s+/g, ' ').trim().substring(0, 50000);
+  // If we got meaningful text from BT/ET, use it
+  const btEtText = textParts.join(' ').replace(/\s+/g, ' ').trim();
+  if (btEtText.length > 50 && isReadableText(btEtText)) {
+    return btEtText;
   }
 
-  return textParts.join(' ').replace(/\\n/g, '\n').replace(/\\r/g, '').replace(/\s+/g, ' ').trim();
+  // Strategy 2: Try to decompress FlateDecode streams and extract text
+  const streamTexts = extractFromStreams(raw);
+  if (streamTexts.length > 50 && isReadableText(streamTexts)) {
+    return streamTexts;
+  }
+
+  // Strategy 3: Extract all printable ASCII runs (last resort)
+  // This captures text content that's embedded in the PDF but not in standard text operators
+  const asciiRuns: string[] = [];
+  const asciiRegex = /[\x20-\x7E]{4,}/g;
+  let asciiMatch;
+  while ((asciiMatch = asciiRegex.exec(raw)) !== null) {
+    const run = asciiMatch[0].trim();
+    // Filter out PDF operators and binary noise
+    if (run.length > 3 && !isPdfOperator(run)) {
+      asciiRuns.push(run);
+    }
+  }
+
+  const asciiText = asciiRuns.join(' ').replace(/\s+/g, ' ').trim();
+  if (asciiText.length > 20) {
+    return asciiText.substring(0, 50000);
+  }
+
+  // Nothing extracted
+  return '';
+}
+
+// Decode PDF escape sequences
+function decodePdfString(s: string): string {
+  return s
+    .replace(/\\n/g, '\n')
+    .replace(/\\r/g, '\r')
+    .replace(/\\t/g, '\t')
+    .replace(/\\\(/g, '(')
+    .replace(/\\\)/g, ')')
+    .replace(/\\\\/g, '\\')
+    .replace(/\\(\d{3})/g, (_, oct) => String.fromCharCode(parseInt(oct, 8)));
+}
+
+// Check if extracted text is actually readable (not garbled binary)
+function isReadableText(text: string): boolean {
+  if (!text || text.length === 0) return false;
+  // Count printable ASCII characters vs total
+  let printable = 0;
+  let letters = 0;
+  for (let i = 0; i < Math.min(text.length, 500); i++) {
+    const code = text.charCodeAt(i);
+    if (code >= 0x20 && code <= 0x7E) printable++;
+    if ((code >= 0x41 && code <= 0x5A) || (code >= 0x61 && code <= 0x7A)) letters++;
+  }
+  const sampleLen = Math.min(text.length, 500);
+  // At least 80% printable and 20% letters
+  return (printable / sampleLen) > 0.8 && (letters / sampleLen) > 0.2;
+}
+
+// Filter out PDF structural keywords
+function isPdfOperator(text: string): boolean {
+  const operators = [
+    'endobj', 'endstream', 'stream', 'xref', 'trailer', 'startxref',
+    '/Type', '/Pages', '/Page', '/Font', '/Catalog', '/Length',
+    '/Filter', '/FlateDecode', '/Subtype', '/BaseFont',
+  ];
+  return operators.some((op) => text.startsWith(op) || text === op);
+}
+
+// Try to extract readable text from PDF stream objects
+function extractFromStreams(raw: string): string {
+  const parts: string[] = [];
+
+  // Find stream...endstream blocks and try to extract ASCII text from them
+  const streamRegex = /stream\r?\n([\s\S]*?)endstream/g;
+  let m;
+  while ((m = streamRegex.exec(raw)) !== null) {
+    const streamData = m[1];
+    // Extract printable ASCII runs from stream data
+    const textRegex = /[\x20-\x7E]{5,}/g;
+    let tm;
+    while ((tm = textRegex.exec(streamData)) !== null) {
+      const run = tm[0].trim();
+      if (run.length > 4 && !isPdfOperator(run)) {
+        parts.push(run);
+      }
+    }
+  }
+
+  return parts.join(' ').replace(/\s+/g, ' ').trim();
+}
+
+// ─── Groq-powered text cleanup for garbled PDF extractions ───────
+async function cleanExtractedTextWithGroq(rawText: string, fileName: string): Promise<string> {
+  const groqApiKey = Deno.env.get('GROQ_API_KEY');
+  if (!groqApiKey || rawText.length < 20) return rawText;
+
+  // Only clean if text seems garbled
+  if (isReadableText(rawText)) return rawText;
+
+  try {
+    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${groqApiKey}`,
+      },
+      body: JSON.stringify({
+        model: 'llama-3.3-70b-versatile',
+        messages: [
+          {
+            role: 'system',
+            content: 'You are a document text extractor. The user will provide garbled text extracted from a PDF. Extract and reconstruct ALL readable information. Return ONLY the cleaned text, no explanations. Preserve structure like headings, lists, contact info, dates.',
+          },
+          {
+            role: 'user',
+            content: `File: ${fileName}\n\nExtracted text (may be garbled):\n${rawText.substring(0, 8000)}`,
+          },
+        ],
+        temperature: 0.1,
+        max_tokens: 4000,
+      }),
+    });
+
+    if (!response.ok) return rawText;
+
+    const data = await response.json();
+    const cleaned = data.choices?.[0]?.message?.content;
+    return cleaned && cleaned.length > 20 ? cleaned : rawText;
+  } catch {
+    return rawText;
+  }
 }
 
 // ─── Main handler ────────────────────────────────────────────────
