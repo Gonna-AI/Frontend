@@ -349,6 +349,36 @@ export const de = {
     'sidebar.team': 'Team',
     'sidebar.customerGraph': 'Kundengraph',
     'sidebar.kbDocuments': 'Dokumente',
+    'sidebar.analytics': 'Analytik',
+    'sidebar.activityLog': 'Aktivitätsprotokoll',
+    'sidebar.webhooks': 'Webhooks',
+    'sidebar.settings': 'Einstellungen',
+
+    // Analytics
+    'analytics.title': 'Analytik',
+    'analytics.subtitle': 'Tiefe Einblicke in die Leistung Ihres KI-Agenten',
+    'analytics.callVolume': 'Anrufvolumen-Trend',
+    'analytics.sentimentTrend': 'Stimmungs-Trend',
+    'analytics.categoryDist': 'Kategorieverteilung',
+    'analytics.priorityDist': 'Prioritätsaufschlüsselung',
+    'analytics.topTopics': 'Top-Themen',
+    'analytics.sentimentDist': 'Stimmungsverteilung',
+
+    // Activity Log
+    'activityLog.title': 'Aktivitätsprotokoll',
+    'activityLog.subtitle': 'Alle Kontoaktionen und Ereignisse verfolgen',
+
+    // Webhooks
+    'webhooks.title': 'Webhooks',
+    'webhooks.subtitle': 'Echtzeit-Ereignisse an Ihre Anwendungen senden',
+
+    // Settings
+    'settings.title': 'Einstellungen',
+    'settings.subtitle': 'Konto, Benachrichtigungen und Datenschutz verwalten',
+    'settings.profile': 'Profil',
+    'settings.notifications': 'Benachrichtigungen',
+    'settings.security': 'Sicherheit',
+    'settings.data': 'Daten & Datenschutz',
 
     // Knowledge Base Documents
     'kbDocs.title': 'Wissensdatenbank-Dokumente',

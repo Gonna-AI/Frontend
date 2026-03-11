@@ -22,7 +22,11 @@ import {
     Users,
     Wand2,
     ShieldCheck,
-    FileText
+    FileText,
+    TrendingUp,
+    Activity,
+    Webhook,
+    Settings,
 } from "lucide-react"
 
 import { useTheme } from "@/hooks/useTheme"
@@ -55,7 +59,7 @@ interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
 }
 
 // Tabs that are always accessible without an access code
-const ALWAYS_ACCESSIBLE_TABS = ['billing', 'keys', 'usage'];
+const ALWAYS_ACCESSIBLE_TABS = ['billing', 'keys', 'usage', 'settings'];
 
 export function AppSidebar({ activeTab, setActiveTab, hasAccess = false, ...props }: AppSidebarProps) {
     const { t, language, setLanguage } = useLanguage();
@@ -182,6 +186,22 @@ export function AppSidebar({ activeTab, setActiveTab, hasAccess = false, ...prop
                                 >
                                     <Network />
                                     <span>{t('sidebar.customerGraph')}</span>
+                                </SidebarMenuButton>
+                            </SidebarMenuItem>
+                            <SidebarMenuItem>
+                                <SidebarMenuButton
+                                    isActive={activeTab === 'analytics'}
+                                    onClick={() => handleTabClick('analytics')}
+                                    tooltip={t('sidebar.analytics')}
+                                    className={cn(
+                                        "transition-colors",
+                                        isDark
+                                            ? "text-white/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-white/10 data-[active=true]:text-white"
+                                            : "text-gray-600 hover:text-gray-900 hover:bg-black/5 data-[active=true]:bg-black/5 data-[active=true]:text-black"
+                                    )}
+                                >
+                                    <TrendingUp />
+                                    <span>{t('sidebar.analytics')}</span>
                                 </SidebarMenuButton>
                             </SidebarMenuItem>
                         </SidebarMenu>
@@ -429,6 +449,54 @@ export function AppSidebar({ activeTab, setActiveTab, hasAccess = false, ...prop
                                 >
                                     <Link2 />
                                     <span>{t('sidebar.integrations')}</span>
+                                </SidebarMenuButton>
+                            </SidebarMenuItem>
+                            <SidebarMenuItem className={getLockedStyles('webhooks')}>
+                                <SidebarMenuButton
+                                    isActive={activeTab === 'webhooks'}
+                                    onClick={() => handleTabClick('webhooks')}
+                                    tooltip={t('sidebar.webhooks')}
+                                    className={cn(
+                                        "transition-colors",
+                                        isDark
+                                            ? "text-white/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-white/10 data-[active=true]:text-white"
+                                            : "text-gray-600 hover:text-gray-900 hover:bg-black/5 data-[active=true]:bg-black/5 data-[active=true]:text-black"
+                                    )}
+                                >
+                                    <Webhook />
+                                    <span>{t('sidebar.webhooks')}</span>
+                                </SidebarMenuButton>
+                            </SidebarMenuItem>
+                            <SidebarMenuItem className={getLockedStyles('activity_log')}>
+                                <SidebarMenuButton
+                                    isActive={activeTab === 'activity_log'}
+                                    onClick={() => handleTabClick('activity_log')}
+                                    tooltip={t('sidebar.activityLog')}
+                                    className={cn(
+                                        "transition-colors",
+                                        isDark
+                                            ? "text-white/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-white/10 data-[active=true]:text-white"
+                                            : "text-gray-600 hover:text-gray-900 hover:bg-black/5 data-[active=true]:bg-black/5 data-[active=true]:text-black"
+                                    )}
+                                >
+                                    <Activity />
+                                    <span>{t('sidebar.activityLog')}</span>
+                                </SidebarMenuButton>
+                            </SidebarMenuItem>
+                            <SidebarMenuItem>
+                                <SidebarMenuButton
+                                    isActive={activeTab === 'settings'}
+                                    onClick={() => handleTabClick('settings')}
+                                    tooltip={t('sidebar.settings')}
+                                    className={cn(
+                                        "transition-colors",
+                                        isDark
+                                            ? "text-white/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-white/10 data-[active=true]:text-white"
+                                            : "text-gray-600 hover:text-gray-900 hover:bg-black/5 data-[active=true]:bg-black/5 data-[active=true]:text-black"
+                                    )}
+                                >
+                                    <Settings />
+                                    <span>{t('sidebar.settings')}</span>
                                 </SidebarMenuButton>
                             </SidebarMenuItem>
                         </SidebarMenu>

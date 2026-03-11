@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import { cn } from '../../utils/cn';
-import { Check, Building2, Rocket, Coins, ArrowRight, ShieldCheck, Sparkles, X, AlertCircle, Crown, Loader2 } from 'lucide-react';
+import { Check, Building2, Rocket, Coins, ArrowRight, ShieldCheck, Sparkles, X, AlertCircle, Crown, Loader2, Receipt, Download, Clock, RefreshCw } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useDemoCall } from '../../contexts/DemoCallContext';
 import { supabase } from '../../config/supabase';
@@ -133,6 +133,19 @@ interface SubscriptionInfo {
     subscription_status: 'active' | 'cancelled' | 'past_due';
     total_credits: number;
     last_updated: string | null;
+}
+
+interface PaymentRecord {
+    id: string;
+    user_id: string;
+    order_id: string;
+    payment_id: string | null;
+    plan: 'monthly' | 'yearly';
+    amount_cents: number;
+    currency: string;
+    status: 'completed' | 'failed' | 'pending';
+    credits_added: number | null;
+    created_at: string;
 }
 
 // ────────────────────────────────────────────────────────────────

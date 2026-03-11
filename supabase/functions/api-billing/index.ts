@@ -184,7 +184,10 @@ Deno.serve(async (req: Request) => {
     }
 
     const url = new URL(req.url);
-    const action = url.pathname.replace(/\/+$/, '').split('/').pop() || '';
+    const pathSegments = url.pathname.replace(/\/+$/, '').split('/').filter(Boolean);
+    const action = pathSegments[pathSegments.length - 1] || '';
+    // For routes like /invoice/:id, detect parent segment
+    const parentAction = pathSegments.length >= 2 ? pathSegments[pathSegments.length - 2] : '';
 
     const adminClient = createClient(
       supabaseUrl,
@@ -201,6 +204,38 @@ Deno.serve(async (req: Request) => {
       if (error && error.code !== 'PGRST116') throw error;
 
       return jsonResponse(req, 200, { balance: data ? data.credits_balance : 50.0 });
+    }
+
+    if (req.method === 'GET' && action === 'history') {
+      const { data, error } = await adminClient
+        .from('payment_history')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(50);
+
+      if (error) throw error;
+
+      return jsonResponse(req, 200, { payments: data ?? [] });
+    }
+
+    if (req.method === 'GET' && parentAction === 'invoice') {
+      // action is the invoice id: /invoice/:id
+      const invoiceId = action;
+
+      const { data, error } = await adminClient
+        .from('payment_history')
+        .select('*')
+        .eq('id', invoiceId)
+        .eq('user_id', user.id)
+        .single();
+
+      if (error && error.code === 'PGRST116') {
+        return jsonResponse(req, 404, { error: 'Invoice not found.' });
+      }
+      if (error) throw error;
+
+      return jsonResponse(req, 200, { invoice: data });
     }
 
     if (req.method === 'POST' && action === 'redeem') {
@@ -268,6 +303,18 @@ Deno.serve(async (req: Request) => {
       );
 
       if (!isValid) {
+        // Record failed payment attempt
+        await adminClient.from('payment_history').insert({
+          user_id: user.id,
+          order_id: orderId,
+          payment_id: paymentId,
+          plan: claimedPlan ?? 'monthly',
+          amount_cents: 0,
+          currency: 'USD',
+          status: 'failed',
+          credits_added: 0,
+        }).catch((err: unknown) => console.error('[api-billing] failed to record failed payment:', err));
+
         return jsonResponse(req, 400, { error: 'Invalid signature. Payment could not be verified.' });
       }
 
@@ -324,6 +371,18 @@ Deno.serve(async (req: Request) => {
       const newBalance = typeof data === 'object' && data !== null && 'balance' in data
         ? (data as { balance: number }).balance
         : null;
+
+      // Record successful payment in history
+      await adminClient.from('payment_history').insert({
+        user_id: user.id,
+        order_id: orderId,
+        payment_id: paymentId,
+        plan: derivedPlan,
+        amount_cents: order.amount,
+        currency: order.currency,
+        status: 'completed',
+        credits_added: creditsToAdd,
+      }).catch((err: unknown) => console.error('[api-billing] failed to record payment history:', err));
 
       return jsonResponse(req, 200, {
         success: true,
