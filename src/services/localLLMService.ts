@@ -39,13 +39,75 @@ import { ragService } from './ragService';
 
 import log from '../utils/logger';
 
+interface GroqToolCall {
+  id: string;
+  type: 'function';
+  function: {
+    name: string;
+    arguments: string;
+  };
+}
+
+interface GroqResponseMessage {
+  content?: string | null;
+  tool_calls?: GroqToolCall[];
+  role?: string;
+}
+
 interface GroqResponse {
   choices?: Array<{
-    message?: {
-      content?: string;
-    };
+    message?: GroqResponseMessage;
+    finish_reason?: string;
   }>;
 }
+
+// ─── RAG Tool Definitions for Groq Tool Calling ────────────────
+const RAG_TOOLS = [
+  {
+    type: 'function' as const,
+    function: {
+      name: 'search_knowledge_base',
+      description:
+        'Search the business knowledge base for relevant information to answer the caller\'s question. Use this when the caller asks about products, services, policies, pricing, hours, procedures, or any business-specific information.',
+      parameters: {
+        type: 'object',
+        properties: {
+          query: {
+            type: 'string',
+            description: 'The search query — rephrase the caller\'s question to maximize relevance. Be specific.',
+          },
+          max_results: {
+            type: 'number',
+            description: 'Max results to return (1-5). Use 3 for normal queries, 5 for complex ones.',
+          },
+        },
+        required: ['query'],
+      },
+    },
+  },
+  {
+    type: 'function' as const,
+    function: {
+      name: 'get_document_details',
+      description:
+        'Get detailed information from a specific uploaded document by searching for a keyword or topic within it. Use when you need precise details from a known document.',
+      parameters: {
+        type: 'object',
+        properties: {
+          query: {
+            type: 'string',
+            description: 'Keyword or topic to search for within documents.',
+          },
+          document_name: {
+            type: 'string',
+            description: 'Optional: specific document name to search within.',
+          },
+        },
+        required: ['query'],
+      },
+    },
+  },
+];
 
 
 
@@ -557,54 +619,180 @@ class GroqLLMService {
       { hasPhone, hasEmail } // Pass contact info status
     );
 
-    let ragContext = '';
-    if (knowledgeBase.id) {
-      log.debug(`🔍 Fetching RAG context for KB ID ${knowledgeBase.id}...`);
-      const contextDocs = await ragService.searchRelevantContext(userMessage, knowledgeBase.id, 3);
-      if (contextDocs && contextDocs.length > 0) {
-        ragContext = `\n\n=== RELEVANT KNOWLEDGE BASE CONTEXT ===\n${contextDocs.join('\n\n')}\n=======================================\nUse the above information to help answer the user.`;
-      }
-    }
-
     // 2. Conversation History (last 8 messages for better context)
     const recentHistory = conversationHistory.slice(-8);
 
+    const hasKnowledgeBase = !!knowledgeBase.id;
+
     // Build messages array for Groq API (OpenAI format)
-    const groqMessages = [
-      { role: 'system' as const, content: systemPrompt + ragContext },
+    const groqMessages: Array<{ role: 'system' | 'user' | 'assistant' | 'tool'; content: string; tool_call_id?: string; name?: string; tool_calls?: GroqToolCall[] }> = [
+      { role: 'system' as const, content: systemPrompt + (hasKnowledgeBase ? '\n\nYou have access to a knowledge base. Use the search_knowledge_base tool when the caller asks about business-specific information. ALWAYS search before answering questions about products, services, policies, pricing, or procedures.' : '') },
       ...recentHistory.map(msg => ({
-        role: msg.speaker === 'agent' ? 'assistant' as const : 'user' as const,
+        role: (msg.speaker === 'agent' ? 'assistant' : 'user') as 'assistant' | 'user',
         content: msg.speaker === 'agent' ? this.cleanFinalAnswer(msg.text) : msg.text
       })),
       { role: 'user' as const, content: `${userMessage}\n\nRespond naturally to the caller, then AFTER your response, add a JSON block with extracted information.\n\nFormat:\n[Your response]\n\n\`\`\`json\n{"extracted": {"name": "caller name or null", "email": "email or null", "phone": "phone or null", "company": "company or null"}, "priority": "low|medium|high|critical", "category": "inquiry|support|complaint|appointment|other"}\n\`\`\`` }
     ];
 
-    // Helper function for Groq API request
+    // ─── Tool-calling RAG handler ──────────────────────────────────
+    // Executes a tool call by dispatching to the right handler
+    const executeToolCall = async (toolCall: GroqToolCall): Promise<string> => {
+      const { name, arguments: argsStr } = toolCall.function;
+      let args: Record<string, unknown>;
+      try {
+        args = JSON.parse(argsStr);
+      } catch {
+        return JSON.stringify({ error: 'Invalid tool arguments' });
+      }
+
+      if (name === 'search_knowledge_base' && knowledgeBase.id) {
+        const query = String(args.query || userMessage);
+        const maxResults = Math.min(Number(args.max_results) || 3, 5);
+        log.debug(`🔧 Tool call: search_knowledge_base("${query}", limit=${maxResults})`);
+
+        try {
+          const docs = await ragService.searchRelevantContext(query, knowledgeBase.id, maxResults);
+          if (docs && docs.length > 0) {
+            log.debug(`✅ KB search returned ${docs.length} results`);
+            return JSON.stringify({
+              results: docs.map((content, i) => ({ rank: i + 1, content })),
+              total: docs.length,
+            });
+          }
+          return JSON.stringify({ results: [], total: 0, note: 'No matching documents found.' });
+        } catch (err) {
+          log.warn('⚠️ KB search failed:', err);
+          return JSON.stringify({ error: 'Knowledge base search failed', details: err instanceof Error ? err.message : 'Unknown error' });
+        }
+      }
+
+      if (name === 'get_document_details' && knowledgeBase.id) {
+        const query = String(args.query || '');
+        log.debug(`🔧 Tool call: get_document_details("${query}")`);
+
+        try {
+          const docs = await ragService.searchRelevantContext(query, knowledgeBase.id, 5);
+          if (docs && docs.length > 0) {
+            return JSON.stringify({
+              results: docs.map((content, i) => ({ rank: i + 1, content, source: args.document_name || 'knowledge base' })),
+              total: docs.length,
+            });
+          }
+          return JSON.stringify({ results: [], total: 0 });
+        } catch (err) {
+          return JSON.stringify({ error: 'Document search failed' });
+        }
+      }
+
+      return JSON.stringify({ error: `Unknown tool: ${name}` });
+    };
+
+    // ─── Groq API request with tool-calling loop ─────────────────
     const makeGroqRequest = async (): Promise<string | null> => {
       if (!this.groqAvailable) return null;
 
       const settings = getCurrentGroqSettings();
-      try {
-        log.debug(`🚀 Calling Groq API via proxy (model: ${settings.model}, temp: ${settings.temperature})...`);
+      const MAX_TOOL_ROUNDS = 3; // Prevent infinite loops
 
-        const data = await proxyJSON<GroqResponse>(ProxyRoutes.COMPLETIONS, {
-          model: settings.model,
-          messages: groqMessages,
-          temperature: settings.temperature,
-          max_tokens: settings.maxTokens,
-          top_p: settings.topP,
-        }, { timeout: REQUEST_TIMEOUT });
+      // Working copy of messages for multi-turn tool calling
+      const messages = [...groqMessages];
 
-        const content = data.choices?.[0]?.message?.content;
-        if (content) {
-          log.debug('✅ Groq response received via proxy');
-          return content;
+      for (let round = 0; round <= MAX_TOOL_ROUNDS; round++) {
+        try {
+          const requestPayload: Record<string, unknown> = {
+            model: settings.model,
+            messages,
+            temperature: settings.temperature,
+            max_tokens: settings.maxTokens,
+            top_p: settings.topP,
+          };
+
+          // Only include tools on the first round or if previous round had tool calls
+          // and only if knowledge base is configured
+          if (hasKnowledgeBase && round <= MAX_TOOL_ROUNDS - 1) {
+            requestPayload.tools = RAG_TOOLS;
+            requestPayload.tool_choice = round === 0 ? 'auto' : 'auto';
+          }
+
+          log.debug(`🚀 Groq API call (round ${round + 1}, model: ${settings.model})...`);
+
+          const data = await proxyJSON<GroqResponse>(ProxyRoutes.COMPLETIONS, requestPayload, { timeout: REQUEST_TIMEOUT });
+
+          const choice = data.choices?.[0];
+          if (!choice?.message) return null;
+
+          const { content, tool_calls } = choice.message;
+
+          // If model returned tool calls, execute them and loop
+          if (tool_calls && tool_calls.length > 0 && round < MAX_TOOL_ROUNDS) {
+            log.debug(`🔧 Model requested ${tool_calls.length} tool call(s) in round ${round + 1}`);
+
+            // Add the assistant message with tool_calls to history
+            messages.push({
+              role: 'assistant' as const,
+              content: content || '',
+              tool_calls,
+            });
+
+            // Execute each tool call and add results
+            for (const tc of tool_calls) {
+              const result = await executeToolCall(tc);
+              messages.push({
+                role: 'tool' as const,
+                tool_call_id: tc.id,
+                name: tc.function.name,
+                content: result,
+              });
+            }
+
+            // Continue loop — model will see tool results and generate final answer
+            continue;
+          }
+
+          // Final answer (no more tool calls)
+          if (content) {
+            log.debug(`✅ Groq response received (${round > 0 ? `after ${round} tool round(s)` : 'direct'})`);
+            return content;
+          }
+
+          return null;
+        } catch (error) {
+          log.warn(`⚠️ Groq request failed (round ${round + 1}):`, error instanceof Error ? error.message : error);
+
+          // If tool calling failed, retry without tools as fallback
+          if (hasKnowledgeBase && round === 0) {
+            log.debug('🔄 Retrying without tools (fallback to context injection)...');
+            // Fallback: do a direct RAG search and inject context
+            try {
+              const docs = await ragService.searchRelevantContext(userMessage, knowledgeBase.id!, 3);
+              if (docs && docs.length > 0) {
+                const ragContext = `\n\n=== RELEVANT KNOWLEDGE BASE CONTEXT ===\n${docs.join('\n\n')}\n=======================================\nUse the above information to help answer the user.`;
+                messages[0] = { role: 'system' as const, content: systemPrompt + ragContext };
+              }
+            } catch {
+              // KB search failed too, proceed without context
+            }
+
+            const fallbackData = await proxyJSON<GroqResponse>(ProxyRoutes.COMPLETIONS, {
+              model: settings.model,
+              messages,
+              temperature: settings.temperature,
+              max_tokens: settings.maxTokens,
+              top_p: settings.topP,
+            }, { timeout: REQUEST_TIMEOUT });
+
+            const fallbackContent = fallbackData.choices?.[0]?.message?.content;
+            if (fallbackContent) {
+              log.debug('✅ Fallback response received (context injection)');
+              return fallbackContent;
+            }
+          }
+
+          return null;
         }
-        return null;
-      } catch (error) {
-        log.warn('⚠️ Groq request failed:', error instanceof Error ? error.message : error);
-        return null;
       }
+
+      return null;
     };
 
     try {
