@@ -72,7 +72,7 @@ const Contact = () => {
         canonical="https://clerktree.com/contact"
       />
       {/* Orange/warm theme background accents matching main landing page */}
-      <div className="fixed inset-0 bg-[rgb(10,10,10)] -z-10">
+      <div className="fixed inset-0 bg-[rgb(10,10,10)] z-0 pointer-events-none">
         {/* Core warm light source top-right */}
         <div
           className="absolute top-[-10%] right-[-10%] w-[80%] h-[100%] pointer-events-none"
@@ -98,90 +98,123 @@ const Contact = () => {
         />
         {/* Grainy noise overlay */}
         <div
-          className="absolute inset-0 opacity-[0.035] pointer-events-none"
-          style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
-            backgroundSize: '128px 128px',
-          }}
+          className="absolute inset-0 opacity-[0.06]"
+          style={{ backgroundImage: 'url(/noise.webp)', backgroundSize: '35%' }}
         />
+        <div className="absolute inset-x-0 top-0 h-36 bg-gradient-to-b from-black/80 via-black/50 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/20 to-black" />
       </div>
 
       {/* Glassy Header with Logo */}
-      <SharedHeader />
+      <div className="relative z-20">
+        <SharedHeader />
+      </div>
 
-      <div className="relative z-10 py-12 px-6 pt-32 md:pt-36">
-        <div className="max-w-5xl mx-auto">
+      <div className="relative z-10 px-4 pb-20 pt-36 sm:px-6 md:pt-40 lg:px-8 lg:pt-44">
+        <div className="mx-auto max-w-6xl">
 
-          {/* Header */}
-          <div className="text-center mb-16">
-            <p className="text-xs font-semibold uppercase tracking-[0.28em] text-[#FF8A5B] sm:text-sm mb-6">
+          {/* Hero */}
+          <div className="rounded-[1.75rem] border border-white/10 bg-[linear-gradient(145deg,#141414_0%,#0C0C0C_100%)] p-8 md:p-12 shadow-[0_30px_80px_rgba(0,0,0,0.45)]">
+            <p className="text-xs font-semibold uppercase tracking-[0.28em] text-[#FF8A5B] sm:text-sm">
               {t('contact.title1')}
             </p>
-            <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-6">
-              <span className="bg-gradient-to-r from-white via-white/95 to-white/90 text-transparent bg-clip-text">
-                {t('contact.title2')}
-              </span>
+            <h1 className="mt-5 text-balance text-4xl md:text-[44px] font-semibold tracking-[-0.05em] text-white">
+              {t('contact.title2')}
             </h1>
-            <p className="text-lg md:text-xl text-white/60 leading-relaxed max-w-3xl mx-auto">
+            <p className="mt-4 text-[16px] md:text-[18px] leading-relaxed text-white/60 max-w-3xl">
               {t('contact.subtitle')}
             </p>
-          </div>
-
-          {/* Contact Info Cards */}
-          <div className="grid md:grid-cols-3 gap-6 mb-16 max-w-5xl mx-auto">
-            <div className="group rounded-3xl border border-white/10 bg-white/[0.02] backdrop-blur-xl p-6 hover:border-[#FF8A5B]/30 hover:bg-white/[0.04] transition-all duration-300 text-center">
-              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#FF8A5B]/10 to-orange-500/10 border border-[#FF8A5B]/20 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
-                <Phone className="w-6 h-6 text-[#FF8A5B]" />
-              </div>
-              <h3 className="font-semibold mb-2 text-white/90 text-lg">{t('contact.phone')}</h3>
-              <a href="tel:+4917683075116" className="text-white/60 hover:text-[#FF8A5B] transition-colors text-sm block">
-                +49 176 83075116
-              </a>
-            </div>
-            <div className="group rounded-3xl border border-white/10 bg-white/[0.02] backdrop-blur-xl p-6 hover:border-[#FF8A5B]/30 hover:bg-white/[0.04] transition-all duration-300 text-center">
-              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#FF8A5B]/10 to-orange-500/10 border border-[#FF8A5B]/20 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
-                <MapPin className="w-6 h-6 text-[#FF8A5B]" />
-              </div>
-              <h3 className="font-semibold mb-2 text-white/90 text-lg">{t('contact.location')}</h3>
-              <p className="text-white/60 text-sm">
-                Industriestraße 2<br />94315 Straubing, Germany
-              </p>
-            </div>
-            <div className="group rounded-3xl border border-white/10 bg-white/[0.02] backdrop-blur-xl p-6 hover:border-[#FF8A5B]/30 hover:bg-white/[0.04] transition-all duration-300 text-center">
-              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#FF8A5B]/10 to-orange-500/10 border border-[#FF8A5B]/20 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
-                <Mail className="w-6 h-6 text-[#FF8A5B]" />
-              </div>
-              <h3 className="font-semibold mb-2 text-white/90 text-lg">{t('contact.email')}</h3>
-              <a href="mailto:team@clerktree.com" className="text-white/60 hover:text-[#FF8A5B] transition-colors text-sm block">
-                team@clerktree.com
-              </a>
+            <div className="mt-6 flex flex-wrap items-center gap-3 text-xs text-white/50">
+              <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5">Response within 24 hours</span>
+              <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5">Enterprise onboarding</span>
+              <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5">Solutions engineering support</span>
             </div>
           </div>
 
-          {/* Contact Form */}
-          <div className="max-w-3xl mx-auto rounded-3xl border border-white/10 bg-white/[0.02] backdrop-blur-xl p-8 md:p-12 shadow-2xl shadow-black/50 relative overflow-hidden">
-            {/* Decorative gradient glow */}
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-1 bg-gradient-to-r from-transparent via-[#FF8A5B]/50 to-transparent" />
-
-            <div className="text-center mb-10">
-              <h2 className="text-3xl md:text-4xl font-bold mb-4 bg-gradient-to-r from-white via-white/90 to-white/70 text-transparent bg-clip-text">
-                {t('contact.sendMsgTitle')}
-              </h2>
-              <p className="text-white/50 text-lg max-w-lg mx-auto">
-                {t('contact.sendMsgDesc')}
-              </p>
-            </div>
-
-            {submitStatus === 'success' ? (
-              <div className="text-center py-16 animate-in fade-in zoom-in duration-500">
-                <div className="w-20 h-20 bg-emerald-500/10 rounded-full flex items-center justify-center mx-auto mb-6 border border-emerald-500/20">
-                  <CheckCircle2 className="w-10 h-10 text-emerald-500" />
+          <div className="mt-10 grid gap-8 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)]">
+            {/* Contact Info */}
+            <div className="space-y-6">
+              <div className="rounded-2xl border border-white/10 bg-white/[0.04] backdrop-blur-sm p-6">
+                <h3 className="text-xs font-semibold uppercase tracking-[0.25em] text-white/50">Contact Details</h3>
+                <div className="mt-5 space-y-4">
+                  <div className="flex items-start gap-4">
+                    <div className="w-11 h-11 rounded-xl bg-[#FF8A5B]/10 border border-[#FF8A5B]/20 flex items-center justify-center">
+                      <Phone className="w-5 h-5 text-[#FF8A5B]" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-white/50">{t('contact.phone')}</p>
+                      <a href="tel:+4917683075116" className="text-white/80 hover:text-[#FF8A5B] transition-colors">
+                        +49 176 83075116
+                      </a>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-4">
+                    <div className="w-11 h-11 rounded-xl bg-[#FF8A5B]/10 border border-[#FF8A5B]/20 flex items-center justify-center">
+                      <Mail className="w-5 h-5 text-[#FF8A5B]" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-white/50">{t('contact.email')}</p>
+                      <a href="mailto:team@clerktree.com" className="text-white/80 hover:text-[#FF8A5B] transition-colors">
+                        team@clerktree.com
+                      </a>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-4">
+                    <div className="w-11 h-11 rounded-xl bg-[#FF8A5B]/10 border border-[#FF8A5B]/20 flex items-center justify-center">
+                      <MapPin className="w-5 h-5 text-[#FF8A5B]" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-white/50">{t('contact.location')}</p>
+                      <p className="text-white/80">
+                        Industriestraße 2<br />94315 Straubing, Germany
+                      </p>
+                    </div>
+                  </div>
                 </div>
-                <h3 className="text-2xl font-bold text-white mb-3">{t('contact.successTitle')}</h3>
-                <p className="text-white/60">{t('contact.successDesc')}</p>
               </div>
-            ) : (
-              <form onSubmit={handleSubmit} className="space-y-6">
+
+              <div className="rounded-2xl border border-white/10 bg-white/[0.04] backdrop-blur-sm p-6">
+                <h3 className="text-xs font-semibold uppercase tracking-[0.25em] text-white/50">What Helps Us Respond Faster</h3>
+                <div className="mt-4 space-y-3 text-sm text-white/60">
+                  <div className="flex items-start gap-3">
+                    <CheckCircle2 className="w-4 h-4 text-[#FF8A5B] mt-0.5" />
+                    <span>Share your use case, volume, and preferred timelines.</span>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <CheckCircle2 className="w-4 h-4 text-[#FF8A5B] mt-0.5" />
+                    <span>Include systems you need to integrate with or replace.</span>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <CheckCircle2 className="w-4 h-4 text-[#FF8A5B] mt-0.5" />
+                    <span>Tell us about your data sensitivities and compliance needs.</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Contact Form */}
+            <div className="rounded-[1.75rem] border border-white/10 bg-[linear-gradient(145deg,#141414_0%,#0C0C0C_100%)] p-8 md:p-12 shadow-[0_30px_80px_rgba(0,0,0,0.45)] relative overflow-hidden">
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-1 bg-gradient-to-r from-transparent via-[#FF8A5B]/50 to-transparent" />
+
+              <div className="text-left mb-10">
+                <h2 className="text-3xl md:text-4xl font-bold mb-3 bg-gradient-to-r from-white via-white/90 to-white/70 text-transparent bg-clip-text">
+                  {t('contact.sendMsgTitle')}
+                </h2>
+                <p className="text-white/50 text-lg max-w-lg">
+                  {t('contact.sendMsgDesc')}
+                </p>
+              </div>
+
+              {submitStatus === 'success' ? (
+                <div className="text-center py-16 animate-in fade-in zoom-in duration-500">
+                  <div className="w-20 h-20 bg-[#FF8A5B]/10 rounded-full flex items-center justify-center mx-auto mb-6 border border-[#FF8A5B]/20">
+                    <CheckCircle2 className="w-10 h-10 text-[#FF8A5B]" />
+                  </div>
+                  <h3 className="text-2xl font-bold text-white mb-3">{t('contact.successTitle')}</h3>
+                  <p className="text-white/60">{t('contact.successDesc')}</p>
+                </div>
+              ) : (
+                <form onSubmit={handleSubmit} className="space-y-6">
                 {/* Full Name and Company Name */}
                 <div className="grid md:grid-cols-2 gap-6">
                   <div className="space-y-2">
@@ -338,10 +371,10 @@ const Contact = () => {
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="group relative w-full overflow-hidden rounded-xl bg-[#E5E5E5] p-[1px] focus:outline-none focus:ring-4 focus:ring-[#FF8A5B]/20 disabled:opacity-50 disabled:cursor-not-allowed shadow-xl transition-all duration-300 hover:shadow-[#FF8A5B]/20 hover:scale-[1.01] active:scale-[0.99]"
+                    className="group relative w-full overflow-hidden rounded-xl bg-gradient-to-r from-[#FF8A5B] via-[#FF9E6C] to-[#FFB286] p-[1px] focus:outline-none focus:ring-4 focus:ring-[#FF8A5B]/20 disabled:opacity-50 disabled:cursor-not-allowed shadow-xl transition-all duration-300 hover:shadow-[#FF8A5B]/25 hover:scale-[1.01] active:scale-[0.99]"
                   >
-                    <div className="relative h-full w-full rounded-xl bg-[#E5E5E5] hover:bg-white px-8 py-4 transition-all duration-300">
-                      <div className="relative flex items-center justify-center gap-3 text-black font-bold text-lg">
+                    <div className="relative h-full w-full rounded-xl bg-[#0F0F0F] hover:bg-[#141414] px-8 py-4 transition-all duration-300">
+                      <div className="relative flex items-center justify-center gap-3 text-white font-bold text-lg">
                         {isSubmitting ? (
                           <>
                             <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -364,6 +397,7 @@ const Contact = () => {
             )}
           </div>
         </div>
+      </div>
       </div>
       <Footer />
     </div>

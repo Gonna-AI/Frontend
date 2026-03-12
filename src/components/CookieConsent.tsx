@@ -363,11 +363,6 @@ export default function CookieConsent() {
         <div
             className={`fixed inset-0 z-[9999] flex items-end sm:items-center justify-center isolate pointer-events-none`}
         >
-            {/* ─── BANNER BACKDROP (transparent) ─── */}
-            {view === 'banner' && (
-                <div className={`absolute inset-0 transition-opacity duration-500 ${animateIn ? 'opacity-100' : 'opacity-0'}`} />
-            )}
-
             {/* ─── PREFERENCES BACKDROP (Solid) ─── */}
             {view === 'preferences' && (
                 <div
@@ -386,46 +381,47 @@ export default function CookieConsent() {
             ${animateIn ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0'}
           `}
                 >
-                    {/* Top Fade */}
-                    <div className="h-12 bg-gradient-to-t from-black/80 to-transparent pointer-events-none" />
-
-                    <div className="bg-[rgb(10,10,10)] border-t border-neutral-800/80 shadow-[0_-10px_40px_rgba(0,0,0,0.5)]">
-                        <div className="max-w-7xl mx-auto px-4 py-4 sm:px-6 sm:py-5">
-                            <div className="flex flex-col lg:flex-row lg:items-center gap-4 lg:gap-8">
-                                {/* Text Content */}
-                                <div className="flex-1">
-                                    <div className="flex items-center gap-2 mb-2 text-white font-medium">
-                                        <Cookie className="w-4 h-4" />
-                                        <span>{t('cookies.bannerTitle')}</span>
+                    <div className="px-3 pb-4 sm:px-6">
+                        <div className="relative mx-auto max-w-6xl rounded-2xl border border-white/10 bg-[linear-gradient(145deg,#141414_0%,#0C0C0C_100%)] shadow-[0_-20px_60px_rgba(0,0,0,0.55)] overflow-hidden">
+                            <div className="absolute inset-0 opacity-[0.06]" style={{ backgroundImage: 'url(/noise.webp)', backgroundSize: '35%' }} />
+                            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/20 to-black" />
+                            <div className="relative z-10 px-5 py-4 sm:px-6 sm:py-5">
+                                <div className="flex flex-col lg:flex-row lg:items-center gap-4 lg:gap-8">
+                                    {/* Text Content */}
+                                    <div className="flex-1">
+                                        <div className="flex items-center gap-2 mb-2 text-white/90 font-medium">
+                                            <Cookie className="w-4 h-4 text-[#FFB286]" />
+                                            <span>{t('cookies.bannerTitle')}</span>
+                                        </div>
+                                        <p className="text-white/60 text-sm leading-relaxed max-w-3xl">
+                                            {t('cookies.bannerDesc')} {' '}
+                                            <Link to="/privacy-policy" className="underline text-white hover:text-white/80 underline-offset-2">
+                                                {t('cookies.privacyPolicy')}
+                                            </Link>
+                                        </p>
                                     </div>
-                                    <p className="text-neutral-400 text-sm leading-relaxed max-w-3xl">
-                                        {t('cookies.bannerDesc')} {' '}
-                                        <Link to="/privacy-policy" className="underline text-white hover:text-white/80 underline-offset-2">
-                                            {t('cookies.privacyPolicy')}
-                                        </Link>
-                                    </p>
-                                </div>
 
-                                {/* Banner Actions */}
-                                <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 flex-shrink-0">
-                                    <button
-                                        onClick={() => setView('preferences')}
-                                        className="order-2 sm:order-1 px-4 py-2.5 rounded-lg border border-neutral-700 hover:border-neutral-500 text-neutral-300 hover:text-white text-sm font-medium transition-colors"
-                                    >
-                                        {t('cookies.preferences')}
-                                    </button>
-                                    <button
-                                        onClick={rejectAll}
-                                        className="order-3 sm:order-2 px-4 py-2.5 rounded-lg hover:bg-neutral-800 text-neutral-400 hover:text-white text-sm font-medium transition-colors"
-                                    >
-                                        {t('cookies.rejectAll')}
-                                    </button>
-                                    <button
-                                        onClick={acceptAll}
-                                        className="order-1 sm:order-3 px-6 py-2.5 rounded-lg bg-white hover:bg-neutral-200 text-black text-sm font-medium transition-colors shadow-lg shadow-white/5"
-                                    >
-                                        {t('cookies.acceptAll')}
-                                    </button>
+                                    {/* Banner Actions */}
+                                    <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 flex-shrink-0">
+                                        <button
+                                            onClick={() => setView('preferences')}
+                                            className="order-2 sm:order-1 px-4 py-2.5 rounded-full border border-white/15 bg-white/5 text-white/70 hover:text-white hover:border-[#FF8A5B]/40 text-sm font-medium transition-colors"
+                                        >
+                                            {t('cookies.preferences')}
+                                        </button>
+                                        <button
+                                            onClick={rejectAll}
+                                            className="order-3 sm:order-2 px-4 py-2.5 rounded-full hover:bg-white/5 text-white/50 hover:text-white text-sm font-medium transition-colors"
+                                        >
+                                            {t('cookies.rejectAll')}
+                                        </button>
+                                        <button
+                                            onClick={acceptAll}
+                                            className="order-1 sm:order-3 px-6 py-2.5 rounded-full bg-gradient-to-r from-[#FF8A5B] via-[#FF9E6C] to-[#FFB286] text-white text-sm font-semibold transition-colors shadow-lg shadow-[#FF8A5B]/20"
+                                        >
+                                            {t('cookies.acceptAll')}
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -440,24 +436,26 @@ export default function CookieConsent() {
                 <div
                     className={`
             pointer-events-auto relative w-full max-w-2xl mx-auto 
-            flex flex-col bg-[rgb(12,12,12)] border border-neutral-800/80 shadow-2xl shadow-black
+            flex flex-col bg-[linear-gradient(145deg,#141414_0%,#0C0C0C_100%)] border border-white/10 shadow-2xl shadow-black
             rounded-t-2xl sm:rounded-2xl overflow-hidden
             max-h-[90vh] sm:max-h-[85vh] h-[90vh] sm:h-auto
             transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] transform
             ${animateIn ? 'translate-y-0 scale-100 opacity-100' : 'translate-y-8 scale-95 opacity-0'}
           `}
                 >
+                    <div className="absolute inset-0 opacity-[0.06] pointer-events-none" style={{ backgroundImage: 'url(/noise.webp)', backgroundSize: '35%' }} />
+                    <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/20 to-black pointer-events-none" />
                     {/* Modal Header */}
-                    <div className="flex items-center justify-between px-5 py-4 border-b border-neutral-800 bg-[rgb(12,12,12)] z-10 shrink-0">
+                    <div className="relative z-10 flex items-center justify-between px-5 py-4 border-b border-white/10 bg-black/40 backdrop-blur-sm shrink-0">
                         <div>
                             <h2 className="text-lg font-semibold text-white flex items-center gap-2">
-                                <Cookie className="w-5 h-5" />
+                                <Cookie className="w-5 h-5 text-[#FFB286]" />
                                 {t('cookies.bannerTitle')}
                             </h2>
                         </div>
                         <button
                             onClick={() => setView('banner')}
-                            className="p-2 -mr-2 text-neutral-400 hover:text-white hover:bg-neutral-800 rounded-full transition-colors"
+                            className="p-2 -mr-2 text-white/60 hover:text-white hover:bg-white/10 rounded-full transition-colors"
                             aria-label="Close"
                         >
                             <X className="w-5 h-5" />
@@ -465,10 +463,10 @@ export default function CookieConsent() {
                     </div>
 
                     {/* Modal Body (Scrollable) */}
-                    <div className="flex-1 overflow-y-auto px-5 py-2 custom-scrollbar overscroll-contain">
+                    <div className="relative z-10 flex-1 overflow-y-auto px-5 py-2 custom-scrollbar overscroll-contain">
                         <div className="py-4 space-y-6">
-                            <div className="bg-neutral-900/30 p-4 rounded-xl border border-neutral-800/50">
-                                <p className="text-sm text-neutral-400 leading-relaxed">
+                            <div className="bg-white/5 p-4 rounded-xl border border-white/10">
+                                <p className="text-sm text-white/60 leading-relaxed">
                                     {t('cookies.customiseDesc')}
                                 </p>
                                 <div className="mt-3 flex gap-4 text-xs">
@@ -502,24 +500,24 @@ export default function CookieConsent() {
                     </div>
 
                     {/* Modal Footer (Fixed) */}
-                    <div className="p-4 sm:px-6 sm:py-5 border-t border-neutral-800 bg-[rgb(12,12,12)] shrink-0 pb-[max(1rem,env(safe-area-inset-bottom))]">
+                    <div className="relative z-10 p-4 sm:px-6 sm:py-5 border-t border-white/10 bg-black/40 backdrop-blur-sm shrink-0 pb-[max(1rem,env(safe-area-inset-bottom))]">
                         <div className="flex flex-col sm:flex-row gap-3">
                             <button
                                 onClick={rejectAll}
-                                className="w-full sm:w-auto px-5 py-2.5 rounded-lg border border-neutral-700 hover:border-neutral-500 text-neutral-400 hover:text-white font-medium transition-colors text-sm"
+                                className="w-full sm:w-auto px-5 py-2.5 rounded-full border border-white/15 hover:border-[#FF8A5B]/40 text-white/60 hover:text-white font-medium transition-colors text-sm"
                             >
                                 {t('cookies.rejectAll')}
                             </button>
                             <div className="flex-1 hidden sm:block" />
                             <button
                                 onClick={savePreferences}
-                                className="w-full sm:w-auto px-5 py-2.5 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-white font-medium transition-colors text-sm"
+                                className="w-full sm:w-auto px-5 py-2.5 rounded-full bg-white/10 hover:bg-white/15 text-white font-medium transition-colors text-sm"
                             >
                                 {t('cookies.savePreferences')}
                             </button>
                             <button
                                 onClick={acceptAll}
-                                className="w-full sm:w-auto px-6 py-2.5 rounded-lg bg-white hover:bg-neutral-200 text-black font-medium transition-colors shadow-lg shadow-white/10 text-sm"
+                                className="w-full sm:w-auto px-6 py-2.5 rounded-full bg-gradient-to-r from-[#FF8A5B] via-[#FF9E6C] to-[#FFB286] text-white font-semibold transition-colors shadow-lg shadow-[#FF8A5B]/20 text-sm"
                             >
                                 {t('cookies.acceptAll')}
                             </button>

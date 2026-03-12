@@ -181,10 +181,15 @@ export default function Solutions() {
       />
       <SharedHeader />
 
-      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+      <div className="pointer-events-none absolute inset-0 overflow-hidden z-0">
         <div className="absolute left-[-12rem] top-[18rem] h-[28rem] w-[28rem] rounded-full bg-[#FF8A5B]/8 blur-[140px]" />
         <div className="absolute right-[-10rem] top-[10rem] h-[24rem] w-[24rem] rounded-full bg-white/6 blur-[120px]" />
         <div className="absolute bottom-[-8rem] left-1/2 h-[24rem] w-[40rem] -translate-x-1/2 rounded-full bg-[#FF8A5B]/6 blur-[120px]" />
+        <div
+          className="absolute inset-0 opacity-[0.06]"
+          style={{ backgroundImage: 'url(/noise.webp)', backgroundSize: '35%' }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/20 to-black" />
       </div>
 
       <main className="relative z-10">

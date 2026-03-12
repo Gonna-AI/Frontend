@@ -19,7 +19,7 @@ export default function About() {
         canonical="https://clerktree.com/about"
       />
       {/* Orange/warm theme background accents matching main landing page */}
-      <div className="fixed inset-0 bg-[rgb(10,10,10)] -z-10">
+      <div className="fixed inset-0 bg-[rgb(10,10,10)] z-0 pointer-events-none">
         {/* Core warm light source top-right */}
         <div
           className="absolute top-[-10%] right-[-10%] w-[80%] h-[100%] pointer-events-none"
@@ -45,17 +45,18 @@ export default function About() {
         />
         {/* Grainy noise overlay */}
         <div
-          className="absolute inset-0 opacity-[0.035] pointer-events-none"
-          style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
-            backgroundSize: '128px 128px',
-          }}
+          className="absolute inset-0 opacity-[0.06]"
+          style={{ backgroundImage: 'url(/noise.webp)', backgroundSize: '35%' }}
         />
+        <div className="absolute inset-x-0 top-0 h-36 bg-gradient-to-b from-black/80 via-black/50 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/20 to-black" />
       </div>
 
-      <SharedHeader />
+      <div className="relative z-20">
+        <SharedHeader />
+      </div>
 
-      <div className="relative z-10 py-12 px-6 pt-32 md:pt-36">
+      <div className="relative z-10 py-12 px-6 pt-36 md:pt-44">
         <div className="max-w-6xl mx-auto">
 
           {/* Header */}
