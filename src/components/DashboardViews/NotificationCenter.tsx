@@ -130,11 +130,12 @@ export default function NotificationCenter({ isDark, className }: NotificationCe
     const rect = btn.getBoundingClientRect();
     const isMobileViewport = window.innerWidth < 640;
     const width = Math.min(380, Math.floor(window.innerWidth * 0.92));
+    const margin = 12;
+    const maxHeight = Math.min(520, window.innerHeight - margin * 2);
     const left = isMobileViewport
       ? (window.innerWidth - width) / 2
       : Math.min(Math.max(rect.right - width, 8), window.innerWidth - width - 8);
-    const top = Math.min(rect.bottom + 12, window.innerHeight - 16);
-    const maxHeight = Math.max(240, window.innerHeight - top - 16);
+    const top = Math.min(rect.bottom + margin, window.innerHeight - margin - maxHeight);
     setDropdownStyle({
       position: 'fixed',
       top,
@@ -187,17 +188,17 @@ export default function NotificationCenter({ isDark, className }: NotificationCe
         ref={buttonRef}
         onClick={() => setOpen(!open)}
         className={cn(
-          "relative inline-flex h-8 w-8 items-center justify-center rounded-full border transition-colors",
+          "relative inline-flex h-7 w-7 items-center justify-center rounded-full border transition-colors backdrop-blur-sm",
           isDark
             ? "border-white/10 bg-white/5 text-white/70 hover:bg-white/10 hover:text-white"
             : "border-black/10 bg-black/5 text-black/60 hover:bg-black/10 hover:text-black"
         )}
       >
-        <Bell className="h-4 w-4" />
+        <Bell className="h-3.5 w-3.5" />
         {unreadCount > 0 && (
           <span
             className={cn(
-              "absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-[#FF8A5B] text-[9px] font-bold text-white leading-none ring-2",
+              "absolute -top-0.5 -right-0.5 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-[#FF8A5B] text-[8px] font-bold text-white leading-none ring-2 shadow-[0_0_12px_rgba(255,138,91,0.5)]",
               isDark ? "ring-[#0A0A0A]" : "ring-white"
             )}
           >

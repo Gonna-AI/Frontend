@@ -200,15 +200,18 @@ const Sidebar = React.forwardRef<
     if (isMobile) {
       return (
         <Drawer open={openMobile} onOpenChange={setOpenMobile}>
-          <DrawerContent
-            data-sidebar="sidebar"
-            data-mobile="true"
-            className={cn(
-              "p-0 border-t rounded-t-2xl",
-              isDark
-                ? "bg-[#0A0A0A] text-white border-white/10 [&>div.bg-muted]:bg-white/20"
-                : "bg-white text-black border-black/10 [&>div.bg-muted]:bg-black/5"
-            )}
+        <DrawerContent
+          data-sidebar="sidebar"
+          data-mobile="true"
+          className={cn(
+            "relative overflow-hidden p-0 border-t rounded-t-2xl",
+            "before:content-[''] before:absolute before:inset-0 before:pointer-events-none before:bg-[radial-gradient(circle_at_15%_0%,rgba(255,138,91,0.14),transparent_55%)]",
+            "after:content-[''] after:absolute after:inset-0 after:pointer-events-none after:bg-[url('/noise.webp')] after:bg-[length:30%] after:opacity-[0.08]",
+            "[&>div]:relative [&>div]:z-10",
+            isDark
+              ? "bg-[#0A0A0A] text-white border-white/10 [&>div.bg-muted]:bg-white/10 [&>div.bg-muted]:shadow-[0_0_10px_rgba(255,255,255,0.08)]"
+              : "bg-white text-black border-black/10 [&>div.bg-muted]:bg-black/10"
+          )}
             style={
               {
                 "--sidebar-width": "100%",

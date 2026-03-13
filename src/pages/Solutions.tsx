@@ -73,7 +73,8 @@ export default function Solutions() {
       suffix: '%',
       label: t('solutions.stat1Label'),
       description: t('solutions.stat1Desc'),
-      numberClass: 'text-[#FF8A5B]',
+      numberClass: 'text-[#FF8A5B] drop-shadow-[0_6px_22px_rgba(255,138,91,0.35)]',
+      suffixClass: 'text-[#FFB286]',
       lineClass: 'bg-[#FF8A5B]',
     },
     {
@@ -81,7 +82,8 @@ export default function Solutions() {
       suffix: '%',
       label: t('solutions.stat2Label'),
       description: t('solutions.stat2Desc'),
-      numberClass: 'text-white',
+      numberClass: 'text-white drop-shadow-[0_6px_22px_rgba(255,255,255,0.18)]',
+      suffixClass: 'text-white/70',
       lineClass: 'bg-[#FF8A5B]/80',
     },
     {
@@ -90,7 +92,8 @@ export default function Solutions() {
       decimalPlaces: 1,
       label: t('solutions.stat3Label'),
       description: t('solutions.stat3Desc'),
-      numberClass: 'text-white',
+      numberClass: 'text-white drop-shadow-[0_6px_22px_rgba(255,255,255,0.18)]',
+      suffixClass: 'text-white/70',
       lineClass: 'bg-[#FF8A5B]/65',
     },
     {
@@ -98,7 +101,8 @@ export default function Solutions() {
       suffix: '/7',
       label: t('solutions.stat4Label'),
       description: t('solutions.stat4Desc'),
-      numberClass: 'text-white',
+      numberClass: 'text-white drop-shadow-[0_6px_22px_rgba(255,255,255,0.18)]',
+      suffixClass: 'text-white/70',
       lineClass: 'bg-[#FF8A5B]/50',
     },
   ];
@@ -286,15 +290,20 @@ export default function Solutions() {
                           className={`${stat.numberClass} text-[2.6rem] font-semibold tracking-[-0.08em] sm:text-5xl`}
                           delay={0.12 + index * 0.04}
                         />
-                        <span className="mb-1 text-lg font-semibold tracking-[-0.05em] text-[#FF8A5B]/78 sm:text-2xl">
+                        <span
+                          className={cn(
+                            "mb-1 text-lg font-semibold tracking-[-0.05em] sm:text-2xl",
+                            stat.suffixClass ?? "text-[#FF8A5B]/78"
+                          )}
+                        >
                           {stat.suffix}
                         </span>
                       </div>
 
-                      <h3 className="mt-3 text-base font-medium tracking-[-0.02em] text-white sm:mt-4 sm:text-lg">
+                      <h3 className="mt-3 text-base font-medium tracking-[-0.02em] !text-white sm:mt-4 sm:text-lg">
                         {stat.label}
                       </h3>
-                      <p className="mt-2 max-w-xs text-sm leading-6 text-white/60">
+                      <p className="mt-2 max-w-xs text-sm leading-6 !text-white/70">
                         {stat.description}
                       </p>
                     </div>

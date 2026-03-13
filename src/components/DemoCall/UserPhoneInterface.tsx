@@ -254,16 +254,16 @@ export default function UserPhoneInterface({
                 )}
 
                 {/* Main Content Area */}
-                <div className="flex-1 flex flex-col items-center justify-center relative px-6 z-10 w-full max-w-lg mx-auto">
+                <div className="flex-1 flex flex-col items-center justify-center relative px-6 z-10 w-full max-w-[92vw] sm:max-w-lg mx-auto">
 
                     {/* Avatar / Visualizer */}
-                    <div className="relative mb-12">
+                    <div className="relative mb-8 sm:mb-12">
                         <motion.div
                             animate={{
                                 scale: agentStatus === 'speaking' ? [1, 1.1, 1] : 1,
                             }}
                             transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-                            className="w-40 h-40 rounded-full flex items-center justify-center text-5xl shadow-2xl border-4 border-white/10 bg-white/5 backdrop-blur-sm relative z-10 text-white"
+                            className="w-32 h-32 sm:w-40 sm:h-40 rounded-full flex items-center justify-center text-4xl sm:text-5xl shadow-2xl border-4 border-white/10 bg-white/5 backdrop-blur-sm relative z-10 text-white"
                         >
                             <span className="font-bold">AI</span>
                         </motion.div>
@@ -287,8 +287,8 @@ export default function UserPhoneInterface({
                     </div>
 
                     {/* Call Status */}
-                    <div className="text-center space-y-2 mb-10">
-                        <h2 className="text-3xl font-semibold text-white tracking-tight">
+                    <div className="text-center space-y-2 mb-8 sm:mb-10">
+                        <h2 className="text-2xl sm:text-3xl font-semibold text-white tracking-tight">
                             Alice (AI Agent)
                         </h2>
                         <p className="font-mono text-sm text-white/50 tracking-wider uppercase">
@@ -310,16 +310,16 @@ export default function UserPhoneInterface({
                                     {currentTranscript ? (
                                         <>
                                             <p className="text-xs uppercase tracking-widest font-bold opacity-40 mb-2 text-green-400">You</p>
-                                            <p className="text-xl font-medium leading-relaxed text-white/90">"{currentTranscript}"</p>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <p className="text-xs uppercase tracking-widest font-bold opacity-40 mb-2 text-blue-400">Alice</p>
-                                            <p className="text-xl font-medium leading-relaxed text-white/90">{lastAgentMessage}</p>
-                                        </>
-                                    )}
-                                </motion.div>
+                                    <p className="text-base sm:text-xl font-medium leading-relaxed text-white/90">"{currentTranscript}"</p>
+                                </>
+                            ) : (
+                                <>
+                                    <p className="text-xs uppercase tracking-widest font-bold opacity-40 mb-2 text-blue-400">Alice</p>
+                                    <p className="text-base sm:text-xl font-medium leading-relaxed text-white/90">{lastAgentMessage}</p>
+                                </>
                             )}
+                        </motion.div>
+                    )}
                         </AnimatePresence>
                     </div>
                 </div>
@@ -364,13 +364,12 @@ export default function UserPhoneInterface({
         return (
             <div className="fixed inset-0 h-[100dvh] z-50 flex flex-col bg-black text-white overflow-hidden">
                 {/* Background Layer */}
-                <motion.div
-                    className="absolute inset-0 z-0 pointer-events-none"
-                    animate={{
-                        background: 'radial-gradient(circle at center, rgba(16, 185, 129, 0.12) 0%, transparent 80%)'
-                    }}
-                    transition={{ duration: 0.8, ease: "easeInOut" }}
-                />
+                <div className="absolute inset-0 z-0 pointer-events-none">
+                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_25%_15%,rgba(255,138,91,0.18),transparent_60%)]" />
+                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_70%,rgba(255,210,184,0.10),transparent_55%)]" />
+                    <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/25 to-black" />
+                    <div className="absolute inset-0 opacity-[0.08] bg-[url('/noise.webp')] bg-[length:30%]" />
+                </div>
 
                 {/* Back Button */}
                 {onBack && (
@@ -386,30 +385,30 @@ export default function UserPhoneInterface({
                 )}
 
                 {/* Main Content Area */}
-                <div className="flex-1 flex flex-col items-center justify-center relative px-6 z-10 w-full max-w-lg mx-auto">
+                <div className="flex-1 flex flex-col items-center justify-center relative px-6 z-10 w-full max-w-[92vw] sm:max-w-lg mx-auto">
                     {/* Avatar */}
-                    <div className="relative mb-12">
+                    <div className="relative mb-8 sm:mb-12">
                         <motion.div
                             animate={{
                                 scale: [1, 1.05, 1],
                             }}
                             transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
-                            className="w-40 h-40 rounded-full flex items-center justify-center text-5xl shadow-2xl border-4 border-emerald-500/20 bg-emerald-500/5 backdrop-blur-sm relative z-10 text-white"
+                            className="w-32 h-32 sm:w-40 sm:h-40 rounded-full flex items-center justify-center text-4xl sm:text-5xl shadow-2xl border border-white/10 bg-[radial-gradient(circle_at_30%_30%,rgba(255,209,184,0.35),rgba(255,138,91,0.18)_45%,rgba(12,10,9,0.9)_100%)] backdrop-blur-sm relative z-10 text-white"
                         >
                             <span className="font-bold">AI</span>
                         </motion.div>
 
                         {/* Ambient ring */}
-                        <div className="absolute -inset-4 rounded-full border-2 animate-[spin_6s_linear_infinite] border-t-emerald-500/30 border-r-transparent border-b-emerald-500/30 border-l-transparent" />
+                        <div className="absolute -inset-4 rounded-full border-2 animate-[spin_6s_linear_infinite] border-t-[#FF8A5B]/40 border-r-transparent border-b-[#FF8A5B]/30 border-l-transparent" />
                     </div>
 
                     {/* Ready Status */}
-                    <div className="text-center space-y-2 mb-10">
-                        <h2 className="text-3xl font-semibold text-white tracking-tight">
-                            Ready to Connect
+                    <div className="text-center space-y-2 mb-8 sm:mb-10">
+                        <h2 className="text-2xl sm:text-3xl font-semibold text-white tracking-tight">
+                            AI Ready to Connect
                         </h2>
-                        <p className="font-mono text-sm text-white/50 tracking-wider uppercase">
-                            AI Agent Standing By
+                        <p className="font-mono text-xs text-white/55 tracking-[0.35em] uppercase">
+                            Standing By
                         </p>
                     </div>
 
@@ -419,18 +418,21 @@ export default function UserPhoneInterface({
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.2, duration: 0.4 }}
                         onClick={handleStartCall}
-                        className="group relative w-20 h-20 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 shadow-[0_0_40px_rgba(16,185,129,0.4)] hover:shadow-[0_0_60px_rgba(16,185,129,0.6)] transition-shadow duration-300 flex items-center justify-center mb-8"
+                        className="group relative w-20 h-20 sm:w-24 sm:h-24 rounded-full flex items-center justify-center mb-6 sm:mb-8 border border-emerald-300/40 shadow-[0_0_45px_rgba(34,197,94,0.45)] hover:shadow-[0_0_70px_rgba(34,197,94,0.65)] transition-shadow duration-300 overflow-hidden"
                     >
-                        <Phone className="w-8 h-8 text-white group-hover:scale-110 transition-transform" />
+                        <div className="absolute inset-0 rounded-full bg-[radial-gradient(circle_at_30%_30%,#C7F9D8_0%,#22C55E_55%,#0B3D1D_100%)]" />
+                        <div className="absolute inset-0 rounded-full bg-[linear-gradient(155deg,rgba(255,255,255,0.25),transparent_55%)]" />
+                        <div className="absolute inset-0 rounded-full bg-[url('/noise.webp')] opacity-[0.12]" />
+                        <Phone className="relative w-7 h-7 sm:w-8 sm:h-8 text-[#0B1A0F] group-hover:scale-110 transition-transform" />
                         {/* Pulse ring */}
                         <motion.div
                             animate={{ scale: [1, 1.5, 1.5], opacity: [0.6, 0, 0] }}
                             transition={{ duration: 2, repeat: Infinity, ease: "easeOut" }}
-                            className="absolute inset-0 rounded-full border-2 border-emerald-400"
+                            className="absolute inset-0 rounded-full border-2 border-emerald-300/70"
                         />
                     </motion.button>
 
-                    <p className="text-sm text-white/40">
+                    <p className="text-sm text-white/45">
                         Tap to start your voice call
                     </p>
 
@@ -453,8 +455,8 @@ export default function UserPhoneInterface({
                         transition={{ delay: 0.4, duration: 0.4 }}
                         className="w-full mt-8 p-5 rounded-3xl bg-black/60 backdrop-blur-xl border border-white/10 shadow-2xl text-center"
                     >
-                        <p className="text-xs uppercase tracking-widest font-bold opacity-40 mb-2 text-emerald-400">Voice Call</p>
-                        <p className="text-base font-medium leading-relaxed text-white/70">
+                        <p className="text-xs uppercase tracking-widest font-bold opacity-40 mb-2 text-[#FFB286]">Voice Call</p>
+                        <p className="text-sm sm:text-base font-medium leading-relaxed text-white/70">
                             Speak naturally with our AI agent. Your microphone will be activated when the call starts.
                         </p>
                     </motion.div>

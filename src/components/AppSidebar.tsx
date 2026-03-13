@@ -75,13 +75,13 @@ export function AppSidebar({ activeTab, setActiveTab, hasAccess = false, ...prop
         isDark
             ? [
                 "text-white/70 hover:text-white hover:bg-white/5",
-                "data-[active=true]:text-white data-[active=true]:bg-[linear-gradient(145deg,#151515_0%,#0B0B0B_100%)]",
+                "data-[active=true]:!text-white data-[active=true]:!bg-[linear-gradient(145deg,#151515_0%,#0B0B0B_100%)]",
                 "data-[active=true]:before:bg-[radial-gradient(circle_at_20%_15%,rgba(255,138,91,0.18),transparent_55%)]",
                 "data-[active=true]:after:bg-[url('/noise.webp')] data-[active=true]:after:bg-[length:30%] data-[active=true]:after:opacity-[0.12]",
             ].join(" ")
             : [
                 "text-gray-600 hover:text-gray-900 hover:bg-black/5",
-                "data-[active=true]:text-[#5B2A16] data-[active=true]:bg-[linear-gradient(145deg,#FFF6F0_0%,#FFFFFF_100%)]",
+                "data-[active=true]:!text-[#5B2A16] data-[active=true]:!bg-[linear-gradient(145deg,#FFF6F0_0%,#FFFFFF_100%)]",
                 "data-[active=true]:before:bg-[radial-gradient(circle_at_20%_15%,rgba(255,138,91,0.14),transparent_55%)]",
                 "data-[active=true]:after:bg-[url('/noise.webp')] data-[active=true]:after:bg-[length:30%] data-[active=true]:after:opacity-[0.08]",
             ].join(" ")
