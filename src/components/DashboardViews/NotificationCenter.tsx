@@ -62,21 +62,27 @@ export default function NotificationCenter({ isDark }: NotificationCenterProps) 
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const apiCall = useCallback(async (path: string, options?: RequestInit) => {
-    const session = await supabase.auth.getSession();
-    const token = session.data.session?.access_token;
-    if (!token) return null;
-    const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/api-notifications/${path}`, {
-      ...options,
-      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json', ...(options?.headers || {}) },
-    });
-    return res.json();
+    try {
+      const session = await supabase.auth.getSession();
+      const token = session.data.session?.access_token;
+      if (!token) return null;
+      const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/api-notifications/${path}`, {
+        ...options,
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json', ...(options?.headers || {}) },
+      });
+      if (!res.ok) return null;
+      return res.json();
+    } catch {
+      // Silently handle network errors — edge function may not be deployed
+      return null;
+    }
   }, []);
 
   const fetchUnreadCount = useCallback(async () => {
     try {
       const data = await apiCall('unread-count');
       if (data) setUnreadCount(data.count ?? 0);
-    } catch {}
+    } catch { }
   }, [apiCall]);
 
   const fetchNotifications = useCallback(async () => {
@@ -119,7 +125,7 @@ export default function NotificationCenter({ isDark }: NotificationCenterProps) 
       await apiCall('mark-read', { method: 'POST', body: JSON.stringify({ ids: [] }) });
       setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
       setUnreadCount(0);
-    } catch {}
+    } catch { }
   };
 
   const markRead = async (id: string) => {
@@ -127,14 +133,14 @@ export default function NotificationCenter({ isDark }: NotificationCenterProps) 
       await apiCall('mark-read', { method: 'POST', body: JSON.stringify({ ids: [id] }) });
       setNotifications(prev => prev.map(n => n.id === id ? { ...n, is_read: true } : n));
       setUnreadCount(prev => Math.max(0, prev - 1));
-    } catch {}
+    } catch { }
   };
 
   const clearRead = async () => {
     try {
       await apiCall('', { method: 'DELETE' });
       setNotifications(prev => prev.filter(n => !n.is_read));
-    } catch {}
+    } catch { }
   };
 
   return (
