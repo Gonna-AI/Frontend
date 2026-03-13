@@ -65,7 +65,7 @@ const EditableInput = ({
         "w-full p-4 rounded-xl transition-all",
         "focus:outline-none focus:ring-2",
         isDark
-          ? "bg-black/40 border border-white/10 text-white"
+          ? "bg-white/5 border border-white/10 text-white focus:ring-[#FF8A5B]/20"
           : "bg-black/5 border border-black/10 text-black"
       )}
       autoFocus
@@ -163,7 +163,7 @@ export default function AISettings() {
     <div className={cn(
       "p-4 sm:p-6 rounded-2xl border transition-all",
       isDark
-        ? "bg-black/40 border-white/10"
+        ? "bg-white/5 border-white/10 backdrop-blur-md"
         : "bg-black/5 border-black/10",
       className
     )}>
@@ -174,7 +174,7 @@ export default function AISettings() {
   const IconContainer = ({ icon: Icon, color }: { icon: any, color: string }) => (
     <div className={cn(
       "w-10 h-10 rounded-xl flex items-center justify-center",
-      isDark ? "bg-black/40" : "bg-black/5"
+      isDark ? "bg-white/5" : "bg-black/5"
     )}>
       <Icon className={cn("w-5 h-5", color)} />
     </div>
@@ -347,28 +347,31 @@ export default function AISettings() {
   const getThemeColors = () => ({
     background: isDark ? 'bg-[#0a0a0a]' : 'bg-gray-50',
     text: isDark ? 'text-white' : 'text-gray-800',
-    cardBg: isDark ? 'bg-black/40' : 'bg-white',
+    cardBg: isDark ? 'bg-white/5' : 'bg-white',
     border: isDark ? 'border-white/10' : 'border-gray-200',
-    inputBg: isDark ? 'bg-black/40' : 'bg-white',
-    inputBorder: isDark ? 'border-purple-500/20' : 'border-purple-200',
+    inputBg: isDark ? 'bg-white/5' : 'bg-white',
+    inputBorder: isDark ? 'border-[#FF8A5B]/20' : 'border-orange-200',
     secondaryText: isDark ? 'text-gray-400' : 'text-gray-500',
-    statsBg: isDark ? 'bg-purple-500/5' : 'bg-purple-50',
-    statsBorder: isDark ? 'border-purple-500/20' : 'border-purple-100',
+    statsBg: isDark ? 'bg-[#FF8A5B]/10' : 'bg-orange-50',
+    statsBorder: isDark ? 'border-[#FF8A5B]/20' : 'border-orange-100',
   });
 
   const theme = getThemeColors();
 
   return (
     <div className={cn(
-      "min-h-screen transition-colors duration-500 rounded-3xl",
-      isDark ? "bg-gradient-to-b from-gray-900 to-black" : "bg-gradient-to-b from-gray-50 to-white"
+      "min-h-screen transition-colors duration-500 rounded-3xl relative overflow-hidden",
+      isDark ? "bg-[#0A0A0A]" : "bg-gradient-to-b from-gray-50 to-white"
     )}>
-      {/* Purple gradient overlay */}
-      <div className={cn(
-        "fixed top-0 left-0 right-0 h-[40vh] pointer-events-none",
-        isDark ? "bg-gradient-to-b from-purple-500/20 via-blue-500/10 to-transparent"
-          : "bg-gradient-to-b from-blue-900/40 via-purple-200/30 to-transparent"
-      )} />
+      {isDark && (
+        <div className="pointer-events-none fixed inset-0">
+          <div className="absolute left-[-12rem] top-[18rem] h-[28rem] w-[28rem] rounded-full bg-[#FF8A5B]/10 blur-[140px]" />
+          <div className="absolute right-[-10rem] top-[10rem] h-[24rem] w-[24rem] rounded-full bg-white/6 blur-[120px]" />
+          <div className="absolute bottom-[-8rem] left-1/2 h-[24rem] w-[40rem] -translate-x-1/2 rounded-full bg-[#FF8A5B]/6 blur-[120px]" />
+          <div className="absolute inset-0 opacity-[0.06]" style={{ backgroundImage: 'url(/noise.webp)', backgroundSize: '35%' }} />
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/20 to-black" />
+        </div>
+      )}
 
       <div className={`min-h-screen ${theme.text} p-6 transition-colors duration-200 relative z-10`}>
         {/* Header */}
@@ -384,8 +387,8 @@ export default function AISettings() {
           <div className="lg:col-span-2 space-y-6">
             <div className={`${theme.cardBg} backdrop-blur-xl border ${theme.border} rounded-3xl p-6`}>
               <div className="flex items-center gap-4 mb-6">
-                <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isDark ? "bg-black/40" : "bg-black/5"}`}>
-                  <Database className={isDark ? "text-blue-400" : "text-blue-600"} />
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isDark ? "bg-white/5" : "bg-black/5"}`}>
+                  <Database className={isDark ? "text-[#FFB286]" : "text-orange-600"} />
                 </div>
                 <h2 className="text-lg font-semibold">{t('ai.knowledgeBase')}</h2>
               </div>
@@ -399,9 +402,9 @@ export default function AISettings() {
                   onChange={(e) => setNewCategory(e.target.value)}
                   placeholder={t('ai.categoryPlaceholder')}
                   className={`w-full p-4 rounded-xl transition-all focus:outline-none focus:ring-2 ${isDark
-                      ? "bg-black/40 border border-white/10 text-white placeholder-white/30 focus:ring-white/20"
-                      : "bg-black/5 border border-black/10 text-black placeholder-black/30 focus:ring-black/20"
-                    }`}
+                    ? "bg-white/5 border border-white/10 text-white placeholder-white/30 focus:ring-[#FF8A5B]/20 focus:border-[#FF8A5B]/30"
+                    : "bg-black/5 border border-black/10 text-black placeholder-black/30 focus:ring-black/20"
+                  }`}
                 />
                 <input
                   ref={descriptionInputRef}
@@ -410,9 +413,9 @@ export default function AISettings() {
                   onChange={(e) => setNewDescription(e.target.value)}
                   placeholder={t('ai.descriptionPlaceholder')}
                   className={`w-full p-4 rounded-xl transition-all focus:outline-none focus:ring-2 ${isDark
-                      ? "bg-black/40 border border-white/10 text-white placeholder-white/30 focus:ring-white/20"
-                      : "bg-black/5 border border-black/10 text-black placeholder-black/30 focus:ring-black/20"
-                    }`}
+                    ? "bg-white/5 border border-white/10 text-white placeholder-white/30 focus:ring-[#FF8A5B]/20 focus:border-[#FF8A5B]/30"
+                    : "bg-black/5 border border-black/10 text-black placeholder-black/30 focus:ring-black/20"
+                  }`}
                 />
               </div>
 
@@ -420,8 +423,8 @@ export default function AISettings() {
               <button
                 onClick={handleAddEntry}
                 className={`w-full p-4 rounded-xl mb-6 transition-colors flex items-center justify-center gap-2 ${isDark
-                    ? "bg-white/10 hover:bg-white/20 text-white"
-                    : "bg-black/10 hover:bg-black/20 text-black"
+                    ? "bg-[#FF8A5B]/10 hover:bg-[#FF8A5B]/20 text-[#FFB286]"
+                    : "bg-orange-100 hover:bg-orange-200 text-orange-700"
                   }`}
               >
                 <Plus className="w-5 h-5" />
@@ -446,8 +449,8 @@ export default function AISettings() {
                   <button
                     onClick={handleConfirmSelection}
                     className={`p-2 rounded-lg transition-colors flex items-center gap-2 ${isDark
-                        ? "bg-white/10 hover:bg-white/20 text-white"
-                        : "bg-black/10 hover:bg-black/20 text-black"
+                        ? "bg-[#FF8A5B]/10 hover:bg-[#FF8A5B]/20 text-[#FFB286]"
+                        : "bg-orange-100 hover:bg-orange-200 text-orange-700"
                       }`}
                   >
                     <Check className="w-5 h-5" />
@@ -474,7 +477,7 @@ export default function AISettings() {
                   <div
                     key={entry.id}
                     className={`p-4 rounded-xl transition-all ${isDark
-                        ? "bg-black/40 border border-white/10"
+                        ? "bg-white/5 backdrop-blur-md border border-white/10"
                         : "bg-black/5 border border-black/10"
                       }`}
                   >
@@ -575,8 +578,8 @@ export default function AISettings() {
               {showSelectedDialog && (
                 <div
                   className={`mt-6 p-4 rounded-xl text-center font-medium transition-opacity duration-300 ${isDark
-                      ? "bg-green-500/20 text-green-300"
-                      : "bg-green-500/20 text-green-700"
+                      ? "bg-[#FF8A5B]/10 text-[#FFB286]"
+                      : "bg-orange-100 text-orange-700"
                     }`}
                 >
                   {t('ai.selected')}
@@ -630,8 +633,8 @@ export default function AISettings() {
             {/* Personality Settings */}
             <div className={`${theme.cardBg} backdrop-blur-xl border ${theme.border} rounded-3xl p-6`}>
               <div className="flex items-center gap-4 mb-6">
-                <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isDark ? "bg-black/40" : "bg-black/5"}`}>
-                  <Bot className={isDark ? "text-purple-400" : "text-purple-600"} />
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isDark ? "bg-white/5" : "bg-black/5"}`}>
+                  <Bot className={isDark ? "text-[#FFB286]" : "text-orange-600"} />
                 </div>
                 <h2 className="text-lg font-semibold">{t('ai.personality')}</h2>
               </div>
@@ -647,9 +650,9 @@ export default function AISettings() {
                     value={aiName}
                     onChange={(e) => setAiName(e.target.value)}
                     className={`w-full p-4 rounded-xl transition-all focus:outline-none focus:ring-2 ${isDark
-                        ? "bg-black/40 border border-white/10 text-white placeholder-white/30 focus:ring-white/20"
-                        : "bg-black/5 border border-black/10 text-black placeholder-black/30 focus:ring-black/20"
-                      }`}
+                    ? "bg-white/5 border border-white/10 text-white placeholder-white/30 focus:ring-[#FF8A5B]/20 focus:border-[#FF8A5B]/30"
+                    : "bg-black/5 border border-black/10 text-black placeholder-black/30 focus:ring-black/20"
+                  }`}
                   />
                 </div>
 
@@ -665,10 +668,10 @@ export default function AISettings() {
                         onClick={() => setTone(option)}
                         className={`p-3 rounded-xl border text-sm font-medium transition-all ${tone === option
                             ? isDark
-                              ? "bg-black/60 border-white/20 text-white"
+                              ? "bg-white/10 border-[#FF8A5B]/40 text-white"
                               : "bg-black/10 border-black/20 text-black"
                             : isDark
-                              ? "bg-black/40 border-white/10 text-white/60 hover:bg-black/50"
+                              ? "bg-white/5 border-white/10 text-white/60 hover:bg-white/10"
                               : "bg-black/5 border-black/10 text-black/60 hover:bg-black/10"
                           }`}
                       >
@@ -683,8 +686,8 @@ export default function AISettings() {
             {/* Response Settings */}
             <div className={`${theme.cardBg} backdrop-blur-xl border ${theme.border} rounded-3xl p-6`}>
               <div className="flex items-center gap-4 mb-6">
-                <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isDark ? "bg-black/40" : "bg-black/5"}`}>
-                  <MessageSquare className={isDark ? "text-emerald-400" : "text-emerald-600"} />
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isDark ? "bg-white/5" : "bg-black/5"}`}>
+                  <MessageSquare className={isDark ? "text-[#FFB286]" : "text-orange-600"} />
                 </div>
                 <h2 className="text-lg font-semibold">{t('ai.responseSettings')}</h2>
               </div>
@@ -701,10 +704,10 @@ export default function AISettings() {
                         onClick={() => setLength(option)}
                         className={`flex-1 p-3 rounded-xl border text-sm font-medium transition-all ${length === option
                             ? isDark
-                              ? "bg-black/60 border-white/20 text-white"
+                              ? "bg-white/10 border-[#FF8A5B]/40 text-white"
                               : "bg-black/10 border-black/20 text-black"
                             : isDark
-                              ? "bg-black/40 border-white/10 text-white/60 hover:bg-black/50"
+                              ? "bg-white/5 border-white/10 text-white/60 hover:bg-white/10"
                               : "bg-black/5 border-black/10 text-black/60 hover:bg-black/10"
                           }`}
                       >
@@ -718,10 +721,10 @@ export default function AISettings() {
                     onClick={() => setEnableFollowUp(!enableFollowUp)}
                     className={`flex items-center gap-2 p-3 rounded-xl border transition-all w-full sm:w-auto ${enableFollowUp
                         ? isDark
-                          ? "bg-black/60 border-white/20 text-white"
+                          ? "bg-white/10 border-[#FF8A5B]/40 text-white"
                           : "bg-black/10 border-black/20 text-black"
                         : isDark
-                          ? "bg-black/40 border-white/10 text-white/60"
+                          ? "bg-white/5 border-white/10 text-white/60"
                           : "bg-black/5 border-black/10 text-black/60"
                       }`}
                   >
@@ -741,8 +744,8 @@ export default function AISettings() {
             <button
               onClick={handleSaveSettings}
               className={`w-full py-3 px-4 rounded-xl transition-all font-medium ${isDark
-                  ? "bg-purple-500/20 hover:bg-purple-500/30 text-purple-300"
-                  : "bg-purple-100 hover:bg-purple-200 text-purple-600"
+                  ? "bg-gradient-to-r from-[#FF8A5B] via-[#FF9E6C] to-[#FFB286] text-white shadow-lg shadow-[#FF8A5B]/20"
+                  : "bg-orange-200 hover:bg-orange-300 text-orange-800"
                 }`}
             >
               {t('ai.saveSettings')}
@@ -753,4 +756,3 @@ export default function AISettings() {
     </div>
   );
 }
-

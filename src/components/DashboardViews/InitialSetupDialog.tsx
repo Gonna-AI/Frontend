@@ -74,8 +74,10 @@ export default function InitialSetupDialog({
             "bg-[linear-gradient(145deg,#141414_0%,#0C0C0C_100%)] text-white max-h-[90vh]"
           )}
         >
+          <div className="absolute inset-0 opacity-[0.06] pointer-events-none" style={{ backgroundImage: 'url(/noise.webp)', backgroundSize: '35%' }} />
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/20 to-black pointer-events-none" />
           {/* Top Bar */}
-          <div className="flex items-center justify-between px-5 py-4 border-b border-white/10 bg-white/[0.03]">
+          <div className="relative z-10 flex items-center justify-between px-5 py-4 border-b border-white/10 bg-black/40 backdrop-blur-sm">
             <div>
               <p className="text-[11px] uppercase tracking-[0.3em] text-[#FF8A5B]">Setup</p>
               <p className="text-sm font-semibold text-white">{t('setup.windowTitle')}</p>
@@ -90,7 +92,7 @@ export default function InitialSetupDialog({
           </div>
 
           {/* Content Area */}
-          <div className="p-6 sm:p-8 flex-1 overflow-y-auto">
+          <div className="relative z-10 p-6 sm:p-8 flex-1 overflow-y-auto">
             <div className="flex flex-col items-center text-center">
               <div className="w-20 h-20 rounded-3xl flex items-center justify-center mb-6 border border-[#FF8A5B]/30 bg-[linear-gradient(135deg,rgba(255,138,91,0.25),rgba(255,255,255,0.08))] shadow-[0_20px_40px_rgba(0,0,0,0.35)] relative">
                 <Wand2 className="w-10 h-10 text-[#FFB286]" />
@@ -136,14 +138,14 @@ export default function InitialSetupDialog({
                 onClick={() => handleAction("manual")}
                 className={cn(
                   "flex flex-col items-start p-5 rounded-2xl border text-left transition-all duration-200 group relative overflow-hidden h-full",
-                  "bg-white/[0.03] border-white/10 hover:border-white/30 hover:bg-white/5",
+                  "bg-white/[0.04] border-white/10 hover:border-[#FF8A5B]/40 hover:bg-white/5",
                 )}
               >
-                <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-15 transition-opacity">
+                <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-20 transition-opacity">
                   <Settings className="w-16 h-16" />
                 </div>
 
-                <div className="p-2 rounded-lg mb-3 inline-flex bg-white/10 text-white/70">
+                <div className="p-2 rounded-lg mb-3 inline-flex bg-[#FF8A5B]/10 text-[#FFB286]">
                   <Settings className="w-5 h-5" />
                 </div>
                 <h3 className="font-semibold text-lg mb-1">{t('setup.manualTitle')}</h3>
@@ -153,7 +155,7 @@ export default function InitialSetupDialog({
 
                 <div
                   className={cn(
-                    "mt-auto pt-4 flex items-center gap-2 font-medium text-sm transition-all opacity-100 text-white/70",
+                    "mt-auto pt-4 flex items-center gap-2 font-medium text-sm transition-all opacity-100 text-white/70 group-hover:text-white",
                   )}
                 >
                   {t('setup.manualAction')} <ArrowRight className="w-4 h-4" />

@@ -45,10 +45,10 @@ function timeAgo(dateStr: string): string {
 
 function getFileIcon(fileType: string) {
     switch (fileType) {
-        case 'pdf': return <FileType className="w-5 h-5 text-red-400" />;
-        case 'md': return <FileText className="w-5 h-5 text-blue-400" />;
-        case 'csv': return <File className="w-5 h-5 text-green-400" />;
-        default: return <FileText className="w-5 h-5 text-gray-400" />;
+        case 'pdf': return <FileType className="w-5 h-5 text-[#FF8A5B]" />;
+        case 'md': return <FileText className="w-5 h-5 text-[#FFB286]" />;
+        case 'csv': return <File className="w-5 h-5 text-[#FFD1B8]" />;
+        default: return <FileText className="w-5 h-5 text-white/40" />;
     }
 }
 
@@ -175,7 +175,7 @@ export default function DocumentsView({ isDark = true }: { isDark?: boolean }) {
     };
 
     // ─── Styles ───────────────────────────────────────────────
-    const cardBg = isDark ? 'bg-[#121214] border-white/10' : 'bg-white border-gray-200';
+    const cardBg = isDark ? 'bg-white/5 backdrop-blur-md border-white/10' : 'bg-white border-gray-200';
     const textPrimary = isDark ? 'text-white' : 'text-gray-900';
     const textSecondary = isDark ? 'text-white/60' : 'text-gray-500';
     const textMuted = isDark ? 'text-white/40' : 'text-gray-400';
@@ -197,8 +197,8 @@ export default function DocumentsView({ isDark = true }: { isDark?: boolean }) {
                     disabled={!!processingProgress && processingProgress.stage !== 'done' && processingProgress.stage !== 'error'}
                     className={cn(
                         "inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 cursor-pointer border shadow-sm",
-                        "bg-gradient-to-r from-purple-600 to-blue-600 text-white border-purple-500/30",
-                        "hover:from-purple-500 hover:to-blue-500 hover:shadow-md hover:-translate-y-0.5",
+                        "bg-gradient-to-r from-[#FF8A5B] via-[#FF9E6C] to-[#FFB286] text-white border-[#FF8A5B]/30",
+                        "hover:from-[#FF9E6C] hover:via-[#FF8A5B] hover:to-[#FFB286] hover:shadow-md hover:-translate-y-0.5",
                         "disabled:opacity-50 disabled:pointer-events-none"
                     )}
                 >
@@ -227,9 +227,9 @@ export default function DocumentsView({ isDark = true }: { isDark?: boolean }) {
                 className={cn(
                     "relative rounded-xl border-2 border-dashed p-8 transition-all duration-200 cursor-pointer",
                     isDragging
-                        ? "border-purple-500 bg-purple-500/10 scale-[1.01]"
+                        ? "border-[#FF8A5B] bg-[#FF8A5B]/10 scale-[1.01]"
                         : isDark
-                            ? "border-white/10 hover:border-white/20 bg-white/[0.02] hover:bg-white/[0.04]"
+                            ? "border-white/10 hover:border-white/20 bg-white/[0.02] hover:bg-white/[0.04] backdrop-blur-sm"
                             : "border-gray-200 hover:border-gray-300 bg-gray-50/50 hover:bg-gray-50",
                 )}
             >
@@ -237,13 +237,13 @@ export default function DocumentsView({ isDark = true }: { isDark?: boolean }) {
                 {processingProgress && processingProgress.stage !== 'done' && processingProgress.stage !== 'error' && (
                     <div className="absolute inset-0 rounded-xl bg-black/50 backdrop-blur-sm flex items-center justify-center z-10">
                         <div className="flex flex-col items-center gap-3 text-center px-6">
-                            <Loader2 className="w-8 h-8 text-purple-400 animate-spin" />
+                            <Loader2 className="w-8 h-8 text-[#FFB286] animate-spin" />
                             <p className="text-white font-medium text-sm">{processingProgress.message}</p>
                             {processingProgress.total > 1 && (
                                 <div className="w-48">
                                     <div className={cn("h-1.5 rounded-full overflow-hidden", isDark ? "bg-white/10" : "bg-gray-200")}>
                                         <div
-                                            className="h-full bg-gradient-to-r from-purple-500 to-blue-500 rounded-full transition-all duration-300"
+                                            className="h-full bg-gradient-to-r from-[#FF8A5B] via-[#FF9E6C] to-[#FFB286] rounded-full transition-all duration-300"
                                             style={{ width: `${(processingProgress.current / processingProgress.total) * 100}%` }}
                                         />
                                     </div>
@@ -258,8 +258,8 @@ export default function DocumentsView({ isDark = true }: { isDark?: boolean }) {
 
                 {/* Success overlay */}
                 {processingProgress?.stage === 'done' && (
-                    <div className="absolute inset-0 rounded-xl bg-emerald-500/10 backdrop-blur-sm flex items-center justify-center z-10">
-                        <div className="flex items-center gap-2 text-emerald-400">
+                    <div className="absolute inset-0 rounded-xl bg-[#FF8A5B]/10 backdrop-blur-sm flex items-center justify-center z-10">
+                        <div className="flex items-center gap-2 text-[#FFB286]">
                             <CheckCircle className="w-6 h-6" />
                             <span className="font-medium">{processingProgress.message}</span>
                         </div>
@@ -324,7 +324,7 @@ export default function DocumentsView({ isDark = true }: { isDark?: boolean }) {
                             <div className={cn(
                                 "rounded-xl border p-4 transition-all duration-200",
                                 cardBg,
-                                expandedDocId === doc.id && (isDark ? "ring-1 ring-purple-500/30" : "ring-1 ring-purple-300")
+                                expandedDocId === doc.id && (isDark ? "ring-1 ring-[#FF8A5B]/30" : "ring-1 ring-[#FF8A5B]/30")
                             )}>
                                 <div className="flex items-center gap-4">
                                     {/* Expand toggle */}
@@ -372,7 +372,7 @@ export default function DocumentsView({ isDark = true }: { isDark?: boolean }) {
                                             <div className="flex items-center gap-2">
                                                 <span className={cn(
                                                     "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium",
-                                                    "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                                                    "bg-[#FF8A5B]/10 text-[#FFB286] border border-[#FF8A5B]/20"
                                                 )}>
                                                     <CheckCircle className="w-3 h-3" />
                                                     {t('kbDocs.ready')}
@@ -389,7 +389,7 @@ export default function DocumentsView({ isDark = true }: { isDark?: boolean }) {
                                         {doc.status === 'processing' && (
                                             <span className={cn(
                                                 "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium",
-                                                "bg-yellow-500/10 text-yellow-400 border border-yellow-500/20"
+                                                "bg-[#FFB286]/10 text-[#FFB286] border border-[#FF8A5B]/20"
                                             )}>
                                                 <Loader2 className="w-3 h-3 animate-spin" />
                                                 {t('kbDocs.processing')}
@@ -460,7 +460,7 @@ export default function DocumentsView({ isDark = true }: { isDark?: boolean }) {
                                     >
                                         <div className={cn(
                                             "ml-6 mt-2 rounded-xl border p-4 space-y-3",
-                                            isDark ? "bg-[#0D0D0F] border-white/5" : "bg-gray-50 border-gray-100"
+                                            isDark ? "bg-white/[0.03] border-white/10 backdrop-blur-md" : "bg-gray-50 border-gray-100"
                                         )}>
                                             {/* Stats bar */}
                                             <div className={cn("flex items-center gap-4 text-xs pb-3 border-b", isDark ? "border-white/5" : "border-gray-200")}>
@@ -488,17 +488,17 @@ export default function DocumentsView({ isDark = true }: { isDark?: boolean }) {
                                                     {chunks.map((chunk, idx) => (
                                                         <div
                                                             key={chunk.id}
-                                                            className={cn(
-                                                                "rounded-lg border p-3 transition-colors",
-                                                                isDark
-                                                                    ? "bg-white/[0.02] border-white/5 hover:bg-white/[0.04]"
+                                                                className={cn(
+                                                                    "rounded-lg border p-3 transition-colors",
+                                                                    isDark
+                                                                    ? "bg-white/[0.03] border-white/10 hover:bg-white/[0.05]"
                                                                     : "bg-white border-gray-200 hover:bg-gray-50"
-                                                            )}
+                                                                )}
                                                         >
                                                             <div className="flex items-start gap-3">
                                                                 <span className={cn(
                                                                     "flex-shrink-0 w-7 h-7 rounded-lg flex items-center justify-center text-xs font-mono font-bold",
-                                                                    isDark ? "bg-purple-500/10 text-purple-400" : "bg-purple-50 text-purple-600"
+                                                                    isDark ? "bg-[#FF8A5B]/10 text-[#FFB286]" : "bg-orange-50 text-orange-600"
                                                                 )}>
                                                                     {idx + 1}
                                                                 </span>
