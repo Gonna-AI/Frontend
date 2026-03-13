@@ -1,12 +1,5 @@
 import { pipeline } from '@xenova/transformers';
 import { supabase } from '../config/supabase';
-import * as pdfjsLib from 'pdfjs-dist/legacy/build/pdf';
-import pdfWorkerSrc from 'pdfjs-dist/legacy/build/pdf.worker?url';
-
-// Safe worker configuration for browser environments
-if (typeof window !== 'undefined' && pdfjsLib?.GlobalWorkerOptions) {
-    pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorkerSrc;
-}
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 
@@ -251,17 +244,7 @@ class RAGService {
 
             let extractedRawText = '';
             try {
-                if (fileType === 'pdf') {
-                    onProgress?.({ stage: 'extracting', current: 0, total: 1, message: 'Extracting PDF text internally...' });
-                    const arrayBuffer = await file.arrayBuffer();
-                    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-                    const numPages = pdf.numPages;
-                    for (let i = 1; i <= numPages; i++) {
-                        const page = await pdf.getPage(i);
-                        const content = await page.getTextContent();
-                        extractedRawText += content.items.map((item: any) => item.str).join(' ') + '\n';
-                    }
-                } else if (['txt', 'md', 'csv'].includes(fileType)) {
+                if (['txt', 'md', 'csv'].includes(fileType)) {
                     extractedRawText = await file.text();
                 }
             } catch (extractorErr) {
