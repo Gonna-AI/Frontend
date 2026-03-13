@@ -1,10 +1,11 @@
 import { pipeline } from '@xenova/transformers';
 import { supabase } from '../config/supabase';
-import * as pdfjsLib from 'pdfjs-dist';
+import * as pdfjsLib from 'pdfjs-dist/legacy/build/pdf';
+import pdfWorkerSrc from 'pdfjs-dist/legacy/build/pdf.worker?url';
 
 // Safe worker configuration for browser environments
-if (typeof window !== 'undefined') {
-    pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+if (typeof window !== 'undefined' && pdfjsLib?.GlobalWorkerOptions) {
+    pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorkerSrc;
 }
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
