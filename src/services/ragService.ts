@@ -1,5 +1,11 @@
 import { pipeline } from '@xenova/transformers';
 import { supabase } from '../config/supabase';
+import * as pdfjsLib from 'pdfjs-dist';
+
+// Safe worker configuration for browser environments
+if (typeof window !== 'undefined') {
+    pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+}
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 
@@ -240,7 +246,26 @@ class RAGService {
             documentRecord = docData as UploadedDocument;
 
             // Stage 3: Process server-side (extract → chunk → embed → store)
-            onProgress?.({ stage: 'embedding', current: 0, total: 1, message: 'Processing document on server...' });
+            onProgress?.({ stage: 'embedding', current: 0, total: 1, message: 'Processing document...' });
+
+            let extractedRawText = '';
+            try {
+                if (fileType === 'pdf') {
+                    onProgress?.({ stage: 'extracting', current: 0, total: 1, message: 'Extracting PDF text internally...' });
+                    const arrayBuffer = await file.arrayBuffer();
+                    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+                    const numPages = pdf.numPages;
+                    for (let i = 1; i <= numPages; i++) {
+                        const page = await pdf.getPage(i);
+                        const content = await page.getTextContent();
+                        extractedRawText += content.items.map((item: any) => item.str).join(' ') + '\n';
+                    }
+                } else if (['txt', 'md', 'csv'].includes(fileType)) {
+                    extractedRawText = await file.text();
+                }
+            } catch (extractorErr) {
+                console.warn("Frontend extraction warning, server will fallback:", extractorErr);
+            }
 
             const { data: { session } } = await supabase.auth.getSession();
             if (!session?.access_token) {
@@ -253,6 +278,7 @@ class RAGService {
                 fileType,
                 fileName: file.name,
                 kbId,
+                rawText: extractedRawText ? extractedRawText : undefined,
             });
 
             // Retry logic for transient edge function errors (e.g. 546 boot failures)
