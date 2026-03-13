@@ -209,7 +209,9 @@ class RAGService {
             // Stage 1: Upload to Supabase Storage
             onProgress?.({ stage: 'uploading', current: 0, total: 1, message: 'Uploading file...' });
 
-            const storagePath = `${userId}/${Date.now()}-${file.name}`;
+            // Sanitize file name to avoid Invalid Key errors from Supabase Storage
+            const sanitizedFileName = file.name.replace(/[^a-zA-Z0-9.\-]/g, '_');
+            const storagePath = `${userId}/${Date.now()}-${sanitizedFileName}`;
             const { error: uploadErr } = await supabase.storage
                 .from('kb-documents')
                 .upload(storagePath, file, {
