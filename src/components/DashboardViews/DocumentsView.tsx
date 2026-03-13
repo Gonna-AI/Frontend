@@ -67,10 +67,9 @@ export default function DocumentsView({ isDark = true }: { isDark?: boolean }) {
     const [chunks, setChunks] = useState<DocumentChunk[]>([]);
     const [loadingChunks, setLoadingChunks] = useState(false);
     const [processingProgress, setProcessingProgress] = useState<ProcessingProgress | null>(null);
-    const [isDragging, setIsDragging] = useState(false);
+    const [textTitle, setTextTitle] = useState('');
+    const [textContent, setTextContent] = useState('');
     const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
-
-    const fileInputRef = useRef<HTMLInputElement>(null);
 
     const kbId = knowledgeBase?.id || user?.id || '';
 
@@ -91,14 +90,15 @@ export default function DocumentsView({ isDark = true }: { isDark?: boolean }) {
         loadDocuments();
     }, [loadDocuments]);
 
-    // ─── Upload handler ───────────────────────────────────────
-    const handleUpload = useCallback(async (file: File) => {
+    // ─── Direct Text Submission ───────────────────────────────────────
+    const handleSubmitText = useCallback(async () => {
         if (!user?.id || !kbId) return;
-
-        if (file.size > MAX_FILE_SIZE) {
-            alert(`File too large. Maximum size is ${formatBytes(MAX_FILE_SIZE)}.`);
+        if (!textTitle.trim() || !textContent.trim()) {
+            alert('Please provide both a title and text content.');
             return;
         }
+
+        const syntheticFile = new File([textContent], `${textTitle.trim()}.txt`, { type: 'text/plain' });
 
         setProcessingProgress({
             stage: 'uploading',
@@ -108,42 +108,20 @@ export default function DocumentsView({ isDark = true }: { isDark?: boolean }) {
         });
 
         const result = await ragService.processDocument(
-            file,
+            syntheticFile,
             kbId,
             user.id,
             (progress) => setProcessingProgress(progress),
         );
 
         if (result) {
-            // Refresh list
+            setTextTitle('');
+            setTextContent('');
             await loadDocuments();
         }
 
-        // Clear progress after a delay
         setTimeout(() => setProcessingProgress(null), 3000);
-    }, [user?.id, kbId, loadDocuments]);
-
-    const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (file) handleUpload(file);
-        e.target.value = '';
-    };
-
-    // ─── Drag & drop ──────────────────────────────────────────
-    const handleDragOver = (e: React.DragEvent) => {
-        e.preventDefault();
-        setIsDragging(true);
-    };
-    const handleDragLeave = (e: React.DragEvent) => {
-        e.preventDefault();
-        setIsDragging(false);
-    };
-    const handleDrop = (e: React.DragEvent) => {
-        e.preventDefault();
-        setIsDragging(false);
-        const file = e.dataTransfer.files?.[0];
-        if (file) handleUpload(file);
-    };
+    }, [user?.id, kbId, textTitle, textContent, loadDocuments]);
 
     // ─── Expand / view chunks ─────────────────────────────────
     const toggleExpand = async (docId: string) => {
@@ -192,47 +170,13 @@ export default function DocumentsView({ isDark = true }: { isDark?: boolean }) {
                         {t('kbDocs.description')}
                     </p>
                 </div>
-                <button
-                    onClick={() => fileInputRef.current?.click()}
-                    disabled={!!processingProgress && processingProgress.stage !== 'done' && processingProgress.stage !== 'error'}
-                    className={cn(
-                        "inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 cursor-pointer border shadow-sm",
-                        "bg-gradient-to-r from-[#FF8A5B] via-[#FF9E6C] to-[#FFB286] text-white border-[#FF8A5B]/30",
-                        "hover:from-[#FF9E6C] hover:via-[#FF8A5B] hover:to-[#FFB286] hover:shadow-md hover:-translate-y-0.5",
-                        "disabled:opacity-50 disabled:pointer-events-none"
-                    )}
-                >
-                    <Upload className="w-4 h-4" />
-                    {t('kbDocs.upload')}
-                </button>
-                <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept={ACCEPTED_TYPES}
-                    className="hidden"
-                    onChange={handleFileSelect}
-                />
             </div>
 
-            {/* Drop Zone */}
-            <div
-                onDragOver={handleDragOver}
-                onDragLeave={handleDragLeave}
-                onDrop={handleDrop}
-                onClick={() => {
-                    if (!processingProgress || processingProgress.stage === 'done' || processingProgress.stage === 'error') {
-                        fileInputRef.current?.click();
-                    }
-                }}
-                className={cn(
-                    "relative rounded-xl border-2 border-dashed p-8 transition-all duration-200 cursor-pointer",
-                    isDragging
-                        ? "border-[#FF8A5B] bg-[#FF8A5B]/10 scale-[1.01]"
-                        : isDark
-                            ? "border-white/10 hover:border-white/20 bg-white/[0.02] hover:bg-white/[0.04] backdrop-blur-sm"
-                            : "border-gray-200 hover:border-gray-300 bg-gray-50/50 hover:bg-gray-50",
-                )}
-            >
+            {/* Text Input Zone */}
+            <div className={cn(
+                "relative rounded-xl border p-6 transition-all duration-200",
+                isDark ? "bg-white/5 border-white/10" : "bg-white border-gray-200 shadow-sm"
+            )}>
                 {/* Processing Progress Overlay */}
                 {processingProgress && processingProgress.stage !== 'done' && processingProgress.stage !== 'error' && (
                     <div className="absolute inset-0 rounded-xl bg-black/50 backdrop-blur-sm flex items-center justify-center z-10">
@@ -276,22 +220,55 @@ export default function DocumentsView({ isDark = true }: { isDark?: boolean }) {
                     </div>
                 )}
 
-                <div className="flex flex-col items-center gap-3">
-                    <div className={cn(
-                        "w-14 h-14 rounded-2xl flex items-center justify-center border",
-                        isDark
-                            ? "bg-white/5 border-white/10"
-                            : "bg-gray-100 border-gray-200"
-                    )}>
-                        <UploadCloud className={cn("w-7 h-7", isDark ? "text-white/40" : "text-gray-400")} />
+                <div className="space-y-4">
+                    <div>
+                        <label className={cn("block text-sm font-medium mb-1.5", textPrimary)}>
+                            Document Title
+                        </label>
+                        <input
+                            type="text"
+                            placeholder="e.g. Employee Handbook"
+                            value={textTitle}
+                            onChange={(e) => setTextTitle(e.target.value)}
+                            className={cn(
+                                "w-full rounded-lg px-4 py-2 border text-sm outline-none transition-all",
+                                isDark
+                                    ? "bg-black/20 border-white/10 text-white placeholder:text-white/30 focus:border-[#FF8A5B]/50"
+                                    : "bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-[#FF8A5B]"
+                            )}
+                        />
                     </div>
-                    <div className="text-center">
-                        <p className={cn("text-sm font-medium", textPrimary)}>
-                            {t('kbDocs.dropzone')}
-                        </p>
-                        <p className={cn("text-xs mt-1", textMuted)}>
-                            PDF, TXT, MD, CSV, DOCX &middot; Max {formatBytes(MAX_FILE_SIZE)}
-                        </p>
+                    <div>
+                        <label className={cn("block text-sm font-medium mb-1.5", textPrimary)}>
+                            Content
+                        </label>
+                        <textarea
+                            placeholder="Paste your text content here..."
+                            rows={6}
+                            value={textContent}
+                            onChange={(e) => setTextContent(e.target.value)}
+                            className={cn(
+                                "w-full rounded-lg px-4 py-3 border text-sm outline-none transition-all resize-y min-h-[120px]",
+                                isDark
+                                    ? "bg-black/20 border-white/10 text-white placeholder:text-white/30 focus:border-[#FF8A5B]/50"
+                                    : "bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-[#FF8A5B]"
+                            )}
+                        />
+                    </div>
+                    <div className="flex justify-end pt-2">
+                        <button
+                            onClick={handleSubmitText}
+                            disabled={!textTitle.trim() || !textContent.trim() || !!processingProgress}
+                            className={cn(
+                                "inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 cursor-pointer border shadow-sm",
+                                "bg-gradient-to-r from-[#FF8A5B] via-[#FF9E6C] to-[#FFB286] text-white border-[#FF8A5B]/30",
+                                "hover:from-[#FF9E6C] hover:via-[#FF8A5B] hover:to-[#FFB286] hover:shadow-md hover:-translate-y-0.5",
+                                "disabled:opacity-50 disabled:pointer-events-none"
+                            )}
+                        >
+                            <FileText className="w-4 h-4" />
+                            Save to Knowledge Base
+                        </button>
                     </div>
                 </div>
             </div>
@@ -488,12 +465,12 @@ export default function DocumentsView({ isDark = true }: { isDark?: boolean }) {
                                                     {chunks.map((chunk, idx) => (
                                                         <div
                                                             key={chunk.id}
-                                                                className={cn(
-                                                                    "rounded-lg border p-3 transition-colors",
-                                                                    isDark
+                                                            className={cn(
+                                                                "rounded-lg border p-3 transition-colors",
+                                                                isDark
                                                                     ? "bg-white/[0.03] border-white/10 hover:bg-white/[0.05]"
                                                                     : "bg-white border-gray-200 hover:bg-gray-50"
-                                                                )}
+                                                            )}
                                                         >
                                                             <div className="flex items-start gap-3">
                                                                 <span className={cn(
