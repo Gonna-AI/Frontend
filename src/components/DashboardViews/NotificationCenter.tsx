@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useLayoutEffect } from 'react';
+import { createPortal } from 'react-dom';
 import {
   Bell, Check, CheckCheck, Trash2, Loader2, X,
   CreditCard, Users, Shield, Phone, Info, AlertTriangle, CheckCircle2,
@@ -30,10 +31,10 @@ const TYPE_ICONS: Record<string, React.ReactNode> = {
 };
 
 const TYPE_COLORS: Record<string, string> = {
-  info: 'text-blue-400 bg-blue-500/10',
-  warning: 'text-orange-400 bg-orange-500/10',
-  success: 'text-emerald-400 bg-emerald-500/10',
-  error: 'text-red-400 bg-red-500/10',
+  info: 'text-[#FFB286] bg-[#FF8A5B]/12',
+  warning: 'text-[#FF9E6C] bg-[#FF8A5B]/14',
+  success: 'text-[#FFD1B8] bg-[#FF8A5B]/10',
+  error: 'text-red-400 bg-red-500/12',
 };
 
 const CATEGORY_ICONS: Record<string, React.ReactNode> = {
@@ -60,7 +61,9 @@ export default function NotificationCenter({ isDark, className }: NotificationCe
   const [loading, setLoading] = useState(false);
   const [notifications, setNotifications] = useState<NotificationEntry[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
+  const buttonRef = useRef<HTMLButtonElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const [dropdownStyle, setDropdownStyle] = useState<React.CSSProperties>({});
 
   const apiCall = useCallback(async (path: string, options?: RequestInit) => {
     try {
@@ -113,13 +116,46 @@ export default function NotificationCenter({ isDark, className }: NotificationCe
   // Close on outside click
   useEffect(() => {
     const handler = (e: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
-        setOpen(false);
-      }
+      const target = e.target as Node;
+      if (dropdownRef.current?.contains(target) || buttonRef.current?.contains(target)) return;
+      setOpen(false);
     };
     if (open) document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
   }, [open]);
+
+  const updatePosition = useCallback(() => {
+    const btn = buttonRef.current;
+    if (!btn) return;
+    const rect = btn.getBoundingClientRect();
+    const isMobileViewport = window.innerWidth < 640;
+    const width = Math.min(380, Math.floor(window.innerWidth * 0.92));
+    const left = isMobileViewport
+      ? (window.innerWidth - width) / 2
+      : Math.min(Math.max(rect.right - width, 8), window.innerWidth - width - 8);
+    const top = Math.min(rect.bottom + 12, window.innerHeight - 16);
+    const maxHeight = Math.max(240, window.innerHeight - top - 16);
+    setDropdownStyle({
+      position: 'fixed',
+      top,
+      left,
+      width,
+      maxHeight,
+    });
+  }, []);
+
+  useLayoutEffect(() => {
+    if (!open) return;
+    updatePosition();
+    const onResize = () => updatePosition();
+    const onScroll = () => updatePosition();
+    window.addEventListener('resize', onResize);
+    window.addEventListener('scroll', onScroll, true);
+    return () => {
+      window.removeEventListener('resize', onResize);
+      window.removeEventListener('scroll', onScroll, true);
+    };
+  }, [open, updatePosition]);
 
   const markAllRead = async () => {
     try {
@@ -145,9 +181,10 @@ export default function NotificationCenter({ isDark, className }: NotificationCe
   };
 
   return (
-    <div className={cn("relative", className)} ref={dropdownRef}>
+    <div className={cn("relative", className)}>
       {/* Bell Button */}
       <button
+        ref={buttonRef}
         onClick={() => setOpen(!open)}
         className={cn(
           "relative inline-flex h-8 w-8 items-center justify-center rounded-full border transition-colors",
@@ -170,12 +207,18 @@ export default function NotificationCenter({ isDark, className }: NotificationCe
       </button>
 
       {/* Dropdown */}
-      {open && (
-        <div className={cn(
-          "absolute top-full mt-3 w-[min(92vw,380px)] max-h-[480px] rounded-2xl border shadow-2xl z-[100] flex flex-col overflow-hidden backdrop-blur-xl",
-          "left-1/2 -translate-x-1/2 sm:left-auto sm:right-0 sm:translate-x-0",
-          isDark ? "bg-[#0F0F12]/95 border-white/10 shadow-black/60" : "bg-white/95 border-gray-200 shadow-lg shadow-gray-200/50"
-        )}>
+      {open && createPortal(
+        <div
+          ref={dropdownRef}
+          style={dropdownStyle}
+          className={cn(
+            "rounded-2xl border shadow-2xl z-[500] flex flex-col overflow-hidden backdrop-blur-2xl",
+            "relative [&>*]:relative [&>*]:z-10",
+            "before:content-[''] before:absolute before:inset-0 before:pointer-events-none before:bg-[radial-gradient(circle_at_20%_0%,rgba(255,138,91,0.16),transparent_60%)]",
+            "after:content-[''] after:absolute after:inset-0 after:pointer-events-none after:bg-[url('/noise.webp')] after:bg-[length:30%] after:opacity-[0.08]",
+            isDark ? "bg-[#0F0F12]/98 border-white/10 shadow-black/60" : "bg-white/98 border-gray-200 shadow-lg shadow-gray-200/50"
+          )}
+        >
           {/* Header */}
           <div className={cn("px-4 py-3 border-b flex items-center justify-between shrink-0", isDark ? "border-white/10" : "border-gray-100")}>
             <h3 className={cn("text-sm font-semibold", isDark ? "text-white" : "text-gray-900")}>Notifications</h3>
@@ -246,7 +289,8 @@ export default function NotificationCenter({ isDark, className }: NotificationCe
               </div>
             )}
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

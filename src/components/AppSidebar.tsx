@@ -66,10 +66,25 @@ export function AppSidebar({ activeTab, setActiveTab, hasAccess = false, ...prop
     const { state, isMobile, setOpenMobile } = useSidebar();
     const { isDark, toggleTheme } = useTheme();
     const menuButtonClass = cn(
-        "transition-colors",
+        "relative isolate transition-colors",
+        "data-[active=true]:shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_10px_20px_rgba(0,0,0,0.35)]",
+        "data-[active=true]:ring-1 data-[active=true]:ring-[#FF8A5B]/25",
+        "data-[active=true]:before:content-[''] data-[active=true]:before:absolute data-[active=true]:before:inset-0 data-[active=true]:before:pointer-events-none data-[active=true]:before:z-0",
+        "data-[active=true]:after:content-[''] data-[active=true]:after:absolute data-[active=true]:after:inset-0 data-[active=true]:after:pointer-events-none data-[active=true]:after:z-0",
+        "data-[active=true]:[&>*]:relative data-[active=true]:[&>*]:z-10",
         isDark
-            ? "text-white/70 hover:text-white hover:bg-white/5 data-[active=true]:bg-[#FF8A5B]/12 data-[active=true]:text-white data-[active=true]:ring-1 data-[active=true]:ring-[#FF8A5B]/25"
-            : "text-gray-600 hover:text-gray-900 hover:bg-black/5 data-[active=true]:bg-[#FF8A5B]/12 data-[active=true]:text-[#7A341C] data-[active=true]:ring-1 data-[active=true]:ring-[#FF8A5B]/20"
+            ? [
+                "text-white/70 hover:text-white hover:bg-white/5",
+                "data-[active=true]:text-white data-[active=true]:bg-[linear-gradient(145deg,#151515_0%,#0B0B0B_100%)]",
+                "data-[active=true]:before:bg-[radial-gradient(circle_at_20%_15%,rgba(255,138,91,0.18),transparent_55%)]",
+                "data-[active=true]:after:bg-[url('/noise.webp')] data-[active=true]:after:bg-[length:30%] data-[active=true]:after:opacity-[0.12]",
+            ].join(" ")
+            : [
+                "text-gray-600 hover:text-gray-900 hover:bg-black/5",
+                "data-[active=true]:text-[#5B2A16] data-[active=true]:bg-[linear-gradient(145deg,#FFF6F0_0%,#FFFFFF_100%)]",
+                "data-[active=true]:before:bg-[radial-gradient(circle_at_20%_15%,rgba(255,138,91,0.14),transparent_55%)]",
+                "data-[active=true]:after:bg-[url('/noise.webp')] data-[active=true]:after:bg-[length:30%] data-[active=true]:after:opacity-[0.08]",
+            ].join(" ")
     );
 
 
