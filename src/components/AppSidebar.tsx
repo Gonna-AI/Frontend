@@ -65,6 +65,13 @@ export function AppSidebar({ activeTab, setActiveTab, hasAccess = false, ...prop
     const { t, language, setLanguage } = useLanguage();
     const { state, isMobile, setOpenMobile } = useSidebar();
     const { isDark, toggleTheme } = useTheme();
+    const menuButtonClass = cn(
+        "transition-colors",
+        isDark
+            ? "text-white/70 hover:text-white hover:bg-white/5 data-[active=true]:bg-[#FF8A5B]/12 data-[active=true]:text-white data-[active=true]:ring-1 data-[active=true]:ring-[#FF8A5B]/25"
+            : "text-gray-600 hover:text-gray-900 hover:bg-black/5 data-[active=true]:bg-[#FF8A5B]/12 data-[active=true]:text-[#7A341C] data-[active=true]:ring-1 data-[active=true]:ring-[#FF8A5B]/20"
+    );
+
 
     // Helper: returns disabled styles for locked tabs
     const getLockedStyles = (tabName: string) => {
@@ -129,12 +136,7 @@ export function AppSidebar({ activeTab, setActiveTab, hasAccess = false, ...prop
                                     isActive={activeTab === 'monitor'}
                                     onClick={() => handleTabClick('monitor')}
                                     tooltip={t('dashboard.tab.monitor')}
-                                    className={cn(
-                                        "transition-colors",
-                                        isDark
-                                            ? "text-white/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-white/10 data-[active=true]:text-white"
-                                            : "text-gray-600 hover:text-gray-900 hover:bg-black/5 data-[active=true]:bg-black/5 data-[active=true]:text-black"
-                                    )}
+                                    className={menuButtonClass}
                                 >
                                     <Phone />
                                     <span>{t('dashboard.tab.monitor')}</span>
@@ -145,12 +147,7 @@ export function AppSidebar({ activeTab, setActiveTab, hasAccess = false, ...prop
                                     isActive={activeTab === 'knowledge'}
                                     onClick={() => handleTabClick('knowledge')}
                                     tooltip={t('dashboard.tab.config')}
-                                    className={cn(
-                                        "transition-colors",
-                                        isDark
-                                            ? "text-white/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-white/10 data-[active=true]:text-white"
-                                            : "text-gray-600 hover:text-gray-900 hover:bg-black/5 data-[active=true]:bg-black/5 data-[active=true]:text-black"
-                                    )}
+                                    className={menuButtonClass}
                                 >
                                     <Brain />
                                     <span>{t('dashboard.tab.config')}</span>
@@ -161,12 +158,7 @@ export function AppSidebar({ activeTab, setActiveTab, hasAccess = false, ...prop
                                     isActive={activeTab === 'history'}
                                     onClick={() => handleTabClick('history')}
                                     tooltip={t('dashboard.tab.history')}
-                                    className={cn(
-                                        "transition-colors",
-                                        isDark
-                                            ? "text-white/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-white/10 data-[active=true]:text-white"
-                                            : "text-gray-600 hover:text-gray-900 hover:bg-black/5 data-[active=true]:bg-black/5 data-[active=true]:text-black"
-                                    )}
+                                    className={menuButtonClass}
                                 >
                                     <History />
                                     <span>{t('dashboard.tab.history')}</span>
@@ -177,12 +169,7 @@ export function AppSidebar({ activeTab, setActiveTab, hasAccess = false, ...prop
                                     isActive={activeTab === 'customer_graph'}
                                     onClick={() => handleTabClick('customer_graph')}
                                     tooltip={t('sidebar.customerGraph')}
-                                    className={cn(
-                                        "transition-colors",
-                                        isDark
-                                            ? "text-white/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-white/10 data-[active=true]:text-white"
-                                            : "text-gray-600 hover:text-gray-900 hover:bg-black/5 data-[active=true]:bg-black/5 data-[active=true]:text-black"
-                                    )}
+                                    className={menuButtonClass}
                                 >
                                     <Network />
                                     <span>{t('sidebar.customerGraph')}</span>
@@ -193,12 +180,7 @@ export function AppSidebar({ activeTab, setActiveTab, hasAccess = false, ...prop
                                     isActive={activeTab === 'analytics'}
                                     onClick={() => handleTabClick('analytics')}
                                     tooltip={t('sidebar.analytics')}
-                                    className={cn(
-                                        "transition-colors",
-                                        isDark
-                                            ? "text-white/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-white/10 data-[active=true]:text-white"
-                                            : "text-gray-600 hover:text-gray-900 hover:bg-black/5 data-[active=true]:bg-black/5 data-[active=true]:text-black"
-                                    )}
+                                    className={menuButtonClass}
                                 >
                                     <TrendingUp />
                                     <span>{t('sidebar.analytics')}</span>
@@ -221,14 +203,9 @@ export function AppSidebar({ activeTab, setActiveTab, hasAccess = false, ...prop
                                     isActive={activeTab === 'onboarding'}
                                     onClick={() => handleTabClick('onboarding')}
                                     tooltip={t('onboarding.title')}
-                                    className={cn(
-                                        "transition-colors",
-                                        isDark
-                                            ? "text-white/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-white/10 data-[active=true]:text-white"
-                                            : "text-gray-600 hover:text-gray-900 hover:bg-black/5 data-[active=true]:bg-black/5 data-[active=true]:text-black"
-                                    )}
+                                    className={menuButtonClass}
                                 >
-                                    <Wand2 className="text-purple-400" />
+                                    <Wand2 />
                                     <span>{t('onboarding.title')}</span>
                                 </SidebarMenuButton>
                             </SidebarMenuItem>
@@ -239,14 +216,9 @@ export function AppSidebar({ activeTab, setActiveTab, hasAccess = false, ...prop
                                     isActive={activeTab === 'kb_documents'}
                                     onClick={() => handleTabClick('kb_documents')}
                                     tooltip={t('sidebar.kbDocuments')}
-                                    className={cn(
-                                        "transition-colors",
-                                        isDark
-                                            ? "text-white/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-white/10 data-[active=true]:text-white"
-                                            : "text-gray-600 hover:text-gray-900 hover:bg-black/5 data-[active=true]:bg-black/5 data-[active=true]:text-black"
-                                    )}
+                                    className={menuButtonClass}
                                 >
-                                    <FileText className="text-blue-400" />
+                                    <FileText />
                                     <span>{t('sidebar.kbDocuments')}</span>
                                 </SidebarMenuButton>
                             </SidebarMenuItem>
@@ -256,14 +228,9 @@ export function AppSidebar({ activeTab, setActiveTab, hasAccess = false, ...prop
                                 <SidebarMenuButton
                                     isActive={activeTab === 'groq_settings'}
                                     onClick={() => handleTabClick('groq_settings')}
-                                    className={cn(
-                                        "transition-colors",
-                                        isDark
-                                            ? "text-white/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-white/10 data-[active=true]:text-white"
-                                            : "text-gray-600 hover:text-gray-900 hover:bg-black/5 data-[active=true]:bg-black/5 data-[active=true]:text-black"
-                                    )}
+                                    className={menuButtonClass}
                                 >
-                                    <Sparkles className="text-purple-400" />
+                                    <Sparkles />
                                     <span>{t('sidebar.groqAi')}</span>
                                 </SidebarMenuButton>
                             </SidebarMenuItem>
@@ -272,12 +239,7 @@ export function AppSidebar({ activeTab, setActiveTab, hasAccess = false, ...prop
                                 <SidebarMenuButton
                                     isActive={activeTab === 'system_prompt'}
                                     onClick={() => handleTabClick('system_prompt')}
-                                    className={cn(
-                                        "transition-colors",
-                                        isDark
-                                            ? "text-white/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-white/10 data-[active=true]:text-white"
-                                            : "text-gray-600 hover:text-gray-900 hover:bg-black/5 data-[active=true]:bg-black/5 data-[active=true]:text-black"
-                                    )}
+                                    className={menuButtonClass}
                                 >
                                     <Terminal />
                                     <span>{t('sidebar.systemPrompt')}</span>
@@ -287,14 +249,9 @@ export function AppSidebar({ activeTab, setActiveTab, hasAccess = false, ...prop
                                 <SidebarMenuButton
                                     isActive={activeTab === 'rescue_playbooks'}
                                     onClick={() => handleTabClick('rescue_playbooks')}
-                                    className={cn(
-                                        "transition-colors",
-                                        isDark
-                                            ? "text-white/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-white/10 data-[active=true]:text-white"
-                                            : "text-gray-600 hover:text-gray-900 hover:bg-black/5 data-[active=true]:bg-black/5 data-[active=true]:text-black"
-                                    )}
+                                    className={menuButtonClass}
                                 >
-                                    <ShieldCheck className="text-emerald-400" />
+                                    <ShieldCheck />
                                     <span>{t('sidebar.rescuePlaybooks')}</span>
                                 </SidebarMenuButton>
                             </SidebarMenuItem>
@@ -303,12 +260,7 @@ export function AppSidebar({ activeTab, setActiveTab, hasAccess = false, ...prop
                                 <SidebarMenuButton
                                     isActive={activeTab === 'context_fields'}
                                     onClick={() => handleTabClick('context_fields')}
-                                    className={cn(
-                                        "transition-colors",
-                                        isDark
-                                            ? "text-white/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-white/10 data-[active=true]:text-white"
-                                            : "text-gray-600 hover:text-gray-900 hover:bg-black/5 data-[active=true]:bg-black/5 data-[active=true]:text-black"
-                                    )}
+                                    className={menuButtonClass}
                                 >
                                     <Database />
                                     <span>{t('sidebar.contextFields')}</span>
@@ -318,12 +270,7 @@ export function AppSidebar({ activeTab, setActiveTab, hasAccess = false, ...prop
                                 <SidebarMenuButton
                                     isActive={activeTab === 'categories'}
                                     onClick={() => handleTabClick('categories')}
-                                    className={cn(
-                                        "transition-colors",
-                                        isDark
-                                            ? "text-white/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-white/10 data-[active=true]:text-white"
-                                            : "text-gray-600 hover:text-gray-900 hover:bg-black/5 data-[active=true]:bg-black/5 data-[active=true]:text-black"
-                                    )}
+                                    className={menuButtonClass}
                                 >
                                     <Tags />
                                     <span>{t('sidebar.categories')}</span>
@@ -333,12 +280,7 @@ export function AppSidebar({ activeTab, setActiveTab, hasAccess = false, ...prop
                                 <SidebarMenuButton
                                     isActive={activeTab === 'priority_rules'}
                                     onClick={() => handleTabClick('priority_rules')}
-                                    className={cn(
-                                        "transition-colors",
-                                        isDark
-                                            ? "text-white/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-white/10 data-[active=true]:text-white"
-                                            : "text-gray-600 hover:text-gray-900 hover:bg-black/5 data-[active=true]:bg-black/5 data-[active=true]:text-black"
-                                    )}
+                                    className={menuButtonClass}
                                 >
                                     <ListOrdered />
                                     <span>{t('sidebar.priorityRules')}</span>
@@ -348,12 +290,7 @@ export function AppSidebar({ activeTab, setActiveTab, hasAccess = false, ...prop
                                 <SidebarMenuButton
                                     isActive={activeTab === 'instructions'}
                                     onClick={() => handleTabClick('instructions')}
-                                    className={cn(
-                                        "transition-colors",
-                                        isDark
-                                            ? "text-white/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-white/10 data-[active=true]:text-white"
-                                            : "text-gray-600 hover:text-gray-900 hover:bg-black/5 data-[active=true]:bg-black/5 data-[active=true]:text-black"
-                                    )}
+                                    className={menuButtonClass}
                                 >
                                     <Scroll />
                                     <span>{t('sidebar.instructions')}</span>
@@ -376,12 +313,7 @@ export function AppSidebar({ activeTab, setActiveTab, hasAccess = false, ...prop
                                     isActive={activeTab === 'usage'}
                                     onClick={() => handleTabClick('usage')}
                                     tooltip={t('sidebar.usage')}
-                                    className={cn(
-                                        "transition-colors",
-                                        isDark
-                                            ? "text-white/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-white/10 data-[active=true]:text-white"
-                                            : "text-gray-600 hover:text-gray-900 hover:bg-black/5 data-[active=true]:bg-black/5 data-[active=true]:text-black"
-                                    )}
+                                    className={menuButtonClass}
                                 >
                                     <BarChart />
                                     <span>{t('sidebar.usage')}</span>
@@ -392,12 +324,7 @@ export function AppSidebar({ activeTab, setActiveTab, hasAccess = false, ...prop
                                     isActive={activeTab === 'billing'}
                                     onClick={() => handleTabClick('billing')}
                                     tooltip={t('sidebar.billing')}
-                                    className={cn(
-                                        "transition-colors",
-                                        isDark
-                                            ? "text-white/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-white/10 data-[active=true]:text-white"
-                                            : "text-gray-600 hover:text-gray-900 hover:bg-black/5 data-[active=true]:bg-black/5 data-[active=true]:text-black"
-                                    )}
+                                    className={menuButtonClass}
                                 >
                                     <CreditCard />
                                     <span>{t('sidebar.billing')}</span>
@@ -408,12 +335,7 @@ export function AppSidebar({ activeTab, setActiveTab, hasAccess = false, ...prop
                                     isActive={activeTab === 'keys'}
                                     onClick={() => handleTabClick('keys')}
                                     tooltip={t('sidebar.keys')}
-                                    className={cn(
-                                        "transition-colors",
-                                        isDark
-                                            ? "text-white/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-white/10 data-[active=true]:text-white"
-                                            : "text-gray-600 hover:text-gray-900 hover:bg-black/5 data-[active=true]:bg-black/5 data-[active=true]:text-black"
-                                    )}
+                                    className={menuButtonClass}
                                 >
                                     <Key />
                                     <span>{t('sidebar.keys')}</span>
@@ -424,12 +346,7 @@ export function AppSidebar({ activeTab, setActiveTab, hasAccess = false, ...prop
                                     isActive={activeTab === 'team'}
                                     onClick={() => handleTabClick('team')}
                                     tooltip={t('sidebar.team')}
-                                    className={cn(
-                                        "transition-colors",
-                                        isDark
-                                            ? "text-white/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-white/10 data-[active=true]:text-white"
-                                            : "text-gray-600 hover:text-gray-900 hover:bg-black/5 data-[active=true]:bg-black/5 data-[active=true]:text-black"
-                                    )}
+                                    className={menuButtonClass}
                                 >
                                     <Users />
                                     <span>{t('sidebar.team')}</span>
@@ -440,12 +357,7 @@ export function AppSidebar({ activeTab, setActiveTab, hasAccess = false, ...prop
                                     isActive={activeTab === 'integrations'}
                                     onClick={() => handleTabClick('integrations')}
                                     tooltip={t('sidebar.integrations')}
-                                    className={cn(
-                                        "transition-colors",
-                                        isDark
-                                            ? "text-white/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-white/10 data-[active=true]:text-white"
-                                            : "text-gray-600 hover:text-gray-900 hover:bg-black/5 data-[active=true]:bg-black/5 data-[active=true]:text-black"
-                                    )}
+                                    className={menuButtonClass}
                                 >
                                     <Link2 />
                                     <span>{t('sidebar.integrations')}</span>
@@ -456,12 +368,7 @@ export function AppSidebar({ activeTab, setActiveTab, hasAccess = false, ...prop
                                     isActive={activeTab === 'webhooks'}
                                     onClick={() => handleTabClick('webhooks')}
                                     tooltip={t('sidebar.webhooks')}
-                                    className={cn(
-                                        "transition-colors",
-                                        isDark
-                                            ? "text-white/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-white/10 data-[active=true]:text-white"
-                                            : "text-gray-600 hover:text-gray-900 hover:bg-black/5 data-[active=true]:bg-black/5 data-[active=true]:text-black"
-                                    )}
+                                    className={menuButtonClass}
                                 >
                                     <Webhook />
                                     <span>{t('sidebar.webhooks')}</span>
@@ -472,12 +379,7 @@ export function AppSidebar({ activeTab, setActiveTab, hasAccess = false, ...prop
                                     isActive={activeTab === 'activity_log'}
                                     onClick={() => handleTabClick('activity_log')}
                                     tooltip={t('sidebar.activityLog')}
-                                    className={cn(
-                                        "transition-colors",
-                                        isDark
-                                            ? "text-white/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-white/10 data-[active=true]:text-white"
-                                            : "text-gray-600 hover:text-gray-900 hover:bg-black/5 data-[active=true]:bg-black/5 data-[active=true]:text-black"
-                                    )}
+                                    className={menuButtonClass}
                                 >
                                     <Activity />
                                     <span>{t('sidebar.activityLog')}</span>
@@ -488,12 +390,7 @@ export function AppSidebar({ activeTab, setActiveTab, hasAccess = false, ...prop
                                     isActive={activeTab === 'settings'}
                                     onClick={() => handleTabClick('settings')}
                                     tooltip={t('sidebar.settings')}
-                                    className={cn(
-                                        "transition-colors",
-                                        isDark
-                                            ? "text-white/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-white/10 data-[active=true]:text-white"
-                                            : "text-gray-600 hover:text-gray-900 hover:bg-black/5 data-[active=true]:bg-black/5 data-[active=true]:text-black"
-                                    )}
+                                    className={menuButtonClass}
                                 >
                                     <Settings />
                                     <span>{t('sidebar.settings')}</span>
