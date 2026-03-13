@@ -43,7 +43,7 @@
     "lucide-react": "^0.344.0",
     "mini-svg-data-uri": "^1.4.4",
     "motion": "^11.15.0",
-    "pdfjs-dist": "^3.11.174",
+    "pdfjs-dist": "^4.2.67",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-error-boundary": "^5.0.0",
