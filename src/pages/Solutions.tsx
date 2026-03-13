@@ -173,7 +173,7 @@ export default function Solutions() {
   ];
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden bg-[#0A0A0A]">
+    <div className="relative min-h-screen overflow-x-hidden bg-[#0A0A0A] text-white">
       <SEO
         title="Solutions"
         description="Explore ClerkTree's autonomous operations solutions across voice agents, document intelligence, workflow orchestration, and enterprise monitoring."
@@ -291,10 +291,10 @@ export default function Solutions() {
                         </span>
                       </div>
 
-                      <h3 className="mt-3 text-base font-medium tracking-[-0.02em] text-white/92 sm:mt-4 sm:text-lg">
+                      <h3 className="mt-3 text-base font-medium tracking-[-0.02em] text-white sm:mt-4 sm:text-lg">
                         {stat.label}
                       </h3>
-                      <p className="mt-2 max-w-xs text-sm leading-6 text-white/44">
+                      <p className="mt-2 max-w-xs text-sm leading-6 text-white/60">
                         {stat.description}
                       </p>
                     </div>

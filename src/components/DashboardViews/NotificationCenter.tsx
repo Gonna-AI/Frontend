@@ -8,6 +8,7 @@ import { supabase } from '../../config/supabase';
 
 interface NotificationCenterProps {
   isDark: boolean;
+  className?: string;
 }
 
 interface NotificationEntry {
@@ -54,7 +55,7 @@ function timeAgo(dateStr: string): string {
   return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
 }
 
-export default function NotificationCenter({ isDark }: NotificationCenterProps) {
+export default function NotificationCenter({ isDark, className }: NotificationCenterProps) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [notifications, setNotifications] = useState<NotificationEntry[]>([]);
@@ -144,18 +145,25 @@ export default function NotificationCenter({ isDark }: NotificationCenterProps) 
   };
 
   return (
-    <div className="relative" ref={dropdownRef}>
+    <div className={cn("relative", className)} ref={dropdownRef}>
       {/* Bell Button */}
       <button
         onClick={() => setOpen(!open)}
         className={cn(
-          "relative p-2 rounded-lg transition-colors",
-          isDark ? "hover:bg-white/10 text-white/60 hover:text-white" : "hover:bg-black/5 text-black/50 hover:text-black"
+          "relative inline-flex h-8 w-8 items-center justify-center rounded-full border transition-colors",
+          isDark
+            ? "border-white/10 bg-white/5 text-white/70 hover:bg-white/10 hover:text-white"
+            : "border-black/10 bg-black/5 text-black/60 hover:bg-black/10 hover:text-black"
         )}
       >
-        <Bell className="w-4.5 h-4.5" />
+        <Bell className="h-4 w-4" />
         {unreadCount > 0 && (
-          <span className="absolute -top-0.5 -right-0.5 w-4.5 h-4.5 flex items-center justify-center rounded-full bg-red-500 text-[9px] font-bold text-white leading-none">
+          <span
+            className={cn(
+              "absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-[#FF8A5B] text-[9px] font-bold text-white leading-none ring-2",
+              isDark ? "ring-[#0A0A0A]" : "ring-white"
+            )}
+          >
             {unreadCount > 9 ? '9+' : unreadCount}
           </span>
         )}
@@ -164,8 +172,9 @@ export default function NotificationCenter({ isDark }: NotificationCenterProps) 
       {/* Dropdown */}
       {open && (
         <div className={cn(
-          "absolute right-0 top-full mt-2 w-[380px] max-h-[480px] rounded-xl border shadow-2xl z-[100] flex flex-col overflow-hidden",
-          isDark ? "bg-[#121214] border-white/10 shadow-black/50" : "bg-white border-gray-200 shadow-lg shadow-gray-200/50"
+          "absolute top-full mt-3 w-[min(92vw,380px)] max-h-[480px] rounded-2xl border shadow-2xl z-[100] flex flex-col overflow-hidden backdrop-blur-xl",
+          "left-1/2 -translate-x-1/2 sm:left-auto sm:right-0 sm:translate-x-0",
+          isDark ? "bg-[#0F0F12]/95 border-white/10 shadow-black/60" : "bg-white/95 border-gray-200 shadow-lg shadow-gray-200/50"
         )}>
           {/* Header */}
           <div className={cn("px-4 py-3 border-b flex items-center justify-between shrink-0", isDark ? "border-white/10" : "border-gray-100")}>
@@ -209,8 +218,8 @@ export default function NotificationCenter({ isDark }: NotificationCenterProps) 
                     onClick={() => { if (!n.is_read) markRead(n.id); }}
                     className={cn(
                       "px-4 py-3 flex items-start gap-3 transition-colors cursor-pointer",
-                      !n.is_read && (isDark ? "bg-purple-500/[0.03]" : "bg-blue-50/50"),
-                      isDark ? "hover:bg-white/[0.02]" : "hover:bg-gray-50/50"
+                      !n.is_read && (isDark ? "bg-[#FF8A5B]/[0.06]" : "bg-orange-50/60"),
+                      isDark ? "hover:bg-white/[0.04]" : "hover:bg-gray-50/60"
                     )}
                   >
                     <div className={cn("p-1.5 rounded-lg shrink-0 mt-0.5", TYPE_COLORS[n.type] || TYPE_COLORS.info)}>
@@ -219,7 +228,7 @@ export default function NotificationCenter({ isDark }: NotificationCenterProps) 
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-1.5">
                         <span className={cn("text-xs font-semibold", isDark ? "text-white" : "text-gray-900")}>{n.title}</span>
-                        {!n.is_read && <div className="w-1.5 h-1.5 rounded-full bg-purple-500 shrink-0" />}
+                        {!n.is_read && <div className="w-1.5 h-1.5 rounded-full bg-[#FF8A5B] shrink-0" />}
                       </div>
                       {n.message && (
                         <p className={cn("text-[11px] mt-0.5 line-clamp-2", isDark ? "text-white/40" : "text-gray-500")}>{n.message}</p>
