@@ -24,7 +24,7 @@ import {
 import { useAuth } from '../../contexts/AuthContext';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useDemoCall } from '../../contexts/DemoCallContext';
-import { ragService, UploadedDocument, DocumentChunk, ProcessingProgress } from '../../services/ragService';
+import { ragService, UploadedDocument, ProcessingProgress } from '../../services/ragService';
 import { pageIndexService, PageIndexNode } from '../../services/pageIndexService';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -56,6 +56,19 @@ function getFileIcon(fileType: string) {
         case 'csv': return <File className="w-5 h-5 text-[#FFD1B8]" />;
         default: return <FileText className="w-5 h-5 text-white/40" />;
     }
+}
+
+function getMaxPageIndex(nodes: PageIndexNode[]): number {
+    let maxPage = 0;
+    for (const node of nodes) {
+        if (typeof node.page_index === 'number') {
+            maxPage = Math.max(maxPage, node.page_index);
+        }
+        if (node.nodes && node.nodes.length > 0) {
+            maxPage = Math.max(maxPage, getMaxPageIndex(node.nodes));
+        }
+    }
+    return maxPage;
 }
 
 const ACCEPTED_TYPES = '.pdf,.txt,.md,.csv,.docx';
@@ -126,8 +139,6 @@ export default function DocumentsView({ isDark = true }: { isDark?: boolean }) {
     const [documents, setDocuments] = useState<UploadedDocument[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [expandedDocId, setExpandedDocId] = useState<string | null>(null);
-    const [chunks, setChunks] = useState<DocumentChunk[]>([]);
-    const [loadingChunks, setLoadingChunks] = useState(false);
     const [processingProgress, setProcessingProgress] = useState<ProcessingProgress | null>(null);
     const [textTitle, setTextTitle] = useState('');
     const [textContent, setTextContent] = useState('');
@@ -137,7 +148,8 @@ export default function DocumentsView({ isDark = true }: { isDark?: boolean }) {
     const [uploadMode, setUploadMode] = useState<'text' | 'pdf'>('pdf');
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [pageIndexTree, setPageIndexTree] = useState<PageIndexNode[]>([]);
-    const [activePageIndexId, setActivePageIndexId] = useState<string | null>(null);
+    const [pageIndexByDocId, setPageIndexByDocId] = useState<Record<string, PageIndexNode[]>>({});
+    const [pageIndexDocIdByDocId, setPageIndexDocIdByDocId] = useState<Record<string, string>>({});
     const [chatMessages, setChatMessages] = useState<{ role: string; content: string }[]>([]);
     const [chatInput, setChatInput] = useState('');
     const [isChatting, setIsChatting] = useState(false);
@@ -221,7 +233,6 @@ export default function DocumentsView({ isDark = true }: { isDark?: boolean }) {
 
             try {
                 const docId = await pageIndexService.submitDocument(selectedFile);
-                setActivePageIndexId(docId);
 
                 setProcessingProgress({
                     stage: 'embedding',
@@ -247,12 +258,16 @@ export default function DocumentsView({ isDark = true }: { isDark?: boolean }) {
                 // In a real app, we'd store the pageindex_id in the DB.
 
                 // Let's create a backup record in Supabase so it shows in the list
-                await ragService.processDocument(
+                const ragDoc = await ragService.processDocument(
                     selectedFile,
                     kbId,
                     user.id,
                     () => { } // Silent progress for standard RAG
                 );
+                if (ragDoc) {
+                    setPageIndexByDocId(prev => ({ ...prev, [ragDoc.id]: result }));
+                    setPageIndexDocIdByDocId(prev => ({ ...prev, [ragDoc.id]: docId }));
+                }
 
                 setSelectedFile(null);
                 setTextTitle('');
@@ -304,19 +319,13 @@ export default function DocumentsView({ isDark = true }: { isDark?: boolean }) {
         }
     }, [chatMessages, isChatting]);
 
-    // ─── Expand / view chunks ─────────────────────────────────
-    const toggleExpand = async (docId: string) => {
+    // ─── Expand / view structure ──────────────────────────────
+    const toggleExpand = (docId: string) => {
         if (expandedDocId === docId) {
             setExpandedDocId(null);
-            setChunks([]);
             return;
         }
-
         setExpandedDocId(docId);
-        setLoadingChunks(true);
-        const docChunks = await ragService.getDocumentChunks(docId);
-        setChunks(docChunks);
-        setLoadingChunks(false);
     };
 
     // ─── Delete ───────────────────────────────────────────────
@@ -327,8 +336,17 @@ export default function DocumentsView({ isDark = true }: { isDark?: boolean }) {
             setDocuments(prev => prev.filter(d => d.id !== docId));
             if (expandedDocId === docId) {
                 setExpandedDocId(null);
-                setChunks([]);
             }
+            setPageIndexByDocId(prev => {
+                const next = { ...prev };
+                delete next[docId];
+                return next;
+            });
+            setPageIndexDocIdByDocId(prev => {
+                const next = { ...prev };
+                delete next[docId];
+                return next;
+            });
         }
         setDeleteConfirmId(null);
     };
@@ -664,8 +682,14 @@ export default function DocumentsView({ isDark = true }: { isDark?: boolean }) {
                             </div>
                         ) : (
                             <div className="space-y-3">
-                                {documents.map((doc) => (
-                                    <div key={doc.id}>
+                                {documents.map((doc) => {
+                                    const treeForDoc = pageIndexByDocId[doc.id];
+                                    const nodeCount = treeForDoc ? pageIndexService.countNodes(treeForDoc) : 0;
+                                    const maxPage = treeForDoc ? getMaxPageIndex(treeForDoc) : 0;
+                                    const pageIndexId = pageIndexDocIdByDocId[doc.id];
+
+                                    return (
+                                        <div key={doc.id}>
                                         {/* Document Row */}
                                         <div className={cn(
                                             "rounded-xl border p-4 transition-all duration-200",
@@ -728,7 +752,7 @@ export default function DocumentsView({ isDark = true }: { isDark?: boolean }) {
                                                                 isDark ? "bg-white/5 text-white/60" : "bg-gray-100 text-gray-600"
                                                             )}>
                                                                 <Layers className="w-3 h-3" />
-                                                                {doc.chunk_count} Chunks
+                                                                {treeForDoc ? `${nodeCount} Nodes` : `${doc.chunk_count} Chunks`}
                                                             </span>
                                                         </div>
                                                     )}
@@ -794,7 +818,7 @@ export default function DocumentsView({ isDark = true }: { isDark?: boolean }) {
                                             )}
                                         </div>
 
-                                        {/* Expanded Chunks */}
+                                        {/* Expanded Structure */}
                                         <AnimatePresence>
                                             {expandedDocId === doc.id && (
                                                 <motion.div
@@ -809,31 +833,34 @@ export default function DocumentsView({ isDark = true }: { isDark?: boolean }) {
                                                         isDark ? "bg-white/[0.03] border-white/10 backdrop-blur-md" : "bg-gray-50 border-gray-100"
                                                     )}>
                                                         {/* Stats bar */}
-                                                        <div className={cn("flex items-center gap-4 text-xs pb-3 border-b", isDark ? "border-white/5" : "border-gray-200")}>
+                                                        <div className={cn("flex flex-wrap items-center gap-4 text-xs pb-3 border-b", isDark ? "border-white/5" : "border-gray-200")}>                                                                                                                            
                                                             <span className={textSecondary}>
-                                                                <strong className={textPrimary}>{doc.chunk_count}</strong> chunks
+                                                                <strong className={textPrimary}>{treeForDoc ? nodeCount : 'N/A'}</strong> nodes
                                                             </span>
                                                             <span className={textSecondary}>
-                                                                <strong className={textPrimary}>{doc.total_tokens?.toLocaleString()}</strong> words
+                                                                <strong className={textPrimary}>{treeForDoc ? treeForDoc.length : 'N/A'}</strong> sections
                                                             </span>
-                                                            <span className={cn("uppercase text-[10px] font-mono px-1.5 py-0.5 rounded", isDark ? "bg-white/5" : "bg-gray-200")}>
+                                                            <span className={textSecondary}>
+                                                                <strong className={textPrimary}>{treeForDoc ? (maxPage || 'N/A') : 'N/A'}</strong> pages
+                                                            </span>
+                                                            {pageIndexId && (
+                                                                <span className={cn(
+                                                                    "text-[10px] font-mono px-1.5 py-0.5 rounded border",
+                                                                    isDark ? "bg-white/5 border-white/10 text-white/60" : "bg-gray-100 border-gray-200 text-gray-600"
+                                                                )}>
+                                                                    ID {pageIndexId}
+                                                                </span>
+                                                            )}
+                                                            <span className={cn("uppercase text-[10px] font-mono px-1.5 py-0.5 rounded", isDark ? "bg-white/5" : "bg-gray-200")}> 
                                                                 {doc.file_type}
                                                             </span>
                                                         </div>
 
-                                                        {loadingChunks ? (
-                                                            <div className="flex items-center justify-center py-8">
-                                                                <Loader2 className={cn("w-5 h-5 animate-spin", textMuted)} />
-                                                            </div>
-                                                        ) : chunks.length === 0 ? (
-                                                            <p className={cn("text-sm text-center py-6", textMuted)}>
-                                                                No chunks found
-                                                            </p>
-                                                        ) : (
+                                                        {treeForDoc ? (
                                                             <div className="space-y-2 max-h-[400px] overflow-y-auto scrollbar-hide">
-                                                                {chunks.map((chunk, idx) => (
+                                                                {treeForDoc.map((node, idx) => (
                                                                     <div
-                                                                        key={chunk.id}
+                                                                        key={`${doc.id}-${idx}`}
                                                                         className={cn(
                                                                             "rounded-lg border p-3 transition-colors",
                                                                             isDark
@@ -841,35 +868,22 @@ export default function DocumentsView({ isDark = true }: { isDark?: boolean }) {
                                                                                 : "bg-white border-gray-200 hover:bg-gray-50"
                                                                         )}
                                                                     >
-                                                                        <div className="flex items-start gap-3">
-                                                                            <span className={cn(
-                                                                                "flex-shrink-0 w-7 h-7 rounded-lg flex items-center justify-center text-xs font-mono font-bold",
-                                                                                isDark ? "bg-[#FF8A5B]/10 text-[#FFB286]" : "bg-orange-50 text-orange-600"
-                                                                            )}>
-                                                                                {idx + 1}
-                                                                            </span>
-                                                                            <div className="flex-1 min-w-0">
-                                                                                <p className={cn(
-                                                                                    "text-xs leading-relaxed line-clamp-4",
-                                                                                    isDark ? "text-white/70" : "text-gray-600"
-                                                                                )}>
-                                                                                    {chunk.content}
-                                                                                </p>
-                                                                                <p className={cn("text-[10px] mt-1.5", textMuted)}>
-                                                                                    {chunk.content.split(/\s+/).length} words
-                                                                                </p>
-                                                                            </div>
-                                                                        </div>
+                                                                        <TreeNodeNode node={node} />
                                                                     </div>
                                                                 ))}
                                                             </div>
+                                                        ) : (
+                                                            <p className={cn("text-sm text-center py-6", textMuted)}>
+                                                                This document hasn't been indexed with PageIndex yet. Re-upload using Vectorless Indexing to generate structure.
+                                                            </p>
                                                         )}
                                                     </div>
                                                 </motion.div>
                                             )}
                                         </AnimatePresence>
                                     </div>
-                                ))}
+                                );
+                            })}
                             </div>
                         )}
                     </div>

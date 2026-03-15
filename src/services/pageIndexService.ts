@@ -31,16 +31,29 @@ class PageIndexService {
     private async fetchTreeStatus(docId: string): Promise<TreeResponse | PageIndexNode[] | null> {
         const headers = this.getPageIndexHeaders();
         const urls = [
+            `${PAGEINDEX_API_URL}/doc/${docId}`,
             `${PAGEINDEX_API_URL}/doc/${docId}/tree/`,
             `${PAGEINDEX_API_URL}/doc/${docId}/tree`,
-            `${PAGEINDEX_API_URL}/doc/${docId}`,
         ];
 
         let sawNotFound = false;
         for (const url of urls) {
             try {
                 const response = await axios.get(url, { headers });
-                return response.data;
+                const data = response.data;
+                if (Array.isArray(data)) {
+                    return data;
+                }
+                if (data?.result) {
+                    return data;
+                }
+                if (data?.status && data.status !== 'completed') {
+                    return data;
+                }
+                if (data?.status === 'completed' && !data?.result) {
+                    continue;
+                }
+                return data;
             } catch (err) {
                 if (axios.isAxiosError(err) && err.response?.status === 404) {
                     sawNotFound = true;
