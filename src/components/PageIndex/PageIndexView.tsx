@@ -58,11 +58,12 @@ const TreeNode = ({ node, depth = 0 }: { node: PageIndexNode; depth?: number }) 
                             <span className="text-[10px] font-mono text-[#FFB286] bg-[#FF8A5B]/10 px-1.5 py-0.5 rounded">
                                 {pageLabel}
                             </span>
-                        ) : node.node_id ? (
-                            <span className="text-[10px] font-mono text-white/40 bg-white/5 px-1.5 py-0.5 rounded">
-                                ID
-                            </span>
                         ) : null}
+                        {node.node_id && (
+                            <span className="text-[10px] font-mono text-white/40 bg-white/5 px-1.5 py-0.5 rounded truncate max-w-[120px]">
+                                {node.node_id}
+                            </span>
+                        )}
                         <h4 className="text-sm font-medium text-white/90 truncate group-hover:text-white">
                             {titleText}
                         </h4>
@@ -70,6 +71,11 @@ const TreeNode = ({ node, depth = 0 }: { node: PageIndexNode; depth?: number }) 
                     {summaryText && isExpanded && (
                         <p className="text-xs text-white/50 mt-1 line-clamp-2 italic leading-relaxed">
                             {summaryText}
+                        </p>
+                    )}
+                    {!summaryText && isExpanded && (
+                        <p className="text-xs text-white/30 mt-1 italic leading-relaxed">
+                            No summary available
                         </p>
                     )}
                 </div>

@@ -1,4 +1,5 @@
 import React from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
 import { useTheme } from '../../../hooks/useTheme';
@@ -28,7 +29,7 @@ export default function MobileSidebar({
   const { isDark } = useTheme();
   const navigate = useNavigate();
 
-  return (
+  const content = (
     <AnimatePresence>
       {isOpen && (
         <>
@@ -54,7 +55,8 @@ export default function MobileSidebar({
             }}
             className={cn(
               "fixed inset-x-0 bottom-0 z-50",
-              "h-auto max-h-[85vh] overflow-y-auto", // Increased height and added scroll
+              "h-auto max-h-[85vh] max-h-[85dvh] overflow-y-auto overscroll-contain",
+              "pb-[max(1rem,env(safe-area-inset-bottom))]",
               "rounded-t-[1.25rem] shadow-2xl",
               isDark
                 ? [
@@ -129,4 +131,7 @@ export default function MobileSidebar({
       )}
     </AnimatePresence>
   );
+
+  if (typeof document === 'undefined') return content;
+  return createPortal(content, document.body);
 }

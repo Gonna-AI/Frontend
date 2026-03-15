@@ -97,7 +97,7 @@ class PageIndexService {
             const treeResponse = await this.fetchTreeStatus(docId);
             const status = treeResponse.status;
             
-            if (status === 'completed' && treeResponse.result) {
+            if (treeResponse.result && treeResponse.result.length > 0) {
                 return treeResponse.result || [];
             } else if (status === 'failed') {
                 throw new Error('PageIndex processing failed');
