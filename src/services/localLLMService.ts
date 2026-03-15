@@ -36,6 +36,7 @@ import { getGroqSettings, type GroqSettings } from '../components/DemoCall/GroqS
 // API calls routed via secure proxy
 import { proxyJSON, ProxyRoutes } from './proxyClient';
 import { ragService } from './ragService';
+import { pageIndexService } from './pageIndexService';
 
 import log from '../utils/logger';
 
@@ -90,7 +91,7 @@ const RAG_TOOLS = [
     function: {
       name: 'get_document_details',
       description:
-        'Get detailed information from a specific uploaded document by searching for a keyword or topic within it. Use when you need precise details from a known document.',
+        'Get detailed information from a specific uploaded document by searching for a keyword or topic within it. Prefer PageIndex structured nodes (with page references) when available.',
       parameters: {
         type: 'object',
         properties: {
@@ -626,7 +627,7 @@ class GroqLLMService {
 
     // Build messages array for Groq API (OpenAI format)
     const groqMessages: Array<{ role: 'system' | 'user' | 'assistant' | 'tool'; content: string; tool_call_id?: string; name?: string; tool_calls?: GroqToolCall[] }> = [
-      { role: 'system' as const, content: systemPrompt + (hasKnowledgeBase ? '\n\nYou have access to a knowledge base. Use the search_knowledge_base tool when the caller asks about business-specific information. ALWAYS search before answering questions about products, services, policies, pricing, or procedures.' : '') },
+      { role: 'system' as const, content: systemPrompt + (hasKnowledgeBase ? '\n\nYou have access to a knowledge base. Use the search_knowledge_base tool when the caller asks about business-specific information. ALWAYS search before answering questions about products, services, policies, pricing, or procedures. Use get_document_details when the caller references a specific document or asks for precise details; it can return PageIndex results with page references when available.' : '') },
       ...recentHistory.map(msg => ({
         role: (msg.speaker === 'agent' ? 'assistant' : 'user') as 'assistant' | 'user',
         content: msg.speaker === 'agent' ? this.cleanFinalAnswer(msg.text) : msg.text
@@ -668,19 +669,60 @@ class GroqLLMService {
 
       if (name === 'get_document_details' && knowledgeBase.id) {
         const query = String(args.query || '');
+        const documentName = typeof args.document_name === 'string' ? args.document_name : undefined;
         log.debug(`🔧 Tool call: get_document_details("${query}")`);
+
+        let pageIndexNote: string | undefined;
+        try {
+          const pageIndexDoc = await ragService.getLatestPageIndexDocument(knowledgeBase.id, documentName);
+          if (pageIndexDoc?.pageindex_doc_id) {
+            const tree = await pageIndexService.getTree(pageIndexDoc.pageindex_doc_id);
+            const matches = pageIndexService.searchTree(tree, query, 5);
+
+            if (matches.length > 0) {
+              return JSON.stringify({
+                source: 'pageindex',
+                document: {
+                  id: pageIndexDoc.id,
+                  name: pageIndexDoc.file_name,
+                  pageindex_doc_id: pageIndexDoc.pageindex_doc_id,
+                },
+                results: matches.map((m, i) => ({ rank: i + 1, ...m })),
+                total: matches.length,
+              });
+            }
+
+            return JSON.stringify({
+              source: 'pageindex',
+              document: {
+                id: pageIndexDoc.id,
+                name: pageIndexDoc.file_name,
+                pageindex_doc_id: pageIndexDoc.pageindex_doc_id,
+              },
+              results: [],
+              total: 0,
+              note: 'No matching nodes found in PageIndex.',
+            });
+          } else if (documentName) {
+            pageIndexNote = 'No PageIndex document found for the requested name.';
+          }
+        } catch (err) {
+          pageIndexNote = err instanceof Error ? err.message : 'PageIndex lookup failed';
+        }
 
         try {
           const docs = await ragService.searchRelevantContext(query, knowledgeBase.id, 5);
           if (docs && docs.length > 0) {
             return JSON.stringify({
-              results: docs.map((content, i) => ({ rank: i + 1, content, source: args.document_name || 'knowledge base' })),
+              source: 'knowledge_base',
+              results: docs.map((content, i) => ({ rank: i + 1, content, source: documentName || 'knowledge base' })),
               total: docs.length,
+              note: pageIndexNote,
             });
           }
-          return JSON.stringify({ results: [], total: 0 });
+          return JSON.stringify({ source: 'knowledge_base', results: [], total: 0, note: pageIndexNote });
         } catch (err) {
-          return JSON.stringify({ error: 'Document search failed' });
+          return JSON.stringify({ error: 'Document search failed', note: pageIndexNote });
         }
       }
 

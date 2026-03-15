@@ -24,6 +24,8 @@ export interface TreeResponse {
 }
 
 class PageIndexService {
+    private treeCache = new Map<string, PageIndexNode[]>();
+
     private getPageIndexHeaders() {
         if (!PAGEINDEX_API_KEY) {
             throw new Error('Missing PageIndex API key');
@@ -45,11 +47,18 @@ class PageIndexService {
         });
 
         const data = response.data;
-        if (Array.isArray(data)) {
+        const tree =
+            (Array.isArray(data) && data) ||
+            (Array.isArray(data?.result) && data.result) ||
+            (Array.isArray(data?.tree) && data.tree) ||
+            (Array.isArray(data?.result?.tree) && data.result.tree) ||
+            null;
+
+        if (tree) {
             return {
                 doc_id: docId,
                 status: 'completed',
-                result: data,
+                result: tree,
                 retrieval_ready: true,
             };
         }
@@ -98,6 +107,7 @@ class PageIndexService {
             const status = treeResponse.status;
             
             if (treeResponse.result && treeResponse.result.length > 0) {
+                this.treeCache.set(docId, treeResponse.result);
                 return treeResponse.result || [];
             } else if (status === 'failed') {
                 throw new Error('PageIndex processing failed');
@@ -109,6 +119,26 @@ class PageIndexService {
         }
 
         throw new Error('Indexing timed out');
+    }
+
+    /**
+     * Fetch tree once (no polling). Uses cache when available.
+     */
+    async getTree(docId: string): Promise<PageIndexNode[]> {
+        const cached = this.treeCache.get(docId);
+        if (cached) return cached;
+
+        const treeResponse = await this.fetchTreeStatus(docId);
+        if (treeResponse.result && treeResponse.result.length > 0) {
+            this.treeCache.set(docId, treeResponse.result);
+            return treeResponse.result;
+        }
+
+        if (treeResponse.status === 'failed') {
+            throw new Error('PageIndex processing failed');
+        }
+
+        throw new Error(`PageIndex status: ${treeResponse.status}`);
     }
 
     /**
@@ -188,6 +218,66 @@ Rules:
             }
         }
         return result;
+    }
+
+    /**
+     * Search the tree for a query (simple keyword match).
+     */
+    searchTree(nodes: PageIndexNode[], query: string, limit: number = 5): Array<{
+        title: string;
+        page_label: string;
+        excerpt: string;
+        score: number;
+    }> {
+        const terms = query.toLowerCase().split(/\s+/).filter(Boolean);
+        if (terms.length === 0) return [];
+
+        const results: Array<{ score: number; node: PageIndexNode }> = [];
+
+        const scoreNode = (node: PageIndexNode): number => {
+            const hay = `${node.title ?? ''} ${node.summary ?? ''} ${node.text ?? ''} ${node.node_id ?? ''}`.toLowerCase();
+            let score = 0;
+            for (const term of terms) {
+                if (hay.includes(term)) score += 1;
+            }
+            return score;
+        };
+
+        const walk = (node: PageIndexNode) => {
+            const score = scoreNode(node);
+            if (score > 0) {
+                results.push({ score, node });
+            }
+            if (node.nodes && node.nodes.length > 0) {
+                node.nodes.forEach(walk);
+            }
+        };
+
+        nodes.forEach(walk);
+
+        return results
+            .sort((a, b) => b.score - a.score)
+            .slice(0, limit)
+            .map(({ score, node }) => {
+                const pageLabel = typeof node.page_index === 'number'
+                    ? `Page ${node.page_index}`
+                    : typeof node.page_number === 'number'
+                        ? `Page ${node.page_number}`
+                        : typeof node.line_num === 'number'
+                            ? `Line ${node.line_num}`
+                            : 'Location ?';
+                const excerptSource = node.summary || node.text || '';
+                const excerpt = excerptSource
+                    ? (excerptSource.length > 240 ? `${excerptSource.substring(0, 240)}...` : excerptSource)
+                    : '';
+
+                return {
+                    title: node.title || node.node_id || 'Untitled',
+                    page_label: pageLabel,
+                    excerpt,
+                    score,
+                };
+            });
     }
 
     /**

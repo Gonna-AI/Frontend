@@ -58,18 +58,38 @@ function getFileIcon(fileType: string) {
     }
 }
 
-function getMaxPageIndex(nodes: PageIndexNode[]): number {
-    let maxPage = 0;
-    for (const node of nodes) {
-        if (typeof node.page_index === 'number') {
-            maxPage = Math.max(maxPage, node.page_index);
-        } else if (typeof node.page_number === 'number') {
-            maxPage = Math.max(maxPage, node.page_number);
+function getPageCount(nodes: PageIndexNode[]): number | null {
+    let minPage = Number.POSITIVE_INFINITY;
+    let maxPage = Number.NEGATIVE_INFINITY;
+    let found = false;
+
+    const walk = (node: PageIndexNode) => {
+        const pageValue = typeof node.page_index === 'number'
+            ? node.page_index
+            : typeof node.page_number === 'number'
+                ? node.page_number
+                : null;
+
+        if (pageValue !== null) {
+            found = true;
+            minPage = Math.min(minPage, pageValue);
+            maxPage = Math.max(maxPage, pageValue);
         }
+
         if (node.nodes && node.nodes.length > 0) {
-            maxPage = Math.max(maxPage, getMaxPageIndex(node.nodes));
+            node.nodes.forEach(walk);
         }
+    };
+
+    nodes.forEach(walk);
+
+    if (!found) return null;
+
+    // If pages are 0-indexed, convert to count
+    if (minPage === 0) {
+        return maxPage + 1;
     }
+
     return maxPage;
 }
 
@@ -173,6 +193,8 @@ export default function DocumentsView({ isDark = true }: { isDark?: boolean }) {
     const [pageIndexTree, setPageIndexTree] = useState<PageIndexNode[]>([]);
     const [pageIndexByDocId, setPageIndexByDocId] = useState<Record<string, PageIndexNode[]>>({});
     const [pageIndexDocIdByDocId, setPageIndexDocIdByDocId] = useState<Record<string, string>>({});
+    const [pageIndexLoadingByDocId, setPageIndexLoadingByDocId] = useState<Record<string, boolean>>({});
+    const [pageIndexErrorByDocId, setPageIndexErrorByDocId] = useState<Record<string, string>>({});
     const [chatMessages, setChatMessages] = useState<{ role: string; content: string }[]>([]);
     const [chatInput, setChatInput] = useState('');
     const [isChatting, setIsChatting] = useState(false);
@@ -300,8 +322,9 @@ export default function DocumentsView({ isDark = true }: { isDark?: boolean }) {
                     kbId,
                     user.id,
                     () => { } // Silent progress for standard RAG
-                ).then((ragDoc) => {
+                ).then(async (ragDoc) => {
                     if (ragDoc) {
+                        await ragService.setPageIndexDocId(ragDoc.id, docId);
                         setPageIndexByDocId(prev => ({ ...prev, [ragDoc.id]: result }));
                         setPageIndexDocIdByDocId(prev => ({ ...prev, [ragDoc.id]: docId }));
                     }
@@ -349,12 +372,41 @@ export default function DocumentsView({ isDark = true }: { isDark?: boolean }) {
     }, [chatMessages, isChatting]);
 
     // ─── Expand / view structure ──────────────────────────────
-    const toggleExpand = (docId: string) => {
+    const resolvePageIndexDocId = (doc: UploadedDocument) =>
+        doc.pageindex_doc_id || pageIndexDocIdByDocId[doc.id];
+
+    const fetchPageIndexTreeForDoc = async (doc: UploadedDocument) => {
+        const pageIndexId = resolvePageIndexDocId(doc);
+        if (!pageIndexId || pageIndexByDocId[doc.id] || pageIndexLoadingByDocId[doc.id]) return;
+
+        setPageIndexLoadingByDocId(prev => ({ ...prev, [doc.id]: true }));
+        setPageIndexErrorByDocId(prev => {
+            const next = { ...prev };
+            delete next[doc.id];
+            return next;
+        });
+
+        try {
+            const tree = await pageIndexService.getTree(pageIndexId);
+            setPageIndexByDocId(prev => ({ ...prev, [doc.id]: tree }));
+        } catch (err: any) {
+            setPageIndexErrorByDocId(prev => ({
+                ...prev,
+                [doc.id]: err?.message || 'Failed to load PageIndex structure',
+            }));
+        } finally {
+            setPageIndexLoadingByDocId(prev => ({ ...prev, [doc.id]: false }));
+        }
+    };
+
+    const toggleExpand = (doc: UploadedDocument) => {
+        const docId = doc.id;
         if (expandedDocId === docId) {
             setExpandedDocId(null);
             return;
         }
         setExpandedDocId(docId);
+        fetchPageIndexTreeForDoc(doc);
     };
 
     // ─── Delete ───────────────────────────────────────────────
@@ -367,6 +419,16 @@ export default function DocumentsView({ isDark = true }: { isDark?: boolean }) {
                 setExpandedDocId(null);
             }
             setPageIndexByDocId(prev => {
+                const next = { ...prev };
+                delete next[docId];
+                return next;
+            });
+            setPageIndexLoadingByDocId(prev => {
+                const next = { ...prev };
+                delete next[docId];
+                return next;
+            });
+            setPageIndexErrorByDocId(prev => {
                 const next = { ...prev };
                 delete next[docId];
                 return next;
@@ -710,8 +772,10 @@ export default function DocumentsView({ isDark = true }: { isDark?: boolean }) {
                                 {documents.map((doc) => {
                                     const treeForDoc = pageIndexByDocId[doc.id];
                                     const nodeCount = treeForDoc ? pageIndexService.countNodes(treeForDoc) : 0;
-                                    const maxPage = treeForDoc ? getMaxPageIndex(treeForDoc) : 0;
-                                    const pageIndexId = pageIndexDocIdByDocId[doc.id];
+                                    const pageCount = treeForDoc ? getPageCount(treeForDoc) : null;
+                                    const pageIndexId = resolvePageIndexDocId(doc);
+                                    const isTreeLoading = !!pageIndexLoadingByDocId[doc.id];
+                                    const treeError = pageIndexErrorByDocId[doc.id];
 
                                     return (
                                         <div key={doc.id}>
@@ -724,7 +788,7 @@ export default function DocumentsView({ isDark = true }: { isDark?: boolean }) {
                                             <div className="flex items-center gap-4">
                                                 {/* Expand toggle */}
                                                 <button
-                                                    onClick={() => toggleExpand(doc.id)}
+                                                    onClick={() => toggleExpand(doc)}
                                                     className={cn(
                                                         "p-1 rounded-md transition-colors cursor-pointer",
                                                         isDark ? "hover:bg-white/10" : "hover:bg-gray-100"
@@ -860,13 +924,13 @@ export default function DocumentsView({ isDark = true }: { isDark?: boolean }) {
                                                         {/* Stats bar */}
                                                         <div className={cn("flex flex-wrap items-center gap-4 text-xs pb-3 border-b", isDark ? "border-white/5" : "border-gray-200")}>                                                                                                                            
                                                             <span className={textSecondary}>
-                                                                <strong className={textPrimary}>{treeForDoc ? nodeCount : 'N/A'}</strong> nodes
+                                                                <strong className={textPrimary}>{treeForDoc ? nodeCount : (isTreeLoading ? 'Loading' : 'N/A')}</strong> nodes
                                                             </span>
                                                             <span className={textSecondary}>
-                                                                <strong className={textPrimary}>{treeForDoc ? treeForDoc.length : 'N/A'}</strong> sections
+                                                                <strong className={textPrimary}>{treeForDoc ? treeForDoc.length : (isTreeLoading ? 'Loading' : 'N/A')}</strong> sections
                                                             </span>
                                                             <span className={textSecondary}>
-                                                                <strong className={textPrimary}>{treeForDoc ? (maxPage || 'N/A') : 'N/A'}</strong> pages
+                                                                <strong className={textPrimary}>{treeForDoc ? (pageCount ?? 'N/A') : (isTreeLoading ? 'Loading' : 'N/A')}</strong> pages
                                                             </span>
                                                             {pageIndexId && (
                                                                 <span className={cn(
@@ -897,6 +961,14 @@ export default function DocumentsView({ isDark = true }: { isDark?: boolean }) {
                                                                     </div>
                                                                 ))}
                                                             </div>
+                                                        ) : treeError ? (
+                                                            <p className={cn("text-sm text-center py-6", textMuted)}>
+                                                                {treeError}
+                                                            </p>
+                                                        ) : isTreeLoading ? (
+                                                            <p className={cn("text-sm text-center py-6", textMuted)}>
+                                                                Loading PageIndex structure...
+                                                            </p>
                                                         ) : (
                                                             <p className={cn("text-sm text-center py-6", textMuted)}>
                                                                 This document hasn't been indexed with PageIndex yet. Re-upload using Vectorless Indexing to generate structure.

@@ -12,6 +12,7 @@ export interface UploadedDocument {
     file_type: string;
     file_size: number;
     storage_path: string | null;
+    pageindex_doc_id?: string | null;
     status: 'processing' | 'ready' | 'error';
     error_message: string | null;
     chunk_count: number;
@@ -375,6 +376,50 @@ class RAGService {
         }
 
         return (data ?? []) as UploadedDocument[];
+    }
+
+    // ─── Fetch latest PageIndex-enabled document (optionally by name) ────────
+    async getLatestPageIndexDocument(kbId: string, documentName?: string): Promise<UploadedDocument | null> {
+        let query = supabase
+            .from('kb_uploaded_documents')
+            .select('*')
+            .eq('kb_id', kbId);
+
+        if (documentName && documentName.trim()) {
+            query = query.ilike('file_name', `%${documentName.trim()}%`);
+        } else {
+            query = query.not('pageindex_doc_id', 'is', null);
+        }
+
+        const { data, error } = await query
+            .order('created_at', { ascending: false })
+            .limit(1);
+
+        if (error) {
+            console.error('Failed to fetch PageIndex document:', error);
+            return null;
+        }
+
+        return (data && data.length > 0 ? data[0] : null) as UploadedDocument | null;
+    }
+
+    // ─── Update PageIndex doc ID for an uploaded document ───────────────────
+    async setPageIndexDocId(documentId: string, pageIndexDocId: string): Promise<boolean> {
+        try {
+            const { error } = await supabase
+                .from('kb_uploaded_documents')
+                .update({
+                    pageindex_doc_id: pageIndexDocId,
+                    updated_at: new Date().toISOString(),
+                })
+                .eq('id', documentId);
+
+            if (error) throw error;
+            return true;
+        } catch (error) {
+            console.error('Failed to update PageIndex doc ID:', error);
+            return false;
+        }
     }
 
     // ─── Fetch chunks for a specific document ────────────────────────
