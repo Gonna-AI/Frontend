@@ -203,7 +203,7 @@ const Sidebar = React.forwardRef<
           open={openMobile}
           onOpenChange={setOpenMobile}
           shouldScaleBackground={false}
-          modal={false}
+          modal={true}
           noBodyStyles
           disablePreventScroll={false}
         >
