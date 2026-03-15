@@ -129,25 +129,25 @@ function DemoDashboardContent() {
               "relative flex items-center justify-between px-4 py-3 border-b backdrop-blur-md",
               isDark ? "bg-[rgb(10,10,10)]/80 border-white/10" : "bg-white/80 border-black/10"
             )}>
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-3 min-w-0">
                 <SidebarTrigger className={isDark ? "text-white" : "text-black"} />
-                <h1 className={cn("text-lg font-semibold", isDark ? "text-white" : "text-black")}>
+                <h1 className={cn("text-base sm:text-lg font-semibold truncate", isDark ? "text-white" : "text-black")}>
                   {getTabLabel(activeTab)}
                 </h1>
+              </div>
+              <div className="flex items-center gap-2">
                 <button
                   className={cn(
-                    "p-1.5 rounded-md transition-colors",
+                    "p-1.5 rounded-md transition-colors sm:order-2",
                     isDark ? "hover:bg-white/10 text-white/60" : "hover:bg-black/10 text-black/60"
                   )}
                   onClick={() => window.location.reload()}
                 >
                   <RotateCcw className="w-4 h-4" />
                 </button>
-              </div>
-              <div className="flex items-center gap-2">
                 <NotificationCenter
                   isDark={isDark}
-                  className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 sm:static sm:left-auto sm:top-auto sm:translate-x-0 sm:translate-y-0"
+                  className="static sm:order-3"
                 />
                 <a
                   href="/docs"

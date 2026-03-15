@@ -69,17 +69,17 @@ const DrawerContent = React.forwardRef<
     return (
         <DrawerPortal>
             <DrawerOverlay />
-            <DrawerPrimitive.Content
-                ref={setRefs}
-                tabIndex={-1}
-                onOpenAutoFocus={handleOpenAutoFocus}
-                className={cn(
-                    "fixed inset-x-0 bottom-0 z-[500] mt-24 flex h-auto flex-col rounded-t-[10px] border bg-background outline-none",
-                    "after:hidden", // Remove default handle if any
-                    className
-                )}
-                {...props}
-            >
+        <DrawerPrimitive.Content
+            ref={setRefs}
+            tabIndex={-1}
+            onOpenAutoFocus={handleOpenAutoFocus}
+            className={cn(
+                "fixed inset-x-0 bottom-0 z-[500] flex h-auto flex-col rounded-t-[10px] border bg-background outline-none",
+                "after:hidden", // Remove default handle if any
+                className
+            )}
+            {...props}
+        >
                 <div className="mx-auto mt-4 h-2 w-[100px] rounded-full bg-muted" />
                 {children}
             </DrawerPrimitive.Content>
