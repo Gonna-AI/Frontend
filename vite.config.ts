@@ -35,11 +35,6 @@ export default defineConfig({
         navigateFallbackDenylist: [/^\/auth\//, /^\/api\//],
         runtimeCaching: [
           {
-            // NEVER cache Supabase API calls — always go to network
-            urlPattern: /^https:\/\/.*\.supabase\.co\/.*/i,
-            handler: 'NetworkOnly',
-          },
-          {
             // HTML pages: always fetch from network first, fall back to cache only if offline
             urlPattern: ({ request }) => request.mode === 'navigate',
             handler: 'NetworkFirst',

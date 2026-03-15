@@ -377,49 +377,6 @@ export default function DocumentsView({ isDark = true }: { isDark?: boolean }) {
                     "lg:col-span-12 relative rounded-xl border p-6 transition-all duration-200",
                     isDark ? "bg-white/5 border-white/10" : "bg-white border-gray-200 shadow-sm"
                 )}>
-                    {/* Processing Progress Overlay */}
-                    {processingProgress && processingProgress.stage !== 'done' && processingProgress.stage !== 'error' && (
-                        <div className="absolute inset-0 rounded-xl bg-black/50 backdrop-blur-sm flex items-center justify-center z-10">
-                            <div className="flex flex-col items-center gap-3 text-center px-6">
-                                <Loader2 className="w-8 h-8 text-[#FFB286] animate-spin" />
-                                <p className="text-white font-medium text-sm">{processingProgress.message}</p>
-                                {processingProgress.total > 1 && ( // Only show progress bar for multi-step processes if applicable
-                                    <div className="w-48">
-                                        <div className={cn("h-1.5 rounded-full overflow-hidden", isDark ? "bg-white/10" : "bg-gray-200")}>
-                                            <div
-                                                className="h-full bg-gradient-to-r from-[#FF8A5B] via-[#FF9E6C] to-[#FFB286] rounded-full transition-all duration-300"
-                                                style={{ width: `${(processingProgress.current / processingProgress.total) * 100}%` }}
-                                            />
-                                        </div>
-                                        <p className="text-white/60 text-xs mt-1.5">
-                                            {processingProgress.current} / {processingProgress.total}
-                                        </p>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Success overlay */}
-                    {processingProgress?.stage === 'done' && (
-                        <div className="absolute inset-0 rounded-xl bg-[#FF8A5B]/10 backdrop-blur-sm flex items-center justify-center z-10">
-                            <div className="flex items-center gap-2 text-[#FFB286]">
-                                <CheckCircle className="w-6 h-6" />
-                                <span className="font-medium text-sm">{processingProgress.message}</span>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Error overlay */}
-                    {processingProgress?.stage === 'error' && (
-                        <div className="absolute inset-0 rounded-xl bg-red-500/10 backdrop-blur-sm flex items-center justify-center z-10">
-                            <div className="flex items-center gap-2 text-red-400">
-                                <AlertCircle className="w-6 h-6" />
-                                <span className="font-medium text-sm">{processingProgress.message}</span>
-                            </div>
-                        </div>
-                    )}
-
                     <div className="flex flex-col gap-6">
                         {/* Tabs */}
                         <div className="flex items-center gap-1 p-1 bg-black/20 rounded-lg w-fit">
@@ -444,6 +401,45 @@ export default function DocumentsView({ isDark = true }: { isDark?: boolean }) {
                                 Paste Text
                             </button>
                         </div>
+
+                        {processingProgress && (
+                            <div className={cn(
+                                "rounded-lg border px-4 py-3 flex items-start gap-3",
+                                processingProgress.stage === 'error'
+                                    ? "border-red-500/30 bg-red-500/10 text-red-300"
+                                    : processingProgress.stage === 'done'
+                                        ? "border-[#FF8A5B]/30 bg-[#FF8A5B]/10 text-[#FFB286]"
+                                        : isDark
+                                            ? "border-white/10 bg-black/20 text-white/80"
+                                            : "border-gray-200 bg-gray-50 text-gray-700"
+                            )}>
+                                <div className="mt-0.5">
+                                    {processingProgress.stage === 'error' ? (
+                                        <AlertCircle className="w-4 h-4" />
+                                    ) : processingProgress.stage === 'done' ? (
+                                        <CheckCircle className="w-4 h-4" />
+                                    ) : (
+                                        <Loader2 className="w-4 h-4 animate-spin" />
+                                    )}
+                                </div>
+                                <div className="flex-1">
+                                    <p className="text-xs font-medium">{processingProgress.message}</p>
+                                    {processingProgress.total > 1 && (
+                                        <div className="mt-2">
+                                            <div className={cn("h-1.5 rounded-full overflow-hidden", isDark ? "bg-white/10" : "bg-gray-200")}>
+                                                <div
+                                                    className="h-full bg-gradient-to-r from-[#FF8A5B] via-[#FF9E6C] to-[#FFB286] rounded-full transition-all duration-300"
+                                                    style={{ width: `${(processingProgress.current / processingProgress.total) * 100}%` }}
+                                                />
+                                            </div>
+                                            <p className={cn("text-[10px] mt-1", isDark ? "text-white/50" : "text-gray-500")}>
+                                                {processingProgress.current} / {processingProgress.total}
+                                            </p>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        )}
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div className="space-y-4">
