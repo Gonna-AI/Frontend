@@ -35,23 +35,57 @@ DrawerOverlay.displayName = DrawerPrimitive.Overlay.displayName
 const DrawerContent = React.forwardRef<
     React.ElementRef<typeof DrawerPrimitive.Content>,
     React.ComponentPropsWithoutRef<typeof DrawerPrimitive.Content>
->(({ className, children, ...props }, ref) => (
-    <DrawerPortal>
-        <DrawerOverlay />
-        <DrawerPrimitive.Content
-            ref={ref}
-            className={cn(
-                "fixed inset-x-0 bottom-0 z-[500] mt-24 flex h-auto flex-col rounded-t-[10px] border bg-background outline-none",
-                "after:hidden", // Remove default handle if any
-                className
-            )}
-            {...props}
-        >
-            <div className="mx-auto mt-4 h-2 w-[100px] rounded-full bg-muted" />
-            {children}
-        </DrawerPrimitive.Content>
-    </DrawerPortal>
-))
+>(({ className, children, onOpenAutoFocus, ...props }, ref) => {
+    const contentRef = React.useRef<HTMLDivElement | null>(null)
+
+    const setRefs = React.useCallback(
+        (node: HTMLDivElement | null) => {
+            contentRef.current = node
+            if (typeof ref === "function") {
+                ref(node)
+            } else if (ref) {
+                ref.current = node
+            }
+        },
+        [ref]
+    )
+
+    const handleOpenAutoFocus = React.useCallback(
+        (event: Event) => {
+            onOpenAutoFocus?.(event)
+            if (event.defaultPrevented) return
+            if (typeof document !== "undefined") {
+                requestAnimationFrame(() => {
+                    const root = document.getElementById("root")
+                    if (root && root.contains(document.activeElement)) {
+                        contentRef.current?.focus()
+                    }
+                })
+            }
+        },
+        [onOpenAutoFocus]
+    )
+
+    return (
+        <DrawerPortal>
+            <DrawerOverlay />
+            <DrawerPrimitive.Content
+                ref={setRefs}
+                tabIndex={-1}
+                onOpenAutoFocus={handleOpenAutoFocus}
+                className={cn(
+                    "fixed inset-x-0 bottom-0 z-[500] mt-24 flex h-auto flex-col rounded-t-[10px] border bg-background outline-none",
+                    "after:hidden", // Remove default handle if any
+                    className
+                )}
+                {...props}
+            >
+                <div className="mx-auto mt-4 h-2 w-[100px] rounded-full bg-muted" />
+                {children}
+            </DrawerPrimitive.Content>
+        </DrawerPortal>
+    )
+})
 DrawerContent.displayName = "DrawerContent"
 
 const DrawerHeader = ({

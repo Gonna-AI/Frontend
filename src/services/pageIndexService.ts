@@ -19,6 +19,40 @@ export interface TreeResponse {
 }
 
 class PageIndexService {
+    private getPageIndexHeaders() {
+        if (!PAGEINDEX_API_KEY) {
+            throw new Error('Missing PageIndex API key');
+        }
+        return {
+            'Authorization': `Bearer ${PAGEINDEX_API_KEY}`,
+        };
+    }
+
+    private async fetchTreeStatus(docId: string): Promise<TreeResponse | PageIndexNode[] | null> {
+        const headers = this.getPageIndexHeaders();
+        const urls = [
+            `${PAGEINDEX_API_URL}/doc/${docId}/tree/`,
+            `${PAGEINDEX_API_URL}/doc/${docId}/tree`,
+            `${PAGEINDEX_API_URL}/doc/${docId}`,
+        ];
+
+        let sawNotFound = false;
+        for (const url of urls) {
+            try {
+                const response = await axios.get(url, { headers });
+                return response.data;
+            } catch (err) {
+                if (axios.isAxiosError(err) && err.response?.status === 404) {
+                    sawNotFound = true;
+                    continue;
+                }
+                throw err;
+            }
+        }
+
+        return sawNotFound ? null : null;
+    }
+
     /**
      * Submits a PDF to PageIndex for indexing
      */
@@ -28,7 +62,7 @@ class PageIndexService {
         
         const response = await axios.post(`${PAGEINDEX_API_URL}/doc/`, formData, {
             headers: {
-                'Authorization': `Bearer ${PAGEINDEX_API_KEY}`,
+                ...this.getPageIndexHeaders(),
                 'Content-Type': 'multipart/form-data'
             }
         });
@@ -48,21 +82,27 @@ class PageIndexService {
         const pollInterval = 5000;
 
         for (let attempt = 0; attempt < maxAttempts; attempt++) {
-            const response = await axios.get(`${PAGEINDEX_API_URL}/doc/${docId}/tree`, {
-                headers: {
-                    'Authorization': `Bearer ${PAGEINDEX_API_KEY}`
-                }
-            });
+            const data = await this.fetchTreeStatus(docId);
+            if (!data) {
+                onProgress?.('processing');
+                await new Promise(resolve => setTimeout(resolve, pollInterval));
+                continue;
+            }
 
-            const data: TreeResponse = response.data;
+            const treeResponse = Array.isArray(data) ? {
+                status: 'completed' as const,
+                result: data,
+                doc_id: docId,
+            } : data;
+            const status = treeResponse.status;
             
-            if (data.status === 'completed') {
-                return data.result || [];
-            } else if (data.status === 'failed') {
+            if (status === 'completed') {
+                return treeResponse.result || [];
+            } else if (status === 'failed') {
                 throw new Error('PageIndex processing failed');
             }
             
-            onProgress?.(data.status);
+            onProgress?.(status);
             await new Promise(resolve => setTimeout(resolve, pollInterval));
         }
 
@@ -77,6 +117,9 @@ class PageIndexService {
         treeNodes: PageIndexNode[], 
         history: { role: string; content: string }[] = []
     ): Promise<string> {
+        if (!GROQ_API_KEY) {
+            throw new Error('Missing Groq API key');
+        }
         const flattenedTree = this.flattenTree(treeNodes);
         
         const systemPrompt = `You are a helpful document assistant.
