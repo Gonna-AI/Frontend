@@ -166,7 +166,7 @@ export default function PageIndexView() {
 
         try {
             const history = chatMessages.map(m => ({ role: m.role, content: m.content }));
-            const response = await pageIndexService.chatWithDocument(userMsg, tree, history);
+            const response = await pageIndexService.chatWithDocument(userMsg, tree, history, { docId: docId || undefined });
             setChatMessages(prev => [...prev, { role: 'assistant', content: response }]);
         } catch (err) {
             setChatMessages(prev => [...prev, { role: 'assistant', content: "Sorry, I encountered an error while processing your request." }]);

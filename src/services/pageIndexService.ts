@@ -23,8 +23,15 @@ export interface TreeResponse {
     retrieval_ready?: boolean;
 }
 
+interface OcrPage {
+    page_index: number;
+    markdown: string;
+    images?: string[];
+}
+
 class PageIndexService {
     private treeCache = new Map<string, PageIndexNode[]>();
+    private ocrCache = new Map<string, OcrPage[] | string>();
 
     private getPageIndexHeaders() {
         if (!PAGEINDEX_API_KEY) {
@@ -142,17 +149,61 @@ class PageIndexService {
     }
 
     /**
+     * Fetch OCR results (page/node/raw).
+     */
+    async getOcr(docId: string, format: 'page' | 'node' | 'raw' = 'page'): Promise<OcrPage[] | string> {
+        const cacheKey = `${docId}:${format}`;
+        const cached = this.ocrCache.get(cacheKey);
+        if (cached) return cached;
+
+        const headers = this.getPageIndexHeaders();
+        const response = await axios.get(`${PAGEINDEX_API_URL}/doc/${docId}/`, {
+            headers,
+            params: {
+                type: 'ocr',
+                format,
+            },
+        });
+
+        const data = response.data;
+        const result = (Array.isArray(data) ? data : data?.result ?? data) as OcrPage[] | string;
+        this.ocrCache.set(cacheKey, result);
+        return result;
+    }
+
+    /**
      * Chat with Groq using the flattened tree as context
      */
     async chatWithDocument(
         question: string, 
         treeNodes: PageIndexNode[], 
-        history: { role: string; content: string }[] = []
+        history: { role: string; content: string }[] = [],
+        options?: { docId?: string }
     ): Promise<string> {
         if (!GROQ_API_KEY) {
             throw new Error('Missing Groq API key');
         }
         const flattenedTree = this.flattenTree(treeNodes);
+        const treeTextChars = this.countTextChars(treeNodes);
+        let ocrContext = '';
+
+        if (options?.docId && treeTextChars < 200) {
+            try {
+                const matches = await this.searchOcrPages(options.docId, question, 4);
+                if (matches.length > 0) {
+                    ocrContext = matches
+                        .map(m => `[Page ${m.page_index}] ${m.excerpt}`)
+                        .join('\n');
+                } else {
+                    const raw = await this.getOcr(options.docId, 'raw');
+                    if (typeof raw === 'string' && raw.trim().length > 0) {
+                        ocrContext = raw.substring(0, 4000);
+                    }
+                }
+            } catch {
+                // Ignore OCR fallback errors, continue with tree only
+            }
+        }
         
         const systemPrompt = `You are a helpful document assistant.
 You have been given a structured index tree extracted from a PDF document.
@@ -168,7 +219,7 @@ Rules:
             { role: 'system', content: systemPrompt },
             { 
                 role: 'user', 
-                content: `Here is the indexed structure of the document:\n\n${flattenedTree}\n\nI will now ask questions about this document.` 
+                content: `Here is the indexed structure of the document:\n\n${flattenedTree}\n\n${ocrContext ? `Additional OCR content (page-based):\n${ocrContext}\n\n` : ''}I will now ask questions about this document.` 
             },
             { role: 'assistant', content: "Got it! I've read the full index. Ask me anything." },
             ...history,
@@ -218,6 +269,21 @@ Rules:
             }
         }
         return result;
+    }
+
+    /**
+     * Count total text characters in the tree (summary/text).
+     */
+    private countTextChars(nodes: PageIndexNode[]): number {
+        let count = 0;
+        for (const node of nodes) {
+            const text = node.summary || node.text || '';
+            count += text.length;
+            if (node.nodes && node.nodes.length > 0) {
+                count += this.countTextChars(node.nodes);
+            }
+        }
+        return count;
     }
 
     /**
@@ -278,6 +344,39 @@ Rules:
                     score,
                 };
             });
+    }
+
+    /**
+     * Search OCR page results for a query.
+     */
+    async searchOcrPages(docId: string, query: string, limit: number = 5): Promise<Array<{
+        page_index: number;
+        excerpt: string;
+        score: number;
+    }>> {
+        const terms = query.toLowerCase().split(/\s+/).filter(Boolean);
+        if (terms.length === 0) return [];
+
+        const ocr = await this.getOcr(docId, 'page');
+        if (!Array.isArray(ocr)) return [];
+
+        const scored = ocr.map((page) => {
+            const hay = (page.markdown || '').toLowerCase();
+            let score = 0;
+            for (const term of terms) {
+                if (hay.includes(term)) score += 1;
+            }
+            return { page, score };
+        }).filter(item => item.score > 0);
+
+        return scored
+            .sort((a, b) => b.score - a.score)
+            .slice(0, limit)
+            .map(({ page, score }) => ({
+                page_index: page.page_index,
+                excerpt: page.markdown.length > 400 ? `${page.markdown.substring(0, 400)}...` : page.markdown,
+                score,
+            }));
     }
 
     /**

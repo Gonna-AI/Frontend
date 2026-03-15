@@ -202,6 +202,7 @@ class RAGService {
         kbId: string,
         userId: string,
         onProgress?: (progress: ProcessingProgress) => void,
+        pageIndexDocId?: string,
     ): Promise<UploadedDocument | null> {
         const fileType = file.name.split('.').pop()?.toLowerCase() || 'txt';
         let documentRecord: UploadedDocument | null = null;
@@ -233,6 +234,7 @@ class RAGService {
                     file_size: file.size,
                     storage_path: storagePath,
                     status: 'processing',
+                    ...(pageIndexDocId ? { pageindex_doc_id: pageIndexDocId } : {}),
                 })
                 .select()
                 .single();

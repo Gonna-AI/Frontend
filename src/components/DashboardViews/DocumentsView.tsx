@@ -195,6 +195,7 @@ export default function DocumentsView({ isDark = true }: { isDark?: boolean }) {
     const [pageIndexDocIdByDocId, setPageIndexDocIdByDocId] = useState<Record<string, string>>({});
     const [pageIndexLoadingByDocId, setPageIndexLoadingByDocId] = useState<Record<string, boolean>>({});
     const [pageIndexErrorByDocId, setPageIndexErrorByDocId] = useState<Record<string, string>>({});
+    const [currentPageIndexDocId, setCurrentPageIndexDocId] = useState<string | null>(null);
     const [chatMessages, setChatMessages] = useState<{ role: string; content: string }[]>([]);
     const [chatInput, setChatInput] = useState('');
     const [isChatting, setIsChatting] = useState(false);
@@ -299,6 +300,7 @@ export default function DocumentsView({ isDark = true }: { isDark?: boolean }) {
                 );
 
                 setPageIndexTree(result);
+                setCurrentPageIndexDocId(docId);
                 setIntelligenceTab('tree');
 
                 // Initial AI greeting
@@ -321,7 +323,8 @@ export default function DocumentsView({ isDark = true }: { isDark?: boolean }) {
                     selectedFile,
                     kbId,
                     user.id,
-                    () => { } // Silent progress for standard RAG
+                    () => { }, // Silent progress for standard RAG
+                    docId
                 ).then(async (ragDoc) => {
                     if (ragDoc) {
                         await ragService.setPageIndexDocId(ragDoc.id, docId);
@@ -356,7 +359,12 @@ export default function DocumentsView({ isDark = true }: { isDark?: boolean }) {
 
         try {
             const history = chatMessages.map(m => ({ role: m.role, content: m.content }));
-            const response = await pageIndexService.chatWithDocument(userMsg, pageIndexTree, history);
+            const response = await pageIndexService.chatWithDocument(
+                userMsg,
+                pageIndexTree,
+                history,
+                { docId: currentPageIndexDocId || undefined }
+            );
             setChatMessages(prev => [...prev, { role: 'assistant', content: response }]);
         } catch (err) {
             setChatMessages(prev => [...prev, { role: 'assistant', content: "Sorry, I encountered an error while processing your request." }]);

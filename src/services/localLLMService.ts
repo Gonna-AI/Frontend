@@ -692,6 +692,21 @@ class GroqLLMService {
               });
             }
 
+            const ocrMatches = await pageIndexService.searchOcrPages(pageIndexDoc.pageindex_doc_id, query, 5);
+            if (ocrMatches.length > 0) {
+              return JSON.stringify({
+                source: 'pageindex_ocr',
+                document: {
+                  id: pageIndexDoc.id,
+                  name: pageIndexDoc.file_name,
+                  pageindex_doc_id: pageIndexDoc.pageindex_doc_id,
+                },
+                results: ocrMatches.map((m, i) => ({ rank: i + 1, ...m })),
+                total: ocrMatches.length,
+                note: 'Tree had no matches; using OCR content.',
+              });
+            }
+
             return JSON.stringify({
               source: 'pageindex',
               document: {
@@ -701,7 +716,7 @@ class GroqLLMService {
               },
               results: [],
               total: 0,
-              note: 'No matching nodes found in PageIndex.',
+              note: 'No matching nodes found in PageIndex or OCR.',
             });
           } else if (documentName) {
             pageIndexNote = 'No PageIndex document found for the requested name.';
