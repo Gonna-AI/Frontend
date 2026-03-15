@@ -867,8 +867,10 @@ export default function DocumentsView({ isDark = true }: { isDark?: boolean }) {
                                     </div>
                                 ))}
                             </div>
-                        )
-                        }
+                        )}
                     </div>
-                    );
+                </div>
+            </div>
+        </div>
+    );
 }
