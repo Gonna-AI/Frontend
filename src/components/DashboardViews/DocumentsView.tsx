@@ -175,6 +175,10 @@ export default function DocumentsView({ isDark = true }: { isDark?: boolean }) {
 
     // ─── Document Submission ───────────────────────────────────────
     const handleSubmit = async () => {
+        if (typeof document !== 'undefined') {
+            const activeEl = document.activeElement as HTMLElement | null;
+            activeEl?.blur();
+        }
         if (!user?.id || !kbId) return;
 
         if (uploadMode === 'text') {
