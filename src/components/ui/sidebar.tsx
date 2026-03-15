@@ -199,7 +199,7 @@ const Sidebar = React.forwardRef<
 
     if (isMobile) {
       return (
-        <Drawer open={openMobile} onOpenChange={setOpenMobile}>
+        <Drawer open={openMobile} onOpenChange={setOpenMobile} shouldScaleBackground={false}>
         <DrawerContent
           data-sidebar="sidebar"
           data-mobile="true"
@@ -221,7 +221,7 @@ const Sidebar = React.forwardRef<
           >
             <DrawerTitle className="sr-only">Sidebar</DrawerTitle>
             <DrawerDescription className="sr-only">Displays the mobile sidebar.</DrawerDescription>
-            <div className="flex h-full w-full flex-col overflow-y-auto max-h-[55vh]">
+            <div className="flex h-full w-full flex-col overflow-y-auto max-h-[70dvh]">
               {children}
             </div>
           </DrawerContent>
