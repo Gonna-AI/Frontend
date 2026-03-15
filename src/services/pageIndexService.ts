@@ -6,9 +6,13 @@ const PAGEINDEX_API_KEY = import.meta.env.VITE_PAGEINDEX_API_KEY;
 const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY;
 
 export interface PageIndexNode {
-    title: string;
-    page_index: number;
-    text: string;
+    title?: string;
+    node_id?: string;
+    page_index?: number;
+    page_number?: number;
+    line_num?: number;
+    summary?: string;
+    text?: string;
     nodes?: PageIndexNode[];
 }
 
@@ -16,6 +20,7 @@ export interface TreeResponse {
     status: 'completed' | 'processing' | 'failed' | 'queued';
     result?: PageIndexNode[];
     doc_id: string;
+    retrieval_ready?: boolean;
 }
 
 class PageIndexService {
@@ -24,46 +29,40 @@ class PageIndexService {
             throw new Error('Missing PageIndex API key');
         }
         return {
-            'Authorization': `Bearer ${PAGEINDEX_API_KEY}`,
+            // PageIndex expects api_key header per docs
+            'api_key': PAGEINDEX_API_KEY,
         };
     }
 
-    private async fetchTreeStatus(docId: string): Promise<TreeResponse | PageIndexNode[] | null> {
+    private async fetchTreeStatus(docId: string): Promise<TreeResponse> {
         const headers = this.getPageIndexHeaders();
-        const urls = [
-            `${PAGEINDEX_API_URL}/doc/${docId}`,
-            `${PAGEINDEX_API_URL}/doc/${docId}/tree/`,
-            `${PAGEINDEX_API_URL}/doc/${docId}/tree`,
-        ];
+        const response = await axios.get(`${PAGEINDEX_API_URL}/doc/${docId}/`, {
+            headers,
+            params: {
+                type: 'tree',
+                summary: true,
+            },
+        });
 
-        let sawNotFound = false;
-        for (const url of urls) {
-            try {
-                const response = await axios.get(url, { headers });
-                const data = response.data;
-                if (Array.isArray(data)) {
-                    return data;
-                }
-                if (data?.result) {
-                    return data;
-                }
-                if (data?.status && data.status !== 'completed') {
-                    return data;
-                }
-                if (data?.status === 'completed' && !data?.result) {
-                    continue;
-                }
-                return data;
-            } catch (err) {
-                if (axios.isAxiosError(err) && err.response?.status === 404) {
-                    sawNotFound = true;
-                    continue;
-                }
-                throw err;
-            }
+        const data = response.data;
+        if (Array.isArray(data)) {
+            return {
+                doc_id: docId,
+                status: 'completed',
+                result: data,
+                retrieval_ready: true,
+            };
         }
 
-        return sawNotFound ? null : null;
+        if (data?.status) {
+            return data as TreeResponse;
+        }
+
+        return {
+            doc_id: docId,
+            status: data?.result ? 'completed' : 'processing',
+            result: data?.result,
+        } as TreeResponse;
     }
 
     /**
@@ -95,27 +94,17 @@ class PageIndexService {
         const pollInterval = 5000;
 
         for (let attempt = 0; attempt < maxAttempts; attempt++) {
-            const data = await this.fetchTreeStatus(docId);
-            if (!data) {
-                onProgress?.('processing');
-                await new Promise(resolve => setTimeout(resolve, pollInterval));
-                continue;
-            }
-
-            const treeResponse = Array.isArray(data) ? {
-                status: 'completed' as const,
-                result: data,
-                doc_id: docId,
-            } : data;
+            const treeResponse = await this.fetchTreeStatus(docId);
             const status = treeResponse.status;
             
-            if (status === 'completed') {
+            if (status === 'completed' && treeResponse.result) {
                 return treeResponse.result || [];
             } else if (status === 'failed') {
                 throw new Error('PageIndex processing failed');
             }
             
-            onProgress?.(status);
+            const readyHint = treeResponse.retrieval_ready ? ' (retrieval ready)' : '';
+            onProgress?.(`${status}${readyHint}`);
             await new Promise(resolve => setTimeout(resolve, pollInterval));
         }
 
@@ -178,8 +167,19 @@ Rules:
         let result = '';
         for (const node of nodes) {
             const indent = '  '.repeat(depth);
-            const excerpt = node.text ? (node.text.length > 300 ? node.text.substring(0, 300) + '...' : node.text) : '';
-            result += `${indent}[Page ${node.page_index}] ${node.title}\n`;
+            const excerptSource = node.summary || node.text || '';
+            const excerpt = excerptSource
+                ? (excerptSource.length > 300 ? excerptSource.substring(0, 300) + '...' : excerptSource)
+                : '';
+            const pageLabel = typeof node.page_index === 'number'
+                ? `Page ${node.page_index}`
+                : typeof node.page_number === 'number'
+                    ? `Page ${node.page_number}`
+                    : typeof node.line_num === 'number'
+                        ? `Line ${node.line_num}`
+                        : 'Location ?';
+            const title = node.title || node.node_id || 'Untitled';
+            result += `${indent}[${pageLabel}] ${title}\n`;
             if (excerpt) {
                 result += `${indent}  → ${excerpt}\n`;
             }

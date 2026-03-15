@@ -63,6 +63,8 @@ function getMaxPageIndex(nodes: PageIndexNode[]): number {
     for (const node of nodes) {
         if (typeof node.page_index === 'number') {
             maxPage = Math.max(maxPage, node.page_index);
+        } else if (typeof node.page_number === 'number') {
+            maxPage = Math.max(maxPage, node.page_number);
         }
         if (node.nodes && node.nodes.length > 0) {
             maxPage = Math.max(maxPage, getMaxPageIndex(node.nodes));
@@ -78,6 +80,15 @@ const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 const TreeNodeNode = ({ node, depth = 0 }: { node: PageIndexNode; depth?: number }) => {
     const [isExpanded, setIsExpanded] = useState(depth < 1);
     const hasChildren = node.nodes && node.nodes.length > 0;
+    const pageLabel = typeof node.page_index === 'number'
+        ? `P${node.page_index}`
+        : typeof node.page_number === 'number'
+            ? `P${node.page_number}`
+            : typeof node.line_num === 'number'
+                ? `L${node.line_num}`
+                : null;
+    const summaryText = node.summary || node.text;
+    const titleText = node.title || node.node_id || "Untitled Section";
 
     return (
         <div className="select-none">
@@ -97,16 +108,22 @@ const TreeNodeNode = ({ node, depth = 0 }: { node: PageIndexNode; depth?: number
                 </div>
                 <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                        <span className="text-[10px] font-mono text-[#FFB286] bg-[#FF8A5B]/10 px-1.5 py-0.5 rounded">
-                            P{node.page_index}
-                        </span>
+                        {pageLabel ? (
+                            <span className="text-[10px] font-mono text-[#FFB286] bg-[#FF8A5B]/10 px-1.5 py-0.5 rounded">
+                                {pageLabel}
+                            </span>
+                        ) : node.node_id ? (
+                            <span className="text-[10px] font-mono text-white/40 bg-white/5 px-1.5 py-0.5 rounded">
+                                ID
+                            </span>
+                        ) : null}
                         <h4 className="text-sm font-medium text-white/90 truncate group-hover:text-white">
-                            {node.title || "Untitled Section"}
+                            {titleText}
                         </h4>
                     </div>
-                    {node.text && isExpanded && (
+                    {summaryText && isExpanded && (
                         <p className="text-xs text-white/50 mt-1 line-clamp-2 italic leading-relaxed">
-                            {node.text}
+                            {summaryText}
                         </p>
                     )}
                 </div>
@@ -192,6 +209,7 @@ export default function DocumentsView({ isDark = true }: { isDark?: boolean }) {
             activeEl?.blur();
         }
         if (!user?.id || !kbId) return;
+        const clearProgressSoon = () => setTimeout(() => setProcessingProgress(null), 3000);
 
         if (uploadMode === 'text') {
             if (!textTitle.trim() || !textContent.trim()) {
@@ -219,6 +237,13 @@ export default function DocumentsView({ isDark = true }: { isDark?: boolean }) {
                 setTextTitle('');
                 setTextContent('');
                 await loadDocuments();
+                setProcessingProgress({
+                    stage: 'done',
+                    current: 1,
+                    total: 1,
+                    message: 'Saved to Knowledge Base',
+                });
+                clearProgressSoon();
             }
         } else {
             // PDF / PageIndex Mode
@@ -253,31 +278,30 @@ export default function DocumentsView({ isDark = true }: { isDark?: boolean }) {
                     { role: 'assistant', content: `Indexed **${selectedFile.name}**. I've extracted ${pageIndexService.countNodes(result)} structured points. Ask me anything about it!` }
                 ]);
 
-                // Also save to standard Knowledge Base for voice agents
-                // For now, we'll extract a sample for standard RAG or just keep the PageIndex tree
-                // In a real app, we'd store the pageindex_id in the DB.
-
-                // Let's create a backup record in Supabase so it shows in the list
-                const ragDoc = await ragService.processDocument(
-                    selectedFile,
-                    kbId,
-                    user.id,
-                    () => { } // Silent progress for standard RAG
-                );
-                if (ragDoc) {
-                    setPageIndexByDocId(prev => ({ ...prev, [ragDoc.id]: result }));
-                    setPageIndexDocIdByDocId(prev => ({ ...prev, [ragDoc.id]: docId }));
-                }
-
                 setSelectedFile(null);
                 setTextTitle('');
-                await loadDocuments();
-
                 setProcessingProgress({
                     stage: 'done',
                     current: 1,
                     total: 1,
-                    message: 'Successfully indexed!',
+                    message: `Indexed ${pageIndexService.countNodes(result)} nodes successfully`,
+                });
+                clearProgressSoon();
+
+                // Also save to standard Knowledge Base for voice agents (non-blocking)
+                ragService.processDocument(
+                    selectedFile,
+                    kbId,
+                    user.id,
+                    () => { } // Silent progress for standard RAG
+                ).then((ragDoc) => {
+                    if (ragDoc) {
+                        setPageIndexByDocId(prev => ({ ...prev, [ragDoc.id]: result }));
+                        setPageIndexDocIdByDocId(prev => ({ ...prev, [ragDoc.id]: docId }));
+                    }
+                    loadDocuments();
+                }).catch((err) => {
+                    console.error('Failed to store backup RAG doc:', err);
                 });
             } catch (err: any) {
                 setProcessingProgress({
@@ -286,10 +310,9 @@ export default function DocumentsView({ isDark = true }: { isDark?: boolean }) {
                     total: 1,
                     message: err.message || 'Indexing failed',
                 });
+                clearProgressSoon();
             }
         }
-
-        setTimeout(() => setProcessingProgress(null), 3000);
     };
 
     // ─── Chat Logic ──────────────────────────────────────────────

@@ -26,6 +26,15 @@ import log from '../../utils/logger';
 const TreeNode = ({ node, depth = 0 }: { node: PageIndexNode; depth?: number }) => {
     const [isExpanded, setIsExpanded] = useState(depth < 1);
     const hasChildren = node.nodes && node.nodes.length > 0;
+    const pageLabel = typeof node.page_index === 'number'
+        ? `P${node.page_index}`
+        : typeof node.page_number === 'number'
+            ? `P${node.page_number}`
+            : typeof node.line_num === 'number'
+                ? `L${node.line_num}`
+                : null;
+    const summaryText = node.summary || node.text;
+    const titleText = node.title || node.node_id || "Untitled Section";
 
     return (
         <div className="select-none">
@@ -45,16 +54,22 @@ const TreeNode = ({ node, depth = 0 }: { node: PageIndexNode; depth?: number }) 
                 </div>
                 <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                        <span className="text-[10px] font-mono text-[#FFB286] bg-[#FF8A5B]/10 px-1.5 py-0.5 rounded">
-                            P{node.page_index}
-                        </span>
+                        {pageLabel ? (
+                            <span className="text-[10px] font-mono text-[#FFB286] bg-[#FF8A5B]/10 px-1.5 py-0.5 rounded">
+                                {pageLabel}
+                            </span>
+                        ) : node.node_id ? (
+                            <span className="text-[10px] font-mono text-white/40 bg-white/5 px-1.5 py-0.5 rounded">
+                                ID
+                            </span>
+                        ) : null}
                         <h4 className="text-sm font-medium text-white/90 truncate group-hover:text-white">
-                            {node.title || "Untitled Section"}
+                            {titleText}
                         </h4>
                     </div>
-                    {node.text && isExpanded && (
+                    {summaryText && isExpanded && (
                         <p className="text-xs text-white/50 mt-1 line-clamp-2 italic leading-relaxed">
-                            {node.text}
+                            {summaryText}
                         </p>
                     )}
                 </div>
