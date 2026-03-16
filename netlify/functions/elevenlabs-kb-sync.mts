@@ -65,11 +65,10 @@ export default async (req: Request, _context: Context) => {
     );
   }
 
+  // Never use VITE_ prefix for service role key — Vite would inline it into the client bundle
   const supabaseServiceKey =
     Netlify.env.get("SUPABASE_SERVICE_ROLE_KEY") ||
-    Netlify.env.get("VITE_SUPABASE_SERVICE_ROLE_KEY") ||
-    process.env.SUPABASE_SERVICE_ROLE_KEY ||
-    process.env.VITE_SUPABASE_SERVICE_ROLE_KEY;
+    process.env.SUPABASE_SERVICE_ROLE_KEY;
 
   if (!supabaseServiceKey) {
     return new Response(
