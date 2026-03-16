@@ -22,7 +22,6 @@ import MonitorView from '../components/DashboardViews/MonitorView';
 import IntegrationView from '../components/DashboardViews/IntegrationView';
 import CustomerGraphView from '../components/DashboardViews/CustomerGraphView';
 import DocumentsView from '../components/DashboardViews/DocumentsView';
-import AnalyticsView from '../components/DashboardViews/AnalyticsView';
 import SettingsView from '../components/DashboardViews/SettingsView';
 import ActivityLogView from '../components/DashboardViews/ActivityLogView';
 import WebhooksView from '../components/DashboardViews/WebhooksView';
@@ -72,7 +71,7 @@ function DemoDashboardContent() {
     if (action === 'ai') {
       setActiveTab('onboarding');
     } else if (action === 'manual') {
-      setActiveTab('knowledge');
+      setActiveTab('system_prompt');
     }
   };
 
@@ -82,7 +81,6 @@ function DemoDashboardContent() {
       monitor: t('dashboard.tab.monitor'),
       history: t('history.title'),
       customer_graph: t('sidebar.customerGraph'),
-      knowledge: t('config.title'),
       system_prompt: t('sidebar.systemPrompt'),
       rescue_playbooks: t('sidebar.rescuePlaybooks'),
 
@@ -203,7 +201,6 @@ function DemoDashboardContent() {
                   {activeTab === 'customer_graph' && <CustomerGraphView isDark={isDark} />}
 
                   {/* Knowledge Base Sections */}
-                  {activeTab === 'knowledge' && <KnowledgeBase isDark={isDark} activeSection="prompt" />}
                   {activeTab === 'system_prompt' && <KnowledgeBase isDark={isDark} activeSection="prompt" />}
                   {activeTab === 'rescue_playbooks' && <KnowledgeBase isDark={isDark} activeSection="rescue_playbooks" />}
 
@@ -221,7 +218,6 @@ function DemoDashboardContent() {
                   {activeTab === 'keys' && <KeysView isDark={isDark} hasAccess={hasAccess} />}
                   {activeTab === 'team' && <TeamView isDark={isDark} />}
                   {activeTab === 'integrations' && <IntegrationView isDark={isDark} />}
-                  {activeTab === 'analytics' && <AnalyticsView isDark={isDark} />}
                   {activeTab === 'activity_log' && <ActivityLogView isDark={isDark} />}
                   {activeTab === 'webhooks' && <WebhooksView isDark={isDark} />}
                   {activeTab === 'settings' && <SettingsView isDark={isDark} />}

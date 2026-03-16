@@ -9,7 +9,6 @@ import {
     ListOrdered,
     Scroll,
     Tags,
-    Brain,
     Sparkles,
     Terminal,
     CreditCard,
@@ -23,7 +22,6 @@ import {
     Wand2,
     ShieldCheck,
     FileText,
-    TrendingUp,
     Activity,
     Webhook,
     Settings,
@@ -159,17 +157,6 @@ export function AppSidebar({ activeTab, setActiveTab, hasAccess = false, ...prop
                             </SidebarMenuItem>
                             <SidebarMenuItem>
                                 <SidebarMenuButton
-                                    isActive={activeTab === 'knowledge'}
-                                    onClick={() => handleTabClick('knowledge')}
-                                    tooltip={t('dashboard.tab.config')}
-                                    className={menuButtonClass}
-                                >
-                                    <Brain />
-                                    <span>{t('dashboard.tab.config')}</span>
-                                </SidebarMenuButton>
-                            </SidebarMenuItem>
-                            <SidebarMenuItem>
-                                <SidebarMenuButton
                                     isActive={activeTab === 'history'}
                                     onClick={() => handleTabClick('history')}
                                     tooltip={t('dashboard.tab.history')}
@@ -188,17 +175,6 @@ export function AppSidebar({ activeTab, setActiveTab, hasAccess = false, ...prop
                                 >
                                     <Network />
                                     <span>{t('sidebar.customerGraph')}</span>
-                                </SidebarMenuButton>
-                            </SidebarMenuItem>
-                            <SidebarMenuItem>
-                                <SidebarMenuButton
-                                    isActive={activeTab === 'analytics'}
-                                    onClick={() => handleTabClick('analytics')}
-                                    tooltip={t('sidebar.analytics')}
-                                    className={menuButtonClass}
-                                >
-                                    <TrendingUp />
-                                    <span>{t('sidebar.analytics')}</span>
                                 </SidebarMenuButton>
                             </SidebarMenuItem>
                         </SidebarMenu>
