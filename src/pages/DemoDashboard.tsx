@@ -71,7 +71,7 @@ function DemoDashboardContent() {
     if (action === 'ai') {
       setActiveTab('onboarding');
     } else if (action === 'manual') {
-      setActiveTab('knowledge');
+      setActiveTab('system_prompt');
     }
   };
 
@@ -81,7 +81,6 @@ function DemoDashboardContent() {
       monitor: t('dashboard.tab.monitor'),
       history: t('history.title'),
       customer_graph: t('sidebar.customerGraph'),
-      knowledge: t('config.title'),
       system_prompt: t('sidebar.systemPrompt'),
       rescue_playbooks: t('sidebar.rescuePlaybooks'),
 
@@ -202,7 +201,6 @@ function DemoDashboardContent() {
                   {activeTab === 'customer_graph' && <CustomerGraphView isDark={isDark} />}
 
                   {/* Knowledge Base Sections */}
-                  {activeTab === 'knowledge' && <KnowledgeBase isDark={isDark} activeSection="prompt" />}
                   {activeTab === 'system_prompt' && <KnowledgeBase isDark={isDark} activeSection="prompt" />}
                   {activeTab === 'rescue_playbooks' && <KnowledgeBase isDark={isDark} activeSection="rescue_playbooks" />}
 

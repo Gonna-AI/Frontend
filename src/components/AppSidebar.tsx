@@ -9,7 +9,6 @@ import {
     ListOrdered,
     Scroll,
     Tags,
-    Brain,
     Sparkles,
     Terminal,
     CreditCard,
@@ -154,17 +153,6 @@ export function AppSidebar({ activeTab, setActiveTab, hasAccess = false, ...prop
                                 >
                                     <Phone />
                                     <span>{t('dashboard.tab.monitor')}</span>
-                                </SidebarMenuButton>
-                            </SidebarMenuItem>
-                            <SidebarMenuItem>
-                                <SidebarMenuButton
-                                    isActive={activeTab === 'knowledge'}
-                                    onClick={() => handleTabClick('knowledge')}
-                                    tooltip={t('dashboard.tab.config')}
-                                    className={menuButtonClass}
-                                >
-                                    <Brain />
-                                    <span>{t('dashboard.tab.config')}</span>
                                 </SidebarMenuButton>
                             </SidebarMenuItem>
                             <SidebarMenuItem>
