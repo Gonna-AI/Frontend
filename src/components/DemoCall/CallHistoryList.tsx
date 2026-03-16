@@ -365,6 +365,7 @@ export default function CallHistoryList({ isDark = true, showFilters = true }: C
                                   )}
 
                                   {/* AI Suggestions */}
+                                  {item.summary.suggestions && item.summary.suggestions.length > 0 && (
                                   <div>
                                     <h4 className={cn("text-xs uppercase mb-2 font-semibold tracking-wider flex items-center gap-2", isDark ? "text-white/40" : "text-black/40")}>
                                       <TrendingUp className="w-3 h-3" /> AI Suggestions
@@ -374,22 +375,22 @@ export default function CallHistoryList({ isDark = true, showFilters = true }: C
                                       isDark ? "bg-black/20 border-white/10" : "bg-white border-black/5"
                                     )}>
                                       <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/10 blur-[40px] rounded-full pointer-events-none" />
-                                      <div className="relative z-10 space-y-4"> {/* Increased spacing */}
-                                        <div className={cn("flex items-start gap-3 text-sm min-w-0", isDark ? "text-white/70" : "text-gray-600")}>
-                                          <div className="w-6 h-6 rounded-lg bg-purple-500/10 flex items-center justify-center flex-shrink-0 text-purple-400">
-                                            <Smile className="w-3 h-3" />
+                                      <div className="relative z-10 space-y-4">
+                                        {item.summary.suggestions.map((suggestion, i) => (
+                                          <div key={i} className={cn("flex items-start gap-3 text-sm min-w-0", isDark ? "text-white/70" : "text-gray-600")}>
+                                            <div className={cn(
+                                              "w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0",
+                                              i % 2 === 0 ? "bg-purple-500/10 text-purple-400" : "bg-blue-500/10 text-blue-400"
+                                            )}>
+                                              {i % 2 === 0 ? <Smile className="w-3 h-3" /> : <ListTodo className="w-3 h-3" />}
+                                            </div>
+                                            <p className="flex-1 break-words">{suggestion}</p>
                                           </div>
-                                          <p className="flex-1 break-words">Consider offering a follow-up consultation to address the client's specific concerns mentioned.</p>
-                                        </div>
-                                        <div className={cn("flex items-start gap-3 text-sm min-w-0", isDark ? "text-white/70" : "text-gray-600")}>
-                                          <div className="w-6 h-6 rounded-lg bg-blue-500/10 flex items-center justify-center flex-shrink-0 text-blue-400">
-                                            <ListTodo className="w-3 h-3" />
-                                          </div>
-                                          <p className="flex-1 break-words">Update the user's profile with the new contact preferences.</p>
-                                        </div>
+                                        ))}
                                       </div>
                                     </div>
                                   </div>
+                                  )}
                                 </div>
 
                                 {/* Action Items - Moved to full width or separate grid if needed, keeping here for flow */}

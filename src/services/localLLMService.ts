@@ -903,6 +903,79 @@ class GroqLLMService {
 
 
   /**
+   * Extract caller name from transcript using a forced Groq tool call.
+   * No regex, no fallback — if the model can't find a name, returns null.
+   */
+  async extractCallerName(messages: CallMessage[]): Promise<string | null> {
+    if (!this.groqAvailable) return null;
+
+    const settings = getCurrentGroqSettings();
+    const transcript = messages
+      .map(m => `${m.speaker === 'agent' ? 'Agent' : 'Caller'}: ${m.text}`)
+      .join('\n');
+
+    const callerInfoTool = {
+      type: 'function' as const,
+      function: {
+        name: 'extract_caller_info',
+        description: 'Extract the caller\'s name from the conversation transcript.',
+        parameters: {
+          type: 'object',
+          properties: {
+            caller_name: {
+              type: 'string',
+              description:
+                'Full name of the caller exactly as they stated it. Return null if the caller never explicitly introduced themselves by name.',
+            },
+          },
+          required: ['caller_name'],
+        },
+      },
+    };
+
+    try {
+      const response = await proxyJSON<GroqResponse>(
+        ProxyRoutes.COMPLETIONS,
+        {
+          model: settings.model,
+          messages: [
+            {
+              role: 'system',
+              content:
+                'You extract the caller\'s name from a conversation transcript. ' +
+                'Only return a name if the caller explicitly stated it (e.g. "my name is …", "I\'m …", "this is …"). ' +
+                'Do NOT infer names from greetings like "good afternoon" or generic words. ' +
+                'If the caller never introduced themselves, set caller_name to null.',
+            },
+            {
+              role: 'user',
+              content: `Extract the caller's name from this transcript:\n\n${transcript}`,
+            },
+          ],
+          tools: [callerInfoTool],
+          tool_choice: { type: 'function', function: { name: 'extract_caller_info' } },
+          temperature: 0,
+          max_tokens: 64,
+        },
+        { timeout: 10000 }
+      );
+
+      const toolCall = response?.choices?.[0]?.message?.tool_calls?.[0];
+      if (toolCall?.function?.name === 'extract_caller_info') {
+        const args = JSON.parse(toolCall.function.arguments) as { caller_name?: string | null };
+        const name = args.caller_name;
+        if (name && name !== 'null' && name.toLowerCase() !== 'unknown' && name.trim().length > 1) {
+          return name.trim();
+        }
+      }
+    } catch (e) {
+      log.warn('⚠️ extractCallerName tool call failed:', e);
+    }
+
+    return null;
+  }
+
+  /**
    * Generate comprehensive call summary using function calling approach
    * Based on Groq API function calling pattern for structured data extraction
    */
@@ -957,34 +1030,11 @@ class GroqLLMService {
     const categoryHint = category ? `\nCategory Hint: ${category.name} (${category.id})` : '';
     const priorityHint = priority ? `\nPriority Hint: ${priority}` : '';
 
-    // Try to find caller name from extracted fields first
-    let callerName = extractedFields.find(f => f.id === 'name')?.value;
-
-    // If no name in fields, try to extract from messages
-    if (!callerName) {
-      for (const msg of messages) {
-        if (msg.speaker === 'user') {
-          // Look for name patterns - enhanced for all cultures
-          const patterns = [
-            /(?:my name is|i'?m|this is|i am)\s+([A-Za-z][A-Za-z]+(?:\s+[A-Za-z][A-Za-z]+)?)/i,
-            /^([A-Za-z][A-Za-z]+(?:\s+[A-Za-z][A-Za-z]+)?)\s+(?:here|calling|speaking)/i,
-            /(?:im|its|it's)\s+([A-Za-z][A-Za-z]+(?:\s+[A-Za-z][A-Za-z]+)?)/i,
-          ];
-          for (const pattern of patterns) {
-            const match = msg.text.match(pattern);
-            if (match?.[1] && match[1].length > 2) {
-              const name = match[1].trim();
-              const commonWords = ['hello', 'hi', 'hey', 'yes', 'no', 'okay', 'sure', 'thanks', 'thank', 'you', 'the', 'help', 'need', 'want', 'thing', 'calling', 'good', 'fine', 'here'];
-              if (!commonWords.includes(name.toLowerCase())) {
-                callerName = name;
-                break;
-              }
-            }
-          }
-          if (callerName) break;
-        }
-      }
-    }
+    // Extract caller name: extracted fields first, then Groq tool call — no regex
+    const callerName =
+      extractedFields.find(f => f.id === 'name')?.value?.trim() ||
+      (await this.extractCallerName(messages)) ||
+      null;
 
     // Enhanced prompt for detailed summary with comprehensive analysis
     const prompt = `Analyze this call transcript thoroughly and provide a comprehensive summary.

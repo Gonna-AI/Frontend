@@ -853,73 +853,17 @@ export function DemoCallProvider({ children, initialAgentId }: { children: React
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, [currentCall?.id, currentCall?.status, cachedToken]);
 
-  // Helper to find caller name from various sources
+  // Helper to find caller name — extracted fields only, no regex.
+  // Actual name extraction from the transcript is handled by Groq tool call in summarizeCall.
   const findCallerName = (call: CallSession): string => {
-    // First try extracted fields (most reliable)
     const nameField = call.extractedFields.find(f =>
       f.id === 'name' ||
       f.label.toLowerCase().includes('name') ||
       f.label.toLowerCase().includes('caller')
     );
     if (nameField?.value && nameField.value.trim() && nameField.value !== 'Unknown Caller') {
-      console.log('✅ Found caller name from extracted fields:', nameField.value);
       return nameField.value.trim();
     }
-
-    // Common words to filter out as false positives
-    const commonWords = ['hello', 'hi', 'hey', 'yes', 'no', 'okay', 'sure', 'thanks', 'thank', 'you', 'the', 'a', 'an', 'how', 'can', 'help', 'may', 'please', 'need', 'want', 'have', 'for', 'reaching', 'out', 'your', 'this', 'that', 'with', 'about', 'today', 'there', 'got', 'it'];
-
-    // Try to find name in messages where user introduced themselves
-    const userMessages = call.messages.filter(m => m.speaker === 'user');
-    for (const msg of userMessages) {
-      // Common patterns: "My name is X", "I'm X", "This is X", "I am X", "Hi, I'm X", "Hello, this is X"
-      const patterns = [
-        /(?:my name is|i'?m|this is|i am|call me|hi,?\s*i'?m|hello,?\s*this is)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)/i,
-        /^([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)\s+(?:here|calling|speaking)/i,
-        /(?:hi|hello),?\s*([A-Z][a-z]+)/i,
-        // Pattern for just stating name directly like "Animesh Mishra" or "Animesh Mishra 9650848339"
-        /^([A-Z][a-z]+\s+[A-Z][a-z]+)(?:\s+\d+)?$/i,
-        // Pattern for "im Animesh" or "its Animesh"
-        /(?:im|its|it's)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)/i,
-      ];
-
-      for (const pattern of patterns) {
-        const match = msg.text.match(pattern);
-        if (match?.[1]) {
-          const name = match[1].trim();
-          // Filter out common false positives
-          if (!commonWords.includes(name.toLowerCase()) && name.length > 2) {
-            console.log('✅ Found caller name from message pattern:', name);
-            return name;
-          }
-        }
-      }
-    }
-
-    // Try agent messages that might reference the caller's name
-    const agentMessages = call.messages.filter(m => m.speaker === 'agent');
-    for (const msg of agentMessages) {
-      const patterns = [
-        /(?:hi|hello),?\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)/i,
-        /(?:thanks|thank you),?\s+([A-Z][a-z]+)/i,
-        // Pattern for "Mr./Ms./Mrs. X" - common in formal responses
-        /(?:Mr\.?|Ms\.?|Mrs\.?)\s+([A-Z][a-z]+)/i,
-        // Pattern for "Hello, Mr. Mishra" style
-        /(?:hello|hi),?\s+(?:Mr\.?|Ms\.?|Mrs\.?)\s+([A-Z][a-z]+)/i,
-      ];
-      for (const pattern of patterns) {
-        const match = msg.text.match(pattern);
-        if (match?.[1]) {
-          const name = match[1].trim();
-          if (!commonWords.includes(name.toLowerCase()) && name.length > 2) {
-            console.log('✅ Found caller name from agent message:', name);
-            return name;
-          }
-        }
-      }
-    }
-
-    console.log('⚠️ Could not find caller name, using "Unknown Caller"');
     return 'Unknown Caller';
   };
 
@@ -1056,7 +1000,8 @@ export function DemoCallProvider({ children, initialAgentId }: { children: React
               finalSummary = summaryResponse.summary;
               tags = summaryResponse.tags;
 
-              if (summaryResponse.callerName && callerName === 'Unknown Caller') {
+              // Always prefer the AI-extracted name (Groq tool call result)
+              if (summaryResponse.callerName && summaryResponse.callerName !== 'Unknown Caller') {
                 callerName = summaryResponse.callerName;
               }
               console.log('✅ AI summary generated successfully');
@@ -1068,10 +1013,6 @@ export function DemoCallProvider({ children, initialAgentId }: { children: React
               ...placeholderSummary,
               notes: `Summary generation failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
             };
-          }
-
-          if (callerName === 'Unknown Caller') {
-            callerName = findCallerName(endedCall);
           }
 
           // Create the final history item with real summary
