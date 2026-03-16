@@ -476,10 +476,10 @@ class RAGService {
 
             if (error) throw error;
 
-      // Sync updated KB to ElevenLabs (fire-and-forget, non-blocking)
-      if (doc?.kb_id) {
-        this.syncKbToElevenLabs((doc as any).kb_id).catch(() => {/* already logged inside */});
-      }
+            // Sync updated KB to ElevenLabs (fire-and-forget, non-blocking)
+            if ((doc as any)?.kb_id) {
+                this.syncKbToElevenLabs((doc as any).kb_id).catch(() => {/* already logged inside */});
+            }
 
             return true;
         } catch (error) {
@@ -488,26 +488,26 @@ class RAGService {
         }
     }
 
-  // ─── Sync documents to ElevenLabs agent KB ───────────────────────
-  async syncKbToElevenLabs(kbId: string): Promise<void> {
-    try {
-      const res = await fetch('/api/elevenlabs-kb-sync', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ kbId }),
-      });
-      if (!res.ok) {
-        const err = await res.text();
-        console.warn('[ragService] ElevenLabs KB sync failed (non-fatal):', err);
-      } else {
-        const data = await res.json();
-        console.log(`[ragService] ElevenLabs KB synced: ${data.chunks_synced ?? 0} chunks`);
-      }
-    } catch (e) {
-      // Non-fatal — voice KB sync failure should never break the document upload UX
-      console.warn('[ragService] ElevenLabs KB sync error (non-fatal):', e);
+    // ─── Sync documents to ElevenLabs agent KB ───────────────────────
+    async syncKbToElevenLabs(kbId: string): Promise<void> {
+        try {
+            const res = await fetch('/api/elevenlabs-kb-sync', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ kbId }),
+            });
+            if (!res.ok) {
+                const err = await res.text();
+                console.warn('[ragService] ElevenLabs KB sync failed (non-fatal):', err);
+            } else {
+                const data = await res.json();
+                console.log(`[ragService] ElevenLabs KB synced: ${data.chunks_synced ?? 0} chunks`);
+            }
+        } catch (e) {
+            // Non-fatal — voice KB sync failure should never break the document upload UX
+            console.warn('[ragService] ElevenLabs KB sync error (non-fatal):', e);
+        }
     }
-  }
 }
 
 export const ragService = new RAGService();

@@ -5,6 +5,7 @@ import { useConversation } from '@elevenlabs/react';
 import { cn } from '../../utils/cn';
 import { useDemoCall } from '../../contexts/DemoCallContext';
 import { fetchElevenLabsSignedUrl } from '../../services/elevenlabsSignedUrl';
+import { buildElevenLabsSystemPrompt } from '../../services/elevenLabsSystemPrompt';
 
 interface UserPhoneInterfaceProps {
     isDark?: boolean;
@@ -27,6 +28,7 @@ export default function UserPhoneInterface({
         startCall,
         endCall,
         addMessage,
+        knowledgeBase,
     } = useDemoCall();
 
     const [callDuration, setCallDuration] = useState(0);
@@ -130,17 +132,28 @@ export default function UserPhoneInterface({
             // Get signed URL from our server (keeps API key safe)
             const signedUrl = await getSignedUrl();
 
-            // Start ElevenLabs Conversational AI session
-            // This single WebSocket connection handles STT + LLM + TTS
+            // Build the system prompt from the current knowledge base config.
+            // This mirrors what Groq gets, keeping voice and text fully in sync.
+            const systemPrompt = buildElevenLabsSystemPrompt(knowledgeBase);
+
             await conversation.startSession({
                 signedUrl,
+                overrides: {
+                    agent: {
+                        prompt: {
+                            prompt: systemPrompt,
+                        },
+                        // Use the KB greeting as the agent's opening line
+                        first_message: knowledgeBase.greeting || undefined,
+                    },
+                },
             });
         } catch (error) {
             console.error('📞 Failed to start ElevenLabs session:', error);
             setConnectionError(error instanceof Error ? error.message : 'Failed to connect');
             setAgentStatus('idle');
         }
-    }, [startCall, getSignedUrl, conversation]);
+    }, [startCall, getSignedUrl, conversation, knowledgeBase]);
 
     const handleEndCall = useCallback(async () => {
         console.log('🔴 End call button pressed');
