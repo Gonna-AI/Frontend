@@ -336,6 +336,9 @@ class RAGService {
                 .eq('id', documentRecord.id)
                 .single();
 
+            // Fire-and-forget: sync documents to ElevenLabs agent KB
+            this.syncKbToElevenLabs(kbId).catch(() => {/* already logged inside */});
+
             return (updatedDoc as UploadedDocument) || documentRecord;
 
         } catch (error) {
@@ -446,7 +449,7 @@ class RAGService {
             // Get storage path before deleting
             const { data: doc } = await supabase
                 .from('kb_uploaded_documents')
-                .select('storage_path')
+                .select('storage_path, kb_id')
                 .eq('id', documentId)
                 .eq('user_id', userId)
                 .single();
@@ -472,10 +475,37 @@ class RAGService {
                 .eq('user_id', userId);
 
             if (error) throw error;
+
+            // Sync updated KB to ElevenLabs (fire-and-forget, non-blocking)
+            if ((doc as any)?.kb_id) {
+                this.syncKbToElevenLabs((doc as any).kb_id).catch(() => {/* already logged inside */});
+            }
+
             return true;
         } catch (error) {
             console.error('Failed to delete document:', error);
             return false;
+        }
+    }
+
+    // ─── Sync documents to ElevenLabs agent KB ───────────────────────
+    async syncKbToElevenLabs(kbId: string): Promise<void> {
+        try {
+            const res = await fetch('/api/elevenlabs-kb-sync', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ kbId }),
+            });
+            if (!res.ok) {
+                const err = await res.text();
+                console.warn('[ragService] ElevenLabs KB sync failed (non-fatal):', err);
+            } else {
+                const data = await res.json();
+                console.log(`[ragService] ElevenLabs KB synced: ${data.chunks_synced ?? 0} chunks`);
+            }
+        } catch (e) {
+            // Non-fatal — voice KB sync failure should never break the document upload UX
+            console.warn('[ragService] ElevenLabs KB sync error (non-fatal):', e);
         }
     }
 }
