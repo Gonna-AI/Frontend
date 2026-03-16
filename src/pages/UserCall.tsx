@@ -13,9 +13,10 @@ type InteractionMode = 'select' | 'chat' | 'call';
 
 interface UserCallContentProps {
   initialMode?: InteractionMode;
+  isEmbed?: boolean;
 }
 
-function UserCallContent({ initialMode = 'select' }: UserCallContentProps) {
+function UserCallContent({ initialMode = 'select', isEmbed = false }: UserCallContentProps) {
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [mode, setMode] = useState<InteractionMode>(initialMode);
@@ -54,14 +55,14 @@ function UserCallContent({ initialMode = 'select' }: UserCallContentProps) {
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[120vw] h-[60vh] bg-gradient-to-b from-blue-500/5 via-purple-500/5 to-transparent blur-3xl opacity-50" />
       </div>
 
-      {mode !== 'call' && (
+      {mode !== 'call' && !isEmbed && (
         <SharedHeader />
       )}
 
       {/* Main content */}
       <main className={cn(
-        "flex-1 relative flex flex-col overflow-y-auto", // Changed min-h-0 to overflow-y-auto for better mobile scrolling in select mode
-        mode !== 'call' && "pt-16" // Only add top padding when header is visible
+        "flex-1 relative flex flex-col overflow-y-auto",
+        mode !== 'call' && !isEmbed && "pt-16"
       )}>
         <AnimatePresence mode="wait">
           {mode === 'select' && (
@@ -252,13 +253,15 @@ function UserCallContent({ initialMode = 'select' }: UserCallContentProps) {
         </AnimatePresence>
       </main>
 
-      <MobileSidebar
-        currentView={'chatbot'}
-        onViewChange={() => { }}
-        onSignOut={() => navigate('/')}
-        isOpen={isMobileMenuOpen}
-        onClose={() => setIsMobileMenuOpen(false)}
-      />
+      {!isEmbed && (
+        <MobileSidebar
+          currentView={'chatbot'}
+          onViewChange={() => { }}
+          onSignOut={() => navigate('/')}
+          isOpen={isMobileMenuOpen}
+          onClose={() => setIsMobileMenuOpen(false)}
+        />
+      )}
     </div>
   );
 }
@@ -266,10 +269,11 @@ function UserCallContent({ initialMode = 'select' }: UserCallContentProps) {
 export default function UserCall({ initialMode }: UserCallContentProps = {}) {
   const [searchParams] = useSearchParams();
   const agentId = searchParams.get('agentId') || undefined;
+  const isEmbed = searchParams.get('embed') === 'true';
 
   return (
     <DemoCallProvider initialAgentId={agentId}>
-      <UserCallContent initialMode={initialMode} />
+      <UserCallContent initialMode={isEmbed ? 'chat' : initialMode} isEmbed={isEmbed} />
     </DemoCallProvider>
   );
 }

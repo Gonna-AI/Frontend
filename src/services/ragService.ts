@@ -1,5 +1,6 @@
 import { pipeline } from '@xenova/transformers';
 import { supabase } from '../config/supabase';
+import { logActivity } from './activityLogger';
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 
@@ -339,6 +340,8 @@ class RAGService {
             // Fire-and-forget: sync documents to ElevenLabs agent KB
             this.syncKbToElevenLabs(kbId).catch(() => {/* already logged inside */});
 
+            logActivity({ event_type: 'documents', action: 'document_uploaded', description: `Document "${file.name}" uploaded`, metadata: { document_id: documentRecord.id, file_size: file.size } }).catch(() => {});
+
             return (updatedDoc as UploadedDocument) || documentRecord;
 
         } catch (error) {
@@ -480,6 +483,8 @@ class RAGService {
             if ((doc as any)?.kb_id) {
                 this.syncKbToElevenLabs((doc as any).kb_id).catch(() => {/* already logged inside */});
             }
+
+            logActivity({ event_type: 'documents', action: 'document_deleted', description: 'Document deleted from knowledge base', metadata: { document_id: documentId } }).catch(() => {});
 
             return true;
         } catch (error) {

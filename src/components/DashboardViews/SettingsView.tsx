@@ -7,6 +7,7 @@ import { cn } from '../../utils/cn';
 import { supabase } from '../../config/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { logActivity } from '../../services/activityLogger';
 
 interface UserSettings {
   theme: 'light' | 'dark' | 'auto';
@@ -177,6 +178,7 @@ export default function SettingsView({ isDark }: SettingsViewProps) {
       });
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
+      logActivity({ event_type: 'config', action: 'settings_saved', description: 'Profile settings updated' }).catch(() => {});
     } catch (err) {
       console.error('[SettingsView] save error:', err);
     } finally {
