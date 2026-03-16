@@ -30,30 +30,36 @@ async function analyzeCallHistoryWithAI(
   apiKey: string
 ): Promise<{ templates: any[]; error?: string }> {
   try {
-    // Prepare call transcripts for analysis
     const callSummaries = calls
-      .slice(0, 20)  // Last 20 calls
+      .slice(0, 30)
       .map(call => ({
         duration: call.duration,
-        category: call.category,
+        category: typeof call.category === 'object' ? call.category?.name || call.category : call.category,
         priority: call.priority,
-        sentiment: call.summary?.sentiment,
+        sentiment: call.sentiment || call.summary?.sentiment,
+        tags: call.tags || [],
         mainPoints: call.summary?.mainPoints || [],
         topics: call.summary?.topics || [],
+        followUpRequired: call.follow_up_required,
       }));
 
-    const prompt = `Analyze these ${callSummaries.length} call records and identify patterns that could become reusable playbook templates:
+    const prompt = `You are a customer success analyst. Analyze ${callSummaries.length} support call records and identify recurring patterns that should become reusable rescue playbook templates.
 
+Call data:
 ${JSON.stringify(callSummaries, null, 2)}
 
-For each distinct pattern you identify, create a playbook template with:
-1. name: short, descriptive name for the playbook
-2. description: what situations trigger this playbook
-3. trigger_keywords: array of words/phrases that indicate this scenario
-4. recommended_actions: array of suggested actions to take
-5. success_indicators: array of metrics/outcomes that show success
+Instructions:
+- Look for recurring issue types, sentiment clusters, high-priority patterns, and common topics
+- Generate 3-5 actionable playbook templates
+- Each template must have:
+  1. name: concise, action-oriented name (e.g. "Billing Dispute Fast-Track")
+  2. description: 1-2 sentences describing when and why to use this playbook
+  3. trigger_keywords: 4-8 keywords/phrases that signal this scenario
+  4. recommended_actions: 3-6 concrete steps the support team should take
+  5. success_indicators: 2-4 measurable outcomes that confirm success
 
-Return a JSON array of 3-5 templates. Only return valid JSON, no other text.`;
+Return ONLY a valid JSON array, no markdown, no explanation:
+[{"name":"...","description":"...","trigger_keywords":[...],"recommended_actions":[...],"success_indicators":[...]}]`;
 
     const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
@@ -62,10 +68,10 @@ Return a JSON array of 3-5 templates. Only return valid JSON, no other text.`;
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'mixtral-8x7b-32768',
+        model: 'llama-3.3-70b-versatile',
         messages: [{ role: 'user', content: prompt }],
-        temperature: 0.7,
-        max_tokens: 2000,
+        temperature: 0.4,
+        max_tokens: 3000,
       }),
     });
 
@@ -129,19 +135,20 @@ Deno.serve(async (req: Request) => {
         return jsonResponse(req, 400, { error: 'start_date and end_date required' });
       }
 
-      // Fetch user's calls in date range
+      // Fetch user's calls in date range from call_history
       const { data: calls, error: callsError } = await adminClient
-        .from('call_sessions')
-        .select('*')
+        .from('call_history')
+        .select('duration, category, priority, sentiment, tags, summary, follow_up_required, created_at')
         .eq('user_id', user.id)
         .gte('created_at', startDate)
         .lte('created_at', endDate)
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+        .limit(100);
 
       if (callsError) throw callsError;
 
       if (!calls || calls.length === 0) {
-        return jsonResponse(req, 400, { error: 'No calls found in date range' });
+        return jsonResponse(req, 400, { error: 'No calls found in the selected date range. Try a wider range.' });
       }
 
       // Call AI to analyze and generate templates
@@ -171,7 +178,7 @@ Deno.serve(async (req: Request) => {
 
       if (saveError) throw saveError;
 
-      return jsonResponse(req, 201, { templates: saved });
+      return jsonResponse(req, 201, { playbooks: saved, call_count: calls.length });
     }
 
     // ─── GET: List playbooks ───────────────────────────────────────

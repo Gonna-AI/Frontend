@@ -33,51 +33,6 @@ function jsonResponse(data: unknown, status: number, corsHeaders: Record<string,
   });
 }
 
-// Default playbook templates seeded for new users
-const DEFAULT_PLAYBOOKS = [
-  {
-    id: 'goodwill-credit-whatsapp',
-    name: '15% Goodwill Credit + WhatsApp Apology',
-    description: 'Fast trust recovery with instant credit and an apology message.',
-    channels: ['whatsapp', 'email'],
-    message_template: 'Hi {{customer_name}}, we are sorry about your recent experience. We have added a {{credit_percent}}% goodwill credit to your account. Reply here for priority help from a specialist.',
-    voice_script: 'Hello {{customer_name}}, we are sorry for the inconvenience. We have issued your goodwill credit and assigned your case to a priority specialist.',
-    credit_amount_inr: 1500,
-    discount_percent: 15,
-    success_criteria: 'Customer responds positively or completes another paid interaction within 14 days.',
-    enabled: true,
-    ab_test_enabled: false,
-    versions: [{ id: 'v1', createdAt: '2026-02-01T00:00:00.000Z', messageTemplate: 'Hi {{customer_name}}, we are sorry about your recent experience.', creditAmountInr: 1500, discountPercent: 15, successCriteria: 'Customer responds positively or completes another paid interaction within 14 days.', note: 'Base launch version' }],
-  },
-  {
-    id: 'priority-callback-slot',
-    name: 'Priority Voice Callback Slot Booked',
-    description: 'Escalates high-friction issues with a pre-booked specialist callback.',
-    channels: ['voice', 'whatsapp', 'email'],
-    message_template: 'Hi {{customer_name}}, your priority callback has been booked for {{callback_slot}}. Please reply YES to confirm and we will call you first.',
-    voice_script: 'Hi {{customer_name}}, this is a priority callback from support. We reserved a dedicated slot to resolve your issue today.',
-    credit_amount_inr: 500,
-    discount_percent: 0,
-    success_criteria: 'Callback completed and issue marked resolved in one touch.',
-    enabled: true,
-    ab_test_enabled: false,
-    versions: [{ id: 'v1', createdAt: '2026-02-01T00:00:00.000Z', messageTemplate: 'Hi {{customer_name}}, your priority callback has been booked for {{callback_slot}}.', creditAmountInr: 500, discountPercent: 0, successCriteria: 'Callback completed and issue marked resolved in one touch.' }],
-  },
-  {
-    id: 'free-upgrade-human-followup',
-    name: 'Free Upgrade + Human Follow-up',
-    description: 'Proactive upgrade for high-value accounts plus human ownership.',
-    channels: ['whatsapp', 'email', 'in_app'],
-    message_template: 'Hi {{customer_name}}, we have upgraded your plan at no cost for this cycle and assigned a human success manager for personal follow-up.',
-    voice_script: 'Hello {{customer_name}}, we upgraded your account for this cycle and assigned a success manager for your follow-up.',
-    credit_amount_inr: 2500,
-    discount_percent: 20,
-    success_criteria: 'Customer remains active and submits no new severe complaints in 30 days.',
-    enabled: true,
-    ab_test_enabled: false,
-    versions: [{ id: 'v1', createdAt: '2026-02-01T00:00:00.000Z', messageTemplate: 'Hi {{customer_name}}, we have upgraded your plan at no cost for this cycle.', creditAmountInr: 2500, discountPercent: 20, successCriteria: 'Customer remains active and submits no new severe complaints in 30 days.' }],
-  },
-];
 
 Deno.serve(async (req) => {
   const corsHeaders = getCorsHeaders(req);
@@ -121,23 +76,7 @@ Deno.serve(async (req) => {
 
         if (error) return jsonResponse({ error: error.message }, 500, corsHeaders);
 
-        // If no playbooks exist, seed defaults
-        if (!data || data.length === 0) {
-          const seeded = DEFAULT_PLAYBOOKS.map(pb => ({
-            ...pb,
-            user_id: user.id,
-          }));
-
-          const { data: insertedData, error: insertError } = await supabaseClient
-            .from('rescue_playbooks')
-            .insert(seeded)
-            .select();
-
-          if (insertError) return jsonResponse({ error: insertError.message }, 500, corsHeaders);
-          return jsonResponse({ playbooks: (insertedData || []).map(mapPlaybookFromDb) }, 200, corsHeaders);
-        }
-
-        return jsonResponse({ playbooks: data.map(mapPlaybookFromDb) }, 200, corsHeaders);
+        return jsonResponse({ playbooks: (data || []).map(mapPlaybookFromDb) }, 200, corsHeaders);
       }
 
       if (req.method === 'POST') {
