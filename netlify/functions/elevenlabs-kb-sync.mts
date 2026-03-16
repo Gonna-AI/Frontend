@@ -24,10 +24,10 @@ export default async (req: Request, _context: Context) => {
 
   // Read env vars
   const apiKey =
-    Netlify.env.get("VITE_ELEVENLABS_API_KEY") ||
     Netlify.env.get("ELEVENLABS_API_KEY") ||
-    process.env.VITE_ELEVENLABS_API_KEY ||
-    process.env.ELEVENLABS_API_KEY;
+    Netlify.env.get("VITE_ELEVENLABS_API_KEY") ||
+    process.env.ELEVENLABS_API_KEY ||
+    process.env.VITE_ELEVENLABS_API_KEY;
 
   if (!apiKey) {
     return new Response(
@@ -37,10 +37,10 @@ export default async (req: Request, _context: Context) => {
   }
 
   const agentId =
-    Netlify.env.get("VITE_ELEVENLABS_AGENT_ID") ||
     Netlify.env.get("ELEVENLABS_AGENT_ID") ||
-    process.env.VITE_ELEVENLABS_AGENT_ID ||
-    process.env.ELEVENLABS_AGENT_ID;
+    Netlify.env.get("VITE_ELEVENLABS_AGENT_ID") ||
+    process.env.ELEVENLABS_AGENT_ID ||
+    process.env.VITE_ELEVENLABS_AGENT_ID;
 
   if (!agentId) {
     return new Response(
