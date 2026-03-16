@@ -24,6 +24,8 @@ import { localLLMService } from '../../services/localLLMService';
 import { DEFAULT_VOICE_ID, normalizeVoiceId } from '../../config/voiceConfig';
 import { useRescueCenter } from '../../contexts/RescueCenterContext';
 import type { RescueChannel, RescuePlaybookTemplate } from '../../types/rescuePlaybook';
+import { supabase } from '../../config/supabase';
+import { Wand2 } from 'lucide-react';
 
 // Define the tabs structure
 type ActiveTab = 'prompt' | 'voice' | 'fields' | 'categories' | 'rules' | 'instructions' | 'rescue_playbooks';
@@ -99,6 +101,56 @@ export default function KnowledgeBase({ isDark = true, activeSection }: Knowledg
   const [isAddingInstruction, setIsAddingInstruction] = useState(false);
   const [newInstruction, setNewInstruction] = useState('');
   const [isAddingPlaybook, setIsAddingPlaybook] = useState(false);
+  const [showAIGenerate, setShowAIGenerate] = useState(false);
+  const [aiGenStartDate, setAiGenStartDate] = useState(() => {
+    const d = new Date();
+    d.setMonth(d.getMonth() - 1);
+    return d.toISOString().split('T')[0];
+  });
+  const [aiGenEndDate, setAiGenEndDate] = useState(() => new Date().toISOString().split('T')[0]);
+  const [isGeneratingAI, setIsGeneratingAI] = useState(false);
+  const [aiGenError, setAiGenError] = useState<string | null>(null);
+
+  const generatePlaybooksWithAI = async () => {
+    setIsGeneratingAI(true);
+    setAiGenError(null);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) { setAiGenError('Not authenticated'); return; }
+
+      const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/playbooks`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ start_date: aiGenStartDate, end_date: aiGenEndDate }),
+      });
+      const result = await res.json();
+      if (!res.ok) { setAiGenError(result.error || 'Failed to generate playbooks'); return; }
+
+      const newTemplates: RescuePlaybookTemplate[] = (result.templates || []).map((t: any) => ({
+        id: t.id || `ai-${Date.now()}-${Math.random()}`,
+        name: t.name,
+        description: t.description || '',
+        channels: ['email'] as RescueChannel[],
+        messageTemplate: (t.recommended_actions || []).join('\n• '),
+        voiceScript: (t.recommended_actions || []).join('. '),
+        creditAmountInr: 0,
+        discountPercent: 0,
+        successCriteria: (t.success_indicators || []).join(', '),
+        enabled: true,
+      }));
+
+      setPlaybooks([...playbooks, ...newTemplates]);
+      setShowAIGenerate(false);
+    } catch {
+      setAiGenError('Network error. Please try again.');
+    } finally {
+      setIsGeneratingAI(false);
+    }
+  };
+
   const [newPlaybook, setNewPlaybook] = useState({
     name: '',
     description: '',
@@ -726,16 +778,68 @@ export default function KnowledgeBase({ isDark = true, activeSection }: Knowledg
 
                 <div className={cn("flex justify-between items-center pb-2 border-b", isDark ? "border-white/10" : "border-gray-100")}>
                   <h3 className={cn("text-lg font-semibold", isDark ? "text-white" : "text-gray-900")}>Action Templates</h3>
-                  <button
-                    onClick={() => setIsAddingPlaybook(true)}
-                    className={cn(
-                      "px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors",
-                      isDark ? "bg-white text-black hover:bg-white/90" : "bg-black text-white hover:bg-black/90"
-                    )}
-                  >
-                    Add Template
-                  </button>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => { setShowAIGenerate(!showAIGenerate); setIsAddingPlaybook(false); }}
+                      className={cn(
+                        "px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors flex items-center gap-1.5",
+                        isDark ? "border-white/10 text-white hover:bg-white/10" : "border-black/10 text-black hover:bg-black/5"
+                      )}
+                    >
+                      <Wand2 className="w-3.5 h-3.5" />
+                      Generate with AI
+                    </button>
+                    <button
+                      onClick={() => { setIsAddingPlaybook(true); setShowAIGenerate(false); }}
+                      className={cn(
+                        "px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors",
+                        isDark ? "bg-white text-black hover:bg-white/90" : "bg-black text-white hover:bg-black/90"
+                      )}
+                    >
+                      Add Template
+                    </button>
+                  </div>
                 </div>
+
+                <AnimatePresence>
+                  {showAIGenerate && (
+                    <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}>
+                      <div className={cn("rounded-xl border p-4 space-y-3", isDark ? "border-white/10 bg-white/[0.03]" : "border-black/10 bg-black/[0.02]")}>
+                        <p className={cn("text-xs", isDark ? "text-white/50" : "text-black/50")}>
+                          Analyze your call history to auto-generate action templates using AI.
+                        </p>
+                        <div className="grid grid-cols-2 gap-3">
+                          <label className="space-y-1">
+                            <span className={cn("text-[11px] uppercase tracking-wide", isDark ? "text-white/45" : "text-black/45")}>From</span>
+                            <input type="date" value={aiGenStartDate} onChange={e => setAiGenStartDate(e.target.value)}
+                              className={cn("w-full rounded-lg px-3 py-2 text-sm border bg-transparent focus:outline-none", isDark ? "border-white/10 text-white" : "border-black/10 text-black")} />
+                          </label>
+                          <label className="space-y-1">
+                            <span className={cn("text-[11px] uppercase tracking-wide", isDark ? "text-white/45" : "text-black/45")}>To</span>
+                            <input type="date" value={aiGenEndDate} onChange={e => setAiGenEndDate(e.target.value)}
+                              className={cn("w-full rounded-lg px-3 py-2 text-sm border bg-transparent focus:outline-none", isDark ? "border-white/10 text-white" : "border-black/10 text-black")} />
+                          </label>
+                        </div>
+                        {aiGenError && (
+                          <div className={cn("flex items-center gap-2 text-xs p-2 rounded-lg", isDark ? "bg-rose-500/10 text-rose-400" : "bg-rose-50 text-rose-600")}>
+                            <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0" />
+                            {aiGenError}
+                          </div>
+                        )}
+                        <div className="flex justify-end gap-2">
+                          <button onClick={() => { setShowAIGenerate(false); setAiGenError(null); }}
+                            className={cn("text-xs px-3 py-1.5 rounded", isDark ? "text-white/60 hover:bg-white/10" : "text-black/60 hover:bg-black/10")}>
+                            Cancel
+                          </button>
+                          <button onClick={generatePlaybooksWithAI} disabled={isGeneratingAI}
+                            className={cn("text-xs font-semibold px-3 py-1.5 rounded flex items-center gap-1.5", isGeneratingAI ? "bg-white/20 text-white/50 cursor-not-allowed" : "bg-white text-black")}>
+                            {isGeneratingAI ? <><Loader2 className="w-3 h-3 animate-spin" />Analyzing...</> : <><Wand2 className="w-3 h-3" />Generate</>}
+                          </button>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
 
                 <AnimatePresence>
                   {isAddingPlaybook && (

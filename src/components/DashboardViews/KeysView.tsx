@@ -33,6 +33,8 @@ export default function KeysView({ isDark = true, hasAccess = false }: { isDark?
     const [newKeyPermissions, setNewKeyPermissions] = useState<string[]>(['voice', 'text']);
     const [newKeyRateLimit, setNewKeyRateLimit] = useState(100);
     const [createdKeyToken, setCreatedKeyToken] = useState<string | null>(null);
+    const [createKeyError, setCreateKeyError] = useState<string | null>(null);
+    const [isCreatingKey, setIsCreatingKey] = useState(false);
 
     const resetForm = () => {
         setNewKeyName('');
@@ -40,6 +42,7 @@ export default function KeysView({ isDark = true, hasAccess = false }: { isDark?
         setNewKeyRateLimit(100);
         setWizardStep('name');
         setCreatedKeyToken(null);
+        setCreateKeyError(null);
     };
 
     const openCreateModal = () => {
@@ -97,6 +100,8 @@ export default function KeysView({ isDark = true, hasAccess = false }: { isDark?
     const createKey = async () => {
         if (!user?.id) return;
 
+        setIsCreatingKey(true);
+        setCreateKeyError(null);
         try {
             const headers = await getAuthHeaders();
             const res = await fetch(apiBase, {
@@ -126,10 +131,12 @@ export default function KeysView({ isDark = true, hasAccess = false }: { isDark?
                 setCreatedKeyToken(data.token);
                 setWizardStep('created');
             } else {
-                console.error('Failed to create API key:', result.error);
+                setCreateKeyError(result.error || 'Failed to create API key.');
             }
         } catch (err) {
-            console.error('Failed to create API key:', err);
+            setCreateKeyError('Network error. Please try again.');
+        } finally {
+            setIsCreatingKey(false);
         }
     };
 
@@ -651,6 +658,12 @@ export default function KeysView({ isDark = true, hasAccess = false }: { isDark?
                                     <p className={cn("text-sm", isDark ? "text-white/60" : "text-gray-600")}>
                                         {t('keys.modal.confirmDesc')}
                                     </p>
+                                    {createKeyError && (
+                                        <div className={cn("p-3 rounded-lg flex items-start gap-3", isDark ? "bg-rose-500/10" : "bg-rose-50")}>
+                                            <AlertTriangle className={cn("w-4 h-4 mt-0.5 flex-shrink-0", isDark ? "text-rose-400" : "text-rose-500")} />
+                                            <p className={cn("text-xs", isDark ? "text-rose-400" : "text-rose-600")}>{createKeyError}</p>
+                                        </div>
+                                    )}
 
                                     <div className={cn(
                                         "rounded-lg border divide-y",
@@ -765,16 +778,16 @@ export default function KeysView({ isDark = true, hasAccess = false }: { isDark?
                                     )}
                                     <button
                                         onClick={nextStep}
-                                        disabled={!canProceed()}
+                                        disabled={!canProceed() || isCreatingKey}
                                         className={cn(
                                             "flex-1 py-3 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2",
-                                            canProceed()
+                                            canProceed() && !isCreatingKey
                                                 ? (isDark ? "bg-white text-black hover:bg-white/90" : "bg-black text-white hover:bg-black/90")
                                                 : (isDark ? "bg-white/10 text-white/30 cursor-not-allowed" : "bg-gray-100 text-gray-400 cursor-not-allowed")
                                         )}
                                     >
-                                        {wizardStep === 'confirm' ? t('keys.createKey') : t('keys.modal.continue')}
-                                        <ArrowRight className="w-4 h-4" />
+                                        {isCreatingKey ? <Loader2 className="w-4 h-4 animate-spin" /> : wizardStep === 'confirm' ? t('keys.createKey') : t('keys.modal.continue')}
+                                        {!isCreatingKey && <ArrowRight className="w-4 h-4" />}
                                     </button>
                                 </>
                             )}

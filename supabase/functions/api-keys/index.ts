@@ -108,7 +108,7 @@ Deno.serve(async (req: Request) => {
     // ─── GET: List API keys ──────────────────────────────────
     if (req.method === 'GET') {
       const { data, error } = await adminClient
-        .from('api_keys')
+        .from('user_api_keys')
         .select('*')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
@@ -137,7 +137,7 @@ Deno.serve(async (req: Request) => {
 
       // Check key count limit (max 10 per user)
       const { count } = await adminClient
-        .from('api_keys')
+        .from('user_api_keys')
         .select('id', { count: 'exact', head: true })
         .eq('user_id', user.id)
         .eq('status', 'active');
@@ -149,7 +149,7 @@ Deno.serve(async (req: Request) => {
       const token = generateApiToken();
 
       const { data, error } = await adminClient
-        .from('api_keys')
+        .from('user_api_keys')
         .insert({
           user_id: user.id,
           name,
@@ -175,7 +175,7 @@ Deno.serve(async (req: Request) => {
       }
 
       const { error } = await adminClient
-        .from('api_keys')
+        .from('user_api_keys')
         .delete()
         .eq('id', keyId)
         .eq('user_id', user.id);

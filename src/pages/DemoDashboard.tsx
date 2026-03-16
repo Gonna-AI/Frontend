@@ -27,7 +27,6 @@ import ActivityLogView from '../components/DashboardViews/ActivityLogView';
 import WebhooksView from '../components/DashboardViews/WebhooksView';
 import NotificationCenter from '../components/DashboardViews/NotificationCenter';
 import InitialSetupDialog from '../components/DashboardViews/InitialSetupDialog';
-import PlaybooksView from '../components/DashboardViews/PlaybooksView';
 import { RescueCenterProvider } from '../contexts/RescueCenterContext';
 
 import { AccessCodeProvider, useAccessCode } from '../contexts/AccessCodeContext';
@@ -84,8 +83,6 @@ function DemoDashboardContent() {
       customer_graph: t('sidebar.customerGraph'),
       system_prompt: t('sidebar.systemPrompt'),
       rescue_playbooks: t('sidebar.rescuePlaybooks'),
-      playbooks: t('sidebar.playbooks') || 'AI Playbooks',
-
       context_fields: t('sidebar.contextFields'),
       categories: t('sidebar.categories'),
       priority_rules: t('sidebar.priorityRules'),
@@ -219,8 +216,7 @@ function DemoDashboardContent() {
                   {activeTab === 'billing' && <BillingView isDark={isDark} hasAccess={hasAccess} />}
                   {activeTab === 'keys' && <KeysView isDark={isDark} hasAccess={hasAccess} />}
                   {activeTab === 'team' && <TeamView isDark={isDark} />}
-                  {activeTab === 'playbooks' && <PlaybooksView isDark={isDark} />}
-                  {activeTab === 'integrations' && <IntegrationView isDark={isDark} />}
+{activeTab === 'integrations' && <IntegrationView isDark={isDark} />}
                   {activeTab === 'activity_log' && <ActivityLogView isDark={isDark} />}
                   {activeTab === 'webhooks' && <WebhooksView isDark={isDark} />}
                   {activeTab === 'settings' && <SettingsView isDark={isDark} />}
