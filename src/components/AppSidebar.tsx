@@ -343,6 +343,17 @@ export function AppSidebar({ activeTab, setActiveTab, hasAccess = false, ...prop
                                     <span>{t('sidebar.team')}</span>
                                 </SidebarMenuButton>
                             </SidebarMenuItem>
+                            <SidebarMenuItem className={getLockedStyles('playbooks')}>
+                                <SidebarMenuButton
+                                    isActive={activeTab === 'playbooks'}
+                                    onClick={() => handleTabClick('playbooks')}
+                                    tooltip={t('sidebar.playbooks') || 'AI Playbooks'}
+                                    className={menuButtonClass}
+                                >
+                                    <Wand2 />
+                                    <span>{t('sidebar.playbooks') || 'Playbooks'}</span>
+                                </SidebarMenuButton>
+                            </SidebarMenuItem>
                             <SidebarMenuItem className={getLockedStyles('integrations')}>
                                 <SidebarMenuButton
                                     isActive={activeTab === 'integrations'}
