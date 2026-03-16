@@ -23,7 +23,6 @@ import {
     Wand2,
     ShieldCheck,
     FileText,
-    TrendingUp,
     Activity,
     Webhook,
     Settings,
@@ -188,17 +187,6 @@ export function AppSidebar({ activeTab, setActiveTab, hasAccess = false, ...prop
                                 >
                                     <Network />
                                     <span>{t('sidebar.customerGraph')}</span>
-                                </SidebarMenuButton>
-                            </SidebarMenuItem>
-                            <SidebarMenuItem>
-                                <SidebarMenuButton
-                                    isActive={activeTab === 'analytics'}
-                                    onClick={() => handleTabClick('analytics')}
-                                    tooltip={t('sidebar.analytics')}
-                                    className={menuButtonClass}
-                                >
-                                    <TrendingUp />
-                                    <span>{t('sidebar.analytics')}</span>
                                 </SidebarMenuButton>
                             </SidebarMenuItem>
                         </SidebarMenu>

@@ -22,7 +22,6 @@ import MonitorView from '../components/DashboardViews/MonitorView';
 import IntegrationView from '../components/DashboardViews/IntegrationView';
 import CustomerGraphView from '../components/DashboardViews/CustomerGraphView';
 import DocumentsView from '../components/DashboardViews/DocumentsView';
-import AnalyticsView from '../components/DashboardViews/AnalyticsView';
 import SettingsView from '../components/DashboardViews/SettingsView';
 import ActivityLogView from '../components/DashboardViews/ActivityLogView';
 import WebhooksView from '../components/DashboardViews/WebhooksView';
@@ -221,7 +220,6 @@ function DemoDashboardContent() {
                   {activeTab === 'keys' && <KeysView isDark={isDark} hasAccess={hasAccess} />}
                   {activeTab === 'team' && <TeamView isDark={isDark} />}
                   {activeTab === 'integrations' && <IntegrationView isDark={isDark} />}
-                  {activeTab === 'analytics' && <AnalyticsView isDark={isDark} />}
                   {activeTab === 'activity_log' && <ActivityLogView isDark={isDark} />}
                   {activeTab === 'webhooks' && <WebhooksView isDark={isDark} />}
                   {activeTab === 'settings' && <SettingsView isDark={isDark} />}
