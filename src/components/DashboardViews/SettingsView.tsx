@@ -8,6 +8,20 @@ import { supabase } from '../../config/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import { useLanguage } from '../../contexts/LanguageContext';
 
+interface UserSettings {
+  theme: 'light' | 'dark' | 'auto';
+  language: string;
+  notifications_email: boolean;
+  notifications_push: boolean;
+  notifications_sms: boolean;
+  privacy_profile_public: boolean;
+  privacy_data_analytics: boolean;
+  team_auto_add_members: boolean;
+  api_rate_limit_alerts: boolean;
+  call_recording_default: boolean;
+  call_transcription_enabled: boolean;
+}
+
 interface SettingsViewProps {
   isDark: boolean;
 }
@@ -50,6 +64,8 @@ export default function SettingsView({ isDark }: SettingsViewProps) {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [exporting, setExporting] = useState(false);
+  const [userSettings, setUserSettings] = useState<UserSettings | null>(null);
+  const [savingSettings, setSavingSettings] = useState(false);
   const [profile, setProfile] = useState<ProfileData>({
     display_name: '', company_name: '', phone: '', timezone: 'UTC',
     email: '', avatar_url: '', credits_balance: 50, created_at: '', last_sign_in: '',
@@ -59,6 +75,16 @@ export default function SettingsView({ isDark }: SettingsViewProps) {
     email_weekly_report: false, push_calls: true, push_security: true, push_billing: true,
   });
   const [deleteConfirm, setDeleteConfirm] = useState(false);
+
+  const settingsBase = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/user-settings`;
+
+  const getAuthHeaders = useCallback(async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    return {
+      'Authorization': `Bearer ${session?.access_token}`,
+      'Content-Type': 'application/json'
+    };
+  }, []);
 
   const apiCall = useCallback(async (path: string, options?: RequestInit) => {
     const session = await supabase.auth.getSession();
@@ -82,6 +108,40 @@ export default function SettingsView({ isDark }: SettingsViewProps) {
     return res.json();
   }, []);
 
+  // Load user settings from endpoint
+  const loadUserSettings = useCallback(async () => {
+    try {
+      const headers = await getAuthHeaders();
+      const res = await fetch(settingsBase, { headers });
+      const result = await res.json();
+      if (res.ok && result.settings) {
+        setUserSettings(result.settings);
+      }
+    } catch (err) {
+      console.error('[SettingsView] Failed to load user settings:', err);
+    }
+  }, [getAuthHeaders]);
+
+  // Save user settings to endpoint
+  const persistUserSettings = useCallback(async (settings: UserSettings) => {
+    try {
+      setSavingSettings(true);
+      const headers = await getAuthHeaders();
+      const res = await fetch(settingsBase, {
+        method: 'PUT',
+        headers,
+        body: JSON.stringify(settings),
+      });
+      if (!res.ok) {
+        console.error('[SettingsView] Failed to save settings');
+      }
+    } catch (err) {
+      console.error('[SettingsView] Failed to persist settings:', err);
+    } finally {
+      setSavingSettings(false);
+    }
+  }, [getAuthHeaders]);
+
   useEffect(() => {
     (async () => {
       setLoading(true);
@@ -92,13 +152,16 @@ export default function SettingsView({ isDark }: SettingsViewProps) {
         ]);
         if (profileRes.profile) setProfile(profileRes.profile);
         if (prefsRes.preferences) setNotifPrefs(prefsRes.preferences);
+
+        // Load user settings from Supabase
+        await loadUserSettings();
       } catch (err) {
         console.error('[SettingsView] load error:', err);
       } finally {
         setLoading(false);
       }
     })();
-  }, [apiCall, notifApiCall]);
+  }, [apiCall, notifApiCall, loadUserSettings]);
 
   const saveProfile = async () => {
     setSaving(true);
