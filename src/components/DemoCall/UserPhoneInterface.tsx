@@ -153,7 +153,7 @@ export default function UserPhoneInterface({
             setConnectionError(error instanceof Error ? error.message : 'Failed to connect');
             setAgentStatus('idle');
         }
-    }, [startCall, getSignedUrl, conversation]);
+    }, [startCall, getSignedUrl, conversation, knowledgeBase]);
 
     const handleEndCall = useCallback(async () => {
         console.log('🔴 End call button pressed');
