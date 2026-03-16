@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { cn } from '../../utils/cn';
 import { useLanguage } from '../../contexts/LanguageContext';
-import { Plus, User, Mail, Shield, Trash2, Check, Loader2 } from 'lucide-react';
+import { Plus, User, Mail, Shield, Trash2, Check, Loader2, Link as LinkIcon, Copy } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '../../config/supabase';
 import { useAuth } from '../../contexts/AuthContext';
@@ -24,6 +24,9 @@ export default function TeamView({ isDark = true }: { isDark?: boolean }) {
     const [inviteSuccess, setInviteSuccess] = useState(false);
     const [members, setMembers] = useState<TeamMember[]>([]);
     const [isLoadingMembers, setIsLoadingMembers] = useState(true);
+    const [inviteLink, setInviteLink] = useState<string | null>(null);
+    const [copiedInvite, setCopiedInvite] = useState(false);
+    const [currentTeamId, setCurrentTeamId] = useState<string | null>(null);
 
     const getAuthHeaders = async () => {
         const { data: { session } } = await supabase.auth.getSession();
@@ -130,6 +133,40 @@ export default function TeamView({ isDark = true }: { isDark?: boolean }) {
         }
     };
 
+    const createInviteLink = async () => {
+        if (!currentTeamId) {
+            console.error('No team ID available');
+            return;
+        }
+
+        try {
+            const headers = await getAuthHeaders();
+            const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/team-invites`, {
+                method: 'POST',
+                headers,
+                body: JSON.stringify({
+                    team_id: currentTeamId,
+                    days_valid: 7,
+                }),
+            });
+
+            const result = await res.json();
+            if (res.ok && result.invite_url) {
+                setInviteLink(result.invite_url);
+            }
+        } catch (err) {
+            console.error('Failed to create invite link:', err);
+        }
+    };
+
+    const copyInviteLink = () => {
+        if (inviteLink) {
+            navigator.clipboard.writeText(inviteLink);
+            setCopiedInvite(true);
+            setTimeout(() => setCopiedInvite(false), 2000);
+        }
+    };
+
     return (
         <div className="space-y-6 max-w-[1600px] mx-auto pb-10">
             {/* Header */}
@@ -222,6 +259,20 @@ export default function TeamView({ isDark = true }: { isDark?: boolean }) {
                                     <span>{t('team.sendInvite')}</span>
                                 </>
                             )}
+                        </button>
+
+                        <button
+                            type="button"
+                            onClick={createInviteLink}
+                            className={cn(
+                                "py-2.5 px-6 rounded-lg font-medium transition-all flex items-center justify-center gap-2 min-w-[140px]",
+                                isDark
+                                    ? "bg-purple-600 text-white hover:bg-purple-700"
+                                    : "bg-purple-500 text-white hover:bg-purple-600"
+                            )}
+                        >
+                            <LinkIcon className="w-4 h-4" />
+                            <span>Create Link</span>
                         </button>
                     </form>
                 </div>
@@ -337,6 +388,57 @@ export default function TeamView({ isDark = true }: { isDark?: boolean }) {
                     </table>
                 </div>
             </div>
+
+            {/* Invite Link Modal */}
+            {inviteLink && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60">
+                    <div className={cn(
+                        "rounded-xl p-6 max-w-md",
+                        isDark ? "bg-[#0A0A0A] border border-white/10" : "bg-white border border-black/10"
+                    )}>
+                        <h3 className={cn("text-lg font-semibold mb-2", isDark ? "text-white" : "text-black")}>
+                            Share Invite Link
+                        </h3>
+                        <p className={cn("text-sm mb-4", isDark ? "text-white/60" : "text-gray-600")}>
+                            This link expires in 7 days. Share it with team members to join.
+                        </p>
+                        <div className={cn(
+                            "p-3 rounded-lg mb-4 flex items-center gap-2",
+                            isDark ? "bg-white/5 border border-white/10" : "bg-gray-50 border border-gray-200"
+                        )}>
+                            <input
+                                type="text"
+                                value={inviteLink}
+                                readOnly
+                                className={cn(
+                                    "flex-1 bg-transparent text-xs outline-none",
+                                    isDark ? "text-white/80" : "text-black"
+                                )}
+                            />
+                            <button
+                                onClick={copyInviteLink}
+                                className={cn(
+                                    "p-2 rounded transition-colors",
+                                    copiedInvite
+                                        ? (isDark ? "bg-green-500/20 text-green-400" : "bg-green-50 text-green-600")
+                                        : (isDark ? "hover:bg-white/10 text-white/60" : "hover:bg-gray-100 text-gray-600")
+                                )}
+                            >
+                                {copiedInvite ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                            </button>
+                        </div>
+                        <button
+                            onClick={() => setInviteLink(null)}
+                            className={cn(
+                                "w-full py-2 rounded-lg font-medium text-sm",
+                                isDark ? "bg-white text-black hover:bg-white/90" : "bg-black text-white hover:bg-black/90"
+                            )}
+                        >
+                            Done
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
