@@ -4,7 +4,11 @@ import { Phone, PhoneOff, Volume2, VolumeX, Minimize2, Maximize2, ArrowLeft } fr
 import { useConversation } from '@elevenlabs/react';
 import { cn } from '../../utils/cn';
 import { useDemoCall } from '../../contexts/DemoCallContext';
-import { fetchElevenLabsSignedUrl } from '../../services/elevenlabsSignedUrl';
+// ElevenLabs agent ID — safe to expose in the frontend (it's not a secret).
+// Set VITE_ELEVENLABS_AGENT_ID in Netlify env vars (with the VITE_ prefix so
+// Vite bundles it).  The SDK fetches its own LiveKit token from ElevenLabs
+// using this ID — no custom signed-URL webhook needed.
+const ELEVENLABS_AGENT_ID = import.meta.env.VITE_ELEVENLABS_AGENT_ID as string | undefined;
 
 interface UserPhoneInterfaceProps {
     isDark?: boolean;
@@ -116,37 +120,28 @@ export default function UserPhoneInterface({
 
     const isActive = currentCall?.status === 'active';
 
-    // Fetch signed URL from our Netlify function (keeps API key server-side)
-    const getSignedUrl = useCallback(async (): Promise<string> => {
-        return fetchElevenLabsSignedUrl();
-    }, []);
-
     const handleStartCall = useCallback(async () => {
         setConnectionError(null);
         setIsEnding(false);
         startCall('voice');
         setAgentStatus('processing');
 
-        try {
-            // Get signed URL from our server (keeps API key safe)
-            const signedUrl = await getSignedUrl();
+        if (!ELEVENLABS_AGENT_ID) {
+            setConnectionError('ElevenLabs agent ID not configured. Set VITE_ELEVENLABS_AGENT_ID in Netlify env vars.');
+            setAgentStatus('idle');
+            return;
+        }
 
-            // Only override firstMessage (greeting) — do NOT override the full
-            // agent prompt. ElevenLabs injects its own tool-call and KB-search
-            // instructions into the agent system prompt at the platform level;
-            // replacing prompt.prompt strips those hidden instructions and causes
-            // the agent to silently fail to respond (timeout disconnect).
+        try {
+            // Use agentId directly — ElevenLabs SDK fetches its own LiveKit token
+            // and connects via WebRTC (the modern stable path). No custom signed-URL
+            // webhook needed; the WebSocket path was causing disconnect issues.
             const overrides = knowledgeBase.greeting
-                ? {
-                      agent: {
-                          // SDK reads firstMessage (camelCase), not first_message
-                          firstMessage: knowledgeBase.greeting,
-                      },
-                  }
+                ? { agent: { firstMessage: knowledgeBase.greeting } }
                 : undefined;
 
             await conversation.startSession({
-                signedUrl,
+                agentId: ELEVENLABS_AGENT_ID,
                 ...(overrides ? { overrides } : {}),
             });
         } catch (error) {
@@ -154,7 +149,7 @@ export default function UserPhoneInterface({
             setConnectionError(error instanceof Error ? error.message : 'Failed to connect');
             setAgentStatus('idle');
         }
-    }, [startCall, getSignedUrl, conversation, knowledgeBase]);
+    }, [startCall, conversation, knowledgeBase]);
 
     const handleEndCall = useCallback(async () => {
         console.log('🔴 End call button pressed');
