@@ -144,7 +144,8 @@ export default function UserPhoneInterface({
                             prompt: systemPrompt,
                         },
                         // Use the KB greeting as the agent's opening line
-                        first_message: knowledgeBase.greeting || undefined,
+                        // SDK reads firstMessage (camelCase), not first_message
+                        firstMessage: knowledgeBase.greeting || undefined,
                     },
                 },
             });
