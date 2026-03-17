@@ -5,7 +5,6 @@ import { useConversation } from '@elevenlabs/react';
 import { cn } from '../../utils/cn';
 import { useDemoCall } from '../../contexts/DemoCallContext';
 import { fetchElevenLabsSignedUrl } from '../../services/elevenlabsSignedUrl';
-import { buildElevenLabsSystemPrompt } from '../../services/elevenLabsSystemPrompt';
 
 interface UserPhoneInterfaceProps {
     isDark?: boolean;
@@ -132,22 +131,23 @@ export default function UserPhoneInterface({
             // Get signed URL from our server (keeps API key safe)
             const signedUrl = await getSignedUrl();
 
-            // Build the system prompt from the current knowledge base config.
-            // This mirrors what Groq gets, keeping voice and text fully in sync.
-            const systemPrompt = buildElevenLabsSystemPrompt(knowledgeBase);
+            // Only override firstMessage (greeting) — do NOT override the full
+            // agent prompt. ElevenLabs injects its own tool-call and KB-search
+            // instructions into the agent system prompt at the platform level;
+            // replacing prompt.prompt strips those hidden instructions and causes
+            // the agent to silently fail to respond (timeout disconnect).
+            const overrides = knowledgeBase.greeting
+                ? {
+                      agent: {
+                          // SDK reads firstMessage (camelCase), not first_message
+                          firstMessage: knowledgeBase.greeting,
+                      },
+                  }
+                : undefined;
 
             await conversation.startSession({
                 signedUrl,
-                overrides: {
-                    agent: {
-                        prompt: {
-                            prompt: systemPrompt,
-                        },
-                        // Use the KB greeting as the agent's opening line
-                        // SDK reads firstMessage (camelCase), not first_message
-                        firstMessage: knowledgeBase.greeting || undefined,
-                    },
-                },
+                ...(overrides ? { overrides } : {}),
             });
         } catch (error) {
             console.error('📞 Failed to start ElevenLabs session:', error);
