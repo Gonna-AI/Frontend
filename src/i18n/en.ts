@@ -105,6 +105,8 @@ export const en = {
     'about.ind3': 'BPO',
     'about.ind4': 'Operations',
     'about.ind5': 'Document Processing',
+    'about.teamTitle': 'Our Team',
+    'about.officeTitle': 'Our Office',
     'about.joinTitle': 'Join Us on This Journey',
     'about.joinDesc': "We're just getting started. Partner with us to transform your operations.",
     'about.getInTouch': 'Get in Touch',
@@ -116,6 +118,7 @@ export const en = {
     'about.team.urja': 'Urja Shrestha (Customer Success Manager) studies Sustainable Management and Technology at TUM in Straubing, Bavaria. At ClerkTree, she drives client engagement by optimizing product adoption and tailoring success strategies for seamless integration.',
     'about.team.sinem': 'Sinem Koc (Legal Analyst) is a law student at Johannes Gutenberg University Mainz with a focus on life science and healthcare law and strong academic results. At ClerkTree, she works as a Legal Analyst, supporting compliance, data protection, and the legal foundations required to scale AI-driven business solutions.',
     'about.team.katharina': 'Katharina Krüger (Executive Assistant) brings strategic expertise from her roles as Head of Strategy at various companies and at Tchibo. A Business Administration graduate from the University of Mannheim, she now optimizes executive operations at ClerkTree, driving high-level strategic initiatives and ensuring seamless organizational efficiency.',
+    'about.team.aryaman': 'Aryaman Srivastava studies CSE at Shiv Nadar Institute of Eminence with a focus on machine learning, scalable systems, and agentic AI. He builds high-performance solutions across GPU-accelerated image segmentation, reinforcement learning, and predictive analytics. He has worked with Fractal Analytics on data-driven applications and interned with the Indian Army, contributing to impactful technology initiatives. He specializes in developing efficient, production-ready AI systems.',
 
     // Contact Page
     'contact.title1': "Let's Talk About",

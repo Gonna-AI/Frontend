@@ -105,6 +105,8 @@ export const de = {
     'about.ind3': 'BPO',
     'about.ind4': 'Operations',
     'about.ind5': 'Dokumentenverarbeitung',
+    'about.teamTitle': 'Unser Team',
+    'about.officeTitle': 'Unser Büro',
     'about.joinTitle': 'Begleiten Sie uns auf dieser Reise',
     'about.joinDesc': 'Wir fangen gerade erst an. Arbeiten Sie mit uns zusammen, um Ihre Abläufe zu transformieren.',
     'about.getInTouch': 'Kontakt aufnehmen',
@@ -116,6 +118,7 @@ export const de = {
     'about.team.urja': 'Urja Shrestha (Customer Success Manager) studiert Sustainable Management and Technology an der TUM in Straubing, Bayern. Bei ClerkTree fördert sie das Kundenengagement durch Optimierung der Produktakzeptanz und maßgeschneiderte Erfolgsstrategien für eine nahtlose Integration.',
     'about.team.sinem': 'Sinem Koc (Legal Analyst) ist Jurastudentin an der Johannes Gutenberg-Universität Mainz mit Schwerpunkt Life Science und Gesundheitsrecht und starken akademischen Ergebnissen. Bei ClerkTree arbeitet sie als Legal Analyst und unterstützt Compliance, Datenschutz und die rechtlichen Grundlagen, die für die Skalierung KI-gesteuerter Geschäftslösungen erforderlich sind.',
     'about.team.katharina': 'Katharina Krüger (Executive Assistant) bringt strategische Expertise aus ihren Rollen als Head of Strategy bei verschiedenen Unternehmen und bei Tchibo ein. Als Absolventin der Betriebswirtschaftslehre der Universität Mannheim optimiert sie nun bei ClerkTree die Abläufe der Geschäftsleitung, treibt strategische Initiativen auf hoher Ebene voran und sorgt für nahtlose organisatorische Effizienz.',
+    'about.team.aryaman': 'Aryaman Srivastava studiert CSE am Shiv Nadar Institute of Eminence mit Fokus auf Machine Learning, skalierbare Systeme und agentische KI. Er entwickelt leistungsstarke Lösungen in den Bereichen GPU-beschleunigte Bildsegmentierung, Reinforcement Learning und Predictive Analytics. Er arbeitete mit Fractal Analytics an datengetriebenen Anwendungen und absolvierte ein Praktikum bei der indischen Armee, wo er zu wirkungsvollen Technologieinitiativen beitrug. Er spezialisiert sich auf die Entwicklung effizienter, produktionsreifer KI-Systeme.',
 
     // Contact Page
     'contact.title1': 'Lassen Sie uns über',

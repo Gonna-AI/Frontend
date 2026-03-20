@@ -103,7 +103,7 @@ export default function About() {
 
             <div className="text-center mb-16 relative z-10">
               <h2 className="text-4xl md:text-5xl font-bold text-white tracking-tight mb-4">
-                Our Team
+                {t('about.teamTitle')}
               </h2>
             </div>
 
@@ -149,17 +149,23 @@ export default function About() {
                   linkedin: 'https://www.linkedin.com/in/sinem-koc-450174337?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app'
                 },
                 {
-                  name: 'Urja Shrestha',
-                  image: 'https://xlzwfkgurrrspcdyqele.supabase.co/storage/v1/object/public/buck/Urja%20Shrestha.jpeg',
-                  description: t('about.team.urja'),
-                  linkedin: 'https://www.linkedin.com/in/urja-shrestha-a4ba5324a/'
-                },
-                {
                   name: 'Katharina Krüger',
                   image: 'https://xlzwfkgurrrspcdyqele.supabase.co/storage/v1/object/public/buck/Katharina.jpeg',
                   description: t('about.team.katharina'),
                   objectPosition: 'center top',
                   linkedin: 'https://www.linkedin.com/in/katharina-krüger-42220a392/'
+                },
+                {
+                  name: 'Aryaman Srivastava',
+                  image: 'https://xlzwfkgurrrspcdyqele.supabase.co/storage/v1/object/public/buck/aryamansriva.jpeg',
+                  description: t('about.team.aryaman'),
+                  objectPosition: 'center top'
+                },
+                {
+                  name: 'Urja Shrestha',
+                  image: 'https://xlzwfkgurrrspcdyqele.supabase.co/storage/v1/object/public/buck/Urja%20Shrestha.jpeg',
+                  description: t('about.team.urja'),
+                  linkedin: 'https://www.linkedin.com/in/urja-shrestha-a4ba5324a/'
                 },
               ].map((member, index) => (
                 <div
@@ -253,7 +259,7 @@ export default function About() {
 
           {/* Location Info */}
           <div className="mt-16 text-center">
-            <h3 className="text-xl font-semibold text-white/80 mb-2">Our Office</h3>
+            <h3 className="text-xl font-semibold text-white/80 mb-2">{t('about.officeTitle')}</h3>
             <p className="text-white/50">
               Industriestraße 2, 94315 Straubing, Germany
             </p>

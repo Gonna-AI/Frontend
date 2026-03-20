@@ -18,6 +18,8 @@ export default function SEO({ title, description, canonical, openGraph, structur
     const siteUrl = 'https://clerktree.com';
     const currentUrl = canonical || (openGraph?.url ?? siteUrl);
     const ogImage = openGraph?.image || 'https://xlzwfkgurrrspcdyqele.supabase.co/storage/v1/object/public/buck/logo.svg';
+    const faviconHref = `${siteUrl}/favicon.svg`;
+    const manifestHref = `${siteUrl}/site.webmanifest`;
 
     return (
         <Helmet>
@@ -25,6 +27,10 @@ export default function SEO({ title, description, canonical, openGraph, structur
             <title>{title} | ClerkTree</title>
             <meta name="description" content={description} />
             <link rel="canonical" href={currentUrl} />
+            <link rel="icon" type="image/svg+xml" href={faviconHref} />
+            <link rel="shortcut icon" href={faviconHref} />
+            <link rel="apple-touch-icon" href={faviconHref} />
+            <link rel="manifest" href={manifestHref} />
 
             {/* Open Graph */}
             <meta property="og:type" content={openGraph?.type || 'website'} />
