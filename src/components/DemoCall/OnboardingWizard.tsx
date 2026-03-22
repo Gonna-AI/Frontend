@@ -311,7 +311,7 @@ export default function OnboardingWizard({ isDark = true, onComplete }: Onboardi
 
     // --- Main Layout matching Dashboard standards ---
     return (
-        <div className="space-y-6 max-w-[1600px] mx-auto pb-10">
+        <div className="space-y-6 max-w-[1400px] mx-auto pb-10">
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
@@ -326,39 +326,44 @@ export default function OnboardingWizard({ isDark = true, onComplete }: Onboardi
 
             {/* Main Content Card */}
             <div className={cn(
-                "flex flex-col rounded-xl border h-[650px] overflow-hidden relative",
-                isDark ? "bg-[#09090B] border-white/10 text-white" : "bg-white border-black/10 text-black"
+                "flex flex-col rounded-2xl border h-[680px] overflow-hidden relative shadow-2xl",
+                isDark ? "bg-[#0B0B0D] border-white/10 text-white" : "bg-white border-black/10 text-black"
             )}>
+                {isDark && (
+                    <div className="absolute inset-0 pointer-events-none">
+                        <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-[80%] h-[220px] bg-[radial-gradient(ellipse_at_top,_rgba(255,138,91,0.15)_0%,_rgba(0,0,0,0)_60%)]" />
+                        <div className="absolute bottom-0 left-0 w-full h-[160px] bg-gradient-to-t from-black/40 to-transparent" />
+                    </div>
+                )}
                 {showIntro ? (
                     <div className="flex-1 flex flex-col items-center justify-center p-8 overflow-y-auto w-full h-full relative z-10">
                         <motion.div
                             initial={{ opacity: 0, y: 30 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-                            className="max-w-lg w-full text-center"
+                            className="max-w-xl w-full text-center"
                         >
                             {/* Animated icon */}
                             <motion.div
-                                initial={{ scale: 0.8 }}
-                                animate={{ scale: 1 }}
-                                transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
-                                className="mx-auto mb-8 relative"
+                                initial={{ scale: 0.85, opacity: 0 }}
+                                animate={{ scale: 1, opacity: 1 }}
+                                transition={{ delay: 0.1, type: 'spring', stiffness: 200 }}
+                                className="mx-auto mb-6 relative"
                             >
                                 <div className={cn(
-                                    "w-20 h-20 rounded-3xl flex items-center justify-center mx-auto border shadow-lg relative z-20",
+                                    "w-16 h-16 rounded-2xl flex items-center justify-center mx-auto border shadow-lg relative z-20",
                                     isDark
-                                        ? "bg-gradient-to-br from-purple-500/20 to-blue-500/20 border-purple-500/30 shadow-purple-500/10"
-                                        : "bg-gradient-to-br from-purple-100 to-blue-100 border-purple-200 shadow-purple-200/30"
+                                        ? "bg-[#FF8A5B]/10 border-[#FF8A5B]/30 shadow-[#FF8A5B]/10"
+                                        : "bg-orange-50 border-orange-200 shadow-orange-200/30"
                                 )}>
-                                    <Wand2 className={cn("w-10 h-10", isDark ? "text-purple-400" : "text-purple-600")} />
+                                    <Wand2 className={cn("w-8 h-8", isDark ? "text-[#FFB286]" : "text-[#FF8A5B]")} />
                                 </div>
-                                <div className="absolute inset-0 bg-purple-500/20 blur-2xl rounded-full z-10" />
                             </motion.div>
 
                             <h2 className={cn("text-3xl font-bold tracking-tight mb-3", textPrimary)}>
                                 {t('onboarding.title')}
                             </h2>
-                            <p className={cn("text-lg mb-10 leading-relaxed", textSecondary)}>
+                            <p className={cn("text-lg mb-8 leading-relaxed", textSecondary)}>
                                 {t('onboarding.introDesc')}
                             </p>
 
@@ -368,15 +373,11 @@ export default function OnboardingWizard({ isDark = true, onComplete }: Onboardi
                                 transition={{ delay: 0.7 }}
                                 onClick={startConversation}
                                 className={cn(
-                                    "relative inline-flex items-center gap-3 px-8 py-4 rounded-2xl text-base font-semibold transition-all duration-300 cursor-pointer overflow-hidden",
-                                    "backdrop-blur-xl border",
-                                    isDark
-                                        ? "bg-white/10 hover:bg-white/20 border-white/20 text-white shadow-lg shadow-black/20 hover:shadow-white/10"
-                                        : "bg-black/5 hover:bg-black/10 border-black/10 text-black shadow-lg shadow-black/5 hover:shadow-black/10",
+                                    "relative inline-flex items-center gap-3 px-8 py-4 rounded-2xl text-base font-semibold transition-all duration-300 cursor-pointer overflow-hidden border shadow-lg",
+                                    "bg-gradient-to-r from-[#FF8A5B] to-[#FFB286] text-white border-[#FF8A5B]/30 shadow-[#FF8A5B]/30",
                                     "hover:scale-[1.02] active:scale-[0.98]"
                                 )}
                             >
-                                <div className="absolute inset-0 bg-gradient-to-tr from-white/5 to-transparent pointer-events-none" />
                                 <Sparkles className="w-5 h-5 relative z-10" />
                                 <span className="relative z-10">{t('onboarding.startButton')}</span>
                                 <ArrowRight className="w-5 h-5 relative z-10" />
@@ -412,7 +413,10 @@ export default function OnboardingWizard({ isDark = true, onComplete }: Onboardi
                 ) : (
                     <div className="flex-1 flex flex-col h-full bg-transparent relative z-10">
                         {/* Chat Messages */}
-                        <div className="flex-1 overflow-y-auto px-6 py-6 space-y-4 scrollbar-hide max-w-4xl mx-auto w-full">
+                        <div className={cn(
+                            "flex-1 overflow-y-auto px-6 py-6 space-y-4 scrollbar-hide max-w-4xl mx-auto w-full rounded-2xl border shadow-inner",
+                            isDark ? "bg-black/30 border-white/10 shadow-black/30" : "bg-gray-50 border-gray-200"
+                        )}>
                             <AnimatePresence mode="popLayout">
                                 {messages.map((msg) => (
                                     <motion.div
@@ -430,10 +434,10 @@ export default function OnboardingWizard({ isDark = true, onComplete }: Onboardi
                                             <div className={cn(
                                                 "w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 mt-1",
                                                 isDark
-                                                    ? "bg-gradient-to-br from-purple-500/20 to-blue-500/20 border border-purple-500/30"
-                                                    : "bg-gradient-to-br from-purple-100 to-blue-100 border border-purple-200"
+                                                    ? "bg-[#FF8A5B]/10 border border-[#FF8A5B]/30"
+                                                    : "bg-orange-50 border border-orange-200"
                                             )}>
-                                                <Bot className={cn("w-4 h-4", isDark ? "text-purple-400" : "text-purple-600")} />
+                                                <Bot className={cn("w-4 h-4", isDark ? "text-[#FFB286]" : "text-[#FF8A5B]")} />
                                             </div>
                                         )}
 
@@ -442,12 +446,12 @@ export default function OnboardingWizard({ isDark = true, onComplete }: Onboardi
                                             msg.role === 'user'
                                                 ? cn(
                                                     "rounded-br-md shadow-md",
-                                                    "bg-gradient-to-r from-blue-600/90 to-blue-500/90 text-white border border-blue-400/20 shadow-blue-500/20"
+                                                    "bg-gradient-to-r from-[#FF8A5B] to-[#FFB286] text-white border border-[#FF8A5B]/30 shadow-[#FF8A5B]/20"
                                                 )
                                                 : cn(
                                                     "rounded-bl-md border shadow-sm",
                                                     isDark
-                                                        ? "bg-[#121214] border-white/10 text-white/90"
+                                                        ? "bg-white/[0.05] border-white/10 text-white/90"
                                                         : "bg-white border-gray-200 text-gray-800"
                                                 )
                                         )}>
@@ -485,15 +489,15 @@ export default function OnboardingWizard({ isDark = true, onComplete }: Onboardi
                                     <div className={cn(
                                         "w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0",
                                         isDark
-                                            ? "bg-gradient-to-br from-purple-500/20 to-blue-500/20 border border-purple-500/30"
-                                            : "bg-gradient-to-br from-purple-100 to-blue-100 border border-purple-200"
+                                            ? "bg-[#FF8A5B]/10 border border-[#FF8A5B]/30"
+                                            : "bg-orange-50 border border-orange-200"
                                     )}>
-                                        <Bot className={cn("w-4 h-4", isDark ? "text-purple-400" : "text-purple-600")} />
+                                        <Bot className={cn("w-4 h-4", isDark ? "text-[#FFB286]" : "text-[#FF8A5B]")} />
                                     </div>
                                     <div className={cn(
                                         "rounded-2xl rounded-bl-md px-5 py-3.5 border shadow-sm",
                                         isDark
-                                            ? "bg-[#121214] border-white/10"
+                                            ? "bg-white/[0.05] border-white/10"
                                             : "bg-white border-gray-200"
                                     )}>
                                         <div className="flex gap-1.5 mt-1">
@@ -504,7 +508,7 @@ export default function OnboardingWizard({ isDark = true, onComplete }: Onboardi
                                                     transition={{ repeat: Infinity, duration: 0.8, delay: i * 0.15 }}
                                                     className={cn(
                                                         "w-2 h-2 rounded-full",
-                                                        isDark ? "bg-purple-400/60" : "bg-purple-500/50"
+                                                        isDark ? "bg-[#FFB286]/70" : "bg-[#FF8A5B]/60"
                                                     )}
                                                 />
                                             ))}
@@ -521,15 +525,15 @@ export default function OnboardingWizard({ isDark = true, onComplete }: Onboardi
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 className={cn(
-                                    "mx-6 mb-4 rounded-xl border p-5 overflow-hidden max-w-4xl self-center w-full shadow-lg shadow-black/5",
+                                    "mx-6 mb-4 rounded-2xl border p-5 overflow-hidden max-w-4xl self-center w-full shadow-lg shadow-black/10 backdrop-blur-xl",
                                     isDark
-                                        ? "bg-gradient-to-br from-purple-500/5 to-blue-500/5 border-purple-500/20"
-                                        : "bg-gradient-to-br from-purple-50 to-blue-50 border-purple-200"
+                                        ? "bg-white/[0.03] border-white/10"
+                                        : "bg-orange-50 border-orange-200"
                                 )}
                             >
                                 <div className="flex items-center justify-between mb-4">
                                     <div className="flex items-center gap-2">
-                                        <Sparkles className={cn("w-5 h-5", isDark ? "text-purple-400" : "text-purple-600")} />
+                                        <Sparkles className={cn("w-5 h-5", isDark ? "text-[#FFB286]" : "text-[#FF8A5B]")} />
                                         <h3 className={cn("font-bold text-base", textPrimary)}>{t('onboarding.configReady')}</h3>
                                     </div>
                                 </div>
@@ -585,8 +589,8 @@ export default function OnboardingWizard({ isDark = true, onComplete }: Onboardi
                                         disabled={isDeploying}
                                         className={cn(
                                             "flex-1 flex items-center justify-center gap-2 px-5 py-3 rounded-xl text-sm font-semibold transition-all duration-200 cursor-pointer shadow-md",
-                                            "bg-gradient-to-r from-emerald-600 to-green-600 text-white shadow-emerald-500/20",
-                                            "hover:from-emerald-500 hover:to-green-500 hover:shadow-lg hover:shadow-emerald-500/30 hover:-translate-y-0.5",
+                                            "bg-gradient-to-r from-[#FF8A5B] to-[#FFB286] text-white shadow-[#FF8A5B]/25",
+                                            "hover:from-[#FF8A5B] hover:to-[#FFC7A1] hover:shadow-lg hover:shadow-[#FF8A5B]/30 hover:-translate-y-0.5",
                                             isDeploying && "opacity-70 pointer-events-none"
                                         )}
                                     >
@@ -620,10 +624,10 @@ export default function OnboardingWizard({ isDark = true, onComplete }: Onboardi
                         {/* Uploaded document badge */}
                         {uploadedDoc && (
                             <div className={cn(
-                                "max-w-4xl self-center w-[calc(100%-3rem)] mx-6 mb-3 flex items-center gap-2 px-3 py-2.5 rounded-lg border text-xs shadow-sm",
+                                "max-w-4xl self-center w-[calc(100%-3rem)] mx-6 mb-3 flex items-center gap-2 px-3 py-2.5 rounded-lg border text-xs shadow-sm backdrop-blur",
                                 isDark
-                                    ? "bg-blue-500/10 border-blue-500/20 text-blue-400"
-                                    : "bg-blue-50 border-blue-200 text-blue-600"
+                                    ? "bg-[#FF8A5B]/10 border-[#FF8A5B]/20 text-[#FFB286]"
+                                    : "bg-orange-50 border-orange-200 text-[#FF8A5B]"
                             )}>
                                 <FileText className="w-4 h-4" />
                                 <span className="font-medium truncate">{uploadedDoc.name}</span>
@@ -639,14 +643,14 @@ export default function OnboardingWizard({ isDark = true, onComplete }: Onboardi
                         {/* Input Area */}
                         <div className={cn(
                             "p-4 border-t flex-shrink-0 z-20",
-                            isDark ? "bg-[#0A0A0A] border-white/10" : "bg-gray-50 border-black/10"
+                            isDark ? "bg-black/40 border-white/10" : "bg-gray-50 border-black/10"
                         )}>
                             <div className={cn(
-                                "flex items-end gap-2 rounded-2xl border px-4 py-3 transition-all duration-200 max-w-4xl mx-auto w-full shadow-sm",
+                                "flex items-end gap-2 rounded-2xl border px-4 py-3 transition-all duration-200 max-w-4xl mx-auto w-full shadow-sm backdrop-blur",
                                 "focus-within:ring-2 focus-within:ring-offset-0",
                                 isDark
-                                    ? "bg-[#121214] border-white/10 focus-within:border-purple-500/50 focus-within:ring-purple-500/20"
-                                    : "bg-white border-gray-200 focus-within:border-purple-400 focus-within:ring-purple-500/10"
+                                    ? "bg-black/30 border-white/10 focus-within:border-[#FF8A5B]/50 focus-within:ring-[#FF8A5B]/20"
+                                    : "bg-white border-gray-200 focus-within:border-[#FF8A5B] focus-within:ring-[#FF8A5B]/10"
                             )}>
                                 {/* Upload button */}
                                 <button
@@ -705,7 +709,7 @@ export default function OnboardingWizard({ isDark = true, onComplete }: Onboardi
                                     className={cn(
                                         "p-2 rounded-xl transition-all duration-200 flex-shrink-0 cursor-pointer",
                                         input.trim() && !isLoading
-                                            ? "bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-md shadow-purple-500/20 hover:scale-105 hover:shadow-lg hover:shadow-purple-500/30"
+                                            ? "bg-gradient-to-r from-[#FF8A5B] to-[#FFB286] text-white shadow-md shadow-[#FF8A5B]/20 hover:scale-105 hover:shadow-lg hover:shadow-[#FF8A5B]/30"
                                             : cn(isDark ? "text-white/20 bg-white/5" : "text-gray-300 bg-gray-100")
                                     )}
                                 >

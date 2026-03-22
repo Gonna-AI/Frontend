@@ -5,6 +5,7 @@ import { Plus, User, Mail, Shield, Trash2, Check, Loader2, Link as LinkIcon, Cop
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '../../config/supabase';
 import { useAuth } from '../../contexts/AuthContext';
+import { logActivity } from '../../services/activityLogger';
 
 interface TeamMember {
     id: string;
@@ -105,6 +106,7 @@ export default function TeamView({ isDark = true }: { isDark?: boolean }) {
                 setInviteSuccess(true);
                 setEmail('');
                 setTimeout(() => setInviteSuccess(false), 3000);
+                logActivity({ event_type: 'team', action: 'member_invited', description: `Team member invited: ${email}`, metadata: { email, role } }).catch(() => {});
             } else {
                 console.error('Failed to invite member:', result.error);
             }
@@ -126,6 +128,7 @@ export default function TeamView({ isDark = true }: { isDark?: boolean }) {
 
                 if (res.ok) {
                     setMembers(members.filter(m => m.id !== id));
+                    logActivity({ event_type: 'team', action: 'member_removed', description: 'Team member removed', metadata: { member_id: id } }).catch(() => {});
                 }
             } catch (err) {
                 console.error('Failed to remove member:', err);

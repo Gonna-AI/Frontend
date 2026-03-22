@@ -4,6 +4,7 @@ import { Plus, Copy, Trash2, Key, Shield, Check, ArrowRight, ArrowLeft, X, Eye, 
 import { supabase } from '../../config/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { logActivity } from '../../services/activityLogger';
 
 interface ApiKey {
     id: string;
@@ -130,6 +131,7 @@ export default function KeysView({ isDark = true, hasAccess = false }: { isDark?
                 setKeys([newKey, ...keys]);
                 setCreatedKeyToken(data.token);
                 setWizardStep('created');
+                logActivity({ event_type: 'api_keys', action: 'api_key_created', description: `API key "${newKeyName}" created`, metadata: { key_id: data.id, permissions: data.permissions } }).catch(() => {});
             } else {
                 setCreateKeyError(result.error || 'Failed to create API key.');
             }
@@ -151,6 +153,7 @@ export default function KeysView({ isDark = true, hasAccess = false }: { isDark?
 
                 if (res.ok) {
                     setKeys(keys.filter(k => k.id !== id));
+                    logActivity({ event_type: 'api_keys', action: 'api_key_revoked', description: `API key revoked`, metadata: { key_id: id } }).catch(() => {});
                 }
             } catch (err) {
                 console.error('Failed to delete API key:', err);

@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Session, User, AuthError } from '@supabase/supabase-js';
 import { supabase } from '../config/supabase';
+import { logActivity } from '../services/activityLogger';
 
 interface AuthContextType {
     user: User | null;
@@ -35,10 +36,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         // Listen for auth changes
         const { data: { subscription } } = supabase.auth.onAuthStateChange(
-            (_event, session) => {
+            (event, session) => {
                 setSession(session);
                 setUser(session?.user ?? null);
                 setLoading(false);
+
+                if (event === 'SIGNED_IN') {
+                    logActivity({ event_type: 'auth', action: 'login', description: 'User signed in' }).catch(() => {});
+                } else if (event === 'SIGNED_OUT') {
+                    // token is gone after sign-out so we skip the log (no auth available)
+                }
             }
         );
 
