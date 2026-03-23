@@ -40,43 +40,55 @@ export default function UserPhoneInterface({
 
     const timerRef = useRef<NodeJS.Timeout | null>(null);
 
+    // Memoized callbacks — stable references prevent useConversation from
+    // re-initialising on every render, which can reset the active WebSocket.
+    const onConnect = useCallback(() => {
+        console.log('📞 ElevenLabs Conversational AI connected');
+        setConnectionError(null);
+        setAgentStatus('listening');
+    }, []);
+
+    const onDisconnect = useCallback(() => {
+        console.log('📞 ElevenLabs Conversational AI disconnected');
+        setAgentStatus('idle');
+    }, []);
+
+    const onMessage = useCallback((message: { source: string; message: string }) => {
+        console.log(`📞 [${message.source}]: ${message.message}`);
+        if (message.source === 'user') {
+            setCurrentTranscript(message.message);
+            addMessage('user', message.message);
+            onTranscript?.(message.message, 'user');
+        } else if (message.source === 'ai') {
+            setCurrentTranscript('');
+            setLastAgentMessage(message.message);
+            addMessage('agent', message.message);
+            onTranscript?.(message.message, 'agent');
+        }
+    }, [addMessage, onTranscript]);
+
+    const onError = useCallback((error: string) => {
+        console.error('📞 ElevenLabs error:', error);
+        setConnectionError(typeof error === 'string' ? error : 'Connection error');
+    }, []);
+
+    const onModeChange = useCallback((modeEvent: { mode: string }) => {
+        console.log('📞 Mode:', modeEvent.mode);
+        if (modeEvent.mode === 'speaking') {
+            setAgentStatus('speaking');
+            setCurrentTranscript('');
+        } else if (modeEvent.mode === 'listening') {
+            setAgentStatus('listening');
+        }
+    }, []);
+
     // ElevenLabs Conversational AI — handles STT + LLM + TTS in one WebSocket
     const conversation = useConversation({
-        onConnect: () => {
-            console.log('📞 ElevenLabs Conversational AI connected');
-            setConnectionError(null);
-            setAgentStatus('listening');
-        },
-        onDisconnect: () => {
-            console.log('📞 ElevenLabs Conversational AI disconnected');
-            setAgentStatus('idle');
-        },
-        onMessage: (message: { source: string; message: string }) => {
-            console.log(`📞 [${message.source}]: ${message.message}`);
-            if (message.source === 'user') {
-                setCurrentTranscript(message.message);
-                addMessage('user', message.message);
-                onTranscript?.(message.message, 'user');
-            } else if (message.source === 'ai') {
-                setCurrentTranscript('');
-                setLastAgentMessage(message.message);
-                addMessage('agent', message.message);
-                onTranscript?.(message.message, 'agent');
-            }
-        },
-        onError: (error: string) => {
-            console.error('📞 ElevenLabs error:', error);
-            setConnectionError(typeof error === 'string' ? error : 'Connection error');
-        },
-        onModeChange: (mode: { mode: string }) => {
-            console.log('📞 Mode:', mode.mode);
-            if (mode.mode === 'speaking') {
-                setAgentStatus('speaking');
-                setCurrentTranscript('');
-            } else if (mode.mode === 'listening') {
-                setAgentStatus('listening');
-            }
-        },
+        onConnect,
+        onDisconnect,
+        onMessage,
+        onError,
+        onModeChange,
     });
 
     // Timer for call duration
@@ -123,18 +135,27 @@ export default function UserPhoneInterface({
     const handleStartCall = useCallback(async () => {
         setConnectionError(null);
         setIsEnding(false);
-        startCall('voice');
         setAgentStatus('processing');
 
+        // 1. Pre-request mic access while still inside the user-gesture context.
+        //    This warms the browser audio pipeline BEFORE the network round-trips,
+        //    so the ElevenLabs AudioWorklet is ready to send audio the instant the
+        //    WebSocket opens — preventing the server's silence/inactivity timeout
+        //    from closing the connection before the conversation can begin.
         try {
-            // Get signed URL from our server (keeps API key safe)
-            const signedUrl = await getSignedUrl();
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            stream.getTracks().forEach(t => t.stop()); // release; SDK acquires its own
+        } catch {
+            setConnectionError('Microphone access denied. Please allow microphone access and try again.');
+            setAgentStatus('idle');
+            return;
+        }
 
-            // Start ElevenLabs Conversational AI session
-            // This single WebSocket connection handles STT + LLM + TTS
-            await conversation.startSession({
-                signedUrl,
-            });
+        startCall('voice');
+
+        try {
+            const signedUrl = await getSignedUrl();
+            await conversation.startSession({ signedUrl });
         } catch (error) {
             console.error('📞 Failed to start ElevenLabs session:', error);
             setConnectionError(error instanceof Error ? error.message : 'Failed to connect');
@@ -156,12 +177,16 @@ export default function UserPhoneInterface({
         setLastAgentMessage('');
     }, [endCall, conversation]);
 
-    // Cleanup on unmount
+    // Keep a ref so the unmount cleanup always calls endSession on the latest instance.
+    // Without this, the closure would capture the stale initial conversation object
+    // (status = 'disconnected') and never actually end the session.
+    const conversationRef = useRef(conversation);
+    conversationRef.current = conversation;
+
+    // Cleanup on unmount — end any active ElevenLabs session
     useEffect(() => {
         return () => {
-            if (conversation.status === 'connected') {
-                conversation.endSession();
-            }
+            conversationRef.current.endSession();
         };
     }, []);
 
