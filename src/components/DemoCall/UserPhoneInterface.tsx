@@ -40,16 +40,41 @@ export default function UserPhoneInterface({
 
     const timerRef = useRef<NodeJS.Timeout | null>(null);
 
+    // Tracks when the WebSocket connected so we can log the live-to-dead delta.
+    const connectTimeRef = useRef<number | null>(null);
+
+    // Inline type that matches @elevenlabs/types DisconnectionDetails union.
+    // Defined here so diagnostics compile even before node_modules is installed.
+    type DisconnectionDetails =
+        | { reason: 'error'; message: string; context?: Event; closeCode?: number; closeReason?: string }
+        | { reason: 'agent'; context?: CloseEvent; closeCode?: number; closeReason?: string }
+        | { reason: 'user' };
+
     // Memoized callbacks — stable references prevent useConversation from
     // re-initialising on every render, which can reset the active WebSocket.
     const onConnect = useCallback(() => {
-        console.log('📞 ElevenLabs Conversational AI connected');
+        connectTimeRef.current = Date.now();
+        console.log('📞 [DIAG] ElevenLabs connected at', new Date().toISOString());
         setConnectionError(null);
         setAgentStatus('listening');
     }, []);
 
-    const onDisconnect = useCallback(() => {
-        console.log('📞 ElevenLabs Conversational AI disconnected');
+    const onDisconnect = useCallback((details?: DisconnectionDetails) => {
+        const uptime = connectTimeRef.current !== null
+            ? Date.now() - connectTimeRef.current
+            : null;
+        connectTimeRef.current = null;
+
+        // ─── DIAGNOSTIC: log every field so we can identify the root cause ───
+        console.log('📞 [DIAG] ElevenLabs disconnected', {
+            reason:      details?.reason ?? '(none)',
+            message:     (details as { message?: string })?.message,
+            closeCode:   (details as { closeCode?: number })?.closeCode,
+            closeReason: (details as { closeReason?: string })?.closeReason,
+            uptimeMs:    uptime,
+            timestamp:   new Date().toISOString(),
+        });
+
         setAgentStatus('idle');
     }, []);
 
@@ -67,13 +92,19 @@ export default function UserPhoneInterface({
         }
     }, [addMessage, onTranscript]);
 
-    const onError = useCallback((error: string) => {
-        console.error('📞 ElevenLabs error:', error);
-        setConnectionError(typeof error === 'string' ? error : 'Connection error');
+    const onError = useCallback((message: string, context?: unknown) => {
+        // ─── DIAGNOSTIC: log message AND the context object (closeCode, etc.) ───
+        console.error('📞 [DIAG] ElevenLabs error:', message, context);
+        try {
+            console.error('📞 [DIAG] ElevenLabs error context (JSON):', JSON.stringify(context, null, 2));
+        } catch {
+            // context may not be serialisable (e.g. native Event)
+        }
+        setConnectionError(message ?? 'Connection error');
     }, []);
 
     const onModeChange = useCallback((modeEvent: { mode: string }) => {
-        console.log('📞 Mode:', modeEvent.mode);
+        console.log('📞 [DIAG] Mode change →', modeEvent.mode, 'at', new Date().toISOString());
         if (modeEvent.mode === 'speaking') {
             setAgentStatus('speaking');
             setCurrentTranscript('');
