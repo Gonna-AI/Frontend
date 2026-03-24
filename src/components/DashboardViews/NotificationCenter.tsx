@@ -101,11 +101,54 @@ export default function NotificationCenter({ isDark, className }: NotificationCe
     }
   }, [apiCall]);
 
-  // Poll unread count
+  // Subscribe to new notifications via Realtime (replaces 30s polling)
+  // User-scoped filter ensures each user only receives their own events —
+  // critical at 1M-user scale to avoid O(N²) broadcast fan-out.
   useEffect(() => {
     fetchUnreadCount();
-    const interval = setInterval(fetchUnreadCount, 30000);
-    return () => clearInterval(interval);
+
+    let channel: ReturnType<typeof supabase.channel> | null = null;
+
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!session?.user?.id) return;
+
+      channel = supabase
+        .channel(`notifications_${session.user.id}`)
+        .on(
+          'postgres_changes',
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'notifications',
+            filter: `user_id=eq.${session.user.id}`,
+          },
+          (payload) => {
+            // Increment badge immediately
+            setUnreadCount(prev => prev + 1);
+            // If dropdown is open, prepend the new notification
+            if (payload.new) {
+              setNotifications(prev => [payload.new as NotificationEntry, ...prev]);
+            }
+          }
+        )
+        .on(
+          'postgres_changes',
+          {
+            event: 'DELETE',
+            schema: 'public',
+            table: 'notifications',
+            filter: `user_id=eq.${session.user.id}`,
+          },
+          (payload) => {
+            setNotifications(prev => prev.filter(n => n.id !== (payload.old as { id: string }).id));
+          }
+        )
+        .subscribe();
+    });
+
+    return () => {
+      if (channel) supabase.removeChannel(channel);
+    };
   }, [fetchUnreadCount]);
 
   // Fetch full list when opened

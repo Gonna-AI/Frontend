@@ -1,5 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2";
+import { insertNotification } from "../_shared/notify.ts";
 
 const corsBaseHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -251,6 +252,14 @@ Deno.serve(async (req: Request) => {
       if (error) throw error;
       if (!data.success) throw new Error(data.message);
 
+      await insertNotification(adminClient, user.id, {
+        type: 'success',
+        title: 'Credits redeemed',
+        message: `${data.added_amount} credits added to your account via promo code.`,
+        category: 'billing',
+        action_url: '/dashboard?tab=billing',
+      });
+
       return jsonResponse(req, 200, { message: data.message, added_amount: data.added_amount });
     }
 
@@ -315,6 +324,13 @@ Deno.serve(async (req: Request) => {
           credits_added: 0,
         }).catch((err: unknown) => console.error('[api-billing] failed to record failed payment:', err));
 
+        await insertNotification(adminClient, user.id, {
+          type: 'error',
+          title: 'Payment failed',
+          message: 'We could not verify your payment. No credits were added. Please try again.',
+          category: 'billing',
+          action_url: '/dashboard?tab=billing',
+        });
         return jsonResponse(req, 400, { error: 'Invalid signature. Payment could not be verified.' });
       }
 
@@ -383,6 +399,14 @@ Deno.serve(async (req: Request) => {
         status: 'completed',
         credits_added: creditsToAdd,
       }).catch((err: unknown) => console.error('[api-billing] failed to record payment history:', err));
+
+      await insertNotification(adminClient, user.id, {
+        type: 'success',
+        title: 'Payment successful',
+        message: `${creditsToAdd} credits added to your account (${derivedPlan} plan).${newBalance !== null ? ` New balance: ${newBalance} credits.` : ''}`,
+        category: 'billing',
+        action_url: '/dashboard?tab=billing',
+      });
 
       return jsonResponse(req, 200, {
         success: true,

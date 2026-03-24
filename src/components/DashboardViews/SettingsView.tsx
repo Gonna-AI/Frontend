@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { createNotification } from '../../services/notificationService';
 import {
   User, Building2, Phone as PhoneIcon, Globe, Shield, Download, Trash2,
   Loader2, Save, Check, AlertCircle, Bell, Mail, Smartphone, ChevronRight,
@@ -177,6 +178,13 @@ export default function SettingsView({ isDark }: SettingsViewProps) {
       });
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
+      void createNotification({
+        type: 'success',
+        title: 'Profile updated',
+        message: 'Your profile changes have been saved.',
+        category: 'system',
+        action_url: '/dashboard?tab=settings',
+      });
     } catch (err) {
       console.error('[SettingsView] save error:', err);
     } finally {
@@ -204,6 +212,12 @@ export default function SettingsView({ isDark }: SettingsViewProps) {
       a.download = `clerktree-export-${new Date().toISOString().slice(0, 10)}.json`;
       a.click();
       URL.revokeObjectURL(url);
+      void createNotification({
+        type: 'success',
+        title: 'Data export ready',
+        message: 'Your account data has been downloaded.',
+        category: 'system',
+      });
     } catch (err) {
       console.error('[SettingsView] export error:', err);
     } finally {
@@ -215,6 +229,12 @@ export default function SettingsView({ isDark }: SettingsViewProps) {
     try {
       await apiCall('account', { method: 'DELETE' });
       setDeleteConfirm(false);
+      void createNotification({
+        type: 'warning',
+        title: 'Account deletion scheduled',
+        message: 'Your account will be deleted. Check your email for confirmation.',
+        category: 'security',
+      });
       alert('Account deletion has been scheduled. You will receive a confirmation email.');
     } catch (err) {
       console.error('[SettingsView] delete error:', err);

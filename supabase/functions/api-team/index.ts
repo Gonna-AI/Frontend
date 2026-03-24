@@ -1,5 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2";
+import { insertNotification } from "../_shared/notify.ts";
 
 const corsBaseHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -207,6 +208,14 @@ Deno.serve(async (req: Request) => {
 
       if (error) throw error;
 
+      await insertNotification(adminClient, user.id, {
+        type: 'info',
+        title: 'Team member invited',
+        message: `Invitation sent to ${email} with ${role} role.`,
+        category: 'team',
+        action_url: '/dashboard?tab=team',
+      });
+
       return jsonResponse(req, 201, { member: data });
     }
 
@@ -252,6 +261,14 @@ Deno.serve(async (req: Request) => {
 
       if (updateError) throw updateError;
 
+      await insertNotification(adminClient, user.id, {
+        type: 'info',
+        title: 'Team member role updated',
+        message: `Role changed to ${newRole}.`,
+        category: 'team',
+        action_url: '/dashboard?tab=team',
+      });
+
       return jsonResponse(req, 200, { member: updated });
     }
 
@@ -262,6 +279,14 @@ Deno.serve(async (req: Request) => {
         return jsonResponse(req, 400, { error: 'Missing member id.' });
       }
 
+      // Fetch email before deleting so we can include it in the notification
+      const { data: memberToRemove } = await adminClient
+        .from('team_members')
+        .select('email')
+        .eq('id', memberId)
+        .eq('owner_id', user.id)
+        .maybeSingle();
+
       const { error } = await adminClient
         .from('team_members')
         .delete()
@@ -269,6 +294,14 @@ Deno.serve(async (req: Request) => {
         .eq('owner_id', user.id);
 
       if (error) throw error;
+
+      await insertNotification(adminClient, user.id, {
+        type: 'info',
+        title: 'Team member removed',
+        message: memberToRemove?.email ? `${memberToRemove.email} has been removed from your team.` : 'Team member removed.',
+        category: 'team',
+        action_url: '/dashboard?tab=team',
+      });
 
       return jsonResponse(req, 200, { success: true });
     }

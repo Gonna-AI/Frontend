@@ -5,6 +5,7 @@ import { useAuth } from './AuthContext';
 import { DEFAULT_VOICE_ID, normalizeVoiceId } from '../config/voiceConfig';
 import type { RescueEngineSettings, RescuePlaybookTemplate } from '../types/rescuePlaybook';
 import { DEFAULT_RESCUE_PLAYBOOKS, DEFAULT_RESCUE_SETTINGS } from '../types/rescuePlaybook';
+import { createNotification } from '../services/notificationService';
 
 // Types for dynamic context extraction
 export interface ExtractedField {
@@ -667,6 +668,13 @@ export function DemoCallProvider({ children, initialAgentId }: { children: React
         console.warn('Supabase save failed (localStorage still saved):', error.message);
       } else {
         console.log('✅ Saved knowledge base to Supabase for user:', userId);
+        void createNotification({
+          type: 'success',
+          title: 'Knowledge base saved',
+          message: 'Your AI agent configuration has been updated.',
+          category: 'system',
+          action_url: '/dashboard?tab=knowledge-base',
+        });
       }
 
       return true;
@@ -1038,6 +1046,15 @@ export function DemoCallProvider({ children, initialAgentId }: { children: React
             item.id === historyId ? finalHistoryItem : item
           ));
           console.log('📝 Call history updated with summary:', historyId);
+
+          // Notify user that the call summary is ready
+          void createNotification({
+            type: finalSummary.followUpRequired ? 'warning' : 'success',
+            title: 'Call completed',
+            message: `${callerName !== 'Unknown Caller' ? callerName + ' · ' : ''}${Math.floor(duration / 60)}m ${duration % 60}s${finalSummary.followUpRequired ? ' · Follow-up required' : ''}`,
+            category: 'calls',
+            action_url: '/dashboard?tab=history',
+          });
 
           // Save to Supabase
           try {
