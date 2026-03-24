@@ -6,6 +6,7 @@ import { useDemoCall } from '../../contexts/DemoCallContext';
 import { ArrowUpRight, ArrowDownRight, MoreHorizontal, Phone, Clock, Activity, AlertCircle, Radio } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { LiveCallMonitor } from '../DemoCall';
+import PreCallBrief from '../DemoCall/PreCallBrief';
 
 import {
     AreaChart,
@@ -455,12 +456,17 @@ export default function MonitorView({ isDark = true }: { isDark?: boolean }) {
                     transition={{ duration: 0.3 }}
                 >
                     {activeSection === 'live' ? (
-                        <div className={cn(
-                            "rounded-2xl border overflow-hidden relative",
-                            isDark ? "bg-[#09090B] border-white/10" : "bg-white border-black/10"
-                        )}>
-                            <div className="p-1">
-                                <LiveCallMonitor isDark={isDark} />
+                        <div className="flex flex-col lg:flex-row gap-4">
+                            <div className={cn(
+                                "flex-1 rounded-2xl border overflow-hidden relative",
+                                isDark ? "bg-[#09090B] border-white/10" : "bg-white border-black/10"
+                            )}>
+                                <div className="p-1">
+                                    <LiveCallMonitor isDark={isDark} />
+                                </div>
+                            </div>
+                            <div className="lg:w-80 shrink-0">
+                                <PreCallBrief isDark={isDark} />
                             </div>
                         </div>
                     ) : (

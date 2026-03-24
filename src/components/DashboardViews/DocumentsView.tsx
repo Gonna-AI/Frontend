@@ -20,10 +20,13 @@ import {
     MessageSquare,
     Send,
     Cpu,
+    BookOpen,
+    AlertOctagon,
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useDemoCall } from '../../contexts/DemoCallContext';
+import { supabase } from '../../config/supabase';
 import { ragService, UploadedDocument, ProcessingProgress } from '../../services/ragService';
 import { pageIndexService, PageIndexNode } from '../../services/pageIndexService';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -204,6 +207,38 @@ export default function DocumentsView({ isDark = true }: { isDark?: boolean }) {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const chatScrollRef = useRef<HTMLDivElement>(null);
     const kbId = knowledgeBase?.id || user?.id || '';
+
+    // ─── KB Coverage State ────────────────────────────────────────
+    const [kbGaps, setKbGaps] = useState<{
+        coverageScore: number;
+        kbArticleCount: number;
+        totalTopics: number;
+        coveredTopics: number;
+        gaps: { topic: string; occurrences: number; coverage: number }[];
+    } | null>(null);
+    const [kbGapsLoading, setKbGapsLoading] = useState(true);
+
+    useEffect(() => {
+        let cancelled = false;
+        async function fetchKbGaps() {
+            setKbGapsLoading(true);
+            try {
+                const { data: { session } } = await supabase.auth.getSession();
+                if (!session?.access_token) return;
+                const res = await fetch(
+                    `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/api-analytics/kb-gaps?days=90`,
+                    { headers: { Authorization: `Bearer ${session.access_token}` } }
+                );
+                if (res.ok && !cancelled) {
+                    const data = await res.json();
+                    setKbGaps(data);
+                }
+            } catch { /* silent — coverage panel is non-critical */ }
+            finally { if (!cancelled) setKbGapsLoading(false); }
+        }
+        fetchKbGaps();
+        return () => { cancelled = true; };
+    }, []);
 
     // ─── Load documents ───────────────────────────────────────
     const loadDocuments = useCallback(async () => {
@@ -993,6 +1028,95 @@ export default function DocumentsView({ isDark = true }: { isDark?: boolean }) {
                         )}
                     </div>
                 </div>
+
+                {/* ─── KB Coverage Panel ─────────────────────────── */}
+                <div className={cn("rounded-xl border p-5 mt-6", isDark ? "bg-white/[0.03] border-white/10" : "bg-white border-gray-200")}>
+                    <div className="flex items-center gap-2 mb-4">
+                        <BookOpen className="w-4 h-4 text-blue-400" />
+                        <h2 className={cn("text-base font-semibold", textPrimary)}>KB Coverage Analysis</h2>
+                        {kbGaps && (
+                            <span className={cn(
+                                "ml-auto text-xs font-medium px-2 py-0.5 rounded-full",
+                                kbGaps.coverageScore >= 0.7
+                                    ? "bg-green-500/10 text-green-400"
+                                    : kbGaps.coverageScore >= 0.4
+                                        ? "bg-amber-500/10 text-amber-400"
+                                        : "bg-red-500/10 text-red-400"
+                            )}>
+                                {Math.round(kbGaps.coverageScore * 100)}% covered
+                            </span>
+                        )}
+                    </div>
+
+                    {kbGapsLoading ? (
+                        <div className="flex items-center gap-2 py-4">
+                            <Loader2 className="w-4 h-4 animate-spin text-blue-400" />
+                            <span className={cn("text-sm", textMuted)}>Analysing KB coverage…</span>
+                        </div>
+                    ) : !kbGaps || kbGaps.totalTopics === 0 ? (
+                        <p className={cn("text-sm py-4", textMuted)}>
+                            No call topics found yet. Coverage analysis will appear once calls have been logged.
+                        </p>
+                    ) : (
+                        <>
+                            {/* Coverage score bar */}
+                            <div className="mb-5">
+                                <div className="flex justify-between text-xs mb-1.5">
+                                    <span className={textMuted}>Topics from recent calls ({kbGaps.totalTopics} total)</span>
+                                    <span className={textSecondary}>{kbGaps.coveredTopics}/{kbGaps.totalTopics} covered · {kbGaps.kbArticleCount} KB articles</span>
+                                </div>
+                                <div className={cn("h-2 rounded-full overflow-hidden", isDark ? "bg-white/10" : "bg-gray-100")}>
+                                    <div
+                                        className={cn(
+                                            "h-full rounded-full transition-all duration-500",
+                                            kbGaps.coverageScore >= 0.7 ? "bg-green-500" : kbGaps.coverageScore >= 0.4 ? "bg-amber-500" : "bg-red-500"
+                                        )}
+                                        style={{ width: `${Math.round(kbGaps.coverageScore * 100)}%` }}
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Gaps list */}
+                            {kbGaps.gaps.length === 0 ? (
+                                <div className="flex items-center gap-2 py-3">
+                                    <CheckCircle className="w-4 h-4 text-green-400" />
+                                    <span className={cn("text-sm", textSecondary)}>All frequent topics are covered by your KB articles.</span>
+                                </div>
+                            ) : (
+                                <div>
+                                    <div className="flex items-center gap-2 mb-2">
+                                        <AlertOctagon className="w-4 h-4 text-amber-400" />
+                                        <span className={cn("text-sm font-medium", textSecondary)}>
+                                            {kbGaps.gaps.length} topic{kbGaps.gaps.length !== 1 ? 's' : ''} not covered
+                                        </span>
+                                    </div>
+                                    <div className="space-y-2">
+                                        {kbGaps.gaps.slice(0, 10).map((gap) => (
+                                            <div
+                                                key={gap.topic}
+                                                className={cn("flex items-center justify-between rounded-lg px-3 py-2", isDark ? "bg-white/[0.04]" : "bg-gray-50")}
+                                            >
+                                                <span className={cn("text-sm font-medium truncate max-w-[60%]", textPrimary)}>{gap.topic}</span>
+                                                <div className="flex items-center gap-3 shrink-0">
+                                                    <span className={cn("text-xs", textMuted)}>{gap.occurrences} unresolved call{gap.occurrences !== 1 ? 's' : ''}</span>
+                                                    <span className={cn(
+                                                        "text-xs px-1.5 py-0.5 rounded font-mono",
+                                                        gap.coverage === 0
+                                                            ? "bg-red-500/10 text-red-400"
+                                                            : "bg-amber-500/10 text-amber-400"
+                                                    )}>
+                                                        {Math.round(gap.coverage * 100)}%
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                        </>
+                    )}
+                </div>
+
             </div>
         </div>
     );

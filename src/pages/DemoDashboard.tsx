@@ -27,6 +27,8 @@ import ActivityLogView from '../components/DashboardViews/ActivityLogView';
 import WebhooksView from '../components/DashboardViews/WebhooksView';
 import NotificationCenter from '../components/DashboardViews/NotificationCenter';
 import InitialSetupDialog from '../components/DashboardViews/InitialSetupDialog';
+import AnalyticsView from '../components/DashboardViews/AnalyticsView';
+import PlaybooksView from '../components/DashboardViews/PlaybooksView';
 import { RescueCenterProvider } from '../contexts/RescueCenterContext';
 
 import { AccessCodeProvider, useAccessCode } from '../contexts/AccessCodeContext';
@@ -220,6 +222,8 @@ function DemoDashboardContent() {
                   {activeTab === 'activity_log' && <ActivityLogView isDark={isDark} />}
                   {activeTab === 'webhooks' && <WebhooksView isDark={isDark} />}
                   {activeTab === 'settings' && <SettingsView isDark={isDark} />}
+                  {activeTab === 'analytics' && <AnalyticsView isDark={isDark} />}
+                  {activeTab === 'rescue_playbooks_view' && <PlaybooksView isDark={isDark} />}
 
                   {activeTab === 'onboarding' && (
                     <OnboardingWizard

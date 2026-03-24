@@ -5,7 +5,8 @@ import {
 } from 'recharts';
 import {
   TrendingUp, TrendingDown, Phone, MessageSquare, Clock, CheckCircle2,
-  Smile, AlertTriangle, Hash, Loader2, RefreshCw, Calendar,
+  Smile, AlertTriangle, Hash, Loader2, RefreshCw, Calendar, Sparkles,
+  ShieldAlert, Target,
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { supabase } from '../../config/supabase';
@@ -41,6 +42,31 @@ interface TrendPoint {
 interface TopicItem {
   topic: string;
   count: number;
+}
+
+interface SignalLift {
+  signal: string;
+  lift: number;
+  resolvedRate: number;
+  unresolvedRate: number;
+  totalOccurrences: number;
+}
+
+interface CategoryFCR {
+  category: string;
+  totalCalls: number;
+  resolvedCalls: number;
+  fcrRate: number;
+  avgDuration: number;
+}
+
+interface PatternsData {
+  periodDays: number;
+  totalCalls: number;
+  overallFCR: number;
+  winningSignals: SignalLift[];
+  riskSignals: SignalLift[];
+  categoryFCR: CategoryFCR[];
 }
 
 const SENTIMENT_COLORS: Record<string, string> = {
@@ -121,6 +147,8 @@ export default function AnalyticsView({ isDark }: AnalyticsViewProps) {
   const [trends, setTrends] = useState<TrendPoint[]>([]);
   const [topTopics, setTopTopics] = useState<TopicItem[]>([]);
   const [dateRange, setDateRange] = useState<{ start: Date | null; end: Date | null }>({ start: null, end: null });
+  const [patterns, setPatterns] = useState<PatternsData | null>(null);
+  const [patternsLoading, setPatternsLoading] = useState(true);
 
   const fetchAnalytics = useCallback(async () => {
     setLoading(true);
@@ -152,6 +180,30 @@ export default function AnalyticsView({ isDark }: AnalyticsViewProps) {
   }, [dateRange]);
 
   useEffect(() => { fetchAnalytics(); }, [fetchAnalytics]);
+
+  // Fetch pattern intelligence separately (not date-range filtered — always last 30 days)
+  useEffect(() => {
+    let cancelled = false;
+    async function fetchPatterns() {
+      setPatternsLoading(true);
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        const token = session?.access_token;
+        if (!token) return;
+        const res = await fetch(
+          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/api-analytics/patterns?days=30`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        if (res.ok && !cancelled) {
+          const data = await res.json();
+          setPatterns(data);
+        }
+      } catch { /* non-critical */ }
+      finally { if (!cancelled) setPatternsLoading(false); }
+    }
+    fetchPatterns();
+    return () => { cancelled = true; };
+  }, []);
 
   const categoryData = overview ? Object.entries(overview.categoryDistribution).map(([name, value]) => ({ name, value })) : [];
   const sentimentData = overview ? Object.entries(overview.sentimentDistribution).map(([name, value]) => ({ name, value })) : [];
@@ -368,6 +420,158 @@ export default function AnalyticsView({ isDark }: AnalyticsViewProps) {
             <p className={cn("text-sm", isDark ? "text-white/30" : "text-gray-400")}>No sentiment data yet</p>
           )}
         </div>
+      </div>
+
+      {/* ── Pattern Intelligence ─────────────────────────────────── */}
+      <div className={cn("rounded-2xl border overflow-hidden", isDark ? "bg-[#09090B] border-white/10" : "bg-white border-black/10")}>
+        {/* Header */}
+        <div className={cn("flex items-center justify-between px-6 py-4 border-b", isDark ? "border-white/5" : "border-gray-100")}>
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-[#FF8A5B]/10">
+              <Sparkles className="w-4 h-4 text-[#FF8A5B]" />
+            </div>
+            <div>
+              <h3 className={cn("text-base font-semibold", isDark ? "text-white" : "text-gray-900")}>Pattern Intelligence</h3>
+              <p className={cn("text-xs mt-0.5", isDark ? "text-white/40" : "text-gray-500")}>
+                Which topics drive resolutions — and which predict escalations
+              </p>
+            </div>
+          </div>
+          {patterns && (
+            <div className="flex items-center gap-2 text-xs">
+              <span className={isDark ? "text-white/40" : "text-gray-400"}>Overall FCR</span>
+              <span className="px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 font-semibold">
+                {Math.round((patterns.overallFCR ?? 0) * 100)}%
+              </span>
+            </div>
+          )}
+        </div>
+
+        {patternsLoading ? (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="w-5 h-5 animate-spin text-[#FF8A5B]" />
+          </div>
+        ) : !patterns || (patterns.winningSignals.length === 0 && patterns.riskSignals.length === 0) ? (
+          <div className="flex flex-col items-center justify-center py-12 gap-2">
+            <Hash className={cn("w-8 h-8", isDark ? "text-white/10" : "text-gray-200")} />
+            <p className={cn("text-sm", isDark ? "text-white/30" : "text-gray-400")}>
+              Need more call history to detect patterns
+            </p>
+          </div>
+        ) : (
+          <div className="p-6 space-y-6">
+            {/* Winning + Risk signals */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Winning signals */}
+              <div>
+                <div className="flex items-center gap-2 mb-3">
+                  <Target className="w-4 h-4 text-emerald-400" />
+                  <span className={cn("text-sm font-semibold", isDark ? "text-white/80" : "text-gray-700")}>
+                    Winning signals
+                  </span>
+                  <span className={cn("text-xs", isDark ? "text-white/30" : "text-gray-400")}>
+                    — appear more in resolved calls
+                  </span>
+                </div>
+                <div className="space-y-2">
+                  {patterns.winningSignals.slice(0, 8).map((s) => {
+                    const liftPct = Math.min(Math.round((s.lift - 1) / (s.lift) * 100), 100);
+                    return (
+                      <div key={s.signal} className="flex items-center gap-3">
+                        <span className={cn("text-xs truncate w-32 shrink-0 capitalize", isDark ? "text-white/70" : "text-gray-600")}>
+                          {s.signal}
+                        </span>
+                        <div className={cn("flex-1 h-1.5 rounded-full", isDark ? "bg-white/5" : "bg-gray-100")}>
+                          <div
+                            className="h-full rounded-full bg-emerald-500 transition-all duration-500"
+                            style={{ width: `${liftPct}%` }}
+                          />
+                        </div>
+                        <span className="text-[11px] text-emerald-400 font-mono w-12 text-right shrink-0">
+                          {s.lift.toFixed(1)}×
+                        </span>
+                      </div>
+                    );
+                  })}
+                  {patterns.winningSignals.length === 0 && (
+                    <p className={cn("text-xs", isDark ? "text-white/30" : "text-gray-400")}>No winning signals yet</p>
+                  )}
+                </div>
+              </div>
+
+              {/* Risk signals */}
+              <div>
+                <div className="flex items-center gap-2 mb-3">
+                  <ShieldAlert className="w-4 h-4 text-rose-400" />
+                  <span className={cn("text-sm font-semibold", isDark ? "text-white/80" : "text-gray-700")}>
+                    Risk signals
+                  </span>
+                  <span className={cn("text-xs", isDark ? "text-white/30" : "text-gray-400")}>
+                    — appear more in unresolved calls
+                  </span>
+                </div>
+                <div className="space-y-2">
+                  {patterns.riskSignals.slice(0, 8).map((s) => {
+                    const riskPct = Math.min(Math.round((1 - s.lift) / 1 * 100), 100);
+                    return (
+                      <div key={s.signal} className="flex items-center gap-3">
+                        <span className={cn("text-xs truncate w-32 shrink-0 capitalize", isDark ? "text-white/70" : "text-gray-600")}>
+                          {s.signal}
+                        </span>
+                        <div className={cn("flex-1 h-1.5 rounded-full", isDark ? "bg-white/5" : "bg-gray-100")}>
+                          <div
+                            className="h-full rounded-full bg-rose-500 transition-all duration-500"
+                            style={{ width: `${riskPct}%` }}
+                          />
+                        </div>
+                        <span className="text-[11px] text-rose-400 font-mono w-12 text-right shrink-0">
+                          {s.lift.toFixed(1)}×
+                        </span>
+                      </div>
+                    );
+                  })}
+                  {patterns.riskSignals.length === 0 && (
+                    <p className={cn("text-xs", isDark ? "text-white/30" : "text-gray-400")}>No risk signals yet</p>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Category FCR bars */}
+            {patterns.categoryFCR.length > 0 && (
+              <div>
+                <p className={cn("text-sm font-semibold mb-3", isDark ? "text-white/80" : "text-gray-700")}>
+                  First Call Resolution by Category
+                </p>
+                <div className="space-y-2">
+                  {patterns.categoryFCR.slice(0, 8).map((c) => {
+                    const pct = Math.round(c.fcrRate * 100);
+                    const color = pct >= 70 ? 'bg-emerald-500' : pct >= 40 ? 'bg-amber-500' : 'bg-rose-500';
+                    return (
+                      <div key={c.category} className="flex items-center gap-3">
+                        <span className={cn("text-xs capitalize w-28 shrink-0 truncate", isDark ? "text-white/70" : "text-gray-600")}>
+                          {c.category}
+                        </span>
+                        <div className={cn("flex-1 h-2 rounded-full", isDark ? "bg-white/5" : "bg-gray-100")}>
+                          <div
+                            className={cn("h-full rounded-full transition-all duration-500", color)}
+                            style={{ width: `${pct}%` }}
+                          />
+                        </div>
+                        <span className={cn("text-[11px] font-mono w-10 text-right shrink-0", isDark ? "text-white/50" : "text-gray-500")}>
+                          {pct}%
+                        </span>
+                        <span className={cn("text-[10px] w-16 shrink-0", isDark ? "text-white/30" : "text-gray-400")}>
+                          {c.totalCalls} calls
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
