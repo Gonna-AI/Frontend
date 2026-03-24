@@ -379,7 +379,8 @@ export function DemoCallProvider({ children, initialAgentId }: { children: React
           .from('call_history')
           .select('*')
           .eq('user_id', user.id)
-          .order('date', { ascending: false });
+          .order('date', { ascending: false })
+          .limit(50);
 
         if (!historyError && historyData && historyData.length > 0) {
           // Map Supabase snake_case to app camelCase
@@ -582,9 +583,9 @@ export function DemoCallProvider({ children, initialAgentId }: { children: React
     // Initial cleanup then fetch
     cleanupStaleSessions().then(() => fetchActiveSessions());
 
-    // Periodically cleanup stale sessions every minute
+    // Periodically cleanup stale sessions and refresh global count every minute
     const cleanupInterval = setInterval(() => {
-      cleanupStaleSessions();
+      cleanupStaleSessions().then(() => fetchActiveSessions());
     }, 60 * 1000);
 
     // Subscribe to changes (debounced to avoid UI thrashing under high load)
@@ -597,10 +598,10 @@ export function DemoCallProvider({ children, initialAgentId }: { children: React
     };
 
     const subscription = supabase
-      .channel('active_sessions_changes')
+      .channel('active_sessions_global_count')
       .on(
         'postgres_changes',
-        { event: '*', schema: 'public', table: 'active_sessions' },
+        { event: '*', schema: 'public', table: 'active_sessions', filter: `user_id=eq.${user?.id ?? ''}` },
         (payload) => {
           console.log('📡 Active sessions change:', payload.eventType);
           debouncedFetch();
@@ -817,7 +818,9 @@ export function DemoCallProvider({ children, initialAgentId }: { children: React
       }
     };
     updateToken();
-    const interval = setInterval(updateToken, 60000); // Refresh every 60s
+    // Jitter prevents 1M sessions all refreshing at the same wall-clock second
+    const jitter = Math.random() * 30_000; // 0–30s random offset
+    const interval = setInterval(updateToken, 60_000 + jitter);
     return () => clearInterval(interval);
   }, []);
 

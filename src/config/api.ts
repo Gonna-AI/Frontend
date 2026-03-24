@@ -17,13 +17,35 @@ const api = axios.create({
   withCredentials: true, // Important for cookies/sessions
 });
 
+// ── Token cache — avoids a Supabase auth read on every request ───────────────
+// At scale (1M users × N requests/s) calling getSession() per request is
+// prohibitively expensive. Cache the token and only refresh when near expiry.
+let _cachedToken: string | null = null;
+let _tokenExpiry = 0;
+
+supabase.auth.onAuthStateChange((_event, session) => {
+  _cachedToken = session?.access_token ?? null;
+  _tokenExpiry = session ? session.expires_at! * 1000 : 0;
+});
+
+async function getCachedToken(): Promise<string | null> {
+  // Return cached token if it won't expire in the next 60 seconds
+  if (_cachedToken && Date.now() < _tokenExpiry - 60_000) return _cachedToken;
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    _cachedToken = session?.access_token ?? null;
+    _tokenExpiry = session ? session.expires_at! * 1000 : 0;
+  } catch {
+    _cachedToken = null;
+  }
+  return _cachedToken;
+}
+
 // Inject Supabase auth token into every request
 api.interceptors.request.use(async (config) => {
   try {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (session?.access_token) {
-      config.headers.Authorization = `Bearer ${session.access_token}`;
-    }
+    const token = await getCachedToken();
+    if (token) config.headers.Authorization = `Bearer ${token}`;
   } catch {
     // Silently proceed without token if auth check fails
   }
