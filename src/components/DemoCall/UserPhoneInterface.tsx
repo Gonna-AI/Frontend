@@ -38,6 +38,17 @@ export default function UserPhoneInterface({
     const [isEnding, setIsEnding] = useState(false);
     const [connectionError, setConnectionError] = useState<string | null>(null);
 
+    // ─── ON-SCREEN DEBUG LOG ───────────────────────────────────────────────────
+    const [debugLogs, setDebugLogs] = useState<string[]>([]);
+    const [showDebug, setShowDebug] = useState(false);
+    const addLog = useCallback((msg: string) => {
+        const ts = new Date().toTimeString().slice(0, 8);
+        const line = `[${ts}] ${msg}`;
+        console.log('📞 [DIAG]', line);
+        setDebugLogs(prev => [...prev.slice(-49), line]); // keep last 50
+    }, []);
+    // ──────────────────────────────────────────────────────────────────────────
+
     const timerRef = useRef<NodeJS.Timeout | null>(null);
 
     // Tracks when the WebSocket connected so we can log the live-to-dead delta.
@@ -54,10 +65,10 @@ export default function UserPhoneInterface({
     // re-initialising on every render, which can reset the active WebSocket.
     const onConnect = useCallback(() => {
         connectTimeRef.current = Date.now();
-        console.log('📞 [DIAG] ElevenLabs connected at', new Date().toISOString());
+        addLog('✅ CONNECTED');
         setConnectionError(null);
         setAgentStatus('listening');
-    }, []);
+    }, [addLog]);
 
     const onDisconnect = useCallback((details?: DisconnectionDetails) => {
         const uptime = connectTimeRef.current !== null
@@ -65,15 +76,12 @@ export default function UserPhoneInterface({
             : null;
         connectTimeRef.current = null;
 
-        // ─── DIAGNOSTIC: log every field so we can identify the root cause ───
-        console.log('📞 [DIAG] ElevenLabs disconnected', {
-            reason:      details?.reason ?? '(none)',
-            message:     (details as { message?: string })?.message,
-            closeCode:   (details as { closeCode?: number })?.closeCode,
-            closeReason: (details as { closeReason?: string })?.closeReason,
-            uptimeMs:    uptime,
-            timestamp:   new Date().toISOString(),
-        });
+        const reason      = details?.reason ?? '(none)';
+        const closeCode   = (details as { closeCode?: number })?.closeCode ?? '';
+        const closeReason = (details as { closeReason?: string })?.closeReason ?? '';
+        const errMsg      = (details as { message?: string })?.message ?? '';
+
+        addLog(`❌ DISCONNECTED reason=${reason} uptimeMs=${uptime ?? '?'} closeCode=${closeCode} closeReason="${closeReason}" errMsg="${errMsg}"`);
 
         setAgentStatus('idle');
 
@@ -82,10 +90,10 @@ export default function UserPhoneInterface({
         if (details?.reason !== 'user') {
             endCall();
         }
-    }, [endCall]);
+    }, [endCall, addLog]);
 
     const onMessage = useCallback((message: { source: string; message: string }) => {
-        console.log(`📞 [${message.source}]: ${message.message}`);
+        addLog(`💬 ${message.source.toUpperCase()}: "${message.message}"`);
         if (message.source === 'user') {
             setCurrentTranscript(message.message);
             addMessage('user', message.message);
@@ -96,28 +104,24 @@ export default function UserPhoneInterface({
             addMessage('agent', message.message);
             onTranscript?.(message.message, 'agent');
         }
-    }, [addMessage, onTranscript]);
+    }, [addMessage, onTranscript, addLog]);
 
     const onError = useCallback((message: string, context?: unknown) => {
-        // ─── DIAGNOSTIC: log message AND the context object (closeCode, etc.) ───
-        console.error('📞 [DIAG] ElevenLabs error:', message, context);
-        try {
-            console.error('📞 [DIAG] ElevenLabs error context (JSON):', JSON.stringify(context, null, 2));
-        } catch {
-            // context may not be serialisable (e.g. native Event)
-        }
+        let ctxStr = '';
+        try { ctxStr = JSON.stringify(context); } catch { ctxStr = String(context); }
+        addLog(`🔴 ERROR: "${message}" ctx=${ctxStr}`);
         setConnectionError(message ?? 'Connection error');
-    }, []);
+    }, [addLog]);
 
     const onModeChange = useCallback((modeEvent: { mode: string }) => {
-        console.log('📞 [DIAG] Mode change →', modeEvent.mode, 'at', new Date().toISOString());
+        addLog(`🔄 MODE → ${modeEvent.mode}`);
         if (modeEvent.mode === 'speaking') {
             setAgentStatus('speaking');
             setCurrentTranscript('');
         } else if (modeEvent.mode === 'listening') {
             setAgentStatus('listening');
         }
-    }, []);
+    }, [addLog]);
 
     // ElevenLabs Conversational AI — handles STT + LLM + TTS in one WebSocket
     const conversation = useConversation({
@@ -189,16 +193,19 @@ export default function UserPhoneInterface({
         }
 
         startCall('voice');
+        addLog('🟡 Fetching signed URL…');
 
         try {
             const signedUrl = await getSignedUrl();
+            addLog(`🟡 Got signed URL, starting session…`);
             await conversation.startSession({ signedUrl });
         } catch (error) {
-            console.error('📞 Failed to start ElevenLabs session:', error);
-            setConnectionError(error instanceof Error ? error.message : 'Failed to connect');
+            const msg = error instanceof Error ? error.message : String(error);
+            addLog(`🔴 startSession failed: ${msg}`);
+            setConnectionError(msg || 'Failed to connect');
             setAgentStatus('idle');
         }
-    }, [startCall, getSignedUrl, conversation]);
+    }, [startCall, getSignedUrl, conversation, addLog]);
 
     const handleEndCall = useCallback(async () => {
         console.log('🔴 End call button pressed');
@@ -395,6 +402,26 @@ export default function UserPhoneInterface({
                     </div>
                 </div>
 
+                {/* ── On-screen debug log ── */}
+                <div className="absolute top-4 right-4 z-30 text-left">
+                    <button
+                        onClick={() => setShowDebug(v => !v)}
+                        className="text-[10px] font-mono px-2 py-1 rounded bg-white/10 text-white/50 hover:bg-white/20"
+                    >
+                        {showDebug ? 'hide log' : 'show log'}
+                    </button>
+                    {showDebug && (
+                        <div className="mt-1 w-80 max-h-52 overflow-y-auto rounded-xl bg-black/80 border border-white/10 p-2">
+                            {debugLogs.length === 0
+                                ? <p className="text-white/30 text-[10px] font-mono">No events yet.</p>
+                                : debugLogs.map((l, i) => (
+                                    <p key={i} className="text-[10px] font-mono text-white/70 leading-relaxed break-all">{l}</p>
+                                ))
+                            }
+                        </div>
+                    )}
+                </div>
+
                 {/* Bottom Controls */}
                 <div className="p-8 pb-[max(2rem,env(safe-area-inset-bottom))] w-full z-20 bg-gradient-to-t from-black via-black/80 to-transparent">
                     <div className="flex items-center justify-center gap-6 max-w-lg mx-auto">
@@ -454,6 +481,26 @@ export default function UserPhoneInterface({
                         </button>
                     </div>
                 )}
+
+                {/* ── On-screen debug log ── */}
+                <div className="absolute top-4 right-4 z-30 text-left">
+                    <button
+                        onClick={() => setShowDebug(v => !v)}
+                        className="text-[10px] font-mono px-2 py-1 rounded bg-white/10 text-white/50 hover:bg-white/20"
+                    >
+                        {showDebug ? 'hide log' : 'show log'}
+                    </button>
+                    {showDebug && (
+                        <div className="mt-1 w-80 max-h-52 overflow-y-auto rounded-xl bg-black/80 border border-white/10 p-2">
+                            {debugLogs.length === 0
+                                ? <p className="text-white/30 text-[10px] font-mono">No events yet.</p>
+                                : debugLogs.map((l, i) => (
+                                    <p key={i} className="text-[10px] font-mono text-white/70 leading-relaxed break-all">{l}</p>
+                                ))
+                            }
+                        </div>
+                    )}
+                </div>
 
                 {/* Main Content Area */}
                 <div className="flex-1 flex flex-col items-center justify-center relative px-6 z-10 w-full max-w-[92vw] sm:max-w-lg mx-auto">
