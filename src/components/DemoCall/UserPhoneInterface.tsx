@@ -214,10 +214,14 @@ export default function UserPhoneInterface({
     const conversationRef = useRef(conversation);
     conversationRef.current = conversation;
 
-    // Cleanup on unmount — end any active ElevenLabs session
+    // Cleanup on unmount — end any active ElevenLabs session.
+    // Guard with status check to avoid "WebSocket is already in CLOSING or CLOSED state"
+    // when handleEndCall already closed the socket before the component unmounts.
     useEffect(() => {
         return () => {
-            conversationRef.current.endSession();
+            if (conversationRef.current.status !== 'disconnected') {
+                conversationRef.current.endSession();
+            }
         };
     }, []);
 
