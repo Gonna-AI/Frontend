@@ -216,7 +216,7 @@ function DemoDashboardContent() {
                   {activeTab === 'billing' && <BillingView isDark={isDark} hasAccess={hasAccess} />}
                   {activeTab === 'keys' && <KeysView isDark={isDark} hasAccess={hasAccess} />}
                   {activeTab === 'team' && <TeamView isDark={isDark} />}
-{activeTab === 'integrations' && <IntegrationView isDark={isDark} />}
+                  {activeTab === 'integrations' && <IntegrationView isDark={isDark} />}
                   {activeTab === 'activity_log' && <ActivityLogView isDark={isDark} />}
                   {activeTab === 'webhooks' && <WebhooksView isDark={isDark} />}
                   {activeTab === 'settings' && <SettingsView isDark={isDark} />}

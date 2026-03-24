@@ -566,7 +566,7 @@ For security-related inquiries and incident reporting:
 
 Primary Security Contact:
     Email: security@clerktree.com
-    Phone: +1-XXX-XXX-XXXX (24/7 security hotline)
+    Response: 24/7 security response via email above
     PGP Key: Available on our security page
 
 Chief Information Security Officer (CISO):

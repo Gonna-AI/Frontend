@@ -95,6 +95,7 @@ export default function UsageView({ isDark = true, hasAccess = false }: { isDark
     const billingApiBase = supabaseUrl ? `${supabaseUrl}/functions/v1/api-billing` : null;
 
     const [liveCredits, setLiveCredits] = useState<number | null>(null);
+    const [liveTotalCredits, setLiveTotalCredits] = useState<number | null>(null);
     const [isRedeeming, setIsRedeeming] = useState(false);
     const [redeemCode, setRedeemCode] = useState('');
     const [redeemMessage, setRedeemMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
@@ -113,6 +114,7 @@ export default function UsageView({ isDark = true, hasAccess = false }: { isDark
             if (res.ok) {
                 const data = await res.json();
                 setLiveCredits(Number(data.balance));
+                if (data.total_credits != null) setLiveTotalCredits(Number(data.total_credits));
             }
         } catch (e) {
             console.error('Failed to fetch live balance', e);
@@ -183,8 +185,9 @@ export default function UsageView({ isDark = true, hasAccess = false }: { isDark
         const fallbackCreditsRemaining = Math.max(0, TOTAL_CREDITS - totalCreditsUsed);
 
         const creditsRemaining = liveCredits !== null ? liveCredits : fallbackCreditsRemaining;
+        const effectiveTotal = liveTotalCredits ?? TOTAL_CREDITS;
         const creditsUsedPercent = liveCredits !== null
-            ? ((TOTAL_CREDITS - creditsRemaining) / TOTAL_CREDITS) * 100
+            ? Math.max(0, ((effectiveTotal - creditsRemaining) / effectiveTotal) * 100)
             : (totalCreditsUsed / TOTAL_CREDITS) * 100;
 
         return {
