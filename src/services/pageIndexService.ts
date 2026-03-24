@@ -1,9 +1,8 @@
-import axios from 'axios';
+import { supabase } from '../config/supabase';
 
-const PAGEINDEX_API_URL = 'https://api.pageindex.ai';
-// Default to the keys provided in the reference script if not in env
-const PAGEINDEX_API_KEY = import.meta.env.VITE_PAGEINDEX_API_KEY;
-const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY;
+// All PageIndex and Groq calls are proxied through the api-page-index edge function.
+// Keys are stored server-side only — never in the frontend bundle.
+const EDGE_BASE = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/api-page-index`;
 
 export interface PageIndexNode {
     title?: string;
@@ -29,31 +28,25 @@ interface OcrPage {
     images?: string[];
 }
 
+async function getAuthHeader(): Promise<string> {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.access_token) throw new Error('Not authenticated');
+    return `Bearer ${session.access_token}`;
+}
+
 class PageIndexService {
     private treeCache = new Map<string, PageIndexNode[]>();
     private ocrCache = new Map<string, OcrPage[] | string>();
 
-    private getPageIndexHeaders() {
-        if (!PAGEINDEX_API_KEY) {
-            throw new Error('Missing PageIndex API key');
-        }
-        return {
-            // PageIndex expects api_key header per docs
-            'api_key': PAGEINDEX_API_KEY,
-        };
-    }
-
     private async fetchTreeStatus(docId: string): Promise<TreeResponse> {
-        const headers = this.getPageIndexHeaders();
-        const response = await axios.get(`${PAGEINDEX_API_URL}/doc/${docId}/`, {
-            headers,
-            params: {
-                type: 'tree',
-                summary: true,
-            },
+        const auth = await getAuthHeader();
+        const params = new URLSearchParams({ type: 'tree', summary: 'true' });
+        const res = await fetch(`${EDGE_BASE}/doc/${docId}?${params}`, {
+            headers: { Authorization: auth },
         });
+        if (!res.ok) throw new Error(`PageIndex status fetch failed: ${res.status}`);
+        const data = await res.json();
 
-        const data = response.data;
         const tree =
             (Array.isArray(data) && data) ||
             (Array.isArray(data?.result) && data.result) ||
@@ -62,18 +55,9 @@ class PageIndexService {
             null;
 
         if (tree) {
-            return {
-                doc_id: docId,
-                status: 'completed',
-                result: tree,
-                retrieval_ready: true,
-            };
+            return { doc_id: docId, status: 'completed', result: tree, retrieval_ready: true };
         }
-
-        if (data?.status) {
-            return data as TreeResponse;
-        }
-
+        if (data?.status) return data as TreeResponse;
         return {
             doc_id: docId,
             status: data?.result ? 'completed' : 'processing',
@@ -85,21 +69,19 @@ class PageIndexService {
      * Submits a PDF to PageIndex for indexing
      */
     async submitDocument(file: File): Promise<string> {
+        const auth = await getAuthHeader();
         const formData = new FormData();
         formData.append('file', file);
-        
-        const response = await axios.post(`${PAGEINDEX_API_URL}/doc/`, formData, {
-            headers: {
-                ...this.getPageIndexHeaders(),
-                'Content-Type': 'multipart/form-data'
-            }
+
+        const res = await fetch(`${EDGE_BASE}/doc`, {
+            method: 'POST',
+            headers: { Authorization: auth },
+            body: formData,
         });
-        
-        if (!response.data || !response.data.doc_id) {
-            throw new Error('Failed to get doc_id from PageIndex');
-        }
-        
-        return response.data.doc_id;
+        if (!res.ok) throw new Error(`Document submit failed: ${res.status}`);
+        const data = await res.json();
+        if (!data?.doc_id) throw new Error('Failed to get doc_id from PageIndex');
+        return data.doc_id;
     }
 
     /**
@@ -112,14 +94,14 @@ class PageIndexService {
         for (let attempt = 0; attempt < maxAttempts; attempt++) {
             const treeResponse = await this.fetchTreeStatus(docId);
             const status = treeResponse.status;
-            
+
             if (treeResponse.result && treeResponse.result.length > 0) {
                 this.treeCache.set(docId, treeResponse.result);
                 return treeResponse.result || [];
             } else if (status === 'failed') {
                 throw new Error('PageIndex processing failed');
             }
-            
+
             const readyHint = treeResponse.retrieval_ready ? ' (retrieval ready)' : '';
             onProgress?.(`${status}${readyHint}`);
             await new Promise(resolve => setTimeout(resolve, pollInterval));
@@ -140,11 +122,7 @@ class PageIndexService {
             this.treeCache.set(docId, treeResponse.result);
             return treeResponse.result;
         }
-
-        if (treeResponse.status === 'failed') {
-            throw new Error('PageIndex processing failed');
-        }
-
+        if (treeResponse.status === 'failed') throw new Error('PageIndex processing failed');
         throw new Error(`PageIndex status: ${treeResponse.status}`);
     }
 
@@ -156,16 +134,13 @@ class PageIndexService {
         const cached = this.ocrCache.get(cacheKey);
         if (cached) return cached;
 
-        const headers = this.getPageIndexHeaders();
-        const response = await axios.get(`${PAGEINDEX_API_URL}/doc/${docId}/`, {
-            headers,
-            params: {
-                type: 'ocr',
-                format,
-            },
+        const auth = await getAuthHeader();
+        const params = new URLSearchParams({ type: 'ocr', format });
+        const res = await fetch(`${EDGE_BASE}/doc/${docId}?${params}`, {
+            headers: { Authorization: auth },
         });
-
-        const data = response.data;
+        if (!res.ok) throw new Error(`OCR fetch failed: ${res.status}`);
+        const data = await res.json();
         const result = (Array.isArray(data) ? data : data?.result ?? data) as OcrPage[] | string;
         this.ocrCache.set(cacheKey, result);
         return result;
@@ -175,14 +150,12 @@ class PageIndexService {
      * Chat with Groq using the flattened tree as context
      */
     async chatWithDocument(
-        question: string, 
-        treeNodes: PageIndexNode[], 
+        question: string,
+        treeNodes: PageIndexNode[],
         history: { role: string; content: string }[] = [],
         options?: { docId?: string }
     ): Promise<string> {
-        if (!GROQ_API_KEY) {
-            throw new Error('Missing Groq API key');
-        }
+        const auth = await getAuthHeader();
         const flattenedTree = this.flattenTree(treeNodes);
         const treeTextChars = this.countTextChars(treeNodes);
         let ocrContext = '';
@@ -191,9 +164,7 @@ class PageIndexService {
             try {
                 const matches = await this.searchOcrPages(options.docId, question, 4);
                 if (matches.length > 0) {
-                    ocrContext = matches
-                        .map(m => `[Page ${m.page_index}] ${m.excerpt}`)
-                        .join('\n');
+                    ocrContext = matches.map(m => `[Page ${m.page_index}] ${m.excerpt}`).join('\n');
                 } else {
                     const raw = await this.getOcr(options.docId, 'raw');
                     if (typeof raw === 'string' && raw.trim().length > 0) {
@@ -204,7 +175,7 @@ class PageIndexService {
                 // Ignore OCR fallback errors, continue with tree only
             }
         }
-        
+
         const systemPrompt = `You are a helpful document assistant.
 You have been given a structured index tree extracted from a PDF document.
 Each node contains a title, the page number, and a short content excerpt.
@@ -217,28 +188,28 @@ Rules:
 
         const messages = [
             { role: 'system', content: systemPrompt },
-            { 
-                role: 'user', 
-                content: `Here is the indexed structure of the document:\n\n${flattenedTree}\n\n${ocrContext ? `Additional OCR content (page-based):\n${ocrContext}\n\n` : ''}I will now ask questions about this document.` 
+            {
+                role: 'user',
+                content: `Here is the indexed structure of the document:\n\n${flattenedTree}\n\n${ocrContext ? `Additional OCR content (page-based):\n${ocrContext}\n\n` : ''}I will now ask questions about this document.`
             },
             { role: 'assistant', content: "Got it! I've read the full index. Ask me anything." },
             ...history,
             { role: 'user', content: question }
         ];
 
-        const response = await axios.post('https://api.groq.com/openai/v1/chat/completions', {
-            model: 'llama-3.3-70b-versatile',
-            messages,
-            temperature: 0.3,
-            max_tokens: 1024
-        }, {
-            headers: {
-                'Authorization': `Bearer ${GROQ_API_KEY}`,
-                'Content-Type': 'application/json'
-            }
+        const res = await fetch(`${EDGE_BASE}/chat`, {
+            method: 'POST',
+            headers: { Authorization: auth, 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                model: 'llama-3.3-70b-versatile',
+                messages,
+                temperature: 0.3,
+                max_tokens: 1024,
+            }),
         });
-
-        return response.data.choices[0].message.content;
+        if (!res.ok) throw new Error(`Groq chat failed: ${res.status}`);
+        const data = await res.json();
+        return data.choices[0].message.content;
     }
 
     /**
@@ -261,9 +232,7 @@ Rules:
                         : 'Location ?';
             const title = node.title || node.node_id || 'Untitled';
             result += `${indent}[${pageLabel}] ${title}\n`;
-            if (excerpt) {
-                result += `${indent}  → ${excerpt}\n`;
-            }
+            if (excerpt) result += `${indent}  → ${excerpt}\n`;
             if (node.nodes && node.nodes.length > 0) {
                 result += this.flattenTree(node.nodes, depth + 1);
             }
@@ -311,12 +280,8 @@ Rules:
 
         const walk = (node: PageIndexNode) => {
             const score = scoreNode(node);
-            if (score > 0) {
-                results.push({ score, node });
-            }
-            if (node.nodes && node.nodes.length > 0) {
-                node.nodes.forEach(walk);
-            }
+            if (score > 0) results.push({ score, node });
+            if (node.nodes && node.nodes.length > 0) node.nodes.forEach(walk);
         };
 
         nodes.forEach(walk);
@@ -336,13 +301,7 @@ Rules:
                 const excerpt = excerptSource
                     ? (excerptSource.length > 240 ? `${excerptSource.substring(0, 240)}...` : excerptSource)
                     : '';
-
-                return {
-                    title: node.title || node.node_id || 'Untitled',
-                    page_label: pageLabel,
-                    excerpt,
-                    score,
-                };
+                return { title: node.title || node.node_id || 'Untitled', page_label: pageLabel, excerpt, score };
             });
     }
 
@@ -385,9 +344,7 @@ Rules:
     countNodes(nodes: PageIndexNode[]): number {
         let count = nodes.length;
         for (const node of nodes) {
-            if (node.nodes) {
-                count += this.countNodes(node.nodes);
-            }
+            if (node.nodes) count += this.countNodes(node.nodes);
         }
         return count;
     }

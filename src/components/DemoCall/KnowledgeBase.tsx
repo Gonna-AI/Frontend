@@ -199,8 +199,6 @@ export default function KnowledgeBase({ isDark = true, activeSection }: Knowledg
 
   useEffect(() => {
     testConnection();
-    const interval = setInterval(testConnection, 30000);
-    return () => clearInterval(interval);
   }, []);
 
   // Update local state and context
