@@ -76,7 +76,13 @@ export default function UserPhoneInterface({
         });
 
         setAgentStatus('idle');
-    }, []);
+
+        // If the agent or an error closed the socket (not the user pressing End Call),
+        // clean up the call session so the UI returns to the idle/start state.
+        if (details?.reason !== 'user') {
+            endCall();
+        }
+    }, [endCall]);
 
     const onMessage = useCallback((message: { source: string; message: string }) => {
         console.log(`📞 [${message.source}]: ${message.message}`);
@@ -198,8 +204,13 @@ export default function UserPhoneInterface({
         console.log('🔴 End call button pressed');
         setIsEnding(true);
 
-        // End ElevenLabs session
-        await conversation.endSession();
+        // Only close the socket if it's still open — the agent may have already
+        // closed it (e.g. it said "thank you for calling" and hung up), in which
+        // case calling endSession() again throws "WebSocket is already in CLOSING
+        // or CLOSED state".
+        if (conversation.status !== 'disconnected') {
+            await conversation.endSession();
+        }
 
         setAgentStatus('idle');
         await endCall();
