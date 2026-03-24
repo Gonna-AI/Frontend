@@ -410,7 +410,7 @@ export default function KnowledgeBase({ isDark = true, activeSection }: Knowledg
             disabled={isTestingConnection}
             title={localLLMConnected ? `${t('config.groqConnected')}: ${localLLMModel}` : t('config.groqOffline')}
             className={cn(
-              "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors border",
+              "flex items-center gap-1 px-2 py-1 rounded-md text-[11px] font-medium transition-colors border",
               isTestingConnection
                 ? (isDark ? "bg-white/5 border-white/10 text-white/50" : "bg-black/5 border-black/5 text-black/50")
                 : localLLMConnected
@@ -929,22 +929,22 @@ export default function KnowledgeBase({ isDark = true, activeSection }: Knowledg
                 ) : (
                   <div className="space-y-4">
                     {playbooks.map((playbook) => (
-                      <div key={playbook.id} className={cn("rounded-xl border p-4 space-y-3", isDark ? "border-white/10 bg-white/[0.03]" : "border-black/10 bg-black/[0.02]")}>
-                        <div className="flex items-start justify-between gap-3">
-                          <div className="space-y-1 flex-1">
-                            <div className="flex items-center gap-2">
-                              <input value={playbook.name} onChange={(event) => handleUpdatePlaybook(playbook.id, { name: event.target.value })} className={cn("text-sm font-semibold bg-transparent border-b focus:outline-none", isDark ? "text-white border-white/10" : "text-black border-black/10")} />
-                              <span className={cn("text-[10px] px-1.5 py-0.5 rounded border", isDark ? "border-white/10 text-white/35" : "border-black/10 text-black/35")}>{playbook.channels.join(', ')}</span>
-                              {playbook.enabled && <span className={cn("text-[10px] px-1.5 py-0.5 rounded", isDark ? "bg-emerald-500/15 text-emerald-300" : "bg-emerald-50 text-emerald-700")}>Active</span>}
+                      <div key={playbook.id} className={cn("rounded-xl border p-3 sm:p-4 space-y-3", isDark ? "border-white/10 bg-white/[0.03]" : "border-black/10 bg-black/[0.02]")}>
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="space-y-1 flex-1 min-w-0">
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              <input value={playbook.name} onChange={(event) => handleUpdatePlaybook(playbook.id, { name: event.target.value })} className={cn("text-sm font-semibold bg-transparent border-b focus:outline-none min-w-0 w-full max-w-[140px] sm:max-w-none", isDark ? "text-white border-white/10" : "text-black border-black/10")} />
+                              <span className={cn("text-[10px] px-1.5 py-0.5 rounded border shrink-0", isDark ? "border-white/10 text-white/35" : "border-black/10 text-black/35")}>{playbook.channels.join(', ')}</span>
+                              {playbook.enabled && <span className={cn("text-[10px] px-1.5 py-0.5 rounded shrink-0", isDark ? "bg-emerald-500/15 text-emerald-300" : "bg-emerald-50 text-emerald-700")}>Active</span>}
                             </div>
                             <input value={playbook.description} onChange={(event) => handleUpdatePlaybook(playbook.id, { description: event.target.value })} className={cn("w-full text-xs bg-transparent border-b focus:outline-none", isDark ? "text-white/65 border-white/10" : "text-black/65 border-black/10")} />
                           </div>
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-1.5 shrink-0">
                             <button onClick={() => handleUpdatePlaybook(playbook.id, { enabled: !playbook.enabled })} className={cn("inline-flex items-center gap-1 text-[11px] px-2 py-1 rounded-full border", playbook.enabled ? (isDark ? "border-emerald-400/35 bg-emerald-500/15 text-emerald-200" : "border-emerald-200 bg-emerald-50 text-emerald-700") : (isDark ? "border-white/10 bg-white/5 text-white/50" : "border-black/10 bg-black/5 text-black/50"))}>
                               {playbook.enabled ? 'On' : 'Off'}
                             </button>
                             <button onClick={() => handleDeletePlaybook(playbook.id)} className={cn("p-1.5 rounded-md", isDark ? "text-rose-300 hover:bg-rose-500/15" : "text-rose-700 hover:bg-rose-50")}>
-                              <Trash2 className="w-4 h-4" />
+                              <Trash2 className="w-3.5 h-3.5" />
                             </button>
                           </div>
                         </div>

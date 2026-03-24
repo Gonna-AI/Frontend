@@ -134,7 +134,7 @@ export default function PlaybooksView({ isDark = true }: { isDark?: boolean }) {
         <label className={cn("text-sm font-medium block mb-3", isDark ? "text-white/80" : "text-gray-700")}>
           Select Date Range for Analysis
         </label>
-        <div className="flex gap-4 mb-4">
+        <div className="flex flex-col sm:flex-row gap-3 mb-4">
           <input
             type="date"
             value={dateRange.start}
@@ -161,7 +161,7 @@ export default function PlaybooksView({ isDark = true }: { isDark?: boolean }) {
             "w-full py-2 rounded-lg font-medium text-sm flex items-center justify-center gap-2 transition-colors",
             isGenerating || !dateRange.start || !dateRange.end
               ? (isDark ? "bg-white/10 text-white/50 cursor-not-allowed" : "bg-gray-100 text-gray-400 cursor-not-allowed")
-              : (isDark ? "bg-purple-600 hover:bg-purple-700 text-white" : "bg-purple-500 hover:bg-purple-600 text-white")
+              : "bg-[#FF8A5B] hover:bg-[#FF9E6C] text-white"
           )}
         >
           {isGenerating && <Loader2 className="w-4 h-4 animate-spin" />}
@@ -210,7 +210,7 @@ export default function PlaybooksView({ isDark = true }: { isDark?: boolean }) {
                   <Trash2 className="w-4 h-4" />
                 </button>
               </div>
-              <div className="grid grid-cols-2 gap-3 text-xs">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
                 <div>
                   <p className={cn("font-medium mb-1", isDark ? "text-white/60" : "text-gray-600")}>
                     Triggers

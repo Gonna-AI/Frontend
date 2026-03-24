@@ -793,12 +793,12 @@ export default function DocumentsView({ isDark = true }: { isDark?: boolean }) {
                                             cardBg,
                                             expandedDocId === doc.id && (isDark ? "ring-1 ring-[#FF8A5B]/30" : "ring-1 ring-[#FF8A5B]/30")
                                         )}>
-                                            <div className="flex items-center gap-4">
+                                            <div className="flex items-center gap-2 sm:gap-4">
                                                 {/* Expand toggle */}
                                                 <button
                                                     onClick={() => toggleExpand(doc)}
                                                     className={cn(
-                                                        "p-1 rounded-md transition-colors cursor-pointer",
+                                                        "p-1 rounded-md transition-colors cursor-pointer shrink-0",
                                                         isDark ? "hover:bg-white/10" : "hover:bg-gray-100"
                                                     )}
                                                 >
@@ -810,7 +810,7 @@ export default function DocumentsView({ isDark = true }: { isDark?: boolean }) {
 
                                                 {/* File icon */}
                                                 <div className={cn(
-                                                    "w-10 h-10 rounded-xl flex items-center justify-center border flex-shrink-0",
+                                                    "w-8 h-8 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center border flex-shrink-0",
                                                     isDark ? "bg-white/5 border-white/10" : "bg-gray-50 border-gray-200"
                                                 )}>
                                                     {getFileIcon(doc.file_type)}
@@ -821,10 +821,10 @@ export default function DocumentsView({ isDark = true }: { isDark?: boolean }) {
                                                     <p className={cn("text-sm font-medium truncate", textPrimary)}>
                                                         {doc.file_name}
                                                     </p>
-                                                    <div className={cn("flex items-center gap-3 mt-0.5 text-xs", textMuted)}>
+                                                    <div className={cn("flex items-center gap-2 mt-0.5 text-xs flex-wrap", textMuted)}>
                                                         <span>{formatBytes(doc.file_size)}</span>
-                                                        <span>&middot;</span>
-                                                        <span className="uppercase">{doc.file_type}</span>
+                                                        <span className="hidden sm:inline">&middot;</span>
+                                                        <span className="hidden sm:inline uppercase">{doc.file_type}</span>
                                                         <span>&middot;</span>
                                                         <span className="flex items-center gap-1">
                                                             <Clock className="w-3 h-3" />
@@ -834,18 +834,18 @@ export default function DocumentsView({ isDark = true }: { isDark?: boolean }) {
                                                 </div>
 
                                                 {/* Status badge */}
-                                                <div className="flex items-center gap-3">
+                                                <div className="flex items-center gap-1.5 shrink-0">
                                                     {doc.status === 'ready' && (
-                                                        <div className="flex items-center gap-2">
+                                                        <div className="flex items-center gap-1.5">
                                                             <span className={cn(
-                                                                "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium",
+                                                                "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium",
                                                                 "bg-[#FF8A5B]/10 text-[#FFB286] border border-[#FF8A5B]/20"
                                                             )}>
                                                                 <CheckCircle className="w-3 h-3" />
-                                                                Ready
+                                                                <span className="hidden sm:inline">Ready</span>
                                                             </span>
                                                             <span className={cn(
-                                                                "inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs",
+                                                                "hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs",
                                                                 isDark ? "bg-white/5 text-white/60" : "bg-gray-100 text-gray-600"
                                                             )}>
                                                                 <Layers className="w-3 h-3" />
@@ -855,20 +855,20 @@ export default function DocumentsView({ isDark = true }: { isDark?: boolean }) {
                                                     )}
                                                     {doc.status === 'processing' && (
                                                         <span className={cn(
-                                                            "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium",
+                                                            "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium",
                                                             "bg-[#FFB286]/10 text-[#FFB286] border border-[#FF8A5B]/20"
                                                         )}>
                                                             <Loader2 className="w-3 h-3 animate-spin" />
-                                                            Processing
+                                                            <span className="hidden sm:inline">Processing</span>
                                                         </span>
                                                     )}
                                                     {doc.status === 'error' && (
                                                         <span className={cn(
-                                                            "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium",
+                                                            "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium",
                                                             "bg-red-500/10 text-red-400 border border-red-500/20"
                                                         )}>
                                                             <AlertCircle className="w-3 h-3" />
-                                                            Error
+                                                            <span className="hidden sm:inline">Error</span>
                                                         </span>
                                                     )}
 
@@ -877,9 +877,9 @@ export default function DocumentsView({ isDark = true }: { isDark?: boolean }) {
                                                         <div className="flex items-center gap-1">
                                                             <button
                                                                 onClick={() => handleDelete(doc.id)}
-                                                                className="px-2.5 py-1 rounded-lg text-xs font-medium bg-red-500/20 text-red-400 hover:bg-red-500/30 transition-colors cursor-pointer"
+                                                                className="px-2 py-0.5 rounded-lg text-xs font-medium bg-red-500/20 text-red-400 hover:bg-red-500/30 transition-colors cursor-pointer"
                                                             >
-                                                                Confirm
+                                                                Del
                                                             </button>
                                                             <button
                                                                 onClick={() => setDeleteConfirmId(null)}
@@ -895,13 +895,13 @@ export default function DocumentsView({ isDark = true }: { isDark?: boolean }) {
                                                         <button
                                                             onClick={() => setDeleteConfirmId(doc.id)}
                                                             className={cn(
-                                                                "p-2 rounded-lg transition-colors cursor-pointer",
+                                                                "p-1.5 rounded-lg transition-colors cursor-pointer shrink-0",
                                                                 isDark
                                                                     ? "text-white/30 hover:text-red-400 hover:bg-red-500/10"
                                                                     : "text-gray-400 hover:text-red-500 hover:bg-red-50"
                                                             )}
                                                         >
-                                                            <Trash2 className="w-4 h-4" />
+                                                            <Trash2 className="w-3.5 h-3.5" />
                                                         </button>
                                                     )}
                                                 </div>
