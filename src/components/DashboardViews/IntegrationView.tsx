@@ -82,7 +82,7 @@ export default function IntegrationView({ isDark = true }: { isDark?: boolean })
 
             {/* Agent ID Card */}
             <div className={cn(
-                "rounded-xl border p-5",
+                "rounded-xl border p-4 sm:p-5",
                 isDark ? "bg-white/[0.02] border-white/10" : "bg-white border-black/10"
             )}>
                 <div className="flex items-center gap-3 mb-3">
@@ -112,7 +112,7 @@ export default function IntegrationView({ isDark = true }: { isDark?: boolean })
 
             {/* Active Persona Card */}
             <div className={cn(
-                "rounded-xl border p-5",
+                "rounded-xl border p-4 sm:p-5",
                 isDark ? "bg-white/[0.02] border-white/10" : "bg-white border-black/10"
             )}>
                 <div className="flex items-center gap-3 mb-4">
@@ -176,10 +176,10 @@ export default function IntegrationView({ isDark = true }: { isDark?: boolean })
             </div>
 
             {/* Links Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {/* Chat Link */}
                 <div className={cn(
-                    "rounded-xl border p-5",
+                    "rounded-xl border p-4 sm:p-5",
                     isDark ? "bg-white/[0.02] border-white/10" : "bg-white border-black/10"
                 )}>
                     <div className="flex items-center gap-3 mb-3">
@@ -225,7 +225,7 @@ export default function IntegrationView({ isDark = true }: { isDark?: boolean })
 
                 {/* Call Link */}
                 <div className={cn(
-                    "rounded-xl border p-5",
+                    "rounded-xl border p-4 sm:p-5",
                     isDark ? "bg-white/[0.02] border-white/10" : "bg-white border-black/10"
                 )}>
                     <div className="flex items-center gap-3 mb-3">
@@ -272,7 +272,7 @@ export default function IntegrationView({ isDark = true }: { isDark?: boolean })
 
             {/* Embed Code */}
             <div className={cn(
-                "rounded-xl border p-5",
+                "rounded-xl border p-4 sm:p-5",
                 isDark ? "bg-white/[0.02] border-white/10" : "bg-white border-black/10"
             )}>
                 <div className="flex items-center justify-between mb-3">

@@ -168,7 +168,7 @@ export default function TeamView({ isDark = true }: { isDark?: boolean }) {
     };
 
     return (
-        <div className="space-y-6 max-w-[1600px] mx-auto pb-10">
+        <div className="space-y-6 pb-10">
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
@@ -183,7 +183,7 @@ export default function TeamView({ isDark = true }: { isDark?: boolean }) {
 
             {/* Invite Card */}
             <div className={cn(
-                "p-6 rounded-xl border relative overflow-hidden transition-all duration-300",
+                "p-4 sm:p-6 rounded-xl border relative overflow-hidden transition-all duration-300",
                 isDark ? "bg-[#09090B] border-white/10" : "bg-white border-black/10"
             )}>
                 <div className="relative z-10">
@@ -191,7 +191,7 @@ export default function TeamView({ isDark = true }: { isDark?: boolean }) {
                         {t('team.invite')}
                     </h3>
 
-                    <form onSubmit={handleInvite} className="flex flex-col md:flex-row gap-4 items-end">
+                    <form onSubmit={handleInvite} className="flex flex-col sm:flex-row gap-4 items-end">
                         <div className="flex-1 space-y-2 w-full">
                             <label className={cn("text-xs font-medium uppercase tracking-wider", isDark ? "text-white/40" : "text-black/40")}>
                                 {t('team.emailLabel')}
@@ -214,7 +214,7 @@ export default function TeamView({ isDark = true }: { isDark?: boolean }) {
                             </div>
                         </div>
 
-                        <div className="space-y-2 w-full md:w-48">
+                        <div className="space-y-2 w-full sm:w-48">
                             <label className={cn("text-xs font-medium uppercase tracking-wider", isDark ? "text-white/40" : "text-black/40")}>
                                 {t('team.role')}
                             </label>
@@ -283,7 +283,7 @@ export default function TeamView({ isDark = true }: { isDark?: boolean }) {
                 "rounded-xl border overflow-hidden",
                 isDark ? "bg-[#09090B] border-white/10" : "bg-white border-black/10"
             )}>
-                <div className="p-6 border-b border-inherit">
+                <div className="p-4 sm:p-6 border-b border-inherit">
                     <h3 className={cn("text-lg font-semibold", isDark ? "text-white" : "text-black")}>
                         {t('team.members')}
                     </h3>
@@ -296,14 +296,14 @@ export default function TeamView({ isDark = true }: { isDark?: boolean }) {
                             isDark ? "bg-white/5 text-gray-400" : "bg-gray-50 text-gray-600"
                         )}>
                             <tr>
-                                <th className="px-6 py-4">{t('team.table.user')}</th>
-                                <th className="px-6 py-4">{t('team.table.role')}</th>
-                                <th className="px-6 py-4">{t('team.table.status')}</th>
-                                <th className="px-6 py-4">{t('team.table.activity')}</th>
-                                <th className="px-6 py-4 text-right">{t('team.table.actions')}</th>
+                                <th className="px-4 sm:px-6 py-3 sm:py-4">{t('team.table.user')}</th>
+                                <th className="px-4 sm:px-6 py-3 sm:py-4 hidden sm:table-cell">{t('team.table.role')}</th>
+                                <th className="px-4 sm:px-6 py-3 sm:py-4">{t('team.table.status')}</th>
+                                <th className="px-4 sm:px-6 py-3 sm:py-4 hidden md:table-cell">{t('team.table.activity')}</th>
+                                <th className="px-4 sm:px-6 py-3 sm:py-4 text-right">{t('team.table.actions')}</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-gray-200 dark:divide-white/5">
+                        <tbody className={cn("divide-y", isDark ? "divide-white/5" : "divide-gray-200")}>
                             <AnimatePresence>
                                 {members.map((member) => (
                                     <motion.tr
@@ -313,7 +313,7 @@ export default function TeamView({ isDark = true }: { isDark?: boolean }) {
                                         exit={{ opacity: 0, height: 0 }}
                                         className={cn(isDark ? "hover:bg-white/5" : "hover:bg-gray-50")}
                                     >
-                                        <td className="px-6 py-4">
+                                        <td className="px-4 sm:px-6 py-3 sm:py-4">
                                             <div className="flex items-center gap-3">
                                                 <div className={cn(
                                                     "w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs",
@@ -331,7 +331,7 @@ export default function TeamView({ isDark = true }: { isDark?: boolean }) {
                                                 </div>
                                             </div>
                                         </td>
-                                        <td className="px-6 py-4">
+                                        <td className="px-4 sm:px-6 py-3 sm:py-4 hidden sm:table-cell">
                                             <span className={cn(
                                                 "px-2 py-1 rounded-md text-xs font-medium capitalize",
                                                 member.role === 'admin'
@@ -341,7 +341,7 @@ export default function TeamView({ isDark = true }: { isDark?: boolean }) {
                                                 {member.role === 'admin' ? t('team.role.admin') : t('team.role.member')}
                                             </span>
                                         </td>
-                                        <td className="px-6 py-4">
+                                        <td className="px-4 sm:px-6 py-3 sm:py-4">
                                             <span className={cn(
                                                 "flex items-center gap-1.5 w-fit px-2 py-1 rounded-full text-xs font-medium",
                                                 member.status === 'active'
@@ -355,7 +355,7 @@ export default function TeamView({ isDark = true }: { isDark?: boolean }) {
                                                 {member.status === 'active' ? t('team.status.active') : t('team.status.pending')}
                                             </span>
                                         </td>
-                                        <td className="px-6 py-4">
+                                        <td className="px-4 sm:px-6 py-3 sm:py-4 hidden md:table-cell">
                                             <div className="flex flex-col">
                                                 <span className={cn("text-xs", isDark ? "text-white/60" : "text-black/60")}>
                                                     {t('team.added').replace('{date}', member.dateAdded)}
@@ -367,7 +367,7 @@ export default function TeamView({ isDark = true }: { isDark?: boolean }) {
                                                 )}
                                             </div>
                                         </td>
-                                        <td className="px-6 py-4 text-right">
+                                        <td className="px-4 sm:px-6 py-3 sm:py-4 text-right">
                                             <button
                                                 onClick={() => handleRemoveMember(member.id)}
                                                 className={cn(

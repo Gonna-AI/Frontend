@@ -623,7 +623,7 @@ function AuthUserSection({ isDark, state }: { isDark: boolean; state: string }) 
                     {/* Dialog — elevated above backdrop */}
                     <div
                         className={cn(
-                            "relative z-10 w-[380px] rounded-[28px] p-8 shadow-2xl border animate-scale-in",
+                            "relative z-10 w-[calc(100vw-2rem)] sm:w-[380px] rounded-[20px] sm:rounded-[28px] p-6 sm:p-8 shadow-2xl border animate-scale-in",
                             isDark
                                 ? "bg-[#121214] border-white/5 shadow-black/50"
                                 : "bg-white border-gray-200/50 shadow-xl shadow-gray-200/50"
@@ -684,7 +684,7 @@ function AuthUserSection({ isDark, state }: { isDark: boolean; state: string }) 
                     state === "collapsed" && "justify-center"
                 )}>
                     {avatarUrl ? (
-                        <div className="w-8 h-8 shrink-0 min-w-[32px] min-h-[32px] max-w-[32px] max-h-[32px] rounded-full overflow-hidden ring-1 ring-white/10 relative">
+                        <div className="w-8 h-8 shrink-0 rounded-full overflow-hidden ring-1 ring-white/10 relative">
                             <img
                                 src={avatarUrl}
                                 alt={displayName}

@@ -293,13 +293,13 @@ export default function SettingsView({ isDark }: SettingsViewProps) {
 
       {/* Profile Tab */}
       {activeTab === 'profile' && (
-        <div className={cn("p-6 rounded-2xl border space-y-6", isDark ? "bg-[#09090B] border-white/10" : "bg-white border-black/10")}>
+        <div className={cn("p-4 sm:p-6 rounded-2xl border space-y-6", isDark ? "bg-[#09090B] border-white/10" : "bg-white border-black/10")}>
           {/* Avatar & Email */}
           <div className="flex items-center gap-4">
             {profile.avatar_url ? (
-              <img src={profile.avatar_url} alt="" className="w-16 h-16 rounded-full ring-2 ring-purple-500/20" />
+              <img src={profile.avatar_url} alt="" className="w-12 h-12 sm:w-16 sm:h-16 rounded-full ring-2 ring-purple-500/20" />
             ) : (
-              <div className={cn("w-16 h-16 rounded-full flex items-center justify-center text-xl font-bold", isDark ? "bg-white/10 text-white" : "bg-gray-100 text-gray-700")}>
+              <div className={cn("w-12 h-12 sm:w-16 sm:h-16 rounded-full flex items-center justify-center text-xl font-bold", isDark ? "bg-white/10 text-white" : "bg-gray-100 text-gray-700")}>
                 {(profile.display_name || profile.email || 'U').charAt(0).toUpperCase()}
               </div>
             )}
@@ -312,7 +312,7 @@ export default function SettingsView({ isDark }: SettingsViewProps) {
           </div>
 
           {/* Form Fields */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className={cn("block text-sm font-medium mb-1.5", isDark ? "text-white/70" : "text-gray-600")}>
                 <User className="w-3.5 h-3.5 inline mr-1.5" />Display Name
@@ -396,7 +396,7 @@ export default function SettingsView({ isDark }: SettingsViewProps) {
 
       {/* Notifications Tab */}
       {activeTab === 'notifications' && (
-        <div className={cn("p-6 rounded-2xl border space-y-6", isDark ? "bg-[#09090B] border-white/10" : "bg-white border-black/10")}>
+        <div className={cn("p-4 sm:p-6 rounded-2xl border space-y-6", isDark ? "bg-[#09090B] border-white/10" : "bg-white border-black/10")}>
           {/* Email Notifications */}
           <div>
             <h3 className={cn("text-sm font-semibold mb-3 flex items-center gap-2", isDark ? "text-white/80" : "text-gray-700")}>
@@ -462,7 +462,7 @@ export default function SettingsView({ isDark }: SettingsViewProps) {
 
       {/* Security Tab */}
       {activeTab === 'security' && (
-        <div className={cn("p-6 rounded-2xl border space-y-6", isDark ? "bg-[#09090B] border-white/10" : "bg-white border-black/10")}>
+        <div className={cn("p-4 sm:p-6 rounded-2xl border space-y-6", isDark ? "bg-[#09090B] border-white/10" : "bg-white border-black/10")}>
           <div>
             <h3 className={cn("text-sm font-semibold mb-1", isDark ? "text-white/80" : "text-gray-700")}>Authentication</h3>
             <p className={cn("text-xs mb-4", isDark ? "text-white/40" : "text-gray-400")}>
@@ -519,7 +519,7 @@ export default function SettingsView({ isDark }: SettingsViewProps) {
       {activeTab === 'data' && (
         <div className="space-y-4">
           {/* Export Data */}
-          <div className={cn("p-6 rounded-2xl border", isDark ? "bg-[#09090B] border-white/10" : "bg-white border-black/10")}>
+          <div className={cn("p-4 sm:p-6 rounded-2xl border", isDark ? "bg-[#09090B] border-white/10" : "bg-white border-black/10")}>
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
                 <h3 className={cn("text-sm font-semibold", isDark ? "text-white" : "text-gray-900")}>Export Your Data</h3>
@@ -542,7 +542,7 @@ export default function SettingsView({ isDark }: SettingsViewProps) {
           </div>
 
           {/* Delete Account */}
-          <div className={cn("p-6 rounded-2xl border border-red-500/20", isDark ? "bg-red-500/[0.03]" : "bg-red-50/50")}>
+          <div className={cn("p-4 sm:p-6 rounded-2xl border border-red-500/20", isDark ? "bg-red-500/[0.03]" : "bg-red-50/50")}>
             <div className="flex items-start gap-3">
               <AlertCircle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
               <div className="flex-1">

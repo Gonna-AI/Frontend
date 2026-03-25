@@ -213,7 +213,7 @@ export default function WebhooksView({ isDark }: WebhooksViewProps) {
 
       {/* Create Form */}
       {showCreate && (
-        <div className={cn("p-6 rounded-2xl border space-y-4", isDark ? "bg-[#09090B] border-white/10" : "bg-white border-black/10")}>
+        <div className={cn("p-4 sm:p-6 rounded-2xl border space-y-4", isDark ? "bg-[#09090B] border-white/10" : "bg-white border-black/10")}>
           <h3 className={cn("text-sm font-semibold", isDark ? "text-white" : "text-gray-900")}>New Webhook</h3>
 
           {createdSecret ? (
@@ -230,7 +230,7 @@ export default function WebhooksView({ isDark }: WebhooksViewProps) {
             </div>
           ) : (
             <>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className={cn("block text-xs font-medium mb-1", isDark ? "text-white/60" : "text-gray-500")}>Name</label>
                   <input
@@ -254,7 +254,7 @@ export default function WebhooksView({ isDark }: WebhooksViewProps) {
               {/* Event Selection */}
               <div>
                 <label className={cn("block text-xs font-medium mb-2", isDark ? "text-white/60" : "text-gray-500")}>Events ({formEvents.length} selected)</label>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                   {Object.entries(EVENT_CATEGORIES).map(([catKey, cat]) => (
                     <div key={catKey}>
                       <p className={cn("text-xs font-semibold mb-1.5", isDark ? "text-white/50" : "text-gray-500")}>{cat.label}</p>
@@ -332,10 +332,10 @@ export default function WebhooksView({ isDark }: WebhooksViewProps) {
                   <p className={cn("text-xs truncate mt-0.5", isDark ? "text-white/40" : "text-gray-400")}>{wh.url}</p>
                   <div className="flex flex-wrap gap-1 mt-1.5">
                     {wh.events.slice(0, 4).map(ev => (
-                      <span key={ev} className={cn("text-[10px] px-1.5 py-0.5 rounded-md", isDark ? "bg-white/5 text-white/50" : "bg-gray-100 text-gray-500")}>{ev}</span>
+                      <span key={ev} className={cn("text-xs px-1.5 py-0.5 rounded-md", isDark ? "bg-white/5 text-white/50" : "bg-gray-100 text-gray-500")}>{ev}</span>
                     ))}
                     {wh.events.length > 4 && (
-                      <span className={cn("text-[10px] px-1.5 py-0.5 rounded-md", isDark ? "bg-white/5 text-white/30" : "bg-gray-100 text-gray-400")}>+{wh.events.length - 4}</span>
+                      <span className={cn("text-xs px-1.5 py-0.5 rounded-md", isDark ? "bg-white/5 text-white/30" : "bg-gray-100 text-gray-400")}>+{wh.events.length - 4}</span>
                     )}
                   </div>
                 </div>

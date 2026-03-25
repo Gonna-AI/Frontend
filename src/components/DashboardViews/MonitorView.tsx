@@ -104,7 +104,7 @@ function StatsCard({ title, value, change, trend, subtitle, icon, isDark, progre
 
                 <div className="z-10 mt-auto">
                     <div className={cn(
-                        "text-5xl font-bold tracking-tight mb-4",
+                        "text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight mb-3 sm:mb-4 tabular-nums",
                         isDark ? "text-white" : "text-gray-900"
                     )}>
                         {value}
@@ -143,7 +143,7 @@ function SectionTab({ active, onClick, children, isDark }: { active: boolean, on
         <button
             onClick={onClick}
             className={cn(
-                "relative px-6 py-2.5 text-sm font-medium rounded-full transition-all duration-300",
+                "relative px-4 sm:px-6 py-2 sm:py-2.5 text-sm font-medium rounded-full transition-all duration-300",
                 active
                     ? (isDark ? "text-white" : "text-black")
                     : (isDark ? "text-white/40 hover:text-white" : "text-black/40 hover:text-black")
