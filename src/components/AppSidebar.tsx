@@ -21,7 +21,6 @@ import {
     LogOut,
     Users,
     Wand2,
-    ShieldCheck,
     FileText,
     Activity,
     Webhook,
@@ -260,17 +259,6 @@ export function AppSidebar({ activeTab, setActiveTab, hasAccess = false, ...prop
                                     <span>{t('sidebar.systemPrompt')}</span>
                                 </SidebarMenuButton>
                             </SidebarMenuItem>
-                            <SidebarMenuItem>
-                                <SidebarMenuButton
-                                    isActive={activeTab === 'rescue_playbooks'}
-                                    onClick={() => handleTabClick('rescue_playbooks')}
-                                    className={menuButtonClass}
-                                >
-                                    <ShieldCheck />
-                                    <span>{t('sidebar.rescuePlaybooks')}</span>
-                                </SidebarMenuButton>
-                            </SidebarMenuItem>
-
                             <SidebarMenuItem>
                                 <SidebarMenuButton
                                     isActive={activeTab === 'context_fields'}

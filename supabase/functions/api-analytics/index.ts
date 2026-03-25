@@ -375,7 +375,8 @@ Deno.serve(async (req: Request) => {
     // Outcome-driven signal analysis: which topics/tags correlate with
     // resolved vs unresolved calls. Pure statistics — no AI calls.
     if (req.method === 'GET' && action === 'patterns') {
-      const days = parseInt(url.searchParams.get('days') ?? '30', 10);
+      const days = parseInt(url.searchParams.get('days') ?? '90', 10);
+      const minOcc = parseInt(url.searchParams.get('min_occ') ?? '1', 10);
       const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
 
       const { data: rows, error: fetchErr } = await adminClient
@@ -389,7 +390,7 @@ Deno.serve(async (req: Request) => {
       if (fetchErr) throw fetchErr;
       const calls = (rows ?? []) as CallRow[];
 
-      const liftResults = computeTagLift(calls, 2);
+      const liftResults = computeTagLift(calls, minOcc);
       const categoryFCR = computeCategoryFCR(calls);
 
       // Split into top winning signals (lift > 1) and top risk signals (lift < 1)

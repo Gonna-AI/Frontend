@@ -1,11 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
 import {
-  BarChart, Bar, AreaChart, Area, PieChart, Pie, Cell,
-  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
+  AreaChart, Area, PieChart, Pie, Cell,
+  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from 'recharts';
 import {
-  TrendingUp, TrendingDown, Phone, MessageSquare, Clock, CheckCircle2,
-  Smile, AlertTriangle, Hash, Loader2, RefreshCw, Calendar, Sparkles,
+  TrendingUp, TrendingDown, CheckCircle2,
+  Smile, Hash, Loader2, RefreshCw, Sparkles,
   ShieldAlert, Target,
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
@@ -191,7 +191,7 @@ export default function AnalyticsView({ isDark }: AnalyticsViewProps) {
         const token = session?.access_token;
         if (!token) return;
         const res = await fetch(
-          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/api-analytics/patterns?days=30`,
+          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/api-analytics/patterns?days=90&min_occ=1`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         if (res.ok && !cancelled) {
@@ -258,33 +258,10 @@ export default function AnalyticsView({ isDark }: AnalyticsViewProps) {
         </div>
       </div>
 
-      {/* KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-        <KpiCard isDark={isDark} title="Total Calls" value={overview?.totalCalls ?? 0} subtitle={`${overview?.voiceCalls ?? 0} voice · ${overview?.textCalls ?? 0} text`} icon={<Phone className="w-4 h-4" />} color="blue" />
-        <KpiCard isDark={isDark} title="Avg Duration" value={`${overview?.avgDuration ?? 0}s`} subtitle="Per interaction" icon={<Clock className="w-4 h-4" />} color="purple" />
+      {/* KPI Cards — analytics-specific metrics only */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <KpiCard isDark={isDark} title="Resolution Rate" value={`${overview?.resolutionRate ?? 0}%`} subtitle="Resolved without follow-up" icon={<CheckCircle2 className="w-4 h-4" />} color="emerald" />
         <KpiCard isDark={isDark} title="Avg Sentiment" value={`${overview?.avgSentiment ?? 50}/100`} subtitle={sentimentLabel(overview?.avgSentiment ?? 50)} icon={<Smile className="w-4 h-4" />} color="orange" />
-        <KpiCard isDark={isDark} title="Follow-ups" value={overview?.followUps ?? 0} subtitle="Requiring attention" icon={<AlertTriangle className="w-4 h-4" />} color="rose" />
-      </div>
-
-      {/* Call Volume Trend Chart */}
-      <div className={cn("p-6 rounded-2xl border", isDark ? "bg-[#09090B] border-white/10" : "bg-white border-black/10")}>
-        <h3 className={cn("text-lg font-semibold mb-4", isDark ? "text-white" : "text-gray-900")}>
-          {t('analytics.callVolume') || 'Call Volume Trend'}
-        </h3>
-        <div className="h-[300px]">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={trends} barCategoryGap="20%">
-              <CartesianGrid strokeDasharray="3 3" stroke={isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)'} />
-              <XAxis dataKey="date" tick={{ fontSize: 11, fill: isDark ? '#999' : '#666' }} tickFormatter={(d) => d.slice(5)} />
-              <YAxis tick={{ fontSize: 11, fill: isDark ? '#999' : '#666' }} />
-              <Tooltip content={(props: any) => <ChartTooltip {...props} isDark={isDark} />} />
-              <Legend />
-              <Bar dataKey="voice" name="Voice" fill="#8b5cf6" radius={[4, 4, 0, 0]} />
-              <Bar dataKey="text" name="Text" fill="#3b82f6" radius={[4, 4, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
       </div>
 
       {/* Sentiment Trend + Category Distribution */}
