@@ -101,6 +101,7 @@ function DemoDashboardContent() {
       webhooks: t('sidebar.webhooks'),
       settings: t('sidebar.settings'),
       onboarding: t('onboarding.title'),
+      rescue_playbooks_view: 'Playbooks',
     };
     return labelMap[tab] || tab;
   };

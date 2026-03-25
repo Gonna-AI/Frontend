@@ -275,8 +275,8 @@ Deno.serve(async (req: Request) => {
       return json(req, 200, { topTopics });
     }
 
-    // Default: return all analytics in one call
-    if (req.method === 'GET') {
+    // Default: return all analytics in one call (only when no specific sub-action)
+    if (req.method === 'GET' && !['patterns', 'kb-gaps', 'precall-brief'].includes(action)) {
       // Combine overview, trends and top-topics for a single request
       const totalCalls = records.length;
       const voiceCalls = records.filter(c => c.type === 'voice').length;

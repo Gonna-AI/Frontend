@@ -15,6 +15,7 @@ import {
     Link2,
     Key,
     BarChart,
+    BarChart2,
     Sun,
     Moon,
     LogOut,
@@ -25,6 +26,7 @@ import {
     Activity,
     Webhook,
     Settings,
+    BookMarked,
 } from "lucide-react"
 
 import { useTheme } from "@/hooks/useTheme"
@@ -175,6 +177,28 @@ export function AppSidebar({ activeTab, setActiveTab, hasAccess = false, ...prop
                                 >
                                     <Network />
                                     <span>{t('sidebar.customerGraph')}</span>
+                                </SidebarMenuButton>
+                            </SidebarMenuItem>
+                            <SidebarMenuItem>
+                                <SidebarMenuButton
+                                    isActive={activeTab === 'analytics'}
+                                    onClick={() => handleTabClick('analytics')}
+                                    tooltip="Analytics"
+                                    className={menuButtonClass}
+                                >
+                                    <BarChart2 />
+                                    <span>Analytics</span>
+                                </SidebarMenuButton>
+                            </SidebarMenuItem>
+                            <SidebarMenuItem>
+                                <SidebarMenuButton
+                                    isActive={activeTab === 'rescue_playbooks_view'}
+                                    onClick={() => handleTabClick('rescue_playbooks_view')}
+                                    tooltip="Playbooks"
+                                    className={menuButtonClass}
+                                >
+                                    <BookMarked />
+                                    <span>Playbooks</span>
                                 </SidebarMenuButton>
                             </SidebarMenuItem>
                         </SidebarMenu>
