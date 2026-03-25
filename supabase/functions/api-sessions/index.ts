@@ -95,6 +95,7 @@ Deno.serve(async (req: Request) => {
         .from('active_sessions')
         .upsert({
           id: sessionId,
+          user_id: user.id,
           session_type: sessionType,
           started_at: startedAt,
           status: 'active',

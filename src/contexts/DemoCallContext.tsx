@@ -601,7 +601,7 @@ export function DemoCallProvider({ children, initialAgentId }: { children: React
       .channel('active_sessions_global_count')
       .on(
         'postgres_changes',
-        { event: '*', schema: 'public', table: 'active_sessions', filter: `user_id=eq.${user?.id ?? ''}` },
+        { event: '*', schema: 'public', table: 'active_sessions' },
         (payload) => {
           console.log('📡 Active sessions change:', payload.eventType);
           debouncedFetch();

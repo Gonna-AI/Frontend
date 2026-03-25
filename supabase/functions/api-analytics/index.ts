@@ -15,18 +15,37 @@ const corsBaseHeaders = {
   'Access-Control-Max-Age': '86400',
 };
 
-const ALLOWED_ORIGINS = new Set([
+const DEFAULT_ALLOWED_ORIGINS = new Set<string>([
   'https://clerktree.com',
   'https://www.clerktree.com',
-  'https://clerktree.netlify.app',
   'http://localhost:5173',
   'http://127.0.0.1:5173',
+  'https://clerktree.netlify.app',
 ]);
 
-function getCorsHeaders(req: Request) {
+const EXTRA_ALLOWED_ORIGINS = (Deno.env.get('ALLOWED_ORIGINS') ?? '')
+  .split(',')
+  .map((o) => o.trim())
+  .filter(Boolean);
+
+for (const o of EXTRA_ALLOWED_ORIGINS) DEFAULT_ALLOWED_ORIGINS.add(o);
+
+function isAllowedOrigin(origin: string | null): boolean {
+  if (!origin) return true;
+  if (DEFAULT_ALLOWED_ORIGINS.has(origin)) return true;
+  try {
+    const url = new URL(origin);
+    if (['localhost', '127.0.0.1', '::1'].includes(url.hostname)) return true;
+    return url.protocol === 'https:' && (
+      url.hostname === 'clerktree.com' || url.hostname.endsWith('.clerktree.com')
+    );
+  } catch { return false; }
+}
+
+function getCorsHeaders(req: Request): Record<string, string> {
   const origin = req.headers.get('origin');
-  const allowedOrigin = origin && ALLOWED_ORIGINS.has(origin) ? origin : 'https://clerktree.com';
-  return { ...corsBaseHeaders, 'Access-Control-Allow-Origin': allowedOrigin };
+  const allowedOrigin = origin && isAllowedOrigin(origin) ? origin : 'https://clerktree.com';
+  return { ...corsBaseHeaders, 'Access-Control-Allow-Origin': allowedOrigin, 'Vary': 'Origin' };
 }
 
 function json(req: Request, status: number, data: unknown) {
@@ -85,6 +104,9 @@ function formatDate(dateStr: string): string {
 
 // ─── Main Handler ────────────────────────────────────────────────
 Deno.serve(async (req: Request) => {
+  if (!isAllowedOrigin(req.headers.get('origin'))) {
+    return json(req, 403, { error: 'Origin not allowed' });
+  }
   if (req.method === 'OPTIONS') {
     return new Response(null, { status: 204, headers: getCorsHeaders(req) });
   }
