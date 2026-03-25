@@ -237,7 +237,7 @@ export default function NotificationCenter({ isDark, className }: NotificationCe
             : "border-black/10 bg-black/5 text-black/60 hover:bg-black/10 hover:text-black"
         )}
       >
-        <Bell className="h-3.5 w-3.5" />
+        <Bell className="h-3.5 w-3.5" strokeWidth={1.5} />
         {unreadCount > 0 && (
           <span
             className={cn(

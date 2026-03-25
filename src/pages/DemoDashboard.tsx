@@ -135,19 +135,22 @@ function DemoDashboardContent() {
                   {getTabLabel(activeTab)}
                 </h1>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5">
                 <button
                   className={cn(
-                    "p-1.5 rounded-md transition-colors sm:order-2",
-                    isDark ? "hover:bg-white/10 text-white/60" : "hover:bg-black/10 text-black/60"
+                    "h-7 w-7 flex items-center justify-center rounded-full border transition-colors backdrop-blur-sm",
+                    isDark
+                      ? "border-white/10 bg-white/5 text-white/60 hover:bg-white/10 hover:text-white"
+                      : "border-black/10 bg-black/5 text-black/50 hover:bg-black/10 hover:text-black"
                   )}
                   onClick={() => window.location.reload()}
+                  title="Refresh"
                 >
-                  <RotateCcw className="w-4 h-4" />
+                  <RotateCcw className="w-3.5 h-3.5" strokeWidth={1.5} />
                 </button>
                 <NotificationCenter
                   isDark={isDark}
-                  className="static sm:order-3"
+                  className="static"
                 />
                 <a
                   href="/docs"

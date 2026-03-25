@@ -424,7 +424,7 @@ export default function KeysView({ isDark = true, hasAccess = false }: { isDark?
                                     <p className={cn("text-sm", isDark ? "text-white/80" : "text-gray-700")}>{key.created}</p>
                                     <p className={cn("text-xs", isDark ? "text-white/40" : "text-gray-500")}>{t('keys.lastUsedPrefix')} {key.lastUsed}</p>
                                 </div>
-                                <div className="col-span-2 flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <div className="col-span-2 flex justify-end gap-2 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                                     <button
                                         onClick={() => copyToClipboard(key.token, key.id)}
                                         className={cn(
@@ -449,7 +449,6 @@ export default function KeysView({ isDark = true, hasAccess = false }: { isDark?
                             </div>
                         ))}
                     </div>
-                    </>
                 )}
             </div>
 

@@ -935,7 +935,7 @@ export default function CustomerGraphView({ isDark = true }: CustomerGraphViewPr
                   : 'bg-black/5 border-black/10 text-black hover:bg-black/10 hover:border-black/20',
               )}
             >
-              <RefreshCcw className="w-4 h-4" />
+              <RefreshCcw className="w-4 h-4" strokeWidth={1.5} />
               {t('customerGraph.controls.recalculate')}
             </button>
 

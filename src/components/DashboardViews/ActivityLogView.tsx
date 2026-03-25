@@ -115,7 +115,7 @@ export default function ActivityLogView({ isDark }: ActivityLogViewProps) {
           onClick={fetchActivities}
           className={cn("p-2 rounded-lg border transition-colors", isDark ? "border-white/10 hover:bg-white/5 text-white/60" : "border-gray-200 hover:bg-gray-50 text-gray-500")}
         >
-          <RefreshCw className="w-4 h-4" />
+          <RefreshCw className="w-4 h-4" strokeWidth={1.5} />
         </button>
       </div>
 

@@ -253,7 +253,7 @@ export default function AnalyticsView({ isDark }: AnalyticsViewProps) {
               isDark ? "border-white/10 hover:bg-white/5 text-white/60" : "border-gray-200 hover:bg-gray-50 text-gray-500"
             )}
           >
-            <RefreshCw className="w-4 h-4" />
+            <RefreshCw className="w-4 h-4" strokeWidth={1.5} />
           </button>
         </div>
       </div>
