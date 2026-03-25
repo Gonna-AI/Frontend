@@ -95,6 +95,7 @@ export default function UsageView({ isDark = true, hasAccess = false }: { isDark
     const billingApiBase = supabaseUrl ? `${supabaseUrl}/functions/v1/api-billing` : null;
 
     const [liveCredits, setLiveCredits] = useState<number | null>(null);
+    const [totalCredits, setTotalCredits] = useState<number>(TOTAL_CREDITS);
     const [isRedeeming, setIsRedeeming] = useState(false);
     const [redeemCode, setRedeemCode] = useState('');
     const [redeemMessage, setRedeemMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
@@ -113,6 +114,7 @@ export default function UsageView({ isDark = true, hasAccess = false }: { isDark
             if (res.ok) {
                 const data = await res.json();
                 setLiveCredits(Number(data.balance));
+                if (data.total_credits != null) setTotalCredits(Number(data.total_credits));
             }
         } catch (e) {
             console.error('Failed to fetch live balance', e);
@@ -180,12 +182,12 @@ export default function UsageView({ isDark = true, hasAccess = false }: { isDark
         const voiceCreditsUsed = totalVoiceMinutes * VOICE_CREDITS_PER_MINUTE;
         const textCreditsUsed = Math.ceil(totalTextRequests / 10) * TEXT_CREDITS_PER_10_REQUESTS;
         const totalCreditsUsed = voiceCreditsUsed + textCreditsUsed;
-        const fallbackCreditsRemaining = Math.max(0, TOTAL_CREDITS - totalCreditsUsed);
+        const fallbackCreditsRemaining = Math.max(0, totalCredits - totalCreditsUsed);
 
         const creditsRemaining = liveCredits !== null ? liveCredits : fallbackCreditsRemaining;
         const creditsUsedPercent = liveCredits !== null
-            ? ((TOTAL_CREDITS - creditsRemaining) / TOTAL_CREDITS) * 100
-            : (totalCreditsUsed / TOTAL_CREDITS) * 100;
+            ? ((totalCredits - creditsRemaining) / totalCredits) * 100
+            : (totalCreditsUsed / totalCredits) * 100;
 
         return {
             voiceCalls: voiceCalls.length,
@@ -198,7 +200,7 @@ export default function UsageView({ isDark = true, hasAccess = false }: { isDark
             creditsRemaining,
             creditsUsedPercent: Math.max(0, Math.min(100, creditsUsedPercent))
         };
-    }, [callHistory, liveCredits]);
+    }, [callHistory, liveCredits, totalCredits]);
 
     // Use actual activity data for the chart, aggregated by day
     const chartData = useMemo(() => {
@@ -379,14 +381,14 @@ export default function UsageView({ isDark = true, hasAccess = false }: { isDark
                     title={t('usage.voiceMinutes')}
                     value={usageStats.totalVoiceMinutes}
                     subtitle={t('usage.creditPerMin')}
-                    progress={(usageStats.totalVoiceMinutes / TOTAL_CREDITS) * 100}
+                    progress={(usageStats.totalVoiceMinutes / totalCredits) * 100}
                     isDark={isDark}
                 />
                 <StatsCard
                     title={t('usage.textRequests')}
                     value={usageStats.totalTextRequests}
                     subtitle={t('usage.creditPerReqs')}
-                    progress={(usageStats.totalTextRequests / (TOTAL_CREDITS * 10)) * 100}
+                    progress={(usageStats.totalTextRequests / (totalCredits * 10)) * 100}
                     isDark={isDark}
                 />
                 <StatsCard
@@ -511,7 +513,7 @@ export default function UsageView({ isDark = true, hasAccess = false }: { isDark
                                 <td className={cn("px-6 py-4 font-medium", isDark ? "text-white" : "text-black")}>
                                     {usageStats.voiceCreditsUsed}
                                 </td>
-                                <td className={cn("px-6 py-4 text-right", isDark ? "text-gray-400" : "text-gray-600")}>{t('usage.credits').replace('{count}', '50')}</td>
+                                <td className={cn("px-6 py-4 text-right", isDark ? "text-gray-400" : "text-gray-600")}>{t('usage.credits').replace('{count}', String(totalCredits))}</td>
                             </tr>
                             <tr className={cn(isDark ? "hover:bg-white/5" : "hover:bg-gray-50")}>
                                 <td className="px-6 py-4 flex items-center gap-3">

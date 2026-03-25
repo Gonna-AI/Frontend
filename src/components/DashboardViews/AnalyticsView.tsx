@@ -120,7 +120,10 @@ export default function AnalyticsView({ isDark }: AnalyticsViewProps) {
   const [overview, setOverview] = useState<OverviewData | null>(null);
   const [trends, setTrends] = useState<TrendPoint[]>([]);
   const [topTopics, setTopTopics] = useState<TopicItem[]>([]);
-  const [dateRange, setDateRange] = useState<{ start: Date | null; end: Date | null }>({ start: null, end: null });
+  const [dateRange, setDateRange] = useState<{ start: Date; end: Date }>({
+    start: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+    end: new Date(),
+  });
 
   const fetchAnalytics = useCallback(async () => {
     setLoading(true);
@@ -130,8 +133,8 @@ export default function AnalyticsView({ isDark }: AnalyticsViewProps) {
       if (!token) return;
 
       const params = new URLSearchParams();
-      if (dateRange.start) params.set('start', dateRange.start.toISOString());
-      if (dateRange.end) params.set('end', dateRange.end.toISOString());
+      params.set('start', dateRange.start.toISOString());
+      params.set('end', dateRange.end.toISOString());
 
       const res = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/api-analytics?${params}`,
@@ -192,8 +195,7 @@ export default function AnalyticsView({ isDark }: AnalyticsViewProps) {
             isDark={isDark}
             startDate={dateRange.start}
             endDate={dateRange.end}
-            onStartDateChange={(d) => setDateRange(prev => ({ ...prev, start: d }))}
-            onEndDateChange={(d) => setDateRange(prev => ({ ...prev, end: d }))}
+            onChange={(start, end) => setDateRange({ start, end })}
           />
           <button
             onClick={fetchAnalytics}
