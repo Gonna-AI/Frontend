@@ -118,8 +118,6 @@ function DemoDashboardContent() {
           hasAccess={hasAccess}
         />
 
-
-
         <main className="flex-1 flex flex-col h-screen overflow-hidden relative">
           {/* Sticky Header Container */}
           <div className="sticky top-0 z-[200] w-full flex flex-col">
@@ -177,7 +175,7 @@ function DemoDashboardContent() {
               {activeTab === '' && accessLoading && (
                 <div className="flex items-center justify-center w-full min-h-[60vh]">
                   <div className="flex flex-col items-center gap-4">
-                    <div className="w-8 h-8 border-2 border-white/20 border-t-purple-500 rounded-full animate-spin" />
+                    <div className={cn("w-8 h-8 border-2 rounded-full animate-spin", isDark ? "border-white/10 border-t-purple-500" : "border-black/10 border-t-purple-500")} />
                     <p className={cn("text-sm", isDark ? "text-white/50" : "text-gray-500")}>{t('access.checking')}</p>
                   </div>
                 </div>

@@ -132,12 +132,12 @@ const TreeNodeNode = ({ node, depth = 0 }: { node: PageIndexNode; depth?: number
                 <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
                         {pageLabel ? (
-                            <span className="text-[10px] font-mono text-[#FFB286] bg-[#FF8A5B]/10 px-1.5 py-0.5 rounded">
+                            <span className="text-[11px] font-mono text-[#FFB286] bg-[#FF8A5B]/10 px-1.5 py-0.5 rounded">
                                 {pageLabel}
                             </span>
                         ) : null}
                         {node.node_id && (
-                            <span className="text-[10px] font-mono text-white/40 bg-white/5 px-1.5 py-0.5 rounded truncate max-w-[120px]">
+                            <span className="text-[11px] font-mono text-white/40 bg-white/5 px-1.5 py-0.5 rounded truncate max-w-[120px]">
                                 {node.node_id}
                             </span>
                         )}
@@ -492,7 +492,7 @@ export default function DocumentsView({ isDark = true }: { isDark?: boolean }) {
     const textMuted = isDark ? 'text-white/40' : 'text-gray-400';
 
     return (
-        <div className="space-y-6 max-w-[1600px] mx-auto pb-10">
+        <div className="space-y-6 pb-10">
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
@@ -566,7 +566,7 @@ export default function DocumentsView({ isDark = true }: { isDark?: boolean }) {
                                                     style={{ width: `${(processingProgress.current / processingProgress.total) * 100}%` }}
                                                 />
                                             </div>
-                                            <p className={cn("text-[10px] mt-1", isDark ? "text-white/50" : "text-gray-500")}>
+                                            <p className={cn("text-[11px] mt-1", isDark ? "text-white/50" : "text-gray-500")}>
                                                 {processingProgress.current} / {processingProgress.total}
                                             </p>
                                         </div>
@@ -575,10 +575,10 @@ export default function DocumentsView({ isDark = true }: { isDark?: boolean }) {
                             </div>
                         )}
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                             <div className="space-y-4">
                                 <div>
-                                    <label className={cn("block text-[10px] font-bold uppercase tracking-wider mb-2", textSecondary)}>
+                                    <label className={cn("block text-[11px] font-bold uppercase tracking-wider mb-2", textSecondary)}>
                                         Document Title
                                     </label>
                                     <input
@@ -599,7 +599,7 @@ export default function DocumentsView({ isDark = true }: { isDark?: boolean }) {
                                     <div
                                         onClick={() => fileInputRef.current?.click()}
                                         className={cn(
-                                            "border-2 border-dashed rounded-xl p-8 flex flex-col items-center justify-center text-center transition-all cursor-pointer group",
+                                            "border-2 border-dashed rounded-xl p-4 sm:p-6 md:p-8 flex flex-col items-center justify-center text-center transition-all cursor-pointer group",
                                             isDark
                                                 ? "bg-black/20 border-white/10 hover:border-[#FF8A5B]/50"
                                                 : "bg-gray-50 border-gray-200 hover:border-[#FF8A5B]"
@@ -624,7 +624,7 @@ export default function DocumentsView({ isDark = true }: { isDark?: boolean }) {
                                     </div>
                                 ) : (
                                     <div className="space-y-4">
-                                        <label className={cn("block text-[10px] font-bold uppercase tracking-wider mb-2", textSecondary)}>
+                                        <label className={cn("block text-[11px] font-bold uppercase tracking-wider mb-2", textSecondary)}>
                                             Content
                                         </label>
                                         <textarea
@@ -664,7 +664,7 @@ export default function DocumentsView({ isDark = true }: { isDark?: boolean }) {
                             </div>
 
                             <div className={cn(
-                                "rounded-xl border flex flex-col min-h-[400px]",
+                                "rounded-xl border flex flex-col min-h-[300px] sm:min-h-[400px]",
                                 isDark ? "bg-black/20 border-white/10" : "bg-gray-50 border-gray-200"
                             )}>
                                 <div className="flex items-center justify-between p-4 border-b border-white/5">
@@ -672,7 +672,7 @@ export default function DocumentsView({ isDark = true }: { isDark?: boolean }) {
                                         <button
                                             onClick={() => setIntelligenceTab('tree')}
                                             className={cn(
-                                                "flex items-center gap-2 px-3 py-1 rounded-md text-[10px] font-bold transition-all",
+                                                "flex items-center gap-2 px-3 py-1 rounded-md text-[11px] font-bold transition-all",
                                                 intelligenceTab === 'tree' ? "bg-white/10 text-white" : "text-white/40 hover:text-white/60"
                                             )}
                                         >
@@ -682,7 +682,7 @@ export default function DocumentsView({ isDark = true }: { isDark?: boolean }) {
                                         <button
                                             onClick={() => setIntelligenceTab('chat')}
                                             className={cn(
-                                                "flex items-center gap-2 px-3 py-1 rounded-md text-[10px] font-bold transition-all relative",
+                                                "flex items-center gap-2 px-3 py-1 rounded-md text-[11px] font-bold transition-all relative",
                                                 intelligenceTab === 'chat' ? "bg-white/10 text-white" : "text-white/40 hover:text-white/60"
                                             )}
                                         >
@@ -694,7 +694,7 @@ export default function DocumentsView({ isDark = true }: { isDark?: boolean }) {
                                         </button>
                                     </div>
                                     {pageIndexTree.length > 0 && intelligenceTab === 'tree' && (
-                                        <span className="text-[10px] font-mono text-[#FFB286]">
+                                        <span className="text-[11px] font-mono text-[#FFB286]">
                                             {pageIndexService.countNodes(pageIndexTree)} NODES
                                         </span>
                                     )}
@@ -713,7 +713,7 @@ export default function DocumentsView({ isDark = true }: { isDark?: boolean }) {
                                                 <div className="h-full flex flex-col items-center justify-center text-center opacity-30 px-6">
                                                     <Layers className="w-10 h-10 mb-3" />
                                                     <p className="text-xs font-medium">No structured data found.</p>
-                                                    <p className="text-[10px] mt-1 leading-relaxed">
+                                                    <p className="text-[11px] mt-1 leading-relaxed">
                                                         Vectorless RAG preserves structure for 100% accuracy.
                                                     </p>
                                                 </div>
@@ -726,7 +726,7 @@ export default function DocumentsView({ isDark = true }: { isDark?: boolean }) {
                                                     <div className="h-full flex flex-col items-center justify-center text-center opacity-20 px-8">
                                                         <Cpu className="w-10 h-10 mb-3" />
                                                         <p className="text-xs font-bold uppercase tracking-widest">Contextual AI</p>
-                                                        <p className="text-[10px] mt-1">Chat using the actual document structure.</p>
+                                                        <p className="text-[11px] mt-1">Chat using the actual document structure.</p>
                                                     </div>
                                                 ) : (
                                                     chatMessages.map((msg, i) => (
@@ -735,7 +735,7 @@ export default function DocumentsView({ isDark = true }: { isDark?: boolean }) {
                                                             msg.role === 'user' ? "ml-auto flex-row-reverse" : "mr-auto"
                                                         )}>
                                                             <div className={cn(
-                                                                "w-6 h-6 rounded-full flex-shrink-0 flex items-center justify-center border text-[10px]",
+                                                                "w-6 h-6 rounded-full flex-shrink-0 flex items-center justify-center border text-[11px]",
                                                                 msg.role === 'user' ? "bg-white/10 border-white/20" : "bg-[#FF8A5B]/20 border-[#FF8A5B]/30"
                                                             )}>
                                                                 {msg.role === 'user' ? 'U' : 'AI'}
@@ -752,7 +752,7 @@ export default function DocumentsView({ isDark = true }: { isDark?: boolean }) {
                                                 {isChatting && (
                                                     <div className="flex gap-2 mr-auto items-center opacity-50">
                                                         <Loader2 className="w-3 h-3 animate-spin" />
-                                                        <span className="text-[10px] italic">Expert is thinking...</span>
+                                                        <span className="text-[11px] italic">Expert is thinking...</span>
                                                     </div>
                                                 )}
                                             </div>
@@ -977,19 +977,19 @@ export default function DocumentsView({ isDark = true }: { isDark?: boolean }) {
                                                             </span>
                                                             {pageIndexId && (
                                                                 <span className={cn(
-                                                                    "text-[10px] font-mono px-1.5 py-0.5 rounded border",
+                                                                    "text-[11px] font-mono px-1.5 py-0.5 rounded border",
                                                                     isDark ? "bg-white/5 border-white/10 text-white/60" : "bg-gray-100 border-gray-200 text-gray-600"
                                                                 )}>
                                                                     ID {pageIndexId}
                                                                 </span>
                                                             )}
-                                                            <span className={cn("uppercase text-[10px] font-mono px-1.5 py-0.5 rounded", isDark ? "bg-white/5" : "bg-gray-200")}> 
+                                                            <span className={cn("uppercase text-[11px] font-mono px-1.5 py-0.5 rounded", isDark ? "bg-white/5" : "bg-gray-200")}> 
                                                                 {doc.file_type}
                                                             </span>
                                                         </div>
 
                                                         {treeForDoc ? (
-                                                            <div className="space-y-2 max-h-[400px] overflow-y-auto scrollbar-hide">
+                                                            <div className="space-y-2 max-h-[280px] sm:max-h-[400px] overflow-y-auto scrollbar-hide">
                                                                 {treeForDoc.map((node, idx) => (
                                                                     <div
                                                                         key={`${doc.id}-${idx}`}

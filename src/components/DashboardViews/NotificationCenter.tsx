@@ -321,11 +321,11 @@ export default function NotificationCenter({ isDark, className }: NotificationCe
                         <p className={cn("text-[11px] mt-0.5 line-clamp-2", isDark ? "text-white/40" : "text-gray-500")}>{n.message}</p>
                       )}
                       <div className="flex items-center gap-2 mt-1">
-                        <span className={cn("text-[10px] flex items-center gap-1", isDark ? "text-white/25" : "text-gray-300")}>
+                        <span className={cn("text-[11px] flex items-center gap-1", isDark ? "text-white/25" : "text-gray-300")}>
                           {CATEGORY_ICONS[n.category] || CATEGORY_ICONS.system}
                           {n.category}
                         </span>
-                        <span className={cn("text-[10px]", isDark ? "text-white/20" : "text-gray-300")}>{timeAgo(n.created_at)}</span>
+                        <span className={cn("text-[11px]", isDark ? "text-white/20" : "text-gray-300")}>{timeAgo(n.created_at)}</span>
                       </div>
                     </div>
                   </div>

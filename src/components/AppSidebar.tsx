@@ -694,7 +694,7 @@ function AuthUserSection({ isDark, state }: { isDark: boolean; state: string }) 
                     state === "collapsed" && "justify-center"
                 )}>
                     {avatarUrl ? (
-                        <div className="w-8 h-8 shrink-0 rounded-full overflow-hidden ring-1 ring-white/10 relative">
+                        <div className={cn("w-8 h-8 shrink-0 rounded-full overflow-hidden ring-1 relative", isDark ? "ring-white/10" : "ring-black/10")}>
                             <img
                                 src={avatarUrl}
                                 alt={displayName}
@@ -703,7 +703,7 @@ function AuthUserSection({ isDark, state }: { isDark: boolean; state: string }) 
                         </div>
                     ) : (
                         <div className={cn(
-                            "w-8 h-8 shrink-0 min-w-[32px] min-h-[32px] max-w-[32px] max-h-[32px] rounded-full flex items-center justify-center text-xs font-bold",
+                            "w-8 h-8 shrink-0 rounded-full flex items-center justify-center text-xs font-bold",
                             isDark ? "bg-white/10 text-white/70" : "bg-black/10 text-black/70"
                         )}>
                             {displayName.charAt(0).toUpperCase()}
@@ -715,7 +715,7 @@ function AuthUserSection({ isDark, state }: { isDark: boolean; state: string }) 
                                 {displayName}
                             </p>
                             {email && (
-                                <p className={cn("text-[10px] truncate", isDark ? "text-white/40" : "text-black/40")}>
+                                <p className={cn("text-[11px] truncate leading-tight", isDark ? "text-white/40" : "text-black/40")}>
                                     {email}
                                 </p>
                             )}
@@ -731,7 +731,7 @@ function AuthUserSection({ isDark, state }: { isDark: boolean; state: string }) 
                         )}
                         title={t('sidebar.signOut')}
                     >
-                        <LogOut className="w-3.5 h-3.5" />
+                        <LogOut className="w-3.5 h-3.5" strokeWidth={1.5} />
                     </button>
                 </div>
             </SidebarMenuItem>

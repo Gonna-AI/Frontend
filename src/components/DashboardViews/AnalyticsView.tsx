@@ -537,7 +537,7 @@ export default function AnalyticsView({ isDark }: AnalyticsViewProps) {
                         <span className={cn("text-[11px] font-mono w-10 text-right shrink-0", isDark ? "text-white/50" : "text-gray-500")}>
                           {pct}%
                         </span>
-                        <span className={cn("text-[10px] w-16 shrink-0", isDark ? "text-white/30" : "text-gray-400")}>
+                        <span className={cn("text-xs w-16 shrink-0", isDark ? "text-white/30" : "text-gray-400")}>
                           {c.totalCalls} calls
                         </span>
                       </div>

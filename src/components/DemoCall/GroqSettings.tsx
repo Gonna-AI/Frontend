@@ -172,7 +172,7 @@ export default function GroqSettingsPage({ isDark = true, onSettingsChange }: Gr
     };
 
     return (
-        <div className="space-y-6 max-w-[1600px] mx-auto pb-10">
+        <div className="space-y-6 pb-10">
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div>
@@ -202,7 +202,7 @@ export default function GroqSettingsPage({ isDark = true, onSettingsChange }: Gr
                 </button>
             </div>
 
-            <div className="grid md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                 {/* Model Selection - Minimal Card */}
                 <div className={cn(
                     "p-6 rounded-xl border",
@@ -261,7 +261,7 @@ export default function GroqSettingsPage({ isDark = true, onSettingsChange }: Gr
                         Fine-tune the model behavior
                     </p>
 
-                    <div className="space-y-8">
+                    <div className="space-y-6 sm:space-y-8">
                         <div>
                             <div className="flex items-center justify-between mb-4">
                                 <label className={cn("text-sm font-medium", isDark ? "text-white" : "text-black")}>
@@ -342,7 +342,7 @@ export default function GroqSettingsPage({ isDark = true, onSettingsChange }: Gr
                         Choose the AI model that powers voice calls on /call
                     </p>
 
-                    <div className="grid md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                         {VOICE_PROVIDERS.map((provider) => (
                             <button
                                 key={provider.id}
@@ -376,7 +376,7 @@ export default function GroqSettingsPage({ isDark = true, onSettingsChange }: Gr
                                         <span
                                             key={f}
                                             className={cn(
-                                                "text-[10px] px-2 py-0.5 rounded-full font-medium",
+                                                "text-[11px] px-2 py-0.5 rounded-full font-medium",
                                                 settings.voiceProvider === provider.id
                                                     ? isDark ? "bg-emerald-500/20 text-emerald-300" : "bg-emerald-100 text-emerald-700"
                                                     : isDark ? "bg-white/5 text-white/40" : "bg-black/5 text-black/40"

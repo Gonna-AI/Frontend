@@ -89,7 +89,7 @@ function StatsCard({ title, value, change, trend, subtitle, icon, isDark, progre
                     </div>
                     {change && (
                         <div className={cn(
-                            "shrink-0 flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full border uppercase tracking-wider",
+                            "shrink-0 flex items-center gap-1 text-xs font-bold px-2 py-0.5 rounded-full border uppercase tracking-wider",
                             trend === 'up'
                                 ? (isDark ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-emerald-100 text-emerald-700 border-emerald-200")
                                 : trend === 'down'

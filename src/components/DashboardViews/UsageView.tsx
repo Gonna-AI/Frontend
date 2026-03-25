@@ -350,13 +350,13 @@ export default function UsageView({ isDark = true, hasAccess = false }: { isDark
                     <div className="flex flex-col items-end gap-2 w-full sm:min-w-[300px] sm:w-auto">
 
                         <div className="relative w-full">
-                            <div className="flex bg-transparent rounded-lg border focus-within:ring-2 focus-within:ring-emerald-500 overflow-hidden w-full transition-all border-black/10 dark:border-white/10">
+                            <div className={cn("flex bg-transparent rounded-lg border focus-within:ring-2 focus-within:ring-emerald-500 overflow-hidden w-full transition-all", isDark ? "border-white/10" : "border-black/10")}>
                                 <input
                                     type="text"
                                     placeholder={t('usage.redeemPlaceholder')}
                                     value={redeemCode}
                                     onChange={e => setRedeemCode(e.target.value)}
-                                    className="px-3 py-1.5 bg-transparent border-none text-sm w-full outline-none dark:text-white"
+                                    className={cn("px-3 py-1.5 bg-transparent border-none text-sm w-full outline-none", isDark ? "text-white" : "text-gray-900")}
                                 />
                                 <button
                                     onClick={handleRedeem}
