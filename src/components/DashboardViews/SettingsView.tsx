@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { createNotification } from '../../services/notificationService';
 import {
   User, Building2, Phone as PhoneIcon, Globe, Shield, Download, Trash2,
   Loader2, Save, Check, AlertCircle, Bell, Mail, Smartphone, ChevronRight,
@@ -94,7 +95,9 @@ export default function SettingsView({ isDark }: SettingsViewProps) {
       ...options,
       headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json', ...(options?.headers || {}) },
     });
-    return res.json();
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(typeof data?.error === 'string' ? data.error : `Request failed (${res.status})`);
+    return data;
   }, []);
 
   const notifApiCall = useCallback(async (path: string, options?: RequestInit) => {
@@ -105,7 +108,9 @@ export default function SettingsView({ isDark }: SettingsViewProps) {
       ...options,
       headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json', ...(options?.headers || {}) },
     });
-    return res.json();
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(typeof data?.error === 'string' ? data.error : `Request failed (${res.status})`);
+    return data;
   }, []);
 
   // Load user settings from endpoint
@@ -177,6 +182,13 @@ export default function SettingsView({ isDark }: SettingsViewProps) {
       });
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
+      void createNotification({
+        type: 'success',
+        title: 'Profile updated',
+        message: 'Your profile changes have been saved.',
+        category: 'system',
+        action_url: '/dashboard?tab=settings',
+      });
     } catch (err) {
       console.error('[SettingsView] save error:', err);
     } finally {
@@ -197,6 +209,7 @@ export default function SettingsView({ isDark }: SettingsViewProps) {
     setExporting(true);
     try {
       const data = await apiCall('export');
+      if (!data?.export) throw new Error('Export data missing');
       const blob = new Blob([JSON.stringify(data.export, null, 2)], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -204,6 +217,12 @@ export default function SettingsView({ isDark }: SettingsViewProps) {
       a.download = `clerktree-export-${new Date().toISOString().slice(0, 10)}.json`;
       a.click();
       URL.revokeObjectURL(url);
+      void createNotification({
+        type: 'success',
+        title: 'Data export ready',
+        message: 'Your account data has been downloaded.',
+        category: 'system',
+      });
     } catch (err) {
       console.error('[SettingsView] export error:', err);
     } finally {
@@ -215,6 +234,12 @@ export default function SettingsView({ isDark }: SettingsViewProps) {
     try {
       await apiCall('account', { method: 'DELETE' });
       setDeleteConfirm(false);
+      void createNotification({
+        type: 'warning',
+        title: 'Account deletion scheduled',
+        message: 'Your account will be deleted. Check your email for confirmation.',
+        category: 'security',
+      });
       alert('Account deletion has been scheduled. You will receive a confirmation email.');
     } catch (err) {
       console.error('[SettingsView] delete error:', err);
@@ -231,7 +256,7 @@ export default function SettingsView({ isDark }: SettingsViewProps) {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <Loader2 className={cn("w-8 h-8 animate-spin", isDark ? "text-purple-400" : "text-purple-600")} />
+        <Loader2 className="w-8 h-8 animate-spin text-[#FF8A5B]" />
       </div>
     );
   }
@@ -248,33 +273,33 @@ export default function SettingsView({ isDark }: SettingsViewProps) {
       </div>
 
       {/* Tab Navigation */}
-      <div className={cn("flex gap-1 p-1 rounded-xl border w-fit", isDark ? "bg-white/[0.02] border-white/10" : "bg-gray-50 border-gray-200")}>
+      <div className={cn("flex gap-1 p-1 rounded-xl border overflow-x-auto scrollbar-hide w-full sm:w-fit", isDark ? "bg-white/[0.02] border-white/10" : "bg-gray-50 border-gray-200")}>
         {tabs.map((tab) => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
             className={cn(
-              "flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all",
+              "flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg text-sm font-medium transition-all shrink-0",
               activeTab === tab.id
-                ? isDark ? "bg-white/10 text-white" : "bg-white text-gray-900 shadow-sm"
+                ? isDark ? "bg-[#FF8A5B]/15 text-[#FFB286]" : "bg-[#FF8A5B]/10 text-[#FF6B35] shadow-sm"
                 : isDark ? "text-white/50 hover:text-white/80" : "text-gray-500 hover:text-gray-700"
             )}
           >
             {tab.icon}
-            {tab.label}
+            <span className="hidden sm:inline">{tab.label}</span>
           </button>
         ))}
       </div>
 
       {/* Profile Tab */}
       {activeTab === 'profile' && (
-        <div className={cn("p-6 rounded-2xl border space-y-6", isDark ? "bg-[#09090B] border-white/10" : "bg-white border-black/10")}>
+        <div className={cn("p-4 sm:p-6 rounded-2xl border space-y-6", isDark ? "bg-[#09090B] border-white/10" : "bg-white border-black/10")}>
           {/* Avatar & Email */}
           <div className="flex items-center gap-4">
             {profile.avatar_url ? (
-              <img src={profile.avatar_url} alt="" className="w-16 h-16 rounded-full ring-2 ring-purple-500/20" />
+              <img src={profile.avatar_url} alt="" className="w-12 h-12 sm:w-16 sm:h-16 rounded-full ring-2 ring-purple-500/20" />
             ) : (
-              <div className={cn("w-16 h-16 rounded-full flex items-center justify-center text-xl font-bold", isDark ? "bg-white/10 text-white" : "bg-gray-100 text-gray-700")}>
+              <div className={cn("w-12 h-12 sm:w-16 sm:h-16 rounded-full flex items-center justify-center text-xl font-bold", isDark ? "bg-white/10 text-white" : "bg-gray-100 text-gray-700")}>
                 {(profile.display_name || profile.email || 'U').charAt(0).toUpperCase()}
               </div>
             )}
@@ -287,7 +312,7 @@ export default function SettingsView({ isDark }: SettingsViewProps) {
           </div>
 
           {/* Form Fields */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className={cn("block text-sm font-medium mb-1.5", isDark ? "text-white/70" : "text-gray-600")}>
                 <User className="w-3.5 h-3.5 inline mr-1.5" />Display Name
@@ -298,7 +323,7 @@ export default function SettingsView({ isDark }: SettingsViewProps) {
                 onChange={(e) => setProfile(p => ({ ...p, display_name: e.target.value }))}
                 className={cn(
                   "w-full px-3 py-2 rounded-lg border text-sm transition-colors",
-                  isDark ? "bg-white/5 border-white/10 text-white focus:border-purple-500/50" : "bg-white border-gray-200 text-gray-900 focus:border-purple-500"
+                  isDark ? "bg-white/5 border-white/10 text-white focus:border-[#FF8A5B]/50" : "bg-white border-gray-200 text-gray-900 focus:border-[#FF8A5B]"
                 )}
                 placeholder="Your name"
               />
@@ -313,7 +338,7 @@ export default function SettingsView({ isDark }: SettingsViewProps) {
                 onChange={(e) => setProfile(p => ({ ...p, company_name: e.target.value }))}
                 className={cn(
                   "w-full px-3 py-2 rounded-lg border text-sm transition-colors",
-                  isDark ? "bg-white/5 border-white/10 text-white focus:border-purple-500/50" : "bg-white border-gray-200 text-gray-900 focus:border-purple-500"
+                  isDark ? "bg-white/5 border-white/10 text-white focus:border-[#FF8A5B]/50" : "bg-white border-gray-200 text-gray-900 focus:border-[#FF8A5B]"
                 )}
                 placeholder="Company name"
               />
@@ -328,7 +353,7 @@ export default function SettingsView({ isDark }: SettingsViewProps) {
                 onChange={(e) => setProfile(p => ({ ...p, phone: e.target.value }))}
                 className={cn(
                   "w-full px-3 py-2 rounded-lg border text-sm transition-colors",
-                  isDark ? "bg-white/5 border-white/10 text-white focus:border-purple-500/50" : "bg-white border-gray-200 text-gray-900 focus:border-purple-500"
+                  isDark ? "bg-white/5 border-white/10 text-white focus:border-[#FF8A5B]/50" : "bg-white border-gray-200 text-gray-900 focus:border-[#FF8A5B]"
                 )}
                 placeholder="+1 (555) 000-0000"
               />
@@ -342,7 +367,7 @@ export default function SettingsView({ isDark }: SettingsViewProps) {
                 onChange={(e) => setProfile(p => ({ ...p, timezone: e.target.value }))}
                 className={cn(
                   "w-full px-3 py-2 rounded-lg border text-sm transition-colors",
-                  isDark ? "bg-white/5 border-white/10 text-white focus:border-purple-500/50" : "bg-white border-gray-200 text-gray-900 focus:border-purple-500"
+                  isDark ? "bg-white/5 border-white/10 text-white focus:border-[#FF8A5B]/50" : "bg-white border-gray-200 text-gray-900 focus:border-[#FF8A5B]"
                 )}
               >
                 {TIMEZONES.map(tz => <option key={tz} value={tz}>{tz}</option>)}
@@ -359,7 +384,7 @@ export default function SettingsView({ isDark }: SettingsViewProps) {
                 "flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all",
                 saved
                   ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
-                  : "bg-purple-600 hover:bg-purple-500 text-white shadow-lg shadow-purple-500/20"
+                  : "bg-[#FF8A5B] hover:bg-[#FF9E6C] text-white shadow-lg shadow-[#FF8A5B]/20"
               )}
             >
               {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : saved ? <Check className="w-4 h-4" /> : <Save className="w-4 h-4" />}
@@ -371,7 +396,7 @@ export default function SettingsView({ isDark }: SettingsViewProps) {
 
       {/* Notifications Tab */}
       {activeTab === 'notifications' && (
-        <div className={cn("p-6 rounded-2xl border space-y-6", isDark ? "bg-[#09090B] border-white/10" : "bg-white border-black/10")}>
+        <div className={cn("p-4 sm:p-6 rounded-2xl border space-y-6", isDark ? "bg-[#09090B] border-white/10" : "bg-white border-black/10")}>
           {/* Email Notifications */}
           <div>
             <h3 className={cn("text-sm font-semibold mb-3 flex items-center gap-2", isDark ? "text-white/80" : "text-gray-700")}>
@@ -393,7 +418,7 @@ export default function SettingsView({ isDark }: SettingsViewProps) {
                     onClick={() => saveNotifPrefs({ ...notifPrefs, [key]: !notifPrefs[key] })}
                     className={cn(
                       "w-10 h-6 rounded-full transition-colors relative",
-                      notifPrefs[key] ? "bg-purple-500" : isDark ? "bg-white/10" : "bg-gray-200"
+                      notifPrefs[key] ? "bg-[#FF8A5B]" : isDark ? "bg-white/10" : "bg-gray-200"
                     )}
                   >
                     <div className={cn("absolute top-1 w-4 h-4 rounded-full bg-white transition-transform", notifPrefs[key] ? "left-5" : "left-1")} />
@@ -423,7 +448,7 @@ export default function SettingsView({ isDark }: SettingsViewProps) {
                     onClick={() => saveNotifPrefs({ ...notifPrefs, [key]: !notifPrefs[key] })}
                     className={cn(
                       "w-10 h-6 rounded-full transition-colors relative",
-                      notifPrefs[key] ? "bg-purple-500" : isDark ? "bg-white/10" : "bg-gray-200"
+                      notifPrefs[key] ? "bg-[#FF8A5B]" : isDark ? "bg-white/10" : "bg-gray-200"
                     )}
                   >
                     <div className={cn("absolute top-1 w-4 h-4 rounded-full bg-white transition-transform", notifPrefs[key] ? "left-5" : "left-1")} />
@@ -437,7 +462,7 @@ export default function SettingsView({ isDark }: SettingsViewProps) {
 
       {/* Security Tab */}
       {activeTab === 'security' && (
-        <div className={cn("p-6 rounded-2xl border space-y-6", isDark ? "bg-[#09090B] border-white/10" : "bg-white border-black/10")}>
+        <div className={cn("p-4 sm:p-6 rounded-2xl border space-y-6", isDark ? "bg-[#09090B] border-white/10" : "bg-white border-black/10")}>
           <div>
             <h3 className={cn("text-sm font-semibold mb-1", isDark ? "text-white/80" : "text-gray-700")}>Authentication</h3>
             <p className={cn("text-xs mb-4", isDark ? "text-white/40" : "text-gray-400")}>
@@ -494,8 +519,8 @@ export default function SettingsView({ isDark }: SettingsViewProps) {
       {activeTab === 'data' && (
         <div className="space-y-4">
           {/* Export Data */}
-          <div className={cn("p-6 rounded-2xl border", isDark ? "bg-[#09090B] border-white/10" : "bg-white border-black/10")}>
-            <div className="flex items-center justify-between">
+          <div className={cn("p-4 sm:p-6 rounded-2xl border", isDark ? "bg-[#09090B] border-white/10" : "bg-white border-black/10")}>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
                 <h3 className={cn("text-sm font-semibold", isDark ? "text-white" : "text-gray-900")}>Export Your Data</h3>
                 <p className={cn("text-xs mt-0.5", isDark ? "text-white/40" : "text-gray-400")}>
@@ -506,7 +531,7 @@ export default function SettingsView({ isDark }: SettingsViewProps) {
                 onClick={handleExport}
                 disabled={exporting}
                 className={cn(
-                  "flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all border",
+                  "shrink-0 flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all border",
                   isDark ? "border-white/10 hover:bg-white/5 text-white" : "border-gray-200 hover:bg-gray-50 text-gray-700"
                 )}
               >
@@ -517,7 +542,7 @@ export default function SettingsView({ isDark }: SettingsViewProps) {
           </div>
 
           {/* Delete Account */}
-          <div className={cn("p-6 rounded-2xl border border-red-500/20", isDark ? "bg-red-500/[0.03]" : "bg-red-50/50")}>
+          <div className={cn("p-4 sm:p-6 rounded-2xl border border-red-500/20", isDark ? "bg-red-500/[0.03]" : "bg-red-50/50")}>
             <div className="flex items-start gap-3">
               <AlertCircle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
               <div className="flex-1">

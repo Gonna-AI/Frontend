@@ -1,11 +1,12 @@
 import { useState, useEffect, useCallback } from 'react';
 import {
-  BarChart, Bar, AreaChart, Area, PieChart, Pie, Cell,
-  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
+  AreaChart, Area, PieChart, Pie, Cell,
+  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from 'recharts';
 import {
-  TrendingUp, TrendingDown, Phone, MessageSquare, Clock, CheckCircle2,
-  Smile, AlertTriangle, Hash, Loader2, RefreshCw, Calendar,
+  TrendingUp, TrendingDown, CheckCircle2,
+  Smile, Hash, Loader2, RefreshCw, Sparkles,
+  ShieldAlert, Target,
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { supabase } from '../../config/supabase';
@@ -41,6 +42,31 @@ interface TrendPoint {
 interface TopicItem {
   topic: string;
   count: number;
+}
+
+interface SignalLift {
+  signal: string;
+  lift: number;
+  resolvedRate: number;
+  unresolvedRate: number;
+  totalOccurrences: number;
+}
+
+interface CategoryFCR {
+  category: string;
+  totalCalls: number;
+  resolvedCalls: number;
+  fcrRate: number;
+  avgDuration: number;
+}
+
+interface PatternsData {
+  periodDays: number;
+  totalCalls: number;
+  overallFCR: number;
+  winningSignals: SignalLift[];
+  riskSignals: SignalLift[];
+  categoryFCR: CategoryFCR[];
 }
 
 const SENTIMENT_COLORS: Record<string, string> = {
@@ -120,10 +146,9 @@ export default function AnalyticsView({ isDark }: AnalyticsViewProps) {
   const [overview, setOverview] = useState<OverviewData | null>(null);
   const [trends, setTrends] = useState<TrendPoint[]>([]);
   const [topTopics, setTopTopics] = useState<TopicItem[]>([]);
-  const [dateRange, setDateRange] = useState<{ start: Date; end: Date }>({
-    start: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
-    end: new Date(),
-  });
+  const [dateRange, setDateRange] = useState<{ start: Date | null; end: Date | null }>({ start: null, end: null });
+  const [patterns, setPatterns] = useState<PatternsData | null>(null);
+  const [patternsLoading, setPatternsLoading] = useState(true);
 
   const fetchAnalytics = useCallback(async () => {
     setLoading(true);
@@ -155,6 +180,30 @@ export default function AnalyticsView({ isDark }: AnalyticsViewProps) {
   }, [dateRange]);
 
   useEffect(() => { fetchAnalytics(); }, [fetchAnalytics]);
+
+  // Fetch pattern intelligence separately (not date-range filtered — always last 30 days)
+  useEffect(() => {
+    let cancelled = false;
+    async function fetchPatterns() {
+      setPatternsLoading(true);
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        const token = session?.access_token;
+        if (!token) return;
+        const res = await fetch(
+          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/api-analytics/patterns?days=90&min_occ=1`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        if (res.ok && !cancelled) {
+          const data = await res.json();
+          setPatterns(data);
+        }
+      } catch { /* non-critical */ }
+      finally { if (!cancelled) setPatternsLoading(false); }
+    }
+    fetchPatterns();
+    return () => { cancelled = true; };
+  }, []);
 
   const categoryData = overview ? Object.entries(overview.categoryDistribution).map(([name, value]) => ({ name, value })) : [];
   const sentimentData = overview ? Object.entries(overview.sentimentDistribution).map(([name, value]) => ({ name, value })) : [];
@@ -193,8 +242,8 @@ export default function AnalyticsView({ isDark }: AnalyticsViewProps) {
         <div className="flex items-center gap-3">
           <DateRangePicker
             isDark={isDark}
-            startDate={dateRange.start}
-            endDate={dateRange.end}
+            startDate={dateRange.start ?? new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)}
+            endDate={dateRange.end ?? new Date()}
             onChange={(start, end) => setDateRange({ start, end })}
           />
           <button
@@ -204,48 +253,25 @@ export default function AnalyticsView({ isDark }: AnalyticsViewProps) {
               isDark ? "border-white/10 hover:bg-white/5 text-white/60" : "border-gray-200 hover:bg-gray-50 text-gray-500"
             )}
           >
-            <RefreshCw className="w-4 h-4" />
+            <RefreshCw className="w-4 h-4" strokeWidth={1.5} />
           </button>
         </div>
       </div>
 
-      {/* KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-        <KpiCard isDark={isDark} title="Total Calls" value={overview?.totalCalls ?? 0} subtitle={`${overview?.voiceCalls ?? 0} voice · ${overview?.textCalls ?? 0} text`} icon={<Phone className="w-4 h-4" />} color="blue" />
-        <KpiCard isDark={isDark} title="Avg Duration" value={`${overview?.avgDuration ?? 0}s`} subtitle="Per interaction" icon={<Clock className="w-4 h-4" />} color="purple" />
+      {/* KPI Cards — analytics-specific metrics only */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <KpiCard isDark={isDark} title="Resolution Rate" value={`${overview?.resolutionRate ?? 0}%`} subtitle="Resolved without follow-up" icon={<CheckCircle2 className="w-4 h-4" />} color="emerald" />
         <KpiCard isDark={isDark} title="Avg Sentiment" value={`${overview?.avgSentiment ?? 50}/100`} subtitle={sentimentLabel(overview?.avgSentiment ?? 50)} icon={<Smile className="w-4 h-4" />} color="orange" />
-        <KpiCard isDark={isDark} title="Follow-ups" value={overview?.followUps ?? 0} subtitle="Requiring attention" icon={<AlertTriangle className="w-4 h-4" />} color="rose" />
-      </div>
-
-      {/* Call Volume Trend Chart */}
-      <div className={cn("p-6 rounded-2xl border", isDark ? "bg-[#09090B] border-white/10" : "bg-white border-black/10")}>
-        <h3 className={cn("text-lg font-semibold mb-4", isDark ? "text-white" : "text-gray-900")}>
-          {t('analytics.callVolume') || 'Call Volume Trend'}
-        </h3>
-        <div className="h-[300px]">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={trends} barCategoryGap="20%">
-              <CartesianGrid strokeDasharray="3 3" stroke={isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)'} />
-              <XAxis dataKey="date" tick={{ fontSize: 11, fill: isDark ? '#999' : '#666' }} tickFormatter={(d) => d.slice(5)} />
-              <YAxis tick={{ fontSize: 11, fill: isDark ? '#999' : '#666' }} />
-              <Tooltip content={(props: any) => <ChartTooltip {...props} isDark={isDark} />} />
-              <Legend />
-              <Bar dataKey="voice" name="Voice" fill="#8b5cf6" radius={[4, 4, 0, 0]} />
-              <Bar dataKey="text" name="Text" fill="#3b82f6" radius={[4, 4, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
       </div>
 
       {/* Sentiment Trend + Category Distribution */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
         {/* Sentiment Trend */}
         <div className={cn("p-6 rounded-2xl border", isDark ? "bg-[#09090B] border-white/10" : "bg-white border-black/10")}>
           <h3 className={cn("text-lg font-semibold mb-4", isDark ? "text-white" : "text-gray-900")}>
             {t('analytics.sentimentTrend') || 'Sentiment Trend'}
           </h3>
-          <div className="h-[260px]">
+          <div className="h-[200px] sm:h-[260px]">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={trends}>
                 <defs>
@@ -269,7 +295,7 @@ export default function AnalyticsView({ isDark }: AnalyticsViewProps) {
           <h3 className={cn("text-lg font-semibold mb-4", isDark ? "text-white" : "text-gray-900")}>
             {t('analytics.categoryDist') || 'Category Distribution'}
           </h3>
-          <div className="h-[260px]">
+          <div className="h-[200px] sm:h-[260px]">
             {categoryData.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
@@ -291,7 +317,7 @@ export default function AnalyticsView({ isDark }: AnalyticsViewProps) {
       </div>
 
       {/* Priority Distribution + Top Topics */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
         {/* Priority Breakdown */}
         <div className={cn("p-6 rounded-2xl border", isDark ? "bg-[#09090B] border-white/10" : "bg-white border-black/10")}>
           <h3 className={cn("text-lg font-semibold mb-4", isDark ? "text-white" : "text-gray-900")}>
@@ -370,6 +396,158 @@ export default function AnalyticsView({ isDark }: AnalyticsViewProps) {
             <p className={cn("text-sm", isDark ? "text-white/30" : "text-gray-400")}>No sentiment data yet</p>
           )}
         </div>
+      </div>
+
+      {/* ── Pattern Intelligence ─────────────────────────────────── */}
+      <div className={cn("rounded-2xl border overflow-hidden", isDark ? "bg-[#09090B] border-white/10" : "bg-white border-black/10")}>
+        {/* Header */}
+        <div className={cn("flex items-center justify-between px-6 py-4 border-b", isDark ? "border-white/5" : "border-gray-100")}>
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-[#FF8A5B]/10">
+              <Sparkles className="w-4 h-4 text-[#FF8A5B]" />
+            </div>
+            <div>
+              <h3 className={cn("text-base font-semibold", isDark ? "text-white" : "text-gray-900")}>Pattern Intelligence</h3>
+              <p className={cn("text-xs mt-0.5", isDark ? "text-white/40" : "text-gray-500")}>
+                Which topics drive resolutions — and which predict escalations
+              </p>
+            </div>
+          </div>
+          {patterns && (
+            <div className="flex items-center gap-2 text-xs">
+              <span className={isDark ? "text-white/40" : "text-gray-400"}>Overall FCR</span>
+              <span className="px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 font-semibold">
+                {Math.round((patterns.overallFCR ?? 0) * 100)}%
+              </span>
+            </div>
+          )}
+        </div>
+
+        {patternsLoading ? (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="w-5 h-5 animate-spin text-[#FF8A5B]" />
+          </div>
+        ) : !patterns || (patterns.winningSignals.length === 0 && patterns.riskSignals.length === 0) ? (
+          <div className="flex flex-col items-center justify-center py-12 gap-2">
+            <Hash className={cn("w-8 h-8", isDark ? "text-white/10" : "text-gray-200")} />
+            <p className={cn("text-sm", isDark ? "text-white/30" : "text-gray-400")}>
+              Need more call history to detect patterns
+            </p>
+          </div>
+        ) : (
+          <div className="p-6 space-y-6">
+            {/* Winning + Risk signals */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Winning signals */}
+              <div>
+                <div className="flex items-center gap-2 mb-3">
+                  <Target className="w-4 h-4 text-emerald-400" />
+                  <span className={cn("text-sm font-semibold", isDark ? "text-white/80" : "text-gray-700")}>
+                    Winning signals
+                  </span>
+                  <span className={cn("text-xs", isDark ? "text-white/30" : "text-gray-400")}>
+                    — appear more in resolved calls
+                  </span>
+                </div>
+                <div className="space-y-2">
+                  {patterns.winningSignals.slice(0, 8).map((s) => {
+                    const liftPct = Math.min(Math.round((s.lift - 1) / (s.lift) * 100), 100);
+                    return (
+                      <div key={s.signal} className="flex items-center gap-3">
+                        <span className={cn("text-xs truncate w-32 shrink-0 capitalize", isDark ? "text-white/70" : "text-gray-600")}>
+                          {s.signal}
+                        </span>
+                        <div className={cn("flex-1 h-1.5 rounded-full", isDark ? "bg-white/5" : "bg-gray-100")}>
+                          <div
+                            className="h-full rounded-full bg-emerald-500 transition-all duration-500"
+                            style={{ width: `${liftPct}%` }}
+                          />
+                        </div>
+                        <span className="text-[11px] text-emerald-400 font-mono w-12 text-right shrink-0">
+                          {s.lift.toFixed(1)}×
+                        </span>
+                      </div>
+                    );
+                  })}
+                  {patterns.winningSignals.length === 0 && (
+                    <p className={cn("text-xs", isDark ? "text-white/30" : "text-gray-400")}>No winning signals yet</p>
+                  )}
+                </div>
+              </div>
+
+              {/* Risk signals */}
+              <div>
+                <div className="flex items-center gap-2 mb-3">
+                  <ShieldAlert className="w-4 h-4 text-rose-400" />
+                  <span className={cn("text-sm font-semibold", isDark ? "text-white/80" : "text-gray-700")}>
+                    Risk signals
+                  </span>
+                  <span className={cn("text-xs", isDark ? "text-white/30" : "text-gray-400")}>
+                    — appear more in unresolved calls
+                  </span>
+                </div>
+                <div className="space-y-2">
+                  {patterns.riskSignals.slice(0, 8).map((s) => {
+                    const riskPct = Math.min(Math.round((1 - s.lift) / 1 * 100), 100);
+                    return (
+                      <div key={s.signal} className="flex items-center gap-3">
+                        <span className={cn("text-xs truncate w-32 shrink-0 capitalize", isDark ? "text-white/70" : "text-gray-600")}>
+                          {s.signal}
+                        </span>
+                        <div className={cn("flex-1 h-1.5 rounded-full", isDark ? "bg-white/5" : "bg-gray-100")}>
+                          <div
+                            className="h-full rounded-full bg-rose-500 transition-all duration-500"
+                            style={{ width: `${riskPct}%` }}
+                          />
+                        </div>
+                        <span className="text-[11px] text-rose-400 font-mono w-12 text-right shrink-0">
+                          {s.lift.toFixed(1)}×
+                        </span>
+                      </div>
+                    );
+                  })}
+                  {patterns.riskSignals.length === 0 && (
+                    <p className={cn("text-xs", isDark ? "text-white/30" : "text-gray-400")}>No risk signals yet</p>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Category FCR bars */}
+            {patterns.categoryFCR.length > 0 && (
+              <div>
+                <p className={cn("text-sm font-semibold mb-3", isDark ? "text-white/80" : "text-gray-700")}>
+                  First Call Resolution by Category
+                </p>
+                <div className="space-y-2">
+                  {patterns.categoryFCR.slice(0, 8).map((c) => {
+                    const pct = Math.round(c.fcrRate * 100);
+                    const color = pct >= 70 ? 'bg-emerald-500' : pct >= 40 ? 'bg-amber-500' : 'bg-rose-500';
+                    return (
+                      <div key={c.category} className="flex items-center gap-3">
+                        <span className={cn("text-xs capitalize w-28 shrink-0 truncate", isDark ? "text-white/70" : "text-gray-600")}>
+                          {c.category}
+                        </span>
+                        <div className={cn("flex-1 h-2 rounded-full", isDark ? "bg-white/5" : "bg-gray-100")}>
+                          <div
+                            className={cn("h-full rounded-full transition-all duration-500", color)}
+                            style={{ width: `${pct}%` }}
+                          />
+                        </div>
+                        <span className={cn("text-[11px] font-mono w-10 text-right shrink-0", isDark ? "text-white/50" : "text-gray-500")}>
+                          {pct}%
+                        </span>
+                        <span className={cn("text-xs w-16 shrink-0", isDark ? "text-white/30" : "text-gray-400")}>
+                          {c.totalCalls} calls
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

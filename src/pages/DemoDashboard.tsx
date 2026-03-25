@@ -27,6 +27,8 @@ import ActivityLogView from '../components/DashboardViews/ActivityLogView';
 import WebhooksView from '../components/DashboardViews/WebhooksView';
 import NotificationCenter from '../components/DashboardViews/NotificationCenter';
 import InitialSetupDialog from '../components/DashboardViews/InitialSetupDialog';
+import AnalyticsView from '../components/DashboardViews/AnalyticsView';
+import PlaybooksView from '../components/DashboardViews/PlaybooksView';
 import { RescueCenterProvider } from '../contexts/RescueCenterContext';
 
 import { AccessCodeProvider, useAccessCode } from '../contexts/AccessCodeContext';
@@ -99,6 +101,7 @@ function DemoDashboardContent() {
       webhooks: t('sidebar.webhooks'),
       settings: t('sidebar.settings'),
       onboarding: t('onboarding.title'),
+      rescue_playbooks_view: 'Playbooks',
     };
     return labelMap[tab] || tab;
   };
@@ -115,8 +118,6 @@ function DemoDashboardContent() {
           hasAccess={hasAccess}
         />
 
-
-
         <main className="flex-1 flex flex-col h-screen overflow-hidden relative">
           {/* Sticky Header Container */}
           <div className="sticky top-0 z-[200] w-full flex flex-col">
@@ -132,19 +133,22 @@ function DemoDashboardContent() {
                   {getTabLabel(activeTab)}
                 </h1>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5">
                 <button
                   className={cn(
-                    "p-1.5 rounded-md transition-colors sm:order-2",
-                    isDark ? "hover:bg-white/10 text-white/60" : "hover:bg-black/10 text-black/60"
+                    "h-7 w-7 flex items-center justify-center rounded-full border transition-colors backdrop-blur-sm",
+                    isDark
+                      ? "border-white/10 bg-white/5 text-white/60 hover:bg-white/10 hover:text-white"
+                      : "border-black/10 bg-black/5 text-black/50 hover:bg-black/10 hover:text-black"
                   )}
                   onClick={() => window.location.reload()}
+                  title="Refresh"
                 >
-                  <RotateCcw className="w-4 h-4" />
+                  <RotateCcw className="w-3.5 h-3.5" strokeWidth={1.5} />
                 </button>
                 <NotificationCenter
                   isDark={isDark}
-                  className="static sm:order-3"
+                  className="static"
                 />
                 <a
                   href="/docs"
@@ -160,7 +164,7 @@ function DemoDashboardContent() {
           </div>
 
           {/* Main Content Area */}
-          <div className="flex-1 overflow-y-auto p-4 md:p-6 scrollbar-hide">
+          <div className="flex-1 overflow-y-auto p-3 sm:p-4 md:p-6 scrollbar-hide">
             <div className="max-w-7xl mx-auto w-full pb-10">
               {/* Show Access Code Dialog when no tab is selected and no access */}
               {activeTab === '' && !hasAccess && !accessLoading && (
@@ -171,7 +175,7 @@ function DemoDashboardContent() {
               {activeTab === '' && accessLoading && (
                 <div className="flex items-center justify-center w-full min-h-[60vh]">
                   <div className="flex flex-col items-center gap-4">
-                    <div className="w-8 h-8 border-2 border-white/20 border-t-purple-500 rounded-full animate-spin" />
+                    <div className={cn("w-8 h-8 border-2 rounded-full animate-spin", isDark ? "border-white/10 border-t-purple-500" : "border-black/10 border-t-purple-500")} />
                     <p className={cn("text-sm", isDark ? "text-white/50" : "text-gray-500")}>{t('access.checking')}</p>
                   </div>
                 </div>
@@ -216,10 +220,12 @@ function DemoDashboardContent() {
                   {activeTab === 'billing' && <BillingView isDark={isDark} hasAccess={hasAccess} />}
                   {activeTab === 'keys' && <KeysView isDark={isDark} hasAccess={hasAccess} />}
                   {activeTab === 'team' && <TeamView isDark={isDark} />}
-{activeTab === 'integrations' && <IntegrationView isDark={isDark} />}
+                  {activeTab === 'integrations' && <IntegrationView isDark={isDark} />}
                   {activeTab === 'activity_log' && <ActivityLogView isDark={isDark} />}
                   {activeTab === 'webhooks' && <WebhooksView isDark={isDark} />}
                   {activeTab === 'settings' && <SettingsView isDark={isDark} />}
+                  {activeTab === 'analytics' && <AnalyticsView isDark={isDark} />}
+                  {activeTab === 'rescue_playbooks_view' && <PlaybooksView isDark={isDark} />}
 
                   {activeTab === 'onboarding' && (
                     <OnboardingWizard

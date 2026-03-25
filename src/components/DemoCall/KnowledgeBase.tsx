@@ -199,8 +199,6 @@ export default function KnowledgeBase({ isDark = true, activeSection }: Knowledg
 
   useEffect(() => {
     testConnection();
-    const interval = setInterval(testConnection, 30000);
-    return () => clearInterval(interval);
   }, []);
 
   // Update local state and context
@@ -393,7 +391,7 @@ export default function KnowledgeBase({ isDark = true, activeSection }: Knowledg
   const currentTabInfo = tabInfo[activeTab];
 
   return (
-    <div className="space-y-6 max-w-[1600px] mx-auto pb-10">
+    <div className="space-y-6 pb-10">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
@@ -412,7 +410,7 @@ export default function KnowledgeBase({ isDark = true, activeSection }: Knowledg
             disabled={isTestingConnection}
             title={localLLMConnected ? `${t('config.groqConnected')}: ${localLLMModel}` : t('config.groqOffline')}
             className={cn(
-              "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors border",
+              "flex items-center gap-1 px-2 py-1 rounded-md text-[11px] font-medium transition-colors border",
               isTestingConnection
                 ? (isDark ? "bg-white/5 border-white/10 text-white/50" : "bg-black/5 border-black/5 text-black/50")
                 : localLLMConnected
@@ -587,7 +585,7 @@ export default function KnowledgeBase({ isDark = true, activeSection }: Knowledg
                         <div className="flex items-center gap-2">
                           <span className={cn("font-medium", isDark ? "text-white" : "text-gray-900")}>{field.name}</span>
                           {field.required && <span className="text-rose-400 text-xs font-medium bg-rose-400/10 px-1.5 py-0.5 rounded-full">Required</span>}
-                          <span className={cn("text-[10px] uppercase border px-1.5 py-0.5 rounded font-medium", isDark ? "text-white/40 border-white/10" : "text-gray-500 border-gray-200")}>{field.type}</span>
+                          <span className={cn("text-[11px] uppercase border px-1.5 py-0.5 rounded font-medium", isDark ? "text-white/40 border-white/10" : "text-gray-500 border-gray-200")}>{field.type}</span>
                         </div>
                         {field.description && <p className={cn("text-xs mt-1", isDark ? "text-white/40" : "text-gray-500")}>{field.description}</p>}
                       </div>
@@ -618,7 +616,7 @@ export default function KnowledgeBase({ isDark = true, activeSection }: Knowledg
                   {isAddingCategory && (
                     <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden mb-4">
                       <div className={cn("p-4 rounded-lg space-y-3 border", isDark ? "bg-white/5 border-white/10" : "bg-gray-50 border-gray-100")}>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                           <input
                             placeholder="Category Name"
                             value={newCategory.name}
@@ -848,7 +846,7 @@ export default function KnowledgeBase({ isDark = true, activeSection }: Knowledg
                         "rounded-xl border p-4 space-y-3",
                         isDark ? "border-white/10 bg-white/[0.03]" : "border-black/10 bg-black/[0.02]"
                       )}>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                           <input
                             value={newPlaybook.name}
                             onChange={(event) => setNewPlaybook({ ...newPlaybook, name: event.target.value })}
@@ -878,7 +876,7 @@ export default function KnowledgeBase({ isDark = true, activeSection }: Knowledg
                             isDark ? "border-white/10 text-white" : "border-black/10 text-black"
                           )}
                         />
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                           <input
                             value={newPlaybook.successCriteria}
                             onChange={(event) => setNewPlaybook({ ...newPlaybook, successCriteria: event.target.value })}
@@ -931,27 +929,27 @@ export default function KnowledgeBase({ isDark = true, activeSection }: Knowledg
                 ) : (
                   <div className="space-y-4">
                     {playbooks.map((playbook) => (
-                      <div key={playbook.id} className={cn("rounded-xl border p-4 space-y-3", isDark ? "border-white/10 bg-white/[0.03]" : "border-black/10 bg-black/[0.02]")}>
-                        <div className="flex items-start justify-between gap-3">
-                          <div className="space-y-1 flex-1">
-                            <div className="flex items-center gap-2">
-                              <input value={playbook.name} onChange={(event) => handleUpdatePlaybook(playbook.id, { name: event.target.value })} className={cn("text-sm font-semibold bg-transparent border-b focus:outline-none", isDark ? "text-white border-white/10" : "text-black border-black/10")} />
-                              <span className={cn("text-[10px] px-1.5 py-0.5 rounded border", isDark ? "border-white/10 text-white/35" : "border-black/10 text-black/35")}>{playbook.channels.join(', ')}</span>
-                              {playbook.enabled && <span className={cn("text-[10px] px-1.5 py-0.5 rounded", isDark ? "bg-emerald-500/15 text-emerald-300" : "bg-emerald-50 text-emerald-700")}>Active</span>}
+                      <div key={playbook.id} className={cn("rounded-xl border p-3 sm:p-4 space-y-3", isDark ? "border-white/10 bg-white/[0.03]" : "border-black/10 bg-black/[0.02]")}>
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="space-y-1 flex-1 min-w-0">
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              <input value={playbook.name} onChange={(event) => handleUpdatePlaybook(playbook.id, { name: event.target.value })} className={cn("text-sm font-semibold bg-transparent border-b focus:outline-none min-w-0 w-full max-w-[140px] sm:max-w-none", isDark ? "text-white border-white/10" : "text-black border-black/10")} />
+                              <span className={cn("text-[11px] px-1.5 py-0.5 rounded border shrink-0", isDark ? "border-white/10 text-white/35" : "border-black/10 text-black/35")}>{playbook.channels.join(', ')}</span>
+                              {playbook.enabled && <span className={cn("text-[11px] px-1.5 py-0.5 rounded shrink-0", isDark ? "bg-emerald-500/15 text-emerald-300" : "bg-emerald-50 text-emerald-700")}>Active</span>}
                             </div>
                             <input value={playbook.description} onChange={(event) => handleUpdatePlaybook(playbook.id, { description: event.target.value })} className={cn("w-full text-xs bg-transparent border-b focus:outline-none", isDark ? "text-white/65 border-white/10" : "text-black/65 border-black/10")} />
                           </div>
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-1.5 shrink-0">
                             <button onClick={() => handleUpdatePlaybook(playbook.id, { enabled: !playbook.enabled })} className={cn("inline-flex items-center gap-1 text-[11px] px-2 py-1 rounded-full border", playbook.enabled ? (isDark ? "border-emerald-400/35 bg-emerald-500/15 text-emerald-200" : "border-emerald-200 bg-emerald-50 text-emerald-700") : (isDark ? "border-white/10 bg-white/5 text-white/50" : "border-black/10 bg-black/5 text-black/50"))}>
                               {playbook.enabled ? 'On' : 'Off'}
                             </button>
                             <button onClick={() => handleDeletePlaybook(playbook.id)} className={cn("p-1.5 rounded-md", isDark ? "text-rose-300 hover:bg-rose-500/15" : "text-rose-700 hover:bg-rose-50")}>
-                              <Trash2 className="w-4 h-4" />
+                              <Trash2 className="w-3.5 h-3.5" />
                             </button>
                           </div>
                         </div>
                         <textarea value={playbook.messageTemplate} onChange={(event) => handleUpdatePlaybook(playbook.id, { messageTemplate: event.target.value, voiceScript: event.target.value })} rows={3} className={cn("w-full rounded-lg px-3 py-2 text-sm border resize-none focus:outline-none", isDark ? "border-white/10 bg-black/20 text-white" : "border-black/10 bg-white text-black")} />
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                           <label className="space-y-1"><span className={cn("text-[11px] uppercase tracking-wide", isDark ? "text-white/45" : "text-black/45")}>Success Criteria</span><input value={playbook.successCriteria} onChange={(event) => handleUpdatePlaybook(playbook.id, { successCriteria: event.target.value })} className={cn("w-full rounded-lg px-2.5 py-1.5 text-sm border bg-transparent focus:outline-none", isDark ? "border-white/10 text-white" : "border-black/10 text-black")} /></label>
                           <label className="space-y-1"><span className={cn("text-[11px] uppercase tracking-wide", isDark ? "text-white/45" : "text-black/45")}>Channel</span>
                             <select value={playbook.channels[0] || 'email'} onChange={(event) => handleUpdatePlaybook(playbook.id, { channels: [event.target.value as RescueChannel] })} className={cn("w-full rounded-lg px-2.5 py-1.5 text-sm border bg-transparent focus:outline-none", isDark ? "border-white/10 text-white [&>option]:bg-[#09090B]" : "border-black/10 text-black")}>

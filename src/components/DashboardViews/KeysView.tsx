@@ -235,7 +235,7 @@ export default function KeysView({ isDark = true, hasAccess = false }: { isDark?
     };
 
     return (
-        <div className="space-y-6 max-w-[1600px] mx-auto pb-10">
+        <div className="space-y-6 pb-10">
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
@@ -291,7 +291,7 @@ export default function KeysView({ isDark = true, hasAccess = false }: { isDark?
                             {hasAccess ? 'Full Access Account' : 'No Access Code Activated'}
                         </h3>
                         <span className={cn(
-                            "text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider",
+                            "text-xs font-bold px-2 py-0.5 rounded-full uppercase tracking-wider",
                             hasAccess
                                 ? (isDark ? "bg-emerald-500/20 text-emerald-400" : "bg-emerald-100 text-emerald-700")
                                 : (isDark ? "bg-amber-500/20 text-amber-400" : "bg-amber-100 text-amber-700")
@@ -358,10 +358,10 @@ export default function KeysView({ isDark = true, hasAccess = false }: { isDark?
                         </button>
                     </div>
                 ) : (
-                    <>
+                    <div className="overflow-x-auto">
                         {/* Table Header */}
                         <div className={cn(
-                            "grid grid-cols-12 px-6 py-3 border-b text-xs font-semibold uppercase tracking-wider",
+                            "grid grid-cols-12 px-4 sm:px-6 py-3 border-b text-xs font-semibold uppercase tracking-wider min-w-[560px]",
                             isDark ? "bg-white/5 border-white/10 text-white/50" : "bg-gray-50 border-black/5 text-gray-500"
                         )}>
                             <div className="col-span-3">{t('keys.table.name')}</div>
@@ -373,7 +373,7 @@ export default function KeysView({ isDark = true, hasAccess = false }: { isDark?
 
                         {keys.map((key) => (
                             <div key={key.id} className={cn(
-                                "grid grid-cols-12 px-6 py-4 border-b last:border-0 items-center transition-colors group",
+                                "grid grid-cols-12 px-4 sm:px-6 py-3 sm:py-4 border-b last:border-0 items-center transition-colors group min-w-[560px]",
                                 isDark ? "border-white/5 hover:bg-white/5" : "border-black/5 hover:bg-gray-50"
                             )}>
                                 <div className="col-span-3">
@@ -424,7 +424,7 @@ export default function KeysView({ isDark = true, hasAccess = false }: { isDark?
                                     <p className={cn("text-sm", isDark ? "text-white/80" : "text-gray-700")}>{key.created}</p>
                                     <p className={cn("text-xs", isDark ? "text-white/40" : "text-gray-500")}>{t('keys.lastUsedPrefix')} {key.lastUsed}</p>
                                 </div>
-                                <div className="col-span-2 flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <div className="col-span-2 flex justify-end gap-2 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                                     <button
                                         onClick={() => copyToClipboard(key.token, key.id)}
                                         className={cn(
@@ -448,7 +448,7 @@ export default function KeysView({ isDark = true, hasAccess = false }: { isDark?
                                 </div>
                             </div>
                         ))}
-                    </>
+                    </div>
                 )}
             </div>
 

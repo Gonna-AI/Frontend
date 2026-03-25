@@ -1,5 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2";
+import { insertNotification } from "../_shared/notify.ts";
 
 const corsBaseHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -170,6 +171,14 @@ Deno.serve(async (req: Request) => {
         .select();
 
       if (saveError) throw saveError;
+
+      await insertNotification(adminClient, user.id, {
+        type: 'success',
+        title: 'Playbooks generated',
+        message: `${saved?.length ?? templates.length} playbook${(saved?.length ?? templates.length) !== 1 ? 's' : ''} generated from your call history.`,
+        category: 'system',
+        action_url: '/dashboard?tab=playbooks',
+      });
 
       return jsonResponse(req, 201, { templates: saved });
     }

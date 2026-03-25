@@ -5,6 +5,7 @@ import { useAuth } from './AuthContext';
 import { DEFAULT_VOICE_ID, normalizeVoiceId } from '../config/voiceConfig';
 import type { RescueEngineSettings, RescuePlaybookTemplate } from '../types/rescuePlaybook';
 import { DEFAULT_RESCUE_PLAYBOOKS, DEFAULT_RESCUE_SETTINGS } from '../types/rescuePlaybook';
+import { createNotification } from '../services/notificationService';
 
 // Types for dynamic context extraction
 export interface ExtractedField {
@@ -379,7 +380,8 @@ export function DemoCallProvider({ children, initialAgentId }: { children: React
           .from('call_history')
           .select('*')
           .eq('user_id', user.id)
-          .order('date', { ascending: false });
+          .order('date', { ascending: false })
+          .limit(50);
 
         if (!historyError && historyData && historyData.length > 0) {
           // Map Supabase snake_case to app camelCase
@@ -582,9 +584,9 @@ export function DemoCallProvider({ children, initialAgentId }: { children: React
     // Initial cleanup then fetch
     cleanupStaleSessions().then(() => fetchActiveSessions());
 
-    // Periodically cleanup stale sessions every minute
+    // Periodically cleanup stale sessions and refresh global count every minute
     const cleanupInterval = setInterval(() => {
-      cleanupStaleSessions();
+      cleanupStaleSessions().then(() => fetchActiveSessions());
     }, 60 * 1000);
 
     // Subscribe to changes (debounced to avoid UI thrashing under high load)
@@ -597,7 +599,7 @@ export function DemoCallProvider({ children, initialAgentId }: { children: React
     };
 
     const subscription = supabase
-      .channel('active_sessions_changes')
+      .channel('active_sessions_global_count')
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'active_sessions' },
@@ -666,6 +668,13 @@ export function DemoCallProvider({ children, initialAgentId }: { children: React
         console.warn('Supabase save failed (localStorage still saved):', error.message);
       } else {
         console.log('✅ Saved knowledge base to Supabase for user:', userId);
+        void createNotification({
+          type: 'success',
+          title: 'Knowledge base saved',
+          message: 'Your AI agent configuration has been updated.',
+          category: 'system',
+          action_url: '/dashboard?tab=knowledge-base',
+        });
       }
 
       return true;
@@ -817,7 +826,9 @@ export function DemoCallProvider({ children, initialAgentId }: { children: React
       }
     };
     updateToken();
-    const interval = setInterval(updateToken, 60000); // Refresh every 60s
+    // Jitter prevents 1M sessions all refreshing at the same wall-clock second
+    const jitter = Math.random() * 30_000; // 0–30s random offset
+    const interval = setInterval(updateToken, 60_000 + jitter);
     return () => clearInterval(interval);
   }, []);
 
@@ -1035,6 +1046,15 @@ export function DemoCallProvider({ children, initialAgentId }: { children: React
             item.id === historyId ? finalHistoryItem : item
           ));
           console.log('📝 Call history updated with summary:', historyId);
+
+          // Notify user that the call summary is ready
+          void createNotification({
+            type: finalSummary.followUpRequired ? 'warning' : 'success',
+            title: 'Call completed',
+            message: `${callerName !== 'Unknown Caller' ? callerName + ' · ' : ''}${Math.floor(duration / 60)}m ${duration % 60}s${finalSummary.followUpRequired ? ' · Follow-up required' : ''}`,
+            category: 'calls',
+            action_url: '/dashboard?tab=history',
+          });
 
           // Save to Supabase
           try {

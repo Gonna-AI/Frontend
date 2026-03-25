@@ -101,11 +101,54 @@ export default function NotificationCenter({ isDark, className }: NotificationCe
     }
   }, [apiCall]);
 
-  // Poll unread count
+  // Subscribe to new notifications via Realtime (replaces 30s polling)
+  // User-scoped filter ensures each user only receives their own events —
+  // critical at 1M-user scale to avoid O(N²) broadcast fan-out.
   useEffect(() => {
     fetchUnreadCount();
-    const interval = setInterval(fetchUnreadCount, 30000);
-    return () => clearInterval(interval);
+
+    let channel: ReturnType<typeof supabase.channel> | null = null;
+
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!session?.user?.id) return;
+
+      channel = supabase
+        .channel(`notifications_${session.user.id}`)
+        .on(
+          'postgres_changes',
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'notifications',
+            filter: `user_id=eq.${session.user.id}`,
+          },
+          (payload) => {
+            // Increment badge immediately
+            setUnreadCount(prev => prev + 1);
+            // If dropdown is open, prepend the new notification
+            if (payload.new) {
+              setNotifications(prev => [payload.new as NotificationEntry, ...prev]);
+            }
+          }
+        )
+        .on(
+          'postgres_changes',
+          {
+            event: 'DELETE',
+            schema: 'public',
+            table: 'notifications',
+            filter: `user_id=eq.${session.user.id}`,
+          },
+          (payload) => {
+            setNotifications(prev => prev.filter(n => n.id !== (payload.old as { id: string }).id));
+          }
+        )
+        .subscribe();
+    });
+
+    return () => {
+      if (channel) supabase.removeChannel(channel);
+    };
   }, [fetchUnreadCount]);
 
   // Fetch full list when opened
@@ -194,7 +237,7 @@ export default function NotificationCenter({ isDark, className }: NotificationCe
             : "border-black/10 bg-black/5 text-black/60 hover:bg-black/10 hover:text-black"
         )}
       >
-        <Bell className="h-3.5 w-3.5" />
+        <Bell className="h-3.5 w-3.5" strokeWidth={1.5} />
         {unreadCount > 0 && (
           <span
             className={cn(
@@ -278,11 +321,11 @@ export default function NotificationCenter({ isDark, className }: NotificationCe
                         <p className={cn("text-[11px] mt-0.5 line-clamp-2", isDark ? "text-white/40" : "text-gray-500")}>{n.message}</p>
                       )}
                       <div className="flex items-center gap-2 mt-1">
-                        <span className={cn("text-[10px] flex items-center gap-1", isDark ? "text-white/25" : "text-gray-300")}>
+                        <span className={cn("text-[11px] flex items-center gap-1", isDark ? "text-white/25" : "text-gray-300")}>
                           {CATEGORY_ICONS[n.category] || CATEGORY_ICONS.system}
                           {n.category}
                         </span>
-                        <span className={cn("text-[10px]", isDark ? "text-white/20" : "text-gray-300")}>{timeAgo(n.created_at)}</span>
+                        <span className={cn("text-[11px]", isDark ? "text-white/20" : "text-gray-300")}>{timeAgo(n.created_at)}</span>
                       </div>
                     </div>
                   </div>

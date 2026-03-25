@@ -1,5 +1,12 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2";
+import {
+  computeTagLift,
+  computeCategoryFCR,
+  computeKbGaps,
+  findCallerHistory,
+  type CallRow,
+} from "../_shared/stats.ts";
 
 // ─── CORS ────────────────────────────────────────────────────────
 const corsBaseHeaders = {
@@ -8,18 +15,37 @@ const corsBaseHeaders = {
   'Access-Control-Max-Age': '86400',
 };
 
-const ALLOWED_ORIGINS = new Set([
+const DEFAULT_ALLOWED_ORIGINS = new Set<string>([
   'https://clerktree.com',
   'https://www.clerktree.com',
-  'https://clerktree.netlify.app',
   'http://localhost:5173',
   'http://127.0.0.1:5173',
+  'https://clerktree.netlify.app',
 ]);
 
-function getCorsHeaders(req: Request) {
+const EXTRA_ALLOWED_ORIGINS = (Deno.env.get('ALLOWED_ORIGINS') ?? '')
+  .split(',')
+  .map((o) => o.trim())
+  .filter(Boolean);
+
+for (const o of EXTRA_ALLOWED_ORIGINS) DEFAULT_ALLOWED_ORIGINS.add(o);
+
+function isAllowedOrigin(origin: string | null): boolean {
+  if (!origin) return true;
+  if (DEFAULT_ALLOWED_ORIGINS.has(origin)) return true;
+  try {
+    const url = new URL(origin);
+    if (['localhost', '127.0.0.1', '::1'].includes(url.hostname)) return true;
+    return url.protocol === 'https:' && (
+      url.hostname === 'clerktree.com' || url.hostname.endsWith('.clerktree.com')
+    );
+  } catch { return false; }
+}
+
+function getCorsHeaders(req: Request): Record<string, string> {
   const origin = req.headers.get('origin');
-  const allowedOrigin = origin && ALLOWED_ORIGINS.has(origin) ? origin : 'https://clerktree.com';
-  return { ...corsBaseHeaders, 'Access-Control-Allow-Origin': allowedOrigin };
+  const allowedOrigin = origin && isAllowedOrigin(origin) ? origin : 'https://clerktree.com';
+  return { ...corsBaseHeaders, 'Access-Control-Allow-Origin': allowedOrigin, 'Vary': 'Origin' };
 }
 
 function json(req: Request, status: number, data: unknown) {
@@ -78,6 +104,9 @@ function formatDate(dateStr: string): string {
 
 // ─── Main Handler ────────────────────────────────────────────────
 Deno.serve(async (req: Request) => {
+  if (!isAllowedOrigin(req.headers.get('origin'))) {
+    return json(req, 403, { error: 'Origin not allowed' });
+  }
   if (req.method === 'OPTIONS') {
     return new Response(null, { status: 204, headers: getCorsHeaders(req) });
   }
@@ -268,8 +297,8 @@ Deno.serve(async (req: Request) => {
       return json(req, 200, { topTopics });
     }
 
-    // Default: return all analytics in one call
-    if (req.method === 'GET') {
+    // Default: return all analytics in one call (only when no specific sub-action)
+    if (req.method === 'GET' && !['patterns', 'kb-gaps', 'precall-brief'].includes(action)) {
       // Combine overview, trends and top-topics for a single request
       const totalCalls = records.length;
       const voiceCalls = records.filter(c => c.type === 'voice').length;
@@ -362,6 +391,109 @@ Deno.serve(async (req: Request) => {
         trends,
         topTopics,
       });
+    }
+
+    // ─── GET /patterns ───────────────────────────────────────────
+    // Outcome-driven signal analysis: which topics/tags correlate with
+    // resolved vs unresolved calls. Pure statistics — no AI calls.
+    if (req.method === 'GET' && action === 'patterns') {
+      const days = parseInt(url.searchParams.get('days') ?? '90', 10);
+      const minOcc = parseInt(url.searchParams.get('min_occ') ?? '1', 10);
+      const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
+
+      const { data: rows, error: fetchErr } = await adminClient
+        .from('call_history')
+        .select('id, caller_name, date, category, priority, sentiment, follow_up_required, duration, tags, summary, messages')
+        .eq('user_id', user.id)
+        .gte('date', since)
+        .order('date', { ascending: false })
+        .limit(2000);
+
+      if (fetchErr) throw fetchErr;
+      const calls = (rows ?? []) as CallRow[];
+
+      const liftResults = computeTagLift(calls, minOcc);
+      const categoryFCR = computeCategoryFCR(calls);
+
+      // Split into top winning signals (lift > 1) and top risk signals (lift < 1)
+      const winningSignals = liftResults.filter(s => s.lift >= 1).slice(0, 15);
+      const riskSignals = liftResults.filter(s => s.lift < 1).slice(-15).reverse();
+
+      // Overall FCR — derived from per-category results to avoid duplicating logic
+      const totalCalls = calls.length;
+      const resolvedCallsTotal = categoryFCR.reduce((s, c) => s + c.resolvedCalls, 0);
+      const overallFCR = totalCalls > 0 ? parseFloat((resolvedCallsTotal / totalCalls).toFixed(4)) : 0;
+
+      return json(req, 200, {
+        periodDays: days,
+        totalCalls,
+        overallFCR,
+        winningSignals,
+        riskSignals,
+        categoryFCR,
+      });
+    }
+
+    // ─── GET /kb-gaps ─────────────────────────────────────────────
+    // Detect which topics from unresolved calls are not covered in the KB.
+    // Uses token-pool coverage check (no embeddings, no AI).
+    if (req.method === 'GET' && action === 'kb-gaps') {
+      const days = parseInt(url.searchParams.get('days') ?? '90', 10);
+      const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
+      const minOcc = parseInt(url.searchParams.get('min_occ') ?? '2', 10);
+      const threshold = parseFloat(url.searchParams.get('threshold') ?? '0.3');
+
+      // Fetch unresolved calls
+      const { data: callRows, error: callErr } = await adminClient
+        .from('call_history')
+        .select('id, follow_up_required, tags, summary')
+        .eq('user_id', user.id)
+        .gte('date', since)
+        .limit(2000);
+      if (callErr) throw callErr;
+
+      // Fetch KB chunks for this user
+      const { data: kbRows, error: kbErr } = await adminClient
+        .from('kb_documents')
+        .select('content')
+        .eq('user_id', user.id)
+        .not('content', 'is', null);
+      if (kbErr) throw kbErr;
+
+      const calls = (callRows ?? []) as CallRow[];
+      const kbContents = (kbRows ?? []).map((r: { content: string }) => r.content ?? '');
+
+      const result = computeKbGaps(calls, kbContents, minOcc, threshold);
+
+      return json(req, 200, {
+        periodDays: days,
+        kbArticleCount: kbContents.length,
+        ...result,
+      });
+    }
+
+    // ─── GET /precall-brief?name=<caller_name> ────────────────────
+    // Look up a caller's history before a call starts.
+    // Returns past calls, open action items, and a risk flag.
+    // Pure tag/name matching — no AI calls.
+    if (req.method === 'GET' && action === 'precall-brief') {
+      const callerName = url.searchParams.get('name') ?? '';
+      if (!callerName.trim()) {
+        return json(req, 400, { error: 'name parameter is required' });
+      }
+
+      const { data: rows, error: fetchErr } = await adminClient
+        .from('call_history')
+        .select('id, caller_name, date, category, sentiment, follow_up_required, duration, tags, summary')
+        .eq('user_id', user.id)
+        .order('date', { ascending: false })
+        .limit(500);
+      if (fetchErr) throw fetchErr;
+
+      const calls = (rows ?? []) as CallRow[];
+      const brief = findCallerHistory(calls, callerName);
+
+      return json(req, 200, brief);
     }
 
     return json(req, 405, { error: 'Method not allowed' });

@@ -15,16 +15,17 @@ import {
     Link2,
     Key,
     BarChart,
+    BarChart2,
     Sun,
     Moon,
     LogOut,
     Users,
     Wand2,
-    ShieldCheck,
     FileText,
     Activity,
     Webhook,
     Settings,
+    BookMarked,
 } from "lucide-react"
 
 import { useTheme } from "@/hooks/useTheme"
@@ -103,7 +104,7 @@ export function AppSidebar({ activeTab, setActiveTab, hasAccess = false, ...prop
     return (
         <Sidebar collapsible="icon" {...props} className={cn(
             "border-r transition-colors duration-300",
-            isDark ? "border-white/10 bg-black" : "border-black/5 bg-white"
+            isDark ? "border-white/10 bg-black" : "border-black/10 bg-white"
         )}>
             {!isMobile && (
                 <SidebarHeader>
@@ -177,6 +178,28 @@ export function AppSidebar({ activeTab, setActiveTab, hasAccess = false, ...prop
                                     <span>{t('sidebar.customerGraph')}</span>
                                 </SidebarMenuButton>
                             </SidebarMenuItem>
+                            <SidebarMenuItem>
+                                <SidebarMenuButton
+                                    isActive={activeTab === 'analytics'}
+                                    onClick={() => handleTabClick('analytics')}
+                                    tooltip="Analytics"
+                                    className={menuButtonClass}
+                                >
+                                    <BarChart2 />
+                                    <span>Analytics</span>
+                                </SidebarMenuButton>
+                            </SidebarMenuItem>
+                            <SidebarMenuItem>
+                                <SidebarMenuButton
+                                    isActive={activeTab === 'rescue_playbooks_view'}
+                                    onClick={() => handleTabClick('rescue_playbooks_view')}
+                                    tooltip="Playbooks"
+                                    className={menuButtonClass}
+                                >
+                                    <BookMarked />
+                                    <span>Playbooks</span>
+                                </SidebarMenuButton>
+                            </SidebarMenuItem>
                         </SidebarMenu>
                     </SidebarGroupContent>
                 </SidebarGroup>
@@ -236,17 +259,6 @@ export function AppSidebar({ activeTab, setActiveTab, hasAccess = false, ...prop
                                     <span>{t('sidebar.systemPrompt')}</span>
                                 </SidebarMenuButton>
                             </SidebarMenuItem>
-                            <SidebarMenuItem>
-                                <SidebarMenuButton
-                                    isActive={activeTab === 'rescue_playbooks'}
-                                    onClick={() => handleTabClick('rescue_playbooks')}
-                                    className={menuButtonClass}
-                                >
-                                    <ShieldCheck />
-                                    <span>{t('sidebar.rescuePlaybooks')}</span>
-                                </SidebarMenuButton>
-                            </SidebarMenuItem>
-
                             <SidebarMenuItem>
                                 <SidebarMenuButton
                                     isActive={activeTab === 'context_fields'}
@@ -602,64 +614,74 @@ function AuthUserSection({ isDark, state }: { isDark: boolean; state: string }) 
 
             {/* Sign Out Confirmation Dialog */}
             {showConfirm && createPortal(
-                <div className="fixed inset-0 z-[100000] flex items-center justify-center animate-fade-in">
-                    {/* Backdrop — separate element so its click doesn't bubble into dialog */}
+                <div
+                    className="fixed inset-0 z-[100000] flex items-center justify-center animate-fade-in"
+                    onPointerDown={(e) => e.stopPropagation()}
+                    onClick={(e) => e.stopPropagation()}
+                >
+                    {/* Backdrop */}
                     <div
-                        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+                        className="absolute inset-0 bg-black/70 backdrop-blur-sm"
                         onClick={() => setShowConfirm(false)}
                     />
-                    {/* Dialog — elevated above backdrop */}
+                    {/* Dialog */}
                     <div
                         className={cn(
-                            "relative z-10 w-[380px] rounded-[28px] p-8 shadow-2xl border animate-scale-in",
+                            "relative z-10 w-[calc(100vw-2rem)] max-w-[360px] rounded-2xl shadow-2xl border overflow-hidden animate-scale-in",
                             isDark
-                                ? "bg-[#121214] border-white/5 shadow-black/50"
-                                : "bg-white border-gray-200/50 shadow-xl shadow-gray-200/50"
+                                ? "bg-[#111113] border-white/8 shadow-black/60"
+                                : "bg-white border-gray-200 shadow-xl"
                         )}
+                        onClick={(e) => e.stopPropagation()}
                     >
-                        {/* Icon */}
-                        <div className="flex justify-center mb-5">
-                            <div className={cn(
-                                "w-12 h-12 rounded-xl flex items-center justify-center border shadow-sm",
-                                isDark ? "bg-white/5 border-white/10" : "bg-white border-gray-200"
-                            )}>
-                                <LogOut className={cn("w-5 h-5", isDark ? "text-white/70" : "text-gray-700")} />
+                        {/* Subtle top gradient accent */}
+                        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-red-500/40 to-transparent" />
+
+                        <div className="p-6">
+                            {/* Icon */}
+                            <div className="flex justify-center mb-4">
+                                <div className={cn(
+                                    "w-11 h-11 rounded-xl flex items-center justify-center",
+                                    isDark ? "bg-red-500/10 border border-red-500/20" : "bg-red-50 border border-red-100"
+                                )}>
+                                    <LogOut className="w-5 h-5 text-red-400" strokeWidth={1.5} />
+                                </div>
                             </div>
-                        </div>
 
-                        {/* Text */}
-                        <h3 className={cn(
-                            "text-center text-lg font-bold mb-1.5 tracking-tight",
-                            isDark ? "text-white" : "text-gray-900"
-                        )}>
-                            {t('sidebar.confirmSignOutTitle')}
-                        </h3>
-                        <p className={cn(
-                            "text-center text-sm mb-7",
-                            isDark ? "text-zinc-400" : "text-gray-500"
-                        )}>
-                            {t('sidebar.confirmSignOutMessage')}
-                        </p>
+                            {/* Text */}
+                            <h3 className={cn(
+                                "text-center text-[15px] font-semibold mb-1 tracking-tight",
+                                isDark ? "text-white" : "text-gray-900"
+                            )}>
+                                {t('sidebar.confirmSignOutTitle')}
+                            </h3>
+                            <p className={cn(
+                                "text-center text-sm mb-6 leading-relaxed",
+                                isDark ? "text-white/40" : "text-gray-400"
+                            )}>
+                                {t('sidebar.confirmSignOutMessage')}
+                            </p>
 
-                        {/* Actions */}
-                        <div className="flex gap-3">
-                            <button
-                                onClick={() => setShowConfirm(false)}
-                                className={cn(
-                                    "flex-1 px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-200 cursor-pointer border",
-                                    isDark
-                                        ? "bg-white/5 hover:bg-white/10 text-white/70 hover:text-white border-white/10"
-                                        : "bg-gray-50 hover:bg-gray-100 text-gray-600 hover:text-gray-800 border-gray-200"
-                                )}
-                            >
-                                {t('sidebar.cancel')}
-                            </button>
-                            <button
-                                onClick={(e) => { e.stopPropagation(); handleSignOut(); }}
-                                className="flex-1 px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-200 cursor-pointer bg-red-500/80 backdrop-blur-sm hover:bg-red-500 text-white shadow-lg shadow-red-500/20 hover:shadow-red-500/30 hover:-translate-y-0.5"
-                            >
-                                {t('sidebar.signOut')}
-                            </button>
+                            {/* Actions */}
+                            <div className="flex gap-2.5">
+                                <button
+                                    onClick={() => setShowConfirm(false)}
+                                    className={cn(
+                                        "flex-1 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 border",
+                                        isDark
+                                            ? "bg-white/5 hover:bg-white/10 text-white/60 hover:text-white border-white/8"
+                                            : "bg-gray-50 hover:bg-gray-100 text-gray-500 hover:text-gray-700 border-gray-200"
+                                    )}
+                                >
+                                    {t('sidebar.cancel')}
+                                </button>
+                                <button
+                                    onClick={handleSignOut}
+                                    className="flex-1 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-150 bg-red-500 hover:bg-red-600 active:bg-red-700 text-white shadow-md shadow-red-500/20"
+                                >
+                                    {t('sidebar.signOut')}
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>,
@@ -672,7 +694,7 @@ function AuthUserSection({ isDark, state }: { isDark: boolean; state: string }) 
                     state === "collapsed" && "justify-center"
                 )}>
                     {avatarUrl ? (
-                        <div className="w-8 h-8 shrink-0 min-w-[32px] min-h-[32px] max-w-[32px] max-h-[32px] rounded-full overflow-hidden ring-1 ring-white/10 relative">
+                        <div className={cn("w-8 h-8 shrink-0 rounded-full overflow-hidden ring-1 relative", isDark ? "ring-white/10" : "ring-black/10")}>
                             <img
                                 src={avatarUrl}
                                 alt={displayName}
@@ -681,7 +703,7 @@ function AuthUserSection({ isDark, state }: { isDark: boolean; state: string }) 
                         </div>
                     ) : (
                         <div className={cn(
-                            "w-8 h-8 shrink-0 min-w-[32px] min-h-[32px] max-w-[32px] max-h-[32px] rounded-full flex items-center justify-center text-xs font-bold",
+                            "w-8 h-8 shrink-0 rounded-full flex items-center justify-center text-xs font-bold",
                             isDark ? "bg-white/10 text-white/70" : "bg-black/10 text-black/70"
                         )}>
                             {displayName.charAt(0).toUpperCase()}
@@ -693,7 +715,7 @@ function AuthUserSection({ isDark, state }: { isDark: boolean; state: string }) 
                                 {displayName}
                             </p>
                             {email && (
-                                <p className={cn("text-[10px] truncate", isDark ? "text-white/40" : "text-black/40")}>
+                                <p className={cn("text-[11px] truncate leading-tight", isDark ? "text-white/40" : "text-black/40")}>
                                     {email}
                                 </p>
                             )}
@@ -709,7 +731,7 @@ function AuthUserSection({ isDark, state }: { isDark: boolean; state: string }) 
                         )}
                         title={t('sidebar.signOut')}
                     >
-                        <LogOut className="w-3.5 h-3.5" />
+                        <LogOut className="w-3.5 h-3.5" strokeWidth={1.5} />
                     </button>
                 </div>
             </SidebarMenuItem>

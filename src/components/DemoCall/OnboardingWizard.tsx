@@ -311,7 +311,7 @@ export default function OnboardingWizard({ isDark = true, onComplete }: Onboardi
 
     // --- Main Layout matching Dashboard standards ---
     return (
-        <div className="space-y-6 max-w-[1600px] mx-auto pb-10">
+        <div className="space-y-6 pb-10">
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
@@ -629,7 +629,7 @@ export default function OnboardingWizard({ isDark = true, onComplete }: Onboardi
                                 <span className="font-medium truncate">{uploadedDoc.name}</span>
                                 <button
                                     onClick={() => setUploadedDoc(null)}
-                                    className="ml-auto p-1 rounded-md hover:bg-black/10 dark:hover:bg-white/10 transition-colors cursor-pointer"
+                                    className={cn("ml-auto p-1 rounded-md transition-colors cursor-pointer", isDark ? "hover:bg-white/10" : "hover:bg-black/10")}
                                 >
                                     <X className="w-3.5 h-3.5" />
                                 </button>

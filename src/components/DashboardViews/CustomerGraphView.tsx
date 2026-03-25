@@ -935,7 +935,7 @@ export default function CustomerGraphView({ isDark = true }: CustomerGraphViewPr
                   : 'bg-black/5 border-black/10 text-black hover:bg-black/10 hover:border-black/20',
               )}
             >
-              <RefreshCcw className="w-4 h-4" />
+              <RefreshCcw className="w-4 h-4" strokeWidth={1.5} />
               {t('customerGraph.controls.recalculate')}
             </button>
 
@@ -968,7 +968,7 @@ export default function CustomerGraphView({ isDark = true }: CustomerGraphViewPr
         </div>
       </section>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
         <MetricCard
           title={t('customerGraph.kpi.customers')}
           value={model?.stats.totalCustomers ?? 0}
@@ -1032,7 +1032,7 @@ export default function CustomerGraphView({ isDark = true }: CustomerGraphViewPr
             {t('customerGraph.alerts.empty')}
           </p>
         ) : (
-          <div className="mt-3 grid grid-cols-1 lg:grid-cols-2 gap-3">
+          <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-3">
             {realtimeAlerts.map((alert) => {
               const meta = alertMeta[alert.type];
               const AlertIcon = meta.icon;
@@ -1115,7 +1115,7 @@ export default function CustomerGraphView({ isDark = true }: CustomerGraphViewPr
             No clusters above {Math.round(settings.riskThreshold * 100)}% risk detected. This updates automatically from the customer graph.
           </p>
         ) : (
-          <div className="mt-4 grid grid-cols-1 lg:grid-cols-2 gap-3">
+          <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3">
             {highRiskClusters.map((cluster) => {
               const riskPct = Math.round(cluster.riskScore * 100);
               const riskLevel = riskPct >= 75 ? 'critical' : riskPct >= 60 ? 'high' : 'moderate';
@@ -1152,11 +1152,11 @@ export default function CustomerGraphView({ isDark = true }: CustomerGraphViewPr
                         <p className={cn('text-sm font-semibold', isDark ? 'text-white' : 'text-black')}>
                           {cluster.label}
                         </p>
-                        <span className={cn('text-[10px] font-bold px-2 py-0.5 rounded-full border', riskColors[riskLevel])}>
+                        <span className={cn('text-[11px] font-bold px-2 py-0.5 rounded-full border', riskColors[riskLevel])}>
                           {riskPct}% risk
                         </span>
                         {cluster.opportunityScore >= 0.6 && (
-                          <span className={cn('text-[10px] font-bold px-2 py-0.5 rounded-full border',
+                          <span className={cn('text-[11px] font-bold px-2 py-0.5 rounded-full border',
                             isDark ? 'border-emerald-400/30 bg-emerald-500/15 text-emerald-200' : 'border-emerald-200 bg-emerald-50 text-emerald-700',
                           )}>
                             {Math.round(cluster.opportunityScore * 100)}% opportunity
@@ -1191,7 +1191,7 @@ export default function CustomerGraphView({ isDark = true }: CustomerGraphViewPr
                         <span
                           key={signal}
                           className={cn(
-                            'text-[10px] px-2 py-0.5 rounded-full border',
+                            'text-[11px] px-2 py-0.5 rounded-full border',
                             isDark ? 'border-white/10 bg-white/5 text-white/60' : 'border-black/10 bg-black/5 text-black/60',
                           )}
                         >
@@ -1422,7 +1422,7 @@ export default function CustomerGraphView({ isDark = true }: CustomerGraphViewPr
                 </div>
               </div>
 
-              <div className="h-[660px] relative overflow-hidden">
+              <div className="h-[420px] sm:h-[560px] lg:h-[660px] relative overflow-hidden">
                 <div
                   className={cn(
                     'absolute inset-0 pointer-events-none',
@@ -1758,7 +1758,7 @@ export default function CustomerGraphView({ isDark = true }: CustomerGraphViewPr
                               {selectedCopilot.playbook.map((step, stepIndex) => (
                                 <div key={`${selectedCopilot.clusterId}-step-${stepIndex}`} className="flex items-start gap-2">
                                   <span className={cn(
-                                    'inline-flex items-center justify-center w-4 h-4 rounded-full text-[10px] font-semibold mt-0.5',
+                                    'inline-flex items-center justify-center w-4 h-4 rounded-full text-[11px] font-semibold mt-0.5',
                                     selectedCopilotMeta.subtleClassName,
                                   )}>
                                     {stepIndex + 1}
@@ -2177,7 +2177,7 @@ export default function CustomerGraphView({ isDark = true }: CustomerGraphViewPr
                         <div className="flex items-center justify-between">
                           <p className="text-sm font-medium">{playbook.name}</p>
                           <span className={cn(
-                            'text-[10px] px-1.5 py-0.5 rounded border',
+                            'text-[11px] px-1.5 py-0.5 rounded border',
                             isDark ? 'border-white/10 text-white/40' : 'border-black/10 text-black/40',
                           )}>
                             {playbook.channels.join(', ')}

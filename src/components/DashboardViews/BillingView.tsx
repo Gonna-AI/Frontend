@@ -429,7 +429,7 @@ export default function BillingView({ isDark = true, hasAccess = false }: { isDa
     const PlanIcon = planIcon;
 
     return (
-        <div className="space-y-8 max-w-[1600px] mx-auto pb-10">
+        <div className="space-y-6 sm:space-y-8 pb-10">
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
@@ -469,7 +469,7 @@ export default function BillingView({ isDark = true, hasAccess = false }: { isDa
                 )}>
                     {/* Background decoration */}
                     <div className={cn(
-                        "absolute top-0 right-0 w-[400px] h-[400px] rounded-full blur-[120px] opacity-10 pointer-events-none -translate-y-1/2 translate-x-1/2",
+                        "absolute top-0 right-0 w-[200px] sm:w-[300px] lg:w-[400px] h-[200px] sm:h-[300px] lg:h-[400px] rounded-full blur-[120px] opacity-10 pointer-events-none -translate-y-1/2 translate-x-1/2",
                         isPro ? "bg-emerald-500" : (isDark ? "bg-white" : "bg-black")
                     )} />
 
@@ -493,7 +493,7 @@ export default function BillingView({ isDark = true, hasAccess = false }: { isDa
                                         {subLoading ? t('billing.plan.loading') : planDisplayName}
                                     </h3>
                                     <span className={cn(
-                                        "px-2.5 py-0.5 rounded-full text-[10px] uppercase font-bold tracking-wider",
+                                        "px-2.5 py-0.5 rounded-full text-xs uppercase font-bold tracking-wider",
                                         isPro
                                             ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/20"
                                             : (isDark ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/20" : "bg-emerald-100 text-emerald-700 border border-emerald-200")
@@ -618,7 +618,7 @@ export default function BillingView({ isDark = true, hasAccess = false }: { isDa
                         )}
                     >
                         {t('billing.yearly')}
-                        <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-500 text-white">
+                        <span className="text-[11px] font-bold px-1.5 py-0.5 rounded bg-emerald-500 text-white">
                             -20%
                         </span>
                     </button>
@@ -626,12 +626,12 @@ export default function BillingView({ isDark = true, hasAccess = false }: { isDa
             </div>
 
             {/* Pricing Plans */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 items-start">
                 {plans.map((plan) => (
                     <div
                         key={plan.name}
                         className={cn(
-                            "relative p-8 rounded-2xl border flex flex-col transition-all duration-300 hover:-translate-y-1",
+                            "relative p-5 sm:p-8 rounded-2xl border flex flex-col transition-all duration-300 hover:-translate-y-1",
                             plan.popular
                                 ? (isDark ? "bg-gradient-to-b from-[#09090B] to-emerald-950/20 border-emerald-500/50 shadow-[0_0_40px_-10px_rgba(16,185,129,0.2)]" : "bg-white border-emerald-200 shadow-xl shadow-emerald-500/10")
                                 : (isDark ? "bg-[#09090B] border-white/10 hover:border-white/20" : "bg-white border-black/10 hover:border-black/20"),

@@ -1,5 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2";
+import { insertNotification } from "../_shared/notify.ts";
 
 const corsBaseHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -163,6 +164,14 @@ Deno.serve(async (req: Request) => {
 
       if (error) throw error;
 
+      await insertNotification(adminClient, user.id, {
+        type: 'success',
+        title: 'API key created',
+        message: `New API key "${name}" is now active. Store it securely — it won't be shown again.`,
+        category: 'security',
+        action_url: '/dashboard?tab=api-keys',
+      });
+
       // Return the full token only on creation (never again)
       return jsonResponse(req, 201, { key: data });
     }
@@ -174,6 +183,14 @@ Deno.serve(async (req: Request) => {
         return jsonResponse(req, 400, { error: 'Missing key id.' });
       }
 
+      // Fetch name before deleting for the notification message
+      const { data: keyToRevoke } = await adminClient
+        .from('user_api_keys')
+        .select('name')
+        .eq('id', keyId)
+        .eq('user_id', user.id)
+        .maybeSingle();
+
       const { error } = await adminClient
         .from('user_api_keys')
         .delete()
@@ -181,6 +198,14 @@ Deno.serve(async (req: Request) => {
         .eq('user_id', user.id);
 
       if (error) throw error;
+
+      await insertNotification(adminClient, user.id, {
+        type: 'warning',
+        title: 'API key revoked',
+        message: keyToRevoke?.name ? `API key "${keyToRevoke.name}" has been permanently revoked.` : 'An API key has been revoked.',
+        category: 'security',
+        action_url: '/dashboard?tab=api-keys',
+      });
 
       return jsonResponse(req, 200, { success: true });
     }

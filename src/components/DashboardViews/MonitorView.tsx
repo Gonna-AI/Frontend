@@ -6,6 +6,7 @@ import { useDemoCall } from '../../contexts/DemoCallContext';
 import { ArrowUpRight, ArrowDownRight, MoreHorizontal, Phone, Clock, Activity, AlertCircle, Radio } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { LiveCallMonitor } from '../DemoCall';
+import PreCallBrief from '../DemoCall/PreCallBrief';
 
 import {
     AreaChart,
@@ -40,7 +41,7 @@ interface StatsCardProps {
 function StatsCard({ title, value, change, trend, subtitle, icon, isDark, progress, color = 'emerald' }: StatsCardProps) {
     return (
         <div className={cn(
-            "p-8 rounded-2xl border flex flex-col justify-between h-[220px] relative overflow-hidden transition-all duration-300 hover:border-opacity-50",
+            "p-5 sm:p-8 rounded-2xl border flex flex-col justify-between min-h-[160px] sm:h-[220px] relative overflow-hidden transition-all duration-300",
             isDark
                 ? cn("bg-[#09090B]",
                     color === 'emerald' ? "border-emerald-500/20" :
@@ -88,7 +89,7 @@ function StatsCard({ title, value, change, trend, subtitle, icon, isDark, progre
                     </div>
                     {change && (
                         <div className={cn(
-                            "shrink-0 flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full border uppercase tracking-wider",
+                            "shrink-0 flex items-center gap-1 text-xs font-bold px-2 py-0.5 rounded-full border uppercase tracking-wider",
                             trend === 'up'
                                 ? (isDark ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-emerald-100 text-emerald-700 border-emerald-200")
                                 : trend === 'down'
@@ -103,7 +104,7 @@ function StatsCard({ title, value, change, trend, subtitle, icon, isDark, progre
 
                 <div className="z-10 mt-auto">
                     <div className={cn(
-                        "text-5xl font-bold tracking-tight mb-4",
+                        "text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight mb-3 sm:mb-4 tabular-nums",
                         isDark ? "text-white" : "text-gray-900"
                     )}>
                         {value}
@@ -142,7 +143,7 @@ function SectionTab({ active, onClick, children, isDark }: { active: boolean, on
         <button
             onClick={onClick}
             className={cn(
-                "relative px-6 py-2.5 text-sm font-medium rounded-full transition-all duration-300",
+                "relative px-4 sm:px-6 py-2 sm:py-2.5 text-sm font-medium rounded-full transition-all duration-300",
                 active
                     ? (isDark ? "text-white" : "text-black")
                     : (isDark ? "text-white/40 hover:text-white" : "text-black/40 hover:text-black")
@@ -241,7 +242,7 @@ export default function MonitorView({ isDark = true }: { isDark?: boolean }) {
 
 
     // Custom Tooltip for Chart
-    const CustomTooltip = ({ active, payload, label }: any) => {
+    const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?: { value: number }[]; label?: string }) => {
         if (active && payload && payload.length) {
             return (
                 <div className={cn(
@@ -262,7 +263,7 @@ export default function MonitorView({ isDark = true }: { isDark?: boolean }) {
     };
 
     return (
-        <div className="space-y-8 max-w-[1600px] mx-auto pb-10">
+        <div className="space-y-6 sm:space-y-8 pb-10">
 
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -281,7 +282,7 @@ export default function MonitorView({ isDark = true }: { isDark?: boolean }) {
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
+                className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6"
             >
                 <StatsCard
                     title={t('monitor.stats.totalCalls')}
@@ -330,7 +331,7 @@ export default function MonitorView({ isDark = true }: { isDark?: boolean }) {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
                 className={cn(
-                    "p-8 rounded-2xl border min-h-[400px] flex flex-col relative overflow-hidden",
+                    "p-4 sm:p-8 rounded-2xl border min-h-[300px] sm:min-h-[400px] flex flex-col relative overflow-hidden",
                     isDark ? "bg-[#09090B] border-white/10" : "bg-white border-black/10"
                 )}
             >
@@ -340,7 +341,7 @@ export default function MonitorView({ isDark = true }: { isDark?: boolean }) {
                     isDark ? "bg-blue-500" : "bg-blue-300"
                 )} />
 
-                <div className="relative z-10 flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4 sm:gap-0">
+                <div className="relative z-10 flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-8 gap-3 sm:gap-0">
                     <div>
                         <h2 className={cn("text-xl font-bold", isDark ? "text-white" : "text-gray-900")}>{t('monitor.chart.title')}</h2>
                         <p className={cn("text-sm mt-1", isDark ? "text-gray-400" : "text-gray-500")}>{t('monitor.chart.subtitle')}</p>
@@ -367,7 +368,7 @@ export default function MonitorView({ isDark = true }: { isDark?: boolean }) {
                     </div>
                 </div>
 
-                <div className="relative z-10 w-full h-[300px] min-h-[300px]">
+                <div className="relative z-10 w-full h-[200px] sm:h-[300px]">
                     <ResponsiveContainer width="100%" height="100%">
                         <AreaChart data={chartData} margin={{ top: 10, right: 0, left: -20, bottom: 20 }}>
                             <defs>
@@ -455,12 +456,17 @@ export default function MonitorView({ isDark = true }: { isDark?: boolean }) {
                     transition={{ duration: 0.3 }}
                 >
                     {activeSection === 'live' ? (
-                        <div className={cn(
-                            "rounded-2xl border overflow-hidden relative",
-                            isDark ? "bg-[#09090B] border-white/10" : "bg-white border-black/10"
-                        )}>
-                            <div className="p-1">
-                                <LiveCallMonitor isDark={isDark} />
+                        <div className="flex flex-col lg:flex-row gap-4">
+                            <div className={cn(
+                                "flex-1 rounded-2xl border overflow-hidden relative",
+                                isDark ? "bg-[#09090B] border-white/10" : "bg-white border-black/10"
+                            )}>
+                                <div className="p-1">
+                                    <LiveCallMonitor isDark={isDark} />
+                                </div>
+                            </div>
+                            <div className="lg:w-80 shrink-0">
+                                <PreCallBrief isDark={isDark} />
                             </div>
                         </div>
                     ) : (
@@ -475,12 +481,12 @@ export default function MonitorView({ isDark = true }: { isDark?: boolean }) {
                                         isDark ? "bg-white/5 text-white/50" : "bg-gray-50 text-gray-500"
                                     )}>
                                         <tr>
-                                            <th className="px-8 py-5">{t('monitor.table.caller')}</th>
-                                            <th className="px-6 py-5">{t('monitor.table.category')}</th>
-                                            <th className="px-6 py-5">{t('monitor.table.status')}</th>
-                                            <th className="px-6 py-5">{t('monitor.table.duration')}</th>
-                                            <th className="px-6 py-5">{t('monitor.table.date')}</th>
-                                            <th className="px-6 py-5 text-right">{t('monitor.table.actions')}</th>
+                                            <th className="px-4 sm:px-8 py-4 sm:py-5">{t('monitor.table.caller')}</th>
+                                            <th className="px-4 sm:px-6 py-4 sm:py-5 hidden sm:table-cell">{t('monitor.table.category')}</th>
+                                            <th className="px-4 sm:px-6 py-4 sm:py-5">{t('monitor.table.status')}</th>
+                                            <th className="px-4 sm:px-6 py-4 sm:py-5 hidden md:table-cell">{t('monitor.table.duration')}</th>
+                                            <th className="px-4 sm:px-6 py-4 sm:py-5 hidden md:table-cell">{t('monitor.table.date')}</th>
+                                            <th className="px-4 sm:px-6 py-4 sm:py-5 text-right">{t('monitor.table.actions')}</th>
                                         </tr>
                                     </thead>
                                     <tbody className={cn("divide-y", isDark ? "divide-white/5" : "divide-gray-200")}>
@@ -499,18 +505,18 @@ export default function MonitorView({ isDark = true }: { isDark?: boolean }) {
                                             filteredHistory.slice(0, 8).map((call) => (
                                                 <React.Fragment key={call.id}>
                                                     <tr className={cn("transition-colors group", isDark ? "hover:bg-white/5" : "hover:bg-gray-50")}>
-                                                        <td className={cn("px-8 py-5 font-medium", isDark ? "text-white" : "text-gray-900")}>
-                                                            <div className="flex items-center gap-3">
+                                                        <td className={cn("px-4 sm:px-8 py-4 sm:py-5 font-medium", isDark ? "text-white" : "text-gray-900")}>
+                                                            <div className="flex items-center gap-2 sm:gap-3">
                                                                 <div className={cn(
-                                                                    "w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold",
+                                                                    "w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0",
                                                                     isDark ? "bg-white/10 text-white" : "bg-black/5 text-black"
                                                                 )}>
                                                                     {call.callerName.substring(0, 2).toUpperCase()}
                                                                 </div>
-                                                                {call.callerName}
+                                                                <span className="truncate max-w-[100px] sm:max-w-none">{call.callerName}</span>
                                                             </div>
                                                         </td>
-                                                        <td className="px-6 py-5">
+                                                        <td className="px-4 sm:px-6 py-4 sm:py-5 hidden sm:table-cell">
                                                             <span className={cn(
                                                                 "px-2.5 py-1 rounded-full text-xs font-medium border shadow-sm",
                                                                 call.category
@@ -520,7 +526,7 @@ export default function MonitorView({ isDark = true }: { isDark?: boolean }) {
                                                                 {call.category?.name || t('monitor.category.uncategorized')}
                                                             </span>
                                                         </td>
-                                                        <td className="px-6 py-5">
+                                                        <td className="px-4 sm:px-6 py-4 sm:py-5">
                                                             <span className={cn(
                                                                 "flex items-center w-fit gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border shadow-sm",
                                                                 call.priority === 'critical' ? "bg-red-500/10 text-red-400 border-red-500/20" :
@@ -534,13 +540,13 @@ export default function MonitorView({ isDark = true }: { isDark?: boolean }) {
                                                                 {call.priority === 'critical' ? t('monitor.status.critical') : call.priority === 'high' ? t('monitor.status.high') : t('monitor.status.resolved')}
                                                             </span>
                                                         </td>
-                                                        <td className={cn("px-6 py-5 font-mono text-xs", isDark ? "text-white/60" : "text-gray-600")}>
+                                                        <td className={cn("px-4 sm:px-6 py-4 sm:py-5 font-mono text-xs hidden md:table-cell", isDark ? "text-white/60" : "text-gray-600")}>
                                                             {formatDuration(call.duration)}
                                                         </td>
-                                                        <td className={cn("px-6 py-5 text-xs", isDark ? "text-white/60" : "text-gray-600")}>
+                                                        <td className={cn("px-4 sm:px-6 py-4 sm:py-5 text-xs hidden md:table-cell", isDark ? "text-white/60" : "text-gray-600")}>
                                                             {new Date(call.date).toLocaleDateString(language === 'de' ? 'de-DE' : 'en-US')} <span className="opacity-50 ml-1">{new Date(call.date).toLocaleTimeString(language === 'de' ? 'de-DE' : 'en-US', { hour: '2-digit', minute: '2-digit' })}</span>
                                                         </td>
-                                                        <td className="px-6 py-5 text-right">
+                                                        <td className="px-4 sm:px-6 py-4 sm:py-5 text-right">
                                                             <button
                                                                 onClick={() => setExpandedLogId(expandedLogId === call.id ? null : call.id)}
                                                                 className={cn(
@@ -555,8 +561,8 @@ export default function MonitorView({ isDark = true }: { isDark?: boolean }) {
                                                     </tr>
                                                     {expandedLogId === call.id && (
                                                         <tr>
-                                                            <td colSpan={6} className={cn("px-8 py-6", isDark ? "bg-white/[0.02]" : "bg-black/[0.02]")}>
-                                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                                            <td colSpan={6} className={cn("px-4 sm:px-8 py-4 sm:py-6", isDark ? "bg-white/[0.02]" : "bg-black/[0.02]")}>
+                                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8">
                                                                     <div>
                                                                         <h4 className={cn("text-xs font-semibold uppercase tracking-wider mb-2 flex items-center gap-1.5", isDark ? "text-white/40" : "text-black/40")}>
                                                                             {t('history.intent')}
@@ -570,10 +576,10 @@ export default function MonitorView({ isDark = true }: { isDark?: boolean }) {
                                                                     {call.extractedFields.length > 0 && (
                                                                         <div>
                                                                             <h4 className={cn("text-xs font-semibold uppercase tracking-wider mb-2", isDark ? "text-white/40" : "text-black/40")}>{t('history.extractedInfo')}</h4>
-                                                                            <div className={cn("rounded-xl border border-white/10", isDark ? "bg-black/20" : "bg-white")}>
+                                                                            <div className={cn("rounded-xl border", isDark ? "border-white/10 bg-black/20" : "border-black/10 bg-white")}>
                                                                                 <div className="space-y-1 p-3">
                                                                                     {call.extractedFields.map(field => (
-                                                                                        <div key={field.id} className={cn("flex items-center justify-between text-sm py-1.5 px-2 rounded hover:bg-black/5 dark:hover:bg-white/5 transition-colors")}>
+                                                                                        <div key={field.id} className={cn("flex items-center justify-between text-sm py-1.5 px-2 rounded transition-colors", isDark ? "hover:bg-white/5" : "hover:bg-black/5")}>
                                                                                             <span className={cn("opacity-70", isDark ? "text-white" : "text-gray-900")}>{field.label}</span>
                                                                                             <span className={cn("font-medium", isDark ? "text-white" : "text-gray-900")}>{field.value}</span>
                                                                                         </div>

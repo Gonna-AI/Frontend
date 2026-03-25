@@ -105,6 +105,33 @@ Deno.serve(async (req: Request) => {
       return json(req, 200, { notifications: data ?? [] });
     }
 
+    // ─── POST: Create a notification ─────────────────────────
+    if (req.method === 'POST' && action === 'create') {
+      const body = await req.json().catch(() => null) as Record<string, unknown> | null;
+      if (!body) return json(req, 400, { error: 'Invalid body' });
+
+      const type = ['info', 'success', 'warning', 'error'].includes(body.type as string)
+        ? (body.type as string) : 'info';
+      const title = typeof body.title === 'string' && body.title.trim() ? body.title.trim() : null;
+      if (!title) return json(req, 400, { error: 'title is required' });
+
+      const category = ['billing', 'team', 'security', 'calls', 'system'].includes(body.category as string)
+        ? (body.category as string) : 'system';
+
+      const { data, error } = await adminClient.from('notifications').insert({
+        user_id: user.id,
+        type,
+        title,
+        message: typeof body.message === 'string' ? body.message : '',
+        category,
+        action_url: typeof body.action_url === 'string' ? body.action_url : null,
+        is_read: false,
+      }).select().single();
+
+      if (error) throw error;
+      return json(req, 201, { notification: data });
+    }
+
     // ─── POST: Mark as read ──────────────────────────────────
     if (req.method === 'POST' && action === 'mark-read') {
       const body = await req.json().catch(() => null) as Record<string, unknown> | null;

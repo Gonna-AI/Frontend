@@ -101,7 +101,7 @@ export default function CallHistoryList({ isDark = true, showFilters = true }: C
   };
 
   return (
-    <div className="space-y-6 max-w-[1600px] mx-auto pb-10">
+    <div className="space-y-6 pb-10">
 
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -240,7 +240,7 @@ export default function CallHistoryList({ isDark = true, showFilters = true }: C
                           </p>
                           <div className="flex items-center gap-2 mt-1">
                             <span className={cn(
-                              "inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded-full font-medium border",
+                              "inline-flex items-center gap-1 text-[11px] px-1.5 py-0.5 rounded-full font-medium border",
                               priority.color === 'red' ? (isDark ? "bg-red-500/10 text-red-400 border-red-500/20" : "bg-red-50 text-red-600 border-red-200") :
                                 priority.color === 'orange' ? (isDark ? "bg-orange-500/10 text-orange-400 border-orange-500/20" : "bg-orange-50 text-orange-600 border-orange-200") :
                                   priority.color === 'blue' ? (isDark ? "bg-blue-500/10 text-blue-400 border-blue-500/20" : "bg-blue-50 text-blue-600 border-blue-200") :
@@ -251,7 +251,7 @@ export default function CallHistoryList({ isDark = true, showFilters = true }: C
                             <span className={cn("text-xs", isDark ? "text-white/40" : "text-gray-400")}>{item.category?.name}</span>
                             {item.tags?.includes('rescue_action') && (
                               <span className={cn(
-                                "inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded-full font-medium border",
+                                "inline-flex items-center gap-1 text-[11px] px-1.5 py-0.5 rounded-full font-medium border",
                                 isDark ? "bg-emerald-500/10 text-emerald-300 border-emerald-500/20" : "bg-emerald-50 text-emerald-700 border-emerald-200"
                               )}>
                                 Rescue Action
@@ -515,7 +515,7 @@ export default function CallHistoryList({ isDark = true, showFilters = true }: C
                                         <span className={cn("text-xs font-semibold uppercase", isDark ? "text-white/40" : "text-black/40")}>
                                           {msg.speaker === 'agent' ? 'AI Agent' : 'User'}
                                         </span>
-                                        <span className={cn("text-[10px]", isDark ? "text-white/20" : "text-black/20")}>
+                                        <span className={cn("text-[11px]", isDark ? "text-white/20" : "text-black/20")}>
                                           {new Date(msg.timestamp).toLocaleTimeString()}
                                         </span>
                                       </div>
@@ -527,7 +527,7 @@ export default function CallHistoryList({ isDark = true, showFilters = true }: C
                             )}
 
                             {activeTab === 'details' && (
-                              <div className="space-y-8 animate-in fade-in slide-in-from-top-2 duration-300">
+                              <div className="space-y-6 sm:space-y-8 animate-in fade-in slide-in-from-top-2 duration-300">
                                 {/* Extracted Fields */}
                                 <div>
                                   <div className="flex items-center gap-2 mb-4">
@@ -572,7 +572,7 @@ export default function CallHistoryList({ isDark = true, showFilters = true }: C
                                 </div>
 
                                 {/* Metadata */}
-                                <div className={cn("pt-6 border-t grid grid-cols-2 md:grid-cols-4 gap-6", isDark ? "border-white/5" : "border-black/5")}>
+                                <div className={cn("pt-6 border-t grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6", isDark ? "border-white/5" : "border-black/5")}>
                                   <div>
                                     <span className={cn("text-xs uppercase font-semibold tracking-wider block mb-1", isDark ? "text-white" : "text-black/40")}>Duration</span>
                                     <span className={cn("font-mono text-lg", isDark ? "text-white" : "text-black")}>{formatDuration(item.duration)}</span>
