@@ -190,10 +190,9 @@ export default function AnalyticsView({ isDark }: AnalyticsViewProps) {
         <div className="flex items-center gap-3">
           <DateRangePicker
             isDark={isDark}
-            startDate={dateRange.start}
-            endDate={dateRange.end}
-            onStartDateChange={(d) => setDateRange(prev => ({ ...prev, start: d }))}
-            onEndDateChange={(d) => setDateRange(prev => ({ ...prev, end: d }))}
+            startDate={dateRange.start ?? new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)}
+            endDate={dateRange.end ?? new Date()}
+            onChange={(start, end) => setDateRange({ start, end })}
           />
           <button
             onClick={fetchAnalytics}
