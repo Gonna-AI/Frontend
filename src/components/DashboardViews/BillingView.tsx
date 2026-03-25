@@ -429,7 +429,7 @@ export default function BillingView({ isDark = true, hasAccess = false }: { isDa
     const PlanIcon = planIcon;
 
     return (
-        <div className="space-y-8 max-w-[1600px] mx-auto pb-10">
+        <div className="space-y-6 sm:space-y-8 pb-10">
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>

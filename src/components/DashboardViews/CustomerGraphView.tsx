@@ -1422,7 +1422,7 @@ export default function CustomerGraphView({ isDark = true }: CustomerGraphViewPr
                 </div>
               </div>
 
-              <div className="h-[660px] relative overflow-hidden">
+              <div className="h-[420px] sm:h-[560px] lg:h-[660px] relative overflow-hidden">
                 <div
                   className={cn(
                     'absolute inset-0 pointer-events-none',

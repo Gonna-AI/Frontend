@@ -106,7 +106,7 @@ export default function PlaybooksView({ isDark = true }: { isDark?: boolean }) {
 
   return (
     <div className={cn(
-      "p-6 rounded-xl border",
+      "p-4 sm:p-6 rounded-xl border",
       isDark ? "bg-[#09090B] border-white/10" : "bg-white border-black/10"
     )}>
       <div className="mb-6">
@@ -130,7 +130,7 @@ export default function PlaybooksView({ isDark = true }: { isDark?: boolean }) {
       )}
 
       {/* Date Range Picker */}
-      <div className="mb-6 p-4 rounded-lg bg-white/5 border border-white/10">
+      <div className={cn("mb-6 p-4 rounded-lg border", isDark ? "bg-white/5 border-white/10" : "bg-gray-50 border-black/10")}>
         <label className={cn("text-sm font-medium block mb-3", isDark ? "text-white/80" : "text-gray-700")}>
           Select Date Range for Analysis
         </label>

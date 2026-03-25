@@ -104,7 +104,7 @@ export function AppSidebar({ activeTab, setActiveTab, hasAccess = false, ...prop
     return (
         <Sidebar collapsible="icon" {...props} className={cn(
             "border-r transition-colors duration-300",
-            isDark ? "border-white/10 bg-black" : "border-black/5 bg-white"
+            isDark ? "border-white/10 bg-black" : "border-black/10 bg-white"
         )}>
             {!isMobile && (
                 <SidebarHeader>

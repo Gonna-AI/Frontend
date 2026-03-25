@@ -263,7 +263,7 @@ export default function UsageView({ isDark = true, hasAccess = false }: { isDark
     };
 
     return (
-        <div className="space-y-6 max-w-[1600px] mx-auto pb-10">
+        <div className="space-y-6 pb-10">
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
@@ -410,7 +410,7 @@ export default function UsageView({ isDark = true, hasAccess = false }: { isDark
 
             {/* Main Graph */}
             <div className={cn(
-                "p-6 rounded-xl border h-[400px] flex flex-col",
+                "p-4 sm:p-6 rounded-xl border h-[280px] sm:h-[400px] flex flex-col",
                 isDark ? "bg-[#09090B] border-white/10" : "bg-white border-black/10"
             )}>
                 <div className="flex justify-between items-center mb-6">

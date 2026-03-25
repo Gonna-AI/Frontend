@@ -163,7 +163,7 @@ function DemoDashboardContent() {
           </div>
 
           {/* Main Content Area */}
-          <div className="flex-1 overflow-y-auto p-4 md:p-6 scrollbar-hide">
+          <div className="flex-1 overflow-y-auto p-3 sm:p-4 md:p-6 scrollbar-hide">
             <div className="max-w-7xl mx-auto w-full pb-10">
               {/* Show Access Code Dialog when no tab is selected and no access */}
               {activeTab === '' && !hasAccess && !accessLoading && (

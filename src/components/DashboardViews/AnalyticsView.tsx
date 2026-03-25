@@ -265,13 +265,13 @@ export default function AnalyticsView({ isDark }: AnalyticsViewProps) {
       </div>
 
       {/* Sentiment Trend + Category Distribution */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
         {/* Sentiment Trend */}
         <div className={cn("p-6 rounded-2xl border", isDark ? "bg-[#09090B] border-white/10" : "bg-white border-black/10")}>
           <h3 className={cn("text-lg font-semibold mb-4", isDark ? "text-white" : "text-gray-900")}>
             {t('analytics.sentimentTrend') || 'Sentiment Trend'}
           </h3>
-          <div className="h-[260px]">
+          <div className="h-[200px] sm:h-[260px]">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={trends}>
                 <defs>
@@ -295,7 +295,7 @@ export default function AnalyticsView({ isDark }: AnalyticsViewProps) {
           <h3 className={cn("text-lg font-semibold mb-4", isDark ? "text-white" : "text-gray-900")}>
             {t('analytics.categoryDist') || 'Category Distribution'}
           </h3>
-          <div className="h-[260px]">
+          <div className="h-[200px] sm:h-[260px]">
             {categoryData.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
@@ -317,7 +317,7 @@ export default function AnalyticsView({ isDark }: AnalyticsViewProps) {
       </div>
 
       {/* Priority Distribution + Top Topics */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
         {/* Priority Breakdown */}
         <div className={cn("p-6 rounded-2xl border", isDark ? "bg-[#09090B] border-white/10" : "bg-white border-black/10")}>
           <h3 className={cn("text-lg font-semibold mb-4", isDark ? "text-white" : "text-gray-900")}>
