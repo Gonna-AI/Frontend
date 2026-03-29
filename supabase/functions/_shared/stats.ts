@@ -140,6 +140,25 @@ function normalizeName(name: string): string {
   return name.toLowerCase().replace(/[^a-z0-9\s]/g, '').replace(/\s+/g, ' ').trim();
 }
 
+export function guessCategory(row: CallRow): string {
+  if (row.category && row.category.toLowerCase() !== 'uncategorized') return row.category;
+  
+  const s = parseSummary(row.summary);
+  const text = [
+    Array.isArray((s as any).mainPoints) ? (s as any).mainPoints.join(' ') : '',
+    (s as any).notes || '', 
+    Array.isArray(s.topics) ? s.topics.join(' ') : ''
+  ].join(' ').toLowerCase();
+
+  if (text.includes('billing') || text.includes('payment') || text.includes('refund') || text.includes('charge') || text.includes('cost')) return 'Billing & Payments';
+  if (text.includes('login') || text.includes('password') || text.includes('account') || text.includes('access')) return 'Account Access';
+  if (text.includes('bug') || text.includes('error') || text.includes('not working') || text.includes('fail') || text.includes('issue')) return 'Technical Support';
+  if (text.includes('feature') || text.includes('how to') || text.includes('help')) return 'Feature Request';
+  if (text.length > 5) return 'General Inquiry';
+  
+  return 'Support';
+}
+
 function parseSummary(raw: CallRow['summary']): NonNullable<Exclude<CallRow['summary'], string>> {
   if (!raw) return {};
   if (typeof raw === 'string') {
@@ -156,7 +175,13 @@ function isFollowUpRequired(row: CallRow): boolean {
 
 function getTopics(row: CallRow): string[] {
   const s = parseSummary(row.summary);
-  const summaryTopics = Array.isArray(s.topics) ? s.topics.map(t => String(t).toLowerCase().trim()).filter(Boolean) : [];
+  let summaryTopics = Array.isArray(s.topics) ? s.topics.map(t => String(t).toLowerCase().trim()).filter(Boolean) : [];
+  
+  if (summaryTopics.length === 0 && Array.isArray((s as any).mainPoints)) {
+    const mainPoints = (s as any).mainPoints.join(' ');
+    summaryTopics = topByFrequency(tokenize(mainPoints), 5);
+  }
+
   const tags = Array.isArray(row.tags) ? row.tags.map(t => String(t).toLowerCase().trim()).filter(Boolean) : [];
   // Deduplicate
   return [...new Set([...summaryTopics, ...tags])];
@@ -242,7 +267,7 @@ export function computeCategoryFCR(calls: CallRow[]): CategoryFCR[] {
   const map = new Map<string, { total: number; resolved: number; durationSum: number }>();
 
   for (const call of calls) {
-    const cat = (call.category ?? 'uncategorized').toLowerCase().trim() || 'uncategorized';
+    const cat = guessCategory(call);
     const existing = map.get(cat) ?? { total: 0, resolved: 0, durationSum: 0 };
     existing.total++;
     if (!isFollowUpRequired(call)) existing.resolved++;

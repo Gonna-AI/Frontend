@@ -976,6 +976,7 @@ export default function CustomerGraphView({ isDark = true }: CustomerGraphViewPr
           icon={<UserRound className="w-4 h-4" />}
           color="cyan"
           isDark={isDark}
+          loading={loading}
         />
         <MetricCard
           title={t('customerGraph.kpi.clusters')}
@@ -984,6 +985,7 @@ export default function CustomerGraphView({ isDark = true }: CustomerGraphViewPr
           icon={<Network className="w-4 h-4" />}
           color="blue"
           isDark={isDark}
+          loading={loading}
         />
         <MetricCard
           title={t('customerGraph.kpi.edges')}
@@ -992,6 +994,7 @@ export default function CustomerGraphView({ isDark = true }: CustomerGraphViewPr
           icon={<Sparkles className="w-4 h-4" />}
           color="purple"
           isDark={isDark}
+          loading={loading}
         />
         <MetricCard
           title={t('customerGraph.kpi.risk')}
@@ -1000,6 +1003,7 @@ export default function CustomerGraphView({ isDark = true }: CustomerGraphViewPr
           icon={<ShieldAlert className="w-4 h-4" />}
           color="orange"
           isDark={isDark}
+          loading={loading}
         />
         <MetricCard
           title={t('customerGraph.kpi.opportunity')}
@@ -1008,6 +1012,7 @@ export default function CustomerGraphView({ isDark = true }: CustomerGraphViewPr
           icon={<Brain className="w-4 h-4" />}
           color="emerald"
           isDark={isDark}
+          loading={loading}
         />
       </div>
 
@@ -2312,6 +2317,7 @@ function MetricCard({
   icon,
   color,
   isDark,
+  loading,
 }: {
   title: string;
   value: number;
@@ -2319,8 +2325,9 @@ function MetricCard({
   icon: ReactNode;
   color: 'cyan' | 'blue' | 'purple' | 'orange' | 'emerald';
   isDark: boolean;
+  loading?: boolean;
 }) {
-  const delta = previousValue !== undefined && previousValue !== 0
+  const delta = !loading && previousValue !== undefined && previousValue !== 0
     ? value - previousValue
     : null;
   const deltaPercent = delta !== null && previousValue

@@ -252,7 +252,7 @@ export default function AnalyticsView({ isDark }: AnalyticsViewProps) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="flex flex-col items-center gap-4">
-          <Loader2 className={cn("w-8 h-8 animate-spin", isDark ? "text-purple-400" : "text-purple-600")} />
+          <Loader2 className={cn("w-8 h-8 animate-spin", isDark ? "text-[#FF8A5B]" : "text-[#FF8A5B]")} />
           <p className={cn("text-sm", isDark ? "text-white/50" : "text-gray-500")}>Loading analytics...</p>
         </div>
       </div>
@@ -603,7 +603,7 @@ export default function AnalyticsView({ isDark }: AnalyticsViewProps) {
                           />
                         </div>
                         <span className="text-[11px] text-rose-400 font-mono w-12 text-right shrink-0 font-bold">
-                          {s.lift.toFixed(2)}×
+                          {s.lift === 0 ? '∞' : `${s.lift.toFixed(2)}×`}
                         </span>
                         <span className={cn("text-[10px] w-8 text-right shrink-0", isDark ? "text-white/25" : "text-gray-300")}>
                           {s.totalOccurrences}

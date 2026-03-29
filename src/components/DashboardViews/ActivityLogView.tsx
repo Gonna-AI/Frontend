@@ -180,7 +180,7 @@ export default function ActivityLogView({ isDark }: ActivityLogViewProps) {
       {/* Activity List */}
       {loading ? (
         <div className="flex items-center justify-center py-20">
-          <Loader2 className={cn("w-6 h-6 animate-spin", isDark ? "text-purple-400" : "text-purple-600")} />
+          <Loader2 className={cn("w-6 h-6 animate-spin", isDark ? "text-[#FF8A5B]" : "text-[#FF8A5B]")} />
         </div>
       ) : activities.length === 0 ? (
         <div className={cn("text-center py-20 rounded-2xl border", isDark ? "bg-[#09090B] border-white/10" : "bg-white border-black/10")}>

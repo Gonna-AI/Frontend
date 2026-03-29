@@ -1030,7 +1030,7 @@ export default function DocumentsView({ isDark = true }: { isDark?: boolean }) {
                 </div>
 
                 {/* ─── KB Coverage Panel ─────────────────────────── */}
-                <div className={cn("rounded-xl border p-5 mt-6", isDark ? "bg-white/[0.03] border-white/10" : "bg-white border-gray-200")}>
+                <div className={cn("lg:col-span-12 rounded-xl border p-5", isDark ? "bg-white/[0.03] border-white/10" : "bg-white border-gray-200")}>
                     <div className="flex items-center gap-2 mb-4">
                         <BookOpen className="w-4 h-4 text-blue-400" />
                         <h2 className={cn("text-base font-semibold", textPrimary)}>KB Coverage Analysis</h2>

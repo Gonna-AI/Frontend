@@ -5,6 +5,7 @@ import {
   computeCategoryFCR,
   computeKbGaps,
   findCallerHistory,
+  guessCategory,
   type CallRow,
 } from "../_shared/stats.ts";
 
@@ -170,7 +171,7 @@ Deno.serve(async (req: Request) => {
       // Category distribution
       const categoryDist: Record<string, number> = {};
       for (const c of records) {
-        const cat = c.category || 'uncategorized';
+        const cat = guessCategory(c as any);
         categoryDist[cat] = (categoryDist[cat] || 0) + 1;
       }
 
@@ -330,7 +331,7 @@ Deno.serve(async (req: Request) => {
         sentimentDist[s] = (sentimentDist[s] || 0) + 1;
         sentimentTotal += sentimentScores[s] ?? 50;
 
-        const cat = c.category || 'uncategorized';
+        const cat = guessCategory(c as any);
         categoryDist[cat] = (categoryDist[cat] || 0) + 1;
 
         const p = c.priority || 'low';
@@ -494,6 +495,88 @@ Deno.serve(async (req: Request) => {
       const brief = findCallerHistory(calls, callerName);
 
       return json(req, 200, brief);
+    }
+
+    if (req.method === 'GET' && action === 'user-profile') {
+      const callerName = url.searchParams.get('name') ?? '';
+      if (!callerName.trim()) {
+        return json(req, 400, { error: 'name parameter is required' });
+      }
+
+      const { data: rows, error: fetchErr } = await adminClient
+        .from('call_history')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('date', { ascending: false })
+        .limit(2000);
+      if (fetchErr) throw fetchErr;
+
+      // Normalization logic identical to stats.ts
+      const normalizedTarget = callerName.toLowerCase().replace(/[^a-z0-9\s]/g, '').replace(/\s+/g, ' ').trim();
+      
+      const matchedCalls = (rows ?? []).filter((c: any) => {
+        const n = (c.caller_name || '').toLowerCase().replace(/[^a-z0-9\s]/g, '').replace(/\s+/g, ' ').trim();
+        return n && n !== 'unknown caller' && n === normalizedTarget;
+      });
+
+      const totalDuration = matchedCalls.reduce((acc: number, c: any) => acc + (c.duration || 0), 0);
+      
+      const sentimentScores: Record<string, number> = {
+        very_positive: 100, positive: 80, slightly_positive: 65,
+        neutral: 50, mixed: 40,
+        slightly_negative: 30, negative: 20, very_negative: 10,
+        anxious: 25, urgent: 15,
+      };
+      
+      const avgSentiment = matchedCalls.length > 0 
+        ? Math.round(matchedCalls.reduce((sum: number, c: any) => {
+            const s = parseSentiment(c.sentiment || parseSummary(c.summary)?.sentiment);
+            return sum + (sentimentScores[s] ?? 50);
+          }, 0) / matchedCalls.length) 
+        : 50;
+        
+      const topicCount: Record<string, number> = {};
+      matchedCalls.forEach((c: any) => {
+        const s = parseSummary(c.summary);
+        (Array.isArray(s.topics) ? s.topics : []).forEach(t => {
+           const topic = String(t).toLowerCase().trim();
+           if(topic) topicCount[topic] = (topicCount[topic] || 0) + 1;
+        });
+        (Array.isArray(c.tags) ? c.tags : []).forEach(t => {
+           const topic = String(t).toLowerCase().trim();
+           if(topic) topicCount[topic] = (topicCount[topic] || 0) + 1;
+        });
+      });
+      const frequentTopics = Object.entries(topicCount).sort((a, b) => b[1] - a[1]).slice(0, 10).map(e => ({ name: e[0], count: e[1] }));
+
+      // Clean up calls parsing summaries correctly so the frontend can display them easily
+      const structuredCalls = matchedCalls.map((c: any) => {
+        const s = parseSummary(c.summary);
+        return {
+          id: c.id,
+          date: c.date,
+          duration: c.duration,
+          category: guessCategory(c as any),
+          type: c.type,
+          sentiment: parseSentiment(c.sentiment || s.sentiment),
+          followUpRequired: c.follow_up_required ?? (s.followUpRequired === true),
+          summaryText: typeof s === 'object' && 'summaryText' in s ? s.summaryText : (s.notes || ''),
+          riskLevel: s.riskLevel || 'none',
+          metrics: {
+            wordCount: c.messages ? JSON.stringify(c.messages).split(/\s+/).length : 0,
+            turnCount: c.messages ? (Array.isArray(c.messages) ? c.messages.length : 0) : 0,
+          }
+        };
+      });
+
+      return json(req, 200, {
+        callerName: matchedCalls.length > 0 && matchedCalls[0].caller_name ? matchedCalls[0].caller_name : callerName,
+        totalCalls: matchedCalls.length,
+        totalDuration,
+        avgSentiment,
+        frequentTopics,
+        calls: structuredCalls
+      });
     }
 
     return json(req, 405, { error: 'Method not allowed' });

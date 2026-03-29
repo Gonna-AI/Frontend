@@ -384,7 +384,9 @@ export default function SettingsView({ isDark }: SettingsViewProps) {
                 "flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all",
                 saved
                   ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
-                  : "bg-[#FF8A5B] hover:bg-[#FF9E6C] text-white shadow-lg shadow-[#FF8A5B]/20"
+                  : isDark
+                    ? "bg-white text-black hover:bg-gray-200 shadow-sm"
+                    : "bg-black text-white hover:bg-gray-800 shadow-sm"
               )}
             >
               {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : saved ? <Check className="w-4 h-4" /> : <Save className="w-4 h-4" />}

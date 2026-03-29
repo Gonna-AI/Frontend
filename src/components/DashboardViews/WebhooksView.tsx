@@ -204,7 +204,7 @@ export default function WebhooksView({ isDark }: WebhooksViewProps) {
           </button>
           <button
             onClick={() => { setShowCreate(!showCreate); setCreatedSecret(''); }}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold bg-purple-600 hover:bg-purple-500 text-white transition-colors shadow-lg shadow-purple-500/20"
+            className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold bg-white text-black hover:bg-gray-100 transition-colors shadow-lg shadow-white/5"
           >
             <Plus className="w-4 h-4" /> Add Webhook
           </button>
@@ -287,7 +287,7 @@ export default function WebhooksView({ isDark }: WebhooksViewProps) {
                 <button
                   onClick={handleCreate}
                   disabled={creating || !formName || !formUrl || formEvents.length === 0}
-                  className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold bg-purple-600 hover:bg-purple-500 text-white disabled:opacity-50 transition-colors"
+                  className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold bg-white text-black hover:bg-gray-100 disabled:opacity-50 transition-colors shadow-sm"
                 >
                   {creating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Zap className="w-4 h-4" />}
                   Create Webhook
@@ -301,7 +301,7 @@ export default function WebhooksView({ isDark }: WebhooksViewProps) {
       {/* Webhooks List */}
       {loading ? (
         <div className="flex items-center justify-center py-20">
-          <Loader2 className={cn("w-6 h-6 animate-spin", isDark ? "text-purple-400" : "text-purple-600")} />
+          <Loader2 className={cn("w-6 h-6 animate-spin", isDark ? "text-[#FF8A5B]" : "text-[#FF8A5B]")} />
         </div>
       ) : webhooks.length === 0 ? (
         <div className={cn("text-center py-20 rounded-2xl border", isDark ? "bg-[#09090B] border-white/10" : "bg-white border-black/10")}>

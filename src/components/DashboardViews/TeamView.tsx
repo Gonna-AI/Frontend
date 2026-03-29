@@ -267,8 +267,8 @@ export default function TeamView({ isDark = true }: { isDark?: boolean }) {
                             className={cn(
                                 "py-2.5 px-6 rounded-lg font-medium transition-all flex items-center justify-center gap-2 min-w-[140px]",
                                 isDark
-                                    ? "bg-purple-600 text-white hover:bg-purple-700"
-                                    : "bg-purple-500 text-white hover:bg-purple-600"
+                                    ? "bg-white text-black hover:bg-gray-200 disabled:bg-white/50"
+                                    : "bg-black text-white hover:bg-gray-800 disabled:bg-black/50"
                             )}
                         >
                             <LinkIcon className="w-4 h-4" />
