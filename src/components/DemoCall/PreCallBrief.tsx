@@ -25,6 +25,8 @@ interface PreCallBriefProps {
   isDark?: boolean;
   /** Pre-fill the name field (e.g. from caller ID). */
   initialName?: string;
+  /** Callback when user wants to view a caller's full profile */
+  onViewProfile?: (callerName: string) => void;
 }
 
 const SENTIMENT_LABELS: Record<string, string> = {
@@ -63,7 +65,15 @@ function formatDate(dateStr: string): string {
   return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 }
 
-export default function PreCallBrief({ isDark = true, initialName = '' }: PreCallBriefProps) {
+export default function PreCallBrief({ isDark = true, initialName = '', onViewProfile }: PreCallBriefProps) {
+  function handleViewProfile(name: string) {
+    if (onViewProfile) {
+      onViewProfile(name);
+    } else {
+      // Dispatch a custom event for the dashboard to handle
+      window.dispatchEvent(new CustomEvent('navigate-user-profile', { detail: name }));
+    }
+  }
   const [query, setQuery] = useState(initialName);
   const [brief, setBrief] = useState<PreCallBriefData | null>(null);
   const [loading, setLoading] = useState(false);
@@ -160,7 +170,7 @@ export default function PreCallBrief({ isDark = true, initialName = '' }: PreCal
                     inputCls
                   )}
                 />
-                {loading && <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 animate-spin text-blue-400" />}
+                {loading && <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 animate-spin" style={{ color: '#FF8A5B' }} />}
               </div>
 
               {/* Result */}
@@ -174,7 +184,14 @@ export default function PreCallBrief({ isDark = true, initialName = '' }: PreCal
                   <div className="flex items-center justify-between">
                     <div>
                       <span className={cn('text-sm font-semibold', brief.isReturning ? 'text-blue-400' : textSecondary)}>
-                        {brief.isReturning ? `↩ ${brief.callerName}` : `New caller — "${brief.callerName || query}"`}
+                        {brief.isReturning ? (
+                          <button
+                            onClick={(e) => { e.stopPropagation(); handleViewProfile(brief.callerName); }}
+                            className="hover:underline cursor-pointer text-left"
+                          >
+                            ↩ {brief.callerName}
+                          </button>
+                        ) : `New caller — "${brief.callerName || query}"`}
                       </span>
                       {brief.isReturning && (
                         <span className={cn('ml-2 text-xs', textMuted)}>
@@ -182,7 +199,17 @@ export default function PreCallBrief({ isDark = true, initialName = '' }: PreCal
                         </span>
                       )}
                     </div>
-                    {brief.isReturning && riskBadge(brief.riskFlag)}
+                    <div className="flex items-center gap-2">
+                      {brief.isReturning && riskBadge(brief.riskFlag)}
+                      {brief.isReturning && (
+                        <button
+                          onClick={() => handleViewProfile(brief.callerName)}
+                          className={cn('text-xs font-medium transition-colors', isDark ? 'text-[#FF8A5B] hover:text-[#FF6B3D]' : 'text-orange-500 hover:text-orange-600')}
+                        >
+                          View Profile →
+                        </button>
+                      )}
+                    </div>
                   </div>
 
                   {brief.isReturning && (

@@ -29,6 +29,7 @@ import NotificationCenter from '../components/DashboardViews/NotificationCenter'
 import InitialSetupDialog from '../components/DashboardViews/InitialSetupDialog';
 import AnalyticsView from '../components/DashboardViews/AnalyticsView';
 import PlaybooksView from '../components/DashboardViews/PlaybooksView';
+import UserProfileView from '../components/DashboardViews/UserProfileView';
 import { RescueCenterProvider } from '../contexts/RescueCenterContext';
 
 import { AccessCodeProvider, useAccessCode } from '../contexts/AccessCodeContext';
@@ -39,6 +40,7 @@ function DemoDashboardContent() {
   const { t } = useLanguage();
   const [activeTab, setActiveTab] = useState('');
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [profileCallerName, setProfileCallerName] = useState('');
   const { hasAccess, isLoading: accessLoading } = useAccessCode();
 
   // Auto-select monitor tab once access is granted and no tab is active
@@ -68,6 +70,19 @@ function DemoDashboardContent() {
       window.removeEventListener('dashboard-switch-tab', handleDashboardSwitch as EventListener);
     };
   }, [hasAccess]);
+
+  // Listen for user profile navigation events from PreCallBrief
+  useEffect(() => {
+    const handleProfileNav = (event: Event) => {
+      const callerName = (event as CustomEvent<string>).detail;
+      if (typeof callerName === 'string' && callerName.trim()) {
+        setProfileCallerName(callerName.trim());
+        setActiveTab('user_profile');
+      }
+    };
+    window.addEventListener('navigate-user-profile', handleProfileNav as EventListener);
+    return () => window.removeEventListener('navigate-user-profile', handleProfileNav as EventListener);
+  }, []);
 
   const handleSetupAction = (action: 'ai' | 'manual' | 'dismiss') => {
     if (action === 'ai') {
@@ -102,6 +117,7 @@ function DemoDashboardContent() {
       settings: t('sidebar.settings'),
       onboarding: t('onboarding.title'),
       rescue_playbooks_view: 'Playbooks',
+      user_profile: profileCallerName ? `Profile: ${profileCallerName}` : 'User Profile',
     };
     return labelMap[tab] || tab;
   };
@@ -226,6 +242,13 @@ function DemoDashboardContent() {
                   {activeTab === 'settings' && <SettingsView isDark={isDark} />}
                   {activeTab === 'analytics' && <AnalyticsView isDark={isDark} />}
                   {activeTab === 'rescue_playbooks_view' && <PlaybooksView isDark={isDark} />}
+                  {activeTab === 'user_profile' && profileCallerName && (
+                    <UserProfileView
+                      isDark={isDark}
+                      callerName={profileCallerName}
+                      onBack={() => setActiveTab('monitor')}
+                    />
+                  )}
 
                   {activeTab === 'onboarding' && (
                     <OnboardingWizard
