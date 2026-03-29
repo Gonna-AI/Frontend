@@ -146,7 +146,10 @@ export default function AnalyticsView({ isDark }: AnalyticsViewProps) {
   const [overview, setOverview] = useState<OverviewData | null>(null);
   const [trends, setTrends] = useState<TrendPoint[]>([]);
   const [topTopics, setTopTopics] = useState<TopicItem[]>([]);
-  const [dateRange, setDateRange] = useState<{ start: Date | null; end: Date | null }>({ start: null, end: null });
+  const [dateRange, setDateRange] = useState<{ start: Date; end: Date }>({
+    start: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+    end: new Date(),
+  });
   const [patterns, setPatterns] = useState<PatternsData | null>(null);
   const [patternsLoading, setPatternsLoading] = useState(true);
 
@@ -155,7 +158,7 @@ export default function AnalyticsView({ isDark }: AnalyticsViewProps) {
     try {
       const session = await supabase.auth.getSession();
       const token = session.data.session?.access_token;
-      if (!token) return;
+      if (!token) { setLoading(false); return; }
 
       const params = new URLSearchParams();
       params.set('start', dateRange.start.toISOString());
@@ -189,7 +192,7 @@ export default function AnalyticsView({ isDark }: AnalyticsViewProps) {
       try {
         const { data: { session } } = await supabase.auth.getSession();
         const token = session?.access_token;
-        if (!token) return;
+        if (!token) { setPatternsLoading(false); return; }
         const res = await fetch(
           `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/api-analytics/patterns?days=90&min_occ=1`,
           { headers: { Authorization: `Bearer ${token}` } }
@@ -242,8 +245,8 @@ export default function AnalyticsView({ isDark }: AnalyticsViewProps) {
         <div className="flex items-center gap-3">
           <DateRangePicker
             isDark={isDark}
-            startDate={dateRange.start ?? new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)}
-            endDate={dateRange.end ?? new Date()}
+            startDate={dateRange.start}
+            endDate={dateRange.end}
             onChange={(start, end) => setDateRange({ start, end })}
           />
           <button
