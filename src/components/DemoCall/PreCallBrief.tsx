@@ -79,7 +79,25 @@ export default function PreCallBrief({ isDark = true, initialName = '', onViewPr
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [expanded, setExpanded] = useState(true);
+  const [topCallers, setTopCallers] = useState<{name:string, callCount:number, riskFlag:string}[]>([]);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    async function fetchCallers() {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session?.access_token) return;
+        const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/api-analytics/callers`, { headers: { Authorization: `Bearer ${session.access_token}` } });
+        if(res.ok) {
+          const data = await res.json();
+          setTopCallers(data.callers?.slice(0, 5) || []);
+        }
+      } catch (e) {
+        // ignore
+      }
+    }
+    fetchCallers();
+  }, []);
 
   async function lookup(name: string) {
     const trimmed = name.trim();
@@ -178,6 +196,31 @@ export default function PreCallBrief({ isDark = true, initialName = '', onViewPr
                 <p className="text-xs text-red-400">{error}</p>
               )}
 
+              {!loading && !brief && query.trim().length < 2 && topCallers.length > 0 && (
+                <div className="space-y-2 mt-2">
+                  <p className={cn('text-xs font-medium uppercase tracking-wide', textMuted)}>Known Callers</p>
+                  <div className="flex flex-col gap-1.5">
+                    {topCallers.map((c, i) => (
+                      <div 
+                        key={i} 
+                        onClick={() => { setQuery(c.name); lookup(c.name); }}
+                        className={cn('flex items-center justify-between p-2 rounded-lg cursor-pointer transition-colors border border-transparent', 
+                          isDark ? 'hover:bg-white/[0.04] hover:border-white/10' : 'hover:bg-gray-50 hover:border-gray-200'
+                        )}
+                      >
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-medium">{c.name}</span>
+                          {c.riskFlag !== 'none' && riskBadge(c.riskFlag as any)}
+                        </div>
+                        <span className={cn('text-xs', textMuted)}>{c.callCount} calls</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {loading && <p className={cn('text-xs', textMuted)}>Searching...</p>}
+
               {!loading && brief && (
                 <div className="space-y-3">
                   {/* Identity */}
@@ -274,7 +317,7 @@ export default function PreCallBrief({ isDark = true, initialName = '', onViewPr
               )}
 
               {!loading && !brief && query.trim().length >= 2 && !error && (
-                <p className={cn('text-xs', textMuted)}>Type to search…</p>
+                <p className={cn('text-xs', textMuted)}>No exact matches found.</p>
               )}
             </div>
           </motion.div>
