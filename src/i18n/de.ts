@@ -149,7 +149,7 @@ export const de = {
     'contact.sendButton': 'Nachricht senden',
 
     // Solutions Page
-    'solutions.eyebrow': 'Lösungsarchitektur',
+    'solutions.eyebrow': 'Lösungen',
     'solutions.title1': 'Gebaut für',
     'solutions.title2': 'autonome Operationen',
     'solutions.subtitle': 'Machen Sie aus eingehenden Gesprächen, gebündelten Kundensignalen und Live-Traffic-Mustern strukturierte Aktionen, geführte Playbooks und messbare operative Kontrolle.',

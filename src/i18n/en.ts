@@ -149,7 +149,7 @@ export const en = {
     'contact.sendButton': 'Send Message',
 
     // Solutions Page
-    'solutions.eyebrow': 'Solutions Architecture',
+    'solutions.eyebrow': 'Solutions',
     'solutions.title1': 'Built for',
     'solutions.title2': 'Autonomous Operations',
     'solutions.subtitle': 'Turn inbound conversations, clustered customer signals, and live traffic patterns into structured actions, guided playbooks, and measurable operational control.',
