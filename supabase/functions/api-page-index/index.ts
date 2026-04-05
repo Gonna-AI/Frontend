@@ -96,8 +96,8 @@ Deno.serve(async (req: Request) => {
       let extraHeaders: Record<string, string> = {};
 
       if (contentType.includes('multipart/form-data')) {
-        // Forward multipart directly
-        body = await req.blob();
+        // Forward multipart as raw bytes to preserve boundary integrity
+        body = await req.arrayBuffer();
         extraHeaders['Content-Type'] = contentType;
       } else {
         body = await req.text();

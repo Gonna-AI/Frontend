@@ -44,6 +44,7 @@ class PageIndexService {
         const res = await fetch(`${EDGE_BASE}/doc/${docId}?${params}`, {
             headers: { Authorization: auth },
         });
+        if (res.status === 404) throw new Error('Document not found on PageIndex. It may have expired or been deleted. Please re-upload to regenerate the structure.');
         if (!res.ok) throw new Error(`PageIndex status fetch failed: ${res.status}`);
         const data = await res.json();
 
@@ -78,6 +79,7 @@ class PageIndexService {
             headers: { Authorization: auth },
             body: formData,
         });
+        if (res.status === 404) throw new Error('PageIndex upload endpoint not found (404). Check that the PAGEINDEX_API_KEY is set and valid.');
         if (!res.ok) throw new Error(`Document submit failed: ${res.status}`);
         const data = await res.json();
         if (!data?.doc_id) throw new Error('Failed to get doc_id from PageIndex');

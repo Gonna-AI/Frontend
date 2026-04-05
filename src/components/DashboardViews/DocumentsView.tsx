@@ -1005,9 +1005,14 @@ export default function DocumentsView({ isDark = true }: { isDark?: boolean }) {
                                                                 ))}
                                                             </div>
                                                         ) : treeError ? (
-                                                            <p className={cn("text-sm text-center py-6", textMuted)}>
-                                                                {treeError}
-                                                            </p>
+                                                            <div className="flex flex-col items-center gap-2 py-6 text-center">
+                                                                <AlertCircle className="w-5 h-5 text-red-400/60" />
+                                                                <p className={cn("text-sm", textMuted)}>
+                                                                    {treeError.includes('not found') || treeError.includes('404')
+                                                                        ? 'Document structure not found on PageIndex. Re-upload the PDF using Vectorless Indexing to regenerate it.'
+                                                                        : treeError}
+                                                                </p>
+                                                            </div>
                                                         ) : isTreeLoading ? (
                                                             <p className={cn("text-sm text-center py-6", textMuted)}>
                                                                 Loading PageIndex structure...
