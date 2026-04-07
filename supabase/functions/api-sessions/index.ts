@@ -66,7 +66,57 @@ Deno.serve(async (req: Request) => {
     const anonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
     const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 
+    const admin = createClient(supabaseUrl, serviceKey);
     const authHeader = req.headers.get('Authorization') ?? '';
+
+    // ━━━ GET — List active sessions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // Unauthenticated: returns only session_type counts (no PII) for global display.
+    // Authenticated: also cleans up stale sessions and returns full session data.
+    if (req.method === 'GET') {
+      const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
+
+      // Check authentication (optional for GET)
+      let isAuthenticated = false;
+      if (authHeader) {
+        const anonClient = createClient(supabaseUrl, anonKey, {
+          global: { headers: { Authorization: authHeader } },
+        });
+        const { data: { user: reqUser } } = await anonClient.auth.getUser();
+        isAuthenticated = !!reqUser;
+      }
+
+      if (isAuthenticated) {
+        // Authenticated: clean up stale sessions, then return full list
+        await admin
+          .from('active_sessions')
+          .delete()
+          .eq('status', 'active')
+          .lt('last_activity', fiveMinutesAgo);
+
+        const { data, error } = await admin
+          .from('active_sessions')
+          .select('*')
+          .eq('status', 'active')
+          .order('started_at', { ascending: false });
+
+        if (error) throw error;
+
+        return json(req, 200, { sessions: data ?? [] });
+      } else {
+        // Unauthenticated: return only session_type for global count display (no PII)
+        const { data, error } = await admin
+          .from('active_sessions')
+          .select('session_type')
+          .eq('status', 'active')
+          .gte('last_activity', fiveMinutesAgo);
+
+        if (error) throw error;
+
+        return json(req, 200, { sessions: data ?? [] });
+      }
+    }
+
+    // POST routes require authentication
     if (!authHeader) return json(req, 401, { error: 'Unauthorized' });
 
     const anonClient = createClient(supabaseUrl, anonKey, {
@@ -74,8 +124,6 @@ Deno.serve(async (req: Request) => {
     });
     const { data: { user }, error: authErr } = await anonClient.auth.getUser();
     if (authErr || !user) return json(req, 401, { error: 'Unauthorized' });
-
-    const admin = createClient(supabaseUrl, serviceKey);
 
     // Route by URL path: /start, /heartbeat, /end
     const url = new URL(req.url);
@@ -156,27 +204,6 @@ Deno.serve(async (req: Request) => {
       if (error) throw error;
 
       return json(req, 200, { success: true });
-    }
-
-    // ━━━ GET — List active sessions (for dashboard/monitor) ━━━
-    if (req.method === 'GET') {
-      // Clean up stale sessions older than 5 minutes with no heartbeat
-      const staleThreshold = new Date(Date.now() - 5 * 60 * 1000).toISOString();
-      await admin
-        .from('active_sessions')
-        .delete()
-        .eq('status', 'active')
-        .lt('last_activity', staleThreshold);
-
-      const { data, error } = await admin
-        .from('active_sessions')
-        .select('*')
-        .eq('status', 'active')
-        .order('started_at', { ascending: false });
-
-      if (error) throw error;
-
-      return json(req, 200, { sessions: data ?? [] });
     }
 
     return json(req, 404, { error: 'Not found' });

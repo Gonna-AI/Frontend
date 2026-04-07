@@ -317,12 +317,16 @@ export function DemoCallProvider({ children, initialAgentId }: { children: React
         const configOwnerId = initialAgentId || user?.id;
 
         if (configOwnerId) {
-          // Load from Supabase first (source of truth)
-          const { data: kbData, error: kbError } = await supabase
-            .from('knowledge_base_config')
-            .select('*')
-            .eq('id', configOwnerId)
-            .maybeSingle();
+          // Load from Supabase via edge function (source of truth)
+          const { data: { session: kbLoadSession } } = await supabase.auth.getSession();
+          const kbLoadToken = kbLoadSession?.access_token || import.meta.env.VITE_SUPABASE_ANON_KEY;
+          const kbLoadRes = await fetch(
+            `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/api-knowledge-base?owner_id=${configOwnerId}`,
+            { headers: { 'Authorization': `Bearer ${kbLoadToken}`, 'Content-Type': 'application/json' } }
+          );
+          const kbLoadJson = await kbLoadRes.json().catch(() => null);
+          const kbData = (kbLoadRes.ok && kbLoadJson?.config) ? { config: kbLoadJson.config, id: kbLoadJson.id } : null;
+          const kbError = kbLoadRes.ok ? null : kbLoadJson;
 
           if (!kbError && kbData?.config) {
             const kbId = kbData.id as string;
@@ -376,12 +380,14 @@ export function DemoCallProvider({ children, initialAgentId }: { children: React
           return;
         }
 
-        const { data: historyData, error: historyError } = await supabase
-          .from('call_history')
-          .select('*')
-          .eq('user_id', user.id)
-          .order('date', { ascending: false })
-          .limit(50);
+        const { data: { session: histSession } } = await supabase.auth.getSession();
+        const histRes = await fetch(
+          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/api-history?limit=50`,
+          { headers: { 'Authorization': `Bearer ${histSession?.access_token}`, 'Content-Type': 'application/json' } }
+        );
+        const histJson = histRes.ok ? await histRes.json().catch(() => null) : null;
+        const historyData = histJson?.history ?? null;
+        const historyError = histRes.ok ? null : histJson;
 
         if (!historyError && historyData && historyData.length > 0) {
           // Map Supabase snake_case to app camelCase
@@ -537,56 +543,33 @@ export function DemoCallProvider({ children, initialAgentId }: { children: React
 
   // Real-time subscription for global active sessions count
   useEffect(() => {
-    // Clean up stale sessions (older than 5 minutes without activity)
-    const cleanupStaleSessions = async () => {
+    // Fetch active sessions via edge function (also handles stale session cleanup server-side)
+    const refreshActiveSessions = async () => {
       try {
-        const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
-        const { error, count } = await supabase
-          .from('active_sessions')
-          .delete()
-          .eq('status', 'active')
-          .lt('last_activity', fiveMinutesAgo);
-
-        if (!error && count && count > 0) {
-          console.log(`🧹 Cleaned up ${count} stale sessions`);
-        }
-      } catch (e) {
-        console.error('🧹 Stale session cleanup error:', e);
-      }
-    };
-
-    // Fetch initial count (only sessions with recent activity - within last 5 min)
-    const fetchActiveSessions = async () => {
-      try {
-        const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
-        const { data, error } = await supabase
-          .from('active_sessions')
-          .select('session_type')
-          .eq('status', 'active')
-          .gte('last_activity', fiveMinutesAgo);
-
-        if (error) {
-          console.log('📡 Active sessions query error:', error.message);
-          return;
-        }
-
-        if (data) {
-          const voice = data.filter(s => s.session_type === 'voice').length;
-          const text = data.filter(s => s.session_type === 'text').length;
-          console.log(`📡 Global active sessions: ${voice} calls, ${text} chats`);
-          setGlobalActiveSessions({ voice, text });
-        }
+        const { data: { session: activeSession } } = await supabase.auth.getSession();
+        const token = activeSession?.access_token || import.meta.env.VITE_SUPABASE_ANON_KEY;
+        const res = await fetch(
+          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/api-sessions`,
+          { headers: { 'Authorization': `Bearer ${token}` } }
+        );
+        if (!res.ok) return;
+        const resJson = await res.json().catch(() => null);
+        if (!resJson?.sessions) return;
+        const voice = resJson.sessions.filter((s: { session_type: string }) => s.session_type === 'voice').length;
+        const text = resJson.sessions.filter((s: { session_type: string }) => s.session_type === 'text').length;
+        console.log(`📡 Global active sessions: ${voice} calls, ${text} chats`);
+        setGlobalActiveSessions({ voice, text });
       } catch (e) {
         console.error('📡 Active sessions fetch error:', e);
       }
     };
 
-    // Initial cleanup then fetch
-    cleanupStaleSessions().then(() => fetchActiveSessions());
+    // Initial fetch
+    refreshActiveSessions();
 
-    // Periodically cleanup stale sessions and refresh global count every minute
+    // Periodically refresh global count every minute (stale cleanup handled server-side)
     const cleanupInterval = setInterval(() => {
-      cleanupStaleSessions().then(() => fetchActiveSessions());
+      refreshActiveSessions();
     }, 60 * 1000);
 
     // Subscribe to changes (debounced to avoid UI thrashing under high load)
@@ -594,7 +577,7 @@ export function DemoCallProvider({ children, initialAgentId }: { children: React
     const debouncedFetch = () => {
       if (debounceTimer) clearTimeout(debounceTimer);
       debounceTimer = setTimeout(() => {
-        fetchActiveSessions();
+        refreshActiveSessions();
       }, 500); // Batch rapid-fire changes into a single refetch
     };
 
@@ -655,14 +638,20 @@ export function DemoCallProvider({ children, initialAgentId }: { children: React
       }
 
       // Try to save to Supabase with user ID
-      const { error } = await supabase
-        .from('knowledge_base_config')
-        .upsert({
-          id: userId,  // User-specific ID
-          user_id: userId,
-          config: configToSave,
-          updated_at: new Date().toISOString()
-        });
+      const { data: { session: kbSaveSession } } = await supabase.auth.getSession();
+      const kbSaveRes = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/api-knowledge-base`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${kbSaveSession?.access_token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ config: configToSave }),
+        }
+      );
+      const kbSaveErrData = kbSaveRes.ok ? null : await kbSaveRes.json().catch(() => null);
+      const error = kbSaveErrData ? { message: kbSaveErrData.error || 'Failed to save' } : null;
 
       if (error) {
         console.warn('Supabase save failed (localStorage still saved):', error.message);
@@ -691,12 +680,16 @@ export function DemoCallProvider({ children, initialAgentId }: { children: React
       const configOwnerId = initialAgentId || getUserId();
       if (configOwnerId === 'anonymous') return;
 
-      // Load the config for the appropriate owner (agent or self)
-      const { data, error } = await supabase
-        .from('knowledge_base_config')
-        .select('*')
-        .eq('id', configOwnerId)
-        .maybeSingle();
+      // Load the config via edge function (supports both authenticated users and agent visitors)
+      const { data: { session: kbCbSession } } = await supabase.auth.getSession();
+      const kbCbToken = kbCbSession?.access_token || import.meta.env.VITE_SUPABASE_ANON_KEY;
+      const kbCbRes = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/api-knowledge-base?owner_id=${configOwnerId}`,
+        { headers: { 'Authorization': `Bearer ${kbCbToken}`, 'Content-Type': 'application/json' } }
+      );
+      const kbCbJson = await kbCbRes.json().catch(() => null);
+      const data = (kbCbRes.ok && kbCbJson?.config) ? { config: kbCbJson.config, id: kbCbJson.id } : null;
+      const error = kbCbRes.ok ? null : kbCbJson;
 
       if (!error && data?.config) {
         const dataId = data.id as string;
