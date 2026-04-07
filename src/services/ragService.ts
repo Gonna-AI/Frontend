@@ -1,7 +1,7 @@
-import { pipeline } from '@xenova/transformers';
 import { supabase } from '../config/supabase';
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+const DOCS_FN = `${SUPABASE_URL}/functions/v1/api-documents`;
 
 // Types for document management
 export interface UploadedDocument {
@@ -37,61 +37,33 @@ export interface ProcessingProgress {
     message: string;
 }
 
+// ─── Helper: get auth token ───────────────────────────────────────
+async function getAuthToken(): Promise<string | null> {
+    const { data: { session } } = await supabase.auth.getSession();
+    return session?.access_token ?? null;
+}
+
 class RAGService {
-    private isInitializing = false;
-    private generator: any = null;
 
-    async initialize() {
-        if (this.generator) return;
-        if (this.isInitializing) {
-            while (this.isInitializing) {
-                await new Promise((resolve) => setTimeout(resolve, 100));
-            }
-            return;
-        }
-
-        try {
-            this.isInitializing = true;
-            // Feature extraction pipeline uses Supabase/gte-small by default
-            this.generator = await pipeline('feature-extraction', 'Supabase/gte-small', {
-                quantized: true
-            });
-            console.log('✅ RAG Embedding model loaded successfully');
-        } catch (error) {
-            console.error('Failed to load embedding model:', error);
-            throw error;
-        } finally {
-            this.isInitializing = false;
-        }
-    }
-
-    async generateEmbedding(text: string): Promise<number[]> {
-        if (!this.generator) {
-            await this.initialize();
-        }
-
-        const output = await this.generator(text, {
-            pooling: 'mean',
-            normalize: true,
-        });
-
-        return Array.from(output.data);
-    }
-
+    // ─── Store a single text chunk via edge function ──────────────
     async storeDocument(kbId: string, content: string, metadata: any = {}) {
         try {
-            const embedding = await this.generateEmbedding(content);
+            const token = await getAuthToken();
+            if (!token) throw new Error('Not authenticated');
 
-            const { error } = await supabase
-                .from('kb_documents')
-                .insert({
-                    kb_id: kbId,
-                    content,
-                    metadata,
-                    embedding,
-                });
+            const res = await fetch(`${DOCS_FN}/store-chunk`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                },
+                body: JSON.stringify({ kb_id: kbId, content, metadata }),
+            });
 
-            if (error) throw error;
+            if (!res.ok) {
+                const err = await res.json().catch(() => ({}));
+                throw new Error((err as any).error || 'Failed to store chunk');
+            }
             return true;
         } catch (error) {
             console.error('Failed to store document embedding:', error);
@@ -99,24 +71,23 @@ class RAGService {
         }
     }
 
+    // ─── Vector similarity search via edge function ───────────────
     async searchRelevantContext(query: string, kbId: string, limit: number = 3): Promise<string[]> {
         try {
-            const queryEmbedding = await this.generateEmbedding(query);
+            const token = await getAuthToken();
 
-            const { data, error } = await supabase
-                .rpc('match_kb_documents', {
-                    query_embedding: queryEmbedding,
-                    match_kb_id: kbId,
-                    match_threshold: 0.70,
-                    match_count: limit,
-                });
+            const res = await fetch(`${DOCS_FN}/search`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+                },
+                body: JSON.stringify({ query, kb_id: kbId, limit }),
+            });
 
-            if (error) {
-                console.error('Supabase RPC Error using vector match', error);
-                return [];
-            }
-
-            return data.map((doc: any) => doc.content);
+            if (!res.ok) return [];
+            const json = await res.json();
+            return (json as any).results ?? [];
         } catch (error) {
             console.error('Failed to search relevant context:', error);
             return [];
@@ -146,7 +117,6 @@ class RAGService {
 
     // ─── Smart sentence-aware chunking ──────────────────────────────
     smartChunkText(text: string, maxWords: number = 300, overlapWords: number = 50): string[] {
-        // Split into sentences (handles ., !, ?, and newlines as boundaries)
         const sentences = text
             .replace(/\r\n/g, '\n')
             .split(/(?<=[.!?])\s+|\n{2,}/)
@@ -162,11 +132,9 @@ class RAGService {
         for (const sentence of sentences) {
             const sentenceWords = sentence.split(/\s+/).length;
 
-            // If adding this sentence exceeds the limit and we have content, flush
             if (currentWordCount + sentenceWords > maxWords && currentSentences.length > 0) {
                 chunks.push(currentSentences.join(' '));
 
-                // Keep overlap: take sentences from the end that fit within overlapWords
                 const overlapSentences: string[] = [];
                 let overlapCount = 0;
                 for (let i = currentSentences.length - 1; i >= 0; i--) {
@@ -184,10 +152,8 @@ class RAGService {
             currentWordCount += sentenceWords;
         }
 
-        // Flush remaining
         if (currentSentences.length > 0) {
             const finalChunk = currentSentences.join(' ');
-            // Avoid duplicate of last chunk
             if (chunks.length === 0 || finalChunk !== chunks[chunks.length - 1]) {
                 chunks.push(finalChunk);
             }
@@ -196,7 +162,8 @@ class RAGService {
         return chunks;
     }
 
-    // ─── Full document processing pipeline (server-side via Edge Function) ──
+    // ─── Full document processing pipeline ───────────────────────
+    // Stage 1 (storage upload) stays on the client; stages 2-5 run server-side.
     async processDocument(
         file: File,
         kbId: string,
@@ -205,13 +172,11 @@ class RAGService {
         pageIndexDocId?: string,
     ): Promise<UploadedDocument | null> {
         const fileType = file.name.split('.').pop()?.toLowerCase() || 'txt';
-        let documentRecord: UploadedDocument | null = null;
 
         try {
             // Stage 1: Upload to Supabase Storage
             onProgress?.({ stage: 'uploading', current: 0, total: 1, message: 'Uploading file...' });
 
-            // Sanitize file name to avoid Invalid Key errors from Supabase Storage
             const sanitizedFileName = file.name.replace(/[^a-zA-Z0-9.\-]/g, '_');
             const storagePath = `${userId}/${Date.now()}-${sanitizedFileName}`;
             const { error: uploadErr } = await supabase.storage
@@ -223,49 +188,20 @@ class RAGService {
 
             if (uploadErr) throw new Error(`Upload failed: ${uploadErr.message}`);
 
-            // Stage 2: Create document record
-            const { data: docData, error: docErr } = await supabase
-                .from('kb_uploaded_documents')
-                .insert({
-                    user_id: userId,
-                    kb_id: kbId,
-                    file_name: file.name,
-                    file_type: fileType,
-                    file_size: file.size,
-                    storage_path: storagePath,
-                    status: 'processing',
-                    ...(pageIndexDocId ? { pageindex_doc_id: pageIndexDocId } : {}),
-                })
-                .select()
-                .single();
-
-            if (docErr || !docData) throw new Error(`Record creation failed: ${docErr?.message}`);
-            documentRecord = docData as UploadedDocument;
-
-            // Stage 3: Process server-side (extract → chunk → embed → store)
+            // Stage 2-5: Process server-side via edge function
+            // The edge function creates the DB record, extracts text, chunks, embeds, and stores.
             onProgress?.({ stage: 'embedding', current: 0, total: 1, message: 'Processing document...' });
 
-            let extractedRawText = '';
-            try {
-                if (['txt', 'md', 'csv'].includes(fileType)) {
-                    extractedRawText = await file.text();
-                }
-            } catch (extractorErr) {
-                console.warn("Frontend extraction warning, server will fallback:", extractorErr);
-            }
-
-            const { data: { session } } = await supabase.auth.getSession();
-            if (!session?.access_token) {
-                throw new Error('No active session — please sign in again');
-            }
+            const token = await getAuthToken();
+            if (!token) throw new Error('No active session — please sign in again');
 
             const requestBody = JSON.stringify({
-                documentId: documentRecord.id,
                 storagePath,
                 fileType,
                 fileName: file.name,
                 kbId,
-                rawText: extractedRawText ? extractedRawText : undefined,
+                file_size: file.size,
+                ...(pageIndexDocId ? { pageIndexDocId } : {}),
             });
 
             // Retry logic for transient edge function errors (e.g. 546 boot failures)
@@ -275,22 +211,20 @@ class RAGService {
 
             for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
                 try {
-                    response = await fetch(`${SUPABASE_URL}/functions/v1/api-documents/process-document`, {
+                    response = await fetch(`${DOCS_FN}/process-document`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${session.access_token}`,
+                            'Authorization': `Bearer ${token}`,
                         },
                         body: requestBody,
                     });
 
-                    // Parse response safely
                     const responseText = await response.text();
                     try {
                         result = JSON.parse(responseText);
                     } catch {
                         console.error('Edge function returned non-JSON:', responseText.substring(0, 200));
-                        // Retry on non-JSON responses (boot failures return HTML/text)
                         if (attempt < MAX_RETRIES - 1) {
                             console.warn(`Retrying edge function call (attempt ${attempt + 2}/${MAX_RETRIES})...`);
                             await new Promise(r => setTimeout(r, 2000 * (attempt + 1)));
@@ -299,14 +233,13 @@ class RAGService {
                         throw new Error(`Server returned an unexpected response (status ${response.status})`);
                     }
 
-                    // Retry on 5xx errors (including 546 boot failures)
                     if (response.status >= 500 && attempt < MAX_RETRIES - 1) {
                         console.warn(`Edge function returned ${response.status}, retrying (attempt ${attempt + 2}/${MAX_RETRIES})...`);
                         await new Promise(r => setTimeout(r, 2000 * (attempt + 1)));
                         continue;
                     }
 
-                    break; // Success or non-retryable error
+                    break;
                 } catch (fetchErr) {
                     if (attempt < MAX_RETRIES - 1) {
                         console.warn(`Fetch failed, retrying (attempt ${attempt + 2}/${MAX_RETRIES})...`, fetchErr);
@@ -321,7 +254,6 @@ class RAGService {
                 throw new Error(result?.error || `Processing failed (status ${response?.status})`);
             }
 
-            // Stage 4: Done
             onProgress?.({
                 stage: 'done',
                 current: result.chunk_count || 0,
@@ -329,94 +261,80 @@ class RAGService {
                 message: `Processed ${result.chunk_count} chunks successfully`,
             });
 
-            // Refresh the document record
-            const { data: updatedDoc } = await supabase
-                .from('kb_uploaded_documents')
-                .select('*')
-                .eq('id', documentRecord.id)
-                .single();
-
-            return (updatedDoc as UploadedDocument) || documentRecord;
+            return (result.document as UploadedDocument) ?? null;
 
         } catch (error) {
             console.error('Document processing failed:', error);
-
-            // Update document record to error status
-            if (documentRecord?.id) {
-                await supabase
-                    .from('kb_uploaded_documents')
-                    .update({
-                        status: 'error',
-                        error_message: error instanceof Error ? error.message : 'Unknown error',
-                        updated_at: new Date().toISOString(),
-                    })
-                    .eq('id', documentRecord.id);
-            }
-
             onProgress?.({
                 stage: 'error',
                 current: 0,
                 total: 0,
                 message: error instanceof Error ? error.message : 'Processing failed',
             });
-
             return null;
         }
     }
 
-    // ─── Fetch user's uploaded documents ─────────────────────────────
-    async getDocuments(userId: string): Promise<UploadedDocument[]> {
-        const { data, error } = await supabase
-            .from('kb_uploaded_documents')
-            .select('*')
-            .eq('user_id', userId)
-            .order('created_at', { ascending: false });
+    // ─── Fetch user's uploaded documents ─────────────────────────
+    async getDocuments(_userId: string): Promise<UploadedDocument[]> {
+        try {
+            const token = await getAuthToken();
+            if (!token) return [];
 
-        if (error) {
+            const res = await fetch(`${DOCS_FN}/documents`, {
+                headers: { 'Authorization': `Bearer ${token}` },
+            });
+
+            if (!res.ok) return [];
+            const json = await res.json();
+            return ((json as any).documents ?? []) as UploadedDocument[];
+        } catch (error) {
             console.error('Failed to fetch documents:', error);
             return [];
         }
-
-        return (data ?? []) as UploadedDocument[];
     }
 
-    // ─── Fetch latest PageIndex-enabled document (optionally by name) ────────
+    // ─── Fetch latest PageIndex-enabled document ──────────────────
     async getLatestPageIndexDocument(kbId: string, documentName?: string): Promise<UploadedDocument | null> {
-        let query = supabase
-            .from('kb_uploaded_documents')
-            .select('*')
-            .eq('kb_id', kbId);
+        try {
+            const token = await getAuthToken();
+            const params = new URLSearchParams({ kb_id: kbId });
+            if (documentName && documentName.trim()) {
+                params.set('name', documentName.trim());
+            }
 
-        if (documentName && documentName.trim()) {
-            query = query.ilike('file_name', `%${documentName.trim()}%`);
-        } else {
-            query = query.not('pageindex_doc_id', 'is', null);
-        }
+            const res = await fetch(`${DOCS_FN}/latest-pageindex?${params}`, {
+                headers: token ? { 'Authorization': `Bearer ${token}` } : {},
+            });
 
-        const { data, error } = await query
-            .order('created_at', { ascending: false })
-            .limit(1);
-
-        if (error) {
+            if (!res.ok) return null;
+            const json = await res.json();
+            return ((json as any).document ?? null) as UploadedDocument | null;
+        } catch (error) {
             console.error('Failed to fetch PageIndex document:', error);
             return null;
         }
-
-        return (data && data.length > 0 ? data[0] : null) as UploadedDocument | null;
     }
 
-    // ─── Update PageIndex doc ID for an uploaded document ───────────────────
+    // ─── Update PageIndex doc ID for an uploaded document ────────
     async setPageIndexDocId(documentId: string, pageIndexDocId: string): Promise<boolean> {
         try {
-            const { error } = await supabase
-                .from('kb_uploaded_documents')
-                .update({
-                    pageindex_doc_id: pageIndexDocId,
-                    updated_at: new Date().toISOString(),
-                })
-                .eq('id', documentId);
+            const token = await getAuthToken();
+            if (!token) throw new Error('Not authenticated');
 
-            if (error) throw error;
+            const res = await fetch(`${DOCS_FN}/documents/${documentId}`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                },
+                body: JSON.stringify({ pageindex_doc_id: pageIndexDocId }),
+            });
+
+            if (!res.ok) {
+                const err = await res.json().catch(() => ({}));
+                throw new Error((err as any).error || 'Failed to update');
+            }
             return true;
         } catch (error) {
             console.error('Failed to update PageIndex doc ID:', error);
@@ -424,54 +342,40 @@ class RAGService {
         }
     }
 
-    // ─── Fetch chunks for a specific document ────────────────────────
+    // ─── Fetch chunks for a specific document ────────────────────
     async getDocumentChunks(documentId: string): Promise<DocumentChunk[]> {
-        const { data, error } = await supabase
-            .from('kb_documents')
-            .select('id, content, metadata, chunk_index, created_at')
-            .eq('document_id', documentId)
-            .order('chunk_index', { ascending: true });
+        try {
+            const token = await getAuthToken();
+            if (!token) return [];
 
-        if (error) {
+            const res = await fetch(`${DOCS_FN}/${documentId}/chunks`, {
+                headers: { 'Authorization': `Bearer ${token}` },
+            });
+
+            if (!res.ok) return [];
+            const json = await res.json();
+            return ((json as any).chunks ?? []) as DocumentChunk[];
+        } catch (error) {
             console.error('Failed to fetch document chunks:', error);
             return [];
         }
-
-        return (data ?? []) as DocumentChunk[];
     }
 
-    // ─── Delete a document and its chunks ────────────────────────────
-    async deleteDocument(documentId: string, userId: string): Promise<boolean> {
+    // ─── Delete a document and its chunks ────────────────────────
+    async deleteDocument(documentId: string, _userId: string): Promise<boolean> {
         try {
-            // Get storage path before deleting
-            const { data: doc } = await supabase
-                .from('kb_uploaded_documents')
-                .select('storage_path')
-                .eq('id', documentId)
-                .eq('user_id', userId)
-                .single();
+            const token = await getAuthToken();
+            if (!token) throw new Error('Not authenticated');
 
-            // Delete chunks
-            await supabase
-                .from('kb_documents')
-                .delete()
-                .eq('document_id', documentId);
+            const res = await fetch(`${DOCS_FN}/documents/${documentId}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` },
+            });
 
-            // Delete from storage
-            if (doc?.storage_path) {
-                await supabase.storage
-                    .from('kb-documents')
-                    .remove([doc.storage_path]);
+            if (!res.ok) {
+                const err = await res.json().catch(() => ({}));
+                throw new Error((err as any).error || 'Delete failed');
             }
-
-            // Delete parent record
-            const { error } = await supabase
-                .from('kb_uploaded_documents')
-                .delete()
-                .eq('id', documentId)
-                .eq('user_id', userId);
-
-            if (error) throw error;
             return true;
         } catch (error) {
             console.error('Failed to delete document:', error);

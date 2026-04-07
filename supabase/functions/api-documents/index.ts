@@ -4,7 +4,7 @@ import { createClient } from "jsr:@supabase/supabase-js@2";
 // ─── CORS ────────────────────────────────────────────────────────
 const corsBaseHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Access-Control-Allow-Methods': 'POST, GET, DELETE, OPTIONS',
+  'Access-Control-Allow-Methods': 'POST, GET, DELETE, PATCH, OPTIONS',
   'Access-Control-Max-Age': '86400',
 };
 
@@ -30,9 +30,6 @@ function jsonResponse(data: unknown, status: number, cors: Record<string, string
 }
 
 // ─── Embedding model (lazy-init to avoid 546 boot crash) ─────────
-// Creating a Supabase.ai.Session at module scope crashes the function
-// if the AI runtime isn't available, producing a 546 before any
-// request is handled.  Deferring to first use fixes this.
 let _embeddingModel: any = null;
 
 function getEmbeddingModel() {
@@ -94,13 +91,9 @@ function smartChunkText(text: string, maxWords = 300, overlapWords = 50): string
 }
 
 // ─── PDF text extraction (multi-strategy) ────────────────────────
-// Strategy 1: BT/ET blocks (works for simple PDFs)
-// Strategy 2: Decompress FlateDecode streams, then extract text
-// Strategy 3: Raw printable ASCII extraction + Groq cleanup
 function extractTextFromPDF(bytes: Uint8Array): string {
   const raw = new TextDecoder('latin1').decode(bytes);
 
-  // Strategy 1: Standard BT/ET text operator extraction
   const textParts: string[] = [];
   const btEtRegex = /BT\s([\s\S]*?)ET/g;
   let match;
@@ -108,7 +101,6 @@ function extractTextFromPDF(bytes: Uint8Array): string {
   while ((match = btEtRegex.exec(raw)) !== null) {
     const block = match[1];
 
-    // Tj operator: (text) Tj
     const tjRegex = /\(([^)]*)\)\s*Tj/g;
     let tjMatch;
     while ((tjMatch = tjRegex.exec(block)) !== null) {
@@ -116,7 +108,6 @@ function extractTextFromPDF(bytes: Uint8Array): string {
       if (decoded.trim()) textParts.push(decoded);
     }
 
-    // TJ operator: [(text) kern (text)] TJ
     const tjArrayRegex = /\[([^\]]*)\]\s*TJ/g;
     let tjArrMatch;
     while ((tjArrMatch = tjArrayRegex.exec(block)) !== null) {
@@ -131,26 +122,21 @@ function extractTextFromPDF(bytes: Uint8Array): string {
     }
   }
 
-  // If we got meaningful text from BT/ET, use it
   const btEtText = textParts.join(' ').replace(/\s+/g, ' ').trim();
   if (btEtText.length > 50 && isReadableText(btEtText)) {
     return btEtText;
   }
 
-  // Strategy 2: Try to decompress FlateDecode streams and extract text
   const streamTexts = extractFromStreams(raw);
   if (streamTexts.length > 50 && isReadableText(streamTexts)) {
     return streamTexts;
   }
 
-  // Strategy 3: Extract all printable ASCII runs (last resort)
-  // This captures text content that's embedded in the PDF but not in standard text operators
   const asciiRuns: string[] = [];
   const asciiRegex = /[\x20-\x7E]{4,}/g;
   let asciiMatch;
   while ((asciiMatch = asciiRegex.exec(raw)) !== null) {
     const run = asciiMatch[0].trim();
-    // Filter out PDF operators and binary noise
     if (run.length > 3 && !isPdfOperator(run)) {
       asciiRuns.push(run);
     }
@@ -161,11 +147,9 @@ function extractTextFromPDF(bytes: Uint8Array): string {
     return asciiText.substring(0, 50000);
   }
 
-  // Nothing extracted
   return '';
 }
 
-// Decode PDF escape sequences
 function decodePdfString(s: string): string {
   return s
     .replace(/\\n/g, '\n')
@@ -177,10 +161,8 @@ function decodePdfString(s: string): string {
     .replace(/\\(\d{3})/g, (_, oct) => String.fromCharCode(parseInt(oct, 8)));
 }
 
-// Check if extracted text is actually readable (not garbled binary)
 function isReadableText(text: string): boolean {
   if (!text || text.length === 0) return false;
-  // Count printable ASCII characters vs total
   let printable = 0;
   let letters = 0;
   for (let i = 0; i < Math.min(text.length, 500); i++) {
@@ -189,11 +171,9 @@ function isReadableText(text: string): boolean {
     if ((code >= 0x41 && code <= 0x5A) || (code >= 0x61 && code <= 0x7A)) letters++;
   }
   const sampleLen = Math.min(text.length, 500);
-  // At least 80% printable and 20% letters
   return (printable / sampleLen) > 0.8 && (letters / sampleLen) > 0.2;
 }
 
-// Filter out PDF structural keywords
 function isPdfOperator(text: string): boolean {
   const operators = [
     'endobj', 'endstream', 'stream', 'xref', 'trailer', 'startxref',
@@ -203,16 +183,12 @@ function isPdfOperator(text: string): boolean {
   return operators.some((op) => text.startsWith(op) || text === op);
 }
 
-// Try to extract readable text from PDF stream objects
 function extractFromStreams(raw: string): string {
   const parts: string[] = [];
-
-  // Find stream...endstream blocks and try to extract ASCII text from them
   const streamRegex = /stream\r?\n([\s\S]*?)endstream/g;
   let m;
   while ((m = streamRegex.exec(raw)) !== null) {
     const streamData = m[1];
-    // Extract printable ASCII runs from stream data
     const textRegex = /[\x20-\x7E]{5,}/g;
     let tm;
     while ((tm = textRegex.exec(streamData)) !== null) {
@@ -222,16 +198,12 @@ function extractFromStreams(raw: string): string {
       }
     }
   }
-
   return parts.join(' ').replace(/\s+/g, ' ').trim();
 }
 
-// ─── Groq-powered text cleanup for garbled PDF extractions ───────
 async function cleanExtractedTextWithGroq(rawText: string, fileName: string): Promise<string> {
   const groqApiKey = Deno.env.get('GROQ_API_KEY');
   if (!groqApiKey || rawText.length < 20) return rawText;
-
-  // Only clean if text seems garbled
   if (isReadableText(rawText)) return rawText;
 
   try {
@@ -259,7 +231,6 @@ async function cleanExtractedTextWithGroq(rawText: string, fileName: string): Pr
     });
 
     if (!response.ok) return rawText;
-
     const data = await response.json();
     const cleaned = data.choices?.[0]?.message?.content;
     return cleaned && cleaned.length > 20 ? cleaned : rawText;
@@ -277,40 +248,140 @@ Deno.serve(async (req: Request) => {
   }
 
   try {
-    // Auth
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const anonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
     const authHeader = req.headers.get('Authorization') ?? '';
 
+    const admin = createClient(supabaseUrl, serviceKey);
+
+    // Routing helpers
+    const url = new URL(req.url);
+    const parts = url.pathname.split('/').filter(Boolean);
+    const last = parts[parts.length - 1] || '';
+    const secondLast = parts[parts.length - 2] || '';
+
+    // ━━━ POST /search — Vector similarity search (no auth required) ━━━
+    // Accepts text query, generates embedding server-side, returns matching chunks.
+    if (req.method === 'POST' && last === 'search') {
+      const body = await req.json();
+      const { query, kb_id, limit = 3, threshold = 0.70 } = body as {
+        query: string; kb_id: string; limit?: number; threshold?: number;
+      };
+      if (!query || !kb_id) return jsonResponse({ error: 'query and kb_id required' }, 400, cors);
+
+      const embeddingResult = await getEmbeddingModel().run(query, { mean_pool: true, normalize: true });
+      const queryEmbedding = Array.isArray(embeddingResult)
+        ? embeddingResult
+        : Array.from(embeddingResult as Iterable<number>);
+
+      const { data, error } = await admin.rpc('match_kb_documents', {
+        query_embedding: queryEmbedding,
+        match_kb_id: kb_id,
+        match_threshold: threshold,
+        match_count: limit,
+      });
+
+      if (error) throw error;
+      return jsonResponse({ results: (data ?? []).map((d: any) => d.content) }, 200, cors);
+    }
+
+    // ━━━ GET /latest-pageindex — Get latest PageIndex doc (no auth required) ━━━
+    // ?kb_id=<uuid>&name=<optional-filename-filter>
+    if (req.method === 'GET' && last === 'latest-pageindex') {
+      const kbId = url.searchParams.get('kb_id');
+      const docName = url.searchParams.get('name');
+      if (!kbId) return jsonResponse({ error: 'kb_id required' }, 400, cors);
+
+      let query = admin
+        .from('kb_uploaded_documents')
+        .select('*')
+        .eq('kb_id', kbId);
+
+      if (docName && docName.trim()) {
+        query = query.ilike('file_name', `%${docName.trim()}%`);
+      } else {
+        query = query.not('pageindex_doc_id', 'is', null);
+      }
+
+      const { data, error } = await query.order('created_at', { ascending: false }).limit(1);
+      if (error) throw error;
+      return jsonResponse({ document: data && data.length > 0 ? data[0] : null }, 200, cors);
+    }
+
+    // ─── All routes below require authentication ──────────────────
     const anonClient = createClient(supabaseUrl, anonKey, {
       global: { headers: { Authorization: authHeader } },
     });
     const { data: { user }, error: authErr } = await anonClient.auth.getUser();
     if (authErr || !user) return jsonResponse({ error: 'Unauthorized' }, 401, cors);
 
-    const admin = createClient(supabaseUrl, serviceKey);
+    // ━━━ POST /store-chunk — Store a single text chunk with server-side embedding ━━━
+    if (req.method === 'POST' && last === 'store-chunk') {
+      const body = await req.json();
+      const { kb_id, content, metadata } = body as {
+        kb_id: string; content: string; metadata?: Record<string, unknown>;
+      };
+      if (!kb_id || !content) return jsonResponse({ error: 'kb_id and content required' }, 400, cors);
 
-    // Routing
-    const url = new URL(req.url);
-    const parts = url.pathname.split('/').filter(Boolean);
-    const last = parts[parts.length - 1] || '';
-    const secondLast = parts[parts.length - 2] || '';
+      const embeddingResult = await getEmbeddingModel().run(content, { mean_pool: true, normalize: true });
+      const embedding = Array.isArray(embeddingResult)
+        ? embeddingResult
+        : Array.from(embeddingResult as Iterable<number>);
 
-    // ━━━ POST /process-document ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // Full server-side pipeline: extract → chunk → embed → store
+      const { error } = await admin.from('kb_documents').insert({
+        kb_id,
+        content,
+        metadata: metadata ?? {},
+        embedding,
+        user_id: user.id,
+      });
+
+      if (error) throw error;
+      return jsonResponse({ success: true }, 200, cors);
+    }
+
+    // ━━━ POST /process-document — Full server-side pipeline ━━━━━━━
+    // If documentId is not provided, the record is created here.
+    // Returns the final document record.
     if (req.method === 'POST' && last === 'process-document') {
       const body = await req.json();
-      const { documentId, storagePath, fileType, fileName, kbId } = body as {
-        documentId: string;
+      const { documentId, storagePath, fileType, fileName, kbId, pageIndexDocId, file_size } = body as {
+        documentId?: string;
         storagePath: string;
         fileType: string;
         fileName: string;
         kbId: string;
+        pageIndexDocId?: string;
+        file_size?: number;
       };
 
-      if (!documentId || !storagePath || !fileType || !kbId) {
-        return jsonResponse({ error: 'Missing required fields' }, 400, cors);
+      if (!storagePath || !fileType || !kbId) {
+        return jsonResponse({ error: 'storagePath, fileType, and kbId are required' }, 400, cors);
+      }
+
+      // Create the document record if not pre-created by the caller
+      let docId = documentId;
+      if (!docId) {
+        const { data: newDoc, error: createErr } = await admin
+          .from('kb_uploaded_documents')
+          .insert({
+            user_id: user.id,
+            kb_id: kbId,
+            file_name: fileName,
+            file_type: fileType,
+            file_size: file_size ?? 0,
+            storage_path: storagePath,
+            status: 'processing',
+            ...(pageIndexDocId ? { pageindex_doc_id: pageIndexDocId } : {}),
+          })
+          .select()
+          .single();
+
+        if (createErr || !newDoc) {
+          return jsonResponse({ error: `Record creation failed: ${createErr?.message ?? 'No data'}` }, 500, cors);
+        }
+        docId = newDoc.id;
       }
 
       // 1. Download from storage
@@ -322,7 +393,7 @@ Deno.serve(async (req: Request) => {
         await admin.from('kb_uploaded_documents').update({
           status: 'error',
           error_message: `Download failed: ${dlErr?.message ?? 'No data'}`,
-        }).eq('id', documentId);
+        }).eq('id', docId);
         return jsonResponse({ error: `Download failed: ${dlErr?.message}` }, 500, cors);
       }
 
@@ -341,7 +412,7 @@ Deno.serve(async (req: Request) => {
         await admin.from('kb_uploaded_documents').update({
           status: 'error',
           error_message: 'No text content could be extracted',
-        }).eq('id', documentId);
+        }).eq('id', docId);
         return jsonResponse({ error: 'No text content extracted' }, 422, cors);
       }
 
@@ -358,7 +429,6 @@ Deno.serve(async (req: Request) => {
             normalize: true,
           });
 
-          // Ensure embedding is a plain array (not a stringified JSON)
           const embedding = Array.isArray(embeddingResult)
             ? embeddingResult
             : Array.from(embeddingResult as Iterable<number>);
@@ -370,13 +440,13 @@ Deno.serve(async (req: Request) => {
               content: chunks[i],
               metadata: {
                 source: fileName,
-                document_id: documentId,
+                document_id: docId,
                 chunk_index: i,
                 total_chunks: chunks.length,
               },
               embedding,
               user_id: user.id,
-              document_id: documentId,
+              document_id: docId,
               chunk_index: i,
             });
 
@@ -400,11 +470,18 @@ Deno.serve(async (req: Request) => {
         chunk_count: storedCount,
         total_tokens: totalTokens,
         updated_at: new Date().toISOString(),
-      }).eq('id', documentId);
+      }).eq('id', docId);
+
+      const { data: finalDoc } = await admin
+        .from('kb_uploaded_documents')
+        .select('*')
+        .eq('id', docId)
+        .single();
 
       return jsonResponse({
         success: true,
         status,
+        document: finalDoc ?? null,
         chunk_count: storedCount,
         total_chunks: chunks.length,
         total_tokens: totalTokens,
@@ -433,7 +510,7 @@ Deno.serve(async (req: Request) => {
       return jsonResponse({ text, wordCount: text.split(/\s+/).filter(Boolean).length }, 200, cors);
     }
 
-    // ━━━ GET documents list ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // ━━━ GET /documents — List user's documents ━━━━━━━━━━━━━━━━━━
     if (req.method === 'GET' && (last === 'documents' || last === 'api-documents')) {
       const { data, error } = await admin.from('kb_uploaded_documents')
         .select('*').eq('user_id', user.id).order('created_at', { ascending: false });
@@ -441,7 +518,7 @@ Deno.serve(async (req: Request) => {
       return jsonResponse({ documents: data ?? [] }, 200, cors);
     }
 
-    // ━━━ GET chunks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // ━━━ GET /{docId}/chunks — Fetch chunks for a document ━━━━━━━
     if (req.method === 'GET' && last === 'chunks') {
       const docId = secondLast;
       if (!docId) return jsonResponse({ error: 'Document ID required' }, 400, cors);
@@ -453,7 +530,32 @@ Deno.serve(async (req: Request) => {
       return jsonResponse({ chunks: data ?? [] }, 200, cors);
     }
 
-    // ━━━ DELETE document ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // ━━━ PATCH /documents/:id — Update document metadata ━━━━━━━━━
+    // Supports: pageindex_doc_id, status, error_message
+    if (req.method === 'PATCH' && secondLast === 'documents') {
+      const docId = last;
+      const body = await req.json() as Record<string, unknown>;
+
+      const updates: Record<string, unknown> = { updated_at: new Date().toISOString() };
+      if (body.pageindex_doc_id !== undefined) updates.pageindex_doc_id = body.pageindex_doc_id;
+      if (body.status !== undefined) updates.status = body.status;
+      if (body.error_message !== undefined) updates.error_message = body.error_message;
+
+      if (Object.keys(updates).length === 1) {
+        return jsonResponse({ error: 'No updatable fields provided' }, 400, cors);
+      }
+
+      const { error } = await admin
+        .from('kb_uploaded_documents')
+        .update(updates)
+        .eq('id', docId)
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+      return jsonResponse({ success: true }, 200, cors);
+    }
+
+    // ━━━ DELETE /documents/:id — Delete document and chunks ━━━━━━
     if (req.method === 'DELETE' && last !== 'documents' && secondLast === 'documents') {
       const docId = last;
       const { data: doc } = await admin.from('kb_uploaded_documents')
