@@ -15,7 +15,6 @@ const SCOPES = [
 ].join(" ");
 
 Deno.serve(async (req: Request) => {
-  if (!req.headers.get("Origin") || true) { /* allow all for oauth init */ }
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeadersFor(req) });
   }
@@ -49,7 +48,7 @@ Deno.serve(async (req: Request) => {
     const { error: stateErr } = await admin
       .from("google_oauth_states")
       .insert({ state, user_id: user.id });
-    if (stateErr) throw stateErr;
+    if (stateErr) throw new Error(`State insert failed: ${stateErr.message} (code: ${stateErr.code})`);
 
     // Opportunistically clean up expired states
     await admin.rpc("cleanup_expired_oauth_states").catch(() => {});
@@ -70,7 +69,8 @@ Deno.serve(async (req: Request) => {
       url: `https://accounts.google.com/o/oauth2/v2/auth?${params}`,
     });
   } catch (err) {
-    console.error("[google-oauth-init]", err);
-    return jsonRes(req, 500, { error: "Internal server error" });
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error("[google-oauth-init]", msg);
+    return jsonRes(req, 500, { error: "Internal server error", detail: msg });
   }
 });
