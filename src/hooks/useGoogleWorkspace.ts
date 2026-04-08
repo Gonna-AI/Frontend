@@ -35,15 +35,15 @@ export function useGoogleWorkspace() {
       // Check for existing token row (email column from google_oauth_tokens)
       const { data } = await supabase
         .from('google_oauth_tokens')
-        .select('email, updated_at')
+        .select('google_email, avatar_url, updated_at')
         .eq('user_id', session.user.id)
         .eq('service', 'workspace')
         .maybeSingle();
 
       setConnection({
         connected: !!data,
-        googleEmail: data?.email ?? null,
-        avatarUrl: null, // google_oauth_tokens doesn't store avatar; fetched separately if needed
+        googleEmail: data?.google_email ?? null,
+        avatarUrl: data?.avatar_url ?? null,
       });
     } catch {
       // not connected — ignore
