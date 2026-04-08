@@ -12,6 +12,10 @@ export interface GoogleTokens {
   googleEmail: string;
 }
 
+function encKey(): string {
+  return Deno.env.get("GOOGLE_TOKEN_ENC_KEY") ?? "";
+}
+
 // ─── Token DB helpers ─────────────────────────────────────────────────────────
 
 export async function loadTokens(
@@ -20,6 +24,7 @@ export async function loadTokens(
 ): Promise<GoogleTokens | null> {
   const { data, error } = await admin.rpc("get_google_tokens", {
     p_user_id: userId,
+    p_enc_key: encKey(),
   });
   // rpc returning a table returns an array
   const row = Array.isArray(data) ? data[0] : data;
@@ -51,6 +56,7 @@ export async function storeTokens(
     p_scopes: scopes,
     p_google_email: googleEmail,
     p_avatar_url: avatarUrl,
+    p_enc_key: encKey(),
   });
   if (error) throw new Error(`Failed to store tokens: ${error.message}`);
 }
@@ -87,6 +93,7 @@ export async function refreshIfExpired(
     p_user_id: tokens.userId,
     p_access_token: newTokens.accessToken,
     p_expiry_at: newTokens.expiryAt.toISOString(),
+    p_enc_key: encKey(),
   });
 
   return newTokens;

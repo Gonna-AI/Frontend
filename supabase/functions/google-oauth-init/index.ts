@@ -54,7 +54,8 @@ Deno.serve(async (req: Request) => {
     // Opportunistically clean up expired states
     await admin.rpc("cleanup_expired_oauth_states").catch(() => {});
 
-    const redirectUri = `${siteUrl}/auth/google/callback`;
+    const redirectUri = Deno.env.get("GOOGLE_REDIRECT_URI")
+      ?? `${supabaseUrl}/functions/v1/google-oauth-callback`;
     const params = new URLSearchParams({
       client_id: clientId,
       redirect_uri: redirectUri,

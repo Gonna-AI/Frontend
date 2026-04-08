@@ -44,7 +44,8 @@ Deno.serve(async (req: Request) => {
   // Consume state (one-time use)
   await admin.from("google_oauth_states").delete().eq("state", state);
 
-  const redirectUri = `${siteUrl}/auth/google/callback`;
+  const redirectUri = Deno.env.get("GOOGLE_REDIRECT_URI")
+    ?? `${supabaseUrl}/functions/v1/google-oauth-callback`;
 
   // Exchange code for tokens
   const tokenRes = await fetch("https://oauth2.googleapis.com/token", {
