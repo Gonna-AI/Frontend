@@ -1,4 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import ConnectedAppsCard from '../Google/ConnectedAppsCard';
 import { createNotification } from '../../services/notificationService';
 import {
   User, Building2, Phone as PhoneIcon, Globe, Shield, Download, Trash2,
@@ -55,12 +57,18 @@ const TIMEZONES = [
   'Asia/Shanghai', 'Asia/Dubai', 'Australia/Sydney', 'Pacific/Auckland',
 ];
 
-type SettingsTab = 'profile' | 'notifications' | 'security' | 'data';
+type SettingsTab = 'profile' | 'notifications' | 'security' | 'data' | 'connected-apps';
 
 export default function SettingsView({ isDark }: SettingsViewProps) {
   const { t } = useLanguage();
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<SettingsTab>('profile');
+  const [searchParams] = useSearchParams();
+  useEffect(() => {
+    if (searchParams.get('google_connected') === '1' || searchParams.get('tab') === 'settings') {
+      setActiveTab('connected-apps');
+    }
+  }, [searchParams]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -251,6 +259,7 @@ export default function SettingsView({ isDark }: SettingsViewProps) {
     { id: 'notifications', label: t('settings.notifications') || 'Notifications', icon: <Bell className="w-4 h-4" /> },
     { id: 'security', label: t('settings.security') || 'Security', icon: <Shield className="w-4 h-4" /> },
     { id: 'data', label: t('settings.data') || 'Data & Privacy', icon: <Download className="w-4 h-4" /> },
+    { id: 'connected-apps' as SettingsTab, label: 'Connected Apps', icon: <Globe className="w-4 h-4" /> },
   ];
 
   if (loading) {
@@ -578,6 +587,21 @@ export default function SettingsView({ isDark }: SettingsViewProps) {
               </div>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Connected Apps Tab */}
+      {activeTab === 'connected-apps' && (
+        <div className="space-y-6 max-w-xl">
+          <div>
+            <h3 className={cn('text-lg font-semibold', isDark ? 'text-white' : 'text-gray-900')}>
+              Connected Apps
+            </h3>
+            <p className={cn('text-sm mt-1', isDark ? 'text-white/50' : 'text-gray-500')}>
+              Manage third-party integrations connected to your account.
+            </p>
+          </div>
+          <ConnectedAppsCard isDark={isDark} />
         </div>
       )}
     </div>

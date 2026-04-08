@@ -4,6 +4,8 @@ import { useLanguage } from '../../contexts/LanguageContext';
 import { useDemoCall } from '../../contexts/DemoCallContext';
 
 import { ArrowUpRight, ArrowDownRight, MoreHorizontal, Phone, Clock, Activity, AlertCircle, Radio } from 'lucide-react';
+import TodayScheduleWidget from '../Google/TodayScheduleWidget';
+import TasksPanel from '../Google/TasksPanel';
 import { cn } from '../../utils/cn';
 import { LiveCallMonitor } from '../DemoCall';
 import PreCallBrief from '../DemoCall/PreCallBrief';
@@ -264,6 +266,9 @@ export default function MonitorView({ isDark = true }: { isDark?: boolean }) {
 
     return (
         <div className="space-y-6 sm:space-y-8 pb-10">
+
+            {/* Google Calendar — Today's Schedule */}
+            <TodayScheduleWidget isDark={isDark} />
 
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -588,6 +593,9 @@ export default function MonitorView({ isDark = true }: { isDark?: boolean }) {
                                                                             </div>
                                                                         </div>
                                                                     )}
+                                                                </div>
+                                                                <div className="mt-4">
+                                                                    <TasksPanel historyId={call.id} isDark={isDark} />
                                                                 </div>
                                                             </td>
                                                         </tr>

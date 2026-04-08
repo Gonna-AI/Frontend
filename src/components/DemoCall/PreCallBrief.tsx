@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import GmailThreads from '../Google/GmailThreads';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, User, Clock, AlertTriangle, CheckCircle2, XCircle, ChevronDown, ChevronUp, Loader2 } from 'lucide-react';
 import { cn } from '../../utils/cn';
@@ -15,6 +16,7 @@ interface LastCall {
 interface PreCallBriefData {
   isReturning: boolean;
   callerName: string;
+  callerEmail?: string;
   totalCalls: number;
   lastCalls: LastCall[];
   openActionItems: string[];
@@ -313,6 +315,12 @@ export default function PreCallBrief({ isDark = true, initialName = '', onViewPr
                   {!brief.isReturning && brief.callerName && (
                     <p className={cn('text-xs', textMuted)}>No previous calls found for this name.</p>
                   )}
+
+                  {/* Gmail thread history for this contact */}
+                  <GmailThreads
+                    contactEmail={brief.callerEmail ?? ''}
+                    isDark={isDark ?? true}
+                  />
                 </div>
               )}
 

@@ -37,6 +37,7 @@ const DocsPage = lazyWithRetry(() => import('./pages/DocsPage'), 'DocsPage');
 const SupportPage = lazyWithRetry(() => import('./pages/SupportPage'), 'SupportPage');
 const AuthPage = lazyWithRetry(() => import('./pages/AuthPage'), 'AuthPage');
 const AuthCallback = lazyWithRetry(() => import('./pages/AuthCallback'), 'AuthCallback');
+const AuthGoogleCallback = lazyWithRetry(() => import('./pages/AuthGoogleCallback'), 'AuthGoogleCallback');
 const InvitePage = lazyWithRetry(() => import('./pages/InvitePage'), 'InvitePage');
 const WhitePaper = lazyWithRetry(() => import('./pages/WhitePaper'), 'WhitePaper');
 
@@ -76,6 +77,7 @@ function App() {
                   {/* Auth Routes */}
                   <Route path="/login" element={<AuthPage />} />
                   <Route path="/auth/callback" element={<AuthCallback />} />
+                  <Route path="/auth/google/callback" element={<AuthGoogleCallback />} />
                   <Route path="/invite" element={<InvitePage />} />
 
                   {/* Protected Dashboard */}

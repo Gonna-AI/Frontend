@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import DriveFileBrowser from '../Google/DriveFileBrowser';
 import { cn } from '../../utils/cn';
 import {
     FileText,
@@ -182,6 +183,7 @@ export default function DocumentsView({ isDark = true }: { isDark?: boolean }) {
     const { user } = useAuth();
     const { knowledgeBase } = useDemoCall();
 
+    const [docsTab, setDocsTab] = useState<'kb' | 'drive'>('kb');
     const [documents, setDocuments] = useState<UploadedDocument[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [expandedDocId, setExpandedDocId] = useState<string | null>(null);
@@ -505,8 +507,28 @@ export default function DocumentsView({ isDark = true }: { isDark?: boolean }) {
                 </div>
             </div>
 
-            {/* Input / Upload Zone */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            {/* Source tabs: Knowledge Base | Google Drive */}
+            <div className={cn("flex gap-1 p-1 rounded-xl border w-fit", isDark ? "bg-white/[0.02] border-white/10" : "bg-gray-50 border-gray-200")}>
+                {(['kb', 'drive'] as const).map(tab => (
+                    <button
+                        key={tab}
+                        onClick={() => setDocsTab(tab)}
+                        className={cn(
+                            "px-4 py-2 rounded-lg text-sm font-medium transition-all",
+                            docsTab === tab
+                                ? isDark ? "bg-white/10 text-white" : "bg-white text-gray-900 shadow-sm"
+                                : isDark ? "text-white/50 hover:text-white/80" : "text-gray-500 hover:text-gray-700"
+                        )}
+                    >
+                        {tab === 'kb' ? 'Knowledge Base' : 'Google Drive'}
+                    </button>
+                ))}
+            </div>
+
+            {/* Google Drive tab */}
+            {docsTab === 'drive' && <DriveFileBrowser isDark={isDark} />}
+
+            {docsTab === 'kb' && <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                 <div className={cn(
                     "lg:col-span-12 relative rounded-xl border p-6 transition-all duration-200",
                     isDark ? "bg-white/5 border-white/10" : "bg-white border-gray-200 shadow-sm"
@@ -1117,7 +1139,7 @@ export default function DocumentsView({ isDark = true }: { isDark?: boolean }) {
                     )}
                 </div>
 
-            </div>
+            </div>}
         </div>
     );
 }

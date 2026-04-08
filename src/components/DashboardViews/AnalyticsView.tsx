@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useGoogleWorkspace } from '../../hooks/useGoogleWorkspace';
 import {
   AreaChart, Area, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -82,6 +83,46 @@ const PRIORITY_COLORS: Record<string, string> = {
 };
 
 const CATEGORY_COLORS = ['#8b5cf6', '#3b82f6', '#06b6d4', '#10b981', '#f59e0b', '#ef4444', '#ec4899', '#6366f1'];
+
+// ─── Meetings KPI Card ──────────────────────────────────────────────
+function MeetingsKpiCard({ isDark }: { isDark: boolean }) {
+  const { connection, gFetch } = useGoogleWorkspace();
+  const [stats, setStats] = useState<{ total: number; avgMinutes: number; busiestDay: string } | null>(null);
+
+  useEffect(() => {
+    if (!connection.connected) return;
+    const start = new Date();
+    start.setDate(1); start.setHours(0, 0, 0, 0);
+    const end = new Date();
+    gFetch(`google-calendar?start=${start.toISOString()}&end=${end.toISOString()}&maxResults=100`)
+      .then((data: unknown) => {
+        const events = (data as { events: { start_at: string; end_at: string }[] }).events ?? [];
+        if (!events.length) { setStats({ total: 0, avgMinutes: 0, busiestDay: '—' }); return; }
+        const totalMs = events.reduce((sum, e) =>
+          sum + (new Date(e.end_at).getTime() - new Date(e.start_at).getTime()), 0);
+        const dayCounts: Record<string, number> = {};
+        events.forEach(e => {
+          const day = new Date(e.start_at).toLocaleDateString('en-US', { weekday: 'short' });
+          dayCounts[day] = (dayCounts[day] ?? 0) + 1;
+        });
+        const busiestDay = Object.entries(dayCounts).sort((a, b) => b[1] - a[1])[0]?.[0] ?? '—';
+        setStats({ total: events.length, avgMinutes: Math.round(totalMs / events.length / 60_000), busiestDay });
+      }).catch(() => {});
+  }, [connection.connected, gFetch]);
+
+  if (!connection.connected || !stats) return null;
+
+  return (
+    <KpiCard
+      isDark={isDark}
+      title="Meetings (Month)"
+      value={stats.total}
+      subtitle={`Avg ${stats.avgMinutes}m · Busiest: ${stats.busiestDay}`}
+      icon={<Activity className="w-5 h-5" />}
+      color="purple"
+    />
+  );
+}
 
 // ─── KPI Card (matches MonitorView / UsageView style) ──────────────
 function KpiCard({ title, value, subtitle, icon, isDark, color = 'blue' }: {
@@ -290,12 +331,13 @@ export default function AnalyticsView({ isDark }: AnalyticsViewProps) {
         </div>
       </div>
 
-      {/* KPI Cards — 4 cards matching MonitorView style */}
+      {/* KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <KpiCard isDark={isDark} title="Total Calls" value={overview?.totalCalls ?? 0} subtitle={`${overview?.voiceCalls ?? 0} voice · ${overview?.textCalls ?? 0} text`} icon={<Phone className="w-5 h-5" />} color="blue" />
         <KpiCard isDark={isDark} title="Resolution Rate" value={`${overview?.resolutionRate ?? 0}%`} subtitle="Resolved without follow-up" icon={<CheckCircle2 className="w-5 h-5" />} color="emerald" />
         <KpiCard isDark={isDark} title="Avg Sentiment" value={`${overview?.avgSentiment ?? 50}/100`} subtitle={sentimentLabel(overview?.avgSentiment ?? 50)} icon={<Smile className="w-5 h-5" />} color="orange" />
         <KpiCard isDark={isDark} title="Avg Duration" value={`${overview?.avgDuration ?? 0}s`} subtitle={`${overview?.followUps ?? 0} need follow-up`} icon={<Clock className="w-5 h-5" />} color="purple" />
+        <MeetingsKpiCard isDark={isDark} />
       </div>
 
       {/* Sentiment Trend + Category Distribution */}
