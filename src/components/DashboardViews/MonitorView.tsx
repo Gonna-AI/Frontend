@@ -1,14 +1,15 @@
 import React, { useState, useMemo } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useDemoCall } from '../../contexts/DemoCallContext';
 
-import { ArrowUpRight, ArrowDownRight, MoreHorizontal, Phone, Clock, Activity, AlertCircle, Radio } from 'lucide-react';
+import { ArrowUpRight, ArrowDownRight, ChevronDown, ChevronUp, Phone, Clock, Activity, AlertCircle, Radio, CalendarPlus, X, Loader2 } from 'lucide-react';
 import TodayScheduleWidget from '../Google/TodayScheduleWidget';
 import TasksPanel from '../Google/TasksPanel';
 import { cn } from '../../utils/cn';
 import { LiveCallMonitor } from '../DemoCall';
 import PreCallBrief from '../DemoCall/PreCallBrief';
+import { useGoogleWorkspace } from '../../hooks/useGoogleWorkspace';
 
 import {
     AreaChart,
@@ -169,15 +170,199 @@ function SectionTab({ active, onClick, children, isDark }: { active: boolean, on
     );
 }
 
+// ── Schedule Follow-up modal ────────────────────────────────────────────────
+
+interface FollowupTarget {
+  callId: string;
+  callerName: string;
+  summaryText?: string;
+}
+
+function ScheduleFollowupModal({
+  target,
+  isDark,
+  onClose,
+}: {
+  target: FollowupTarget;
+  isDark: boolean;
+  onClose: () => void;
+}) {
+  const { gFetch } = useGoogleWorkspace();
+  const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate() + 1);
+  const defaultDate = tomorrow.toISOString().slice(0, 10);
+
+  const [title, setTitle] = useState(`Follow-up: ${target.callerName}`);
+  const [date, setDate] = useState(defaultDate);
+  const [time, setTime] = useState('10:00');
+  const [duration, setDuration] = useState(30);
+  const [saving, setSaving] = useState(false);
+  const [done, setDone] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleCreate = async () => {
+    setSaving(true);
+    setError('');
+    try {
+      const start = new Date(`${date}T${time}:00`);
+      const end = new Date(start.getTime() + duration * 60000);
+      await gFetch('google-calendar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title,
+          start: start.toISOString(),
+          end: end.toISOString(),
+          description: target.summaryText
+            ? `Call summary:\n${target.summaryText}\n\nScheduled via ClerkTree`
+            : 'Scheduled via ClerkTree',
+        }),
+      });
+      setDone(true);
+      setTimeout(onClose, 1200);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Failed to create event');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+      onClick={(e) => e.target === e.currentTarget && onClose()}
+    >
+      <motion.div
+        initial={{ opacity: 0, scale: 0.96, y: 8 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.96, y: 8 }}
+        transition={{ duration: 0.18 }}
+        className={cn(
+          'w-full max-w-sm rounded-2xl border shadow-2xl p-5',
+          isDark ? 'bg-[#111113] border-white/10' : 'bg-white border-black/10',
+        )}
+      >
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <CalendarPlus className={cn('w-4 h-4', isDark ? 'text-blue-400' : 'text-blue-500')} />
+            <span className={cn('text-sm font-semibold', isDark ? 'text-white' : 'text-gray-900')}>
+              Schedule Follow-up
+            </span>
+          </div>
+          <button onClick={onClose} className={cn('p-1 rounded transition-colors', isDark ? 'text-white/30 hover:text-white/60' : 'text-gray-400 hover:text-gray-600')}>
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+
+        {done ? (
+          <div className="flex flex-col items-center gap-2 py-4">
+            <div className="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center">
+              <CalendarPlus className="w-5 h-5 text-emerald-400" />
+            </div>
+            <p className={cn('text-sm font-medium', isDark ? 'text-white' : 'text-gray-900')}>Event created in Google Calendar!</p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            <div>
+              <label className={cn('block text-xs mb-1', isDark ? 'text-white/50' : 'text-gray-500')}>Title</label>
+              <input
+                value={title}
+                onChange={e => setTitle(e.target.value)}
+                className={cn(
+                  'w-full text-sm px-3 py-2 rounded-lg border bg-transparent outline-none focus:ring-1',
+                  isDark
+                    ? 'border-white/10 text-white focus:ring-blue-500/40 focus:border-blue-500/40'
+                    : 'border-gray-200 text-gray-900 focus:ring-blue-300 focus:border-blue-300',
+                )}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className={cn('block text-xs mb-1', isDark ? 'text-white/50' : 'text-gray-500')}>Date</label>
+                <input
+                  type="date"
+                  value={date}
+                  onChange={e => setDate(e.target.value)}
+                  className={cn(
+                    'w-full text-sm px-3 py-2 rounded-lg border bg-transparent outline-none focus:ring-1',
+                    isDark
+                      ? 'border-white/10 text-white focus:ring-blue-500/40 focus:border-blue-500/40 [color-scheme:dark]'
+                      : 'border-gray-200 text-gray-900 focus:ring-blue-300 focus:border-blue-300',
+                  )}
+                />
+              </div>
+              <div>
+                <label className={cn('block text-xs mb-1', isDark ? 'text-white/50' : 'text-gray-500')}>Time</label>
+                <input
+                  type="time"
+                  value={time}
+                  onChange={e => setTime(e.target.value)}
+                  className={cn(
+                    'w-full text-sm px-3 py-2 rounded-lg border bg-transparent outline-none focus:ring-1',
+                    isDark
+                      ? 'border-white/10 text-white focus:ring-blue-500/40 focus:border-blue-500/40 [color-scheme:dark]'
+                      : 'border-gray-200 text-gray-900 focus:ring-blue-300 focus:border-blue-300',
+                  )}
+                />
+              </div>
+            </div>
+            <div>
+              <label className={cn('block text-xs mb-1', isDark ? 'text-white/50' : 'text-gray-500')}>Duration</label>
+              <div className="flex gap-2">
+                {[15, 30, 60, 90].map(d => (
+                  <button
+                    key={d}
+                    onClick={() => setDuration(d)}
+                    className={cn(
+                      'flex-1 text-xs py-1.5 rounded-lg border transition-colors',
+                      duration === d
+                        ? isDark ? 'bg-blue-500/20 border-blue-500/40 text-blue-400' : 'bg-blue-50 border-blue-300 text-blue-600'
+                        : isDark ? 'border-white/10 text-white/50 hover:bg-white/5' : 'border-gray-200 text-gray-500 hover:bg-gray-50',
+                    )}
+                  >
+                    {d}m
+                  </button>
+                ))}
+              </div>
+            </div>
+            {error && <p className="text-xs text-red-400">{error}</p>}
+            <button
+              onClick={handleCreate}
+              disabled={saving || !title.trim()}
+              className={cn(
+                'w-full py-2.5 rounded-xl text-sm font-semibold transition-all mt-1',
+                saving || !title.trim()
+                  ? 'opacity-50 cursor-not-allowed bg-blue-500/20 text-blue-400'
+                  : 'bg-blue-500 hover:bg-blue-600 text-white shadow-sm',
+              )}
+            >
+              {saving ? (
+                <span className="flex items-center justify-center gap-2">
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" /> Creating…
+                </span>
+              ) : (
+                'Create in Google Calendar'
+              )}
+            </button>
+          </div>
+        )}
+      </motion.div>
+    </div>
+  );
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+
 export default function MonitorView({ isDark = true }: { isDark?: boolean }) {
     const { t, language } = useLanguage();
     const { getAnalytics, callHistory, currentCall } = useDemoCall();
+    const { connection } = useGoogleWorkspace();
 
     const analytics = getAnalytics();
     const [activeSection, setActiveSection] = useState<'history' | 'live'>('live');
     const [chartRange, setChartRange] = useState<'week' | 'month' | 'all'>('month');
     const [filterPriority, setFilterPriority] = useState<string>('all');
     const [expandedLogId, setExpandedLogId] = useState<string | null>(null);
+    const [followupTarget, setFollowupTarget] = useState<FollowupTarget | null>(null);
 
     const filteredHistory = useMemo(() => {
         return callHistory.filter(call => filterPriority === 'all' || call.priority === filterPriority);
@@ -552,16 +737,37 @@ export default function MonitorView({ isDark = true }: { isDark?: boolean }) {
                                                             {new Date(call.date).toLocaleDateString(language === 'de' ? 'de-DE' : 'en-US')} <span className="opacity-50 ml-1">{new Date(call.date).toLocaleTimeString(language === 'de' ? 'de-DE' : 'en-US', { hour: '2-digit', minute: '2-digit' })}</span>
                                                         </td>
                                                         <td className="px-4 sm:px-6 py-4 sm:py-5 text-right">
-                                                            <button
-                                                                onClick={() => setExpandedLogId(expandedLogId === call.id ? null : call.id)}
-                                                                className={cn(
-                                                                    "p-2 rounded-lg transition-all",
-                                                                    expandedLogId === call.id
-                                                                        ? (isDark ? "bg-white/10 text-white" : "bg-gray-200 text-gray-900")
-                                                                        : (isDark ? "opacity-0 group-hover:opacity-100 hover:bg-white/10 text-white/40 hover:text-white" : "opacity-0 group-hover:opacity-100 hover:bg-gray-100 text-gray-400 hover:text-gray-900")
-                                                                )}>
-                                                                <MoreHorizontal className="w-4 h-4" />
-                                                            </button>
+                                                            <div className="flex items-center justify-end gap-1">
+                                                                {connection.connected && (
+                                                                    <button
+                                                                        onClick={() => setFollowupTarget({
+                                                                            callId: call.id,
+                                                                            callerName: call.callerName,
+                                                                            summaryText: call.summary?.summaryText,
+                                                                        })}
+                                                                        title="Schedule follow-up in Google Calendar"
+                                                                        className={cn(
+                                                                            "p-2 rounded-lg transition-all opacity-0 group-hover:opacity-100",
+                                                                            isDark ? "hover:bg-blue-500/10 text-blue-400/60 hover:text-blue-400" : "hover:bg-blue-50 text-blue-400 hover:text-blue-600",
+                                                                        )}
+                                                                    >
+                                                                        <CalendarPlus className="w-4 h-4" />
+                                                                    </button>
+                                                                )}
+                                                                <button
+                                                                    onClick={() => setExpandedLogId(expandedLogId === call.id ? null : call.id)}
+                                                                    className={cn(
+                                                                        "p-2 rounded-lg transition-all",
+                                                                        expandedLogId === call.id
+                                                                            ? (isDark ? "bg-white/10 text-white" : "bg-gray-200 text-gray-900")
+                                                                            : (isDark ? "text-white/30 hover:bg-white/10 hover:text-white" : "text-gray-400 hover:bg-gray-100 hover:text-gray-900"),
+                                                                    )}>
+                                                                    {expandedLogId === call.id
+                                                                        ? <ChevronUp className="w-4 h-4" />
+                                                                        : <ChevronDown className="w-4 h-4" />
+                                                                    }
+                                                                </button>
+                                                            </div>
                                                         </td>
                                                     </tr>
                                                     {expandedLogId === call.id && (
@@ -594,9 +800,23 @@ export default function MonitorView({ isDark = true }: { isDark?: boolean }) {
                                                                         </div>
                                                                     )}
                                                                 </div>
-                                                                <div className="mt-4">
-                                                                    <TasksPanel historyId={call.id} isDark={isDark} />
-                                                                </div>
+                                                                {/* Google Tasks — visible when Google is connected */}
+                                                                {connection.connected && (
+                                                                    <div className="mt-4">
+                                                                        <div className="flex items-center gap-2 mb-2">
+                                                                            <svg viewBox="0 0 48 48" className="w-3.5 h-3.5 shrink-0">
+                                                                                <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z" />
+                                                                                <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z" />
+                                                                                <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z" />
+                                                                                <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z" />
+                                                                            </svg>
+                                                                            <h4 className={cn("text-xs font-semibold uppercase tracking-wider", isDark ? "text-white/40" : "text-black/40")}>
+                                                                                Google Tasks &amp; Notes
+                                                                            </h4>
+                                                                        </div>
+                                                                        <TasksPanel historyId={call.id} isDark={isDark} />
+                                                                    </div>
+                                                                )}
                                                             </td>
                                                         </tr>
                                                     )}
@@ -610,6 +830,17 @@ export default function MonitorView({ isDark = true }: { isDark?: boolean }) {
                     )}
                 </motion.div>
             </div>
+
+            {/* Schedule Follow-up modal */}
+            <AnimatePresence>
+                {followupTarget && (
+                    <ScheduleFollowupModal
+                        target={followupTarget}
+                        isDark={isDark}
+                        onClose={() => setFollowupTarget(null)}
+                    />
+                )}
+            </AnimatePresence>
         </div>
     );
 }

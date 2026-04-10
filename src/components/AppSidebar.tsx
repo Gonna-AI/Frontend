@@ -50,6 +50,7 @@ import { useLanguage } from "@/contexts/LanguageContext"
 import LanguageSwitcher from "./Layout/LanguageSwitcher"
 import { useAuth } from "@/contexts/AuthContext"
 import { supabase } from "@/config/supabase"
+import { GoogleSidebarWidget } from "./Google/GoogleSidebarWidget"
 
 interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
     activeTab: string;
@@ -496,6 +497,13 @@ export function AppSidebar({ activeTab, setActiveTab, hasAccess = false, ...prop
                             </SidebarMenuItem>
                         </>
                     )}
+                    <SidebarSeparator className={isDark ? "bg-white/10" : "bg-black/5"} />
+                    <SidebarMenuItem>
+                        <GoogleSidebarWidget
+                            state={state}
+                            onNavigateSettings={() => handleTabClick('settings')}
+                        />
+                    </SidebarMenuItem>
                     <SidebarSeparator className={isDark ? "bg-white/10" : "bg-black/5"} />
                     <AuthUserSection isDark={isDark} state={state} />
                 </SidebarMenu>
