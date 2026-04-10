@@ -46,23 +46,24 @@ Deno.serve(async (req: Request) => {
     const { data: { user }, error: authError } = await userClient.auth.getUser();
     if (authError || !user) return json(req, 401, { error: 'Unauthorized' });
 
+    // Service-role client for writes/reads — every query MUST include .eq('user_id', user.id)
     const adminClient = createClient(supabaseUrl, supabaseServiceRoleKey);
     const url = new URL(req.url);
     const action = url.pathname.replace(/\/+$/, '').split('/').pop() || '';
 
-    // ─── GET: Unread count ───────────────────────────────────
-    // notifications table uses patient_id (not user_id) — count all unread
+    // ─── GET: Unread count ───────────────────────────────────────────────────
     if (req.method === 'GET' && action === 'unread-count') {
       const { count, error } = await adminClient
         .from('notifications')
         .select('id', { count: 'exact', head: true })
+        .eq('user_id', user.id)
         .eq('is_read', false);
 
       if (error) throw error;
       return json(req, 200, { count: count ?? 0 });
     }
 
-    // ─── GET: Notification preferences ──────────────────────
+    // ─── GET: Notification preferences ──────────────────────────────────────
     if (req.method === 'GET' && action === 'preferences') {
       const { data, error } = await adminClient
         .from('notification_preferences')
@@ -84,8 +85,7 @@ Deno.serve(async (req: Request) => {
       return json(req, 200, { preferences: data });
     }
 
-    // ─── GET: List notifications ─────────────────────────────
-    // notifications table uses patient_id (not user_id) — list all
+    // ─── GET: List notifications ─────────────────────────────────────────────
     if (req.method === 'GET') {
       const limit = Math.min(parseInt(url.searchParams.get('limit') ?? '50', 10), 100);
       const unreadOnly = url.searchParams.get('unread') === 'true';
@@ -93,6 +93,7 @@ Deno.serve(async (req: Request) => {
       let query = adminClient
         .from('notifications')
         .select('*')
+        .eq('user_id', user.id)
         .order('created_at', { ascending: false })
         .limit(limit);
 
@@ -104,31 +105,63 @@ Deno.serve(async (req: Request) => {
       return json(req, 200, { notifications: data ?? [] });
     }
 
-    // ─── POST: Mark as read ──────────────────────────────────
+    // ─── POST: Create notification (called by frontend notificationService) ──
+    if (req.method === 'POST' && action === 'create') {
+      const body = await req.json().catch(() => null) as Record<string, unknown> | null;
+      if (!body?.title) return json(req, 400, { error: 'Missing title' });
+
+      const VALID_TYPES = new Set(['info', 'success', 'warning', 'error']);
+      const VALID_CATS  = new Set(['billing', 'team', 'security', 'calls', 'system']);
+
+      const record = {
+        user_id:    user.id,
+        type:       VALID_TYPES.has(body.type as string) ? body.type : 'info',
+        title:      String(body.title).slice(0, 255),
+        message:    body.message ? String(body.message).slice(0, 1000) : '',
+        category:   VALID_CATS.has(body.category as string) ? body.category : 'system',
+        is_read:    false,
+        action_url: body.action_url ? String(body.action_url).slice(0, 2048) : null,
+      };
+
+      const { data, error } = await adminClient
+        .from('notifications')
+        .insert(record)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return json(req, 201, { notification: data });
+    }
+
+    // ─── POST: Mark as read ──────────────────────────────────────────────────
     if (req.method === 'POST' && action === 'mark-read') {
       const body = await req.json().catch(() => null) as Record<string, unknown> | null;
       const ids = Array.isArray(body?.ids) ? body.ids.filter((id: unknown) => typeof id === 'string') : [];
 
       if (ids.length === 0) {
+        // Mark ALL of this user's unread notifications as read
         const { error } = await adminClient
           .from('notifications')
           .update({ is_read: true })
+          .eq('user_id', user.id)
           .eq('is_read', false);
 
         if (error) throw error;
         return json(req, 200, { success: true, marked: 'all' });
       }
 
+      // Mark specific notifications — still scoped to this user to prevent cross-user mutation
       const { error } = await adminClient
         .from('notifications')
         .update({ is_read: true })
+        .eq('user_id', user.id)
         .in('id', ids);
 
       if (error) throw error;
       return json(req, 200, { success: true, marked: ids.length });
     }
 
-    // ─── PUT: Update notification preferences ────────────────
+    // ─── PUT: Update notification preferences ────────────────────────────────
     if (req.method === 'PUT' && action === 'preferences') {
       const body = await req.json().catch(() => null) as Record<string, unknown> | null;
       if (!body) return json(req, 400, { error: 'Invalid body' });
@@ -153,21 +186,25 @@ Deno.serve(async (req: Request) => {
       return json(req, 200, { preferences: data });
     }
 
-    // ─── DELETE: Clear notifications ─────────────────────────
+    // ─── DELETE: Clear notifications ─────────────────────────────────────────
     if (req.method === 'DELETE') {
       const id = url.searchParams.get('id');
 
       if (id) {
+        // Delete a specific notification — scoped to this user
         const { error } = await adminClient
           .from('notifications')
           .delete()
-          .eq('id', id);
+          .eq('id', id)
+          .eq('user_id', user.id);
 
         if (error) throw error;
       } else {
+        // Clear all read notifications for this user
         const { error } = await adminClient
           .from('notifications')
           .delete()
+          .eq('user_id', user.id)
           .eq('is_read', true);
 
         if (error) throw error;
@@ -178,7 +215,8 @@ Deno.serve(async (req: Request) => {
 
     return json(req, 405, { error: 'Method not allowed' });
   } catch (err) {
-    console.error('[api-notifications]', err);
-    return json(req, 500, { error: 'Internal server error' });
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error('[api-notifications]', msg);
+    return json(req, 500, { error: 'Internal server error', detail: msg });
   }
 });
