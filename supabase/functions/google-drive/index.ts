@@ -52,7 +52,24 @@ Deno.serve(async (req: Request) => {
     const gRes = await googleFetch(`${DRIVE_BASE}/files?${params}`, fresh);
     if (!gRes.ok) {
       if (gRes.status === 401) return jsonRes(req, 403, { error: "reconnect_required" });
-      throw new Error(`Google Drive API ${gRes.status}`);
+      const errBody = await gRes.text();
+      console.error(`[google-drive] Google API ${gRes.status}:`, errBody);
+      let reason = "unknown";
+      try {
+        const parsed = JSON.parse(errBody);
+        reason = parsed?.error?.errors?.[0]?.reason ?? parsed?.error?.status ?? parsed?.error?.message ?? "unknown";
+      } catch { /* not JSON */ }
+      if (gRes.status === 403) {
+        return jsonRes(req, 403, {
+          error: "google_api_forbidden",
+          reason,
+          detail: errBody.slice(0, 500),
+          hint: reason === "accessNotConfigured"
+            ? "Enable Google Drive API in your Google Cloud project."
+            : "Check OAuth scopes and reconnect Google Workspace.",
+        });
+      }
+      throw new Error(`Google Drive API ${gRes.status}: ${reason}`);
     }
     const gData = await gRes.json();
 
@@ -76,7 +93,8 @@ Deno.serve(async (req: Request) => {
       nextPageToken: gData.nextPageToken ?? null,
     });
   } catch (err) {
-    console.error("[google-drive]", err);
-    return jsonRes(req, 500, { error: "Internal server error" });
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error("[google-drive]", msg);
+    return jsonRes(req, 500, { error: "Internal server error", detail: msg });
   }
 });

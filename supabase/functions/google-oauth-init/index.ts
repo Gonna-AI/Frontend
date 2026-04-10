@@ -50,8 +50,12 @@ Deno.serve(async (req: Request) => {
       .insert({ state, user_id: user.id });
     if (stateErr) throw new Error(`State insert failed: ${stateErr.message} (code: ${stateErr.code})`);
 
-    // Opportunistically clean up expired states
-    await admin.rpc("cleanup_expired_oauth_states").catch(() => {});
+    // Opportunistically clean up expired states.
+    // NOTE: supabase-js rpc() returns a PostgrestFilterBuilder (thenable, no .catch);
+    // we must await inside a try/catch to swallow errors.
+    try {
+      await admin.rpc("cleanup_expired_oauth_states");
+    } catch { /* non-fatal */ }
 
     const redirectUri = Deno.env.get("GOOGLE_REDIRECT_URI")
       ?? `${supabaseUrl}/functions/v1/google-oauth-callback`;

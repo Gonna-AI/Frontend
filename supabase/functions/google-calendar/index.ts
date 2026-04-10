@@ -75,7 +75,25 @@ Deno.serve(async (req: Request) => {
       );
       if (!gRes.ok) {
         if (gRes.status === 401) return jsonRes(req, 403, { error: "reconnect_required" });
-        throw new Error(`Google Calendar API ${gRes.status}`);
+        const errBody = await gRes.text();
+        console.error(`[google-calendar] Google API ${gRes.status}:`, errBody);
+        // Surface Google's own reason (e.g. accessNotConfigured, insufficientPermissions)
+        let reason = "unknown";
+        try {
+          const parsed = JSON.parse(errBody);
+          reason = parsed?.error?.errors?.[0]?.reason ?? parsed?.error?.status ?? parsed?.error?.message ?? "unknown";
+        } catch { /* not JSON */ }
+        if (gRes.status === 403) {
+          return jsonRes(req, 403, {
+            error: "google_api_forbidden",
+            reason,
+            detail: errBody.slice(0, 500),
+            hint: reason === "accessNotConfigured"
+              ? "Enable Google Calendar API in your Google Cloud project."
+              : "Check OAuth scopes and reconnect Google Workspace.",
+          });
+        }
+        throw new Error(`Google Calendar API ${gRes.status}: ${reason}`);
       }
       const gData = await gRes.json();
       const now = new Date().toISOString();
@@ -149,8 +167,9 @@ Deno.serve(async (req: Request) => {
 
     return jsonRes(req, 404, { error: "Not found" });
   } catch (err) {
-    console.error("[google-calendar]", err);
-    return jsonRes(req, 500, { error: "Internal server error" });
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error("[google-calendar]", msg);
+    return jsonRes(req, 500, { error: "Internal server error", detail: msg });
   }
 });
 
