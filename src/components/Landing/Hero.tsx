@@ -1,7 +1,112 @@
+import { useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../../contexts/LanguageContext';
 
+const heroVideoSrc = '/hero-logo-video.mp4';
+
+const HeroLogoVideo = () => {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+
+    if (!video || !canvas) {
+      return;
+    }
+
+    const context = canvas.getContext('2d', { willReadFrequently: true });
+
+    if (!context) {
+      return;
+    }
+
+    let frameId = 0;
+    let isDisposed = false;
+
+    const renderFrame = () => {
+      if (isDisposed || video.readyState < HTMLMediaElement.HAVE_CURRENT_DATA || video.videoWidth === 0 || video.videoHeight === 0) {
+        frameId = window.requestAnimationFrame(renderFrame);
+        return;
+      }
+
+      if (canvas.width !== video.videoWidth || canvas.height !== video.videoHeight) {
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+      }
+
+      context.clearRect(0, 0, canvas.width, canvas.height);
+      context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+      const frame = context.getImageData(0, 0, canvas.width, canvas.height);
+      const { data } = frame;
+
+      for (let index = 0; index < data.length; index += 4) {
+        const brightness = Math.max(data[index], data[index + 1], data[index + 2]);
+
+        if (brightness <= 14) {
+          data[index + 3] = 0;
+          continue;
+        }
+
+        const normalizedAlpha = Math.min(1, (brightness - 14) / 120);
+        data[index + 3] = Math.round(Math.pow(normalizedAlpha, 1.35) * 255);
+      }
+
+      context.putImageData(frame, 0, 0);
+      frameId = window.requestAnimationFrame(renderFrame);
+    };
+
+    const startPlayback = async () => {
+      try {
+        await video.play();
+      } catch {
+        return;
+      }
+
+      if (!frameId) {
+        frameId = window.requestAnimationFrame(renderFrame);
+      }
+    };
+
+    startPlayback();
+
+    return () => {
+      isDisposed = true;
+      window.cancelAnimationFrame(frameId);
+      video.pause();
+    };
+  }, []);
+
+  return (
+    <div
+      className="relative z-10 flex h-full w-full items-center justify-center"
+      style={{
+        maskImage: 'radial-gradient(circle at center, rgba(0,0,0,1) 60%, rgba(0,0,0,0.98) 80%, transparent 100%)',
+        WebkitMaskImage: 'radial-gradient(circle at center, rgba(0,0,0,1) 60%, rgba(0,0,0,0.98) 80%, transparent 100%)',
+      }}
+    >
+      <canvas
+        ref={canvasRef}
+        aria-hidden="true"
+        className="w-full h-auto max-h-full scale-[1.02]"
+      />
+      <video
+        ref={videoRef}
+        autoPlay
+        loop
+        muted
+        playsInline
+        preload="auto"
+        className="sr-only"
+      >
+        <source src={heroVideoSrc} type="video/mp4" />
+      </video>
+    </div>
+  );
+};
 
 const Hero = () => {
   const navigate = useNavigate();
@@ -91,29 +196,21 @@ const Hero = () => {
             </motion.div>
           </div>
 
-          {/* Right Column: Image */}
+          {/* Right Column: Logo Video */}
           <div
             className="relative hidden lg:block"
           >
-            {/* 
-                Visual Scale: 3x size (Gigantic).
-                Constraint: In Frame (max-h-screen, max-w-screen).
-                Position: Centered/Left-shifted to avoid cutoff.
-            */}
-            <div className="relative w-[275%] -ml-[80%] h-[100vh] flex items-center justify-center -mt-[45%]">
-              <img
-                src="/hero-dashboard-graphic.png"
-                alt="Hero Graphic"
-                fetchPriority="high"
-                loading="eager"
-                width="1200"
-                height="800"
-                className="w-full h-full object-contain scale-140"
-                style={{
-                  filter: 'drop-shadow(0 25px 50px rgba(0,0,0,0.5))'
-                }}
-              />
-            </div>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.96 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="relative w-[180%] -ml-[12%] h-[84vh] flex items-center justify-center -mt-[16%]"
+            >
+              <div className="relative flex h-full w-full items-center justify-center">
+                <div className="absolute h-[70%] w-[70%] rounded-full bg-white/12 blur-[120px] opacity-70" />
+                <HeroLogoVideo />
+              </div>
+            </motion.div>
           </div>
 
         </div>
