@@ -42,17 +42,29 @@ const HeroLogoVideo = () => {
 
       const frame = context.getImageData(0, 0, canvas.width, canvas.height);
       const { data } = frame;
+      const fadeStartY = canvas.height * 0.7;
+      const fadeEndY = canvas.height * 0.98;
 
-      for (let index = 0; index < data.length; index += 4) {
-        const brightness = Math.max(data[index], data[index + 1], data[index + 2]);
+      for (let y = 0; y < canvas.height; y += 1) {
+        let bottomFade = 1;
 
-        if (brightness <= 14) {
-          data[index + 3] = 0;
-          continue;
+        if (y > fadeStartY) {
+          const progress = Math.min(1, (y - fadeStartY) / (fadeEndY - fadeStartY));
+          bottomFade = 1 - Math.pow(progress, 1.8);
         }
 
-        const normalizedAlpha = Math.min(1, (brightness - 14) / 120);
-        data[index + 3] = Math.round(Math.pow(normalizedAlpha, 1.35) * 255);
+        for (let x = 0; x < canvas.width; x += 1) {
+          const index = (y * canvas.width + x) * 4;
+          const brightness = Math.max(data[index], data[index + 1], data[index + 2]);
+
+          if (brightness <= 14) {
+            data[index + 3] = 0;
+            continue;
+          }
+
+          const normalizedAlpha = Math.min(1, (brightness - 14) / 120);
+          data[index + 3] = Math.round(Math.pow(normalizedAlpha, 1.35) * bottomFade * 255);
+        }
       }
 
       context.putImageData(frame, 0, 0);
@@ -88,11 +100,19 @@ const HeroLogoVideo = () => {
         WebkitMaskImage: 'radial-gradient(circle at center, rgba(0,0,0,1) 60%, rgba(0,0,0,0.98) 80%, transparent 100%)',
       }}
     >
-      <canvas
-        ref={canvasRef}
-        aria-hidden="true"
-        className="w-full h-auto max-h-full scale-[1.02]"
-      />
+      <div
+        className="flex h-full w-full items-center justify-center overflow-hidden"
+        style={{
+          maskImage: 'linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 68%, rgba(0,0,0,0.92) 78%, rgba(0,0,0,0.45) 90%, transparent 100%)',
+          WebkitMaskImage: 'linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 68%, rgba(0,0,0,0.92) 78%, rgba(0,0,0,0.45) 90%, transparent 100%)',
+        }}
+      >
+        <canvas
+          ref={canvasRef}
+          aria-hidden="true"
+          className="w-full h-auto max-h-full scale-[1.02]"
+        />
+      </div>
       <video
         ref={videoRef}
         autoPlay
