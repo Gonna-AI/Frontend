@@ -27,7 +27,7 @@ const researchTopics: ResearchTopic[] = [
       'A research program in reliable task execution, with benchmark validation used as one external measure of system quality.',
     summary:
       'Juris is ClerkTree research on building dependable task-oriented agents that operate with high precision under tool, schema, and latency constraints. The emphasis is not on open-ended theatrical reasoning, but on execution quality: selecting the right action path, preserving structural correctness, minimizing failure cascades, and improving consistency across large and heterogeneous interfaces. In this entry, VAKRA is used as an external validation setting rather than the definition of the system itself.',
-    status: 'Externally validated',
+    status: 'Extern validiert',
     benchmarkUrl: 'https://www.ibm.com/new/announcements/introducing-vakra-benchmark',
     leaderboardUrl: 'https://huggingface.co/spaces/ibm-research/vakra',
     approachTitle: 'Method and Research Direction',
