@@ -1,4 +1,4 @@
-import { ArrowLeft, ArrowUpRight, Clock3, Cpu, Database, Sparkles } from 'lucide-react';
+import { ArrowLeft, ArrowUpRight, Cpu, Sparkles } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import SharedHeader from '../components/Layout/SharedHeader';
@@ -12,66 +12,44 @@ type ResearchTopic = {
   subtitle: string;
   summary: string;
   status: string;
-  repoUrl: string;
+  benchmarkUrl: string;
+  leaderboardUrl: string;
   metrics: Array<{ label: string; value: string }>;
-  highlights: string[];
-  datasets: string[];
-  notes: string[];
+  approachTitle: string;
+  approach: string[];
 };
 
 const researchTopics: ResearchTopic[] = [
   {
     slug: 'juris-vakra-capability-2',
     badge: 'Current Focus',
-    title: 'Juris for VAKRA Capability 2',
-    subtitle: 'A capability-wide dashboard-API benchmark submission with deterministic tool routing.',
+    title: 'Juris',
+    subtitle:
+      'A research program in reliable task execution, with benchmark validation used as one external measure of system quality.',
     summary:
-      'Juris is ClerkTree research on constrained agent execution for dashboard-style API benchmarks. This first public entry captures the VAKRA capability 2 submission, covering all released domains with a single-tool execution loop, deterministic overrides, and argument normalization to reduce routing drift.',
-    status: 'Validated submission',
-    repoUrl: 'https://github.com/amethystani/juris-vakra-cap2-submission',
+      'Juris is ClerkTree research on building dependable task-oriented agents that operate with high precision under tool, schema, and latency constraints. The emphasis is not on open-ended theatrical reasoning, but on execution quality: selecting the right action path, preserving structural correctness, minimizing failure cascades, and improving consistency across large and heterogeneous interfaces. In this entry, VAKRA is used as an external validation setting rather than the definition of the system itself.',
+    status: 'Externally validated',
+    benchmarkUrl: 'https://www.ibm.com/new/announcements/introducing-vakra-benchmark',
+    leaderboardUrl: 'https://huggingface.co/spaces/ibm-research/vakra',
     metrics: [
       { label: 'Completion Rate', value: '94.99%' },
       { label: 'Successful Runs', value: '1,517 / 1,597' },
       { label: 'Domain Coverage', value: '17 / 17' },
       { label: 'Average Duration', value: '62.89s' },
     ],
-    highlights: [
-      'Capability-level submission instead of a single-domain sample, aligned to current evaluator guidance.',
-      'Hybrid lexical and semantic tool shortlisting with deterministic overrides for failure-prone query classes.',
-      'Constrained one-tool execution loop to limit free-form reasoning drift on large API inventories.',
-    ],
-    datasets: [
-      'california_schools',
-      'card_games',
-      'chicago_crime',
-      'debit_card_specializing',
-      'european_football_2',
-      'financial',
-      'formula_1',
-      'movie',
-      'movie_3',
-      'movielens',
-      'movies_4',
-      'public_review_platform',
-      'simpson_episodes',
-      'superhero',
-      'thrombosis_prediction',
-      'toxicology',
-      'video_games',
-    ],
-    notes: [
-      'Primary model: Qwen/Qwen3.6-35B-A3B served locally via Ollama as qwen3.6:35b-a3b.',
-      'Hardware: NVIDIA RTX 4500 Ada Generation with 24 GB VRAM.',
-      'Validation passed for all 17 output files in the official VAKRA validator.',
+    approachTitle: 'Method and Research Direction',
+    approach: [
+      'Juris is designed around the idea that strong agent performance comes from disciplined execution architecture rather than unconstrained autonomy. The system prioritizes action selection, interface alignment, and error containment so that it behaves predictably even when the task surface is broad and operationally noisy.',
+      'A central part of the work is reducing avoidable decision entropy. Instead of allowing the model to wander through long free-form tool chains, the system narrows the action space early, enforces tighter correspondence between query intent and tool selection, and biases toward the smallest valid execution path. This improves reliability, lowers latency overhead from unproductive loops, and makes outcomes more stable across varied workloads.',
+      'The research also focuses on structural robustness. In practical deployments, failures often come less from raw intelligence limits and more from malformed arguments, wrong interface choice, shallow ambiguity handling, or compounding recovery behavior. Juris addresses this by treating orchestration quality as a first-class research target, allowing the agent to remain precise under operational constraints without exposing internal heuristics or overfitting to presentation.',
+      'Benchmark evaluation is used here as external evidence that the execution framework generalizes under pressure. VAKRA is useful because it stresses real tool-use behavior across multiple domains, making it possible to test whether improvements in routing discipline, execution control, and answer shaping translate into measurable gains beyond internal testing alone.',
     ],
   },
 ];
 
 function getResearchCanonical(slug?: string) {
   if (typeof window === 'undefined') {
-    return slug
-      ? `https://clerktree.com/research/${slug}`
-      : 'https://clerktree.com/research';
+    return slug ? `https://clerktree.com/research/${slug}` : 'https://clerktree.com/research';
   }
 
   const { hostname, origin } = window.location;
@@ -187,10 +165,14 @@ function ResearchLanding({ topic, isResearchHost }: { topic: ResearchTopic; isRe
                 {topic.metrics.map((metric) => (
                   <div
                     key={metric.label}
-                    className="rounded-[28px] border border-white/12 bg-black/25 px-6 py-7"
+                    className="rounded-[28px] border border-white/12 bg-black/25 px-5 py-6 md:px-6 md:py-7"
                   >
-                    <p className="text-sm uppercase tracking-[0.22em] text-white/45">{metric.label}</p>
-                    <p className="mt-6 text-3xl font-semibold leading-tight text-white">{metric.value}</p>
+                    <p className="text-[11px] uppercase tracking-[0.22em] text-white/45 md:text-sm">
+                      {metric.label}
+                    </p>
+                    <p className="mt-5 text-2xl font-semibold leading-tight text-white md:mt-6 md:text-3xl">
+                      {metric.value}
+                    </p>
                   </div>
                 ))}
               </div>
@@ -220,7 +202,7 @@ function ResearchDetail({ topic, isResearchHost }: { topic: ResearchTopic; isRes
       />
 
       <ResearchShell>
-        <div className="mx-auto max-w-6xl">
+        <div className="mx-auto max-w-5xl">
           <button
             type="button"
             onClick={() => navigate(landingPath)}
@@ -230,14 +212,14 @@ function ResearchDetail({ topic, isResearchHost }: { topic: ResearchTopic; isRes
             Back to research
           </button>
 
-          <div className="rounded-[32px] border border-[#FF8A5B]/20 bg-gradient-to-br from-[#FF8A5B]/8 via-white/[0.03] to-white/[0.02] p-8 backdrop-blur-sm md:p-10">
-            <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
+          <div className="rounded-[32px] border border-[#FF8A5B]/20 bg-gradient-to-br from-[#FF8A5B]/8 via-white/[0.03] to-white/[0.02] p-6 backdrop-blur-sm sm:p-8 md:p-10">
+            <div className="flex flex-col gap-8">
               <div className="max-w-3xl">
                 <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-[#FF8A5B]/25 bg-[#FF8A5B]/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-[#FFB089]">
                   <Sparkles className="h-4 w-4" />
                   {topic.status}
                 </div>
-                <h1 className="text-4xl font-bold tracking-tight text-white md:text-6xl">
+                <h1 className="text-4xl font-bold tracking-tight text-white md:text-5xl">
                   {topic.title}
                 </h1>
                 <p className="mt-4 max-w-2xl text-base leading-relaxed text-white/70 md:text-lg">
@@ -245,7 +227,7 @@ function ResearchDetail({ topic, isResearchHost }: { topic: ResearchTopic; isRes
                 </p>
               </div>
 
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+              <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
                 {topic.metrics.map((metric) => (
                   <div
                     key={metric.label}
@@ -259,8 +241,8 @@ function ResearchDetail({ topic, isResearchHost }: { topic: ResearchTopic; isRes
             </div>
           </div>
 
-          <section className="mt-8 rounded-[32px] border border-white/10 bg-white/[0.03] p-8 backdrop-blur-sm md:p-10">
-            <div className="flex flex-col gap-6 border-b border-white/10 pb-8 md:flex-row md:items-start md:justify-between">
+          <section className="mt-8 rounded-[32px] border border-white/10 bg-white/[0.03] p-6 backdrop-blur-sm sm:p-8 md:p-10">
+            <div className="flex flex-col gap-6 border-b border-white/10 pb-8 lg:flex-row lg:items-start lg:justify-between">
               <div className="max-w-3xl">
                 <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#FF8A5B]">
                   Detailed overview
@@ -268,68 +250,46 @@ function ResearchDetail({ topic, isResearchHost }: { topic: ResearchTopic; isRes
                 <h2 className="mt-4 text-3xl font-bold tracking-tight text-white md:text-4xl">
                   {topic.title}
                 </h2>
-                <p className="mt-4 text-base leading-relaxed text-white/75 md:text-lg">
+                <p className="mt-4 max-w-[62ch] text-base leading-relaxed text-white/75 md:text-lg">
                   {topic.summary}
                 </p>
               </div>
 
-              <div className="flex flex-col gap-3 sm:flex-row md:flex-col">
+              <div className="flex flex-col gap-3 sm:flex-row lg:flex-col">
                 <a
-                  href={topic.repoUrl}
+                  href={topic.benchmarkUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#E5E5E5] px-5 py-3 font-semibold text-black transition-all duration-300 hover:bg-white"
                 >
-                  View Repository
+                  What Is VAKRA
+                  <ArrowUpRight className="h-4 w-4" />
+                </a>
+                <a
+                  href={topic.leaderboardUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/15 bg-white/5 px-5 py-3 font-semibold text-white transition-all duration-300 hover:bg-white/10"
+                >
+                  View Leaderboard
                   <ArrowUpRight className="h-4 w-4" />
                 </a>
               </div>
             </div>
 
-            <div className="grid gap-6 pt-8 md:grid-cols-2">
-              <div className="rounded-[28px] border border-white/10 bg-black/20 p-6">
+            <div className="pt-8">
+              <div className="rounded-[28px] border border-white/10 bg-black/20 p-5 sm:p-6 md:p-8">
                 <div className="mb-4 flex items-center gap-3">
                   <Cpu className="h-5 w-5 text-[#FF8A5B]" />
-                  <h3 className="text-lg font-semibold text-white">Approach</h3>
+                  <h3 className="text-lg font-semibold text-white">{topic.approachTitle}</h3>
                 </div>
-                <div className="space-y-3">
-                  {topic.highlights.map((highlight) => (
-                    <p key={highlight} className="text-sm leading-relaxed text-white/72">
-                      {highlight}
+                <div className="space-y-5">
+                  {topic.approach.map((paragraph) => (
+                    <p key={paragraph} className="max-w-[66ch] text-sm leading-7 text-white/72 md:text-[15px]">
+                      {paragraph}
                     </p>
                   ))}
                 </div>
-              </div>
-
-              <div className="rounded-[28px] border border-white/10 bg-black/20 p-6">
-                <div className="mb-4 flex items-center gap-3">
-                  <Clock3 className="h-5 w-5 text-[#FF8A5B]" />
-                  <h3 className="text-lg font-semibold text-white">Run Notes</h3>
-                </div>
-                <div className="space-y-3">
-                  {topic.notes.map((note) => (
-                    <p key={note} className="text-sm leading-relaxed text-white/72">
-                      {note}
-                    </p>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-6 rounded-[28px] border border-white/10 bg-black/20 p-6">
-              <div className="mb-5 flex items-center gap-3">
-                <Database className="h-5 w-5 text-[#FF8A5B]" />
-                <h3 className="text-lg font-semibold text-white">Covered domains</h3>
-              </div>
-              <div className="flex flex-wrap gap-3">
-                {topic.datasets.map((dataset) => (
-                  <span
-                    key={dataset}
-                    className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/75"
-                  >
-                    {dataset}
-                  </span>
-                ))}
               </div>
             </div>
           </section>
