@@ -1,6 +1,5 @@
-import { useEffect, useMemo, useState } from 'react';
+import { ArrowLeft, ArrowUpRight, Clock3, Cpu, Database, Sparkles } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowUpRight, CheckCircle2, Clock3, Cpu, Database, Sparkles } from 'lucide-react';
 
 import SharedHeader from '../components/Layout/SharedHeader';
 import Footer from '../components/Landing/Footer';
@@ -14,7 +13,6 @@ type ResearchTopic = {
   summary: string;
   status: string;
   repoUrl: string;
-  artifactUrl: string;
   metrics: Array<{ label: string; value: string }>;
   highlights: string[];
   datasets: string[];
@@ -24,15 +22,13 @@ type ResearchTopic = {
 const researchTopics: ResearchTopic[] = [
   {
     slug: 'juris-vakra-capability-2',
-    badge: 'Featured Research',
+    badge: 'Current Focus',
     title: 'Juris for VAKRA Capability 2',
     subtitle: 'A capability-wide dashboard-API benchmark submission with deterministic tool routing.',
     summary:
       'Juris is ClerkTree research on constrained agent execution for dashboard-style API benchmarks. This first public entry captures the VAKRA capability 2 submission, covering all released domains with a single-tool execution loop, deterministic overrides, and argument normalization to reduce routing drift.',
     status: 'Validated submission',
     repoUrl: 'https://github.com/amethystani/juris-vakra-cap2-submission',
-    artifactUrl:
-      'https://github.com/amethystani/juris-vakra-cap2-submission/releases/download/v1/juris_vakra_capability2_submission_20260504.zip',
     metrics: [
       { label: 'Completion Rate', value: '94.99%' },
       { label: 'Successful Runs', value: '1,517 / 1,597' },
@@ -86,47 +82,13 @@ function getResearchCanonical(slug?: string) {
   return slug ? `${origin}/research/${slug}` : `${origin}/research`;
 }
 
-export default function Research() {
-  const navigate = useNavigate();
-  const { topicSlug } = useParams<{ topicSlug?: string }>();
-  const defaultTopic = researchTopics[0];
-  const activeTopic = useMemo(
-    () => researchTopics.find((topic) => topic.slug === topicSlug) ?? defaultTopic,
-    [topicSlug]
-  );
-  const [selectedTopic, setSelectedTopic] = useState(activeTopic.slug);
+function getTopicPath(slug: string, isResearchHost: boolean) {
+  return isResearchHost ? `/${slug}` : `/research/${slug}`;
+}
 
-  useEffect(() => {
-    setSelectedTopic(activeTopic.slug);
-  }, [activeTopic.slug]);
-
-  const isResearchHost =
-    typeof window !== 'undefined' && window.location.hostname === 'research.clerktree.com';
-
-  const handleTopicClick = (slug: string) => {
-    setSelectedTopic(slug);
-    if (isResearchHost) {
-      navigate(slug === defaultTopic.slug ? '/' : `/${slug}`);
-      return;
-    }
-
-    navigate(slug === defaultTopic.slug ? '/research' : `/research/${slug}`);
-  };
-
+function ResearchShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="bg-[rgb(10,10,10)] min-h-screen relative overflow-x-hidden">
-      <SEO
-        title="Research"
-        description="ClerkTree research on agent systems, benchmark submissions, and applied reasoning workflows."
-        canonical={getResearchCanonical(activeTopic.slug === defaultTopic.slug ? undefined : activeTopic.slug)}
-        openGraph={{
-          title: 'ClerkTree Research',
-          description:
-            'Research updates from ClerkTree, starting with the Juris VAKRA capability 2 benchmark submission.',
-          url: getResearchCanonical(activeTopic.slug === defaultTopic.slug ? undefined : activeTopic.slug),
-        }}
-      />
-
       <div className="fixed inset-0 bg-[rgb(10,10,10)] z-0 pointer-events-none">
         <div
           className="absolute top-[-12%] right-[-10%] h-[110%] w-[82%]"
@@ -171,41 +133,120 @@ export default function Research() {
         <SharedHeader />
       </div>
 
-      <div className="relative z-10 px-6 pb-24 pt-36 md:pt-44">
-        <div className="mx-auto max-w-6xl">
-          <div className="mb-16 text-center">
-            <p className="mb-6 text-xs font-semibold uppercase tracking-[0.28em] text-[#FF8A5B] sm:text-sm">
-              Research at ClerkTree
-            </p>
-            <h1 className="text-5xl font-bold tracking-tight md:text-7xl">
-              <span className="bg-gradient-to-r from-white via-white/95 to-white/85 bg-clip-text text-transparent">
-                Applied systems research, shipped publicly.
-              </span>
-            </h1>
-            <p className="mx-auto mt-8 max-w-3xl text-lg leading-relaxed text-white/70 md:text-xl">
-              This space tracks the research work behind ClerkTree, from benchmark submissions to
-              agent workflow design. Each topic opens into the implementation notes, validation
-              status, and public artifacts behind the work.
-            </p>
-          </div>
+      <div className="relative z-10 px-6 pb-24 pt-36 md:pt-44">{children}</div>
 
-          <div className="mb-10 rounded-[32px] border border-[#FF8A5B]/20 bg-gradient-to-br from-[#FF8A5B]/8 via-white/[0.03] to-white/[0.02] p-8 backdrop-blur-sm md:p-10">
+      <div className="relative z-10">
+        <Footer />
+      </div>
+    </div>
+  );
+}
+
+function ResearchLanding({ topic, isResearchHost }: { topic: ResearchTopic; isResearchHost: boolean }) {
+  const navigate = useNavigate();
+
+  return (
+    <>
+      <SEO
+        title="Research"
+        description="ClerkTree research on agent systems, benchmark submissions, and applied reasoning workflows."
+        canonical={getResearchCanonical()}
+        openGraph={{
+          title: 'ClerkTree Research',
+          description: 'Research updates from ClerkTree and the public work behind them.',
+          url: getResearchCanonical(),
+        }}
+      />
+
+      <ResearchShell>
+        <div className="mx-auto max-w-[1600px]">
+          <button
+            type="button"
+            onClick={() => navigate(getTopicPath(topic.slug, isResearchHost))}
+            className="group w-full rounded-[42px] border border-[#6d4739] bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.08),transparent_35%),linear-gradient(180deg,rgba(8,8,8,0.96),rgba(6,6,6,0.98))] px-8 py-10 text-left shadow-[0_0_0_1px_rgba(255,138,91,0.05)] transition-all duration-500 hover:border-[#8f5b47] hover:shadow-[0_0_45px_-20px_rgba(255,138,91,0.28)] md:px-14 md:py-16"
+          >
+            <div className="flex flex-col gap-10 xl:flex-row xl:items-center xl:justify-between">
+              <div className="max-w-3xl">
+                <div className="mb-8 inline-flex items-center gap-3 rounded-full border border-[#704738] bg-[#2a1a16]/90 px-6 py-3 text-sm font-semibold uppercase tracking-[0.26em] text-[#ffc29e]">
+                  <Sparkles className="h-4 w-4" />
+                  {topic.badge}
+                </div>
+                <h1 className="max-w-2xl text-5xl font-bold leading-[0.95] tracking-tight text-white md:text-7xl">
+                  {topic.title}
+                </h1>
+                <p className="mt-8 max-w-3xl text-xl leading-relaxed text-white/70 md:text-2xl">
+                  {topic.subtitle}
+                </p>
+                <div className="mt-8 inline-flex items-center gap-3 text-sm font-semibold uppercase tracking-[0.24em] text-[#ffc29e] transition-transform duration-300 group-hover:translate-x-1">
+                  Open research topic
+                  <ArrowUpRight className="h-4 w-4" />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 md:grid-cols-4 xl:min-w-[760px] xl:max-w-[820px]">
+                {topic.metrics.map((metric) => (
+                  <div
+                    key={metric.label}
+                    className="rounded-[28px] border border-white/12 bg-black/25 px-6 py-7"
+                  >
+                    <p className="text-sm uppercase tracking-[0.22em] text-white/45">{metric.label}</p>
+                    <p className="mt-6 text-3xl font-semibold leading-tight text-white">{metric.value}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </button>
+        </div>
+      </ResearchShell>
+    </>
+  );
+}
+
+function ResearchDetail({ topic, isResearchHost }: { topic: ResearchTopic; isResearchHost: boolean }) {
+  const navigate = useNavigate();
+  const landingPath = isResearchHost ? '/' : '/research';
+
+  return (
+    <>
+      <SEO
+        title={topic.title}
+        description={topic.summary}
+        canonical={getResearchCanonical(topic.slug)}
+        openGraph={{
+          title: topic.title,
+          description: topic.summary,
+          url: getResearchCanonical(topic.slug),
+        }}
+      />
+
+      <ResearchShell>
+        <div className="mx-auto max-w-6xl">
+          <button
+            type="button"
+            onClick={() => navigate(landingPath)}
+            className="mb-8 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-4 py-2 text-sm text-white/70 transition-colors hover:text-white"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to research
+          </button>
+
+          <div className="rounded-[32px] border border-[#FF8A5B]/20 bg-gradient-to-br from-[#FF8A5B]/8 via-white/[0.03] to-white/[0.02] p-8 backdrop-blur-sm md:p-10">
             <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
               <div className="max-w-3xl">
                 <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-[#FF8A5B]/25 bg-[#FF8A5B]/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-[#FFB089]">
                   <Sparkles className="h-4 w-4" />
-                  Current focus
+                  {topic.status}
                 </div>
-                <h2 className="text-3xl font-bold tracking-tight text-white md:text-5xl">
-                  {activeTopic.title}
-                </h2>
+                <h1 className="text-4xl font-bold tracking-tight text-white md:text-6xl">
+                  {topic.title}
+                </h1>
                 <p className="mt-4 max-w-2xl text-base leading-relaxed text-white/70 md:text-lg">
-                  {activeTopic.subtitle}
+                  {topic.subtitle}
                 </p>
               </div>
 
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-                {activeTopic.metrics.map((metric) => (
+                {topic.metrics.map((metric) => (
                   <div
                     key={metric.label}
                     className="rounded-2xl border border-white/10 bg-black/25 px-4 py-4"
@@ -218,138 +259,98 @@ export default function Research() {
             </div>
           </div>
 
-          <div className="grid gap-8 lg:grid-cols-[340px_minmax(0,1fr)]">
-            <aside className="space-y-4">
-              {researchTopics.map((topic) => {
-                const isSelected = selectedTopic === topic.slug;
-
-                return (
-                  <button
-                    key={topic.slug}
-                    type="button"
-                    onClick={() => handleTopicClick(topic.slug)}
-                    className={`w-full rounded-[28px] border p-6 text-left transition-all duration-300 ${
-                      isSelected
-                        ? 'border-[#FF8A5B]/40 bg-[#FF8A5B]/10 shadow-[0_0_40px_-15px_rgba(255,138,91,0.35)]'
-                        : 'border-white/10 bg-white/[0.03] hover:border-white/20 hover:bg-white/[0.05]'
-                    }`}
-                  >
-                    <div className="mb-4 flex items-center justify-between gap-3">
-                      <span className="rounded-full border border-white/10 bg-black/20 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-white/60">
-                        {topic.badge}
-                      </span>
-                      {isSelected ? (
-                        <CheckCircle2 className="h-5 w-5 text-[#FF8A5B]" />
-                      ) : (
-                        <ArrowUpRight className="h-5 w-5 text-white/35" />
-                      )}
-                    </div>
-                    <h3 className="text-xl font-semibold tracking-tight text-white">{topic.title}</h3>
-                    <p className="mt-3 text-sm leading-relaxed text-white/65">{topic.summary}</p>
-                  </button>
-                );
-              })}
-            </aside>
-
-            <section className="rounded-[32px] border border-white/10 bg-white/[0.03] p-8 backdrop-blur-sm md:p-10">
-              <div className="flex flex-col gap-6 border-b border-white/10 pb-8 md:flex-row md:items-start md:justify-between">
-                <div className="max-w-3xl">
-                  <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#FF8A5B]">
-                    {activeTopic.status}
-                  </p>
-                  <h2 className="mt-4 text-3xl font-bold tracking-tight text-white md:text-4xl">
-                    {activeTopic.title}
-                  </h2>
-                  <p className="mt-4 text-base leading-relaxed text-white/75 md:text-lg">
-                    {activeTopic.summary}
-                  </p>
-                </div>
-
-                <div className="flex flex-col gap-3 sm:flex-row md:flex-col">
-                  <a
-                    href={activeTopic.repoUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#E5E5E5] px-5 py-3 font-semibold text-black transition-all duration-300 hover:bg-white"
-                  >
-                    View Repository
-                    <ArrowUpRight className="h-4 w-4" />
-                  </a>
-                  <a
-                    href={activeTopic.artifactUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/15 bg-white/5 px-5 py-3 font-semibold text-white transition-all duration-300 hover:bg-white/10"
-                  >
-                    Download Artifact
-                    <ArrowUpRight className="h-4 w-4" />
-                  </a>
-                </div>
+          <section className="mt-8 rounded-[32px] border border-white/10 bg-white/[0.03] p-8 backdrop-blur-sm md:p-10">
+            <div className="flex flex-col gap-6 border-b border-white/10 pb-8 md:flex-row md:items-start md:justify-between">
+              <div className="max-w-3xl">
+                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#FF8A5B]">
+                  Detailed overview
+                </p>
+                <h2 className="mt-4 text-3xl font-bold tracking-tight text-white md:text-4xl">
+                  {topic.title}
+                </h2>
+                <p className="mt-4 text-base leading-relaxed text-white/75 md:text-lg">
+                  {topic.summary}
+                </p>
               </div>
 
-              <div className="grid gap-6 pt-8 md:grid-cols-2">
-                <div className="rounded-[28px] border border-white/10 bg-black/20 p-6">
-                  <div className="mb-4 flex items-center gap-3">
-                    <Cpu className="h-5 w-5 text-[#FF8A5B]" />
-                    <h3 className="text-lg font-semibold text-white">Approach</h3>
-                  </div>
-                  <div className="space-y-3">
-                    {activeTopic.highlights.map((highlight) => (
-                      <p key={highlight} className="text-sm leading-relaxed text-white/72">
-                        {highlight}
-                      </p>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="rounded-[28px] border border-white/10 bg-black/20 p-6">
-                  <div className="mb-4 flex items-center gap-3">
-                    <Clock3 className="h-5 w-5 text-[#FF8A5B]" />
-                    <h3 className="text-lg font-semibold text-white">Run Notes</h3>
-                  </div>
-                  <div className="space-y-3">
-                    {activeTopic.notes.map((note) => (
-                      <p key={note} className="text-sm leading-relaxed text-white/72">
-                        {note}
-                      </p>
-                    ))}
-                  </div>
-                </div>
+              <div className="flex flex-col gap-3 sm:flex-row md:flex-col">
+                <a
+                  href={topic.repoUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#E5E5E5] px-5 py-3 font-semibold text-black transition-all duration-300 hover:bg-white"
+                >
+                  View Repository
+                  <ArrowUpRight className="h-4 w-4" />
+                </a>
               </div>
+            </div>
 
-              <div className="mt-6 rounded-[28px] border border-white/10 bg-black/20 p-6">
-                <div className="mb-5 flex items-center gap-3">
-                  <Database className="h-5 w-5 text-[#FF8A5B]" />
-                  <h3 className="text-lg font-semibold text-white">Covered domains</h3>
+            <div className="grid gap-6 pt-8 md:grid-cols-2">
+              <div className="rounded-[28px] border border-white/10 bg-black/20 p-6">
+                <div className="mb-4 flex items-center gap-3">
+                  <Cpu className="h-5 w-5 text-[#FF8A5B]" />
+                  <h3 className="text-lg font-semibold text-white">Approach</h3>
                 </div>
-                <div className="flex flex-wrap gap-3">
-                  {activeTopic.datasets.map((dataset) => (
-                    <span
-                      key={dataset}
-                      className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/75"
-                    >
-                      {dataset}
-                    </span>
+                <div className="space-y-3">
+                  {topic.highlights.map((highlight) => (
+                    <p key={highlight} className="text-sm leading-relaxed text-white/72">
+                      {highlight}
+                    </p>
                   ))}
                 </div>
               </div>
 
-              <div className="mt-6 rounded-[28px] border border-[#FF8A5B]/15 bg-gradient-to-r from-[#FF8A5B]/8 to-transparent p-6">
-                <p className="text-sm uppercase tracking-[0.2em] text-[#FFB089]">Next in queue</p>
-                <p className="mt-3 max-w-2xl text-base leading-relaxed text-white/70">
-                  This page is structured to grow into a research index. Additional topics can be
-                  added as new public artifacts land, and each one will appear as another tab in the
-                  left rail without changing the overall page layout.
-                </p>
+              <div className="rounded-[28px] border border-white/10 bg-black/20 p-6">
+                <div className="mb-4 flex items-center gap-3">
+                  <Clock3 className="h-5 w-5 text-[#FF8A5B]" />
+                  <h3 className="text-lg font-semibold text-white">Run Notes</h3>
+                </div>
+                <div className="space-y-3">
+                  {topic.notes.map((note) => (
+                    <p key={note} className="text-sm leading-relaxed text-white/72">
+                      {note}
+                    </p>
+                  ))}
+                </div>
               </div>
-            </section>
-          </div>
-        </div>
-      </div>
+            </div>
 
-      <div className="relative z-10">
-        <Footer />
-      </div>
-    </div>
+            <div className="mt-6 rounded-[28px] border border-white/10 bg-black/20 p-6">
+              <div className="mb-5 flex items-center gap-3">
+                <Database className="h-5 w-5 text-[#FF8A5B]" />
+                <h3 className="text-lg font-semibold text-white">Covered domains</h3>
+              </div>
+              <div className="flex flex-wrap gap-3">
+                {topic.datasets.map((dataset) => (
+                  <span
+                    key={dataset}
+                    className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/75"
+                  >
+                    {dataset}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </section>
+        </div>
+      </ResearchShell>
+    </>
   );
+}
+
+export default function Research() {
+  const { topicSlug } = useParams<{ topicSlug?: string }>();
+  const isResearchHost =
+    typeof window !== 'undefined' && window.location.hostname === 'research.clerktree.com';
+
+  const topic = topicSlug
+    ? researchTopics.find((candidate) => candidate.slug === topicSlug)
+    : undefined;
+
+  if (topicSlug && topic) {
+    return <ResearchDetail topic={topic} isResearchHost={isResearchHost} />;
+  }
+
+  return <ResearchLanding topic={researchTopics[0]} isResearchHost={isResearchHost} />;
 }
