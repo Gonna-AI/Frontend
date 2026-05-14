@@ -23,6 +23,7 @@ const SmartContracts = lazyWithRetry(() => import('./pages/SmartContracts'), 'Sm
 const Documents = lazyWithRetry(() => import('./pages/Documents'), 'Documents');
 const Contact = lazyWithRetry(() => import('./pages/Contact'), 'Contact');
 const About = lazyWithRetry(() => import('./pages/About'), 'About');
+const Research = lazyWithRetry(() => import('./pages/Research'), 'Research');
 const Careers = lazyWithRetry(() => import('./pages/Careers'), 'Careers');
 const Solutions = lazyWithRetry(() => import('./pages/Solutions'), 'Solutions');
 const Blog = lazyWithRetry(() => import('./pages/Blog'), 'Blog');
@@ -56,6 +57,9 @@ const queryClient = new QueryClient({
 });
 
 function App() {
+  const isResearchHost =
+    typeof window !== 'undefined' && window.location.hostname === 'research.clerktree.com';
+
   return (
     <AuthProvider>
       <LanguageProvider>
@@ -72,7 +76,8 @@ function App() {
               <main className="flex-1 flex flex-col">
                 <Routes>
                   {/* Public Routes */}
-                  <Route path="/" element={<Landing />} />
+                  <Route path="/" element={isResearchHost ? <Research /> : <Landing />} />
+                  <Route path="/:topicSlug" element={isResearchHost ? <Research /> : <NotFound />} />
 
                   {/* Auth Routes */}
                   <Route path="/login" element={<AuthPage />} />
@@ -101,6 +106,8 @@ function App() {
 
                   {/* Company Pages */}
                   <Route path="/about" element={<About />} />
+                  <Route path="/research" element={<Research />} />
+                  <Route path="/research/:topicSlug" element={<Research />} />
                   <Route path="/careers" element={<Careers />} />
                   <Route path="/solutions" element={<Solutions />} />
                   <Route path="/contact" element={<Contact />} />

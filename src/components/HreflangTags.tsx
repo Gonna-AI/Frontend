@@ -5,12 +5,12 @@ const HreflangTags = () => {
     const location = useLocation();
 
     useEffect(() => {
-        const hostname = 'https://clerktree.com';
+        const origin = typeof window !== 'undefined' ? window.location.origin : 'https://clerktree.com';
         // Remove trailing slash if present (except for root)
         const path = location.pathname === '/' ? '' : location.pathname.replace(/\/$/, '');
 
         // Base URL without query params for English (default)
-        const baseUrl = `${hostname}${path}`;
+        const baseUrl = `${origin}${path}`;
 
         // Define language variants
         const variants = [

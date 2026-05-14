@@ -6,7 +6,7 @@ const CanonicalLink = () => {
 
     useEffect(() => {
         // Determine the canonical URL
-        const baseUrl = 'https://clerktree.com';
+        const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://clerktree.com';
         const path = location.pathname === '/' ? '' : location.pathname.replace(/\/$/, '');
         const canonicalUrl = `${baseUrl}${path}`;
 
