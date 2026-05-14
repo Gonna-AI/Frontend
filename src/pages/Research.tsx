@@ -14,14 +14,13 @@ type ResearchTopic = {
   status: string;
   benchmarkUrl: string;
   leaderboardUrl: string;
-  metrics: Array<{ label: string; value: string }>;
   approachTitle: string;
   approach: string[];
 };
 
 const researchTopics: ResearchTopic[] = [
   {
-    slug: 'juris-vakra-capability-2',
+    slug: 'juris',
     badge: 'Current Focus',
     title: 'Juris',
     subtitle:
@@ -31,12 +30,6 @@ const researchTopics: ResearchTopic[] = [
     status: 'Externally validated',
     benchmarkUrl: 'https://www.ibm.com/new/announcements/introducing-vakra-benchmark',
     leaderboardUrl: 'https://huggingface.co/spaces/ibm-research/vakra',
-    metrics: [
-      { label: 'Completion Rate', value: '94.99%' },
-      { label: 'Successful Runs', value: '1,517 / 1,597' },
-      { label: 'Domain Coverage', value: '17 / 17' },
-      { label: 'Average Duration', value: '62.89s' },
-    ],
     approachTitle: 'Method and Research Direction',
     approach: [
       'Juris is designed around the idea that strong agent performance comes from disciplined execution architecture rather than unconstrained autonomy. The system prioritizes action selection, interface alignment, and error containment so that it behaves predictably even when the task surface is broad and operationally noisy.',
@@ -143,7 +136,7 @@ function ResearchLanding({ topic, isResearchHost }: { topic: ResearchTopic; isRe
             onClick={() => navigate(getTopicPath(topic.slug, isResearchHost))}
             className="group w-full rounded-[42px] border border-[#6d4739] bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.08),transparent_35%),linear-gradient(180deg,rgba(8,8,8,0.96),rgba(6,6,6,0.98))] px-8 py-10 text-left shadow-[0_0_0_1px_rgba(255,138,91,0.05)] transition-all duration-500 hover:border-[#8f5b47] hover:shadow-[0_0_45px_-20px_rgba(255,138,91,0.28)] md:px-14 md:py-16"
           >
-            <div className="flex flex-col gap-10 xl:flex-row xl:items-center xl:justify-between">
+            <div className="flex flex-col gap-10">
               <div className="max-w-3xl">
                 <div className="mb-8 inline-flex items-center gap-3 rounded-full border border-[#704738] bg-[#2a1a16]/90 px-6 py-3 text-sm font-semibold uppercase tracking-[0.26em] text-[#ffc29e]">
                   <Sparkles className="h-4 w-4" />
@@ -159,22 +152,6 @@ function ResearchLanding({ topic, isResearchHost }: { topic: ResearchTopic; isRe
                   Open research topic
                   <ArrowUpRight className="h-4 w-4" />
                 </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4 md:grid-cols-4 xl:min-w-[760px] xl:max-w-[820px]">
-                {topic.metrics.map((metric) => (
-                  <div
-                    key={metric.label}
-                    className="rounded-[28px] border border-white/12 bg-black/25 px-5 py-6 md:px-6 md:py-7"
-                  >
-                    <p className="text-[11px] uppercase tracking-[0.22em] text-white/45 md:text-sm">
-                      {metric.label}
-                    </p>
-                    <p className="mt-5 text-2xl font-semibold leading-tight text-white md:mt-6 md:text-3xl">
-                      {metric.value}
-                    </p>
-                  </div>
-                ))}
               </div>
             </div>
           </button>
@@ -212,38 +189,13 @@ function ResearchDetail({ topic, isResearchHost }: { topic: ResearchTopic; isRes
             Back to research
           </button>
 
-          <div className="rounded-[32px] border border-[#FF8A5B]/20 bg-gradient-to-br from-[#FF8A5B]/8 via-white/[0.03] to-white/[0.02] p-6 backdrop-blur-sm sm:p-8 md:p-10">
-            <div className="flex flex-col gap-8">
+          <section className="mt-8 rounded-[32px] border border-white/10 bg-white/[0.03] p-6 backdrop-blur-sm sm:p-8 md:p-10">
+            <div className="flex flex-col gap-6 border-b border-white/10 pb-8 lg:flex-row lg:items-start lg:justify-between">
               <div className="max-w-3xl">
                 <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-[#FF8A5B]/25 bg-[#FF8A5B]/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-[#FFB089]">
                   <Sparkles className="h-4 w-4" />
                   {topic.status}
                 </div>
-                <h1 className="text-4xl font-bold tracking-tight text-white md:text-5xl">
-                  {topic.title}
-                </h1>
-                <p className="mt-4 max-w-2xl text-base leading-relaxed text-white/70 md:text-lg">
-                  {topic.subtitle}
-                </p>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-                {topic.metrics.map((metric) => (
-                  <div
-                    key={metric.label}
-                    className="rounded-2xl border border-white/10 bg-black/25 px-4 py-4"
-                  >
-                    <p className="text-xs uppercase tracking-[0.18em] text-white/45">{metric.label}</p>
-                    <p className="mt-2 text-xl font-semibold text-white">{metric.value}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          <section className="mt-8 rounded-[32px] border border-white/10 bg-white/[0.03] p-6 backdrop-blur-sm sm:p-8 md:p-10">
-            <div className="flex flex-col gap-6 border-b border-white/10 pb-8 lg:flex-row lg:items-start lg:justify-between">
-              <div className="max-w-3xl">
                 <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#FF8A5B]">
                   Detailed overview
                 </p>
