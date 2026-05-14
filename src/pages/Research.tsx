@@ -11,7 +11,6 @@ type ResearchTopic = {
   title: string;
   subtitle: string;
   summary: string;
-  status: string;
   benchmarkUrl: string;
   leaderboardUrl: string;
   approachTitle: string;
@@ -21,21 +20,20 @@ type ResearchTopic = {
 const researchTopics: ResearchTopic[] = [
   {
     slug: 'juris',
-    badge: 'Current Focus',
+    badge: 'Aktueller Fokus',
     title: 'Juris',
     subtitle:
-      'A research program in reliable task execution, with benchmark validation used as one external measure of system quality.',
+      'Ein Forschungsprogramm für verlässliche Aufgabenausführung, bei dem Benchmark-Validierung als ein externer Maßstab für Systemqualität dient.',
     summary:
-      'Juris is ClerkTree research on building dependable task-oriented agents that operate with high precision under tool, schema, and latency constraints. The emphasis is not on open-ended theatrical reasoning, but on execution quality: selecting the right action path, preserving structural correctness, minimizing failure cascades, and improving consistency across large and heterogeneous interfaces. In this entry, VAKRA is used as an external validation setting rather than the definition of the system itself.',
-    status: 'Extern validiert',
+      'Juris ist ClerkTree-Forschung zum Aufbau verlässlicher, aufgabenorientierter Agenten, die auch unter Werkzeug-, Schema- und Latenzbeschränkungen mit hoher Präzision arbeiten. Der Fokus liegt nicht auf offenem, inszeniertem Reasoning, sondern auf Ausführungsqualität: dem richtigen Aktionspfad, struktureller Korrektheit, der Minimierung von Fehlerketten und konsistentem Verhalten über große und heterogene Schnittstellen hinweg. VAKRA dient in diesem Eintrag als externer Validierungsrahmen und nicht als Definition des Systems selbst.',
     benchmarkUrl: 'https://www.ibm.com/new/announcements/introducing-vakra-benchmark',
     leaderboardUrl: 'https://huggingface.co/spaces/ibm-research/vakra',
-    approachTitle: 'Method and Research Direction',
+    approachTitle: 'Methode und Forschungsrichtung',
     approach: [
-      'Juris is designed around the idea that strong agent performance comes from disciplined execution architecture rather than unconstrained autonomy. The system prioritizes action selection, interface alignment, and error containment so that it behaves predictably even when the task surface is broad and operationally noisy.',
-      'A central part of the work is reducing avoidable decision entropy. Instead of allowing the model to wander through long free-form tool chains, the system narrows the action space early, enforces tighter correspondence between query intent and tool selection, and biases toward the smallest valid execution path. This improves reliability, lowers latency overhead from unproductive loops, and makes outcomes more stable across varied workloads.',
-      'The research also focuses on structural robustness. In practical deployments, failures often come less from raw intelligence limits and more from malformed arguments, wrong interface choice, shallow ambiguity handling, or compounding recovery behavior. Juris addresses this by treating orchestration quality as a first-class research target, allowing the agent to remain precise under operational constraints without exposing internal heuristics or overfitting to presentation.',
-      'Benchmark evaluation is used here as external evidence that the execution framework generalizes under pressure. VAKRA is useful because it stresses real tool-use behavior across multiple domains, making it possible to test whether improvements in routing discipline, execution control, and answer shaping translate into measurable gains beyond internal testing alone.',
+      'Juris basiert auf der Annahme, dass starke Agentenleistung aus disziplinierter Ausführungsarchitektur entsteht und nicht aus unbeschränkter Autonomie. Das System priorisiert Aktionsauswahl, Schnittstellenabgleich und Fehlerbegrenzung, damit es selbst dann vorhersagbar bleibt, wenn die Aufgabenoberfläche breit und operativ verrauscht ist.',
+      'Ein zentraler Teil der Arbeit besteht darin, vermeidbare Entscheidungsentropie zu reduzieren. Anstatt dem Modell lange freie Tool-Ketten zu erlauben, verengt das System den Aktionsraum früh, erzwingt eine engere Kopplung zwischen Anfrageintention und Tool-Auswahl und bevorzugt den kleinsten gültigen Ausführungspfad. Das verbessert die Verlässlichkeit, senkt Latenzaufwand durch unproduktive Schleifen und stabilisiert Ergebnisse über unterschiedliche Workloads hinweg.',
+      'Die Forschung konzentriert sich außerdem auf strukturelle Robustheit. In praktischen Einsätzen entstehen Fehler oft weniger durch reine Intelligenzgrenzen als durch fehlerhafte Argumente, falsche Schnittstellenwahl, oberflächliche Ambiguitätsbehandlung oder sich verstärkendes Recovery-Verhalten. Juris begegnet dem, indem Orchestrierungsqualität als primäres Forschungsziel behandelt wird, sodass der Agent auch unter operativen Beschränkungen präzise bleibt, ohne interne Heuristiken offenzulegen oder auf Präsentation zu überoptimieren.',
+      'Die Benchmark-Auswertung dient hier als externer Nachweis dafür, dass das Ausführungsframework auch unter Druck generalisiert. VAKRA ist dafür nützlich, weil es reales Tool-Use-Verhalten über mehrere Domänen hinweg belastet und damit sichtbar macht, ob Verbesserungen in Routing-Disziplin, Ausführungskontrolle und Antwortformung über internes Testing hinaus messbare Wirkung zeigen.',
     ],
   },
 ];
@@ -149,7 +147,7 @@ function ResearchLanding({ topic, isResearchHost }: { topic: ResearchTopic; isRe
                   {topic.subtitle}
                 </p>
                 <div className="mt-8 inline-flex items-center gap-3 text-sm font-semibold uppercase tracking-[0.24em] text-[#ffc29e] transition-transform duration-300 group-hover:translate-x-1">
-                  Open research topic
+                  Forschungsthema öffnen
                   <ArrowUpRight className="h-4 w-4" />
                 </div>
               </div>
@@ -186,18 +184,14 @@ function ResearchDetail({ topic, isResearchHost }: { topic: ResearchTopic; isRes
             className="mb-8 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-4 py-2 text-sm text-white/70 transition-colors hover:text-white"
           >
             <ArrowLeft className="h-4 w-4" />
-            Back to research
+            Zurück zur Forschung
           </button>
 
           <section className="mt-8 rounded-[32px] border border-white/10 bg-white/[0.03] p-6 backdrop-blur-sm sm:p-8 md:p-10">
             <div className="flex flex-col gap-6 border-b border-white/10 pb-8 lg:flex-row lg:items-start lg:justify-between">
               <div className="max-w-3xl">
-                <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-[#FF8A5B]/25 bg-[#FF8A5B]/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-[#FFB089]">
-                  <Sparkles className="h-4 w-4" />
-                  {topic.status}
-                </div>
                 <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#FF8A5B]">
-                  Detailed overview
+                  Detailübersicht
                 </p>
                 <h2 className="mt-4 text-3xl font-bold tracking-tight text-white md:text-4xl">
                   {topic.title}
@@ -214,7 +208,7 @@ function ResearchDetail({ topic, isResearchHost }: { topic: ResearchTopic; isRes
                   rel="noopener noreferrer"
                   className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#E5E5E5] px-5 py-3 font-semibold text-black transition-all duration-300 hover:bg-white"
                 >
-                  What Is VAKRA
+                  Was ist VAKRA
                   <ArrowUpRight className="h-4 w-4" />
                 </a>
                 <a
@@ -223,7 +217,7 @@ function ResearchDetail({ topic, isResearchHost }: { topic: ResearchTopic; isRes
                   rel="noopener noreferrer"
                   className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/15 bg-white/5 px-5 py-3 font-semibold text-white transition-all duration-300 hover:bg-white/10"
                 >
-                  View Leaderboard
+                  Zum Leaderboard
                   <ArrowUpRight className="h-4 w-4" />
                 </a>
               </div>
