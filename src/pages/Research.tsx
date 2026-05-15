@@ -91,7 +91,7 @@ function ResearchShell({ children }: { children: React.ReactNode }) {
     <div className="bg-[rgb(10,10,10)] min-h-screen relative overflow-x-hidden">
       <div className="fixed inset-0 bg-[rgb(10,10,10)] z-0 pointer-events-none">
         <div
-          className="absolute top-[-12%] right-[-10%] h-[110%] w-[82%]"
+          className="absolute top-[-12%] right-[-10%] h-[110%] w-[82%] hidden md:block"
           style={{
             background:
               'radial-gradient(circle at 70% 30%, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.06) 32%, transparent 60%)',
@@ -99,7 +99,7 @@ function ResearchShell({ children }: { children: React.ReactNode }) {
           }}
         />
         <div
-          className="absolute top-0 right-0 h-full w-full"
+          className="absolute top-0 right-0 h-full w-full hidden md:block"
           style={{
             background:
               'linear-gradient(215deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.015) 40%, transparent 65%)',
@@ -110,11 +110,10 @@ function ResearchShell({ children }: { children: React.ReactNode }) {
           style={{
             background:
               'radial-gradient(circle, rgba(255,138,91,0.4) 0%, rgba(255,138,91,0.15) 40%, transparent 100%)',
-            filter: 'blur(80px)',
           }}
         />
         <div
-          className="absolute right-[10%] top-[25%] h-64 w-64 rounded-full opacity-20 md:h-96 md:w-96"
+          className="absolute right-[10%] top-[25%] h-64 w-64 rounded-full opacity-20 hidden md:block md:h-96 md:w-96"
           style={{
             background:
               'radial-gradient(circle, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.05) 45%, transparent 100%)',
@@ -122,7 +121,7 @@ function ResearchShell({ children }: { children: React.ReactNode }) {
           }}
         />
         <div
-          className="absolute inset-0 opacity-[0.06]"
+          className="absolute inset-0 opacity-[0.06] hidden md:block"
           style={{ backgroundImage: 'url(/noise.webp)', backgroundSize: '35%' }}
         />
         <div className="absolute inset-x-0 top-0 h-36 bg-gradient-to-b from-black/80 via-black/50 to-transparent" />
@@ -227,7 +226,7 @@ function ResearchDetail({ topic, isResearchHost }: { topic: ResearchTopic; isRes
             {language === 'de' ? 'Zurück zur Forschung' : 'Back to research'}
           </button>
 
-          <section className="mt-8 rounded-[32px] border border-white/10 bg-white/[0.03] p-6 backdrop-blur-sm sm:p-8 md:p-10">
+          <section className="mt-8 rounded-[32px] border border-white/10 bg-white/[0.03] p-6 md:backdrop-blur-sm sm:p-8 md:p-10">
             <div className="flex flex-col gap-6 border-b border-white/10 pb-8 lg:flex-row lg:items-start lg:justify-between">
               <div className="max-w-3xl">
                 <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#FF8A5B]">
@@ -271,7 +270,7 @@ function ResearchDetail({ topic, isResearchHost }: { topic: ResearchTopic; isRes
                 </div>
                 <div className="space-y-5">
                   {topic.approach.map((paragraph) => (
-                    <p key={paragraph.en} className="max-w-[66ch] text-sm leading-7 text-white/72 md:text-[15px]">
+                    <p key={paragraph.en} className="max-w-[66ch] text-sm leading-7 text-white/70 md:text-[15px]">
                       {paragraph[language]}
                     </p>
                   ))}
