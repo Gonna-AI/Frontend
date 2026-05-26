@@ -26,6 +26,10 @@ import {
     Webhook,
     Settings,
     BookMarked,
+    Kanban,
+    UserRound,
+    Building2,
+    CalendarCheck,
 } from "lucide-react"
 
 import { useTheme } from "@/hooks/useTheme"
@@ -201,6 +205,35 @@ export function AppSidebar({ activeTab, setActiveTab, hasAccess = false, ...prop
                                     <span>Playbooks</span>
                                 </SidebarMenuButton>
                             </SidebarMenuItem>
+                        </SidebarMenu>
+                    </SidebarGroupContent>
+                </SidebarGroup>
+
+                <SidebarSeparator className={isDark ? "bg-white/10" : "bg-black/5"} />
+
+                {/* CRM Group */}
+                <SidebarGroup>
+                    <SidebarGroupLabel className={isDark ? "text-white/60" : "text-black/60"}>CRM</SidebarGroupLabel>
+                    <SidebarGroupContent>
+                        <SidebarMenu>
+                            {[
+                                { label: 'Deals', icon: Kanban, path: '/crm/deals' },
+                                { label: 'Contacts', icon: UserRound, path: '/crm/contacts' },
+                                { label: 'Companies', icon: Building2, path: '/crm/companies' },
+                                { label: 'Activities', icon: CalendarCheck, path: '/crm/activities' },
+                            ].map(({ label, icon: Icon, path }) => (
+                                <SidebarMenuItem key={path}>
+                                    <SidebarMenuButton
+                                        isActive={window.location.pathname === path}
+                                        onClick={() => { window.location.href = path; }}
+                                        tooltip={label}
+                                        className={menuButtonClass}
+                                    >
+                                        <Icon />
+                                        <span>{label}</span>
+                                    </SidebarMenuButton>
+                                </SidebarMenuItem>
+                            ))}
                         </SidebarMenu>
                     </SidebarGroupContent>
                 </SidebarGroup>
