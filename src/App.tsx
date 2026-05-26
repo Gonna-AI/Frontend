@@ -41,6 +41,11 @@ const AuthCallback = lazyWithRetry(() => import('./pages/AuthCallback'), 'AuthCa
 const AuthGoogleCallback = lazyWithRetry(() => import('./pages/AuthGoogleCallback'), 'AuthGoogleCallback');
 const InvitePage = lazyWithRetry(() => import('./pages/InvitePage'), 'InvitePage');
 const WhitePaper = lazyWithRetry(() => import('./pages/WhitePaper'), 'WhitePaper');
+const CRM = lazyWithRetry(() => import('./pages/CRM'), 'CRM');
+const CRMDeals = lazyWithRetry(() => import('./pages/crm/DealsPage'), 'CRMDeals');
+const CRMContacts = lazyWithRetry(() => import('./pages/crm/ContactsPage'), 'CRMContacts');
+const CRMCompanies = lazyWithRetry(() => import('./pages/crm/CompaniesPage'), 'CRMCompanies');
+const CRMActivities = lazyWithRetry(() => import('./pages/crm/ActivitiesPage'), 'CRMActivities');
 
 const NotFound = lazyWithRetry(() => import('./pages/NotFound'), 'NotFound');
 import LoadingScreen from './components/LoadingScreen';
@@ -113,6 +118,12 @@ function App() {
                   <Route path="/contact" element={<Contact />} />
                   <Route path="/support" element={<SupportPage />} />
                   <Route path="/whitepaper" element={<WhitePaper />} />
+                  {/* CRM App (auth-gated) */}
+                  <Route path="/crm" element={<CRM />} />
+                  <Route path="/crm/deals" element={<PrivateRoute><CRMDeals /></PrivateRoute>} />
+                  <Route path="/crm/contacts" element={<PrivateRoute><CRMContacts /></PrivateRoute>} />
+                  <Route path="/crm/companies" element={<PrivateRoute><CRMCompanies /></PrivateRoute>} />
+                  <Route path="/crm/activities" element={<PrivateRoute><CRMActivities /></PrivateRoute>} />
 
                   {/* Blog */}
                   <Route path="/blog" element={<Blog />} />

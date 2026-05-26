@@ -7,7 +7,7 @@ import { useIsMobile } from "@/hooks/use-mobile"
 import { useTheme } from "@/hooks/useTheme"
 import { cn } from "@/utils/cn"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/Input"
+import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
 import {
   Drawer,
