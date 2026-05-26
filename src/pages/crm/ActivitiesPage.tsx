@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Phone, Mail, Users, StickyNote, CheckSquare, Plus, Check } from 'lucide-react';
 import { useCRMActivities, useCreateActivity } from '../../hooks/useCRM';
+import { useCRMSearch } from '../../contexts/CRMContext';
 import type { CRMActivity } from '../../types/crm';
 import CRMLayout from './CRMLayout';
 import { cn } from '../../lib/utils';
@@ -36,12 +37,9 @@ function ActivityRow({ activity }: { activity: CRMActivity }) {
   };
 
   return (
-    <div className={cn(
-      'flex items-start gap-4 rounded-lg border border-white/[0.06] bg-[#1c1c1c] p-4 hover:border-white/[0.1] transition-colors',
-      activity.completed && 'opacity-40'
-    )}>
+    <div className={cn('flex items-start gap-4 rounded-lg border border-white/[0.06] bg-[#1c1c1c] p-4 hover:border-white/[0.1] transition-colors', activity.completed && 'opacity-40')}>
       <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg" style={{ backgroundColor: `${meta.color}18` }}>
-        <Icon className="h-3.5 w-3.5" style={{ color: meta.color }} aria-hidden="true" />
+        <Icon className="h-3.5 w-3.5" style={{ color: meta.color }} />
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2.5">
@@ -52,9 +50,7 @@ function ActivityRow({ activity }: { activity: CRMActivity }) {
             </span>
           )}
         </div>
-        {activity.title && (
-          <p className={cn('mt-0.5 text-[13px] font-medium text-[#e0e0e0]', activity.completed && 'line-through')}>{activity.title}</p>
-        )}
+        {activity.title && <p className={cn('mt-0.5 text-[13px] font-medium text-[#e0e0e0]', activity.completed && 'line-through')}>{activity.title}</p>}
         {activity.body && <p className="mt-1 text-[13px] text-[#656565] leading-relaxed">{activity.body}</p>}
         <p className="mt-1.5 text-[11px] text-[#454545]">
           {new Date(activity.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
@@ -63,12 +59,7 @@ function ActivityRow({ activity }: { activity: CRMActivity }) {
       {activity.type === 'task' && (
         <button
           onClick={toggleComplete}
-          className={cn(
-            'mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded border transition-colors',
-            activity.completed
-              ? 'border-[#10B981]/50 bg-[#10B981]/15 text-[#10B981]'
-              : 'border-white/[0.12] text-white/20 hover:border-white/25',
-          )}
+          className={cn('mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded border transition-colors', activity.completed ? 'border-[#10B981]/50 bg-[#10B981]/15 text-[#10B981]' : 'border-white/[0.12] text-white/20 hover:border-white/25')}
           aria-label={activity.completed ? 'Mark incomplete' : 'Mark complete'}
         >
           {activity.completed && <Check className="h-3 w-3" />}
@@ -84,13 +75,6 @@ function NewActivityModal({ onClose }: { onClose: () => void }) {
     type: 'note', title: '', body: '', due_date: '',
   });
   const set = (k: string, v: string) => setForm(f => ({ ...f, [k]: v }));
-
-  const save = () => create.mutate({
-    type: form.type,
-    title: form.title || undefined,
-    body: form.body || undefined,
-    due_date: form.due_date ? new Date(form.due_date).toISOString() : undefined,
-  }, { onSuccess: onClose });
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-[2px]" onClick={onClose}>
@@ -123,7 +107,11 @@ function NewActivityModal({ onClose }: { onClose: () => void }) {
         </div>
         <div className="mt-6 flex justify-end gap-2">
           <button onClick={onClose} className="crm-btn-ghost">Cancel</button>
-          <button onClick={save} disabled={create.isPending} className="crm-btn-primary">
+          <button
+            onClick={() => create.mutate({ type: form.type, title: form.title || undefined, body: form.body || undefined, due_date: form.due_date ? new Date(form.due_date).toISOString() : undefined }, { onSuccess: onClose })}
+            disabled={create.isPending}
+            className="crm-btn-primary"
+          >
             {create.isPending ? 'Saving…' : 'Log activity'}
           </button>
         </div>
@@ -134,34 +122,30 @@ function NewActivityModal({ onClose }: { onClose: () => void }) {
 
 export default function ActivitiesPage() {
   const { data: activities = [], isLoading } = useCRMActivities();
+  const { search } = useCRMSearch();
   const [showNew, setShowNew] = useState(false);
   const [filter, setFilter] = useState<CRMActivity['type'] | 'all'>('all');
-  const filtered = filter === 'all' ? activities : activities.filter(a => a.type === filter);
+
+  const q = search.toLowerCase();
+  const filtered = activities
+    .filter(a => filter === 'all' || a.type === filter)
+    .filter(a => !q || (a.title ?? '').toLowerCase().includes(q) || (a.body ?? '').toLowerCase().includes(q));
 
   return (
     <CRMLayout title="Activities" onAdd={() => setShowNew(true)} addLabel="+ Log activity">
-      {/* Filter bar */}
       <div className="flex items-center gap-1.5 border-b border-white/[0.06] px-6 py-2.5">
-        <button
-          onClick={() => setFilter('all')}
-          className={cn('rounded-md px-3 py-1.5 text-[12px] font-medium transition-colors', filter === 'all' ? 'bg-white/[0.08] text-white' : 'text-[#656565] hover:text-white/70')}
-        >
+        <button onClick={() => setFilter('all')} className={cn('rounded-md px-3 py-1.5 text-[12px] font-medium transition-colors', filter === 'all' ? 'bg-white/[0.08] text-white' : 'text-[#656565] hover:text-white/70')}>
           All
         </button>
         {(Object.keys(TYPE_META) as CRMActivity['type'][]).map(t => {
           const m = TYPE_META[t];
           return (
-            <button
-              key={t}
-              onClick={() => setFilter(t)}
-              className={cn('flex items-center gap-1.5 rounded-md px-3 py-1.5 text-[12px] font-medium transition-colors', filter === t ? 'bg-white/[0.08] text-white' : 'text-[#656565] hover:text-white/70')}
-            >
+            <button key={t} onClick={() => setFilter(t)} className={cn('flex items-center gap-1.5 rounded-md px-3 py-1.5 text-[12px] font-medium transition-colors', filter === t ? 'bg-white/[0.08] text-white' : 'text-[#656565] hover:text-white/70')}>
               <m.icon className="h-3 w-3" /> {m.label}
             </button>
           );
         })}
       </div>
-
       {isLoading ? (
         <div className="flex h-full items-center justify-center"><p className="text-[13px] text-white/25">Loading…</p></div>
       ) : (
@@ -169,10 +153,12 @@ export default function ActivitiesPage() {
           {filtered.map(a => <ActivityRow key={a.id} activity={a} />)}
           {filtered.length === 0 && (
             <div className="flex flex-col items-center justify-center py-24 gap-3">
-              <p className="text-[13px] text-[#3a3a3a]">No activities logged yet.</p>
-              <button onClick={() => setShowNew(true)} className="flex items-center gap-1.5 text-[12px] text-[#FF8A5B]/70 hover:text-[#FF8A5B] transition-colors">
-                <Plus className="h-3.5 w-3.5" /> Log your first activity
-              </button>
+              <p className="text-[13px] text-[#3a3a3a]">{search ? 'No activities match your search.' : 'No activities logged yet.'}</p>
+              {!search && (
+                <button onClick={() => setShowNew(true)} className="flex items-center gap-1.5 text-[12px] text-[#FF8A5B]/70 hover:text-[#FF8A5B] transition-colors">
+                  <Plus className="h-3.5 w-3.5" /> Log your first activity
+                </button>
+              )}
             </div>
           )}
         </div>

@@ -1,9 +1,10 @@
-import { type ReactNode, useState } from 'react';
+import { type ReactNode } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Building2, Users, Kanban, Activity, ChevronLeft, Plus, Search, Settings, LogOut, Filter } from 'lucide-react';
 import { supabase } from '../../config/supabase';
 import { useAuth } from '../../hooks/useAuth';
 import { cn } from '../../lib/utils';
+import { CRMProvider, useCRMSearch } from '../../contexts/CRMContext';
 
 const NAV = [
   { label: 'Deals',      icon: Kanban,    path: '/crm/deals' },
@@ -12,22 +13,23 @@ const NAV = [
   { label: 'Activities', icon: Activity,  path: '/crm/activities' },
 ];
 
-export default function CRMLayout({
+function CRMLayoutInner({
   children,
   title,
   onAdd,
   addLabel,
+  toolbar,
 }: {
   children: ReactNode;
   title: string;
   onAdd?: () => void;
   addLabel?: string;
+  toolbar?: ReactNode;
 }) {
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useAuth();
-  const [search, setSearch] = useState('');
-  void search;
+  const { search, setSearch } = useCRMSearch();
 
   const initials = user?.email?.slice(0, 2).toUpperCase() ?? 'CT';
 
@@ -35,7 +37,6 @@ export default function CRMLayout({
     <div className="flex h-screen overflow-hidden bg-[#141414] text-white">
       {/* Sidebar */}
       <aside className="flex w-[212px] shrink-0 flex-col border-r border-white/[0.06] bg-[#141414]">
-        {/* Logo */}
         <div className="flex h-[52px] shrink-0 items-center gap-2 border-b border-white/[0.06] px-4">
           <button
             onClick={() => navigate('/')}
@@ -47,11 +48,8 @@ export default function CRMLayout({
           <span className="text-[13px] font-semibold text-white/90 tracking-tight">ClerkTree CRM</span>
         </div>
 
-        {/* Nav */}
         <nav className="flex-1 overflow-y-auto px-2 pt-3 pb-2" aria-label="CRM navigation">
-          <p className="mb-1 px-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-white/30">
-            Workspace
-          </p>
+          <p className="mb-1 px-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-white/30">Workspace</p>
           {NAV.map(({ label, icon: Icon, path }) => {
             const active = location.pathname.startsWith(path);
             return (
@@ -60,9 +58,7 @@ export default function CRMLayout({
                 onClick={() => navigate(path)}
                 className={cn(
                   'flex w-full items-center gap-2 rounded-md px-2 py-[7px] text-[13px] transition-colors duration-100',
-                  active
-                    ? 'bg-[#FF8A5B]/10 text-[#FF8A5B] font-medium'
-                    : 'text-white/45 hover:bg-white/[0.04] hover:text-white/80',
+                  active ? 'bg-[#FF8A5B]/10 text-[#FF8A5B] font-medium' : 'text-white/45 hover:bg-white/[0.04] hover:text-white/80',
                 )}
               >
                 <Icon className="h-[15px] w-[15px] shrink-0" aria-hidden="true" />
@@ -72,7 +68,6 @@ export default function CRMLayout({
           })}
         </nav>
 
-        {/* Bottom */}
         <div className="border-t border-white/[0.06] px-2 py-2 space-y-0.5">
           <button
             onClick={() => navigate('/ai-settings')}
@@ -99,14 +94,17 @@ export default function CRMLayout({
 
       {/* Main */}
       <div className="flex flex-1 flex-col overflow-hidden">
-        {/* Topbar */}
         <header className="flex h-[52px] shrink-0 items-center justify-between border-b border-white/[0.06] bg-[#141414] px-6">
-          <h1 className="text-[13px] font-semibold text-white/90">{title}</h1>
+          <div className="flex items-center gap-3">
+            <h1 className="text-[13px] font-semibold text-white/90">{title}</h1>
+            {toolbar}
+          </div>
           <div className="flex items-center gap-2">
             <div className="relative">
               <Search className="absolute left-2.5 top-1/2 h-[13px] w-[13px] -translate-y-1/2 text-white/25" aria-hidden="true" />
               <input
                 type="search"
+                value={search}
                 placeholder="Search..."
                 onChange={e => setSearch(e.target.value)}
                 className="h-8 w-44 rounded-md border border-white/[0.08] bg-white/[0.03] pl-8 pr-3 text-[13px] text-white/80 placeholder-white/20 outline-none focus:border-white/[0.18] transition-colors"
@@ -129,5 +127,19 @@ export default function CRMLayout({
         <main className="flex-1 overflow-auto bg-[#141414]">{children}</main>
       </div>
     </div>
+  );
+}
+
+export default function CRMLayout(props: {
+  children: ReactNode;
+  title: string;
+  onAdd?: () => void;
+  addLabel?: string;
+  toolbar?: ReactNode;
+}) {
+  return (
+    <CRMProvider>
+      <CRMLayoutInner {...props} />
+    </CRMProvider>
   );
 }

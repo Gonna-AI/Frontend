@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { X, Globe, Building2 } from 'lucide-react';
 import { useCRMCompanies, useCreateCompany, useUpdateCompany, useDeleteCompany } from '../../hooks/useCRM';
+import { useCRMSearch } from '../../contexts/CRMContext';
 import type { CRMCompany } from '../../types/crm';
 import CRMLayout from './CRMLayout';
 
@@ -105,7 +106,11 @@ function NewCompanyModal({ onClose }: { onClose: () => void }) {
         </div>
         <div className="mt-6 flex justify-end gap-2">
           <button onClick={onClose} className="crm-btn-ghost">Cancel</button>
-          <button onClick={() => create.mutate({ name: form.name, domain: form.domain || undefined, industry: form.industry || undefined, size: form.size || undefined }, { onSuccess: onClose })} disabled={create.isPending || !form.name.trim()} className="crm-btn-primary">
+          <button
+            onClick={() => create.mutate({ name: form.name, domain: form.domain || undefined, industry: form.industry || undefined, size: form.size || undefined }, { onSuccess: onClose })}
+            disabled={create.isPending || !form.name.trim()}
+            className="crm-btn-primary"
+          >
             {create.isPending ? 'Creating…' : 'Create company'}
           </button>
         </div>
@@ -114,10 +119,43 @@ function NewCompanyModal({ onClose }: { onClose: () => void }) {
   );
 }
 
+type SortKey = 'name' | 'industry' | 'size' | 'country' | 'created_at';
+
 export default function CompaniesPage() {
-  const { data: companies = [], isLoading } = useCRMCompanies();
+  const { data: allCompanies = [], isLoading } = useCRMCompanies();
+  const { search } = useCRMSearch();
   const [selected, setSelected] = useState<CRMCompany | null>(null);
   const [showNew, setShowNew] = useState(false);
+  const [sortKey, setSortKey] = useState<SortKey>('created_at');
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
+
+  const q = search.toLowerCase();
+  const filtered = q
+    ? allCompanies.filter(c =>
+        c.name.toLowerCase().includes(q) ||
+        (c.domain ?? '').toLowerCase().includes(q) ||
+        (c.industry ?? '').toLowerCase().includes(q) ||
+        (c.country ?? '').toLowerCase().includes(q)
+      )
+    : allCompanies;
+
+  const companies = [...filtered].sort((a, b) => {
+    const av = (a[sortKey] ?? '') as string;
+    const bv = (b[sortKey] ?? '') as string;
+    const cmp = av < bv ? -1 : av > bv ? 1 : 0;
+    return sortDir === 'asc' ? cmp : -cmp;
+  });
+
+  const toggle = (k: SortKey) => {
+    if (sortKey === k) setSortDir(d => d === 'asc' ? 'desc' : 'asc');
+    else { setSortKey(k); setSortDir('asc'); }
+  };
+
+  const ColH = ({ k, label }: { k: SortKey; label: string }) => (
+    <th onClick={() => toggle(k)} className="cursor-pointer py-2.5 pr-6 text-left text-[11px] font-semibold uppercase tracking-[0.12em] text-white/25 hover:text-white/50 transition-colors select-none">
+      {label}{sortKey === k ? (sortDir === 'asc' ? ' ↑' : ' ↓') : ''}
+    </th>
+  );
 
   return (
     <CRMLayout title="Companies" onAdd={() => setShowNew(true)} addLabel="+ New company">
@@ -128,9 +166,11 @@ export default function CompaniesPage() {
           <table className="w-full border-collapse">
             <thead>
               <tr className="border-b border-white/[0.06]">
-                {['Company', 'Domain', 'Industry', 'Size', 'Country'].map(h => (
-                  <th key={h} className="py-2.5 pr-6 text-left text-[11px] font-semibold uppercase tracking-[0.12em] text-white/25 first:pl-0">{h}</th>
-                ))}
+                <ColH k="name" label="Company" />
+                <th className="py-2.5 pr-6 text-left text-[11px] font-semibold uppercase tracking-[0.12em] text-white/25">Domain</th>
+                <ColH k="industry" label="Industry" />
+                <ColH k="size" label="Size" />
+                <ColH k="country" label="Country" />
               </tr>
             </thead>
             <tbody>
@@ -153,7 +193,7 @@ export default function CompaniesPage() {
                 </tr>
               ))}
               {companies.length === 0 && (
-                <tr><td colSpan={5} className="py-20 text-center text-[13px] text-[#3a3a3a]">No companies yet. Add your first one.</td></tr>
+                <tr><td colSpan={5} className="py-20 text-center text-[13px] text-[#3a3a3a]">{search ? 'No companies match your search.' : 'No companies yet. Add your first one.'}</td></tr>
               )}
             </tbody>
           </table>
