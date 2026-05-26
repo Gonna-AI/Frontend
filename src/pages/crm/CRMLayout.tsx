@@ -1,10 +1,11 @@
-import { type ReactNode } from 'react';
+import { type ReactNode, useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Building2, Users, Kanban, Activity, ChevronLeft, Plus, Search, Settings, LogOut, Filter } from 'lucide-react';
 import { supabase } from '../../config/supabase';
 import { useAuth } from '../../hooks/useAuth';
 import { cn } from '../../lib/utils';
 import { CRMProvider, useCRMSearch } from '../../contexts/CRMContext';
+import CommandPalette from './CommandPalette';
 
 const NAV = [
   { label: 'Deals',      icon: Kanban,    path: '/crm/deals' },
@@ -30,6 +31,18 @@ function CRMLayoutInner({
   const location = useLocation();
   const { user } = useAuth();
   const { search, setSearch } = useCRMSearch();
+  const [showCmd, setShowCmd] = useState(false);
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        setShowCmd(s => !s);
+      }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, []);
 
   const initials = user?.email?.slice(0, 2).toUpperCase() ?? 'CT';
 
@@ -100,14 +113,23 @@ function CRMLayoutInner({
             {toolbar}
           </div>
           <div className="flex items-center gap-2">
+            <button
+              onClick={() => setShowCmd(true)}
+              className="flex h-8 items-center gap-2 rounded-md border border-white/[0.08] bg-white/[0.03] pl-2.5 pr-2 text-[13px] text-white/30 hover:border-white/[0.15] hover:text-white/50 transition-colors"
+              aria-label="Open command palette (Ctrl+K)"
+            >
+              <Search className="h-[13px] w-[13px] shrink-0" />
+              <span className="hidden sm:inline w-28 text-left">Search...</span>
+              <kbd className="rounded border border-white/[0.1] bg-white/[0.04] px-1 py-0.5 text-[9px]">⌘K</kbd>
+            </button>
             <div className="relative">
               <Search className="absolute left-2.5 top-1/2 h-[13px] w-[13px] -translate-y-1/2 text-white/25" aria-hidden="true" />
               <input
                 type="search"
                 value={search}
-                placeholder="Search..."
+                placeholder="Filter..."
                 onChange={e => setSearch(e.target.value)}
-                className="h-8 w-44 rounded-md border border-white/[0.08] bg-white/[0.03] pl-8 pr-3 text-[13px] text-white/80 placeholder-white/20 outline-none focus:border-white/[0.18] transition-colors"
+                className="h-8 w-32 rounded-md border border-white/[0.08] bg-white/[0.03] pl-8 pr-3 text-[13px] text-white/80 placeholder-white/20 outline-none focus:border-white/[0.18] transition-colors"
               />
             </div>
             <button className="flex h-8 items-center gap-1.5 rounded-md border border-white/[0.08] px-3 text-[13px] text-white/40 hover:text-white/70 hover:border-white/[0.15] transition-colors">
@@ -126,6 +148,7 @@ function CRMLayoutInner({
         </header>
         <main className="flex-1 overflow-auto bg-[#141414]">{children}</main>
       </div>
+      {showCmd && <CommandPalette onClose={() => setShowCmd(false)} />}
     </div>
   );
 }
