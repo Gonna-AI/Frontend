@@ -1,17 +1,15 @@
 import { type ReactNode, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import {
-  Building2, Users, Kanban, Activity,
-  ChevronLeft, Plus, Search, Settings, LogOut,
-} from 'lucide-react';
+import { Building2, Users, Kanban, Activity, ChevronLeft, Plus, Search, Settings, LogOut, Filter } from 'lucide-react';
 import { supabase } from '../../config/supabase';
+import { useAuth } from '../../hooks/useAuth';
 import { cn } from '../../lib/utils';
 
 const NAV = [
-  { label: 'Deals',      icon: Kanban, path: '/crm/deals' },
-  { label: 'Contacts',   icon: Users,        path: '/crm/contacts' },
-  { label: 'Companies',  icon: Building2,    path: '/crm/companies' },
-  { label: 'Activities', icon: Activity,     path: '/crm/activities' },
+  { label: 'Deals',      icon: Kanban,    path: '/crm/deals' },
+  { label: 'Contacts',   icon: Users,     path: '/crm/contacts' },
+  { label: 'Companies',  icon: Building2, path: '/crm/companies' },
+  { label: 'Activities', icon: Activity,  path: '/crm/activities' },
 ];
 
 export default function CRMLayout({
@@ -27,26 +25,31 @@ export default function CRMLayout({
 }) {
   const navigate = useNavigate();
   const location = useLocation();
+  const { user } = useAuth();
   const [search, setSearch] = useState('');
-  void search; // available for future filter prop-drilling
+  void search;
+
+  const initials = user?.email?.slice(0, 2).toUpperCase() ?? 'CT';
 
   return (
-    <div className="flex h-screen overflow-hidden bg-[#111111] text-white">
+    <div className="flex h-screen overflow-hidden bg-[#141414] text-white">
       {/* Sidebar */}
-      <aside className="flex w-[220px] shrink-0 flex-col border-r border-white/8 bg-[#0D0D0D]">
-        <div className="flex items-center gap-2.5 border-b border-white/8 px-4 py-4">
+      <aside className="flex w-[212px] shrink-0 flex-col border-r border-white/[0.06] bg-[#141414]">
+        {/* Logo */}
+        <div className="flex h-[52px] shrink-0 items-center gap-2 border-b border-white/[0.06] px-4">
           <button
             onClick={() => navigate('/')}
-            className="text-white/50 hover:text-white transition-colors"
+            className="flex h-5 w-5 items-center justify-center rounded text-white/30 hover:text-white transition-colors"
             aria-label="Back to site"
           >
             <ChevronLeft className="h-3.5 w-3.5" />
           </button>
-          <span className="text-sm font-semibold tracking-tight text-white">ClerkTree CRM</span>
+          <span className="text-[13px] font-semibold text-white/90 tracking-tight">ClerkTree CRM</span>
         </div>
 
-        <nav className="flex-1 overflow-y-auto px-2 py-3" aria-label="CRM navigation">
-          <p className="mb-1.5 px-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-white/30">
+        {/* Nav */}
+        <nav className="flex-1 overflow-y-auto px-2 pt-3 pb-2" aria-label="CRM navigation">
+          <p className="mb-1 px-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-white/30">
             Workspace
           </p>
           {NAV.map(({ label, icon: Icon, path }) => {
@@ -56,54 +59,66 @@ export default function CRMLayout({
                 key={path}
                 onClick={() => navigate(path)}
                 className={cn(
-                  'flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm transition-all duration-150',
+                  'flex w-full items-center gap-2 rounded-md px-2 py-[7px] text-[13px] transition-colors duration-100',
                   active
-                    ? 'bg-[#FF8A5B]/12 text-[#FF8A5B] font-medium'
-                    : 'text-white/55 hover:bg-white/5 hover:text-white',
+                    ? 'bg-[#FF8A5B]/10 text-[#FF8A5B] font-medium'
+                    : 'text-white/45 hover:bg-white/[0.04] hover:text-white/80',
                 )}
               >
-                <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
+                <Icon className="h-[15px] w-[15px] shrink-0" aria-hidden="true" />
                 {label}
-                {active && <span className="ml-auto h-1.5 w-1.5 rounded-full bg-[#FF8A5B]" />}
               </button>
             );
           })}
         </nav>
 
-        <div className="border-t border-white/8 p-2 space-y-0.5">
+        {/* Bottom */}
+        <div className="border-t border-white/[0.06] px-2 py-2 space-y-0.5">
           <button
             onClick={() => navigate('/ai-settings')}
-            className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm text-white/40 hover:bg-white/5 hover:text-white transition-colors"
+            className="flex w-full items-center gap-2 rounded-md px-2 py-[7px] text-[13px] text-white/35 hover:bg-white/[0.04] hover:text-white/70 transition-colors"
           >
-            <Settings className="h-4 w-4" aria-hidden="true" /> Settings
+            <Settings className="h-[15px] w-[15px] shrink-0" /> Settings
           </button>
           <button
             onClick={() => supabase.auth.signOut().then(() => navigate('/login'))}
-            className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm text-white/40 hover:bg-white/5 hover:text-white transition-colors"
+            className="flex w-full items-center gap-2 rounded-md px-2 py-[7px] text-[13px] text-white/35 hover:bg-white/[0.04] hover:text-white/70 transition-colors"
           >
-            <LogOut className="h-4 w-4" aria-hidden="true" /> Sign out
+            <LogOut className="h-[15px] w-[15px] shrink-0" /> Sign out
           </button>
+          {user && (
+            <div className="flex items-center gap-2 rounded-md px-2 py-2 mt-1">
+              <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#FF8A5B] text-[9px] font-bold text-white">
+                {initials}
+              </div>
+              <span className="truncate text-[11px] text-white/25">{user.email}</span>
+            </div>
+          )}
         </div>
       </aside>
 
       {/* Main */}
       <div className="flex flex-1 flex-col overflow-hidden">
-        <header className="flex items-center justify-between border-b border-white/8 bg-[#0D0D0D] px-5 py-3">
-          <h1 className="text-sm font-semibold text-white">{title}</h1>
+        {/* Topbar */}
+        <header className="flex h-[52px] shrink-0 items-center justify-between border-b border-white/[0.06] bg-[#141414] px-6">
+          <h1 className="text-[13px] font-semibold text-white/90">{title}</h1>
           <div className="flex items-center gap-2">
             <div className="relative">
-              <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-white/30" aria-hidden="true" />
+              <Search className="absolute left-2.5 top-1/2 h-[13px] w-[13px] -translate-y-1/2 text-white/25" aria-hidden="true" />
               <input
                 type="search"
-                placeholder="Search…"
+                placeholder="Search..."
                 onChange={e => setSearch(e.target.value)}
-                className="w-44 rounded-lg border border-white/10 bg-white/5 py-1.5 pl-8 pr-3 text-xs text-white placeholder-white/30 outline-none focus:border-[#FF8A5B]/40"
+                className="h-8 w-44 rounded-md border border-white/[0.08] bg-white/[0.03] pl-8 pr-3 text-[13px] text-white/80 placeholder-white/20 outline-none focus:border-white/[0.18] transition-colors"
               />
             </div>
+            <button className="flex h-8 items-center gap-1.5 rounded-md border border-white/[0.08] px-3 text-[13px] text-white/40 hover:text-white/70 hover:border-white/[0.15] transition-colors">
+              <Filter className="h-3 w-3" /> Filter
+            </button>
             {onAdd && (
               <button
                 onClick={onAdd}
-                className="flex items-center gap-1.5 rounded-lg bg-[#FF8A5B] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#FF9E70] transition-colors"
+                className="flex h-8 items-center gap-1.5 rounded-md bg-[#FF8A5B] px-3 text-[13px] font-medium text-white hover:bg-[#FF9E70] transition-colors"
               >
                 <Plus className="h-3.5 w-3.5" aria-hidden="true" />
                 {addLabel ?? 'Add'}
@@ -111,7 +126,7 @@ export default function CRMLayout({
             )}
           </div>
         </header>
-        <main className="flex-1 overflow-auto">{children}</main>
+        <main className="flex-1 overflow-auto bg-[#141414]">{children}</main>
       </div>
     </div>
   );
