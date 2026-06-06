@@ -3,7 +3,9 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { LanguageProvider } from './contexts/LanguageContext';
 import { AuthProvider } from './contexts/AuthContext';
+import { ClientPortalProvider } from './contexts/ClientPortalContext';
 import { PrivateRoute } from './components/Auth/PrivateRoute';
+import { ClientPortalRoute } from './components/client-portal/ClientPortalRoute';
 import ScrollToTop from './components/ScrollToTop';
 import SEO from './components/SEO';
 import CanonicalLink from './components/CanonicalLink';
@@ -49,6 +51,8 @@ const CRMActivities = lazyWithRetry(() => import('./pages/crm/ActivitiesPage'), 
 const CRMDealDetail = lazyWithRetry(() => import('./pages/crm/DealDetailPage'), 'CRMDealDetail');
 const CRMContactDetail = lazyWithRetry(() => import('./pages/crm/ContactDetailPage'), 'CRMContactDetail');
 const CRMCompanyDetail = lazyWithRetry(() => import('./pages/crm/CompanyDetailPage'), 'CRMCompanyDetail');
+const ClientPortalLoginPage = lazyWithRetry(() => import('./pages/client-portal/ClientPortalLoginPage'), 'ClientPortalLoginPage');
+const ClientPortalDashboard = lazyWithRetry(() => import('./pages/client-portal/ClientPortalDashboard'), 'ClientPortalDashboard');
 
 const NotFound = lazyWithRetry(() => import('./pages/NotFound'), 'NotFound');
 import LoadingScreen from './components/LoadingScreen';
@@ -70,91 +74,101 @@ function App() {
 
   return (
     <AuthProvider>
-      <LanguageProvider>
-        <QueryClientProvider client={queryClient}>
-          <BrowserRouter>
-            <CanonicalLink />
-            <HreflangTags />
-            <ScrollToTop />
-            <SEO
-              title="ClerkTree"
-              description="AI-powered workflow automation for claims and back-office operations. Transform your operations with intelligent automation that reduces turnaround time by 40%."
-            />
-            <Suspense fallback={<LoadingScreen />}>
-              <main className="flex-1 flex flex-col">
-                <Routes>
-                  {/* Public Routes */}
-                  <Route path="/" element={isResearchHost ? <Research /> : <Landing />} />
-                  <Route path="/:topicSlug" element={isResearchHost ? <Research /> : <NotFound />} />
+      <ClientPortalProvider>
+        <LanguageProvider>
+          <QueryClientProvider client={queryClient}>
+            <BrowserRouter>
+              <CanonicalLink />
+              <HreflangTags />
+              <ScrollToTop />
+              <SEO
+                title="ClerkTree"
+                description="AI-powered workflow automation for claims and back-office operations. Transform your operations with intelligent automation that reduces turnaround time by 40%."
+              />
+              <Suspense fallback={<LoadingScreen />}>
+                <main className="flex-1 flex flex-col">
+                  <Routes>
+                    {/* Public Routes */}
+                    <Route path="/" element={isResearchHost ? <Research /> : <Landing />} />
+                    <Route path="/:topicSlug" element={isResearchHost ? <Research /> : <NotFound />} />
 
-                  {/* Auth Routes */}
-                  <Route path="/login" element={<AuthPage />} />
-                  <Route path="/auth/callback" element={<AuthCallback />} />
-                  <Route path="/auth/google/callback" element={<AuthGoogleCallback />} />
-                  <Route path="/invite" element={<InvitePage />} />
+                    {/* Auth Routes */}
+                    <Route path="/login" element={<AuthPage />} />
+                    <Route path="/auth/callback" element={<AuthCallback />} />
+                    <Route path="/auth/google/callback" element={<AuthGoogleCallback />} />
+                    <Route path="/invite" element={<InvitePage />} />
 
-                  {/* Protected Dashboard */}
-                  <Route path="/dashboard" element={
-                    <PrivateRoute>
-                      <DemoDashboard />
-                    </PrivateRoute>
-                  } />
+                    {/* Client Portal Routes */}
+                    <Route path="/client/login" element={<ClientPortalLoginPage />} />
+                    <Route path="/client" element={
+                      <ClientPortalRoute>
+                        <ClientPortalDashboard />
+                      </ClientPortalRoute>
+                    } />
 
-                  {/* User Call */}
-                  <Route path="/user" element={<UserCall />} />
-                  <Route path="/user/chat" element={<UserChat />} />
-                  <Route path="/user/call" element={<UserVoiceCall />} />
-                  <Route path="/ai-settings" element={
-                    <PrivateRoute>
-                      <AISettings />
-                    </PrivateRoute>
-                  } />
+                    {/* Protected Dashboard */}
+                    <Route path="/dashboard" element={
+                      <PrivateRoute>
+                        <DemoDashboard />
+                      </PrivateRoute>
+                    } />
 
-                  <Route path="/bioflow" element={<Bioflow />} />
+                    {/* User Call */}
+                    <Route path="/user" element={<UserCall />} />
+                    <Route path="/user/chat" element={<UserChat />} />
+                    <Route path="/user/call" element={<UserVoiceCall />} />
+                    <Route path="/ai-settings" element={
+                      <PrivateRoute>
+                        <AISettings />
+                      </PrivateRoute>
+                    } />
 
-                  {/* Company Pages */}
-                  <Route path="/about" element={<About />} />
-                  <Route path="/research" element={<Research />} />
-                  <Route path="/research/:topicSlug" element={<Research />} />
-                  <Route path="/careers" element={<Careers />} />
-                  <Route path="/solutions" element={<Solutions />} />
-                  <Route path="/contact" element={<Contact />} />
-                  <Route path="/support" element={<SupportPage />} />
-                  <Route path="/whitepaper" element={<WhitePaper />} />
-                  {/* CRM App (auth-gated) */}
-                  <Route path="/crm" element={<CRM />} />
-                  <Route path="/crm/deals" element={<PrivateRoute><CRMDeals /></PrivateRoute>} />
-                  <Route path="/crm/deals/:id" element={<PrivateRoute><CRMDealDetail /></PrivateRoute>} />
-                  <Route path="/crm/contacts" element={<PrivateRoute><CRMContacts /></PrivateRoute>} />
-                  <Route path="/crm/contacts/:id" element={<PrivateRoute><CRMContactDetail /></PrivateRoute>} />
-                  <Route path="/crm/companies" element={<PrivateRoute><CRMCompanies /></PrivateRoute>} />
-                  <Route path="/crm/companies/:id" element={<PrivateRoute><CRMCompanyDetail /></PrivateRoute>} />
-                  <Route path="/crm/activities" element={<PrivateRoute><CRMActivities /></PrivateRoute>} />
+                    <Route path="/bioflow" element={<Bioflow />} />
 
-                  {/* Blog */}
-                  <Route path="/blog" element={<Blog />} />
-                  <Route path="/blog/:slug" element={<BlogPost />} />
+                    {/* Company Pages */}
+                    <Route path="/about" element={<About />} />
+                    <Route path="/research" element={<Research />} />
+                    <Route path="/research/:topicSlug" element={<Research />} />
+                    <Route path="/careers" element={<Careers />} />
+                    <Route path="/solutions" element={<Solutions />} />
+                    <Route path="/contact" element={<Contact />} />
+                    <Route path="/support" element={<SupportPage />} />
+                    <Route path="/whitepaper" element={<WhitePaper />} />
+                    {/* CRM App (auth-gated) */}
+                    <Route path="/crm" element={<CRM />} />
+                    <Route path="/crm/deals" element={<PrivateRoute><CRMDeals /></PrivateRoute>} />
+                    <Route path="/crm/deals/:id" element={<PrivateRoute><CRMDealDetail /></PrivateRoute>} />
+                    <Route path="/crm/contacts" element={<PrivateRoute><CRMContacts /></PrivateRoute>} />
+                    <Route path="/crm/contacts/:id" element={<PrivateRoute><CRMContactDetail /></PrivateRoute>} />
+                    <Route path="/crm/companies" element={<PrivateRoute><CRMCompanies /></PrivateRoute>} />
+                    <Route path="/crm/companies/:id" element={<PrivateRoute><CRMCompanyDetail /></PrivateRoute>} />
+                    <Route path="/crm/activities" element={<PrivateRoute><CRMActivities /></PrivateRoute>} />
 
-                  {/* Documentation */}
-                  <Route path="/docs" element={<DocsPage />} />
-                  <Route path="/smart-contracts" element={<SmartContracts />} />
-                  <Route path="/documents" element={<Documents />} />
+                    {/* Blog */}
+                    <Route path="/blog" element={<Blog />} />
+                    <Route path="/blog/:slug" element={<BlogPost />} />
 
-                  {/* Legal */}
-                  <Route path="/terms-of-service" element={<TermsOfService />} />
-                  <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-                  <Route path="/cookie-policy" element={<CookiePolicy />} />
-                  <Route path="/security" element={<Security />} />
+                    {/* Documentation */}
+                    <Route path="/docs" element={<DocsPage />} />
+                    <Route path="/smart-contracts" element={<SmartContracts />} />
+                    <Route path="/documents" element={<Documents />} />
 
-                  {/* Catch all route */}
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-              </main>
-            </Suspense>
-            <CookieConsent />
-          </BrowserRouter>
-        </QueryClientProvider>
-      </LanguageProvider>
+                    {/* Legal */}
+                    <Route path="/terms-of-service" element={<TermsOfService />} />
+                    <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+                    <Route path="/cookie-policy" element={<CookiePolicy />} />
+                    <Route path="/security" element={<Security />} />
+
+                    {/* Catch all route */}
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                </main>
+              </Suspense>
+              <CookieConsent />
+            </BrowserRouter>
+          </QueryClientProvider>
+        </LanguageProvider>
+      </ClientPortalProvider>
     </AuthProvider>
   );
 }
