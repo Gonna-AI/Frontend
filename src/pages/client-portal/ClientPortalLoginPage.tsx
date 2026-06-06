@@ -118,7 +118,7 @@ export default function ClientPortalLoginPage() {
                             <p className="mt-4 max-w-2xl text-sm leading-7 text-white/60 sm:text-base">
                                 {lookup?.client_accounts
                                     ? lookup.welcome_label || 'Enter the password assigned to this workspace.'
-                                    : 'Enter the workspace username first. The portal will load the matching client identity before sign-in.'}
+                                    : 'Enter the workspace username to continue.'}
                             </p>
                         </div>
 
@@ -144,15 +144,9 @@ export default function ClientPortalLoginPage() {
                                     </div>
                                 </div>
                             ) : (
-                                <div className="grid gap-4 sm:grid-cols-2">
-                                    <div className="rounded-[1.4rem] border border-white/10 bg-white/5 p-4">
-                                        <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-white/35">Route</p>
-                                        <p className="mt-3 text-lg font-semibold text-white">/client/login</p>
-                                    </div>
-                                    <div className="rounded-[1.4rem] border border-white/10 bg-white/5 p-4">
-                                        <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-white/35">Flow</p>
-                                        <p className="mt-3 text-lg font-semibold text-white">Username then password</p>
-                                    </div>
+                                <div className="rounded-[1.4rem] border border-white/10 bg-white/5 p-5">
+                                    <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-white/35">Ready</p>
+                                    <p className="mt-3 text-lg font-semibold text-white">Client identity appears after the workspace is verified.</p>
                                 </div>
                             )}
                         </div>
@@ -183,7 +177,7 @@ export default function ClientPortalLoginPage() {
                                 </h2>
                                 <p className="mt-2 text-sm leading-7 text-white/55">
                                     {step === 'username'
-                                        ? 'Use the username provisioned for this client account.'
+                                        ? 'Use the username provisioned for this workspace.'
                                         : 'The workspace brand is locked. Continue with the assigned password.'}
                                 </p>
                             </div>
