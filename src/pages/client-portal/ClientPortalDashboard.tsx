@@ -2,7 +2,7 @@ import { FormEvent, useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import {
     CalendarDays,
-    CircleCheckBig,
+    CheckCircle,
     Flag,
     LayoutDashboard,
     LogOut,
@@ -59,7 +59,7 @@ const sidebarHighlights: { icon: LucideIcon; label: string }[] = [
 
 const statCards: { label: string; body: string; icon: LucideIcon; tone: 'neutral' | 'accent' | 'danger' | 'success'; key: 'inFlight' | 'completed' | 'dueSoon' | 'updates' }[] = [
     { label: 'In flight', body: 'Deliverables actively moving right now.', icon: Sparkles, tone: 'accent', key: 'inFlight' },
-    { label: 'Completed', body: 'Items already wrapped and shared.', icon: CircleCheckBig, tone: 'success', key: 'completed' },
+    { label: 'Completed', body: 'Items already wrapped and shared.', icon: CheckCircle, tone: 'success', key: 'completed' },
     { label: 'Due soon', body: 'Deliverables landing inside the next week.', icon: CalendarDays, tone: 'danger', key: 'dueSoon' },
     { label: 'Update posts', body: 'Messages visible in the client feed.', icon: Flag, tone: 'neutral', key: 'updates' },
 ];

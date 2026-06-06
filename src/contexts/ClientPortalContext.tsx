@@ -18,6 +18,14 @@ interface ClientPortalContextValue {
 
 const ClientPortalContext = createContext<ClientPortalContextValue | undefined>(undefined);
 
+type ClientAccountRelation = ClientAccount | ClientAccount[] | null;
+type RawClientPortalProfile = Omit<ClientPortalProfile, 'client_accounts'> & {
+    client_accounts: ClientAccountRelation;
+};
+type RawClientPortalDirectoryEntry = Omit<ClientPortalDirectoryEntry, 'client_accounts'> & {
+    client_accounts: ClientAccountRelation;
+};
+
 function normalizeAccountRelation(account: ClientAccount | ClientAccount[] | null | undefined) {
     if (Array.isArray(account)) {
         return account[0] ?? null;
@@ -59,9 +67,11 @@ async function fetchPortalProfile(userId: string) {
         return null;
     }
 
+    const rawProfile = data as unknown as RawClientPortalProfile;
+
     return {
-        ...(data as ClientPortalProfile),
-        client_accounts: normalizeAccountRelation((data as ClientPortalProfile).client_accounts),
+        ...rawProfile,
+        client_accounts: normalizeAccountRelation(rawProfile.client_accounts),
     } satisfies ClientPortalProfile;
 }
 
@@ -185,9 +195,11 @@ export function ClientPortalProvider({ children }: { children: React.ReactNode }
             return null;
         }
 
+        const rawDirectoryEntry = data as unknown as RawClientPortalDirectoryEntry;
+
         return {
-            ...(data as ClientPortalDirectoryEntry),
-            client_accounts: normalizeAccountRelation((data as ClientPortalDirectoryEntry).client_accounts),
+            ...rawDirectoryEntry,
+            client_accounts: normalizeAccountRelation(rawDirectoryEntry.client_accounts),
         } satisfies ClientPortalDirectoryEntry;
     };
 
