@@ -1,22 +1,22 @@
+import { ReactNode } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useClientPortal } from '../../contexts/ClientPortalContext';
+import ClientPortalShell from './ClientPortalShell';
 
-export function ClientPortalRoute({ children }: { children: React.ReactNode }) {
-    const { session, profile, loading } = useClientPortal();
+export function ClientPortalRoute({ children }: { children: ReactNode }) {
+    const { session, profile, account, loading } = useClientPortal();
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-[#eef1ee] px-4 py-10 text-[#22313a]">
-                <div className="mx-auto flex min-h-[calc(100vh-5rem)] max-w-3xl items-center justify-center rounded-[2rem] border border-[#d5ddd8] bg-white shadow-[0_32px_80px_rgba(44,63,73,0.08)]">
-                    <div className="flex items-center gap-4">
-                        <div className="h-10 w-10 rounded-full border-2 border-[#2c3f49]/20 border-t-[#4ec4b6] animate-spin" />
-                        <div>
-                            <p className="text-sm font-medium uppercase tracking-[0.28em] text-[#4ec4b6]">Gluth portal</p>
-                            <p className="text-base text-[#4a5d67]">Loading your workspace...</p>
-                        </div>
+            <ClientPortalShell account={account ?? null} headerBadge="Client workspace">
+                <div className="mx-auto flex min-h-[calc(100vh-10rem)] max-w-3xl items-center justify-center">
+                    <div className="w-full rounded-[2rem] border border-white/10 bg-white/[0.04] p-8 text-center shadow-[0_30px_100px_rgba(0,0,0,0.35)]">
+                        <div className="mx-auto h-12 w-12 animate-spin rounded-full border-2 border-white/12 border-t-[#FF8A5B]" />
+                        <p className="mt-6 text-xs font-semibold uppercase tracking-[0.3em] text-[#FF8A5B]">Client portal</p>
+                        <p className="mt-3 text-2xl font-semibold tracking-[-0.03em] text-white">Loading your workspace</p>
                     </div>
                 </div>
-            </div>
+            </ClientPortalShell>
         );
     }
 
