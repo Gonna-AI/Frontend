@@ -110,7 +110,7 @@ export default function ClientPortalLoginPage() {
                     <div className="relative flex h-full flex-col justify-between gap-10">
                         <div>
                             <p className="text-xs font-semibold uppercase tracking-[0.3em] text-[#FF8A5B]">
-                                {lookup?.client_accounts ? 'Client identified' : 'Secure access'}
+                                {lookup?.client_accounts ? 'Workspace verified' : 'Secure access'}
                             </p>
                             <h1 className="mt-5 max-w-xl text-4xl font-semibold tracking-[-0.04em] text-white sm:text-5xl">
                                 {lookup?.client_accounts ? lookup.client_accounts.name : 'Access your workspace'}

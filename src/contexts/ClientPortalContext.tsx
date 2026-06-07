@@ -139,12 +139,18 @@ export function ClientPortalProvider({ children }: { children: React.ReactNode }
             }
         });
 
-        const { data: { subscription } } = clientPortalSupabase.auth.onAuthStateChange(async (_event, nextSession) => {
+        const { data: { subscription } } = clientPortalSupabase.auth.onAuthStateChange(async (event, nextSession) => {
             setSession(nextSession);
             setUser(nextSession?.user ?? null);
 
             if (!nextSession?.user) {
                 setProfile(null);
+                setLoading(false);
+                return;
+            }
+
+            // Skip re-fetching the profile on token refresh — session is still valid
+            if (event === 'TOKEN_REFRESHED' || event === 'INITIAL_SESSION') {
                 setLoading(false);
                 return;
             }

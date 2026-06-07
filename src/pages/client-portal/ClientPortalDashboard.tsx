@@ -4,7 +4,6 @@ import {
     CalendarDays,
     Clock3,
     ExternalLink,
-    LayoutDashboard,
     Mail,
     MessageCircle,
     MessagesSquare,
@@ -253,8 +252,8 @@ export default function ClientPortalDashboard() {
         setSlackError(null);
     };
 
-    const workspaceSummary = account.summary?.trim() || 'Track live deliverables and recent workspace updates.';
-    const supportEmail = account.support_email || 'client-success@clerktree.com';
+    const workspaceSummary = account.summary?.trim() || null;
+    const supportEmail = account.support_email || null;
     const roleLabel = profile.role === 'client_admin' ? 'Client admin' : 'Client member';
     const lastSeenLabel = profile.last_login_at ? formatPortalDate(profile.last_login_at) : 'First session';
 
@@ -268,7 +267,6 @@ export default function ClientPortalDashboard() {
                             <div className="flex flex-wrap gap-2">
                                 <Pill tone="accent">Client portal</Pill>
                                 <Pill tone="neutral">{roleLabel}</Pill>
-                                <Pill tone="neutral">@{profile.username}</Pill>
                             </div>
 
                             <div className="mt-6 flex flex-col gap-5 sm:flex-row sm:items-center">
@@ -277,7 +275,7 @@ export default function ClientPortalDashboard() {
                                 </div>
                                 <div className="min-w-0">
                                     <h1 className="text-3xl font-semibold tracking-[-0.04em] text-white sm:text-4xl lg:text-5xl">{account.name}</h1>
-                                    <p className="mt-3 max-w-3xl text-sm leading-7 text-white/60 sm:text-base">{workspaceSummary}</p>
+                                    {workspaceSummary ? <p className="mt-3 max-w-3xl text-sm leading-7 text-white/60 sm:text-base">{workspaceSummary}</p> : null}
                                 </div>
                             </div>
 
@@ -296,14 +294,17 @@ export default function ClientPortalDashboard() {
                                     </div>
                                     <p className="mt-3 text-sm font-semibold text-white">{lastSeenLabel}</p>
                                 </div>
+                                {(supportEmail || account.calendly_url) ? (
                                 <div className="rounded-[1.4rem] border border-white/10 bg-black/20 p-4">
                                     <div className="flex items-center gap-2 text-white/40">
                                         <Mail className="h-4 w-4" />
                                         <span className="text-[11px] font-semibold uppercase tracking-[0.24em]">Support</span>
                                     </div>
-                                    <a href={`mailto:${supportEmail}`} className="mt-3 block text-sm font-semibold text-white transition hover:text-[#FFB08C]">
-                                        {supportEmail}
-                                    </a>
+                                    {supportEmail ? (
+                                        <a href={`mailto:${supportEmail}`} className="mt-3 block text-sm font-semibold text-white transition hover:text-[#FFB08C]">
+                                            {supportEmail}
+                                        </a>
+                                    ) : null}
                                     {account.calendly_url ? (
                                         <a
                                             href={account.calendly_url}
@@ -316,6 +317,7 @@ export default function ClientPortalDashboard() {
                                         </a>
                                     ) : null}
                                 </div>
+                                ) : null}
                             </div>
                         </div>
 
@@ -533,6 +535,7 @@ export default function ClientPortalDashboard() {
                                     <p className="mt-3 text-sm font-semibold text-white">{roleLabel}</p>
                                 </div>
 
+                                {supportEmail ? (
                                 <div className="rounded-[1.4rem] border border-white/10 bg-black/20 p-4">
                                     <div className="flex items-center gap-2 text-white/40">
                                         <Mail className="h-4 w-4" />
@@ -542,14 +545,7 @@ export default function ClientPortalDashboard() {
                                         {supportEmail}
                                     </a>
                                 </div>
-
-                                <div className="rounded-[1.4rem] border border-white/10 bg-black/20 p-4">
-                                    <div className="flex items-center gap-2 text-white/40">
-                                        <LayoutDashboard className="h-4 w-4" />
-                                        <span className="text-[11px] font-semibold uppercase tracking-[0.24em]">Portal</span>
-                                    </div>
-                                    <p className="mt-3 text-sm font-semibold text-white">Deliverables and updates stay in this dedicated client workspace.</p>
-                                </div>
+                                ) : null}
                             </div>
                         </section>
                     </div>
