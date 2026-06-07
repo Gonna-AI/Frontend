@@ -53,7 +53,11 @@ async function fetchPortalProfile(userId: string) {
                 accent_color,
                 surface_color,
                 summary,
-                support_email
+                support_email,
+                calendly_url,
+                slack_channel_id,
+                notion_page_id,
+                clickup_list_id
             )
         `)
         .eq('id', userId)

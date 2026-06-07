@@ -8,17 +8,21 @@ import {
     ExternalLink,
     LayoutDashboard,
     Mail,
+    MessageCircle,
     MessagesSquare,
     Plus,
+    Send,
     Shield,
     Sparkles,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { Navigate } from 'react-router-dom';
+import ClickUpTasks from '../../components/client-portal/ClickUpTasks';
 import ClientPortalShell from '../../components/client-portal/ClientPortalShell';
+import NotionNotes from '../../components/client-portal/NotionNotes';
 import { useClientPortal } from '../../contexts/ClientPortalContext';
 import { cn } from '../../lib/utils';
-import { createDeliverable, createUpdate, fetchClientPortalData, updateDeliverable } from '../../services/clientPortalService';
+import { createDeliverable, createUpdate, fetchClientPortalData, sendSlackSupportMessage, updateDeliverable } from '../../services/clientPortalService';
 import type {
     ClientDeliverable,
     ClientDeliverableInput,
@@ -143,6 +147,11 @@ export default function ClientPortalDashboard() {
     const [editingDeliverable, setEditingDeliverable] = useState<ClientDeliverable | null>(null);
     const [deliverableModalOpen, setDeliverableModalOpen] = useState(false);
     const [updateModalOpen, setUpdateModalOpen] = useState(false);
+    const [slackModalOpen, setSlackModalOpen] = useState(false);
+    const [slackMessage, setSlackMessage] = useState('');
+    const [slackSending, setSlackSending] = useState(false);
+    const [slackSent, setSlackSent] = useState(false);
+    const [slackError, setSlackError] = useState<string | null>(null);
 
     useEffect(() => {
         if (!session || !profile) {
@@ -256,6 +265,29 @@ export default function ClientPortalDashboard() {
         }
     };
 
+    const handleSlackSubmit = async (event: FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        if (!slackMessage.trim()) return;
+        setSlackSending(true);
+        setSlackError(null);
+        try {
+            await sendSlackSupportMessage(slackMessage.trim(), profile.display_name || profile.username);
+            setSlackSent(true);
+            setSlackMessage('');
+        } catch {
+            setSlackError('Could not send your message. Please try email instead.');
+        } finally {
+            setSlackSending(false);
+        }
+    };
+
+    const resetSlackModal = () => {
+        setSlackModalOpen(false);
+        setSlackMessage('');
+        setSlackSent(false);
+        setSlackError(null);
+    };
+
     const workspaceSummary = account.summary?.trim() || 'Track live deliverables and recent workspace updates.';
     const supportEmail = account.support_email || 'client-success@clerktree.com';
     const roleLabel = profile.role === 'client_admin' ? 'Client admin' : 'Client member';
@@ -307,6 +339,17 @@ export default function ClientPortalDashboard() {
                                     <a href={`mailto:${supportEmail}`} className="mt-3 block text-sm font-semibold text-white transition hover:text-[#FFB08C]">
                                         {supportEmail}
                                     </a>
+                                    {account.calendly_url ? (
+                                        <a
+                                            href={account.calendly_url}
+                                            target="_blank"
+                                            rel="noreferrer"
+                                            className="mt-3 inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.22em] text-[#FFB08C] transition hover:text-white"
+                                        >
+                                            <CalendarDays className="h-3.5 w-3.5" />
+                                            Book a call
+                                        </a>
+                                    ) : null}
                                 </div>
                             </div>
                         </div>
@@ -337,6 +380,14 @@ export default function ClientPortalDashboard() {
                             >
                                 <MessagesSquare className="h-4 w-4" />
                                 Post update
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => { setSlackSent(false); setSlackError(null); setSlackModalOpen(true); }}
+                                className="inline-flex h-12 items-center justify-center gap-2 rounded-full border border-white/10 bg-white/[0.06] px-5 text-sm font-semibold text-white transition hover:bg-white/[0.10] active:scale-[0.98]"
+                            >
+                                <MessageCircle className="h-4 w-4" />
+                                Contact support
                             </button>
                         </div>
                     </div>
@@ -563,7 +614,54 @@ export default function ClientPortalDashboard() {
                         </section>
                     </div>
                 </section>
+
+                <section className="grid gap-6 xl:grid-cols-2">
+                    <NotionNotes notionPageId={account.notion_page_id} />
+                    <ClickUpTasks clickupListId={account.clickup_list_id} />
+                </section>
             </div>
+
+            {slackModalOpen ? (
+                <Modal
+                    title="Contact support"
+                    description="Send a message directly to the ClerkTree team. We'll reply via Slack or email."
+                    onClose={resetSlackModal}
+                >
+                    {slackSent ? (
+                        <div className="rounded-[1.2rem] border border-[#7BDCB5]/20 bg-[#7BDCB5]/10 px-4 py-5 text-center">
+                            <p className="text-base font-semibold text-white">Message sent!</p>
+                            <p className="mt-2 text-sm text-white/55">The ClerkTree team has received your message and will be in touch shortly.</p>
+                        </div>
+                    ) : (
+                        <form className="grid gap-4" onSubmit={handleSlackSubmit}>
+                            <label className={labelClassName}>
+                                Your message
+                                <textarea
+                                    required
+                                    rows={5}
+                                    value={slackMessage}
+                                    onChange={(e) => setSlackMessage(e.target.value)}
+                                    placeholder="Describe what you need help with…"
+                                    className={fieldClassName}
+                                />
+                            </label>
+                            {slackError ? (
+                                <p className="text-sm text-[#FFD1BF]">{slackError}</p>
+                            ) : null}
+                            <div className="pt-1 text-right">
+                                <button
+                                    type="submit"
+                                    disabled={slackSending || !slackMessage.trim()}
+                                    className="inline-flex items-center gap-2 rounded-full bg-[#FF8A5B] px-5 py-3 text-sm font-semibold text-black transition hover:bg-[#FF9A71] disabled:opacity-60"
+                                >
+                                    <Send className="h-4 w-4" />
+                                    {slackSending ? 'Sending…' : 'Send message'}
+                                </button>
+                            </div>
+                        </form>
+                    )}
+                </Modal>
+            ) : null}
 
             {deliverableModalOpen ? (
                 <Modal
