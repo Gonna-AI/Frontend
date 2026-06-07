@@ -1,9 +1,7 @@
-import { FormEvent, ReactNode, useEffect, useMemo, useState } from 'react';
-import { motion } from 'framer-motion';
+import { FormEvent, ReactNode, useEffect, useState } from 'react';
 import {
     Building2,
     CalendarDays,
-    CheckCircle,
     Clock3,
     ExternalLink,
     LayoutDashboard,
@@ -13,9 +11,7 @@ import {
     Plus,
     Send,
     Shield,
-    Sparkles,
 } from 'lucide-react';
-import type { LucideIcon } from 'lucide-react';
 import { Navigate } from 'react-router-dom';
 import ClickUpTasks from '../../components/client-portal/ClickUpTasks';
 import ClientPortalShell from '../../components/client-portal/ClientPortalShell';
@@ -31,8 +27,6 @@ import type {
     ClientUpdateKind,
 } from '../../types/clientPortal';
 import { daysUntil, formatPortalDate, statusLabel } from '../../utils/clientPortal';
-
-const easeOut = [0.23, 1, 0.32, 1] as const;
 
 const statusOptions: ClientDeliverableInput['status'][] = ['planned', 'in_progress', 'review', 'blocked', 'done'];
 const priorityOptions: ClientDeliverableInput['priority'][] = ['low', 'medium', 'high'];
@@ -60,19 +54,6 @@ const defaultUpdateForm: ClientUpdateInput = {
     posted_by: 'ClerkTree',
     is_pinned: false,
 };
-
-const statCards: {
-    label: string;
-    body: string;
-    icon: LucideIcon;
-    tone: 'neutral' | 'accent' | 'danger' | 'success';
-    key: 'inFlight' | 'completed' | 'dueSoon' | 'updates';
-}[] = [
-    { label: 'In flight', body: 'Active deliverables in motion.', icon: Sparkles, tone: 'accent', key: 'inFlight' },
-    { label: 'Completed', body: 'Closed items already delivered.', icon: CheckCircle, tone: 'success', key: 'completed' },
-    { label: 'Due soon', body: 'Due within the next seven days.', icon: CalendarDays, tone: 'danger', key: 'dueSoon' },
-    { label: 'Updates', body: 'Published to the client feed.', icon: MessagesSquare, tone: 'neutral', key: 'updates' },
-];
 
 const fieldClassName = 'mt-2 w-full rounded-[1rem] border border-white/10 bg-white/[0.04] px-4 py-3 text-sm text-white outline-none transition focus:border-[#FF8A5B]/60 focus:bg-white/[0.06]';
 const labelClassName = 'text-sm font-medium text-white/75';
@@ -187,22 +168,6 @@ export default function ClientPortalDashboard() {
             active = false;
         };
     }, [profile, session]);
-
-    const stats = useMemo(() => {
-        const completed = deliverables.filter((item) => item.status === 'done').length;
-        const inFlight = deliverables.filter((item) => item.status === 'in_progress' || item.status === 'review').length;
-        const dueSoon = deliverables.filter((item) => {
-            const days = daysUntil(item.due_date);
-            return days !== null && days >= 0 && days <= 7;
-        }).length;
-
-        return {
-            completed,
-            inFlight,
-            dueSoon,
-            updates: updates.length,
-        };
-    }, [deliverables, updates]);
 
     if (!session || !profile || !account || !user) {
         return <Navigate to="/client/login" replace />;
@@ -391,31 +356,6 @@ export default function ClientPortalDashboard() {
                             </button>
                         </div>
                     </div>
-                </section>
-
-                <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-                    {statCards.map(({ label, body, icon: Icon, tone, key }, index) => (
-                        <motion.div
-                            key={label}
-                            initial={{ opacity: 0, y: 12 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.22, delay: index * 0.04, ease: easeOut }}
-                            className="rounded-[1.6rem] border border-white/10 bg-white/[0.04] p-5 shadow-[0_20px_60px_rgba(0,0,0,0.25)]"
-                        >
-                            <div className="flex items-start justify-between gap-4">
-                                <div>
-                                    <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/40">{label}</p>
-                                    <p className="mt-4 text-4xl font-semibold tracking-[-0.04em] text-white">{stats[key]}</p>
-                                </div>
-                                <div className="rounded-full border border-white/10 bg-white/[0.06] p-3">
-                                    <Icon className="h-5 w-5 text-white" />
-                                </div>
-                            </div>
-                            <div className="mt-5">
-                                <Pill tone={tone}>{body}</Pill>
-                            </div>
-                        </motion.div>
-                    ))}
                 </section>
 
                 {error ? (
