@@ -86,7 +86,7 @@ export default function NotificationCenter({ isDark, className }: NotificationCe
     try {
       const data = await apiCall('unread-count');
       if (data) setUnreadCount(data.count ?? 0);
-    } catch { }
+    } catch { /* ignored */ }
   }, [apiCall]);
 
   const fetchNotifications = useCallback(async () => {
@@ -206,7 +206,7 @@ export default function NotificationCenter({ isDark, className }: NotificationCe
       await apiCall('mark-read', { method: 'POST', body: JSON.stringify({ ids: [] }) });
       setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
       setUnreadCount(0);
-    } catch { }
+    } catch { /* ignored */ }
   };
 
   const markRead = async (id: string) => {
@@ -214,14 +214,14 @@ export default function NotificationCenter({ isDark, className }: NotificationCe
       await apiCall('mark-read', { method: 'POST', body: JSON.stringify({ ids: [id] }) });
       setNotifications(prev => prev.map(n => n.id === id ? { ...n, is_read: true } : n));
       setUnreadCount(prev => Math.max(0, prev - 1));
-    } catch { }
+    } catch { /* ignored */ }
   };
 
   const clearRead = async () => {
     try {
       await apiCall('', { method: 'DELETE' });
       setNotifications(prev => prev.filter(n => !n.is_read));
-    } catch { }
+    } catch { /* ignored */ }
   };
 
   return (
