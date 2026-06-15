@@ -4,13 +4,13 @@
 
 [[redirects]]
   from = "/crm"
-  to = "http://140.238.254.77"
+  to = "https://crm.clerktree.com"
   status = 302
   force = true
 
 [[redirects]]
   from = "/crm/*"
-  to = "http://140.238.254.77/:splat"
+  to = "https://crm.clerktree.com/:splat"
   status = 302
   force = true
 
