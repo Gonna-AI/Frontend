@@ -3,6 +3,18 @@
   publish = "dist"
 
 [[redirects]]
+  from = "/crm"
+  to = "http://140.238.254.77"
+  status = 302
+  force = true
+
+[[redirects]]
+  from = "/crm/*"
+  to = "http://140.238.254.77/:splat"
+  status = 302
+  force = true
+
+[[redirects]]
   from = "/sitemap.xml"
   to = "/sitemap.xml"
   status = 200
