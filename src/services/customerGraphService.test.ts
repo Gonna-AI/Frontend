@@ -1,11 +1,16 @@
-import { describe, expect, it } from 'vitest';
-import {
-  buildCustomerProfiles,
-  buildGraphModel,
-  computeSimilarityEdges,
-  normalizeHistoryItem,
-} from './customerGraphService';
-import type { CustomerGraphFilters } from '../types/customerGraph';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { buildGraphModel } from './customerGraphService';
+import type { CustomerGraphFilters, CustomerGraphModel } from '../types/customerGraph';
+
+vi.mock('../config/supabase', () => ({
+  supabase: {
+    auth: {
+      getSession: vi.fn(),
+    },
+  },
+}));
+
+import { supabase } from '../config/supabase';
 
 const baseFilters: CustomerGraphFilters = {
   startDate: null,
@@ -15,219 +20,143 @@ const baseFilters: CustomerGraphFilters = {
   anonymize: false,
 };
 
+const MOCK_TOKEN = 'mock-access-token';
+
+function setMockSession() {
+  vi.mocked(supabase.auth.getSession).mockResolvedValue({
+    data: { session: { access_token: MOCK_TOKEN, user: { id: 'user-1' } } as never },
+    error: null,
+  });
+}
+
+function emptyModel(override: Partial<CustomerGraphModel> = {}): CustomerGraphModel {
+  return {
+    generatedAt: '2026-06-22T10:00:00.000Z',
+    profiles: [],
+    edges: [],
+    clusters: [],
+    stats: { totalCustomers: 0, totalEdges: 0, totalClusters: 0, highRiskClusters: 0, opportunityClusters: 0 },
+    ...override,
+  };
+}
+
+beforeEach(() => {
+  vi.clearAllMocks();
+});
+
+afterEach(() => {
+  vi.unstubAllGlobals();
+});
+
 describe('customerGraphService', () => {
-  it('normalizes legacy summary data safely', () => {
-    const normalized = normalizeHistoryItem({
-      id: 'legacy-1',
-      callerName: 'Alice',
-      date: '2026-02-10T12:00:00.000Z',
-      type: 'text',
-      tags: ['Billing'],
-      summary: {
-        notes: 'Needs billing plan update',
-      },
+  it('throws when there is no active session', async () => {
+    vi.mocked(supabase.auth.getSession).mockResolvedValue({
+      data: { session: null },
+      error: null,
     });
 
-    expect(normalized).not.toBeNull();
-    expect(normalized?.summaryText).toBe('Needs billing plan update');
-    expect(normalized?.topics).toContain('billing');
-    expect(normalized?.priority).toBe('medium');
-    expect(normalized?.category.id).toBe('uncategorized');
+    await expect(buildGraphModel([], baseFilters)).rejects.toThrow('Authentication required');
   });
 
-  it('handles malformed legacy records without throwing', () => {
-    const normalized = normalizeHistoryItem({
-      callerName: '',
-      date: 'not-a-real-date',
-      summary: null,
-      tags: null,
-      extractedFields: null,
+  it('calls the edge function with the correct URL, method, and auth header', async () => {
+    setMockSession();
+
+    const fetchSpy = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => emptyModel(),
     });
+    vi.stubGlobal('fetch', fetchSpy);
 
-    expect(normalized).not.toBeNull();
-    expect(normalized?.date.toISOString()).toBe('1970-01-01T00:00:00.000Z');
-    expect(normalized?.callerName).toBe('Unknown Caller');
-    expect(normalized?.tags).toEqual([]);
+    await buildGraphModel([], baseFilters, { enrichWithAI: false });
+
+    expect(fetchSpy).toHaveBeenCalledOnce();
+    const [url, init] = fetchSpy.mock.calls[0] as [string, RequestInit & { headers: Record<string, string> }];
+    expect(url).toContain('/functions/v1/api-customer-graph');
+    expect(init.method).toBe('POST');
+    expect(init.headers['Authorization']).toBe(`Bearer ${MOCK_TOKEN}`);
   });
 
-  it('merges customer profiles by email', () => {
-    const profiles = buildCustomerProfiles([
-      {
-        id: 'call-1',
-        callerName: 'Alice Johnson',
-        date: '2026-02-01T10:00:00.000Z',
-        type: 'voice',
-        tags: ['billing', 'upgrade'],
-        summary: { summaryText: 'Please email me at alice@example.com', topics: ['billing', 'upgrade'] },
-        extractedFields: [{ id: 'email', label: 'Email', value: 'alice@example.com' }],
-      },
-      {
-        id: 'call-2',
-        callerName: 'A. Johnson',
-        date: '2026-02-05T11:00:00.000Z',
-        type: 'text',
-        tags: ['pricing', 'billing'],
-        summary: { summaryText: 'Following up on pricing', topics: ['pricing', 'billing'] },
-        extractedFields: [{ id: 'contact', label: 'Contact email', value: 'alice@example.com' }],
-      },
-    ], baseFilters);
+  it('sends filters and enrichWithAI flag in the request body', async () => {
+    setMockSession();
 
-    expect(profiles).toHaveLength(1);
-    expect(profiles[0].interactionCount).toBe(2);
-    expect(profiles[0].contact.email).toBe('alice@example.com');
-  });
-
-  it('does not over-merge name-only profiles without signal overlap', () => {
-    const profiles = buildCustomerProfiles([
-      {
-        id: 'call-3',
-        callerName: 'Jordan Smith',
-        date: '2026-02-01T09:00:00.000Z',
-        tags: ['refund'],
-        summary: { summaryText: 'Need refund on invoice', topics: ['refund'] },
-      },
-      {
-        id: 'call-4',
-        callerName: 'Jordan Smith',
-        date: '2026-02-03T09:00:00.000Z',
-        tags: ['onboarding'],
-        summary: { summaryText: 'Question about onboarding process', topics: ['onboarding'] },
-      },
-    ], baseFilters);
-
-    expect(profiles).toHaveLength(2);
-  });
-
-  it('falls back to deterministic similarity when semantic provider fails', async () => {
-    const profiles = buildCustomerProfiles([
-      {
-        id: 'call-5',
-        callerName: 'Mira Patel',
-        date: '2026-02-01T09:00:00.000Z',
-        tags: ['billing', 'invoice', 'renewal'],
-        summary: { summaryText: 'invoice billing renewal request', topics: ['billing', 'renewal'] },
-      },
-      {
-        id: 'call-6',
-        callerName: 'Sam Lee',
-        date: '2026-02-04T09:00:00.000Z',
-        tags: ['billing', 'invoice', 'renewal'],
-        summary: { summaryText: 'billing renewal invoice plan', topics: ['billing', 'renewal'] },
-      },
-    ], {
-      ...baseFilters,
-      minSimilarity: 0.2,
+    const fetchSpy = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => emptyModel(),
     });
+    vi.stubGlobal('fetch', fetchSpy);
 
-    const edges = await computeSimilarityEdges(profiles, {
-      minScore: 0.2,
-      semanticEnabled: true,
-      embeddingProvider: async () => {
-        throw new Error('semantic unavailable');
-      },
-    });
+    await buildGraphModel([], baseFilters, { enrichWithAI: true });
 
-    expect(edges.length).toBeGreaterThan(0);
-    expect(edges[0].deterministicScore).toBeGreaterThan(0);
-    expect(edges[0].semanticScore).toBeUndefined();
+    const [, init] = fetchSpy.mock.calls[0] as [string, RequestInit];
+    const body = JSON.parse(init.body as string);
+    expect(body.filters).toEqual(baseFilters);
+    expect(body.enrichWithAI).toBe(true);
   });
 
-  it('builds graph model safely for mixed date shapes', async () => {
-    const model = await buildGraphModel([
-      {
-        id: 'call-7',
-        callerName: 'Nova',
-        date: new Date('2026-01-01T10:00:00.000Z'),
-        tags: ['support'],
-        summary: { summaryText: 'support needed', topics: ['support'] },
-      },
-      {
-        id: 'call-8',
-        callerName: '',
-        date: '2026-01-03T10:00:00.000Z',
-        tags: ['support'],
-        summary: { notes: 'support follow-up' },
-      },
-      {
-        id: 'call-9',
-        callerName: 'Unknown',
-        date: 'invalid-date-here',
-      },
-    ], {
-      ...baseFilters,
-      minSimilarity: 0.2,
-    }, {
-      semanticEnabled: false,
-      cacheMode: 'off',
-    });
+  it('converts string date fields in profile responses to Date objects', async () => {
+    setMockSession();
 
-    expect(model.stats.totalCustomers).toBeGreaterThanOrEqual(2);
-    expect(model.profiles.length).toBe(model.stats.totalCustomers);
+    const rawProfile = {
+      id: 'prof-1',
+      displayName: 'Alice',
+      firstSeen: '2026-01-01T10:00:00.000Z',
+      lastSeen: '2026-06-01T10:00:00.000Z',
+      interactions: [{ date: '2026-01-15T10:00:00.000Z' }],
+    };
+
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => emptyModel({ profiles: [rawProfile as never] }),
+    }));
+
+    const model = await buildGraphModel([], baseFilters);
+
+    expect(model.profiles[0].firstSeen).toBeInstanceOf(Date);
+    expect(model.profiles[0].lastSeen).toBeInstanceOf(Date);
+    expect(model.profiles[0].interactions[0].date).toBeInstanceOf(Date);
   });
 
-  it('builds clusters without copilot plans before AI enrichment', async () => {
-    const model = await buildGraphModel([
-      {
-        id: 'risk-call-1',
-        callerName: 'Anita',
-        date: '2026-02-10T10:00:00.000Z',
-        type: 'voice',
-        priority: 'critical',
-        tags: ['refund', 'outage', 'complaint'],
-        summary: { summaryText: 'Service outage and refund escalation requested urgently', topics: ['refund', 'outage'] },
-      },
-      {
-        id: 'risk-call-2',
-        callerName: 'Marco',
-        date: '2026-02-11T10:00:00.000Z',
-        type: 'text',
-        priority: 'high',
-        tags: ['refund', 'cancel', 'escalation'],
-        summary: { summaryText: 'Considering cancel after unresolved billing outage', topics: ['refund', 'cancel'] },
-      },
-    ], {
-      ...baseFilters,
-      minSimilarity: 0.2,
-    }, {
-      semanticEnabled: false,
-      cacheMode: 'off',
-    });
+  it('throws with the API error message on a non-ok response', async () => {
+    setMockSession();
 
-    const targetCluster = model.clusters[0];
-    expect(targetCluster).toBeDefined();
-    expect(targetCluster.copilot).toBeUndefined();
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+      ok: false,
+      status: 400,
+      json: async () => ({ error: 'Invalid filter combination' }),
+    }));
+
+    await expect(buildGraphModel([], baseFilters)).rejects.toThrow('Invalid filter combination');
   });
 
-  it('keeps graph generation stable for stale low-activity clusters', async () => {
-    const model = await buildGraphModel([
-      {
-        id: 'reengage-call-1',
-        callerName: 'Liam',
-        date: '2024-11-01T09:00:00.000Z',
-        type: 'text',
-        priority: 'low',
-        tags: ['followup', 'trial'],
-        summary: { summaryText: 'Trial followup request from inactive user', topics: ['followup', 'trial'] },
-      },
-      {
-        id: 'reengage-call-2',
-        callerName: 'Nina',
-        date: '2024-11-03T09:00:00.000Z',
-        type: 'voice',
-        priority: 'low',
-        tags: ['checkin', 'reconnect'],
-        summary: { summaryText: 'Customer asked to reconnect later after pause', topics: ['checkin', 'reconnect'] },
-      },
-    ], {
-      ...baseFilters,
-      minSimilarity: 0.2,
-    }, {
-      semanticEnabled: false,
-      cacheMode: 'off',
-    });
+  it('throws a generic message when the error response body is not JSON', async () => {
+    setMockSession();
 
-    const targetCluster = model.clusters[0];
-    expect(targetCluster).toBeDefined();
-    expect(targetCluster.memberCount).toBeGreaterThan(0);
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+      ok: false,
+      status: 503,
+      json: async () => { throw new SyntaxError('not json'); },
+    }));
+
+    await expect(buildGraphModel([], baseFilters)).rejects.toThrow('Failed to fetch customer graph');
+  });
+
+  it('defaults enrichWithAI to false when options are omitted', async () => {
+    setMockSession();
+
+    const fetchSpy = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => emptyModel(),
+    });
+    vi.stubGlobal('fetch', fetchSpy);
+
+    await buildGraphModel([], baseFilters);
+
+    const [, init] = fetchSpy.mock.calls[0] as [string, RequestInit];
+    const body = JSON.parse(init.body as string);
+    expect(body.enrichWithAI).toBe(false);
   });
 });
