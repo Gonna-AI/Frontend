@@ -84,7 +84,7 @@
     "globals": "^15.9.0",
     "happy-dom": "^20.7.0",
     "jsdom": "^27.2.0",
-    "postcss": "^8.4.35",
+    "postcss": "^8.5.15",
     "prettier": "^3.8.1",
     "tailwindcss": "^3.4.1",
     "typescript": "^5.9.3",
