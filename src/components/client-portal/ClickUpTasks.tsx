@@ -41,12 +41,12 @@ function TaskRow({ task }: { task: ClickUpTask }) {
     );
 }
 
-export default function ClickUpTasks({ clickupListId }: { clickupListId: string | null }) {
+export default function ClickUpTasks({ clickupListId, defaultOpen = false }: { clickupListId: string | null; defaultOpen?: boolean }) {
     const [tasks, setTasks] = useState<ClickUpTask[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [configured, setConfigured] = useState(true);
-    const [open, setOpen] = useState(false);
+    const [open, setOpen] = useState(defaultOpen);
 
     useEffect(() => {
         if (!open || !clickupListId) return;

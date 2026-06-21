@@ -50,12 +50,12 @@ function Block({ block }: { block: NotionBlock }) {
     }
 }
 
-export default function NotionNotes({ notionPageId }: { notionPageId: string | null }) {
+export default function NotionNotes({ notionPageId, defaultOpen = false }: { notionPageId: string | null; defaultOpen?: boolean }) {
     const [blocks, setBlocks] = useState<NotionBlock[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [configured, setConfigured] = useState(true);
-    const [open, setOpen] = useState(false);
+    const [open, setOpen] = useState(defaultOpen);
 
     useEffect(() => {
         if (!open || !notionPageId) return;
