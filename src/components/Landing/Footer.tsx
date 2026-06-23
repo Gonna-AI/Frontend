@@ -54,6 +54,14 @@ export default function Footer() {
         <div className="absolute inset-0 opacity-[0.06]" style={{ backgroundImage: 'url(/noise.webp)', backgroundSize: '35%' }} />
       </div>
 
+      {/* GDPR Badge — top right */}
+      <img
+        src="/gdpr-compliant.webp"
+        alt="GDPR Compliant"
+        className="absolute top-8 right-8 z-20 h-32 w-32 md:h-40 md:w-40 opacity-95 pointer-events-none select-none"
+        loading="lazy"
+      />
+
       {/* Background Logo */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 md:left-0 md:translate-x-[-10%] w-[30rem] md:w-[50rem] h-[30rem] md:h-[50rem] opacity-[0.08] pointer-events-none select-none z-0 mix-blend-screen">
         <svg
@@ -227,7 +235,7 @@ export default function Footer() {
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
           transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.4, delay: 0.2 }}
-          className="pb-12 flex w-full items-center justify-between"
+          className="pb-12 flex w-full items-center justify-center md:justify-end"
         >
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg relative overflow-hidden border border-white/10 bg-[#0C0C0C] flex items-center justify-center">
@@ -240,12 +248,6 @@ export default function Footer() {
               © {currentYear} ClerkTree Inc.
             </p>
           </div>
-          <img
-            src="/gdpr-compliant.webp"
-            alt="GDPR Compliant"
-            className="h-20 w-20 opacity-90"
-            loading="lazy"
-          />
 
         </motion.div>
       </div>
