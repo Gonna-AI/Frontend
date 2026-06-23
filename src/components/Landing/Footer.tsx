@@ -227,27 +227,25 @@ export default function Footer() {
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
           transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.4, delay: 0.2 }}
-          className="pb-12 flex w-full items-center justify-center md:justify-end"
+          className="pb-12 flex w-full items-center justify-between"
         >
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg relative overflow-hidden border border-white/10 bg-[#0C0C0C] flex items-center justify-center">
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,138,91,0.55),transparent_60%)]" />
-                <div className="absolute inset-0 bg-[linear-gradient(160deg,rgba(255,255,255,0.12),transparent_55%)]" />
-                <div className="absolute inset-0 opacity-[0.18]" style={{ backgroundImage: 'url(/noise.webp)', backgroundSize: '40%' }} />
-                <img src="/favicon.svg" alt="Logo" className="w-5 h-5 opacity-90 relative z-10" />
-              </div>
-              <p className="text-neutral-500 text-xs">
-                © {currentYear} ClerkTree Inc.
-              </p>
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg relative overflow-hidden border border-white/10 bg-[#0C0C0C] flex items-center justify-center">
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,138,91,0.55),transparent_60%)]" />
+              <div className="absolute inset-0 bg-[linear-gradient(160deg,rgba(255,255,255,0.12),transparent_55%)]" />
+              <div className="absolute inset-0 opacity-[0.18]" style={{ backgroundImage: 'url(/noise.webp)', backgroundSize: '40%' }} />
+              <img src="/favicon.svg" alt="Logo" className="w-5 h-5 opacity-90 relative z-10" />
             </div>
-            <img
-              src="/gdpr-compliant.webp"
-              alt="GDPR Compliant"
-              className="h-8 w-8 opacity-80"
-              loading="lazy"
-            />
+            <p className="text-neutral-500 text-xs">
+              © {currentYear} ClerkTree Inc.
+            </p>
           </div>
+          <img
+            src="/gdpr-compliant.webp"
+            alt="GDPR Compliant"
+            className="h-20 w-20 opacity-90"
+            loading="lazy"
+          />
 
         </motion.div>
       </div>
