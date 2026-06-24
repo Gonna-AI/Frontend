@@ -58,7 +58,7 @@ export default function Footer() {
       <img
         src="/gdpr-compliant.webp"
         alt="GDPR Compliant"
-        className="absolute top-8 right-8 z-20 h-32 w-32 md:h-40 md:w-40 opacity-95 pointer-events-none select-none"
+        className="hidden md:block absolute top-8 right-8 z-20 h-40 w-40 opacity-95 pointer-events-none select-none"
         loading="lazy"
       />
 
@@ -235,8 +235,15 @@ export default function Footer() {
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
           transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.4, delay: 0.2 }}
-          className="pb-12 flex w-full items-center justify-center md:justify-end"
+          className="pb-12 flex flex-col md:flex-row w-full items-center gap-6 justify-center md:justify-end"
         >
+          {/* GDPR badge — mobile bottom only */}
+          <img
+            src="/gdpr-compliant.webp"
+            alt="GDPR Compliant"
+            className="block md:hidden h-24 w-24 opacity-90"
+            loading="lazy"
+          />
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg relative overflow-hidden border border-white/10 bg-[#0C0C0C] flex items-center justify-center">
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,138,91,0.55),transparent_60%)]" />
