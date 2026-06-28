@@ -44,13 +44,6 @@ const AuthGoogleCallback = lazyWithRetry(() => import('./pages/AuthGoogleCallbac
 const InvitePage = lazyWithRetry(() => import('./pages/InvitePage'), 'InvitePage');
 const WhitePaper = lazyWithRetry(() => import('./pages/WhitePaper'), 'WhitePaper');
 const CRM = lazyWithRetry(() => import('./pages/CRM'), 'CRM');
-const CRMDeals = lazyWithRetry(() => import('./pages/crm/DealsPage'), 'CRMDeals');
-const CRMContacts = lazyWithRetry(() => import('./pages/crm/ContactsPage'), 'CRMContacts');
-const CRMCompanies = lazyWithRetry(() => import('./pages/crm/CompaniesPage'), 'CRMCompanies');
-const CRMActivities = lazyWithRetry(() => import('./pages/crm/ActivitiesPage'), 'CRMActivities');
-const CRMDealDetail = lazyWithRetry(() => import('./pages/crm/DealDetailPage'), 'CRMDealDetail');
-const CRMContactDetail = lazyWithRetry(() => import('./pages/crm/ContactDetailPage'), 'CRMContactDetail');
-const CRMCompanyDetail = lazyWithRetry(() => import('./pages/crm/CompanyDetailPage'), 'CRMCompanyDetail');
 const ClientPortalLoginPage = lazyWithRetry(() => import('./pages/client-portal/ClientPortalLoginPage'), 'ClientPortalLoginPage');
 const ClientPortalDashboard = lazyWithRetry(() => import('./pages/client-portal/ClientPortalDashboard'), 'ClientPortalDashboard');
 
@@ -136,13 +129,6 @@ function App() {
                     <Route path="/whitepaper" element={<WhitePaper />} />
                     {/* CRM App (auth-gated) */}
                     <Route path="/crm" element={<CRM />} />
-                    <Route path="/crm/deals" element={<PrivateRoute><CRMDeals /></PrivateRoute>} />
-                    <Route path="/crm/deals/:id" element={<PrivateRoute><CRMDealDetail /></PrivateRoute>} />
-                    <Route path="/crm/contacts" element={<PrivateRoute><CRMContacts /></PrivateRoute>} />
-                    <Route path="/crm/contacts/:id" element={<PrivateRoute><CRMContactDetail /></PrivateRoute>} />
-                    <Route path="/crm/companies" element={<PrivateRoute><CRMCompanies /></PrivateRoute>} />
-                    <Route path="/crm/companies/:id" element={<PrivateRoute><CRMCompanyDetail /></PrivateRoute>} />
-                    <Route path="/crm/activities" element={<PrivateRoute><CRMActivities /></PrivateRoute>} />
 
                     {/* Blog */}
                     <Route path="/blog" element={<Blog />} />
