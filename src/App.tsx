@@ -1,5 +1,5 @@
 import { Suspense } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { LanguageProvider } from './contexts/LanguageContext';
 import { AuthProvider } from './contexts/AuthContext';
@@ -44,6 +44,7 @@ const AuthGoogleCallback = lazyWithRetry(() => import('./pages/AuthGoogleCallbac
 const InvitePage = lazyWithRetry(() => import('./pages/InvitePage'), 'InvitePage');
 const WhitePaper = lazyWithRetry(() => import('./pages/WhitePaper'), 'WhitePaper');
 const CRM = lazyWithRetry(() => import('./pages/CRM'), 'CRM');
+const LandingFramer = lazyWithRetry(() => import('./pages/LandingFramer'), 'LandingFramer');
 const ClientPortalLoginPage = lazyWithRetry(() => import('./pages/client-portal/ClientPortalLoginPage'), 'ClientPortalLoginPage');
 const ClientPortalDashboard = lazyWithRetry(() => import('./pages/client-portal/ClientPortalDashboard'), 'ClientPortalDashboard');
 
@@ -82,7 +83,8 @@ function App() {
                 <main className="flex-1 flex flex-col">
                   <Routes>
                     {/* Public Routes */}
-                    <Route path="/" element={isResearchHost ? <Research /> : <Landing />} />
+                    <Route path="/" element={isResearchHost ? <Research /> : <LandingFramer />} />
+                    <Route path="/legacy" element={<Landing />} />
                     <Route path="/:topicSlug" element={isResearchHost ? <Research /> : <NotFound />} />
 
                     {/* Auth Routes */}
@@ -145,12 +147,15 @@ function App() {
                     <Route path="/cookie-policy" element={<CookiePolicy />} />
                     <Route path="/security" element={<Security />} />
 
+                    {/* Framer template test */}
+                    <Route path="/framer-test" element={<LandingFramer />} />
+
                     {/* Catch all route */}
                     <Route path="*" element={<NotFound />} />
                   </Routes>
                 </main>
               </Suspense>
-              <CookieConsent />
+              <ConditionalCookieConsent />
             </BrowserRouter>
           </QueryClientProvider>
         </LanguageProvider>
@@ -159,5 +164,15 @@ function App() {
   );
 }
 
+function ConditionalCookieConsent() {
+  const { pathname } = useLocation();
+  const isAgeroPreview = pathname === '/framer-test' || pathname === '/works';
+
+  if (isAgeroPreview) {
+    return null;
+  }
+
+  return <CookieConsent />;
+}
 
 export default App;
