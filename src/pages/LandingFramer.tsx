@@ -594,10 +594,25 @@ function useAgeroPageMotion() {
     let ticking = false;
     const updateCards = () => {
       const viewportHeight = window.innerHeight || 1;
-      solRows.forEach((row) => {
+      solRows.forEach((row, i) => {
         const rect = row.getBoundingClientRect();
         const progress = clamp((viewportHeight - rect.top) / (viewportHeight + rect.height), 0, 1);
         row.style.setProperty('--scroll-progress', progress.toFixed(4));
+
+        if (i < solRows.length - 1) {
+          const nextRow = solRows[i + 1];
+          const nextRect = nextRow.getBoundingClientRect();
+          const rowHeight = rect.height || 1;
+          const stickyTop = Number.parseFloat(window.getComputedStyle(nextRow).top) || 56;
+          const overlapProgress = clamp((stickyTop + rowHeight - nextRect.top) / rowHeight, 0, 1);
+          row.style.setProperty('--sol-y', `${(-18 * overlapProgress).toFixed(2)}px`);
+          row.style.setProperty('--sol-scale', (1 - overlapProgress * 0.035).toFixed(4));
+          row.style.setProperty('--sol-opacity', (1 - overlapProgress * 0.28).toFixed(4));
+        } else {
+          row.style.setProperty('--sol-y', '0px');
+          row.style.setProperty('--sol-scale', '1');
+          row.style.setProperty('--sol-opacity', '1');
+        }
       });
 
       if (pricingCards.length > 1) {
@@ -805,6 +820,7 @@ function WorkCard({ index, work }: { index: number; work: (typeof works)[number]
       style={
         {
           '--accent': work.accent,
+          '--card-index': String(index),
           '--reveal-delay': `${index * 150}ms`,
         } as CSSProperties
       }

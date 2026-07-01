@@ -1097,10 +1097,29 @@ html.lenis.lenis-stopped {
 
 .agero-portfolio {
   align-items: center;
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.045) 1px, transparent 1px) 0 0 / 100% 112px,
+    linear-gradient(90deg, rgba(255, 255, 255, 0.055) 1px, transparent 1px) center 0 /
+      min(11.7vw, 224px) 100%,
+    #000;
+  color: #fff;
   display: flex;
   flex-direction: column;
-  padding-top: 112px;
+  margin-top: clamp(36px, 4vw, 72px);
+  overflow: visible;
+  padding: 112px 0 88px;
+  position: relative;
   width: 100%;
+}
+
+.agero-portfolio::before {
+  background:
+    radial-gradient(circle at 18% 0%, rgba(255, 77, 0, 0.025), transparent 24%),
+    linear-gradient(180deg, rgba(0, 0, 0, 0), #000 84%);
+  content: '';
+  inset: 0;
+  pointer-events: none;
+  position: absolute;
 }
 
 .agero-section-kicker {
@@ -1112,61 +1131,144 @@ html.lenis.lenis-stopped {
 }
 
 .agero-portfolio-title {
-  color: rgba(12, 12, 12, 0.16);
-  font-size: 204px;
-  line-height: 204px;
-  margin: 0;
-  max-width: 100%;
-  overflow: hidden;
+  color: #fff;
+  font-size: clamp(76px, 9.6vw, 184px);
+  letter-spacing: -0.065em;
+  line-height: 0.92;
+  margin: clamp(72px, 9vw, 150px) auto clamp(56px, 8vw, 128px);
+  max-width: 1440px;
+  padding: 0 7vw;
   text-align: center;
-  white-space: nowrap;
   width: 100%;
 }
 
 .agero-work-list {
-  border-top: 1px solid rgba(12, 12, 12, 0.12);
-  display: flex;
-  flex-direction: column;
-  margin-top: 48px;
-  padding: 0;
+  display: block;
+  margin: 0 auto;
+  max-width: 1784px;
+  padding: 0 7vw clamp(96px, 18vh, 220px);
   width: 100%;
+}
+
+.agero-portfolio > .agero-section-kicker,
+.agero-portfolio > .agero-portfolio-title,
+.agero-work-list {
+  position: relative;
+  z-index: 1;
+}
+
+.agero-portfolio > .agero-section-kicker {
+  color: rgba(255, 255, 255, 0.72);
+  font-family: var(--agero-mono, ui-monospace, 'SFMono-Regular', 'SF Mono', Menlo, Consolas, monospace);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 /* ── Nitro-style solution rows ─────────────────────────── */
 
 .agero-sol-row {
-  border-bottom: 1px solid rgba(12, 12, 12, 0.12);
-  padding: 0 32px 56px;
-  position: relative;
+  background: var(--accent, #ff4d00);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 20px;
+  box-shadow:
+    0 34px 120px rgba(0, 0, 0, 0.42),
+    inset 0 1px 0 rgba(255, 255, 255, 0.22);
+  color: #121212;
+  margin: 0 0 24vh;
+  min-height: min(980px, 92vh);
+  overflow: hidden;
+  padding: clamp(24px, 2.5vw, 36px);
+  position: sticky;
+  top: calc(28px + var(--card-index, 0) * 28px);
+  transition:
+    opacity 320ms var(--agero-ease-out),
+    filter 320ms var(--agero-ease-out),
+    transform 420ms var(--agero-ease-out);
+  will-change: filter, opacity, transform;
+  z-index: calc(20 + var(--card-index, 0));
 }
 
 .agero-sol-row::before {
-  background: var(--accent, #e8651a);
+  background: rgba(18, 18, 18, 0.18);
   content: '';
-  display: block;
-  height: 4px;
-  width: 100%;
+  height: 1px;
+  left: clamp(24px, 2.5vw, 36px);
+  position: absolute;
+  right: clamp(24px, 2.5vw, 36px);
+  top: 72px;
+}
+
+.agero-sol-row::after {
+  background: radial-gradient(circle at 50% 110%, var(--card-glow, rgba(255, 77, 0, 0.28)), transparent 45%);
+  content: '';
+  inset: 0;
+  pointer-events: none;
+  position: absolute;
+}
+
+.agero-sol-row:last-child {
+  margin-bottom: 0;
+}
+
+.agero-sol-row:nth-child(1) {
+  --card-glow: rgba(255, 77, 0, 0.34);
+}
+
+.agero-sol-row:nth-child(2) {
+  --card-glow: rgba(91, 108, 249, 0.26);
+  color: #f6f7ff;
+}
+
+.agero-sol-row:nth-child(2)::before {
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.agero-sol-row:nth-child(3) {
+  --card-glow: rgba(43, 201, 144, 0.24);
+  color: #071a12;
+}
+
+.agero-sol-row:nth-child(3)::before {
+  background: rgba(7, 26, 18, 0.18);
+}
+
+.agero-sol-row.is-visible,
+.agero-sol-row[data-agero-visible='true'] {
+  filter: blur(0);
+  opacity: var(--sol-opacity, 1);
+  transform: translate3d(0, var(--sol-y, 0px), 0) scale(var(--sol-scale, 1));
+}
+
+.agero-sol-row:not(.is-visible):not([data-agero-visible='true']) {
+  filter: blur(8px);
+  opacity: 0;
+}
+
+.agero-sol-row > * {
+  position: relative;
+  z-index: 1;
 }
 
 .agero-sol-header {
   align-items: center;
-  border-bottom: 1px solid rgba(12, 12, 12, 0.1);
   display: flex;
   justify-content: space-between;
-  padding: 20px 0;
+  min-height: 42px;
+  padding: 0 0 20px;
 }
 
 .agero-sol-year,
 .agero-sol-role {
-  color: rgba(12, 12, 12, 0.42);
+  color: currentColor;
   font-family: var(--agero-mono, ui-monospace, monospace);
-  font-size: 11px;
-  letter-spacing: 0.1em;
+  font-size: 13px;
+  letter-spacing: 0.12em;
+  opacity: 0.68;
   text-transform: uppercase;
 }
 
 .agero-sol-body {
-  padding: 28px 0 24px;
+  padding: clamp(28px, 3vw, 48px) 0 clamp(24px, 2vw, 32px);
 }
 
 .agero-sol-title-row {
@@ -1177,37 +1279,42 @@ html.lenis.lenis-stopped {
 }
 
 .agero-sol-title {
-  color: var(--accent, #e8651a);
-  font-size: clamp(72px, 11vw, 148px);
-  font-weight: 600;
-  letter-spacing: -0.035em;
-  line-height: 0.92;
+  color: currentColor;
+  font-size: clamp(80px, 8vw, 156px);
+  font-weight: 400;
+  letter-spacing: -0.07em;
+  line-height: 0.82;
   margin: 0;
 }
 
 .agero-sol-arrow {
-  color: var(--accent, #e8651a);
+  color: currentColor;
   display: inline-block;
   flex-shrink: 0;
-  font-size: clamp(36px, 5vw, 64px);
+  font-size: clamp(52px, 4.7vw, 92px);
   line-height: 1;
   margin-top: 10px;
+  opacity: 0.88;
   text-decoration: none;
-  transition: transform 240ms ease;
+  transition:
+    opacity 180ms ease,
+    transform 240ms var(--agero-ease-out);
 }
 
 @media (hover: hover) and (pointer: fine) {
   .agero-sol-arrow:hover {
+    opacity: 1;
     transform: translate(6px, -6px);
   }
 }
 
 .agero-sol-desc {
-  color: rgba(12, 12, 12, 0.52);
-  font-size: 15px;
-  line-height: 1.65;
-  margin: 0 0 20px;
-  max-width: 580px;
+  color: currentColor;
+  font-size: clamp(18px, 1.7vw, 28px);
+  line-height: 1.45;
+  margin: 0 0 28px;
+  max-width: 920px;
+  opacity: 0.62;
 }
 
 .agero-sol-tags {
@@ -1217,29 +1324,36 @@ html.lenis.lenis-stopped {
 }
 
 .agero-sol-tag {
-  border: 1px solid var(--accent);
+  border: 1px solid currentColor;
   border-radius: 100px;
-  color: var(--accent);
-  font-size: 11px;
-  letter-spacing: 0.07em;
-  padding: 5px 14px;
+  color: currentColor;
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  opacity: 0.74;
+  padding: 9px 18px;
   text-transform: uppercase;
 }
 
 .agero-sol-media {
-  aspect-ratio: 16 / 7;
-  border-radius: 18px;
+  aspect-ratio: 16 / 7.4;
+  background: #050505;
+  border-radius: 10px;
   display: block;
   overflow: hidden;
+  transform: translate3d(0, calc((0.5 - var(--scroll-progress, 0.5)) * 34px), 0);
+  transition:
+    box-shadow 260ms var(--agero-ease-out),
+    transform 180ms linear;
+  will-change: transform;
   width: 100%;
 }
 
 .agero-sol-video {
   display: block;
-  height: 110%;
-  margin-top: -5%;
+  height: 116%;
+  margin-top: -5.5%;
   object-fit: cover;
-  transform: translate3d(0, calc((0.5 - var(--scroll-progress, 0.5)) * 70px), 0);
+  transform: translate3d(0, calc((0.5 - var(--scroll-progress, 0.5)) * 72px), 0) scale(1.035);
   transition: transform 180ms linear;
   will-change: transform;
   width: 100%;
@@ -1247,22 +1361,84 @@ html.lenis.lenis-stopped {
 
 @media (hover: hover) and (pointer: fine) {
   .agero-sol-media:hover .agero-sol-video {
-    transform: translate3d(0, calc((0.5 - var(--scroll-progress, 0.5)) * 70px), 0) scale(1.03);
+    transform: translate3d(0, calc((0.5 - var(--scroll-progress, 0.5)) * 72px), 0) scale(1.07);
   }
 }
 
 @media (max-width: 767px) {
+  .agero-portfolio {
+    padding: 88px 0 96px;
+  }
+
+  .agero-portfolio-title {
+    font-size: clamp(58px, 17vw, 84px);
+    letter-spacing: -0.055em;
+    margin: 64px auto 52px;
+    padding: 0 20px;
+  }
+
+  .agero-work-list {
+    padding: 0 16px;
+  }
+
   .agero-sol-row {
-    padding: 0 16px 40px;
+    border-radius: 18px;
+    margin: 0 0 10vh;
+    min-height: auto;
+    padding: 20px;
+    position: sticky;
+    top: calc(60px + var(--card-index, 0) * 14px);
+  }
+
+  .agero-sol-row:nth-child(n + 2) {
+    margin-top: 0;
+  }
+
+  .agero-sol-row::before {
+    left: 20px;
+    right: 20px;
+    top: 54px;
+  }
+
+  .agero-sol-header {
+    padding-bottom: 18px;
+  }
+
+  .agero-sol-title-row {
+    gap: 18px;
+    margin-bottom: 20px;
   }
 
   .agero-sol-title {
-    font-size: clamp(52px, 16vw, 80px);
+    font-size: clamp(56px, 18vw, 92px);
+    line-height: 0.86;
+  }
+
+  .agero-sol-arrow {
+    font-size: 54px;
+  }
+
+  .agero-sol-desc {
+    font-size: 18px;
+    line-height: 1.5;
+  }
+
+  .agero-sol-tag {
+    font-size: 11px;
+    padding: 8px 13px;
   }
 
   .agero-sol-media {
     aspect-ratio: 4 / 3;
     border-radius: 12px;
+    min-height: 0;
+    transform: none;
+  }
+
+  .agero-sol-video {
+    height: 100%;
+    margin-top: 0;
+    transform: scale(1.02);
   }
 }
 
@@ -2821,18 +2997,20 @@ html.lenis.lenis-stopped {
   }
 
   .agero-portfolio {
-    padding-top: 100px;
+    padding: 88px 0 96px;
   }
 
   .agero-portfolio-title {
-    font-size: 100px;
-    line-height: 100px;
+    font-size: clamp(58px, 17vw, 84px);
+    letter-spacing: -0.055em;
+    line-height: 0.92;
+    margin: 64px auto 52px;
+    padding: 0 20px;
   }
 
   .agero-work-list {
-    gap: 80px;
-    margin-top: -85px;
-    padding: 0 8px;
+    margin-top: 0;
+    padding: 0 16px;
   }
 
   .agero-work-card {
