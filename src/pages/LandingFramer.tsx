@@ -394,7 +394,7 @@ function LocationIntro() {
           <div className="agero-founder-socials" aria-label="Office social links">
             <a
               aria-label="Open in Google Maps"
-              href="https://www.google.com/maps/search/?api=1&query=Industriestraße+2,+94315+Straubing,+Germany"
+              href="https://maps.app.goo.gl/6p7fB1u5Qbk3fNB18"
               target="_blank"
               rel="noreferrer"
             >
