@@ -1411,7 +1411,7 @@ html.lenis.lenis-stopped {
   }
 
   .agero-sol-title {
-    font-size: clamp(56px, 18vw, 92px);
+    font-size: clamp(32px, 13vw, 56px);
     line-height: 0.86;
   }
 
