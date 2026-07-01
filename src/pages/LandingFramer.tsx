@@ -8,7 +8,7 @@ const BASE = 'https://xlzwfkgurrrspcdyqele.supabase.co/storage/v1/object/public/
 const works = [
   {
     title: 'Arbor',
-    accent: '#ff4d00',
+    accent: '#e8651a',
     description:
       'ClerkTree coordinates documents, decisions, and downstream actions in one operational layer built for volatile enterprise demand.',
     page: '01',
