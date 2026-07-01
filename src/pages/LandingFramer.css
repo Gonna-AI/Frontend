@@ -3162,7 +3162,7 @@ html.lenis.lenis-stopped {
   }
 
   .agero-footer-logo-text {
-    font-size: clamp(5.25rem, 28vw, 11rem);
+    font-size: clamp(4rem, 18.5vw, 9rem);
     line-height: 0.78;
     margin: 56px -20px 0;
     width: calc(100% + 40px);
