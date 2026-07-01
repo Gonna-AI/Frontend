@@ -8,7 +8,7 @@ const BASE = 'https://xlzwfkgurrrspcdyqele.supabase.co/storage/v1/object/public/
 const works = [
   {
     title: 'Arbor',
-    accent: '#e8651a',
+    accent: '#ff4d00',
     description:
       'ClerkTree coordinates documents, decisions, and downstream actions in one operational layer built for volatile enterprise demand.',
     page: '01',
@@ -20,7 +20,7 @@ const works = [
   },
   {
     title: 'Voice AI',
-    accent: '#5b6cf9',
+    accent: '#232323',
     description:
       'Deploy human-sounding AI agents that qualify, route, and resolve conversations around the clock — never miss a high-intent call.',
     page: '02',
@@ -32,7 +32,7 @@ const works = [
   },
   {
     title: 'Enterprise',
-    accent: '#2bc990',
+    accent: '#ffffff',
     description:
       'We design custom agentic setups, black-box models, and integration layers that fit your workflows instead of forcing template automation.',
     page: '03',

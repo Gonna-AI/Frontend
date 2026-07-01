@@ -1211,25 +1211,26 @@ html.lenis.lenis-stopped {
 }
 
 .agero-sol-row:nth-child(1) {
-  --card-glow: rgba(255, 77, 0, 0.34);
+  --card-glow: rgba(255, 77, 0, 0.38);
+  color: #0d0d0d;
 }
 
 .agero-sol-row:nth-child(2) {
-  --card-glow: rgba(91, 108, 249, 0.26);
-  color: #f6f7ff;
+  --card-glow: rgba(255, 255, 255, 0.06);
+  color: #f0ede8;
 }
 
 .agero-sol-row:nth-child(2)::before {
-  background: rgba(255, 255, 255, 0.22);
+  background: rgba(255, 255, 255, 0.14);
 }
 
 .agero-sol-row:nth-child(3) {
-  --card-glow: rgba(43, 201, 144, 0.24);
-  color: #071a12;
+  --card-glow: rgba(0, 0, 0, 0.08);
+  color: #0d0d0d;
 }
 
 .agero-sol-row:nth-child(3)::before {
-  background: rgba(7, 26, 18, 0.18);
+  background: rgba(0, 0, 0, 0.12);
 }
 
 .agero-sol-row.is-visible,
