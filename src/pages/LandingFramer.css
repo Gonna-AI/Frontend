@@ -1146,7 +1146,7 @@ html.lenis.lenis-stopped {
   display: block;
   margin: 0 auto;
   max-width: 1784px;
-  padding: 0 7vw clamp(200px, 80vh, 1200px);
+  padding: 0 7vw clamp(96px, 18vh, 220px);
   width: 100%;
 }
 
@@ -1175,7 +1175,7 @@ html.lenis.lenis-stopped {
     inset 0 1px 0 rgba(255, 255, 255, 0.22);
   color: #121212;
   margin: 0 0 24vh;
-  min-height: min(980px, 92vh);
+  min-height: max(min(980px, 92vh), 100vh);
   overflow: hidden;
   padding: clamp(24px, 2.5vw, 36px);
   position: sticky;
@@ -3010,7 +3010,7 @@ html.lenis.lenis-stopped {
 
   .agero-work-list {
     margin-top: 0;
-    padding: 0 16px;
+    padding: 0 16px clamp(160px, 60vh, 800px);
   }
 
   .agero-work-card {
