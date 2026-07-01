@@ -1179,7 +1179,7 @@ html.lenis.lenis-stopped {
   overflow: hidden;
   padding: clamp(24px, 2.5vw, 36px);
   position: sticky;
-  top: calc(28px + var(--card-index, 0) * 28px);
+  top: 50px;
   transition:
     opacity 320ms var(--agero-ease-out),
     filter 320ms var(--agero-ease-out),
@@ -1387,7 +1387,7 @@ html.lenis.lenis-stopped {
     min-height: auto;
     padding: 20px;
     position: sticky;
-    top: calc(60px + var(--card-index, 0) * 14px);
+    top: 60px;
   }
 
   .agero-sol-row:nth-child(n + 2) {
