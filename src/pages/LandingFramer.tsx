@@ -7,37 +7,37 @@ const BASE = 'https://xlzwfkgurrrspcdyqele.supabase.co/storage/v1/object/public/
 
 const works = [
   {
-    title: 'Arbor',
+    title: 'Predictive AI',
     accent: '#e8651a',
     description:
-      'ClerkTree coordinates documents, decisions, and downstream actions in one operational layer built for volatile enterprise demand.',
+      'ClerkTree structures sensor feeds, log streams, and machine telemetry in one operational layer built for predictive industrial reliability.',
     page: '01',
-    role: 'AI Orchestration',
-    services: ['Agentic Orchestration', 'Neural Pipelines', 'LLM Harness', 'Autonomous Ops'],
+    role: 'Predictive Ops',
+    services: ['Anomaly Detection', 'Remaining Useful Life', 'Telemetry Harness', 'Autonomous Diagnostics'],
     bg: 'https://framerusercontent.com/images/x3RMizQqFhQ9G8jF5dqqcbxY8M.png?scale-down-to=2048',
     cover: `${BASE}/VIDEO1.mp4`,
     href: '/solutions',
   },
   {
-    title: 'Voice AI',
+    title: 'Process Health',
     accent: '#232323',
     description:
-      'Deploy human-sounding AI agents that qualify, route, and resolve conversations around the clock — never miss a high-intent call.',
+      'Deploy intelligent process control agents that monitor, adjust, and optimize mechanical workloads around the clock — zero unplanned downtime.',
     page: '02',
-    role: 'AI Voice Layer',
-    services: ['Synthetic Voice Layer', 'Intent Classification', 'Infinite Concurrency', 'Real-time CRM Sync'],
+    role: 'OT / IT Bridge',
+    services: ['Process Optimization', 'Yield Maximization', 'Closed-Loop Control', 'Real-time MES Sync'],
     bg: 'https://framerusercontent.com/images/MHwFX5PK3mWp7JJNseH8110qdg.png?scale-down-to=2048',
     cover: `${BASE}/VIDEO2.mp4`,
     href: '/solutions',
   },
   {
-    title: 'Enterprise',
+    title: 'Custom Harness',
     accent: '#ffffff',
     description:
-      'We design custom agentic setups, black-box models, and integration layers that fit your workflows instead of forcing template automation.',
+      'We design custom machine learning setups, physics-informed models, and agentic harness layers that fit your mechanical infrastructure.',
     page: '03',
-    role: 'Custom Deployment',
-    services: ['Black-box Model Deployment', 'Multi-agent Mesh', 'Zero-config Scaling', 'Sovereign Infra'],
+    role: 'Industrial Deployment',
+    services: ['Physics-Informed Models', 'Sensor Mesh Networks', 'Zero-Downtime Scaling', 'Edge Infrastructure'],
     bg: 'https://framerusercontent.com/images/jXErNhJ75aLqKEeFiIYT76adrM8.png?scale-down-to=2048',
     cover: `${BASE}/VIDEO3.mp4`,
     href: '/contact',
@@ -90,18 +90,18 @@ const clientLogos = [
   { alt: 'Partner', src: `${BASE}/3cWSgJFsUVvZeOw9LdQmTOSVFhE.svg`, width: 120 },
 ];
 
-const serviceRibbonItems = ['AI Voice Agents', 'Operations Intelligence', 'Custom Deployment'];
-const metricRibbonItems = ['40% Faster Turnaround', 'Enterprise Grade AI', '24/7 Autonomous'];
+const serviceRibbonItems = ['Predictive Maintenance', 'Operational Intelligence', 'Custom AI Harness'];
+const metricRibbonItems = ['40% Downtime Reduction', 'Industrial Grade AI', '24/7 Machine Health'];
 
 const showcaseImage = '/desktop1.png';
 
 const introTags = [
-  { label: 'Voice Agents', Icon: Sparkles },
-  { label: 'Workflows', Icon: Globe2 },
-  { label: 'Claims AI', Icon: Globe2 },
-  { label: 'Document AI', Icon: PenTool },
-  { label: 'Operations', Icon: PanelTop },
-  { label: 'Deployment', Icon: Compass },
+  { label: 'Predictive Ops', Icon: Sparkles },
+  { label: 'Sensor Networks', Icon: Globe2 },
+  { label: 'Telemetry AI', Icon: Globe2 },
+  { label: 'Process Health', Icon: PenTool },
+  { label: 'Edge Control', Icon: PanelTop },
+  { label: 'Physics AI', Icon: Compass },
 ];
 
 const locationImage = 'https://xlzwfkgurrrspcdyqele.supabase.co/storage/v1/object/public/buck/munich.jpg';
@@ -112,9 +112,9 @@ const locationDetails = [
 ];
 
 const testimonialStats = [
-  ['26+', 'Enterprise Clients'],
-  ['40%', 'Faster turnaround'],
-  ['24/7', 'AI availability'],
+  ['26+', 'Industrial Plants'],
+  ['40%', 'Downtime reduction'],
+  ['24/7', 'Machine health monitoring'],
 ];
 
 const testimonials = [
@@ -123,45 +123,45 @@ const testimonials = [
     image:
       'https://xlzwfkgurrrspcdyqele.supabase.co/storage/v1/object/public/buck/gluthbhulding.jpg',
     quote:
-      '"ClerkTree cut our claims turnaround by 40%. The AI handles 80% of intake automatically."',
+      '"ClerkTree cut our unplanned downtime by 40%. The AI handles 80% of anomaly triage automatically."',
     name: 'Ethan Moore',
-    role: 'Operations Director, Gluth GmbH',
+    role: 'Director of Manufacturing Operations, Gluth GmbH',
   },
   {
     page: '02',
     image:
       'https://xlzwfkgurrrspcdyqele.supabase.co/storage/v1/object/public/buck/thdbuilding.jpg',
-    quote: '"The voice agents handle our Gäubodenvolksfest rush flawlessly — zero missed bookings."',
+    quote: '"The predictive models handle our turbine load fluctuations flawlessly — zero missed failures."',
     name: 'Olivia Wagner',
-    role: 'GM, THD GmbH',
+    role: 'Plant Manager, THD GmbH',
   },
 ];
 
 const plans = [
   {
-    name: 'Growth',
+    name: 'Ops AI',
     description:
-      'For scaling businesses that need reliable AI automation. Voice agents, document intelligence, and workflow orchestration — all in one stack.',
+      'For industrial teams that need reliable asset monitoring. Telemetry analysis, predictive diagnostics, and process orchestration — all in one stack.',
     price: 'Get a Quote',
     features: [
-      'AI Voice Agents (unlimited concurrent)',
-      'Document & claims processing',
-      'Workflow automation & API integrations',
-      'Dedicated onboarding + success manager',
+      'Predictive Maintenance Engine',
+      'Process & yield optimization',
+      'SCADA, PLC & MES integrations',
+      'Dedicated industrial engineering setup',
     ],
     featured: false,
   },
   {
-    name: 'Enterprise',
+    name: 'Custom Harness',
     description:
-      'White-glove deployment for complex enterprise environments. Custom models, dedicated infrastructure, and SLA-backed support.',
+      'Custom-tailored deployment for complex industrial machinery and fleets. Custom models, edge/on-prem infrastructure, and SLA-backed support.',
     price: "Let's Talk",
     prefix: '',
     features: [
-      'Custom model fine-tuning & RAG pipelines',
-      'Dedicated GPU infrastructure',
-      'SAP, Salesforce & ERP integrations',
-      '24/7 dedicated support + enterprise SLA',
+      'Custom model training & physics-informed AI',
+      'Edge GPU & secure on-premise hardware',
+      'Historian, MES & plant ERP integrations',
+      '24/7 critical alert support + industrial SLA',
     ],
     featured: true,
   },
@@ -169,34 +169,34 @@ const plans = [
 
 const faqs = [
   {
-    question: 'Can I use the Digitalbonus Bayern for ClerkTree?',
+    question: 'How does ClerkTree integrate with our existing MES/SCADA systems?',
     answer:
-      'Yes, Bavarian SMEs can receive up to 50% funding (up to €50,000) for integrating our AI Voice Concierge. This can also be combined with free training support from Zukunftszentrum Süd.',
+      'ClerkTree connects directly to your existing historians, PLC controllers, and MES systems via industry standard protocols like OPC-UA, Modbus, and custom APIs, with zero rip-and-replace.',
   },
   {
-    question: 'How does the AI handle the Gäubodenvolksfest rush?',
+    question: 'Can your AI models be deployed on the factory edge?',
     answer:
-      'Our AI agents handle unlimited concurrent calls simultaneously. When 1.25M visitors flood Straubing, your AI concierge will autonomously take reservations, answer FAQs, and ensure you never miss a booking.',
+      'Yes. ClerkTree supports deployment of lightweight, high-frequency models directly on edge hardware next to your machines for ultra-low latency diagnostics and air-gapped security.',
   },
   {
     question: 'How is ClerkTree priced?',
     answer:
-      'We offer flexible pricing based on your volume, number of users, and specific features. Contact our sales team for a customized quote that fits your business needs.',
+      'We offer flexible pricing based on your connected assets, data ingestion volume, and features. Contact our engineering team for a customized quote that fits your operations.',
   },
   {
     question: 'How long does implementation take?',
     answer:
-      'Implementation typically takes 2-4 weeks depending on your specific requirements and existing systems. We provide dedicated onboarding support and training.',
+      'A standard deployment takes 2 to 4 weeks depending on your data pipelines. We provide dedicated industrial engineering support to map your signals and validate the models.',
   },
   {
-    question: 'Can I integrate with my existing systems?',
+    question: 'Do you support physics-informed AI models?',
     answer:
-      'Yes! ClerkTree offers REST APIs and pre-built integrations with Salesforce, SAP, Microsoft Dynamics, and more. Our team can also help with custom integrations.',
+      'Yes. For mechanical assets, we combine neural networks with first-principles physical models of wear and thermodynamic stress to increase predictive accuracy and eliminate false alarms.',
   },
   {
-    question: 'Is my data secure with ClerkTree?',
+    question: 'Is our operational data kept private and secure?',
     answer:
-      'Absolutely. We take security seriously with end-to-end encryption, SOC 2 compliance, and regular security audits. GDPR & CCPA ready for enterprise deployments.',
+      'Absolutely. We support fully isolated, on-premise, virtual private cloud, or air-gapped deployments. Your proprietary machinery and process data never leaves your secure network.',
   },
 ];
 
@@ -230,8 +230,8 @@ export default function LandingFramer() {
                 playsInline
                 src="/hero-logo-video.mp4"
               />
-              <span className="agero-orange">Enterprise</span>
-              <span className="agero-muted">Autonomous</span>
+              <span className="agero-orange">Industrial</span>
+              <span className="agero-muted">Machine</span>
               <video
                 autoPlay
                 className="agero-hero-pill agero-hero-pill-desktop"
@@ -240,12 +240,12 @@ export default function LandingFramer() {
                 playsInline
                 src={`${BASE}/HERO4.mp4`}
               />
-              <span>AI Systems</span>
+              <span>Intelligence</span>
             </h1>
 
             <p className="agero-hero-copy">
-              Transform how your enterprise operates. We deploy fully customized agentic AI setups
-              and robust black-box models designed to handle volatile demand and complex workflows.
+              Transform how your machinery operates. We deploy custom-tailored AI/ML harness layers
+              and robust predictive models designed to optimize operations, reduce downtime, and manage critical industrial assets.
             </p>
 
             <a className="agero-button agero-hero-cta" href="/contact">
@@ -362,8 +362,8 @@ function IntroStatement() {
         data-agero-reveal="title"
         id="agero-about-intro-title"
       >
-        We help enterprises orchestrate autonomous AI systems — with{' '}
-        <span>speed, precision,</span> and zero drama.
+        We help industrial operators orchestrate machine intelligence systems — with{' '}
+        <span>speed, precision,</span> and absolute reliability.
       </h2>
 
       <div className="agero-intro-tags" data-agero-reveal="up">
@@ -407,7 +407,7 @@ function LocationIntro() {
           <div>
             <h3 id="agero-founder-title">Straubing Office</h3>
             <p>
-              ClerkTree is based in the high-tech Bavarian town of Straubing, Germany. Our location on Industriestraße houses our core operations and deployment research, close to academic and industrial pioneers at the Technical University of Munich (TUM) Straubing campus.
+              ClerkTree is based in the high-tech Bavarian town of Straubing, Germany. Our location on Industriestraße houses our core operations and machine intelligence research, close to academic and industrial partners at the Technical University of Munich (TUM) Straubing campus.
             </p>
           </div>
 
@@ -873,15 +873,15 @@ function Pricing() {
   return (
     <section className="agero-pricing" id="pricing" aria-labelledby="agero-pricing-title">
       <p className="agero-section-kicker" data-agero-reveal="up">
-        (Enterprise Pricing)
+        (Industrial Pricing)
       </p>
       <h2
         className="agero-section-title"
         data-agero-reveal="title"
         id="agero-pricing-title"
-        aria-label="Built for Enterprise"
+        aria-label="Built for Machinery Operations"
       >
-        <SplitText text="Built for Enterprise" />
+        <SplitText text="Built for Machinery Operations" />
       </h2>
 
       <div className="agero-plan-list" data-agero-pricing-stack>
@@ -957,7 +957,7 @@ function Faq() {
         Your Questions, Answered
       </h2>
       <p className="agero-faq-subtitle" data-agero-reveal="up">
-        Helping you understand how ClerkTree transforms your operations.
+        Helping you understand how ClerkTree transforms your machinery operations.
       </p>
 
       <div className="agero-faq-grid">
@@ -1058,10 +1058,10 @@ function Contact() {
         />
         <div className="agero-contact-top">
           <div className="agero-contact-copy">
-            <h3 aria-label="Ready to transform your ops?">
-              <SplitText text="Ready to transform your ops?" />
+            <h3 aria-label="Ready to optimize your machinery?">
+              <SplitText text="Ready to optimize your machinery?" />
             </h3>
-            <p>Let's build your autonomous AI stack together</p>
+            <p>Let's build your industrial AI harness together</p>
           </div>
 
           <form className="agero-contact-form" onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
@@ -1110,7 +1110,7 @@ function Footer() {
             <p>
               AI harness for
               <br />
-              growing businesses.
+              industrial machinery.
             </p>
             <a className="agero-footer-cta-button" href="/contact">
               <span aria-hidden="true">+</span>
