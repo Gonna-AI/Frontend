@@ -735,11 +735,9 @@ html.lenis.lenis-stopped {
 
 .agero-founder-watermark {
   color: rgba(12, 12, 12, 0.1);
-  font-size: 204px;
+  font-size: clamp(100px, 10vw, 204px);
   line-height: 204px;
   margin: 0;
-  max-width: 100%;
-  overflow: hidden;
   text-align: center;
   white-space: nowrap;
 }

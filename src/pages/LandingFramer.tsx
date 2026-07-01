@@ -852,7 +852,6 @@ function WorkCard({ index, work }: { index: number; work: (typeof works)[number]
           loop
           muted
           playsInline
-          poster={work.bg}
           src={work.cover}
         />
       </a>
