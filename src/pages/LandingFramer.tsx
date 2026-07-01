@@ -938,14 +938,14 @@ function Pricing() {
 }
 
 function Faq() {
-  const [openQuestion, setOpenQuestion] = useState('How is ClerkTree priced?');
+  const [openQuestion, setOpenQuestion] = useState<string | null>(null);
   const faqColumns = [
     faqs.filter((_, index) => index % 2 === 0),
     faqs.filter((_, index) => index % 2 === 1),
   ];
 
   const toggleQuestion = (question: string) => {
-    setOpenQuestion((currentQuestion) => (currentQuestion === question ? '' : question));
+    setOpenQuestion((currentQuestion) => (currentQuestion === question ? null : question));
   };
 
   return (
