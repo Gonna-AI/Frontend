@@ -1,5 +1,5 @@
 import { type CSSProperties, Fragment, useEffect, useRef, useState } from 'react';
-import { Compass, Globe2, PanelTop, PenTool, Sparkles } from 'lucide-react';
+import { Compass, Globe2, MapPin, PanelTop, PenTool, Sparkles } from 'lucide-react';
 import Lenis from 'lenis';
 import './LandingFramer.css';
 
@@ -83,10 +83,8 @@ const footerLegalLinks: FooterLink[] = [
 const clientLogos = [
   { alt: 'THD', src: `${BASE}/THD.png`, width: 200 },
   { alt: 'TUM', src: `${BASE}/TUM1.svg`, width: 210 },
-  { alt: 'GLUTH', src: `${BASE}/GLUTH.png`, width: 600 },
-  { alt: 'Partner', src: `${BASE}/3cWSgJFsUVvZeOw9LdQmTOSVFhE.svg`, width: 80 },
-  // infinity/chain logo — upload to bucket and replace this placeholder
-  // { alt: 'Infinity logo', src: `${BASE}/FILENAME.png`, width: 140 },
+  { alt: 'GLUTH', src: `${BASE}/GLUTH.png`, width: 180 },
+  { alt: 'Partner', src: `${BASE}/3cWSgJFsUVvZeOw9LdQmTOSVFhE.svg`, width: 120 },
 ];
 
 const serviceRibbonItems = ['AI Voice Agents', 'Operations Intelligence', 'Custom Deployment'];
@@ -311,7 +309,7 @@ function HomePrelude() {
             muted
             loop
             playsInline
-            src="https://xlzwfkgurrrspcdyqele.supabase.co/storage/v1/object/public/buck/hero.mov"
+            src="https://xlzwfkgurrrspcdyqele.supabase.co/storage/v1/object/public/buck/entrybox.mov"
           />
         </div>
 
@@ -391,8 +389,13 @@ function LocationIntro() {
         <figure className="agero-founder-portrait" data-agero-reveal="up">
           <img alt="ClerkTree Straubing Headquarters" className="agero-founder-image" src={locationImage} />
           <div className="agero-founder-socials" aria-label="Office social links">
-            <a aria-label="Website" href="https://clerktree.com" target="_blank" rel="noreferrer">
-              <Globe2 aria-hidden="true" size={18} strokeWidth={1.8} />
+            <a
+              aria-label="Open in Google Maps"
+              href="https://www.google.com/maps/search/?api=1&query=Industriestraße+2,+94315+Straubing,+Germany"
+              target="_blank"
+              rel="noreferrer"
+            >
+              <MapPin aria-hidden="true" size={18} strokeWidth={1.8} />
             </a>
           </div>
         </figure>
@@ -834,7 +837,7 @@ function WorkCard({ index, work }: { index: number; work: (typeof works)[number]
         </div>
 
         <a className="agero-work-cover-link" href={work.href}>
-          <video autoPlay className="agero-work-cover" loop muted playsInline src={work.cover} />
+          <video autoPlay className="agero-work-cover" loop muted playsInline poster={work.bg} src={work.cover} />
         </a>
 
         <div className="agero-work-meta">
@@ -1049,7 +1052,7 @@ function Contact() {
           muted
           playsInline
           className="agero-contact-bg-video"
-          src="https://xlzwfkgurrrspcdyqele.supabase.co/storage/v1/object/public/buck/entrybox.mov"
+          src="https://xlzwfkgurrrspcdyqele.supabase.co/storage/v1/object/public/buck/hero.mov"
         />
         <div className="agero-contact-top">
           <div className="agero-contact-copy">

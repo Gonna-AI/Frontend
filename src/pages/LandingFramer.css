@@ -549,12 +549,13 @@ html.lenis.lenis-stopped {
   mix-blend-mode: darken;
   opacity: 0.94;
   object-fit: contain;
-  width: auto;
+  width: var(--logo-width, auto);
+  max-width: var(--logo-width, 220px);
 }
 
 @media (min-width: 1024px) {
   .agero-client-logo-set img {
-    height: 80px;
+    height: 60px;
   }
 }
 
@@ -2731,6 +2732,7 @@ html.lenis.lenis-stopped {
   .agero-work-cover-link {
     height: 400px;
     width: 300px;
+    transform: none;
   }
 
   .agero-work-meta {
