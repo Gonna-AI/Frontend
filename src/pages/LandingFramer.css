@@ -1206,8 +1206,24 @@ html.lenis.lenis-stopped {
   color: rgba(12, 12, 12, 0.52);
   font-size: 15px;
   line-height: 1.65;
-  margin: 0;
+  margin: 0 0 20px;
   max-width: 580px;
+}
+
+.agero-sol-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.agero-sol-tag {
+  border: 1px solid var(--accent);
+  border-radius: 100px;
+  color: var(--accent);
+  font-size: 11px;
+  letter-spacing: 0.07em;
+  padding: 5px 14px;
+  text-transform: uppercase;
 }
 
 .agero-sol-media {
@@ -1220,15 +1236,18 @@ html.lenis.lenis-stopped {
 
 .agero-sol-video {
   display: block;
-  height: 100%;
+  height: 110%;
+  margin-top: -5%;
   object-fit: cover;
-  transition: transform 700ms var(--agero-ease-out);
+  transform: translate3d(0, calc((0.5 - var(--scroll-progress, 0.5)) * 70px), 0);
+  transition: transform 180ms linear;
+  will-change: transform;
   width: 100%;
 }
 
 @media (hover: hover) and (pointer: fine) {
   .agero-sol-media:hover .agero-sol-video {
-    transform: scale(1.03);
+    transform: translate3d(0, calc((0.5 - var(--scroll-progress, 0.5)) * 70px), 0) scale(1.03);
   }
 }
 

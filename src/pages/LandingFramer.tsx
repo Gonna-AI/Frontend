@@ -574,7 +574,7 @@ function useAgeroPageMotion() {
 
   useEffect(() => {
     const revealTargets = document.querySelectorAll<HTMLElement>('.agero-works [data-agero-reveal]');
-    const workTilts = document.querySelectorAll<HTMLElement>('.agero-work-tilt');
+    const solRows = document.querySelectorAll<HTMLElement>('.agero-sol-row');
     const pricingCards = document.querySelectorAll<HTMLElement>('.agero-plan-card');
 
     const revealObserver = new IntersectionObserver(
@@ -594,16 +594,10 @@ function useAgeroPageMotion() {
     let ticking = false;
     const updateCards = () => {
       const viewportHeight = window.innerHeight || 1;
-      workTilts.forEach((tilt) => {
-        const card = tilt.querySelector<HTMLElement>('.agero-work-card');
-        const rect = tilt.getBoundingClientRect();
+      solRows.forEach((row) => {
+        const rect = row.getBoundingClientRect();
         const progress = clamp((viewportHeight - rect.top) / (viewportHeight + rect.height), 0, 1);
-        tilt.style.setProperty('--scroll-progress', progress.toFixed(4));
-
-        if (card && rect.top < viewportHeight * 0.86 && rect.bottom > 0) {
-          card.classList.add('is-visible');
-          card.setAttribute('data-agero-visible', 'true');
-        }
+        row.style.setProperty('--scroll-progress', progress.toFixed(4));
       });
 
       if (pricingCards.length > 1) {
@@ -828,6 +822,11 @@ function WorkCard({ index, work }: { index: number; work: (typeof works)[number]
           </a>
         </div>
         <p className="agero-sol-desc">{work.description}</p>
+        <div className="agero-sol-tags" aria-label="Services">
+          {work.services.map((service) => (
+            <span className="agero-sol-tag" key={service}>{service}</span>
+          ))}
+        </div>
       </div>
 
       <a aria-label={`See ${work.title} in action`} className="agero-sol-media" href={work.href}>
