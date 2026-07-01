@@ -1024,7 +1024,7 @@ function Contact() {
           Authorization: `Bearer ${SUPA_KEY}`,
           Prefer: 'return=minimal',
         },
-        body: JSON.stringify({ name, email, message }),
+        body: JSON.stringify({ full_name: name, email, message }),
       });
       if (!res.ok) throw new Error('failed');
       setStatus('sent');
