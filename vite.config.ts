@@ -121,8 +121,11 @@ export default defineConfig({
     }),
   ],
   resolve: {
+    dedupe: ['react', 'react-dom', 'framer-motion'],
     alias: {
       "@": path.resolve(process.cwd(), "src"),
+      "react": path.resolve("./node_modules/react"),
+      "react-dom": path.resolve("./node_modules/react-dom"),
     },
   },
   optimizeDeps: {

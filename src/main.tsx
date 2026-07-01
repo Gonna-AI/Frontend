@@ -1,4 +1,3 @@
-import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { ErrorBoundary } from 'react-error-boundary';
 
@@ -33,11 +32,9 @@ if (typeof window.requestIdleCallback === 'function') {
 }
 
 createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-    <HelmetProvider>
-      <ErrorBoundary FallbackComponent={ErrorFallback} onReset={() => window.location.reload()}>
-        <App />
-      </ErrorBoundary>
-    </HelmetProvider>
-  </StrictMode>
+  <HelmetProvider>
+    <ErrorBoundary FallbackComponent={ErrorFallback} onReset={() => window.location.reload()}>
+      <App />
+    </ErrorBoundary>
+  </HelmetProvider>
 );

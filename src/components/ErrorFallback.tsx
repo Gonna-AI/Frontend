@@ -47,8 +47,27 @@ async function hardReload() {
     window.location.replace(url.toString());
 }
 
+function useSafeTranslation() {
+    try {
+        return useLanguage().t;
+    } catch {
+        return (key: string) => {
+            const fallbacks: Record<string, string> = {
+                'error.updating': 'Updating…',
+                'error.updateAvailable': 'Update Available',
+                'error.somethingWrong': 'Something went wrong',
+                'error.updateDesc': 'A new version is available. Reloading…',
+                'error.unexpectedDesc': 'An unexpected error occurred.',
+                'error.reloadPage': 'Reload Page',
+                'error.tryAgain': 'Try Again',
+            };
+            return fallbacks[key] ?? key;
+        };
+    }
+}
+
 const ErrorFallback: React.FC<ErrorFallbackProps> = ({ error, resetErrorBoundary }) => {
-    const { t } = useLanguage();
+    const t = useSafeTranslation();
     const [autoReloading, setAutoReloading] = useState(false);
 
     // Auto-reload once for chunk load errors (deploy mismatch)
