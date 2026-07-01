@@ -1124,13 +1124,127 @@ html.lenis.lenis-stopped {
 }
 
 .agero-work-list {
-  align-items: center;
+  border-top: 1px solid rgba(12, 12, 12, 0.12);
   display: flex;
   flex-direction: column;
-  gap: 100px;
-  margin-top: -51px;
-  padding: 0 8px;
+  margin-top: 48px;
+  padding: 0;
   width: 100%;
+}
+
+/* ── Nitro-style solution rows ─────────────────────────── */
+
+.agero-sol-row {
+  border-bottom: 1px solid rgba(12, 12, 12, 0.12);
+  padding: 0 32px 56px;
+  position: relative;
+}
+
+.agero-sol-row::before {
+  background: var(--accent, #e8651a);
+  content: '';
+  display: block;
+  height: 4px;
+  width: 100%;
+}
+
+.agero-sol-header {
+  align-items: center;
+  border-bottom: 1px solid rgba(12, 12, 12, 0.1);
+  display: flex;
+  justify-content: space-between;
+  padding: 20px 0;
+}
+
+.agero-sol-year,
+.agero-sol-role {
+  color: rgba(12, 12, 12, 0.42);
+  font-family: var(--agero-mono, ui-monospace, monospace);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.agero-sol-body {
+  padding: 28px 0 24px;
+}
+
+.agero-sol-title-row {
+  align-items: flex-start;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.agero-sol-title {
+  color: var(--accent, #e8651a);
+  font-size: clamp(72px, 11vw, 148px);
+  font-weight: 600;
+  letter-spacing: -0.035em;
+  line-height: 0.92;
+  margin: 0;
+}
+
+.agero-sol-arrow {
+  color: var(--accent, #e8651a);
+  display: inline-block;
+  flex-shrink: 0;
+  font-size: clamp(36px, 5vw, 64px);
+  line-height: 1;
+  margin-top: 10px;
+  text-decoration: none;
+  transition: transform 240ms ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .agero-sol-arrow:hover {
+    transform: translate(6px, -6px);
+  }
+}
+
+.agero-sol-desc {
+  color: rgba(12, 12, 12, 0.52);
+  font-size: 15px;
+  line-height: 1.65;
+  margin: 0;
+  max-width: 580px;
+}
+
+.agero-sol-media {
+  aspect-ratio: 16 / 7;
+  border-radius: 18px;
+  display: block;
+  overflow: hidden;
+  width: 100%;
+}
+
+.agero-sol-video {
+  display: block;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 700ms var(--agero-ease-out);
+  width: 100%;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .agero-sol-media:hover .agero-sol-video {
+    transform: scale(1.03);
+  }
+}
+
+@media (max-width: 767px) {
+  .agero-sol-row {
+    padding: 0 16px 40px;
+  }
+
+  .agero-sol-title {
+    font-size: clamp(52px, 16vw, 80px);
+  }
+
+  .agero-sol-media {
+    aspect-ratio: 4 / 3;
+    border-radius: 12px;
+  }
 }
 
 .agero-work-tilt {

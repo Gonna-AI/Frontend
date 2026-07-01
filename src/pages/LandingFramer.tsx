@@ -8,6 +8,7 @@ const BASE = 'https://xlzwfkgurrrspcdyqele.supabase.co/storage/v1/object/public/
 const works = [
   {
     title: 'Arbor',
+    accent: '#e8651a',
     description:
       'ClerkTree coordinates documents, decisions, and downstream actions in one operational layer built for volatile enterprise demand.',
     page: '01',
@@ -19,6 +20,7 @@ const works = [
   },
   {
     title: 'Voice AI',
+    accent: '#5b6cf9',
     description:
       'Deploy human-sounding AI agents that qualify, route, and resolve conversations around the clock — never miss a high-intent call.',
     page: '02',
@@ -30,6 +32,7 @@ const works = [
   },
   {
     title: 'Enterprise',
+    accent: '#2bc990',
     description:
       'We design custom agentic setups, black-box models, and integration layers that fit your workflows instead of forcing template automation.',
     page: '03',
@@ -802,59 +805,43 @@ function Header() {
 
 function WorkCard({ index, work }: { index: number; work: (typeof works)[number] }) {
   return (
-    <div
-      className="agero-work-tilt"
-      style={{ '--reveal-delay': `${index * 90}ms` } as CSSProperties}
-    >
     <article
-      className="agero-work-card"
+      className="agero-sol-row"
       data-agero-reveal="card"
+      style={
+        {
+          '--accent': work.accent,
+          '--reveal-delay': `${index * 150}ms`,
+        } as CSSProperties
+      }
     >
-      <img alt="BG Image" className="agero-work-bg" src={work.bg} />
-      <div className="agero-work-blur" aria-hidden="true" />
-      <img
-        alt="noise"
-        className="agero-work-noise"
-        src="https://framerusercontent.com/images/hiGYz6grmhAHSeZuNKHEuchTGTw.png?scale-down-to=2048"
-      />
-
-      <div className="agero-work-inner">
-        <div className="agero-work-left">
-          <p className="agero-work-description">{work.description}</p>
-          <div className="agero-work-brand">
-            <p className="agero-work-count" aria-label={`${work.page} / 03`}>
-              <span className="agero-work-count-current">
-                <SplitText text={work.page} />
-              </span>
-              <span className="agero-work-count-total">
-                <SplitText text="/ 03" />
-              </span>
-            </p>
-            <h3 aria-label={work.title}>
-              <SplitText text={work.title} />
-            </h3>
-          </div>
-        </div>
-
-        <a className="agero-work-cover-link" href={work.href}>
-          <video autoPlay className="agero-work-cover" loop muted playsInline poster={work.bg} src={work.cover} />
-        </a>
-
-        <div className="agero-work-meta">
-          <MetaBlock label="Year" value="2025" />
-          <MetaBlock label="Role" value={work.role} />
-          <div>
-            <p className="agero-meta-label">Services</p>
-            <ul className="agero-service-list">
-              {work.services.map((service) => (
-                <li key={service}>{service}</li>
-              ))}
-            </ul>
-          </div>
-        </div>
+      <div className="agero-sol-header">
+        <span className="agero-sol-year">2025</span>
+        <span className="agero-sol-role">{work.role}</span>
       </div>
+
+      <div className="agero-sol-body">
+        <div className="agero-sol-title-row">
+          <h3 className="agero-sol-title">{work.title}</h3>
+          <a aria-label={`View ${work.title}`} className="agero-sol-arrow" href={work.href}>
+            ↗
+          </a>
+        </div>
+        <p className="agero-sol-desc">{work.description}</p>
+      </div>
+
+      <a aria-label={`See ${work.title} in action`} className="agero-sol-media" href={work.href}>
+        <video
+          autoPlay
+          className="agero-sol-video"
+          loop
+          muted
+          playsInline
+          poster={work.bg}
+          src={work.cover}
+        />
+      </a>
     </article>
-    </div>
   );
 }
 
