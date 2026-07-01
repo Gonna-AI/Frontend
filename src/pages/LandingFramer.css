@@ -1379,7 +1379,7 @@ html.lenis.lenis-stopped {
   }
 
   .agero-work-list {
-    padding: 0 16px clamp(160px, 60vh, 800px);
+    padding: 0 16px clamp(24px, 4vh, 48px);
   }
 
   .agero-sol-row {
@@ -3011,7 +3011,7 @@ html.lenis.lenis-stopped {
 
   .agero-work-list {
     margin-top: 0;
-    padding: 0 16px clamp(160px, 60vh, 800px);
+    padding: 0 16px clamp(24px, 4vh, 48px);
   }
 
   .agero-work-card {
