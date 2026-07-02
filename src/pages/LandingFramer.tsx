@@ -117,25 +117,13 @@ const testimonialStats = [
   ['24/7', 'Machine health monitoring'],
 ];
 
-const testimonials = [
-  {
-    page: '01',
-    image:
-      'https://xlzwfkgurrrspcdyqele.supabase.co/storage/v1/object/public/buck/gluthbhulding.jpg',
-    quote:
-      '"ClerkTree cut our unplanned downtime by 40%. The AI handles 80% of anomaly triage automatically."',
-    name: 'Ethan Moore',
-    role: 'Director of Manufacturing Operations, Gluth GmbH',
-  },
-  {
-    page: '02',
-    image:
-      'https://xlzwfkgurrrspcdyqele.supabase.co/storage/v1/object/public/buck/thdbuilding.jpg',
-    quote: '"The predictive models handle our turbine load fluctuations flawlessly — zero missed failures."',
-    name: 'Olivia Wagner',
-    role: 'Plant Manager, THD GmbH',
-  },
-];
+const testimonial = {
+  image:
+    'https://xlzwfkgurrrspcdyqele.supabase.co/storage/v1/object/public/buck/thdbuilding.jpg',
+  quote: '"The predictive models handle our turbine load fluctuations flawlessly — zero missed failures."',
+  name: 'Olivia Wagner',
+  role: 'Plant Manager, THD GmbH',
+};
 
 const plans = [
   {
@@ -445,24 +433,6 @@ function RibbonRow({ items, variant }: { items: string[]; variant: 'black' | 'or
 }
 
 function Testimonials() {
-  const [activeIndex, setActiveIndex] = useState(0);
-  const active = testimonials[activeIndex];
-
-  useEffect(() => {
-    const timer = window.setInterval(() => {
-      setActiveIndex((index) => (index + 1) % testimonials.length);
-    }, 10000);
-
-    return () => window.clearInterval(timer);
-  }, []);
-
-  const goTo = (direction: 'prev' | 'next') => {
-    setActiveIndex((index) => {
-      const offset = direction === 'next' ? 1 : -1;
-      return (index + offset + testimonials.length) % testimonials.length;
-    });
-  };
-
   return (
     <section className="agero-testimonials" aria-labelledby="agero-testimonials-title">
       <p className="agero-section-kicker" data-agero-reveal="up">
@@ -489,32 +459,18 @@ function Testimonials() {
         <article
           className="agero-testimonial-card"
           data-agero-reveal="up"
-          style={{ '--testimonial-image': `url("${active.image}")` } as CSSProperties}
+          style={{ '--testimonial-image': `url("${testimonial.image}")` } as CSSProperties}
         >
-          <img alt="Intro Image" className="agero-testimonial-image" src={active.image} />
+          <img alt="THD GmbH plant" className="agero-testimonial-image" src={testimonial.image} />
           <div className="agero-testimonial-shade" aria-hidden="true" />
           <div className="agero-testimonial-content">
-            <p className="agero-testimonial-count">
-              <span>{active.page}</span>
-              <span>/ 02</span>
-            </p>
-
             <div className="agero-testimonial-bottom">
-              <blockquote key={active.quote}>{active.quote}</blockquote>
+              <blockquote>{testimonial.quote}</blockquote>
               <div className="agero-testimonial-author">
-                <span>{active.name}</span>
-                <span>{active.role}</span>
+                <span>{testimonial.name}</span>
+                <span>{testimonial.role}</span>
               </div>
             </div>
-          </div>
-
-          <div className="agero-testimonial-controls">
-            <button aria-label="Previous testimonial" onClick={() => goTo('prev')} type="button">
-              ‹
-            </button>
-            <button aria-label="Next testimonial" onClick={() => goTo('next')} type="button">
-              ›
-            </button>
           </div>
         </article>
       </div>

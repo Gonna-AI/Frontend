@@ -1204,8 +1204,11 @@ html.lenis.lenis-stopped {
   position: absolute;
 }
 
+/* The last card needs bottom runway too: the middle card stays pinned only
+   until its bottom hits the list's content bottom, so without this the stack
+   releases before the last card fully covers it. */
 .agero-sol-row:last-child {
-  margin-bottom: 0;
+  margin-bottom: 40vh;
 }
 
 .agero-sol-row:nth-child(1) {
