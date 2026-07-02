@@ -1204,11 +1204,20 @@ html.lenis.lenis-stopped {
   position: absolute;
 }
 
-/* The last card needs bottom runway too: the middle card stays pinned only
-   until its bottom hits the list's content bottom, so without this the stack
-   releases before the last card fully covers it. */
+/* Runway after the last card: sticky pins hold only while each card's margin
+   box fits inside the list's content box, so the runway must match the
+   sibling cards' 80vh bottom margin or the stack releases before the last
+   card fully covers the previous one. It lives on a ::after spacer (not a
+   margin on the card) so the last card itself can stay pinned through it
+   instead of scrolling off into an empty band. */
 .agero-sol-row:last-child {
-  margin-bottom: 40vh;
+  margin-bottom: 0;
+}
+
+.agero-work-list::after {
+  content: '';
+  display: block;
+  height: 85vh;
 }
 
 .agero-sol-row:nth-child(1) {
@@ -1367,6 +1376,26 @@ html.lenis.lenis-stopped {
   }
 }
 
+/* Desktop: match the mobile look — the pinned card fits fully inside the
+   viewport (50px pin above + 50px breathing room below) so the section
+   background frames it instead of the card bleeding past the fold. The
+   media box flexes to absorb the leftover height rather than forcing the
+   card taller than the screen via its aspect ratio. */
+@media (min-width: 768px) {
+  .agero-sol-row {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 100px);
+    min-height: 560px;
+  }
+
+  .agero-sol-media {
+    aspect-ratio: auto;
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+}
+
 @media (max-width: 767px) {
   .agero-portfolio {
     padding: 88px 0 96px;
@@ -1394,6 +1423,16 @@ html.lenis.lenis-stopped {
 
   .agero-sol-row:nth-child(n + 2) {
     margin-top: 0;
+  }
+
+  /* Mobile keeps its original runway: 40vh margin on the last card, no
+     desktop spacer. */
+  .agero-sol-row:last-child {
+    margin-bottom: 40vh;
+  }
+
+  .agero-work-list::after {
+    height: 0;
   }
 
   .agero-sol-row::before {
