@@ -533,6 +533,20 @@ function useAgeroPageMotion() {
     const solRows = document.querySelectorAll<HTMLElement>('.agero-sol-row');
     const pricingCards = document.querySelectorAll<HTMLElement>('.agero-plan-card');
 
+    const worksRoot = document.querySelector<HTMLElement>('.agero-works');
+    const bgSections = worksRoot ? (Array.from(worksRoot.children) as HTMLElement[]) : [];
+    const fallbackBg = worksRoot ? window.getComputedStyle(worksRoot).backgroundColor : 'rgb(220, 220, 220)';
+    const sectionBgs = bgSections.map((section) => {
+      // Contact/footer get their dark look from video/image layers, so their
+      // backgroundColor computes transparent — pin them to the matching dark.
+      if (section.classList.contains('agero-contact') || section.classList.contains('agero-footer')) {
+        return 'rgb(13, 13, 13)';
+      }
+      const color = window.getComputedStyle(section).backgroundColor;
+      return color === 'transparent' || color === 'rgba(0, 0, 0, 0)' ? fallbackBg : color;
+    });
+    let currentBodyBg = '';
+
     const revealObserver = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -586,6 +600,20 @@ function useAgeroPageMotion() {
         proCard.style.setProperty('--plan-y', '0px');
         proCard.style.setProperty('--plan-scale', '1');
         proCard.style.setProperty('--plan-opacity', '1');
+      }
+
+      // iOS Safari tints its floating bar from the sampled body color, so the
+      // body background must track the section currently at the bottom edge.
+      const bottomEdge = viewportHeight - 1;
+      for (let i = bgSections.length - 1; i >= 0; i -= 1) {
+        const rect = bgSections[i].getBoundingClientRect();
+        if (rect.top <= bottomEdge && rect.bottom > bottomEdge) {
+          if (sectionBgs[i] !== currentBodyBg) {
+            currentBodyBg = sectionBgs[i];
+            document.body.style.setProperty('--agero-body-bg', currentBodyBg);
+          }
+          break;
+        }
       }
 
       ticking = false;

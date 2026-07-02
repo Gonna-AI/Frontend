@@ -74,8 +74,11 @@ html.lenis.lenis-stopped {
   overflow: hidden;
 }
 
+/* iOS Safari samples this body color to tint its floating bar (it ignores
+   theme-color for Liquid Glass), so LandingFramer.tsx keeps --agero-body-bg
+   in sync with the section at the viewport's bottom edge. */
 .agero-page-active {
-  background: rgb(220, 220, 220) !important;
+  background: var(--agero-body-bg, rgb(220, 220, 220)) !important;
 }
 
 .agero-works {
