@@ -14,6 +14,14 @@
   status = 302
   force = true
 
+# Proxy (not redirect): serves the THD predictive-maintenance API from the
+# Oracle VPS under our HTTPS origin, avoiding mixed-content and CORS issues.
+[[redirects]]
+  from = "/thd-api/*"
+  to = "http://140.238.254.77:8100/:splat"
+  status = 200
+  force = true
+
 [[redirects]]
   from = "/sitemap.xml"
   to = "/sitemap.xml"

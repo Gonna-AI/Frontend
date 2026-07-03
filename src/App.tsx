@@ -47,6 +47,7 @@ const CRM = lazyWithRetry(() => import('./pages/CRM'), 'CRM');
 const LandingFramer = lazyWithRetry(() => import('./pages/LandingFramer'), 'LandingFramer');
 const ClientPortalLoginPage = lazyWithRetry(() => import('./pages/client-portal/ClientPortalLoginPage'), 'ClientPortalLoginPage');
 const ClientPortalDashboard = lazyWithRetry(() => import('./pages/client-portal/ClientPortalDashboard'), 'ClientPortalDashboard');
+const ThdShowcase = lazyWithRetry(() => import('./pages/ThdShowcase'), 'ThdShowcase');
 
 const NotFound = lazyWithRetry(() => import('./pages/NotFound'), 'NotFound');
 import LoadingScreen from './components/LoadingScreen';
@@ -85,6 +86,7 @@ function App() {
                     {/* Public Routes */}
                     <Route path="/" element={isResearchHost ? <Research /> : <LandingFramer />} />
                     <Route path="/legacy" element={<Landing />} />
+                    <Route path="/thd" element={<ThdShowcase />} />
                     <Route path="/:topicSlug" element={isResearchHost ? <Research /> : <NotFound />} />
 
                     {/* Auth Routes */}
