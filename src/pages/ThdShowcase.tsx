@@ -13,6 +13,7 @@ import {
 // Dev hits the VPS directly (API allows CORS); production goes through the
 // Netlify proxy so everything stays on the HTTPS origin.
 const API_BASE = import.meta.env.DEV ? 'http://140.238.254.77:8100' : '/thd-api';
+const VOICE_BASE = import.meta.env.DEV ? 'http://140.238.254.77:8200' : '/thd-voice';
 
 const ACCENT = '#ff4d00';
 const POLL_MS = 3000;
@@ -129,6 +130,105 @@ function useTelemetry(turbineId: string) {
   }, [turbineId]);
 
   return samples;
+}
+
+function VoiceAgentPanel({ selected }: { selected: Prediction | undefined }) {
+  const [text, setText] = useState('');
+  const [phase, setPhase] = useState<'idle' | 'queued' | 'generating' | 'done' | 'failed'>('idle');
+  const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  const [meta, setMeta] = useState<string | null>(null);
+  const [voiceOnline, setVoiceOnline] = useState<string>('checking');
+  const pollRef = useRef<number>();
+
+  useEffect(() => {
+    fetch(`${VOICE_BASE}/health`)
+      .then((r) => r.json())
+      .then((h) => setVoiceOnline(h.status))
+      .catch(() => setVoiceOnline('offline'));
+    return () => window.clearInterval(pollRef.current);
+  }, []);
+
+  const defaultText = selected
+    ? `Hello, this is the ClerkTree maintenance agent. ${selected.name.split('—')[0].trim()} is showing elevated ${DRIVER_LABELS[selected.primary_driver]?.toLowerCase() ?? 'sensor readings'}. Remaining useful life is ${selected.rul_days} days. ${selected.recommendation}.`
+    : 'Hello, this is the ClerkTree maintenance agent calling with a fleet status update.';
+
+  const speak = async () => {
+    setPhase('queued');
+    setAudioUrl(null);
+    setMeta(null);
+    try {
+      const res = await fetch(`${VOICE_BASE}/api/speak`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: (text || defaultText).slice(0, 280), speaker: 0 }),
+      });
+      if (!res.ok) throw new Error('speak failed');
+      const { job_id } = await res.json();
+      pollRef.current = window.setInterval(async () => {
+        const job = await (await fetch(`${VOICE_BASE}/api/jobs/${job_id}`)).json();
+        if (job.status === 'generating') setPhase('generating');
+        if (job.status === 'done') {
+          window.clearInterval(pollRef.current);
+          setPhase('done');
+          setAudioUrl(`${VOICE_BASE}${job.audio_url}`);
+          setMeta(`${job.duration_s}s of speech in ${job.generation_s}s (CPU)`);
+        }
+        if (job.status === 'failed') {
+          window.clearInterval(pollRef.current);
+          setPhase('failed');
+          setMeta(job.error ?? 'generation failed');
+        }
+      }, 4000);
+    } catch {
+      setPhase('failed');
+      setMeta('Voice API unreachable');
+    }
+  };
+
+  return (
+    <section aria-label="Voice agent" className="mt-6 rounded-2xl border border-white/10 bg-white/[0.03] p-5">
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+        <div>
+          <p className="font-mono text-[10px] uppercase tracking-widest text-white/45">
+            sesame csm-1b — conversational voice agent
+          </p>
+          <h2 className="text-lg font-semibold">Maintenance call, generated live</h2>
+        </div>
+        <span className="font-mono text-xs text-white/55">
+          model: {voiceOnline === 'ok' ? 'online' : voiceOnline}
+        </span>
+      </div>
+      <p className="mb-3 max-w-3xl text-sm leading-relaxed text-white/60">
+        When the pipeline flags a failure risk, ClerkTree's agent calls the plant lead. This speech is
+        synthesized on our Oracle VPS by Sesame CSM-1B — no third-party TTS API involved.
+      </p>
+      <textarea
+        className="h-24 w-full rounded-xl border border-white/15 bg-black/40 p-3 text-sm text-white/90 outline-none focus:border-[#ff4d00]"
+        maxLength={280}
+        onChange={(e) => setText(e.target.value)}
+        placeholder={defaultText}
+        value={text}
+      />
+      <div className="mt-3 flex flex-wrap items-center gap-3">
+        <button
+          className="rounded-full px-5 py-2 font-mono text-xs font-semibold text-white transition-opacity disabled:opacity-40"
+          disabled={phase === 'queued' || phase === 'generating' || voiceOnline !== 'ok'}
+          onClick={speak}
+          style={{ background: ACCENT }}
+          type="button"
+        >
+          {phase === 'queued' ? 'queued…' : phase === 'generating' ? 'synthesizing…' : '▶ Generate call audio'}
+        </button>
+        {(phase === 'queued' || phase === 'generating') && (
+          <span className="font-mono text-xs text-white/50">
+            CPU inference on a 2-core VPS — expect a minute or two
+          </span>
+        )}
+        {meta && <span className="font-mono text-xs" style={{ color: phase === 'failed' ? ACCENT : '#3ddc84' }}>{meta}</span>}
+        {audioUrl && <audio autoPlay controls className="h-9" src={audioUrl} />}
+      </div>
+    </section>
+  );
 }
 
 function HealthRing({ score }: { score: number }) {
@@ -377,8 +477,10 @@ export default function ThdShowcase() {
           </div>
         </div>
 
+        <VoiceAgentPanel selected={selected} />
+
         <footer className="mt-10 border-t border-white/10 pt-6 text-center font-mono text-[11px] text-white/35">
-          FastAPI · scikit-learn · Oracle Cloud (ap-mumbai-1) · Netlify edge proxy — a ClerkTree industrial AI showcase
+          FastAPI · scikit-learn · Sesame CSM-1B · Oracle Cloud (ap-mumbai-1) · Netlify edge proxy — a ClerkTree industrial AI showcase
         </footer>
       </div>
     </main>
