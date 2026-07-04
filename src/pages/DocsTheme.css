@@ -1,0 +1,214 @@
+.clerktree-docs {
+  background: var(--agero-bg);
+  color: var(--agero-ink);
+}
+
+.clerktree-docs > .pointer-events-none {
+  display: none;
+}
+
+.clerktree-docs .text-white,
+.clerktree-docs .text-white\/90,
+.clerktree-docs .text-white\/80 {
+  color: var(--agero-ink) !important;
+}
+
+.clerktree-docs .text-white\/70,
+.clerktree-docs .text-white\/60,
+.clerktree-docs .text-white\/50,
+.clerktree-docs .text-white\/40,
+.clerktree-docs .text-white\/30 {
+  color: rgba(12, 12, 12, 0.58) !important;
+}
+
+.clerktree-docs .border-white\/10,
+.clerktree-docs .border-white\/5 {
+  border-color: rgba(12, 12, 12, 0.1) !important;
+}
+
+.clerktree-docs .bg-white,
+.clerktree-docs .bg-white\/10,
+.clerktree-docs .bg-white\/5 {
+  background-color: rgba(255, 255, 255, 0.58) !important;
+}
+
+.clerktree-docs .bg-\[\#0A0A0A\],
+.clerktree-docs .bg-\[\#0A0A0A\]\/95 {
+  background-color: rgba(240, 240, 240, 0.96) !important;
+}
+
+.clerktree-docs .max-w-\[1600px\] {
+  max-width: 1920px;
+}
+
+.clerktree-docs nav {
+  border-color: rgba(12, 12, 12, 0.1) !important;
+}
+
+.clerktree-docs nav h3,
+.clerktree-docs aside h4 {
+  color: rgba(12, 12, 12, 0.9) !important;
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.clerktree-docs nav button,
+.clerktree-docs aside a {
+  border-radius: 999px !important;
+}
+
+.clerktree-docs nav button:not([class*="bg-[#FF4D00]"]) {
+  color: rgba(12, 12, 12, 0.56) !important;
+}
+
+.clerktree-docs nav button:hover,
+.clerktree-docs aside a:hover {
+  background: rgba(255, 255, 255, 0.7) !important;
+  color: var(--agero-ink) !important;
+}
+
+.clerktree-docs nav button[class*="bg-[#FF4D00]"],
+.clerktree-docs aside a[class*="text-[#FF8A5B]"] {
+  background: var(--agero-ink) !important;
+  border-color: var(--agero-ink) !important;
+  color: #fff !important;
+}
+
+.clerktree-docs main {
+  padding-top: clamp(56px, 7vw, 112px);
+}
+
+.clerktree-docs #welcome h1 {
+  background: none !important;
+  color: var(--agero-ink) !important;
+  font-family: "Cal Sans", "Inter", system-ui, sans-serif !important;
+  font-size: clamp(54px, 8vw, 126px);
+  letter-spacing: -0.07em;
+  line-height: 0.9;
+  max-width: 980px;
+}
+
+.clerktree-docs #welcome > div:first-child > p:first-child {
+  color: var(--agero-orange) !important;
+  font-weight: 800;
+}
+
+.clerktree-docs #welcome > div:first-child > p:last-child {
+  color: rgba(12, 12, 12, 0.62) !important;
+  font-size: clamp(18px, 2vw, 23px);
+  max-width: 900px;
+}
+
+.clerktree-docs #welcome .grid > div,
+.clerktree-docs section[id] > .relative.overflow-hidden,
+.clerktree-docs .rounded-xl.border,
+.clerktree-docs .rounded-2xl.border {
+  background: var(--agero-panel) !important;
+  border-color: rgba(12, 12, 12, 0.08) !important;
+  box-shadow: 0 18px 54px rgba(12, 12, 12, 0.04) !important;
+}
+
+.clerktree-docs section[id] {
+  border-color: rgba(12, 12, 12, 0.08) !important;
+}
+
+.clerktree-docs h2,
+.clerktree-docs h3,
+.clerktree-docs h4 {
+  color: var(--agero-ink) !important;
+  font-family: "Cal Sans", "Inter", system-ui, sans-serif !important;
+  letter-spacing: -0.035em;
+}
+
+.clerktree-docs p,
+.clerktree-docs td {
+  color: rgba(12, 12, 12, 0.62) !important;
+}
+
+.clerktree-docs a {
+  color: var(--agero-orange);
+}
+
+.clerktree-docs code:not(pre code) {
+  background: rgba(255, 77, 0, 0.1) !important;
+  color: var(--agero-orange) !important;
+}
+
+.clerktree-docs pre,
+.clerktree-docs pre code,
+.clerktree-docs .bg-\[\#0C0C0E\] {
+  background: #090909 !important;
+  color: rgba(255, 255, 255, 0.84) !important;
+}
+
+.clerktree-docs .bg-\[\#0C0C0E\] .text-white\/80,
+.clerktree-docs pre .text-white\/80,
+.clerktree-docs pre .text-white,
+.clerktree-docs pre code {
+  color: rgba(255, 255, 255, 0.84) !important;
+}
+
+.clerktree-docs .bg-\[\#0C0C0E\] .text-white\/40,
+.clerktree-docs .bg-\[\#0C0C0E\] .text-white\/50 {
+  color: rgba(255, 255, 255, 0.52) !important;
+}
+
+.clerktree-docs thead tr,
+.clerktree-docs tr[class*="bg-white"] {
+  background: rgba(255, 255, 255, 0.66) !important;
+}
+
+.clerktree-docs th {
+  color: rgba(12, 12, 12, 0.52) !important;
+}
+
+.clerktree-docs td:first-child {
+  color: var(--agero-ink) !important;
+}
+
+.clerktree-docs button[class*="from-[#FF4D00]"],
+.clerktree-docs button[class*="bg-gradient-to-r"] {
+  background: var(--agero-ink) !important;
+  border-color: var(--agero-ink) !important;
+  color: #fff !important;
+}
+
+.clerktree-docs footer {
+  border-color: rgba(12, 12, 12, 0.1) !important;
+}
+
+.clerktree-docs footer,
+.clerktree-docs footer p,
+.clerktree-docs footer a {
+  color: rgba(12, 12, 12, 0.52) !important;
+}
+
+.clerktree-docs footer a:hover {
+  color: var(--agero-ink) !important;
+}
+
+.clerktree-docs .fixed.inset-0.z-\[60\] .bg-black\/60 {
+  background: rgba(0, 0, 0, 0.44) !important;
+}
+
+.clerktree-docs .fixed.inset-0.z-\[60\] .relative {
+  background: var(--agero-panel) !important;
+  border-color: rgba(12, 12, 12, 0.1) !important;
+  color: var(--agero-ink) !important;
+}
+
+.clerktree-docs .fixed.inset-0.z-\[60\] input {
+  color: var(--agero-ink) !important;
+}
+
+@media (max-width: 768px) {
+  .clerktree-docs nav {
+    background: rgba(240, 240, 240, 0.98) !important;
+  }
+
+  .clerktree-docs main {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+}

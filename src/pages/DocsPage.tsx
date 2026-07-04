@@ -6,6 +6,8 @@ import {
     dashboardEndpoints, errorCodes
 } from './docsContent';
 import SharedHeader from '../components/Layout/SharedHeader';
+import './LandingFramer.css';
+import './DocsTheme.css';
 
 type DocSection = 'intro' | 'auth' | 'chat' | 'call' | 'dashboard' | 'webhooks';
 interface NavItem { id: string; label: string; section: DocSection; }
@@ -347,7 +349,7 @@ export default function DocsPage() {
     }, [location.hash]);
 
     return (
-        <div className="relative min-h-screen bg-[rgb(10,10,10)] text-white font-urbanist selection:bg-[#FF4D00]/30 overflow-hidden">
+        <div className="agero-works clerktree-docs relative min-h-screen text-white font-urbanist selection:bg-[#FF4D00]/30 overflow-hidden">
             <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(80%_60%_at_80%_0%,rgba(255,255,255,0.12),transparent)]" />
             <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(215deg,rgba(255,255,255,0.08)_0%,rgba(255,255,255,0.02)_40%,transparent_70%)]" />
             <div className="pointer-events-none absolute inset-0 opacity-[0.07]" style={{ backgroundImage: 'url(/noise.webp)', backgroundSize: '35%' }} />
