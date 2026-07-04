@@ -1,135 +1,92 @@
-# Deploying the Kostencheck Copilot worker
+# Kostencheck Copilot worker — deployment status
 
-I (Claude) do not have SSH access to your Oracle VPS, so I can't run these
-steps myself — this is a copy-paste guide for you to run there. It follows
-the same pattern as the existing `thd-pipeline` service already on that box
-(systemd unit, plain venv, no Docker), just on a different port (8200
-instead of thd-pipeline's 8100) so the two run side by side.
+**Deployed and running.** This was set up end-to-end (OCI CLI auth,
+instance provisioning, deployment, secrets, systemd, firewall, embedding
+backfill) directly from this machine on 2026-07-04.
 
-## 1. Ship the code
+## Live instance
 
-From your Mac:
+- Name: `clerktree-kostencheck-worker`
+- Shape: `VM.Standard.A1.Flex`, 2 OCPU / 12GB (Always Free tier ARM Ampere)
+- Region: ap-mumbai-1 (`ap-south-1` in AWS-style naming)
+- Public IP: `130.210.20.208`
+- Health check: `curl http://130.210.20.208:8200/health` → `{"status":"ok"}`
+- SSH: `ssh -i ~/.oci/clerktree-crm-ssh ubuntu@130.210.20.208`
+- Service: `sudo systemctl status kostencheck-worker` (systemd, auto-restarts on failure)
+- Code lives at `/home/ubuntu/kostencheck-worker` on the box
 
-```bash
-rsync -avz --exclude .venv --exclude __pycache__ worker/ your-user@your-vps-host:/opt/kostencheck-worker/
-```
+This is a **separate, new instance** from the pre-existing `clerktree-crm-server`
+(140.238.254.77) — that one was provisioned earlier with a different SSH key
+that wasn't available on this machine, so it was left untouched rather than
+risking it. It's still running under your OCI account; deal with it
+separately if it's not needed (check what's on it before terminating —
+I didn't touch it or its contents).
 
-(Or `git clone` the repo on the VPS and use the `worker/` subdirectory —
-either works, rsync is simplest if you don't want the whole frontend repo
-on the box.)
+## What had to be fixed during deployment (for future reference)
 
-## 2. Install system dependencies (Debian/Ubuntu)
+1. **Upload permission**: `main.py`'s `UPLOAD_DIR` (`/var/lib/kostencheck/uploads`)
+   needs root to create. Fixed with `sudo mkdir -p /var/lib/kostencheck &&
+   sudo chown ubuntu:ubuntu /var/lib/kostencheck` — already done on the live box.
+2. **iptables**: Ubuntu's default Oracle-image firewall only allows inbound
+   SSH (port 22) out of the box, independent of the OCI-side security list
+   (which already had 8200 open). Had to add and persist an explicit rule:
+   `sudo iptables -I INPUT 5 -p tcp -m state --state NEW -m tcp --dport 8200 -j ACCEPT`
+   then `sudo netfilter-persistent save`.
+3. **IPv6-only direct DB connection**: `db.[project-ref].supabase.co:5432` has
+   no IPv4 (A) record on the free tier, and this VPS has no outbound IPv6
+   route. Switched `DATABASE_URL` to the Supavisor **session pooler**
+   (IPv4-compatible on every tier): `aws-1-ap-south-1.pooler.supabase.com:5432`,
+   username `postgres.<project-ref>` instead of just `postgres`.
+4. **Stale DB password**: the password pasted earlier in chat had been
+   rotated since. Reset it via the Supabase Management API
+   (`PATCH /v1/projects/{ref}/database/password`) using a Personal Access
+   Token — this requires a PAT from `supabase.com/dashboard/account/tokens`;
+   there's no MCP tool or raw-SQL path for it (the `postgres` role can't be
+   `ALTER`'d directly, "Only superusers can alter privileged roles").
 
-```bash
-sudo apt-get update
-sudo apt-get install -y python3-venv python3-pip tesseract-ocr tesseract-ocr-deu poppler-utils
-```
+## Embeddings backfilled
 
-## 3. Python environment
-
-```bash
-cd /opt/kostencheck-worker
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-```
-
-The first `sentence-transformers` install will download the
-`multilingual-e5-small` model (~470MB) on first run — expect a few minutes
-and make sure there's disk headroom.
-
-## 4. Configure secrets
-
-```bash
-cp .env.example .env
-nano .env   # fill in DATABASE_URL and GROQ_API_KEY
-```
-
-Get `DATABASE_URL` from the Supabase dashboard: Project Settings →
-Database → Connection string (URI). Use a fresh Groq API key — rotate the
-one that was pasted in plaintext chat earlier in this project.
-
-## 5. Systemd service
-
-Create `/etc/systemd/system/kostencheck-worker.service`:
-
-```ini
-[Unit]
-Description=Kostencheck Copilot worker
-After=network.target
-
-[Service]
-Type=simple
-User=your-user
-WorkingDirectory=/opt/kostencheck-worker
-EnvironmentFile=/opt/kostencheck-worker/.env
-ExecStart=/opt/kostencheck-worker/.venv/bin/python main.py
-Restart=on-failure
-RestartSec=5
-
-[Install]
-WantedBy=multi-user.target
-```
+All 12 seeded historical projects now have real `multilingual-e5-small`
+embeddings (`select count(*) from pipeline_historical_projects where
+embedding is not null` → 12). Academy's "Projects Indexed" KPI should now
+show 12/12 instead of "Pending". To re-run after adding more historical
+projects:
 
 ```bash
-sudo systemctl daemon-reload
-sudo systemctl enable --now kostencheck-worker
-sudo systemctl status kostencheck-worker
-curl http://127.0.0.1:8200/health
-```
-
-## 6. Expose it publicly (for the customer ERP demo curl)
-
-Whatever reverse proxy already fronts `thd-pipeline` on this box, add a
-matching site/location block pointing at port 8200. If you're using Nginx,
-something like:
-
-```nginx
-location /kostencheck/ {
-    proxy_pass http://127.0.0.1:8200/;
-    proxy_set_header Host $host;
-}
-```
-
-then `curl -X POST https://your-domain/kostencheck/api/v1/documents ...`
-during the demo instead of a raw IP:port.
-
-## 7. Backfill embeddings for the seeded historical projects
-
-The 12 historical projects seeded in Supabase have `embedding = null` right
-now (they were inserted directly via SQL, not through this worker). Once
-the service is running, backfill them once:
-
-```bash
-source .venv/bin/activate
-python -c "
+ssh -i ~/.oci/clerktree-crm-ssh ubuntu@130.210.20.208
+cd kostencheck-worker && set -a && source .env && set +a
+.venv/bin/python -c "
 import db, embeddings
 for company in db.fetch_all('select id from pipeline_companies'):
     for row in db.historical_projects_missing_embeddings(company['id'], limit=100):
         vec = embeddings.embed_passage(f'{row[\"title\"]}. {row[\"summary\"]} {row[\"outcome\"]}')
         db.set_historical_embedding(row['id'], vec)
-print('done')
 "
 ```
 
 ## Demo API keys (already seeded)
 
 ```
-THD GmbH                    thd_demo_d5845675b5bf43c28dd89724d1e85e46
-Weber Präzisionstechnik GmbH weber-praezisionstechnik_demo_360ff6136d824d7cbed7b43de61c751e
-MK Anlagenbau GmbH           mk-anlagenbau_demo_01f0b92a457c4d7381710e6acd256286
+THD GmbH                     thd_demo_d5845675b5bf43c28dd89724d1e85e46
+Weber Präzisionstechnik GmbH  weber-praezisionstechnik_demo_360ff6136d824d7cbed7b43de61c751e
+MK Anlagenbau GmbH            mk-anlagenbau_demo_01f0b92a457c4d7381710e6acd256286
 ```
 
-Use the THD key for the live demo curl. These are demo-only values sitting
-in the `pipeline_companies.api_key` column — fine for a pilot, but treat
-them as real secrets once any non-fictional company is onboarded.
+Demo curl for the live meeting (uses the THD key):
 
-## What I have NOT done
+```bash
+curl -X POST http://130.210.20.208:8200/api/v1/documents \
+  -H "X-API-Key: thd_demo_d5845675b5bf43c28dd89724d1e85e46" \
+  -F "kind=bestellung" -F "doc_number=B-88431" -F "file=@bestellung.pdf"
+```
 
-- Not created any Oracle Cloud resources (the `oci compute instance launch`
-  commands pasted earlier are still sitting unexecuted — provisioning a new
-  paid VM is your call, not something to run automatically).
-- Not touched the existing `thd-pipeline` or `thd-voice` services.
-- Not run this worker or verified it end-to-end against a real PDF — do
-  that on the VPS itself once deployed, ideally with the demo Angebot/
-  Bestellung PDF pair before the live client meeting.
+These are demo-only values sitting in the `pipeline_companies.api_key`
+column — fine for a pilot, treat as real secrets once a non-fictional
+company is onboarded.
+
+## Rotate afterward
+
+The Groq API key and the original Supabase DB password were both pasted in
+plaintext chat earlier in this project and are now sitting in the VPS's
+`.env` file (mode 600, only readable by `ubuntu`/root). Worth rotating both
+once you're past the demo, same as flagged earlier in this project.
