@@ -1,15 +1,16 @@
 import type { ChangeEvent, FormEvent } from 'react';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ArrowUpRight, CheckCircle2, Linkedin, Mail, MapPin, Phone, Send, Twitter } from 'lucide-react';
 
 import { useLanguage } from '../contexts/LanguageContext';
 import { Header, Footer } from '../components/Landing/AgeroChrome';
+import { isSaveDataEnabled } from '../utils/idle';
 import SEO from '../components/SEO';
 import './LandingFramer.css';
 import './Contact.css';
 
 const MAP_URL = 'https://www.google.com/maps/search/?api=1&query=Industriestrasse%202%2C%2094315%20Straubing%2C%20Germany';
-const MAP_EMBED_URL = 'https://www.google.com/maps?q=Industriestrasse%202%2C%2094315%20Straubing%2C%20Germany&output=embed';
+const CONTACT_VIDEO_SRC = 'https://xlzwfkgurrrspcdyqele.supabase.co/storage/v1/object/public/buck/contactuspagevideo.mp4';
 
 type SubmitStatus = 'idle' | 'success' | 'error';
 
@@ -32,6 +33,46 @@ const emptyForm: ContactFormData = {
   employeeCount: '',
   message: '',
 };
+
+function ContactHeroVideo({ src }: { src: string }) {
+  const ref = useRef<HTMLVideoElement>(null);
+  const [shouldLoad, setShouldLoad] = useState(false);
+
+  useEffect(() => {
+    if (isSaveDataEnabled() || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      return;
+    }
+
+    const video = ref.current;
+    if (!video) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry?.isIntersecting) return;
+        setShouldLoad(true);
+        observer.disconnect();
+      },
+      { rootMargin: '400px 0px', threshold: 0.01 },
+    );
+
+    observer.observe(video);
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <video
+      autoPlay={shouldLoad}
+      className="clerktree-contact-hero-video"
+      loop
+      muted
+      playsInline
+      preload="none"
+      ref={ref}
+      src={shouldLoad ? src : undefined}
+      aria-hidden="true"
+    />
+  );
+}
 
 export default function Contact() {
   const { t } = useLanguage();
@@ -83,15 +124,19 @@ export default function Contact() {
       <Header />
 
       <main className="clerktree-contact-page">
-        <section className="clerktree-contact-hero" aria-labelledby="contact-title">
-          <p className="clerktree-contact-kicker">ClerkTree • {t('contact.sendMsgTitle')}</p>
-          <h1 id="contact-title">{t('contact.sendMsgTitle')}</h1>
-          <p>{t('contact.subtitle')}</p>
+        <section className="clerktree-contact-hero-wrap" aria-labelledby="contact-title">
+          <div className="clerktree-contact-hero-media">
+            <ContactHeroVideo src={CONTACT_VIDEO_SRC} />
+          </div>
+
+          <div className="clerktree-contact-hero">
+            <p className="clerktree-contact-kicker">ClerkTree • {t('contact.sendMsgTitle')}</p>
+            <h1 id="contact-title">{t('contact.sendMsgTitle')}</h1>
+            <p>{t('contact.subtitle')}</p>
+          </div>
         </section>
 
         <section className="clerktree-contact-form-section" aria-label="Contact form">
-          <ContactIllustration side="left" />
-
           <div className="clerktree-contact-form-shell">
             {submitStatus === 'success' ? (
               <div className="clerktree-contact-success">
@@ -208,8 +253,6 @@ export default function Contact() {
               </form>
             )}
           </div>
-
-          <ContactIllustration side="right" />
         </section>
 
         <section className="clerktree-contact-location" aria-labelledby="contact-location-title">
@@ -218,12 +261,11 @@ export default function Contact() {
 
           <div className="clerktree-contact-location-grid">
             <a className="clerktree-contact-map" href={MAP_URL} rel="noopener noreferrer" target="_blank">
-              <iframe
-                loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
-                src={MAP_EMBED_URL}
-                title="ClerkTree office map"
-              />
+              <div className="clerktree-contact-map-inner">
+                <MapPin size={46} strokeWidth={1.5} />
+                <p>{t('contact.location')}</p>
+                <strong>Industriestrasse 2<br />94315 Straubing</strong>
+              </div>
               <span>
                 {t('contact.openMap')}
                 <ArrowUpRight size={18} />
@@ -277,27 +319,5 @@ function ContactInfoItem({
         <strong>{value}</strong>
       </span>
     </a>
-  );
-}
-
-function ContactIllustration({ side }: { side: 'left' | 'right' }) {
-  return (
-    <div className={`clerktree-contact-illustration is-${side}`} aria-hidden="true">
-      <div className="clerktree-contact-figure-head" />
-      <div className="clerktree-contact-figure-body" />
-      <div className="clerktree-contact-figure-arm" />
-      <div className="clerktree-contact-figure-desk" />
-      {side === 'left' ? (
-        <div className="clerktree-contact-figure-laptop">
-          <span />
-        </div>
-      ) : (
-        <div className="clerktree-contact-figure-board">
-          <span />
-          <span />
-          <span />
-        </div>
-      )}
-    </div>
   );
 }
