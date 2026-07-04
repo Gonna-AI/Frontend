@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 
 import { ArrowUpRight, PackageCheck, PackageX, TriangleAlert } from "lucide-react-dash";
 import { Label, Pie, PieChart } from "recharts";
@@ -5,52 +6,53 @@ import { Label, Pie, PieChart } from "recharts";
 import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/dashboard-ui/card";
 import { type ChartConfig, ChartContainer } from "@/components/dashboard-ui/chart";
 import { Separator } from "@/components/dashboard-ui/separator";
+import { fetchProducts, type PipelineProductRow, subscribeToTable } from "@/dashboard/lib/pipelineClient";
 
-const chartData = [{ month: "current", "in-stock": 760, "low-stock": 320, "out-of-stock": 160 }];
-const totalUnits = chartData[0]["in-stock"] + chartData[0]["low-stock"] + chartData[0]["out-of-stock"];
-const availablePercent = Math.round((chartData[0]["in-stock"] / totalUnits) * 100);
-const gaugeSegmentCount = 32;
-const inStockSegments = Math.round((chartData[0]["in-stock"] / totalUnits) * gaugeSegmentCount);
-const lowStockSegments = Math.round((chartData[0]["low-stock"] / totalUnits) * gaugeSegmentCount);
+const GAUGE_SEGMENT_COUNT = 32;
+const DELAYED_LEAD_TIME_WEEKS = 12;
 
-function getGaugeSegmentStatus(index: number) {
-  if (index < inStockSegments) {
-    return "in-stock";
+const FALLBACK_COUNTS = { "in-stock": 760, "low-stock": 320, "out-of-stock": 160 };
+
+function buildGaugeSegments(counts: { "in-stock": number; "low-stock": number; "out-of-stock": number }) {
+  const totalUnits = counts["in-stock"] + counts["low-stock"] + counts["out-of-stock"];
+  const availablePercent = totalUnits > 0 ? Math.round((counts["in-stock"] / totalUnits) * 100) : 0;
+  const inStockSegments = totalUnits > 0 ? Math.round((counts["in-stock"] / totalUnits) * GAUGE_SEGMENT_COUNT) : 0;
+  const lowStockSegments = totalUnits > 0 ? Math.round((counts["low-stock"] / totalUnits) * GAUGE_SEGMENT_COUNT) : 0;
+
+  function getGaugeSegmentStatus(index: number) {
+    if (index < inStockSegments) return "in-stock";
+    if (index < inStockSegments + lowStockSegments) return "low-stock";
+    return "out-of-stock";
   }
 
-  if (index < inStockSegments + lowStockSegments) {
-    return "low-stock";
-  }
+  const gaugeSegments = Array.from({ length: GAUGE_SEGMENT_COUNT }, (_, index) => {
+    const status = getGaugeSegmentStatus(index);
+    return {
+      fill: `var(--color-${status})`,
+      id: `segment-${index + 1}`,
+      status,
+      value: 1,
+    };
+  });
 
-  return "out-of-stock";
+  return { availablePercent, gaugeSegments };
 }
 
-const gaugeSegments = Array.from({ length: gaugeSegmentCount }, (_, index) => {
-  const status = getGaugeSegmentStatus(index);
-  return {
-    fill: `var(--color-${status})`,
-    id: `segment-${index + 1}`,
-    status,
-    value: 1,
-  };
-});
-const inventorySummary = [
-  {
-    icon: PackageCheck,
-    label: "On time",
-    value: chartData[0]["in-stock"],
-  },
-  {
-    icon: TriangleAlert,
-    label: "Long-lead (TM-75)",
-    value: chartData[0]["low-stock"],
-  },
-  {
-    icon: PackageX,
-    label: "Delayed",
-    value: chartData[0]["out-of-stock"],
-  },
-] as const;
+function buildFromProducts(products: PipelineProductRow[]) {
+  if (products.length === 0) return null;
+
+  const onTime = products.filter((p) => !p.is_long_lead && p.lead_time_weeks < DELAYED_LEAD_TIME_WEEKS).length;
+  const longLead = products.filter((p) => p.is_long_lead).length;
+  const delayed = products.filter((p) => !p.is_long_lead && p.lead_time_weeks >= DELAYED_LEAD_TIME_WEEKS).length;
+
+  return { "in-stock": onTime, "low-stock": longLead, "out-of-stock": delayed };
+}
+
+const inventorySummaryMeta = [
+  { key: "in-stock" as const, icon: PackageCheck, label: "On time" },
+  { key: "low-stock" as const, icon: TriangleAlert, label: "Long-lead items" },
+  { key: "out-of-stock" as const, icon: PackageX, label: "Delayed" },
+];
 
 const chartConfig = {
   "in-stock": {
@@ -68,6 +70,34 @@ const chartConfig = {
 } satisfies ChartConfig;
 
 export function Inventory() {
+  const [counts, setCounts] = useState(FALLBACK_COUNTS);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const load = () => {
+      fetchProducts()
+        .then((rows) => {
+          const built = buildFromProducts(rows);
+          if (!cancelled && built) setCounts(built);
+        })
+        .catch(() => {
+          // Fall back to the static demo snapshot if Supabase is unreachable.
+        });
+    };
+
+    load();
+    const unsubscribe = subscribeToTable("pipeline_products", load);
+
+    return () => {
+      cancelled = true;
+      unsubscribe();
+    };
+  }, []);
+
+  const { availablePercent, gaugeSegments } = buildGaugeSegments(counts);
+  const inventorySummary = inventorySummaryMeta.map((item) => ({ ...item, value: counts[item.key] }));
+
   return (
     <Card className="h-full">
       <CardHeader>
@@ -122,7 +152,7 @@ export function Inventory() {
         <Separator />
 
         <div className="grid grid-cols-3 divide-x">
-          {inventorySummary.map((item, _index) => (
+          {inventorySummary.map((item) => (
             <div key={item.label} className="flex flex-col items-center gap-3 text-center">
               <div className="grid size-9 place-items-center rounded-full bg-muted">
                 <item.icon className="size-4 text-muted-foreground" />

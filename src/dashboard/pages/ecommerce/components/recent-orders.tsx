@@ -28,6 +28,13 @@ import {
 } from "@/components/dashboard-ui/pagination";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/dashboard-ui/table";
 import { ToggleGroup, ToggleGroupItem } from "@/components/dashboard-ui/toggle-group";
+import {
+  fetchDocuments,
+  fetchProducts,
+  type PipelineDocumentRow,
+  type PipelineProductRow,
+  subscribeToTable,
+} from "@/dashboard/lib/pipelineClient";
 
 import { recentOrdersColumns } from "./recent-orders-table/columns";
 import recentOrdersData from "./recent-orders-table/data.json";
@@ -38,9 +45,70 @@ import {
 } from "./recent-orders-table/formatters";
 import { type OrderFilter, type OrderRow, orderFilters } from "./recent-orders-table/schema";
 
-const recentOrders = recentOrdersData as OrderRow[];
+const FALLBACK_ORDERS = recentOrdersData as OrderRow[];
+
+function formatEur(value: number): string {
+  return `€${Math.round(value).toLocaleString("de-DE")}`;
+}
+
+/**
+ * Builds "AI-Detected Procurement Needs" rows from genuinely queried data: every long-lead
+ * product becomes a procurement need (mirroring the TM-75 style long-lead alert), each paired
+ * with the most recent `bestellung` document as a stand-in customer/date context when available.
+ */
+function buildFromLiveData(products: PipelineProductRow[], documents: PipelineDocumentRow[]): OrderRow[] {
+  const longLeadProducts = products.filter((p) => p.is_long_lead);
+  if (longLeadProducts.length === 0) return [];
+
+  const bestellungen = documents.filter((d) => d.kind === "bestellung");
+
+  return longLeadProducts.map((product, index) => {
+    const relatedDoc = bestellungen.length > 0 ? bestellungen[index % bestellungen.length] : undefined;
+    const payment: OrderRow["payment"] = relatedDoc?.status === "error" ? "Refunded" : "Pending";
+
+    return {
+      id: `#PROC-${product.article_no}`,
+      date: relatedDoc?.uploaded_at ?? new Date().toISOString(),
+      customer: relatedDoc
+        ? `Bestellung ${relatedDoc.doc_number ?? relatedDoc.id.slice(0, 8)}`
+        : "Kein zugehöriges Dokument",
+      payment,
+      total: formatEur(product.unit_price),
+      items: `${product.article_no} ${product.name} — ${product.lead_time_weeks} Wochen Lieferzeit, jetzt bestellen`,
+      fulfillment: "Unfulfilled",
+    };
+  });
+}
 
 export function RecentOrders() {
+  const [liveOrders, setLiveOrders] = React.useState<OrderRow[]>([]);
+
+  React.useEffect(() => {
+    let cancelled = false;
+
+    const load = () => {
+      Promise.all([fetchProducts(), fetchDocuments()])
+        .then(([products, documents]) => {
+          if (!cancelled) setLiveOrders(buildFromLiveData(products, documents));
+        })
+        .catch(() => {
+          // Fall back to the static demo snapshot if Supabase is unreachable.
+        });
+    };
+
+    load();
+    const unsubscribeProducts = subscribeToTable("pipeline_products", load);
+    const unsubscribeDocuments = subscribeToTable("pipeline_documents", load);
+
+    return () => {
+      cancelled = true;
+      unsubscribeProducts();
+      unsubscribeDocuments();
+    };
+  }, []);
+
+  const recentOrders = liveOrders.length > 0 ? liveOrders : FALLBACK_ORDERS;
+
   const [rowSelection, setRowSelection] = React.useState({});
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
