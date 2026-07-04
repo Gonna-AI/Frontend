@@ -1,5 +1,5 @@
 import { Suspense, useEffect, useState } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { LanguageProvider } from './contexts/LanguageContext';
 import ScrollToTop from './components/ScrollToTop';
@@ -232,10 +232,20 @@ function App() {
 }
 
 function ConditionalCookieConsent() {
+  const location = useLocation();
   const [shouldRender, setShouldRender] = useState(false);
+  const shouldSkipConsent =
+    location.pathname.startsWith('/dashboard') ||
+    location.pathname === '/chat' ||
+    location.pathname === '/mail' ||
+    location.search.includes('preview=dashboard');
 
   useEffect(() => {
     if (typeof window === 'undefined') return undefined;
+    if (shouldSkipConsent) {
+      setShouldRender(false);
+      return undefined;
+    }
     if (window.localStorage.getItem('clerktree_cookie_consent')) return undefined;
 
     let idleHandle = 0;
@@ -247,9 +257,9 @@ function ConditionalCookieConsent() {
       window.clearTimeout(loadTimer);
       if (idleHandle) cancelIdle(idleHandle);
     };
-  }, []);
+  }, [shouldSkipConsent]);
 
-  if (!shouldRender) return null;
+  if (shouldSkipConsent || !shouldRender) return null;
 
   return (
     <Suspense fallback={null}>
