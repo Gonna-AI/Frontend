@@ -1,13 +1,7 @@
+import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { ChevronDown } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
-import {
-  Drawer,
-  DrawerTrigger,
-  DrawerContent,
-  DrawerHeader,
-  DrawerBody,
-} from '../ui/drawer';
 
 interface TagFilterProps {
   tags: string[];
@@ -19,6 +13,7 @@ export function TagFilter({ tags, selectedTag, tagCounts }: TagFilterProps) {
   const navigate = useNavigate();
   const location = useLocation();
   const { t } = useLanguage();
+  const [isMobileOpen, setIsMobileOpen] = useState(false);
 
   const handleTagClick = (tag: string) => {
     const params = new URLSearchParams(location.search);
@@ -28,6 +23,7 @@ export function TagFilter({ tags, selectedTag, tagCounts }: TagFilterProps) {
       params.delete("tag");
     }
     navigate(`${location.pathname}?${params.toString()}`);
+    setIsMobileOpen(false);
   };
 
   const DesktopTagFilter = () => (
@@ -58,24 +54,26 @@ export function TagFilter({ tags, selectedTag, tagCounts }: TagFilterProps) {
   );
 
   const MobileTagFilter = () => (
-    <Drawer>
-      <DrawerTrigger className="md:hidden w-full flex items-center justify-between px-4 py-2 border border-white/10 rounded-xl backdrop-blur-sm bg-white/5 hover:bg-white/10 hover:border-white/20 transition-all duration-300 text-white/60">
+    <div className="md:hidden relative">
+      <button
+        type="button"
+        onClick={() => setIsMobileOpen((open) => !open)}
+        className="w-full flex items-center justify-between px-4 py-2 border border-white/10 rounded-xl backdrop-blur-sm bg-white/5 hover:bg-white/10 hover:border-white/20 transition-all duration-300 text-white/60"
+      >
         <span className="capitalize text-sm font-medium">{selectedTag === 'All' ? t('blog.all') : selectedTag}</span>
-        <ChevronDown className="h-4 w-4" />
-      </DrawerTrigger>
+        <ChevronDown className={`h-4 w-4 transition-transform ${isMobileOpen ? 'rotate-180' : ''}`} />
+      </button>
 
-      <DrawerContent className="md:hidden border-transparent">
-        <DrawerHeader>
-          <h3 className="font-semibold text-sm text-white">{t('blog.selectCategory')}</h3>
-        </DrawerHeader>
-
-        <DrawerBody>
-          <div className="space-y-2">
+      {isMobileOpen && (
+        <div className="absolute left-0 right-0 top-full z-20 mt-2 rounded-2xl border border-white/10 bg-black/95 p-4 shadow-2xl backdrop-blur-xl">
+          <h3 className="mb-3 font-semibold text-sm text-white">{t('blog.selectCategory')}</h3>
+          <div className="max-h-72 space-y-2 overflow-y-auto">
             {tags.map((tag) => (
               <button
                 key={tag}
+                type="button"
                 onClick={() => handleTagClick(tag)}
-                className="w-full flex items-center justify-between font-medium cursor-pointer text-sm transition-colors"
+                className="w-full flex items-center justify-between rounded-lg px-2 py-2 font-medium cursor-pointer text-sm transition-colors hover:bg-white/5"
               >
                 <span
                   className={`w-full flex items-center justify-between font-medium cursor-pointer text-sm transition-colors ${selectedTag === tag
@@ -96,9 +94,9 @@ export function TagFilter({ tags, selectedTag, tagCounts }: TagFilterProps) {
               </button>
             ))}
           </div>
-        </DrawerBody>
-      </DrawerContent>
-    </Drawer>
+        </div>
+      )}
+    </div>
   );
 
   return (
@@ -108,4 +106,3 @@ export function TagFilter({ tags, selectedTag, tagCounts }: TagFilterProps) {
     </>
   );
 }
-

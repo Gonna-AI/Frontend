@@ -195,9 +195,6 @@ export const sidebarItems: NavGroup[] = [
         id: "legacy-dashboards",
         title: "Dashboards",
         subItems: [
-          { id: "legacy-default", title: "Default V1", url: "/dashboard/default-v1" },
-          { id: "legacy-crm", title: "CRM V1", url: "/dashboard/crm-v1" },
-          { id: "legacy-finance", title: "Finance V1", url: "/dashboard/finance-v1" },
           { id: "legacy-analytics", title: "Analytics V1", url: "/dashboard/analytics-v1" },
         ],
       },

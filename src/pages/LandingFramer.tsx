@@ -1,6 +1,7 @@
-import { type CSSProperties, Fragment, useEffect, useRef, useState } from 'react';
+import { type CSSProperties, type VideoHTMLAttributes, Fragment, useEffect, useRef, useState } from 'react';
 import { Compass, Globe2, MapPin, PanelTop, PenTool, Sparkles } from 'lucide-react';
 import Lenis from 'lenis';
+import { isSaveDataEnabled } from '../utils/idle';
 import './LandingFramer.css';
 
 const BASE = 'https://xlzwfkgurrrspcdyqele.supabase.co/storage/v1/object/public/buck';
@@ -68,7 +69,6 @@ const footerExploreLinks: FooterLink[] = [
   { label: 'Solutions', href: '/solutions' },
   { label: 'Docs', href: '/docs' },
   { label: 'About Us', href: '/about' },
-  { label: 'Whitepaper', href: '/whitepaper' },
 ];
 
 const footerSocialLinks: FooterLink[] = [
@@ -216,6 +216,7 @@ export default function LandingFramer() {
                 loop
                 muted
                 playsInline
+                preload="metadata"
                 src="/hero-logo-video.mp4"
               />
               <span className="agero-orange">Industrial</span>
@@ -226,6 +227,7 @@ export default function LandingFramer() {
                 loop
                 muted
                 playsInline
+                preload="metadata"
                 src={`${BASE}/HERO4.mp4`}
               />
               <span>Intelligence</span>
@@ -295,8 +297,7 @@ function HomePrelude() {
     <section className="agero-home-prelude" aria-label="Agero client showcase">
       <div className="agero-showcase-shell" data-agero-reveal="up">
         <div className="agero-showcase-media">
-          <video
-            autoPlay
+          <LazyVideo
             muted
             loop
             playsInline
@@ -311,8 +312,10 @@ function HomePrelude() {
                 {clientLogos.map((logo) => (
                   <img
                     alt={groupIndex === 0 ? logo.alt : ''}
+                    decoding="async"
                     height="32"
                     key={`${groupIndex}-${logo.src}`}
+                    loading="lazy"
                     src={logo.src}
                     style={{ '--logo-width': `${logo.width}px`, ...(logo.natural ? { filter: 'none' } : {}) } as CSSProperties}
                     width={logo.width}
@@ -378,7 +381,7 @@ function LocationIntro() {
 
       <div className="agero-founder-grid">
         <figure className="agero-founder-portrait" data-agero-reveal="up">
-          <img alt="ClerkTree Straubing Headquarters" className="agero-founder-image" src={locationImage} />
+          <img alt="ClerkTree Straubing Headquarters" className="agero-founder-image" decoding="async" loading="lazy" src={locationImage} />
           <div className="agero-founder-socials" aria-label="Office social links">
             <a
               aria-label="Open in Google Maps"
@@ -424,7 +427,7 @@ function RibbonRow({ items, variant }: { items: string[]; variant: 'black' | 'or
         {repeatedItems.map((item, index) => (
           <span className="agero-ribbon-item" key={`${variant}-${item}-${index}`}>
             <span>{item}</span>
-            <img alt="" src={variant === 'orange' ? ribbonFlowerOrange : ribbonFlower} />
+            <img alt="" decoding="async" loading="lazy" src={variant === 'orange' ? ribbonFlowerOrange : ribbonFlower} />
           </span>
         ))}
       </div>
@@ -461,7 +464,7 @@ function Testimonials() {
           data-agero-reveal="up"
           style={{ '--testimonial-image': `url("${testimonial.image}")` } as CSSProperties}
         >
-          <img alt="THD GmbH plant" className="agero-testimonial-image" src={testimonial.image} />
+          <img alt="THD GmbH plant" className="agero-testimonial-image" decoding="async" loading="lazy" src={testimonial.image} />
           <div className="agero-testimonial-shade" aria-hidden="true" />
           <div className="agero-testimonial-content">
             <div className="agero-testimonial-bottom">
@@ -484,7 +487,7 @@ function useAgeroPageMotion() {
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     document.body.classList.add('agero-page-active');
 
-    if (reduceMotion) {
+    if (reduceMotion || isSaveDataEnabled()) {
       document.body.classList.add('agero-reduced-motion');
       return () => {
         document.body.classList.remove('agero-page-active', 'agero-reduced-motion');
@@ -641,6 +644,53 @@ function clamp(value: number, min: number, max: number) {
   return Math.min(max, Math.max(min, value));
 }
 
+function LazyVideo({
+  autoPlay = true,
+  preload = 'none',
+  src,
+  ...props
+}: VideoHTMLAttributes<HTMLVideoElement> & { src: string }) {
+  const ref = useRef<HTMLVideoElement>(null);
+  const [shouldLoad, setShouldLoad] = useState(false);
+
+  useEffect(() => {
+    if (isSaveDataEnabled() || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      return;
+    }
+
+    const video = ref.current;
+    if (!video) {
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry?.isIntersecting) {
+          return;
+        }
+
+        setShouldLoad(true);
+        observer.disconnect();
+      },
+      { rootMargin: '400px 0px', threshold: 0.01 },
+    );
+
+    observer.observe(video);
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <video
+      {...props}
+      autoPlay={autoPlay && shouldLoad}
+      data-src={src}
+      preload={preload}
+      ref={ref}
+      src={shouldLoad ? src : undefined}
+    />
+  );
+}
+
 function formatMunichTime() {
   return new Intl.DateTimeFormat('en-GB', {
     hour: '2-digit',
@@ -651,13 +701,16 @@ function formatMunichTime() {
   }).format(new Date());
 }
 
-function useMunichTime() {
+function useMunichTime(active = true) {
   const [time, setTime] = useState(() => formatMunichTime());
 
   useEffect(() => {
+    if (!active) return undefined;
+
+    setTime(formatMunichTime());
     const timer = window.setInterval(() => setTime(formatMunichTime()), 1000);
     return () => window.clearInterval(timer);
-  }, []);
+  }, [active]);
 
   return time;
 }
@@ -830,8 +883,7 @@ function WorkCard({ index, work }: { index: number; work: (typeof works)[number]
       </div>
 
       <a aria-label={`See ${work.title} in action`} className="agero-sol-media" href={work.href}>
-        <video
-          autoPlay
+        <LazyVideo
           className="agero-sol-video"
           loop
           muted
@@ -1031,7 +1083,7 @@ function Contact() {
       </h2>
 
       <div className="agero-contact-panel" data-agero-reveal="up">
-        <video
+        <LazyVideo
           autoPlay
           loop
           muted
@@ -1070,7 +1122,7 @@ function Contact() {
         <div className="agero-mail-ticker" aria-hidden="true">
           {Array.from({ length: 12 }).map((_, index) => (
             <a className="agero-mail-card" href="mailto:team@clerktree.com" key={index} tabIndex={-1}>
-              <img alt="" src={flowerIcon} />
+              <img alt="" decoding="async" loading="lazy" src={flowerIcon} />
               <span>
                 team<b>@</b>clerktree.com
               </span>
@@ -1083,10 +1135,29 @@ function Contact() {
 }
 
 function Footer() {
-  const munichTime = useMunichTime();
+  const footerRef = useRef<HTMLElement>(null);
+  const [isFooterNearViewport, setIsFooterNearViewport] = useState(false);
+  const munichTime = useMunichTime(isFooterNearViewport);
+
+  useEffect(() => {
+    const footer = footerRef.current;
+    if (!footer) return undefined;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry?.isIntersecting) {
+          setIsFooterNearViewport(true);
+        }
+      },
+      { rootMargin: '600px 0px', threshold: 0 },
+    );
+
+    observer.observe(footer);
+    return () => observer.disconnect();
+  }, []);
 
   return (
-    <footer className="agero-footer">
+    <footer className="agero-footer" ref={footerRef}>
       <div className="agero-footer-inner">
         <div className="agero-footer-main">
           <div className="agero-footer-cta">
@@ -1110,7 +1181,7 @@ function Footer() {
         <div className="agero-footer-bottom">
           <div className="agero-footer-copyright">
             <p>© 2026 ClerkTree. All rights reserved.</p>
-            <img alt="GDPR Compliant" src="/gdpr-compliant.webp" />
+            <img alt="GDPR Compliant" decoding="async" loading="lazy" src="/gdpr-compliant.webp" />
           </div>
           <div className="agero-footer-time" aria-label={`Munich time ${munichTime}`}>
             <span>Munich →</span>

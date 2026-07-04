@@ -56,7 +56,7 @@ function isRetryableStatus(status: number): boolean {
  * Includes retry with exponential backoff for 429 and 5xx errors.
  * Returns the raw Response so callers can handle JSON or binary (audio) responses.
  */
-export async function proxyFetch(
+async function proxyFetch(
     route: ProxyRoute,
     body: unknown,
     options?: {
@@ -153,23 +153,4 @@ export async function proxyJSON<T = unknown>(
     }
 
     return response.json() as Promise<T>;
-}
-
-/**
- * Convenience: POST to proxy and get back a Blob (for audio responses).
- * Throws on non-OK responses.
- */
-export async function proxyBlob(
-    route: ProxyRoute,
-    body: unknown,
-    options?: { signal?: AbortSignal; timeout?: number; maxRetries?: number }
-): Promise<Blob> {
-    const response = await proxyFetch(route, body, options);
-
-    if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: `HTTP ${response.status}` }));
-        throw new Error(errorData.error || `Proxy request failed: ${response.status}`);
-    }
-
-    return response.blob();
 }

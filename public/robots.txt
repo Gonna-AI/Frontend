@@ -10,7 +10,6 @@ Disallow: /billing/
 Disallow: /invite/
 Disallow: /chat/
 Disallow: /demo-dashboard/
-Disallow: /user/
 Disallow: /ai-settings/
 Disallow: /admin/
 Disallow: /404

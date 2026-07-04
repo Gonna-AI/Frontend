@@ -62,7 +62,6 @@ export default function Footer() {
                     { label: t('nav.solutions'), path: '/solutions' },
                     { label: t('footer.docs'),    path: '/docs' },
                     { label: t('footer.aboutUs'), path: '/about' },
-                    { label: 'Whitepaper',         path: '/whitepaper' },
                   ].map(({ label, path }) => (
                     <li key={path}>
                       <button

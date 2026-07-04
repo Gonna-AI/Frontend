@@ -3,7 +3,7 @@ import { enrichGraphWithAICopilot } from './customerGraphCopilotAIService';
 import type { CustomerGraphModel } from '../types/customerGraph';
 import { proxyJSON } from './proxyClient';
 
-vi.mock('../components/DemoCall/GroqSettings', () => ({
+vi.mock('../lib/groqSettings', () => ({
   getGroqSettings: () => ({
     model: 'llama-3.3-70b-versatile',
     temperature: 0.7,

@@ -175,6 +175,29 @@ html.lenis.lenis-stopped {
   box-sizing: border-box;
 }
 
+.agero-home-prelude,
+.agero-ribbon-stage,
+.agero-about-intro,
+.agero-founder,
+.agero-testimonials,
+.agero-portfolio,
+.agero-pricing,
+.agero-faq,
+.agero-contact,
+.agero-footer {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 900px;
+}
+
+.agero-reduced-motion .agero-works *,
+.agero-reduced-motion .agero-works *::before,
+.agero-reduced-motion .agero-works *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  scroll-behavior: auto !important;
+  transition-duration: 0.01ms !important;
+}
+
 .agero-works p,
 .agero-works a,
 .agero-works button,

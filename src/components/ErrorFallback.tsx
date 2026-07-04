@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { AlertTriangle, RefreshCcw } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 
 interface ErrorFallbackProps {
@@ -105,7 +104,7 @@ const ErrorFallback: React.FC<ErrorFallbackProps> = ({ error, resetErrorBoundary
             <div className="max-w-md w-full bg-zinc-900 border border-zinc-800 rounded-xl p-8 shadow-2xl text-center">
                 <div className="flex justify-center mb-6">
                     <div className="p-4 bg-red-500/10 rounded-full border border-red-500/20">
-                        <AlertTriangle className="w-12 h-12 text-red-500" />
+                        <span className="block text-4xl leading-none text-red-500" aria-hidden="true">!</span>
                     </div>
                 </div>
 
@@ -130,7 +129,7 @@ const ErrorFallback: React.FC<ErrorFallbackProps> = ({ error, resetErrorBoundary
                     onClick={chunkError ? () => hardReload() : resetErrorBoundary}
                     className="w-full py-3 px-4 bg-white text-black font-semibold rounded-lg hover:bg-zinc-200 transition-colors flex items-center justify-center gap-2"
                 >
-                    <RefreshCcw className="w-4 h-4" />
+                    <span aria-hidden="true">↻</span>
                     {chunkError ? t('error.reloadPage') : t('error.tryAgain')}
                 </button>
             </div>

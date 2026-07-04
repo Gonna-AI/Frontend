@@ -1,6 +1,7 @@
 import { Outlet } from "react-router-dom";
 import { siGithub } from "simple-icons";
 
+import "@/dashboard/styles/dashboard-theme.css";
 import { AppSidebar } from "@/dashboard/layout/app-sidebar";
 import { SimpleIcon } from "@/dashboard/components/simple-icon";
 import { Button } from "@/components/dashboard-ui/button";

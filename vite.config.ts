@@ -15,6 +15,10 @@ export default defineConfig({
     tailwindcss(),
     netlifyPlugin(),
     viteCompression(),
+    viteCompression({
+      algorithm: 'brotliCompress',
+      ext: '.br',
+    }),
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.svg', 'robots.txt', 'sitemap.xml'],
@@ -50,21 +54,21 @@ export default defineConfig({
             },
           },
           {
-            // JS and CSS: always fetch from network first to get fresh deploys
+            // Hashed JS and CSS assets are immutable. Cache-first avoids repeat
+            // network trips while new deploys still work because filenames change.
             urlPattern: /\.(?:js|css)$/,
-            handler: 'NetworkFirst',
+            handler: 'CacheFirst',
             options: {
               cacheName: 'static-assets',
               expiration: {
-                maxEntries: 100,
-                maxAgeSeconds: 60 * 60 * 24, // 1 day
+                maxEntries: 200,
+                maxAgeSeconds: 60 * 60 * 24 * 365, // 1 year
               },
-              networkTimeoutSeconds: 5,
             },
           },
           {
             // Images: cache-first is fine since they rarely change
-            urlPattern: /\.(?:png|jpg|jpeg|svg|gif|webp|ico)$/,
+            urlPattern: /\.(?:avif|png|jpg|jpeg|svg|gif|webp|ico)$/,
             handler: 'CacheFirst',
             options: {
               cacheName: 'images',
@@ -143,12 +147,23 @@ export default defineConfig({
     chunkSizeWarningLimit: 200, // Warn if any chunk exceeds 200KB
     rollupOptions: {
       output: {
-        manualChunks: {
-          vendor: ['react', 'react-dom', 'react-router-dom', 'react-helmet-async'],
-          'framer-motion': ['framer-motion'],
-          icons: ['lucide-react'],
-          supabase: ['@supabase/supabase-js'],
-          sentry: ['@sentry/react'],
+        manualChunks(id) {
+          if (!id.includes('/node_modules/')) return undefined;
+
+          if (id.includes('/react/') || id.includes('/react-dom/') || id.includes('/scheduler/')) return 'react-vendor';
+          if (id.includes('/react-router') || id.includes('/react-helmet-async/')) return 'router-vendor';
+          if (id.includes('/@tanstack/react-query/')) return 'query-vendor';
+          if (id.includes('/@tanstack/react-table/')) return 'table-vendor';
+          if (id.includes('/@supabase/')) return 'supabase';
+          if (id.includes('/framer-motion/') || id.includes('/motion-dom/') || id.includes('/motion-utils/')) return 'animation-vendor';
+          if (id.includes('/recharts/') || id.includes('/d3-') || id.includes('/victory-vendor/')) return 'chart-vendor';
+          if (id.includes('/lucide-react') || id.includes('/simple-icons/')) return 'icon-vendor';
+          if (id.includes('/radix-ui/') || id.includes('/@radix-ui/') || id.includes('/vaul/') || id.includes('/cmdk/')) return 'ui-vendor';
+          if (id.includes('/react-markdown/') || id.includes('/remark-') || id.includes('/micromark') || id.includes('/mdast-') || id.includes('/hast-') || id.includes('/unified/')) return 'markdown-vendor';
+          if (id.includes('/@dnd-kit/')) return 'dnd-vendor';
+          if (id.includes('/react-hook-form/') || id.includes('/@hookform/') || id.includes('/zod/')) return 'form-vendor';
+
+          return undefined;
         },
       },
     },

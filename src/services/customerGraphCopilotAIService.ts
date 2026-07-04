@@ -1,4 +1,4 @@
-import { getGroqSettings } from '../components/DemoCall/GroqSettings';
+import { getGroqSettings } from '../lib/groqSettings';
 import type {
   ClusterCopilotAction,
   ClusterCopilotPlan,

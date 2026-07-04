@@ -1,4 +1,3 @@
-@import './dashboard/styles/dashboard-theme.css';
 @import './styles/animations.css';
 
 @import "tailwindcss";
@@ -156,17 +155,6 @@
 @media (max-width: 768px) {
   .animate-blob {
     animation: none;
-  }
-}
-
-/* ReactFlow loading animation for Bioflow */
-@keyframes loading {
-  0% {
-    transform: translateX(-100%);
-  }
-
-  100% {
-    transform: translateX(300%);
   }
 }
 
