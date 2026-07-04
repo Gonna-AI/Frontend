@@ -128,3 +128,241 @@ export function subscribeToDeviations(projectId: string, onChange: () => void): 
     supabase.removeChannel(channel);
   };
 }
+
+/** Generic realtime helper for tables not covered by a dedicated subscribe* function above. */
+export function subscribeToTable(table: string, onChange: () => void, filter?: string): () => void {
+  const channelName = `${table}_live${filter ? `_${filter}` : ""}`;
+  let builder = supabase.channel(channelName);
+  builder = filter
+    ? builder.on("postgres_changes", { event: "*", schema: "public", table, filter }, onChange)
+    : builder.on("postgres_changes", { event: "*", schema: "public", table }, onChange);
+  const channel = builder.subscribe();
+
+  return () => {
+    supabase.removeChannel(channel);
+  };
+}
+
+export async function fetchCompanies() {
+  const { data, error } = await supabase.from("pipeline_companies").select("*").order("name");
+  if (error) throw error;
+  return data;
+}
+
+export interface PipelineChecklistItemRow {
+  id: string;
+  project_id: string;
+  label: string;
+  category: string | null;
+  priority: "low" | "medium" | "high";
+  status: "open" | "in_progress" | "done";
+  created_at: string;
+}
+
+export async function fetchChecklistItems(projectId?: string): Promise<PipelineChecklistItemRow[]> {
+  let query = supabase.from("pipeline_checklist_items").select("*").order("created_at");
+  if (projectId) query = query.eq("project_id", projectId);
+  const { data, error } = await query;
+  if (error) throw error;
+  return (data ?? []) as PipelineChecklistItemRow[];
+}
+
+export async function updateChecklistItemStatus(id: string, status: PipelineChecklistItemRow["status"]): Promise<void> {
+  const { error } = await supabase.from("pipeline_checklist_items").update({ status }).eq("id", id);
+  if (error) throw error;
+}
+
+export interface PipelineMilestoneRow {
+  id: string;
+  project_id: string;
+  label: string;
+  kind: string | null;
+  due_date: string | null;
+  status: "pending" | "done";
+}
+
+export async function fetchMilestones(projectId?: string): Promise<PipelineMilestoneRow[]> {
+  let query = supabase.from("pipeline_milestones").select("*").order("due_date");
+  if (projectId) query = query.eq("project_id", projectId);
+  const { data, error } = await query;
+  if (error) throw error;
+  return (data ?? []) as PipelineMilestoneRow[];
+}
+
+export interface PipelineGeneratedDocRow {
+  id: string;
+  project_id: string;
+  kind: "zusammenfassung" | "kickoff_brief" | "deviation_report" | "ab_draft";
+  title: string | null;
+  content: string | null;
+  created_at: string;
+}
+
+export async function fetchGeneratedDocs(projectId?: string): Promise<PipelineGeneratedDocRow[]> {
+  let query = supabase.from("pipeline_generated_docs").select("*").order("created_at", { ascending: false });
+  if (projectId) query = query.eq("project_id", projectId);
+  const { data, error } = await query;
+  if (error) throw error;
+  return (data ?? []) as PipelineGeneratedDocRow[];
+}
+
+export interface PipelineOpportunityRow {
+  id: string;
+  company_id: string;
+  customer_name: string;
+  stage: "Anfrage" | "Konzept" | "Kalkulation" | "Angebot" | "Bestellung" | "AB";
+  value_eur: number;
+  contact_email: string | null;
+  updated_at: string;
+}
+
+export async function fetchOpportunities(): Promise<PipelineOpportunityRow[]> {
+  const { data, error } = await supabase.from("pipeline_crm_opportunities").select("*").order("updated_at", { ascending: false });
+  if (error) throw error;
+  return (data ?? []) as PipelineOpportunityRow[];
+}
+
+export async function updateOpportunityStage(id: string, stage: PipelineOpportunityRow["stage"]): Promise<void> {
+  const { error } = await supabase
+    .from("pipeline_crm_opportunities")
+    .update({ stage, updated_at: new Date().toISOString() })
+    .eq("id", id);
+  if (error) throw error;
+}
+
+export interface PipelineProductRow {
+  id: string;
+  article_no: string;
+  name: string;
+  unit_price: number;
+  lead_time_weeks: number;
+  category: string | null;
+  is_long_lead: boolean;
+}
+
+export async function fetchProducts(): Promise<PipelineProductRow[]> {
+  const { data, error } = await supabase.from("pipeline_products").select("*").order("category");
+  if (error) throw error;
+  return (data ?? []) as PipelineProductRow[];
+}
+
+export interface PipelineShipmentRow {
+  id: string;
+  project_id: string | null;
+  origin: string;
+  destination: string;
+  status: "pending" | "in_transit" | "delivered" | "on_hold";
+  eta_date: string | null;
+  note: string | null;
+  created_at: string;
+}
+
+export async function fetchShipments(): Promise<PipelineShipmentRow[]> {
+  const { data, error } = await supabase.from("pipeline_shipments").select("*").order("created_at", { ascending: false });
+  if (error) throw error;
+  return (data ?? []) as PipelineShipmentRow[];
+}
+
+export async function updateShipmentStatus(id: string, status: PipelineShipmentRow["status"]): Promise<void> {
+  const { error } = await supabase.from("pipeline_shipments").update({ status }).eq("id", id);
+  if (error) throw error;
+}
+
+export interface PipelineTeamMemberRow {
+  id: string;
+  name: string;
+  role: string;
+  team: string | null;
+  email: string | null;
+  company_id: string | null;
+  is_customer_contact: boolean;
+}
+
+export async function fetchTeamMembers(): Promise<PipelineTeamMemberRow[]> {
+  const { data, error } = await supabase.from("pipeline_team_members").select("*").order("name");
+  if (error) throw error;
+  return (data ?? []) as PipelineTeamMemberRow[];
+}
+
+export interface PipelineRoleRow {
+  id: string;
+  role_name: string;
+  description: string | null;
+  permissions: Record<string, boolean>;
+  group_name: string | null;
+  owner_name: string | null;
+}
+
+export async function fetchRoles(): Promise<PipelineRoleRow[]> {
+  const { data, error } = await supabase.from("pipeline_roles").select("*").order("role_name");
+  if (error) throw error;
+  return (data ?? []) as PipelineRoleRow[];
+}
+
+export interface PipelineDocumentRow {
+  id: string;
+  company_id: string;
+  kind: "angebot" | "bestellung";
+  doc_number: string | null;
+  status: "uploaded" | "parsing" | "parsed" | "error";
+  uploaded_at: string;
+}
+
+export async function fetchDocuments(): Promise<PipelineDocumentRow[]> {
+  const { data, error } = await supabase.from("pipeline_documents").select("*").order("uploaded_at", { ascending: false });
+  if (error) throw error;
+  return (data ?? []) as PipelineDocumentRow[];
+}
+
+export async function fetchAllDeviations(): Promise<PipelineDeviationRow[]> {
+  const { data, error } = await supabase.from("pipeline_deviations").select("*").order("created_at", { ascending: false });
+  if (error) throw error;
+  return (data ?? []) as PipelineDeviationRow[];
+}
+
+export async function fetchAllProjects(): Promise<PipelineProjectRow[]> {
+  const { data, error } = await supabase.from("pipeline_projects").select("*").order("created_at", { ascending: false });
+  if (error) throw error;
+  return (data ?? []) as PipelineProjectRow[];
+}
+
+export interface PipelineChatThreadRow {
+  id: string;
+  company_id: string | null;
+  title: string;
+  created_at: string;
+}
+
+export interface PipelineChatMessageRow {
+  id: string;
+  thread_id: string;
+  role: "user" | "assistant";
+  content: string;
+  created_at: string;
+}
+
+export async function fetchChatThreads(): Promise<PipelineChatThreadRow[]> {
+  const { data, error } = await supabase.from("pipeline_chat_threads").select("*").order("created_at", { ascending: false });
+  if (error) throw error;
+  return (data ?? []) as PipelineChatThreadRow[];
+}
+
+export async function fetchChatMessages(threadId: string): Promise<PipelineChatMessageRow[]> {
+  const { data, error } = await supabase
+    .from("pipeline_chat_messages")
+    .select("*")
+    .eq("thread_id", threadId)
+    .order("created_at", { ascending: true });
+  if (error) throw error;
+  return (data ?? []) as PipelineChatMessageRow[];
+}
+
+/** Calls the live kostencheck-copilot Edge Function: persists the user message, retrieves */
+/** relevant historical projects via pg_trgm, asks Groq, persists + returns the assistant reply. */
+export async function askCopilot(params: { message: string; companySlug: string; threadId?: string }) {
+  const { data, error } = await supabase.functions.invoke("kostencheck-copilot", {
+    body: { message: params.message, company_slug: params.companySlug, thread_id: params.threadId },
+  });
+  if (error) throw error;
+  return data as { thread_id: string; message: PipelineChatMessageRow; matches: unknown[] };
+}
