@@ -31,7 +31,6 @@ const Solutions = lazyWithRetry(() => import('./pages/Solutions'), 'Solutions');
 const Blog = lazyWithRetry(() => import('./pages/Blog'), 'Blog');
 const BlogPost = lazyWithRetry(() => import('./pages/BlogPost'), 'BlogPost');
 const Bioflow = lazyWithRetry(() => import('./pages/Bioflow'), 'Bioflow');
-const DemoDashboard = lazyWithRetry(() => import('./pages/DemoDashboard'), 'DemoDashboard');
 
 // New shadcn-admin-style dashboard shell
 const DashboardLayout = lazyWithRetry(() => import('./dashboard/layout/DashboardLayout'), 'DashboardLayout');
@@ -165,13 +164,6 @@ function App() {
                       <Route path="analytics-v1" element={<DashboardAnalyticsV1 />} />
                       <Route path="coming-soon" element={<DashboardComingSoon />} />
                     </Route>
-
-                    {/* AI Agent section — the existing AI receptionist product, folded in as one section */}
-                    <Route path="/dashboard/ai/*" element={
-                      <PrivateRoute>
-                        <DemoDashboard />
-                      </PrivateRoute>
-                    } />
 
                     {/* Standalone full-screen apps embedded in the dashboard via preview iframes */}
                     <Route path="/mail" element={
