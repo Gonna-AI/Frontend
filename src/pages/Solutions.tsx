@@ -116,21 +116,6 @@ export default function Solutions() {
 
             <p className="fabric-solution-copy">{t('solutions.subtitle')}</p>
             <p className="fabric-solution-copyright">© 2026 ClerkTree Systems</p>
-
-            <div className="fabric-solution-contact" aria-label="Talk to ClerkTree">
-              <div className="fabric-solution-avatar" aria-hidden="true">
-                <span>CT</span>
-              </div>
-              <div className="fabric-solution-contact-copy">
-                <p>Solution Lead</p>
-                <span>at ClerkTree®</span>
-                <strong>AI Operations</strong>
-                <button type="button" onClick={() => navigate('/contact')}>
-                  Let&apos;s talk
-                  <span aria-hidden="true" />
-                </button>
-              </div>
-            </div>
           </div>
         </section>
 

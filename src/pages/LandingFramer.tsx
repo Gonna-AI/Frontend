@@ -2,7 +2,7 @@ import { type CSSProperties, type VideoHTMLAttributes, Fragment, useEffect, useR
 import { Compass, Globe2, MapPin, PanelTop, PenTool, Sparkles } from 'lucide-react';
 import Lenis from 'lenis';
 import { isSaveDataEnabled } from '../utils/idle';
-import { Header, Footer } from '../components/Landing/AgeroChrome';
+import { Footer } from '../components/Landing/AgeroChrome';
 import './LandingFramer.css';
 
 const BASE = 'https://xlzwfkgurrrspcdyqele.supabase.co/storage/v1/object/public/buck';
@@ -163,7 +163,7 @@ export default function LandingFramer() {
     <div className="agero-works" id="agero-works">
       <div className="agero-top-area">
         <section className="agero-hero-panel">
-          <Header />
+          <ShellHeader />
 
           <div
             className="agero-hero-content"
@@ -239,6 +239,20 @@ export default function LandingFramer() {
       <Contact />
       <Footer />
     </div>
+  );
+}
+
+function ShellHeader() {
+  return (
+    <header className="agero-shell-header">
+      <a className="agero-shell-logo" href="/" aria-label="ClerkTree home">
+        ClerkTree<sup>®</sup>
+      </a>
+      <a className="agero-shell-menu" href="/contact" aria-label="Open contact">
+        <span />
+        <span />
+      </a>
+    </header>
   );
 }
 
@@ -980,4 +994,3 @@ function Contact() {
     </section>
   );
 }
-

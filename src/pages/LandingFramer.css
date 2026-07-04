@@ -217,10 +217,54 @@ html.lenis.lenis-stopped {
   background: transparent;
   display: flex;
   flex-direction: column;
-  min-height: 648px;
-  padding-bottom: 96px;
+  min-height: 560px;
+  padding: 34px 34px 96px;
   overflow: hidden;
   position: relative;
+  width: 100%;
+}
+
+.agero-shell-header {
+  align-items: center;
+  display: flex;
+  flex: none;
+  justify-content: space-between;
+  margin: 0 auto 72px;
+  width: min(100%, 1920px);
+}
+
+.agero-shell-logo {
+  color: rgb(6, 6, 6);
+  font-family: "Cal Sans", "Inter", system-ui, sans-serif;
+  font-size: clamp(2rem, 2.5vw, 3rem);
+  line-height: 0.9;
+  text-decoration: none;
+}
+
+.agero-shell-logo sup {
+  font-size: 0.42em;
+  margin-left: 0.08em;
+  vertical-align: super;
+}
+
+.agero-shell-menu {
+  align-items: center;
+  background: transparent;
+  border-radius: 999px;
+  display: inline-flex;
+  flex-direction: column;
+  gap: 13px;
+  height: 54px;
+  justify-content: center;
+  padding: 0;
+  text-decoration: none;
+  width: 118px;
+}
+
+.agero-shell-menu span {
+  background: rgb(6, 6, 6);
+  display: block;
+  height: 4px;
   width: 100%;
 }
 
@@ -395,7 +439,7 @@ html.lenis.lenis-stopped {
   align-items: center;
   display: flex;
   flex-direction: column;
-  margin-top: 12px;
+  margin-top: 0;
   padding: 0 20px;
   text-align: center;
   width: 100%;
@@ -2627,11 +2671,29 @@ html.lenis.lenis-stopped {
 @media (max-width: 767px) {
   .agero-hero-panel {
     min-height: 538px;
-    padding-bottom: 64px;
+    padding: 22px 18px 64px;
   }
 
   .agero-header {
     height: 196px;
+  }
+
+  .agero-shell-header {
+    margin-bottom: 56px;
+  }
+
+  .agero-shell-logo {
+    font-size: 2rem;
+  }
+
+  .agero-shell-menu {
+    gap: 9px;
+    height: 42px;
+    width: 70px;
+  }
+
+  .agero-shell-menu span {
+    height: 3px;
   }
 
   .agero-status {
