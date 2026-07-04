@@ -365,6 +365,12 @@ export async function fetchChatMessages(threadId: string): Promise<PipelineChatM
   return (data ?? []) as PipelineChatMessageRow[];
 }
 
+export async function fetchAllChatMessages(): Promise<PipelineChatMessageRow[]> {
+  const { data, error } = await supabase.from("pipeline_chat_messages").select("*");
+  if (error) throw error;
+  return (data ?? []) as PipelineChatMessageRow[];
+}
+
 export interface PipelineHistoricalProjectRow {
   id: string;
   company_id: string;
