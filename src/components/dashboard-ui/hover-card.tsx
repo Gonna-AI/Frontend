@@ -10,13 +10,15 @@ function HoverCard({
   return <HoverCardPrimitive.Root data-slot="hover-card" {...props} />
 }
 
-function HoverCardTrigger({
-  ...props
-}: React.ComponentProps<typeof HoverCardPrimitive.Trigger>) {
-  return (
-    <HoverCardPrimitive.Trigger data-slot="hover-card-trigger" {...props} />
-  )
-}
+const HoverCardTrigger = React.forwardRef<React.ElementRef<typeof HoverCardPrimitive.Trigger>, React.ComponentProps<typeof HoverCardPrimitive.Trigger>>(
+  ({ ...props }, ref) => {
+    return (
+    <HoverCardPrimitive.Trigger
+      ref={ref} data-slot="hover-card-trigger" {...props} />
+    )
+  }
+)
+HoverCardTrigger.displayName = "HoverCardTrigger"
 
 function HoverCardContent({
   className,

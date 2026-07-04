@@ -1,5 +1,20 @@
 
-import { AlarmClock, ArrowLeft, Copy, Flag, Link, MoreHorizontal, Paperclip, PhoneCall, Send, Smile, Sparkles, Tag, Type, UserRound } from "lucide-react";
+import {
+  AlarmClock,
+  ArrowLeft,
+  Copy,
+  Flag,
+  Link,
+  MoreHorizontal,
+  Paperclip,
+  PhoneCall,
+  Send,
+  Smile,
+  Sparkles,
+  Tag,
+  Type,
+  UserRound,
+} from "lucide-react-dash";
 
 import { Avatar, AvatarBadge, AvatarFallback } from "@/components/dashboard-ui/avatar";
 import { Bubble, BubbleContent, BubbleGroup, BubbleReactions } from "@/components/dashboard-ui/bubble";

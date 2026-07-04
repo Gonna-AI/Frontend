@@ -4,15 +4,19 @@ import { Slot } from "radix-ui"
 
 import { cn } from "@/lib/utils"
 
-function BubbleGroup({ className, ...props }: React.ComponentProps<"div">) {
-  return (
+const BubbleGroup = React.forwardRef<HTMLDivElement, React.ComponentProps<"div">>(
+  ({ className, ...props }, ref) => {
+    return (
     <div
+      ref={ref}
       data-slot="bubble-group"
       className={cn("flex min-w-0 flex-col gap-2", className)}
       {...props}
     />
-  )
-}
+    )
+  }
+)
+BubbleGroup.displayName = "BubbleGroup"
 
 const bubbleVariants = cva(
   "group/bubble relative flex w-fit max-w-[80%] min-w-0 flex-col gap-1 group-data-[align=end]/message:self-end data-[align=end]:self-end data-[variant=ghost]:max-w-full",
@@ -41,25 +45,27 @@ const bubbleVariants = cva(
   }
 )
 
-function Bubble({
-  variant = "default",
-  align = "start",
-  className,
-  ...props
-}: React.ComponentProps<"div"> &
+const Bubble = React.forwardRef<HTMLDivElement, React.ComponentProps<"div"> &
   VariantProps<typeof bubbleVariants> & {
     align?: "start" | "end"
-  }) {
-  return (
+  }>(
+  ({ variant = "default",
+  align = "start",
+  className,
+  ...props }, ref) => {
+    return (
     <div
+      ref={ref}
       data-slot="bubble"
       data-variant={variant}
       data-align={align}
       className={cn(bubbleVariants({ variant }), className)}
       {...props}
     />
-  )
-}
+    )
+  }
+)
+Bubble.displayName = "Bubble"
 
 function BubbleContent({
   asChild = false,
@@ -102,24 +108,26 @@ const bubbleReactionsVariants = cva(
   }
 )
 
-function BubbleReactions({
-  side = "bottom",
-  align = "end",
-  className,
-  ...props
-}: React.ComponentProps<"div"> & {
+const BubbleReactions = React.forwardRef<HTMLDivElement, React.ComponentProps<"div"> & {
   align?: "start" | "end"
   side?: "top" | "bottom"
-}) {
-  return (
+}>(
+  ({ side = "bottom",
+  align = "end",
+  className,
+  ...props }, ref) => {
+    return (
     <div
+      ref={ref}
       data-slot="bubble-reactions"
       data-align={align}
       data-side={side}
       className={cn(bubbleReactionsVariants({ side, align }), className)}
       {...props}
     />
-  )
-}
+    )
+  }
+)
+BubbleReactions.displayName = "BubbleReactions"
 
 export { BubbleGroup, Bubble, BubbleContent, BubbleReactions }

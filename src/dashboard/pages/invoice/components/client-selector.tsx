@@ -1,4 +1,4 @@
-import { Plus } from "lucide-react";
+import { Plus } from "lucide-react-dash";
 import { Controller, useFormContext } from "react-hook-form";
 
 import { Avatar, AvatarFallback } from "@/components/dashboard-ui/avatar";

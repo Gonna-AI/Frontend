@@ -1,7 +1,7 @@
 "use no memo";
 
 import type { ColumnDef } from "@tanstack/react-table";
-import { MoreVertical } from "lucide-react";
+import { MoreVertical } from "lucide-react-dash";
 
 import { Badge } from "@/components/dashboard-ui/badge";
 import { Button } from "@/components/dashboard-ui/button";

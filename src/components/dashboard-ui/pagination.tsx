@@ -2,32 +2,38 @@ import * as React from "react"
 
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/dashboard-ui/button"
-import { ChevronLeftIcon, ChevronRightIcon, MoreHorizontalIcon } from "lucide-react"
+import { ChevronLeftIcon, ChevronRightIcon, MoreHorizontalIcon } from "lucide-react-dash"
 
-function Pagination({ className, ...props }: React.ComponentProps<"nav">) {
-  return (
+const Pagination = React.forwardRef<HTMLElement, React.ComponentProps<"nav">>(
+  ({ className, ...props }, ref) => {
+    return (
     <nav
+      ref={ref}
       role="navigation"
       aria-label="pagination"
       data-slot="pagination"
       className={cn("mx-auto flex w-full justify-center", className)}
       {...props}
     />
-  )
-}
+    )
+  }
+)
+Pagination.displayName = "Pagination"
 
-function PaginationContent({
-  className,
-  ...props
-}: React.ComponentProps<"ul">) {
-  return (
+const PaginationContent = React.forwardRef<HTMLUListElement, React.ComponentProps<"ul">>(
+  ({ className,
+  ...props }, ref) => {
+    return (
     <ul
+      ref={ref}
       data-slot="pagination-content"
       className={cn("flex items-center gap-0.5", className)}
       {...props}
     />
-  )
-}
+    )
+  }
+)
+PaginationContent.displayName = "PaginationContent"
 
 function PaginationItem({ ...props }: React.ComponentProps<"li">) {
   return <li data-slot="pagination-item" {...props} />
@@ -38,14 +44,14 @@ type PaginationLinkProps = {
 } & Pick<React.ComponentProps<typeof Button>, "size"> &
   React.ComponentProps<"a">
 
-function PaginationLink({
-  className,
+const PaginationLink = React.forwardRef<React.ElementRef<typeof Button>, PaginationLinkProps>(
+  ({ className,
   isActive,
   size = "icon",
-  ...props
-}: PaginationLinkProps) {
-  return (
+  ...props }, ref) => {
+    return (
     <Button
+      ref={ref}
       asChild
       variant={isActive ? "outline" : "ghost"}
       size={size}
@@ -58,16 +64,18 @@ function PaginationLink({
         {...props}
       />
     </Button>
-  )
-}
+    )
+  }
+)
+PaginationLink.displayName = "PaginationLink"
 
-function PaginationPrevious({
-  className,
+const PaginationPrevious = React.forwardRef<React.ElementRef<typeof PaginationLink>, React.ComponentProps<typeof PaginationLink> & { text?: string }>(
+  ({ className,
   text = "Previous",
-  ...props
-}: React.ComponentProps<typeof PaginationLink> & { text?: string }) {
-  return (
+  ...props }, ref) => {
+    return (
     <PaginationLink
+      ref={ref}
       aria-label="Go to previous page"
       size="default"
       className={cn("pl-1.5!", className)}
@@ -76,16 +84,18 @@ function PaginationPrevious({
       <ChevronLeftIcon data-icon="inline-start" />
       <span className="hidden sm:block">{text}</span>
     </PaginationLink>
-  )
-}
+    )
+  }
+)
+PaginationPrevious.displayName = "PaginationPrevious"
 
-function PaginationNext({
-  className,
+const PaginationNext = React.forwardRef<React.ElementRef<typeof PaginationLink>, React.ComponentProps<typeof PaginationLink> & { text?: string }>(
+  ({ className,
   text = "Next",
-  ...props
-}: React.ComponentProps<typeof PaginationLink> & { text?: string }) {
-  return (
+  ...props }, ref) => {
+    return (
     <PaginationLink
+      ref={ref}
       aria-label="Go to next page"
       size="default"
       className={cn("pr-1.5!", className)}
@@ -94,15 +104,17 @@ function PaginationNext({
       <span className="hidden sm:block">{text}</span>
       <ChevronRightIcon data-icon="inline-end" />
     </PaginationLink>
-  )
-}
+    )
+  }
+)
+PaginationNext.displayName = "PaginationNext"
 
-function PaginationEllipsis({
-  className,
-  ...props
-}: React.ComponentProps<"span">) {
-  return (
+const PaginationEllipsis = React.forwardRef<HTMLSpanElement, React.ComponentProps<"span">>(
+  ({ className,
+  ...props }, ref) => {
+    return (
     <span
+      ref={ref}
       aria-hidden
       data-slot="pagination-ellipsis"
       className={cn(
@@ -115,8 +127,10 @@ function PaginationEllipsis({
       />
       <span className="sr-only">More pages</span>
     </span>
-  )
-}
+    )
+  }
+)
+PaginationEllipsis.displayName = "PaginationEllipsis"
 
 export {
   Pagination,

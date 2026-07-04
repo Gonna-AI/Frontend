@@ -1,4 +1,4 @@
-import { ArrowLeft, ArrowRight, ArrowUpRight, Star } from "lucide-react";
+import { ArrowLeft, ArrowRight, ArrowUpRight, Star } from "lucide-react-dash";
 
 import { Avatar, AvatarFallback, AvatarGroup, AvatarGroupCount } from "@/components/dashboard-ui/avatar";
 import { Button } from "@/components/dashboard-ui/button";

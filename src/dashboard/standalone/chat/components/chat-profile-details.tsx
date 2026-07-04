@@ -1,5 +1,20 @@
 
-import { Building2, Calendar, CheckCircle2, Globe, Link, Mail, MapPin, Monitor, MoreHorizontal, Phone, PhoneCall, Tag, UserRound, X } from "lucide-react";
+import {
+  Building2,
+  Calendar,
+  CheckCircle2,
+  Globe,
+  Link,
+  Mail,
+  MapPin,
+  Monitor,
+  MoreHorizontal,
+  Phone,
+  PhoneCall,
+  Tag,
+  UserRound,
+  X,
+} from "lucide-react-dash";
 
 import { Avatar, AvatarFallback } from "@/components/dashboard-ui/avatar";
 import { Badge } from "@/components/dashboard-ui/badge";

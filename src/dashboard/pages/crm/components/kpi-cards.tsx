@@ -1,4 +1,4 @@
-import { ArrowUpRight, TrendingDown, TrendingUp } from "lucide-react";
+import { ArrowUpRight, TrendingDown, TrendingUp } from "lucide-react-dash";
 
 import { Badge } from "@/components/dashboard-ui/badge";
 import { Card, CardAction, CardContent, CardDescription, CardHeader } from "@/components/dashboard-ui/card";

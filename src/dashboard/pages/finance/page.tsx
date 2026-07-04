@@ -1,5 +1,5 @@
 import { format } from "date-fns";
-import { Download, RotateCw, Settings2 } from "lucide-react";
+import { Download, RotateCw, Settings2 } from "lucide-react-dash";
 
 import { Button } from "@/components/dashboard-ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/dashboard-ui/tabs";

@@ -1,4 +1,4 @@
-import { ArrowRight, Clock3, Focus, TrendingUp } from "lucide-react";
+import { ArrowRight, Clock3, Focus, TrendingUp } from "lucide-react-dash";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/dashboard-ui/card";
 

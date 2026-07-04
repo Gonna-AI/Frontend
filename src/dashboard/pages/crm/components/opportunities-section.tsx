@@ -12,7 +12,7 @@ import {
   useReactTable,
   type VisibilityState,
 } from "@tanstack/react-table";
-import { ChevronDownIcon, ListFilter } from "lucide-react";
+import { ChevronDownIcon, ListFilter } from "lucide-react-dash";
 
 import { Button } from "@/components/dashboard-ui/button";
 import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/dashboard-ui/card";

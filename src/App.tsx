@@ -59,6 +59,11 @@ const DashboardAnalyticsV1 = lazyWithRetry(() => import('./dashboard/pages/legac
 const DashboardComingSoon = lazyWithRetry(() => import('./dashboard/pages/coming-soon/page'), 'DashboardComingSoon');
 const MailApp = lazyWithRetry(() => import('./dashboard/standalone/mail/MailApp'), 'MailApp');
 const ChatApp = lazyWithRetry(() => import('./dashboard/standalone/chat/ChatApp'), 'ChatApp');
+const AuthV1Login = lazyWithRetry(() => import('./dashboard/auth/v1/login/page'), 'AuthV1Login');
+const AuthV1Register = lazyWithRetry(() => import('./dashboard/auth/v1/register/page'), 'AuthV1Register');
+const AuthV2Layout = lazyWithRetry(() => import('./dashboard/auth/v2/AuthV2Layout'), 'AuthV2Layout');
+const AuthV2Login = lazyWithRetry(() => import('./dashboard/auth/v2/login/page'), 'AuthV2Login');
+const AuthV2Register = lazyWithRetry(() => import('./dashboard/auth/v2/register/page'), 'AuthV2Register');
 const UserCall = lazyWithRetry(() => import('./pages/UserCall'), 'UserCall');
 const UserChat = lazyWithRetry(() => import('./pages/UserChat'), 'UserChat');
 const UserVoiceCall = lazyWithRetry(() => import('./pages/UserVoiceCall'), 'UserVoiceCall');
@@ -179,6 +184,14 @@ function App() {
                         <ChatApp />
                       </PrivateRoute>
                     } />
+
+                    {/* Dashboard template's own auth screen showcase (design demos, not wired to real auth) */}
+                    <Route path="/auth/v1/login" element={<AuthV1Login />} />
+                    <Route path="/auth/v1/register" element={<AuthV1Register />} />
+                    <Route path="/auth/v2" element={<AuthV2Layout />}>
+                      <Route path="login" element={<AuthV2Login />} />
+                      <Route path="register" element={<AuthV2Register />} />
+                    </Route>
 
                     {/* User Call */}
                     <Route path="/user" element={<UserCall />} />

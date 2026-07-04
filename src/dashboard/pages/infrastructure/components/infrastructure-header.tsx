@@ -1,4 +1,4 @@
-import { Box, Container, Filter, PlusCircle, RefreshCw, Search, Server, Settings } from "lucide-react";
+import { Box, Container, Filter, PlusCircle, RefreshCw, Search, Server, Settings } from "lucide-react-dash";
 
 import { Badge } from "@/components/dashboard-ui/badge";
 import { Button } from "@/components/dashboard-ui/button";

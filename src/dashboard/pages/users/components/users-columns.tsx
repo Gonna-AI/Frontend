@@ -2,7 +2,7 @@
 
 import type { ColumnDef } from "@tanstack/react-table";
 import { parse } from "date-fns";
-import { Check, Clock, MoreHorizontal, X } from "lucide-react";
+import { Check, Clock, MoreHorizontal, X } from "lucide-react-dash";
 
 import { Avatar, AvatarBadge, AvatarFallback, AvatarGroup, AvatarGroupCount } from "@/components/dashboard-ui/avatar";
 import { Badge } from "@/components/dashboard-ui/badge";

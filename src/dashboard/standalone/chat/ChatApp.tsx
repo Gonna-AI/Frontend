@@ -8,16 +8,18 @@ import { conversations } from "./components/data";
 
 export default function ChatApp() {
   return (
-    <TooltipProvider>
-      <div className="h-dvh [--header-height:calc(--spacing(14))]">
-        <SidebarProvider className="flex h-full flex-col">
-          <ChatHeader />
-          <div className="flex flex-1 min-h-0">
-            <ChatSidebar />
-            <Chat conversations={conversations} />
-          </div>
-        </SidebarProvider>
-      </div>
-    </TooltipProvider>
+    <div className="dashboard-root">
+      <TooltipProvider>
+        <div className="h-dvh [--header-height:calc(--spacing(14))]">
+          <SidebarProvider className="flex h-full flex-col">
+            <ChatHeader />
+            <div className="flex flex-1 min-h-0">
+              <ChatSidebar />
+              <Chat conversations={conversations} />
+            </div>
+          </SidebarProvider>
+        </div>
+      </TooltipProvider>
+    </div>
   );
 }

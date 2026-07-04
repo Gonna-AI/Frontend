@@ -1,4 +1,4 @@
-import { BookOpenCheck, Megaphone, Plus } from "lucide-react";
+import { BookOpenCheck, Megaphone, Plus } from "lucide-react-dash";
 
 import { Button } from "@/components/dashboard-ui/button";
 

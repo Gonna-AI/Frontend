@@ -2,7 +2,7 @@
 
 import type { ColumnDef } from "@tanstack/react-table";
 import { addMinutes, differenceInCalendarDays, endOfToday, format, parseISO } from "date-fns";
-import { AlertCircle as CircleAlertIcon, CheckCircle2 as CircleCheckIcon, Clock3Icon, LoaderIcon, UserRound } from "lucide-react";
+import { CircleAlertIcon, CircleCheckIcon, Clock3Icon, LoaderIcon, UserRound } from "lucide-react-dash";
 
 import { Badge } from "@/components/dashboard-ui/badge";
 import { Checkbox } from "@/components/dashboard-ui/checkbox";

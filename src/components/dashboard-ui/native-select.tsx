@@ -1,19 +1,19 @@
 import * as React from "react"
 
 import { cn } from "@/lib/utils"
-import { ChevronDownIcon } from "lucide-react"
+import { ChevronDownIcon } from "lucide-react-dash"
 
 type NativeSelectProps = Omit<React.ComponentProps<"select">, "size"> & {
   size?: "sm" | "default"
 }
 
-function NativeSelect({
-  className,
+const NativeSelect = React.forwardRef<HTMLDivElement, NativeSelectProps>(
+  ({ className,
   size = "default",
-  ...props
-}: NativeSelectProps) {
-  return (
+  ...props }, ref) => {
+    return (
     <div
+      ref={ref}
       className={cn(
         "group/native-select relative w-fit has-[select:disabled]:opacity-50",
         className
@@ -29,21 +29,25 @@ function NativeSelect({
       />
       <ChevronDownIcon className="pointer-events-none absolute top-1/2 right-2.5 size-4 -translate-y-1/2 text-muted-foreground select-none" aria-hidden="true" data-slot="native-select-icon" />
     </div>
-  )
-}
+    )
+  }
+)
+NativeSelect.displayName = "NativeSelect"
 
-function NativeSelectOption({
-  className,
-  ...props
-}: React.ComponentProps<"option">) {
-  return (
+const NativeSelectOption = React.forwardRef<HTMLOptionElement, React.ComponentProps<"option">>(
+  ({ className,
+  ...props }, ref) => {
+    return (
     <option
+      ref={ref}
       data-slot="native-select-option"
       className={cn("bg-[Canvas] text-[CanvasText]", className)}
       {...props}
     />
-  )
-}
+    )
+  }
+)
+NativeSelectOption.displayName = "NativeSelectOption"
 
 function NativeSelectOptGroup({
   className,

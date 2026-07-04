@@ -1,6 +1,6 @@
 
 import { format, subMonths } from "date-fns";
-import { BadgeDollarSign, Wallet } from "lucide-react";
+import { BadgeDollarSign, Wallet } from "lucide-react-dash";
 import { Area, AreaChart, Bar, BarChart, Line, LineChart, XAxis } from "recharts";
 
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/dashboard-ui/card";

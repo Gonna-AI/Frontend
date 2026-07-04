@@ -1,5 +1,15 @@
 
-import { ArrowUpRight, BadgeCheck, CalendarDays, FileText, Flame, type LucideIcon, MessageSquare, Minus, Paperclip } from "lucide-react";
+import {
+  ArrowUpRight,
+  BadgeCheck,
+  CalendarDays,
+  FileText,
+  Flame,
+  type LucideIcon,
+  MessageSquare,
+  Minus,
+  Paperclip,
+} from "lucide-react-dash";
 
 import { Avatar, AvatarFallback } from "@/components/dashboard-ui/avatar";
 import { Badge } from "@/components/dashboard-ui/badge";

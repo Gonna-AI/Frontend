@@ -1,5 +1,5 @@
 
-import { MoreHorizontal as Ellipsis, RotateCcw, Search, SlidersHorizontal } from "lucide-react";
+import { Ellipsis, RotateCcw, Search, SlidersHorizontal } from "lucide-react-dash";
 
 import { Button } from "@/components/dashboard-ui/button";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/dashboard-ui/input-group";

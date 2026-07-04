@@ -1,5 +1,5 @@
 
-import { ArrowUpRight } from "lucide-react";
+import { ArrowUpRight } from "lucide-react-dash";
 import { Bar, BarChart, LabelList, type LabelProps, XAxis, YAxis } from "recharts";
 import { siEbay, siGoogle, siMeta, siShopify, siTiktok } from "simple-icons";
 

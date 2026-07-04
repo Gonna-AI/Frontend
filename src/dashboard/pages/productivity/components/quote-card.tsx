@@ -1,4 +1,4 @@
-import { Quote } from "lucide-react";
+import { Quote } from "lucide-react-dash";
 
 export function QuoteCard() {
   return (

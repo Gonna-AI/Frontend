@@ -1,6 +1,6 @@
 
 import { addDays, format, set } from "date-fns";
-import { ChevronRight, Zap } from "lucide-react";
+import { ChevronRight, Zap } from "lucide-react-dash";
 import { siClaude, siLinear, siResend } from "simple-icons";
 
 import { SimpleIcon } from "@/dashboard/components/simple-icon";

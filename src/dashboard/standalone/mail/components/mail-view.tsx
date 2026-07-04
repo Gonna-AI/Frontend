@@ -1,6 +1,23 @@
 
 import { format } from "date-fns/format";
-import { Archive, ChevronDown, ChevronLeft, ChevronRight, MoreVertical as EllipsisVertical, Forward, MailOpen, Paperclip, Pin, Reply, ReplyAll, Send, Smile, Tag, Trash2, X } from "lucide-react";
+import {
+  Archive,
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  EllipsisVertical,
+  Forward,
+  MailOpen,
+  Paperclip,
+  Pin,
+  Reply,
+  ReplyAll,
+  Send,
+  Smile,
+  Tag,
+  Trash2,
+  X,
+} from "lucide-react-dash";
 
 import { SimpleIcon } from "@/dashboard/components/simple-icon";
 import { Avatar, AvatarFallback } from "@/components/dashboard-ui/avatar";

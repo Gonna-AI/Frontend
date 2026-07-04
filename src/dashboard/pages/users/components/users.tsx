@@ -13,7 +13,7 @@ import {
   useReactTable,
   type VisibilityState,
 } from "@tanstack/react-table";
-import { Cog, Download, Grid, Plus, Rows3, Search, SlidersHorizontal } from "lucide-react";
+import { Cog, Download, Grid, Plus, Rows3, Search, SlidersHorizontal } from "lucide-react-dash";
 
 import { Button } from "@/components/dashboard-ui/button";
 import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/dashboard-ui/card";

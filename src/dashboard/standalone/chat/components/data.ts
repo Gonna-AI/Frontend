@@ -1,5 +1,5 @@
-import type { LucideIcon } from "lucide-react";
-import { Clock3, Inbox, Mail, MessageCircle, Phone, Send, Star, User } from "lucide-react";
+import type { LucideIcon } from "lucide-react-dash";
+import { Clock3, Inbox, Mail, MessageCircle, Phone, Send, Star, User } from "lucide-react-dash";
 
 export type Conversation = {
   id: number;

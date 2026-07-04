@@ -1,4 +1,19 @@
-import { ArrowUpDown, Bell, ChevronDown, CircleDashed, Gauge as CircleGauge, Clock3, Copy, MoreVertical as EllipsisVertical, FileText, Plus, RefreshCw, Settings, Terminal as SquareTerminal, Terminal } from "lucide-react";
+import {
+  ArrowUpDown,
+  Bell,
+  ChevronDown,
+  CircleDashed,
+  CircleGauge,
+  Clock3,
+  Copy,
+  EllipsisVertical,
+  FileText,
+  Plus,
+  RefreshCw,
+  Settings,
+  SquareTerminal,
+  Terminal,
+} from "lucide-react-dash";
 
 import { SimpleIcon } from "@/dashboard/components/simple-icon";
 import { Badge } from "@/components/dashboard-ui/badge";

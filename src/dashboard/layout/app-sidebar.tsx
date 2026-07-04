@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Command } from "lucide-react";
+import { Command } from "lucide-react-dash";
 
 import {
   Sidebar,
@@ -11,6 +11,7 @@ import {
   SidebarMenuItem,
 } from "@/components/dashboard-ui/sidebar";
 import { APP_CONFIG } from "@/dashboard/data/app-config";
+import { rootUser } from "@/dashboard/data/users";
 import { sidebarItems } from "@/dashboard/navigation/sidebar-items";
 import { usePreferencesStore } from "@/dashboard/store/preferences-store";
 
@@ -41,7 +42,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarContent>
       <SidebarFooter>
         <SidebarSupportCard />
-        <NavUser />
+        <NavUser user={rootUser} />
       </SidebarFooter>
     </Sidebar>
   );

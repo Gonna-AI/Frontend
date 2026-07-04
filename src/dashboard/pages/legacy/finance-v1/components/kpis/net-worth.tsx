@@ -1,5 +1,5 @@
 
-import { Banknote as SaudiRiyal } from "lucide-react";
+import { SaudiRiyal } from "lucide-react-dash";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/dashboard-ui/card";
 import { Separator } from "@/components/dashboard-ui/separator";

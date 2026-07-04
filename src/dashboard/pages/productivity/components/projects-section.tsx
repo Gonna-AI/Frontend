@@ -1,5 +1,5 @@
 import { addDays, format } from "date-fns";
-import { ClipboardCheck, Globe, Orbit, Plus } from "lucide-react";
+import { ClipboardCheck, Globe, Orbit, Plus } from "lucide-react-dash";
 
 import { Badge } from "@/components/dashboard-ui/badge";
 import { Button } from "@/components/dashboard-ui/button";

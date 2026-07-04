@@ -1,5 +1,5 @@
 
-import { MoreHorizontal as Ellipsis } from "lucide-react";
+import { Ellipsis } from "lucide-react-dash";
 import { CartesianGrid, ComposedChart, Line, XAxis, YAxis } from "recharts";
 
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/dashboard-ui/card";

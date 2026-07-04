@@ -14,7 +14,17 @@ import {
   useReactTable,
   type VisibilityState,
 } from "@tanstack/react-table";
-import { ArrowUpDown, CalendarDays, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, CreditCard, Search, UsersRound } from "lucide-react";
+import {
+  ArrowUpDown,
+  CalendarDays,
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
+  CreditCard,
+  Search,
+  UsersRound,
+} from "lucide-react-dash";
 
 import { Button } from "@/components/dashboard-ui/button";
 import {

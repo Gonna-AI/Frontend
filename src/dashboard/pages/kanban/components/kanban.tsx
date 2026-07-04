@@ -20,7 +20,19 @@ import {
   SortableContext,
   sortableKeyboardCoordinates,
 } from "@dnd-kit/sortable";
-import { ArrowUpDown, Bot, ChevronDown, Kanban as KanbanIcon, LayoutTemplate, List, Plus, Search, SlidersHorizontal, Table2, Upload } from "lucide-react";
+import {
+  ArrowUpDown,
+  Bot,
+  ChevronDown,
+  Kanban as KanbanIcon,
+  LayoutTemplate,
+  List,
+  Plus,
+  Search,
+  SlidersHorizontal,
+  Table2,
+  Upload,
+} from "lucide-react-dash";
 
 import { Button } from "@/components/dashboard-ui/button";
 import { ButtonGroup, ButtonGroupSeparator } from "@/components/dashboard-ui/button-group";

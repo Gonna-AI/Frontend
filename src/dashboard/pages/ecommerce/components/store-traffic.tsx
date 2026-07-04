@@ -2,7 +2,7 @@
 import { useState } from "react";
 
 import { format, subMinutes } from "date-fns";
-import { ArrowUpRight } from "lucide-react";
+import { ArrowUpRight } from "lucide-react-dash";
 import { Area, AreaChart, CartesianGrid, Line, XAxis, YAxis } from "recharts";
 
 import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/dashboard-ui/card";

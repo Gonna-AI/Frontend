@@ -1,17 +1,24 @@
-import { Link } from "react-router-dom";
+import { siX } from "simple-icons";
 
+import { SimpleIcon } from "@/dashboard/components/simple-icon";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/dashboard-ui/card";
 
 export function SidebarSupportCard() {
   return (
     <Card size="sm" className="overflow-hidden shadow-none group-data-[collapsible=icon]:hidden">
       <CardHeader className="min-w-0 px-4">
-        <CardTitle className="truncate text-sm">Need a hand?</CardTitle>
+        <CardTitle className="truncate text-sm">Looking for something more?</CardTitle>
         <CardDescription className="line-clamp-2">
-          Reach our team any time at{" "}
-          <Link to="/contact" className="inline-flex items-center text-foreground underline underline-offset-2">
-            team@clerktree.com
-          </Link>
+          Open an issue or do reach out to me on&nbsp;
+          <a
+            href="https://x.com/arhamkhnz"
+            target="_blank"
+            rel="noreferrer"
+            aria-label="Reach out on X"
+            className="inline-flex items-center text-foreground"
+          >
+            <SimpleIcon icon={siX} aria-hidden className="size-3 fill-current" />
+          </a>
           .
         </CardDescription>
       </CardHeader>

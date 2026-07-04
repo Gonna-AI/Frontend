@@ -1,4 +1,4 @@
-import { MoreHorizontal as Ellipsis, FileDown, FileUp, RefreshCw, Share2 } from "lucide-react";
+import { Ellipsis, FileDown, FileUp, RefreshCw, Share2 } from "lucide-react-dash";
 
 import { Button } from "@/components/dashboard-ui/button";
 import {

@@ -1,5 +1,5 @@
 
-import { MoreVertical as EllipsisVertical, LogOut, Settings, UserRound } from "lucide-react";
+import { EllipsisVertical, LogOut, Settings, UserRound } from "lucide-react-dash";
 import { siFacebook, siInstagram, siWhatsapp } from "simple-icons";
 
 import { SimpleIcon } from "@/dashboard/components/simple-icon";

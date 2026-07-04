@@ -1,6 +1,6 @@
 
 import { SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
-import { GripVertical, MoreVertical, Plus } from "lucide-react";
+import { GripVertical, MoreVertical, Plus } from "lucide-react-dash";
 
 import { Button } from "@/components/dashboard-ui/button";
 import { cn } from "@/lib/utils";

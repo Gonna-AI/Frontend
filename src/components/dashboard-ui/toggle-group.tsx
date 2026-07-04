@@ -18,21 +18,21 @@ const ToggleGroupContext = React.createContext<
   orientation: "horizontal",
 })
 
-function ToggleGroup({
-  className,
+const ToggleGroup = React.forwardRef<React.ElementRef<typeof ToggleGroupPrimitive.Root>, React.ComponentProps<typeof ToggleGroupPrimitive.Root> &
+  VariantProps<typeof toggleVariants> & {
+    spacing?: number
+    orientation?: "horizontal" | "vertical"
+  }>(
+  ({ className,
   variant,
   size,
   spacing = 2,
   orientation = "horizontal",
   children,
-  ...props
-}: React.ComponentProps<typeof ToggleGroupPrimitive.Root> &
-  VariantProps<typeof toggleVariants> & {
-    spacing?: number
-    orientation?: "horizontal" | "vertical"
-  }) {
-  return (
+  ...props }, ref) => {
+    return (
     <ToggleGroupPrimitive.Root
+      ref={ref}
       data-slot="toggle-group"
       data-variant={variant}
       data-size={size}
@@ -51,8 +51,10 @@ function ToggleGroup({
         {children}
       </ToggleGroupContext.Provider>
     </ToggleGroupPrimitive.Root>
-  )
-}
+    )
+  }
+)
+ToggleGroup.displayName = "ToggleGroup"
 
 function ToggleGroupItem({
   className,

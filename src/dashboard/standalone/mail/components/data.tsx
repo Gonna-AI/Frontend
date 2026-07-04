@@ -1,4 +1,4 @@
-import { Archive, HelpCircle as CircleHelp, File, Inbox, Keyboard, type LucideIcon, Send, Star, Trash2 } from "lucide-react";
+import { Archive, CircleHelp, File, Inbox, Keyboard, type LucideIcon, Send, Star, Trash2 } from "lucide-react-dash";
 import { siFigma, siGoogledocs, siGooglephotos } from "simple-icons";
 
 const arhamKhan = {

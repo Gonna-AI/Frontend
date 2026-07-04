@@ -1,4 +1,4 @@
-import { BellOff } from "lucide-react";
+import { BellOff } from "lucide-react-dash";
 
 import { Button } from "@/components/dashboard-ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/dashboard-ui/card";

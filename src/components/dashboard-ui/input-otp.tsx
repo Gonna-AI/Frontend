@@ -3,17 +3,17 @@ import * as React from "react"
 import { OTPInput, OTPInputContext } from "input-otp"
 
 import { cn } from "@/lib/utils"
-import { MinusIcon } from "lucide-react"
+import { MinusIcon } from "lucide-react-dash"
 
-function InputOTP({
-  className,
-  containerClassName,
-  ...props
-}: React.ComponentProps<typeof OTPInput> & {
+const InputOTP = React.forwardRef<React.ElementRef<typeof OTPInput>, React.ComponentProps<typeof OTPInput> & {
   containerClassName?: string
-}) {
-  return (
+}>(
+  ({ className,
+  containerClassName,
+  ...props }, ref) => {
+    return (
     <OTPInput
+      ref={ref}
       data-slot="input-otp"
       containerClassName={cn(
         "cn-input-otp flex items-center has-disabled:opacity-50",
@@ -23,12 +23,16 @@ function InputOTP({
       className={cn("disabled:cursor-not-allowed", className)}
       {...props}
     />
-  )
-}
+    )
+  }
+)
+InputOTP.displayName = "InputOTP"
 
-function InputOTPGroup({ className, ...props }: React.ComponentProps<"div">) {
-  return (
+const InputOTPGroup = React.forwardRef<HTMLDivElement, React.ComponentProps<"div">>(
+  ({ className, ...props }, ref) => {
+    return (
     <div
+      ref={ref}
       data-slot="input-otp-group"
       className={cn(
         "flex items-center rounded-lg has-aria-invalid:border-destructive has-aria-invalid:ring-3 has-aria-invalid:ring-destructive/20 dark:has-aria-invalid:ring-destructive/40",
@@ -36,8 +40,10 @@ function InputOTPGroup({ className, ...props }: React.ComponentProps<"div">) {
       )}
       {...props}
     />
-  )
-}
+    )
+  }
+)
+InputOTPGroup.displayName = "InputOTPGroup"
 
 function InputOTPSlot({
   index,
@@ -69,9 +75,11 @@ function InputOTPSlot({
   )
 }
 
-function InputOTPSeparator({ ...props }: React.ComponentProps<"div">) {
-  return (
+const InputOTPSeparator = React.forwardRef<HTMLDivElement, React.ComponentProps<"div">>(
+  ({ ...props }, ref) => {
+    return (
     <div
+      ref={ref}
       data-slot="input-otp-separator"
       className="flex items-center [&_svg:not([class*='size-'])]:size-4"
       role="separator"
@@ -80,7 +88,9 @@ function InputOTPSeparator({ ...props }: React.ComponentProps<"div">) {
       <MinusIcon
       />
     </div>
-  )
-}
+    )
+  }
+)
+InputOTPSeparator.displayName = "InputOTPSeparator"
 
 export { InputOTP, InputOTPGroup, InputOTPSlot, InputOTPSeparator }

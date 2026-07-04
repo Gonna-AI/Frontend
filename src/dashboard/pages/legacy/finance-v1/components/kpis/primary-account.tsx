@@ -1,5 +1,5 @@
 
-import { Wallet as WalletMinimal } from "lucide-react";
+import { WalletMinimal } from "lucide-react-dash";
 
 import { Button } from "@/components/dashboard-ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/dashboard-ui/card";

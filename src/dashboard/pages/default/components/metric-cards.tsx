@@ -1,4 +1,4 @@
-import { DollarSign, TrendingDown, TrendingUp, UserPlus, Users, Waves } from "lucide-react";
+import { DollarSign, TrendingDown, TrendingUp, UserPlus, Users, Waves } from "lucide-react-dash";
 
 import { Badge } from "@/components/dashboard-ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/dashboard-ui/card";

@@ -1,5 +1,5 @@
 
-import { ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react-dash";
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
 
 import { Avatar, AvatarFallback } from "@/components/dashboard-ui/avatar";

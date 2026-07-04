@@ -1,3 +1,4 @@
+import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
 import { Slot } from "radix-ui"
 
@@ -21,21 +22,23 @@ const buttonGroupVariants = cva(
   }
 )
 
-function ButtonGroup({
-  className,
+const ButtonGroup = React.forwardRef<HTMLDivElement, React.ComponentProps<"div"> & VariantProps<typeof buttonGroupVariants>>(
+  ({ className,
   orientation,
-  ...props
-}: React.ComponentProps<"div"> & VariantProps<typeof buttonGroupVariants>) {
-  return (
+  ...props }, ref) => {
+    return (
     <div
+      ref={ref}
       role="group"
       data-slot="button-group"
       data-orientation={orientation}
       className={cn(buttonGroupVariants({ orientation }), className)}
       {...props}
     />
-  )
-}
+    )
+  }
+)
+ButtonGroup.displayName = "ButtonGroup"
 
 function ButtonGroupText({
   className,
@@ -57,13 +60,13 @@ function ButtonGroupText({
   )
 }
 
-function ButtonGroupSeparator({
-  className,
+const ButtonGroupSeparator = React.forwardRef<React.ElementRef<typeof Separator>, React.ComponentProps<typeof Separator>>(
+  ({ className,
   orientation = "vertical",
-  ...props
-}: React.ComponentProps<typeof Separator>) {
-  return (
+  ...props }, ref) => {
+    return (
     <Separator
+      ref={ref}
       data-slot="button-group-separator"
       orientation={orientation}
       className={cn(
@@ -72,8 +75,10 @@ function ButtonGroupSeparator({
       )}
       {...props}
     />
-  )
-}
+    )
+  }
+)
+ButtonGroupSeparator.displayName = "ButtonGroupSeparator"
 
 export {
   ButtonGroup,

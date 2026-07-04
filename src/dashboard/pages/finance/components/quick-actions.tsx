@@ -1,4 +1,14 @@
-import { Banknote, ChevronRight, Droplet, History, Lightbulb, MoreHorizontal, QrCode, SendHorizontal, Smartphone } from "lucide-react";
+import {
+  Banknote,
+  ChevronRight,
+  Droplet,
+  History,
+  Lightbulb,
+  MoreHorizontal,
+  QrCode,
+  SendHorizontal,
+  Smartphone,
+} from "lucide-react-dash";
 
 import { Avatar, AvatarFallback } from "@/components/dashboard-ui/avatar";
 import { Button } from "@/components/dashboard-ui/button";

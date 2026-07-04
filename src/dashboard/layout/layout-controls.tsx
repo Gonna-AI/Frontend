@@ -1,28 +1,37 @@
-import { Settings } from "lucide-react";
+import { Settings } from "lucide-react-dash";
 
 import { Button } from "@/components/dashboard-ui/button";
 import { Label } from "@/components/dashboard-ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/dashboard-ui/popover";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/dashboard-ui/select";
 import { ToggleGroup, ToggleGroupItem } from "@/components/dashboard-ui/toggle-group";
-import {
-  usePreferencesStore,
-  type ContentLayout,
-  type NavbarStyle,
-  type SidebarCollapsible,
-  type SidebarVariant,
-} from "@/dashboard/store/preferences-store";
+import { useTheme } from "@/hooks/useTheme";
+import { fontOptions, THEME_PRESET_OPTIONS, usePreferencesStore, type ContentLayout, type FontKey, type NavbarStyle, type SidebarCollapsible, type SidebarVariant, type ThemeMode, type ThemePreset } from "@/dashboard/store/preferences-store";
 
 export function LayoutControls() {
   const values = usePreferencesStore((s) => s.values);
   const setPreference = usePreferencesStore((s) => s.setPreference);
   const resetPreferences = usePreferencesStore((s) => s.resetPreferences);
+  const { isDark } = useTheme();
 
   const {
+    theme_mode: themeMode,
+    theme_preset: themePreset,
     content_layout: contentLayout,
     navbar_style: navbarStyle,
     sidebar_variant: variant,
     sidebar_collapsible: collapsible,
+    font,
   } = values;
+
+  const onThemePresetChange = (preset: ThemePreset) => {
+    setPreference("theme_preset", preset);
+  };
+
+  const onThemeModeChange = (mode: ThemeMode | "") => {
+    if (!mode) return;
+    setPreference("theme_mode", mode);
+  };
 
   const onContentLayoutChange = (layout: ContentLayout | "") => {
     if (!layout) return;
@@ -44,6 +53,11 @@ export function LayoutControls() {
     setPreference("sidebar_collapsible", value);
   };
 
+  const onFontChange = (value: FontKey | "") => {
+    if (!value) return;
+    setPreference("font", value);
+  };
+
   return (
     <Popover>
       <PopoverTrigger asChild>
@@ -58,6 +72,69 @@ export function LayoutControls() {
             <p className="text-muted-foreground text-xs">Customize your dashboard layout preferences.</p>
           </div>
           <div className="space-y-3 **:data-[slot=toggle-group]:w-full **:data-[slot=toggle-group-item]:flex-1 **:data-[slot=toggle-group-item]:text-xs">
+            <div className="space-y-1">
+              <Label className="font-medium text-xs">Theme Preset</Label>
+              <Select value={themePreset} onValueChange={onThemePresetChange}>
+                <SelectTrigger size="sm" className="w-full text-xs">
+                  <SelectValue placeholder="Preset" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    {THEME_PRESET_OPTIONS.map((preset) => (
+                      <SelectItem key={preset.value} className="text-xs" value={preset.value}>
+                        <span
+                          className="size-2.5 rounded-full"
+                          style={{
+                            backgroundColor: isDark ? preset.primary.dark : preset.primary.light,
+                          }}
+                        />
+                        {preset.label}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-1">
+              <Label className="font-medium text-xs">Fonts</Label>
+              <Select value={font} onValueChange={onFontChange}>
+                <SelectTrigger size="sm" className="w-full text-xs">
+                  <SelectValue placeholder="Select font" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    {fontOptions.map((font) => (
+                      <SelectItem key={font.key} className="text-xs" value={font.key}>
+                        {font.label}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-1">
+              <Label className="font-medium text-xs">Theme Mode</Label>
+              <ToggleGroup
+                size="sm"
+                variant="outline"
+                type="single"
+                value={themeMode}
+                onValueChange={onThemeModeChange}
+              >
+                <ToggleGroupItem value="light" aria-label="Toggle light">
+                  Light
+                </ToggleGroupItem>
+                <ToggleGroupItem value="dark" aria-label="Toggle dark">
+                  Dark
+                </ToggleGroupItem>
+                <ToggleGroupItem value="system" aria-label="Toggle system">
+                  System
+                </ToggleGroupItem>
+              </ToggleGroup>
+            </div>
+
             <div className="space-y-1">
               <Label className="font-medium text-xs">Page Layout</Label>
               <ToggleGroup

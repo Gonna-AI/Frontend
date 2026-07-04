@@ -1,5 +1,5 @@
 import { format, isToday, isYesterday, subDays } from "date-fns";
-import { BookOpen, FileText } from "lucide-react";
+import { BookOpen, FileText } from "lucide-react-dash";
 
 import { Button } from "@/components/dashboard-ui/button";
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/dashboard-ui/card";

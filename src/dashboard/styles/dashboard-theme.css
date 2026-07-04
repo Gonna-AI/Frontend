@@ -1,0 +1,218 @@
+/* Dashboard-scoped theme system — mirrors arhamkhnz/next-shadcn-admin-dashboard's
+   globals.css exactly, but every rule is scoped under .dashboard-root instead of
+   :root so it never touches the rest of the site's colors/fonts. */
+
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans:wght@400;500;600;700&family=Roboto:wght@400;500;700&family=Outfit:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&family=Nunito+Sans:wght@400;600;700&family=Figtree:wght@400;500;600;700&family=Raleway:wght@400;500;600;700&family=Public+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Noto+Serif:wght@400;600;700&family=Roboto+Slab:wght@400;500;700&family=Merriweather:wght@400;700&family=Lora:wght@400;500;600;700&family=Playfair+Display:wght@400;600;700&display=swap");
+@import "./tangerine.css";
+@import "./brutalist.css";
+@import "./soft-pop.css";
+
+@font-face {
+  font-family: "Geist";
+  src: url("/fonts/dashboard/Geist-Variable.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Geist Mono";
+  src: url("/fonts/dashboard/GeistMono-Variable.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+.dashboard-root {
+  --font-geist: "Geist", ui-sans-serif, system-ui, sans-serif;
+  --font-geist-mono: "Geist Mono", ui-monospace, monospace;
+  --font-geist-pixel-square: "Geist Mono", ui-monospace, monospace;
+  --font-inter: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-noto-sans: "Noto Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-nunito-sans: "Nunito Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-figtree: "Figtree", ui-sans-serif, system-ui, sans-serif;
+  --font-roboto: "Roboto", ui-sans-serif, system-ui, sans-serif;
+  --font-raleway: "Raleway", ui-sans-serif, system-ui, sans-serif;
+  --font-dm-sans: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-public-sans: "Public Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-outfit: "Outfit", ui-sans-serif, system-ui, sans-serif;
+  --font-jetbrains-mono: "JetBrains Mono", ui-monospace, monospace;
+  --font-noto-serif: "Noto Serif", ui-serif, serif;
+  --font-roboto-slab: "Roboto Slab", ui-serif, serif;
+  --font-merriweather: "Merriweather", ui-serif, serif;
+  --font-lora: "Lora", ui-serif, serif;
+  --font-playfair-display: "Playfair Display", ui-serif, serif;
+
+  --font-sans: var(--font-geist);
+  font-family: var(--font-sans), system-ui, sans-serif;
+
+  color-scheme: light;
+
+  --radius: 0.625rem;
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  --primary: oklch(0.205 0 0);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.922 0 0);
+  --input: oklch(0.922 0 0);
+  --ring: oklch(0.708 0 0);
+  --chart-1: oklch(0.87 0 0);
+  --chart-2: oklch(0.556 0 0);
+  --chart-3: oklch(0.439 0 0);
+  --chart-4: oklch(0.371 0 0);
+  --chart-5: oklch(0.269 0 0);
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-primary: oklch(0.205 0 0);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.97 0 0);
+  --sidebar-accent-foreground: oklch(0.205 0 0);
+  --sidebar-border: oklch(0.922 0 0);
+  --sidebar-ring: oklch(0.708 0 0);
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+}
+
+.dashboard-root.dark {
+  color-scheme: dark;
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.205 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.205 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.922 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.556 0 0);
+  --chart-1: oklch(0.87 0 0);
+  --chart-2: oklch(0.556 0 0);
+  --chart-3: oklch(0.439 0 0);
+  --chart-4: oklch(0.371 0 0);
+  --chart-5: oklch(0.269 0 0);
+  --sidebar: oklch(0.205 0 0);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.556 0 0);
+}
+
+.dashboard-root {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  background-color: var(--background);
+  color: var(--foreground);
+}
+
+.dashboard-root [data-theme-preset]:not([data-theme-preset="default"]) .shadow-2xs,
+.dashboard-root[data-theme-preset]:not([data-theme-preset="default"]) .shadow-2xs {
+  box-shadow: var(--shadow-2xs);
+}
+.dashboard-root [data-theme-preset]:not([data-theme-preset="default"]) .shadow-xs,
+.dashboard-root[data-theme-preset]:not([data-theme-preset="default"]) .shadow-xs {
+  box-shadow: var(--shadow-xs);
+}
+.dashboard-root [data-theme-preset]:not([data-theme-preset="default"]) .shadow-sm,
+.dashboard-root[data-theme-preset]:not([data-theme-preset="default"]) .shadow-sm {
+  box-shadow: var(--shadow-sm);
+}
+.dashboard-root [data-theme-preset]:not([data-theme-preset="default"]) .shadow,
+.dashboard-root[data-theme-preset]:not([data-theme-preset="default"]) .shadow {
+  box-shadow: var(--shadow);
+}
+.dashboard-root [data-theme-preset]:not([data-theme-preset="default"]) .shadow-md,
+.dashboard-root[data-theme-preset]:not([data-theme-preset="default"]) .shadow-md {
+  box-shadow: var(--shadow-md);
+}
+.dashboard-root [data-theme-preset]:not([data-theme-preset="default"]) .shadow-lg,
+.dashboard-root[data-theme-preset]:not([data-theme-preset="default"]) .shadow-lg {
+  box-shadow: var(--shadow-lg);
+}
+.dashboard-root [data-theme-preset]:not([data-theme-preset="default"]) .shadow-xl,
+.dashboard-root[data-theme-preset]:not([data-theme-preset="default"]) .shadow-xl {
+  box-shadow: var(--shadow-xl);
+}
+.dashboard-root [data-theme-preset]:not([data-theme-preset="default"]) .shadow-2xl,
+.dashboard-root[data-theme-preset]:not([data-theme-preset="default"]) .shadow-2xl {
+  box-shadow: var(--shadow-2xl);
+}
+
+.dashboard-root[data-font="inter"] { --font-sans: var(--font-inter); }
+.dashboard-root[data-font="notoSans"] { --font-sans: var(--font-noto-sans); }
+.dashboard-root[data-font="nunitoSans"] { --font-sans: var(--font-nunito-sans); }
+.dashboard-root[data-font="figtree"] { --font-sans: var(--font-figtree); }
+.dashboard-root[data-font="roboto"] { --font-sans: var(--font-roboto); }
+.dashboard-root[data-font="geist"] { --font-sans: var(--font-geist); }
+.dashboard-root[data-font="raleway"] { --font-sans: var(--font-raleway); }
+.dashboard-root[data-font="dmSans"] { --font-sans: var(--font-dm-sans); }
+.dashboard-root[data-font="publicSans"] { --font-sans: var(--font-public-sans); }
+.dashboard-root[data-font="outfit"] { --font-sans: var(--font-outfit); }
+.dashboard-root[data-font="geistMono"] { --font-sans: var(--font-geist-mono); }
+.dashboard-root[data-font="geistPixelSquare"] { --font-sans: var(--font-geist-pixel-square); }
+.dashboard-root[data-font="jetBrainsMono"] { --font-sans: var(--font-jetbrains-mono); }
+.dashboard-root[data-font="notoSerif"] { --font-sans: var(--font-noto-serif); }
+.dashboard-root[data-font="robotoSlab"] { --font-sans: var(--font-roboto-slab); }
+.dashboard-root[data-font="merriweather"] { --font-sans: var(--font-merriweather); }
+.dashboard-root[data-font="lora"] { --font-sans: var(--font-lora); }
+.dashboard-root[data-font="playfairDisplay"] { --font-sans: var(--font-playfair-display); }
+
+.dashboard-root * {
+  border-color: var(--border);
+}
+
+.dashboard-root[data-content-layout="centered"] > * {
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
+  max-width: 1536px;
+}

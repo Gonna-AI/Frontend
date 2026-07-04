@@ -1,6 +1,6 @@
 
 import { addDays, format } from "date-fns";
-import { Home, Receipt, Sparkles, Zap } from "lucide-react";
+import { Home, Receipt, Sparkles, Zap } from "lucide-react-dash";
 import { siApple, siMastercard } from "simple-icons";
 
 import { SimpleIcon } from "@/dashboard/components/simple-icon";

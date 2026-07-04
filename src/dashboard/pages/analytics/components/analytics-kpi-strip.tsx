@@ -1,4 +1,4 @@
-import { ArrowDownRight, ArrowUpRight, MoreHorizontal as Ellipsis } from "lucide-react";
+import { ArrowDownRight, ArrowUpRight, Ellipsis } from "lucide-react-dash";
 
 import { Badge } from "@/components/dashboard-ui/badge";
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/dashboard-ui/card";

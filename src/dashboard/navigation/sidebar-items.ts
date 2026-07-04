@@ -1,4 +1,25 @@
-import { Banknote, Bot, Calendar, BarChart2 as ChartBar, CheckSquare, Fingerprint, Forklift, Gauge, GraduationCap, Kanban, LayoutDashboard, ListTodo, Lock, type LucideIcon, Mail, MessageSquare, ReceiptText, Server, ShoppingBag, ArrowUpRight as SquareArrowUpRight, Users } from "lucide-react";
+import {
+  Banknote,
+  Calendar,
+  ChartBar,
+  CheckSquare,
+  Fingerprint,
+  Forklift,
+  Gauge,
+  GraduationCap,
+  Kanban,
+  LayoutDashboard,
+  ListTodo,
+  Lock,
+  type LucideIcon,
+  Mail,
+  MessageSquare,
+  ReceiptText,
+  Server,
+  ShoppingBag,
+  SquareArrowUpRight,
+  Users,
+} from "lucide-react-dash";
 
 export type NavBadge = "new" | "soon";
 
@@ -39,18 +60,6 @@ export interface NavGroup {
 }
 
 export const sidebarItems: NavGroup[] = [
-  {
-    id: 0,
-    label: "AI",
-    items: [
-      {
-        id: "ai-agent",
-        title: "AI Agent",
-        url: "/dashboard/ai",
-        icon: Bot,
-      },
-    ],
-  },
   {
     id: 1,
     label: "Dashboards",
@@ -168,9 +177,13 @@ export const sidebarItems: NavGroup[] = [
       {
         id: "authentication",
         title: "Authentication",
-        url: "/login",
         icon: Fingerprint,
-        newTab: true,
+        subItems: [
+          { id: "auth-login-v1", title: "Login v1", url: "/auth/v1/login", newTab: true },
+          { id: "auth-login-v2", title: "Login v2", url: "/auth/v2/login", newTab: true },
+          { id: "auth-register-v1", title: "Register v1", url: "/auth/v1/register", newTab: true },
+          { id: "auth-register-v2", title: "Register v2", url: "/auth/v2/register", newTab: true },
+        ],
       },
     ],
   },

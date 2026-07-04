@@ -2,7 +2,7 @@ import * as React from "react"
 
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/dashboard-ui/button"
-import { ArrowDownIcon } from "lucide-react"
+import { ArrowDownIcon } from "lucide-react-dash"
 
 interface MessageScrollerContextValue {
   viewportRef: React.RefObject<HTMLDivElement>
@@ -67,15 +67,19 @@ function MessageScrollerProvider({
   )
 }
 
-function MessageScroller({ className, ...props }: React.ComponentProps<"div">) {
-  return (
+const MessageScroller = React.forwardRef<HTMLDivElement, React.ComponentProps<"div">>(
+  ({ className, ...props }, ref) => {
+    return (
     <div
+      ref={ref}
       data-slot="message-scroller"
       className={cn("group/message-scroller relative flex size-full min-h-0 flex-col overflow-hidden", className)}
       {...props}
     />
-  )
-}
+    )
+  }
+)
+MessageScroller.displayName = "MessageScroller"
 
 function MessageScrollerViewport({ className, ...props }: React.ComponentProps<"div">) {
   const { viewportRef } = useMessageScroller()
@@ -93,21 +97,23 @@ function MessageScrollerContent({ className, ...props }: React.ComponentProps<"d
   return <div data-slot="message-scroller-content" className={cn("flex h-max min-h-full flex-col gap-6", className)} {...props} />
 }
 
-function MessageScrollerItem({
-  className,
+const MessageScrollerItem = React.forwardRef<HTMLDivElement, React.ComponentProps<"div"> & { scrollAnchor?: boolean; messageId?: string }>(
+  ({ className,
   scrollAnchor: _scrollAnchor = false,
   messageId,
-  ...props
-}: React.ComponentProps<"div"> & { scrollAnchor?: boolean; messageId?: string }) {
-  return (
+  ...props }, ref) => {
+    return (
     <div
+      ref={ref}
       data-slot="message-scroller-item"
       data-message-id={messageId}
       className={cn("min-w-0 shrink-0", className)}
       {...props}
     />
-  )
-}
+    )
+  }
+)
+MessageScrollerItem.displayName = "MessageScrollerItem"
 
 function MessageScrollerButton({
   direction = "end",

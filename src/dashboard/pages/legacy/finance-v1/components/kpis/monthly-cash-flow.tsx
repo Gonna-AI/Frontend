@@ -1,5 +1,5 @@
 
-import { Calendar, TrendingUp } from "lucide-react";
+import { Calendar, TrendingUp } from "lucide-react-dash";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/dashboard-ui/card";
 import { Separator } from "@/components/dashboard-ui/separator";

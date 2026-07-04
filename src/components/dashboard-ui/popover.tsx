@@ -10,11 +10,13 @@ function Popover({
   return <PopoverPrimitive.Root data-slot="popover" {...props} />
 }
 
-function PopoverTrigger({
-  ...props
-}: React.ComponentProps<typeof PopoverPrimitive.Trigger>) {
-  return <PopoverPrimitive.Trigger data-slot="popover-trigger" {...props} />
-}
+const PopoverTrigger = React.forwardRef<
+  React.ElementRef<typeof PopoverPrimitive.Trigger>,
+  React.ComponentProps<typeof PopoverPrimitive.Trigger>
+>(({ ...props }, ref) => {
+  return <PopoverPrimitive.Trigger ref={ref} data-slot="popover-trigger" {...props} />
+})
+PopoverTrigger.displayName = "PopoverTrigger"
 
 function PopoverContent({
   className,
@@ -44,38 +46,48 @@ function PopoverAnchor({
   return <PopoverPrimitive.Anchor data-slot="popover-anchor" {...props} />
 }
 
-function PopoverHeader({ className, ...props }: React.ComponentProps<"div">) {
-  return (
+const PopoverHeader = React.forwardRef<HTMLDivElement, React.ComponentProps<"div">>(
+  ({ className, ...props }, ref) => {
+    return (
     <div
+      ref={ref}
       data-slot="popover-header"
       className={cn("flex flex-col gap-0.5 text-sm", className)}
       {...props}
     />
-  )
-}
+    )
+  }
+)
+PopoverHeader.displayName = "PopoverHeader"
 
-function PopoverTitle({ className, ...props }: React.ComponentProps<"h2">) {
-  return (
+const PopoverTitle = React.forwardRef<HTMLDivElement, React.ComponentProps<"h2">>(
+  ({ className, ...props }, ref) => {
+    return (
     <div
+      ref={ref}
       data-slot="popover-title"
       className={cn("font-medium", className)}
       {...props}
     />
-  )
-}
+    )
+  }
+)
+PopoverTitle.displayName = "PopoverTitle"
 
-function PopoverDescription({
-  className,
-  ...props
-}: React.ComponentProps<"p">) {
-  return (
+const PopoverDescription = React.forwardRef<HTMLParagraphElement, React.ComponentProps<"p">>(
+  ({ className,
+  ...props }, ref) => {
+    return (
     <p
+      ref={ref}
       data-slot="popover-description"
       className={cn("text-muted-foreground", className)}
       {...props}
     />
-  )
-}
+    )
+  }
+)
+PopoverDescription.displayName = "PopoverDescription"
 
 export {
   Popover,

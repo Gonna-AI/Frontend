@@ -13,7 +13,7 @@ import {
   type SortingState,
   useReactTable,
 } from "@tanstack/react-table";
-import { ArrowUpDown, ArrowUpRight, Download, MoreHorizontal } from "lucide-react";
+import { ArrowUpDown, ArrowUpRight, Download, MoreHorizontal } from "lucide-react-dash";
 
 import { Button } from "@/components/dashboard-ui/button";
 import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/dashboard-ui/card";

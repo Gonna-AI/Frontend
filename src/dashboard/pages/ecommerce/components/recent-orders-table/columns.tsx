@@ -1,6 +1,6 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import { format, parseISO } from "date-fns";
-import { MoreHorizontal } from "lucide-react";
+import { MoreHorizontal } from "lucide-react-dash";
 
 import { Badge } from "@/components/dashboard-ui/badge";
 import { Button } from "@/components/dashboard-ui/button";

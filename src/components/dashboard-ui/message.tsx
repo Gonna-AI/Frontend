@@ -2,23 +2,27 @@ import * as React from "react"
 
 import { cn } from "@/lib/utils"
 
-function MessageGroup({ className, ...props }: React.ComponentProps<"div">) {
-  return (
+const MessageGroup = React.forwardRef<HTMLDivElement, React.ComponentProps<"div">>(
+  ({ className, ...props }, ref) => {
+    return (
     <div
+      ref={ref}
       data-slot="message-group"
       className={cn("flex min-w-0 flex-col gap-2", className)}
       {...props}
     />
-  )
-}
+    )
+  }
+)
+MessageGroup.displayName = "MessageGroup"
 
-function Message({
-  className,
+const Message = React.forwardRef<HTMLDivElement, React.ComponentProps<"div"> & { align?: "start" | "end" }>(
+  ({ className,
   align = "start",
-  ...props
-}: React.ComponentProps<"div"> & { align?: "start" | "end" }) {
-  return (
+  ...props }, ref) => {
+    return (
     <div
+      ref={ref}
       data-slot="message"
       data-align={align}
       className={cn(
@@ -27,12 +31,16 @@ function Message({
       )}
       {...props}
     />
-  )
-}
+    )
+  }
+)
+Message.displayName = "Message"
 
-function MessageAvatar({ className, ...props }: React.ComponentProps<"div">) {
-  return (
+const MessageAvatar = React.forwardRef<HTMLDivElement, React.ComponentProps<"div">>(
+  ({ className, ...props }, ref) => {
+    return (
     <div
+      ref={ref}
       data-slot="message-avatar"
       className={cn(
         "flex w-fit min-w-8 shrink-0 items-center justify-center self-end overflow-hidden rounded-full bg-muted group-has-data-[slot=message-footer]/message:-translate-y-8",
@@ -40,12 +48,16 @@ function MessageAvatar({ className, ...props }: React.ComponentProps<"div">) {
       )}
       {...props}
     />
-  )
-}
+    )
+  }
+)
+MessageAvatar.displayName = "MessageAvatar"
 
-function MessageContent({ className, ...props }: React.ComponentProps<"div">) {
-  return (
+const MessageContent = React.forwardRef<HTMLDivElement, React.ComponentProps<"div">>(
+  ({ className, ...props }, ref) => {
+    return (
     <div
+      ref={ref}
       data-slot="message-content"
       className={cn(
         "flex w-full min-w-0 flex-col gap-2.5 wrap-break-word group-data-[align=end]/message:*:data-slot:self-end",
@@ -53,12 +65,16 @@ function MessageContent({ className, ...props }: React.ComponentProps<"div">) {
       )}
       {...props}
     />
-  )
-}
+    )
+  }
+)
+MessageContent.displayName = "MessageContent"
 
-function MessageHeader({ className, ...props }: React.ComponentProps<"div">) {
-  return (
+const MessageHeader = React.forwardRef<HTMLDivElement, React.ComponentProps<"div">>(
+  ({ className, ...props }, ref) => {
+    return (
     <div
+      ref={ref}
       data-slot="message-header"
       className={cn(
         "flex max-w-full min-w-0 items-center px-3 text-xs font-medium text-muted-foreground group-has-data-[variant=ghost]/message:px-0",
@@ -66,12 +82,16 @@ function MessageHeader({ className, ...props }: React.ComponentProps<"div">) {
       )}
       {...props}
     />
-  )
-}
+    )
+  }
+)
+MessageHeader.displayName = "MessageHeader"
 
-function MessageFooter({ className, ...props }: React.ComponentProps<"div">) {
-  return (
+const MessageFooter = React.forwardRef<HTMLDivElement, React.ComponentProps<"div">>(
+  ({ className, ...props }, ref) => {
+    return (
     <div
+      ref={ref}
       data-slot="message-footer"
       className={cn(
         "flex max-w-full min-w-0 items-center px-3 text-xs font-medium text-muted-foreground group-has-data-[variant=ghost]/message:px-0 group-data-[align=end]/message:justify-end",
@@ -79,8 +99,10 @@ function MessageFooter({ className, ...props }: React.ComponentProps<"div">) {
       )}
       {...props}
     />
-  )
-}
+    )
+  }
+)
+MessageFooter.displayName = "MessageFooter"
 
 export {
   MessageGroup,

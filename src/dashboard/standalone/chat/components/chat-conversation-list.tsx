@@ -1,5 +1,5 @@
 
-import { ChevronDown, Filter, PanelRightClose, PanelRightOpen, Pin } from "lucide-react";
+import { ChevronDown, Filter, PanelRightClose, PanelRightOpen, Pin } from "lucide-react-dash";
 
 import { Avatar, AvatarBadge, AvatarFallback } from "@/components/dashboard-ui/avatar";
 import { Button } from "@/components/dashboard-ui/button";

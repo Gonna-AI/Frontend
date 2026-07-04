@@ -1,10 +1,13 @@
+import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
 
 import { cn } from "@/lib/utils"
 
-function Empty({ className, ...props }: React.ComponentProps<"div">) {
-  return (
+const Empty = React.forwardRef<HTMLDivElement, React.ComponentProps<"div">>(
+  ({ className, ...props }, ref) => {
+    return (
     <div
+      ref={ref}
       data-slot="empty"
       className={cn(
         "flex w-full min-w-0 flex-1 flex-col items-center justify-center gap-4 rounded-xl border-dashed p-6 text-center text-balance",
@@ -12,18 +15,24 @@ function Empty({ className, ...props }: React.ComponentProps<"div">) {
       )}
       {...props}
     />
-  )
-}
+    )
+  }
+)
+Empty.displayName = "Empty"
 
-function EmptyHeader({ className, ...props }: React.ComponentProps<"div">) {
-  return (
+const EmptyHeader = React.forwardRef<HTMLDivElement, React.ComponentProps<"div">>(
+  ({ className, ...props }, ref) => {
+    return (
     <div
+      ref={ref}
       data-slot="empty-header"
       className={cn("flex max-w-sm flex-col items-center gap-2", className)}
       {...props}
     />
-  )
-}
+    )
+  }
+)
+EmptyHeader.displayName = "EmptyHeader"
 
 const emptyMediaVariants = cva(
   "mb-2 flex shrink-0 items-center justify-center [&_svg]:pointer-events-none [&_svg]:shrink-0",
@@ -40,24 +49,28 @@ const emptyMediaVariants = cva(
   }
 )
 
-function EmptyMedia({
-  className,
+const EmptyMedia = React.forwardRef<HTMLDivElement, React.ComponentProps<"div"> & VariantProps<typeof emptyMediaVariants>>(
+  ({ className,
   variant = "default",
-  ...props
-}: React.ComponentProps<"div"> & VariantProps<typeof emptyMediaVariants>) {
-  return (
+  ...props }, ref) => {
+    return (
     <div
+      ref={ref}
       data-slot="empty-icon"
       data-variant={variant}
       className={cn(emptyMediaVariants({ variant, className }))}
       {...props}
     />
-  )
-}
+    )
+  }
+)
+EmptyMedia.displayName = "EmptyMedia"
 
-function EmptyTitle({ className, ...props }: React.ComponentProps<"div">) {
-  return (
+const EmptyTitle = React.forwardRef<HTMLDivElement, React.ComponentProps<"div">>(
+  ({ className, ...props }, ref) => {
+    return (
     <div
+      ref={ref}
       data-slot="empty-title"
       className={cn(
         "font-heading text-sm font-medium tracking-tight",
@@ -65,12 +78,16 @@ function EmptyTitle({ className, ...props }: React.ComponentProps<"div">) {
       )}
       {...props}
     />
-  )
-}
+    )
+  }
+)
+EmptyTitle.displayName = "EmptyTitle"
 
-function EmptyDescription({ className, ...props }: React.ComponentProps<"p">) {
-  return (
+const EmptyDescription = React.forwardRef<HTMLDivElement, React.ComponentProps<"p">>(
+  ({ className, ...props }, ref) => {
+    return (
     <div
+      ref={ref}
       data-slot="empty-description"
       className={cn(
         "text-sm/relaxed text-muted-foreground [&>a]:underline [&>a]:underline-offset-4 [&>a:hover]:text-primary",
@@ -78,12 +95,16 @@ function EmptyDescription({ className, ...props }: React.ComponentProps<"p">) {
       )}
       {...props}
     />
-  )
-}
+    )
+  }
+)
+EmptyDescription.displayName = "EmptyDescription"
 
-function EmptyContent({ className, ...props }: React.ComponentProps<"div">) {
-  return (
+const EmptyContent = React.forwardRef<HTMLDivElement, React.ComponentProps<"div">>(
+  ({ className, ...props }, ref) => {
+    return (
     <div
+      ref={ref}
       data-slot="empty-content"
       className={cn(
         "flex w-full max-w-sm min-w-0 flex-col items-center gap-2.5 text-sm text-balance",
@@ -91,8 +112,10 @@ function EmptyContent({ className, ...props }: React.ComponentProps<"div">) {
       )}
       {...props}
     />
-  )
-}
+    )
+  }
+)
+EmptyContent.displayName = "EmptyContent"
 
 export {
   Empty,

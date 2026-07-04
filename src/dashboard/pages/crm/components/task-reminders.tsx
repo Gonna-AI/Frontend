@@ -1,4 +1,4 @@
-import { CalendarDays, CalendarRange } from "lucide-react";
+import { CalendarDays, CalendarRange } from "lucide-react-dash";
 
 import { Button } from "@/components/dashboard-ui/button";
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/dashboard-ui/card";

@@ -1,4 +1,20 @@
-import { AlertTriangleIcon, ArrowUp, Ban, CheckCircle2, Droplets, Flame, Forklift, type LucideIcon, PackageCheck, PenLine, ShieldCheck, Snowflake, Star, Thermometer, Truck } from "lucide-react";
+import {
+  AlertTriangleIcon,
+  ArrowUp,
+  Ban,
+  CheckCircle2,
+  Droplets,
+  Flame,
+  Forklift,
+  type LucideIcon,
+  PackageCheck,
+  PenLine,
+  ShieldCheck,
+  Snowflake,
+  Star,
+  Thermometer,
+  Truck,
+} from "lucide-react-dash";
 
 export type ShipmentStatus =
   | "Scheduled"

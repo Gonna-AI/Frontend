@@ -1,4 +1,4 @@
-import { AlertTriangleIcon, Copy, Plane, Ship, Star, Truck } from "lucide-react";
+import { AlertTriangleIcon, Copy, Plane, Ship, Star, Truck } from "lucide-react-dash";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/dashboard-ui/alert";
 import { Avatar, AvatarFallback } from "@/components/dashboard-ui/avatar";

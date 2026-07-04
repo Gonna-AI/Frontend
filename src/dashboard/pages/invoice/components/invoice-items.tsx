@@ -14,7 +14,7 @@ import {
   useSortable,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
-import { GripVertical, Plus, Trash2 } from "lucide-react";
+import { GripVertical, Plus, Trash2 } from "lucide-react-dash";
 import type { UseFormRegister } from "react-hook-form";
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 

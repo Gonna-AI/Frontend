@@ -3,7 +3,7 @@
 import { useSortable } from "@dnd-kit/sortable";
 import type { ColumnDef, Row } from "@tanstack/react-table";
 import { flexRender } from "@tanstack/react-table";
-import { CheckCircle2 as CircleCheckIcon, MoreVertical as EllipsisVerticalIcon, GripVerticalIcon, LoaderIcon, TrendingUpIcon } from "lucide-react";
+import { CircleCheckIcon, EllipsisVerticalIcon, GripVerticalIcon, LoaderIcon, TrendingUpIcon } from "lucide-react-dash";
 import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
 import { toast } from "sonner";
 

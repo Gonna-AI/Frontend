@@ -1,4 +1,4 @@
-import { MoreHorizontal as Ellipsis } from "lucide-react";
+import { Ellipsis } from "lucide-react-dash";
 
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/dashboard-ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/dashboard-ui/table";

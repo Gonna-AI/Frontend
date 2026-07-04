@@ -39,9 +39,11 @@ function Marker({
   )
 }
 
-function MarkerIcon({ className, ...props }: React.ComponentProps<"span">) {
-  return (
+const MarkerIcon = React.forwardRef<HTMLSpanElement, React.ComponentProps<"span">>(
+  ({ className, ...props }, ref) => {
+    return (
     <span
+      ref={ref}
       data-slot="marker-icon"
       aria-hidden="true"
       className={cn(
@@ -50,12 +52,16 @@ function MarkerIcon({ className, ...props }: React.ComponentProps<"span">) {
       )}
       {...props}
     />
-  )
-}
+    )
+  }
+)
+MarkerIcon.displayName = "MarkerIcon"
 
-function MarkerContent({ className, ...props }: React.ComponentProps<"span">) {
-  return (
+const MarkerContent = React.forwardRef<HTMLSpanElement, React.ComponentProps<"span">>(
+  ({ className, ...props }, ref) => {
+    return (
     <span
+      ref={ref}
       data-slot="marker-content"
       className={cn(
         "min-w-0 wrap-break-word group-data-[variant=separator]/marker:flex-none group-data-[variant=separator]/marker:text-center *:[a]:underline *:[a]:underline-offset-3 *:[a]:hover:text-foreground",
@@ -63,7 +69,9 @@ function MarkerContent({ className, ...props }: React.ComponentProps<"span">) {
       )}
       {...props}
     />
-  )
-}
+    )
+  }
+)
+MarkerContent.displayName = "MarkerContent"
 
 export { Marker, MarkerIcon, MarkerContent, markerVariants }

@@ -8,7 +8,7 @@ import listPlugin from "@fullcalendar/react/list";
 import multiMonthPlugin from "@fullcalendar/react/multimonth";
 import timeGridPlugin from "@fullcalendar/react/timegrid";
 import { differenceInCalendarDays, endOfMonth, format, startOfMonth } from "date-fns";
-import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Plus, XIcon } from "lucide-react";
+import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Plus, XIcon } from "lucide-react-dash";
 
 import { EventCalendarViews } from "@/dashboard/components/calendar/event-calendar-views";
 import { Button } from "@/components/dashboard-ui/button";

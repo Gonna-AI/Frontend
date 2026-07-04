@@ -1,5 +1,5 @@
 import { format } from "date-fns";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react-dash";
 
 import { Badge } from "@/components/dashboard-ui/badge";
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/dashboard-ui/card";

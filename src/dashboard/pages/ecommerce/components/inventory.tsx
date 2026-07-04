@@ -1,5 +1,5 @@
 
-import { ArrowUpRight, PackageCheck, PackageX, AlertTriangle as TriangleAlert } from "lucide-react";
+import { ArrowUpRight, PackageCheck, PackageX, TriangleAlert } from "lucide-react-dash";
 import { Label, Pie, PieChart } from "recharts";
 
 import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/dashboard-ui/card";

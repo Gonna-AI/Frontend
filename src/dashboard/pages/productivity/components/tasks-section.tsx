@@ -1,7 +1,7 @@
 
 import * as React from "react";
 
-import { Calendar as Calendar1, Plus } from "lucide-react";
+import { Calendar1, Plus } from "lucide-react-dash";
 
 import { Badge } from "@/components/dashboard-ui/badge";
 import { Button } from "@/components/dashboard-ui/button";

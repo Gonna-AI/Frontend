@@ -1,7 +1,20 @@
 const svgToDataUri = require("mini-svg-data-uri");
-const {
-	default: flattenColorPalette,
-} = require("tailwindcss/lib/util/flattenColorPalette");
+
+// Vendored equivalent of the old tailwindcss/lib/util/flattenColorPalette
+// helper (removed from the package internals in Tailwind v4) — flattens a
+// nested color object like { blue: { 500: '#...' } } into { 'blue-500': '#...' }.
+function flattenColorPalette(colors) {
+	return Object.assign(
+		{},
+		...Object.entries(colors ?? {}).flatMap(([color, values]) =>
+			typeof values === "object"
+				? Object.entries(values).map(([key, value]) => ({
+						[`${color}-${key}`]: value,
+					}))
+				: [{ [color]: values }]
+		)
+	);
+}
 
 /** @type {import('tailwindcss').Config} */
 module.exports = {
@@ -14,51 +27,11 @@ module.exports = {
 				satoshi: ['Satoshi', 'sans-serif'],
 				urbanist: ['Satoshi', 'sans-serif'], // fallback for existing classes
 			},
-			colors: {
-				background: 'hsl(var(--background))',
-				foreground: 'hsl(var(--foreground))',
-				card: {
-					DEFAULT: 'hsl(var(--card))',
-					foreground: 'hsl(var(--card-foreground))'
-				},
-				popover: {
-					DEFAULT: 'hsl(var(--popover))',
-					foreground: 'hsl(var(--popover-foreground))'
-				},
-				primary: {
-					DEFAULT: 'hsl(var(--primary))',
-					foreground: 'hsl(var(--primary-foreground))'
-				},
-				secondary: {
-					DEFAULT: 'hsl(var(--secondary))',
-					foreground: 'hsl(var(--secondary-foreground))'
-				},
-				muted: {
-					DEFAULT: 'hsl(var(--muted))',
-					foreground: 'hsl(var(--muted-foreground))'
-				},
-				accent: {
-					DEFAULT: 'hsl(var(--accent))',
-					foreground: 'hsl(var(--accent-foreground))'
-				},
-				destructive: {
-					DEFAULT: 'hsl(var(--destructive))',
-					foreground: 'hsl(var(--destructive-foreground))'
-				},
-				border: 'hsl(var(--border))',
-				input: 'hsl(var(--input))',
-				ring: 'hsl(var(--ring))',
-				sidebar: {
-					DEFAULT: 'hsl(var(--sidebar-background))',
-					foreground: 'hsl(var(--sidebar-foreground))',
-					primary: 'hsl(var(--sidebar-primary))',
-					'primary-foreground': 'hsl(var(--sidebar-primary-foreground))',
-					accent: 'hsl(var(--sidebar-accent))',
-					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
-					border: 'hsl(var(--sidebar-border))',
-					ring: 'hsl(var(--sidebar-ring))'
-				}
-			},
+			// Color tokens (background, primary, sidebar, etc.) are now defined
+			// natively in src/index.css via an `@theme` block instead of here —
+			// Tailwind v4's CSS-first theme lets the dashboard override the
+			// underlying CSS variables per-scope (see .dashboard-root) without
+			// needing a second Tailwind config.
 			borderRadius: {
 				lg: 'var(--radius)',
 				md: 'calc(var(--radius) - 2px)',
@@ -103,10 +76,10 @@ module.exports = {
 	},
 	plugins: [
 		addVariablesForColors,
-		function ({ matchUtilities, theme }: any) {
+		function ({ matchUtilities, theme }) {
 			matchUtilities(
 				{
-					"bg-dot-thick": (value: any) => ({
+					"bg-dot-thick": (value) => ({
 						backgroundImage: `url("${svgToDataUri(
 							`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="16" height="16" fill="none"><circle fill="${value}" id="pattern-circle" cx="10" cy="10" r="2.5"></circle></svg>`
 						)}")`,
@@ -119,7 +92,7 @@ module.exports = {
 };
 
 // This plugin adds each Tailwind color as a global CSS variable, e.g. var(--gray-200).
-function addVariablesForColors({ addBase, theme }: any) {
+function addVariablesForColors({ addBase, theme }) {
 	let allColors = flattenColorPalette(theme("colors"));
 	let newVars = Object.fromEntries(
 		Object.entries(allColors).map(([key, val]) => [`--${key}`, val])

@@ -1,5 +1,5 @@
 
-import { Download } from "lucide-react";
+import { Download } from "lucide-react-dash";
 
 import { Button } from "@/components/dashboard-ui/button";
 import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/dashboard-ui/card";

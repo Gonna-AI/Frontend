@@ -1,4 +1,4 @@
-import { Plane, Search, Ship, SlidersHorizontal, Truck } from "lucide-react";
+import { Plane, Search, Ship, SlidersHorizontal, Truck } from "lucide-react-dash";
 
 import { Button } from "@/components/dashboard-ui/button";
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/dashboard-ui/card";

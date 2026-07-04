@@ -1,5 +1,5 @@
 import { format } from "date-fns";
-import { Settings2 } from "lucide-react";
+import { Settings2 } from "lucide-react-dash";
 
 import { Button } from "@/components/dashboard-ui/button";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/dashboard-ui/select";

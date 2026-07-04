@@ -2,7 +2,7 @@
 import * as React from "react";
 
 import { eachDayOfInterval, format, startOfDay, subDays } from "date-fns";
-import { Check, ChevronsUpDown, Download } from "lucide-react";
+import { Check, ChevronsUpDown, Download } from "lucide-react-dash";
 import type { DateRange } from "react-day-picker";
 import { Area, ComposedChart, XAxis, YAxis } from "recharts";
 

@@ -1,5 +1,5 @@
 
-import { Clock } from "lucide-react";
+import { Clock } from "lucide-react-dash";
 import { Funnel, FunnelChart, LabelList } from "recharts";
 
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/dashboard-ui/card";

@@ -1,6 +1,6 @@
 
 import { Toaster as Sonner, type ToasterProps } from "sonner"
-import { CheckCircle2 as CircleCheckIcon, InfoIcon, AlertTriangle as TriangleAlertIcon, XOctagon as OctagonXIcon, Loader2Icon } from "lucide-react"
+import { CircleCheckIcon, InfoIcon, TriangleAlertIcon, OctagonXIcon, Loader2Icon } from "lucide-react-dash"
 import { useTheme } from "@/hooks/useTheme"
 
 const Toaster = ({ ...props }: ToasterProps) => {
