@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 
+import { format } from "date-fns";
+
 import {
   fetchCompanies,
   fetchTeamMembers,
@@ -40,11 +42,10 @@ function teamMembersToRows(members: PipelineTeamMemberRow[], companies: Pipeline
         company?.name ?? "ClerkTree",
         ...(member.is_customer_contact ? [] : ["Kostencheck Copilot"]),
       ],
-      joinedDate: new Date(member.created_at).toLocaleDateString("de-DE", {
-        day: "2-digit",
-        month: "short",
-        year: "numeric",
-      }),
+      // Must match the "dd MMM yyyy, h:mm a" format users-columns.tsx expects when it re-parses
+      // this string for sorting (accessorFn on the joinedDate column) — a mismatched format
+      // silently produces an Invalid Date there.
+      joinedDate: format(new Date(member.created_at), "dd MMM yyyy, h:mm a"),
       lastActive: 0,
     };
   });
