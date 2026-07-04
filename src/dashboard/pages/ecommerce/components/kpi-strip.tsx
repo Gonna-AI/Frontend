@@ -1,10 +1,13 @@
 
+import { useEffect, useState } from "react";
+
 import { format, parse } from "date-fns";
 import { ArrowUpRight, DollarSign, PackageCheck, ReceiptText, RotateCcw, ShoppingBag, Users } from "lucide-react-dash";
 import { Area, Bar, CartesianGrid, ComposedChart, XAxis, YAxis } from "recharts";
 
 import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/dashboard-ui/card";
 import { type ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/dashboard-ui/chart";
+import { fetchAllDeviations, subscribeToTable } from "@/dashboard/lib/pipelineClient";
 
 const revenueBucketRanges = ["01-05", "06-10", "11-15", "16-20", "21-25", "26-31"] as const;
 const profitMultipliers = [0.24, 0.28, 0.26] as const;
@@ -85,6 +88,30 @@ function formatCurrencyTooltipValue(value: unknown) {
 }
 
 export function KpiStrip() {
+  const [deviationCount, setDeviationCount] = useState<number | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const load = () => {
+      fetchAllDeviations()
+        .then((rows) => {
+          if (!cancelled) setDeviationCount(rows.length);
+        })
+        .catch(() => {
+          // Falls back to the static demo count if Supabase is unreachable.
+        });
+    };
+
+    load();
+    const unsubscribe = subscribeToTable("pipeline_deviations", load);
+
+    return () => {
+      cancelled = true;
+      unsubscribe();
+    };
+  }, []);
+
   return (
     <div className="h-full overflow-hidden rounded-xl bg-card ring-1 ring-foreground/10 xl:col-span-12">
       <div>
@@ -166,7 +193,7 @@ export function KpiStrip() {
               <CardHeader>
                 <CardTitle className="font-normal text-sm">Kostencheck-Abweichungen</CardTitle>
                 <CardDescription className="text-3xl text-foreground tabular-nums leading-none tracking-tight">
-                  18
+                  {deviationCount ?? 18}
                 </CardDescription>
                 <CardAction className="grid size-6 place-items-center rounded-sm bg-muted">
                   <RotateCcw className="size-3 text-foreground" />
@@ -174,8 +201,7 @@ export function KpiStrip() {
               </CardHeader>
               <CardContent>
                 <div className="text-sm">
-                  <span className="text-destructive">+0.6%</span>
-                  <span className="text-muted-foreground"> vs last month</span>
+                  <span className="text-muted-foreground">{deviationCount !== null ? "live count, all projects" : "+0.6% vs last month"}</span>
                 </div>
               </CardContent>
             </Card>
