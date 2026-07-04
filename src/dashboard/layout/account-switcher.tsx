@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
-import { BadgeCheck, Bell, Check, CreditCard, LogOut } from "lucide-react-dash";
+import { BadgeCheck, Bell, CreditCard, LogOut } from "lucide-react-dash";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/dashboard-ui/avatar";
 import {
@@ -11,61 +11,41 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/dashboard-ui/dropdown-menu";
-import { cn, getInitials } from "@/lib/utils";
+import { getInitials } from "@/lib/utils";
+import { useAuth } from "@/contexts/AuthContext";
 
-export function AccountSwitcher({
-  users,
-}: {
-  readonly users: ReadonlyArray<{
-    readonly id: string;
-    readonly name: string;
-    readonly email: string;
-    readonly avatar: string;
-    readonly role: string;
-  }>;
-}) {
-  const [activeUser, setActiveUser] = useState(users[0]);
+export function AccountSwitcher() {
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
 
-  if (!activeUser) {
-    return null;
-  }
+  const name = (user?.user_metadata?.full_name as string | undefined)?.trim() || user?.email?.split("@")[0] || "Account";
+  const email = user?.email ?? "";
+  const avatar = (user?.user_metadata?.avatar_url as string | undefined) ?? "";
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate("/login");
+  };
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Avatar className="size-8 rounded-lg">
-          <AvatarImage src={activeUser.avatar || undefined} alt={activeUser.name} />
-          <AvatarFallback>{getInitials(activeUser.name)}</AvatarFallback>
+          <AvatarImage src={avatar || undefined} alt={name} />
+          <AvatarFallback>{getInitials(name)}</AvatarFallback>
         </Avatar>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="min-w-56 space-y-1 rounded-lg" side="bottom" align="end" sideOffset={4}>
-        {users.map((user) => (
-          <DropdownMenuItem
-            key={user.email}
-            className={cn("p-0", user.id === activeUser.id && "bg-accent/50")}
-            aria-current={user.id === activeUser.id ? "true" : undefined}
-            onClick={() => setActiveUser(user)}
-          >
-            <div className="flex w-full items-center gap-2 px-1 py-1.5">
-              <Avatar className="size-9 rounded-lg">
-                <AvatarImage src={user.avatar || undefined} alt={user.name} />
-                <AvatarFallback>{getInitials(user.name)}</AvatarFallback>
-              </Avatar>
-              <div className="grid min-w-0 flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-semibold">{user.name}</span>
-                <span className="truncate text-xs capitalize">{user.role}</span>
-              </div>
-              <span
-                className={cn(
-                  "mr-1 flex size-5 items-center justify-center rounded-full text-primary opacity-0",
-                  user.id === activeUser.id && "opacity-100",
-                )}
-              >
-                <Check aria-hidden="true" />
-              </span>
-            </div>
-          </DropdownMenuItem>
-        ))}
+        <div className="flex w-full items-center gap-2 px-1 py-1.5">
+          <Avatar className="size-9 rounded-lg">
+            <AvatarImage src={avatar || undefined} alt={name} />
+            <AvatarFallback>{getInitials(name)}</AvatarFallback>
+          </Avatar>
+          <div className="grid min-w-0 flex-1 text-left text-sm leading-tight">
+            <span className="truncate font-semibold">{name}</span>
+            <span className="truncate text-muted-foreground text-xs">{email}</span>
+          </div>
+        </div>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
           <DropdownMenuItem>
@@ -82,7 +62,7 @@ export function AccountSwitcher({
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuItem>
+        <DropdownMenuItem onClick={handleSignOut}>
           <LogOut />
           Log out
         </DropdownMenuItem>

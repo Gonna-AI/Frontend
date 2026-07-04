@@ -9,7 +9,6 @@ import { Separator } from "@/components/dashboard-ui/separator";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/dashboard-ui/sidebar";
 import { Toaster } from "@/components/dashboard-ui/sonner";
 import { TooltipProvider } from "@/components/dashboard-ui/tooltip";
-import { users } from "@/dashboard/data/users";
 import { cn } from "@/lib/utils";
 import { usePreferencesStore } from "@/dashboard/store/preferences-store";
 
@@ -78,7 +77,7 @@ export default function DashboardLayout() {
                       <SimpleIcon icon={siGithub} className="fill-primary-foreground" />
                     </a>
                   </Button>
-                  <AccountSwitcher users={users} />
+                  <AccountSwitcher />
                 </div>
               </div>
             </header>
