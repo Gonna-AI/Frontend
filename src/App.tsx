@@ -1,5 +1,5 @@
 import { Suspense } from 'react';
-import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { LanguageProvider } from './contexts/LanguageContext';
 import { AuthProvider } from './contexts/AuthContext';
@@ -32,6 +32,33 @@ const Blog = lazyWithRetry(() => import('./pages/Blog'), 'Blog');
 const BlogPost = lazyWithRetry(() => import('./pages/BlogPost'), 'BlogPost');
 const Bioflow = lazyWithRetry(() => import('./pages/Bioflow'), 'Bioflow');
 const DemoDashboard = lazyWithRetry(() => import('./pages/DemoDashboard'), 'DemoDashboard');
+
+// New shadcn-admin-style dashboard shell
+const DashboardLayout = lazyWithRetry(() => import('./dashboard/layout/DashboardLayout'), 'DashboardLayout');
+const DashboardDefault = lazyWithRetry(() => import('./dashboard/pages/default/page'), 'DashboardDefault');
+const DashboardCrm = lazyWithRetry(() => import('./dashboard/pages/crm/page'), 'DashboardCrm');
+const DashboardFinance = lazyWithRetry(() => import('./dashboard/pages/finance/page'), 'DashboardFinance');
+const DashboardAnalytics = lazyWithRetry(() => import('./dashboard/pages/analytics/page'), 'DashboardAnalytics');
+const DashboardProductivity = lazyWithRetry(() => import('./dashboard/pages/productivity/page'), 'DashboardProductivity');
+const DashboardEcommerce = lazyWithRetry(() => import('./dashboard/pages/ecommerce/page'), 'DashboardEcommerce');
+const DashboardAcademy = lazyWithRetry(() => import('./dashboard/pages/academy/page'), 'DashboardAcademy');
+const DashboardLogistics = lazyWithRetry(() => import('./dashboard/pages/logistics/page'), 'DashboardLogistics');
+const DashboardInfrastructure = lazyWithRetry(() => import('./dashboard/pages/infrastructure/page'), 'DashboardInfrastructure');
+const DashboardMailPreview = lazyWithRetry(() => import('./dashboard/pages/mail/page'), 'DashboardMailPreview');
+const DashboardChatPreview = lazyWithRetry(() => import('./dashboard/pages/chat/page'), 'DashboardChatPreview');
+const DashboardCalendar = lazyWithRetry(() => import('./dashboard/pages/calendar/page'), 'DashboardCalendar');
+const DashboardKanban = lazyWithRetry(() => import('./dashboard/pages/kanban/page'), 'DashboardKanban');
+const DashboardTasks = lazyWithRetry(() => import('./dashboard/pages/tasks/page'), 'DashboardTasks');
+const DashboardInvoice = lazyWithRetry(() => import('./dashboard/pages/invoice/page'), 'DashboardInvoice');
+const DashboardUsers = lazyWithRetry(() => import('./dashboard/pages/users/page'), 'DashboardUsers');
+const DashboardRoles = lazyWithRetry(() => import('./dashboard/pages/roles/page'), 'DashboardRoles');
+const DashboardDefaultV1 = lazyWithRetry(() => import('./dashboard/pages/legacy/default-v1/page'), 'DashboardDefaultV1');
+const DashboardCrmV1 = lazyWithRetry(() => import('./dashboard/pages/legacy/crm-v1/page'), 'DashboardCrmV1');
+const DashboardFinanceV1 = lazyWithRetry(() => import('./dashboard/pages/legacy/finance-v1/page'), 'DashboardFinanceV1');
+const DashboardAnalyticsV1 = lazyWithRetry(() => import('./dashboard/pages/legacy/analytics-v1/page'), 'DashboardAnalyticsV1');
+const DashboardComingSoon = lazyWithRetry(() => import('./dashboard/pages/coming-soon/page'), 'DashboardComingSoon');
+const MailApp = lazyWithRetry(() => import('./dashboard/standalone/mail/MailApp'), 'MailApp');
+const ChatApp = lazyWithRetry(() => import('./dashboard/standalone/chat/ChatApp'), 'ChatApp');
 const UserCall = lazyWithRetry(() => import('./pages/UserCall'), 'UserCall');
 const UserChat = lazyWithRetry(() => import('./pages/UserChat'), 'UserChat');
 const UserVoiceCall = lazyWithRetry(() => import('./pages/UserVoiceCall'), 'UserVoiceCall');
@@ -103,10 +130,53 @@ function App() {
                       </ClientPortalRoute>
                     } />
 
-                    {/* Protected Dashboard */}
+                    {/* Protected Dashboard shell (shadcn-admin style) */}
                     <Route path="/dashboard" element={
                       <PrivateRoute>
+                        <DashboardLayout />
+                      </PrivateRoute>
+                    }>
+                      <Route index element={<Navigate to="/dashboard/default" replace />} />
+                      <Route path="default" element={<DashboardDefault />} />
+                      <Route path="crm" element={<DashboardCrm />} />
+                      <Route path="finance" element={<DashboardFinance />} />
+                      <Route path="analytics" element={<DashboardAnalytics />} />
+                      <Route path="productivity" element={<DashboardProductivity />} />
+                      <Route path="ecommerce" element={<DashboardEcommerce />} />
+                      <Route path="academy" element={<DashboardAcademy />} />
+                      <Route path="logistics" element={<DashboardLogistics />} />
+                      <Route path="infrastructure" element={<DashboardInfrastructure />} />
+                      <Route path="mail" element={<DashboardMailPreview />} />
+                      <Route path="chat" element={<DashboardChatPreview />} />
+                      <Route path="calendar" element={<DashboardCalendar />} />
+                      <Route path="kanban" element={<DashboardKanban />} />
+                      <Route path="tasks" element={<DashboardTasks />} />
+                      <Route path="invoice" element={<DashboardInvoice />} />
+                      <Route path="users" element={<DashboardUsers />} />
+                      <Route path="roles" element={<DashboardRoles />} />
+                      <Route path="default-v1" element={<DashboardDefaultV1 />} />
+                      <Route path="crm-v1" element={<DashboardCrmV1 />} />
+                      <Route path="finance-v1" element={<DashboardFinanceV1 />} />
+                      <Route path="analytics-v1" element={<DashboardAnalyticsV1 />} />
+                      <Route path="coming-soon" element={<DashboardComingSoon />} />
+                    </Route>
+
+                    {/* AI Agent section — the existing AI receptionist product, folded in as one section */}
+                    <Route path="/dashboard/ai/*" element={
+                      <PrivateRoute>
                         <DemoDashboard />
+                      </PrivateRoute>
+                    } />
+
+                    {/* Standalone full-screen apps embedded in the dashboard via preview iframes */}
+                    <Route path="/mail" element={
+                      <PrivateRoute>
+                        <MailApp />
+                      </PrivateRoute>
+                    } />
+                    <Route path="/chat" element={
+                      <PrivateRoute>
+                        <ChatApp />
                       </PrivateRoute>
                     } />
 
