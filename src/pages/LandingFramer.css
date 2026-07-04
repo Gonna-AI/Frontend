@@ -285,8 +285,8 @@ html.lenis.lenis-stopped {
     inset 0 1px 0 rgba(255, 255, 255, 0.82),
     inset 0 -1px 0 rgba(0, 0, 0, 0.04),
     0 18px 48px rgba(0, 0, 0, 0.12);
-  gap: clamp(10px, 1.1vw, 18px);
-  padding: 10px 18px 10px clamp(24px, 2.2vw, 36px);
+  gap: clamp(8px, 0.9vw, 14px);
+  padding: 6px 10px 6px clamp(18px, 1.7vw, 26px);
 }
 
 .agero-shell-nav {
@@ -306,7 +306,7 @@ html.lenis.lenis-stopped {
 }
 
 .agero-shell-header.is-menu-open .agero-shell-nav {
-  max-width: 920px;
+  max-width: 690px;
   opacity: 1;
   pointer-events: auto;
   transform: translateX(0);
@@ -318,12 +318,12 @@ html.lenis.lenis-stopped {
   color: rgba(19, 19, 19, 0.78);
   display: inline-flex;
   font-family: "Cal Sans", "Inter", system-ui, sans-serif;
-  font-size: clamp(1.45rem, 1.65vw, 2rem);
-  height: 118px;
+  font-size: clamp(1.12rem, 1.16vw, 1.38rem);
+  height: 66px;
   justify-content: center;
   line-height: 1;
-  min-width: clamp(106px, 9vw, 146px);
-  padding: 0 clamp(12px, 1.4vw, 24px);
+  min-width: clamp(88px, 7vw, 112px);
+  padding: 0 clamp(10px, 1vw, 18px);
   text-decoration: none;
   transition:
     background 160ms ease,
@@ -362,7 +362,12 @@ html.lenis.lenis-stopped {
 }
 
 .agero-shell-header.is-menu-open .agero-shell-menu {
-  height: 118px;
+  height: 66px;
+  width: 78px;
+}
+
+.agero-shell-header.is-menu-open .agero-shell-menu span {
+  width: 58px;
 }
 
 .agero-shell-header.is-menu-open .agero-shell-menu span:first-child {
@@ -2823,6 +2828,10 @@ html.lenis.lenis-stopped {
 
   .agero-shell-menu span {
     height: 3px;
+  }
+
+  .agero-shell-header.is-menu-open .agero-shell-menu span {
+    width: 100%;
   }
 
   .agero-shell-header.is-menu-open .agero-shell-menu span:first-child {
