@@ -10,6 +10,7 @@ import './LandingFramer.css';
 import './Contact.css';
 
 const MAP_URL = 'https://www.google.com/maps/search/?api=1&query=Industriestrasse%202%2C%2094315%20Straubing%2C%20Germany';
+const MAP_EMBED_URL = 'https://maps.google.com/maps?q=Industriestrasse%202%2C%2094315%20Straubing%2C%20Germany&z=15&output=embed';
 const CONTACT_VIDEO_SRC = 'https://xlzwfkgurrrspcdyqele.supabase.co/storage/v1/object/public/buck/contactuspagevideo.mp4';
 
 type SubmitStatus = 'idle' | 'success' | 'error';
@@ -125,14 +126,14 @@ export default function Contact() {
 
       <main className="clerktree-contact-page">
         <section className="clerktree-contact-hero-wrap" aria-labelledby="contact-title">
-          <div className="clerktree-contact-hero-media">
-            <ContactHeroVideo src={CONTACT_VIDEO_SRC} />
-          </div>
-
           <div className="clerktree-contact-hero">
             <p className="clerktree-contact-kicker">ClerkTree • {t('contact.sendMsgTitle')}</p>
             <h1 id="contact-title">{t('contact.sendMsgTitle')}</h1>
             <p>{t('contact.subtitle')}</p>
+          </div>
+
+          <div className="clerktree-contact-hero-media">
+            <ContactHeroVideo src={CONTACT_VIDEO_SRC} />
           </div>
         </section>
 
@@ -260,17 +261,18 @@ export default function Contact() {
           <h2 id="contact-location-title">{t('contact.locationTitle')}</h2>
 
           <div className="clerktree-contact-location-grid">
-            <a className="clerktree-contact-map" href={MAP_URL} rel="noopener noreferrer" target="_blank">
-              <div className="clerktree-contact-map-inner">
-                <MapPin size={46} strokeWidth={1.5} />
-                <p>{t('contact.location')}</p>
-                <strong>Industriestrasse 2<br />94315 Straubing</strong>
-              </div>
-              <span>
+            <div className="clerktree-contact-map">
+              <iframe
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                src={MAP_EMBED_URL}
+                title="ClerkTree office map"
+              />
+              <a href={MAP_URL} rel="noopener noreferrer" target="_blank">
                 {t('contact.openMap')}
                 <ArrowUpRight size={18} />
-              </span>
-            </a>
+              </a>
+            </div>
 
             <aside className="clerktree-contact-info-card">
               <ContactInfoItem icon={MapPin} label={t('contact.location')} value="Industriestrasse 2, 94315 Straubing" href={MAP_URL} />

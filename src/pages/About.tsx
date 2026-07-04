@@ -83,10 +83,6 @@ export default function About() {
 
       <main className="agero-about-page">
         <section className="agero-about-hero" aria-labelledby="about-hero-title">
-          <div className="agero-about-hero-media" aria-hidden="true">
-            <HeroBackgroundVideo src={HERO_VIDEO_SRC} />
-          </div>
-
           <div className="agero-about-hero-content">
             <p className="agero-about-eyebrow">
               <span className="agero-about-eyebrow-icon">
@@ -100,6 +96,10 @@ export default function About() {
             </h1>
 
             <p>{t('about.heroDesc')}</p>
+          </div>
+
+          <div className="agero-about-hero-media" aria-hidden="true">
+            <HeroBackgroundVideo src={HERO_VIDEO_SRC} />
           </div>
         </section>
 
