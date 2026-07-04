@@ -1,5 +1,6 @@
 import { useLayoutEffect } from "react";
 
+import "@/dashboard/styles/dashboard-theme.css";
 import { SidebarProvider } from "@/components/dashboard-ui/sidebar";
 import { TooltipProvider } from "@/components/dashboard-ui/tooltip";
 
@@ -24,7 +25,7 @@ export default function MailApp() {
   }, [isDashboardPreview]);
 
   return (
-    <div className="dashboard-root" data-dashboard-preview={isDashboardPreview ? "true" : undefined}>
+    <div className="dashboard-root h-dvh bg-background text-foreground" data-dashboard-preview={isDashboardPreview ? "true" : undefined}>
       <TooltipProvider>
         <div className="relative h-dvh min-h-0 overflow-hidden">
           <SidebarProvider className="h-full min-h-0">

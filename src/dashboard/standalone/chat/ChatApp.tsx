@@ -1,5 +1,6 @@
 import { useLayoutEffect } from "react";
 
+import "@/dashboard/styles/dashboard-theme.css";
 import { SidebarProvider } from "@/components/dashboard-ui/sidebar";
 import { TooltipProvider } from "@/components/dashboard-ui/tooltip";
 
@@ -24,7 +25,7 @@ export default function ChatApp() {
   }, [isDashboardPreview]);
 
   return (
-    <div className="dashboard-root" data-dashboard-preview={isDashboardPreview ? "true" : undefined}>
+    <div className="dashboard-root h-dvh bg-background text-foreground" data-dashboard-preview={isDashboardPreview ? "true" : undefined}>
       <TooltipProvider>
         <div className="h-dvh [--header-height:calc(--spacing(14))]">
           <SidebarProvider className="flex h-full flex-col">
