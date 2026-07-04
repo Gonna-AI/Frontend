@@ -109,7 +109,7 @@ export const recentOrdersColumns: ColumnDef<OrderRow>[] = [
   },
   {
     accessorKey: "id",
-    header: "Order",
+    header: "Bedarf",
     cell: ({ row }) => (
       <div className="flex flex-col gap-0.5">
         <div className="font-medium leading-none">{row.original.id}</div>
@@ -120,7 +120,7 @@ export const recentOrdersColumns: ColumnDef<OrderRow>[] = [
   },
   {
     accessorKey: "customer",
-    header: "Customer",
+    header: "Projekt",
   },
   {
     id: "statusSummary",
@@ -158,12 +158,12 @@ export const recentOrdersColumns: ColumnDef<OrderRow>[] = [
   },
   {
     accessorKey: "total",
-    header: () => <div className="w-28">Total</div>,
+    header: () => <div className="w-28">Wert</div>,
     cell: ({ row }) => <div className="w-28 tabular-nums">{row.original.total}</div>,
   },
   {
     accessorKey: "date",
-    header: () => <div className="w-44">Date</div>,
+    header: () => <div className="w-44">Erkannt am</div>,
     cell: ({ row }) => <div className="w-44 text-muted-foreground">{formatOrderDate(row.original.date)}</div>,
   },
   {
@@ -179,11 +179,11 @@ export const recentOrdersColumns: ColumnDef<OrderRow>[] = [
           </div>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-40">
-          <DropdownMenuLabel>Order Actions</DropdownMenuLabel>
+          <DropdownMenuLabel>Aktionen</DropdownMenuLabel>
           <DropdownMenuGroup>
-            <DropdownMenuItem>View order</DropdownMenuItem>
-            <DropdownMenuItem>Contact customer</DropdownMenuItem>
-            <DropdownMenuItem>Copy order ID</DropdownMenuItem>
+            <DropdownMenuItem>Bedarf ansehen</DropdownMenuItem>
+            <DropdownMenuItem>Jetzt bestellen</DropdownMenuItem>
+            <DropdownMenuItem>Bedarf-ID kopieren</DropdownMenuItem>
           </DropdownMenuGroup>
         </DropdownMenuContent>
       </DropdownMenu>

@@ -79,9 +79,9 @@ export function Users({ users }: { users: UserRow[] }) {
   return (
     <Card>
       <CardHeader className="border-b has-data-[slot=card-action]:grid-cols-1 md:has-data-[slot=card-action]:grid-cols-[1fr_auto]">
-        <CardTitle className="text-xl leading-none">Users</CardTitle>
+        <CardTitle className="text-xl leading-none">Team &amp; Contacts</CardTitle>
         <CardDescription className="max-w-sm leading-snug">
-          Manage your organization members and their access.
+          Manage THD team members, roles, and customer contacts across projects.
         </CardDescription>
         <CardAction className="col-start-1 row-start-auto flex w-full flex-wrap justify-start gap-2 justify-self-stretch md:col-start-2 md:row-span-2 md:row-start-1 md:w-auto md:flex-nowrap md:justify-end md:justify-self-end">
           <InputGroup className="h-7 w-full md:w-64">
@@ -90,7 +90,7 @@ export function Users({ users }: { users: UserRow[] }) {
             </InputGroupAddon>
             <InputGroupInput
               className="h-7"
-              placeholder="Search users..."
+              placeholder="Search team & contacts..."
               value={searchQuery}
               onChange={(event) => {
                 table.getColumn("search")?.setFilterValue(event.target.value || undefined);
@@ -111,7 +111,7 @@ export function Users({ users }: { users: UserRow[] }) {
             <Download /> Export
           </Button>
           <Button size="sm">
-            <Plus /> Add User
+            <Plus /> Add Contact
           </Button>
         </CardAction>
       </CardHeader>

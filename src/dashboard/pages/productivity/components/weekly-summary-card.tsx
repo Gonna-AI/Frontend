@@ -6,7 +6,7 @@ export function WeeklySummaryCard() {
   return (
     <Card className="shadow-xs">
       <CardHeader>
-        <CardTitle>This Week</CardTitle>
+        <CardTitle>Stunden eingespart durch Automatisierung</CardTitle>
         <CardAction>
           <Button variant="ghost" size="sm" className="text-muted-foreground">
             View all
@@ -14,10 +14,10 @@ export function WeeklySummaryCard() {
         </CardAction>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
-        <p className="text-muted-foreground">You’re doing great. Keep the momentum going.</p>
+        <p className="text-muted-foreground">Trending upward — the Kostencheck Copilot is catching more automatically each week.</p>
         <div className="flex flex-col gap-2">
-          <div className="font-medium">4 of 6 goals completed</div>
-          <Progress value={66} className="h-2" />
+          <div className="font-medium">18.5 Stunden diese Woche eingespart</div>
+          <Progress value={78} className="h-2" />
         </div>
       </CardContent>
     </Card>

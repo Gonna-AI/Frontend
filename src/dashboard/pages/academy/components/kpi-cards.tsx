@@ -9,26 +9,26 @@ export function KpiCards() {
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
         <Card>
           <CardHeader>
-            <CardTitle className="text-sm">Students Taught</CardTitle>
+            <CardTitle className="text-sm">Projects Indexed</CardTitle>
             <CardAction>
               <Info className="size-3 text-muted-foreground" />
             </CardAction>
           </CardHeader>
           <CardContent className="flex flex-col">
             <div className="flex items-center gap-2">
-              <span className="text-3xl text-foreground leading-none tracking-tight">128</span>
+              <span className="text-3xl text-foreground leading-none tracking-tight">12</span>
               <Badge className="rounded-sm border-green-600/50 bg-green-500/10 px-1 font-normal text-green-700 text-xs dark:border-green-800/50 dark:bg-green-500/15 dark:text-green-300">
                 <ArrowUp />
                 2.8%
               </Badge>
             </div>
-            <div className="text-right text-muted-foreground text-xs">across 5 Grade 11 sections</div>
+            <div className="text-right text-muted-foreground text-xs">across 3 monitored companies</div>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-sm">Avg. Attendance</CardTitle>
+            <CardTitle className="text-sm">Avg. Retrieval Hit Rate</CardTitle>
             <CardAction>
               <Info className="size-3 text-muted-foreground" />
             </CardAction>
@@ -47,7 +47,7 @@ export function KpiCards() {
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-sm">Assignments</CardTitle>
+            <CardTitle className="text-sm">Copilot Queries</CardTitle>
             <CardAction>
               <Info className="size-3 text-muted-foreground" />
             </CardAction>
@@ -55,13 +55,13 @@ export function KpiCards() {
           <CardContent className="flex flex-col">
             <div className="text-3xl text-foreground leading-none tracking-tight">81</div>
 
-            <div className="text-right text-muted-foreground text-xs">63 pending · 18 overdue</div>
+            <div className="text-right text-muted-foreground text-xs">63 answered · 18 escalated</div>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-sm">Classes Today</CardTitle>
+            <CardTitle className="text-sm">Active Projects Today</CardTitle>
             <CardAction>
               <Info className="size-3 text-muted-foreground" />
             </CardAction>
@@ -69,7 +69,7 @@ export function KpiCards() {
           <CardContent className="flex flex-col">
             <div className="text-3xl text-foreground leading-none tracking-tight">5</div>
 
-            <div className="text-right text-muted-foreground text-xs">1 in progress · 3 upcoming · 1 cancelled</div>
+            <div className="text-right text-muted-foreground text-xs">1 processing · 3 in review · 1 flagged</div>
           </CardContent>
         </Card>
       </div>

@@ -91,8 +91,8 @@ function buildMapGeometry(shipment: Shipment | null) {
     );
   } else {
     projection
-      .center([102, 17])
-      .scale(760)
+      .center([10.5, 51])
+      .scale(1800)
       .translate([WIDTH / 2, HEIGHT / 2]);
   }
 
@@ -174,7 +174,7 @@ export function ShipmentRouteMap({ shipment }: ShipmentRouteMapProps) {
   return (
     <div className="size-full min-h-0 overflow-hidden bg-[#d4dadc] dark:bg-[#2C353C]">
       <svg
-        aria-label="Southeast Asia shipment region map"
+        aria-label="Germany delivery region map"
         className="block size-full bg-[#d4dadc] dark:bg-[#2C353C]"
         role="img"
         viewBox={`0 0 ${WIDTH} ${HEIGHT}`}

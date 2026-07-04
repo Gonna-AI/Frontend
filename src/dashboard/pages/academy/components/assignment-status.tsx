@@ -13,11 +13,11 @@ import {
 } from "@/components/dashboard-ui/chart";
 
 const chartData = [
-  { className: "G11A", submitted: 14, pending: 18, overdue: 2 },
-  { className: "G11B", submitted: 22, pending: 7, overdue: 3 },
-  { className: "G11C", submitted: 10, pending: 19, overdue: 5 },
-  { className: "G11D", submitted: 17, pending: 15, overdue: 6 },
-  { className: "G11E", submitted: 24, pending: 4, overdue: 2 },
+  { className: "Bergmann", submitted: 4, pending: 1, overdue: 1 },
+  { className: "Weber", submitted: 1, pending: 1, overdue: 0 },
+  { className: "MK Anl.", submitted: 1, pending: 0, overdue: 0 },
+  { className: "Hartmann", submitted: 1, pending: 0, overdue: 0 },
+  { className: "Andere", submitted: 5, pending: 0, overdue: 0 },
 ];
 
 function SubmittedLegendIcon() {
@@ -34,17 +34,17 @@ function OverdueLegendIcon() {
 
 const chartConfig = {
   submitted: {
-    label: "Submitted",
+    label: "Indexed",
     color: "var(--chart-3)",
     icon: SubmittedLegendIcon,
   },
   pending: {
-    label: "Pending",
+    label: "Processing",
     color: "var(--chart-2)",
     icon: PendingLegendIcon,
   },
   overdue: {
-    label: "Overdue",
+    label: "Needs Review",
     color: "var(--destructive)",
     icon: OverdueLegendIcon,
   },
@@ -64,7 +64,7 @@ export function AssignmentStatus() {
   return (
     <Card className="h-full">
       <CardHeader>
-        <CardTitle className="text-sm">Assignment Status</CardTitle>
+        <CardTitle className="text-sm">Indexing Status by Customer</CardTitle>
         <CardAction className="flex items-center gap-1 text-muted-foreground text-xs">
           View Report <ArrowRight className="size-4" />
         </CardAction>

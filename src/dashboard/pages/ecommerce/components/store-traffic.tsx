@@ -127,11 +127,11 @@ function getTrafficData() {
 
 const trafficConfig = {
   visitors: {
-    label: "Visitors",
+    label: "Dokumente",
     color: "var(--chart-3)",
   },
   anomalies: {
-    label: "Anomalies",
+    label: "Abweichungen",
     color: "var(--destructive)",
   },
 } satisfies ChartConfig;
@@ -156,9 +156,9 @@ export function StoreTraffic() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="font-normal text-muted-foreground text-sm">Store Traffic</CardTitle>
+        <CardTitle className="font-normal text-muted-foreground text-sm">Dokumenten-Durchsatz</CardTitle>
         <CardDescription className="text-foreground text-xl tabular-nums leading-none tracking-tight">
-          12.9K visits
+          12.9K Dokumente
         </CardDescription>
         <CardAction>
           <ArrowUpRight className="size-4" />

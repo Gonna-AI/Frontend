@@ -133,7 +133,7 @@ export function ShipmentList({ shipments, selectedShipmentId, onSelectShipment }
   return (
     <Card className="h-full rounded-none ring-0">
       <CardHeader>
-        <CardTitle className="font-normal text-xl">Shipments</CardTitle>
+        <CardTitle className="font-normal text-xl">Deliveries</CardTitle>
         <CardAction>
           <Button size="icon-sm" variant="ghost">
             <SlidersHorizontal />
@@ -144,23 +144,23 @@ export function ShipmentList({ shipments, selectedShipmentId, onSelectShipment }
         <Tabs defaultValue="all">
           <TabsList className="w-full border-b px-4" variant="line">
             <TabsTrigger className="text-xs" value="all">
-              All (156)
+              All (12)
             </TabsTrigger>
             <TabsTrigger className="text-xs" value="in-transit">
-              In Transit (32)
+              In Transit (4)
             </TabsTrigger>
             <TabsTrigger className="text-xs" value="delivered">
-              Delivered (98)
+              Delivered (2)
             </TabsTrigger>
             <TabsTrigger className="text-xs" value="delayed">
-              Delayed (9)
+              Delayed (1)
             </TabsTrigger>
           </TabsList>
         </Tabs>
 
         <div className="px-4">
           <InputGroup className="h-8">
-            <InputGroupInput className="h-8" aria-label="Search shipments" placeholder="Search shipments..." />
+            <InputGroupInput className="h-8" aria-label="Search deliveries" placeholder="Search deliveries..." />
             <InputGroupAddon>
               <Search />
             </InputGroupAddon>

@@ -13,24 +13,24 @@ export default function Page() {
     <div className="flex flex-col gap-4">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div className="space-y-1">
-          <h1 className="text-3xl tracking-tight">Academy Dashboard</h1>
+          <h1 className="text-3xl tracking-tight">Project Memory</h1>
           <p className="text-muted-foreground text-sm">
-            Good morning, Teacher. Here's a quick overview of today's activity.
+            Good morning, Anna. Here's a quick overview of the RAG index across historical projects.
           </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2 lg:w-fit">
           <Button size="sm">
             <Megaphone />
-            New Announcement
+            New Query
           </Button>
           <Button size="sm" variant="outline">
             <BookOpenCheck />
-            Gradebook
+            Project Log
           </Button>
           <Button size="sm" variant="outline">
             <Plus />
-            Add Assignment
+            Reindex Project
           </Button>
         </div>
       </div>

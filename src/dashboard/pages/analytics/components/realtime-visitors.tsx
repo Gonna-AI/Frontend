@@ -49,7 +49,7 @@ const realtimeData = [
 const chartConfig = {
   visitors: {
     color: "var(--chart-3)",
-    label: "Visitors",
+    label: "Documents",
   },
 } satisfies ChartConfig;
 
@@ -99,7 +99,7 @@ export function RealtimeVisitors() {
   return (
     <Card className="h-full">
       <CardHeader>
-        <CardTitle className="font-normal">Realtime Visitors</CardTitle>
+        <CardTitle className="font-normal">Documents by Customer Country</CardTitle>
         <CardAction>
           <Ellipsis className="size-4" />
         </CardAction>
@@ -129,24 +129,24 @@ export function RealtimeVisitors() {
         </ChartContainer>
         <div className="grid grid-cols-2">
           <div className="flex items-center gap-3 border-border/50 border-r border-b pt-1 pr-5 pb-4">
-            <span aria-hidden="true" className="flag:US shrink-0 rounded-xs text-lg ring-1 ring-foreground/10" />
-            <span className="min-w-0 flex-1 truncate text-sm">United States</span>
-            <span className="text-sm tabular-nums">14</span>
+            <span aria-hidden="true" className="flag:DE shrink-0 rounded-xs text-lg ring-1 ring-foreground/10" />
+            <span className="min-w-0 flex-1 truncate text-sm">Germany</span>
+            <span className="text-sm tabular-nums">248</span>
           </div>
           <div className="flex items-center gap-3 border-border/50 border-b pt-1 pb-4 pl-5">
-            <span aria-hidden="true" className="flag:GB shrink-0 rounded-xs text-lg ring-1 ring-foreground/10" />
-            <span className="min-w-0 flex-1 truncate text-sm">United Kingdom</span>
-            <span className="text-sm tabular-nums">4</span>
+            <span aria-hidden="true" className="flag:AT shrink-0 rounded-xs text-lg ring-1 ring-foreground/10" />
+            <span className="min-w-0 flex-1 truncate text-sm">Austria</span>
+            <span className="text-sm tabular-nums">31</span>
           </div>
           <div className="flex items-center gap-3 border-border/50 border-r pt-4 pr-5 pb-1">
-            <span aria-hidden="true" className="flag:CA shrink-0 rounded-xs text-lg ring-1 ring-foreground/10" />
-            <span className="min-w-0 flex-1 truncate text-sm">Canada</span>
-            <span className="text-sm tabular-nums">3</span>
+            <span aria-hidden="true" className="flag:CH shrink-0 rounded-xs text-lg ring-1 ring-foreground/10" />
+            <span className="min-w-0 flex-1 truncate text-sm">Switzerland</span>
+            <span className="text-sm tabular-nums">18</span>
           </div>
           <div className="flex items-center gap-3 pt-4 pb-1 pl-5">
-            <span aria-hidden="true" className="flag:IN shrink-0 rounded-xs text-lg ring-1 ring-foreground/10" />
-            <span className="min-w-0 flex-1 truncate text-sm">India</span>
-            <span className="text-sm tabular-nums">3</span>
+            <span aria-hidden="true" className="flag:CZ shrink-0 rounded-xs text-lg ring-1 ring-foreground/10" />
+            <span className="min-w-0 flex-1 truncate text-sm">Czechia</span>
+            <span className="text-sm tabular-nums">9</span>
           </div>
         </div>
       </CardContent>

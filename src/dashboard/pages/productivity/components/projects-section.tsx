@@ -11,25 +11,25 @@ const today = new Date();
 
 const projects = [
   {
-    title: "Q2 Roadmap",
+    title: "Bergmann Maschinenbau – CNC-Paket 2026",
     status: "In Progress",
-    description: "Ship better, ship smarter.",
+    description: "Kostencheck: 5 Abweichungen erkannt.",
     progress: 68,
     due: `Due ${format(addDays(today, 9), "MMM d")}`,
     icon: Orbit,
   },
   {
-    title: "Website Redesign",
+    title: "Weber Präzisionstechnik – Spannsysteme",
     status: "Planning",
-    description: "Clean, modern, and fast.",
+    description: "Angebot in Kalkulation.",
     progress: 42,
     due: `Due ${format(addDays(today, 21), "MMM d")}`,
     icon: Globe,
   },
   {
-    title: "Onboarding",
+    title: "MK Anlagenbau – Rundschalttische",
     status: "Planning",
-    description: "Trim first-run steps.",
+    description: "Bestellung eingegangen, AB ausstehend.",
     progress: 31,
     due: `Due ${format(addDays(today, 18), "MMM d")}`,
     icon: ClipboardCheck,

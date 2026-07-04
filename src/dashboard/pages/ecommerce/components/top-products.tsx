@@ -5,17 +5,17 @@ import { Separator } from "@/components/dashboard-ui/separator";
 
 const categories = [
   {
-    name: "Apparel",
+    name: "Rundschalttische",
     share: 44,
     color: "var(--chart-3)",
   },
   {
-    name: "Accessories",
+    name: "Spannsysteme",
     share: 32,
     color: "var(--chart-2)",
   },
   {
-    name: "Home",
+    name: "Sondermotoren",
     share: 24,
     color: "var(--chart-1)",
   },
@@ -23,22 +23,22 @@ const categories = [
 
 const products = [
   {
-    name: "Linen Overshirt",
-    category: "Apparel",
+    name: "RT-450 Rundschalttisch",
+    category: "Rundschalttische",
     share: "31%",
-    sales: "$14,820",
+    sales: "€18,500",
   },
   {
-    name: "Everyday Tote",
-    category: "Accessories",
+    name: "SP-200 Spannsystem",
+    category: "Spannsysteme",
     share: "24%",
-    sales: "$11,460",
+    sales: "€1,250",
   },
   {
-    name: "Ceramic Planter",
-    category: "Home",
+    name: "TM-75 Sondermotor",
+    category: "Sondermotoren",
     share: "18%",
-    sales: "$8,930",
+    sales: "€6,400",
   },
 ] as const;
 
@@ -48,7 +48,7 @@ export function TopProducts() {
       <CardHeader>
         <CardTitle className="font-normal text-muted-foreground text-sm">Top Products</CardTitle>
         <CardDescription className="text-foreground text-xl tabular-nums leading-none tracking-tight">
-          73% of sales
+          73% of Bestellwert
         </CardDescription>
         <CardAction>
           <ArrowUpRight className="size-4" />

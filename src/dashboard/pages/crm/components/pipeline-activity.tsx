@@ -10,7 +10,7 @@ const pipelineChartValues = [34, 38, 31, 47, 42, 51, 44, 40, 58, 46, 43, 49] as 
 
 const pipelineChartConfig = {
   qualified: {
-    label: "Qualified",
+    label: "Angebote",
     color: "var(--chart-2)",
   },
 } satisfies ChartConfig;
@@ -40,7 +40,7 @@ export function PipelineActivity() {
     <div className="grid grid-cols-1 gap-4 xl:grid-cols-12">
       <Card className="xl:col-span-12">
         <CardHeader>
-          <CardTitle>Qualified Lead Flow</CardTitle>
+          <CardTitle>Angebots-Verlauf</CardTitle>
           <CardAction>
             <Select defaultValue="last-12-months">
               <SelectTrigger size="sm" className="min-w-40">
@@ -111,14 +111,14 @@ export function PipelineActivity() {
             <div className="flex flex-col gap-5 rounded-lg p-4 lg:col-span-4">
               <div className="flex flex-col gap-1">
                 <div className="font-medium text-4xl tabular-nums leading-none">
-                  {totalQualified} <span className="font-normal text-lg text-muted-foreground">leads</span>
+                  {totalQualified} <span className="font-normal text-lg text-muted-foreground">Angebote</span>
                 </div>
-                <p className="text-muted-foreground text-sm">Total qualified leads captured over the last 12 months.</p>
+                <p className="text-muted-foreground text-sm">Angebote erstellt over the last 12 months.</p>
               </div>
 
               <div className="flex flex-col gap-3 rounded-lg border border-border/60 p-3">
                 <div className="text-[11px] text-muted-foreground uppercase tracking-widest">
-                  Discovery Calls Booked
+                  Kalkulations-Meetings gebucht
                 </div>
 
                 <div className="flex flex-col gap-1.5">
@@ -126,7 +126,7 @@ export function PipelineActivity() {
                     {discoveryCallsBooked} <span className="font-normal text-muted-foreground text-sm">meetings</span>
                   </div>
                   <p className="text-muted-foreground text-sm">
-                    {discoveryProgress}% of qualified leads booked a first call.
+                    {discoveryProgress}% of Angebote booked a first Kalkulations call.
                   </p>
                 </div>
 

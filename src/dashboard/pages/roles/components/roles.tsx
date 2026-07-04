@@ -83,8 +83,10 @@ export function Roles({ roles }: { roles: Role[] }) {
     <div className="flex h-full flex-col gap-4">
       <div className="flex flex-col items-start gap-4 sm:flex-row sm:justify-between">
         <div className="flex flex-col gap-1">
-          <h1 className="text-3xl tracking-tight">Roles & Permissions</h1>
-          <p className="text-muted-foreground text-sm">Manage access roles and permissions across your organization.</p>
+          <h1 className="text-3xl tracking-tight">Access Control</h1>
+          <p className="text-muted-foreground text-sm">
+            TV, PM, AL, PTL, and Kunde roles — mirroring THD&apos;s Angebot → Bestellung → AB process.
+          </p>
         </div>
 
         <div className="flex items-center gap-2">
@@ -173,9 +175,9 @@ export function Roles({ roles }: { roles: Role[] }) {
                       <SelectGroup>
                         <SelectItem value="All">All</SelectItem>
                         <SelectItem value="System">System</SelectItem>
-                        <SelectItem value="Jane Doe">Jane Doe</SelectItem>
-                        <SelectItem value="Alex Kim">Alex Kim</SelectItem>
-                        <SelectItem value="Chris Lee">Chris Lee</SelectItem>
+                        <SelectItem value="Sabine Ecker">Sabine Ecker</SelectItem>
+                        <SelectItem value="Claudia Reinhardt">Claudia Reinhardt</SelectItem>
+                        <SelectItem value="Bianca Hofmann">Bianca Hofmann</SelectItem>
                       </SelectGroup>
                     </SelectContent>
                   </Select>

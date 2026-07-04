@@ -51,11 +51,11 @@ const revenueOverviewData = getRollingRevenueBuckets().flatMap(({ month, values 
 
 const revenueOverviewConfig = {
   revenue: {
-    label: "Revenue",
+    label: "Bestellwert",
     color: "var(--foreground)",
   },
   profit: {
-    label: "Profit",
+    label: "Marge",
     color: "var(--muted-foreground)",
   },
 } satisfies ChartConfig;
@@ -81,7 +81,7 @@ function formatTooltipLabel(value: string) {
 }
 
 function formatCurrencyTooltipValue(value: unknown) {
-  return typeof value === "number" ? `$${value.toLocaleString()}` : String(value ?? "");
+  return typeof value === "number" ? `€${value.toLocaleString()}` : String(value ?? "");
 }
 
 export function KpiStrip() {
@@ -92,9 +92,9 @@ export function KpiStrip() {
           <div className="grid grid-cols-1 md:grid-cols-2 md:grid-rows-3 xl:col-span-5 xl:border-r">
             <Card className="h-full rounded-none border-0 border-border border-b ring-0 md:border-r">
               <CardHeader>
-                <CardTitle className="font-normal text-sm">Total Sales</CardTitle>
+                <CardTitle className="font-normal text-sm">Total Bestellwert</CardTitle>
                 <CardDescription className="text-3xl text-foreground tabular-nums leading-none tracking-tight">
-                  $48,560.00
+                  €48,560.00
                 </CardDescription>
                 <CardAction className="grid size-6 place-items-center rounded-sm bg-muted">
                   <DollarSign className="size-3 text-foreground" />
@@ -110,7 +110,7 @@ export function KpiStrip() {
 
             <Card className="h-full rounded-none border-0 border-border border-b ring-0">
               <CardHeader>
-                <CardTitle className="font-normal text-sm">Total Orders</CardTitle>
+                <CardTitle className="font-normal text-sm">Bestellungen gesamt</CardTitle>
                 <CardDescription className="text-3xl text-foreground tabular-nums leading-none tracking-tight">
                   379
                 </CardDescription>
@@ -128,7 +128,7 @@ export function KpiStrip() {
 
             <Card className="h-full rounded-none border-0 border-border border-b ring-0 md:border-r">
               <CardHeader>
-                <CardTitle className="font-normal text-sm">Customer Growth</CardTitle>
+                <CardTitle className="font-normal text-sm">Aktive Kunden</CardTitle>
                 <CardDescription className="text-3xl text-foreground tabular-nums leading-none tracking-tight">
                   820
                 </CardDescription>
@@ -146,9 +146,9 @@ export function KpiStrip() {
 
             <Card className="h-full rounded-none border-0 border-border border-b ring-0">
               <CardHeader>
-                <CardTitle className="font-normal text-sm">Average Order</CardTitle>
+                <CardTitle className="font-normal text-sm">Durchschnittliche Bestellung</CardTitle>
                 <CardDescription className="text-3xl text-foreground tabular-nums leading-none tracking-tight">
-                  $128
+                  €4,280
                 </CardDescription>
                 <CardAction className="grid size-6 place-items-center rounded-sm bg-muted">
                   <ReceiptText className="size-3 text-foreground" />
@@ -164,7 +164,7 @@ export function KpiStrip() {
 
             <Card className="h-full rounded-none border-0 border-border border-b ring-0 md:border-r md:border-b-0">
               <CardHeader>
-                <CardTitle className="font-normal text-sm">Return Requests</CardTitle>
+                <CardTitle className="font-normal text-sm">Kostencheck-Abweichungen</CardTitle>
                 <CardDescription className="text-3xl text-foreground tabular-nums leading-none tracking-tight">
                   18
                 </CardDescription>
@@ -182,7 +182,7 @@ export function KpiStrip() {
 
             <Card className="h-full rounded-none border-0 ring-0">
               <CardHeader>
-                <CardTitle className="font-normal text-sm">Stock Accuracy</CardTitle>
+                <CardTitle className="font-normal text-sm">Lieferzeit-Genauigkeit</CardTitle>
                 <CardDescription className="text-3xl text-foreground tabular-nums leading-none tracking-tight">
                   97%
                 </CardDescription>
@@ -201,7 +201,7 @@ export function KpiStrip() {
 
           <Card className="h-full rounded-none border-0 ring-0 xl:col-span-7">
             <CardHeader>
-              <CardTitle className="font-normal">Sales Overview</CardTitle>
+              <CardTitle className="font-normal">Bestellwert-Übersicht</CardTitle>
               <CardAction>
                 <ArrowUpRight className="size-4" />
               </CardAction>

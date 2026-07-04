@@ -58,9 +58,9 @@ export function TaskReminders() {
                   </div>
                   <div className="min-w-0">
                     <div className="truncate font-medium text-primary-foreground text-xs leading-none">
-                      Product demo with Tim
+                      Kalkulations-Call mit Bergmann Maschinenbau
                     </div>
-                    <div className="truncate text-[10px] text-primary-foreground/75">Weblabs Studio</div>
+                    <div className="truncate text-[10px] text-primary-foreground/75">Bergmann Maschinenbau GmbH</div>
                   </div>
                 </div>
               </div>
@@ -72,12 +72,12 @@ export function TaskReminders() {
 
       <Card className="xl:col-span-4">
         <CardHeader>
-          <CardTitle>Monthly Proposal Goal</CardTitle>
+          <CardTitle>Monatliches Angebots-Ziel</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-1">
           <div className="flex items-end justify-between gap-3">
             <div className="font-medium text-2xl tabular-nums leading-none">
-              {proposalSent} <span className="font-normal text-base text-muted-foreground">sent</span>
+              {proposalSent} <span className="font-normal text-base text-muted-foreground">Angebote</span>
             </div>
             <div className="text-muted-foreground text-sm tabular-nums">{proposalGoal} target</div>
           </div>

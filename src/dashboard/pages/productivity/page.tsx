@@ -14,9 +14,9 @@ export default function Page() {
       <section className="lg:col-span-9">
         <div className="flex flex-col gap-6">
           <div className="flex flex-col gap-2">
-            <h1 className="text-3xl text-foreground leading-none tracking-tight">Good morning, Arham.</h1>
+            <h1 className="text-3xl text-foreground leading-none tracking-tight">Engineer Workload</h1>
             <p className="text-lg text-muted-foreground leading-none">
-              Let&apos;s make today productive and meaningful.
+              3 Dokumente warten auf Prüfung. Here&apos;s where the Kostencheck Copilot needs your input today.
             </p>
           </div>
           <SummaryCards />

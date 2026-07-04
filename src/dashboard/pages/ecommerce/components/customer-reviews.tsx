@@ -10,7 +10,7 @@ export function CustomerReviews() {
   return (
     <Card className="h-full">
       <CardHeader>
-        <CardTitle className="font-normal text-muted-foreground text-sm">Reviews</CardTitle>
+        <CardTitle className="font-normal text-muted-foreground text-sm">Kundenfeedback</CardTitle>
         <CardDescription className="text-foreground text-xl tabular-nums leading-none tracking-tight">
           4.6 average rating
         </CardDescription>
@@ -31,9 +31,9 @@ export function CustomerReviews() {
                 <Star className="size-3.5 fill-current" />
               </div>
               <div>
-                <div className="font-medium text-sm">Melody Macy</div>
+                <div className="font-medium text-sm">Bergmann Maschinenbau GmbH</div>
                 <p className="mt-2 line-clamp-3 min-h-[4.5em] text-muted-foreground text-sm">
-                  The linen overshirt arrived faster than expected and the fit was exactly right.
+                  Der Kostencheck hat die Zahlungsbedingungen-Abweichung vor der AB erkannt — hätte uns sonst Wochen gekostet.
                 </p>
               </div>
             </div>
@@ -51,8 +51,8 @@ export function CustomerReviews() {
 
         <div className="flex items-center justify-between gap-4 rounded-lg border px-4 py-3">
           <div className="min-w-0">
-            <div className="font-medium text-sm">12.8K reviews</div>
-            <div className="line-clamp-2 min-h-[3em] text-muted-foreground text-xs">Customers reviewed this month</div>
+            <div className="font-medium text-sm">128 Rückmeldungen</div>
+            <div className="line-clamp-2 min-h-[3em] text-muted-foreground text-xs">Kunden bewertet diesen Monat</div>
           </div>
 
           <AvatarGroup>

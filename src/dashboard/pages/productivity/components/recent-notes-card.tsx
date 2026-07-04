@@ -13,10 +13,10 @@ function formatNoteDate(date: Date) {
 }
 
 const recentNotes = [
-  { title: "Design principles that scale", date: formatNoteDate(today), icon: FileText },
-  { title: `Content ideas – ${format(today, "MMMM")}`, date: formatNoteDate(subDays(today, 1)), icon: FileText },
-  { title: "Lessons from the week", date: formatNoteDate(subDays(today, 4)), icon: FileText },
-  { title: "Books I’m Reading", date: formatNoteDate(subDays(today, 5)), icon: BookOpen },
+  { title: "Kostencheck-Regeln für Sondermotoren", date: formatNoteDate(today), icon: FileText },
+  { title: `Lieferzeiten TM-75 – ${format(today, "MMMM")}`, date: formatNoteDate(subDays(today, 1)), icon: FileText },
+  { title: "Abweichungen der letzten Woche", date: formatNoteDate(subDays(today, 4)), icon: FileText },
+  { title: "AB-Vorlagen für THD GmbH", date: formatNoteDate(subDays(today, 5)), icon: BookOpen },
 ] as const;
 
 export function RecentNotesCard() {

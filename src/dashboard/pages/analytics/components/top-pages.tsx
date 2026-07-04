@@ -4,18 +4,18 @@ import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/componen
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/dashboard-ui/table";
 
 const pages = [
-  { bounce: "24%", path: "/dashboard", time: "3m 12s", views: "64.2k" },
-  { bounce: "31%", path: "/pricing", time: "2m 08s", views: "41.8k" },
-  { bounce: "18%", path: "/docs/getting-started", time: "4m 44s", views: "28.6k" },
-  { bounce: "22%", path: "/blog/analytics-guide", time: "5m 06s", views: "19.3k" },
-  { bounce: "42%", path: "/contact", time: "1m 18s", views: "8.9k" },
+  { bounce: "2.1%", path: "QTY_CHANGED — Mengenänderung", time: "41%", views: "1,024" },
+  { bounce: "1.4%", path: "PRICE_CHANGED — Preisänderung", time: "27%", views: "672" },
+  { bounce: "3.8%", path: "REMOVED — Position fehlt", time: "18%", views: "448" },
+  { bounce: "5.2%", path: "CLAUSE_CHANGED — Klauseländerung", time: "11%", views: "274" },
+  { bounce: "0.6%", path: "ADDED — Position hinzugefügt", time: "3%", views: "76" },
 ];
 
 export function TopPages() {
   return (
     <Card className="h-full gap-2">
       <CardHeader>
-        <CardTitle className="font-normal">Page Performance</CardTitle>
+        <CardTitle className="font-normal">Most-Flagged Deviation Types</CardTitle>
         <CardAction>
           <Ellipsis className="size-4" />
         </CardAction>
@@ -26,9 +26,9 @@ export function TopPages() {
           <TableHeader className="[&_tr]:border-border/50">
             <TableRow className="hover:bg-transparent">
               <TableHead className="h-8" />
-              <TableHead className="h-8 w-24 text-right font-normal">Views</TableHead>
-              <TableHead className="h-8 w-24 text-right font-normal">Avg Time</TableHead>
-              <TableHead className="h-8 w-20 text-right font-normal">Bounce</TableHead>
+              <TableHead className="h-8 w-24 text-right font-normal">Count</TableHead>
+              <TableHead className="h-8 w-24 text-right font-normal">Share</TableHead>
+              <TableHead className="h-8 w-20 text-right font-normal">False Positives</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody className="[&_tr]:border-border/50">

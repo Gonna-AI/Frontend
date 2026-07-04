@@ -8,8 +8,8 @@ export function QuoteCard() {
           <Quote className="size-6" />
         </div>
         <div className="flex flex-col gap-1">
-          <p className="text-xl leading-none tracking-tight">Small, consistent actions lead to big results.</p>
-          <p className="text-muted-foreground">Keep showing up. You&apos;ve got this.</p>
+          <p className="text-xl leading-none tracking-tight">Jede geprüfte Abweichung spart eine Stunde Nacharbeit.</p>
+          <p className="text-muted-foreground">Der Kostencheck Copilot findet sie — Sie bestätigen sie.</p>
         </div>
       </div>
     </section>

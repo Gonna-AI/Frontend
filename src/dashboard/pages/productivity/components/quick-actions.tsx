@@ -3,11 +3,11 @@ import { CheckSquare, FileText, Focus, Orbit, Upload } from "lucide-react-dash";
 import { Button } from "@/components/dashboard-ui/button";
 
 const quickActions = [
-  { label: "New Note", icon: FileText },
-  { label: "New Task", icon: CheckSquare },
-  { label: "New Project", icon: Orbit },
-  { label: "New Goal", icon: Focus },
-  { label: "Upload", icon: Upload },
+  { label: "Neue Notiz", icon: FileText },
+  { label: "Neuer Review-Punkt", icon: CheckSquare },
+  { label: "Neues Projekt", icon: Orbit },
+  { label: "Neues Ziel", icon: Focus },
+  { label: "Dokument hochladen", icon: Upload },
 ] as const;
 
 export function QuickActions() {

@@ -37,17 +37,17 @@ const gaugeSegments = Array.from({ length: gaugeSegmentCount }, (_, index) => {
 const inventorySummary = [
   {
     icon: PackageCheck,
-    label: "In stock",
+    label: "On time",
     value: chartData[0]["in-stock"],
   },
   {
     icon: TriangleAlert,
-    label: "Low stock",
+    label: "Long-lead (TM-75)",
     value: chartData[0]["low-stock"],
   },
   {
     icon: PackageX,
-    label: "Out",
+    label: "Delayed",
     value: chartData[0]["out-of-stock"],
   },
 ] as const;
@@ -71,9 +71,9 @@ export function Inventory() {
   return (
     <Card className="h-full">
       <CardHeader>
-        <CardTitle className="font-normal text-muted-foreground text-sm">Inventory</CardTitle>
+        <CardTitle className="font-normal text-muted-foreground text-sm">Long-Lead Item Tracking</CardTitle>
         <CardDescription className="text-foreground text-xl tabular-nums leading-none tracking-tight">
-          {availablePercent}% available
+          {availablePercent}% on time
         </CardDescription>
         <CardAction>
           <ArrowUpRight className="size-4" />
@@ -109,7 +109,7 @@ export function Inventory() {
                           {availablePercent}%
                         </tspan>
                         <tspan className="fill-muted-foreground text-xs" x={viewBox.cx} y={(viewBox.cy || 0) + 38}>
-                          Available
+                          On time
                         </tspan>
                       </text>
                     );

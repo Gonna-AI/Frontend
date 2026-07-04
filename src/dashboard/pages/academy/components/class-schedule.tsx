@@ -10,7 +10,7 @@ export function ClassSchedule() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-sm">Class Schedule</CardTitle>
+        <CardTitle className="text-sm">Kostencheck Pipeline Schedule</CardTitle>
         <CardAction className="flex items-center gap-1 text-muted-foreground text-xs">
           View Full Schedule <ArrowRight className="size-4" />
         </CardAction>
@@ -27,8 +27,12 @@ export function ClassSchedule() {
             </div>
 
             <div className="flex min-w-0 flex-col gap-1">
-              <div className="truncate font-medium text-foreground text-sm leading-none">Pure Mathematics</div>
-              <div className="truncate text-muted-foreground text-xs leading-none">Grade 11A • Room 2.14</div>
+              <div className="truncate font-medium text-foreground text-sm leading-none">
+                Bergmann CNC-Paket 2026 — Extraktion
+              </div>
+              <div className="truncate text-muted-foreground text-xs leading-none">
+                B-88431 vs. A-2026-0142 • Kostencheck Copilot
+              </div>
             </div>
 
             <Badge
@@ -49,8 +53,12 @@ export function ClassSchedule() {
             </div>
 
             <div className="flex min-w-0 flex-col gap-1">
-              <div className="truncate font-medium text-foreground text-sm leading-none">English Literature</div>
-              <div className="truncate text-muted-foreground text-xs leading-none">Grade 11B • Seminar Room 3</div>
+              <div className="truncate font-medium text-foreground text-sm leading-none">
+                KickOff 1 — Bergmann CNC-Paket 2026
+              </div>
+              <div className="truncate text-muted-foreground text-xs leading-none">
+                Auftragsleitung • Sondermotor TM-75 Meldung
+              </div>
             </div>
 
             <Badge
@@ -71,8 +79,12 @@ export function ClassSchedule() {
             </div>
 
             <div className="flex min-w-0 flex-col gap-1">
-              <div className="truncate font-medium text-foreground text-sm leading-none">Physics</div>
-              <div className="truncate text-muted-foreground text-xs leading-none">Grade 11C • Physics Lab</div>
+              <div className="truncate font-medium text-foreground text-sm leading-none">
+                Weber Rundtisch-Nachrüstung 2026 — Abweichungsprüfung
+              </div>
+              <div className="truncate text-muted-foreground text-xs leading-none">
+                W-55214 vs. A-2026-0087 • Kostencheck Copilot
+              </div>
             </div>
 
             <Badge
@@ -93,8 +105,12 @@ export function ClassSchedule() {
             </div>
 
             <div className="flex min-w-0 flex-col gap-1">
-              <div className="truncate font-medium text-foreground text-sm leading-none">Modern European History</div>
-              <div className="truncate text-muted-foreground text-xs leading-none">Grade 11A • Room 1.08</div>
+              <div className="truncate font-medium text-foreground text-sm leading-none">
+                MK Anlagenbau Steuerungsintegration 2026 — Freigabe-Review
+              </div>
+              <div className="truncate text-muted-foreground text-xs leading-none">
+                M-31207 • Zahlungsziel-Rückfrage offen
+              </div>
             </div>
 
             <Badge
@@ -115,8 +131,12 @@ export function ClassSchedule() {
             </div>
 
             <div className="flex min-w-0 flex-col gap-1">
-              <div className="truncate font-medium text-foreground text-sm leading-none">Computer Science</div>
-              <div className="truncate text-muted-foreground text-xs leading-none">Grade 11B • Computing Lab</div>
+              <div className="truncate font-medium text-foreground text-sm leading-none">
+                KickOff 2 — Bergmann CNC-Paket 2026
+              </div>
+              <div className="truncate text-muted-foreground text-xs leading-none">
+                Projektleiter Technik • Reitstock RS-90 Prüfung
+              </div>
             </div>
 
             <Badge

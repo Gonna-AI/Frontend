@@ -39,7 +39,7 @@ import { opportunitiesColumns } from "./opportunities-table/columns";
 import opportunitiesData from "./opportunities-table/data.json";
 import { opportunitiesSchema } from "./opportunities-table/schema";
 
-const stageOptions = ["all", "Proposal Sent", "Discovery", "Negotiation", "Qualified"] as const;
+const stageOptions = ["all", "Anfrage", "Konzept", "Kalkulation", "Angebot", "Bestellung", "AB"] as const;
 const healthOptions = ["all", "On Track", "Needs Review", "At Risk", "On Hold"] as const;
 const opportunities = opportunitiesSchema.parse(opportunitiesData);
 
@@ -100,15 +100,15 @@ export function OpportunitiesSection() {
     <section>
       <Card>
         <CardHeader>
-          <CardTitle className="leading-none">Recent Opportunities</CardTitle>
+          <CardTitle className="leading-none">Anfragen &amp; Angebote</CardTitle>
           <CardDescription>
-            Track qualified leads moving through discovery, proposal, and closing stages.
+            Track customer requests moving through Anfrage, Konzept, Kalkulation, Angebot, Bestellung, and AB.
           </CardDescription>
           <CardAction>
             <div className="flex items-center gap-2">
               <Input
                 className="h-7 w-44 md:w-52"
-                placeholder="Search deals..."
+                placeholder="Search customers..."
                 value={searchQuery}
                 onChange={(event) => {
                   table.setGlobalFilter(event.target.value || undefined);

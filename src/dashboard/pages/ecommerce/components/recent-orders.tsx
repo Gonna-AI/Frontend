@@ -92,7 +92,7 @@ export function RecentOrders() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="font-normal text-muted-foreground text-sm">Recent Orders</CardTitle>
+        <CardTitle className="font-normal text-muted-foreground text-sm">AI-Detected Procurement Needs</CardTitle>
         <CardDescription className="text-foreground text-xl tabular-nums leading-none tracking-tight">
           {orderCountDescription}
         </CardDescription>

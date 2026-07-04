@@ -3,9 +3,9 @@ import { ArrowRight, Clock3, Focus, TrendingUp } from "lucide-react-dash";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/dashboard-ui/card";
 
 const summaryCards = [
-  { title: "Today", value: "4", description: "tasks scheduled", icon: Clock3 },
-  { title: "This Week", value: "68%", description: "progress", icon: TrendingUp },
-  { title: "Focus", value: "Deep Work", description: "2 hours remaining", icon: Focus },
+  { title: "Heute", value: "3", description: "Human-Review-Punkte offen", icon: Clock3 },
+  { title: "Diese Woche", value: "76%", description: "automatisch geprüft", icon: TrendingUp },
+  { title: "Fokus", value: "Bergmann CNC-Paket", description: "2 Abweichungen zu prüfen", icon: Focus },
 ] as const;
 
 export function SummaryCards() {

@@ -8,42 +8,42 @@ import { type ChartConfig, ChartContainer } from "@/components/dashboard-ui/char
 
 const performanceHighlights = [
   {
-    className: "G11A",
+    className: "Bergmann",
     start: 1.25,
     duration: 1.45,
-    subject: "Pure Math",
-    score: 84,
-    avatars: ["AM", "LS", "NK"],
+    subject: "Prototypenlinie 2023",
+    score: 96,
+    avatars: ["AB", "KC", "TH"],
   },
   {
-    className: "G11B",
+    className: "Weiss",
     start: 0.72,
     duration: 1.75,
-    subject: "Literature",
-    score: 78,
-    avatars: ["IR"],
+    subject: "Torquemotor 2023",
+    score: 93,
+    avatars: ["AB"],
   },
   {
-    className: "G11C",
+    className: "Trautmann",
     start: 1.35,
     duration: 1.9,
-    subject: "Physics",
-    score: 80,
-    avatars: ["SK", "MJ", "AT"],
+    subject: "Reitstock 2023",
+    score: 91,
+    avatars: ["AB", "KC", "TH"],
   },
   {
-    className: "G11D",
+    className: "Falk",
     start: 2.22,
     duration: 1.66,
-    subject: "History",
-    score: 73,
-    avatars: ["RP", "EH"],
+    subject: "Steuerung 2022",
+    score: 88,
+    avatars: ["AB", "KC"],
   },
 ];
 
 const chartConfig = {
   duration: {
-    label: "Score",
+    label: "Similarity",
     color: "var(--chart-3)",
   },
 } satisfies ChartConfig;
@@ -128,7 +128,7 @@ export function PerformanceHighlights() {
   return (
     <Card className="h-full">
       <CardHeader>
-        <CardTitle className="text-sm">Performance Highlights</CardTitle>
+        <CardTitle className="text-sm">Retrieval Similarity Highlights</CardTitle>
         <CardAction className="flex items-center gap-1 text-muted-foreground text-xs">
           View Insights <ArrowRight className="size-4" />
         </CardAction>

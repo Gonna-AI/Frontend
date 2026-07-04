@@ -9,14 +9,14 @@ export function AnalyticsKpiStrip() {
       <div className="grid divide-y *:data-[slot=card]:rounded-none *:data-[slot=card]:ring-0 md:grid-cols-2 md:divide-x md:divide-y-0 xl:grid-cols-5">
         <Card>
           <CardHeader>
-            <CardTitle className="font-normal text-sm">Unique Visitors</CardTitle>
+            <CardTitle className="font-normal text-sm">Pages Parsed</CardTitle>
             <CardAction>
               <Ellipsis className="size-4" />
             </CardAction>
           </CardHeader>
           <CardContent className="flex flex-col gap-4">
             <div className="flex items-center justify-between gap-4">
-              <div className="text-2xl leading-none tracking-tight">213.1k</div>
+              <div className="text-2xl leading-none tracking-tight">1,240</div>
               <Badge className="bg-green-500/10 text-green-700 dark:bg-green-500/15 dark:text-green-300">
                 <ArrowUpRight />
                 2.8%
@@ -25,7 +25,7 @@ export function AnalyticsKpiStrip() {
 
             <div className="flex items-center gap-2 text-muted-foreground text-xs">
               <span>
-                from <span className="text-foreground">207.3k</span>
+                from <span className="text-foreground">1,206</span>
               </span>
               <span>•</span>
               <span>last 4 weeks</span>
@@ -35,14 +35,14 @@ export function AnalyticsKpiStrip() {
 
         <Card>
           <CardHeader>
-            <CardTitle className="font-normal text-sm">Sessions</CardTitle>
+            <CardTitle className="font-normal text-sm">Documents Processed</CardTitle>
             <CardAction>
               <Ellipsis className="size-4" />
             </CardAction>
           </CardHeader>
           <CardContent className="flex flex-col gap-4">
             <div className="flex items-center justify-between gap-4">
-              <div className="text-2xl leading-none tracking-tight">248.6k</div>
+              <div className="text-2xl leading-none tracking-tight">312</div>
               <Badge className="bg-green-500/10 text-green-700 dark:bg-green-500/15 dark:text-green-300">
                 <ArrowUpRight />
                 2.1%
@@ -51,7 +51,7 @@ export function AnalyticsKpiStrip() {
 
             <div className="flex items-center gap-2 text-muted-foreground text-xs">
               <span>
-                from <span className="text-foreground">243.5k</span>
+                from <span className="text-foreground">305</span>
               </span>
               <span>•</span>
               <span>last 4 weeks</span>
@@ -61,14 +61,14 @@ export function AnalyticsKpiStrip() {
 
         <Card>
           <CardHeader>
-            <CardTitle className="font-normal text-sm">Pageviews</CardTitle>
+            <CardTitle className="font-normal text-sm">Avg. Processing Time</CardTitle>
             <CardAction>
               <Ellipsis className="size-4" />
             </CardAction>
           </CardHeader>
           <CardContent className="flex flex-col gap-4">
             <div className="flex items-center justify-between gap-4">
-              <div className="text-2xl leading-none tracking-tight">547.9k</div>
+              <div className="text-2xl leading-none tracking-tight">48s</div>
               <Badge className="bg-destructive/10 text-destructive">
                 <ArrowDownRight />
                 3.3%
@@ -77,7 +77,7 @@ export function AnalyticsKpiStrip() {
 
             <div className="flex items-center gap-2 text-muted-foreground text-xs">
               <span>
-                from <span className="text-foreground">566.8k</span>
+                from <span className="text-foreground">50s</span>
               </span>
               <span>•</span>
               <span>last 4 weeks</span>
@@ -87,14 +87,14 @@ export function AnalyticsKpiStrip() {
 
         <Card>
           <CardHeader>
-            <CardTitle className="font-normal text-sm">Engagement Rate</CardTitle>
+            <CardTitle className="font-normal text-sm">Avg. Extraction Confidence</CardTitle>
             <CardAction>
               <Ellipsis className="size-4" />
             </CardAction>
           </CardHeader>
           <CardContent className="flex flex-col gap-4">
             <div className="flex items-center justify-between gap-4">
-              <div className="text-2xl leading-none tracking-tight">61.4%</div>
+              <div className="text-2xl leading-none tracking-tight">94.2%</div>
               <Badge className="bg-green-500/10 text-green-700 dark:bg-green-500/15 dark:text-green-300">
                 <ArrowUpRight />
                 4.2%
@@ -103,7 +103,7 @@ export function AnalyticsKpiStrip() {
 
             <div className="flex items-center gap-2 text-muted-foreground text-xs">
               <span>
-                from <span className="text-foreground">58.9%</span>
+                from <span className="text-foreground">90.4%</span>
               </span>
               <span>•</span>
               <span>last 4 weeks</span>
@@ -113,7 +113,7 @@ export function AnalyticsKpiStrip() {
 
         <Card>
           <CardHeader>
-            <CardTitle className="font-normal text-sm">Conversion Rate</CardTitle>
+            <CardTitle className="font-normal text-sm">Deviation Rate</CardTitle>
             <CardAction>
               <Ellipsis className="size-4" />
             </CardAction>

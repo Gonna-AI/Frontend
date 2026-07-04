@@ -9,13 +9,13 @@ export default function Page() {
     <div className="relative z-0 flex h-full flex-col gap-2">
       <div className="flex items-center justify-between gap-3">
         <div className="flex flex-col gap-0.5">
-          <h1 className="font-medium text-sm leading-none">Mail preview</h1>
+          <h1 className="font-medium text-sm leading-none">Generated Documents preview</h1>
           <p className="text-muted-foreground text-sm">
-            This iframe shows the standalone mail screen. Open it in full screen for a better view.
+            This iframe shows the standalone generated documents screen. Open it in full screen for a better view.
           </p>
         </div>
         <Button asChild variant="ghost" size="icon-sm">
-          <Link to="/mail" target="_blank" rel="noreferrer" aria-label="Open mail in new tab">
+          <Link to="/mail" target="_blank" rel="noreferrer" aria-label="Open generated documents in new tab">
             <ExternalLink />
           </Link>
         </Button>
@@ -23,7 +23,7 @@ export default function Page() {
 
       <iframe
         src="/mail?preview=dashboard"
-        title="Mail preview"
+        title="Generated Documents preview"
         className="relative z-0 block min-h-0 flex-1 rounded-lg border bg-background [color-scheme:light]"
       />
     </div>
