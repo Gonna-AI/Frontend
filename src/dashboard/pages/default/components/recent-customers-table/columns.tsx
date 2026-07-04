@@ -9,6 +9,15 @@ import { Checkbox } from "@/components/dashboard-ui/checkbox";
 
 import type { RecentCustomerRow } from "./schema";
 
+// row.id is a plain incrementing number for the static seed data, but a real UUID string for
+// live pipeline_projects rows — Number(uuid) is NaN, which breaks the date math below. Hash the
+// id to a stable small integer instead, so it works for either shape.
+function stableOffset(id: string, mod: number): number {
+  let hash = 0;
+  for (let i = 0; i < id.length; i += 1) hash = (hash * 31 + id.charCodeAt(i)) >>> 0;
+  return hash % mod;
+}
+
 // "billing" values are repurposed here to represent deviation severity for the project.
 const severityLabels: Record<string, string> = {
   Paid: "No Deviations",
@@ -131,7 +140,7 @@ export const recentCustomersColumns: ColumnDef<RecentCustomerRow>[] = [
     header: "Detected",
     cell: ({ row }) => {
       const baseDate = parseISO(row.original.joined);
-      const joinedAt = addMinutes(baseDate, 9 * 60 + (Number(row.original.id) % 12) * 17);
+      const joinedAt = addMinutes(baseDate, 9 * 60 + stableOffset(row.original.id, 12) * 17);
 
       return (
         <div className="grid gap-0.5">
