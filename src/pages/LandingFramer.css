@@ -1354,6 +1354,7 @@ html.lenis.lenis-stopped {
   border-radius: 10px;
   display: block;
   overflow: hidden;
+  position: relative;
   transform: translate3d(0, calc((0.5 - var(--scroll-progress, 0.5)) * 34px), 0);
   transition:
     box-shadow 260ms var(--agero-ease-out),
@@ -1362,12 +1363,16 @@ html.lenis.lenis-stopped {
   width: 100%;
 }
 
+/* Video is pinned edge-to-edge via inset + object-fit: cover so it is always
+   centered symmetrically; the extra scale (not a lopsided margin hack) is
+   what supplies the buffer for the parallax translate below. */
 .agero-sol-video {
   display: block;
-  height: 116%;
-  margin-top: -5.5%;
+  height: 100%;
+  inset: 0;
   object-fit: cover;
-  transform: translate3d(0, calc((0.5 - var(--scroll-progress, 0.5)) * 72px), 0) scale(1.035);
+  position: absolute;
+  transform: translate3d(0, calc((0.5 - var(--scroll-progress, 0.5)) * 72px), 0) scale(1.16);
   transition: transform 180ms linear;
   will-change: transform;
   width: 100%;
@@ -1375,7 +1380,7 @@ html.lenis.lenis-stopped {
 
 @media (hover: hover) and (pointer: fine) {
   .agero-sol-media:hover .agero-sol-video {
-    transform: translate3d(0, calc((0.5 - var(--scroll-progress, 0.5)) * 72px), 0) scale(1.07);
+    transform: translate3d(0, calc((0.5 - var(--scroll-progress, 0.5)) * 72px), 0) scale(1.2);
   }
 }
 
@@ -1480,8 +1485,6 @@ html.lenis.lenis-stopped {
   }
 
   .agero-sol-video {
-    height: 100%;
-    margin-top: 0;
     transform: scale(1.02);
   }
 }

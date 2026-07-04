@@ -56,7 +56,7 @@ export const de = {
     'faq.q1': 'Kann ich Digitalbonus Bayern für ClerkTree nutzen?',
     'faq.a1': 'Ja, Sie erhalten bis zu 50% Zuschuss (bis zu 50.000€) für Straubinger KMU durch bayerische Förderprogramme. Kombinierbar mit kostenloser Trainings-Unterstützung durch das Zukunftszentrum Süd.',
     'faq.q2': 'Wie geht die KI mit dem Gäubodenvolksfest-Ansturm um?',
-    'faq.a2': 'Unsere KI-Agenten können unbegrenzt viele Anrufe gleichzeitig entgegennehmen. Wenn 1,25 Millionen Besucher nach Straubing strömen, nimmt Ihr KI-Concierge autonom Reservierungen an, beantwortet FAQs und stellt sicher, dass Sie keine Buchung verpassen, während sich Ihr Personal auf den Service vor Ort konzentriert.',
+    'faq.a2': 'Unsere KI-Agenten können unbegrenzt viele Anrufe gleichzeitig entgegennehmen. Wenn 1,25 Millionen Besucher nach Straubing strömen, nimmt Ihr KI-Harness autonom Reservierungen an, beantwortet FAQs und stellt sicher, dass Sie keine Buchung verpassen, während sich Ihr Personal auf den Service vor Ort konzentriert.',
     'faq.q3': 'Wie ist die Preisgestaltung von ClerkTree?',
     'faq.a3': 'Wir bieten flexible Preise basierend auf Ihrem Dokumentenvolumen, der Anzahl der Benutzer und den benötigten Funktionen an. Kontaktieren Sie unser Vertriebsteam für ein individuelles Angebot, das Ihren geschäftlichen Anforderungen entspricht.',
     'faq.q4': 'Wie lange dauert die Implementierung?',

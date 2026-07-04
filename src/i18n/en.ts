@@ -54,9 +54,9 @@ export const en = {
 
     // FAQ Items
     'faq.q1': 'Can I use the Digitalbonus Bayern for ClerkTree?',
-    'faq.a1': 'Yes, Bavarian SMEs can receive up to 50% funding (up to €50,000) for integrating our AI Voice Concierge. This can also be combined with free training support from Zukunftszentrum Süd.',
+    'faq.a1': 'Yes, Bavarian SMEs can receive up to 50% funding (up to €50,000) for integrating our AI harness. This can also be combined with free training support from Zukunftszentrum Süd.',
     'faq.q2': 'How does the AI handle the Gäubodenvolksfest rush?',
-    'faq.a2': 'Our AI agents can handle unlimited concurrent calls simultaneously. When 1.25M visitors flood Straubing, your AI concierge will autonomously take reservations, answer FAQs, and ensure you never miss a booking while your staff focuses on in-person service.',
+    'faq.a2': 'Our AI agents can handle unlimited concurrent calls simultaneously. When 1.25M visitors flood Straubing, your AI harness will autonomously take reservations, answer FAQs, and ensure you never miss a booking while your staff focuses on in-person service.',
     'faq.q3': 'How is ClerkTree priced?',
     'faq.a3': 'We offer flexible pricing based on your volume of documents, number of users, and specific features required. Contact our sales team for a customized quote that fits your business needs.',
     'faq.q4': 'How long does implementation take?',
