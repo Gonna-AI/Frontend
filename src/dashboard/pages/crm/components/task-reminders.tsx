@@ -1,21 +1,55 @@
+import { useEffect, useState } from "react";
+
 import { CalendarDays, CalendarRange } from "lucide-react-dash";
 
 import { Button } from "@/components/dashboard-ui/button";
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/dashboard-ui/card";
+import { fetchOpportunities, subscribeToTable } from "@/dashboard/lib/pipelineClient";
 import { cn } from "@/lib/utils";
 
-const proposalSent = 12;
-const proposalGoal = 18;
-const proposalProgressPercentage = Math.round((proposalSent / proposalGoal) * 100);
-const proposalGoalBarCount = 42;
-const activeProposalBars = Math.round((proposalSent / proposalGoal) * proposalGoalBarCount);
-
-const proposalGoalBars = Array.from({ length: proposalGoalBarCount }, (_, index) => ({
-  id: `proposal-goal-${index + 1}`,
-  active: index < activeProposalBars,
-}));
+// The monthly goal (18) is a business-set target, not something derivable from data — kept as a
+// constant. "Sent" is real: opportunities that have reached Angebot stage or further.
+const PROPOSAL_GOAL = 18;
+const PROPOSAL_GOAL_BAR_COUNT = 42;
 
 export function TaskReminders() {
+  const [proposalSent, setProposalSent] = useState(12);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const load = () => {
+      fetchOpportunities()
+        .then((rows) => {
+          if (cancelled) return;
+          if (rows.length === 0) return;
+          const sent = rows.filter((r) => r.stage === "Angebot" || r.stage === "Bestellung" || r.stage === "AB").length;
+          setProposalSent(sent);
+        })
+        .catch(() => {
+          // Falls back to the static demo count if Supabase is unreachable.
+        });
+    };
+
+    load();
+    const unsubscribe = subscribeToTable("pipeline_crm_opportunities", load);
+
+    return () => {
+      cancelled = true;
+      unsubscribe();
+    };
+  }, []);
+
+  const proposalProgressPercentage = Math.round((proposalSent / PROPOSAL_GOAL) * 100);
+  const activeProposalBars = Math.min(
+    PROPOSAL_GOAL_BAR_COUNT,
+    Math.round((proposalSent / PROPOSAL_GOAL) * PROPOSAL_GOAL_BAR_COUNT),
+  );
+  const proposalGoalBars = Array.from({ length: PROPOSAL_GOAL_BAR_COUNT }, (_, index) => ({
+    id: `proposal-goal-${index + 1}`,
+    active: index < activeProposalBars,
+  }));
+
   return (
     <section className="grid grid-cols-1 gap-4 xl:grid-cols-12">
       <Card className="xl:col-span-8">
@@ -79,7 +113,7 @@ export function TaskReminders() {
             <div className="font-medium text-2xl tabular-nums leading-none">
               {proposalSent} <span className="font-normal text-base text-muted-foreground">Angebote</span>
             </div>
-            <div className="text-muted-foreground text-sm tabular-nums">{proposalGoal} target</div>
+            <div className="text-muted-foreground text-sm tabular-nums">{PROPOSAL_GOAL} target</div>
           </div>
           <div className="flex h-10 w-full items-end gap-0.5">
             {proposalGoalBars.map((bar) => (
