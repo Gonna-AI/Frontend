@@ -14,9 +14,10 @@ import { useChat } from "./use-chat";
 
 interface ChatProps {
   conversations: Conversation[];
+  onSendMessage?: (text: string) => Promise<void> | void;
 }
 
-export function Chat({ conversations }: ChatProps) {
+export function Chat({ conversations, onSendMessage }: ChatProps) {
   const [chat] = useChat();
   const [showContact, setShowContact] = useState(false);
   const [showThread, setShowThread] = useState(false);
@@ -46,6 +47,8 @@ export function Chat({ conversations }: ChatProps) {
         <ChatThread
           contact={activeConversation.contact}
           messages={activeConversation.messages}
+          isPending={activeConversation.isPending}
+          onSendMessage={activeConversation.threadId ? onSendMessage : undefined}
           showBackButton={isMobile}
           onBack={() => setShowThread(false)}
           onOpenContact={() => setShowContact(true)}

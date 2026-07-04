@@ -2,7 +2,7 @@ import type { LucideIcon } from "lucide-react-dash";
 import { Clock3, Inbox, Mail, MessageCircle, Phone, Send, Star, User } from "lucide-react-dash";
 
 export type Conversation = {
-  id: number;
+  id: number | string;
   group: "Pinned" | "Today" | "Yesterday";
   name: string;
   subject: string;
@@ -13,10 +13,14 @@ export type Conversation = {
   unreadCount: number;
   contact: Contact;
   messages: Message[];
+  /** Live-backed conversations carry the real pipeline_chat_threads.id so replies can be persisted via askCopilot. */
+  threadId?: string;
+  /** True while waiting on the askCopilot Edge Function response for this conversation. */
+  isPending?: boolean;
 };
 
 export type Message = {
-  id: number;
+  id: number | string;
   align: "start" | "end";
   text: string;
   time: string;

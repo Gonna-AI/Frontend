@@ -1,4 +1,6 @@
 
+import { type FormEvent, useState } from "react";
+
 import {
   AlarmClock,
   ArrowLeft,
@@ -52,9 +54,22 @@ interface ChatThreadProps {
   onBack?: () => void;
   showBackButton?: boolean;
   className?: string;
+  /** When set, the composer submits through this instead of being a no-op (wires up askCopilot). */
+  onSendMessage?: (text: string) => Promise<void> | void;
+  /** True while waiting on the assistant's reply — shows a typing indicator bubble. */
+  isPending?: boolean;
 }
 
-export function ChatThread({ contact, messages, onOpenContact, onBack, showBackButton, className }: ChatThreadProps) {
+export function ChatThread({
+  contact,
+  messages,
+  onOpenContact,
+  onBack,
+  showBackButton,
+  className,
+  onSendMessage,
+  isPending,
+}: ChatThreadProps) {
   return (
     <div className={cn("flex h-full flex-col py-3", className)}>
       <div className="flex flex-col gap-3">
@@ -189,6 +204,33 @@ export function ChatThread({ contact, messages, onOpenContact, onBack, showBackB
                   </MessageScrollerItem>
                 );
               })}
+
+              {isPending && (
+                <MessageScrollerItem messageId="copilot-typing" scrollAnchor>
+                  <Message align="start">
+                    <MessageAvatar>
+                      <Avatar>
+                        <AvatarFallback className="bg-muted text-foreground text-xs">
+                          {getInitials(contact.name)}
+                        </AvatarFallback>
+                      </Avatar>
+                    </MessageAvatar>
+                    <MessageContent>
+                      <BubbleGroup>
+                        <Bubble variant="muted" align="start">
+                          <BubbleContent>
+                            <span className="inline-flex items-center gap-1 text-muted-foreground">
+                              <span className="size-1.5 animate-bounce rounded-full bg-current [animation-delay:-0.3s]" />
+                              <span className="size-1.5 animate-bounce rounded-full bg-current [animation-delay:-0.15s]" />
+                              <span className="size-1.5 animate-bounce rounded-full bg-current" />
+                            </span>
+                          </BubbleContent>
+                        </Bubble>
+                      </BubbleGroup>
+                    </MessageContent>
+                  </Message>
+                </MessageScrollerItem>
+              )}
             </MessageScrollerContent>
           </MessageScrollerViewport>
           <MessageScrollerButton />
@@ -210,7 +252,7 @@ export function ChatThread({ contact, messages, onOpenContact, onBack, showBackB
           </TabsList>
 
           <TabsContent value="reply" className="m-0">
-            <MessageComposer placeholder="Type your message..." />
+            <MessageComposer placeholder="Type your message..." onSubmit={onSendMessage} disabled={isPending} />
           </TabsContent>
           <TabsContent value="note" className="m-0">
             <MessageComposer placeholder="Write an internal note..." />
@@ -221,17 +263,42 @@ export function ChatThread({ contact, messages, onOpenContact, onBack, showBackB
   );
 }
 
-function MessageComposer({ placeholder }: { placeholder: string }) {
+function MessageComposer({
+  placeholder,
+  onSubmit,
+  disabled,
+}: {
+  placeholder: string;
+  onSubmit?: (text: string) => Promise<void> | void;
+  disabled?: boolean;
+}) {
+  const [value, setValue] = useState("");
+
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const trimmed = value.trim();
+    if (!trimmed || disabled) return;
+
+    if (onSubmit) {
+      setValue("");
+      void onSubmit(trimmed);
+    }
+  };
+
   return (
-    <form
-      className="w-full"
-      onSubmit={(event) => {
-        event.preventDefault();
-      }}
-    >
+    <form className="w-full" onSubmit={handleSubmit}>
       <InputGroup className="border-0 bg-transparent shadow-none has-[[data-slot=input-group-control]:focus-visible]:border-0 has-[[data-slot][aria-invalid=true]]:border-0 has-[[data-slot=input-group-control]:focus-visible]:ring-0 has-[[data-slot][aria-invalid=true]]:ring-0 dark:bg-transparent dark:has-[[data-slot][aria-invalid=true]]:ring-0">
         <InputGroupTextarea
           placeholder={placeholder}
+          value={value}
+          disabled={disabled}
+          onChange={(event) => setValue(event.target.value)}
+          onKeyDown={(event) => {
+            if (event.key === "Enter" && !event.shiftKey) {
+              event.preventDefault();
+              event.currentTarget.form?.requestSubmit();
+            }
+          }}
           className="min-h-14 px-3 py-2.5 text-sm ring-0 focus-visible:ring-0 aria-invalid:ring-0 dark:aria-invalid:ring-0"
         />
         <InputGroupAddon align="block-end">
@@ -250,7 +317,7 @@ function MessageComposer({ placeholder }: { placeholder: string }) {
           <InputGroupButton aria-label="AI assist" type="button" size="icon-sm" variant="outline">
             <Sparkles />
           </InputGroupButton>
-          <InputGroupButton type="submit" variant="default" size="icon-sm" className="ml-auto">
+          <InputGroupButton type="submit" variant="default" size="icon-sm" className="ml-auto" disabled={disabled}>
             <Send />
             <span className="sr-only">Send</span>
           </InputGroupButton>

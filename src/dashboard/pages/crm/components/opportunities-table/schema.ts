@@ -12,3 +12,6 @@ const opportunitySchema = z.object({
 export const opportunitiesSchema = z.array(opportunitySchema);
 
 export type OpportunityRow = z.infer<typeof opportunitySchema>;
+
+export const STAGE_OPTIONS = ["Anfrage", "Konzept", "Kalkulation", "Angebot", "Bestellung", "AB"] as const;
+export type OpportunityStage = (typeof STAGE_OPTIONS)[number];
