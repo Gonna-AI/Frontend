@@ -1,5 +1,4 @@
 import { Link } from "react-router-dom";
-import { Command } from "lucide-react-dash";
 
 import {
   Sidebar,
@@ -17,7 +16,6 @@ import { useAuth } from "@/contexts/AuthContext";
 
 import { NavMain } from "./nav-main";
 import { NavUser } from "./nav-user";
-import { SidebarSupportCard } from "./sidebar-support-card";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const variant = usePreferencesStore((s) => s.values.sidebar_variant);
@@ -37,7 +35,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <SidebarMenuItem>
             <SidebarMenuButton asChild>
               <Link to="/dashboard/default">
-                <Command />
+                <img src="/favicon.svg" alt="ClerkTree" className="size-5" />
                 <span className="font-semibold text-base">{APP_CONFIG.name}</span>
               </Link>
             </SidebarMenuButton>
@@ -48,7 +46,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavMain items={sidebarItems} />
       </SidebarContent>
       <SidebarFooter>
-        <SidebarSupportCard />
         <NavUser user={currentUser} />
       </SidebarFooter>
     </Sidebar>

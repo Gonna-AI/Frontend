@@ -5,6 +5,11 @@ import { Command } from "lucide-react-dash";
 import { Separator } from "@/components/dashboard-ui/separator";
 import { APP_CONFIG } from "@/dashboard/data/app-config";
 
+// Without this, .dashboard-root has no CSS variables defined anywhere (they're all scoped
+// under .dashboard-root inside this stylesheet), so every bg-background/text-foreground/etc.
+// utility resolves to nothing — black-on-black. DashboardLayout.tsx imports this too.
+import "@/dashboard/styles/dashboard-theme.css";
+
 export default function AuthV2Layout() {
   return (
     <main className="dashboard-root">
