@@ -22,7 +22,7 @@ export default function Page() {
       </div>
 
       <iframe
-        src="/chat"
+        src="/chat?preview=dashboard"
         title="Chat preview"
         className="relative z-0 block min-h-0 flex-1 rounded-lg border bg-background [color-scheme:light]"
       />
