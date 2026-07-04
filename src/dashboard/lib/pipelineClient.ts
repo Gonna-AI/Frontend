@@ -143,10 +143,17 @@ export function subscribeToTable(table: string, onChange: () => void, filter?: s
   };
 }
 
-export async function fetchCompanies() {
+export interface PipelineCompanyRow {
+  id: string;
+  name: string;
+  slug: string;
+  industry: string | null;
+}
+
+export async function fetchCompanies(): Promise<PipelineCompanyRow[]> {
   const { data, error } = await supabase.from("pipeline_companies").select("*").order("name");
   if (error) throw error;
-  return data;
+  return (data ?? []) as PipelineCompanyRow[];
 }
 
 export interface PipelineChecklistItemRow {
@@ -355,6 +362,49 @@ export async function fetchChatMessages(threadId: string): Promise<PipelineChatM
     .order("created_at", { ascending: true });
   if (error) throw error;
   return (data ?? []) as PipelineChatMessageRow[];
+}
+
+export interface PipelineHistoricalProjectRow {
+  id: string;
+  company_id: string;
+  title: string;
+  summary: string | null;
+  outcome: string | null;
+  embedding: number[] | string | null;
+}
+
+/**
+ * Historical projects backing the Project Memory / RAG index.
+ * `embedding` is currently NULL for all rows until the VPS worker backfills it —
+ * treat embedding === null as "Pending"/"Nicht indiziert", non-null as "Indexed"/"Indiziert".
+ */
+export async function fetchHistoricalProjects(companySlug?: string): Promise<PipelineHistoricalProjectRow[]> {
+  let query = supabase
+    .from("pipeline_historical_projects")
+    .select("id, company_id, title, summary, outcome, embedding")
+    .order("title");
+
+  if (companySlug) {
+    // Best-effort filter: if the slug isn't found, fall back to the unfiltered list rather
+    // than failing the whole fetch.
+    try {
+      const { data: company, error: companyError } = await supabase
+        .from("pipeline_companies")
+        .select("id")
+        .eq("slug", companySlug)
+        .maybeSingle();
+
+      if (!companyError && company) {
+        query = query.eq("company_id", company.id);
+      }
+    } catch {
+      // ignore — unfiltered query below still runs
+    }
+  }
+
+  const { data, error } = await query;
+  if (error) throw error;
+  return (data ?? []) as PipelineHistoricalProjectRow[];
 }
 
 /** Calls the live kostencheck-copilot Edge Function: persists the user message, retrieves */

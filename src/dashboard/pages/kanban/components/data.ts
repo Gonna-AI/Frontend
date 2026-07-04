@@ -1,4 +1,4 @@
-import type { BoardState, Column, TaskOwnerProfile, TaskTeam } from "./types";
+import type { BoardState, Column, ColumnId, TaskOwnerProfile, TaskTeam } from "./types";
 
 export const columns = [
   { id: "ideas", title: "Erkannt" },
@@ -9,6 +9,25 @@ export const columns = [
 ] as const satisfies readonly Column[];
 
 export const columnIds = columns.map((column) => column.id);
+
+// The board keeps 5 visual columns, but `pipeline_checklist_items.status` only has 3 states
+// (open | in_progress | done). Each column maps to the DB status it writes when a card is
+// dropped there; "planned" is the canonical column live in_progress items land back in after a
+// refetch/Realtime tick (building/qa are treated as sub-stages of the same in_progress status).
+export const columnIdToChecklistStatus: Record<ColumnId, "open" | "in_progress" | "done"> = {
+  ideas: "open",
+  planned: "in_progress",
+  building: "in_progress",
+  qa: "in_progress",
+  shipped: "done",
+};
+
+// Where a freshly (re)fetched checklist item of a given DB status is placed on the board.
+export const checklistStatusToColumnId: Record<"open" | "in_progress" | "done", ColumnId> = {
+  open: "ideas",
+  in_progress: "planned",
+  done: "shipped",
+};
 
 export const tagTones: Record<TaskTeam, string> = {
   Backend: "bg-blue-500/10 text-blue-700 dark:text-blue-300",
@@ -52,6 +71,8 @@ const taskOwners = {
     tone: "[&_[data-slot=avatar-fallback]]:bg-sky-100 [&_[data-slot=avatar-fallback]]:text-sky-700 after:border-sky-200 dark:[&_[data-slot=avatar-fallback]]:bg-sky-500/15 dark:[&_[data-slot=avatar-fallback]]:text-sky-300 dark:after:border-sky-500/20",
   },
 } satisfies Record<string, TaskOwnerProfile>;
+
+export const fallbackTaskOwners = taskOwners;
 
 export const initialBoard: BoardState = {
   ideas: [

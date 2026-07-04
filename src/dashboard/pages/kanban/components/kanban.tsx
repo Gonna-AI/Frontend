@@ -44,8 +44,9 @@ import {
 } from "@/components/dashboard-ui/dropdown-menu";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/dashboard-ui/input-group";
 import { Tabs, TabsList, TabsTrigger } from "@/components/dashboard-ui/tabs";
+import { updateChecklistItemStatus } from "@/dashboard/lib/pipelineClient";
 
-import { columnIds, columns } from "./data";
+import { columnIdToChecklistStatus, columnIds, columns } from "./data";
 import { KanbanColumn } from "./kanban-column";
 import { TaskCard } from "./task-card";
 import type { BoardState, ColumnId, Task } from "./types";
@@ -58,6 +59,16 @@ interface KanbanProps {
 export function Kanban({ initialBoard }: KanbanProps) {
   const [board, setBoard] = React.useState<BoardState>(initialBoard);
   const [columnOrder, setColumnOrder] = React.useState<ColumnId[]>(columnIds);
+  const previousInitialBoard = React.useRef(initialBoard);
+
+  // `initialBoard` changes when the parent page's live Supabase fetch/Realtime tick resolves.
+  // Re-sync local board state so cards moved on the Tasks page (or by another user) show up here.
+  React.useEffect(() => {
+    if (previousInitialBoard.current !== initialBoard) {
+      previousInitialBoard.current = initialBoard;
+      setBoard(initialBoard);
+    }
+  }, [initialBoard]);
   const [activeTask, setActiveTask] = React.useState<Task | null>(null);
   const [activeColumnId, setActiveColumnId] = React.useState<ColumnId | null>(null);
   const boardBeforeDrag = React.useRef<BoardState | null>(null);
@@ -151,6 +162,18 @@ export function Kanban({ initialBoard }: KanbanProps) {
 
     const activeId = String(active.id);
     const overId = String(over.id);
+
+    // By the time handleDragEnd fires, a cross-column move already happened optimistically in
+    // handleDragOver — `board` reflects the task's new column. Compare against the pre-drag
+    // snapshot to detect that and persist the status change.
+    const originalColumnId = snapshot ? findColumnId(snapshot, activeId) : null;
+    const currentColumnId = findColumnId(board, activeId);
+    if (originalColumnId && currentColumnId && originalColumnId !== currentColumnId) {
+      const newStatus = columnIdToChecklistStatus[currentColumnId];
+      updateChecklistItemStatus(activeId, newStatus).catch(() => {
+        // Best-effort — a Realtime refetch will reconcile the board if this write fails.
+      });
+    }
 
     setBoard((currentBoard) => {
       const activeColumnId = findColumnId(currentBoard, activeId);

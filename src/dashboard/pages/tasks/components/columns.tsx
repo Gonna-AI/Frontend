@@ -18,9 +18,20 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/dashboard-ui/dropdown-menu";
+import { updateChecklistItemStatus } from "@/dashboard/lib/pipelineClient";
 import { cn } from "@/lib/utils";
 
 import { labels, priorities, statuses, type Task } from "./data";
+
+// Tasks has 5 display statuses, pipeline_checklist_items only has 3 — collapse the same way the
+// Kanban board does (backlog/todo -> open, "in progress" -> in_progress, done/canceled -> done).
+const taskStatusToChecklistStatus: Record<string, "open" | "in_progress" | "done"> = {
+  backlog: "open",
+  todo: "open",
+  "in progress": "in_progress",
+  done: "done",
+  canceled: "done",
+};
 
 const statusStyles: Record<string, string> = {
   backlog: "border-muted-foreground/20 bg-muted text-muted-foreground",
@@ -178,6 +189,26 @@ export const columns: ColumnDef<Task>[] = [
               <DropdownMenuItem>Duplizieren</DropdownMenuItem>
               <DropdownMenuItem>Favorisieren</DropdownMenuItem>
               <DropdownMenuSeparator />
+              <DropdownMenuSub>
+                <DropdownMenuSubTrigger>Status</DropdownMenuSubTrigger>
+                <DropdownMenuSubContent>
+                  <DropdownMenuRadioGroup
+                    value={task.status}
+                    onValueChange={(value) => {
+                      updateChecklistItemStatus(task.id, taskStatusToChecklistStatus[value]).catch(() => {
+                        // Best-effort — a Realtime refetch will reconcile the table if this write fails.
+                      });
+                    }}
+                  >
+                    {statuses.map((status) => (
+                      <DropdownMenuRadioItem key={status.value} value={status.value}>
+                        {status.icon && <status.icon className="mr-2 size-4" />}
+                        {status.label}
+                      </DropdownMenuRadioItem>
+                    ))}
+                  </DropdownMenuRadioGroup>
+                </DropdownMenuSubContent>
+              </DropdownMenuSub>
               <DropdownMenuSub>
                 <DropdownMenuSubTrigger>Kategorie</DropdownMenuSubTrigger>
                 <DropdownMenuSubContent>
