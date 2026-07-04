@@ -618,22 +618,29 @@ html.lenis.lenis-stopped {
 }
 
 .agero-home-prelude {
-  background: transparent;
+  background: var(--agero-bg);
   overflow: hidden;
+  padding: 8px 8px 0;
   position: relative;
   width: 100%;
 }
 
 .agero-showcase-shell {
-  background: transparent;
-  padding: 0 8px;
+  background: var(--agero-panel);
+  border: 1px solid rgba(19, 19, 19, 0.12);
+  border-radius: 42px;
+  box-shadow: 0 24px 90px rgba(0, 0, 0, 0.1);
+  margin: 0 auto;
+  max-width: 1920px;
+  overflow: hidden;
+  padding: 8px;
   position: relative;
-  width: 100%;
+  width: min(100%, calc(100vw - 16px));
 }
 
 .agero-showcase-media {
   background: #000;
-  border-radius: 32px;
+  border-radius: 34px 34px 0 0;
   height: clamp(420px, 37vw, 760px);
   overflow: hidden;
   position: relative;
@@ -660,6 +667,7 @@ html.lenis.lenis-stopped {
   overflow: hidden;
   position: relative;
   width: 100%;
+  border-radius: 0 0 34px 34px;
 }
 
 .agero-client-logo-strip::before,
@@ -3065,18 +3073,20 @@ html.lenis.lenis-stopped {
   }
 
   .agero-showcase-shell {
-    border-radius: 0;
+    border-radius: 30px;
     margin: 0;
+    padding: 6px;
+    width: min(100%, calc(100vw - 12px));
   }
 
   .agero-showcase-media {
-    border-top-left-radius: 24px;
-    border-top-right-radius: 24px;
+    border-radius: 24px 24px 0 0;
     height: auto;
     aspect-ratio: 16 / 9;
   }
 
   .agero-client-logo-strip {
+    border-radius: 0 0 24px 24px;
     height: 132px;
   }
 
