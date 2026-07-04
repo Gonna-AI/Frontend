@@ -1,13 +1,13 @@
 import {
-  Banknote,
   ChevronRight,
-  Droplet,
-  History,
-  Lightbulb,
+  ClipboardList,
+  FileCheck2,
+  FileClock,
+  FileSearch,
+  FileText,
   MoreHorizontal,
-  QrCode,
-  SendHorizontal,
-  Smartphone,
+  RefreshCw,
+  Send,
 } from "lucide-react-dash";
 
 import { Avatar, AvatarFallback } from "@/components/dashboard-ui/avatar";
@@ -17,20 +17,20 @@ import { Field } from "@/components/dashboard-ui/field";
 import { InputGroup, InputGroupAddon, InputGroupInput, InputGroupText } from "@/components/dashboard-ui/input-group";
 
 const contacts = [
-  { id: 1, initials: "AR" },
-  { id: 2, initials: "SC" },
+  { id: 1, initials: "AL" },
+  { id: 2, initials: "PTL" },
   { id: 3, initials: "MJ" },
   { id: 4, initials: "ED" },
 ];
 
 const shortcuts = [
-  { id: 1, label: "Scan QR", icon: QrCode },
-  { id: 2, label: "Transfer", icon: SendHorizontal },
-  { id: 3, label: "Pay Bills", icon: Banknote },
-  { id: 4, label: "History", icon: History },
-  { id: 5, label: "Mobile", icon: Smartphone },
-  { id: 6, label: "Electricity", icon: Lightbulb },
-  { id: 7, label: "Water", icon: Droplet },
+  { id: 1, label: "Zusammenfassung", icon: FileText },
+  { id: 2, label: "KickOff-Brief", icon: Send },
+  { id: 3, label: "Abweichungsbericht", icon: FileSearch },
+  { id: 4, label: "AB-Entwurf", icon: FileCheck2 },
+  { id: 5, label: "Re-run diff", icon: RefreshCw },
+  { id: 6, label: "Review queue", icon: ClipboardList },
+  { id: 7, label: "Pending", icon: FileClock },
   { id: 8, label: "More", icon: MoreHorizontal },
 ];
 
@@ -39,7 +39,7 @@ export function QuickActions() {
     <div className="flex flex-col gap-4">
       <Card>
         <CardHeader>
-          <CardTitle className="font-normal">Quick Transfer</CardTitle>
+          <CardTitle className="font-normal">Send to AL/PTL</CardTitle>
           <CardAction>
             <div className="flex items-center gap-1">
               <div className="flex -space-x-2">
@@ -57,11 +57,11 @@ export function QuickActions() {
           <Field orientation="horizontal">
             <InputGroup>
               <InputGroupAddon>
-                <InputGroupText>$</InputGroupText>
+                <InputGroupText>#</InputGroupText>
               </InputGroupAddon>
-              <InputGroupInput placeholder="0.00" />
+              <InputGroupInput placeholder="B-88431" />
               <InputGroupAddon align="inline-end">
-                <InputGroupText>USD</InputGroupText>
+                <InputGroupText>Order</InputGroupText>
               </InputGroupAddon>
             </InputGroup>
             <Button>Send</Button>
@@ -71,7 +71,7 @@ export function QuickActions() {
 
       <Card>
         <CardHeader>
-          <CardTitle className="font-normal">Shortcuts</CardTitle>
+          <CardTitle className="font-normal">Generated Documents</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-4 gap-4">

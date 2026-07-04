@@ -1,30 +1,28 @@
 
 import { addDays, format, set } from "date-fns";
-import { ChevronRight, Zap } from "lucide-react-dash";
-import { siClaude, siLinear, siResend } from "simple-icons";
+import { ChevronRight, FileSearch, FileText, Send, Zap } from "lucide-react-dash";
 
-import { SimpleIcon } from "@/dashboard/components/simple-icon";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/dashboard-ui/card";
 import { Item, ItemActions, ItemContent, ItemDescription, ItemGroup, ItemMedia, ItemTitle } from "@/components/dashboard-ui/item";
 
 const transactions = [
   {
     id: 1,
-    title: "Claude Pro Subscription",
-    date: format(set(addDays(new Date(), 2), { hours: 14, minutes: 45 }), "hh.mm a '•' MMMM dd, yyyy"),
-    icon: siClaude,
+    title: "Zusammenfassung",
+    date: format(set(addDays(new Date(), -2), { hours: 14, minutes: 45 }), "hh.mm a '•' MMMM dd, yyyy"),
+    icon: FileText,
   },
   {
     id: 2,
-    title: "Resend Pro Team",
-    date: format(set(addDays(new Date(), 4), { hours: 7, minutes: 0 }), "hh.mm a '•' MMMM dd, yyyy"),
-    icon: siResend,
+    title: "Abweichungsbericht",
+    date: format(set(addDays(new Date(), -2), { hours: 15, minutes: 10 }), "hh.mm a '•' MMMM dd, yyyy"),
+    icon: FileSearch,
   },
   {
     id: 3,
-    title: "Linear Plus Plan",
-    date: format(set(addDays(new Date(), 10), { hours: 7, minutes: 0 }), "hh.mm a '•' MMMM dd, yyyy"),
-    icon: siLinear,
+    title: "KickOff-Brief für AL/PTL",
+    date: format(set(addDays(new Date(), -1), { hours: 9, minutes: 0 }), "hh.mm a '•' MMMM dd, yyyy"),
+    icon: Send,
   },
 ];
 
@@ -32,23 +30,22 @@ export function UpcomingTransactions() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="font-normal">Upcoming Bills & Payments</CardTitle>
+        <CardTitle className="font-normal">Generated Documents</CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col gap-3">
         <div className="flex flex-col gap-3">
           <div className="flex flex-col gap-1">
             <h2 className="flex items-baseline text-3xl leading-none tracking-tight">
-              <span className="font-normal">$1,245</span>
-              <span className="text-muted-foreground text-xl">.00</span>
+              <span className="font-normal">4</span>
             </h2>
             <p className="text-muted-foreground text-sm leading-none">
-              You have <span className="font-medium text-foreground">3</span> bills due this month
+              Documents generated for <span className="font-medium text-foreground">Bergmann Maschinenbau</span>
             </p>
           </div>
           <div className="flex w-max items-center gap-2 rounded-md border border-border bg-muted/70 px-2 py-1.5 text-sm">
             <Zap className="size-4 fill-primary text-primary" />
             <span className="text-muted-foreground">
-              Autopay will process <span className="font-medium text-foreground">$145.00</span> today
+              <span className="font-medium text-foreground">AB-Entwurf</span> still pending sign-off
             </span>
           </div>
         </div>
@@ -58,7 +55,7 @@ export function UpcomingTransactions() {
             <Item key={transaction.id} variant="outline" size="xs">
               <ItemMedia>
                 <div className="grid size-9 place-items-center rounded-md border bg-background">
-                  <SimpleIcon icon={transaction.icon} />
+                  <transaction.icon className="size-4 text-muted-foreground" />
                 </div>
               </ItemMedia>
               <ItemContent>

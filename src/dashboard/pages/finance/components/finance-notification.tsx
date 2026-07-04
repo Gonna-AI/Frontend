@@ -1,4 +1,4 @@
-import { TrendingUp } from "lucide-react-dash";
+import { AlertTriangle } from "lucide-react-dash";
 
 import { Button } from "@/components/dashboard-ui/button";
 import { Item, ItemActions, ItemContent, ItemDescription, ItemMedia, ItemTitle } from "@/components/dashboard-ui/item";
@@ -7,11 +7,13 @@ export function FinanceNotification() {
   return (
     <Item className="rounded-xl" variant="outline">
       <ItemMedia variant="icon">
-        <TrendingUp />
+        <AlertTriangle />
       </ItemMedia>
       <ItemContent>
-        <ItemTitle>Credit score updated</ItemTitle>
-        <ItemDescription>Your score increased by 14 points to 782.</ItemDescription>
+        <ItemTitle>Payment terms silently changed</ItemTitle>
+        <ItemDescription>
+          "30 Tage netto" → "60 Tage netto" in prose, not visually flagged in the document (confidence 0.62).
+        </ItemDescription>
       </ItemContent>
       <ItemActions>
         <Button size="sm" variant="outline">

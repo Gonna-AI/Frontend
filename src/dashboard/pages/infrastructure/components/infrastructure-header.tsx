@@ -12,10 +12,10 @@ export function InfrastructureHeader() {
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div className="flex min-w-0 flex-col gap-1">
             <h1 className="font-medium text-2xl leading-tight tracking-tight sm:text-3xl sm:leading-none">
-              Infrastructure Overview
+              Live Stack
             </h1>
             <p className="text-muted-foreground text-sm">
-              Monitor environments, server health, uptime, and resource usage across every project.
+              Real-time health of the Kostencheck Copilot pipeline: worker, inference, and database.
             </p>
           </div>
 
@@ -33,19 +33,19 @@ export function InfrastructureHeader() {
         </div>
         <div className="flex flex-wrap gap-2">
           <Badge variant="outline" className="h-auto gap-1 rounded-sm px-1.5 py-0.5">
-            <Container />6 Projects
+            <Container />3 Services
           </Badge>
           <Badge variant="outline" className="h-auto gap-1 rounded-sm px-1.5 py-0.5">
             <Box />
-            16 Environments
+            5 Components
           </Badge>
           <Badge variant="outline" className="h-auto gap-1 rounded-sm px-1.5 py-0.5">
             <Server />
-            36 Servers
+            1 Worker Node
           </Badge>
           <Badge variant="outline" className="h-auto gap-1 rounded-sm px-1.5 py-0.5">
             <span className="size-2 rounded-full bg-green-600 dark:bg-green-500" />
-            99.93% Global Uptime
+            99.98% Uptime (30d)
           </Badge>
         </div>
       </div>
@@ -55,7 +55,7 @@ export function InfrastructureHeader() {
           <InputGroupAddon>
             <Search />
           </InputGroupAddon>
-          <InputGroupInput placeholder="Search by name or domain..." />
+          <InputGroupInput placeholder="Search by service or endpoint..." />
           <InputGroupAddon align="inline-end">
             <Kbd>⌘ K</Kbd>
           </InputGroupAddon>
@@ -64,19 +64,19 @@ export function InfrastructureHeader() {
         <div className="flex flex-wrap gap-2">
           <Button variant="outline">
             <PlusCircle data-icon="inline-start" />
-            Organization
+            Worker
           </Button>
           <Button variant="outline">
             <PlusCircle data-icon="inline-start" />
-            Stack
+            Inference
           </Button>
           <Button variant="outline">
             <PlusCircle data-icon="inline-start" />
-            Cloud provider
+            Database
           </Button>
           <Button variant="outline">
             <PlusCircle data-icon="inline-start" />
-            Project type
+            Queue Stage
           </Button>
           <Button variant="outline">
             <PlusCircle data-icon="inline-start" />

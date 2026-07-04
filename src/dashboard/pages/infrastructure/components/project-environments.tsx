@@ -166,16 +166,19 @@ function EnvironmentTable({ rows }: { rows: InfrastructureEnvironment[] }) {
               </TableCell>
               <TableCell>
                 <Badge
-                  variant={row.status === "Online" ? "secondary" : "destructive"}
+                  variant={row.status === "Unhealthy" ? "destructive" : "secondary"}
                   className={cn(
                     "rounded-sm px-1.5 py-0.5",
                     row.status === "Online" && "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
+                    row.status === "Processing" && "bg-amber-500/10 text-amber-600 dark:text-amber-400",
                   )}
                 >
                   <span
                     className={cn(
                       "size-1.5 rounded-full",
-                      row.status === "Online" ? "bg-emerald-500" : "bg-destructive",
+                      row.status === "Online" && "bg-emerald-500",
+                      row.status === "Processing" && "bg-amber-500",
+                      row.status === "Unhealthy" && "bg-destructive",
                     )}
                   />
                   {row.status}

@@ -2,14 +2,29 @@
 
 import type { ColumnDef } from "@tanstack/react-table";
 import { addMinutes, differenceInCalendarDays, endOfToday, format, parseISO } from "date-fns";
-import { CircleAlertIcon, CircleCheckIcon, Clock3Icon, LoaderIcon, UserRound } from "lucide-react-dash";
+import { CircleAlertIcon, CircleCheckIcon, Clock3Icon, FileStack, LoaderIcon } from "lucide-react-dash";
 
 import { Badge } from "@/components/dashboard-ui/badge";
 import { Checkbox } from "@/components/dashboard-ui/checkbox";
 
 import type { RecentCustomerRow } from "./schema";
 
-function billingIcon(billing: string) {
+// "billing" values are repurposed here to represent deviation severity for the project.
+const severityLabels: Record<string, string> = {
+  Paid: "No Deviations",
+  Pending: "Review Pending",
+  Overdue: "High Severity",
+  Trial: "Low Severity",
+};
+
+// "status" values are repurposed here to represent the review state of the AI comparison.
+const reviewStatusLabels: Record<string, string> = {
+  Subscribed: "Clean",
+  Inactive: "In Review",
+  Unsubscribed: "Escalated",
+};
+
+function severityIcon(billing: string) {
   switch (billing) {
     case "Paid":
       return <CircleCheckIcon className="fill-green-500 stroke-primary-foreground dark:fill-green-600" />;
@@ -32,7 +47,7 @@ export const recentCustomersColumns: ColumnDef<RecentCustomerRow>[] = [
         <Checkbox
           checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && "indeterminate")}
           onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-          aria-label="Select all customers on this page"
+          aria-label="Select all projects on this page"
         />
       </div>
     ),
@@ -49,11 +64,11 @@ export const recentCustomersColumns: ColumnDef<RecentCustomerRow>[] = [
   },
   {
     accessorKey: "name",
-    header: "Customer",
+    header: "Project",
     cell: ({ row }) => (
       <div className="flex items-center gap-2">
         <span className="flex size-8 items-center justify-center rounded-md border bg-muted">
-          <UserRound className="size-4 text-muted-foreground" />
+          <FileStack className="size-4 text-muted-foreground" />
         </span>
         <div className="min-w-0 flex-1">
           <div className="flex items-end justify-between gap-3">
@@ -75,28 +90,28 @@ export const recentCustomersColumns: ColumnDef<RecentCustomerRow>[] = [
   },
   {
     accessorKey: "status",
-    header: "Status",
+    header: "Review Status",
     filterFn: "equalsString",
     cell: ({ row }) => (
       <Badge variant="outline" className="px-1.5 text-muted-foreground">
-        {row.original.status}
+        {reviewStatusLabels[row.original.status] ?? row.original.status}
       </Badge>
     ),
   },
   {
     accessorKey: "billing",
-    header: "Billing",
+    header: "Severity",
     filterFn: "equalsString",
     cell: ({ row }) => (
       <Badge variant="outline" className="px-1.5 text-muted-foreground">
-        {billingIcon(row.original.billing)}
-        {row.original.billing}
+        {severityIcon(row.original.billing)}
+        {severityLabels[row.original.billing] ?? row.original.billing}
       </Badge>
     ),
   },
   {
     accessorKey: "plan",
-    header: "Plan",
+    header: "Company",
     cell: ({ row }) => <span className="text-sm">{row.original.plan}</span>,
   },
   {
@@ -113,7 +128,7 @@ export const recentCustomersColumns: ColumnDef<RecentCustomerRow>[] = [
   },
   {
     accessorKey: "joined",
-    header: "Joined",
+    header: "Detected",
     cell: ({ row }) => {
       const baseDate = parseISO(row.original.joined);
       const joinedAt = addMinutes(baseDate, 9 * 60 + (Number(row.original.id) % 12) * 17);

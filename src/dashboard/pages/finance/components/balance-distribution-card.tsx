@@ -10,6 +10,9 @@ import { formatCurrency } from "@/lib/utils";
 
 type BalanceKey = "investment" | "main" | "reserve" | "savings";
 
+// Field names kept from the original account-allocation shape; each "account" now
+// represents one of the 5 planted deviations on the Bergmann Maschinenbau project,
+// sized by absolute € impact (or a nominal weight for the two €0-line-impact clause changes).
 const balanceData: {
   account: string;
   amount: number;
@@ -17,62 +20,62 @@ const balanceData: {
   percentage: number;
 }[] = [
   {
-    account: "Main Wallet",
-    amount: 122_540,
+    account: "Steuerungsverkabelung removed",
+    amount: 2_100,
     key: "main",
-    percentage: 52.2,
+    percentage: 44.2,
   },
   {
-    account: "Savings Account",
-    amount: 48_320,
+    account: "SP-200 qty 4→5",
+    amount: 1_250,
     key: "savings",
-    percentage: 20.6,
+    percentage: 26.3,
   },
   {
-    account: "Investment Account",
-    amount: 36_780,
+    account: "RS-100 → RS-90 swap",
+    amount: 900,
     key: "investment",
-    percentage: 15.7,
+    percentage: 18.9,
   },
   {
-    account: "Reserve Account",
-    amount: 27_256,
+    account: "Delivery KW38 → KW36 (nominal risk weight)",
+    amount: 500,
     key: "reserve",
-    percentage: 11.5,
+    percentage: 10.5,
   },
 ];
 
 const chartConfig = {
   amount: {
-    label: "Balance",
+    label: "€ Impact",
   },
   investment: {
     color: "var(--chart-1)",
-    label: "Investment Account",
+    label: "RS-100 → RS-90 swap",
   },
   main: {
     color: "var(--chart-2)",
-    label: "Main Wallet",
+    label: "Steuerungsverkabelung removed",
   },
   reserve: {
     color: "var(--chart-3)",
-    label: "Reserve Account",
+    label: "Delivery KW38 → KW36",
   },
   savings: {
     color: "var(--chart-4)",
-    label: "Savings Account",
+    label: "SP-200 qty 4→5",
   },
 } satisfies ChartConfig;
 
 const currencies = {
   EUR: {
-    label: "Euro Balance",
+    label: "EUR Impact",
   },
   GBP: {
-    label: "GBP Balance",
+    label: "GBP Impact",
   },
   USD: {
-    label: "USD Balance",
+    label: "USD Impact",
   },
 } as const;
 
@@ -91,12 +94,12 @@ const chartData = balanceData.map((item) => ({
 const totalBalance = balanceData.reduce((total, item) => total + item.amount, 0);
 
 export function BalanceDistributionCard() {
-  const [currency, setCurrency] = React.useState<Currency>("USD");
+  const [currency, setCurrency] = React.useState<Currency>("EUR");
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="font-normal">Account Allocation</CardTitle>
+        <CardTitle className="font-normal">Deviation Breakdown</CardTitle>
         <CardAction>
           <Select onValueChange={(value) => setCurrency(value as Currency)} value={currency}>
             <SelectTrigger className="w-36" size="sm">

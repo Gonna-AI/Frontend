@@ -15,15 +15,15 @@ import {
   type VisibilityState,
 } from "@tanstack/react-table";
 import {
+  AlertTriangle,
   ArrowUpDown,
   CalendarDays,
   ChevronLeft,
   ChevronRight,
   ChevronsLeft,
   ChevronsRight,
-  CreditCard,
   Search,
-  UsersRound,
+  ShieldCheck,
 } from "lucide-react-dash";
 
 import { Button } from "@/components/dashboard-ui/button";
@@ -44,16 +44,16 @@ import type { RecentCustomerRow } from "./schema";
 
 const statusOptions = [
   { value: "all", label: "All" },
-  { value: "Subscribed", label: "Subscribed" },
-  { value: "Inactive", label: "Inactive" },
-  { value: "Unsubscribed", label: "Unsubscribed" },
+  { value: "Subscribed", label: "Clean" },
+  { value: "Inactive", label: "In Review" },
+  { value: "Unsubscribed", label: "Escalated" },
 ] as const;
 const billingOptions = [
   { value: "all", label: "All" },
-  { value: "Paid", label: "Paid" },
-  { value: "Pending", label: "Pending" },
-  { value: "Overdue", label: "Overdue" },
-  { value: "Trial", label: "Trial" },
+  { value: "Paid", label: "No Deviations" },
+  { value: "Pending", label: "Review Pending" },
+  { value: "Overdue", label: "High Severity" },
+  { value: "Trial", label: "Low Severity" },
 ] as const;
 const joinedDateOptions = [
   { value: "all", label: "All time" },
@@ -132,7 +132,7 @@ export function RecentCustomersTable({ data }: { data: RecentCustomerRow[] }) {
             <Search className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               className="h-7 rounded-[min(var(--radius-md),12px)] pl-8"
-              placeholder="Search customers..."
+              placeholder="Search projects..."
               value={searchQuery}
               onChange={(event) => {
                 table.getColumn("search")?.setFilterValue(event.target.value || undefined);
@@ -143,8 +143,8 @@ export function RecentCustomersTable({ data }: { data: RecentCustomerRow[] }) {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" size="sm">
-                <UsersRound />
-                Status
+                <ShieldCheck />
+                Review Status
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-35" align="start">
@@ -167,7 +167,7 @@ export function RecentCustomersTable({ data }: { data: RecentCustomerRow[] }) {
             <DropdownMenuTrigger asChild>
               <Button variant="outline" size="sm">
                 <CalendarDays />
-                Joined date
+                Detected date
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-40" align="start">
@@ -191,8 +191,8 @@ export function RecentCustomersTable({ data }: { data: RecentCustomerRow[] }) {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" size="sm">
-                <CreditCard />
-                Billing
+                <AlertTriangle />
+                Severity
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">

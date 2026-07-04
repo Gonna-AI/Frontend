@@ -14,8 +14,11 @@ export function SubscriberOverview() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="leading-none">18,426 Customers</CardTitle>
-        <CardDescription>Recent customer records with plan, billing, status, and signup activity.</CardDescription>
+        <CardTitle className="leading-none">Active & Recent Projects</CardTitle>
+        <CardDescription>
+          Bestellung-vs-Angebot comparisons across THD GmbH, Weber Präzisionstechnik, and MK Anlagenbau — with
+          company, review status, and severity.
+        </CardDescription>
         <CardAction>
           <Button variant="outline" size="sm">
             <Download />
