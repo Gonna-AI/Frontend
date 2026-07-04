@@ -15,6 +15,12 @@
   force = true
 
 [[redirects]]
+  from = "/reddit-industrial-ai"
+  to = "https://clerktree.com"
+  status = 301
+  force = true
+
+[[redirects]]
   from = "/sitemap.xml"
   to = "/sitemap.xml"
   status = 200

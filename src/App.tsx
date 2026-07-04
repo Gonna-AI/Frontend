@@ -73,7 +73,6 @@ import LoadingScreen from './components/LoadingScreen';
 
 const routePrefetchers = {
   '/': () => import('./pages/LandingFramer'),
-  '/reddit-industrial-ai': () => import('./pages/LandingFramer'),
   '/about': () => import('./pages/About'),
   '/research': () => import('./pages/Research'),
   '/research/:topicSlug': () => import('./pages/Research'),
@@ -126,7 +125,6 @@ function App() {
               <Routes>
                 {/* Public Routes */}
                 <Route path="/" element={isResearchHost ? <Research /> : <LandingFramer />} />
-                <Route path="/reddit-industrial-ai" element={isResearchHost ? <Research /> : <LandingFramer />} />
                 <Route path="/:topicSlug" element={isResearchHost ? <Research /> : <NotFound />} />
 
                 {/* Auth Routes */}

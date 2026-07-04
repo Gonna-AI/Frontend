@@ -1,8 +1,6 @@
 import { type CSSProperties, type VideoHTMLAttributes, Fragment, useEffect, useRef, useState } from 'react';
 import { Compass, Globe2, MapPin, PanelTop, PenTool, Sparkles } from 'lucide-react';
-import { useLocation } from 'react-router-dom';
 import Lenis from 'lenis';
-import SEO from '../components/SEO';
 import { isSaveDataEnabled } from '../utils/idle';
 import './LandingFramer.css';
 
@@ -197,25 +195,9 @@ const ribbonFlowerOrange = 'https://framerusercontent.com/images/7LCWzuhI2N54jKd
 
 export default function LandingFramer() {
   useAgeroPageMotion();
-  const { pathname } = useLocation();
-  const isRedditSeoRoute = pathname.replace(/\/$/, '') === '/reddit-industrial-ai';
 
   return (
-    <>
-      {isRedditSeoRoute && (
-        <SEO
-          title="Reddit Industrial AI Automation"
-          description="ClerkTree helps teams discussing industrial automation on Reddit evaluate predictive maintenance, machine intelligence, and custom AI harnesses for real operations."
-          canonical="https://clerktree.com/reddit-industrial-ai"
-          openGraph={{
-            title: 'Reddit Industrial AI Automation | ClerkTree',
-            description:
-              'A focused ClerkTree page for Reddit conversations around industrial AI, predictive maintenance, and machine intelligence.',
-            url: 'https://clerktree.com/reddit-industrial-ai',
-          }}
-        />
-      )}
-      <div className="agero-works" id="agero-works">
+    <div className="agero-works" id="agero-works">
       <div className="agero-top-area">
         <section className="agero-hero-panel">
           <Header />
@@ -227,7 +209,6 @@ export default function LandingFramer() {
           >
             <h1 className="agero-hero-title" id="agero-works-title">
               <span>Orchestrating</span>
-              {isRedditSeoRoute && <span className="agero-muted">Reddit</span>}
               <video
                 autoPlay
                 className="agero-hero-pill agero-hero-pill-desktop"
@@ -295,7 +276,6 @@ export default function LandingFramer() {
       <Contact />
       <Footer />
     </div>
-    </>
   );
 }
 
