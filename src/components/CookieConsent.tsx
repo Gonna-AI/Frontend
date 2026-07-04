@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
-import { Cookie, ChevronDown, ChevronRight, X, ExternalLink, Check } from 'lucide-react';
+import { ChevronDown, ChevronRight, X, ExternalLink } from 'lucide-react';
 
 declare global {
     interface Window {
@@ -127,15 +127,14 @@ function Checkbox({
             <label
                 htmlFor={id}
                 className={`
-          flex h-5 w-5 items-center justify-center rounded border transition-colors cursor-pointer
+          flex h-5 w-5 items-center justify-center rounded-full border border-black transition-colors cursor-pointer
           ${disabled ? 'cursor-not-allowed opacity-50' : ''}
           ${checked
-                        ? 'bg-white border-white text-black'
-                        : 'bg-transparent border-neutral-600 hover:border-neutral-400'
+                        ? 'bg-black text-black'
+                        : 'bg-transparent hover:bg-black/5'
                     }
         `}
             >
-                {checked && <Check className="h-3.5 w-3.5 stroke-[3]" />}
             </label>
         </div>
     );
@@ -158,14 +157,14 @@ function CategoryAccordion({
     t: (key: string) => string;
 }) {
     return (
-        <div className="border border-neutral-800/60 rounded-xl overflow-hidden bg-neutral-900/20 transition-colors duration-200 hover:border-neutral-700/60">
+        <div className="overflow-hidden rounded-[22px] border border-black/20 bg-white/28 transition-colors duration-200 hover:bg-white/38">
             {/* Header Row */}
             <div className="flex items-center gap-3 px-4 py-3 sm:px-5 sm:py-4 select-none">
                 {/* Expand arrow */}
                 <button
                     type="button"
                     onClick={onExpand}
-                    className="p-1 -ml-1 text-neutral-500 hover:text-neutral-300 transition-colors flex-shrink-0"
+                    className="p-1 -ml-1 text-black/65 hover:text-black transition-colors flex-shrink-0"
                     aria-label={expanded ? t('common.collapse') || 'Collapse' : t('common.expand') || 'Expand'}
                 >
                     {expanded ? (
@@ -180,13 +179,13 @@ function CategoryAccordion({
                     onClick={onExpand}
                     className="flex-1 text-left flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 min-w-0 cursor-pointer"
                 >
-                    <span className="text-sm font-medium text-white">{t(cat.title)}</span>
+                    <span className="text-[15px] font-semibold text-black">{t(cat.title)}</span>
                     <div className="flex items-center gap-2">
-                        <span className="text-[11px] text-neutral-500 font-mono hidden sm:inline-block">
+                        <span className="text-[11px] text-black/50 font-mono hidden sm:inline-block">
                             {cat.cookies.length} {cat.cookies.length === 1 ? t('cookies.count').replace('{count}', '') : t('cookies.count_plural').replace('{count}', '')}
                         </span>
                         {cat.locked && (
-                            <span className="text-[10px] text-neutral-400 bg-neutral-800 border border-neutral-700 px-1.5 py-0.5 roundedElement font-medium tracking-wide uppercase">
+                            <span className="text-[10px] text-black bg-white/65 border border-black/10 px-2 py-0.5 rounded-full font-semibold tracking-wide uppercase">
                                 {t('cookies.required')}
                             </span>
                         )}
@@ -210,28 +209,28 @@ function CategoryAccordion({
                 <div className="overflow-hidden">
                     <div className="px-4 pb-4 pt-0 sm:px-5 sm:pb-5 space-y-4">
                         {/* Description */}
-                        <p className="text-xs text-neutral-400 leading-relaxed pl-1 sm:pl-8 border-l-2 border-neutral-800 ml-1.5 sm:ml-0">
+                        <p className="text-xs text-black/68 leading-relaxed pl-1 sm:pl-8 border-l-2 border-black/18 ml-1.5 sm:ml-0">
                             {t(cat.description)}
                         </p>
 
                         {/* Cookie table */}
-                        <div className="sm:ml-8 rounded-lg border border-neutral-800/40 overflow-hidden overflow-x-auto">
+                        <div className="sm:ml-8 rounded-[16px] border border-black/16 bg-white/32 overflow-hidden overflow-x-auto">
                             <table className="w-full text-xs min-w-[500px]">
                                 <thead>
-                                    <tr className="bg-neutral-900/80 border-b border-neutral-800">
-                                        <th className="text-left px-3 py-2 text-neutral-500 font-medium w-1/4">{t('cookies.tableName')}</th>
-                                        <th className="text-left px-3 py-2 text-neutral-500 font-medium w-1/4">{t('cookies.tableProvider')}</th>
-                                        <th className="text-left px-3 py-2 text-neutral-500 font-medium w-1/3">{t('cookies.tablePurpose')}</th>
-                                        <th className="text-left px-3 py-2 text-neutral-500 font-medium w-1/6">{t('cookies.tableExpiry')}</th>
+                                    <tr className="bg-white/42 border-b border-black/12">
+                                        <th className="text-left px-3 py-2 text-black/52 font-semibold w-1/4">{t('cookies.tableName')}</th>
+                                        <th className="text-left px-3 py-2 text-black/52 font-semibold w-1/4">{t('cookies.tableProvider')}</th>
+                                        <th className="text-left px-3 py-2 text-black/52 font-semibold w-1/3">{t('cookies.tablePurpose')}</th>
+                                        <th className="text-left px-3 py-2 text-black/52 font-semibold w-1/6">{t('cookies.tableExpiry')}</th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-neutral-800/50">
+                                <tbody className="divide-y divide-black/10">
                                     {cat.cookies.map((c) => (
-                                        <tr key={c.name} className="hover:bg-white/[0.02]">
-                                            <td className="px-3 py-2 font-mono text-neutral-300 break-words">{c.name}</td>
-                                            <td className="px-3 py-2 text-neutral-400">{c.provider}</td>
-                                            <td className="px-3 py-2 text-neutral-400">{c.purpose}</td>
-                                            <td className="px-3 py-2 text-neutral-500">{c.expiry}</td>
+                                        <tr key={c.name} className="hover:bg-white/24">
+                                            <td className="px-3 py-2 font-mono text-black break-words">{c.name}</td>
+                                            <td className="px-3 py-2 text-black/68">{c.provider}</td>
+                                            <td className="px-3 py-2 text-black/68">{c.purpose}</td>
+                                            <td className="px-3 py-2 text-black/56">{c.expiry}</td>
                                         </tr>
                                     ))}
                                 </tbody>
@@ -359,14 +358,21 @@ export default function CookieConsent() {
 
     if (!visible) return null;
 
+    const bannerChoices = [
+        { id: 'necessary', label: 'Essential', locked: true },
+        { id: 'analytics', label: 'Analytics' },
+        { id: 'marketing', label: 'Marketing' },
+        { id: 'unclassified', label: 'External Media' },
+    ] as const;
+
     return (
         <div
-            className={`fixed inset-0 z-[9999] flex items-end sm:items-center justify-center isolate pointer-events-none`}
+            className="fixed inset-0 z-[9999] flex items-end sm:items-center justify-center isolate pointer-events-none"
         >
-            {/* ─── PREFERENCES BACKDROP (Solid) ─── */}
+            {/* ─── PREFERENCES BACKDROP ─── */}
             {view === 'preferences' && (
                 <div
-                    className={`absolute inset-0 bg-black/80 backdrop-blur-sm transition-opacity duration-500 pointer-events-auto ${animateIn ? 'opacity-100' : 'opacity-0'
+                    className={`absolute inset-0 bg-black/70 transition-opacity duration-500 pointer-events-auto ${animateIn ? 'opacity-100' : 'opacity-0'
                         }`}
                     onClick={() => setView('banner')}
                 />
@@ -381,52 +387,87 @@ export default function CookieConsent() {
             ${animateIn ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0'}
           `}
                 >
-                    <div className="px-3 pb-4 sm:px-6">
-                        <div className="relative mx-auto max-w-6xl rounded-2xl border border-white/10 bg-[linear-gradient(145deg,#141414_0%,#0C0C0C_100%)] shadow-[0_-20px_60px_rgba(0,0,0,0.55)] overflow-hidden">
-                            <div className="absolute inset-0 opacity-[0.06]" style={{ backgroundImage: 'url(/noise.webp)', backgroundSize: '35%' }} />
-                            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/20 to-black" />
-                            <div className="relative z-10 px-5 py-4 sm:px-6 sm:py-5">
-                                <div className="flex flex-col lg:flex-row lg:items-center gap-4 lg:gap-8">
-                                    {/* Text Content */}
-                                    <div className="flex-1">
-                                        <div className="flex items-center gap-2 mb-2 text-white/90 font-medium">
-                                            <Cookie className="w-4 h-4 text-[#FFB286]" />
-                                            <span>{t('cookies.bannerTitle')}</span>
-                                        </div>
-                                        <p className="text-white/60 text-sm leading-relaxed max-w-3xl">
-                                            {t('cookies.bannerDesc')} {' '}
-                                            <Link to="/privacy-policy" className="underline text-white hover:text-white/80 underline-offset-2">
-                                                {t('cookies.privacyPolicy')}
-                                            </Link>
-                                        </p>
-                                    </div>
+                    <div className="bg-[#ff4d00] px-5 py-7 text-black shadow-[0_-24px_70px_rgba(0,0,0,0.28)] sm:px-10 sm:py-9">
+                        <div className="mx-auto grid max-w-[1440px] gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(280px,460px)] lg:items-end">
+                            <div>
+                                <h2 className="text-[28px] font-medium leading-none tracking-[-0.03em] sm:text-[34px]">
+                                    This website uses cookies
+                                </h2>
+                                <div className="mt-7 max-w-[860px] space-y-5 text-[13px] leading-[1.25] text-black/82 sm:text-sm">
+                                    <p>
+                                        We use cookies to provide the best experience on our website. This includes cookies for website
+                                        functionality, to manage our commercial objectives and optimization. You can decide which cookie
+                                        categories you would like to permit.
+                                    </p>
+                                    <p>
+                                        Please note that depending on your settings, the full functionality of our website may no longer be
+                                        available. For more detailed information about our cookies, and to change your preferences at a
+                                        later stage, see our{' '}
+                                        <Link to="/privacy-policy" className="font-semibold underline underline-offset-2">
+                                            privacy policy
+                                        </Link>.
+                                    </p>
+                                </div>
 
-                                    {/* Banner Actions */}
-                                    <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 flex-shrink-0">
-                                        <button
-                                            onClick={() => setView('preferences')}
-                                            className="order-2 sm:order-1 px-4 py-2.5 rounded-full border border-white/15 bg-white/5 text-white/70 hover:text-white hover:border-[#FF8A5B]/40 text-sm font-medium transition-colors"
-                                        >
-                                            {t('cookies.preferences')}
-                                        </button>
-                                        <button
-                                            onClick={rejectAll}
-                                            className="order-3 sm:order-2 px-4 py-2.5 rounded-full hover:bg-white/5 text-white/50 hover:text-white text-sm font-medium transition-colors"
-                                        >
-                                            {t('cookies.rejectAll')}
-                                        </button>
-                                        <button
-                                            onClick={acceptAll}
-                                            className="order-1 sm:order-3 px-6 py-2.5 rounded-full bg-gradient-to-r from-[#FF8A5B] via-[#FF9E6C] to-[#FFB286] text-white text-sm font-semibold transition-colors shadow-lg shadow-[#FF8A5B]/20"
-                                        >
-                                            {t('cookies.acceptAll')}
-                                        </button>
-                                    </div>
+                                <div className="mt-6 grid max-w-[620px] grid-cols-1 gap-x-16 gap-y-3 text-[20px] leading-none sm:grid-cols-2">
+                                    {bannerChoices.map((choice) => {
+                                        const checked = choice.locked ? true : (consent[choice.id] ?? false);
+                                        return (
+                                            <button
+                                                key={choice.id}
+                                                type="button"
+                                                onClick={() => {
+                                                    if (choice.locked) return;
+                                                    setConsent((prev) => ({ ...prev, [choice.id]: !prev[choice.id] }));
+                                                }}
+                                                className="group inline-flex w-fit items-center gap-3 text-left transition-opacity hover:opacity-72"
+                                                aria-pressed={checked}
+                                            >
+                                                <span
+                                                    className={`h-5 w-5 rounded-full border border-black ${checked ? 'bg-black' : 'bg-transparent'}`}
+                                                    aria-hidden="true"
+                                                />
+                                                <span>{choice.label}</span>
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+
+                                <div className="mt-7 flex flex-wrap gap-x-5 gap-y-2 text-[13px]">
+                                    <Link to="/privacy-policy" className="underline underline-offset-2">
+                                        Privacy Policy
+                                    </Link>
+                                    <Link to="/cookie-policy" className="underline underline-offset-2">
+                                        Imprint
+                                    </Link>
+                                    <button type="button" onClick={() => setView('preferences')} className="underline underline-offset-2">
+                                        {t('cookies.preferences')}
+                                    </button>
                                 </div>
                             </div>
+
+                            <div className="flex flex-col gap-4 lg:pb-10">
+                                <button
+                                    onClick={acceptAll}
+                                    className="min-h-[54px] rounded-full bg-black px-8 text-lg font-semibold text-white transition-transform hover:-translate-y-0.5"
+                                >
+                                    {t('cookies.acceptAll')}
+                                </button>
+                                <button
+                                    onClick={savePreferences}
+                                    className="min-h-[54px] rounded-full bg-white px-8 text-lg font-medium text-black transition-transform hover:-translate-y-0.5"
+                                >
+                                    Save
+                                </button>
+                                <button
+                                    onClick={rejectAll}
+                                    className="text-sm font-medium text-black/62 underline underline-offset-4 transition-colors hover:text-black"
+                                >
+                                    {t('cookies.rejectAll')}
+                                </button>
+                            </div>
                         </div>
-                        {/* Safe Area for Mobile Home Indicator */}
-                        <div className="h-[env(safe-area-inset-bottom)] bg-[rgb(10,10,10)]" />
+                        <div className="h-[env(safe-area-inset-bottom)]" />
                     </div>
                 </div>
             )}
@@ -435,45 +476,42 @@ export default function CookieConsent() {
             {view === 'preferences' && (
                 <div
                     className={`
-            pointer-events-auto relative w-full max-w-2xl mx-auto 
-            flex flex-col bg-[linear-gradient(145deg,#141414_0%,#0C0C0C_100%)] border border-white/10 shadow-2xl shadow-black
-            rounded-t-2xl sm:rounded-2xl overflow-hidden
-            max-h-[90vh] sm:max-h-[85vh] h-[90vh] sm:h-auto
+            pointer-events-auto relative mx-auto flex w-full max-w-5xl flex-col overflow-hidden bg-[#ff4d00] text-black shadow-2xl shadow-black/55
+            rounded-t-[28px] sm:rounded-[32px]
+            max-h-[92vh] h-[92vh] sm:h-auto sm:max-h-[86vh]
             transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] transform
             ${animateIn ? 'translate-y-0 scale-100 opacity-100' : 'translate-y-8 scale-95 opacity-0'}
           `}
                 >
-                    <div className="absolute inset-0 opacity-[0.06] pointer-events-none" style={{ backgroundImage: 'url(/noise.webp)', backgroundSize: '35%' }} />
-                    <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/20 to-black pointer-events-none" />
                     {/* Modal Header */}
-                    <div className="relative z-10 flex items-center justify-between px-5 py-4 border-b border-white/10 bg-black/40 backdrop-blur-sm shrink-0">
+                    <div className="flex shrink-0 items-start justify-between gap-6 border-b border-black/16 px-5 py-5 sm:px-8 sm:py-7">
                         <div>
-                            <h2 className="text-lg font-semibold text-white flex items-center gap-2">
-                                <Cookie className="w-5 h-5 text-[#FFB286]" />
-                                {t('cookies.bannerTitle')}
+                            <p className="text-xs font-bold uppercase tracking-[0.16em] text-black/54">Cookie Settings</p>
+                            <h2 className="mt-4 text-[34px] font-medium leading-none tracking-[-0.045em] sm:text-[52px]">
+                                This website uses cookies
                             </h2>
                         </div>
                         <button
                             onClick={() => setView('banner')}
-                            className="p-2 -mr-2 text-white/60 hover:text-white hover:bg-white/10 rounded-full transition-colors"
+                            className="rounded-full bg-black p-3 text-white transition-transform hover:-translate-y-0.5"
                             aria-label="Close"
                         >
-                            <X className="w-5 h-5" />
+                            <X className="h-5 w-5" />
                         </button>
                     </div>
 
                     {/* Modal Body (Scrollable) */}
-                    <div className="relative z-10 flex-1 overflow-y-auto px-5 py-2 custom-scrollbar overscroll-contain">
-                        <div className="py-4 space-y-6">
-                            <div className="bg-white/5 p-4 rounded-xl border border-white/10">
-                                <p className="text-sm text-white/60 leading-relaxed">
+                    <div className="flex-1 overflow-y-auto px-5 py-5 custom-scrollbar overscroll-contain sm:px-8 sm:py-6">
+                        <div className="space-y-6">
+                            <div className="rounded-[24px] bg-white/30 p-5 text-sm leading-relaxed text-black/78 sm:p-6">
+                                <p>
                                     {t('cookies.customiseDesc')}
                                 </p>
-                                <div className="mt-3 flex gap-4 text-xs">
-                                    <Link to="/privacy-policy" className="flex items-center gap-1 text-white hover:text-neutral-300 transition-colors">
+                                <div className="mt-4 flex flex-wrap gap-5 text-sm font-medium">
+                                    <Link to="/privacy-policy" className="flex items-center gap-1 underline underline-offset-2">
                                         {t('cookies.privacyPolicy')} <ExternalLink className="w-3 h-3" />
                                     </Link>
-                                    <Link to="/cookie-policy" className="flex items-center gap-1 text-white hover:text-neutral-300 transition-colors">
+                                    <Link to="/cookie-policy" className="flex items-center gap-1 underline underline-offset-2">
                                         {t('cookies.cookiePolicy')} <ExternalLink className="w-3 h-3" />
                                     </Link>
                                 </div>
@@ -500,24 +538,24 @@ export default function CookieConsent() {
                     </div>
 
                     {/* Modal Footer (Fixed) */}
-                    <div className="relative z-10 p-4 sm:px-6 sm:py-5 border-t border-white/10 bg-black/40 backdrop-blur-sm shrink-0 pb-[max(1rem,env(safe-area-inset-bottom))]">
-                        <div className="flex flex-col sm:flex-row gap-3">
+                    <div className="shrink-0 border-t border-black/16 px-5 py-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] sm:px-8">
+                        <div className="flex flex-col gap-3 sm:flex-row">
                             <button
                                 onClick={rejectAll}
-                                className="w-full sm:w-auto px-5 py-2.5 rounded-full border border-white/15 hover:border-[#FF8A5B]/40 text-white/60 hover:text-white font-medium transition-colors text-sm"
+                                className="min-h-[50px] rounded-full border border-black/35 px-6 text-sm font-semibold text-black transition-colors hover:bg-black hover:text-white sm:w-auto"
                             >
                                 {t('cookies.rejectAll')}
                             </button>
-                            <div className="flex-1 hidden sm:block" />
+                            <div className="hidden flex-1 sm:block" />
                             <button
                                 onClick={savePreferences}
-                                className="w-full sm:w-auto px-5 py-2.5 rounded-full bg-white/10 hover:bg-white/15 text-white font-medium transition-colors text-sm"
+                                className="min-h-[50px] rounded-full bg-white px-8 text-sm font-semibold text-black transition-transform hover:-translate-y-0.5 sm:w-auto"
                             >
                                 {t('cookies.savePreferences')}
                             </button>
                             <button
                                 onClick={acceptAll}
-                                className="w-full sm:w-auto px-6 py-2.5 rounded-full bg-gradient-to-r from-[#FF8A5B] via-[#FF9E6C] to-[#FFB286] text-white font-semibold transition-colors shadow-lg shadow-[#FF8A5B]/20 text-sm"
+                                className="min-h-[50px] rounded-full bg-black px-8 text-sm font-semibold text-white transition-transform hover:-translate-y-0.5 sm:w-auto"
                             >
                                 {t('cookies.acceptAll')}
                             </button>
