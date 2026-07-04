@@ -10,22 +10,12 @@ type AuthView = 'signin' | 'signup' | 'forgot_password';
 // Industrial Machine [video] Intelligence"), featured here as the panel's centerpiece.
 const BRAND_VIDEO_URL = '/hero-logo-video.mp4';
 
+// Outer padding + rounded panel matches the main site's floating-card treatment
+// (.agero-top-area / .agero-footer both sit a few pixels off the viewport edge with large
+// border-radius) instead of the panel running flush to the browser edge.
 const BrandPanel = () => (
-    <div className="relative hidden h-full flex-col justify-between overflow-hidden bg-[rgb(10,10,10)] p-10 text-white lg:flex">
-        <div
-            className="pointer-events-none absolute top-[-10%] right-[-10%] h-[100%] w-[80%] opacity-90"
-            style={{
-                background: 'radial-gradient(circle at 70% 30%, rgba(255,77,0,0.22) 0%, rgba(255,77,0,0.08) 30%, transparent 60%)',
-                filter: 'blur(40px)',
-            }}
-        />
-
-        <div className="relative z-10 space-y-1">
-            <h1 className="text-2xl font-medium">ClerkTree</h1>
-            <p className="text-sm text-white/70">AI harness for industrial machinery.</p>
-        </div>
-
-        <div className="relative z-10 flex flex-1 flex-col items-center justify-center gap-6">
+    <div className="hidden h-full p-2 lg:block">
+        <div className="relative flex h-full flex-col justify-between overflow-hidden rounded-[32px] bg-[rgb(10,10,10)] p-10 text-white">
             <video
                 autoPlay
                 loop
@@ -33,22 +23,31 @@ const BrandPanel = () => (
                 playsInline
                 preload="metadata"
                 src={BRAND_VIDEO_URL}
-                className="h-56 w-56 rounded-full object-cover shadow-[0_0_120px_rgba(255,77,0,0.25)]"
+                className="absolute inset-0 h-full w-full object-cover"
             />
-            <p className="max-w-xs text-center text-2xl leading-tight font-medium">
-                Orchestrating <span className="text-[#ff4d00]">Industrial</span> Machine Intelligence
-            </p>
-        </div>
+            <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.55)_0%,rgba(0,0,0,0.25)_35%,rgba(0,0,0,0.75)_100%)]" />
 
-        <div className="relative z-10 flex w-full justify-between gap-8">
-            <div className="flex-1 space-y-1">
-                <h2 className="font-medium">New here?</h2>
-                <p className="text-sm text-white/70">Create an account to spin up your own Kostencheck Copilot workspace.</p>
+            <div className="relative z-10 space-y-1">
+                <h1 className="text-2xl font-medium">ClerkTree</h1>
+                <p className="text-sm text-white/70">AI harness for industrial machinery.</p>
             </div>
-            <div className="mx-1 w-px self-stretch bg-white/20" />
-            <div className="flex-1 space-y-1">
-                <h2 className="font-medium">Need help?</h2>
-                <p className="text-sm text-white/70">Reach out to your ClerkTree contact, or email team@clerktree.com.</p>
+
+            <div className="relative z-10 flex flex-1 flex-col items-center justify-center">
+                <p className="max-w-xs text-center text-2xl leading-tight font-medium">
+                    Orchestrating <span className="text-[#ff4d00]">Industrial</span> Machine Intelligence
+                </p>
+            </div>
+
+            <div className="relative z-10 flex w-full justify-between gap-8">
+                <div className="flex-1 space-y-1">
+                    <h2 className="font-medium">New here?</h2>
+                    <p className="text-sm text-white/70">Create an account to spin up your own Kostencheck Copilot workspace.</p>
+                </div>
+                <div className="mx-1 w-px self-stretch bg-white/20" />
+                <div className="flex-1 space-y-1">
+                    <h2 className="font-medium">Need help?</h2>
+                    <p className="text-sm text-white/70">Reach out to your ClerkTree contact, or email team@clerktree.com.</p>
+                </div>
             </div>
         </div>
     </div>
