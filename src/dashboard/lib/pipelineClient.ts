@@ -153,8 +153,19 @@ export function subscribeToDeviations(projectId: string, onChange: () => void): 
 }
 
 /** Generic realtime helper for tables not covered by a dedicated subscribe* function above. */
+let subscribeToTableCallCount = 0;
+
+/**
+ * Every call gets its own uniquely-named channel. Supabase's client keys channels by name and
+ * will hand back an already-subscribed channel if two callers race on the same name — a second
+ * .on() call on that channel then throws "cannot add postgres_changes callbacks ... after
+ * subscribe()". Multiple components on one page (e.g. CRM's KPI cards, opportunities table, and
+ * task reminders) all subscribing to the same table is exactly that race, so the name must be
+ * unique per call, not per table.
+ */
 export function subscribeToTable(table: string, onChange: () => void, filter?: string): () => void {
-  const channelName = `${table}_live${filter ? `_${filter}` : ""}`;
+  subscribeToTableCallCount += 1;
+  const channelName = `${table}_live${filter ? `_${filter}` : ""}_${subscribeToTableCallCount}`;
   let builder = supabase.channel(channelName);
   builder = filter
     ? builder.on("postgres_changes", { event: "*", schema: "public", table, filter }, onChange)
