@@ -71,6 +71,8 @@ export function subscribeToJobQueue(onChange: () => void): () => void {
 export interface PipelineDeviationRow {
   id: string;
   project_id: string;
+  quote_line_item_id: string | null;
+  order_line_item_id: string | null;
   type: "MATCH" | "QTY_CHANGED" | "PRICE_CHANGED" | "ADDED" | "REMOVED" | "CLAUSE_CHANGED";
   severity: "low" | "medium" | "high";
   impact_eur: number;
@@ -78,6 +80,27 @@ export interface PipelineDeviationRow {
   needs_review: boolean;
   description: string;
   created_at: string;
+}
+
+export interface PipelineLineItemRow {
+  id: string;
+  document_id: string;
+  position_no: number | null;
+  article_no: string | null;
+  description: string | null;
+  qty: number | null;
+  unit_price: number | null;
+  delivery_date: string | null;
+}
+
+export async function fetchLineItemsForDocument(documentId: string): Promise<PipelineLineItemRow[]> {
+  const { data, error } = await supabase
+    .from("pipeline_line_items")
+    .select("*")
+    .eq("document_id", documentId)
+    .order("position_no");
+  if (error) throw error;
+  return (data ?? []) as PipelineLineItemRow[];
 }
 
 export interface PipelineProjectRow {

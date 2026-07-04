@@ -1,8 +1,10 @@
 import { addDays, format } from "date-fns";
 
 import type {
+  PipelineDeviationRow,
   PipelineDocumentRow,
   PipelineGeneratedDocRow,
+  PipelineLineItemRow,
   PipelineProjectRow,
 } from "@/dashboard/lib/pipelineClient";
 
@@ -200,19 +202,46 @@ export function getInvoiceTotal(invoice: InvoiceFormValues) {
   return Math.max(getInvoiceSubtotal(invoice) - getInvoiceDiscount(invoice), 0) + getInvoiceTax(invoice);
 }
 
+/** Builds the AB's real line items from the order document's AI-extracted rows, annotating
+ * each with the matching deviation (if the Kostencheck diff flagged one) so the builder shows
+ * exactly what the AI found — not a hand-written description. */
+function lineItemsFromLiveData(
+  orderLineItems: PipelineLineItemRow[],
+  deviations: PipelineDeviationRow[],
+): InvoiceLineItem[] {
+  const deviationByOrderLineItem = new Map(
+    deviations.filter((d) => d.order_line_item_id).map((d) => [d.order_line_item_id, d]),
+  );
+
+  return orderLineItems.map((item) => {
+    const deviation = item.id ? deviationByOrderLineItem.get(item.id) : undefined;
+    const description = deviation ? `${item.description} (${deviation.description})` : item.description ?? "—";
+
+    return {
+      id: item.id,
+      description,
+      quantity: item.qty ?? 0,
+      unitPrice: item.unit_price ?? 0,
+    };
+  });
+}
+
 /**
  * Seeds initial AB builder form state from live Supabase data: the latest project, its
- * "ab_draft" generated doc content (used as the intro/summary text), and the matching
- * bestellung document's doc_number (used as the reference number). Line items and the
- * from/tax/discount setup stay the static demo defaults — only the parts that should
- * reflect the live pipeline (reference, client, intro text) are overridden here.
+ * "ab_draft" generated doc content (intro/summary text), the matching bestellung document's
+ * doc_number (reference), and — the actual point of an AI-generated AB — the order's real
+ * AI-extracted line items, each annotated with whatever Kostencheck deviation the diff engine
+ * found for it. Only the from/tax/discount setup (company letterhead, VAT rate, payment terms)
+ * stays the static demo default, since none of that is something the AI derives.
  */
 export function buildInvoiceValuesFromLiveData(params: {
   project: PipelineProjectRow | null;
   abDraft: PipelineGeneratedDocRow | null;
   documents: PipelineDocumentRow[];
+  orderLineItems: PipelineLineItemRow[];
+  deviations: PipelineDeviationRow[];
 }): InvoiceFormValues {
-  const { project, abDraft, documents } = params;
+  const { project, abDraft, documents, orderLineItems, deviations } = params;
 
   const bestellung = documents.find((doc) => doc.kind === "bestellung") ?? null;
   const referenceNumber = bestellung?.doc_number ?? defaultInvoiceValues.referenceNumber;
@@ -221,10 +250,13 @@ export function buildInvoiceValuesFromLiveData(params: {
     ? invoiceClients.find((client) => client.name === project.customer_name)
     : undefined;
 
+  const items = orderLineItems.length > 0 ? lineItemsFromLiveData(orderLineItems, deviations) : defaultInvoiceValues.items;
+
   return {
     ...defaultInvoiceValues,
     referenceNumber,
     to: matchingClient ?? defaultInvoiceValues.to,
     introText: abDraft?.content ?? undefined,
+    items,
   };
 }

@@ -3,7 +3,13 @@ import * as React from "react";
 
 import { FormProvider, useForm, useWatch } from "react-hook-form";
 
-import { fetchAllProjects, fetchDocuments, fetchGeneratedDocs } from "@/dashboard/lib/pipelineClient";
+import {
+  fetchAllProjects,
+  fetchDeviationsForProject,
+  fetchDocuments,
+  fetchGeneratedDocs,
+  fetchLineItemsForDocument,
+} from "@/dashboard/lib/pipelineClient";
 
 import { buildInvoiceValuesFromLiveData, defaultInvoiceValues, type InvoiceFormValues } from "./data";
 import { InvoiceForm } from "./invoice-form";
@@ -25,12 +31,23 @@ export function Invoice() {
       .then(async ([projects, documents]) => {
         if (cancelled) return;
         const latestProject = projects[0] ?? null;
+        const bestellung = documents.find((doc) => doc.kind === "bestellung") ?? null;
 
-        const generatedDocs = latestProject ? await fetchGeneratedDocs(latestProject.id) : [];
+        const [generatedDocs, orderLineItems, deviations] = await Promise.all([
+          latestProject ? fetchGeneratedDocs(latestProject.id) : Promise.resolve([]),
+          bestellung ? fetchLineItemsForDocument(bestellung.id) : Promise.resolve([]),
+          latestProject ? fetchDeviationsForProject(latestProject.id) : Promise.resolve([]),
+        ]);
         if (cancelled) return;
 
         const abDraft = generatedDocs.find((doc) => doc.kind === "ab_draft") ?? null;
-        const liveValues = buildInvoiceValuesFromLiveData({ project: latestProject, abDraft, documents });
+        const liveValues = buildInvoiceValuesFromLiveData({
+          project: latestProject,
+          abDraft,
+          documents,
+          orderLineItems,
+          deviations,
+        });
 
         form.reset(liveValues);
       })
