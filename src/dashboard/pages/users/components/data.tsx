@@ -9,6 +9,7 @@ const teamValues = [
   "Compliance",
   "Einkauf",
   "Finanzen",
+  "Kunde",
 ] as const;
 
 export type UserTeam = (typeof teamValues)[number];

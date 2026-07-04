@@ -283,6 +283,7 @@ export interface PipelineTeamMemberRow {
   email: string | null;
   company_id: string | null;
   is_customer_contact: boolean;
+  created_at: string;
 }
 
 export async function fetchTeamMembers(): Promise<PipelineTeamMemberRow[]> {
