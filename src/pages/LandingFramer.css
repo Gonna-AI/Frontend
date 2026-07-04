@@ -234,11 +234,25 @@ html.lenis.lenis-stopped {
 }
 
 .agero-shell-logo {
+  align-items: center;
   color: rgb(6, 6, 6);
+  display: inline-flex;
   font-family: "Cal Sans", "Inter", system-ui, sans-serif;
   font-size: clamp(2rem, 2.5vw, 3rem);
+  gap: 12px;
   line-height: 0.9;
   text-decoration: none;
+}
+
+.agero-shell-logo-mark {
+  display: block;
+  flex: 0 0 auto;
+  height: 34px;
+  width: 34px;
+}
+
+.agero-shell-logo > span {
+  display: block;
 }
 
 .agero-shell-logo sup {
@@ -247,10 +261,54 @@ html.lenis.lenis-stopped {
   vertical-align: super;
 }
 
+.agero-shell-actions {
+  align-items: center;
+  display: inline-flex;
+  gap: clamp(18px, 2vw, 28px);
+  min-width: 0;
+  position: relative;
+}
+
+.agero-shell-nav {
+  align-items: center;
+  display: inline-flex;
+  gap: clamp(20px, 2.6vw, 42px);
+  max-width: 0;
+  opacity: 0;
+  overflow: hidden;
+  pointer-events: none;
+  transform: translateX(12px);
+  transition:
+    max-width 320ms var(--agero-ease-out),
+    opacity 180ms ease,
+    transform 240ms var(--agero-ease-out);
+  white-space: nowrap;
+}
+
+.agero-shell-header.is-menu-open .agero-shell-nav {
+  max-width: 560px;
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(0);
+}
+
+.agero-shell-nav a {
+  color: rgba(19, 19, 19, 0.78);
+  font-size: clamp(1rem, 1.08vw, 1.18rem);
+  text-decoration: none;
+  transition: color 160ms ease;
+}
+
+.agero-shell-nav a:hover {
+  color: rgb(6, 6, 6);
+}
+
 .agero-shell-menu {
   align-items: center;
   background: transparent;
+  border: 0;
   border-radius: 999px;
+  cursor: pointer;
   display: inline-flex;
   flex-direction: column;
   gap: 13px;
@@ -265,7 +323,18 @@ html.lenis.lenis-stopped {
   background: rgb(6, 6, 6);
   display: block;
   height: 4px;
+  transition:
+    transform 220ms var(--agero-ease-out),
+    opacity 180ms ease;
   width: 100%;
+}
+
+.agero-shell-header.is-menu-open .agero-shell-menu span:first-child {
+  transform: translateY(8.5px) rotate(45deg);
+}
+
+.agero-shell-header.is-menu-open .agero-shell-menu span:last-child {
+  transform: translateY(-8.5px) rotate(-45deg);
 }
 
 .agero-header {
@@ -454,7 +523,7 @@ html.lenis.lenis-stopped {
   font-feature-settings: "blwf" on, "cv09" on, "cv03" on, "cv04" on, "cv11" on;
   font-size: 72px;
   font-weight: 400;
-  gap: 0 22px;
+  gap: 0 32px;
   justify-content: center;
   line-height: 80px;
   margin: 0 auto;
@@ -2680,10 +2749,67 @@ html.lenis.lenis-stopped {
 
   .agero-shell-header {
     margin-bottom: 56px;
+    position: relative;
   }
 
   .agero-shell-logo {
     font-size: 2rem;
+    gap: 10px;
+  }
+
+  .agero-shell-logo-mark {
+    height: 28px;
+    width: 28px;
+  }
+
+  .agero-shell-actions {
+    position: static;
+  }
+
+  .agero-shell-nav {
+    align-items: stretch;
+    background: rgba(248, 248, 248, 0.96);
+    border: 1px solid rgba(19, 19, 19, 0.12);
+    border-radius: 24px;
+    box-shadow: 0 18px 48px rgba(0, 0, 0, 0.16);
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    max-width: none;
+    min-width: 220px;
+    opacity: 0;
+    overflow: hidden;
+    padding: 10px;
+    position: absolute;
+    pointer-events: none;
+    right: 0;
+    top: calc(100% + 14px);
+    transform: translateY(-8px);
+    transition:
+      opacity 180ms ease,
+      transform 240ms var(--agero-ease-out),
+      visibility 180ms ease;
+    visibility: hidden;
+    white-space: normal;
+    z-index: 20;
+  }
+
+  .agero-shell-header.is-menu-open .agero-shell-nav {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+    visibility: visible;
+  }
+
+  .agero-shell-nav a {
+    border-radius: 16px;
+    color: rgb(19, 19, 19);
+    font-size: 1rem;
+    padding: 12px 14px;
+  }
+
+  .agero-shell-nav a:active {
+    background: rgba(19, 19, 19, 0.06);
   }
 
   .agero-shell-menu {
@@ -2694,6 +2820,14 @@ html.lenis.lenis-stopped {
 
   .agero-shell-menu span {
     height: 3px;
+  }
+
+  .agero-shell-header.is-menu-open .agero-shell-menu span:first-child {
+    transform: translateY(6px) rotate(45deg);
+  }
+
+  .agero-shell-header.is-menu-open .agero-shell-menu span:last-child {
+    transform: translateY(-6px) rotate(-45deg);
   }
 
   .agero-status {
