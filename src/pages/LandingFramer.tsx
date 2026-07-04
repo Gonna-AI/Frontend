@@ -57,6 +57,21 @@ const metricRibbonItems = ['40% Downtime Reduction', 'Industrial Grade AI', '24/
 
 const showcaseImage = '/desktop1.png';
 
+const shellLinks = [
+  ['Solutions', '/solutions'],
+  ['About', '/about'],
+  ['Blog', '/blog'],
+  ['Docs', '/docs'],
+  ['Contact', '/contact'],
+] as const;
+
+const shellMobileLinks = [
+  ['Solutions', '/solutions'],
+  ['Docs', '/docs'],
+  ['About', '/about'],
+  ['Blog', '/blog'],
+] as const;
+
 const introTags = [
   { label: 'Predictive Ops', Icon: Sparkles },
   { label: 'Sensor Networks', Icon: Globe2 },
@@ -248,14 +263,25 @@ function ShellHeader() {
   useEffect(() => {
     if (!isMenuOpen) return undefined;
 
+    const previousOverflow = document.body.style.overflow;
+    const shouldLockScroll = window.matchMedia('(max-width: 767px)').matches;
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         setIsMenuOpen(false);
       }
     };
 
+    if (shouldLockScroll) {
+      document.body.style.overflow = 'hidden';
+    }
+
     window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    return () => {
+      if (shouldLockScroll) {
+        document.body.style.overflow = previousOverflow;
+      }
+      window.removeEventListener('keydown', handleKeyDown);
+    };
   }, [isMenuOpen]);
 
   const closeMenu = () => setIsMenuOpen(false);
@@ -272,17 +298,17 @@ function ShellHeader() {
       </a>
       <div className="agero-shell-actions">
         <nav className="agero-shell-nav" id="agero-shell-nav" aria-label="Main navigation">
-          <a href="/solutions" onClick={closeMenu}>Solutions</a>
-          <a href="/about" onClick={closeMenu}>About</a>
-          <a href="/blog" onClick={closeMenu}>Blog</a>
-          <a href="/docs" onClick={closeMenu}>Docs</a>
-          <a href="/contact" onClick={closeMenu}>Contact</a>
+          {shellLinks.map(([label, href]) => (
+            <a href={href} key={label} onClick={closeMenu}>
+              {label}
+            </a>
+          ))}
         </nav>
         <button
-          aria-controls="agero-shell-nav"
+          aria-controls="agero-shell-nav agero-mobile-menu"
           aria-expanded={isMenuOpen}
           aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
-          className="agero-shell-menu"
+          className={`agero-shell-menu${isMenuOpen ? ' is-open' : ''}`}
           onClick={() => setIsMenuOpen((open) => !open)}
           type="button"
         >
@@ -290,6 +316,39 @@ function ShellHeader() {
           <span />
         </button>
       </div>
+
+      {isMenuOpen && (
+        <div className="agero-mobile-menu" id="agero-mobile-menu">
+          <button
+            aria-label="Close mobile menu"
+            className="agero-mobile-menu-scrim"
+            onClick={closeMenu}
+            type="button"
+          />
+
+          <div className="agero-mobile-menu-panel" role="navigation" aria-label="Mobile navigation">
+            <button aria-label="Close menu" className="agero-mobile-menu-close" onClick={closeMenu} type="button">
+              x
+            </button>
+            <div className="agero-mobile-menu-top">
+              <span>Menu</span>
+            </div>
+
+            <div className="agero-mobile-menu-links">
+              {shellMobileLinks.map(([label, href]) => (
+                <a href={href} key={label} onClick={closeMenu}>
+                  {label}
+                </a>
+              ))}
+            </div>
+
+            <a className="agero-mobile-menu-cta" href="/contact" onClick={closeMenu}>
+              <span>Book Demo</span>
+              <span aria-hidden="true">-&gt;</span>
+            </a>
+          </div>
+        </div>
+      )}
     </header>
   );
 }
