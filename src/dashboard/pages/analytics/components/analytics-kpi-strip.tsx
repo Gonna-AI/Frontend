@@ -1,9 +1,56 @@
+import { useEffect, useState } from "react";
+
 import { ArrowDownRight, ArrowUpRight, Ellipsis } from "lucide-react-dash";
 
 import { Badge } from "@/components/dashboard-ui/badge";
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/dashboard-ui/card";
+import { fetchAllDeviations, fetchDocuments, subscribeToTable } from "@/dashboard/lib/pipelineClient";
+
+interface LiveStats {
+  documentsProcessed: number;
+  avgConfidencePct: number;
+  deviationRatePct: number;
+}
 
 export function AnalyticsKpiStrip() {
+  const [live, setLive] = useState<LiveStats | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const load = () => {
+      Promise.all([fetchDocuments(), fetchAllDeviations()])
+        .then(([documents, deviations]) => {
+          if (cancelled) return;
+          if (documents.length === 0) return;
+
+          const avgConfidence =
+            deviations.length > 0
+              ? (deviations.reduce((sum, d) => sum + Number(d.confidence), 0) / deviations.length) * 100
+              : 0;
+
+          setLive({
+            documentsProcessed: documents.length,
+            avgConfidencePct: avgConfidence,
+            deviationRatePct: (deviations.length / documents.length) * 100,
+          });
+        })
+        .catch(() => {
+          // AI Performance falls back to the static demo snapshot if Supabase is unreachable.
+        });
+    };
+
+    load();
+    const unsubscribeDocs = subscribeToTable("pipeline_documents", load);
+    const unsubscribeDeviations = subscribeToTable("pipeline_deviations", load);
+
+    return () => {
+      cancelled = true;
+      unsubscribeDocs();
+      unsubscribeDeviations();
+    };
+  }, []);
+
   return (
     <div className="overflow-hidden rounded-xl bg-card shadow-xs ring-1 ring-foreground/10">
       <div className="grid divide-y *:data-[slot=card]:rounded-none *:data-[slot=card]:ring-0 md:grid-cols-2 md:divide-x md:divide-y-0 xl:grid-cols-5">
@@ -28,7 +75,7 @@ export function AnalyticsKpiStrip() {
                 from <span className="text-foreground">1,206</span>
               </span>
               <span>•</span>
-              <span>last 4 weeks</span>
+              <span>last 4 weeks — no per-page tracking until the worker is deployed</span>
             </div>
           </CardContent>
         </Card>
@@ -42,7 +89,7 @@ export function AnalyticsKpiStrip() {
           </CardHeader>
           <CardContent className="flex flex-col gap-4">
             <div className="flex items-center justify-between gap-4">
-              <div className="text-2xl leading-none tracking-tight">312</div>
+              <div className="text-2xl leading-none tracking-tight">{live ? live.documentsProcessed : 312}</div>
               <Badge className="bg-green-500/10 text-green-700 dark:bg-green-500/15 dark:text-green-300">
                 <ArrowUpRight />
                 2.1%
@@ -54,7 +101,7 @@ export function AnalyticsKpiStrip() {
                 from <span className="text-foreground">305</span>
               </span>
               <span>•</span>
-              <span>last 4 weeks</span>
+              <span>{live ? "live count" : "last 4 weeks"}</span>
             </div>
           </CardContent>
         </Card>
@@ -80,7 +127,7 @@ export function AnalyticsKpiStrip() {
                 from <span className="text-foreground">50s</span>
               </span>
               <span>•</span>
-              <span>last 4 weeks</span>
+              <span>last 4 weeks — no timing data until the worker is deployed</span>
             </div>
           </CardContent>
         </Card>
@@ -94,7 +141,9 @@ export function AnalyticsKpiStrip() {
           </CardHeader>
           <CardContent className="flex flex-col gap-4">
             <div className="flex items-center justify-between gap-4">
-              <div className="text-2xl leading-none tracking-tight">94.2%</div>
+              <div className="text-2xl leading-none tracking-tight">
+                {live ? `${live.avgConfidencePct.toFixed(1)}%` : "94.2%"}
+              </div>
               <Badge className="bg-green-500/10 text-green-700 dark:bg-green-500/15 dark:text-green-300">
                 <ArrowUpRight />
                 4.2%
@@ -106,7 +155,7 @@ export function AnalyticsKpiStrip() {
                 from <span className="text-foreground">90.4%</span>
               </span>
               <span>•</span>
-              <span>last 4 weeks</span>
+              <span>{live ? "avg. across all deviations" : "last 4 weeks"}</span>
             </div>
           </CardContent>
         </Card>
@@ -120,7 +169,9 @@ export function AnalyticsKpiStrip() {
           </CardHeader>
           <CardContent className="flex flex-col gap-4">
             <div className="flex items-center justify-between gap-4">
-              <div className="text-2xl leading-none tracking-tight">8.4%</div>
+              <div className="text-2xl leading-none tracking-tight">
+                {live ? `${live.deviationRatePct.toFixed(1)}%` : "8.4%"}
+              </div>
               <Badge className="bg-destructive/10 text-destructive">
                 <ArrowDownRight />
                 5.6%
@@ -132,7 +183,7 @@ export function AnalyticsKpiStrip() {
                 from <span className="text-foreground">8.9%</span>
               </span>
               <span>•</span>
-              <span>last 4 weeks</span>
+              <span>{live ? "deviations ÷ documents" : "last 4 weeks"}</span>
             </div>
           </CardContent>
         </Card>
