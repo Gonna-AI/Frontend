@@ -1,56 +1,61 @@
-import { useState, FormEvent, ReactNode } from 'react';
+import { useState, FormEvent } from 'react';
 import { Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { useTheme } from '../hooks/useTheme';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowRight, CheckCircle2, AlertCircle, Loader2, ArrowLeft } from 'lucide-react';
-import { cn } from '../lib/utils';
 
 type AuthView = 'signin' | 'signup' | 'forgot_password';
 
-const GrainOverlay = ({ className = '' }: { className?: string }) => (
-    <div
-        className={cn(
-            'pointer-events-none absolute inset-0 opacity-[0.12] [mask-image:radial-gradient(ellipse_at_center,#fff,transparent_70%)]',
-            className
-        )}
-        style={{ backgroundImage: 'url(/noise.webp)', backgroundSize: '30%' }}
-    />
-);
+// Same rotating ClerkTree logo video used inline in the homepage hero ("Orchestrating [video]
+// Industrial Machine [video] Intelligence"), featured here as the panel's centerpiece.
+const BRAND_VIDEO_URL = '/hero-logo-video.mp4';
 
-const AuthShell = ({ isDark, children }: { isDark: boolean; children: ReactNode }) => (
-    <div
-        className={cn(
-            'relative min-h-screen w-full overflow-x-hidden font-urbanist transition-colors duration-500',
-            isDark ? 'bg-[rgb(10,10,10)] text-white' : 'bg-[#f7f4f2] text-neutral-900'
-        )}
-    >
-        {isDark ? (
-            <>
-                <div
-                    className="pointer-events-none absolute top-[-10%] right-[-10%] w-[80%] h-[100%] opacity-90"
-                    style={{
-                        background: 'radial-gradient(circle at 70% 30%, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0.08) 30%, transparent 60%)',
-                        filter: 'blur(40px)',
-                    }}
-                />
-                <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(80%_60%_at_80%_0%,rgba(255,255,255,0.12),transparent)]" />
-                <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(215deg,rgba(255,255,255,0.08)_0%,rgba(255,255,255,0.02)_40%,transparent_70%)]" />
-                <div className="pointer-events-none absolute inset-0 opacity-[0.07]" style={{ backgroundImage: 'url(/noise.webp)', backgroundSize: '35%' }} />
-            </>
-        ) : (
-            <>
-                <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(80%_60%_at_80%_0%,rgba(255,77,0,0.12),transparent)]" />
-                <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(215deg,rgba(0,0,0,0.06)_0%,transparent_60%)]" />
-            </>
-        )}
-        <div className="relative z-10">{children}</div>
+const BrandPanel = () => (
+    <div className="relative hidden h-full flex-col justify-between overflow-hidden bg-[rgb(10,10,10)] p-10 text-white lg:flex">
+        <div
+            className="pointer-events-none absolute top-[-10%] right-[-10%] h-[100%] w-[80%] opacity-90"
+            style={{
+                background: 'radial-gradient(circle at 70% 30%, rgba(255,77,0,0.22) 0%, rgba(255,77,0,0.08) 30%, transparent 60%)',
+                filter: 'blur(40px)',
+            }}
+        />
+
+        <div className="relative z-10 space-y-1">
+            <h1 className="text-2xl font-medium">ClerkTree</h1>
+            <p className="text-sm text-white/70">AI harness for industrial machinery.</p>
+        </div>
+
+        <div className="relative z-10 flex flex-1 flex-col items-center justify-center gap-6">
+            <video
+                autoPlay
+                loop
+                muted
+                playsInline
+                preload="metadata"
+                src={BRAND_VIDEO_URL}
+                className="h-56 w-56 rounded-full object-cover shadow-[0_0_120px_rgba(255,77,0,0.25)]"
+            />
+            <p className="max-w-xs text-center text-2xl leading-tight font-medium">
+                Orchestrating <span className="text-[#ff4d00]">Industrial</span> Machine Intelligence
+            </p>
+        </div>
+
+        <div className="relative z-10 flex w-full justify-between gap-8">
+            <div className="flex-1 space-y-1">
+                <h2 className="font-medium">New here?</h2>
+                <p className="text-sm text-white/70">Create an account to spin up your own Kostencheck Copilot workspace.</p>
+            </div>
+            <div className="mx-1 w-px self-stretch bg-white/20" />
+            <div className="flex-1 space-y-1">
+                <h2 className="font-medium">Need help?</h2>
+                <p className="text-sm text-white/70">Reach out to your ClerkTree contact, or email team@clerktree.com.</p>
+            </div>
+        </div>
     </div>
 );
 
 export default function AuthPage() {
     const { session, loading, signIn, signUp, signInWithGoogle, resetPassword } = useAuth();
-    const { isDark } = useTheme();
     const navigate = useNavigate();
 
     const [searchParams] = useSearchParams();
@@ -61,6 +66,7 @@ export default function AuthPage() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [fullName, setFullName] = useState('');
+    const [rememberMe, setRememberMe] = useState(true);
     const [error, setError] = useState('');
     const [info, setInfo] = useState(initialMessage);
     const [successMessage, setSuccessMessage] = useState('');
@@ -126,191 +132,134 @@ export default function AuthPage() {
 
     if (loading) {
         return (
-            <AuthShell isDark={isDark}>
-                <div className="flex min-h-screen items-center justify-center px-4">
-                    <div className={cn(
-                        "flex items-center gap-3 rounded-2xl border px-5 py-4",
-                        isDark ? "bg-black/60 border-white/10 text-white/70" : "bg-white border-gray-200 text-gray-600"
-                    )}>
-                        <Loader2 className={cn("w-5 h-5 animate-spin", isDark ? "text-white/60" : "text-gray-500")} />
-                        <span className="text-sm font-medium">Loading…</span>
-                    </div>
+            <div className="flex min-h-screen w-full items-center justify-center bg-white">
+                <div className="flex items-center gap-3 rounded-2xl border border-gray-200 bg-white px-5 py-4 text-gray-600">
+                    <Loader2 className="h-5 w-5 animate-spin text-gray-500" />
+                    <span className="text-sm font-medium">Loading…</span>
                 </div>
-            </AuthShell>
+            </div>
         );
     }
 
-    // Success state (Email confirmation or Reset link sent)
-    if (successMessage) {
-        return (
-            <AuthShell isDark={isDark}>
-                <div className="flex min-h-screen items-center justify-center p-4">
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        className={cn(
-                            "relative w-full max-w-md overflow-hidden rounded-[28px] border p-8 text-center shadow-[0_30px_80px_rgba(0,0,0,0.45)]",
-                            isDark
-                                ? "bg-[linear-gradient(180deg,#141414_0%,#0b0b0b_100%)] border-white/10"
-                                : "bg-white border-gray-200 shadow-xl"
-                        )}
-                    >
-                        {isDark && (
-                            <>
-                                <div className="absolute inset-0 bg-[radial-gradient(120%_120%_at_top,rgba(255,77,0,0.12),transparent)]" />
-                                <GrainOverlay className="opacity-[0.16]" />
-                            </>
-                        )}
-                        <div className="relative z-10">
-                            <div className={cn(
-                                "w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6",
-                                isDark ? "bg-emerald-500/10 text-emerald-400" : "bg-emerald-50 text-emerald-500"
-                            )}>
-                                <CheckCircle2 className="w-8 h-8" />
+    return (
+        <div className="grid min-h-screen w-full bg-white text-neutral-900 lg:grid-cols-2">
+            <div className="relative flex min-h-screen flex-col justify-center px-4 py-12 sm:px-6">
+                <div className="absolute top-5 right-4 sm:right-8">
+                    <span className="text-sm text-gray-500">
+                        {view === 'signup' ? 'Already have an account?' : "Don't have an account?"}{' '}
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setView(view === 'signup' ? 'signin' : 'signup');
+                                setError('');
+                            }}
+                            className="font-medium text-gray-900 hover:underline"
+                        >
+                            {view === 'signup' ? 'Sign in' : 'Register'}
+                        </button>
+                    </span>
+                </div>
+
+                <div className="mx-auto w-full max-w-[350px] space-y-8">
+                    {successMessage ? (
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            className="text-center"
+                        >
+                            <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-500">
+                                <CheckCircle2 className="h-8 w-8" />
                             </div>
-                            <h2 className={cn("text-2xl font-bold mb-2", isDark ? "text-white" : "text-gray-900")}>Check your email</h2>
-                            <p className={cn("text-sm mb-6", isDark ? "text-white/60" : "text-gray-500")}>
-                                {successMessage}
-                            </p>
+                            <h2 className="mb-2 text-2xl font-medium">Check your email</h2>
+                            <p className="mb-6 text-sm text-gray-500">{successMessage}</p>
                             <button
                                 onClick={() => {
                                     setSuccessMessage('');
                                     setView('signin');
                                     setPassword('');
                                 }}
-                                className={cn(
-                                    "w-full py-2.5 rounded-xl text-sm font-semibold transition-colors",
-                                    isDark
-                                        ? "bg-gradient-to-r from-[#FF4D00] to-[#FF8A5B] text-white hover:from-[#FF6A2A] hover:to-[#FF9B74]"
-                                        : "bg-black text-white hover:bg-gray-800"
-                                )}
+                                className="w-full rounded-xl bg-black py-2.5 text-sm font-semibold text-white transition-colors hover:bg-gray-800"
                             >
                                 Back to Sign In
                             </button>
-                        </div>
-                    </motion.div>
-                </div>
-            </AuthShell>
-        );
-    }
-
-    return (
-        <AuthShell isDark={isDark}>
-
-            {/* Main Container */}
-            <div className="mx-auto flex min-h-screen w-full max-w-2xl items-center justify-center px-4 py-12 sm:px-6">
-
-                {/* Card Wrapper */}
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5 }}
-                    className={cn(
-                        "relative w-full max-w-md overflow-hidden rounded-[28px] border p-6 shadow-[0_30px_80px_rgba(0,0,0,0.45)] sm:p-8",
-                        isDark
-                            ? "bg-[linear-gradient(180deg,#141414_0%,#0b0b0b_100%)] border-white/10"
-                            : "bg-white border-gray-200 shadow-xl"
-                    )}
-                >
-                    {isDark && (
+                        </motion.div>
+                    ) : (
                         <>
-                            <div className="absolute inset-0 bg-[radial-gradient(120%_120%_at_top,rgba(255,77,0,0.12),transparent)]" />
-                            <GrainOverlay className="opacity-[0.16]" />
-                        </>
-                    )}
-
-                    {/* Form Container */}
-                    <div className="relative z-10 flex w-full flex-col">
-
-                        {/* Logo */}
-                        <div className="flex items-center justify-center gap-3 mb-8">
-                            <div className={cn(
-                                "w-10 h-10 rounded-xl flex items-center justify-center border shadow-sm transition-all duration-300",
-                                isDark ? "bg-white/5 border-white/10" : "bg-white border-gray-200"
-                            )}>
-                                <img
-                                    src="/favicon.svg"
-                                    alt="ClerkTree"
-                                    className={cn("w-5 h-5 transition-all duration-300",
-                                        !isDark && "brightness-0 invert-0"
-                                    )}
-                                />
+                            <div className="space-y-2 text-center">
+                                <img src="/favicon.svg" alt="ClerkTree" className="mx-auto mb-2 h-8 w-8" />
+                                <h1 className="text-3xl font-medium">
+                                    {view === 'signup' ? 'Create an account' : view === 'forgot_password' ? 'Reset password' : 'Login to your account'}
+                                </h1>
+                                <p className="text-sm text-gray-500">
+                                    {view === 'signup' ? 'Enter your details to get started.' : view === 'forgot_password' ? 'Enter your email to receive instructions.' : 'Please enter your details to login.'}
+                                </p>
                             </div>
-                            <span className={cn("text-lg font-semibold tracking-tight", isDark ? "text-white" : "text-gray-900")}>
-                                ClerkTree
-                            </span>
-                        </div>
 
-                        {/* Header Text */}
-                        <div className="mb-8">
-                            <h1 className={cn("text-3xl font-bold mb-2 tracking-tight", isDark ? "text-white" : "text-gray-900")}>
-                                {view === 'signup' ? 'Create an account' : view === 'forgot_password' ? 'Reset password' : 'Welcome back'}
-                            </h1>
-                            <p className={cn("text-sm", isDark ? "text-white/60" : "text-gray-500")}>
-                                {view === 'signup' ? 'Enter your details to get started.' : view === 'forgot_password' ? 'Enter your email to receive instructions.' : 'Login to your ClerkTree account.'}
-                            </p>
-                        </div>
+                            {view !== 'forgot_password' && (
+                                <div className="space-y-4">
+                                    <button
+                                        onClick={handleGoogleSignIn}
+                                        className="flex w-full items-center justify-center gap-3 rounded-xl border border-gray-200 bg-white px-4 py-3 text-gray-700 transition-all duration-200 hover:bg-gray-50"
+                                    >
+                                        <svg className="w-5 h-5" viewBox="0 0 24 24">
+                                            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4" />
+                                            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
+                                            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
+                                            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
+                                        </svg>
+                                        <span className="text-sm font-medium">Continue with Google</span>
+                                    </button>
 
-                        {/* Auth Form */}
-                        <form onSubmit={handleSubmit} className="space-y-5">
+                                    <div className="relative text-center text-sm">
+                                        <div className="absolute inset-0 top-1/2 flex items-center border-t border-gray-200" />
+                                        <span className="relative bg-white px-2 text-gray-400">Or continue with</span>
+                                    </div>
+                                </div>
+                            )}
 
-                            {view === 'signup' && (
-                                <div className="space-y-1.5">
-                                    <label className={cn("text-sm font-medium", isDark ? "text-white/70" : "text-gray-700")}>Full Name</label>
-                                    <div className="relative">
+                            <form onSubmit={handleSubmit} className="space-y-5">
+                                {view === 'signup' && (
+                                    <div className="space-y-1.5">
+                                        <label className="text-sm font-medium text-gray-700">Full Name</label>
                                         <input
                                             type="text"
                                             value={fullName}
                                             onChange={(e) => setFullName(e.target.value)}
                                             placeholder="John Doe"
-                                            className={cn(
-                                                "w-full px-4 py-3 rounded-xl text-sm border focus:ring-2 focus:ring-offset-0 outline-none transition-all duration-200",
-                                                isDark
-                                                    ? "bg-black/60 border-white/10 text-white placeholder-white/30 focus:border-[#FF4D00]/50 focus:ring-[#FF4D00]/20"
-                                                    : "bg-white border-gray-200 text-gray-900 placeholder-gray-400 focus:border-orange-300 focus:ring-orange-100"
-                                            )}
+                                            className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 placeholder-gray-400 outline-none transition-all duration-200 focus:border-orange-300 focus:ring-2 focus:ring-orange-100"
                                         />
                                     </div>
-                                </div>
-                            )}
+                                )}
 
-                            <div className="space-y-1.5">
-                                <label className={cn("text-sm font-medium", isDark ? "text-white/70" : "text-gray-700")}>Email</label>
-                                <div className="relative">
+                                <div className="space-y-1.5">
+                                    <label className="text-sm font-medium text-gray-700">Email Address</label>
                                     <input
                                         type="email"
                                         value={email}
                                         onChange={(e) => setEmail(e.target.value)}
-                                        placeholder="name@example.com"
+                                        placeholder="you@example.com"
                                         required
-                                        className={cn(
-                                            "w-full px-4 py-3 rounded-xl text-sm border focus:ring-2 focus:ring-offset-0 outline-none transition-all duration-200",
-                                            isDark
-                                                ? "bg-black/60 border-white/10 text-white placeholder-white/30 focus:border-[#FF4D00]/50 focus:ring-[#FF4D00]/20"
-                                                : "bg-white border-gray-200 text-gray-900 placeholder-gray-400 focus:border-orange-300 focus:ring-orange-100"
-                                        )}
+                                        className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 placeholder-gray-400 outline-none transition-all duration-200 focus:border-orange-300 focus:ring-2 focus:ring-orange-100"
                                     />
                                 </div>
-                            </div>
 
-                            {view !== 'forgot_password' && (
-                                <div className="space-y-1.5">
-                                    <div className="flex items-center justify-between">
-                                        <label className={cn("text-sm font-medium", isDark ? "text-white/70" : "text-gray-700")}>Password</label>
-                                        {view === 'signin' && (
-                                            <button
-                                                type="button"
-                                                onClick={() => {
-                                                    setView('forgot_password');
-                                                    setError('');
-                                                }}
-                                                className={cn("text-xs font-medium hover:underline", isDark ? "text-white/50 hover:text-white" : "text-gray-500 hover:text-gray-900")}
-                                            >
-                                                Forgot your password?
-                                            </button>
-                                        )}
-                                    </div>
-                                    <div className="relative">
+                                {view !== 'forgot_password' && (
+                                    <div className="space-y-1.5">
+                                        <div className="flex items-center justify-between">
+                                            <label className="text-sm font-medium text-gray-700">Password</label>
+                                            {view === 'signin' && (
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        setView('forgot_password');
+                                                        setError('');
+                                                    }}
+                                                    className="text-xs font-medium text-gray-500 hover:text-gray-900 hover:underline"
+                                                >
+                                                    Forgot your password?
+                                                </button>
+                                            )}
+                                        </div>
                                         <input
                                             type="password"
                                             value={password}
@@ -318,151 +267,93 @@ export default function AuthPage() {
                                             placeholder={view === 'signup' ? "Create a password" : "Enter your password"}
                                             required
                                             minLength={6}
-                                            className={cn(
-                                                "w-full px-4 py-3 rounded-xl text-sm border focus:ring-2 focus:ring-offset-0 outline-none transition-all duration-200",
-                                                isDark
-                                                    ? "bg-black/60 border-white/10 text-white placeholder-white/30 focus:border-[#FF4D00]/50 focus:ring-[#FF4D00]/20"
-                                                    : "bg-white border-gray-200 text-gray-900 placeholder-gray-400 focus:border-orange-300 focus:ring-orange-100"
-                                            )}
+                                            className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 placeholder-gray-400 outline-none transition-all duration-200 focus:border-orange-300 focus:ring-2 focus:ring-orange-100"
                                         />
                                     </div>
-                                </div>
-                            )}
+                                )}
 
-                            {/* Info/Error Display */}
-                            <AnimatePresence>
-                                {info && (
-                                    <motion.div
-                                        initial={{ opacity: 0, height: 0 }}
-                                        animate={{ opacity: 1, height: 'auto' }}
-                                        exit={{ opacity: 0, height: 0 }}
-                                        className={cn(
-                                            "text-xs flex items-center gap-2 p-3 rounded-lg border",
-                                            isDark ? "bg-[#FF4D00]/10 border-[#FF4D00]/20 text-[#FFB286]" : "bg-orange-50 border-orange-200 text-orange-600"
-                                        )}
-                                    >
-                                        <CheckCircle2 className="w-4 h-4" />
-                                        {info}
-                                    </motion.div>
+                                {view === 'signin' && (
+                                    <label className="flex items-center gap-2 text-sm text-gray-700">
+                                        <input
+                                            type="checkbox"
+                                            checked={rememberMe}
+                                            onChange={(e) => setRememberMe(e.target.checked)}
+                                            className="size-4 rounded border-gray-300"
+                                        />
+                                        Remember me for 30 days
+                                    </label>
                                 )}
-                                {error && (
-                                    <motion.div
-                                        initial={{ opacity: 0, height: 0 }}
-                                        animate={{ opacity: 1, height: 'auto' }}
-                                        exit={{ opacity: 0, height: 0 }}
-                                        className={cn(
-                                            "text-xs flex items-center gap-2 p-3 rounded-lg border",
-                                            isDark ? "bg-red-500/10 border-red-500/20 text-red-300" : "bg-red-50 border-red-200 text-red-600"
-                                        )}
-                                    >
-                                        <AlertCircle className="w-4 h-4" />
-                                        {error}
-                                    </motion.div>
-                                )}
-                            </AnimatePresence>
 
-                            {/* Submit Button */}
-                            <button
-                                type="submit"
-                                disabled={submitting}
-                                className={cn(
-                                    "w-full py-3 rounded-xl text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none",
-                                    isDark
-                                        ? "bg-gradient-to-r from-[#FF4D00] to-[#FF8A5B] text-white hover:from-[#FF6A2A] hover:to-[#FF9B74] shadow-[#FF4D00]/20"
-                                        : "bg-black text-white hover:bg-gray-800 shadow-black/10"
-                                )}
-                            >
-                                {submitting ? (
-                                    <Loader2 className="w-4 h-4 animate-spin" />
-                                ) : (
-                                    <>
-                                        <span>
-                                            {view === 'signup' ? 'Sign up' : view === 'forgot_password' ? 'Send Reset Link' : 'Login'}
-                                        </span>
-                                        <ArrowRight className="w-4 h-4" />
-                                    </>
-                                )}
-                            </button>
-
-                            {view === 'forgot_password' && (
-                                <button
-                                    type="button"
-                                    onClick={() => {
-                                        setView('signin');
-                                        setError('');
-                                    }}
-                                    className={cn(
-                                        "w-full flex items-center justify-center gap-2 text-sm transition-colors",
-                                        isDark ? "text-white/50 hover:text-white" : "text-gray-500 hover:text-gray-900"
+                                <AnimatePresence>
+                                    {info && (
+                                        <motion.div
+                                            initial={{ opacity: 0, height: 0 }}
+                                            animate={{ opacity: 1, height: 'auto' }}
+                                            exit={{ opacity: 0, height: 0 }}
+                                            className="flex items-center gap-2 rounded-lg border border-orange-200 bg-orange-50 p-3 text-xs text-orange-600"
+                                        >
+                                            <CheckCircle2 className="w-4 h-4" />
+                                            {info}
+                                        </motion.div>
                                     )}
-                                >
-                                    <ArrowLeft className="w-4 h-4" />
-                                    Back to Sign In
-                                </button>
-                            )}
-                        </form>
-
-                        {view !== 'forgot_password' && (
-                            <>
-                                <div className="relative my-8">
-                                    <div className="absolute inset-0 flex items-center">
-                                        <div className={cn("w-full border-t", isDark ? "border-white/10" : "border-gray-200")} />
-                                    </div>
-                                    <div className="relative flex justify-center text-xs uppercase">
-                                        <span className={cn("px-2 font-medium tracking-wider", isDark ? "bg-[#0f0f0f] text-white/40" : "bg-white text-gray-400")}>
-                                            Or continue with
-                                        </span>
-                                    </div>
-                                </div>
+                                    {error && (
+                                        <motion.div
+                                            initial={{ opacity: 0, height: 0 }}
+                                            animate={{ opacity: 1, height: 'auto' }}
+                                            exit={{ opacity: 0, height: 0 }}
+                                            className="flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 p-3 text-xs text-red-600"
+                                        >
+                                            <AlertCircle className="w-4 h-4" />
+                                            {error}
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
 
                                 <button
-                                    onClick={handleGoogleSignIn}
-                                    className={cn(
-                                        "w-full flex items-center justify-center gap-3 px-4 py-3 rounded-xl border transition-all duration-200 hover:bg-opacity-50",
-                                        isDark
-                                            ? "bg-white/5 border-white/10 hover:bg-white/10 text-white"
-                                            : "bg-white border-gray-200 hover:bg-gray-50 text-gray-700"
-                                    )}
+                                    type="submit"
+                                    disabled={submitting}
+                                    className="flex w-full items-center justify-center gap-2 rounded-xl bg-black py-3 text-sm font-semibold text-white shadow-lg shadow-black/10 transition-all duration-200 hover:-translate-y-0.5 hover:bg-gray-800 hover:shadow-xl disabled:pointer-events-none disabled:opacity-50"
                                 >
-                                    <svg className="w-5 h-5" viewBox="0 0 24 24">
-                                        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4" />
-                                        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
-                                        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
-                                        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
-                                    </svg>
-                                    <span className="font-medium text-sm">Continue with Google</span>
+                                    {submitting ? (
+                                        <Loader2 className="w-4 h-4 animate-spin" />
+                                    ) : (
+                                        <>
+                                            <span>
+                                                {view === 'signup' ? 'Sign up' : view === 'forgot_password' ? 'Send Reset Link' : 'Login'}
+                                            </span>
+                                            <ArrowRight className="w-4 h-4" />
+                                        </>
+                                    )}
                                 </button>
 
-                                <div className="mt-8 text-center text-sm">
-                                    <span className={cn(isDark ? "text-white/50" : "text-gray-500")}>
-                                        {view === 'signup' ? "Already have an account?" : "Don't have an account?"}
-                                    </span>
-                                    {' '}
+                                {view === 'forgot_password' && (
                                     <button
+                                        type="button"
                                         onClick={() => {
-                                            setView(view === 'signup' ? 'signin' : 'signup');
+                                            setView('signin');
                                             setError('');
                                         }}
-                                        className={cn("font-semibold hover:underline", isDark ? "text-white" : "text-black")}
+                                        className="flex w-full items-center justify-center gap-2 text-sm text-gray-500 transition-colors hover:text-gray-900"
                                     >
-                                        {view === 'signup' ? 'Sign in' : 'Sign up'}
+                                        <ArrowLeft className="w-4 h-4" />
+                                        Back to Sign In
                                     </button>
-                                </div>
-                            </>
-                        )}
+                                )}
+                            </form>
+                        </>
+                    )}
+                </div>
 
-                        {/* Legal Links Footer */}
-                        <div className="mt-10 flex justify-center gap-6 text-xs text-opacity-50">
-                            <a href="/terms" className={cn("hover:underline", isDark ? "text-white/40 hover:text-white" : "text-gray-400 hover:text-gray-600")}>Terms</a>
-                            <a href="/privacy" className={cn("hover:underline", isDark ? "text-white/40 hover:text-white" : "text-gray-400 hover:text-gray-600")}>Privacy</a>
-                        </div>
-
-
+                <div className="absolute bottom-5 flex w-full justify-between px-4 sm:px-8">
+                    <span className="text-sm text-gray-400">© 2026, ClerkTree.</span>
+                    <div className="flex items-center gap-6 text-sm">
+                        <a href="/terms" className="text-gray-400 hover:text-gray-600 hover:underline">Terms</a>
+                        <a href="/privacy" className="text-gray-400 hover:text-gray-600 hover:underline">Privacy</a>
                     </div>
-
-
-                </motion.div>
+                </div>
             </div>
-        </AuthShell>
+
+            <BrandPanel />
+        </div>
     );
 }
