@@ -1,5 +1,11 @@
 import { addDays, format } from "date-fns";
 
+import type {
+  PipelineDocumentRow,
+  PipelineGeneratedDocRow,
+  PipelineProjectRow,
+} from "@/dashboard/lib/pipelineClient";
+
 export interface InvoiceLineItem {
   id: string;
   description: string;
@@ -49,6 +55,8 @@ export interface InvoiceFormValues {
   discountType: InvoiceDiscountType;
   discountValue: number;
   items: InvoiceLineItem[];
+  /** AB intro/summary text — seeded from the live pipeline_generated_docs "ab_draft" content when available. */
+  introText?: string;
 }
 
 const today = new Date();
@@ -190,4 +198,33 @@ export function getInvoiceDiscount(invoice: InvoiceFormValues) {
 
 export function getInvoiceTotal(invoice: InvoiceFormValues) {
   return Math.max(getInvoiceSubtotal(invoice) - getInvoiceDiscount(invoice), 0) + getInvoiceTax(invoice);
+}
+
+/**
+ * Seeds initial AB builder form state from live Supabase data: the latest project, its
+ * "ab_draft" generated doc content (used as the intro/summary text), and the matching
+ * bestellung document's doc_number (used as the reference number). Line items and the
+ * from/tax/discount setup stay the static demo defaults — only the parts that should
+ * reflect the live pipeline (reference, client, intro text) are overridden here.
+ */
+export function buildInvoiceValuesFromLiveData(params: {
+  project: PipelineProjectRow | null;
+  abDraft: PipelineGeneratedDocRow | null;
+  documents: PipelineDocumentRow[];
+}): InvoiceFormValues {
+  const { project, abDraft, documents } = params;
+
+  const bestellung = documents.find((doc) => doc.kind === "bestellung") ?? null;
+  const referenceNumber = bestellung?.doc_number ?? defaultInvoiceValues.referenceNumber;
+
+  const matchingClient = project?.customer_name
+    ? invoiceClients.find((client) => client.name === project.customer_name)
+    : undefined;
+
+  return {
+    ...defaultInvoiceValues,
+    referenceNumber,
+    to: matchingClient ?? defaultInvoiceValues.to,
+    introText: abDraft?.content ?? undefined,
+  };
 }

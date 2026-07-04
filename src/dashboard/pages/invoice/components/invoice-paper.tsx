@@ -68,6 +68,13 @@ export function InvoicePaper({ invoice }: { invoice: InvoiceFormValues }) {
         </section>
       </header>
 
+      {invoice.introText ? (
+        <section className="-mt-20 text-sm leading-relaxed">
+          <p className="mb-2 font-semibold uppercase">Zusammenfassung</p>
+          <p className="line-clamp-4 whitespace-pre-wrap">{invoice.introText}</p>
+        </section>
+      ) : null}
+
       <div className="flex flex-col gap-5">
         <section className="text-sm">
           <div className="grid grid-cols-[1fr_74px_116px_116px] bg-stone-200 px-3 py-3 font-semibold uppercase">

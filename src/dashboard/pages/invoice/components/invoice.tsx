@@ -1,7 +1,11 @@
 
+import * as React from "react";
+
 import { FormProvider, useForm, useWatch } from "react-hook-form";
 
-import { defaultInvoiceValues, type InvoiceFormValues } from "./data";
+import { fetchAllProjects, fetchDocuments, fetchGeneratedDocs } from "@/dashboard/lib/pipelineClient";
+
+import { buildInvoiceValuesFromLiveData, defaultInvoiceValues, type InvoiceFormValues } from "./data";
 import { InvoiceForm } from "./invoice-form";
 import { InvoicePreview } from "./invoice-preview";
 
@@ -10,6 +14,34 @@ export function Invoice() {
     defaultValues: defaultInvoiceValues,
   });
   const invoice = useWatch({ control: form.control }) as InvoiceFormValues;
+
+  // Seed the AB builder's initial state from live Supabase data once, on mount. The form keeps
+  // using the static defaultInvoiceValues while the fetch is in flight or if it fails — the
+  // builder UI/logic itself is unchanged, only its starting values come from live data.
+  React.useEffect(() => {
+    let cancelled = false;
+
+    Promise.all([fetchAllProjects(), fetchDocuments()])
+      .then(async ([projects, documents]) => {
+        if (cancelled) return;
+        const latestProject = projects[0] ?? null;
+
+        const generatedDocs = latestProject ? await fetchGeneratedDocs(latestProject.id) : [];
+        if (cancelled) return;
+
+        const abDraft = generatedDocs.find((doc) => doc.kind === "ab_draft") ?? null;
+        const liveValues = buildInvoiceValuesFromLiveData({ project: latestProject, abDraft, documents });
+
+        form.reset(liveValues);
+      })
+      .catch(() => {
+        // AB builder falls back to the static defaultInvoiceValues if Supabase is unreachable.
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [form]);
 
   return (
     <FormProvider {...form}>

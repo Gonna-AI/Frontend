@@ -1,6 +1,8 @@
 import { Archive, CircleHelp, File, Inbox, Keyboard, type LucideIcon, Send, Star, Trash2 } from "lucide-react-dash";
 import { siFigma, siGoogledocs, siGooglephotos } from "simple-icons";
 
+import type { PipelineGeneratedDocRow } from "@/dashboard/lib/pipelineClient";
+
 const kostencheckCopilot = {
   name: "Kostencheck Copilot",
   email: "copilot@clerktree.ai",
@@ -378,3 +380,60 @@ export const accounts = [
     email: "pipeline@clerktree.ai",
   },
 ];
+
+/** Per-kind subject prefix and sender — kept in sync with the themed static seed above. */
+const GENERATED_DOC_KIND_META: Record<
+  PipelineGeneratedDocRow["kind"],
+  { prefix: string; from: Recipient; accountId: number; labels: string[] }
+> = {
+  zusammenfassung: {
+    prefix: "Zusammenfassung",
+    from: kostencheckCopilot,
+    accountId: 1,
+    labels: ["kostencheck"],
+  },
+  kickoff_brief: {
+    prefix: "KickOff-Brief",
+    from: clerkTreePipeline,
+    accountId: 1,
+    labels: ["kickoff"],
+  },
+  deviation_report: {
+    prefix: "Abweichungsbericht",
+    from: clerkTreePipeline,
+    accountId: 1,
+    labels: ["kostencheck"],
+  },
+  ab_draft: {
+    prefix: "Auftragsbestätigung (Entwurf)",
+    from: kostencheckCopilot,
+    accountId: 1,
+    labels: ["entwurf"],
+  },
+};
+
+/** Maps a live pipeline_generated_docs row onto the inbox's Mail shape. */
+export function mapGeneratedDocToMail(doc: PipelineGeneratedDocRow): Mail {
+  const meta = GENERATED_DOC_KIND_META[doc.kind];
+  const subject = doc.title?.trim() ? doc.title : `${meta.prefix} – ${doc.id.slice(0, 8)}`;
+
+  return {
+    id: doc.id,
+    accountId: meta.accountId,
+    from: meta.from,
+    to: [{ name: "THD GmbH – Vertrieb", email: "vertrieb@thd-gmbh.de" }],
+    subject,
+    body: doc.content ?? "",
+    receivedAt: doc.created_at,
+    folder: "inbox",
+    isRead: false,
+    isPinned: false,
+    isPriority: doc.kind === "ab_draft",
+    labels: meta.labels,
+  };
+}
+
+/** Maps a list of live generated docs onto the inbox's Mail list, newest first. */
+export function mapGeneratedDocsToMails(docs: PipelineGeneratedDocRow[]): Mail[] {
+  return docs.map(mapGeneratedDocToMail);
+}

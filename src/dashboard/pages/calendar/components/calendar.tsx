@@ -14,8 +14,13 @@ import { EventCalendarViews } from "@/dashboard/components/calendar/event-calend
 import { Button } from "@/components/dashboard-ui/button";
 import { ButtonGroup } from "@/components/dashboard-ui/button-group";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/dashboard-ui/select";
+import { fetchMilestones, subscribeToTable } from "@/dashboard/lib/pipelineClient";
 
-import { demoEvents } from "./events-data";
+import { demoEvents, mapMilestoneToEvent } from "./events-data";
+
+// Internal-only events (standups, capacity planning) that don't come from pipeline_milestones —
+// always kept alongside whatever milestone events are live/fallback.
+const internalEvents = demoEvents.filter((event) => event.groupId === "standup" || !event.title.includes("–"));
 
 const views = [
   { key: "dayGridMonth", label: "Monat" },
@@ -47,6 +52,32 @@ export function Calendar() {
   });
   const title = dateInfo.title;
   const days = dateInfo.days;
+
+  const [events, setEvents] = React.useState(demoEvents);
+
+  React.useEffect(() => {
+    let cancelled = false;
+
+    const load = () => {
+      fetchMilestones()
+        .then((milestones) => {
+          if (cancelled) return;
+          if (milestones.length === 0) return;
+          setEvents([...milestones.map(mapMilestoneToEvent), ...internalEvents]);
+        })
+        .catch(() => {
+          // Terminplan falls back to the static demo snapshot if Supabase is unreachable.
+        });
+    };
+
+    load();
+    const unsubscribe = subscribeToTable("pipeline_milestones", load);
+
+    return () => {
+      cancelled = true;
+      unsubscribe();
+    };
+  }, []);
 
   return (
     <div className="flex flex-col overflow-hidden rounded-md border">
@@ -116,7 +147,7 @@ export function Calendar() {
         initialView={views[0].key}
         plugins={[...plugins]}
         popoverCloseContent={() => <XIcon className="size-5 text-muted-foreground group-hover:text-foreground" />}
-        events={demoEvents}
+        events={events}
         nowIndicator
         datesSet={(info) => {
           setDateInfo({
@@ -124,7 +155,7 @@ export function Calendar() {
             days: differenceInCalendarDays(info.view.currentEnd, info.view.currentStart),
           });
           setEventCount(
-            demoEvents.filter((event) => {
+            events.filter((event) => {
               const start = new Date(event.start);
 
               return start >= info.start && start < info.end;

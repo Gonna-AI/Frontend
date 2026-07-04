@@ -1,10 +1,56 @@
 import { addDays, setHours, setMinutes } from "date-fns";
 
+import type { PipelineMilestoneRow } from "@/dashboard/lib/pipelineClient";
+
 const today = new Date();
 const d = (offsetDays: number) => addDays(today, offsetDays);
 const dt = (offsetDays: number, hour: number, min = 0) => setMinutes(setHours(addDays(today, offsetDays), hour), min);
 
-export const demoEvents = [
+/** Color hint per milestone kind — keeps live calendar events visually distinguishable by kind. */
+const KIND_COLORS: Record<string, string> = {
+  kickoff_1: "var(--chart-1)",
+  kickoff_2: "var(--chart-2)",
+  liefertermin: "var(--chart-3)",
+  ab_ausstellungsfrist: "var(--chart-4)",
+};
+
+function colorForKind(kind: string | null): string | undefined {
+  if (!kind) return undefined;
+  return KIND_COLORS[kind.toLowerCase()];
+}
+
+export interface CalendarEvent {
+  id?: string;
+  title: string;
+  start: Date | string;
+  end?: Date | string;
+  allDay?: boolean;
+  groupId?: string;
+  color?: string;
+  extendedProps?: {
+    kind: string | null;
+    status: string;
+    projectId: string;
+  };
+}
+
+/** Maps a live pipeline_milestones row onto a FullCalendar EventInput. */
+export function mapMilestoneToEvent(milestone: PipelineMilestoneRow): CalendarEvent {
+  return {
+    id: milestone.id,
+    title: milestone.label,
+    start: milestone.due_date ?? new Date().toISOString(),
+    allDay: true,
+    color: colorForKind(milestone.kind),
+    extendedProps: {
+      kind: milestone.kind,
+      status: milestone.status,
+      projectId: milestone.project_id,
+    },
+  };
+}
+
+export const demoEvents: CalendarEvent[] = [
   // Bergmann Maschinenbau GmbH – CNC-Paket 2026 (AI-erkannte Meilensteine)
   { title: "AB-Ausstellungsfrist – Bergmann Maschinenbau", start: d(3), allDay: true },
   { title: "KickOff 1 (AL) – Bergmann Maschinenbau", start: dt(5, 9, 30), end: dt(5, 10, 30) },

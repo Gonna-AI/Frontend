@@ -25,10 +25,20 @@ interface MailProps {
 export function MailComponent({ mails, defaultLayout = [...DEFAULT_MAIL_LAYOUT] }: MailProps) {
   const { isMobile } = useSidebar();
   const [isMounted, setIsMounted] = React.useState(false);
+  const [mail, setMail] = useMail();
 
   React.useEffect(() => {
     setIsMounted(true);
   }, []);
+
+  // Keep a valid selection as the live mail list changes (e.g. once the initial live fetch
+  // replaces the static seed, or a new generated doc arrives via Realtime).
+  React.useEffect(() => {
+    if (mails.length === 0) return;
+    if (mails.some((item) => item.id === mail.selected)) return;
+    setMail({ selected: mails[0].id });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mails]);
 
   if (!isMounted) {
     return (
