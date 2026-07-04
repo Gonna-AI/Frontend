@@ -387,13 +387,13 @@ export default function CookieConsent() {
             ${animateIn ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0'}
           `}
                 >
-                    <div className="bg-[#ff4d00] px-5 py-7 text-black shadow-[0_-24px_70px_rgba(0,0,0,0.28)] sm:px-10 sm:py-9">
-                        <div className="mx-auto grid max-w-[1440px] gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(280px,460px)] lg:items-end">
+                    <div className="max-h-[40dvh] overflow-y-auto overscroll-contain rounded-t-[22px] bg-[#ff4d00] px-4 py-4 text-black shadow-[0_-24px_70px_rgba(0,0,0,0.28)] sm:max-h-none sm:overflow-visible sm:rounded-none sm:px-10 sm:py-9">
+                        <div className="mx-auto grid max-w-[1440px] gap-4 sm:gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(280px,460px)] lg:items-end">
                             <div>
-                                <h2 className="text-[28px] font-medium leading-none tracking-[-0.03em] sm:text-[34px]">
+                                <h2 className="text-[23px] font-medium leading-none tracking-[-0.03em] sm:text-[34px]">
                                     This website uses cookies
                                 </h2>
-                                <div className="mt-7 max-w-[860px] space-y-5 text-[13px] leading-[1.25] text-black/82 sm:text-sm">
+                                <div className="mt-3 max-w-[860px] space-y-3 text-[12px] leading-[1.25] text-black/82 sm:mt-7 sm:space-y-5 sm:text-sm">
                                     <p>
                                         We use cookies to provide the best experience on our website. This includes cookies for website
                                         functionality, to manage our commercial objectives and optimization. You can decide which cookie
@@ -409,7 +409,7 @@ export default function CookieConsent() {
                                     </p>
                                 </div>
 
-                                <div className="mt-6 grid max-w-[620px] grid-cols-1 gap-x-16 gap-y-3 text-[20px] leading-none sm:grid-cols-2">
+                                <div className="mt-4 grid max-w-[620px] grid-cols-2 gap-x-5 gap-y-3 text-[15px] leading-none sm:mt-6 sm:gap-x-16 sm:text-[20px]">
                                     {bannerChoices.map((choice) => {
                                         const checked = choice.locked ? true : (consent[choice.id] ?? false);
                                         return (
@@ -424,7 +424,7 @@ export default function CookieConsent() {
                                                 aria-pressed={checked}
                                             >
                                                 <span
-                                                    className={`h-5 w-5 rounded-full border border-black ${checked ? 'bg-black' : 'bg-transparent'}`}
+                                                    className={`h-4 w-4 rounded-full border border-black sm:h-5 sm:w-5 ${checked ? 'bg-black' : 'bg-transparent'}`}
                                                     aria-hidden="true"
                                                 />
                                                 <span>{choice.label}</span>
@@ -433,7 +433,7 @@ export default function CookieConsent() {
                                     })}
                                 </div>
 
-                                <div className="mt-7 flex flex-wrap gap-x-5 gap-y-2 text-[13px]">
+                                <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-[12px] sm:mt-7 sm:text-[13px]">
                                     <Link to="/privacy-policy" className="underline underline-offset-2">
                                         Privacy Policy
                                     </Link>
@@ -446,22 +446,22 @@ export default function CookieConsent() {
                                 </div>
                             </div>
 
-                            <div className="flex flex-col gap-4 lg:pb-10">
+                            <div className="grid grid-cols-2 gap-3 lg:flex lg:flex-col lg:gap-4 lg:pb-10">
                                 <button
                                     onClick={acceptAll}
-                                    className="min-h-[54px] rounded-full bg-black px-8 text-lg font-semibold text-white transition-transform hover:-translate-y-0.5"
+                                    className="min-h-[44px] rounded-full bg-black px-5 text-sm font-semibold text-white transition-transform hover:-translate-y-0.5 sm:min-h-[54px] sm:px-8 sm:text-lg"
                                 >
                                     {t('cookies.acceptAll')}
                                 </button>
                                 <button
                                     onClick={savePreferences}
-                                    className="min-h-[54px] rounded-full bg-white px-8 text-lg font-medium text-black transition-transform hover:-translate-y-0.5"
+                                    className="min-h-[44px] rounded-full bg-white px-5 text-sm font-medium text-black transition-transform hover:-translate-y-0.5 sm:min-h-[54px] sm:px-8 sm:text-lg"
                                 >
                                     Save
                                 </button>
                                 <button
                                     onClick={rejectAll}
-                                    className="text-sm font-medium text-black/62 underline underline-offset-4 transition-colors hover:text-black"
+                                    className="col-span-2 text-xs font-medium text-black/62 underline underline-offset-4 transition-colors hover:text-black sm:text-sm lg:col-span-1"
                                 >
                                     {t('cookies.rejectAll')}
                                 </button>
