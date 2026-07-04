@@ -189,6 +189,10 @@ export const en = {
     'contact.error': 'Something went wrong. Please try again later.',
     'contact.sending': 'Sending...',
     'contact.sendButton': 'Send Message',
+    'contact.legalPrefix': 'By sending this message, you agree to our',
+    'contact.locationKicker': 'Straubing, Germany',
+    'contact.locationTitle': 'Get in touch with ClerkTree',
+    'contact.openMap': 'Open in Google Maps',
 
     // Solutions Page
     'solutions.eyebrow': 'Solutions',

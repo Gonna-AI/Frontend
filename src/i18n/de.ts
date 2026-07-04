@@ -189,6 +189,10 @@ export const de = {
     'contact.error': 'Etwas ist schief gelaufen. Bitte versuchen Sie es später erneut.',
     'contact.sending': 'Wird gesendet...',
     'contact.sendButton': 'Nachricht senden',
+    'contact.legalPrefix': 'Mit dem Senden dieser Nachricht stimmen Sie unseren',
+    'contact.locationKicker': 'Straubing, Deutschland',
+    'contact.locationTitle': 'Kontaktieren Sie ClerkTree',
+    'contact.openMap': 'In Google Maps öffnen',
 
     // Solutions Page
     'solutions.eyebrow': 'Lösungen',
