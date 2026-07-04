@@ -1,6 +1,6 @@
 .agero-about-page {
   overflow: hidden;
-  padding: 0 20px 40px;
+  padding: 0 8px 40px;
   width: 100%;
 }
 
@@ -9,9 +9,9 @@
   border-radius: 32px;
   color: #fff;
   margin: 0 auto;
-  max-width: 1440px;
+  max-width: 1920px;
   overflow: hidden;
-  padding: clamp(40px, 6vw, 96px) clamp(24px, 5vw, 96px) clamp(48px, 7vw, 96px);
+  padding: clamp(14px, 2vw, 24px);
   position: relative;
 }
 
@@ -21,6 +21,30 @@
   inset: 0;
   pointer-events: none;
   position: absolute;
+  z-index: 1;
+}
+
+.agero-about-hero-media {
+  aspect-ratio: 16 / 7;
+  background: linear-gradient(140deg, rgba(255, 77, 0, 0.18), rgba(255, 255, 255, 0.08)), rgb(18, 18, 18);
+  border-radius: 26px;
+  overflow: hidden;
+  position: relative;
+  z-index: 2;
+}
+
+.agero-about-hero-video {
+  display: block;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+  width: 100%;
+}
+
+.agero-about-hero-content {
+  padding: clamp(34px, 5vw, 72px) clamp(14px, 4vw, 72px) clamp(36px, 5vw, 72px);
+  position: relative;
+  z-index: 2;
 }
 
 .agero-about-eyebrow {
@@ -453,5 +477,19 @@
 
   .agero-about-page {
     padding: 0 14px 24px;
+  }
+
+  .agero-about-hero {
+    border-radius: 24px;
+    padding: 10px;
+  }
+
+  .agero-about-hero-media {
+    aspect-ratio: 4 / 3;
+    border-radius: 18px;
+  }
+
+  .agero-about-hero-content {
+    padding: 30px 14px 34px;
   }
 }

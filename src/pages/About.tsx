@@ -1,12 +1,56 @@
 import type { CSSProperties } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowUpRight, BrainCircuit, CheckCircle2, Clock3, MapPin, Sparkles } from 'lucide-react';
 
 import { useLanguage } from '../contexts/LanguageContext';
 import { Header, Footer } from '../components/Landing/AgeroChrome';
+import { isSaveDataEnabled } from '../utils/idle';
 import SEO from '../components/SEO';
 import './LandingFramer.css';
 import './About.css';
+
+const HERO_VIDEO_SRC = 'https://xlzwfkgurrrspcdyqele.supabase.co/storage/v1/object/public/buck/aboutusvideo.mp4';
+
+function HeroBackgroundVideo({ src }: { src: string }) {
+  const ref = useRef<HTMLVideoElement>(null);
+  const [shouldLoad, setShouldLoad] = useState(false);
+
+  useEffect(() => {
+    if (isSaveDataEnabled() || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      return;
+    }
+
+    const video = ref.current;
+    if (!video) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry?.isIntersecting) return;
+        setShouldLoad(true);
+        observer.disconnect();
+      },
+      { rootMargin: '400px 0px', threshold: 0.01 },
+    );
+
+    observer.observe(video);
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <video
+      className="agero-about-hero-video"
+      autoPlay={shouldLoad}
+      loop
+      muted
+      playsInline
+      preload="none"
+      ref={ref}
+      src={shouldLoad ? src : undefined}
+      aria-hidden="true"
+    />
+  );
+}
 
 type TeamMember = {
   name: string;
@@ -39,18 +83,24 @@ export default function About() {
 
       <main className="agero-about-page">
         <section className="agero-about-hero" aria-labelledby="about-hero-title">
-          <p className="agero-about-eyebrow">
-            <span className="agero-about-eyebrow-icon">
-              <Sparkles size={16} />
-            </span>
-            {t('about.heroEyebrow')}
-          </p>
+          <div className="agero-about-hero-media" aria-hidden="true">
+            <HeroBackgroundVideo src={HERO_VIDEO_SRC} />
+          </div>
 
-          <h1 id="about-hero-title">
-            {t('about.heroLead')} <em>{t('about.heroEmphasis')}</em>
-          </h1>
+          <div className="agero-about-hero-content">
+            <p className="agero-about-eyebrow">
+              <span className="agero-about-eyebrow-icon">
+                <Sparkles size={16} />
+              </span>
+              {t('about.heroEyebrow')}
+            </p>
 
-          <p>{t('about.heroDesc')}</p>
+            <h1 id="about-hero-title">
+              {t('about.heroLead')} <em>{t('about.heroEmphasis')}</em>
+            </h1>
+
+            <p>{t('about.heroDesc')}</p>
+          </div>
         </section>
 
         <section className="agero-about-section">
