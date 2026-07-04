@@ -125,7 +125,7 @@ export function Tasks({ data }: TasksProps) {
           ) : (
             <TableRow>
               <TableCell colSpan={table.getVisibleLeafColumns().length} className="h-24 text-center">
-                No results.
+                Keine Ergebnisse.
               </TableCell>
             </TableRow>
           )}
@@ -133,12 +133,12 @@ export function Tasks({ data }: TasksProps) {
       </Table>
       <div className="flex flex-col gap-3 border-t px-4 py-4 md:flex-row md:items-center md:justify-between">
         <div className="text-muted-foreground text-sm">
-          {table.getFilteredSelectedRowModel().rows.length} of {table.getFilteredRowModel().rows.length} row(s)
-          selected.
+          {table.getFilteredSelectedRowModel().rows.length} von {table.getFilteredRowModel().rows.length} Zeile(n)
+          ausgewählt.
         </div>
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end sm:gap-6 lg:gap-8">
           <div className="flex items-center gap-2">
-            <p className="font-medium text-muted-foreground text-sm">Rows per page</p>
+            <p className="font-medium text-muted-foreground text-sm">Zeilen pro Seite</p>
             <Select
               value={`${table.getState().pagination.pageSize}`}
               onValueChange={(value) => {
@@ -160,7 +160,7 @@ export function Tasks({ data }: TasksProps) {
             </Select>
           </div>
           <div className="flex w-24 items-center justify-start font-medium text-sm sm:justify-center">
-            Page {currentPage} of {pageCount}
+            Seite {currentPage} von {pageCount}
           </div>
           <Pagination className="mx-0 w-auto justify-start sm:justify-end">
             <PaginationContent className="gap-1">
@@ -181,7 +181,7 @@ export function Tasks({ data }: TasksProps) {
               <PaginationItem>
                 <PaginationPrevious
                   href="#"
-                  text="Prev"
+                  text="Zurück"
                   aria-disabled={!canPreviousPage}
                   className={cn(!canPreviousPage && "pointer-events-none opacity-50")}
                   onClick={(event) => {

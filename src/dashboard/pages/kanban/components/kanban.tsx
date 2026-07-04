@@ -180,18 +180,18 @@ export function Kanban({ initialBoard }: KanbanProps) {
             </TabsTrigger>
             <TabsTrigger value="list" className="gap-2">
               <List />
-              List
+              Liste
             </TabsTrigger>
             <TabsTrigger value="table" className="gap-2">
               <Table2 />
-              Table
+              Tabelle
             </TabsTrigger>
           </TabsList>
         </Tabs>
 
         <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center 2xl:justify-end">
           <InputGroup className="min-w-0 sm:w-64 2xl:w-48">
-            <InputGroupInput type="search" placeholder="Search tasks" />
+            <InputGroupInput type="search" placeholder="Aufgaben durchsuchen" />
             <InputGroupAddon>
               <Search />
             </InputGroupAddon>
@@ -202,12 +202,12 @@ export function Kanban({ initialBoard }: KanbanProps) {
           </Button>
           <Button variant="outline" className="w-full sm:w-auto">
             <ArrowUpDown data-icon="inline-start" />
-            Sort
+            Sortieren
           </Button>
           <ButtonGroup className="w-full sm:w-fit">
             <Button className="flex-1 sm:flex-none">
               <Plus data-icon="inline-start" />
-              Add task
+              Aufgabe hinzufügen
             </Button>
             <ButtonGroupSeparator />
             <DropdownMenu>
@@ -219,15 +219,15 @@ export function Kanban({ initialBoard }: KanbanProps) {
               <DropdownMenuContent align="end" className="w-48">
                 <DropdownMenuItem>
                   <Upload />
-                  Import CSV
+                  CSV importieren
                 </DropdownMenuItem>
                 <DropdownMenuItem>
                   <LayoutTemplate />
-                  Add from template
+                  Aus Vorlage hinzufügen
                 </DropdownMenuItem>
                 <DropdownMenuItem>
                   <Bot />
-                  Create automation
+                  Automatisierung erstellen
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

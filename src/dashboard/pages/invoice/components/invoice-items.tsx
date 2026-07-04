@@ -56,10 +56,10 @@ export function InvoiceItems() {
   return (
     <section className="flex flex-col gap-4">
       <div className="flex items-center justify-between gap-3">
-        <h2 className="font-medium tracking-tight">Invoice Items</h2>
+        <h2 className="font-medium tracking-tight">Auftragspositionen</h2>
         <Button type="button" variant="ghost" size="sm" onClick={handleAddItem}>
           <Plus data-icon="inline-start" />
-          Add Item
+          Position hinzufügen
         </Button>
       </div>
 

@@ -15,10 +15,10 @@ export function ClientSelector() {
   return (
     <section className="flex flex-col gap-4">
       <div className="flex items-center justify-between gap-3">
-        <h2 className="font-medium tracking-tight">Billed To</h2>
+        <h2 className="font-medium tracking-tight">Kunde</h2>
         <Button type="button" variant="ghost" size="sm">
           <Plus data-icon="inline-start" />
-          Add New Client
+          Neuen Kunden hinzufügen
         </Button>
       </div>
 
@@ -30,7 +30,7 @@ export function ClientSelector() {
 
           return (
             <Field className="gap-1">
-              <FieldLabel className="text-xs">Client</FieldLabel>
+              <FieldLabel className="text-xs">Kunde</FieldLabel>
               <Select
                 value={selectedClient.id}
                 onValueChange={(clientId) => {
@@ -42,7 +42,7 @@ export function ClientSelector() {
                 }}
               >
                 <SelectTrigger className="w-full data-[size=default]:h-auto">
-                  <SelectValue placeholder="Select client">
+                  <SelectValue placeholder="Kunde auswählen">
                     <div className="flex items-center gap-1.5">
                       <Avatar className="after:rounded-md">
                         <AvatarFallback className="rounded-md bg-card text-foreground">

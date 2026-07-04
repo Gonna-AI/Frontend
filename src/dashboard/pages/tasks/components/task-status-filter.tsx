@@ -83,7 +83,7 @@ export function TaskStatusFilter<TData>({ table }: TaskStatusFilterProps<TData>)
             <DropdownMenuGroup>
               <DropdownMenuItem onSelect={clearFilter} className="justify-center text-center">
                 <X />
-                Clear filters
+                Filter zurücksetzen
               </DropdownMenuItem>
             </DropdownMenuGroup>
           </>

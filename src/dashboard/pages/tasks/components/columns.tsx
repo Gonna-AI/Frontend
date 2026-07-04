@@ -47,23 +47,23 @@ function TitleColumnHeader({ column }: { column: Column<Task, unknown> }) {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="sm" className="-ml-3 text-muted-foreground data-[state=open]:bg-accent">
-          Title
+          Titel
           <SortIcon sortDirection={column.getIsSorted()} />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start">
         <DropdownMenuItem onSelect={() => column.toggleSorting(false)}>
           <ArrowUp />
-          Asc
+          Aufsteigend
         </DropdownMenuItem>
         <DropdownMenuItem onSelect={() => column.toggleSorting(true)}>
           <ArrowDown />
-          Desc
+          Absteigend
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem onSelect={() => column.clearSorting()}>
           <RotateCcw />
-          Reset
+          Zurücksetzen
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
@@ -94,7 +94,7 @@ export const columns: ColumnDef<Task>[] = [
   },
   {
     accessorKey: "id",
-    header: "Task",
+    header: "Position",
     cell: ({ row }) => <div className="w-20 font-mono text-muted-foreground text-sm">{row.getValue("id")}</div>,
     enableSorting: false,
     enableHiding: false,
@@ -140,7 +140,7 @@ export const columns: ColumnDef<Task>[] = [
   },
   {
     accessorKey: "priority",
-    header: "Priority",
+    header: "Priorität",
     cell: ({ row }) => {
       const priority = priorities.find((priority) => priority.value === row.getValue("priority"));
 
@@ -174,12 +174,12 @@ export const columns: ColumnDef<Task>[] = [
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-40">
-              <DropdownMenuItem>Edit</DropdownMenuItem>
-              <DropdownMenuItem>Make a copy</DropdownMenuItem>
-              <DropdownMenuItem>Favorite</DropdownMenuItem>
+              <DropdownMenuItem>Bearbeiten</DropdownMenuItem>
+              <DropdownMenuItem>Duplizieren</DropdownMenuItem>
+              <DropdownMenuItem>Favorisieren</DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuSub>
-                <DropdownMenuSubTrigger>Labels</DropdownMenuSubTrigger>
+                <DropdownMenuSubTrigger>Kategorie</DropdownMenuSubTrigger>
                 <DropdownMenuSubContent>
                   <DropdownMenuRadioGroup value={task.label}>
                     {labels.map((label) => (
@@ -192,7 +192,7 @@ export const columns: ColumnDef<Task>[] = [
               </DropdownMenuSub>
               <DropdownMenuSeparator />
               <DropdownMenuItem>
-                Delete
+                Löschen
                 <DropdownMenuShortcut>⌘⌫</DropdownMenuShortcut>
               </DropdownMenuItem>
             </DropdownMenuContent>

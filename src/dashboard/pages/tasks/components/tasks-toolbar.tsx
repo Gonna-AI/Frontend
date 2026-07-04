@@ -35,7 +35,7 @@ export function TasksToolbar<TData>({ table }: TasksToolbarProps<TData>) {
     <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
       <div className="flex flex-1 flex-wrap items-center gap-2">
         <Input
-          placeholder="Filter tasks..."
+          placeholder="Checklisten filtern..."
           value={searchValue}
           onChange={(event) => {
             table.getColumn("title")?.setFilterValue(event.target.value);
@@ -54,7 +54,7 @@ export function TasksToolbar<TData>({ table }: TasksToolbarProps<TData>) {
             }}
           >
             <X data-icon="inline-start" />
-            Reset
+            Zurücksetzen
           </Button>
         )}
       </div>
@@ -67,11 +67,11 @@ export function TasksToolbar<TData>({ table }: TasksToolbarProps<TData>) {
               className={cn("ml-auto hidden lg:flex", hiddenColumns.length > 0 && "bg-muted text-foreground")}
             >
               <Settings2 data-icon="inline-start" />
-              View
+              Ansicht
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-38">
-            <DropdownMenuLabel>Toggle columns</DropdownMenuLabel>
+            <DropdownMenuLabel>Spalten ein-/ausblenden</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               {hideableColumns.map((column) => (

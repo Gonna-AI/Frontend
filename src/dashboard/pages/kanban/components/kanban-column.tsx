@@ -48,7 +48,7 @@ export function KanbanColumn({ column, tasks }: KanbanColumnProps) {
             <h2 className="truncate font-medium text-base leading-none">{column.title}</h2>
           </div>
           <p className="text-muted-foreground text-sm tabular-nums leading-none">
-            {tasks.length} {tasks.length === 1 ? "task" : "tasks"}
+            {tasks.length} {tasks.length === 1 ? "Aufgabe" : "Aufgaben"}
           </p>
         </div>
         <div className="-mr-2 flex items-center gap-0.5 text-muted-foreground">

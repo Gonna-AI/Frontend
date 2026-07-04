@@ -11,9 +11,9 @@ export function InvoiceForm() {
     <div className="flex flex-col gap-4 rounded-xl border bg-card p-4">
       <Tabs defaultValue="invoice">
         <TabsList className="w-full">
-          <TabsTrigger value="invoice">Invoice</TabsTrigger>
-          <TabsTrigger value="payment">Payment</TabsTrigger>
-          <TabsTrigger value="business">Business</TabsTrigger>
+          <TabsTrigger value="invoice">Auftragsbestätigung</TabsTrigger>
+          <TabsTrigger value="payment">Zahlung</TabsTrigger>
+          <TabsTrigger value="business">Unternehmen</TabsTrigger>
         </TabsList>
       </Tabs>
 

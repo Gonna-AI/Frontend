@@ -1,0 +1,10 @@
+fastapi==0.115.6
+uvicorn==0.34.0
+python-multipart==0.0.20
+python-dotenv==1.0.1
+psycopg2-binary==2.9.10
+pdfplumber==0.11.4
+pytesseract==0.3.13
+groq==0.13.1
+rapidfuzz==3.11.0
+sentence-transformers==3.3.1
