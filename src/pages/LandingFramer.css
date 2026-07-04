@@ -285,14 +285,14 @@ html.lenis.lenis-stopped {
     inset 0 1px 0 rgba(255, 255, 255, 0.82),
     inset 0 -1px 0 rgba(0, 0, 0, 0.04),
     0 18px 48px rgba(0, 0, 0, 0.12);
-  gap: clamp(18px, 2vw, 30px);
-  padding: 8px 8px 8px clamp(22px, 2vw, 32px);
+  gap: clamp(16px, 1.8vw, 26px);
+  padding: 8px 14px 8px clamp(22px, 2vw, 32px);
 }
 
 .agero-shell-nav {
   align-items: center;
   display: inline-flex;
-  gap: clamp(20px, 2.6vw, 42px);
+  gap: clamp(8px, 1vw, 14px);
   max-width: 0;
   opacity: 0;
   overflow: hidden;
@@ -306,21 +306,32 @@ html.lenis.lenis-stopped {
 }
 
 .agero-shell-header.is-menu-open .agero-shell-nav {
-  max-width: 520px;
+  max-width: 610px;
   opacity: 1;
   pointer-events: auto;
   transform: translateX(0);
 }
 
 .agero-shell-nav a {
+  align-items: center;
+  border-radius: 999px;
   color: rgba(19, 19, 19, 0.78);
-  font-size: clamp(1rem, 1.08vw, 1.18rem);
+  display: inline-flex;
+  font-family: "Cal Sans", "Inter", system-ui, sans-serif;
+  font-size: clamp(1rem, 1vw, 1.12rem);
+  height: 54px;
+  justify-content: center;
   line-height: 1;
+  min-width: 82px;
+  padding: 0 14px;
   text-decoration: none;
-  transition: color 160ms ease;
+  transition:
+    background 160ms ease,
+    color 160ms ease;
 }
 
 .agero-shell-nav a:hover {
+  background: rgba(255, 255, 255, 0.48);
   color: rgb(6, 6, 6);
 }
 
@@ -350,29 +361,12 @@ html.lenis.lenis-stopped {
   width: 100%;
 }
 
-.agero-shell-header.is-menu-open .agero-shell-menu {
-  background: rgba(255, 255, 255, 0.58);
-  border: 1px solid rgba(255, 255, 255, 0.62);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.72),
-    0 10px 24px rgba(0, 0, 0, 0.1);
-  height: 56px;
-  position: relative;
-  width: 56px;
-}
-
-.agero-shell-header.is-menu-open .agero-shell-menu span {
-  height: 3px;
-  position: absolute;
-  width: 32px;
-}
-
 .agero-shell-header.is-menu-open .agero-shell-menu span:first-child {
-  transform: rotate(45deg);
+  transform: translateY(8.5px) rotate(45deg);
 }
 
 .agero-shell-header.is-menu-open .agero-shell-menu span:last-child {
-  transform: rotate(-45deg);
+  transform: translateY(-8.5px) rotate(-45deg);
 }
 
 .agero-header {
