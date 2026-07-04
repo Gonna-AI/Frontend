@@ -3,6 +3,23 @@
 @import "tailwindcss";
 @config "../tailwind.config.js";
 
+@font-face {
+  font-family: "Cal Sans";
+  font-display: swap;
+  font-style: normal;
+  font-weight: 400;
+  src: url("https://fonts.gstatic.com/s/calsans/v2/fdN99sWUv3gWqXxqqSBevloE4LZx.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Cal Sans Placeholder";
+  ascent-override: 98.60%;
+  descent-override: 29.58%;
+  line-gap-override: 0.00%;
+  size-adjust: 101.42%;
+  src: local("Arial");
+}
+
 /* Native Tailwind v4 theme tokens. Values live in :root/.dark below as
    complete color functions; .dashboard-root (see dashboard-theme.css)
    overrides the same variable names within its own scope so the two
@@ -245,7 +262,7 @@
   /* The dashboard runs its own font system (Geist by default, switchable),
      scoped under .dashboard-root — keep the site-wide Satoshi override from
      leaking into it. */
-  *:not(.dashboard-root, .dashboard-root *) {
+  *:not(.dashboard-root, .dashboard-root *, .agero-works, .agero-works *, .site-display-font, .site-display-font *) {
     font-family: 'Satoshi', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
   }
 
@@ -255,6 +272,10 @@
 }
 
 @layer components {
+  .site-display-font {
+    font-family: "Cal Sans", "Cal Sans Placeholder", "Satoshi", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+  }
+
   .crm-input {
     @apply w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder-white/30 outline-none transition-colors focus:border-[#FF8A5B]/50 focus:bg-white/[0.08];
   }

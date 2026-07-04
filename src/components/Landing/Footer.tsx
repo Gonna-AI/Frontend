@@ -30,8 +30,8 @@ export default function Footer() {
               className="max-w-lg"
             >
               <p
-                className="text-white font-semibold leading-[1.1] mb-10"
-                style={{ fontSize: 'clamp(2rem, 4vw, 3.5rem)' }}
+                className="site-display-font text-white leading-[1.1] mb-10"
+                style={{ fontSize: 'clamp(2rem, 4vw, 3.5rem)', fontWeight: 400 }}
               >
                 AI harness for<br />
                 growing businesses.
@@ -159,12 +159,13 @@ export default function Footer() {
         aria-hidden="true"
       >
         <span
+          className="site-display-font"
           style={{
             display: 'block',
             textAlign: 'center',
             whiteSpace: 'nowrap',
-            fontWeight: 900,
-            letterSpacing: '-0.03em',
+            fontWeight: 400,
+            letterSpacing: '0',
             /* ~112vw natural width — clips at both edges for true edge-to-edge */
             fontSize: '20.5vw',
             lineHeight: 0.82,

@@ -1,23 +1,6 @@
 @import url("https://fonts.googleapis.com/css2?family=Caveat:wght@500;600&display=swap");
 
 @font-face {
-  font-family: "Cal Sans";
-  font-display: swap;
-  font-style: normal;
-  font-weight: 400;
-  src: url("https://fonts.gstatic.com/s/calsans/v2/fdN99sWUv3gWqXxqqSBevloE4LZx.woff2") format("woff2");
-}
-
-@font-face {
-  font-family: "Cal Sans Placeholder";
-  ascent-override: 98.60%;
-  descent-override: 29.58%;
-  line-gap-override: 0.00%;
-  size-adjust: 101.42%;
-  src: local("Arial");
-}
-
-@font-face {
   font-family: "Inter Display";
   font-display: swap;
   font-style: normal;
@@ -1294,7 +1277,6 @@ html.lenis.lenis-stopped {
   padding: 0 0 20px;
 }
 
-.agero-sol-year,
 .agero-sol-role {
   color: currentColor;
   font-family: var(--agero-mono, ui-monospace, monospace);

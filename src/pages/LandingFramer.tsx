@@ -86,7 +86,6 @@ const footerLegalLinks: FooterLink[] = [
 const clientLogos = [
   { alt: 'THD', src: `${BASE}/THD.png`, width: 200 },
   { alt: 'TUM', src: `${BASE}/TUM1.svg`, width: 210 },
-  { alt: 'GLUTH', src: `${BASE}/GLUTH.png`, width: 180 },
   { alt: 'Partner', src: `${BASE}/3cWSgJFsUVvZeOw9LdQmTOSVFhE.svg`, width: 120 },
 ];
 
@@ -863,7 +862,6 @@ function WorkCard({ index, work }: { index: number; work: (typeof works)[number]
       }
     >
       <div className="agero-sol-header">
-        <span className="agero-sol-year">2025</span>
         <span className="agero-sol-role">{work.role}</span>
       </div>
 
