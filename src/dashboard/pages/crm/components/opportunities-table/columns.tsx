@@ -6,9 +6,17 @@ import { Pencil } from "lucide-react-dash";
 import { Badge } from "@/components/dashboard-ui/badge";
 import { Button } from "@/components/dashboard-ui/button";
 import { Checkbox } from "@/components/dashboard-ui/checkbox";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
+} from "@/components/dashboard-ui/dropdown-menu";
+import { updateOpportunityStage, type PipelineOpportunityRow } from "@/dashboard/lib/pipelineClient";
 import { cn } from "@/lib/utils";
 
-import type { OpportunityRow } from "./schema";
+import { STAGE_OPTIONS, type OpportunityRow } from "./schema";
 
 const healthStripSlots = Array.from({ length: 18 }, (_, index) => ({
   id: `strip-${index + 1}`,
@@ -64,9 +72,31 @@ export const opportunitiesColumns: ColumnDef<OpportunityRow>[] = [
     accessorKey: "stage",
     header: "Stage",
     cell: ({ row }) => (
-      <Badge variant="outline" className="rounded-full px-2.5">
-        {row.original.stage}
-      </Badge>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <button type="button">
+            <Badge variant="outline" className="cursor-pointer rounded-full px-2.5 hover:bg-muted">
+              {row.original.stage}
+            </Badge>
+          </button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="start">
+          <DropdownMenuRadioGroup
+            value={row.original.stage}
+            onValueChange={(value) => {
+              updateOpportunityStage(row.original.id, value as PipelineOpportunityRow["stage"]).catch(() => {
+                // Best-effort — a Realtime refetch will reconcile the table if this write fails.
+              });
+            }}
+          >
+            {STAGE_OPTIONS.map((stage) => (
+              <DropdownMenuRadioItem key={stage} value={stage}>
+                {stage}
+              </DropdownMenuRadioItem>
+            ))}
+          </DropdownMenuRadioGroup>
+        </DropdownMenuContent>
+      </DropdownMenu>
     ),
     filterFn: "equalsString",
   },

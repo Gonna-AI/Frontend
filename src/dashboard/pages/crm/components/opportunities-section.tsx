@@ -34,20 +34,22 @@ import {
   PaginationPrevious,
 } from "@/components/dashboard-ui/pagination";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/dashboard-ui/table";
+import { fetchOpportunities, subscribeToTable } from "@/dashboard/lib/pipelineClient";
 
 import { opportunitiesColumns } from "./opportunities-table/columns";
 import opportunitiesData from "./opportunities-table/data.json";
-import { opportunitiesSchema } from "./opportunities-table/schema";
+import { opportunitiesSchema, opportunityRowFromLive, type OpportunityRow } from "./opportunities-table/schema";
 
 const stageOptions = ["all", "Anfrage", "Konzept", "Kalkulation", "Angebot", "Bestellung", "AB"] as const;
 const healthOptions = ["all", "On Track", "Needs Review", "At Risk", "On Hold"] as const;
-const opportunities = opportunitiesSchema.parse(opportunitiesData);
+const fallbackOpportunities = opportunitiesSchema.parse(opportunitiesData);
 
 function preventPaginationNavigation(event: React.MouseEvent<HTMLAnchorElement>) {
   event.preventDefault();
 }
 
 export function OpportunitiesSection() {
+  const [opportunities, setOpportunities] = React.useState<OpportunityRow[]>(fallbackOpportunities);
   const [rowSelection, setRowSelection] = React.useState({});
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
   const [columnVisibility] = React.useState<VisibilityState>({});
@@ -56,6 +58,30 @@ export function OpportunitiesSection() {
     pageIndex: 0,
     pageSize: 10,
   });
+
+  React.useEffect(() => {
+    let cancelled = false;
+
+    const load = () => {
+      fetchOpportunities()
+        .then((rows) => {
+          if (cancelled) return;
+          if (rows.length === 0) return;
+          setOpportunities(rows.map(opportunityRowFromLive));
+        })
+        .catch(() => {
+          // Sales Pipeline falls back to the static demo snapshot if Supabase is unreachable.
+        });
+    };
+
+    load();
+    const unsubscribe = subscribeToTable("pipeline_crm_opportunities", load);
+
+    return () => {
+      cancelled = true;
+      unsubscribe();
+    };
+  }, []);
 
   const table = useReactTable({
     data: opportunities,
