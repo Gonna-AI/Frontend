@@ -1,0 +1,457 @@
+.agero-about-page {
+  overflow: hidden;
+  padding: 0 20px 40px;
+  width: 100%;
+}
+
+.agero-about-hero {
+  background: linear-gradient(160deg, rgb(20, 20, 20), rgb(46, 40, 34) 68%, var(--agero-orange) 130%);
+  border-radius: 32px;
+  color: #fff;
+  margin: 0 auto;
+  max-width: 1440px;
+  overflow: hidden;
+  padding: clamp(40px, 6vw, 96px) clamp(24px, 5vw, 96px) clamp(48px, 7vw, 96px);
+  position: relative;
+}
+
+.agero-about-hero::before {
+  background: radial-gradient(circle at 78% 20%, rgba(255, 77, 0, 0.32), transparent 46%);
+  content: "";
+  inset: 0;
+  pointer-events: none;
+  position: absolute;
+}
+
+.agero-about-eyebrow {
+  align-items: center;
+  color: var(--agero-orange);
+  display: inline-flex;
+  font-size: 14px;
+  gap: 10px;
+  letter-spacing: 0.02em;
+  margin: 0 0 32px;
+  position: relative;
+}
+
+.agero-about-eyebrow-icon {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  color: var(--agero-orange);
+  display: inline-flex;
+  height: 32px;
+  justify-content: center;
+  width: 32px;
+}
+
+.agero-about-hero h1 {
+  font-family: "Cal Sans", "Inter", system-ui, sans-serif !important;
+  font-size: clamp(38px, 6.4vw, 88px);
+  letter-spacing: -0.03em;
+  line-height: 0.98;
+  margin: 0 0 28px;
+  max-width: 20ch;
+  position: relative;
+}
+
+.agero-about-hero h1 em {
+  color: var(--agero-orange);
+  font-style: normal;
+}
+
+.agero-about-hero p {
+  color: rgba(255, 255, 255, 0.76);
+  font-size: clamp(16px, 1.6vw, 20px);
+  line-height: 1.5;
+  margin: 0;
+  max-width: 46ch;
+  position: relative;
+}
+
+.agero-about-section {
+  margin: 0 auto;
+  max-width: 1300px;
+  padding: clamp(56px, 8vw, 112px) 0;
+}
+
+.agero-about-grid-head {
+  display: grid;
+  gap: 32px;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+}
+
+.agero-about-grid-head h2 {
+  font-family: "Cal Sans", "Inter", system-ui, sans-serif !important;
+  font-size: clamp(30px, 4.6vw, 56px);
+  letter-spacing: -0.03em;
+  line-height: 1;
+  margin: 0;
+}
+
+.agero-about-grid-head .agero-about-copy {
+  align-self: end;
+}
+
+.agero-about-copy p {
+  color: var(--agero-muted);
+  font-size: clamp(16px, 1.4vw, 19px);
+  line-height: 1.6;
+  margin: 0 0 16px;
+}
+
+.agero-about-copy p:last-child {
+  margin-bottom: 0;
+}
+
+.agero-about-principles {
+  display: grid;
+  gap: 20px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.agero-about-card {
+  background: var(--agero-panel);
+  border-radius: 24px;
+  padding: 32px;
+}
+
+.agero-about-card-icon {
+  align-items: center;
+  background: rgba(12, 12, 12, 0.86);
+  border-radius: 12px;
+  color: var(--agero-orange);
+  display: inline-flex;
+  height: 52px;
+  justify-content: center;
+  margin-bottom: 28px;
+  width: 52px;
+}
+
+.agero-about-card h3 {
+  font-size: 22px;
+  font-weight: 600;
+  margin: 0 0 12px;
+}
+
+.agero-about-card p {
+  color: var(--agero-muted);
+  font-size: 15px;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.agero-about-mission {
+  background: var(--agero-ink);
+  border-radius: 28px;
+  color: #fff;
+  margin: 0 auto;
+  max-width: 900px;
+  padding: clamp(32px, 5vw, 56px);
+}
+
+.agero-about-mission p:first-child {
+  color: var(--agero-orange);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  margin: 0 0 20px;
+  text-transform: uppercase;
+}
+
+.agero-about-mission p:last-child {
+  font-size: clamp(22px, 3vw, 34px);
+  line-height: 1.3;
+  margin: 0;
+}
+
+.agero-about-services {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin: 0 auto;
+  max-width: 900px;
+}
+
+.agero-about-service-card {
+  background: var(--agero-panel);
+  border-radius: 24px;
+  overflow: hidden;
+  padding: 8px;
+}
+
+.agero-about-service-body {
+  padding: 24px;
+}
+
+.agero-about-service-body h3 {
+  font-size: 22px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.agero-about-service-body p {
+  color: var(--agero-muted);
+  font-size: 15px;
+  line-height: 1.6;
+  margin: 12px 0 0;
+  max-width: 46ch;
+}
+
+.agero-about-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 18px;
+}
+
+.agero-about-tag {
+  background: rgba(12, 12, 12, 0.06);
+  border-radius: 999px;
+  color: var(--agero-ink);
+  font-size: 12px;
+  padding: 6px 14px;
+}
+
+.agero-about-service-media {
+  border-radius: 18px;
+  min-height: 200px;
+}
+
+.agero-about-team-head {
+  align-items: end;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: space-between;
+  margin-bottom: 36px;
+}
+
+.agero-about-team-head h2 {
+  font-family: "Cal Sans", "Inter", system-ui, sans-serif !important;
+  font-size: clamp(28px, 4.6vw, 48px);
+  letter-spacing: -0.03em;
+  line-height: 1;
+  margin: 0;
+}
+
+.agero-about-team-head p {
+  color: var(--agero-muted);
+  font-size: 16px;
+  line-height: 1.5;
+  margin: 0;
+  max-width: 30ch;
+}
+
+.agero-about-team-grid {
+  display: grid;
+  gap: 20px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.agero-about-team-card {
+  background: var(--agero-panel);
+  border-radius: 22px;
+  overflow: hidden;
+  padding: 10px;
+  transition: transform 320ms var(--agero-ease-out);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .agero-about-team-card:hover {
+    transform: translateY(-4px);
+  }
+}
+
+.agero-about-team-photo {
+  aspect-ratio: 4 / 4.6;
+  background: rgba(12, 12, 12, 0.1);
+  border-radius: 16px;
+  overflow: hidden;
+  position: relative;
+}
+
+.agero-about-team-photo img {
+  display: block;
+  height: 100%;
+  object-fit: cover;
+  transform: scale(var(--base-scale, 1));
+  transition: transform 640ms var(--agero-ease-out);
+  width: 100%;
+}
+
+.agero-about-team-card:hover .agero-about-team-photo img {
+  transform: scale(var(--hover-scale, 1.06));
+}
+
+.agero-about-team-linkedin {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.92);
+  border-radius: 50%;
+  color: var(--agero-ink);
+  display: inline-flex;
+  height: 36px;
+  justify-content: center;
+  position: absolute;
+  right: 12px;
+  top: 12px;
+  transition: background-color 180ms ease;
+  width: 36px;
+}
+
+.agero-about-team-linkedin:hover {
+  background: var(--agero-orange);
+  color: #fff;
+}
+
+.agero-about-team-copy {
+  padding: 16px 10px 10px;
+}
+
+.agero-about-team-copy h3 {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.agero-about-team-copy p {
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
+  color: var(--agero-muted);
+  display: -webkit-box;
+  font-size: 13px;
+  line-height: 1.55;
+  margin: 10px 0 0;
+  overflow: hidden;
+}
+
+.agero-about-bottom {
+  display: grid;
+  gap: 20px;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 0.7fr);
+}
+
+.agero-about-join {
+  background: var(--agero-orange);
+  border-radius: 28px;
+  color: #fff;
+  padding: clamp(28px, 4vw, 48px);
+}
+
+.agero-about-join svg {
+  margin-bottom: 24px;
+}
+
+.agero-about-join h2 {
+  font-family: "Cal Sans", "Inter", system-ui, sans-serif !important;
+  font-size: clamp(26px, 3.6vw, 42px);
+  letter-spacing: -0.03em;
+  line-height: 1.02;
+  margin: 0;
+}
+
+.agero-about-join p {
+  font-size: 16px;
+  line-height: 1.55;
+  margin: 16px 0 0;
+  max-width: 42ch;
+  opacity: 0.92;
+}
+
+.agero-about-join-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 28px;
+}
+
+.agero-about-join-actions button {
+  border: none;
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  min-height: 48px;
+  padding: 0 26px;
+  transition: transform 180ms var(--agero-ease-out), background-color 180ms ease;
+}
+
+.agero-about-join-primary {
+  background: var(--agero-ink);
+  color: #fff;
+}
+
+.agero-about-join-secondary {
+  background: rgba(255, 255, 255, 0.16);
+  color: #fff;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .agero-about-join-actions button:hover {
+    transform: translateY(-2px);
+  }
+
+  .agero-about-join-primary:hover {
+    background: #000;
+  }
+
+  .agero-about-join-secondary:hover {
+    background: rgba(255, 255, 255, 0.28);
+  }
+}
+
+.agero-about-office {
+  background: var(--agero-panel);
+  border-radius: 28px;
+  padding: clamp(28px, 4vw, 48px);
+}
+
+.agero-about-office svg {
+  color: var(--agero-orange);
+  margin-bottom: 24px;
+}
+
+.agero-about-office p:first-of-type {
+  color: var(--agero-orange);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  margin: 0 0 12px;
+  text-transform: uppercase;
+}
+
+.agero-about-office h3 {
+  font-size: 24px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.agero-about-office p:last-child {
+  color: var(--agero-muted);
+  font-size: 15px;
+  line-height: 1.6;
+  margin: 14px 0 0;
+}
+
+@media (max-width: 1024px) {
+  .agero-about-grid-head,
+  .agero-about-principles,
+  .agero-about-team-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .agero-about-bottom {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .agero-about-principles,
+  .agero-about-team-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .agero-about-page {
+    padding: 0 14px 24px;
+  }
+}
