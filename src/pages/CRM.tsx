@@ -215,18 +215,14 @@ export default function CRM() {
           </Reveal>
 
           <Reveal delay={0.08}>
-            <h1
-              id="crm-hero-heading"
-              className="text-balance text-[40px] leading-[40px] md:text-[60px] md:leading-[68px] lg:text-[72px] lg:leading-[80px] font-normal tracking-tight text-white"
-              style={{ fontFamily: '"Cal Sans", "Inter", system-ui, sans-serif' }}
-            >
+            <h1 id="crm-hero-heading" className="text-balance">
               CRM Built for the{' '}
               <span className="text-[#FF8A5B]">AI Era</span>
             </h1>
           </Reveal>
 
           <Reveal delay={0.14}>
-            <p className="mx-auto max-w-2xl text-[clamp(1rem,0.9rem+0.4vw,1.2rem)] leading-relaxed text-white/65">
+            <p className="mx-auto max-w-2xl text-balance">
               We design and deploy enterprise CRM systems where every record, workflow, and pipeline
               is natively connected to AI. Custom-built to your data model. Versioned like code.
               Deployed on your terms.

@@ -140,7 +140,7 @@ export default function Careers() {
         <section className="agero-hero-stage">
           <div className="agero-hero-stage-scrim" aria-hidden="true" />
           <div className="agero-hero-stage-content">
-            <h1 className="text-[40px] leading-[40px] md:text-[60px] md:leading-[68px] lg:text-[72px] lg:leading-[80px] font-normal tracking-tight" style={{ fontFamily: '"Cal Sans", "Inter", system-ui, sans-serif' }}>
+            <h1>
               <span className="text-white">
                 {t('careers.title1')}
               </span>
@@ -149,7 +149,7 @@ export default function Careers() {
                 {t('careers.title2')}
               </span>
             </h1>
-            <p className="text-lg md:text-xl text-white/70 leading-relaxed max-w-3xl mx-auto">
+            <p className="max-w-3xl mx-auto">
               {t('careers.subtitle')}
             </p>
           </div>
