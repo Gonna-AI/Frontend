@@ -2917,28 +2917,34 @@ html.lenis.lenis-stopped {
     display: inline-flex;
     gap: 6px;
     height: 24px;
-    width: 30px;
+    width: 24px;
   }
 
   .agero-shell-header.is-menu-open .agero-shell-menu {
     height: 24px;
-    width: 30px;
+    width: 24px;
   }
 
   .agero-shell-menu span {
-    height: 2px;
+    height: 1.5px;
+    width: 18px;
   }
 
   .agero-shell-header.is-menu-open .agero-shell-menu span {
-    width: 100%;
+    width: 18px;
   }
 
   .agero-shell-header.is-menu-open .agero-shell-menu span:first-child {
-    transform: translateY(4px) rotate(45deg);
+    transform: translateY(3.75px) rotate(45deg);
   }
 
   .agero-shell-header.is-menu-open .agero-shell-menu span:last-child {
-    transform: translateY(-4px) rotate(-45deg);
+    transform: translateY(-3.75px) rotate(-45deg);
+  }
+
+  .agero-shell-header.is-menu-open .agero-shell-menu {
+    opacity: 0;
+    pointer-events: none;
   }
 
   .agero-status {
@@ -2999,19 +3005,53 @@ html.lenis.lenis-stopped {
     left: 0;
     position: fixed;
     right: 0;
-    top: 84px;
+    top: 0;
     z-index: 1000;
   }
 
   .agero-mobile-menu-scrim {
-    background: rgba(0, 0, 0, 0.1);
-    backdrop-filter: blur(6px);
+    background: rgba(240, 240, 240, 0.36);
+    backdrop-filter: blur(22px);
+    -webkit-backdrop-filter: blur(22px);
     border: 0;
     cursor: pointer;
     inset: 0;
     padding: 0;
     position: absolute;
     width: 100%;
+  }
+
+  .agero-mobile-menu-close-fab {
+    align-items: center;
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(19, 19, 19, 0.1);
+    border-radius: 999px;
+    box-shadow: 0 10px 26px rgba(0, 0, 0, 0.18);
+    cursor: pointer;
+    display: flex;
+    height: 44px;
+    justify-content: center;
+    position: fixed;
+    right: 20px;
+    top: 20px;
+    width: 44px;
+    z-index: 1002;
+  }
+
+  .agero-mobile-menu-close-fab span {
+    background: var(--agero-ink);
+    border-radius: 2px;
+    height: 1.5px;
+    position: absolute;
+    width: 18px;
+  }
+
+  .agero-mobile-menu-close-fab span:first-child {
+    transform: rotate(45deg);
+  }
+
+  .agero-mobile-menu-close-fab span:last-child {
+    transform: rotate(-45deg);
   }
 
   .agero-mobile-menu-panel {
@@ -3032,7 +3072,7 @@ html.lenis.lenis-stopped {
     padding: 18px;
     position: absolute;
     right: 16px;
-    top: 8px;
+    top: 80px;
   }
 
   .agero-menu-button.is-open {

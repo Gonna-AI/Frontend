@@ -126,6 +126,16 @@ export function Header() {
             type="button"
           />
 
+          <button
+            aria-label="Close menu"
+            className="agero-mobile-menu-close-fab"
+            onClick={closeMenu}
+            type="button"
+          >
+            <span />
+            <span />
+          </button>
+
           <div className="agero-mobile-menu-panel" role="navigation" aria-label="Mobile navigation">
             <div className="agero-mobile-menu-top">
               <span>Menu</span>

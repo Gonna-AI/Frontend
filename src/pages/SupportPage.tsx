@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { CheckCircle2, Ticket, AlertTriangle, FileText, MessageSquare, Menu, X, ArrowLeft } from 'lucide-react';
+import { CheckCircle2, Ticket, AlertTriangle, FileText, MessageSquare, ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../config/supabase';
-import SharedHeader from '../components/Layout/SharedHeader';
+import { Header, Footer } from '../components/Landing/AgeroChrome';
+import './LandingFramer.css';
 
 const CATEGORIES = [
     { value: 'technical', label: 'Technical Issue' },
@@ -42,7 +43,6 @@ const SupportPage = () => {
     const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
     const [ticketId, setTicketId] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
-    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         setFormData(prev => ({
@@ -96,46 +96,33 @@ const SupportPage = () => {
     };
 
     return (
-        <div className="bg-[#0A0A0A] min-h-screen text-white/80 font-sans selection:bg-[#FF8A5B]/30 relative overflow-hidden">
-            <div className="pointer-events-none absolute inset-0 -z-10">
-                <div className="absolute left-[-12rem] top-[14rem] h-[26rem] w-[26rem] rounded-full bg-[#FF8A5B]/12 blur-[140px]" />
-                <div className="absolute right-[-10rem] top-[8rem] h-[22rem] w-[22rem] rounded-full bg-white/6 blur-[120px]" />
-                <div className="absolute bottom-[-8rem] left-1/2 h-[22rem] w-[36rem] -translate-x-1/2 rounded-full bg-[#FF8A5B]/10 blur-[120px]" />
-                <div
-                    className="absolute inset-0 opacity-[0.12] mix-blend-soft-light"
-                    style={{ backgroundImage: 'url(/noise.webp)', backgroundSize: '30%' }}
-                />
+        <div className="agero-works min-h-screen font-sans selection:bg-[#FF8A5B]/30 relative overflow-hidden">
+            <div className="agero-top-area agero-top-area-compact">
+                <Header />
             </div>
-            <SharedHeader
-                onMobileMenuToggle={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                isMobileMenuOpenExternal={isMobileMenuOpen}
-                rightActions={
-                    <div className="flex items-center gap-2">
-                        <Link to="/docs" className="hidden md:block text-sm text-white/60 hover:text-white transition-colors">Documentation</Link>
-                        <Link to="/dashboard" className="hidden md:inline-flex items-center px-4 py-2 rounded-full border border-white/10 bg-white/5 text-xs font-semibold uppercase tracking-[0.2em] text-white/70 hover:text-white hover:bg-white/10 transition-colors">
-                            Dashboard
-                        </Link>
-                    </div>
-                }
-            />
 
-            <div className="pt-16 max-w-[1600px] mx-auto flex min-h-[calc(100vh-64px)]">
+            <div className="max-w-[1600px] mx-auto flex flex-col md:flex-row py-8 md:py-12 px-4 md:px-8 gap-8 md:gap-12">
 
                 {/* Left Sidebar - Navigation */}
-                <aside className={`fixed inset-y-0 left-0 z-40 w-64 bg-[#0A0A0A] border-r border-white/5 transform transition-transform duration-300 md:translate-x-0 md:static md:block pt-20 md:pt-8 px-4 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+                <aside className="w-full md:w-64 shrink-0">
                     <div className="space-y-8">
+                        <div className="flex items-center gap-2 mb-2 md:hidden">
+                            <Link to="/docs" className="text-sm text-[rgba(19,19,19,0.6)] hover:text-[rgb(19,19,19)] transition-colors">Documentation</Link>
+                            <span className="text-[rgba(19,19,19,0.2)]">·</span>
+                            <Link to="/dashboard" className="text-sm text-[rgba(19,19,19,0.6)] hover:text-[rgb(19,19,19)] transition-colors">Dashboard</Link>
+                        </div>
                         <div>
-                            <h3 className="text-xs font-semibold text-white/40 uppercase tracking-wider mb-3 px-2">Support Resources</h3>
+                            <h3 className="text-xs font-semibold text-[rgba(19,19,19,0.4)] uppercase tracking-wider mb-3 px-2">Support Resources</h3>
                             <nav className="space-y-0.5">
                                 <button type="button" className="flex items-center gap-2 px-3 py-2 rounded-lg bg-[#FF8A5B]/10 text-[#FFB286] font-medium">
                                     <Ticket className="w-4 h-4" />
                                     <span>Submit Ticket</span>
                                 </button>
-                                <Link to="/docs" className="flex items-center gap-2 px-3 py-2 rounded-lg text-white/60 hover:text-white hover:bg-white/5 transition-colors">
+                                <Link to="/docs" className="flex items-center gap-2 px-3 py-2 rounded-lg text-[rgba(19,19,19,0.6)] hover:text-[rgb(19,19,19)] hover:bg-[rgba(19,19,19,0.03)] transition-colors">
                                     <FileText className="w-4 h-4" />
                                     <span>Documentation</span>
                                 </Link>
-                                <a href="mailto:team@clerktree.com" className="flex items-center gap-2 px-3 py-2 rounded-lg text-white/60 hover:text-white hover:bg-white/5 transition-colors">
+                                <a href="mailto:team@clerktree.com" className="flex items-center gap-2 px-3 py-2 rounded-lg text-[rgba(19,19,19,0.6)] hover:text-[rgb(19,19,19)] hover:bg-[rgba(19,19,19,0.03)] transition-colors">
                                     <MessageSquare className="w-4 h-4" />
                                     <span>Email Us</span>
                                 </a>
@@ -143,18 +130,18 @@ const SupportPage = () => {
                         </div>
 
                         <div>
-                            <h3 className="text-xs font-semibold text-white/40 uppercase tracking-wider mb-3 px-2">Common Topics</h3>
+                            <h3 className="text-xs font-semibold text-[rgba(19,19,19,0.4)] uppercase tracking-wider mb-3 px-2">Common Topics</h3>
                             <nav className="space-y-0.5">
-                                <Link to="/docs#auth" className="block px-3 py-1.5 text-sm text-white/50 hover:text-white transition-colors">Authentication</Link>
-                                <Link to="/docs#rate-limits" className="block px-3 py-1.5 text-sm text-white/50 hover:text-white transition-colors">Rate Limits</Link>
-                                <Link to="/docs#webhooks" className="block px-3 py-1.5 text-sm text-white/50 hover:text-white transition-colors">Webhooks</Link>
+                                <Link to="/docs#auth" className="block px-3 py-1.5 text-sm text-[rgba(19,19,19,0.5)] hover:text-[rgb(19,19,19)] transition-colors">Authentication</Link>
+                                <Link to="/docs#rate-limits" className="block px-3 py-1.5 text-sm text-[rgba(19,19,19,0.5)] hover:text-[rgb(19,19,19)] transition-colors">Rate Limits</Link>
+                                <Link to="/docs#webhooks" className="block px-3 py-1.5 text-sm text-[rgba(19,19,19,0.5)] hover:text-[rgb(19,19,19)] transition-colors">Webhooks</Link>
                             </nav>
                         </div>
                     </div>
                 </aside>
 
                 {/* Main Content */}
-                <main className="flex-1 min-w-0 py-12 px-4 md:px-12 lg:px-16 overflow-y-auto">
+                <main className="flex-1 min-w-0">
                     <div className="max-w-3xl">
 
                         <div className="mb-10">
@@ -163,8 +150,8 @@ const SupportPage = () => {
                                 <span>/</span>
                                 <span>New Ticket</span>
                             </div>
-                            <h1 className="text-3xl md:text-4xl font-bold text-white mb-4 tracking-tight">Submit a Request</h1>
-                            <p className="text-lg text-white/60 leading-relaxed">
+                            <h1 className="text-3xl md:text-4xl font-bold text-[rgb(19,19,19)] mb-4 tracking-tight">Submit a Request</h1>
+                            <p className="text-lg text-[rgba(19,19,19,0.6)] leading-relaxed">
                                 Encountering an issue? Our engineering team is ready to help. Please provide detailed information to ensure a fast resolution.
                             </p>
                         </div>
@@ -177,13 +164,13 @@ const SupportPage = () => {
                                         <CheckCircle2 className="w-6 h-6" />
                                     </div>
                                     <div className="flex-1">
-                                        <h3 className="text-xl font-semibold text-white mb-2">Ticket Created Successfully</h3>
-                                        <p className="text-white/60 mb-6">
-                                            We've received your request and sent a confirmation email to <span className="text-white">{formData.user_email}</span>.
+                                        <h3 className="text-xl font-semibold text-[rgb(19,19,19)] mb-2">Ticket Created Successfully</h3>
+                                        <p className="text-[rgba(19,19,19,0.6)] mb-6">
+                                            We've received your request and sent a confirmation email to <span className="text-[rgb(19,19,19)]">{formData.user_email}</span>.
                                         </p>
 
-                                        <div className="rounded-lg border border-white/10 bg-[#0A0A0A] p-4 font-mono text-sm mb-6 flex items-center justify-between group">
-                                            <span className="text-white/40">Ticket ID</span>
+                                        <div className="rounded-lg border border-[rgba(19,19,19,0.1)] bg-[rgba(19,19,19,0.03)] p-4 font-mono text-sm mb-6 flex items-center justify-between group">
+                                            <span className="text-[rgba(19,19,19,0.4)]">Ticket ID</span>
                                             <div className="flex items-center gap-2">
                                                 <span className="text-[#FF8A5B] font-bold text-lg">{ticketId}</span>
                                             </div>
@@ -199,13 +186,13 @@ const SupportPage = () => {
                                                         category: '', priority: 'medium', description: '',
                                                     });
                                                 }}
-                                                className="px-4 py-2 rounded-lg bg-white/10 text-white text-sm font-medium hover:bg-white/20 transition-colors"
+                                                className="px-4 py-2 rounded-lg bg-[rgba(19,19,19,0.06)] text-[rgb(19,19,19)] text-sm font-medium hover:bg-[rgba(19,19,19,0.1)] transition-colors"
                                             >
                                                 Create Another Ticket
                                             </button>
                                             <Link
                                                 to="/"
-                                                className="px-4 py-2 rounded-lg border border-white/10 text-white/60 text-sm font-medium hover:text-white hover:bg-white/5 transition-colors"
+                                                className="px-4 py-2 rounded-lg border border-[rgba(19,19,19,0.1)] text-[rgba(19,19,19,0.6)] text-sm font-medium hover:text-[rgb(19,19,19)] hover:bg-[rgba(19,19,19,0.03)] transition-colors"
                                             >
                                                 Return Home
                                             </Link>
@@ -228,7 +215,7 @@ const SupportPage = () => {
 
                                 <div className="grid md:grid-cols-2 gap-6">
                                     <div className="space-y-2">
-                                        <label htmlFor="user_name" className="block text-sm font-medium text-white/80">Full Name</label>
+                                        <label htmlFor="user_name" className="block text-sm font-medium text-[rgba(19,19,19,0.75)]">Full Name</label>
                                         <input
                                             id="user_name"
                                             type="text"
@@ -236,12 +223,12 @@ const SupportPage = () => {
                                             required
                                             value={formData.user_name}
                                             onChange={handleChange}
-                                            className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white placeholder-white/20 focus:outline-none focus:border-[#FF8A5B]/50 focus:ring-1 focus:ring-[#FF8A5B]/50 transition-all font-mono text-sm"
+                                            className="w-full bg-[rgba(19,19,19,0.03)] border border-[rgba(19,19,19,0.1)] rounded-lg px-4 py-2.5 text-[rgb(19,19,19)] placeholder-[rgba(19,19,19,0.35)] focus:outline-none focus:border-[#FF8A5B]/50 focus:ring-1 focus:ring-[#FF8A5B]/50 transition-all font-mono text-sm"
                                             placeholder="Jane Doe"
                                         />
                                     </div>
                                     <div className="space-y-2">
-                                        <label htmlFor="user_email" className="block text-sm font-medium text-white/80">Email Address</label>
+                                        <label htmlFor="user_email" className="block text-sm font-medium text-[rgba(19,19,19,0.75)]">Email Address</label>
                                         <input
                                             id="user_email"
                                             type="email"
@@ -249,14 +236,14 @@ const SupportPage = () => {
                                             required
                                             value={formData.user_email}
                                             onChange={handleChange}
-                                            className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white placeholder-white/20 focus:outline-none focus:border-[#FF8A5B]/50 focus:ring-1 focus:ring-[#FF8A5B]/50 transition-all font-mono text-sm"
+                                            className="w-full bg-[rgba(19,19,19,0.03)] border border-[rgba(19,19,19,0.1)] rounded-lg px-4 py-2.5 text-[rgb(19,19,19)] placeholder-[rgba(19,19,19,0.35)] focus:outline-none focus:border-[#FF8A5B]/50 focus:ring-1 focus:ring-[#FF8A5B]/50 transition-all font-mono text-sm"
                                             placeholder="jane@company.com"
                                         />
                                     </div>
                                 </div>
 
                                 <div className="space-y-2">
-                                    <label htmlFor="subject" className="block text-sm font-medium text-white/80">Subject</label>
+                                    <label htmlFor="subject" className="block text-sm font-medium text-[rgba(19,19,19,0.75)]">Subject</label>
                                     <input
                                         id="subject"
                                         type="text"
@@ -264,14 +251,14 @@ const SupportPage = () => {
                                         required
                                         value={formData.subject}
                                         onChange={handleChange}
-                                        className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white placeholder-white/20 focus:outline-none focus:border-[#FF8A5B]/50 focus:ring-1 focus:ring-[#FF8A5B]/50 transition-all font-mono text-sm"
+                                        className="w-full bg-[rgba(19,19,19,0.03)] border border-[rgba(19,19,19,0.1)] rounded-lg px-4 py-2.5 text-[rgb(19,19,19)] placeholder-[rgba(19,19,19,0.35)] focus:outline-none focus:border-[#FF8A5B]/50 focus:ring-1 focus:ring-[#FF8A5B]/50 transition-all font-mono text-sm"
                                         placeholder="API Rate Limit Issues..."
                                     />
                                 </div>
 
                                 <div className="grid md:grid-cols-2 gap-6">
                                     <div className="space-y-2">
-                                        <label htmlFor="category" className="block text-sm font-medium text-white/80">Category</label>
+                                        <label htmlFor="category" className="block text-sm font-medium text-[rgba(19,19,19,0.75)]">Category</label>
                                         <div className="relative">
                                             <select
                                                 id="category"
@@ -279,18 +266,18 @@ const SupportPage = () => {
                                                 required
                                                 value={formData.category}
                                                 onChange={handleChange}
-                                                className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-[#FF8A5B]/50 focus:ring-1 focus:ring-[#FF8A5B]/50 transition-all appearance-none font-mono text-sm"
+                                                className="w-full bg-[rgba(19,19,19,0.03)] border border-[rgba(19,19,19,0.1)] rounded-lg px-4 py-2.5 text-[rgb(19,19,19)] focus:outline-none focus:border-[#FF8A5B]/50 focus:ring-1 focus:ring-[#FF8A5B]/50 transition-all appearance-none font-mono text-sm"
                                             >
-                                                <option value="" className="bg-[#0A0A0A]">Select Category...</option>
+                                                <option value="">Select Category...</option>
                                                 {CATEGORIES.map(cat => (
-                                                    <option key={cat.value} value={cat.value} className="bg-[#0A0A0A]">{cat.label}</option>
+                                                    <option key={cat.value} value={cat.value}>{cat.label}</option>
                                                 ))}
                                             </select>
-                                            <ArrowLeft className="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 -rotate-90 pointer-events-none text-white/30" />
+                                            <ArrowLeft className="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 -rotate-90 pointer-events-none text-[rgba(19,19,19,0.35)]" />
                                         </div>
                                     </div>
                                     <div className="space-y-2">
-                                        <p id="priority-label" className="block text-sm font-medium text-white/80">Priority</p>
+                                        <p id="priority-label" className="block text-sm font-medium text-[rgba(19,19,19,0.75)]">Priority</p>
                                         <div role="radiogroup" aria-labelledby="priority-label" className="grid grid-cols-4 gap-2">
                                             {PRIORITIES.map(p => (
                                                 <button
@@ -299,7 +286,7 @@ const SupportPage = () => {
                                                     onClick={() => setFormData(prev => ({ ...prev, priority: p.value }))}
                                                     className={`px-2 py-2 rounded-lg text-xs font-mono font-medium border transition-all ${formData.priority === p.value
                                                         ? p.color
-                                                        : 'text-white/40 bg-white/5 border-white/5 hover:bg-white/10 hover:text-white/60'
+                                                        : 'text-[rgba(19,19,19,0.4)] bg-[rgba(19,19,19,0.03)] border-[rgba(19,19,19,0.08)] hover:bg-[rgba(19,19,19,0.06)] hover:text-[rgba(19,19,19,0.6)]'
                                                         }`}
                                                 >
                                                     {p.label}
@@ -310,7 +297,7 @@ const SupportPage = () => {
                                 </div>
 
                                 <div className="space-y-2">
-                                    <label htmlFor="description" className="block text-sm font-medium text-white/80">Description</label>
+                                    <label htmlFor="description" className="block text-sm font-medium text-[rgba(19,19,19,0.75)]">Description</label>
                                     <textarea
                                         id="description"
                                         name="description"
@@ -318,15 +305,15 @@ const SupportPage = () => {
                                         rows={8}
                                         value={formData.description}
                                         onChange={handleChange}
-                                        className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-white/20 focus:outline-none focus:border-[#FF8A5B]/50 focus:ring-1 focus:ring-[#FF8A5B]/50 transition-all font-mono text-sm leading-relaxed"
+                                        className="w-full bg-[rgba(19,19,19,0.03)] border border-[rgba(19,19,19,0.1)] rounded-lg px-4 py-3 text-[rgb(19,19,19)] placeholder-[rgba(19,19,19,0.35)] focus:outline-none focus:border-[#FF8A5B]/50 focus:ring-1 focus:ring-[#FF8A5B]/50 transition-all font-mono text-sm leading-relaxed"
                                         placeholder={`Steps to reproduce:\n1. ...\n\nExpected behavior:\n...\n\nActual behavior:\n...`}
                                     />
-                                    <p className="text-xs text-white/30">Please include any relevant error codes or request IDs.</p>
+                                    <p className="text-xs text-[rgba(19,19,19,0.35)]">Please include any relevant error codes or request IDs.</p>
                                 </div>
 
-                                <div className="pt-4 border-t border-white/5 flex items-center justify-between">
-                                    <p className="text-xs text-white/40">
-                                        By submitting this form, you agree to our <Link to="/terms" className="hover:text-white underline">Terms of Service</Link>.
+                                <div className="pt-4 border-t border-[rgba(19,19,19,0.08)] flex items-center justify-between">
+                                    <p className="text-xs text-[rgba(19,19,19,0.4)]">
+                                        By submitting this form, you agree to our <Link to="/terms" className="hover:text-[rgb(19,19,19)] underline">Terms of Service</Link>.
                                     </p>
                                     <button
                                         type="submit"
@@ -351,6 +338,8 @@ const SupportPage = () => {
                     </div>
                 </main>
             </div>
+
+            <Footer />
         </div>
     );
 };
