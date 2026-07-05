@@ -309,9 +309,6 @@ function ShellHeader() {
           />
 
           <div className="agero-mobile-menu-panel" role="navigation" aria-label="Mobile navigation">
-            <button aria-label="Close menu" className="agero-mobile-menu-close" onClick={closeMenu} type="button">
-              x
-            </button>
             <div className="agero-mobile-menu-top">
               <span>Menu</span>
             </div>

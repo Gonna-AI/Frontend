@@ -420,7 +420,7 @@ html.lenis.lenis-stopped {
   display: flex;
   flex: none;
   justify-content: space-between;
-  margin: 0 auto 72px;
+  margin: 0 auto 28px;
   width: min(100%, 1920px);
 }
 
@@ -2887,7 +2887,7 @@ html.lenis.lenis-stopped {
   }
 
   .agero-shell-header {
-    margin-bottom: 56px;
+    margin-bottom: 20px;
     position: relative;
   }
 
@@ -3005,15 +3005,18 @@ html.lenis.lenis-stopped {
   }
 
   .agero-mobile-menu {
+    bottom: 0;
     display: block;
-    inset: 0;
+    left: 0;
     position: fixed;
+    right: 0;
+    top: 84px;
     z-index: 1000;
   }
 
   .agero-mobile-menu-scrim {
-    background: rgba(0, 0, 0, 0.24);
-    backdrop-filter: blur(10px);
+    background: rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(6px);
     border: 0;
     cursor: pointer;
     inset: 0;
@@ -3025,38 +3028,22 @@ html.lenis.lenis-stopped {
   .agero-mobile-menu-panel {
     animation: ageroMobileMenuIn 260ms var(--agero-ease-out) both;
     background:
-      linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(235, 235, 235, 0.94)),
+      linear-gradient(180deg, rgba(255, 255, 255, 0.62), rgba(235, 235, 235, 0.58)),
       var(--agero-panel);
-    border: 1px solid rgba(255, 255, 255, 0.78);
+    backdrop-filter: blur(28px);
+    -webkit-backdrop-filter: blur(28px);
+    border: 1px solid rgba(255, 255, 255, 0.6);
     border-radius: 28px;
     box-shadow:
-      0 24px 70px rgba(0, 0, 0, 0.28),
-      inset 0 1px 0 rgba(255, 255, 255, 0.75);
+      0 24px 70px rgba(0, 0, 0, 0.22),
+      inset 0 1px 0 rgba(255, 255, 255, 0.5);
     color: var(--agero-ink);
     left: 16px;
     overflow: hidden;
     padding: 18px;
     position: absolute;
     right: 16px;
-    top: 16px;
-  }
-
-  .agero-mobile-menu-close {
-    align-items: center;
-    background: rgba(19, 19, 19, 0.08);
-    border: 0;
-    border-radius: 999px;
-    color: var(--agero-ink);
-    cursor: pointer;
-    display: flex;
-    font-size: 14px;
-    height: 34px;
-    justify-content: center;
-    line-height: 1;
-    position: absolute;
-    right: 14px;
-    top: 14px;
-    width: 34px;
+    top: 8px;
   }
 
   .agero-menu-button.is-open {
@@ -3069,7 +3056,6 @@ html.lenis.lenis-stopped {
     display: flex;
     justify-content: space-between;
     margin-bottom: 18px;
-    padding-right: 44px;
   }
 
   .agero-mobile-menu-top span {
