@@ -333,7 +333,43 @@ html.lenis.lenis-stopped {
   color: rgba(255, 255, 255, 0.72);
 }
 
+/* Homepage hero: left-aligned, full-width poster treatment instead of a
+   centered block, with a bigger scale than the generic page-hero cap. */
+.agero-hero-stage-content--home {
+  align-items: flex-start;
+  padding: 56px clamp(24px, 6vw, 88px);
+  text-align: left;
+}
+
+.agero-hero-stage-content--home .agero-hero-title {
+  font-size: clamp(64px, 9vw, 168px);
+  justify-content: flex-start;
+  margin: 0 0 24px;
+  max-width: none;
+}
+
+.agero-hero-stage-content--home .agero-hero-copy {
+  margin: 0;
+  max-width: 620px;
+}
+
+.agero-hero-stage-content--home .agero-hero-cta {
+  align-self: flex-start;
+}
+
+.agero-hero-stage--home {
+  height: clamp(680px, 56vw, 1000px);
+}
+
 @media (max-width: 1199px) {
+  .agero-hero-stage-content--home .agero-hero-title {
+    font-size: clamp(48px, 10vw, 100px);
+  }
+
+  .agero-hero-stage--home {
+    height: clamp(560px, 54vw, 780px);
+  }
+
   .agero-hero-stage-content h1 {
     font-size: clamp(48px, 9vw, 84px);
     line-height: 0.96;
@@ -352,6 +388,18 @@ html.lenis.lenis-stopped {
   .agero-hero-stage-content h1 {
     font-size: clamp(36px, 12vw, 52px);
     line-height: 1;
+  }
+
+  .agero-hero-stage-content--home {
+    padding: 32px 20px;
+  }
+
+  .agero-hero-stage-content--home .agero-hero-title {
+    font-size: clamp(36px, 13vw, 56px);
+  }
+
+  .agero-hero-stage--home {
+    height: clamp(480px, 130vw, 640px);
   }
 }
 
@@ -675,21 +723,6 @@ html.lenis.lenis-stopped {
 
 .agero-muted {
   color: var(--agero-muted);
-}
-
-.agero-hero-pill {
-  border-radius: 50px;
-  flex: 0 0 auto;
-  height: 64px;
-  object-fit: cover;
-  overflow: hidden;
-  animation: ageroHeroPillFloat 3000ms cubic-bezier(0, 0, 1, 1) infinite alternate;
-  transform: translateY(2px);
-  width: 81px;
-}
-
-.agero-hero-pill:nth-of-type(2) {
-  animation-delay: -1200ms;
 }
 
 .agero-hero-copy {
@@ -2694,16 +2727,6 @@ html.lenis.lenis-stopped {
   }
 }
 
-@keyframes ageroHeroPillFloat {
-  from {
-    transform: translate3d(0, 2px, 0);
-  }
-
-  to {
-    transform: translate3d(-9px, -9px, 0);
-  }
-}
-
 @keyframes ageroShowcaseDrift {
   from {
     transform: scale(1.035) translate3d(0, 0, 0);
@@ -3118,10 +3141,6 @@ html.lenis.lenis-stopped {
     font-size: 40px;
     line-height: 40px;
     max-width: 350px;
-  }
-
-  .agero-hero-pill-desktop {
-    display: none;
   }
 
   .agero-hero-copy {

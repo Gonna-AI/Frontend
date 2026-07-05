@@ -182,32 +182,14 @@ export default function LandingFramer() {
         <HomePrelude
           heroContent={
             <div
-              className="agero-hero-stage-content"
+              className="agero-hero-stage-content agero-hero-stage-content--home"
               aria-labelledby="agero-works-title"
               data-agero-reveal="hero"
             >
               <h1 className="agero-hero-title" id="agero-works-title">
                 <span>Orchestrating</span>
-                <video
-                  autoPlay
-                  className="agero-hero-pill agero-hero-pill-desktop"
-                  loop
-                  muted
-                  playsInline
-                  preload="metadata"
-                  src="/hero-logo-video.mp4"
-                />
                 <span className="agero-orange">Industrial</span>
                 <span className="agero-muted">Machine</span>
-                <video
-                  autoPlay
-                  className="agero-hero-pill agero-hero-pill-desktop"
-                  loop
-                  muted
-                  playsInline
-                  preload="metadata"
-                  src={`${BASE}/HERO4.mp4`}
-                />
                 <span>Intelligence</span>
               </h1>
 
@@ -369,7 +351,7 @@ function HomePrelude({ heroContent }: { heroContent: ReactNode }) {
   return (
     <section className="agero-home-prelude" aria-label="Agero client showcase">
       <div className="agero-showcase-shell" data-agero-reveal="up">
-        <div className="agero-hero-stage">
+        <div className="agero-hero-stage agero-hero-stage--home">
           <LazyVideo
             className="agero-hero-stage-media"
             muted
