@@ -1,4 +1,4 @@
-import { type CSSProperties, type VideoHTMLAttributes, Fragment, useEffect, useRef, useState } from 'react';
+import { type CSSProperties, type ReactNode, type VideoHTMLAttributes, Fragment, useEffect, useRef, useState } from 'react';
 import { Compass, Globe2, MapPin, PanelTop, PenTool, Sparkles } from 'lucide-react';
 import Lenis from 'lenis';
 import { isSaveDataEnabled } from '../utils/idle';
@@ -177,52 +177,52 @@ export default function LandingFramer() {
   return (
     <div className="agero-works" id="agero-works">
       <div className="agero-top-area">
-        <section className="agero-hero-panel">
-          <ShellHeader />
+        <ShellHeader />
 
-          <div
-            className="agero-hero-content"
-            aria-labelledby="agero-works-title"
-            data-agero-reveal="hero"
-          >
-            <h1 className="agero-hero-title" id="agero-works-title">
-              <span>Orchestrating</span>
-              <video
-                autoPlay
-                className="agero-hero-pill agero-hero-pill-desktop"
-                loop
-                muted
-                playsInline
-                preload="metadata"
-                src="/hero-logo-video.mp4"
-              />
-              <span className="agero-orange">Industrial</span>
-              <span className="agero-muted">Machine</span>
-              <video
-                autoPlay
-                className="agero-hero-pill agero-hero-pill-desktop"
-                loop
-                muted
-                playsInline
-                preload="metadata"
-                src={`${BASE}/HERO4.mp4`}
-              />
-              <span>Intelligence</span>
-            </h1>
+        <HomePrelude
+          heroContent={
+            <div
+              className="agero-hero-stage-content"
+              aria-labelledby="agero-works-title"
+              data-agero-reveal="hero"
+            >
+              <h1 className="agero-hero-title" id="agero-works-title">
+                <span>Orchestrating</span>
+                <video
+                  autoPlay
+                  className="agero-hero-pill agero-hero-pill-desktop"
+                  loop
+                  muted
+                  playsInline
+                  preload="metadata"
+                  src="/hero-logo-video.mp4"
+                />
+                <span className="agero-orange">Industrial</span>
+                <span className="agero-muted">Machine</span>
+                <video
+                  autoPlay
+                  className="agero-hero-pill agero-hero-pill-desktop"
+                  loop
+                  muted
+                  playsInline
+                  preload="metadata"
+                  src={`${BASE}/HERO4.mp4`}
+                />
+                <span>Intelligence</span>
+              </h1>
 
-            <p className="agero-hero-copy">
-              Transform how your machinery operates. We deploy custom-tailored AI/ML harness layers
-              and robust predictive models designed to optimize operations, reduce downtime, and manage critical industrial assets.
-            </p>
+              <p className="agero-hero-copy">
+                Transform how your machinery operates. We deploy custom-tailored AI/ML harness layers
+                and robust predictive models designed to optimize operations, reduce downtime, and manage critical industrial assets.
+              </p>
 
-            <a className="agero-button agero-hero-cta" href="/contact">
-              <span>Book Demo</span>
-              <span aria-hidden="true">→</span>
-            </a>
-          </div>
-        </section>
-
-        <HomePrelude />
+              <a className="agero-button agero-hero-cta" href="/contact">
+                <span>Book Demo</span>
+                <span aria-hidden="true">→</span>
+              </a>
+            </div>
+          }
+        />
       </div>
 
       <RibbonStage />
@@ -353,7 +353,7 @@ function ShellHeader() {
   );
 }
 
-function HomePrelude() {
+function HomePrelude({ heroContent }: { heroContent: ReactNode }) {
   const logoTrackRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const track = logoTrackRef.current;
@@ -369,13 +369,16 @@ function HomePrelude() {
   return (
     <section className="agero-home-prelude" aria-label="Agero client showcase">
       <div className="agero-showcase-shell" data-agero-reveal="up">
-        <div className="agero-showcase-media">
+        <div className="agero-hero-stage">
           <LazyVideo
+            className="agero-hero-stage-media"
             muted
             loop
             playsInline
             src="https://xlzwfkgurrrspcdyqele.supabase.co/storage/v1/object/public/buck/entrybox.mov"
           />
+          <div className="agero-hero-stage-scrim" aria-hidden="true" />
+          {heroContent}
         </div>
 
         <div className="agero-client-logo-strip">

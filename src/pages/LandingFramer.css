@@ -242,6 +242,119 @@ html.lenis.lenis-stopped {
   width: 100%;
 }
 
+/* Solutions-style hero: headline/copy/CTA overlaid directly on the video box,
+   instead of sitting above it as a separate light-background block. */
+.agero-hero-stage {
+  background: #000;
+  border-radius: 34px;
+  height: clamp(560px, 46vw, 860px);
+  margin-top: clamp(34px, 5vw, 72px);
+  overflow: hidden;
+  position: relative;
+  width: 100%;
+}
+
+.agero-hero-stage-media {
+  display: block;
+  height: 100%;
+  inset: 0;
+  object-fit: cover;
+  position: absolute;
+  width: 100%;
+}
+
+.agero-hero-stage-scrim {
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.18) 0%, rgba(0, 0, 0, 0.1) 38%, rgba(0, 0, 0, 0.6) 100%);
+  inset: 0;
+  pointer-events: none;
+  position: absolute;
+}
+
+.agero-hero-stage-content {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  justify-content: center;
+  padding: 40px 24px;
+  position: relative;
+  text-align: center;
+  width: 100%;
+  z-index: 2;
+}
+
+.agero-hero-stage-content h1 {
+  color: rgb(255, 255, 255);
+  font-family: "Cal Sans", "Inter", system-ui, sans-serif !important;
+  font-size: 72px;
+  font-weight: 400;
+  line-height: 80px;
+  letter-spacing: -0.01em;
+  margin: 0 0 20px;
+  text-wrap: balance;
+}
+
+.agero-hero-stage-content p {
+  color: rgba(255, 255, 255, 0.74);
+  font-size: clamp(16px, 1.4vw, 20px);
+  line-height: 1.4;
+  margin: 0 auto;
+  max-width: 640px;
+  text-wrap: balance;
+}
+
+.agero-hero-stage-content > * + * {
+  margin-top: 20px;
+}
+
+/* Page-specific eyebrow/emphasis accents keep their orange brand color even
+   though the generic paragraph color above them is white for video contrast. */
+.agero-hero-stage-content .agero-about-eyebrow,
+.agero-hero-stage-content .clerktree-contact-kicker,
+.agero-hero-stage-content .clerktree-blog-hero-copy > p:first-child {
+  color: var(--agero-orange);
+}
+
+.agero-hero-stage-content h1 em,
+.agero-hero-stage-content h1 .agero-orange {
+  color: var(--agero-orange);
+  font-style: normal;
+}
+
+.agero-hero-stage-content .agero-hero-title {
+  color: rgb(255, 255, 255);
+}
+
+.agero-hero-stage-content .agero-muted {
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.agero-hero-stage-content .agero-hero-copy {
+  color: rgba(255, 255, 255, 0.72);
+}
+
+@media (max-width: 1199px) {
+  .agero-hero-stage-content h1 {
+    font-size: 60px;
+    line-height: 68px;
+  }
+
+  .agero-hero-stage {
+    height: clamp(480px, 44vw, 680px);
+  }
+}
+
+@media (max-width: 767px) {
+  .agero-hero-stage {
+    height: clamp(460px, 92vw, 620px);
+  }
+
+  .agero-hero-stage-content h1 {
+    font-size: 40px;
+    line-height: 40px;
+  }
+}
+
 .agero-top-area-with-hero .agero-header {
   height: auto;
 }
@@ -252,21 +365,6 @@ html.lenis.lenis-stopped {
 
 .agero-top-area-with-hero > .agero-header {
   margin-bottom: clamp(24px, 4vw, 56px);
-}
-
-.agero-hero-panel {
-  align-items: center;
-  background: transparent;
-  border: 0;
-  border-radius: 0;
-  box-shadow: none;
-  display: flex;
-  flex-direction: column;
-  min-height: 560px;
-  overflow: hidden;
-  padding: 0 0 88px;
-  position: relative;
-  width: 100%;
 }
 
 .agero-shell-header {
@@ -550,16 +648,6 @@ html.lenis.lenis-stopped {
   display: none;
 }
 
-.agero-hero-content {
-  align-items: center;
-  display: flex;
-  flex-direction: column;
-  margin-top: 0;
-  padding: 0 20px;
-  text-align: center;
-  width: 100%;
-}
-
 .agero-hero-title {
   align-items: center;
   color: var(--agero-ink);
@@ -636,29 +724,6 @@ html.lenis.lenis-stopped {
   padding: 0;
   position: relative;
   width: 100%;
-}
-
-.agero-showcase-media {
-  background: #000;
-  border-radius: 34px;
-  height: clamp(420px, 37vw, 760px);
-  overflow: hidden;
-  position: relative;
-}
-
-.agero-showcase-media img,
-.agero-showcase-media video {
-  display: block;
-  height: 100%;
-  object-fit: cover;
-  object-position: center;
-  width: 100%;
-}
-
-.agero-showcase-media img {
-  animation: ageroShowcaseDrift 9000ms var(--agero-ease-in-out) infinite alternate;
-  transform: scale(1.035);
-  will-change: transform;
 }
 
 .agero-client-logo-strip {
@@ -2734,10 +2799,6 @@ html.lenis.lenis-stopped {
     max-width: 760px;
   }
 
-  .agero-showcase-media {
-    height: clamp(380px, 42vw, 560px);
-  }
-
   .agero-about-heading {
     font-size: 56px;
     line-height: 68px;
@@ -2795,13 +2856,6 @@ html.lenis.lenis-stopped {
     border-radius: 30px;
     margin-top: 6px;
     padding: 16px;
-    width: min(100%, calc(100vw - 12px));
-  }
-
-  .agero-hero-panel {
-    border-radius: 30px;
-    min-height: 538px;
-    padding: 22px 18px 64px;
     width: min(100%, calc(100vw - 12px));
   }
 
@@ -3059,11 +3113,6 @@ html.lenis.lenis-stopped {
     text-decoration: none;
   }
 
-  .agero-hero-content {
-    margin-top: 16px;
-    padding: 0 20px;
-  }
-
   .agero-hero-title {
     column-gap: 8px;
     font-size: 40px;
@@ -3091,12 +3140,6 @@ html.lenis.lenis-stopped {
     margin: 0;
     padding: 0;
     width: 100%;
-  }
-
-  .agero-showcase-media {
-    border-radius: 24px;
-    height: auto;
-    aspect-ratio: 16 / 9;
   }
 
   .agero-client-logo-strip {

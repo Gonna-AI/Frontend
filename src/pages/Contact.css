@@ -3,81 +3,21 @@
   padding: 24px 8px 48px;
 }
 
-.clerktree-contact-hero-wrap {
-  margin: 0 auto;
-  max-width: 1920px;
-  position: relative;
-}
-
-.clerktree-contact-hero-wrap::before {
-  content: none;
-}
-
-.clerktree-contact-hero-media {
-  background: #000;
-  border-radius: 34px;
-  height: clamp(420px, 37vw, 760px);
-  margin-top: clamp(34px, 5vw, 72px);
-  overflow: hidden;
-  position: relative;
-  width: 100%;
-}
-
-.clerktree-contact-hero-video {
-  display: block;
-  height: 100%;
-  object-fit: cover;
-  pointer-events: none;
-  width: 100%;
-}
-
-.clerktree-contact-hero {
-  margin: 0 auto;
-  max-width: 1760px;
-  padding: 0 clamp(14px, 4vw, 72px);
-  position: relative;
-  text-align: center;
-}
-
 .clerktree-contact-kicker {
-  color: rgba(12, 12, 12, 0.48);
   font-size: 13px;
   font-weight: 700;
   letter-spacing: 0.14em;
-  margin: 0 0 18px;
+  margin: 0;
   text-transform: uppercase;
 }
 
 .clerktree-contact-location h2 {
+  color: var(--agero-ink);
   font-family: "Cal Sans", "Inter", system-ui, sans-serif !important;
   font-size: clamp(52px, 7.1vw, 132px);
   letter-spacing: -0.065em;
   line-height: 0.92;
   margin: 0;
-  text-wrap: balance;
-}
-
-.clerktree-contact-hero h1 {
-  color: var(--agero-ink);
-  font-family: "Cal Sans", "Inter", system-ui, sans-serif !important;
-  font-size: 72px;
-  font-weight: 400;
-  letter-spacing: -0.01em;
-  line-height: 80px;
-  margin: 0;
-  text-wrap: balance;
-}
-
-.clerktree-contact-location h2 {
-  color: var(--agero-ink);
-}
-
-.clerktree-contact-hero p:last-child {
-  color: rgba(12, 12, 12, 0.62);
-  font-size: clamp(18px, 2vw, 23px);
-  line-height: 1.35;
-  margin: 28px auto 0;
-  max-width: 1180px;
   text-wrap: balance;
 }
 
@@ -397,34 +337,11 @@
   .clerktree-contact-location-grid {
     grid-template-columns: minmax(0, 1fr);
   }
-
-  .clerktree-contact-hero h1 {
-    font-size: 60px;
-    line-height: 68px;
-  }
 }
 
 @media (max-width: 720px) {
   .clerktree-contact-page {
     padding: 24px 14px 30px;
-  }
-
-  .clerktree-contact-hero-wrap {
-    border-radius: 0;
-  }
-
-  .clerktree-contact-hero-media {
-    border-radius: 24px;
-    height: clamp(340px, 86vw, 520px);
-  }
-
-  .clerktree-contact-hero {
-    padding: 0 4px;
-  }
-
-  .clerktree-contact-hero h1 {
-    font-size: 40px;
-    line-height: 40px;
   }
 
   .clerktree-contact-field-grid {

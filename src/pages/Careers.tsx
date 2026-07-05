@@ -137,22 +137,23 @@ export default function Careers() {
       <div className="agero-top-area agero-top-area-with-hero">
         <Header />
 
-        <div className="text-center px-6">
-          <h1 className="text-[40px] leading-[40px] md:text-[60px] md:leading-[68px] lg:text-[72px] lg:leading-[80px] font-normal tracking-tight mb-6" style={{ fontFamily: '"Cal Sans", "Inter", system-ui, sans-serif' }}>
-            <span className="text-[rgb(19,19,19)]">
-              {t('careers.title1')}
-            </span>
-            <br />
-            <span className="bg-gradient-to-r from-[#FF4D00] via-[#FF7A33] to-[#FF4D00] text-transparent bg-clip-text">
-              {t('careers.title2')}
-            </span>
-          </h1>
-          <p className="text-lg md:text-xl text-[rgba(19,19,19,0.6)] leading-relaxed max-w-3xl mx-auto">
-            {t('careers.subtitle')}
-          </p>
-        </div>
-
-        <div className="agero-hero-video-slot" aria-hidden="true" />
+        <section className="agero-hero-stage">
+          <div className="agero-hero-stage-scrim" aria-hidden="true" />
+          <div className="agero-hero-stage-content">
+            <h1 className="text-[40px] leading-[40px] md:text-[60px] md:leading-[68px] lg:text-[72px] lg:leading-[80px] font-normal tracking-tight" style={{ fontFamily: '"Cal Sans", "Inter", system-ui, sans-serif' }}>
+              <span className="text-white">
+                {t('careers.title1')}
+              </span>
+              <br />
+              <span className="bg-gradient-to-r from-[#FF4D00] via-[#FF7A33] to-[#FF4D00] text-transparent bg-clip-text">
+                {t('careers.title2')}
+              </span>
+            </h1>
+            <p className="text-lg md:text-xl text-white/70 leading-relaxed max-w-3xl mx-auto">
+              {t('careers.subtitle')}
+            </p>
+          </div>
+        </section>
       </div>
 
       <div className="relative z-10 py-12 px-6">

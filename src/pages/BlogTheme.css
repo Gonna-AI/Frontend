@@ -11,12 +11,6 @@
   padding: 24px 8px 48px;
 }
 
-.clerktree-blog-hero-top {
-  margin: 0 auto;
-  max-width: 1680px;
-  padding: 0 clamp(14px, 4vw, 72px);
-}
-
 .clerktree-blog-filters-wrap {
   margin: 0 auto clamp(28px, 5vw, 56px);
   max-width: 1680px;
@@ -47,7 +41,7 @@
 }
 
 .clerktree-blog-hero-copy span {
-  color: rgba(12, 12, 12, 0.62);
+  color: rgba(255, 255, 255, 0.74);
   display: block;
   font-size: clamp(18px, 2vw, 24px);
   line-height: 1.35;
@@ -163,7 +157,6 @@
     padding: 24px 14px 32px;
   }
 
-  .clerktree-blog-hero-top,
   .clerktree-blog-filters-wrap,
   .clerktree-blog-grid-wrap {
     padding-left: 0;

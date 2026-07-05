@@ -63,7 +63,7 @@ function ContactHeroVideo({ src }: { src: string }) {
   return (
     <video
       autoPlay={shouldLoad}
-      className="clerktree-contact-hero-video"
+      className="agero-hero-stage-media"
       loop
       muted
       playsInline
@@ -125,15 +125,13 @@ export default function Contact() {
       <div className="agero-top-area agero-top-area-with-hero">
         <Header />
 
-        <section className="clerktree-contact-hero-wrap" aria-labelledby="contact-title">
-          <div className="clerktree-contact-hero">
+        <section className="agero-hero-stage" aria-labelledby="contact-title">
+          <ContactHeroVideo src={CONTACT_VIDEO_SRC} />
+          <div className="agero-hero-stage-scrim" aria-hidden="true" />
+          <div className="agero-hero-stage-content">
             <p className="clerktree-contact-kicker">ClerkTree • {t('contact.sendMsgTitle')}</p>
             <h1 id="contact-title">{t('contact.sendMsgTitle')}</h1>
             <p>{t('contact.subtitle')}</p>
-          </div>
-
-          <div className="clerktree-contact-hero-media">
-            <ContactHeroVideo src={CONTACT_VIDEO_SRC} />
           </div>
         </section>
       </div>

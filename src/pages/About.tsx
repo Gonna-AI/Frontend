@@ -39,7 +39,7 @@ function HeroBackgroundVideo({ src }: { src: string }) {
 
   return (
     <video
-      className="agero-about-hero-video"
+      className="agero-hero-stage-media"
       autoPlay={shouldLoad}
       loop
       muted
@@ -82,8 +82,10 @@ export default function About() {
       <div className="agero-top-area agero-top-area-with-hero">
         <Header />
 
-        <section className="agero-about-hero" aria-labelledby="about-hero-title">
-          <div className="agero-about-hero-content">
+        <section className="agero-hero-stage" aria-labelledby="about-hero-title">
+          <HeroBackgroundVideo src={HERO_VIDEO_SRC} />
+          <div className="agero-hero-stage-scrim" aria-hidden="true" />
+          <div className="agero-hero-stage-content">
             <p className="agero-about-eyebrow">
               <span className="agero-about-eyebrow-icon">
                 <Sparkles size={16} />
@@ -96,10 +98,6 @@ export default function About() {
             </h1>
 
             <p>{t('about.heroDesc')}</p>
-          </div>
-
-          <div className="agero-about-hero-media" aria-hidden="true">
-            <HeroBackgroundVideo src={HERO_VIDEO_SRC} />
           </div>
         </section>
       </div>

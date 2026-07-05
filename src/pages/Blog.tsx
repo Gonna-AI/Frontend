@@ -48,8 +48,9 @@ function BlogContent() {
       <div className="agero-top-area agero-top-area-with-hero">
         <Header />
 
-        <section className="clerktree-blog-hero-top">
-          <div className="clerktree-blog-hero-copy">
+        <section className="agero-hero-stage">
+          <div className="agero-hero-stage-scrim" aria-hidden="true" />
+          <div className="agero-hero-stage-content clerktree-blog-hero-copy">
             <p>ClerkTree Journal</p>
             <h1>
                 {t('blogPage.title')}
@@ -58,7 +59,6 @@ function BlogContent() {
                 {t('blogPage.subtitle')}
             </span>
           </div>
-          <div className="agero-hero-video-slot" aria-hidden="true" />
         </section>
       </div>
 

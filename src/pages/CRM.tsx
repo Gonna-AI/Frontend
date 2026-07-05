@@ -205,12 +205,11 @@ export default function CRM() {
         <Header />
 
         {/* ── Hero ─────────────────────────────────────── */}
-        <section
-          className="mx-auto flex max-w-7xl flex-col items-center justify-center px-5 pb-10 pt-6 text-center"
-          aria-labelledby="crm-hero-heading"
-        >
+        <section className="agero-hero-stage" aria-labelledby="crm-hero-heading">
+          <div className="agero-hero-stage-scrim" aria-hidden="true" />
+          <div className="agero-hero-stage-content">
           <Reveal>
-            <SectionEyebrow className="mx-auto mb-6">
+            <SectionEyebrow className="mx-auto">
               CRM Platform
             </SectionEyebrow>
           </Reveal>
@@ -218,7 +217,7 @@ export default function CRM() {
           <Reveal delay={0.08}>
             <h1
               id="crm-hero-heading"
-              className="text-balance text-[40px] leading-[40px] md:text-[60px] md:leading-[68px] lg:text-[72px] lg:leading-[80px] font-normal tracking-tight text-[rgb(19,19,19)]"
+              className="text-balance text-[40px] leading-[40px] md:text-[60px] md:leading-[68px] lg:text-[72px] lg:leading-[80px] font-normal tracking-tight text-white"
               style={{ fontFamily: '"Cal Sans", "Inter", system-ui, sans-serif' }}
             >
               CRM Built for the{' '}
@@ -227,7 +226,7 @@ export default function CRM() {
           </Reveal>
 
           <Reveal delay={0.14}>
-            <p className="mx-auto mt-6 max-w-2xl text-[clamp(1rem,0.9rem+0.4vw,1.2rem)] leading-relaxed text-[rgba(19,19,19,0.55)]">
+            <p className="mx-auto max-w-2xl text-[clamp(1rem,0.9rem+0.4vw,1.2rem)] leading-relaxed text-white/65">
               We design and deploy enterprise CRM systems where every record, workflow, and pipeline
               is natively connected to AI. Custom-built to your data model. Versioned like code.
               Deployed on your terms.
@@ -235,7 +234,7 @@ export default function CRM() {
           </Reveal>
 
           <Reveal delay={0.2}>
-            <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
+            <div className="flex flex-wrap items-center justify-center gap-4">
               <button
                 onClick={() => navigate('/contact')}
                 className="group inline-flex items-center gap-2 rounded-full bg-[#FF8A5B] px-7 py-3.5 text-sm font-semibold text-white shadow-[0_0_28px_rgba(255,138,91,0.35)] transition-all duration-200 hover:bg-[#FF9E70] hover:shadow-[0_0_38px_rgba(255,138,91,0.5)]"
@@ -245,7 +244,7 @@ export default function CRM() {
               </button>
               <button
                 onClick={() => navigate('/solutions')}
-                className="inline-flex items-center gap-2 rounded-full border border-[rgba(19,19,19,0.12)] bg-[rgba(19,19,19,0.04)] px-7 py-3.5 text-sm font-semibold text-[rgba(19,19,19,0.8)] backdrop-blur-sm transition-all duration-200 hover:border-[rgba(19,19,19,0.18)] hover:bg-[rgba(19,19,19,0.07)] hover:text-[rgb(19,19,19)]"
+                className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-7 py-3.5 text-sm font-semibold text-white/85 backdrop-blur-sm transition-all duration-200 hover:border-white/30 hover:bg-white/15 hover:text-white"
               >
                 See all solutions
               </button>
@@ -254,7 +253,7 @@ export default function CRM() {
 
           {/* Floating stat pills */}
           <Reveal delay={0.28}>
-            <div className="mt-14 flex flex-wrap items-center justify-center gap-3">
+            <div className="flex flex-wrap items-center justify-center gap-3">
               {[
                 { value: '100%', label: 'Custom data model' },
                 { value: 'Code-first', label: 'Versioned deploys' },
@@ -263,14 +262,15 @@ export default function CRM() {
               ].map((pill) => (
                 <div
                   key={pill.label}
-                  className="flex items-center gap-2 rounded-full border border-[rgba(19,19,19,0.1)] bg-[rgba(19,19,19,0.04)] px-4 py-2 text-sm backdrop-blur-sm"
+                  className="flex items-center gap-2 rounded-full border border-white/15 bg-white/8 px-4 py-2 text-sm backdrop-blur-sm"
                 >
                   <span className="font-semibold text-[#FFB286]">{pill.value}</span>
-                  <span className="text-[rgba(19,19,19,0.5)]">{pill.label}</span>
+                  <span className="text-white/60">{pill.label}</span>
                 </div>
               ))}
             </div>
           </Reveal>
+          </div>
         </section>
 
         <div className="agero-hero-video-slot mx-auto max-w-7xl px-5" aria-hidden="true" />
