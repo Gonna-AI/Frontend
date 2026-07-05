@@ -138,7 +138,7 @@ export default function Careers() {
         <Header />
 
         <div className="text-center px-6">
-          <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-6">
+          <h1 className="text-[40px] leading-[40px] md:text-[60px] md:leading-[68px] lg:text-[72px] lg:leading-[80px] font-normal tracking-tight mb-6" style={{ fontFamily: '"Cal Sans", "Inter", system-ui, sans-serif' }}>
             <span className="text-[rgb(19,19,19)]">
               {t('careers.title1')}
             </span>

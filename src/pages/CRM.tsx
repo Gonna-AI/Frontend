@@ -218,7 +218,8 @@ export default function CRM() {
           <Reveal delay={0.08}>
             <h1
               id="crm-hero-heading"
-              className="text-balance text-[clamp(2.8rem,1.2rem+5.5vw,5.5rem)] font-semibold leading-[1.05] tracking-[-0.05em] text-[rgb(19,19,19)]"
+              className="text-balance text-[40px] leading-[40px] md:text-[60px] md:leading-[68px] lg:text-[72px] lg:leading-[80px] font-normal tracking-tight text-[rgb(19,19,19)]"
+              style={{ fontFamily: '"Cal Sans", "Inter", system-ui, sans-serif' }}
             >
               CRM Built for the{' '}
               <span className="text-[#FF8A5B]">AI Era</span>

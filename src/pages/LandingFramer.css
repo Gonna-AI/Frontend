@@ -236,9 +236,9 @@ html.lenis.lenis-stopped {
 
 .agero-hero-video-slot {
   background: #000;
-  border-radius: 32px;
-  height: clamp(360px, 32vw, 640px);
-  margin-top: clamp(28px, 5vw, 64px);
+  border-radius: 34px;
+  height: clamp(420px, 37vw, 760px);
+  margin-top: clamp(34px, 5vw, 72px);
   width: 100%;
 }
 
