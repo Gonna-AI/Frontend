@@ -34,9 +34,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton asChild>
-              <Link to="/dashboard/default">
-                <img src="/favicon.svg" alt="ClerkTree" className="size-5" />
-                <span className="font-semibold text-base">{APP_CONFIG.name}</span>
+              <Link to="/dashboard/default" className="flex items-center gap-2">
+                {/* favicon.svg is drawn in solid white (built for dark surfaces) — brightness-0
+                    forces it fully black so it's visible against the light sidebar background.
+                    The -mt-px nudge corrects the mark sitting slightly low within its own
+                    viewBox, an optical-alignment issue independent of the flex centering. */}
+                <img src="/favicon.svg" alt="ClerkTree" className="-mt-px size-5 shrink-0 brightness-0" />
+                <span className="font-semibold text-base leading-none">{APP_CONFIG.name}</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
