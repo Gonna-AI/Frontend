@@ -79,7 +79,9 @@ export default function About() {
         canonical="https://clerktree.com/about"
       />
 
-      <Header />
+      <div className="agero-top-area agero-top-area-compact">
+        <Header />
+      </div>
 
       <main className="agero-about-page">
         <section className="agero-about-hero" aria-labelledby="about-hero-title">

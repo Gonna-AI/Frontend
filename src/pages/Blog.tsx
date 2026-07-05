@@ -45,7 +45,9 @@ function BlogContent() {
         description="Latest insights on legal AI, claims automation, and the future of work. Stay updated with ClerkTree."
         canonical="https://clerktree.com/blog"
       />
-      <Header />
+      <div className="agero-top-area agero-top-area-compact">
+        <Header />
+      </div>
 
       <main className="clerktree-blog-main">
         <section className="clerktree-blog-hero">

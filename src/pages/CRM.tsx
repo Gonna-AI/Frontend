@@ -15,10 +15,10 @@ import {
   Zap,
 } from 'lucide-react';
 import { motion, useInView, useReducedMotion } from 'framer-motion';
-import SharedHeader from '../components/Layout/SharedHeader';
-import Footer from '../components/Landing/Footer';
+import { Header, Footer } from '../components/Landing/AgeroChrome';
 import SEO from '../components/SEO';
 import { cn } from '../lib/utils';
+import './LandingFramer.css';
 
 const EASE_OUT = [0.23, 1, 0.32, 1] as const;
 
@@ -77,7 +77,7 @@ function GlassCard({
   return (
     <div
       className={cn(
-        'rounded-2xl border border-white/8 bg-[linear-gradient(145deg,#141414_0%,#0C0C0C_100%)] p-6 shadow-[0_20px_60px_rgba(0,0,0,0.4)]',
+        'rounded-2xl border border-[rgba(19,19,19,0.08)] bg-white p-6 shadow-[0_20px_60px_rgba(0,0,0,0.06)]',
         className,
       )}
     >
@@ -188,39 +188,28 @@ export default function CRM() {
   void shouldReduce;
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden bg-[#0A0A0A] text-white">
+    <div className="agero-works relative min-h-screen overflow-x-hidden">
       <SEO
         title="AI-Native CRM — ClerkTree"
         description="ClerkTree builds enterprise CRM systems designed for the AI era. Custom objects, AI agents, workflow automation, and full self-hosting — deployed as code."
         canonical="https://clerktree.com/crm"
       />
-      <SharedHeader />
+      <div className="agero-top-area agero-top-area-compact">
+        <Header />
+      </div>
 
       {/* ── Atmosphere ──────────────────────────────────── */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden z-0" aria-hidden="true">
-        <div className="absolute left-[-14rem] top-[16rem] h-[32rem] w-[32rem] rounded-full bg-[#FF8A5B]/7 blur-[160px]" />
-        <div className="absolute right-[-10rem] top-[8rem] h-[26rem] w-[26rem] rounded-full bg-white/5 blur-[130px]" />
-        <div className="absolute bottom-[-10rem] left-1/2 h-[28rem] w-[44rem] -translate-x-1/2 rounded-full bg-[#FF8A5B]/5 blur-[140px]" />
-        <div
-          className="absolute inset-0 opacity-[0.018]"
-          style={{
-            backgroundImage:
-              'radial-gradient(circle, rgba(255,255,255,0.8) 1px, transparent 1px)',
-            backgroundSize: '28px 28px',
-          }}
-        />
-        <div
-          className="absolute inset-0 opacity-[0.055]"
-          style={{ backgroundImage: 'url(/noise.webp)', backgroundSize: '35%' }}
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/15 to-black" />
+        <div className="absolute left-[-14rem] top-[16rem] h-[32rem] w-[32rem] rounded-full bg-[#FF8A5B]/10 blur-[160px]" />
+        <div className="absolute right-[-10rem] top-[8rem] h-[26rem] w-[26rem] rounded-full bg-[rgba(19,19,19,0.04)] blur-[130px]" />
+        <div className="absolute bottom-[-10rem] left-1/2 h-[28rem] w-[44rem] -translate-x-1/2 rounded-full bg-[#FF8A5B]/8 blur-[140px]" />
       </div>
 
       <div className="relative z-10">
 
         {/* ── Hero ─────────────────────────────────────── */}
         <section
-          className="mx-auto flex min-h-[90vh] max-w-7xl flex-col items-center justify-center px-5 pb-16 pt-36 text-center"
+          className="mx-auto flex min-h-[70vh] max-w-7xl flex-col items-center justify-center px-5 pb-16 pt-10 text-center"
           aria-labelledby="crm-hero-heading"
         >
           <Reveal>
@@ -232,7 +221,7 @@ export default function CRM() {
           <Reveal delay={0.08}>
             <h1
               id="crm-hero-heading"
-              className="text-balance text-[clamp(2.8rem,1.2rem+5.5vw,5.5rem)] font-semibold leading-[1.05] tracking-[-0.05em] text-white"
+              className="text-balance text-[clamp(2.8rem,1.2rem+5.5vw,5.5rem)] font-semibold leading-[1.05] tracking-[-0.05em] text-[rgb(19,19,19)]"
             >
               CRM Built for the{' '}
               <span className="text-[#FF8A5B]">AI Era</span>
@@ -240,7 +229,7 @@ export default function CRM() {
           </Reveal>
 
           <Reveal delay={0.14}>
-            <p className="mx-auto mt-6 max-w-2xl text-[clamp(1rem,0.9rem+0.4vw,1.2rem)] leading-relaxed text-white/55">
+            <p className="mx-auto mt-6 max-w-2xl text-[clamp(1rem,0.9rem+0.4vw,1.2rem)] leading-relaxed text-[rgba(19,19,19,0.55)]">
               We design and deploy enterprise CRM systems where every record, workflow, and pipeline
               is natively connected to AI. Custom-built to your data model. Versioned like code.
               Deployed on your terms.
@@ -258,7 +247,7 @@ export default function CRM() {
               </button>
               <button
                 onClick={() => navigate('/solutions')}
-                className="inline-flex items-center gap-2 rounded-full border border-white/12 bg-white/5 px-7 py-3.5 text-sm font-semibold text-white/80 backdrop-blur-sm transition-all duration-200 hover:border-white/20 hover:bg-white/8 hover:text-white"
+                className="inline-flex items-center gap-2 rounded-full border border-[rgba(19,19,19,0.12)] bg-[rgba(19,19,19,0.04)] px-7 py-3.5 text-sm font-semibold text-[rgba(19,19,19,0.8)] backdrop-blur-sm transition-all duration-200 hover:border-[rgba(19,19,19,0.18)] hover:bg-[rgba(19,19,19,0.07)] hover:text-[rgb(19,19,19)]"
               >
                 See all solutions
               </button>
@@ -276,10 +265,10 @@ export default function CRM() {
               ].map((pill) => (
                 <div
                   key={pill.label}
-                  className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm backdrop-blur-sm"
+                  className="flex items-center gap-2 rounded-full border border-[rgba(19,19,19,0.1)] bg-[rgba(19,19,19,0.04)] px-4 py-2 text-sm backdrop-blur-sm"
                 >
                   <span className="font-semibold text-[#FFB286]">{pill.value}</span>
-                  <span className="text-white/50">{pill.label}</span>
+                  <span className="text-[rgba(19,19,19,0.5)]">{pill.label}</span>
                 </div>
               ))}
             </div>
@@ -289,16 +278,16 @@ export default function CRM() {
         {/* ── Problem banner ───────────────────────────── */}
         <section className="mx-auto max-w-7xl px-5 pb-24">
           <Reveal>
-            <div className="rounded-3xl border border-white/8 bg-[linear-gradient(135deg,#111111_0%,#0D0D0D_100%)] p-8 sm:p-12">
+            <div className="rounded-3xl border border-[rgba(19,19,19,0.08)] bg-[linear-gradient(135deg,#111111_0%,#0D0D0D_100%)] p-8 sm:p-12">
               <div className="mx-auto max-w-3xl text-center">
-                <p className="text-xs font-semibold uppercase tracking-[0.28em] text-white/40">
+                <p className="text-xs font-semibold uppercase tracking-[0.28em] text-[rgba(19,19,19,0.4)]">
                   The problem with off-the-shelf CRMs
                 </p>
-                <h2 className="mt-4 text-balance text-3xl font-semibold tracking-[-0.04em] text-white sm:text-4xl">
+                <h2 className="mt-4 text-balance text-3xl font-semibold tracking-[-0.04em] text-[rgb(19,19,19)] sm:text-4xl">
                   Your business isn't generic.{' '}
-                  <span className="text-white/40">Your CRM shouldn't be either.</span>
+                  <span className="text-[rgba(19,19,19,0.4)]">Your CRM shouldn't be either.</span>
                 </h2>
-                <p className="mt-4 text-base leading-relaxed text-white/50 sm:text-lg">
+                <p className="mt-4 text-base leading-relaxed text-[rgba(19,19,19,0.5)] sm:text-lg">
                   Salesforce, HubSpot, and Pipedrive were designed for an average company.
                   You end up hacking fields into shapes they weren't meant for, paying per seat for
                   features you don't need, and integrating AI on top of a system that was never designed for it.
@@ -314,9 +303,9 @@ export default function CRM() {
                 ].map((item) => (
                   <div
                     key={item.problem}
-                    className="rounded-xl border border-white/6 bg-white/3 p-4 text-center"
+                    className="rounded-xl border border-[rgba(19,19,19,0.06)] bg-[rgba(19,19,19,0.03)] p-4 text-center"
                   >
-                    <p className="text-xs text-white/35 line-through">{item.problem}</p>
+                    <p className="text-xs text-[rgba(19,19,19,0.35)] line-through">{item.problem}</p>
                     <p className="mt-1.5 text-sm font-medium text-[#FFB286]">{item.fix}</p>
                   </div>
                 ))}
@@ -334,11 +323,11 @@ export default function CRM() {
             <SectionEyebrow>Platform capabilities</SectionEyebrow>
             <h2
               id="features-heading"
-              className="mt-4 text-balance text-4xl font-semibold tracking-[-0.05em] text-white sm:text-5xl"
+              className="mt-4 text-balance text-4xl font-semibold tracking-[-0.05em] text-[rgb(19,19,19)] sm:text-5xl"
             >
               Everything a modern CRM needs
             </h2>
-            <p className="mt-4 max-w-xl text-base leading-relaxed text-white/50 sm:text-lg">
+            <p className="mt-4 max-w-xl text-base leading-relaxed text-[rgba(19,19,19,0.5)] sm:text-lg">
               Built on an enterprise-grade foundation — and customised to your exact requirements before
               the first line of production code ships.
             </p>
@@ -347,13 +336,13 @@ export default function CRM() {
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {CORE_FEATURES.map((feat, i) => (
               <Reveal key={feat.title} delay={i * 0.05}>
-                <GlassCard className="group flex h-full flex-col gap-4 transition-all duration-300 hover:border-white/16 hover:shadow-[0_24px_64px_rgba(0,0,0,0.55)]">
+                <GlassCard className="group flex h-full flex-col gap-4 transition-all duration-300 hover:border-[rgba(19,19,19,0.16)] hover:shadow-[0_24px_64px_rgba(0,0,0,0.55)]">
                   <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-[#FF8A5B]/20 bg-[#FF8A5B]/10">
                     <feat.icon className="h-5 w-5 text-[#FF8A5B]" aria-hidden="true" />
                   </div>
                   <div>
-                    <h3 className="text-base font-semibold text-white">{feat.title}</h3>
-                    <p className="mt-2 text-sm leading-relaxed text-white/50">{feat.description}</p>
+                    <h3 className="text-base font-semibold text-[rgb(19,19,19)]">{feat.title}</h3>
+                    <p className="mt-2 text-sm leading-relaxed text-[rgba(19,19,19,0.5)]">{feat.description}</p>
                   </div>
                 </GlassCard>
               </Reveal>
@@ -366,7 +355,7 @@ export default function CRM() {
           className="mx-auto max-w-7xl px-5 pb-28"
           aria-labelledby="ai-heading"
         >
-          <div className="overflow-hidden rounded-3xl border border-white/8 bg-[linear-gradient(145deg,#0F0F0F_0%,#0A0A0A_100%)]">
+          <div className="overflow-hidden rounded-3xl border border-[rgba(19,19,19,0.08)] bg-[linear-gradient(145deg,#0F0F0F_0%,#0A0A0A_100%)]">
             <div
               className="h-px w-full"
               style={{
@@ -380,12 +369,12 @@ export default function CRM() {
                 <SectionEyebrow>AI-Native</SectionEyebrow>
                 <h2
                   id="ai-heading"
-                  className="mt-4 text-balance text-4xl font-semibold tracking-[-0.05em] text-white sm:text-5xl"
+                  className="mt-4 text-balance text-4xl font-semibold tracking-[-0.05em] text-[rgb(19,19,19)] sm:text-5xl"
                 >
                   Your CRM speaks{' '}
                   <span className="text-[#FF8A5B]">AI fluently</span>
                 </h2>
-                <p className="mt-4 max-w-2xl text-base leading-relaxed text-white/50 sm:text-lg">
+                <p className="mt-4 max-w-2xl text-base leading-relaxed text-[rgba(19,19,19,0.5)] sm:text-lg">
                   AI isn't added on top of our CRM — it's designed in from the start. Every object,
                   field, and workflow is exposed to your AI stack via a native integration layer that
                   lets language models read and write your data in real time.
@@ -395,13 +384,13 @@ export default function CRM() {
               <div className="mt-12 grid gap-6 sm:grid-cols-2">
                 {AI_CAPABILITIES.map((cap, i) => (
                   <Reveal key={cap.title} delay={i * 0.06}>
-                    <div className="flex gap-4 rounded-2xl border border-white/6 bg-white/3 p-5 transition-colors duration-200 hover:border-[#FF8A5B]/20 hover:bg-[#FF8A5B]/5">
+                    <div className="flex gap-4 rounded-2xl border border-[rgba(19,19,19,0.06)] bg-[rgba(19,19,19,0.03)] p-5 transition-colors duration-200 hover:border-[#FF8A5B]/20 hover:bg-[#FF8A5B]/5">
                       <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#FF8A5B]/12">
                         <cap.icon className="h-4 w-4 text-[#FF8A5B]" aria-hidden="true" />
                       </div>
                       <div>
-                        <h3 className="text-sm font-semibold text-white">{cap.title}</h3>
-                        <p className="mt-1.5 text-sm leading-relaxed text-white/50">{cap.body}</p>
+                        <h3 className="text-sm font-semibold text-[rgb(19,19,19)]">{cap.title}</h3>
+                        <p className="mt-1.5 text-sm leading-relaxed text-[rgba(19,19,19,0.5)]">{cap.body}</p>
                       </div>
                     </div>
                   </Reveal>
@@ -410,24 +399,24 @@ export default function CRM() {
 
               {/* Natural language demo chip */}
               <Reveal delay={0.25}>
-                <div className="mt-10 rounded-2xl border border-white/10 bg-black/40 p-5 backdrop-blur-sm">
-                  <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.22em] text-white/30">
+                <div className="mt-10 rounded-2xl border border-[rgba(19,19,19,0.1)] bg-[rgba(19,19,19,0.04)] p-5 backdrop-blur-sm">
+                  <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.22em] text-[rgba(19,19,19,0.3)]">
                     Example query
                   </p>
                   <div className="flex items-start gap-3">
                     <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#FF8A5B]/20 text-[10px] font-bold text-[#FF8A5B]">
                       AI
                     </div>
-                    <p className="font-mono text-sm leading-relaxed text-white/70">
+                    <p className="font-mono text-sm leading-relaxed text-[rgba(19,19,19,0.7)]">
                       "Show me all active deals over $100k where the last touch was more than 14 days
                       ago, grouped by account owner — and draft a follow-up for each one."
                     </p>
                   </div>
                   <div className="mt-4 flex items-start gap-3">
-                    <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-white/8 text-[10px] font-bold text-white/40">
+                    <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[rgba(19,19,19,0.07)] text-[10px] font-bold text-[rgba(19,19,19,0.4)]">
                       CRM
                     </div>
-                    <p className="text-sm leading-relaxed text-white/50">
+                    <p className="text-sm leading-relaxed text-[rgba(19,19,19,0.5)]">
                       Found <span className="text-[#FFB286] font-medium">12 deals</span> matching criteria.
                       Drafting personalised follow-ups for each account owner…
                     </p>
@@ -447,11 +436,11 @@ export default function CRM() {
             <SectionEyebrow>How we build</SectionEyebrow>
             <h2
               id="process-heading"
-              className="mt-4 text-balance text-4xl font-semibold tracking-[-0.05em] text-white sm:text-5xl"
+              className="mt-4 text-balance text-4xl font-semibold tracking-[-0.05em] text-[rgb(19,19,19)] sm:text-5xl"
             >
               From discovery to deployment
             </h2>
-            <p className="mt-4 max-w-xl text-base leading-relaxed text-white/50 sm:text-lg">
+            <p className="mt-4 max-w-xl text-base leading-relaxed text-[rgba(19,19,19,0.5)] sm:text-lg">
               Every CRM we build is a bespoke engagement — no starter templates recycled from a previous client.
             </p>
           </Reveal>
@@ -476,8 +465,8 @@ export default function CRM() {
                     <div className="h-px flex-1 bg-gradient-to-r from-[#FF8A5B]/20 to-transparent" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-semibold text-white">{step.title}</h3>
-                    <p className="mt-2.5 text-sm leading-relaxed text-white/50">
+                    <h3 className="text-lg font-semibold text-[rgb(19,19,19)]">{step.title}</h3>
+                    <p className="mt-2.5 text-sm leading-relaxed text-[rgba(19,19,19,0.5)]">
                       {step.description}
                     </p>
                   </div>
@@ -490,14 +479,14 @@ export default function CRM() {
         {/* ── Tech stack ───────────────────────────────── */}
         <section className="mx-auto max-w-7xl px-5 pb-28">
           <Reveal>
-            <div className="rounded-3xl border border-white/8 bg-[linear-gradient(135deg,#0F0F0F_0%,#0A0A0A_100%)] p-8 sm:p-12">
+            <div className="rounded-3xl border border-[rgba(19,19,19,0.08)] bg-[linear-gradient(135deg,#0F0F0F_0%,#0A0A0A_100%)] p-8 sm:p-12">
               <div className="flex flex-col items-start gap-8 lg:flex-row lg:items-center lg:justify-between">
                 <div className="max-w-lg">
                   <SectionEyebrow>Tech stack</SectionEyebrow>
-                  <h2 className="mt-4 text-3xl font-semibold tracking-[-0.04em] text-white sm:text-4xl">
+                  <h2 className="mt-4 text-3xl font-semibold tracking-[-0.04em] text-[rgb(19,19,19)] sm:text-4xl">
                     Production-grade from day one
                   </h2>
-                  <p className="mt-3 text-base leading-relaxed text-white/50">
+                  <p className="mt-3 text-base leading-relaxed text-[rgba(19,19,19,0.5)]">
                     We don't assemble your CRM from SaaS patchwork. Everything is built on a battle-tested,
                     open foundation using the same tooling your engineering team already knows.
                   </p>
@@ -506,7 +495,7 @@ export default function CRM() {
                   {STACK_BADGES.map((badge) => (
                     <span
                       key={badge}
-                      className="rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-xs font-semibold text-white/60 backdrop-blur-sm transition-colors duration-200 hover:border-[#FF8A5B]/30 hover:text-[#FFB286]"
+                      className="rounded-full border border-[rgba(19,19,19,0.1)] bg-[rgba(19,19,19,0.04)] px-4 py-1.5 text-xs font-semibold text-[rgba(19,19,19,0.6)] backdrop-blur-sm transition-colors duration-200 hover:border-[#FF8A5B]/30 hover:text-[#FFB286]"
                     >
                       {badge}
                     </span>
@@ -538,18 +527,18 @@ export default function CRM() {
                       'rounded-xl border p-4',
                       i === 1
                         ? 'border-[#FF8A5B]/20 bg-[#FF8A5B]/6'
-                        : 'border-white/6 bg-white/3',
+                        : 'border-[rgba(19,19,19,0.06)] bg-[rgba(19,19,19,0.03)]',
                     )}
                   >
                     <div className="flex items-center gap-2.5 mb-3">
                       <arch.icon className="h-4 w-4 text-[#FF8A5B]" aria-hidden="true" />
-                      <span className="text-xs font-semibold uppercase tracking-[0.2em] text-white/50">
+                      <span className="text-xs font-semibold uppercase tracking-[0.2em] text-[rgba(19,19,19,0.5)]">
                         {arch.layer}
                       </span>
                     </div>
                     <ul className="space-y-1.5">
                       {arch.items.map((item) => (
-                        <li key={item} className="flex items-center gap-2 text-sm text-white/70">
+                        <li key={item} className="flex items-center gap-2 text-sm text-[rgba(19,19,19,0.7)]">
                           <span className="h-1 w-1 rounded-full bg-[#FF8A5B]/50" />
                           {item}
                         </li>
@@ -590,8 +579,8 @@ export default function CRM() {
               <Reveal key={item.title} delay={i * 0.06}>
                 <GlassCard className="flex flex-col gap-3">
                   <item.icon className="h-5 w-5 text-[#FF8A5B]" aria-hidden="true" />
-                  <h3 className="text-sm font-semibold text-white">{item.title}</h3>
-                  <p className="text-xs leading-relaxed text-white/45">{item.desc}</p>
+                  <h3 className="text-sm font-semibold text-[rgb(19,19,19)]">{item.title}</h3>
+                  <p className="text-xs leading-relaxed text-[rgba(19,19,19,0.45)]">{item.desc}</p>
                 </GlassCard>
               </Reveal>
             ))}
@@ -602,7 +591,7 @@ export default function CRM() {
         <section className="mx-auto max-w-7xl px-5 pb-28" aria-labelledby="cta-heading">
           <Reveal>
             <div
-              className="relative overflow-hidden rounded-3xl border border-white/8 p-10 text-center sm:p-16"
+              className="relative overflow-hidden rounded-3xl border border-[rgba(19,19,19,0.08)] p-10 text-center sm:p-16"
               style={{
                 background:
                   'radial-gradient(ellipse at 50% 0%, rgba(255,138,91,0.12) 0%, transparent 65%), linear-gradient(145deg, #111111 0%, #0A0A0A 100%)',
@@ -624,11 +613,11 @@ export default function CRM() {
 
               <h2
                 id="cta-heading"
-                className="text-balance text-4xl font-semibold tracking-[-0.05em] text-white sm:text-5xl"
+                className="text-balance text-4xl font-semibold tracking-[-0.05em] text-[rgb(19,19,19)] sm:text-5xl"
               >
                 Ready to build your CRM?
               </h2>
-              <p className="mx-auto mt-5 max-w-xl text-base leading-relaxed text-white/50 sm:text-lg">
+              <p className="mx-auto mt-5 max-w-xl text-base leading-relaxed text-[rgba(19,19,19,0.5)] sm:text-lg">
                 Tell us about your data model, team size, and integration requirements.
                 We'll scope a custom CRM that ships as real software — not a no-code approximation.
               </p>
@@ -646,13 +635,13 @@ export default function CRM() {
                 </button>
                 <button
                   onClick={() => navigate('/solutions')}
-                  className="inline-flex items-center gap-2 rounded-full border border-white/12 bg-white/5 px-8 py-4 text-sm font-semibold text-white/75 backdrop-blur-sm transition-all duration-200 hover:border-white/22 hover:bg-white/8 hover:text-white"
+                  className="inline-flex items-center gap-2 rounded-full border border-[rgba(19,19,19,0.12)] bg-[rgba(19,19,19,0.04)] px-8 py-4 text-sm font-semibold text-[rgba(19,19,19,0.75)] backdrop-blur-sm transition-all duration-200 hover:border-[rgba(19,19,19,0.2)] hover:bg-[rgba(19,19,19,0.07)] hover:text-[rgb(19,19,19)]"
                 >
                   Explore all solutions
                 </button>
               </div>
 
-              <div className="mt-10 flex flex-wrap items-center justify-center gap-6 text-xs text-white/30">
+              <div className="mt-10 flex flex-wrap items-center justify-center gap-6 text-xs text-[rgba(19,19,19,0.3)]">
                 <span className="flex items-center gap-1.5">
                   <Shield className="h-3 w-3" aria-hidden="true" /> SOC 2 aligned
                 </span>

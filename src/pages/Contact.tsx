@@ -122,7 +122,9 @@ export default function Contact() {
         canonical="https://clerktree.com/contact"
       />
 
-      <Header />
+      <div className="agero-top-area agero-top-area-compact">
+        <Header />
+      </div>
 
       <main className="clerktree-contact-page">
         <section className="clerktree-contact-hero-wrap" aria-labelledby="contact-title">

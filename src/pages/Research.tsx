@@ -1,10 +1,10 @@
 import { ArrowLeft, ArrowUpRight, Cpu, Sparkles } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 
-import SharedHeader from '../components/Layout/SharedHeader';
-import Footer from '../components/Landing/Footer';
+import { Header, Footer } from '../components/Landing/AgeroChrome';
 import SEO from '../components/SEO';
 import { useLanguage } from '../contexts/LanguageContext';
+import './LandingFramer.css';
 
 type LocalizedText = {
   en: string;
@@ -88,51 +88,12 @@ function getTopicPath(slug: string, isResearchHost: boolean) {
 
 function ResearchShell({ children }: { children: React.ReactNode }) {
   return (
-    <div className="bg-[rgb(10,10,10)] min-h-screen relative overflow-x-hidden">
-      <div className="fixed inset-0 bg-[rgb(10,10,10)] z-0 pointer-events-none">
-        <div
-          className="absolute top-[-12%] right-[-10%] h-[110%] w-[82%] hidden md:block"
-          style={{
-            background:
-              'radial-gradient(circle at 70% 30%, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.06) 32%, transparent 60%)',
-            filter: 'blur(40px)',
-          }}
-        />
-        <div
-          className="absolute top-0 right-0 h-full w-full hidden md:block"
-          style={{
-            background:
-              'linear-gradient(215deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.015) 40%, transparent 65%)',
-          }}
-        />
-        <div
-          className="absolute bottom-0 left-0 h-72 w-72 -translate-x-1/4 translate-y-1/4 opacity-20 md:h-[600px] md:w-[600px]"
-          style={{
-            background:
-              'radial-gradient(circle, rgba(255,138,91,0.4) 0%, rgba(255,138,91,0.15) 40%, transparent 100%)',
-          }}
-        />
-        <div
-          className="absolute right-[10%] top-[25%] h-64 w-64 rounded-full opacity-20 hidden md:block md:h-96 md:w-96"
-          style={{
-            background:
-              'radial-gradient(circle, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.05) 45%, transparent 100%)',
-            filter: 'blur(100px)',
-          }}
-        />
-        <div
-          className="absolute inset-0 opacity-[0.06] hidden md:block"
-          style={{ backgroundImage: 'url(/noise.webp)', backgroundSize: '35%' }}
-        />
-        <div className="absolute inset-x-0 top-0 h-36 bg-gradient-to-b from-black/80 via-black/50 to-transparent" />
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/20 to-black" />
+    <div className="agero-works min-h-screen relative overflow-x-hidden">
+      <div className="agero-top-area agero-top-area-compact">
+        <Header />
       </div>
 
-      <div className="relative z-20">
-        <SharedHeader />
-      </div>
-
-      <div className="relative z-10 px-6 pb-24 pt-36 md:pt-44">{children}</div>
+      <div className="relative z-10 px-6 pb-24 pt-16 md:pt-20">{children}</div>
 
       <div className="relative z-10">
         <Footer />
@@ -170,21 +131,21 @@ function ResearchLanding({ topic, isResearchHost }: { topic: ResearchTopic; isRe
           <button
             type="button"
             onClick={() => navigate(getTopicPath(topic.slug, isResearchHost))}
-            className="group w-full rounded-[42px] border border-[#6d4739] bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.08),transparent_35%),linear-gradient(180deg,rgba(8,8,8,0.96),rgba(6,6,6,0.98))] px-8 py-10 text-left shadow-[0_0_0_1px_rgba(255,138,91,0.05)] transition-all duration-500 hover:border-[#8f5b47] hover:shadow-[0_0_45px_-20px_rgba(255,138,91,0.28)] md:px-14 md:py-16"
+            className="group w-full rounded-[42px] border border-[rgba(19,19,19,0.1)] bg-white px-8 py-10 text-left shadow-[0_24px_70px_rgba(0,0,0,0.08)] transition-all duration-500 hover:border-[#FF4D00]/30 hover:shadow-[0_24px_70px_rgba(255,77,0,0.12)] md:px-14 md:py-16"
           >
             <div className="flex flex-col gap-10">
               <div className="max-w-3xl">
-                <div className="mb-8 inline-flex items-center gap-3 rounded-full border border-[#704738] bg-[#2a1a16]/90 px-6 py-3 text-sm font-semibold uppercase tracking-[0.26em] text-[#ffc29e]">
+                <div className="mb-8 inline-flex items-center gap-3 rounded-full border border-[#FF4D00]/25 bg-[#FF4D00]/[0.08] px-6 py-3 text-sm font-semibold uppercase tracking-[0.26em] text-[#FF4D00]">
                   <Sparkles className="h-4 w-4" />
                   {topic.badge[language]}
                 </div>
-                <h1 className="max-w-2xl text-5xl font-bold leading-[0.95] tracking-tight text-white md:text-7xl">
+                <h1 className="max-w-2xl text-5xl font-bold leading-[0.95] tracking-tight text-[rgb(19,19,19)] md:text-7xl">
                   {topic.title[language]}
                 </h1>
-                <p className="mt-8 max-w-3xl text-xl leading-relaxed text-white/70 md:text-2xl">
+                <p className="mt-8 max-w-3xl text-xl leading-relaxed text-[rgba(19,19,19,0.65)] md:text-2xl">
                   {topic.subtitle[language]}
                 </p>
-                <div className="mt-8 inline-flex items-center gap-3 text-sm font-semibold uppercase tracking-[0.24em] text-[#ffc29e] transition-transform duration-300 group-hover:translate-x-1">
+                <div className="mt-8 inline-flex items-center gap-3 text-sm font-semibold uppercase tracking-[0.24em] text-[#FF4D00] transition-transform duration-300 group-hover:translate-x-1">
                   {language === 'de' ? 'Forschungsthema öffnen' : 'Open research topic'}
                   <ArrowUpRight className="h-4 w-4" />
                 </div>
@@ -220,22 +181,22 @@ function ResearchDetail({ topic, isResearchHost }: { topic: ResearchTopic; isRes
           <button
             type="button"
             onClick={() => navigate(landingPath)}
-            className="mb-8 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-4 py-2 text-sm text-white/70 transition-colors hover:text-white"
+            className="mb-8 inline-flex items-center gap-2 rounded-full border border-[rgba(19,19,19,0.1)] bg-[rgba(19,19,19,0.03)] px-4 py-2 text-sm text-[rgba(19,19,19,0.7)] transition-colors hover:text-[rgb(19,19,19)]"
           >
             <ArrowLeft className="h-4 w-4" />
             {language === 'de' ? 'Zurück zur Forschung' : 'Back to research'}
           </button>
 
-          <section className="mt-8 rounded-[32px] border border-white/10 bg-white/[0.03] p-6 md:backdrop-blur-sm sm:p-8 md:p-10">
-            <div className="flex flex-col gap-6 border-b border-white/10 pb-8 lg:flex-row lg:items-start lg:justify-between">
+          <section className="mt-8 rounded-[32px] border border-[rgba(19,19,19,0.1)] bg-white p-6 shadow-[0_24px_70px_rgba(0,0,0,0.06)] sm:p-8 md:p-10">
+            <div className="flex flex-col gap-6 border-b border-[rgba(19,19,19,0.08)] pb-8 lg:flex-row lg:items-start lg:justify-between">
               <div className="max-w-3xl">
-                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#FF8A5B]">
+                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#FF4D00]">
                   {language === 'de' ? 'Detailübersicht' : 'Detailed overview'}
                 </p>
-                <h2 className="mt-4 text-3xl font-bold tracking-tight text-white md:text-4xl">
+                <h2 className="mt-4 text-3xl font-bold tracking-tight text-[rgb(19,19,19)] md:text-4xl">
                   {topic.title[language]}
                 </h2>
-                <p className="mt-4 max-w-[62ch] text-base leading-relaxed text-white/75 md:text-lg">
+                <p className="mt-4 max-w-[62ch] text-base leading-relaxed text-[rgba(19,19,19,0.7)] md:text-lg">
                   {topic.summary[language]}
                 </p>
               </div>
@@ -245,7 +206,7 @@ function ResearchDetail({ topic, isResearchHost }: { topic: ResearchTopic; isRes
                   href={topic.benchmarkUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#E5E5E5] px-5 py-3 font-semibold text-black transition-all duration-300 hover:bg-white"
+                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-[rgb(19,19,19)] px-5 py-3 font-semibold text-white transition-all duration-300 hover:bg-black"
                 >
                   {language === 'de' ? 'Was ist VAKRA' : 'What Is VAKRA'}
                   <ArrowUpRight className="h-4 w-4" />
@@ -254,7 +215,7 @@ function ResearchDetail({ topic, isResearchHost }: { topic: ResearchTopic; isRes
                   href={topic.leaderboardUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/15 bg-white/5 px-5 py-3 font-semibold text-white transition-all duration-300 hover:bg-white/10"
+                  className="inline-flex items-center justify-center gap-2 rounded-xl border border-[rgba(19,19,19,0.15)] bg-[rgba(19,19,19,0.03)] px-5 py-3 font-semibold text-[rgb(19,19,19)] transition-all duration-300 hover:bg-[rgba(19,19,19,0.06)]"
                 >
                   {language === 'de' ? 'Zum Leaderboard' : 'View Leaderboard'}
                   <ArrowUpRight className="h-4 w-4" />
@@ -263,14 +224,14 @@ function ResearchDetail({ topic, isResearchHost }: { topic: ResearchTopic; isRes
             </div>
 
             <div className="pt-8">
-              <div className="rounded-[28px] border border-white/10 bg-black/20 p-5 sm:p-6 md:p-8">
+              <div className="rounded-[28px] border border-[rgba(19,19,19,0.08)] bg-[rgba(19,19,19,0.02)] p-5 sm:p-6 md:p-8">
                 <div className="mb-4 flex items-center gap-3">
-                  <Cpu className="h-5 w-5 text-[#FF8A5B]" />
-                  <h3 className="text-lg font-semibold text-white">{topic.approachTitle[language]}</h3>
+                  <Cpu className="h-5 w-5 text-[#FF4D00]" />
+                  <h3 className="text-lg font-semibold text-[rgb(19,19,19)]">{topic.approachTitle[language]}</h3>
                 </div>
                 <div className="space-y-5">
                   {topic.approach.map((paragraph) => (
-                    <p key={paragraph.en} className="max-w-[66ch] text-sm leading-7 text-white/70 md:text-[15px]">
+                    <p key={paragraph.en} className="max-w-[66ch] text-sm leading-7 text-[rgba(19,19,19,0.7)] md:text-[15px]">
                       {paragraph[language]}
                     </p>
                   ))}

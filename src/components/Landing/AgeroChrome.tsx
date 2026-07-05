@@ -9,13 +9,6 @@ const headerLinks = [
   ['Docs', '/docs'],
 ];
 
-const mobileHeaderLinks = [
-  ['Solutions', '/solutions'],
-  ['Docs', '/docs'],
-  ['About', '/about'],
-  ['Blog', '/blog'],
-];
-
 type FooterLink = {
   label: string;
   href: string;
@@ -65,29 +58,6 @@ function useMunichTime(active = true) {
 }
 
 export function Header() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-
-  useEffect(() => {
-    if (!isMenuOpen) return;
-
-    const previousOverflow = document.body.style.overflow;
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        setIsMenuOpen(false);
-      }
-    };
-
-    document.body.style.overflow = 'hidden';
-    window.addEventListener('keydown', handleKeyDown);
-
-    return () => {
-      document.body.style.overflow = previousOverflow;
-      window.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [isMenuOpen]);
-
-  const closeMenu = () => setIsMenuOpen(false);
-
   return (
     <header className="agero-header">
       <nav className="agero-nav" aria-label="Main navigation">
@@ -105,52 +75,7 @@ export function Header() {
             </a>
           ))}
         </div>
-
-        <button
-          aria-controls="agero-mobile-menu"
-          aria-expanded={isMenuOpen}
-          aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
-          className={`agero-menu-button${isMenuOpen ? ' is-open' : ''}`}
-          onClick={() => setIsMenuOpen((open) => !open)}
-          type="button"
-        >
-          <span />
-          <span />
-        </button>
       </nav>
-
-      {isMenuOpen && (
-        <div className="agero-mobile-menu" id="agero-mobile-menu">
-          <button
-            aria-label="Close mobile menu"
-            className="agero-mobile-menu-scrim"
-            onClick={closeMenu}
-            type="button"
-          />
-
-          <div className="agero-mobile-menu-panel" role="navigation" aria-label="Mobile navigation">
-            <button aria-label="Close menu" className="agero-mobile-menu-close" onClick={closeMenu} type="button">
-              ✕
-            </button>
-            <div className="agero-mobile-menu-top">
-              <span>Menu</span>
-            </div>
-
-            <div className="agero-mobile-menu-links">
-              {mobileHeaderLinks.map(([label, href]) => (
-                <a href={href} key={label} onClick={closeMenu}>
-                  {label}
-                </a>
-              ))}
-            </div>
-
-            <a className="agero-mobile-menu-cta" href="/contact" onClick={closeMenu}>
-              <span>Book Demo</span>
-              <span aria-hidden="true">→</span>
-            </a>
-          </div>
-        </div>
-      )}
     </header>
   );
 }

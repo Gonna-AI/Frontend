@@ -216,6 +216,24 @@ html.lenis.lenis-stopped {
   width: min(100%, calc(100vw - 16px));
 }
 
+.agero-top-area-compact {
+  padding: 22px 34px;
+}
+
+.agero-top-area-compact .agero-header {
+  height: auto;
+}
+
+.agero-top-area-compact .agero-nav {
+  padding-top: 0;
+}
+
+@media (max-width: 767px) {
+  .agero-top-area-compact {
+    padding: 16px 18px;
+  }
+}
+
 .agero-hero-panel {
   align-items: center;
   background: transparent;
@@ -2841,9 +2859,20 @@ html.lenis.lenis-stopped {
     width: 90px;
   }
 
-  .agero-nav-links,
   .agero-contact-pill {
     display: none;
+  }
+
+  .agero-nav-links {
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+  }
+
+  .agero-nav-links a {
+    font-size: 13px;
+    height: 30px;
+    padding: 0 10px;
   }
 
   .agero-menu-button {
