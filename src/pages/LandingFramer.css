@@ -2915,18 +2915,18 @@ html.lenis.lenis-stopped {
 
   .agero-shell-menu {
     display: inline-flex;
-    gap: 9px;
-    height: 42px;
-    width: 70px;
+    gap: 6px;
+    height: 24px;
+    width: 30px;
   }
 
   .agero-shell-header.is-menu-open .agero-shell-menu {
-    height: 42px;
-    width: 70px;
+    height: 24px;
+    width: 30px;
   }
 
   .agero-shell-menu span {
-    height: 3px;
+    height: 2px;
   }
 
   .agero-shell-header.is-menu-open .agero-shell-menu span {
@@ -2934,11 +2934,11 @@ html.lenis.lenis-stopped {
   }
 
   .agero-shell-header.is-menu-open .agero-shell-menu span:first-child {
-    transform: translateY(6px) rotate(45deg);
+    transform: translateY(4px) rotate(45deg);
   }
 
   .agero-shell-header.is-menu-open .agero-shell-menu span:last-child {
-    transform: translateY(-6px) rotate(-45deg);
+    transform: translateY(-4px) rotate(-45deg);
   }
 
   .agero-status {
@@ -2956,20 +2956,9 @@ html.lenis.lenis-stopped {
     width: 90px;
   }
 
-  .agero-contact-pill {
-    display: none;
-  }
-
+  .agero-contact-pill,
   .agero-nav-links {
-    flex-wrap: wrap;
-    gap: 8px;
-    justify-content: center;
-  }
-
-  .agero-nav-links a {
-    font-size: 13px;
-    height: 30px;
-    padding: 0 10px;
+    display: none;
   }
 
   .agero-menu-button {
