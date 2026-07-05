@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -10,9 +11,18 @@ import './Solutions.css';
 const SOLUTIONS_HERO_VIDEO_SRC =
   'https://xlzwfkgurrrspcdyqele.supabase.co/storage/v1/object/public/buck/solutiosboagevidoe.mp4';
 
+const solutionsNavLinks = [
+  ['Solutions', '/solutions'],
+  ['About', '/about'],
+  ['Blog', '/blog'],
+  ['Docs', '/docs'],
+];
+
 export default function Solutions() {
   const navigate = useNavigate();
   const { t } = useLanguage();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const closeMenu = () => setIsMenuOpen(false);
 
   const heroServices = [
     t('solutions.card1Title'),
@@ -67,16 +77,57 @@ export default function Solutions() {
             <a className="fabric-solution-logo" href="/" aria-label="ClerkTree home">
               ClerkTree<sup>®</sup>
             </a>
+
+            <div className="agero-nav-links">
+              {solutionsNavLinks.map(([label, href]) => (
+                <a key={label} href={href}>
+                  {label}
+                </a>
+              ))}
+            </div>
+
             <button
-              className="fabric-solution-menu"
-              onClick={() => navigate('/contact')}
+              aria-controls="agero-mobile-menu"
+              aria-expanded={isMenuOpen}
+              aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
+              className={`agero-menu-button${isMenuOpen ? ' is-open' : ''}`}
+              onClick={() => setIsMenuOpen((open) => !open)}
               type="button"
-              aria-label="Open contact"
             >
               <span />
               <span />
             </button>
           </div>
+
+          {isMenuOpen && (
+            <div className="agero-mobile-menu" id="agero-mobile-menu">
+              <button
+                aria-label="Close mobile menu"
+                className="agero-mobile-menu-scrim"
+                onClick={closeMenu}
+                type="button"
+              />
+
+              <div className="agero-mobile-menu-panel" role="navigation" aria-label="Mobile navigation">
+                <div className="agero-mobile-menu-top">
+                  <span>Menu</span>
+                </div>
+
+                <div className="agero-mobile-menu-links">
+                  {solutionsNavLinks.map(([label, href]) => (
+                    <a href={href} key={label} onClick={closeMenu}>
+                      {label}
+                    </a>
+                  ))}
+                </div>
+
+                <a className="agero-mobile-menu-cta" href="/contact" onClick={closeMenu}>
+                  <span>Book Demo</span>
+                  <span aria-hidden="true">→</span>
+                </a>
+              </div>
+            </div>
+          )}
 
           <div className="fabric-solution-stage">
             {SOLUTIONS_HERO_VIDEO_SRC ? (
