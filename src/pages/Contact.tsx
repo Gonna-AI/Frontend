@@ -122,11 +122,9 @@ export default function Contact() {
         canonical="https://clerktree.com/contact"
       />
 
-      <div className="agero-top-area agero-top-area-compact">
+      <div className="agero-top-area agero-top-area-with-hero">
         <Header />
-      </div>
 
-      <main className="clerktree-contact-page">
         <section className="clerktree-contact-hero-wrap" aria-labelledby="contact-title">
           <div className="clerktree-contact-hero">
             <p className="clerktree-contact-kicker">ClerkTree • {t('contact.sendMsgTitle')}</p>
@@ -138,7 +136,9 @@ export default function Contact() {
             <ContactHeroVideo src={CONTACT_VIDEO_SRC} />
           </div>
         </section>
+      </div>
 
+      <main className="clerktree-contact-page">
         <section className="clerktree-contact-form-section" aria-label="Contact form">
           <div className="clerktree-contact-form-shell">
             {submitStatus === 'success' ? (

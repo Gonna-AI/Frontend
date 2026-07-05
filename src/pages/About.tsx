@@ -79,11 +79,9 @@ export default function About() {
         canonical="https://clerktree.com/about"
       />
 
-      <div className="agero-top-area agero-top-area-compact">
+      <div className="agero-top-area agero-top-area-with-hero">
         <Header />
-      </div>
 
-      <main className="agero-about-page">
         <section className="agero-about-hero" aria-labelledby="about-hero-title">
           <div className="agero-about-hero-content">
             <p className="agero-about-eyebrow">
@@ -104,7 +102,9 @@ export default function About() {
             <HeroBackgroundVideo src={HERO_VIDEO_SRC} />
           </div>
         </section>
+      </div>
 
+      <main className="agero-about-page">
         <section className="agero-about-section">
           <div className="agero-about-grid-head">
             <h2>{t('about.introTitle')}</h2>

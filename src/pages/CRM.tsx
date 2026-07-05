@@ -194,10 +194,6 @@ export default function CRM() {
         description="ClerkTree builds enterprise CRM systems designed for the AI era. Custom objects, AI agents, workflow automation, and full self-hosting — deployed as code."
         canonical="https://clerktree.com/crm"
       />
-      <div className="agero-top-area agero-top-area-compact">
-        <Header />
-      </div>
-
       {/* ── Atmosphere ──────────────────────────────────── */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden z-0" aria-hidden="true">
         <div className="absolute left-[-14rem] top-[16rem] h-[32rem] w-[32rem] rounded-full bg-[#FF8A5B]/10 blur-[160px]" />
@@ -205,11 +201,12 @@ export default function CRM() {
         <div className="absolute bottom-[-10rem] left-1/2 h-[28rem] w-[44rem] -translate-x-1/2 rounded-full bg-[#FF8A5B]/8 blur-[140px]" />
       </div>
 
-      <div className="relative z-10">
+      <div className="agero-top-area agero-top-area-with-hero relative z-10">
+        <Header />
 
         {/* ── Hero ─────────────────────────────────────── */}
         <section
-          className="mx-auto flex min-h-[70vh] max-w-7xl flex-col items-center justify-center px-5 pb-16 pt-10 text-center"
+          className="mx-auto flex max-w-7xl flex-col items-center justify-center px-5 pb-10 pt-6 text-center"
           aria-labelledby="crm-hero-heading"
         >
           <Reveal>
@@ -275,10 +272,14 @@ export default function CRM() {
           </Reveal>
         </section>
 
+        <div className="agero-hero-video-slot mx-auto max-w-7xl px-5" aria-hidden="true" />
+      </div>
+
+      <div className="relative z-10">
         {/* ── Problem banner ───────────────────────────── */}
         <section className="mx-auto max-w-7xl px-5 pb-24">
           <Reveal>
-            <div className="rounded-3xl border border-[rgba(19,19,19,0.08)] bg-[linear-gradient(135deg,#111111_0%,#0D0D0D_100%)] p-8 sm:p-12">
+            <div className="rounded-3xl border border-[rgba(19,19,19,0.08)] bg-[linear-gradient(135deg,#ffffff_0%,#f7f7f7_100%)] p-8 sm:p-12">
               <div className="mx-auto max-w-3xl text-center">
                 <p className="text-xs font-semibold uppercase tracking-[0.28em] text-[rgba(19,19,19,0.4)]">
                   The problem with off-the-shelf CRMs
@@ -355,7 +356,7 @@ export default function CRM() {
           className="mx-auto max-w-7xl px-5 pb-28"
           aria-labelledby="ai-heading"
         >
-          <div className="overflow-hidden rounded-3xl border border-[rgba(19,19,19,0.08)] bg-[linear-gradient(145deg,#0F0F0F_0%,#0A0A0A_100%)]">
+          <div className="overflow-hidden rounded-3xl border border-[rgba(19,19,19,0.08)] bg-[linear-gradient(145deg,#ffffff_0%,#f7f7f7_100%)]">
             <div
               className="h-px w-full"
               style={{
@@ -479,7 +480,7 @@ export default function CRM() {
         {/* ── Tech stack ───────────────────────────────── */}
         <section className="mx-auto max-w-7xl px-5 pb-28">
           <Reveal>
-            <div className="rounded-3xl border border-[rgba(19,19,19,0.08)] bg-[linear-gradient(135deg,#0F0F0F_0%,#0A0A0A_100%)] p-8 sm:p-12">
+            <div className="rounded-3xl border border-[rgba(19,19,19,0.08)] bg-[linear-gradient(135deg,#ffffff_0%,#f7f7f7_100%)] p-8 sm:p-12">
               <div className="flex flex-col items-start gap-8 lg:flex-row lg:items-center lg:justify-between">
                 <div className="max-w-lg">
                   <SectionEyebrow>Tech stack</SectionEyebrow>
@@ -594,7 +595,7 @@ export default function CRM() {
               className="relative overflow-hidden rounded-3xl border border-[rgba(19,19,19,0.08)] p-10 text-center sm:p-16"
               style={{
                 background:
-                  'radial-gradient(ellipse at 50% 0%, rgba(255,138,91,0.12) 0%, transparent 65%), linear-gradient(145deg, #111111 0%, #0A0A0A 100%)',
+                  'radial-gradient(ellipse at 50% 0%, rgba(255,138,91,0.12) 0%, transparent 65%), linear-gradient(145deg, #ffffff 0%, #f7f7f7 100%)',
               }}
             >
               <div

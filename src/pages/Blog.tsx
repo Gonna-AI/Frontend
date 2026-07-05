@@ -45,12 +45,10 @@ function BlogContent() {
         description="Latest insights on legal AI, claims automation, and the future of work. Stay updated with ClerkTree."
         canonical="https://clerktree.com/blog"
       />
-      <div className="agero-top-area agero-top-area-compact">
+      <div className="agero-top-area agero-top-area-with-hero">
         <Header />
-      </div>
 
-      <main className="clerktree-blog-main">
-        <section className="clerktree-blog-hero">
+        <section className="clerktree-blog-hero-top">
           <div className="clerktree-blog-hero-copy">
             <p>ClerkTree Journal</p>
             <h1>
@@ -60,7 +58,13 @@ function BlogContent() {
                 {t('blogPage.subtitle')}
             </span>
           </div>
-          {allTags.length > 0 && (
+          <div className="agero-hero-video-slot" aria-hidden="true" />
+        </section>
+      </div>
+
+      <main className="clerktree-blog-main">
+        {allTags.length > 0 && (
+          <section className="clerktree-blog-filters-wrap">
             <div className="clerktree-blog-filters">
               <TagFilter
                 tags={allTags}
@@ -68,8 +72,8 @@ function BlogContent() {
                 tagCounts={tagCounts}
               />
             </div>
-          )}
-        </section>
+          </section>
+        )}
 
         <section className="clerktree-blog-grid-wrap">
           <Suspense fallback={<div className="text-white px-6">{t('blogPage.loadingArticles')}</div>}>

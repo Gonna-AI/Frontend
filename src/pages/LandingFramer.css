@@ -234,6 +234,26 @@ html.lenis.lenis-stopped {
   }
 }
 
+.agero-hero-video-slot {
+  background: #000;
+  border-radius: 32px;
+  height: clamp(360px, 32vw, 640px);
+  margin-top: clamp(28px, 5vw, 64px);
+  width: 100%;
+}
+
+.agero-top-area-with-hero .agero-header {
+  height: auto;
+}
+
+.agero-top-area-with-hero .agero-nav {
+  padding-top: 0;
+}
+
+.agero-top-area-with-hero > .agero-header {
+  margin-bottom: clamp(24px, 4vw, 56px);
+}
+
 .agero-hero-panel {
   align-items: center;
   background: transparent;

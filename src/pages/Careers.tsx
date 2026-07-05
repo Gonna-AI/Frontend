@@ -134,28 +134,29 @@ export default function Careers() {
 
   return (
     <div className="agero-works min-h-screen relative overflow-x-hidden">
-      <div className="agero-top-area agero-top-area-compact">
+      <div className="agero-top-area agero-top-area-with-hero">
         <Header />
+
+        <div className="text-center px-6">
+          <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-6">
+            <span className="text-[rgb(19,19,19)]">
+              {t('careers.title1')}
+            </span>
+            <br />
+            <span className="bg-gradient-to-r from-[#FF4D00] via-[#FF7A33] to-[#FF4D00] text-transparent bg-clip-text">
+              {t('careers.title2')}
+            </span>
+          </h1>
+          <p className="text-lg md:text-xl text-[rgba(19,19,19,0.6)] leading-relaxed max-w-3xl mx-auto">
+            {t('careers.subtitle')}
+          </p>
+        </div>
+
+        <div className="agero-hero-video-slot" aria-hidden="true" />
       </div>
 
       <div className="relative z-10 py-12 px-6">
         <div className="max-w-5xl mx-auto">
-
-          {/* Header */}
-          <div className="text-center mb-16">
-            <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-6">
-              <span className="text-[rgb(19,19,19)]">
-                {t('careers.title1')}
-              </span>
-              <br />
-              <span className="bg-gradient-to-r from-[#FF4D00] via-[#FF7A33] to-[#FF4D00] text-transparent bg-clip-text">
-                {t('careers.title2')}
-              </span>
-            </h1>
-            <p className="text-lg md:text-xl text-[rgba(19,19,19,0.6)] leading-relaxed max-w-3xl mx-auto">
-              {t('careers.subtitle')}
-            </p>
-          </div>
 
           {/* LinkedIn Link */}
           <div className="mb-12 text-center">

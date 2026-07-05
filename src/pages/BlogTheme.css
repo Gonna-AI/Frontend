@@ -8,17 +8,19 @@
 .clerktree-blog-main {
   margin: 0 auto;
   max-width: 1920px;
-  padding: 120px 8px 48px;
+  padding: 24px 8px 48px;
 }
 
-.clerktree-blog-hero {
-  align-items: end;
-  display: grid;
-  gap: clamp(28px, 5vw, 72px);
-  grid-template-columns: minmax(0, 1fr);
+.clerktree-blog-hero-top {
   margin: 0 auto;
   max-width: 1680px;
-  padding: 0 clamp(14px, 4vw, 72px) clamp(48px, 7vw, 96px);
+  padding: 0 clamp(14px, 4vw, 72px);
+}
+
+.clerktree-blog-filters-wrap {
+  margin: 0 auto clamp(28px, 5vw, 56px);
+  max-width: 1680px;
+  padding: 0 clamp(14px, 4vw, 72px);
 }
 
 .clerktree-blog-hero-copy {

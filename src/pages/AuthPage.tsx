@@ -2,13 +2,10 @@ import { useState, FormEvent } from 'react';
 import { Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
+import { LiquidMetal } from '@paper-design/shaders-react';
 import { ArrowRight, CheckCircle2, AlertCircle, Loader2, ArrowLeft } from 'lucide-react';
 
 type AuthView = 'signin' | 'signup' | 'forgot_password';
-
-// Same rotating ClerkTree logo video used inline in the homepage hero ("Orchestrating [video]
-// Industrial Machine [video] Intelligence"), featured here as the panel's centerpiece.
-const BRAND_VIDEO_URL = '/hero-logo-video.mp4';
 
 // Outer padding + rounded panel matches the main site's floating-card treatment
 // (.agero-top-area / .agero-footer both sit a few pixels off the viewport edge with large
@@ -16,14 +13,23 @@ const BRAND_VIDEO_URL = '/hero-logo-video.mp4';
 const BrandPanel = () => (
     <div className="hidden h-full p-2 lg:block">
         <div className="relative h-full overflow-hidden rounded-[32px] bg-[rgb(10,10,10)]">
-            <video
-                autoPlay
-                loop
-                muted
-                playsInline
-                preload="metadata"
-                src={BRAND_VIDEO_URL}
-                className="absolute inset-0 h-full w-full object-cover"
+            <LiquidMetal
+                className="absolute inset-0 h-full w-full"
+                width="100%"
+                height="100%"
+                image="/favicon.svg"
+                colorBack="#0a0a0a"
+                colorTint="#ffffff"
+                repetition={2}
+                softness={0.1}
+                shiftRed={0.3}
+                shiftBlue={0.3}
+                distortion={0.07}
+                contour={0.4}
+                angle={70}
+                speed={1}
+                scale={0.6}
+                fit="contain"
             />
         </div>
     </div>
