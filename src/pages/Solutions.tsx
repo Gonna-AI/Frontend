@@ -12,7 +12,7 @@ import './LandingFramer.css';
 import './Solutions.css';
 
 const SOLUTIONS_HERO_VIDEO_SRC =
-  '/media/solutiosboagevidoe.mp4';
+  'https://pub-0f804855178c4f4e8184c4fef3bd5b2a.r2.dev/solutiosboagevidoe.mp4';
 
 const solutionsNavLinkPaths = [
   ['nav.solutions', '/solutions'],

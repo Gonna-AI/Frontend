@@ -1241,7 +1241,7 @@ html.lenis.lenis-stopped {
 .agero-stats-card {
   background:
     linear-gradient(90deg, rgba(0, 0, 0, 0.72), rgba(0, 0, 0, 0.36)),
-    url("/media/3222.jpg") right center / cover;
+    url("https://pub-0f804855178c4f4e8184c4fef3bd5b2a.r2.dev/3222.jpg") right center / cover;
   color: #fff;
   display: flex;
   flex-direction: column;

@@ -10,7 +10,7 @@ import { shouldAutoplayMedia } from '../utils/idle';
 import './LandingFramer.css';
 import './BlogTheme.css';
 
-const BLOG_HERO_VIDEO_SRC = '/media/blogvideo.mp4';
+const BLOG_HERO_VIDEO_SRC = 'https://pub-0f804855178c4f4e8184c4fef3bd5b2a.r2.dev/blogvideo.mp4';
 
 const formatDate = (date: string, language: string): string => {
   return new Date(date).toLocaleDateString(language === 'de' ? 'de-DE' : 'en-US', {

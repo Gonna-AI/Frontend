@@ -7,7 +7,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 import SEO from '../components/SEO';
 import './LandingFramer.css';
 
-const BASE = '/media';
+const BASE = 'https://pub-0f804855178c4f4e8184c4fef3bd5b2a.r2.dev';
 const HOME_HERO_VIDEO_SRC = `${BASE}/entrybox.mov`;
 const HOME_CONTACT_VIDEO_SRC = `${BASE}/hero.mov`;
 
@@ -55,9 +55,9 @@ const introTagsBase = [
   { key: 'tag6' as const, Icon: Compass },
 ];
 
-const locationImage = '/media/munich.jpg';
+const locationImage = 'https://pub-0f804855178c4f4e8184c4fef3bd5b2a.r2.dev/munich.jpg';
 
-const testimonialImage = '/media/thdbuilding.jpg';
+const testimonialImage = 'https://pub-0f804855178c4f4e8184c4fef3bd5b2a.r2.dev/thdbuilding.jpg';
 
 const plans = [
   {

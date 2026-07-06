@@ -22,7 +22,7 @@ export default function SEO({ title, description, canonical, preloadVideos, open
     const siteUrl = 'https://clerktree.com';
     const currentUrl = canonical || (openGraph?.url ?? siteUrl);
     // og:image/twitter:image must be absolute URLs per spec — social crawlers don't resolve relative paths.
-    const ogImage = openGraph?.image || `${siteUrl}/media/logo.svg`;
+    const ogImage = openGraph?.image || 'https://pub-0f804855178c4f4e8184c4fef3bd5b2a.r2.dev/logo.svg';
     const faviconHref = `${siteUrl}/favicon.svg`;
     const manifestHref = `${siteUrl}/site.webmanifest`;
 
