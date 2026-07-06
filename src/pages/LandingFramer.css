@@ -353,7 +353,7 @@ html.lenis.lenis-stopped {
   max-width: 620px;
 }
 
-.agero-hero-stage-content--home .agero-hero-cta {
+.agero-hero-stage-content--home .agero-hero-actions {
   align-self: flex-start;
 }
 
@@ -736,7 +736,34 @@ html.lenis.lenis-stopped {
 .agero-hero-cta {
   height: 44px;
   margin-top: 28px;
-  width: 141px;
+  width: auto;
+}
+
+.agero-hero-actions {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 28px;
+}
+
+.agero-hero-actions .agero-hero-cta,
+.agero-hero-actions .agero-hero-login {
+  margin-top: 0;
+}
+
+.agero-hero-login {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.14);
+  color: rgba(255, 255, 255, 0.92);
+  min-width: 104px;
+}
+
+@media (hover: hover) {
+  .agero-hero-login:hover {
+    background: rgba(255, 255, 255, 0.14);
+    color: #fff;
+  }
 }
 
 .agero-home-prelude {
@@ -3165,7 +3192,7 @@ html.lenis.lenis-stopped {
     max-width: 350px;
   }
 
-  .agero-hero-cta {
+  .agero-hero-actions {
     margin-bottom: 24px;
     margin-top: 24px;
   }

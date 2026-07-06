@@ -142,10 +142,15 @@ export default function LandingFramer() {
                 {t('home.hero.copy')}
               </p>
 
-              <a className="agero-button agero-hero-cta" href="/contact">
-                <span>{t('home.hero.cta')}</span>
-                <span aria-hidden="true">→</span>
-              </a>
+              <div className="agero-hero-actions">
+                <a className="agero-button agero-hero-cta" href="/contact">
+                  <span>{t('home.hero.cta')}</span>
+                  <span aria-hidden="true">→</span>
+                </a>
+                <a className="agero-button agero-hero-login" href="/login">
+                  <span>{t('nav.login')}</span>
+                </a>
+              </div>
             </div>
           }
         />
