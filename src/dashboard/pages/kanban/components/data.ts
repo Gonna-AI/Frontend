@@ -1,5 +1,8 @@
 import type { BoardState, Column, ColumnId, TaskOwnerProfile, TaskTeam } from "./types";
 
+// NOTE: `title` fields below are fallback/default (German) display strings used as map keys and
+// as a safety net; the UI always prefers the localized value from `t('dashKanban.column.<id>')`
+// (see kanban.tsx / kanban-column.tsx) so this board renders correctly in both languages.
 export const columns = [
   { id: "ideas", title: "Erkannt" },
   { id: "planned", title: "Geprüft" },
@@ -73,6 +76,27 @@ const taskOwners = {
 } satisfies Record<string, TaskOwnerProfile>;
 
 export const fallbackTaskOwners = taskOwners;
+
+// Maps a task's stable id to its i18n key segment (`dashKanban.task.<key>.title` /
+// `dashKanban.task.<key>.description`). `initialBoard` below stays in German as the fallback/seed
+// content; components localize via this map (see kanban.tsx / kanban-column.tsx / task-card.tsx).
+export const taskI18nKeys: Record<string, string> = {
+  "sondermotor-tm75-bestellen": "sondermotorTm75Bestellen",
+  "spannsystem-menge-bestaetigen": "spannsystemMengeBestaetigen",
+  "weber-angebot-pruefen": "weberAngebotPruefen",
+  "mk-anlagenbau-liefertermin": "mkAnlagenbauLiefertermin",
+  "reitstock-rs90-freigeben": "reitstockRs90Freigeben",
+  "steuerungsverkabelung-klaeren": "steuerungsverkabelungKlaeren",
+  "weber-kickoff-vorbereiten": "weberKickoffVorbereiten",
+  "zahlungskonditionen-freigeben": "zahlungskonditionenFreigeben",
+  "ab-entwurf-erstellen": "abEntwurfErstellen",
+  "mk-anlagenbau-einkauf": "mkAnlagenbauEinkauf",
+  "abweichungsbericht-review": "abweichungsberichtReview",
+  "weber-kickoff-brief-review": "weberKickoffBriefReview",
+  "angebot-bestellung-abgleich": "angebotBestellungAbgleich",
+  "zusammenfassung-generiert": "zusammenfassungGeneriert",
+  "mk-anlagenbau-checkliste": "mkAnlagenbauCheckliste",
+};
 
 export const initialBoard: BoardState = {
   ideas: [

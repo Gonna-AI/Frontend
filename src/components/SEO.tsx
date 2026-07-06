@@ -4,6 +4,10 @@ interface SEOProps {
     title: string;
     description: string;
     canonical?: string;
+    preloadVideos?: Array<{
+        href: string;
+        type?: string;
+    }>;
     openGraph?: {
         title?: string;
         description?: string;
@@ -14,8 +18,9 @@ interface SEOProps {
     structuredData?: object;
 }
 
-export default function SEO({ title, description, canonical, openGraph, structuredData }: SEOProps) {
+export default function SEO({ title, description, canonical, preloadVideos, openGraph, structuredData }: SEOProps) {
     const siteUrl = 'https://clerktree.com';
+    const mediaHost = 'https://xlzwfkgurrrspcdyqele.supabase.co';
     const currentUrl = canonical || (openGraph?.url ?? siteUrl);
     const ogImage = openGraph?.image || 'https://xlzwfkgurrrspcdyqele.supabase.co/storage/v1/object/public/buck/logo.svg';
     const faviconHref = `${siteUrl}/favicon.svg`;
@@ -31,6 +36,17 @@ export default function SEO({ title, description, canonical, openGraph, structur
             <link rel="shortcut icon" href={faviconHref} />
             <link rel="apple-touch-icon" href={faviconHref} />
             <link rel="manifest" href={manifestHref} />
+            <link rel="preconnect" href={mediaHost} />
+            <link rel="dns-prefetch" href={mediaHost} />
+            {preloadVideos?.map((video) => (
+                <link
+                    key={video.href}
+                    rel="preload"
+                    as="video"
+                    href={video.href}
+                    type={video.type || 'video/mp4'}
+                />
+            ))}
 
             {/* Open Graph */}
             <meta property="og:type" content={openGraph?.type || 'website'} />

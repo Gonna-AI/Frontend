@@ -46,11 +46,23 @@ export function cancelIdle(handle: IdleCallbackHandle) {
 }
 
 export function isSaveDataEnabled() {
+  if (typeof navigator === 'undefined') {
+    return false;
+  }
+
   const connection = (navigator as Navigator & {
     connection?: { saveData?: boolean };
   }).connection;
 
   return Boolean(connection?.saveData);
+}
+
+export function shouldAutoplayMedia() {
+  if (typeof window === 'undefined') {
+    return false;
+  }
+
+  return !isSaveDataEnabled() && !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 }
 
 export async function yieldToMain() {

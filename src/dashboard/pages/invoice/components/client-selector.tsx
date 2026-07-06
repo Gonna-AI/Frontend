@@ -5,20 +5,22 @@ import { Avatar, AvatarFallback } from "@/components/dashboard-ui/avatar";
 import { Button } from "@/components/dashboard-ui/button";
 import { Field, FieldLabel } from "@/components/dashboard-ui/field";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/dashboard-ui/select";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { getInitials } from "@/lib/utils";
 
 import { type InvoiceFormValues, invoiceClients } from "./data";
 
 export function ClientSelector() {
   const { control } = useFormContext<InvoiceFormValues>();
+  const { t } = useLanguage();
 
   return (
     <section className="flex flex-col gap-4">
       <div className="flex items-center justify-between gap-3">
-        <h2 className="font-medium tracking-tight">Kunde</h2>
+        <h2 className="font-medium tracking-tight">{t('dashInvoice.client.heading')}</h2>
         <Button type="button" variant="ghost" size="sm">
           <Plus data-icon="inline-start" />
-          Neuen Kunden hinzufügen
+          {t('dashInvoice.client.addNew')}
         </Button>
       </div>
 
@@ -30,7 +32,7 @@ export function ClientSelector() {
 
           return (
             <Field className="gap-1">
-              <FieldLabel className="text-xs">Kunde</FieldLabel>
+              <FieldLabel className="text-xs">{t('dashInvoice.client.label')}</FieldLabel>
               <Select
                 value={selectedClient.id}
                 onValueChange={(clientId) => {
@@ -42,7 +44,7 @@ export function ClientSelector() {
                 }}
               >
                 <SelectTrigger className="w-full data-[size=default]:h-auto">
-                  <SelectValue placeholder="Kunde auswählen">
+                  <SelectValue placeholder={t('dashInvoice.client.selectPlaceholder')}>
                     <div className="flex items-center gap-1.5">
                       <Avatar className="after:rounded-md">
                         <AvatarFallback className="rounded-md bg-card text-foreground">

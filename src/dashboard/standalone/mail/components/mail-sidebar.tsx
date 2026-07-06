@@ -31,13 +31,16 @@ import {
 } from "@/components/dashboard-ui/sidebar";
 import { ToggleGroup, ToggleGroupItem } from "@/components/dashboard-ui/toggle-group";
 import { cn, getInitials } from "@/lib/utils";
+import { useLanguage } from "@/contexts/LanguageContext";
 
-import { accounts, type MailNavItem, mailNavigation } from "./data";
+import { accounts, type MailNavItem, useMailNavigation } from "./data";
 
 export function MailSidebar() {
+  const { t } = useLanguage();
   const { state } = useSidebar();
   const isCollapsed = state === "collapsed";
   const [selectedAccount, setSelectedAccount] = React.useState(accounts[0]);
+  const mailNavigation = useMailNavigation();
 
   return (
     <Sidebar collapsible="icon" className="absolute inset-y-0 h-full **:data-[sidebar=sidebar]:bg-background">
@@ -50,7 +53,7 @@ export function MailSidebar() {
                   variant="ghost"
                   size="icon-sm"
                   className={accountTriggerClassName}
-                  aria-label={`Open ${selectedAccount.label} menu`}
+                  aria-label={t('dashMail.openAccountMenu').replace('{label}', selectedAccount.label)}
                 >
                   <AccountMarker account={selectedAccount} isSelected />
                 </Button>
@@ -82,7 +85,7 @@ export function MailSidebar() {
                     key={account.id}
                     className={accountTriggerClassName}
                     value={String(account.id)}
-                    aria-label={`Select ${account.label}`}
+                    aria-label={t('dashMail.selectAccount').replace('{label}', account.label)}
                   >
                     <AccountMarker account={account} />
                   </ToggleGroupItem>
@@ -91,7 +94,7 @@ export function MailSidebar() {
 
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon-sm" aria-label="Open account menu">
+                  <Button variant="ghost" size="icon-sm" aria-label={t('dashMail.openAccountMenuGeneric')}>
                     <EllipsisVertical />
                   </Button>
                 </DropdownMenuTrigger>
@@ -110,7 +113,7 @@ export function MailSidebar() {
 
         <Button size={isCollapsed ? "icon-sm" : "sm"} variant="outline" className="group-data-[state=expanded]:w-full">
           <PenLine data-icon="inline-start" />
-          <span className="group-data-[state=collapsed]:hidden">New email</span>
+          <span className="group-data-[state=collapsed]:hidden">{t('dashMail.newEmail')}</span>
         </Button>
       </SidebarHeader>
       <SidebarContent>
@@ -119,7 +122,7 @@ export function MailSidebar() {
         </SidebarGroup>
 
         <SidebarGroup>
-          <SidebarGroupLabel className="font-normal">Folders</SidebarGroupLabel>
+          <SidebarGroupLabel className="font-normal">{t('dashMail.folders')}</SidebarGroupLabel>
           <SidebarMenu className="gap-1">{mailNavigation.folders.map(renderNavItem)}</SidebarMenu>
         </SidebarGroup>
       </SidebarContent>
@@ -178,11 +181,13 @@ function AccountMenuContent({
   onSelectAccount: (account: Account) => void;
   showAccounts?: boolean;
 } & Pick<React.ComponentProps<typeof DropdownMenuContent>, "align" | "side">) {
+  const { t } = useLanguage();
+
   return (
     <DropdownMenuContent className="w-56" {...props}>
       {showAccounts && (
         <>
-          <DropdownMenuLabel>Accounts</DropdownMenuLabel>
+          <DropdownMenuLabel>{t('dashMail.accounts')}</DropdownMenuLabel>
           <DropdownMenuGroup>
             <DropdownMenuRadioGroup
               value={String(selectedAccountId)}
@@ -210,22 +215,22 @@ function AccountMenuContent({
       <DropdownMenuGroup>
         <DropdownMenuItem>
           <UserPlus />
-          Add account
+          {t('dashMail.addAccount')}
         </DropdownMenuItem>
         <DropdownMenuItem>
           <UsersRound />
-          Manage accounts
+          {t('dashMail.manageAccounts')}
         </DropdownMenuItem>
         <DropdownMenuItem>
           <Settings2 />
-          Account settings
+          {t('dashMail.accountSettings')}
         </DropdownMenuItem>
       </DropdownMenuGroup>
       <DropdownMenuSeparator />
       <DropdownMenuGroup>
         <DropdownMenuItem>
           <LogOut />
-          Sign out
+          {t('dashMail.signOut')}
         </DropdownMenuItem>
       </DropdownMenuGroup>
     </DropdownMenuContent>

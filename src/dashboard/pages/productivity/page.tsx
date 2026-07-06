@@ -1,3 +1,5 @@
+import { useLanguage } from "@/contexts/LanguageContext";
+
 import { CalendarPanel } from "./components/calendar-panel";
 import { FocusCard } from "./components/focus-card";
 import { ProjectsSection } from "./components/projects-section";
@@ -9,14 +11,16 @@ import { TasksSection } from "./components/tasks-section";
 import { WeeklySummaryCard } from "./components/weekly-summary-card";
 
 export default function Page() {
+  const { t } = useLanguage();
+
   return (
     <div className="grid gap-6 lg:grid-cols-12">
       <section className="lg:col-span-9">
         <div className="flex flex-col gap-6">
           <div className="flex flex-col gap-2">
-            <h1 className="text-3xl text-foreground leading-none tracking-tight">Engineer Workload</h1>
+            <h1 className="text-3xl text-foreground leading-none tracking-tight">{t("dashProductivity.page.title")}</h1>
             <p className="text-lg text-muted-foreground leading-none">
-              3 Dokumente warten auf Prüfung. Here&apos;s where the Kostencheck Copilot needs your input today.
+              {t("dashProductivity.page.subtitle").replace("{count}", "3")}
             </p>
           </div>
           <SummaryCards />

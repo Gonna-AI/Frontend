@@ -1,11 +1,10 @@
 import type { CSSProperties } from 'react';
-import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowUpRight, BrainCircuit, CheckCircle2, Clock3, MapPin, Sparkles } from 'lucide-react';
 
 import { useLanguage } from '../contexts/LanguageContext';
 import { Header, Footer } from '../components/Landing/AgeroChrome';
-import { isSaveDataEnabled } from '../utils/idle';
+import { shouldAutoplayMedia } from '../utils/idle';
 import SEO from '../components/SEO';
 import './LandingFramer.css';
 import './About.css';
@@ -13,40 +12,18 @@ import './About.css';
 const HERO_VIDEO_SRC = 'https://xlzwfkgurrrspcdyqele.supabase.co/storage/v1/object/public/buck/aboutusvideo.mp4';
 
 function HeroBackgroundVideo({ src }: { src: string }) {
-  const ref = useRef<HTMLVideoElement>(null);
-  const [shouldLoad, setShouldLoad] = useState(false);
-
-  useEffect(() => {
-    if (isSaveDataEnabled() || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      return;
-    }
-
-    const video = ref.current;
-    if (!video) return;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (!entry?.isIntersecting) return;
-        setShouldLoad(true);
-        observer.disconnect();
-      },
-      { rootMargin: '400px 0px', threshold: 0.01 },
-    );
-
-    observer.observe(video);
-    return () => observer.disconnect();
-  }, []);
+  const shouldPlay = shouldAutoplayMedia();
 
   return (
     <video
       className="agero-hero-stage-media"
-      autoPlay={shouldLoad}
+      autoPlay={shouldPlay}
       loop
       muted
       playsInline
-      preload="none"
-      ref={ref}
-      src={shouldLoad ? src : undefined}
+      preload={shouldPlay ? 'auto' : 'metadata'}
+      src={src}
+      crossOrigin="anonymous"
       aria-hidden="true"
     />
   );
@@ -77,6 +54,7 @@ export default function About() {
         title={t('about.seoTitle')}
         description={t('about.seoDesc')}
         canonical="https://clerktree.com/about"
+        preloadVideos={[{ href: HERO_VIDEO_SRC }]}
       />
 
       <div className="agero-top-area agero-top-area-with-hero">

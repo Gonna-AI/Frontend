@@ -6,6 +6,7 @@ import { Badge } from "@/components/dashboard-ui/badge";
 import { Button } from "@/components/dashboard-ui/button";
 import { Separator } from "@/components/dashboard-ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/dashboard-ui/tabs";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { cn } from "@/lib/utils";
 
 import type { Shipment } from "./shipment-data";
@@ -41,49 +42,133 @@ type ShipmentDetailsProps = {
   shipment: Shipment | null;
 };
 
-function getContactLabel(mode: Shipment["mode"]) {
-  if (mode === "land") {
-    return "Call Driver";
-  }
+const statusLabelKeys: Record<Shipment["status"], string> = {
+  Scheduled: "dashLogistics.status.scheduled",
+  "In Transit": "dashLogistics.status.inTransit",
+  "Out for Delivery": "dashLogistics.status.outForDelivery",
+  Delivered: "dashLogistics.status.delivered",
+  Delayed: "dashLogistics.status.delayed",
+  "On Hold": "dashLogistics.status.onHold",
+  "Customs Hold": "dashLogistics.status.customsHold",
+};
 
-  if (mode === "air") {
-    return "Call Airline Support";
-  }
+const tierLabelKeys: Record<Shipment["customer"]["tier"], string> = {
+  Priority: "dashLogistics.tier.priority",
+  Standard: "dashLogistics.tier.standard",
+  "Non-priority": "dashLogistics.tier.nonPriority",
+};
 
-  return "Call Captain";
+const tierDescriptionKeys: Record<string, string> = {
+  "Flagship project account": "dashLogistics.tierLabel.flagshipProjectAccount",
+  "Top 1% by order volume": "dashLogistics.tierLabel.top1PercentByOrderVolume",
+  "Internal stock replenishment": "dashLogistics.tierLabel.internalStockReplenishment",
+  "Recurring order account": "dashLogistics.tierLabel.recurringOrderAccount",
+  "Occasional order account": "dashLogistics.tierLabel.occasionalOrderAccount",
+  "Managed order account": "dashLogistics.tierLabel.managedOrderAccount",
+};
+
+const handlingLabelKeys: Record<string, string> = {
+  "Long-lead special order": "dashLogistics.handling.longLeadSpecialOrder",
+  "Substituted part": "dashLogistics.handling.substitutedPart",
+  "Precision tooling": "dashLogistics.handling.precisionTooling",
+  "Heavy machinery": "dashLogistics.handling.heavyMachinery",
+  "Standard freight": "dashLogistics.handling.standardFreight",
+  "Heavy bulk cargo": "dashLogistics.handling.heavyBulkCargo",
+  "Sensitive precision tooling": "dashLogistics.handling.sensitivePrecisionTooling",
+  "Industrial parts": "dashLogistics.handling.industrialParts",
+  "High-value precision cargo": "dashLogistics.handling.highValuePrecisionCargo",
+  "Fragile precision cargo": "dashLogistics.handling.fragilePrecisionCargo",
+};
+
+const tagLabelKeys: Record<string, string> = {
+  "Do not stack": "dashLogistics.tag.doNotStack",
+  "Keep upright": "dashLogistics.tag.keepUpright",
+  "Signature required": "dashLogistics.tag.signatureRequired",
+  "Forklift only": "dashLogistics.tag.forkliftOnly",
+  "Secure load": "dashLogistics.tag.secureLoad",
+  "Do not tip": "dashLogistics.tag.doNotTip",
+  "Keep dry": "dashLogistics.tag.keepDry",
+  "Seal intact": "dashLogistics.tag.sealIntact",
+  "Standard handoff": "dashLogistics.tag.standardHandoff",
+  "Heavy lift": "dashLogistics.tag.heavyLift",
+  "Do not crush": "dashLogistics.tag.doNotCrush",
+  "Call before delivery": "dashLogistics.tag.callBeforeDelivery",
+  "Count on arrival": "dashLogistics.tag.countOnArrival",
+  "Two-person lift": "dashLogistics.tag.twoPersonLift",
+};
+
+const etaMetaLabelKeys: Record<string, string> = {
+  Today: "dashLogistics.etaMeta.today",
+  Tomorrow: "dashLogistics.etaMeta.tomorrow",
+  "Delivered Yesterday": "dashLogistics.etaMeta.deliveredYesterday",
+  "Departing Today": "dashLogistics.etaMeta.departingToday",
+  Friday: "dashLogistics.etaMeta.friday",
+  Wednesday: "dashLogistics.etaMeta.wednesday",
+};
+
+const modeLabelKeys: Record<Shipment["mode"], string> = {
+  land: "dashLogistics.mode.land",
+  air: "dashLogistics.mode.air",
+  sea: "dashLogistics.mode.sea",
+};
+
+const routeTypeLabelKeys: Record<Shipment["routeType"], string> = {
+  road: "dashLogistics.routeType.road",
+  flight: "dashLogistics.routeType.flight",
+  ship: "dashLogistics.routeType.ship",
+};
+
+function translateOrFallback(t: (key: string) => string, dict: Record<string, string>, value: string) {
+  const key = dict[value];
+  return key ? t(key) : value;
 }
 
-function getTransportNumberLabel(mode: Shipment["mode"]) {
+function getContactLabel(t: (key: string) => string, mode: Shipment["mode"]) {
   if (mode === "land") {
-    return "Vehicle number";
+    return t("dashLogistics.contact.callDriver");
   }
 
   if (mode === "air") {
-    return "Flight number";
+    return t("dashLogistics.contact.callAirlineSupport");
   }
 
-  return "Vessel number";
+  return t("dashLogistics.contact.callCaptain");
+}
+
+function getTransportNumberLabel(t: (key: string) => string, mode: Shipment["mode"]) {
+  if (mode === "land") {
+    return t("dashLogistics.transportNumber.vehicle");
+  }
+
+  if (mode === "air") {
+    return t("dashLogistics.transportNumber.flight");
+  }
+
+  return t("dashLogistics.transportNumber.vessel");
 }
 
 function EmptyShipmentOverview() {
+  const { t } = useLanguage();
+
   return (
     <div className="grid min-h-48 place-items-center rounded-lg border border-dashed text-muted-foreground text-sm">
-      Select a shipment to view details.
+      {t("dashLogistics.empty.selectShipment")}
     </div>
   );
 }
 
 function ShipmentOverview({ shipment }: { shipment: Shipment }) {
+  const { t } = useLanguage();
   const ContactIcon = modeIcons[shipment.mode];
-  const contactLabel = getContactLabel(shipment.mode);
-  const transportNumberLabel = getTransportNumberLabel(shipment.mode);
+  const contactLabel = getContactLabel(t, shipment.mode);
+  const transportNumberLabel = getTransportNumberLabel(t, shipment.mode);
 
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
         <div className="flex items-center gap-2">
           <h1 className="font-medium text-lg tabular-nums tracking-tight sm:text-xl">#{shipment.id}</h1>
-          <Button variant="ghost" size="icon-sm" aria-label="Copy shipment ID">
+          <Button variant="ghost" size="icon-sm" aria-label={t("dashLogistics.overview.copyIdAria")}>
             <Copy />
           </Button>
         </div>
@@ -91,13 +176,17 @@ function ShipmentOverview({ shipment }: { shipment: Shipment }) {
         <div className="flex items-center gap-2 text-xs sm:text-sm">
           <Badge variant="outline" className={cn("gap-1.5", statusBadgeClasses[shipment.status])}>
             <span className={cn("size-1.5 rounded-full bg-current", progressRingClasses[shipment.status])} />
-            {shipment.status}
+            {t(statusLabelKeys[shipment.status])}
           </Badge>
           <span className="text-muted-foreground">·</span>
-          <span className="text-foreground tabular-nums">{shipment.progress}% complete</span>
+          <span className="text-foreground tabular-nums">
+            {t("dashLogistics.overview.percentComplete").replace("{percent}", String(shipment.progress))}
+          </span>
           <span className="text-muted-foreground">·</span>
           <span className="text-foreground tabular-nums">
-            ETA: {shipment.eta} {shipment.etaMeta}
+            {t("dashLogistics.overview.etaWithMeta")
+              .replace("{eta}", shipment.eta)
+              .replace("{etaMeta}", translateOrFallback(t, etaMetaLabelKeys, shipment.etaMeta))}
           </span>
         </div>
       </div>
@@ -122,9 +211,11 @@ function ShipmentOverview({ shipment }: { shipment: Shipment }) {
         <div className="flex flex-col items-end gap-1">
           <Badge variant="secondary">
             <Star />
-            {shipment.customer.tier}
+            {t(tierLabelKeys[shipment.customer.tier])}
           </Badge>
-          <div className="text-muted-foreground text-xs leading-none">{shipment.customer.tierLabel}</div>
+          <div className="text-muted-foreground text-xs leading-none">
+            {translateOrFallback(t, tierDescriptionKeys, shipment.customer.tierLabel)}
+          </div>
         </div>
       </div>
 
@@ -132,7 +223,7 @@ function ShipmentOverview({ shipment }: { shipment: Shipment }) {
 
       <div className="flex flex-col gap-8">
         <div className="flex items-start justify-between gap-4">
-          <h2 className="font-medium">Cargo details</h2>
+          <h2 className="font-medium">{t("dashLogistics.overview.cargoDetails")}</h2>
 
           <Button variant="outline" size="sm">
             <ContactIcon data-icon="inline-start" />
@@ -142,19 +233,25 @@ function ShipmentOverview({ shipment }: { shipment: Shipment }) {
 
         <div className="grid grid-cols-2 gap-x-4 gap-y-5 md:grid-cols-[1.35fr_1fr_1.1fr_1.15fr_1fr]">
           <div className="col-span-2 flex flex-col gap-1 md:col-span-1 md:gap-2">
-            <div className="text-muted-foreground text-xs leading-none md:invisible md:text-sm">Cargo</div>
+            <div className="text-muted-foreground text-xs leading-none md:invisible md:text-sm">
+              {t("dashLogistics.overview.cargo")}
+            </div>
             <div className="whitespace-nowrap text-sm leading-none">{shipment.cargo}</div>
           </div>
 
           <div className="flex flex-col gap-2">
-            <div className="text-muted-foreground text-xs leading-none md:text-sm">Total weight</div>
+            <div className="text-muted-foreground text-xs leading-none md:text-sm">
+              {t("dashLogistics.overview.totalWeight")}
+            </div>
             <div className="text-sm leading-none">{shipment.weight}</div>
           </div>
 
           <div className="flex flex-col gap-2">
-            <div className="text-muted-foreground text-xs leading-none md:text-sm">Transport mode</div>
-            <div className="text-sm capitalize leading-none">
-              {shipment.mode} · {shipment.routeType}
+            <div className="text-muted-foreground text-xs leading-none md:text-sm">
+              {t("dashLogistics.overview.transportMode")}
+            </div>
+            <div className="text-sm leading-none">
+              {t(modeLabelKeys[shipment.mode])} · {t(routeTypeLabelKeys[shipment.routeType])}
             </div>
           </div>
 
@@ -164,8 +261,12 @@ function ShipmentOverview({ shipment }: { shipment: Shipment }) {
           </div>
 
           <div className="flex flex-col gap-2 md:text-right">
-            <div className="text-muted-foreground text-xs leading-none md:text-sm">Status</div>
-            <div className="text-sm leading-none">{shipment.progress}% complete</div>
+            <div className="text-muted-foreground text-xs leading-none md:text-sm">
+              {t("dashLogistics.overview.status")}
+            </div>
+            <div className="text-sm leading-none">
+              {t("dashLogistics.overview.percentComplete").replace("{percent}", String(shipment.progress))}
+            </div>
           </div>
         </div>
       </div>
@@ -174,7 +275,7 @@ function ShipmentOverview({ shipment }: { shipment: Shipment }) {
 
       <Alert className="border-amber-200 bg-amber-50 text-amber-900 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-50">
         <AlertTriangleIcon />
-        <AlertTitle>{shipment.handling.label}</AlertTitle>
+        <AlertTitle>{translateOrFallback(t, handlingLabelKeys, shipment.handling.label)}</AlertTitle>
         <AlertDescription className="space-y-2">
           <div className="border-amber-900 text-amber-900 leading-none dark:border-amber-50 dark:text-amber-50">
             {shipment.handling.note}

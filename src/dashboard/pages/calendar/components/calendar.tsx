@@ -14,32 +14,35 @@ import { EventCalendarViews } from "@/dashboard/components/calendar/event-calend
 import { Button } from "@/components/dashboard-ui/button";
 import { ButtonGroup } from "@/components/dashboard-ui/button-group";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/dashboard-ui/select";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { fetchMilestones, subscribeToTable } from "@/dashboard/lib/pipelineClient";
 
-import { demoEvents, mapMilestoneToEvent } from "./events-data";
-
-// Internal-only events (standups, capacity planning) that don't come from pipeline_milestones —
-// always kept alongside whatever milestone events are live/fallback.
-const internalEvents = demoEvents.filter((event) => event.groupId === "standup" || !event.title.includes("–"));
-
-const views = [
-  { key: "dayGridMonth", label: "Monat" },
-  { key: "timeGridWeek", label: "Woche" },
-  { key: "timeGridDay", label: "Tag" },
-];
-
-const calendars = [
-  { key: "all", label: "Alle Projekte" },
-  { key: "work", label: "Bergmann Maschinenbau" },
-  { key: "personal", label: "Weber Präzisionstechnik" },
-  { key: "team", label: "MK Anlagenbau" },
-  { key: "focus", label: "Intern" },
-];
+import { getDemoEvents, mapMilestoneToEvent } from "./events-data";
 
 const plugins = [dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin, multiMonthPlugin];
 
 export function Calendar() {
+  const { t } = useLanguage();
   const controller = useCalendarController();
+  const demoEvents = React.useMemo(() => getDemoEvents(t), [t]);
+  const internalEvents = React.useMemo(
+    () => demoEvents.filter((event) => event.groupId === "standup" || !event.title.includes("–")),
+    [demoEvents],
+  );
+
+  const views = [
+    { key: "dayGridMonth", label: t("dashCalendar.view.month") },
+    { key: "timeGridWeek", label: t("dashCalendar.view.week") },
+    { key: "timeGridDay", label: t("dashCalendar.view.day") },
+  ];
+
+  const calendars = [
+    { key: "all", label: t("dashCalendar.filter.all") },
+    { key: "work", label: t("dashCalendar.filter.work") },
+    { key: "personal", label: t("dashCalendar.filter.personal") },
+    { key: "team", label: t("dashCalendar.filter.team") },
+    { key: "focus", label: t("dashCalendar.filter.focus") },
+  ];
   const [eventCount, setEventCount] = React.useState(0);
   const [selectedCalendar, setSelectedCalendar] = React.useState(calendars[0].key);
   const [dateInfo, setDateInfo] = React.useState(() => {
@@ -57,6 +60,7 @@ export function Calendar() {
 
   React.useEffect(() => {
     let cancelled = false;
+    setEvents(demoEvents);
 
     const load = () => {
       fetchMilestones()
@@ -77,7 +81,7 @@ export function Calendar() {
       cancelled = true;
       unsubscribe();
     };
-  }, []);
+  }, [demoEvents, internalEvents]);
 
   return (
     <div className="flex flex-col overflow-hidden rounded-md border">
@@ -85,7 +89,7 @@ export function Calendar() {
         <div className="flex min-w-0 shrink-0 flex-col gap-1">
           <div className="font-medium text-lg leading-none">{title}</div>
           <p className="text-muted-foreground text-sm">
-            {days} Tage - {eventCount} Termine
+            {t("dashCalendar.daysCount").replace("{days}", String(days)).replace("{count}", String(eventCount))}
           </p>
         </div>
 
@@ -110,7 +114,7 @@ export function Calendar() {
               <ChevronLeft />
             </Button>
             <Button variant="outline" onClick={() => controller.today()}>
-              Heute
+              {t("dashCalendar.today")}
             </Button>
             <Button size="icon" variant="outline" onClick={() => controller.next()}>
               <ChevronRight />
@@ -137,7 +141,7 @@ export function Calendar() {
           </Select>
           <Button>
             <Plus />
-            Termin hinzufügen
+            {t("dashCalendar.addEvent")}
           </Button>
         </div>
       </div>

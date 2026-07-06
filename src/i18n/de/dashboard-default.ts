@@ -1,0 +1,72 @@
+export const deDashboardDefault = {
+  // Metric cards
+  'dashDefault.metric.documentsProcessed.label': 'Verarbeitete Dokumente',
+  'dashDefault.metric.documentsProcessed.description': 'Angebote & Bestellungen aus 3 Unternehmen erfasst',
+  'dashDefault.metric.deviationsCaught.label': 'Erkannte Abweichungen',
+  'dashDefault.metric.deviationsCaught.description': 'Zur Prüfung markierte Abweichungen zwischen Angebot und Bestellung',
+  'dashDefault.metric.atRisk.label': '€ Risikobetrag markiert',
+  'dashDefault.metric.atRisk.description': 'Kumulierte Auftragswert-Auswirkung, vor Freigabe erkannt',
+  'dashDefault.metric.hoursSaved.label': 'Eingesparte Ingenieurstunden',
+  'dashDefault.metric.hoursSaved.description': 'Vermiedener manueller Zeilenabgleich',
+
+  // Performance overview
+  'dashDefault.performance.title': 'Dokumente & Abweichungen',
+  'dashDefault.performance.descriptionLong': 'Verarbeitete Dokumente und erkannte Abweichungen der letzten 3 Monate',
+  'dashDefault.performance.descriptionShort': 'Letzte 3 Monate',
+  'dashDefault.performance.periodLabel': 'Zeitraum',
+  'dashDefault.performance.period3Months': '3 Monate',
+  'dashDefault.performance.companiesLabel': 'Unternehmen',
+  'dashDefault.performance.companiesPlaceholder': 'Alle Unternehmen',
+  'dashDefault.performance.companiesAll': 'Alle Unternehmen',
+  'dashDefault.performance.viewReport': 'Bericht ansehen',
+  'dashDefault.performance.chart.documentsProcessed': 'Verarbeitete Dokumente',
+  'dashDefault.performance.chart.deviationsCaught': 'Erkannte Abweichungen',
+  'dashDefault.performance.chart.reviewNeeded': 'Manuelle Prüfung erforderlich',
+
+  // Recent customers table — column headers
+  'dashDefault.table.column.project': 'Projekt',
+  'dashDefault.table.column.reviewStatus': 'Prüfstatus',
+  'dashDefault.table.column.severity': 'Schweregrad',
+  'dashDefault.table.column.company': 'Unternehmen',
+  'dashDefault.table.column.detected': 'Erkannt',
+  'dashDefault.table.selectAllAria': 'Alle Projekte auf dieser Seite auswählen',
+  'dashDefault.table.selectRowAria': '{name} auswählen',
+  'dashDefault.table.detectedAt': 'um',
+
+  // Severity / review status value labels
+  'dashDefault.severity.noDeviations': 'Keine Abweichungen',
+  'dashDefault.severity.reviewPending': 'Prüfung ausstehend',
+  'dashDefault.severity.highSeverity': 'Hoher Schweregrad',
+  'dashDefault.severity.lowSeverity': 'Niedriger Schweregrad',
+  'dashDefault.review.clean': 'Unauffällig',
+  'dashDefault.review.inReview': 'In Prüfung',
+  'dashDefault.review.escalated': 'Eskaliert',
+
+  // Recent customers table — toolbar / filters
+  'dashDefault.table.searchPlaceholder': 'Projekte durchsuchen...',
+  'dashDefault.table.filter.reviewStatus': 'Prüfstatus',
+  'dashDefault.table.filter.detectedDate': 'Erkennungsdatum',
+  'dashDefault.table.filter.severity': 'Schweregrad',
+  'dashDefault.table.filter.sort': 'Sortieren',
+  'dashDefault.table.filter.all': 'Alle',
+  'dashDefault.table.filter.allTime': 'Gesamter Zeitraum',
+  'dashDefault.table.filter.last30Days': 'Letzte 30 Tage',
+  'dashDefault.table.filter.last90Days': 'Letzte 90 Tage',
+  'dashDefault.table.sort.newestFirst': 'Neueste zuerst',
+  'dashDefault.table.sort.oldestFirst': 'Älteste zuerst',
+  'dashDefault.table.sort.nameAZ': 'Name A-Z',
+  'dashDefault.table.sort.nameZA': 'Name Z-A',
+  'dashDefault.table.noResults': 'Keine Ergebnisse.',
+  'dashDefault.table.rowsSelected': '{selected} von {total} Zeile(n) ausgewählt.',
+  'dashDefault.table.rowsPerPage': 'Zeilen pro Seite',
+  'dashDefault.table.pageOf': 'Seite {current} von {total}',
+  'dashDefault.table.goToFirstPage': 'Zur ersten Seite',
+  'dashDefault.table.goToPreviousPage': 'Zur vorherigen Seite',
+  'dashDefault.table.goToNextPage': 'Zur nächsten Seite',
+  'dashDefault.table.goToLastPage': 'Zur letzten Seite',
+
+  // Subscriber overview (Active & Recent Projects)
+  'dashDefault.subscriber.title': 'Aktive & aktuelle Projekte',
+  'dashDefault.subscriber.description': 'Bestellung-vs-Angebot-Vergleiche bei THD GmbH, Weber Präzisionstechnik und MK Anlagenbau — mit Unternehmen, Prüfstatus und Schweregrad.',
+  'dashDefault.subscriber.export': 'Exportieren',
+} as const;

@@ -2,6 +2,7 @@ import { Archive, CircleHelp, File, Inbox, Keyboard, type LucideIcon, Send, Star
 import { siFigma, siGoogledocs, siGooglephotos } from "simple-icons";
 
 import type { PipelineGeneratedDocRow } from "@/dashboard/lib/pipelineClient";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const kostencheckCopilot = {
   name: "Kostencheck Copilot",
@@ -308,7 +309,8 @@ export const mails: Mail[] = [
   },
 ];
 
-export const mailNavigation: MailNavigation = {
+/** Structural (untranslated) nav config — titles are resolved via useMailNavigation() at render time. */
+const mailNavigationConfig: MailNavigation = {
   navMain: [
     {
       id: "inbox",
@@ -367,6 +369,34 @@ export const mailNavigation: MailNavigation = {
     },
   ],
 };
+
+const MAIL_NAV_TITLE_KEYS: Record<string, string> = {
+  inbox: "dashMail.inbox",
+  priority: "dashMail.priority",
+  drafts: "dashMail.drafts",
+  sent: "dashMail.sent",
+  archive: "dashMail.archive",
+  trash: "dashMail.trash",
+  "help-feedback": "dashMail.helpFeedback",
+  "keyboard-shortcuts": "dashMail.keyboardShortcuts",
+};
+
+/** Returns mailNavigationConfig with each item's title localized via the active language. */
+export function useMailNavigation(): MailNavigation {
+  const { t } = useLanguage();
+
+  const localize = (items: MailNavItem[]): MailNavItem[] =>
+    items.map((item) => ({
+      ...item,
+      title: MAIL_NAV_TITLE_KEYS[item.id] ? t(MAIL_NAV_TITLE_KEYS[item.id]) : item.title,
+    }));
+
+  return {
+    navMain: localize(mailNavigationConfig.navMain),
+    folders: localize(mailNavigationConfig.folders),
+    navFooter: localize(mailNavigationConfig.navFooter),
+  };
+}
 
 export const accounts = [
   {

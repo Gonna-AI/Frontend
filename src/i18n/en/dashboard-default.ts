@@ -1,0 +1,72 @@
+export const enDashboardDefault = {
+  // Metric cards
+  'dashDefault.metric.documentsProcessed.label': 'Documents Processed',
+  'dashDefault.metric.documentsProcessed.description': 'Angebote & Bestellungen ingested across 3 companies',
+  'dashDefault.metric.deviationsCaught.label': 'Deviations Caught',
+  'dashDefault.metric.deviationsCaught.description': 'Quote-vs-order mismatches flagged for review',
+  'dashDefault.metric.atRisk.label': '€ At Risk Flagged',
+  'dashDefault.metric.atRisk.description': 'Cumulative order-value impact caught before signoff',
+  'dashDefault.metric.hoursSaved.label': 'Engineer-Hours Saved',
+  'dashDefault.metric.hoursSaved.description': 'Manual line-by-line comparison time avoided',
+
+  // Performance overview
+  'dashDefault.performance.title': 'Documents & Deviations',
+  'dashDefault.performance.descriptionLong': 'Documents processed and deviations caught over the last 3 months',
+  'dashDefault.performance.descriptionShort': 'Last 3 months',
+  'dashDefault.performance.periodLabel': 'Period',
+  'dashDefault.performance.period3Months': '3 months',
+  'dashDefault.performance.companiesLabel': 'Companies',
+  'dashDefault.performance.companiesPlaceholder': 'All companies',
+  'dashDefault.performance.companiesAll': 'All companies',
+  'dashDefault.performance.viewReport': 'View report',
+  'dashDefault.performance.chart.documentsProcessed': 'Documents Processed',
+  'dashDefault.performance.chart.deviationsCaught': 'Deviations Caught',
+  'dashDefault.performance.chart.reviewNeeded': 'Needs Human Review',
+
+  // Recent customers table — column headers
+  'dashDefault.table.column.project': 'Project',
+  'dashDefault.table.column.reviewStatus': 'Review Status',
+  'dashDefault.table.column.severity': 'Severity',
+  'dashDefault.table.column.company': 'Company',
+  'dashDefault.table.column.detected': 'Detected',
+  'dashDefault.table.selectAllAria': 'Select all projects on this page',
+  'dashDefault.table.selectRowAria': 'Select {name}',
+  'dashDefault.table.detectedAt': 'at',
+
+  // Severity / review status value labels
+  'dashDefault.severity.noDeviations': 'No Deviations',
+  'dashDefault.severity.reviewPending': 'Review Pending',
+  'dashDefault.severity.highSeverity': 'High Severity',
+  'dashDefault.severity.lowSeverity': 'Low Severity',
+  'dashDefault.review.clean': 'Clean',
+  'dashDefault.review.inReview': 'In Review',
+  'dashDefault.review.escalated': 'Escalated',
+
+  // Recent customers table — toolbar / filters
+  'dashDefault.table.searchPlaceholder': 'Search projects...',
+  'dashDefault.table.filter.reviewStatus': 'Review Status',
+  'dashDefault.table.filter.detectedDate': 'Detected date',
+  'dashDefault.table.filter.severity': 'Severity',
+  'dashDefault.table.filter.sort': 'Sort',
+  'dashDefault.table.filter.all': 'All',
+  'dashDefault.table.filter.allTime': 'All time',
+  'dashDefault.table.filter.last30Days': 'Last 30 days',
+  'dashDefault.table.filter.last90Days': 'Last 90 days',
+  'dashDefault.table.sort.newestFirst': 'Newest first',
+  'dashDefault.table.sort.oldestFirst': 'Oldest first',
+  'dashDefault.table.sort.nameAZ': 'Name A-Z',
+  'dashDefault.table.sort.nameZA': 'Name Z-A',
+  'dashDefault.table.noResults': 'No results.',
+  'dashDefault.table.rowsSelected': '{selected} of {total} row(s) selected.',
+  'dashDefault.table.rowsPerPage': 'Rows per page',
+  'dashDefault.table.pageOf': 'Page {current} of {total}',
+  'dashDefault.table.goToFirstPage': 'Go to first page',
+  'dashDefault.table.goToPreviousPage': 'Go to previous page',
+  'dashDefault.table.goToNextPage': 'Go to next page',
+  'dashDefault.table.goToLastPage': 'Go to last page',
+
+  // Subscriber overview (Active & Recent Projects)
+  'dashDefault.subscriber.title': 'Active & Recent Projects',
+  'dashDefault.subscriber.description': 'Bestellung-vs-Angebot comparisons across THD GmbH, Weber Präzisionstechnik, and MK Anlagenbau — with company, review status, and severity.',
+  'dashDefault.subscriber.export': 'Export',
+} as const;

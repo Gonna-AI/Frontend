@@ -5,6 +5,7 @@ import { format, parse } from "date-fns";
 import { ArrowUpRight, DollarSign, PackageCheck, ReceiptText, RotateCcw, ShoppingBag, Users } from "lucide-react-dash";
 import { Area, Bar, CartesianGrid, ComposedChart, XAxis, YAxis } from "recharts";
 
+import { useLanguage } from "@/contexts/LanguageContext";
 import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/dashboard-ui/card";
 import { type ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/dashboard-ui/chart";
 import { fetchAllDeviations, subscribeToTable } from "@/dashboard/lib/pipelineClient";
@@ -52,17 +53,6 @@ const revenueOverviewData = getRollingRevenueBuckets().flatMap(({ month, values 
   })),
 );
 
-const revenueOverviewConfig = {
-  revenue: {
-    label: "Bestellwert",
-    color: "var(--foreground)",
-  },
-  profit: {
-    label: "Marge",
-    color: "var(--muted-foreground)",
-  },
-} satisfies ChartConfig;
-
 function formatMonthTick(value: string) {
   const parts = value.split(" ");
   const range = parts.at(-1);
@@ -88,7 +78,19 @@ function formatCurrencyTooltipValue(value: unknown) {
 }
 
 export function KpiStrip() {
+  const { t } = useLanguage();
   const [deviationCount, setDeviationCount] = useState<number | null>(null);
+
+  const revenueOverviewConfig = {
+    revenue: {
+      label: t("dashEcommerce.kpi.overview.revenue"),
+      color: "var(--foreground)",
+    },
+    profit: {
+      label: t("dashEcommerce.kpi.overview.profit"),
+      color: "var(--muted-foreground)",
+    },
+  } satisfies ChartConfig;
 
   useEffect(() => {
     let cancelled = false;
@@ -119,9 +121,9 @@ export function KpiStrip() {
           <div className="grid grid-cols-1 md:grid-cols-2 md:grid-rows-3 xl:col-span-5 xl:border-r">
             <Card className="h-full rounded-none border-0 border-border border-b ring-0 md:border-r">
               <CardHeader>
-                <CardTitle className="font-normal text-sm">Total Bestellwert</CardTitle>
+                <CardTitle className="font-normal text-sm">{t("dashEcommerce.kpi.totalOrderValue.title")}</CardTitle>
                 <CardDescription className="text-3xl text-foreground tabular-nums leading-none tracking-tight">
-                  €48,560.00
+                  {t("dashEcommerce.kpi.totalOrderValue.value")}
                 </CardDescription>
                 <CardAction className="grid size-6 place-items-center rounded-sm bg-muted">
                   <DollarSign className="size-3 text-foreground" />
@@ -129,17 +131,17 @@ export function KpiStrip() {
               </CardHeader>
               <CardContent>
                 <div className="text-sm">
-                  <span className="text-green-700 dark:text-green-300">+15.8%</span>
-                  <span className="text-muted-foreground"> vs last week</span>
+                  <span className="text-green-700 dark:text-green-300">{t("dashEcommerce.kpi.totalOrderValue.change")}</span>
+                  <span className="text-muted-foreground"> {t("dashEcommerce.kpi.totalOrderValue.compare")}</span>
                 </div>
               </CardContent>
             </Card>
 
             <Card className="h-full rounded-none border-0 border-border border-b ring-0">
               <CardHeader>
-                <CardTitle className="font-normal text-sm">Bestellungen gesamt</CardTitle>
+                <CardTitle className="font-normal text-sm">{t("dashEcommerce.kpi.totalOrders.title")}</CardTitle>
                 <CardDescription className="text-3xl text-foreground tabular-nums leading-none tracking-tight">
-                  379
+                  {t("dashEcommerce.kpi.totalOrders.value")}
                 </CardDescription>
                 <CardAction className="grid size-6 place-items-center rounded-sm bg-muted">
                   <ShoppingBag className="size-3 text-foreground" />
@@ -147,17 +149,17 @@ export function KpiStrip() {
               </CardHeader>
               <CardContent>
                 <div className="text-sm">
-                  <span className="text-green-700 dark:text-green-300">+8.3%</span>
-                  <span className="text-muted-foreground"> vs last week</span>
+                  <span className="text-green-700 dark:text-green-300">{t("dashEcommerce.kpi.totalOrders.change")}</span>
+                  <span className="text-muted-foreground"> {t("dashEcommerce.kpi.totalOrders.compare")}</span>
                 </div>
               </CardContent>
             </Card>
 
             <Card className="h-full rounded-none border-0 border-border border-b ring-0 md:border-r">
               <CardHeader>
-                <CardTitle className="font-normal text-sm">Aktive Kunden</CardTitle>
+                <CardTitle className="font-normal text-sm">{t("dashEcommerce.kpi.activeCustomers.title")}</CardTitle>
                 <CardDescription className="text-3xl text-foreground tabular-nums leading-none tracking-tight">
-                  820
+                  {t("dashEcommerce.kpi.activeCustomers.value")}
                 </CardDescription>
                 <CardAction className="grid size-6 place-items-center rounded-sm bg-muted">
                   <Users className="size-3 text-foreground" />
@@ -165,17 +167,17 @@ export function KpiStrip() {
               </CardHeader>
               <CardContent>
                 <div className="text-sm">
-                  <span className="text-green-700 dark:text-green-300">+12.5%</span>
-                  <span className="text-muted-foreground"> vs last month</span>
+                  <span className="text-green-700 dark:text-green-300">{t("dashEcommerce.kpi.activeCustomers.change")}</span>
+                  <span className="text-muted-foreground"> {t("dashEcommerce.kpi.activeCustomers.compare")}</span>
                 </div>
               </CardContent>
             </Card>
 
             <Card className="h-full rounded-none border-0 border-border border-b ring-0">
               <CardHeader>
-                <CardTitle className="font-normal text-sm">Durchschnittliche Bestellung</CardTitle>
+                <CardTitle className="font-normal text-sm">{t("dashEcommerce.kpi.averageOrder.title")}</CardTitle>
                 <CardDescription className="text-3xl text-foreground tabular-nums leading-none tracking-tight">
-                  €4,280
+                  {t("dashEcommerce.kpi.averageOrder.value")}
                 </CardDescription>
                 <CardAction className="grid size-6 place-items-center rounded-sm bg-muted">
                   <ReceiptText className="size-3 text-foreground" />
@@ -183,15 +185,15 @@ export function KpiStrip() {
               </CardHeader>
               <CardContent>
                 <div className="text-sm">
-                  <span className="text-destructive">-$4.20</span>
-                  <span className="text-muted-foreground"> vs last week</span>
+                  <span className="text-destructive">{t("dashEcommerce.kpi.averageOrder.change")}</span>
+                  <span className="text-muted-foreground"> {t("dashEcommerce.kpi.averageOrder.compare")}</span>
                 </div>
               </CardContent>
             </Card>
 
             <Card className="h-full rounded-none border-0 border-border border-b ring-0 md:border-r md:border-b-0">
               <CardHeader>
-                <CardTitle className="font-normal text-sm">Kostencheck-Abweichungen</CardTitle>
+                <CardTitle className="font-normal text-sm">{t("dashEcommerce.kpi.deviations.title")}</CardTitle>
                 <CardDescription className="text-3xl text-foreground tabular-nums leading-none tracking-tight">
                   {deviationCount ?? 18}
                 </CardDescription>
@@ -201,16 +203,16 @@ export function KpiStrip() {
               </CardHeader>
               <CardContent>
                 <div className="text-sm">
-                  <span className="text-muted-foreground">{deviationCount !== null ? "live count, all projects" : "+0.6% vs last month"}</span>
+                  <span className="text-muted-foreground">{deviationCount !== null ? t("dashEcommerce.kpi.deviations.compareLive") : t("dashEcommerce.kpi.deviations.compareFallback")}</span>
                 </div>
               </CardContent>
             </Card>
 
             <Card className="h-full rounded-none border-0 ring-0">
               <CardHeader>
-                <CardTitle className="font-normal text-sm">Lieferzeit-Genauigkeit</CardTitle>
+                <CardTitle className="font-normal text-sm">{t("dashEcommerce.kpi.leadTimeAccuracy.title")}</CardTitle>
                 <CardDescription className="text-3xl text-foreground tabular-nums leading-none tracking-tight">
-                  97%
+                  {t("dashEcommerce.kpi.leadTimeAccuracy.value")}
                 </CardDescription>
                 <CardAction className="grid size-6 place-items-center rounded-sm bg-muted">
                   <PackageCheck className="size-3 text-foreground" />
@@ -218,8 +220,8 @@ export function KpiStrip() {
               </CardHeader>
               <CardContent>
                 <div className="text-sm">
-                  <span className="text-green-700 dark:text-green-300">+2.4 pts</span>
-                  <span className="text-muted-foreground"> vs last audit</span>
+                  <span className="text-green-700 dark:text-green-300">{t("dashEcommerce.kpi.leadTimeAccuracy.change")}</span>
+                  <span className="text-muted-foreground"> {t("dashEcommerce.kpi.leadTimeAccuracy.compare")}</span>
                 </div>
               </CardContent>
             </Card>
@@ -227,7 +229,7 @@ export function KpiStrip() {
 
           <Card className="h-full rounded-none border-0 ring-0 xl:col-span-7">
             <CardHeader>
-              <CardTitle className="font-normal">Bestellwert-Übersicht</CardTitle>
+              <CardTitle className="font-normal">{t("dashEcommerce.kpi.overview.title")}</CardTitle>
               <CardAction>
                 <ArrowUpRight className="size-4" />
               </CardAction>

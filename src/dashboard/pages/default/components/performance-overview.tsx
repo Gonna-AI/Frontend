@@ -21,6 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/dashboard-ui/select";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const chartValues = [
   { documentsProcessed: 1, deviationsCaught: 0, reviewNeeded: 0 },
@@ -213,51 +214,53 @@ const chartData = chartValues.map((point, index) => ({
   ...point,
 }));
 
-const chartConfig = {
-  documentsProcessed: {
-    label: "Documents Processed",
-    color: "var(--chart-1)",
-  },
-  deviationsCaught: {
-    label: "Deviations Caught",
-    color: "var(--chart-2)",
-  },
-  reviewNeeded: {
-    label: "Needs Human Review",
-    color: "var(--chart-3)",
-  },
-} satisfies ChartConfig;
-
 export function PerformanceOverview() {
+  const { t } = useLanguage();
+
+  const chartConfig = {
+    documentsProcessed: {
+      label: t("dashDefault.performance.chart.documentsProcessed"),
+      color: "var(--chart-1)",
+    },
+    deviationsCaught: {
+      label: t("dashDefault.performance.chart.deviationsCaught"),
+      color: "var(--chart-2)",
+    },
+    reviewNeeded: {
+      label: t("dashDefault.performance.chart.reviewNeeded"),
+      color: "var(--chart-3)",
+    },
+  } satisfies ChartConfig;
+
   return (
     <Card className="@container/card">
       <CardHeader>
-        <CardTitle className="leading-none">Documents & Deviations</CardTitle>
+        <CardTitle className="leading-none">{t("dashDefault.performance.title")}</CardTitle>
         <CardDescription>
-          <span className="@[540px]/card:block hidden">Documents processed and deviations caught over the last 3 months</span>
-          <span className="@[540px]/card:hidden">Last 3 months</span>
+          <span className="@[540px]/card:block hidden">{t("dashDefault.performance.descriptionLong")}</span>
+          <span className="@[540px]/card:hidden">{t("dashDefault.performance.descriptionShort")}</span>
         </CardDescription>
         <CardAction className="flex items-center gap-2">
           <Select defaultValue="quarter">
             <SelectTrigger size="sm" className="w-28">
-              <SelectValue placeholder="3 months" />
+              <SelectValue placeholder={t("dashDefault.performance.period3Months")} />
             </SelectTrigger>
             <SelectContent>
               <SelectGroup>
-                <SelectLabel>Period</SelectLabel>
-                <SelectItem value="quarter">3 months</SelectItem>
+                <SelectLabel>{t("dashDefault.performance.periodLabel")}</SelectLabel>
+                <SelectItem value="quarter">{t("dashDefault.performance.period3Months")}</SelectItem>
               </SelectGroup>
             </SelectContent>
           </Select>
 
           <Select defaultValue="all">
             <SelectTrigger size="sm" className="w-32">
-              <SelectValue placeholder="All companies" />
+              <SelectValue placeholder={t("dashDefault.performance.companiesPlaceholder")} />
             </SelectTrigger>
             <SelectContent>
               <SelectGroup>
-                <SelectLabel>Companies</SelectLabel>
-                <SelectItem value="all">All companies</SelectItem>
+                <SelectLabel>{t("dashDefault.performance.companiesLabel")}</SelectLabel>
+                <SelectItem value="all">{t("dashDefault.performance.companiesAll")}</SelectItem>
                 <SelectItem value="thd">THD GmbH</SelectItem>
                 <SelectItem value="weber">Weber Präzisionstechnik</SelectItem>
                 <SelectItem value="mk">MK Anlagenbau</SelectItem>
@@ -266,7 +269,7 @@ export function PerformanceOverview() {
           </Select>
 
           <Button variant="outline" size="sm">
-            View report
+            {t("dashDefault.performance.viewReport")}
           </Button>
         </CardAction>
       </CardHeader>

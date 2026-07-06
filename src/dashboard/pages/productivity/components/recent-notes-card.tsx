@@ -3,30 +3,33 @@ import { BookOpen, FileText } from "lucide-react-dash";
 
 import { Button } from "@/components/dashboard-ui/button";
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/dashboard-ui/card";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const today = new Date();
 
-function formatNoteDate(date: Date) {
-  if (isToday(date)) return "Today";
-  if (isYesterday(date)) return "Yesterday";
-  return format(date, "MMM d");
-}
-
-const recentNotes = [
-  { title: "Kostencheck-Regeln für Sondermotoren", date: formatNoteDate(today), icon: FileText },
-  { title: `Lieferzeiten TM-75 – ${format(today, "MMMM")}`, date: formatNoteDate(subDays(today, 1)), icon: FileText },
-  { title: "Abweichungen der letzten Woche", date: formatNoteDate(subDays(today, 4)), icon: FileText },
-  { title: "AB-Vorlagen für THD GmbH", date: formatNoteDate(subDays(today, 5)), icon: BookOpen },
-] as const;
-
 export function RecentNotesCard() {
+  const { t } = useLanguage();
+
+  function formatNoteDate(date: Date) {
+    if (isToday(date)) return t("dashProductivity.notes.today");
+    if (isYesterday(date)) return t("dashProductivity.notes.yesterday");
+    return format(date, "MMM d");
+  }
+
+  const recentNotes = [
+    { title: t("dashProductivity.notes.note1.title"), date: formatNoteDate(today), icon: FileText },
+    { title: t("dashProductivity.notes.note2.title").replace("{month}", format(today, "MMMM")), date: formatNoteDate(subDays(today, 1)), icon: FileText },
+    { title: t("dashProductivity.notes.note3.title"), date: formatNoteDate(subDays(today, 4)), icon: FileText },
+    { title: t("dashProductivity.notes.note4.title"), date: formatNoteDate(subDays(today, 5)), icon: BookOpen },
+  ] as const;
+
   return (
     <Card className="shadow-xs">
       <CardHeader>
-        <CardTitle>Recent Notes</CardTitle>
+        <CardTitle>{t("dashProductivity.notes.title")}</CardTitle>
         <CardAction>
           <Button variant="ghost" size="sm" className="text-muted-foreground">
-            View all
+            {t("dashProductivity.notes.viewAll")}
           </Button>
         </CardAction>
       </CardHeader>

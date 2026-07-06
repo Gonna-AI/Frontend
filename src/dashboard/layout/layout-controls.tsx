@@ -6,6 +6,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/dashboard-
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/dashboard-ui/select";
 import { ToggleGroup, ToggleGroupItem } from "@/components/dashboard-ui/toggle-group";
 import { useTheme } from "@/hooks/useTheme";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { fontOptions, THEME_PRESET_OPTIONS, usePreferencesStore, type ContentLayout, type FontKey, type NavbarStyle, type SidebarCollapsible, type SidebarVariant, type ThemeMode, type ThemePreset } from "@/dashboard/store/preferences-store";
 
 export function LayoutControls() {
@@ -13,6 +14,7 @@ export function LayoutControls() {
   const setPreference = usePreferencesStore((s) => s.setPreference);
   const resetPreferences = usePreferencesStore((s) => s.resetPreferences);
   const { isDark } = useTheme();
+  const { t } = useLanguage();
 
   const {
     theme_mode: themeMode,
@@ -68,15 +70,15 @@ export function LayoutControls() {
       <PopoverContent align="end">
         <div className="flex flex-col gap-5">
           <div className="space-y-1.5">
-            <h4 className="font-medium text-sm leading-none">Preferences</h4>
-            <p className="text-muted-foreground text-xs">Customize your dashboard layout preferences.</p>
+            <h4 className="font-medium text-sm leading-none">{t("dashShell.layoutControls.preferencesTitle")}</h4>
+            <p className="text-muted-foreground text-xs">{t("dashShell.layoutControls.preferencesDesc")}</p>
           </div>
           <div className="space-y-3 **:data-[slot=toggle-group]:w-full **:data-[slot=toggle-group-item]:flex-1 **:data-[slot=toggle-group-item]:text-xs">
             <div className="space-y-1">
-              <Label className="font-medium text-xs">Theme Preset</Label>
+              <Label className="font-medium text-xs">{t("dashShell.layoutControls.themePreset")}</Label>
               <Select value={themePreset} onValueChange={onThemePresetChange}>
                 <SelectTrigger size="sm" className="w-full text-xs">
-                  <SelectValue placeholder="Preset" />
+                  <SelectValue placeholder={t("dashShell.layoutControls.presetPlaceholder")} />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectGroup>

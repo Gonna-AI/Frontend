@@ -1,5 +1,17 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { en } from '../i18n/en';
+import { enDashboardShell } from '../i18n/en/dashboard-shell';
+import { deDashboardShell } from '../i18n/de/dashboard-shell';
+import { enDashboardCrm } from '../i18n/en/dashboard-crm';
+import { deDashboardCrm } from '../i18n/de/dashboard-crm';
+import { enDashboardFinance } from '../i18n/en/dashboard-finance';
+import { deDashboardFinance } from '../i18n/de/dashboard-finance';
+import { enDashboardInvoice } from '../i18n/en/dashboard-invoice';
+import { deDashboardInvoice } from '../i18n/de/dashboard-invoice';
+import { enDashboardUsers } from '../i18n/en/dashboard-users';
+import { deDashboardUsers } from '../i18n/de/dashboard-users';
+import { enDashboardRoles } from '../i18n/en/dashboard-roles';
+import { deDashboardRoles } from '../i18n/de/dashboard-roles';
 
 type Language = 'en' | 'de';
 
@@ -11,9 +23,13 @@ type LanguageContextType = {
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
+// Base translations merged with feature-module translations (e.g. dashboard shell).
+// New modules should be spread in here rather than edited into en.ts/de.ts directly.
+const mergedEn = { ...en, ...enDashboardShell, ...enDashboardCrm, ...enDashboardFinance };
+
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
     const [language, setLanguageState] = useState<Language>('en');
-    const [translations, setTranslations] = useState<Record<string, any>>({ en });
+    const [translations, setTranslations] = useState<Record<string, any>>({ en: mergedEn });
 
     useEffect(() => {
         // Check URL params first
@@ -24,7 +40,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
             if (lang === 'de' && !translations.de) {
                 try {
                     const module = await import('../i18n/de');
-                    setTranslations(prev => ({ ...prev, de: module.de }));
+                    setTranslations(prev => ({ ...prev, de: { ...module.de, ...deDashboardShell, ...deDashboardCrm, ...deDashboardFinance } }));
                 } catch (error) {
                     console.error('Failed to load German translations', error);
                 }
@@ -51,7 +67,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
         if (lang === 'de' && !translations.de) {
             try {
                 const module = await import('../i18n/de');
-                setTranslations(prev => ({ ...prev, de: module.de }));
+                setTranslations(prev => ({ ...prev, de: { ...module.de, ...deDashboardShell } }));
             } catch (error) {
                 console.error('Failed to load German translations', error);
                 return; // Don't switch if loading fails

@@ -6,57 +6,60 @@ import { Button } from "@/components/dashboard-ui/button";
 import { Card, CardAction, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/dashboard-ui/card";
 import { Progress } from "@/components/dashboard-ui/progress";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/dashboard-ui/select";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const today = new Date();
 
-const projects = [
-  {
-    title: "Bergmann Maschinenbau – CNC-Paket 2026",
-    status: "In Progress",
-    description: "Kostencheck: 5 Abweichungen erkannt.",
-    progress: 68,
-    due: `Due ${format(addDays(today, 9), "MMM d")}`,
-    icon: Orbit,
-  },
-  {
-    title: "Weber Präzisionstechnik – Spannsysteme",
-    status: "Planning",
-    description: "Angebot in Kalkulation.",
-    progress: 42,
-    due: `Due ${format(addDays(today, 21), "MMM d")}`,
-    icon: Globe,
-  },
-  {
-    title: "MK Anlagenbau – Rundschalttische",
-    status: "Planning",
-    description: "Bestellung eingegangen, AB ausstehend.",
-    progress: 31,
-    due: `Due ${format(addDays(today, 18), "MMM d")}`,
-    icon: ClipboardCheck,
-  },
-] as const;
-
 export function ProjectsSection() {
+  const { t } = useLanguage();
+
+  const projects = [
+    {
+      title: t("dashProductivity.projects.project1.title"),
+      status: t("dashProductivity.projects.status.inProgress"),
+      description: t("dashProductivity.projects.project1.description"),
+      progress: 68,
+      due: t("dashProductivity.projects.due").replace("{date}", format(addDays(today, 9), "MMM d")),
+      icon: Orbit,
+    },
+    {
+      title: t("dashProductivity.projects.project2.title"),
+      status: t("dashProductivity.projects.status.planning"),
+      description: t("dashProductivity.projects.project2.description"),
+      progress: 42,
+      due: t("dashProductivity.projects.due").replace("{date}", format(addDays(today, 21), "MMM d")),
+      icon: Globe,
+    },
+    {
+      title: t("dashProductivity.projects.project3.title"),
+      status: t("dashProductivity.projects.status.planning"),
+      description: t("dashProductivity.projects.project3.description"),
+      progress: 31,
+      due: t("dashProductivity.projects.due").replace("{date}", format(addDays(today, 18), "MMM d")),
+      icon: ClipboardCheck,
+    },
+  ] as const;
+
   return (
     <section className="flex flex-col gap-2">
       <div className="flex items-center justify-between gap-4">
-        <h2 className="text-xl tracking-tight">Projects</h2>
+        <h2 className="text-xl tracking-tight">{t("dashProductivity.projects.heading")}</h2>
         <div className="flex items-center gap-2">
           <Select defaultValue="active">
             <SelectTrigger className="w-28">
-              <SelectValue placeholder="Active" />
+              <SelectValue placeholder={t("dashProductivity.projects.filter.active")} />
             </SelectTrigger>
             <SelectContent>
               <SelectGroup>
-                <SelectItem value="active">Active</SelectItem>
-                <SelectItem value="planning">Planning</SelectItem>
-                <SelectItem value="completed">Completed</SelectItem>
+                <SelectItem value="active">{t("dashProductivity.projects.filter.active")}</SelectItem>
+                <SelectItem value="planning">{t("dashProductivity.projects.filter.planning")}</SelectItem>
+                <SelectItem value="completed">{t("dashProductivity.projects.filter.completed")}</SelectItem>
               </SelectGroup>
             </SelectContent>
           </Select>
           <Button variant="outline">
             <Plus data-icon="inline-start" />
-            New
+            {t("dashProductivity.projects.newButton")}
           </Button>
         </div>
       </div>

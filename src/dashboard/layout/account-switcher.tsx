@@ -13,10 +13,12 @@ import {
 } from "@/components/dashboard-ui/dropdown-menu";
 import { getInitials } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export function AccountSwitcher() {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
+  const { t } = useLanguage();
 
   const name = (user?.user_metadata?.full_name as string | undefined)?.trim() || user?.email?.split("@")[0] || "Account";
   const email = user?.email ?? "";
@@ -50,21 +52,21 @@ export function AccountSwitcher() {
         <DropdownMenuGroup>
           <DropdownMenuItem>
             <BadgeCheck />
-            Account
+            {t("dashShell.user.account")}
           </DropdownMenuItem>
           <DropdownMenuItem>
             <CreditCard />
-            Billing
+            {t("dashShell.user.billing")}
           </DropdownMenuItem>
           <DropdownMenuItem>
             <Bell />
-            Notifications
+            {t("dashShell.user.notifications")}
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleSignOut}>
           <LogOut />
-          Log out
+          {t("dashShell.user.logout")}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

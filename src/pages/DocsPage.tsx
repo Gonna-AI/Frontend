@@ -6,53 +6,54 @@ import {
     dashboardEndpoints, errorCodes
 } from './docsContent';
 import { Header } from '../components/Landing/AgeroChrome';
+import { useLanguage } from '../contexts/LanguageContext';
 import './LandingFramer.css';
 
 type DocSection = 'intro' | 'auth' | 'chat' | 'call' | 'dashboard' | 'webhooks';
-interface NavItem { id: string; label: string; section: DocSection; }
-interface NavGroup { title: string; items: NavItem[]; }
+interface NavItem { id: string; labelKey: string; section: DocSection; }
+interface NavGroup { titleKey: string; items: NavItem[]; }
 
 const navGroups: NavGroup[] = [
     {
-        title: 'Get Started', items: [
-            { id: 'welcome', label: 'Introduction', section: 'intro' },
-            { id: 'quickstart', label: 'Quickstart', section: 'intro' },
-            { id: 'auth', label: 'Authentication', section: 'auth' },
-            { id: 'rate-limits', label: 'Rate Limits', section: 'auth' },
-            { id: 'errors', label: 'Error Handling', section: 'auth' },
+        titleKey: 'docsPage.nav.getStarted', items: [
+            { id: 'welcome', labelKey: 'docsPage.nav.introduction', section: 'intro' },
+            { id: 'quickstart', labelKey: 'docsPage.nav.quickstart', section: 'intro' },
+            { id: 'auth', labelKey: 'docsPage.nav.authentication', section: 'auth' },
+            { id: 'rate-limits', labelKey: 'docsPage.nav.rateLimits', section: 'auth' },
+            { id: 'errors', labelKey: 'docsPage.nav.errorHandling', section: 'auth' },
         ]
     },
     {
-        title: 'Chat API', items: [
-            { id: 'chat-overview', label: 'Overview', section: 'chat' },
-            { id: 'chat-completions', label: 'Create Completion', section: 'chat' },
-            { id: 'chat-streaming', label: 'Streaming', section: 'chat' },
-            { id: 'chat-history', label: 'Conversation History', section: 'chat' },
+        titleKey: 'docsPage.nav.chatApi', items: [
+            { id: 'chat-overview', labelKey: 'docsPage.nav.overview', section: 'chat' },
+            { id: 'chat-completions', labelKey: 'docsPage.nav.createCompletion', section: 'chat' },
+            { id: 'chat-streaming', labelKey: 'docsPage.nav.streaming', section: 'chat' },
+            { id: 'chat-history', labelKey: 'docsPage.nav.conversationHistory', section: 'chat' },
         ]
     },
     {
-        title: 'Call API', items: [
-            { id: 'call-overview', label: 'Overview', section: 'call' },
-            { id: 'call-initiate', label: 'Initiate Call', section: 'call' },
-            { id: 'call-status', label: 'Get Call Status', section: 'call' },
-            { id: 'call-history', label: 'Call History', section: 'call' },
-            { id: 'call-recording', label: 'Get Recording', section: 'call' },
+        titleKey: 'docsPage.nav.callApi', items: [
+            { id: 'call-overview', labelKey: 'docsPage.nav.overview', section: 'call' },
+            { id: 'call-initiate', labelKey: 'docsPage.nav.initiateCall', section: 'call' },
+            { id: 'call-status', labelKey: 'docsPage.nav.getCallStatus', section: 'call' },
+            { id: 'call-history', labelKey: 'docsPage.nav.callHistory', section: 'call' },
+            { id: 'call-recording', labelKey: 'docsPage.nav.getRecording', section: 'call' },
         ]
     },
     {
-        title: 'Dashboard API', items: [
-            { id: 'dash-overview', label: 'Overview', section: 'dashboard' },
-            { id: 'dash-monitor', label: 'Live Monitor', section: 'dashboard' },
-            { id: 'dash-analytics', label: 'Sales Analytics', section: 'dashboard' },
-            { id: 'dash-leads', label: 'Leads', section: 'dashboard' },
-            { id: 'dash-usage', label: 'Usage & Credits', section: 'dashboard' },
-            { id: 'dash-keys', label: 'API Keys', section: 'dashboard' },
+        titleKey: 'docsPage.nav.dashboardApi', items: [
+            { id: 'dash-overview', labelKey: 'docsPage.nav.overview', section: 'dashboard' },
+            { id: 'dash-monitor', labelKey: 'docsPage.nav.liveMonitor', section: 'dashboard' },
+            { id: 'dash-analytics', labelKey: 'docsPage.nav.salesAnalytics', section: 'dashboard' },
+            { id: 'dash-leads', labelKey: 'docsPage.nav.leads', section: 'dashboard' },
+            { id: 'dash-usage', labelKey: 'docsPage.nav.usageCredits', section: 'dashboard' },
+            { id: 'dash-keys', labelKey: 'docsPage.nav.apiKeys', section: 'dashboard' },
         ]
     },
     {
-        title: 'Real-time', items: [
-            { id: 'webhooks', label: 'Webhooks', section: 'webhooks' },
-            { id: 'websocket', label: 'WebSocket Stream', section: 'webhooks' },
+        titleKey: 'docsPage.nav.realtime', items: [
+            { id: 'webhooks', labelKey: 'docsPage.nav.webhooks', section: 'webhooks' },
+            { id: 'websocket', labelKey: 'docsPage.nav.websocketStream', section: 'webhooks' },
         ]
     },
 ];
@@ -92,6 +93,7 @@ const GrainOverlay = ({ className = '' }: { className?: string }) => (
 );
 
 const ParamTable = ({ params, title }: { params: EndpointDoc['params']; title?: string }) => {
+    const { t } = useLanguage();
     if (!params || params.length === 0) return null;
     return (
         <div className="mt-6">
@@ -99,17 +101,17 @@ const ParamTable = ({ params, title }: { params: EndpointDoc['params']; title?: 
             <div className="rounded-xl border border-[rgba(19,19,19,0.1)] overflow-hidden w-full overflow-x-auto">
                 <table className="w-full text-sm min-w-[600px]">
                     <thead><tr className="bg-[rgba(19,19,19,0.03)] text-left">
-                        <th className="px-4 py-3 text-[rgba(19,19,19,0.6)] font-medium">Parameter</th>
-                        <th className="px-4 py-3 text-[rgba(19,19,19,0.6)] font-medium">Type</th>
-                        <th className="px-4 py-3 text-[rgba(19,19,19,0.6)] font-medium">Required</th>
-                        <th className="px-4 py-3 text-[rgba(19,19,19,0.6)] font-medium">Description</th>
+                        <th className="px-4 py-3 text-[rgba(19,19,19,0.6)] font-medium">{t('docsPage.table.parameter')}</th>
+                        <th className="px-4 py-3 text-[rgba(19,19,19,0.6)] font-medium">{t('docsPage.table.type')}</th>
+                        <th className="px-4 py-3 text-[rgba(19,19,19,0.6)] font-medium">{t('docsPage.table.required')}</th>
+                        <th className="px-4 py-3 text-[rgba(19,19,19,0.6)] font-medium">{t('docsPage.table.description')}</th>
                     </tr></thead>
                     <tbody>
                         {params.map((p, i) => (
                             <tr key={i} className="border-t border-[rgba(19,19,19,0.08)]">
                                 <td className="px-4 py-3 font-mono text-[#D14000]">{p.name}</td>
                                 <td className="px-4 py-3 text-[rgba(19,19,19,0.5)]">{p.type}</td>
-                                <td className="px-4 py-3">{p.required ? <span className="text-amber-400 text-xs font-semibold">Required</span> : <span className="text-[rgba(19,19,19,0.35)] text-xs">Optional</span>}</td>
+                                <td className="px-4 py-3">{p.required ? <span className="text-amber-400 text-xs font-semibold">{t('docsPage.table.requiredBadge')}</span> : <span className="text-[rgba(19,19,19,0.35)] text-xs">{t('docsPage.table.optionalBadge')}</span>}</td>
                                 <td className="px-4 py-3 text-[rgba(19,19,19,0.6)]">{p.desc}</td>
                             </tr>
                         ))}
@@ -136,6 +138,7 @@ const SectionHeader = ({ title, description, iconColor, iconClass }: { title: st
 );
 
 const TryItPanel = ({ ep }: { ep: EndpointDoc }) => {
+    const { t } = useLanguage();
     const [apiKey, setApiKey] = useState('');
     const [body, setBody] = useState(ep.tryItBody || '');
     const [response, setResponse] = useState('');
@@ -146,7 +149,7 @@ const TryItPanel = ({ ep }: { ep: EndpointDoc }) => {
     if (!ep.realUrl) return null;
 
     const handleSend = async () => {
-        if (!apiKey) { setResponse('{"error": "Enter your API key above"}'); setStatusCode(401); return; }
+        if (!apiKey) { setResponse(`{"error": "${t('docsPage.tryIt.enterApiKeyError')}"}`); setStatusCode(401); return; }
         setLoading(true); setResponse(''); setStatusCode(null);
         try {
             const method = ep.realMethod || ep.method;
@@ -160,7 +163,7 @@ const TryItPanel = ({ ep }: { ep: EndpointDoc }) => {
             const text = await res.text();
             try { setResponse(JSON.stringify(JSON.parse(text), null, 2)); } catch { setResponse(text); }
         } catch (err: any) {
-            setResponse(JSON.stringify({ error: 'Network error', message: err.message }, null, 2));
+            setResponse(JSON.stringify({ error: t('docsPage.tryIt.networkError'), message: err.message }, null, 2));
             setStatusCode(0);
         }
         setLoading(false);
@@ -170,19 +173,19 @@ const TryItPanel = ({ ep }: { ep: EndpointDoc }) => {
         <div className="mt-6">
             <button onClick={() => setIsOpen(!isOpen)} className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#FF4D00]/20 to-[#FF8A5B]/20 border border-[#FF4D00]/30 hover:border-[#FF8A5B]/50 text-sm font-medium text-[#D14000] hover:text-[rgb(19,19,19)] transition-all group">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" /></svg>
-                {isOpen ? 'Hide' : 'Try It Live'}
+                {isOpen ? t('docsPage.tryIt.hide') : t('docsPage.tryIt.tryItLive')}
                 <ChevronRight className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-90' : ''}`} />
             </button>
             {isOpen && (
                 <div className="mt-3 p-5 rounded-2xl bg-[rgba(19,19,19,0.02)] border border-[rgba(19,19,19,0.1)] space-y-4">
                     <div>
-                        <label className="text-xs text-[rgba(19,19,19,0.5)] font-medium block mb-1.5">API Key</label>
+                        <label className="text-xs text-[rgba(19,19,19,0.5)] font-medium block mb-1.5">{t('docsPage.tryIt.apiKeyLabel')}</label>
                         <input type="password" placeholder="ct_live_..." value={apiKey} onChange={(e) => setApiKey(e.target.value)}
                             className="w-full bg-[rgba(19,19,19,0.04)] border border-[rgba(19,19,19,0.1)] rounded-lg px-3 py-2 text-sm font-mono text-[rgb(19,19,19)] placeholder-[rgba(19,19,19,0.3)] focus:outline-none focus:border-[#FF4D00]/50 transition-colors" />
                     </div>
                     {(ep.realMethod === 'POST' || ep.method === 'POST') && (
                         <div>
-                            <label className="text-xs text-[rgba(19,19,19,0.5)] font-medium block mb-1.5">Request Body</label>
+                            <label className="text-xs text-[rgba(19,19,19,0.5)] font-medium block mb-1.5">{t('docsPage.tryIt.requestBodyLabel')}</label>
                             <textarea value={body} onChange={(e) => setBody(e.target.value)} rows={Math.min(10, (body.split('\n').length || 3) + 1)}
                                 className="w-full bg-[rgba(19,19,19,0.04)] border border-[rgba(19,19,19,0.1)] rounded-lg px-3 py-2 text-sm font-mono text-[rgba(19,19,19,0.75)] focus:outline-none focus:border-[#FF4D00]/50 resize-y transition-colors" />
                         </div>
@@ -190,13 +193,13 @@ const TryItPanel = ({ ep }: { ep: EndpointDoc }) => {
                     <button onClick={handleSend} disabled={loading}
                         className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#FF4D00]/15 to-[#FF8A5B]/10 border border-[#FF4D00]/30 hover:border-[#FF8A5B]/50 text-sm font-medium text-[#D14000] hover:text-[#FF4D00] transition-all disabled:opacity-50 disabled:cursor-not-allowed backdrop-blur-sm">
                         {loading ? (
-                            <span className="flex items-center gap-2"><svg className="animate-spin w-4 h-4" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>Sending...</span>
-                        ) : <><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4"><path d="M3.105 2.289a.75.75 0 00-.826.95l1.414 4.925A1.5 1.5 0 005.135 9.25h6.115a.75.75 0 010 1.5H5.135a1.5 1.5 0 00-1.442 1.086l-1.414 4.926a.75.75 0 00.826.95 28.896 28.896 0 0015.293-7.154.75.75 0 000-1.115A28.897 28.897 0 003.105 2.289z" /></svg>Send Request</>}
+                            <span className="flex items-center gap-2"><svg className="animate-spin w-4 h-4" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>{t('docsPage.tryIt.sending')}</span>
+                        ) : <><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4"><path d="M3.105 2.289a.75.75 0 00-.826.95l1.414 4.925A1.5 1.5 0 005.135 9.25h6.115a.75.75 0 010 1.5H5.135a1.5 1.5 0 00-1.442 1.086l-1.414 4.926a.75.75 0 00.826.95 28.896 28.896 0 0015.293-7.154.75.75 0 000-1.115A28.897 28.897 0 003.105 2.289z" /></svg>{t('docsPage.tryIt.sendRequest')}</>}
                     </button>
                     {response && (
                         <div>
                             <div className="flex items-center gap-2 mb-2">
-                                <span className="text-xs text-[rgba(19,19,19,0.5)]">Response</span>
+                                <span className="text-xs text-[rgba(19,19,19,0.5)]">{t('docsPage.tryIt.response')}</span>
                                 {statusCode !== null && (
                                     <span className={`text-xs px-2 py-0.5 rounded-full font-mono font-bold ${statusCode >= 200 && statusCode < 300 ? 'bg-emerald-500/20 text-emerald-400' : statusCode >= 400 ? 'bg-red-500/20 text-red-400' : 'bg-amber-500/20 text-amber-400'}`}>
                                         {statusCode}
@@ -212,23 +215,27 @@ const TryItPanel = ({ ep }: { ep: EndpointDoc }) => {
     );
 };
 
-const EndpointSection = ({ ep }: { ep: EndpointDoc }) => (
-    <section id={ep.id} className="scroll-mt-24 space-y-4 py-8">
-        <h3 className="text-2xl font-semibold text-[rgb(19,19,19)]">{ep.title}</h3>
-        <p className="text-[rgba(19,19,19,0.6)] leading-relaxed">{ep.description}</p>
-        <div className="flex items-center gap-3 text-sm font-mono mt-4 overflow-x-auto pb-2 w-full">
-            <MethodBadge method={ep.method} color={ep.color} />
-            <span className="text-[rgba(19,19,19,0.7)] whitespace-nowrap">{BASE_URL}{ep.path}</span>
-        </div>
-        <ParamTable params={ep.params} title="Request Body Parameters" />
-        <ParamTable params={ep.queryParams} title="Query Parameters" />
-        {ep.requestBody && (<div className="mt-6"><h4 className="text-sm font-semibold text-[rgba(19,19,19,0.75)] mb-2">Request Example</h4><CodeBlock code={ep.requestBody} language="bash" /></div>)}
-        {ep.responseBody && (<div className="mt-6"><h4 className="text-sm font-semibold text-[rgba(19,19,19,0.75)] mb-2">Response</h4><CodeBlock code={ep.responseBody} language="json" /></div>)}
-        <TryItPanel ep={ep} />
-    </section>
-);
+const EndpointSection = ({ ep }: { ep: EndpointDoc }) => {
+    const { t } = useLanguage();
+    return (
+        <section id={ep.id} className="scroll-mt-24 space-y-4 py-8">
+            <h3 className="text-2xl font-semibold text-[rgb(19,19,19)]">{ep.title}</h3>
+            <p className="text-[rgba(19,19,19,0.6)] leading-relaxed">{ep.description}</p>
+            <div className="flex items-center gap-3 text-sm font-mono mt-4 overflow-x-auto pb-2 w-full">
+                <MethodBadge method={ep.method} color={ep.color} />
+                <span className="text-[rgba(19,19,19,0.7)] whitespace-nowrap">{BASE_URL}{ep.path}</span>
+            </div>
+            <ParamTable params={ep.params} title={t('docsPage.section.requestBodyParams')} />
+            <ParamTable params={ep.queryParams} title={t('docsPage.section.queryParams')} />
+            {ep.requestBody && (<div className="mt-6"><h4 className="text-sm font-semibold text-[rgba(19,19,19,0.75)] mb-2">{t('docsPage.section.requestExample')}</h4><CodeBlock code={ep.requestBody} language="bash" /></div>)}
+            {ep.responseBody && (<div className="mt-6"><h4 className="text-sm font-semibold text-[rgba(19,19,19,0.75)] mb-2">{t('docsPage.section.response')}</h4><CodeBlock code={ep.responseBody} language="json" /></div>)}
+            <TryItPanel ep={ep} />
+        </section>
+    );
+};
 
 export default function DocsPage() {
+    const { t } = useLanguage();
     const [activeId, setActiveId] = useState('welcome');
     const [isSearchOpen, setIsSearchOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
@@ -300,7 +307,7 @@ export default function DocsPage() {
 
     // Combine nav items with actual API endpoints for search
     const allSearchItems = [
-        ...allNavItems.map(item => ({ ...item, description: '' })),
+        ...allNavItems.map(item => ({ id: item.id, label: t(item.labelKey), section: item.section, description: '' })),
         ...chatEndpoints.map(ep => ({ id: ep.id, label: ep.title, section: 'chat' as DocSection, description: ep.description })),
         ...callEndpoints.map(ep => ({ id: ep.id, label: ep.title, section: 'call' as DocSection, description: ep.description })),
         ...dashboardEndpoints.map(ep => ({ id: ep.id, label: ep.title, section: 'dashboard' as DocSection, description: ep.description }))
@@ -358,21 +365,21 @@ export default function DocsPage() {
                     <div className="flex items-center gap-3 mb-6 pb-6 border-b border-[rgba(19,19,19,0.1)]">
                         <button onClick={() => setIsSearchOpen(true)} className="flex-1 flex items-center gap-2 px-3 py-2 rounded-lg border border-[rgba(19,19,19,0.1)] bg-[rgba(19,19,19,0.02)] text-sm text-[rgba(19,19,19,0.5)] hover:text-[rgb(19,19,19)] hover:border-[rgba(19,19,19,0.18)] transition-colors">
                             <Search className="w-4 h-4" />
-                            <span>Search docs...</span>
+                            <span>{t('docsPage.searchDocs')}</span>
                         </button>
                     </div>
                     <div className="flex items-center gap-2 mb-6">
-                        <Link to="/support" className="text-sm text-[rgba(19,19,19,0.6)] hover:text-[rgb(19,19,19)] transition-colors">Support</Link>
+                        <Link to="/support" className="text-sm text-[rgba(19,19,19,0.6)] hover:text-[rgb(19,19,19)] transition-colors">{t('docsPage.supportLink')}</Link>
                         <span className="text-[rgba(19,19,19,0.2)]">·</span>
-                        <Link to="/dashboard" className="text-sm text-[rgba(19,19,19,0.6)] hover:text-[rgb(19,19,19)] transition-colors">Dashboard</Link>
+                        <Link to="/dashboard" className="text-sm text-[rgba(19,19,19,0.6)] hover:text-[rgb(19,19,19)] transition-colors">{t('docsPage.dashboardLink')}</Link>
                     </div>
                     <div className="space-y-8">
                         {navGroups.map((group) => (
-                            <div key={group.title}>
-                                <h3 className="text-sm font-semibold text-[rgba(19,19,19,0.85)] mb-3">{group.title}</h3>
+                            <div key={group.titleKey}>
+                                <h3 className="text-sm font-semibold text-[rgba(19,19,19,0.85)] mb-3">{t(group.titleKey)}</h3>
                                 <ul className="space-y-1">
                                     {group.items.map((item) => (
-                                        <li key={item.id}><button onClick={() => scrollToSection(item.id)} className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-all ${activeId === item.id ? 'bg-[#FF4D00]/10 text-[#FF8A5B] font-medium border border-[#FF4D00]/20' : 'text-[rgba(19,19,19,0.5)] hover:text-[rgba(19,19,19,0.75)] hover:bg-[rgba(19,19,19,0.03)]'}`}>{item.label}</button></li>
+                                        <li key={item.id}><button onClick={() => scrollToSection(item.id)} className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-all ${activeId === item.id ? 'bg-[#FF4D00]/10 text-[#FF8A5B] font-medium border border-[#FF4D00]/20' : 'text-[rgba(19,19,19,0.5)] hover:text-[rgba(19,19,19,0.75)] hover:bg-[rgba(19,19,19,0.03)]'}`}>{t(item.labelKey)}</button></li>
                                     ))}
                                 </ul>
                             </div>
@@ -387,10 +394,10 @@ export default function DocsPage() {
                         {/* ─── INTRODUCTION ─── */}
                         <section id="welcome" className="scroll-mt-24 space-y-6">
                             <div className="space-y-4">
-                                <p className="text-[#FF8A5B] font-medium uppercase tracking-[0.2em] text-xs">API Reference</p>
-                                <h1 className="text-3xl md:text-5xl font-bold text-[rgb(19,19,19)] font-urbanist">ClerkTree API Documentation</h1>
+                                <p className="text-[#FF8A5B] font-medium uppercase tracking-[0.2em] text-xs">{t('docsPage.intro.eyebrow')}</p>
+                                <h1 className="text-3xl md:text-5xl font-bold text-[rgb(19,19,19)] font-urbanist">{t('docsPage.intro.heading')}</h1>
                                 <p className="text-xl text-[rgba(19,19,19,0.6)] leading-relaxed max-w-3xl">
-                                    Integrate AI-powered sales chat and voice calling into your product with a single API. ClerkTree provides blackbox AI models for chat and call — you send requests, we handle the intelligence.
+                                    {t('docsPage.intro.description')}
                                 </p>
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
@@ -398,24 +405,24 @@ export default function DocsPage() {
                                     <GrainOverlay />
                                     <div className="relative z-10">
                                         <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center mb-4"><div className="w-5 h-5 bg-emerald-500 rounded-full" /></div>
-                                        <h3 className="text-lg font-semibold text-[rgb(19,19,19)] mb-2">Chat API</h3>
-                                        <p className="text-[rgba(19,19,19,0.5)] text-sm">AI chat completions for sales conversations, support, and lead qualification.</p>
+                                        <h3 className="text-lg font-semibold text-[rgb(19,19,19)] mb-2">{t('docsPage.intro.cardChatTitle')}</h3>
+                                        <p className="text-[rgba(19,19,19,0.5)] text-sm">{t('docsPage.intro.cardChatDesc')}</p>
                                     </div>
                                 </div>
                                 <div className="relative overflow-hidden rounded-2xl border border-[rgba(19,19,19,0.1)] bg-white p-6 shadow-[0_18px_50px_rgba(0,0,0,0.06)] hover:border-[#FF4D00]/40 transition-colors">
                                     <GrainOverlay />
                                     <div className="relative z-10">
                                         <div className="w-10 h-10 rounded-xl bg-pink-500/10 flex items-center justify-center mb-4"><div className="w-5 h-5 bg-pink-500 rounded-full" /></div>
-                                        <h3 className="text-lg font-semibold text-[rgb(19,19,19)] mb-2">Call API</h3>
-                                        <p className="text-[rgba(19,19,19,0.5)] text-sm">AI-powered voice calls with real-time transcription, sentiment analysis, and lead extraction.</p>
+                                        <h3 className="text-lg font-semibold text-[rgb(19,19,19)] mb-2">{t('docsPage.intro.cardCallTitle')}</h3>
+                                        <p className="text-[rgba(19,19,19,0.5)] text-sm">{t('docsPage.intro.cardCallDesc')}</p>
                                     </div>
                                 </div>
                                 <div className="relative overflow-hidden rounded-2xl border border-[#FF4D00]/20 bg-white p-6 shadow-[0_18px_50px_rgba(0,0,0,0.06)] hover:border-[#FF4D00]/40 transition-colors">
                                     <GrainOverlay />
                                     <div className="relative z-10">
                                         <div className="w-10 h-10 rounded-xl bg-[#FF4D00]/15 flex items-center justify-center mb-4"><div className="w-5 h-5 bg-[#FF4D00] rounded-full" /></div>
-                                        <h3 className="text-lg font-semibold text-[rgb(19,19,19)] mb-2">Dashboard API</h3>
-                                        <p className="text-[rgba(19,19,19,0.5)] text-sm">Access your sales analytics, leads, usage data, and manage API keys programmatically.</p>
+                                        <h3 className="text-lg font-semibold text-[rgb(19,19,19)] mb-2">{t('docsPage.intro.cardDashboardTitle')}</h3>
+                                        <p className="text-[rgba(19,19,19,0.5)] text-sm">{t('docsPage.intro.cardDashboardDesc')}</p>
                                     </div>
                                 </div>
                             </div>
@@ -423,20 +430,20 @@ export default function DocsPage() {
 
                         {/* ─── QUICKSTART ─── */}
                         <section id="quickstart" className="scroll-mt-24 space-y-6 border-t border-[rgba(19,19,19,0.08)] pt-12">
-                            <h2 className="text-3xl font-bold text-[rgb(19,19,19)] font-urbanist">Quickstart</h2>
-                            <p className="text-[rgba(19,19,19,0.6)]">Get up and running in under 2 minutes. All you need is an API key from your <Link to="/dashboard" className="text-[#FF8A5B] hover:text-[#D14000] underline underline-offset-4">ClerkTree Dashboard</Link>.</p>
+                            <h2 className="text-3xl font-bold text-[rgb(19,19,19)] font-urbanist">{t('docsPage.quickstart.heading')}</h2>
+                            <p className="text-[rgba(19,19,19,0.6)]">{t('docsPage.quickstart.intro')} <Link to="/dashboard" className="text-[#FF8A5B] hover:text-[#D14000] underline underline-offset-4">{t('docsPage.quickstart.dashboardLinkLabel')}</Link>.</p>
                             <div className="space-y-6">
                                 <div className="flex flex-col md:flex-row items-start gap-3">
                                     <span className="flex-shrink-0 w-7 h-7 rounded-full bg-[#FF4D00]/20 text-[#FF8A5B] flex items-center justify-center text-sm font-bold">1</span>
                                     <div className="min-w-0 flex-1">
-                                        <p className="text-[rgb(19,19,19)] font-medium">Get your API key</p>
-                                        <p className="text-[rgba(19,19,19,0.5)] text-sm mt-1">Navigate to Dashboard → API Keys → Create New Key. Copy the generated token.</p>
+                                        <p className="text-[rgb(19,19,19)] font-medium">{t('docsPage.quickstart.step1Title')}</p>
+                                        <p className="text-[rgba(19,19,19,0.5)] text-sm mt-1">{t('docsPage.quickstart.step1Desc')}</p>
                                     </div>
                                 </div>
                                 <div className="flex flex-col md:flex-row items-start gap-3">
                                     <span className="flex-shrink-0 w-7 h-7 rounded-full bg-[#FF4D00]/20 text-[#FF8A5B] flex items-center justify-center text-sm font-bold">2</span>
                                     <div className="w-full min-w-0 flex-1">
-                                        <p className="text-[rgb(19,19,19)] font-medium mb-2">Make your first Chat request</p>
+                                        <p className="text-[rgb(19,19,19)] font-medium mb-2">{t('docsPage.quickstart.step2Title')}</p>
                                         <CodeBlock code={`curl -X POST "https://api.clerktree.com/v1/chat/completions" \\
   -H "Authorization: Bearer ct_live_YOUR_KEY" \\
   -H "Content-Type: application/json" \\
@@ -451,7 +458,7 @@ export default function DocsPage() {
                                 <div className="flex flex-col md:flex-row items-start gap-3">
                                     <span className="flex-shrink-0 w-7 h-7 rounded-full bg-[#FF4D00]/20 text-[#FF8A5B] flex items-center justify-center text-sm font-bold">3</span>
                                     <div className="w-full min-w-0 flex-1">
-                                        <p className="text-[rgb(19,19,19)] font-medium mb-2">Make your first Call request</p>
+                                        <p className="text-[rgb(19,19,19)] font-medium mb-2">{t('docsPage.quickstart.step3Title')}</p>
                                         <CodeBlock code={`curl -X POST "https://api.clerktree.com/v1/calls" \\
   -H "Authorization: Bearer ct_live_YOUR_KEY" \\
   -H "Content-Type: application/json" \\
@@ -467,45 +474,45 @@ export default function DocsPage() {
 
                         {/* ─── AUTH ─── */}
                         <section id="auth" className="scroll-mt-24 space-y-6 border-t border-[rgba(19,19,19,0.08)] pt-12">
-                            <h2 className="text-3xl font-bold text-[rgb(19,19,19)]">Authentication</h2>
-                            <p className="text-[rgba(19,19,19,0.6)]">The ClerkTree API uses Bearer token authentication. Include your API key in every request.</p>
+                            <h2 className="text-3xl font-bold text-[rgb(19,19,19)]">{t('docsPage.auth.heading')}</h2>
+                            <p className="text-[rgba(19,19,19,0.6)]">{t('docsPage.auth.intro')}</p>
                             <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-4 text-amber-200/80 text-sm flex gap-3 items-start">
                                 <div className="mt-1">⚠️</div>
-                                <p>Your API keys carry many privileges. Keep them secure! Never expose them in client-side code, public repositories, or browser applications. Use environment variables on your server.</p>
+                                <p>{t('docsPage.auth.warning')}</p>
                             </div>
-                            <p className="text-[rgba(19,19,19,0.6)]">All requests must include the <code className="text-[#D14000] bg-[#FF4D00]/10 px-1.5 py-0.5 rounded">Authorization</code> header:</p>
+                            <p className="text-[rgba(19,19,19,0.6)]">{t('docsPage.auth.headerIntro')} <code className="text-[#D14000] bg-[#FF4D00]/10 px-1.5 py-0.5 rounded">Authorization</code> {t('docsPage.auth.headerIntroSuffix')}</p>
                             <CodeBlock code={`Authorization: Bearer ct_live_YOUR_API_KEY`} language="http" />
-                            <p className="text-[rgba(19,19,19,0.6)]">API keys are prefixed for easy identification:</p>
+                            <p className="text-[rgba(19,19,19,0.6)]">{t('docsPage.auth.prefixIntro')}</p>
                             <div className="rounded-xl border border-[rgba(19,19,19,0.1)] overflow-hidden w-full overflow-x-auto">
                                 <table className="w-full text-sm min-w-[600px]"><tbody>
-                                    <tr className="border-b border-[rgba(19,19,19,0.08)]"><td className="px-4 py-3 font-mono text-emerald-400">ct_live_*</td><td className="px-4 py-3 text-[rgba(19,19,19,0.6)]">Production key — full access</td></tr>
-                                    <tr className="border-b border-[rgba(19,19,19,0.08)]"><td className="px-4 py-3 font-mono text-amber-400">ct_test_*</td><td className="px-4 py-3 text-[rgba(19,19,19,0.6)]">Test key — sandbox only, no real calls</td></tr>
-                                    <tr><td className="px-4 py-3 font-mono text-blue-400">ct_restrict_*</td><td className="px-4 py-3 text-[rgba(19,19,19,0.6)]">Restricted key — limited scopes</td></tr>
+                                    <tr className="border-b border-[rgba(19,19,19,0.08)]"><td className="px-4 py-3 font-mono text-emerald-400">ct_live_*</td><td className="px-4 py-3 text-[rgba(19,19,19,0.6)]">{t('docsPage.auth.prodKeyDesc')}</td></tr>
+                                    <tr className="border-b border-[rgba(19,19,19,0.08)]"><td className="px-4 py-3 font-mono text-amber-400">ct_test_*</td><td className="px-4 py-3 text-[rgba(19,19,19,0.6)]">{t('docsPage.auth.testKeyDesc')}</td></tr>
+                                    <tr><td className="px-4 py-3 font-mono text-blue-400">ct_restrict_*</td><td className="px-4 py-3 text-[rgba(19,19,19,0.6)]">{t('docsPage.auth.restrictedKeyDesc')}</td></tr>
                                 </tbody></table>
                             </div>
                         </section>
 
                         {/* ─── RATE LIMITS ─── */}
                         <section id="rate-limits" className="scroll-mt-24 space-y-6 border-t border-[rgba(19,19,19,0.08)] pt-12">
-                            <h2 className="text-3xl font-bold text-[rgb(19,19,19)]">Rate Limits</h2>
-                            <p className="text-[rgba(19,19,19,0.6)]">Rate limits vary by plan. Limits are applied per API key.</p>
+                            <h2 className="text-3xl font-bold text-[rgb(19,19,19)]">{t('docsPage.rateLimits.heading')}</h2>
+                            <p className="text-[rgba(19,19,19,0.6)]">{t('docsPage.rateLimits.intro')}</p>
                             <div className="rounded-xl border border-[rgba(19,19,19,0.1)] overflow-hidden w-full overflow-x-auto">
                                 <table className="w-full text-sm min-w-[600px]">
-                                    <thead><tr className="bg-[rgba(19,19,19,0.03)]"><th className="px-4 py-3 text-left text-[rgba(19,19,19,0.6)]">Plan</th><th className="px-4 py-3 text-left text-[rgba(19,19,19,0.6)]">Chat</th><th className="px-4 py-3 text-left text-[rgba(19,19,19,0.6)]">Calls</th><th className="px-4 py-3 text-left text-[rgba(19,19,19,0.6)]">Dashboard</th></tr></thead>
+                                    <thead><tr className="bg-[rgba(19,19,19,0.03)]"><th className="px-4 py-3 text-left text-[rgba(19,19,19,0.6)]">{t('docsPage.rateLimits.colPlan')}</th><th className="px-4 py-3 text-left text-[rgba(19,19,19,0.6)]">{t('docsPage.rateLimits.colChat')}</th><th className="px-4 py-3 text-left text-[rgba(19,19,19,0.6)]">{t('docsPage.rateLimits.colCalls')}</th><th className="px-4 py-3 text-left text-[rgba(19,19,19,0.6)]">{t('docsPage.rateLimits.colDashboard')}</th></tr></thead>
                                     <tbody>
-                                        <tr className="border-t border-[rgba(19,19,19,0.08)]"><td className="px-4 py-3 text-[rgb(19,19,19)]">Starter</td><td className="px-4 py-3 text-[rgba(19,19,19,0.6)]">30 req/min</td><td className="px-4 py-3 text-[rgba(19,19,19,0.6)]">5 concurrent</td><td className="px-4 py-3 text-[rgba(19,19,19,0.6)]">60 req/min</td></tr>
-                                        <tr className="border-t border-[rgba(19,19,19,0.08)]"><td className="px-4 py-3 text-[rgb(19,19,19)]">Professional</td><td className="px-4 py-3 text-[rgba(19,19,19,0.6)]">120 req/min</td><td className="px-4 py-3 text-[rgba(19,19,19,0.6)]">20 concurrent</td><td className="px-4 py-3 text-[rgba(19,19,19,0.6)]">120 req/min</td></tr>
-                                        <tr className="border-t border-[rgba(19,19,19,0.08)]"><td className="px-4 py-3 text-[rgb(19,19,19)]">Enterprise</td><td className="px-4 py-3 text-[rgba(19,19,19,0.6)]">Custom</td><td className="px-4 py-3 text-[rgba(19,19,19,0.6)]">Custom</td><td className="px-4 py-3 text-[rgba(19,19,19,0.6)]">Custom</td></tr>
+                                        <tr className="border-t border-[rgba(19,19,19,0.08)]"><td className="px-4 py-3 text-[rgb(19,19,19)]">{t('docsPage.rateLimits.planStarter')}</td><td className="px-4 py-3 text-[rgba(19,19,19,0.6)]">30 req/min</td><td className="px-4 py-3 text-[rgba(19,19,19,0.6)]">{t('docsPage.rateLimits.concurrent5')}</td><td className="px-4 py-3 text-[rgba(19,19,19,0.6)]">60 req/min</td></tr>
+                                        <tr className="border-t border-[rgba(19,19,19,0.08)]"><td className="px-4 py-3 text-[rgb(19,19,19)]">{t('docsPage.rateLimits.planProfessional')}</td><td className="px-4 py-3 text-[rgba(19,19,19,0.6)]">120 req/min</td><td className="px-4 py-3 text-[rgba(19,19,19,0.6)]">{t('docsPage.rateLimits.concurrent20')}</td><td className="px-4 py-3 text-[rgba(19,19,19,0.6)]">120 req/min</td></tr>
+                                        <tr className="border-t border-[rgba(19,19,19,0.08)]"><td className="px-4 py-3 text-[rgb(19,19,19)]">{t('docsPage.rateLimits.planEnterprise')}</td><td className="px-4 py-3 text-[rgba(19,19,19,0.6)]">{t('docsPage.rateLimits.custom')}</td><td className="px-4 py-3 text-[rgba(19,19,19,0.6)]">{t('docsPage.rateLimits.custom')}</td><td className="px-4 py-3 text-[rgba(19,19,19,0.6)]">{t('docsPage.rateLimits.custom')}</td></tr>
                                     </tbody>
                                 </table>
                             </div>
-                            <p className="text-[rgba(19,19,19,0.5)] text-sm">Rate limit headers are included in every response: <code className="text-[#D14000] bg-[#FF4D00]/10 px-1 rounded">X-RateLimit-Limit</code>, <code className="text-[#D14000] bg-[#FF4D00]/10 px-1 rounded">X-RateLimit-Remaining</code>, <code className="text-[#D14000] bg-[#FF4D00]/10 px-1 rounded">X-RateLimit-Reset</code></p>
+                            <p className="text-[rgba(19,19,19,0.5)] text-sm">{t('docsPage.rateLimits.headersIntro')} <code className="text-[#D14000] bg-[#FF4D00]/10 px-1 rounded">X-RateLimit-Limit</code>, <code className="text-[#D14000] bg-[#FF4D00]/10 px-1 rounded">X-RateLimit-Remaining</code>, <code className="text-[#D14000] bg-[#FF4D00]/10 px-1 rounded">X-RateLimit-Reset</code></p>
                         </section>
 
                         {/* ─── ERRORS ─── */}
                         <section id="errors" className="scroll-mt-24 space-y-6 border-t border-[rgba(19,19,19,0.08)] pt-12">
-                            <h2 className="text-3xl font-bold text-[rgb(19,19,19)]">Error Handling</h2>
-                            <p className="text-[rgba(19,19,19,0.6)]">The ClerkTree API uses standard HTTP status codes. Errors return a consistent JSON body:</p>
+                            <h2 className="text-3xl font-bold text-[rgb(19,19,19)]">{t('docsPage.errors.heading')}</h2>
+                            <p className="text-[rgba(19,19,19,0.6)]">{t('docsPage.errors.intro')}</p>
                             <CodeBlock code={`{
   "error": {
     "code": "invalid_api_key",
@@ -516,7 +523,7 @@ export default function DocsPage() {
 }`} language="json" />
                             <div className="rounded-xl border border-[rgba(19,19,19,0.1)] overflow-hidden w-full overflow-x-auto">
                                 <table className="w-full text-sm min-w-[600px]">
-                                    <thead><tr className="bg-[rgba(19,19,19,0.03)]"><th className="px-4 py-3 text-left text-[rgba(19,19,19,0.6)]">Status</th><th className="px-4 py-3 text-left text-[rgba(19,19,19,0.6)]">Meaning</th><th className="px-4 py-3 text-left text-[rgba(19,19,19,0.6)]">What to do</th></tr></thead>
+                                    <thead><tr className="bg-[rgba(19,19,19,0.03)]"><th className="px-4 py-3 text-left text-[rgba(19,19,19,0.6)]">{t('docsPage.errors.colStatus')}</th><th className="px-4 py-3 text-left text-[rgba(19,19,19,0.6)]">{t('docsPage.errors.colMeaning')}</th><th className="px-4 py-3 text-left text-[rgba(19,19,19,0.6)]">{t('docsPage.errors.colWhatToDo')}</th></tr></thead>
                                     <tbody>{errorCodes.map(e => (
                                         <tr key={e.code} className="border-t border-[rgba(19,19,19,0.08)]"><td className="px-4 py-3 font-mono text-[rgb(19,19,19)]">{e.code}</td><td className="px-4 py-3 text-[rgb(19,19,19)] font-medium">{e.name}</td><td className="px-4 py-3 text-[rgba(19,19,19,0.6)]">{e.desc}</td></tr>
                                     ))}</tbody>
@@ -527,62 +534,62 @@ export default function DocsPage() {
                         {/* ─── CHAT API ─── */}
                         <section id="chat-overview" className="scroll-mt-24 space-y-8 border-t border-[rgba(19,19,19,0.08)] pt-16">
                             <SectionHeader
-                                title="Chat API"
-                                description="The ClerkTree Chat API provides a blackbox AI model for conversational interactions. Send messages and receive intelligent completions without managing model infrastructure. Ideal for sales chatbots, support agents, and lead qualification flows."
+                                title={t('docsPage.chatApi.title')}
+                                description={t('docsPage.chatApi.description')}
                                 iconColor="bg-emerald-500"
                                 iconClass="bg-emerald-500/10 text-emerald-500"
                             />
-                            <p className="text-[rgba(19,19,19,0.6)] px-2 flex items-center gap-2 overflow-x-auto pb-2 w-full"><span className="flex-shrink-0">Base URL:</span> <code className="text-[#D14000] bg-[#FF4D00]/10 px-1.5 py-0.5 rounded ml-2 whitespace-nowrap">{BASE_URL}/chat</code></p>
+                            <p className="text-[rgba(19,19,19,0.6)] px-2 flex items-center gap-2 overflow-x-auto pb-2 w-full"><span className="flex-shrink-0">{t('docsPage.baseUrl')}</span> <code className="text-[#D14000] bg-[#FF4D00]/10 px-1.5 py-0.5 rounded ml-2 whitespace-nowrap">{BASE_URL}/chat</code></p>
                         </section>
                         {chatEndpoints.map(ep => <EndpointSection key={ep.id} ep={ep} />)}
 
                         {/* ─── CALL API ─── */}
                         <section id="call-overview" className="scroll-mt-24 space-y-8 border-t border-[rgba(19,19,19,0.08)] pt-16">
                             <SectionHeader
-                                title="Call API"
-                                description="The ClerkTree Call API lets you deploy AI voice agents that handle outbound and inbound calls. Each call is fully autonomous — the model handles conversation flow, objection handling, and data extraction. You get a full transcript, sentiment analysis, and extracted leads after every call."
+                                title={t('docsPage.callApi.title')}
+                                description={t('docsPage.callApi.description')}
                                 iconColor="bg-pink-500"
                                 iconClass="bg-pink-500/10 text-pink-500"
                             />
-                            <p className="text-[rgba(19,19,19,0.6)] px-2 flex items-center gap-2 overflow-x-auto pb-2 w-full"><span className="flex-shrink-0">Base URL:</span> <code className="text-[#D14000] bg-[#FF4D00]/10 px-1.5 py-0.5 rounded ml-2 whitespace-nowrap">{BASE_URL}/calls</code></p>
+                            <p className="text-[rgba(19,19,19,0.6)] px-2 flex items-center gap-2 overflow-x-auto pb-2 w-full"><span className="flex-shrink-0">{t('docsPage.baseUrl')}</span> <code className="text-[#D14000] bg-[#FF4D00]/10 px-1.5 py-0.5 rounded ml-2 whitespace-nowrap">{BASE_URL}/calls</code></p>
                         </section>
                         {callEndpoints.map(ep => <EndpointSection key={ep.id} ep={ep} />)}
 
                         {/* ─── DASHBOARD API ─── */}
                         <section id="dash-overview" className="scroll-mt-24 space-y-8 border-t border-[rgba(19,19,19,0.08)] pt-16">
                             <SectionHeader
-                                title="Dashboard API"
-                                description="Access all the data powering your ClerkTree Dashboard programmatically. Monitor live activity, pull sales analytics, manage leads, track usage and credits, and manage API keys — all via REST endpoints."
+                                title={t('docsPage.dashboardApi.title')}
+                                description={t('docsPage.dashboardApi.description')}
                                 iconColor="bg-[#FF4D00]"
                                 iconClass="bg-[#FF4D00]/10 text-[#FF4D00]"
                             />
-                            <p className="text-[rgba(19,19,19,0.6)] px-2 flex items-center gap-2 overflow-x-auto pb-2 w-full"><span className="flex-shrink-0">Base URL:</span> <code className="text-[#D14000] bg-[#FF4D00]/10 px-1.5 py-0.5 rounded ml-2 whitespace-nowrap">{BASE_URL}/dashboard</code></p>
+                            <p className="text-[rgba(19,19,19,0.6)] px-2 flex items-center gap-2 overflow-x-auto pb-2 w-full"><span className="flex-shrink-0">{t('docsPage.baseUrl')}</span> <code className="text-[#D14000] bg-[#FF4D00]/10 px-1.5 py-0.5 rounded ml-2 whitespace-nowrap">{BASE_URL}/dashboard</code></p>
                         </section>
                         {dashboardEndpoints.map(ep => <EndpointSection key={ep.id} ep={ep} />)}
 
                         {/* ─── WEBHOOKS ─── */}
                         <section id="webhooks" className="scroll-mt-24 space-y-8 border-t border-[rgba(19,19,19,0.08)] pt-16">
                             <SectionHeader
-                                title="Webhooks"
-                                description="Subscribe to real-time events. ClerkTree sends POST requests to your configured webhook URL whenever key events occur."
+                                title={t('docsPage.webhooks.title')}
+                                description={t('docsPage.webhooks.description')}
                                 iconColor="bg-amber-500"
                                 iconClass="bg-amber-500/10 text-amber-500"
                             />
-                            <h3 className="text-xl font-semibold text-[rgb(19,19,19)] mt-8 px-2">Available Events</h3>
+                            <h3 className="text-xl font-semibold text-[rgb(19,19,19)] mt-8 px-2">{t('docsPage.webhooks.availableEvents')}</h3>
                             <div className="rounded-xl border border-[rgba(19,19,19,0.1)] overflow-hidden w-full overflow-x-auto">
                                 <table className="w-full text-sm min-w-[600px]">
-                                    <thead><tr className="bg-[rgba(19,19,19,0.03)]"><th className="px-4 py-3 text-left text-[rgba(19,19,19,0.6)]">Event</th><th className="px-4 py-3 text-left text-[rgba(19,19,19,0.6)]">Description</th></tr></thead>
+                                    <thead><tr className="bg-[rgba(19,19,19,0.03)]"><th className="px-4 py-3 text-left text-[rgba(19,19,19,0.6)]">{t('docsPage.webhooks.colEvent')}</th><th className="px-4 py-3 text-left text-[rgba(19,19,19,0.6)]">{t('docsPage.webhooks.colDescription')}</th></tr></thead>
                                     <tbody>
-                                        <tr className="border-t border-[rgba(19,19,19,0.08)]"><td className="px-4 py-3 font-mono text-emerald-400">call.started</td><td className="px-4 py-3 text-[rgba(19,19,19,0.6)]">Call has been connected</td></tr>
-                                        <tr className="border-t border-[rgba(19,19,19,0.08)]"><td className="px-4 py-3 font-mono text-emerald-400">call.completed</td><td className="px-4 py-3 text-[rgba(19,19,19,0.6)]">Call ended with full transcript and analysis</td></tr>
-                                        <tr className="border-t border-[rgba(19,19,19,0.08)]"><td className="px-4 py-3 font-mono text-emerald-400">call.failed</td><td className="px-4 py-3 text-[rgba(19,19,19,0.6)]">Call could not be completed</td></tr>
-                                        <tr className="border-t border-[rgba(19,19,19,0.08)]"><td className="px-4 py-3 font-mono text-emerald-400">lead.created</td><td className="px-4 py-3 text-[rgba(19,19,19,0.6)]">New lead extracted from a call or chat</td></tr>
-                                        <tr className="border-t border-[rgba(19,19,19,0.08)]"><td className="px-4 py-3 font-mono text-emerald-400">lead.updated</td><td className="px-4 py-3 text-[rgba(19,19,19,0.6)]">Lead status or priority changed</td></tr>
-                                        <tr className="border-t border-[rgba(19,19,19,0.08)]"><td className="px-4 py-3 font-mono text-emerald-400">usage.threshold</td><td className="px-4 py-3 text-[rgba(19,19,19,0.6)]">Credit usage exceeded 80% or 95% threshold</td></tr>
+                                        <tr className="border-t border-[rgba(19,19,19,0.08)]"><td className="px-4 py-3 font-mono text-emerald-400">call.started</td><td className="px-4 py-3 text-[rgba(19,19,19,0.6)]">{t('docsPage.webhooks.eventCallStarted')}</td></tr>
+                                        <tr className="border-t border-[rgba(19,19,19,0.08)]"><td className="px-4 py-3 font-mono text-emerald-400">call.completed</td><td className="px-4 py-3 text-[rgba(19,19,19,0.6)]">{t('docsPage.webhooks.eventCallCompleted')}</td></tr>
+                                        <tr className="border-t border-[rgba(19,19,19,0.08)]"><td className="px-4 py-3 font-mono text-emerald-400">call.failed</td><td className="px-4 py-3 text-[rgba(19,19,19,0.6)]">{t('docsPage.webhooks.eventCallFailed')}</td></tr>
+                                        <tr className="border-t border-[rgba(19,19,19,0.08)]"><td className="px-4 py-3 font-mono text-emerald-400">lead.created</td><td className="px-4 py-3 text-[rgba(19,19,19,0.6)]">{t('docsPage.webhooks.eventLeadCreated')}</td></tr>
+                                        <tr className="border-t border-[rgba(19,19,19,0.08)]"><td className="px-4 py-3 font-mono text-emerald-400">lead.updated</td><td className="px-4 py-3 text-[rgba(19,19,19,0.6)]">{t('docsPage.webhooks.eventLeadUpdated')}</td></tr>
+                                        <tr className="border-t border-[rgba(19,19,19,0.08)]"><td className="px-4 py-3 font-mono text-emerald-400">usage.threshold</td><td className="px-4 py-3 text-[rgba(19,19,19,0.6)]">{t('docsPage.webhooks.eventUsageThreshold')}</td></tr>
                                     </tbody>
                                 </table>
                             </div>
-                            <h4 className="text-sm font-semibold text-[rgba(19,19,19,0.75)] mt-6 mb-2">Webhook Payload Example</h4>
+                            <h4 className="text-sm font-semibold text-[rgba(19,19,19,0.75)] mt-6 mb-2">{t('docsPage.webhooks.payloadExample')}</h4>
                             <CodeBlock code={`{
   "id": "evt_9a8b7c6d",
   "type": "call.completed",
@@ -599,8 +606,8 @@ export default function DocsPage() {
     "action_items": ["Send revised quote", "Schedule follow-up"]
   }
 }`} language="json" />
-                            <h4 className="text-sm font-semibold text-[rgba(19,19,19,0.75)] mt-6 mb-2">Verifying Webhook Signatures</h4>
-                            <p className="text-[rgba(19,19,19,0.6)] text-sm">Every webhook includes a <code className="text-[#D14000] bg-[#FF4D00]/10 px-1 rounded">X-ClerkTree-Signature</code> header. Verify it using HMAC-SHA256 with your webhook secret:</p>
+                            <h4 className="text-sm font-semibold text-[rgba(19,19,19,0.75)] mt-6 mb-2">{t('docsPage.webhooks.verifyingSignatures')}</h4>
+                            <p className="text-[rgba(19,19,19,0.6)] text-sm">{t('docsPage.webhooks.verifyIntro')} <code className="text-[#D14000] bg-[#FF4D00]/10 px-1 rounded">X-ClerkTree-Signature</code> {t('docsPage.webhooks.verifyIntroSuffix')}</p>
                             <CodeBlock code={`const crypto = require('crypto');
 
 function verifyWebhook(payload, signature, secret) {
@@ -617,8 +624,8 @@ function verifyWebhook(payload, signature, secret) {
 
                         {/* ─── WEBSOCKET ─── */}
                         <section id="websocket" className="scroll-mt-24 space-y-6 border-t border-[rgba(19,19,19,0.08)] pt-12">
-                            <h3 className="text-2xl font-semibold text-[rgb(19,19,19)]">WebSocket Stream</h3>
-                            <p className="text-[rgba(19,19,19,0.6)]">Connect to a full-duplex WebSocket for real-time call audio streaming and live transcript updates.</p>
+                            <h3 className="text-2xl font-semibold text-[rgb(19,19,19)]">{t('docsPage.websocket.heading')}</h3>
+                            <p className="text-[rgba(19,19,19,0.6)]">{t('docsPage.websocket.intro')}</p>
                             <div className="flex items-center gap-3 text-sm font-mono mt-4">
                                 <MethodBadge method="WSS" color="blue" />
                                 <span className="text-[rgba(19,19,19,0.7)]">wss://api.clerktree.com/v1/stream</span>
@@ -647,21 +654,21 @@ ws.onmessage = (event) => {
 
                     {/* Footer */}
                     <footer className="mt-24 pt-12 border-t border-[rgba(19,19,19,0.1)] flex flex-col md:flex-row justify-between items-center gap-6 text-[rgba(19,19,19,0.4)] text-sm">
-                        <p>&copy; {new Date().getFullYear()} ClerkTree Inc. All rights reserved.</p>
+                        <p>&copy; {new Date().getFullYear()} {t('docsPage.footer.copyright')}</p>
                         <div className="flex gap-6">
-                            <Link to="/privacy-policy" className="hover:text-[rgb(19,19,19)] transition-colors">Privacy Policy</Link>
-                            <Link to="/terms-of-service" className="hover:text-[rgb(19,19,19)] transition-colors">Terms of Service</Link>
-                            <Link to="/security" className="hover:text-[rgb(19,19,19)] transition-colors">Security</Link>
+                            <Link to="/privacy-policy" className="hover:text-[rgb(19,19,19)] transition-colors">{t('docsPage.footer.privacyPolicy')}</Link>
+                            <Link to="/terms-of-service" className="hover:text-[rgb(19,19,19)] transition-colors">{t('docsPage.footer.termsOfService')}</Link>
+                            <Link to="/security" className="hover:text-[rgb(19,19,19)] transition-colors">{t('docsPage.footer.security')}</Link>
                         </div>
                     </footer>
                 </main>
 
                 {/* Right Table of Contents */}
                 <aside className="hidden xl:block w-64 pt-8 px-6 border-l border-[rgba(19,19,19,0.08)] sticky top-0 h-screen overflow-y-auto">
-                    <h4 className="text-sm font-semibold text-[rgba(19,19,19,0.85)] mb-4">On this page</h4>
+                    <h4 className="text-sm font-semibold text-[rgba(19,19,19,0.85)] mb-4">{t('docsPage.onThisPage')}</h4>
                     <ul className="space-y-3 text-sm">
                         {allNavItems.map(item => (
-                            <li key={item.id}><a href={`#${item.id}`} onClick={(e) => { e.preventDefault(); scrollToSection(item.id); }} className={`transition-colors ${activeId === item.id ? 'text-[#FF8A5B]' : 'text-[rgba(19,19,19,0.6)] hover:text-[rgb(19,19,19)]'}`}>{item.label}</a></li>
+                            <li key={item.id}><a href={`#${item.id}`} onClick={(e) => { e.preventDefault(); scrollToSection(item.id); }} className={`transition-colors ${activeId === item.id ? 'text-[#FF8A5B]' : 'text-[rgba(19,19,19,0.6)] hover:text-[rgb(19,19,19)]'}`}>{t(item.labelKey)}</a></li>
                         ))}
                     </ul>
                 </aside>
@@ -674,14 +681,14 @@ ws.onmessage = (event) => {
                         <div className="relative w-full max-w-lg bg-white border border-[rgba(19,19,19,0.1)] rounded-xl shadow-2xl overflow-hidden">
                             <div className="flex items-center px-4 py-3 border-b border-[rgba(19,19,19,0.08)]">
                                 <Search className="w-5 h-5 text-[rgba(19,19,19,0.4)] mr-3" />
-                                <input type="text" placeholder="Search documentation..." className="flex-1 bg-transparent border-none outline-none text-[rgb(19,19,19)] placeholder-[rgba(19,19,19,0.35)] text-base md:text-sm h-6" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} autoFocus />
+                                <input type="text" placeholder={t('docsPage.search.placeholder')} className="flex-1 bg-transparent border-none outline-none text-[rgb(19,19,19)] placeholder-[rgba(19,19,19,0.35)] text-base md:text-sm h-6" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} autoFocus />
                                 <button onClick={() => setIsSearchOpen(false)} className="p-1 hover:bg-[rgba(19,19,19,0.06)] rounded text-[rgba(19,19,19,0.4)] hover:text-[rgb(19,19,19)]">
                                     <kbd className="text-xs bg-[rgba(19,19,19,0.06)] px-1.5 py-0.5 rounded">ESC</kbd>
                                 </button>
                             </div>
                             <div className="max-h-[50vh] md:max-h-[60vh] overflow-y-auto py-2">
                                 {filteredItems.length === 0 ? (
-                                    <div className="px-4 py-8 text-center text-[rgba(19,19,19,0.4)] text-sm">No results found for "{searchQuery}"</div>
+                                    <div className="px-4 py-8 text-center text-[rgba(19,19,19,0.4)] text-sm">{t('docsPage.search.noResults').replace('{query}', searchQuery)}</div>
                                 ) : (
                                     <ul>{filteredItems.map(item => (
                                         <li key={item.id}>

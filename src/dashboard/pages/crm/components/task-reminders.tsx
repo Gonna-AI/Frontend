@@ -4,6 +4,7 @@ import { CalendarDays, CalendarRange } from "lucide-react-dash";
 
 import { Button } from "@/components/dashboard-ui/button";
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/dashboard-ui/card";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { fetchOpportunities, subscribeToTable } from "@/dashboard/lib/pipelineClient";
 import { cn } from "@/lib/utils";
 
@@ -13,6 +14,7 @@ const PROPOSAL_GOAL = 18;
 const PROPOSAL_GOAL_BAR_COUNT = 42;
 
 export function TaskReminders() {
+  const { t } = useLanguage();
   const [proposalSent, setProposalSent] = useState(12);
 
   useEffect(() => {
@@ -54,11 +56,11 @@ export function TaskReminders() {
     <section className="grid grid-cols-1 gap-4 xl:grid-cols-12">
       <Card className="xl:col-span-8">
         <CardHeader>
-          <CardTitle>Upcoming Meetings</CardTitle>
+          <CardTitle>{t("dashCrm.reminders.upcomingMeetings")}</CardTitle>
           <CardAction>
             <Button variant="outline" size="sm">
               <CalendarDays data-icon="inline-start" />
-              View Calendar
+              {t("dashCrm.reminders.viewCalendar")}
             </Button>
           </CardAction>
         </CardHeader>
@@ -92,7 +94,7 @@ export function TaskReminders() {
                   </div>
                   <div className="min-w-0">
                     <div className="truncate font-medium text-primary-foreground text-xs leading-none">
-                      Kalkulations-Call mit Bergmann Maschinenbau
+                      {t("dashCrm.reminders.calculationCallWith")}
                     </div>
                     <div className="truncate text-[10px] text-primary-foreground/75">Bergmann Maschinenbau GmbH</div>
                   </div>
@@ -106,14 +108,17 @@ export function TaskReminders() {
 
       <Card className="xl:col-span-4">
         <CardHeader>
-          <CardTitle>Monatliches Angebots-Ziel</CardTitle>
+          <CardTitle>{t("dashCrm.reminders.monthlyQuoteGoal")}</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-1">
           <div className="flex items-end justify-between gap-3">
             <div className="font-medium text-2xl tabular-nums leading-none">
-              {proposalSent} <span className="font-normal text-base text-muted-foreground">Angebote</span>
+              {proposalSent}{" "}
+              <span className="font-normal text-base text-muted-foreground">{t("dashCrm.reminders.quotes")}</span>
             </div>
-            <div className="text-muted-foreground text-sm tabular-nums">{PROPOSAL_GOAL} target</div>
+            <div className="text-muted-foreground text-sm tabular-nums">
+              {PROPOSAL_GOAL} {t("dashCrm.reminders.target")}
+            </div>
           </div>
           <div className="flex h-10 w-full items-end gap-0.5">
             {proposalGoalBars.map((bar) => (
@@ -128,7 +133,7 @@ export function TaskReminders() {
             ))}
           </div>
           <p className="text-muted-foreground text-sm">
-            {proposalProgressPercentage}% of this month&apos;s proposal target reached.
+            {t("dashCrm.reminders.percentTargetReached").replace("{percent}", String(proposalProgressPercentage))}
           </p>
         </CardContent>
       </Card>

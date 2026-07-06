@@ -1,10 +1,10 @@
 import type { ChangeEvent, FormEvent } from 'react';
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import { ArrowUpRight, CheckCircle2, Linkedin, Mail, MapPin, Phone, Send, Twitter } from 'lucide-react';
 
 import { useLanguage } from '../contexts/LanguageContext';
 import { Header, Footer } from '../components/Landing/AgeroChrome';
-import { isSaveDataEnabled } from '../utils/idle';
+import { shouldAutoplayMedia } from '../utils/idle';
 import SEO from '../components/SEO';
 import './LandingFramer.css';
 import './Contact.css';
@@ -36,40 +36,18 @@ const emptyForm: ContactFormData = {
 };
 
 function ContactHeroVideo({ src }: { src: string }) {
-  const ref = useRef<HTMLVideoElement>(null);
-  const [shouldLoad, setShouldLoad] = useState(false);
-
-  useEffect(() => {
-    if (isSaveDataEnabled() || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      return;
-    }
-
-    const video = ref.current;
-    if (!video) return;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (!entry?.isIntersecting) return;
-        setShouldLoad(true);
-        observer.disconnect();
-      },
-      { rootMargin: '400px 0px', threshold: 0.01 },
-    );
-
-    observer.observe(video);
-    return () => observer.disconnect();
-  }, []);
+  const shouldPlay = shouldAutoplayMedia();
 
   return (
     <video
-      autoPlay={shouldLoad}
+      autoPlay={shouldPlay}
       className="agero-hero-stage-media"
       loop
       muted
       playsInline
-      preload="none"
-      ref={ref}
-      src={shouldLoad ? src : undefined}
+      preload={shouldPlay ? 'auto' : 'metadata'}
+      src={src}
+      crossOrigin="anonymous"
       aria-hidden="true"
     />
   );
@@ -120,6 +98,7 @@ export default function Contact() {
         title="Contact Us"
         description="Get in touch with ClerkTree. Speak with our team about automating legal, claims, and back-office operations."
         canonical="https://clerktree.com/contact"
+        preloadVideos={[{ href: CONTACT_VIDEO_SRC }]}
       />
 
       <div className="agero-top-area agero-top-area-with-hero">

@@ -34,6 +34,7 @@ import {
   PaginationPrevious,
 } from "@/components/dashboard-ui/pagination";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/dashboard-ui/table";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { fetchOpportunities, subscribeToTable } from "@/dashboard/lib/pipelineClient";
 
 import { opportunitiesColumns } from "./opportunities-table/columns";
@@ -44,11 +45,28 @@ const stageOptions = ["all", "Anfrage", "Konzept", "Kalkulation", "Angebot", "Be
 const healthOptions = ["all", "On Track", "Needs Review", "At Risk", "On Hold"] as const;
 const fallbackOpportunities = opportunitiesSchema.parse(opportunitiesData);
 
+const stageKeyMap: Record<string, string> = {
+  Anfrage: "dashCrm.stage.anfrage",
+  Konzept: "dashCrm.stage.konzept",
+  Kalkulation: "dashCrm.stage.kalkulation",
+  Angebot: "dashCrm.stage.angebot",
+  Bestellung: "dashCrm.stage.bestellung",
+  AB: "dashCrm.stage.ab",
+};
+
+const healthKeyMap: Record<string, string> = {
+  "On Track": "dashCrm.health.onTrack",
+  "Needs Review": "dashCrm.health.needsReview",
+  "At Risk": "dashCrm.health.atRisk",
+  "On Hold": "dashCrm.health.onHold",
+};
+
 function preventPaginationNavigation(event: React.MouseEvent<HTMLAnchorElement>) {
   event.preventDefault();
 }
 
 export function OpportunitiesSection() {
+  const { t } = useLanguage();
   const [opportunities, setOpportunities] = React.useState<OpportunityRow[]>(fallbackOpportunities);
   const [rowSelection, setRowSelection] = React.useState({});
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
@@ -126,15 +144,13 @@ export function OpportunitiesSection() {
     <section>
       <Card>
         <CardHeader>
-          <CardTitle className="leading-none">Anfragen &amp; Angebote</CardTitle>
-          <CardDescription>
-            Track customer requests moving through Anfrage, Konzept, Kalkulation, Angebot, Bestellung, and AB.
-          </CardDescription>
+          <CardTitle className="leading-none">{t("dashCrm.opportunities.title")}</CardTitle>
+          <CardDescription>{t("dashCrm.opportunities.description")}</CardDescription>
           <CardAction>
             <div className="flex items-center gap-2">
               <Input
                 className="h-7 w-44 md:w-52"
-                placeholder="Search customers..."
+                placeholder={t("dashCrm.opportunities.searchPlaceholder")}
                 value={searchQuery}
                 onChange={(event) => {
                   table.setGlobalFilter(event.target.value || undefined);
@@ -145,7 +161,7 @@ export function OpportunitiesSection() {
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" size="sm">
                     <ListFilter data-icon="inline-start" />
-                    Stage
+                    {t("dashCrm.opportunities.stage")}
                     <ChevronDownIcon data-icon="inline-end" />
                   </Button>
                 </DropdownMenuTrigger>
@@ -159,7 +175,7 @@ export function OpportunitiesSection() {
                   >
                     {stageOptions.map((option) => (
                       <DropdownMenuRadioItem key={option} value={option}>
-                        {option === "all" ? "All stages" : option}
+                        {option === "all" ? t("dashCrm.opportunities.allStages") : t(stageKeyMap[option] ?? option)}
                       </DropdownMenuRadioItem>
                     ))}
                   </DropdownMenuRadioGroup>
@@ -169,7 +185,7 @@ export function OpportunitiesSection() {
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" size="sm">
                     <ListFilter data-icon="inline-start" />
-                    Health
+                    {t("dashCrm.opportunities.health")}
                     <ChevronDownIcon data-icon="inline-end" />
                   </Button>
                 </DropdownMenuTrigger>
@@ -183,7 +199,7 @@ export function OpportunitiesSection() {
                   >
                     {healthOptions.map((option) => (
                       <DropdownMenuRadioItem key={option} value={option}>
-                        {option === "all" ? "All health" : option}
+                        {option === "all" ? t("dashCrm.opportunities.allHealth") : t(healthKeyMap[option] ?? option)}
                       </DropdownMenuRadioItem>
                     ))}
                   </DropdownMenuRadioGroup>
@@ -218,7 +234,7 @@ export function OpportunitiesSection() {
                 ) : (
                   <TableRow>
                     <TableCell colSpan={table.getVisibleLeafColumns().length} className="h-24 text-center">
-                      No results.
+                      {t("dashCrm.opportunities.noResults")}
                     </TableCell>
                   </TableRow>
                 )}
@@ -227,7 +243,9 @@ export function OpportunitiesSection() {
           </div>
           <div className="flex items-center justify-between gap-4 px-4 pb-1">
             <p className="text-muted-foreground text-sm">
-              Viewing {visibleOpportunityCount} out of {filteredOpportunityCount.toLocaleString()} opportunities
+              {t("dashCrm.opportunities.viewingOf")
+                .replace("{visible}", String(visibleOpportunityCount))
+                .replace("{total}", filteredOpportunityCount.toLocaleString())}
             </p>
 
             <Pagination className="mx-0 w-auto justify-end">

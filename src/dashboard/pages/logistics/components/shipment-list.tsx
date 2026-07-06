@@ -5,6 +5,7 @@ import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/componen
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/dashboard-ui/input-group";
 import { ScrollArea } from "@/components/dashboard-ui/scroll-area";
 import { Tabs, TabsList, TabsTrigger } from "@/components/dashboard-ui/tabs";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { cn } from "@/lib/utils";
 
 import type { Shipment } from "./shipment-data";
@@ -25,11 +26,35 @@ const progressRingClasses: Record<Shipment["status"], string> = {
   "Customs Hold": "text-amber-500",
 };
 
+const statusLabelKeys: Record<Shipment["status"], string> = {
+  Scheduled: "dashLogistics.status.scheduled",
+  "In Transit": "dashLogistics.status.inTransit",
+  "Out for Delivery": "dashLogistics.status.outForDelivery",
+  Delivered: "dashLogistics.status.delivered",
+  Delayed: "dashLogistics.status.delayed",
+  "On Hold": "dashLogistics.status.onHold",
+  "Customs Hold": "dashLogistics.status.customsHold",
+};
+
 function getProgressRingClass(status: Shipment["status"]) {
   return cn(
     "grid size-3 place-items-center rounded-full p-[0.5px] bg-[conic-gradient(currentColor_0deg_var(--angle),transparent_var(--angle)_360deg)]",
     progressRingClasses[status],
   );
+}
+
+const etaMetaLabelKeys: Record<string, string> = {
+  Today: "dashLogistics.etaMeta.today",
+  Tomorrow: "dashLogistics.etaMeta.tomorrow",
+  "Delivered Yesterday": "dashLogistics.etaMeta.deliveredYesterday",
+  "Departing Today": "dashLogistics.etaMeta.departingToday",
+  Friday: "dashLogistics.etaMeta.friday",
+  Wednesday: "dashLogistics.etaMeta.wednesday",
+};
+
+function translateEtaMeta(t: (key: string) => string, etaMeta: string) {
+  const key = etaMetaLabelKeys[etaMeta];
+  return key ? t(key) : etaMeta;
 }
 
 type ShipmentCardProps = {
@@ -45,6 +70,7 @@ type ShipmentListProps = {
 };
 
 function ShipmentCard({ shipment, active, onSelectShipment }: ShipmentCardProps) {
+  const { t } = useLanguage();
   const angle = (shipment.progress / 100) * 360;
   const Icon = modeIcons[shipment.mode];
 
@@ -74,7 +100,7 @@ function ShipmentCard({ shipment, active, onSelectShipment }: ShipmentCardProps)
               <div className="size-1 rounded-full bg-current" />
             </div>
           </div>
-          <div className="text-muted-foreground text-xs">{shipment.status}</div>
+          <div className="text-muted-foreground text-xs">{t(statusLabelKeys[shipment.status])}</div>
         </div>
       </div>
 
@@ -112,15 +138,17 @@ function ShipmentCard({ shipment, active, onSelectShipment }: ShipmentCardProps)
 
       <div className="flex items-center justify-between">
         <div>
-          <div className="text-muted-foreground text-xs leading-none">Cargo</div>
+          <div className="text-muted-foreground text-xs leading-none">{t("dashLogistics.list.cargoLabel")}</div>
           <div className="truncate text-sm tracking-tight">{shipment.cargo}</div>
         </div>
         <div className="text-right">
-          <div className="text-muted-foreground text-xs leading-none">ETA</div>
+          <div className="text-muted-foreground text-xs leading-none">{t("dashLogistics.list.etaLabel")}</div>
           <div className="text-sm tabular-nums tracking-tight">
             {shipment.eta}
             {shipment.etaMeta && (
-              <span className="ml-1 font-normal text-muted-foreground text-xs">{shipment.etaMeta}</span>
+              <span className="ml-1 font-normal text-muted-foreground text-xs">
+                {translateEtaMeta(t, shipment.etaMeta)}
+              </span>
             )}
           </div>
         </div>
@@ -130,10 +158,12 @@ function ShipmentCard({ shipment, active, onSelectShipment }: ShipmentCardProps)
 }
 
 export function ShipmentList({ shipments, selectedShipmentId, onSelectShipment }: ShipmentListProps) {
+  const { t } = useLanguage();
+
   return (
     <Card className="h-full rounded-none ring-0">
       <CardHeader>
-        <CardTitle className="font-normal text-xl">Deliveries</CardTitle>
+        <CardTitle className="font-normal text-xl">{t("dashLogistics.list.title")}</CardTitle>
         <CardAction>
           <Button size="icon-sm" variant="ghost">
             <SlidersHorizontal />
@@ -144,23 +174,27 @@ export function ShipmentList({ shipments, selectedShipmentId, onSelectShipment }
         <Tabs defaultValue="all">
           <TabsList className="w-full border-b px-4" variant="line">
             <TabsTrigger className="text-xs" value="all">
-              All (12)
+              {t("dashLogistics.list.tabs.all").replace("{count}", "12")}
             </TabsTrigger>
             <TabsTrigger className="text-xs" value="in-transit">
-              In Transit (4)
+              {t("dashLogistics.list.tabs.inTransit").replace("{count}", "4")}
             </TabsTrigger>
             <TabsTrigger className="text-xs" value="delivered">
-              Delivered (2)
+              {t("dashLogistics.list.tabs.delivered").replace("{count}", "2")}
             </TabsTrigger>
             <TabsTrigger className="text-xs" value="delayed">
-              Delayed (1)
+              {t("dashLogistics.list.tabs.delayed").replace("{count}", "1")}
             </TabsTrigger>
           </TabsList>
         </Tabs>
 
         <div className="px-4">
           <InputGroup className="h-8">
-            <InputGroupInput className="h-8" aria-label="Search deliveries" placeholder="Search deliveries..." />
+            <InputGroupInput
+              className="h-8"
+              aria-label={t("dashLogistics.list.searchAria")}
+              placeholder={t("dashLogistics.list.searchPlaceholder")}
+            />
             <InputGroupAddon>
               <Search />
             </InputGroupAddon>

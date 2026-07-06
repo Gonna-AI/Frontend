@@ -1,45 +1,38 @@
 import { type CSSProperties, type ReactNode, type VideoHTMLAttributes, Fragment, useEffect, useRef, useState } from 'react';
 import { Compass, Globe2, MapPin, PanelTop, PenTool, Sparkles } from 'lucide-react';
 import Lenis from 'lenis';
-import { isSaveDataEnabled } from '../utils/idle';
+import { isSaveDataEnabled, shouldAutoplayMedia } from '../utils/idle';
 import { Footer } from '../components/Landing/AgeroChrome';
+import { useLanguage } from '../contexts/LanguageContext';
+import LanguageSwitcher from '../components/Layout/LanguageSwitcher';
+import SEO from '../components/SEO';
 import './LandingFramer.css';
 
 const BASE = 'https://xlzwfkgurrrspcdyqele.supabase.co/storage/v1/object/public/buck';
+const HOME_HERO_VIDEO_SRC = `${BASE}/entrybox.mov`;
+const HOME_CONTACT_VIDEO_SRC = `${BASE}/hero.mov`;
 
 const works = [
   {
-    title: 'Predictive AI',
+    key: 'work1' as const,
     accent: '#e8651a',
-    description:
-      'ClerkTree structures sensor feeds, log streams, and machine telemetry in one operational layer built for predictive industrial reliability.',
     page: '01',
-    role: 'Predictive Ops',
-    services: ['Anomaly Detection', 'Remaining Useful Life', 'Telemetry Harness', 'Autonomous Diagnostics'],
     bg: 'https://framerusercontent.com/images/x3RMizQqFhQ9G8jF5dqqcbxY8M.png?scale-down-to=2048',
     cover: `${BASE}/VIDEO1.mp4`,
     href: '/solutions',
   },
   {
-    title: 'Process Health',
+    key: 'work2' as const,
     accent: '#232323',
-    description:
-      'Deploy intelligent process control agents that monitor, adjust, and optimize mechanical workloads around the clock — zero unplanned downtime.',
     page: '02',
-    role: 'OT / IT Bridge',
-    services: ['Process Optimization', 'Yield Maximization', 'Closed-Loop Control', 'Real-time MES Sync'],
     bg: 'https://framerusercontent.com/images/MHwFX5PK3mWp7JJNseH8110qdg.png?scale-down-to=2048',
     cover: `${BASE}/VIDEO2.mp4`,
     href: '/solutions',
   },
   {
-    title: 'Custom Harness',
+    key: 'work3' as const,
     accent: '#ffffff',
-    description:
-      'We design custom machine learning setups, physics-informed models, and agentic harness layers that fit your mechanical infrastructure.',
     page: '03',
-    role: 'Industrial Deployment',
-    services: ['Physics-Informed Models', 'Sensor Mesh Networks', 'Zero-Downtime Scaling', 'Edge Infrastructure'],
     bg: 'https://framerusercontent.com/images/jXErNhJ75aLqKEeFiIYT76adrM8.png?scale-down-to=2048',
     cover: `${BASE}/VIDEO3.mp4`,
     href: '/contact',
@@ -52,118 +45,56 @@ const clientLogos = [
   { alt: 'Partner', src: `${BASE}/3cWSgJFsUVvZeOw9LdQmTOSVFhE.svg`, width: 120 },
 ];
 
-const serviceRibbonItems = ['Predictive Maintenance', 'Operational Intelligence', 'Custom AI Harness'];
-const metricRibbonItems = ['40% Downtime Reduction', 'Industrial Grade AI', '24/7 Machine Health'];
-
 const showcaseImage = '/desktop1.png';
 
-const shellLinks = [
-  ['Solutions', '/solutions'],
-  ['About', '/about'],
-  ['Blog', '/blog'],
-  ['Docs', '/docs'],
-  ['Contact', '/contact'],
+const shellLinkPaths = [
+  ['nav.solutions', '/solutions'],
+  ['nav.about', '/about'],
+  ['nav.blog', '/blog'],
+  ['nav.docs', '/docs'],
+  ['home.nav.contact', '/contact'],
 ] as const;
 
-const shellMobileLinks = [
-  ['Solutions', '/solutions'],
-  ['Docs', '/docs'],
-  ['About', '/about'],
-  ['Blog', '/blog'],
+const shellMobileLinkPaths = [
+  ['nav.solutions', '/solutions'],
+  ['nav.docs', '/docs'],
+  ['nav.about', '/about'],
+  ['nav.blog', '/blog'],
 ] as const;
 
-const introTags = [
-  { label: 'Predictive Ops', Icon: Sparkles },
-  { label: 'Sensor Networks', Icon: Globe2 },
-  { label: 'Telemetry AI', Icon: Globe2 },
-  { label: 'Process Health', Icon: PenTool },
-  { label: 'Edge Control', Icon: PanelTop },
-  { label: 'Physics AI', Icon: Compass },
+const introTagsBase = [
+  { key: 'tag1' as const, Icon: Sparkles },
+  { key: 'tag2' as const, Icon: Globe2 },
+  { key: 'tag3' as const, Icon: Globe2 },
+  { key: 'tag4' as const, Icon: PenTool },
+  { key: 'tag5' as const, Icon: PanelTop },
+  { key: 'tag6' as const, Icon: Compass },
 ];
 
 const locationImage = 'https://xlzwfkgurrrspcdyqele.supabase.co/storage/v1/object/public/buck/munich.jpg';
 
-const locationDetails = [
-  ['Address', 'Industriestraße 2, 94315 Straubing'],
-  ['Region', 'Bavaria, Germany'],
-];
-
-const testimonialStats = [
-  ['26+', 'Industrial Plants'],
-  ['40%', 'Downtime reduction'],
-  ['24/7', 'Machine health monitoring'],
-];
-
-const testimonial = {
-  image:
-    'https://xlzwfkgurrrspcdyqele.supabase.co/storage/v1/object/public/buck/thdbuilding.jpg',
-  quote: '"The predictive models handle our turbine load fluctuations flawlessly — zero missed failures."',
-  name: 'Olivia Wagner',
-  role: 'Plant Manager, THD GmbH',
-};
+const testimonialImage = 'https://xlzwfkgurrrspcdyqele.supabase.co/storage/v1/object/public/buck/thdbuilding.jpg';
 
 const plans = [
   {
-    name: 'Ops AI',
-    description:
-      'For industrial teams that need reliable asset monitoring. Telemetry analysis, predictive diagnostics, and process orchestration — all in one stack.',
-    price: 'Get a Quote',
-    features: [
-      'Predictive Maintenance Engine',
-      'Process & yield optimization',
-      'SCADA, PLC & MES integrations',
-      'Dedicated industrial engineering setup',
-    ],
+    key: 'plan1' as const,
     featured: false,
   },
   {
-    name: 'Custom Harness',
-    description:
-      'Custom-tailored deployment for complex industrial machinery and fleets. Custom models, edge/on-prem infrastructure, and SLA-backed support.',
-    price: "Let's Talk",
+    key: 'plan2' as const,
     prefix: '',
-    features: [
-      'Custom model training & physics-informed AI',
-      'Edge GPU & secure on-premise hardware',
-      'Historian, MES & plant ERP integrations',
-      '24/7 critical alert support + industrial SLA',
-    ],
     featured: true,
   },
 ];
 
-const faqs = [
-  {
-    question: 'How does ClerkTree integrate with our existing MES/SCADA systems?',
-    answer:
-      'ClerkTree connects directly to your existing historians, PLC controllers, and MES systems via industry standard protocols like OPC-UA, Modbus, and custom APIs, with zero rip-and-replace.',
-  },
-  {
-    question: 'Can your AI models be deployed on the factory edge?',
-    answer:
-      'Yes. ClerkTree supports deployment of lightweight, high-frequency models directly on edge hardware next to your machines for ultra-low latency diagnostics and air-gapped security.',
-  },
-  {
-    question: 'How is ClerkTree priced?',
-    answer:
-      'We offer flexible pricing based on your connected assets, data ingestion volume, and features. Contact our engineering team for a customized quote that fits your operations.',
-  },
-  {
-    question: 'How long does implementation take?',
-    answer:
-      'A standard deployment takes 2 to 4 weeks depending on your data pipelines. We provide dedicated industrial engineering support to map your signals and validate the models.',
-  },
-  {
-    question: 'Do you support physics-informed AI models?',
-    answer:
-      'Yes. For mechanical assets, we combine neural networks with first-principles physical models of wear and thermodynamic stress to increase predictive accuracy and eliminate false alarms.',
-  },
-  {
-    question: 'Is our operational data kept private and secure?',
-    answer:
-      'Absolutely. We support fully isolated, on-premise, virtual private cloud, or air-gapped deployments. Your proprietary machinery and process data never leaves your secure network.',
-  },
-];
+const faqKeys = ['q1', 'q2', 'q3', 'q4', 'q5', 'q6'] as const;
+
+type LocalizedWork = (typeof works)[number] & {
+  title: string;
+  role: string;
+  description: string;
+  services: string[];
+};
 
 const flowerIcon =
   'https://framerusercontent.com/images/bPFUMYGmKDGU6pubiY2MFnjtBAk.svg?width=16&height=16';
@@ -173,9 +104,22 @@ const ribbonFlowerOrange = 'https://framerusercontent.com/images/7LCWzuhI2N54jKd
 
 export default function LandingFramer() {
   useAgeroPageMotion();
+  const { t } = useLanguage();
 
   return (
     <div className="agero-works" id="agero-works">
+      <SEO
+        title="ClerkTree"
+        description="AI-powered workflow automation for claims and back-office operations. Transform your operations with intelligent automation that reduces turnaround time by 40%."
+        canonical="https://clerktree.com/"
+        preloadVideos={[
+          { href: HOME_HERO_VIDEO_SRC, type: 'video/quicktime' },
+          { href: works[0].cover },
+          { href: works[1].cover },
+          { href: works[2].cover },
+          { href: HOME_CONTACT_VIDEO_SRC, type: 'video/quicktime' },
+        ]}
+      />
       <div className="agero-top-area">
         <ShellHeader />
 
@@ -187,19 +131,18 @@ export default function LandingFramer() {
               data-agero-reveal="hero"
             >
               <h1 className="agero-hero-title" id="agero-works-title">
-                <span>Orchestrating</span>
-                <span className="agero-orange">Industrial</span>
-                <span className="agero-muted">Machine</span>
-                <span>Intelligence</span>
+                <span>{t('home.hero.word1')}</span>
+                <span className="agero-orange">{t('home.hero.word2')}</span>
+                <span className="agero-muted">{t('home.hero.word3')}</span>
+                <span>{t('home.hero.word4')}</span>
               </h1>
 
               <p className="agero-hero-copy">
-                Transform how your machinery operates. We deploy custom-tailored AI/ML harness layers
-                and robust predictive models designed to optimize operations, reduce downtime, and manage critical industrial assets.
+                {t('home.hero.copy')}
               </p>
 
               <a className="agero-button agero-hero-cta" href="/contact">
-                <span>Book Demo</span>
+                <span>{t('home.hero.cta')}</span>
                 <span aria-hidden="true">→</span>
               </a>
             </div>
@@ -212,24 +155,7 @@ export default function LandingFramer() {
       <LocationIntro />
       <Testimonials />
 
-      <section className="agero-portfolio" aria-labelledby="agero-portfolio-title">
-        <p className="agero-section-kicker" data-agero-reveal="up">
-          (What We Do)
-        </p>
-        <h2
-          className="agero-portfolio-title"
-          data-agero-reveal="title"
-          id="agero-portfolio-title"
-        >
-          Our Solutions
-        </h2>
-
-        <div className="agero-work-list">
-          {works.map((work, index) => (
-            <WorkCard index={index} key={work.title} work={work} />
-          ))}
-        </div>
-      </section>
+      <Portfolio />
 
       <Pricing />
       <Faq />
@@ -239,7 +165,42 @@ export default function LandingFramer() {
   );
 }
 
+function Portfolio() {
+  const { t } = useLanguage();
+  const localizedWorks = works.map((work) => ({
+    ...work,
+    title: t(`home.${work.key}.title`),
+    role: t(`home.${work.key}.role`),
+    description: t(`home.${work.key}.description`),
+    services: [1, 2, 3, 4].map((n) => t(`home.${work.key}.service${n}`)),
+  }));
+
+  return (
+    <section className="agero-portfolio" aria-labelledby="agero-portfolio-title">
+      <p className="agero-section-kicker" data-agero-reveal="up">
+        ({t('home.portfolio.kicker')})
+      </p>
+      <h2
+        className="agero-portfolio-title"
+        data-agero-reveal="title"
+        id="agero-portfolio-title"
+      >
+        {t('home.portfolio.heading')}
+      </h2>
+
+      <div className="agero-work-list">
+        {localizedWorks.map((work, index) => (
+          <WorkCard index={index} key={work.key} work={work} />
+        ))}
+      </div>
+    </section>
+  );
+}
+
 function ShellHeader() {
+  const { t } = useLanguage();
+  const shellLinks = shellLinkPaths.map(([key, href]) => [t(key), href] as const);
+  const shellMobileLinks = shellMobileLinkPaths.map(([key, href]) => [t(key), href] as const);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   useEffect(() => {
@@ -270,7 +231,7 @@ function ShellHeader() {
 
   return (
     <header className={`agero-shell-header${isMenuOpen ? ' is-menu-open' : ''}`}>
-      <a className="agero-shell-logo" href="/" aria-label="ClerkTree home">
+      <a className="agero-shell-logo" href="/" aria-label={t('home.brand.aria')}>
         <svg className="agero-shell-logo-mark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 464 468" aria-hidden="true" focusable="false">
           <path fill="currentColor" d="M275.9 63.5c37.7 5.3 76.6 24.1 103.7 50.2 30 28.8 41.8 57.6 35.8 87.1-6.1 30.1-33.6 52.9-70.6 58.3-6 0.9-18.3 1-44.9 0.6l-36.6-0.7-0.5 17.8c-0.3 9.7-0.4 17.8-0.4 17.9 0.1 0.1 19.1 0.3 42.2 0.4 23.2 0 42.7 0.5 43.5 1 1.2 0.7 1.1 2.2-0.8 9.4-6 23-20.5 42.1-41.8 55-7.3 4.3-26.7 11.9-36 14.1-9 2-34 2-44.5 0-41.3-7.9-74.2-38-82.9-75.7-8.1-35.7 2.2-71.5 27.5-94.7 16.1-14.9 35.5-22.4 63.7-24.7l7.7-0.7v-34.1l-11.7 0.7c-22.2 1.3-37 5.3-56.4 15.2-28.7 14.6-49.7 39.3-59.9 70.2-9.6 29.3-9.3 62.6 0.8 91.4 3.3 9.2 12.2 25.6 18.3 33.8 11.3 14.9 30.6 30.8 48.7 39.9 19.9 10 49.2 15.9 73.2 14.7 26.5-1.3 52.5-9.6 74.2-23.9 26.9-17.6 47.2-47.9 53.3-79.7 1-5.2 2.3-10.1 2.8-10.8 0.8-0.9 6.9-1.2 27.1-1l26.1 0.3 0.3 3.8c1.2 14.6-10.9 52.1-23.9 74-17.8 30-43.2 54-75.9 71.5-20.9 11.2-38.3 16.5-67.2 20.7-27.6 3.9-47.9 3.1-75.8-3.1-36.9-8.3-67.8-25.6-97.1-54.6-23.6-23.2-44.8-61.9-51.7-93.8-5.1-23.7-5.5-28.1-4.9-48.8 1.7-63.2 23.4-111.8 67.7-152 28-25.4 60.4-41.3 99-48.8 18.5-3.6 46.1-4 67.9-0.9zm16.4 92.6c-6.3 2.4-12.8 8.5-15.4 14.5-2.6 6.1-2.6 18.3 0 23.9 5 11 20.2 17.7 32.3 14.1 11.9-3.4 19.8-14.3 19.8-27.1-0.1-19.9-18.2-32.5-36.7-25.4z" />
         </svg>
@@ -279,17 +240,20 @@ function ShellHeader() {
         </span>
       </a>
       <div className="agero-shell-actions">
-        <nav className="agero-shell-nav" id="agero-shell-nav" aria-label="Main navigation">
+        <nav className="agero-shell-nav" id="agero-shell-nav" aria-label={t('home.nav.aria')}>
           {shellLinks.map(([label, href]) => (
             <a href={href} key={label} onClick={closeMenu}>
               {label}
             </a>
           ))}
         </nav>
+        <div className="agero-shell-lang">
+          <LanguageSwitcher isExpanded forceDark={false} />
+        </div>
         <button
           aria-controls="agero-shell-nav agero-mobile-menu"
           aria-expanded={isMenuOpen}
-          aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
+          aria-label={isMenuOpen ? t('home.menu.close') : t('home.menu.open')}
           className={`agero-shell-menu${isMenuOpen ? ' is-open' : ''}`}
           onClick={() => setIsMenuOpen((open) => !open)}
           type="button"
@@ -302,14 +266,14 @@ function ShellHeader() {
       {isMenuOpen && (
         <div className="agero-mobile-menu" id="agero-mobile-menu">
           <button
-            aria-label="Close mobile menu"
+            aria-label={t('home.menu.closeMobile')}
             className="agero-mobile-menu-scrim"
             onClick={closeMenu}
             type="button"
           />
 
           <button
-            aria-label="Close menu"
+            aria-label={t('home.menu.close')}
             className="agero-mobile-menu-close-fab"
             onClick={closeMenu}
             type="button"
@@ -318,9 +282,10 @@ function ShellHeader() {
             <span />
           </button>
 
-          <div className="agero-mobile-menu-panel" role="navigation" aria-label="Mobile navigation">
+          <div className="agero-mobile-menu-panel" role="navigation" aria-label={t('home.menu.navAria')}>
             <div className="agero-mobile-menu-top">
-              <span>Menu</span>
+              <span>{t('home.menu.title')}</span>
+              <LanguageSwitcher isExpanded forceDark={false} />
             </div>
 
             <div className="agero-mobile-menu-links">
@@ -332,7 +297,7 @@ function ShellHeader() {
             </div>
 
             <a className="agero-mobile-menu-cta" href="/contact" onClick={closeMenu}>
-              <span>Book Demo</span>
+              <span>{t('home.menu.cta')}</span>
               <span aria-hidden="true">-&gt;</span>
             </a>
           </div>
@@ -343,6 +308,7 @@ function ShellHeader() {
 }
 
 function HomePrelude({ heroContent }: { heroContent: ReactNode }) {
+  const { t } = useLanguage();
   const logoTrackRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const track = logoTrackRef.current;
@@ -356,7 +322,7 @@ function HomePrelude({ heroContent }: { heroContent: ReactNode }) {
   }, []);
 
   return (
-    <section className="agero-home-prelude" aria-label="Agero client showcase">
+    <section className="agero-home-prelude" aria-label={t('home.showcase.aria')}>
       <div className="agero-showcase-shell" data-agero-reveal="up">
         <div className="agero-hero-stage agero-hero-stage--home">
           <LazyVideo
@@ -364,14 +330,14 @@ function HomePrelude({ heroContent }: { heroContent: ReactNode }) {
             muted
             loop
             playsInline
-            src="https://xlzwfkgurrrspcdyqele.supabase.co/storage/v1/object/public/buck/entrybox.mov"
+            src={HOME_HERO_VIDEO_SRC}
           />
           <div className="agero-hero-stage-scrim" aria-hidden="true" />
           {heroContent}
         </div>
 
         <div className="agero-client-logo-strip">
-          <div className="agero-client-logo-track" aria-label="Client logos" ref={logoTrackRef}>
+          <div className="agero-client-logo-track" aria-label={t('home.showcase.logosAria')} ref={logoTrackRef}>
             {Array.from({ length: 2 }).map((_, groupIndex) => (
               <div className="agero-client-logo-set" aria-hidden={groupIndex > 0} key={groupIndex}>
                 {clientLogos.map((logo) => (
@@ -396,20 +362,27 @@ function HomePrelude({ heroContent }: { heroContent: ReactNode }) {
 }
 
 function RibbonStage() {
+  const { t } = useLanguage();
+  const metricItems = [1, 2, 3].map((n) => t(`home.ribbon.metric${n}`));
+  const serviceItems = [1, 2, 3].map((n) => t(`home.ribbon.service${n}`));
+
   return (
     <section className="agero-ribbon-stage" aria-hidden="true">
-      <RibbonRow items={metricRibbonItems} variant="black" />
-      <RibbonRow items={serviceRibbonItems} variant="orange" />
+      <RibbonRow items={metricItems} variant="black" />
+      <RibbonRow items={serviceItems} variant="orange" />
     </section>
   );
 }
 
 function IntroStatement() {
+  const { t } = useLanguage();
+  const introTags = introTagsBase.map(({ key, Icon }) => ({ Icon, label: t(`home.about.${key}`) }));
+
   return (
     <section className="agero-about-intro" aria-labelledby="agero-about-intro-title">
       <div className="agero-hello" data-agero-reveal="up">
         <span aria-hidden="true">(</span>
-        <span className="agero-hello-script">About Us</span>
+        <span className="agero-hello-script">{t('home.about.kicker')}</span>
         <span aria-hidden="true">)</span>
       </div>
 
@@ -418,8 +391,8 @@ function IntroStatement() {
         data-agero-reveal="title"
         id="agero-about-intro-title"
       >
-        We help industrial operators orchestrate machine intelligence systems — with{' '}
-        <span>speed, precision,</span> and absolute reliability.
+        {t('home.about.headingPre')}{' '}
+        <span>{t('home.about.headingEmphasis')}</span> {t('home.about.headingPost')}
       </h2>
 
       <div className="agero-intro-tags" data-agero-reveal="up">
@@ -435,21 +408,27 @@ function IntroStatement() {
 }
 
 function LocationIntro() {
+  const { t } = useLanguage();
+  const locationDetails = [
+    [t('home.office.addressLabel'), t('home.office.address')],
+    [t('home.office.regionLabel'), t('home.office.region')],
+  ];
+
   return (
     <section className="agero-founder" aria-labelledby="agero-founder-title">
       <p className="agero-section-kicker" data-agero-reveal="up">
-        (Office)
+        ({t('home.office.kicker')})
       </p>
       <h2 className="agero-founder-watermark" data-agero-reveal="title">
-        Our Location
+        {t('home.office.heading')}
       </h2>
 
       <div className="agero-founder-grid">
         <figure className="agero-founder-portrait" data-agero-reveal="up">
-          <img alt="ClerkTree Straubing Headquarters" className="agero-founder-image" decoding="async" loading="lazy" src={locationImage} />
-          <div className="agero-founder-socials" aria-label="Office social links">
+          <img alt={t('home.office.imageAlt')} className="agero-founder-image" decoding="async" loading="lazy" src={locationImage} />
+          <div className="agero-founder-socials" aria-label={t('home.office.socialAria')}>
             <a
-              aria-label="Open in Google Maps"
+              aria-label={t('home.office.mapAria')}
               href="https://maps.app.goo.gl/6p7fB1u5Qbk3fNB18"
               target="_blank"
               rel="noreferrer"
@@ -461,9 +440,9 @@ function LocationIntro() {
 
         <div className="agero-founder-copy" data-agero-reveal="up">
           <div>
-            <h3 id="agero-founder-title">Straubing Office</h3>
+            <h3 id="agero-founder-title">{t('home.office.title')}</h3>
             <p>
-              ClerkTree is based in the high-tech Bavarian town of Straubing, Germany. Our location on Industriestraße houses our core operations and machine intelligence research, close to academic and industrial partners at the Technical University of Munich (TUM) Straubing campus.
+              {t('home.office.desc')}
             </p>
           </div>
 
@@ -501,17 +480,25 @@ function RibbonRow({ items, variant }: { items: string[]; variant: 'black' | 'or
 }
 
 function Testimonials() {
+  const { t } = useLanguage();
+  const testimonialStats = [1, 2, 3].map((n) => [t(`home.testimonials.stat${n}Value`), t(`home.testimonials.stat${n}Label`)]);
+  const testimonial = {
+    quote: t('home.testimonial.quote'),
+    name: t('home.testimonial.name'),
+    role: t('home.testimonial.role'),
+  };
+
   return (
     <section className="agero-testimonials" aria-labelledby="agero-testimonials-title">
       <p className="agero-section-kicker" data-agero-reveal="up">
-        (Why clients choose ClerkTree)
+        ({t('home.testimonials.kicker')})
       </p>
       <h2
         className="agero-testimonial-watermark"
         data-agero-reveal="title"
         id="agero-testimonials-title"
       >
-        Testimonials
+        {t('home.testimonials.heading')}
       </h2>
 
       <div className="agero-testimonial-grid">
@@ -527,9 +514,9 @@ function Testimonials() {
         <article
           className="agero-testimonial-card"
           data-agero-reveal="up"
-          style={{ '--testimonial-image': `url("${testimonial.image}")` } as CSSProperties}
+          style={{ '--testimonial-image': `url("${testimonialImage}")` } as CSSProperties}
         >
-          <img alt="THD GmbH plant" className="agero-testimonial-image" decoding="async" loading="lazy" src={testimonial.image} />
+          <img alt="THD GmbH plant" className="agero-testimonial-image" decoding="async" loading="lazy" src={testimonialImage} />
           <div className="agero-testimonial-shade" aria-hidden="true" />
           <div className="agero-testimonial-content">
             <div className="agero-testimonial-bottom">
@@ -711,47 +698,19 @@ function clamp(value: number, min: number, max: number) {
 
 function LazyVideo({
   autoPlay = true,
-  preload = 'none',
+  preload,
   src,
   ...props
 }: VideoHTMLAttributes<HTMLVideoElement> & { src: string }) {
-  const ref = useRef<HTMLVideoElement>(null);
-  const [shouldLoad, setShouldLoad] = useState(false);
-
-  useEffect(() => {
-    if (isSaveDataEnabled() || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      return;
-    }
-
-    const video = ref.current;
-    if (!video) {
-      return;
-    }
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (!entry?.isIntersecting) {
-          return;
-        }
-
-        setShouldLoad(true);
-        observer.disconnect();
-      },
-      { rootMargin: '400px 0px', threshold: 0.01 },
-    );
-
-    observer.observe(video);
-    return () => observer.disconnect();
-  }, []);
+  const shouldPlay = shouldAutoplayMedia();
 
   return (
     <video
       {...props}
-      autoPlay={autoPlay && shouldLoad}
-      data-src={src}
-      preload={preload}
-      ref={ref}
-      src={shouldLoad ? src : undefined}
+      autoPlay={autoPlay && shouldPlay}
+      crossOrigin="anonymous"
+      preload={preload || (shouldPlay ? 'auto' : 'metadata')}
+      src={src}
     />
   );
 }
@@ -800,7 +759,8 @@ function SplitText({ text }: { text: string }) {
 }
 
 
-function WorkCard({ index, work }: { index: number; work: (typeof works)[number] }) {
+function WorkCard({ index, work }: { index: number; work: LocalizedWork }) {
+  const { t } = useLanguage();
   return (
     <article
       className="agero-sol-row"
@@ -820,19 +780,19 @@ function WorkCard({ index, work }: { index: number; work: (typeof works)[number]
       <div className="agero-sol-body">
         <div className="agero-sol-title-row">
           <h3 className="agero-sol-title">{work.title}</h3>
-          <a aria-label={`View ${work.title}`} className="agero-sol-arrow" href={work.href}>
+          <a aria-label={t('home.work.viewAria').replace('{title}', work.title)} className="agero-sol-arrow" href={work.href}>
             ↗
           </a>
         </div>
         <p className="agero-sol-desc">{work.description}</p>
-        <div className="agero-sol-tags" aria-label="Services">
+        <div className="agero-sol-tags" aria-label={t('home.work.servicesAria')}>
           {work.services.map((service) => (
             <span className="agero-sol-tag" key={service}>{service}</span>
           ))}
         </div>
       </div>
 
-      <a aria-label={`See ${work.title} in action`} className="agero-sol-media" href={work.href}>
+      <a aria-label={t('home.work.seeActionAria').replace('{title}', work.title)} className="agero-sol-media" href={work.href}>
         <LazyVideo
           className="agero-sol-video"
           loop
@@ -855,26 +815,36 @@ function MetaBlock({ label, value }: { label: string; value: string }) {
 }
 
 function Pricing() {
+  const { t } = useLanguage();
+  const localizedPlans = plans.map((plan) => ({
+    ...plan,
+    name: t(`home.${plan.key}.name`),
+    description: t(`home.${plan.key}.description`),
+    price: t(`home.${plan.key}.price`),
+    features: [1, 2, 3, 4].map((n) => t(`home.${plan.key}.feature${n}`)),
+  }));
+  const pricingHeading = t('home.pricing.heading');
+
   return (
     <section className="agero-pricing" id="pricing" aria-labelledby="agero-pricing-title">
       <p className="agero-section-kicker" data-agero-reveal="up">
-        (Industrial Pricing)
+        ({t('home.pricing.kicker')})
       </p>
       <h2
         className="agero-section-title"
         data-agero-reveal="title"
         id="agero-pricing-title"
-        aria-label="Built for Machinery Operations"
+        aria-label={pricingHeading}
       >
-        <SplitText text="Built for Machinery Operations" />
+        <SplitText text={pricingHeading} />
       </h2>
 
       <div className="agero-plan-list" data-agero-pricing-stack>
-        {plans.map((plan, index) => (
+        {localizedPlans.map((plan, index) => (
           <article
             className={`agero-plan-card${plan.featured ? ' agero-plan-card-featured' : ''}`}
             data-agero-reveal="up"
-            key={plan.name}
+            key={plan.key}
             style={
               {
                 '--plan-index': String(index),
@@ -894,8 +864,8 @@ function Pricing() {
                 <p>{plan.description}</p>
               </div>
               <div className="agero-delivery">
-                <span>Setup Time</span>
-                <span>2-4 weeks</span>
+                <span>{t('home.pricing.setupLabel')}</span>
+                <span>{t('home.pricing.setupValue')}</span>
               </div>
             </div>
 
@@ -903,7 +873,6 @@ function Pricing() {
               <div className="agero-price">
                 {plan.prefix && <span>{plan.prefix}</span>}
                 <strong>{plan.price}</strong>
-                {plan.suffix && <em>{plan.suffix}</em>}
               </div>
               <ul>
                 {plan.features.map((feature) => (
@@ -911,7 +880,7 @@ function Pricing() {
                 ))}
               </ul>
               <a className="agero-button agero-plan-button" href="/contact">
-                <span>Book a Discovery Call</span>
+                <span>{t('home.pricing.bookCall')}</span>
                 <span aria-hidden="true">→</span>
               </a>
             </div>
@@ -923,6 +892,11 @@ function Pricing() {
 }
 
 function Faq() {
+  const { t } = useLanguage();
+  const faqs = faqKeys.map((key, i) => ({
+    question: t(`home.faq.${key}`),
+    answer: t(`home.faq.a${i + 1}`),
+  }));
   const [openQuestion, setOpenQuestion] = useState<string | null>(null);
   const faqColumns = [
     faqs.filter((_, index) => index % 2 === 0),
@@ -936,13 +910,13 @@ function Faq() {
   return (
     <section className="agero-faq" aria-labelledby="agero-faq-title">
       <p className="agero-section-kicker" data-agero-reveal="up">
-        (FAQs)
+        ({t('home.faq.kicker')})
       </p>
       <h2 className="agero-section-title" data-agero-reveal="title" id="agero-faq-title">
-        Your Questions, Answered
+        {t('home.faq.heading')}
       </h2>
       <p className="agero-faq-subtitle" data-agero-reveal="up">
-        Helping you understand how ClerkTree transforms your machinery operations.
+        {t('home.faq.subtitle')}
       </p>
 
       <div className="agero-faq-grid">
@@ -992,6 +966,7 @@ const SUPA_URL = import.meta.env.VITE_SUPABASE_URL as string;
 const SUPA_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
 
 function Contact() {
+  const { t } = useLanguage();
   const [status, setStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -1021,15 +996,18 @@ function Contact() {
     }
   };
 
+  const connectHeading = t('home.contact.heading');
+  const subheading = t('home.contact.subheading');
+
   return (
     <section className="agero-contact" id="contact" aria-labelledby="agero-contact-title">
       <h2
-        aria-label="Let's Connect"
+        aria-label={connectHeading}
         className="agero-contact-watermark"
         data-agero-reveal="title"
         id="agero-contact-title"
       >
-        <SplitText text="Let's Connect" />
+        <SplitText text={connectHeading} />
       </h2>
 
       <div className="agero-contact-panel" data-agero-reveal="up">
@@ -1039,31 +1017,31 @@ function Contact() {
           muted
           playsInline
           className="agero-contact-bg-video"
-          src="https://xlzwfkgurrrspcdyqele.supabase.co/storage/v1/object/public/buck/hero.mov"
+          src={HOME_CONTACT_VIDEO_SRC}
         />
         <div className="agero-contact-top">
           <div className="agero-contact-copy">
-            <h3 aria-label="Ready to optimize your machinery?">
-              <SplitText text="Ready to optimize your machinery?" />
+            <h3 aria-label={subheading}>
+              <SplitText text={subheading} />
             </h3>
-            <p>Let's build your industrial AI harness together</p>
+            <p>{t('home.contact.tagline')}</p>
           </div>
 
           <form className="agero-contact-form" onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
             <label>
-              <span>Your Name</span>
-              <input onChange={(e) => setName(e.target.value)} placeholder="Enter your Name" type="text" value={name} />
+              <span>{t('home.contact.nameLabel')}</span>
+              <input onChange={(e) => setName(e.target.value)} placeholder={t('home.contact.namePlaceholder')} type="text" value={name} />
             </label>
             <label>
-              <span>Your Email</span>
-              <input onChange={(e) => setEmail(e.target.value)} placeholder="Enter the Email" type="email" value={email} />
+              <span>{t('home.contact.emailLabel')}</span>
+              <input onChange={(e) => setEmail(e.target.value)} placeholder={t('home.contact.emailPlaceholder')} type="email" value={email} />
             </label>
             <label>
-              <span>Project Description</span>
-              <textarea onChange={(e) => setMessage(e.target.value)} placeholder="Type Here..." value={message} />
+              <span>{t('home.contact.messageLabel')}</span>
+              <textarea onChange={(e) => setMessage(e.target.value)} placeholder={t('home.contact.messagePlaceholder')} value={message} />
             </label>
             <button className={`agero-submit-button is-${status}`} type="submit">
-              <span>{status === 'sent' ? '✓ Sent!' : status === 'error' ? 'Try again' : 'Send Now!'}</span>
+              <span>{status === 'sent' ? t('home.contact.sent') : status === 'error' ? t('home.contact.error') : t('home.contact.send')}</span>
               {status === 'sending' && <i aria-hidden="true" />}
             </button>
           </form>

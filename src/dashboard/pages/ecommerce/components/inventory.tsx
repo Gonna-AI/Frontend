@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { ArrowUpRight, PackageCheck, PackageX, TriangleAlert } from "lucide-react-dash";
 import { Label, Pie, PieChart } from "recharts";
 
+import { useLanguage } from "@/contexts/LanguageContext";
 import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/dashboard-ui/card";
 import { type ChartConfig, ChartContainer } from "@/components/dashboard-ui/chart";
 import { Separator } from "@/components/dashboard-ui/separator";
@@ -49,28 +50,29 @@ function buildFromProducts(products: PipelineProductRow[]) {
 }
 
 const inventorySummaryMeta = [
-  { key: "in-stock" as const, icon: PackageCheck, label: "On time" },
-  { key: "low-stock" as const, icon: TriangleAlert, label: "Long-lead items" },
-  { key: "out-of-stock" as const, icon: PackageX, label: "Delayed" },
+  { key: "in-stock" as const, icon: PackageCheck, labelKey: "dashEcommerce.inventory.onTime" },
+  { key: "low-stock" as const, icon: TriangleAlert, labelKey: "dashEcommerce.inventory.longLeadItems" },
+  { key: "out-of-stock" as const, icon: PackageX, labelKey: "dashEcommerce.inventory.delayed" },
 ];
 
-const chartConfig = {
-  "in-stock": {
-    label: "In stock",
-    color: "var(--chart-2)",
-  },
-  "low-stock": {
-    label: "Low stock",
-    color: "var(--chart-1)",
-  },
-  "out-of-stock": {
-    label: "Out of stock",
-    color: "var(--destructive)",
-  },
-} satisfies ChartConfig;
-
 export function Inventory() {
+  const { t } = useLanguage();
   const [counts, setCounts] = useState(FALLBACK_COUNTS);
+
+  const chartConfig = {
+    "in-stock": {
+      label: t("dashEcommerce.inventory.onTime"),
+      color: "var(--chart-2)",
+    },
+    "low-stock": {
+      label: t("dashEcommerce.inventory.longLeadItems"),
+      color: "var(--chart-1)",
+    },
+    "out-of-stock": {
+      label: t("dashEcommerce.inventory.delayed"),
+      color: "var(--destructive)",
+    },
+  } satisfies ChartConfig;
 
   useEffect(() => {
     let cancelled = false;
@@ -96,14 +98,18 @@ export function Inventory() {
   }, []);
 
   const { availablePercent, gaugeSegments } = buildGaugeSegments(counts);
-  const inventorySummary = inventorySummaryMeta.map((item) => ({ ...item, value: counts[item.key] }));
+  const inventorySummary = inventorySummaryMeta.map((item) => ({
+    ...item,
+    label: t(item.labelKey),
+    value: counts[item.key],
+  }));
 
   return (
     <Card className="h-full">
       <CardHeader>
-        <CardTitle className="font-normal text-muted-foreground text-sm">Long-Lead Item Tracking</CardTitle>
+        <CardTitle className="font-normal text-muted-foreground text-sm">{t("dashEcommerce.inventory.title")}</CardTitle>
         <CardDescription className="text-foreground text-xl tabular-nums leading-none tracking-tight">
-          {availablePercent}% on time
+          {t("dashEcommerce.inventory.onTimePercent").replace("{percent}", String(availablePercent))}
         </CardDescription>
         <CardAction>
           <ArrowUpRight className="size-4" />
@@ -139,7 +145,7 @@ export function Inventory() {
                           {availablePercent}%
                         </tspan>
                         <tspan className="fill-muted-foreground text-xs" x={viewBox.cx} y={(viewBox.cy || 0) + 38}>
-                          On time
+                          {t("dashEcommerce.inventory.onTime")}
                         </tspan>
                       </text>
                     );

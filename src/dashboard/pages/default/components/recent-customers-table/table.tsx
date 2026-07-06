@@ -38,42 +38,48 @@ import { Input } from "@/components/dashboard-ui/input";
 import { Label } from "@/components/dashboard-ui/label";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/dashboard-ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/dashboard-ui/table";
+import { useLanguage } from "@/contexts/LanguageContext";
 
-import { recentCustomersColumns } from "./columns";
+import { buildRecentCustomersColumns } from "./columns";
 import type { RecentCustomerRow } from "./schema";
 
-const statusOptions = [
-  { value: "all", label: "All" },
-  { value: "Subscribed", label: "Clean" },
-  { value: "Inactive", label: "In Review" },
-  { value: "Unsubscribed", label: "Escalated" },
-] as const;
-const billingOptions = [
-  { value: "all", label: "All" },
-  { value: "Paid", label: "No Deviations" },
-  { value: "Pending", label: "Review Pending" },
-  { value: "Overdue", label: "High Severity" },
-  { value: "Trial", label: "Low Severity" },
-] as const;
-const joinedDateOptions = [
-  { value: "all", label: "All time" },
-  { value: "30", label: "Last 30 days" },
-  { value: "90", label: "Last 90 days" },
-] as const;
-const sortOptions = [
-  { value: "newest", label: "Newest first" },
-  { value: "oldest", label: "Oldest first" },
-  { value: "name-asc", label: "Name A-Z" },
-  { value: "name-desc", label: "Name Z-A" },
-] as const;
 const sortOptionState = {
   newest: [{ id: "joined", desc: true }],
   oldest: [{ id: "joined", desc: false }],
   "name-asc": [{ id: "name", desc: false }],
   "name-desc": [{ id: "name", desc: true }],
-} satisfies Record<(typeof sortOptions)[number]["value"], SortingState>;
+} satisfies Record<"newest" | "oldest" | "name-asc" | "name-desc", SortingState>;
 
 export function RecentCustomersTable({ data }: { data: RecentCustomerRow[] }) {
+  const { t } = useLanguage();
+
+  const statusOptions = [
+    { value: "all", label: t("dashDefault.table.filter.all") },
+    { value: "Subscribed", label: t("dashDefault.review.clean") },
+    { value: "Inactive", label: t("dashDefault.review.inReview") },
+    { value: "Unsubscribed", label: t("dashDefault.review.escalated") },
+  ] as const;
+  const billingOptions = [
+    { value: "all", label: t("dashDefault.table.filter.all") },
+    { value: "Paid", label: t("dashDefault.severity.noDeviations") },
+    { value: "Pending", label: t("dashDefault.severity.reviewPending") },
+    { value: "Overdue", label: t("dashDefault.severity.highSeverity") },
+    { value: "Trial", label: t("dashDefault.severity.lowSeverity") },
+  ] as const;
+  const joinedDateOptions = [
+    { value: "all", label: t("dashDefault.table.filter.allTime") },
+    { value: "30", label: t("dashDefault.table.filter.last30Days") },
+    { value: "90", label: t("dashDefault.table.filter.last90Days") },
+  ] as const;
+  const sortOptions = [
+    { value: "newest", label: t("dashDefault.table.sort.newestFirst") },
+    { value: "oldest", label: t("dashDefault.table.sort.oldestFirst") },
+    { value: "name-asc", label: t("dashDefault.table.sort.nameAZ") },
+    { value: "name-desc", label: t("dashDefault.table.sort.nameZA") },
+  ] as const;
+
+  const recentCustomersColumns = React.useMemo(() => buildRecentCustomersColumns(t), [t]);
+
   const [rowSelection, setRowSelection] = React.useState({});
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
   const [sorting, setSorting] = React.useState<SortingState>([{ id: "joined", desc: true }]);

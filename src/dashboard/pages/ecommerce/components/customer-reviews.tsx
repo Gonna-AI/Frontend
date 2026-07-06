@@ -1,5 +1,6 @@
 import { ArrowLeft, ArrowRight, ArrowUpRight, Star } from "lucide-react-dash";
 
+import { useLanguage } from "@/contexts/LanguageContext";
 import { Avatar, AvatarFallback, AvatarGroup, AvatarGroupCount } from "@/components/dashboard-ui/avatar";
 import { Button } from "@/components/dashboard-ui/button";
 import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/dashboard-ui/card";
@@ -7,12 +8,14 @@ import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle }
 const customerInitials = ["EM", "OW", "NO", "MM"] as const;
 
 export function CustomerReviews() {
+  const { t } = useLanguage();
+
   return (
     <Card className="h-full">
       <CardHeader>
-        <CardTitle className="font-normal text-muted-foreground text-sm">Kundenfeedback</CardTitle>
+        <CardTitle className="font-normal text-muted-foreground text-sm">{t("dashEcommerce.reviews.title")}</CardTitle>
         <CardDescription className="text-foreground text-xl tabular-nums leading-none tracking-tight">
-          4.6 average rating
+          {t("dashEcommerce.reviews.averageRating")}
         </CardDescription>
         <CardAction>
           <ArrowUpRight className="size-4" />
@@ -31,18 +34,18 @@ export function CustomerReviews() {
                 <Star className="size-3.5 fill-current" />
               </div>
               <div>
-                <div className="font-medium text-sm">Bergmann Maschinenbau GmbH</div>
+                <div className="font-medium text-sm">{t("dashEcommerce.reviews.reviewerName")}</div>
                 <p className="mt-2 line-clamp-3 min-h-[4.5em] text-muted-foreground text-sm">
-                  Der Kostencheck hat die Zahlungsbedingungen-Abweichung vor der AB erkannt — hätte uns sonst Wochen gekostet.
+                  {t("dashEcommerce.reviews.reviewText")}
                 </p>
               </div>
             </div>
 
             <div className="flex gap-1">
-              <Button aria-label="Previous review" size="icon-xs" variant="outline">
+              <Button aria-label={t("dashEcommerce.reviews.previousAria")} size="icon-xs" variant="outline">
                 <ArrowLeft />
               </Button>
-              <Button aria-label="Next review" size="icon-xs" variant="outline">
+              <Button aria-label={t("dashEcommerce.reviews.nextAria")} size="icon-xs" variant="outline">
                 <ArrowRight />
               </Button>
             </div>
@@ -51,8 +54,8 @@ export function CustomerReviews() {
 
         <div className="flex items-center justify-between gap-4 rounded-lg border px-4 py-3">
           <div className="min-w-0">
-            <div className="font-medium text-sm">128 Rückmeldungen</div>
-            <div className="line-clamp-2 min-h-[3em] text-muted-foreground text-xs">Kunden bewertet diesen Monat</div>
+            <div className="font-medium text-sm">{t("dashEcommerce.reviews.feedbackCount")}</div>
+            <div className="line-clamp-2 min-h-[3em] text-muted-foreground text-xs">{t("dashEcommerce.reviews.feedbackCaption")}</div>
           </div>
 
           <AvatarGroup>

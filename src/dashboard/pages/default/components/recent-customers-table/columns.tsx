@@ -6,6 +6,7 @@ import { CircleAlertIcon, CircleCheckIcon, Clock3Icon, FileStack, LoaderIcon } f
 
 import { Badge } from "@/components/dashboard-ui/badge";
 import { Checkbox } from "@/components/dashboard-ui/checkbox";
+import type { useLanguage } from "@/contexts/LanguageContext";
 
 import type { RecentCustomerRow } from "./schema";
 
@@ -17,21 +18,6 @@ function stableOffset(id: string, mod: number): number {
   for (let i = 0; i < id.length; i += 1) hash = (hash * 31 + id.charCodeAt(i)) >>> 0;
   return hash % mod;
 }
-
-// "billing" values are repurposed here to represent deviation severity for the project.
-const severityLabels: Record<string, string> = {
-  Paid: "No Deviations",
-  Pending: "Review Pending",
-  Overdue: "High Severity",
-  Trial: "Low Severity",
-};
-
-// "status" values are repurposed here to represent the review state of the AI comparison.
-const reviewStatusLabels: Record<string, string> = {
-  Subscribed: "Clean",
-  Inactive: "In Review",
-  Unsubscribed: "Escalated",
-};
 
 function severityIcon(billing: string) {
   switch (billing) {
@@ -48,106 +34,125 @@ function severityIcon(billing: string) {
   }
 }
 
-export const recentCustomersColumns: ColumnDef<RecentCustomerRow>[] = [
-  {
-    id: "select",
-    header: ({ table }) => (
-      <div className="flex items-center justify-center">
-        <Checkbox
-          checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && "indeterminate")}
-          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-          aria-label="Select all projects on this page"
-        />
-      </div>
-    ),
-    cell: ({ row }) => (
-      <div className="flex items-center justify-center">
-        <Checkbox
-          checked={row.getIsSelected()}
-          onCheckedChange={(value) => row.toggleSelected(!!value)}
-          aria-label={`Select ${row.original.name}`}
-        />
-      </div>
-    ),
-    enableHiding: false,
-  },
-  {
-    accessorKey: "name",
-    header: "Project",
-    cell: ({ row }) => (
-      <div className="flex items-center gap-2">
-        <span className="flex size-8 items-center justify-center rounded-md border bg-muted">
-          <FileStack className="size-4 text-muted-foreground" />
-        </span>
-        <div className="min-w-0 flex-1">
-          <div className="flex items-end justify-between gap-3">
-            <div className="grid min-w-0 gap-0.5">
-              <span className="truncate font-medium text-sm leading-none">{row.original.name}</span>
-              <span className="truncate text-muted-foreground text-xs leading-none">#{row.original.id}</span>
+export function buildRecentCustomersColumns(t: ReturnType<typeof useLanguage>["t"]): ColumnDef<RecentCustomerRow>[] {
+  // "billing" values are repurposed here to represent deviation severity for the project.
+  const severityLabels: Record<string, string> = {
+    Paid: t("dashDefault.severity.noDeviations"),
+    Pending: t("dashDefault.severity.reviewPending"),
+    Overdue: t("dashDefault.severity.highSeverity"),
+    Trial: t("dashDefault.severity.lowSeverity"),
+  };
+
+  // "status" values are repurposed here to represent the review state of the AI comparison.
+  const reviewStatusLabels: Record<string, string> = {
+    Subscribed: t("dashDefault.review.clean"),
+    Inactive: t("dashDefault.review.inReview"),
+    Unsubscribed: t("dashDefault.review.escalated"),
+  };
+
+  return [
+    {
+      id: "select",
+      header: ({ table }) => (
+        <div className="flex items-center justify-center">
+          <Checkbox
+            checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && "indeterminate")}
+            onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+            aria-label={t("dashDefault.table.selectAllAria")}
+          />
+        </div>
+      ),
+      cell: ({ row }) => (
+        <div className="flex items-center justify-center">
+          <Checkbox
+            checked={row.getIsSelected()}
+            onCheckedChange={(value) => row.toggleSelected(!!value)}
+            aria-label={t("dashDefault.table.selectRowAria").replace("{name}", row.original.name)}
+          />
+        </div>
+      ),
+      enableHiding: false,
+    },
+    {
+      accessorKey: "name",
+      header: t("dashDefault.table.column.project"),
+      cell: ({ row }) => (
+        <div className="flex items-center gap-2">
+          <span className="flex size-8 items-center justify-center rounded-md border bg-muted">
+            <FileStack className="size-4 text-muted-foreground" />
+          </span>
+          <div className="min-w-0 flex-1">
+            <div className="flex items-end justify-between gap-3">
+              <div className="grid min-w-0 gap-0.5">
+                <span className="truncate font-medium text-sm leading-none">{row.original.name}</span>
+                <span className="truncate text-muted-foreground text-xs leading-none">#{row.original.id}</span>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    ),
-    enableHiding: false,
-  },
-  {
-    id: "search",
-    accessorFn: (row) => `${row.id} ${row.name} ${row.email}`,
-    filterFn: "includesString",
-    enableHiding: true,
-  },
-  {
-    accessorKey: "status",
-    header: "Review Status",
-    filterFn: "equalsString",
-    cell: ({ row }) => (
-      <Badge variant="outline" className="px-1.5 text-muted-foreground">
-        {reviewStatusLabels[row.original.status] ?? row.original.status}
-      </Badge>
-    ),
-  },
-  {
-    accessorKey: "billing",
-    header: "Severity",
-    filterFn: "equalsString",
-    cell: ({ row }) => (
-      <Badge variant="outline" className="px-1.5 text-muted-foreground">
-        {severityIcon(row.original.billing)}
-        {severityLabels[row.original.billing] ?? row.original.billing}
-      </Badge>
-    ),
-  },
-  {
-    accessorKey: "plan",
-    header: "Company",
-    cell: ({ row }) => <span className="text-sm">{row.original.plan}</span>,
-  },
-  {
-    id: "joinedWindow",
-    accessorFn: (row) => {
-      const daysSinceJoined = differenceInCalendarDays(endOfToday(), parseISO(row.joined));
-
-      if (daysSinceJoined <= 30) return ["30", "90"];
-      if (daysSinceJoined <= 90) return ["90"];
-      return [];
+      ),
+      enableHiding: false,
     },
-    filterFn: "arrIncludes",
-    enableHiding: true,
-  },
-  {
-    accessorKey: "joined",
-    header: "Detected",
-    cell: ({ row }) => {
-      const baseDate = parseISO(row.original.joined);
-      const joinedAt = addMinutes(baseDate, 9 * 60 + stableOffset(row.original.id, 12) * 17);
-
-      return (
-        <div className="grid gap-0.5">
-          <span className="text-sm">{format(joinedAt, "do MMMM yyyy")}</span>
-          <span className="text-muted-foreground text-xs">at {format(joinedAt, "h:mm a")}</span>
-        </div>
-      );
+    {
+      id: "search",
+      accessorFn: (row) => `${row.id} ${row.name} ${row.email}`,
+      filterFn: "includesString",
+      enableHiding: true,
     },
-  },
-];
+    {
+      accessorKey: "status",
+      header: t("dashDefault.table.column.reviewStatus"),
+      filterFn: "equalsString",
+      cell: ({ row }) => (
+        <Badge variant="outline" className="px-1.5 text-muted-foreground">
+          {reviewStatusLabels[row.original.status] ?? row.original.status}
+        </Badge>
+      ),
+    },
+    {
+      accessorKey: "billing",
+      header: t("dashDefault.table.column.severity"),
+      filterFn: "equalsString",
+      cell: ({ row }) => (
+        <Badge variant="outline" className="px-1.5 text-muted-foreground">
+          {severityIcon(row.original.billing)}
+          {severityLabels[row.original.billing] ?? row.original.billing}
+        </Badge>
+      ),
+    },
+    {
+      accessorKey: "plan",
+      header: t("dashDefault.table.column.company"),
+      cell: ({ row }) => <span className="text-sm">{row.original.plan}</span>,
+    },
+    {
+      id: "joinedWindow",
+      accessorFn: (row) => {
+        const daysSinceJoined = differenceInCalendarDays(endOfToday(), parseISO(row.joined));
+
+        if (daysSinceJoined <= 30) return ["30", "90"];
+        if (daysSinceJoined <= 90) return ["90"];
+        return [];
+      },
+      filterFn: "arrIncludes",
+      enableHiding: true,
+    },
+    {
+      accessorKey: "joined",
+      header: t("dashDefault.table.column.detected"),
+      cell: ({ row }) => {
+        const baseDate = parseISO(row.original.joined);
+        const joinedAt = addMinutes(baseDate, 9 * 60 + stableOffset(row.original.id, 12) * 17);
+
+        return (
+          <div className="grid gap-0.5">
+            <span className="text-sm">{format(joinedAt, "do MMMM yyyy")}</span>
+            <span className="text-muted-foreground text-xs">
+              {t("dashDefault.table.detectedAt")} {format(joinedAt, "h:mm a")}
+            </span>
+          </div>
+        );
+      },
+    },
+  ];
+}

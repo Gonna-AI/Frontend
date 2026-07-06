@@ -3,21 +3,22 @@ import { CheckCircle2, Ticket, AlertTriangle, FileText, MessageSquare, ArrowLeft
 import { Link } from 'react-router-dom';
 import { supabase } from '../config/supabase';
 import { Header, Footer } from '../components/Landing/AgeroChrome';
+import { useLanguage } from '../contexts/LanguageContext';
 import './LandingFramer.css';
 
 const CATEGORIES = [
-    { value: 'technical', label: 'Technical Issue' },
-    { value: 'billing', label: 'Billing & Payments' },
-    { value: 'account', label: 'Account & Access' },
-    { value: 'api', label: 'API & Integration' },
-    { value: 'general', label: 'General Inquiry' },
+    { value: 'technical', labelKey: 'supportPage.category.technical' },
+    { value: 'billing', labelKey: 'supportPage.category.billing' },
+    { value: 'account', labelKey: 'supportPage.category.account' },
+    { value: 'api', labelKey: 'supportPage.category.api' },
+    { value: 'general', labelKey: 'supportPage.category.general' },
 ];
 
 const PRIORITIES = [
-    { value: 'low', label: 'Low', color: 'text-emerald-400 border-emerald-500/20 bg-emerald-500/10' },
-    { value: 'medium', label: 'Medium', color: 'text-amber-400 border-amber-500/20 bg-amber-500/10' },
-    { value: 'high', label: 'High', color: 'text-orange-400 border-orange-500/20 bg-orange-500/10' },
-    { value: 'urgent', label: 'Urgent', color: 'text-red-400 border-red-500/20 bg-red-500/10' },
+    { value: 'low', labelKey: 'supportPage.priority.low', color: 'text-emerald-400 border-emerald-500/20 bg-emerald-500/10' },
+    { value: 'medium', labelKey: 'supportPage.priority.medium', color: 'text-amber-400 border-amber-500/20 bg-amber-500/10' },
+    { value: 'high', labelKey: 'supportPage.priority.high', color: 'text-orange-400 border-orange-500/20 bg-orange-500/10' },
+    { value: 'urgent', labelKey: 'supportPage.priority.urgent', color: 'text-red-400 border-red-500/20 bg-red-500/10' },
 ];
 
 interface TicketForm {
@@ -30,6 +31,7 @@ interface TicketForm {
 }
 
 const SupportPage = () => {
+    const { t } = useLanguage();
     const supabaseUrl = import.meta.env.VITE_SUPABASE_URL?.trim();
     const [formData, setFormData] = useState<TicketForm>({
         user_name: '',
@@ -58,12 +60,12 @@ const SupportPage = () => {
 
         try {
             if (!supabaseUrl) {
-                throw new Error('Support service is not configured.');
+                throw new Error(t('supportPage.error.serviceNotConfigured'));
             }
 
             const { data: { session } } = await supabase.auth.getSession();
             if (!session?.access_token) {
-                throw new Error('Please sign in to submit a support ticket.');
+                throw new Error(t('supportPage.error.signInRequired'));
             }
 
             const response = await fetch(
@@ -81,14 +83,14 @@ const SupportPage = () => {
             const result = await response.json();
 
             if (!response.ok) {
-                throw new Error(result.message || result.error || 'Failed to create ticket');
+                throw new Error(result.message || result.error || t('supportPage.error.createFailed'));
             }
 
             setTicketId(result.ticket_id);
             setSubmitStatus('success');
         } catch (err) {
             console.error('Ticket submission error:', err);
-            setErrorMessage(err instanceof Error ? err.message : 'Something went wrong. Please try again.');
+            setErrorMessage(err instanceof Error ? err.message : t('supportPage.error.generic'));
             setSubmitStatus('error');
         } finally {
             setIsSubmitting(false);

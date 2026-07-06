@@ -1,6 +1,10 @@
 import { Quote } from "lucide-react-dash";
 
+import { useLanguage } from "@/contexts/LanguageContext";
+
 export function QuoteCard() {
+  const { t } = useLanguage();
+
   return (
     <section className="rounded-2xl border bg-card p-6 shadow-xs">
       <div className="flex items-start gap-4">
@@ -8,8 +12,8 @@ export function QuoteCard() {
           <Quote className="size-6" />
         </div>
         <div className="flex flex-col gap-1">
-          <p className="text-xl leading-none tracking-tight">Jede geprüfte Abweichung spart eine Stunde Nacharbeit.</p>
-          <p className="text-muted-foreground">Der Kostencheck Copilot findet sie — Sie bestätigen sie.</p>
+          <p className="text-xl leading-none tracking-tight">{t("dashProductivity.quote.text")}</p>
+          <p className="text-muted-foreground">{t("dashProductivity.quote.attribution")}</p>
         </div>
       </div>
     </section>

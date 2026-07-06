@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 
 import { useLanguage } from '../contexts/LanguageContext';
 import { Footer } from '../components/Landing/AgeroChrome';
+import { shouldAutoplayMedia } from '../utils/idle';
 import SEO from '../components/SEO';
 import './LandingFramer.css';
 import './Solutions.css';
@@ -22,6 +23,7 @@ export default function Solutions() {
   const navigate = useNavigate();
   const { t } = useLanguage();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const shouldPlayVideo = shouldAutoplayMedia();
   const closeMenu = () => setIsMenuOpen(false);
 
   const heroServices = [
@@ -70,6 +72,7 @@ export default function Solutions() {
         title="Solutions"
         description="Explore ClerkTree's autonomous operations solutions across voice agents, document intelligence, workflow orchestration, and enterprise monitoring."
         canonical="https://clerktree.com/solutions"
+        preloadVideos={[{ href: SOLUTIONS_HERO_VIDEO_SRC }]}
       />
       <main className="clerktree-solutions-main">
         <section className="fabric-solution-shell" aria-labelledby="solutions-title">
@@ -144,10 +147,12 @@ export default function Solutions() {
               <video
                 className="fabric-solution-video"
                 src={SOLUTIONS_HERO_VIDEO_SRC}
-                autoPlay
+                autoPlay={shouldPlayVideo}
                 loop
                 muted
                 playsInline
+                preload={shouldPlayVideo ? 'auto' : 'metadata'}
+                crossOrigin="anonymous"
                 aria-label="ClerkTree solutions video"
               />
             ) : (

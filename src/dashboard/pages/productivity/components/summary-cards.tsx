@@ -3,15 +3,23 @@ import { useEffect, useState } from "react";
 import { ArrowRight, Clock3, Focus, TrendingUp } from "lucide-react-dash";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/dashboard-ui/card";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { fetchAllProjects, fetchChecklistItems, subscribeToTable } from "@/dashboard/lib/pipelineClient";
 
-const FALLBACK_CARDS = [
-  { title: "Heute", value: "3", description: "Human-Review-Punkte offen", icon: Clock3 },
-  { title: "Diese Woche", value: "76%", description: "automatisch geprüft", icon: TrendingUp },
-  { title: "Fokus", value: "Bergmann CNC-Paket", description: "2 Abweichungen zu prüfen", icon: Focus },
-] as const;
-
 export function SummaryCards() {
+  const { t } = useLanguage();
+
+  const FALLBACK_CARDS = [
+    { title: t("dashProductivity.summary.today.title"), value: "3", description: t("dashProductivity.summary.today.description"), icon: Clock3 },
+    { title: t("dashProductivity.summary.thisWeek.title"), value: "76%", description: t("dashProductivity.summary.thisWeek.description"), icon: TrendingUp },
+    {
+      title: t("dashProductivity.summary.focus.title"),
+      value: t("dashProductivity.summary.focus.value"),
+      description: t("dashProductivity.summary.focus.description").replace("{count}", "2"),
+      icon: Focus,
+    },
+  ] as const;
+
   const [cards, setCards] = useState<{ title: string; value: string; description: string; icon: typeof Clock3 }[]>([
     ...FALLBACK_CARDS,
   ]);
@@ -31,12 +39,12 @@ export function SummaryCards() {
           const focusOpenCount = focusProject ? items.filter((i) => i.project_id === focusProject.id && i.status !== "done").length : 0;
 
           setCards([
-            { title: "Heute", value: String(open), description: "Human-Review-Punkte offen", icon: Clock3 },
-            { title: "Diese Woche", value: `${doneShare}%`, description: "automatisch geprüft", icon: TrendingUp },
+            { title: t("dashProductivity.summary.today.title"), value: String(open), description: t("dashProductivity.summary.today.description"), icon: Clock3 },
+            { title: t("dashProductivity.summary.thisWeek.title"), value: `${doneShare}%`, description: t("dashProductivity.summary.thisWeek.description"), icon: TrendingUp },
             {
-              title: "Fokus",
+              title: t("dashProductivity.summary.focus.title"),
               value: focusProject?.name ?? FALLBACK_CARDS[2].value,
-              description: `${focusOpenCount} Abweichungen zu prüfen`,
+              description: t("dashProductivity.summary.focus.description").replace("{count}", String(focusOpenCount)),
               icon: Focus,
             },
           ]);

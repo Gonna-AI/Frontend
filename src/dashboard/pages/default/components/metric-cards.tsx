@@ -2,8 +2,11 @@ import { AlertTriangle, FileStack, TrendingDown, TrendingUp, Timer } from "lucid
 
 import { Badge } from "@/components/dashboard-ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/dashboard-ui/card";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export function MetricCards() {
+  const { t } = useLanguage();
+
   return (
     <div className="grid grid-cols-1 gap-4 *:data-[slot=card]:bg-linear-to-t *:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card *:data-[slot=card]:shadow-xs xl:grid-cols-4 dark:*:data-[slot=card]:bg-card">
       <Card>
@@ -13,7 +16,7 @@ export function MetricCards() {
               <FileStack className="size-4" />
             </div>
           </CardTitle>
-          <CardDescription>Documents Processed</CardDescription>
+          <CardDescription>{t("dashDefault.metric.documentsProcessed.label")}</CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-1">
           <div className="flex flex-wrap items-center gap-2">
@@ -23,7 +26,7 @@ export function MetricCards() {
               +12.5%
             </Badge>
           </div>
-          <p className="text-muted-foreground text-sm">Angebote & Bestellungen ingested across 3 companies</p>
+          <p className="text-muted-foreground text-sm">{t("dashDefault.metric.documentsProcessed.description")}</p>
         </CardContent>
       </Card>
 
@@ -34,7 +37,7 @@ export function MetricCards() {
               <AlertTriangle className="size-4" />
             </div>
           </CardTitle>
-          <CardDescription>Deviations Caught</CardDescription>
+          <CardDescription>{t("dashDefault.metric.deviationsCaught.label")}</CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-1">
           <div className="flex flex-wrap items-center gap-2">
@@ -44,7 +47,7 @@ export function MetricCards() {
               +20%
             </Badge>
           </div>
-          <p className="text-muted-foreground text-sm">Quote-vs-order mismatches flagged for review</p>
+          <p className="text-muted-foreground text-sm">{t("dashDefault.metric.deviationsCaught.description")}</p>
         </CardContent>
       </Card>
 
@@ -55,7 +58,7 @@ export function MetricCards() {
               <TrendingDown className="size-4" />
             </div>
           </CardTitle>
-          <CardDescription>€ At Risk Flagged</CardDescription>
+          <CardDescription>{t("dashDefault.metric.atRisk.label")}</CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-1">
           <div className="flex flex-wrap items-center gap-2">
@@ -65,7 +68,7 @@ export function MetricCards() {
               +12.5%
             </Badge>
           </div>
-          <p className="text-muted-foreground text-sm">Cumulative order-value impact caught before signoff</p>
+          <p className="text-muted-foreground text-sm">{t("dashDefault.metric.atRisk.description")}</p>
         </CardContent>
       </Card>
 
@@ -76,7 +79,7 @@ export function MetricCards() {
               <Timer className="size-4" />
             </div>
           </CardTitle>
-          <CardDescription>Engineer-Hours Saved</CardDescription>
+          <CardDescription>{t("dashDefault.metric.hoursSaved.label")}</CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-1">
           <div className="flex flex-wrap items-center gap-2">
@@ -86,7 +89,7 @@ export function MetricCards() {
               +4.5%
             </Badge>
           </div>
-          <p className="text-muted-foreground text-sm">Manual line-by-line comparison time avoided</p>
+          <p className="text-muted-foreground text-sm">{t("dashDefault.metric.hoursSaved.description")}</p>
         </CardContent>
       </Card>
     </div>
