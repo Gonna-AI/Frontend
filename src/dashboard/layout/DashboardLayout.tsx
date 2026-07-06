@@ -10,17 +10,22 @@ import { cn } from "@/lib/utils";
 import { usePreferencesStore } from "@/dashboard/store/preferences-store";
 
 import { LanguageSwitcher } from "./language-switcher";
-import { LayoutControls } from "./layout-controls";
 import { SearchDialog } from "./search-dialog";
 import { ThemeSwitcher } from "./theme-switcher";
 
 export default function DashboardLayout() {
   const values = usePreferencesStore((s) => s.values);
-  const { content_layout: contentLayout, navbar_style: navbarStyle, sidebar_variant, sidebar_collapsible } = values;
+  const {
+    content_layout: contentLayout,
+    navbar_style: navbarStyle,
+    sidebar_variant,
+    sidebar_collapsible,
+    theme_mode: themeMode,
+  } = values;
 
   return (
     <div
-      className="dashboard-root"
+      className={cn("dashboard-root", themeMode === "dark" && "dark")}
       data-content-layout={contentLayout}
       data-navbar-style={navbarStyle}
       data-theme-preset="default"
@@ -62,7 +67,6 @@ export default function DashboardLayout() {
                   <SearchDialog />
                 </div>
                 <div className="flex items-center gap-2">
-                  <LayoutControls />
                   <LanguageSwitcher />
                   <ThemeSwitcher />
                 </div>
