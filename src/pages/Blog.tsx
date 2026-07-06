@@ -49,6 +49,15 @@ function BlogContent() {
         description="Latest insights on legal AI, claims automation, and the future of work. Stay updated with ClerkTree."
         canonical="https://clerktree.com/blog"
         preloadVideos={[{ href: BLOG_HERO_VIDEO_SRC }]}
+        videos={[
+          {
+            name: t('blogPage.title'),
+            description: t('blogPage.subtitle'),
+            contentUrl: BLOG_HERO_VIDEO_SRC,
+            thumbnailUrl: 'https://framerusercontent.com/images/MHwFX5PK3mWp7JJNseH8110qdg.png?scale-down-to=2048',
+            uploadDate: '2026-07-06',
+          },
+        ]}
       />
       <div className="agero-top-area agero-top-area-with-hero">
         <Header />

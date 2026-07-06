@@ -99,6 +99,15 @@ export default function Contact() {
         description="Get in touch with ClerkTree. Speak with our team about automating legal, claims, and back-office operations."
         canonical="https://clerktree.com/contact"
         preloadVideos={[{ href: CONTACT_VIDEO_SRC }]}
+        videos={[
+          {
+            name: `${t('contact.title1')} ${t('contact.title2')}`,
+            description: t('contact.subtitle'),
+            contentUrl: CONTACT_VIDEO_SRC,
+            thumbnailUrl: 'https://pub-0f804855178c4f4e8184c4fef3bd5b2a.r2.dev/munich.jpg',
+            uploadDate: '2026-07-04',
+          },
+        ]}
       />
 
       <div className="agero-top-area agero-top-area-with-hero">

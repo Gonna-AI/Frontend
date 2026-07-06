@@ -55,6 +55,15 @@ export default function About() {
         description={t('about.seoDesc')}
         canonical="https://clerktree.com/about"
         preloadVideos={[{ href: HERO_VIDEO_SRC }]}
+        videos={[
+          {
+            name: t('about.heroLead') + ' ' + t('about.heroEmphasis'),
+            description: t('about.heroDesc'),
+            contentUrl: HERO_VIDEO_SRC,
+            thumbnailUrl: 'https://pub-0f804855178c4f4e8184c4fef3bd5b2a.r2.dev/thdbuilding.jpg',
+            uploadDate: '2026-07-04',
+          },
+        ]}
       />
 
       <div className="agero-top-area agero-top-area-with-hero">

@@ -1,5 +1,14 @@
 import { Helmet } from 'react-helmet-async';
 
+interface VideoMeta {
+    name: string;
+    description: string;
+    contentUrl: string;
+    thumbnailUrl: string;
+    uploadDate: string;
+    durationSeconds?: number;
+}
+
 interface SEOProps {
     title: string;
     description: string;
@@ -16,15 +25,29 @@ interface SEOProps {
         url?: string;
     };
     structuredData?: object;
+    /** VideoObject schema for every <video> embedded on the page — Google Search
+     * Console won't index a video without a thumbnailUrl in structured data. */
+    videos?: VideoMeta[];
 }
 
-export default function SEO({ title, description, canonical, preloadVideos, openGraph, structuredData }: SEOProps) {
+export default function SEO({ title, description, canonical, preloadVideos, openGraph, structuredData, videos }: SEOProps) {
     const siteUrl = 'https://clerktree.com';
     const currentUrl = canonical || (openGraph?.url ?? siteUrl);
     // og:image/twitter:image must be absolute URLs per spec — social crawlers don't resolve relative paths.
     const ogImage = openGraph?.image || 'https://pub-0f804855178c4f4e8184c4fef3bd5b2a.r2.dev/logo.svg';
     const faviconHref = `${siteUrl}/favicon.svg`;
     const manifestHref = `${siteUrl}/site.webmanifest`;
+
+    const videoSchemas = videos?.map((video) => ({
+        '@context': 'https://schema.org',
+        '@type': 'VideoObject',
+        name: video.name,
+        description: video.description,
+        thumbnailUrl: [video.thumbnailUrl],
+        uploadDate: video.uploadDate,
+        contentUrl: video.contentUrl,
+        ...(video.durationSeconds ? { duration: `PT${video.durationSeconds}S` } : {}),
+    }));
 
     return (
         <Helmet>
@@ -65,6 +88,12 @@ export default function SEO({ title, description, canonical, preloadVideos, open
                     {JSON.stringify(structuredData)}
                 </script>
             )}
+
+            {videoSchemas?.map((schema) => (
+                <script key={schema.contentUrl} type="application/ld+json">
+                    {JSON.stringify(schema)}
+                </script>
+            ))}
         </Helmet>
     );
 }

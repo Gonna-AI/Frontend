@@ -102,6 +102,15 @@ export default function Solutions() {
         description="Explore ClerkTree's industrial machine intelligence layer for telemetry, predictive maintenance, production analytics, and maintenance workflow orchestration."
         canonical="https://clerktree.com/solutions"
         preloadVideos={[{ href: SOLUTIONS_HERO_VIDEO_SRC }]}
+        videos={[
+          {
+            name: `${t('solutions.title1')} ${t('solutions.title2')}`,
+            description: t('solutions.subtitle'),
+            contentUrl: SOLUTIONS_HERO_VIDEO_SRC,
+            thumbnailUrl: 'https://framerusercontent.com/images/x3RMizQqFhQ9G8jF5dqqcbxY8M.png?scale-down-to=2048',
+            uploadDate: '2026-07-04',
+          },
+        ]}
       />
       <main className="clerktree-solutions-main">
         <section className="fabric-solution-shell" aria-labelledby="solutions-title">

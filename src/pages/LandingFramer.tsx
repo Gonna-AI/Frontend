@@ -86,6 +86,8 @@ const flowerIcon =
 const ribbonFlower = 'https://framerusercontent.com/images/InxDM6L8xjRn2ZsMquQwkLQ0VLA.svg';
 const ribbonFlowerOrange = 'https://framerusercontent.com/images/7LCWzuhI2N54jKdu359awJ6cKLU.svg';
 
+const HOME_VIDEO_UPLOAD_DATE = '2026-06-29';
+
 export default function LandingFramer() {
   useAgeroPageMotion();
   const { t } = useLanguage();
@@ -102,6 +104,29 @@ export default function LandingFramer() {
           { href: works[1].cover },
           { href: works[2].cover },
           { href: HOME_CONTACT_VIDEO_SRC, type: 'video/quicktime' },
+        ]}
+        videos={[
+          {
+            name: t('home.hero.word1') + ' ' + t('home.hero.word2') + ' ' + t('home.hero.word3') + ' ' + t('home.hero.word4'),
+            description: t('home.hero.copy'),
+            contentUrl: HOME_HERO_VIDEO_SRC,
+            thumbnailUrl: works[0].bg,
+            uploadDate: HOME_VIDEO_UPLOAD_DATE,
+          },
+          {
+            name: t('home.contact.heading'),
+            description: t('home.contact.tagline'),
+            contentUrl: HOME_CONTACT_VIDEO_SRC,
+            thumbnailUrl: works[2].bg,
+            uploadDate: HOME_VIDEO_UPLOAD_DATE,
+          },
+          ...works.map((work) => ({
+            name: t(`home.${work.key}.title`),
+            description: t(`home.${work.key}.description`),
+            contentUrl: work.cover,
+            thumbnailUrl: work.bg,
+            uploadDate: HOME_VIDEO_UPLOAD_DATE,
+          })),
         ]}
       />
       <div className="agero-top-area">
