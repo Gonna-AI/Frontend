@@ -3,9 +3,17 @@ import { useTheme } from '../../hooks/useTheme';
 import { cn } from '../../utils/cn';
 import { Globe } from 'lucide-react';
 
-export default function LanguageSwitcher({ isExpanded = false, forceDark = false }: { isExpanded?: boolean; forceDark?: boolean }) {
+export default function LanguageSwitcher({
+    isExpanded = false,
+    forceDark = false,
+    forceLight = false,
+}: {
+    isExpanded?: boolean;
+    forceDark?: boolean;
+    forceLight?: boolean;
+}) {
     const { isDark: themeIsDark } = useTheme();
-    const isDark = forceDark || themeIsDark;
+    const isDark = forceDark ? true : forceLight ? false : themeIsDark;
 
     // Use the context hook
     const { language, setLanguage, t } = useLanguage();

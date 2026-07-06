@@ -244,7 +244,7 @@ function ShellHeader() {
           ))}
         </nav>
         <div className="agero-shell-lang">
-          <LanguageSwitcher isExpanded forceDark={false} />
+          <LanguageSwitcher isExpanded forceLight />
         </div>
         <button
           aria-controls="agero-shell-nav agero-mobile-menu"
@@ -281,7 +281,7 @@ function ShellHeader() {
           <div className="agero-mobile-menu-panel" role="navigation" aria-label={t('home.menu.navAria')}>
             <div className="agero-mobile-menu-top">
               <span>{t('home.menu.title')}</span>
-              <LanguageSwitcher isExpanded forceDark={false} />
+              <LanguageSwitcher isExpanded forceLight />
             </div>
 
             <div className="agero-mobile-menu-links">
