@@ -54,7 +54,8 @@
   background: rgb(12, 12, 12);
   border-radius: 36px;
   color: white;
-  min-height: clamp(640px, 54.5vw, 1080px);
+  container-type: inline-size;
+  min-height: clamp(720px, 54.5vw, 1080px);
   overflow: hidden;
   position: relative;
 }
@@ -107,15 +108,18 @@
   left: 3.2%;
   position: absolute;
   top: 14%;
-  width: min(66vw, 1260px);
+  width: min(58vw, 1120px);
+  z-index: 2;
 }
 
 .fabric-solution-brand h1 {
   color: rgb(255, 255, 255);
-  font-size: clamp(6.4rem, 14.2vw, 18.8rem);
+  font-size: clamp(6rem, 11.8cqw, 15.5rem);
   letter-spacing: -0.095em;
   line-height: 0.76;
   margin: 0;
+  max-width: 100%;
+  overflow-wrap: normal;
   white-space: nowrap;
 }
 
@@ -129,28 +133,33 @@
 .fabric-solution-brand p {
   color: rgb(255, 255, 255);
   font-family: "Cal Sans", "Inter", system-ui, sans-serif !important;
-  font-size: clamp(3.4rem, 5.9vw, 7.2rem);
+  font-size: clamp(3rem, 4.6cqw, 5.8rem);
   line-height: 0.88;
-  margin: 1.4rem 0 0 51%;
+  margin: 1.25rem 0 0 clamp(15rem, 31cqw, 34rem);
+  max-width: min(36cqw, 680px);
+  overflow-wrap: normal;
+  white-space: nowrap;
 }
 
 .fabric-solution-list {
   display: grid;
-  gap: 20px;
+  gap: clamp(14px, 1.15cqw, 22px);
   list-style: none;
   margin: 0;
   padding: 0;
   position: absolute;
   right: 5.6%;
-  top: 25%;
-  width: min(30vw, 500px);
+  top: 26%;
+  width: min(28cqw, 500px);
+  z-index: 3;
 }
 
 .fabric-solution-list li {
   color: rgb(255, 255, 255);
   font-family: "Cal Sans", "Inter", system-ui, sans-serif;
-  font-size: clamp(1.35rem, 1.8vw, 2.05rem);
-  line-height: 1.02;
+  font-size: clamp(1.22rem, 1.62cqw, 2rem);
+  line-height: 1.08;
+  overflow-wrap: anywhere;
 }
 
 .fabric-solution-plus {
@@ -343,13 +352,13 @@
   }
 }
 
-@media (max-width: 1180px) {
+@media (max-width: 1680px) {
   .fabric-solution-shell {
     padding: 24px;
   }
 
   .fabric-solution-stage {
-    min-height: 760px;
+    min-height: clamp(760px, 62vw, 940px);
   }
 
   .fabric-solution-brand {
@@ -357,11 +366,21 @@
     width: 92%;
   }
 
+  .fabric-solution-brand h1 {
+    font-size: clamp(5.8rem, 12.2cqw, 12rem);
+  }
+
+  .fabric-solution-brand p {
+    font-size: clamp(3.2rem, 5.2cqw, 5.7rem);
+    margin-left: clamp(13rem, 32cqw, 32rem);
+    max-width: min(48cqw, 720px);
+  }
+
   .fabric-solution-list {
     left: 4%;
     right: auto;
-    top: 39%;
-    width: auto;
+    top: clamp(360px, 41%, 440px);
+    width: min(62cqw, 760px);
   }
 
   .fabric-solution-copy {
@@ -375,10 +394,15 @@
   }
 }
 
-@media (min-width: 1181px) and (max-width: 1440px) {
+@media (min-width: 1681px) and (max-width: 1920px) {
+  .fabric-solution-brand {
+    width: min(56cqw, 1080px);
+  }
+
   .fabric-solution-list {
     right: 6%;
-    top: 37%;
+    top: 30%;
+    width: min(27cqw, 500px);
   }
 }
 
