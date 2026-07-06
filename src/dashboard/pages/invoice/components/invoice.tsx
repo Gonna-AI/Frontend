@@ -62,7 +62,11 @@ export function Invoice() {
 
   return (
     <FormProvider {...form}>
-      <form className="grid gap-5 xl:grid-cols-2" noValidate onSubmit={(event) => event.preventDefault()}>
+      <form
+        className="grid min-w-0 items-start gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]"
+        noValidate
+        onSubmit={(event) => event.preventDefault()}
+      >
         <InvoiceForm />
         <InvoicePreview invoice={invoice} />
       </form>

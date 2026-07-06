@@ -80,16 +80,16 @@ export function Roles({ roles }: { roles: Role[] }) {
   const statusFilter = (table.getColumn("status")?.getFilterValue() as string | undefined) ?? "All";
 
   return (
-    <div className="flex h-full flex-col gap-4">
-      <div className="flex flex-col items-start gap-4 sm:flex-row sm:justify-between">
-        <div className="flex flex-col gap-1">
+    <div className="flex h-full min-w-0 flex-col gap-4">
+      <div className="flex min-w-0 flex-col items-start gap-4 sm:flex-row sm:justify-between">
+        <div className="flex min-w-0 flex-col gap-1">
           <h1 className="text-3xl tracking-tight">Access Control</h1>
           <p className="text-muted-foreground text-sm">
             TV, PM, AL, PTL, and Kunde roles — mirroring THD&apos;s Angebot → Bestellung → AB process.
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <Button size="sm" variant="outline">
             <FileUp data-icon="inline-start" />
             Import JSON
@@ -98,7 +98,7 @@ export function Roles({ roles }: { roles: Role[] }) {
         </div>
       </div>
 
-      <Tabs className="h-full gap-4" defaultValue="roles">
+      <Tabs className="h-full min-w-0 gap-4" defaultValue="roles">
         <TabsList
           variant="line"
           className="w-full justify-start gap-2 border-b ps-0 *:data-[slot=tabs-trigger]:flex-none"
@@ -109,7 +109,7 @@ export function Roles({ roles }: { roles: Role[] }) {
         </TabsList>
 
         <TabsContent value="roles">
-          <div className="flex flex-col gap-4">
+          <div className="flex min-w-0 flex-col gap-4">
             <Alert className="border-amber-200 bg-amber-50 text-amber-900 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-50">
               <AlertTriangle className="size-4" />
               <AlertTitle>Review required</AlertTitle>
@@ -122,7 +122,7 @@ export function Roles({ roles }: { roles: Role[] }) {
               </AlertAction>
             </Alert>
 
-            <div className="overflow-hidden rounded-xl border border-border/70 bg-background">
+            <div className="min-w-0 overflow-hidden rounded-xl border border-border/70 bg-background">
               <div className="flex flex-col items-stretch gap-4 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
                 <InputGroup className="h-7 w-full rounded-md sm:w-82">
                   <InputGroupAddon>

@@ -9,9 +9,9 @@ export default function Page() {
   const { t } = useLanguage();
 
   return (
-    <div className="relative z-0 flex h-full flex-col gap-2">
-      <div className="flex items-center justify-between gap-3">
-        <div className="flex flex-col gap-0.5">
+    <div className="relative z-0 flex h-full min-w-0 flex-col gap-2">
+      <div className="flex min-w-0 items-center justify-between gap-3">
+        <div className="flex min-w-0 flex-col gap-0.5">
           <h1 className="font-medium text-sm leading-none">{t('dashMail.generatedDocsPreview')}</h1>
           <p className="text-muted-foreground text-sm">
             {t('dashMail.generatedDocsPreviewDesc')}
@@ -27,7 +27,7 @@ export default function Page() {
       <iframe
         src="/mail?preview=dashboard"
         title={t('dashMail.generatedDocsPreview')}
-        className="relative z-0 block min-h-0 flex-1 rounded-lg border bg-background [color-scheme:light]"
+        className="relative z-0 block min-h-0 min-w-0 flex-1 rounded-lg border bg-background [color-scheme:light]"
       />
     </div>
   );

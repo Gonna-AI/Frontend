@@ -93,6 +93,7 @@ export function useTaskColumns(): ColumnDef<Task>[] {
   return [
     {
       id: "select",
+      size: 44,
       header: ({ table }) => (
         <Checkbox
           checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && "indeterminate")}
@@ -115,24 +116,37 @@ export function useTaskColumns(): ColumnDef<Task>[] {
     {
       accessorKey: "id",
       header: t("dashTasks.column.position"),
-      cell: ({ row }) => <div className="w-20 font-mono text-muted-foreground text-sm">{row.getValue("id")}</div>,
+      size: 170,
+      minSize: 140,
+      cell: ({ row }) => {
+        const id = String(row.getValue("id"));
+        return (
+          <div className="w-32 max-w-32 truncate font-mono text-muted-foreground text-sm" title={id}>
+            {id}
+          </div>
+        );
+      },
       enableSorting: false,
       enableHiding: false,
     },
     {
       accessorKey: "title",
       header: ({ column }) => <TitleColumnHeader column={column} />,
+      size: 520,
+      minSize: 320,
       cell: ({ row }) => {
         const label = labels.find((label) => label.value === row.original.label);
 
         return (
-          <div className="flex min-w-0 items-center gap-2">
+          <div className="flex min-w-0 max-w-full items-center gap-2">
             {label && (
-              <Badge className="rounded-sm bg-transparent" variant="outline">
+              <Badge className="shrink-0 rounded-sm bg-transparent" variant="outline">
                 {label.label}
               </Badge>
             )}
-            <span className="max-w-lg truncate font-medium text-sm">{row.getValue("title")}</span>
+            <span className="min-w-0 flex-1 truncate font-medium text-sm" title={String(row.getValue("title"))}>
+              {row.getValue("title")}
+            </span>
           </div>
         );
       },
@@ -140,6 +154,7 @@ export function useTaskColumns(): ColumnDef<Task>[] {
     {
       accessorKey: "status",
       header: t("dashTasks.column.status"),
+      size: 150,
       cell: ({ row }) => {
         const status = statuses.find((status) => status.value === row.getValue("status"));
 
@@ -161,6 +176,7 @@ export function useTaskColumns(): ColumnDef<Task>[] {
     {
       accessorKey: "priority",
       header: t("dashTasks.column.priority"),
+      size: 150,
       cell: ({ row }) => {
         const priority = priorities.find((priority) => priority.value === row.getValue("priority"));
 
@@ -181,6 +197,7 @@ export function useTaskColumns(): ColumnDef<Task>[] {
     },
     {
       id: "actions",
+      size: 70,
       cell: ({ row }) => {
         const task = row.original as Task;
 

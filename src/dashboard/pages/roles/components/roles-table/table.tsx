@@ -57,7 +57,8 @@ export function RolesTable({ table }: { table: TableType<Role> }) {
 
   return (
     <>
-      <Table className="w-full table-fixed border-collapse" style={{ minWidth: table.getTotalSize() }}>
+      <div className="max-w-full overflow-x-auto">
+        <Table className="min-w-[980px] table-fixed border-collapse" style={{ width: table.getTotalSize() }}>
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id} className="border-y hover:bg-transparent [&>:not(:last-child)]:border-r">
@@ -92,13 +93,14 @@ export function RolesTable({ table }: { table: TableType<Role> }) {
           )}
         </TableBody>
       </Table>
+      </div>
 
-      <div className="flex items-center border-border/70 border-t p-4">
+      <div className="flex flex-col gap-3 border-border/70 border-t p-4 lg:flex-row lg:items-center">
         <div className="text-muted-foreground text-sm">
           Showing {start} to {end} of {filteredRows.length} roles
         </div>
 
-        <div className="mx-auto">
+        <div className="lg:mx-auto">
           <Pagination className="mx-0 w-auto justify-center">
             <PaginationContent>
               <PaginationItem>
@@ -141,7 +143,7 @@ export function RolesTable({ table }: { table: TableType<Role> }) {
           </Pagination>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <span className="text-muted-foreground text-sm">Rows per page</span>
           <Select
             value={`${pageSize}`}

@@ -21,12 +21,12 @@ export function MailInbox({ mails, onSelectMail }: MailInboxProps) {
   const { t } = useLanguage();
 
   return (
-    <div className="flex h-full min-h-0 flex-col gap-3 pt-3">
-      <div className="flex items-center justify-between gap-4 px-2">
-        <div className="flex items-center">
+    <div className="flex h-full min-h-0 min-w-0 flex-col gap-3 pt-3">
+      <div className="flex min-w-0 items-center justify-between gap-4 px-2">
+        <div className="flex min-w-0 items-center">
           <SidebarTrigger />
           <Separator orientation="vertical" className="mr-2 ml-1 h-4 data-vertical:self-center" />
-          <h1 className="font-medium text-xl leading-none">{t('dashMail.inboxHeading')}</h1>
+          <h1 className="min-w-0 truncate font-medium text-xl leading-none">{t('dashMail.inboxHeading')}</h1>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="ghost" size="icon-sm">

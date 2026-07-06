@@ -99,7 +99,7 @@ export default function Solutions() {
     <div className="agero-works clerktree-solutions-page">
       <SEO
         title="Solutions"
-        description="Explore ClerkTree's autonomous operations solutions across voice agents, document intelligence, workflow orchestration, and enterprise monitoring."
+        description="Explore ClerkTree's industrial machine intelligence layer for telemetry, predictive maintenance, production analytics, and maintenance workflow orchestration."
         canonical="https://clerktree.com/solutions"
         preloadVideos={[{ href: SOLUTIONS_HERO_VIDEO_SRC }]}
       />

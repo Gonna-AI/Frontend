@@ -37,8 +37,8 @@ export function UpcomingEvents() {
           const eventDate = addDays(today, event.dayOffset);
 
           return (
-            <div key={event.title} className="flex items-center justify-between gap-4">
-              <div className="flex items-center gap-2">
+            <div key={event.title} className="flex min-w-0 items-center justify-between gap-4">
+              <div className="flex min-w-0 items-center gap-2">
                 <div className="size-11 shrink-0 overflow-hidden rounded-sm border">
                   <div className="grid h-1/3 place-items-center border-b bg-muted font-medium text-[10px] uppercase leading-none">
                     {format(eventDate, "MMM")}
@@ -51,7 +51,10 @@ export function UpcomingEvents() {
                   <div className="text-muted-foreground text-xs leading-none">{event.time}</div>
                 </div>
               </div>
-              <Badge variant="outline" className="shrink-0 rounded-md px-2.5 py-1 font-medium text-[10px]">
+              <Badge
+                variant="outline"
+                className="max-w-[7rem] shrink-0 truncate rounded-md px-2.5 py-1 font-medium text-[10px]"
+              >
                 {event.type}
               </Badge>
             </div>

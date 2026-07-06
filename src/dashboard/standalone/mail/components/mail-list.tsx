@@ -38,7 +38,7 @@ export function MailList({ groups, onSelectMail }: MailListProps) {
                   type="button"
                   key={item.id}
                   className={cn(
-                    "group relative w-full border-transparent border-y p-3 text-left transition-colors",
+                    "group relative w-full min-w-0 border-transparent border-y p-3 text-left transition-colors",
                     "hover:bg-muted/60",
                     mail.selected === item.id &&
                       "border-border bg-muted/70 before:absolute before:-inset-y-px before:left-0 before:w-0.5 before:bg-primary",
@@ -53,14 +53,14 @@ export function MailList({ groups, onSelectMail }: MailListProps) {
                     onSelectMail?.(item);
                   }}
                 >
-                  <div className="flex items-start gap-3">
+                  <div className="flex min-w-0 items-start gap-3">
                     <Avatar className="size-9 after:rounded-sm">
                       <AvatarFallback className="rounded-sm bg-background">{item.from.name[0]}</AvatarFallback>
                     </Avatar>
 
-                    <div className="space-y-2">
-                      <div className="flex items-start justify-between gap-3">
-                        <div>
+                    <div className="min-w-0 flex-1 space-y-2">
+                      <div className="flex min-w-0 items-start justify-between gap-3">
+                        <div className="min-w-0">
                           <div
                             className={cn(
                               "flex items-center gap-2 truncate font-normal text-sm",

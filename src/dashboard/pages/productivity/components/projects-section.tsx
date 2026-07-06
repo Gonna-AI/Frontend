@@ -42,9 +42,9 @@ export function ProjectsSection() {
 
   return (
     <section className="flex flex-col gap-2">
-      <div className="flex items-center justify-between gap-4">
+      <div className="flex flex-wrap items-center justify-between gap-4">
         <h2 className="text-xl tracking-tight">{t("dashProductivity.projects.heading")}</h2>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <Select defaultValue="active">
             <SelectTrigger className="w-28">
               <SelectValue placeholder={t("dashProductivity.projects.filter.active")} />
@@ -64,18 +64,20 @@ export function ProjectsSection() {
         </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 lg:grid-cols-3">
         {projects.map((project) => (
-          <Card key={project.title} className="shadow-xs">
-            <CardHeader>
-              <CardTitle>
-                <div className="flex items-center gap-2">
+          <Card key={project.title} className="min-w-0 shadow-xs">
+            <CardHeader className="gap-2">
+              <CardTitle className="min-w-0">
+                <div className="flex min-w-0 items-start gap-2">
                   <project.icon className="size-4 text-muted-foreground" />
-                  <span>{project.title}</span>
+                  <span className="min-w-0 break-words">{project.title}</span>
                 </div>
               </CardTitle>
-              <CardAction>
-                <Badge variant="outline">{project.status}</Badge>
+              <CardAction className="min-w-0">
+                <Badge variant="outline" className="max-w-full truncate">
+                  {project.status}
+                </Badge>
               </CardAction>
             </CardHeader>
             <CardContent>

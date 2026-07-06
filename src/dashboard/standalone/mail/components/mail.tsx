@@ -88,13 +88,13 @@ function MailDesktopLayout({ mails, defaultLayout = [...DEFAULT_MAIL_LAYOUT] }: 
         const sizes = [layout[MAIL_LIST_PANEL_ID], layout[MAIL_DETAIL_PANEL_ID]];
         setClientCookie(MAIL_LAYOUT_COOKIE, JSON.stringify(sizes));
       }}
-      className="h-full"
+      className="h-full min-w-0"
     >
-      <ResizablePanel id={MAIL_LIST_PANEL_ID} defaultSize={`${defaultLayout[0]}%`} minSize="30%" className="min-h-0">
+      <ResizablePanel id={MAIL_LIST_PANEL_ID} defaultSize={`${defaultLayout[0]}%`} minSize="24%" className="min-h-0 min-w-0">
         <MailInbox mails={mails} />
       </ResizablePanel>
       <ResizableHandle withHandle />
-      <ResizablePanel id={MAIL_DETAIL_PANEL_ID} defaultSize={`${defaultLayout[1]}%`} minSize="30%" className="min-h-0">
+      <ResizablePanel id={MAIL_DETAIL_PANEL_ID} defaultSize={`${defaultLayout[1]}%`} minSize="34%" className="min-h-0 min-w-0">
         <MailView mail={mails.find((item) => item.id === mail.selected) || null} />
       </ResizablePanel>
     </ResizablePanelGroup>

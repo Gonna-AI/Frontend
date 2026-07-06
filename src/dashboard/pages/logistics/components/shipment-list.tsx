@@ -83,15 +83,15 @@ function ShipmentCard({ shipment, active, onSelectShipment }: ShipmentCardProps)
         onSelectShipment(shipment.id);
       }}
       className={cn(
-        "flex w-full flex-col gap-5 rounded-xl border p-3 text-left transition-colors",
+        "flex w-full min-w-0 flex-col gap-5 overflow-hidden rounded-xl border p-3 text-left transition-colors",
         "hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
         active && "border-primary bg-muted/50",
       )}
     >
-      <div className="flex items-center justify-between">
-        <div>#{shipment.id}</div>
+      <div className="flex min-w-0 items-center justify-between gap-3">
+        <div className="min-w-0 truncate">#{shipment.id}</div>
 
-        <div className="flex items-center gap-1">
+        <div className="flex shrink-0 items-center gap-1">
           <div
             style={{ "--angle": `${angle}deg` } as React.CSSProperties}
             className={getProgressRingClass(shipment.status)}
@@ -104,19 +104,19 @@ function ShipmentCard({ shipment, active, onSelectShipment }: ShipmentCardProps)
         </div>
       </div>
 
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-1.5">
+      <div className="grid min-w-0 grid-cols-2 gap-3">
+        <div className="flex min-w-0 items-center gap-1.5">
           <div className={cn(`flag:${shipment.origin.countryCode.toUpperCase()}`, "rounded-xs text-3xl outline")} />
-          <div className="flex flex-col gap-0.5">
-            <div className="font-medium text-xs leading-none">{shipment.origin.country},</div>
-            <div className="text-muted-foreground text-xs">{shipment.origin.display}</div>
+          <div className="flex min-w-0 flex-col gap-0.5">
+            <div className="truncate font-medium text-xs leading-none">{shipment.origin.country},</div>
+            <div className="truncate text-muted-foreground text-xs">{shipment.origin.display}</div>
           </div>
         </div>
 
-        <div className="flex items-center gap-1.5 text-right">
-          <div className="flex flex-col gap-0.5">
-            <div className="font-medium text-xs leading-none">{shipment.destination.country},</div>
-            <div className="text-muted-foreground text-xs">{shipment.destination.display}</div>
+        <div className="flex min-w-0 items-center justify-end gap-1.5 text-right">
+          <div className="flex min-w-0 flex-col gap-0.5">
+            <div className="truncate font-medium text-xs leading-none">{shipment.destination.country},</div>
+            <div className="truncate text-muted-foreground text-xs">{shipment.destination.display}</div>
           </div>
           <div
             className={cn(`flag:${shipment.destination.countryCode.toUpperCase()}`, "rounded-xs text-3xl outline")}
@@ -136,12 +136,12 @@ function ShipmentCard({ shipment, active, onSelectShipment }: ShipmentCardProps)
         />
       </div>
 
-      <div className="flex items-center justify-between">
-        <div>
+      <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-end gap-3">
+        <div className="min-w-0">
           <div className="text-muted-foreground text-xs leading-none">{t("dashLogistics.list.cargoLabel")}</div>
           <div className="truncate text-sm tracking-tight">{shipment.cargo}</div>
         </div>
-        <div className="text-right">
+        <div className="max-w-[45%] text-right">
           <div className="text-muted-foreground text-xs leading-none">{t("dashLogistics.list.etaLabel")}</div>
           <div className="text-sm tabular-nums tracking-tight">
             {shipment.eta}
@@ -171,8 +171,11 @@ export function ShipmentList({ shipments, selectedShipmentId, onSelectShipment }
         </CardAction>
       </CardHeader>
       <CardContent className="flex flex-1 flex-col gap-4 overflow-hidden px-0">
-        <Tabs defaultValue="all">
-          <TabsList className="w-full border-b px-4" variant="line">
+        <Tabs defaultValue="all" className="min-w-0">
+          <TabsList
+            className="h-auto min-h-8 w-full justify-start overflow-x-auto border-b px-4 **:data-[slot=tabs-trigger]:h-8"
+            variant="line"
+          >
             <TabsTrigger className="text-xs" value="all">
               {t("dashLogistics.list.tabs.all").replace("{count}", "12")}
             </TabsTrigger>

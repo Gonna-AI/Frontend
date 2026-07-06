@@ -9,8 +9,8 @@ export default function Page() {
     <div className="flex flex-col gap-4 md:gap-6">
       <AnalyticsOverview />
 
-      <div className="grid grid-cols-1 items-stretch gap-4 lg:grid-cols-3">
-        <div className="flex flex-col gap-4 lg:col-span-2">
+      <div className="grid grid-cols-1 items-stretch gap-4 xl:grid-cols-3">
+        <div className="flex min-w-0 flex-col gap-4 xl:col-span-2">
           <DriversForecastTarget />
           <DriversCoverageTriage />
         </div>

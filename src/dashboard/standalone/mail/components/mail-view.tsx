@@ -55,8 +55,8 @@ export function MailView({ mail, onClose }: MailDisplayProps) {
   }
 
   return (
-    <div className="flex h-full min-h-0 flex-col gap-3 px-2 py-3">
-      <div className="flex items-center">
+    <div className="flex h-full min-h-0 min-w-0 flex-col gap-3 px-2 py-3">
+      <div className="flex min-w-0 items-center">
         <div className="flex items-center gap-2">
           <Tooltip>
             <TooltipTrigger asChild>
@@ -87,7 +87,7 @@ export function MailView({ mail, onClose }: MailDisplayProps) {
           </div>
         </div>
 
-        <div className="ml-auto flex items-center gap-2">
+        <div className="ml-auto flex shrink-0 items-center gap-2">
           <Tooltip>
             <TooltipTrigger asChild>
               <Button variant="ghost" size="icon-sm" aria-label={t('dashMail.pinThread')}>
@@ -161,11 +161,13 @@ export function MailView({ mail, onClose }: MailDisplayProps) {
 
       <Separator />
 
-      <div className="flex min-h-0 flex-1 flex-col">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col">
         {mail ? (
-          <div className="flex min-h-0 flex-1 flex-col gap-3">
-            <div className="space-y-1.5">
-              <div className="font-medium leading-none">{mail.subject}</div>
+          <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-3">
+            <div className="min-w-0 space-y-1.5">
+              <div className="min-w-0 truncate font-medium leading-none" title={mail.subject}>
+                {mail.subject}
+              </div>
 
               <div className="text-muted-foreground text-xs leading-none">
                 {format(new Date(mail.receivedAt), "EEE, d MMM yyyy, h:mm a")}
@@ -174,25 +176,25 @@ export function MailView({ mail, onClose }: MailDisplayProps) {
 
             <Separator />
 
-            <div className="flex gap-2">
+            <div className="flex min-w-0 gap-2">
               <Avatar className="size-9 after:rounded-sm">
                 <AvatarFallback className="rounded-sm bg-background">{mail.from.name[0]}</AvatarFallback>
               </Avatar>
 
-              <div className="flex h-full flex-col gap-1">
-                <div className="flex items-center gap-2">
-                  <div className="text-xs">{mail.from.name}</div>
+              <div className="flex h-full min-w-0 flex-col gap-1">
+                <div className="flex min-w-0 items-center gap-2">
+                  <div className="min-w-0 truncate text-xs">{mail.from.name}</div>
                   <Separator className="h-3 data-vertical:self-center" orientation="vertical" />
-                  <div className="text-muted-foreground text-xs">{mail.from.email}</div>
+                  <div className="min-w-0 truncate text-muted-foreground text-xs">{mail.from.email}</div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <div className="text-muted-foreground text-xs">
+                <div className="flex min-w-0 flex-wrap items-center gap-2">
+                  <div className="min-w-0 truncate text-muted-foreground text-xs">
                     {t('dashMail.to')}{" "}
                     <span className="text-foreground">{mail.to.map((recipient) => recipient.name).join(", ")}</span>
                   </div>
 
                   {mail.cc?.length ? (
-                    <div className="text-muted-foreground text-xs">
+                    <div className="min-w-0 truncate text-muted-foreground text-xs">
                       {t('dashMail.cc')}{" "}
                       <span className="text-foreground">{mail.cc.map((recipient) => recipient.name).join(", ")}</span>
                     </div>
@@ -238,7 +240,7 @@ export function MailView({ mail, onClose }: MailDisplayProps) {
               </>
             ) : null}
 
-            <div className="scrollbar-none min-h-0 flex-1 overflow-y-auto whitespace-pre-wrap text-sm">{mail.body}</div>
+            <div className="scrollbar-none min-h-0 min-w-0 flex-1 overflow-y-auto whitespace-pre-wrap break-words text-sm">{mail.body}</div>
 
             <div className="mt-auto flex flex-col gap-3">
               <Separator />

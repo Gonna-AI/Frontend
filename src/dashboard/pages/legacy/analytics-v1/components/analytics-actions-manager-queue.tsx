@@ -31,50 +31,50 @@ export function ActionsManagerQueue() {
   const { t } = useLanguage();
 
   return (
-    <Card className="h-full shadow-xs">
+    <Card className="h-full min-w-0 shadow-xs">
       <CardHeader>
         <CardTitle>{t('dashAnalyticsV1.managerQueue.title')}</CardTitle>
         <CardDescription>{t('dashAnalyticsV1.managerQueue.description')}</CardDescription>
       </CardHeader>
 
-      <CardContent className="flex h-full flex-col gap-4">
-        <div className="flex h-full flex-col gap-3">
-          <div className="grid grid-cols-2 gap-2">
+      <CardContent className="flex h-full min-w-0 flex-col gap-4">
+        <div className="flex h-full min-w-0 flex-col gap-3">
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-1 2xl:grid-cols-2">
             <StatCard label={t('dashAnalyticsV1.managerQueue.stat.actionableDeals')} value="7" />
             <StatCard label={t('dashAnalyticsV1.managerQueue.stat.revenueInPlay')} value={formatCurrency(811000, { noDecimals: true })} mono />
             <StatCard label={t('dashAnalyticsV1.managerQueue.stat.ownersEngaged')} value="3" />
             <StatCard label={t('dashAnalyticsV1.managerQueue.stat.medianRisk')} value="72" mono />
           </div>
 
-          <div className="space-y-2 rounded-md border bg-muted/20 px-3 py-2">
-            <div className="flex items-center justify-between gap-2">
-              <p className="text-muted-foreground text-xs">{t('dashAnalyticsV1.managerQueue.interventionMix')}</p>
-              <Badge variant="outline" className="h-5 px-2 text-[11px] tabular-nums">
+          <div className="min-w-0 space-y-2 rounded-md border bg-muted/20 px-3 py-2">
+            <div className="flex min-w-0 flex-col items-start gap-2 sm:flex-row sm:items-center sm:justify-between">
+              <p className="min-w-0 text-muted-foreground text-xs">{t('dashAnalyticsV1.managerQueue.interventionMix')}</p>
+              <Badge variant="outline" className="h-auto min-h-5 max-w-full px-2 text-[11px] tabular-nums">
                 {t('dashAnalyticsV1.managerQueue.escalateBadge').replace('{value}', formatCurrency(174000, { noDecimals: true }))}
               </Badge>
             </div>
             <div className="space-y-1.5">
-              <div className="flex items-center justify-between rounded-md border bg-background/70 px-2.5 py-1.5">
-                <span className="text-xs">{t('dashAnalyticsV1.managerQueue.escalate')}</span>
-                <span className="text-muted-foreground text-xs tabular-nums">
+              <div className="flex min-w-0 flex-col items-start gap-1 rounded-md border bg-background/70 px-2.5 py-1.5 sm:flex-row sm:items-center sm:justify-between">
+                <span className="min-w-0 text-xs">{t('dashAnalyticsV1.managerQueue.escalate')}</span>
+                <span className="min-w-0 text-muted-foreground text-xs tabular-nums sm:text-right">
                   {t('dashAnalyticsV1.managerQueue.dealsShare')
                     .replace('{count}', '1')
                     .replace('{pct}', '14')
                     .replace('{value}', formatCurrency(174000, { noDecimals: true }))}
                 </span>
               </div>
-              <div className="flex items-center justify-between rounded-md border bg-background/70 px-2.5 py-1.5">
-                <span className="text-xs">{t('dashAnalyticsV1.managerQueue.coach')}</span>
-                <span className="text-muted-foreground text-xs tabular-nums">
+              <div className="flex min-w-0 flex-col items-start gap-1 rounded-md border bg-background/70 px-2.5 py-1.5 sm:flex-row sm:items-center sm:justify-between">
+                <span className="min-w-0 text-xs">{t('dashAnalyticsV1.managerQueue.coach')}</span>
+                <span className="min-w-0 text-muted-foreground text-xs tabular-nums sm:text-right">
                   {t('dashAnalyticsV1.managerQueue.dealsShare')
                     .replace('{count}', '4')
                     .replace('{pct}', '57')
                     .replace('{value}', formatCurrency(478000, { noDecimals: true }))}
                 </span>
               </div>
-              <div className="flex items-center justify-between rounded-md border bg-background/70 px-2.5 py-1.5">
-                <span className="text-xs">{t('dashAnalyticsV1.managerQueue.reforecast')}</span>
-                <span className="text-muted-foreground text-xs tabular-nums">
+              <div className="flex min-w-0 flex-col items-start gap-1 rounded-md border bg-background/70 px-2.5 py-1.5 sm:flex-row sm:items-center sm:justify-between">
+                <span className="min-w-0 text-xs">{t('dashAnalyticsV1.managerQueue.reforecast')}</span>
+                <span className="min-w-0 text-muted-foreground text-xs tabular-nums sm:text-right">
                   {t('dashAnalyticsV1.managerQueue.dealsShare')
                     .replace('{count}', '2')
                     .replace('{pct}', '29')
@@ -84,32 +84,32 @@ export function ActionsManagerQueue() {
             </div>
           </div>
 
-          <div className="space-y-2 rounded-md border bg-muted/20 px-3 py-2">
-            <div className="flex items-center justify-between gap-2">
-              <p className="text-muted-foreground text-xs">{t('dashAnalyticsV1.managerQueue.managerFocus')}</p>
-              <span className="text-muted-foreground text-xs tabular-nums">{t('dashAnalyticsV1.managerQueue.thisForecastCycle')}</span>
+          <div className="min-w-0 space-y-2 rounded-md border bg-muted/20 px-3 py-2">
+            <div className="flex min-w-0 flex-col items-start gap-1 sm:flex-row sm:items-center sm:justify-between sm:gap-2">
+              <p className="min-w-0 text-muted-foreground text-xs">{t('dashAnalyticsV1.managerQueue.managerFocus')}</p>
+              <span className="min-w-0 text-muted-foreground text-xs tabular-nums sm:text-right">{t('dashAnalyticsV1.managerQueue.thisForecastCycle')}</span>
             </div>
 
             <div className="space-y-1.5 text-xs">
-              <div className="flex items-center justify-between gap-2 rounded-md border bg-background/70 px-2.5 py-1.5">
-                <span>{t('dashAnalyticsV1.managerQueue.coachQueue')}</span>
-                <span className="text-muted-foreground tabular-nums">
+              <div className="flex min-w-0 flex-col items-start gap-1 rounded-md border bg-background/70 px-2.5 py-1.5 sm:flex-row sm:items-center sm:justify-between sm:gap-2">
+                <span className="min-w-0">{t('dashAnalyticsV1.managerQueue.coachQueue')}</span>
+                <span className="min-w-0 text-muted-foreground tabular-nums sm:text-right">
                   {t('dashAnalyticsV1.managerQueue.dealsValue')
                     .replace('{count}', '4')
                     .replace('{value}', formatCurrency(478000, { noDecimals: true }))}
                 </span>
               </div>
 
-              <div className="flex items-center justify-between gap-2 rounded-md border bg-background/70 px-2.5 py-1.5">
-                <span>{t('dashAnalyticsV1.managerQueue.primaryOwner')}</span>
-                <span className="text-muted-foreground tabular-nums">
+              <div className="flex min-w-0 flex-col items-start gap-1 rounded-md border bg-background/70 px-2.5 py-1.5 sm:flex-row sm:items-center sm:justify-between sm:gap-2">
+                <span className="min-w-0">{t('dashAnalyticsV1.managerQueue.primaryOwner')}</span>
+                <span className="min-w-0 text-muted-foreground tabular-nums sm:text-right">
                   {t('dashAnalyticsV1.managerQueue.ownerDeals').replace('{owner}', 'Leila Zhang').replace('{count}', '3')}
                 </span>
               </div>
 
-              <div className="flex items-center justify-between gap-2 rounded-md border bg-background/70 px-2.5 py-1.5">
-                <span>{t('dashAnalyticsV1.managerQueue.stalePipeline')}</span>
-                <span className="text-muted-foreground tabular-nums">
+              <div className="flex min-w-0 flex-col items-start gap-1 rounded-md border bg-background/70 px-2.5 py-1.5 sm:flex-row sm:items-center sm:justify-between sm:gap-2">
+                <span className="min-w-0">{t('dashAnalyticsV1.managerQueue.stalePipeline')}</span>
+                <span className="min-w-0 text-muted-foreground tabular-nums sm:text-right">
                   {t('dashAnalyticsV1.managerQueue.dealsValue')
                     .replace('{count}', '8')
                     .replace('{value}', formatCurrency(1151000, { noDecimals: true }))}
@@ -122,10 +122,10 @@ export function ActionsManagerQueue() {
             <p className="text-muted-foreground text-xs">{t('dashAnalyticsV1.managerQueue.nextInterventions')}</p>
 
             {NEXT_INTERVENTIONS.map((item) => (
-              <div key={`${item.priorityKey}-${item.dealId}`} className="space-y-1 rounded-md border px-3 py-2">
-                <div className="flex items-center justify-between gap-2">
+              <div key={`${item.priorityKey}-${item.dealId}`} className="min-w-0 space-y-1 rounded-md border px-3 py-2">
+                <div className="flex min-w-0 items-center justify-between gap-2">
                   <span className="font-medium text-sm">{item.dealId}</span>
-                  <Badge variant="outline" className="h-5 px-2 text-[11px]">
+                  <Badge variant="outline" className="h-auto min-h-5 shrink-0 px-2 text-[11px]">
                     {t(`dashAnalyticsV1.managerQueue.${item.priorityKey}`)}
                   </Badge>
                 </div>
@@ -137,9 +137,9 @@ export function ActionsManagerQueue() {
             ))}
           </div>
 
-          <div className="flex items-center justify-between gap-2 rounded-md border bg-muted/20 px-3 py-2">
-            <span className="text-muted-foreground text-xs">{t('dashAnalyticsV1.managerQueue.noActionMonitor')}</span>
-            <span className="font-medium text-xs tabular-nums">{t('dashAnalyticsV1.managerQueue.dealsCount').replace('{count}', '3')}</span>
+          <div className="flex min-w-0 flex-col items-start gap-1 rounded-md border bg-muted/20 px-3 py-2 sm:flex-row sm:items-center sm:justify-between sm:gap-2">
+            <span className="min-w-0 text-muted-foreground text-xs">{t('dashAnalyticsV1.managerQueue.noActionMonitor')}</span>
+            <span className="shrink-0 font-medium text-xs tabular-nums">{t('dashAnalyticsV1.managerQueue.dealsCount').replace('{count}', '3')}</span>
           </div>
         </div>
       </CardContent>
@@ -149,9 +149,9 @@ export function ActionsManagerQueue() {
 
 function StatCard({ label, value, mono = false }: { label: string; value: string; mono?: boolean }) {
   return (
-    <div className="rounded-md border bg-muted/20 px-2.5 py-2">
-      <p className="text-muted-foreground text-xs">{label}</p>
-      <p className={mono ? "font-semibold text-base tabular-nums" : "font-semibold text-base"}>{value}</p>
+    <div className="min-w-0 rounded-md border bg-muted/20 px-2.5 py-2">
+      <p className="min-w-0 text-muted-foreground text-xs">{label}</p>
+      <p className={mono ? "min-w-0 truncate font-semibold text-base tabular-nums" : "min-w-0 truncate font-semibold text-base"}>{value}</p>
     </div>
   );
 }

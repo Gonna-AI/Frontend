@@ -66,10 +66,10 @@ export default function Page() {
   const groups = applyLiveJobQueue(staticGroups, jobSummary, t);
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex min-w-0 flex-col gap-4">
       <InfrastructureHeader />
 
-      <div className="flex flex-col gap-4">
+      <div className="flex min-w-0 flex-col gap-4">
         {groups.map((group) => (
           <ProjectEnvironments key={group.name} group={group} />
         ))}

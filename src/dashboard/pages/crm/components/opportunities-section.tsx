@@ -142,14 +142,14 @@ export function OpportunitiesSection() {
 
   return (
     <section>
-      <Card>
-        <CardHeader>
+      <Card className="min-w-0">
+        <CardHeader className="gap-3">
           <CardTitle className="leading-none">{t("dashCrm.opportunities.title")}</CardTitle>
           <CardDescription>{t("dashCrm.opportunities.description")}</CardDescription>
-          <CardAction>
-            <div className="flex items-center gap-2">
+          <CardAction className="min-w-0">
+            <div className="flex min-w-0 flex-wrap items-center gap-2">
               <Input
-                className="h-7 w-44 md:w-52"
+                className="h-7 w-full min-w-40 sm:w-44 md:w-52"
                 placeholder={t("dashCrm.opportunities.searchPlaceholder")}
                 value={searchQuery}
                 onChange={(event) => {
@@ -209,8 +209,8 @@ export function OpportunitiesSection() {
           </CardAction>
         </CardHeader>
         <CardContent className="flex flex-col gap-4 px-0">
-          <div className="overflow-hidden">
-            <Table className="**:data-[slot='table-cell']:px-4 **:data-[slot='table-head']:px-4 **:data-[slot='table-cell']:py-4">
+          <div className="max-w-full overflow-x-auto">
+            <Table className="min-w-[960px] table-fixed **:data-[slot='table-cell']:px-4 **:data-[slot='table-head']:px-4 **:data-[slot='table-cell']:py-4">
               <TableHeader className="border-t **:data-[slot='table-head']:h-11 **:data-[slot='table-head']:font-medium **:data-[slot='table-head']:text-foreground **:data-[slot='table-head']:text-sm">
                 {table.getHeaderGroups().map((headerGroup) => (
                   <TableRow key={headerGroup.id}>
@@ -241,7 +241,7 @@ export function OpportunitiesSection() {
               </TableBody>
             </Table>
           </div>
-          <div className="flex items-center justify-between gap-4 px-4 pb-1">
+          <div className="flex flex-col gap-4 px-4 pb-1 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-muted-foreground text-sm">
               {t("dashCrm.opportunities.viewingOf")
                 .replace("{visible}", String(visibleOpportunityCount))

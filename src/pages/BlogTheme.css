@@ -18,7 +18,16 @@
 }
 
 .clerktree-blog-hero-copy {
-  max-width: 1320px;
+  max-width: 1680px;
+}
+
+.clerktree-blog-hero-stage {
+  isolation: isolate;
+}
+
+.clerktree-blog-hero-video {
+  filter: contrast(1.05) saturate(0.82);
+  transform: scale(1.01);
 }
 
 .clerktree-blog-hero-copy > p {
@@ -32,11 +41,12 @@
 
 .clerktree-blog-hero-copy h1 {
   font-family: "Cal Sans", "Inter", system-ui, sans-serif !important;
-  font-size: 72px;
+  font-size: clamp(8.4rem, 18vw, 23rem);
   font-weight: 400;
-  letter-spacing: -0.01em;
-  line-height: 80px;
+  letter-spacing: -0.09em;
+  line-height: 0.78;
   margin: 0;
+  max-width: 100%;
   text-wrap: balance;
 }
 
@@ -147,8 +157,8 @@
   }
 
   .clerktree-blog-hero-copy h1 {
-    font-size: 60px;
-    line-height: 68px;
+    font-size: clamp(6.5rem, 19vw, 13rem);
+    line-height: 0.78;
   }
 }
 
@@ -164,8 +174,8 @@
   }
 
   .clerktree-blog-hero-copy h1 {
-    font-size: 40px;
-    line-height: 40px;
+    font-size: clamp(4.7rem, 24vw, 7.4rem);
+    line-height: 0.82;
   }
 
   .clerktree-blog-grid {

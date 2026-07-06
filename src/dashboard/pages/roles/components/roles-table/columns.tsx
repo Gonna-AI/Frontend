@@ -35,7 +35,11 @@ export const rolesColumns: ColumnDef<Role>[] = [
     header: "Role",
     size: 180,
     minSize: 180,
-    cell: ({ row }) => <span className="font-medium text-sm">{row.original.role}</span>,
+    cell: ({ row }) => (
+      <span className="block min-w-0 truncate font-medium text-sm" title={row.original.role}>
+        {row.original.role}
+      </span>
+    ),
   },
   {
     id: "accessLevel",
@@ -61,9 +65,9 @@ export const rolesColumns: ColumnDef<Role>[] = [
     header: "Permission sets",
     size: 310,
     cell: ({ row }) => (
-      <div className="flex flex-wrap items-center justify-start gap-2">
+      <div className="flex min-w-0 flex-wrap items-center justify-start gap-2">
         {row.original.permissionSets.slice(0, 3).map((set) => (
-          <Badge className="rounded-sm" variant="outline" key={set}>
+          <Badge className="max-w-32 truncate rounded-sm" variant="outline" key={set}>
             {set}
           </Badge>
         ))}
@@ -78,7 +82,7 @@ export const rolesColumns: ColumnDef<Role>[] = [
     accessorKey: "lastReview",
     header: "Last review",
     size: 120,
-    cell: ({ row }) => <span className="text-sm">{row.original.lastReview}</span>,
+    cell: ({ row }) => <span className="block truncate text-sm">{row.original.lastReview}</span>,
   },
   {
     id: "owner",
@@ -86,7 +90,11 @@ export const rolesColumns: ColumnDef<Role>[] = [
     header: "Owner",
     size: 110,
     filterFn: "equalsString",
-    cell: ({ row }) => <span className="text-sm">{row.original.owner}</span>,
+    cell: ({ row }) => (
+      <span className="block truncate text-sm" title={row.original.owner}>
+        {row.original.owner}
+      </span>
+    ),
   },
   {
     id: "status",

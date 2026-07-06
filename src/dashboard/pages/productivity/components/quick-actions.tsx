@@ -19,9 +19,9 @@ export function QuickActions() {
       <h2 className="text-xl tracking-tight">{t("dashProductivity.quickActions.heading")}</h2>
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
         {quickActions.map((action) => (
-          <Button key={action.label} variant="outline" className="justify-start">
+          <Button key={action.label} variant="outline" className="h-auto min-h-10 justify-start gap-2 px-3">
             <action.icon data-icon="inline-start" />
-            {action.label}
+            <span className="min-w-0 truncate">{action.label}</span>
           </Button>
         ))}
       </div>

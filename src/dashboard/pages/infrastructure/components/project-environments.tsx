@@ -60,17 +60,17 @@ export function ProjectEnvironments({ group }: { group: InfrastructureGroup }) {
   return (
     <Collapsible
       defaultOpen
-      className="flex flex-col overflow-hidden rounded-xl border bg-card py-3 text-card-foreground data-[state=open]:gap-3 data-[state=open]:pb-0"
+      className="flex min-w-0 flex-col overflow-hidden rounded-xl border bg-card py-3 text-card-foreground data-[state=open]:gap-3 data-[state=open]:pb-0"
     >
       <div className="flex flex-col gap-2 px-4 sm:flex-row sm:items-center">
         <CollapsibleTrigger asChild>
           <Button
             variant="ghost"
-            className="group -ml-2 h-auto w-full justify-start gap-2 px-2 py-1 hover:bg-transparent aria-expanded:bg-transparent sm:flex-1"
+            className="group -ml-2 h-auto w-full min-w-0 justify-start gap-2 px-2 py-1 hover:bg-transparent aria-expanded:bg-transparent sm:flex-1"
           >
             <ChevronDown className="group-data-[state=open]:rotate-180" />
             <div className="flex min-w-0 items-baseline gap-1.5 text-left">
-              <span className="shrink-0 font-medium leading-none">{group.organization}</span>
+              <span className="min-w-0 truncate font-medium leading-none">{group.organization}</span>
               <span className="min-w-0 truncate text-muted-foreground text-sm">({localizedGroupName})</span>
             </div>
           </Button>
@@ -134,18 +134,18 @@ function EnvironmentTable({ rows }: { rows: InfrastructureEnvironment[] }) {
   const { t } = useLanguage();
 
   return (
-    <div className="scrollbar-thin overflow-x-auto [scrollbar-color:var(--border)_transparent] **:data-[slot=table-container]:overflow-visible [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar]:h-1">
-      <Table className="min-w-[1700px] table-fixed **:data-[slot='table-cell']:px-5 **:data-[slot='table-head']:px-5">
+    <div className="scrollbar-thin max-w-full overflow-x-auto [scrollbar-color:var(--border)_transparent] **:data-[slot=table-container]:overflow-visible [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar]:h-1">
+      <Table className="min-w-[1040px] table-fixed **:data-[slot='table-cell']:px-4 **:data-[slot='table-head']:px-4">
         <colgroup>
-          <col className="w-90" />
-          <col className="w-40" />
-          <col className="w-42" />
-          <col className="w-35" />
-          <col className="w-35" />
-          <col className="w-38" />
-          <col className="w-98" />
-          <col className="w-55" />
-          <col className="w-18" />
+          <col className="w-[30%]" />
+          <col className="w-[16%]" />
+          <col className="w-[12%]" />
+          <col className="w-[12%]" />
+          <col className="w-[11%]" />
+          <col className="w-[12%]" />
+          <col className="hidden w-[20%] 2xl:table-column" />
+          <col className="hidden w-[16%] 2xl:table-column" />
+          <col className="w-[7%]" />
         </colgroup>
         <TableHeader className="bg-muted/50 [&_tr]:border-y">
           <TableRow>
@@ -159,8 +159,8 @@ function EnvironmentTable({ rows }: { rows: InfrastructureEnvironment[] }) {
             <TableHead>{t("dashInfra.table.health")}</TableHead>
             <TableHead>{t("dashInfra.table.latency")}</TableHead>
             <TableHead>{t("dashInfra.table.uptime")}</TableHead>
-            <TableHead>{t("dashInfra.table.resources")}</TableHead>
-            <TableHead>{t("dashInfra.table.server")}</TableHead>
+            <TableHead className="hidden 2xl:table-cell">{t("dashInfra.table.resources")}</TableHead>
+            <TableHead className="hidden 2xl:table-cell">{t("dashInfra.table.server")}</TableHead>
             <TableHead />
           </TableRow>
         </TableHeader>
@@ -173,9 +173,9 @@ function EnvironmentTable({ rows }: { rows: InfrastructureEnvironment[] }) {
                 </span>
               </TableCell>
               <TableCell>
-                <span className="flex items-center gap-2 font-medium text-muted-foreground">
+                <span className="flex min-w-0 items-center gap-2 font-medium text-muted-foreground">
                   <SimpleIcon icon={row.platform.icon} className="size-4 fill-current" />
-                  {row.platform.name}
+                  <span className="min-w-0 truncate">{row.platform.name}</span>
                 </span>
               </TableCell>
               <TableCell>
@@ -222,14 +222,14 @@ function EnvironmentTable({ rows }: { rows: InfrastructureEnvironment[] }) {
                   {row.uptime}
                 </span>
               </TableCell>
-              <TableCell>
+              <TableCell className="hidden 2xl:table-cell">
                 <div className="grid grid-cols-3 gap-4">
                   <ResourceMeter label={t("dashInfra.resource.cpu")} value={row.resources.cpu} />
                   <ResourceMeter label={t("dashInfra.resource.ram")} value={row.resources.ram} />
                   <ResourceMeter label={t("dashInfra.resource.disk")} value={row.resources.disk} />
                 </div>
               </TableCell>
-              <TableCell>
+              <TableCell className="hidden 2xl:table-cell">
                 <span className="flex flex-col font-medium">
                   {t(row.serverKey)}
                   <span className="flex items-center gap-1.5 text-muted-foreground text-xs">

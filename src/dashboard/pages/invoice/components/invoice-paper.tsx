@@ -91,9 +91,9 @@ export function InvoicePaper({ invoice }: { invoice: InvoiceFormValues }) {
           {getInvoiceItems(invoice).map((item) => (
             <div
               key={item.id}
-              className="grid grid-cols-[1fr_74px_116px_116px] border-[oklch(0.86_0_0)] border-b px-3 py-4"
+              className="grid grid-cols-[minmax(0,1fr)_74px_116px_116px] border-[oklch(0.86_0_0)] border-b px-3 py-3"
             >
-              <span>{item.description}</span>
+              <span className="line-clamp-3 min-w-0 pr-4 leading-snug">{item.description}</span>
               <span className="text-right">{item.quantity}</span>
               <span className="text-right">{formatInvoiceCurrency(item.unitPrice)}</span>
               <span className="text-right">{formatInvoiceCurrency(getLineAmount(item))}</span>

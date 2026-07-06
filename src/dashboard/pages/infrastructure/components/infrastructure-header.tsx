@@ -10,9 +10,9 @@ export function InfrastructureHeader() {
   const { t } = useLanguage();
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="flex flex-col gap-2">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+    <div className="flex min-w-0 flex-col gap-4">
+      <div className="flex min-w-0 flex-col gap-2">
+        <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div className="flex min-w-0 flex-col gap-1">
             <h1 className="font-medium text-2xl leading-tight tracking-tight sm:text-3xl sm:leading-none">
               {t("dashInfra.header.title")}
@@ -20,7 +20,7 @@ export function InfrastructureHeader() {
             <p className="text-muted-foreground text-sm">{t("dashInfra.header.description")}</p>
           </div>
 
-          <div className="flex w-full items-center justify-between gap-2 sm:w-auto sm:justify-end">
+          <div className="flex w-full min-w-0 items-center justify-between gap-2 sm:w-auto sm:justify-end">
             <span className="whitespace-nowrap text-muted-foreground text-sm">
               {t("dashInfra.header.lastUpdated").replace("{seconds}", "30")}
             </span>
@@ -54,7 +54,7 @@ export function InfrastructureHeader() {
         </div>
       </div>
 
-      <div className="flex flex-col gap-3 xl:flex-row">
+      <div className="flex min-w-0 flex-col gap-3 xl:flex-row">
         <InputGroup className="flex-1">
           <InputGroupAddon>
             <Search />
@@ -65,7 +65,7 @@ export function InfrastructureHeader() {
           </InputGroupAddon>
         </InputGroup>
 
-        <div className="flex flex-wrap gap-2">
+        <div className="flex min-w-0 flex-wrap gap-2">
           <Button variant="outline">
             <PlusCircle data-icon="inline-start" />
             {t("dashInfra.header.addWorker")}

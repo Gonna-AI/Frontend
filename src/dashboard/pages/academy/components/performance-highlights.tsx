@@ -101,14 +101,16 @@ function PerformanceHighlightBar({
         );
       })}
 
-      <text
-        dominantBaseline="middle"
-        x={labelX}
-        y={barY + barHeight / 2 + 0.5}
-        className="fill-primary-foreground font-medium text-xs"
-      >
-        {payload.subject}
-      </text>
+      {width > 150 ? (
+        <text
+          dominantBaseline="middle"
+          x={labelX}
+          y={barY + barHeight / 2 + 0.5}
+          className="fill-primary-foreground font-medium text-xs"
+        >
+          {payload.subject}
+        </text>
+      ) : null}
 
       <text
         dominantBaseline="middle"
@@ -161,7 +163,7 @@ export function PerformanceHighlights() {
         </CardAction>
       </CardHeader>
       <CardContent>
-        <ChartContainer config={chartConfig} className="h-70 w-full">
+        <ChartContainer config={chartConfig} className="h-70 w-full min-w-0">
           <BarChart
             accessibilityLayer
             data={performanceHighlights}
@@ -178,7 +180,7 @@ export function PerformanceHighlights() {
               ticks={[0, 1, 2, 3, 4]}
               type="number"
             />
-            <YAxis axisLine={false} dataKey="className" tickLine={false} tickMargin={10} type="category" width={45} />
+            <YAxis axisLine={false} dataKey="className" tickLine={false} tickMargin={10} type="category" width={82} />
             <Bar dataKey="start" fill="transparent" stackId="timeline" />
             <Bar dataKey="duration" shape={<PerformanceHighlightBar />} stackId="timeline" />
           </BarChart>

@@ -28,8 +28,8 @@ export function InvoicePreview({ invoice }: { invoice: InvoiceFormValues }) {
   return (
     <>
       <PrintInvoice invoice={invoice} />
-      <div className="flex flex-col rounded-xl border bg-card">
-        <div className="flex items-center justify-between px-4 py-4">
+      <div className="flex min-h-[calc(100svh-8rem)] min-w-0 flex-col overflow-hidden rounded-xl border bg-card xl:sticky xl:top-16">
+        <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-4">
           <h2 className="font-medium text-lg">{t('dashInvoice.preview.heading')}</h2>
           <ButtonGroup>
             <Button type="button" variant="outline" onClick={handlePrint}>
@@ -45,7 +45,7 @@ export function InvoicePreview({ invoice }: { invoice: InvoiceFormValues }) {
 
         <div
           ref={previewBodyRef}
-          className="@container/preview relative min-h-[calc(100svh-15rem)] flex-1 rounded-b-xl bg-stone-200 p-4 dark:bg-stone-800"
+          className="@container/preview relative min-h-[calc(100svh-15rem)] min-w-0 flex-1 overflow-hidden rounded-b-xl bg-stone-200 p-4 dark:bg-stone-200"
         >
           {paperLayout === null ? (
             <div className="absolute inset-0 grid place-items-center text-muted-foreground text-sm">

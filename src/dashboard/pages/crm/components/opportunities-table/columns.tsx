@@ -41,6 +41,7 @@ function getHealthScore(health: OpportunityRow["health"]) {
 export const opportunitiesColumns: ColumnDef<OpportunityRow>[] = [
   {
     id: "select",
+    size: 44,
     header: ({ table }) => (
       <Checkbox
         checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && "indeterminate")}
@@ -60,17 +61,28 @@ export const opportunitiesColumns: ColumnDef<OpportunityRow>[] = [
   {
     accessorKey: "id",
     header: "ID",
-    cell: ({ row }) => <div className="text-sm tracking-tight">{row.original.id}</div>,
+    size: 230,
+    cell: ({ row }) => (
+      <div className="min-w-0 truncate text-sm tracking-tight" title={row.original.id}>
+        {row.original.id}
+      </div>
+    ),
     enableHiding: false,
   },
   {
     accessorKey: "account",
     header: "Account",
-    cell: ({ row }) => <div className="font-medium text-sm">{row.original.account}</div>,
+    size: 280,
+    cell: ({ row }) => (
+      <div className="min-w-0 truncate font-medium text-sm" title={row.original.account}>
+        {row.original.account}
+      </div>
+    ),
   },
   {
     accessorKey: "stage",
     header: "Stage",
+    size: 150,
     cell: ({ row }) => (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
@@ -103,11 +115,13 @@ export const opportunitiesColumns: ColumnDef<OpportunityRow>[] = [
   {
     accessorKey: "priority",
     header: "Priority",
+    size: 120,
     cell: ({ row }) => <div className="text-sm">{row.original.priority}</div>,
   },
   {
     accessorKey: "health",
     header: "Health",
+    size: 160,
     cell: ({ row }) => (
       <div className="flex items-end gap-0.5" title={row.original.health}>
         <span className="sr-only">{row.original.health}</span>
@@ -127,11 +141,13 @@ export const opportunitiesColumns: ColumnDef<OpportunityRow>[] = [
   {
     accessorKey: "value",
     header: "Value",
+    size: 130,
     cell: ({ row }) => <div className="font-medium text-sm tabular-nums">{row.original.value}</div>,
   },
   {
     id: "actions",
     header: () => <div className="text-right">Edit</div>,
+    size: 70,
     cell: () => (
       <div className="text-right">
         <Button

@@ -94,11 +94,11 @@ export function Tasks({ data }: TasksProps) {
   const canNextPage = table.getCanNextPage();
 
   return (
-    <div className="overflow-hidden rounded-xl border border-border/70 bg-background">
+    <div className="min-w-0 overflow-hidden rounded-xl border border-border/70 bg-background">
       <div className="border-b px-4 py-4">
         <TasksToolbar table={table} />
       </div>
-      <Table className="**:data-[slot=table-cell]:px-4 **:data-[slot=table-head]:px-4">
+      <Table className="min-w-[920px] table-fixed **:data-[slot=table-cell]:px-4 **:data-[slot=table-head]:px-4">
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id} className="hover:bg-transparent">

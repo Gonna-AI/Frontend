@@ -221,46 +221,48 @@ function ShipmentOverview({ shipment }: { shipment: Shipment }) {
 
       <Separator />
 
-      <div className="flex flex-col gap-8">
-        <div className="flex items-start justify-between gap-4">
+      <div className="flex min-w-0 flex-col gap-8">
+        <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
           <h2 className="font-medium">{t("dashLogistics.overview.cargoDetails")}</h2>
 
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" className="w-fit">
             <ContactIcon data-icon="inline-start" />
             {contactLabel}
           </Button>
         </div>
 
-        <div className="grid grid-cols-2 gap-x-4 gap-y-5 md:grid-cols-[1.35fr_1fr_1.1fr_1.15fr_1fr]">
-          <div className="col-span-2 flex flex-col gap-1 md:col-span-1 md:gap-2">
+        <div className="grid min-w-0 grid-cols-1 gap-x-4 gap-y-5 sm:grid-cols-2 xl:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)_minmax(0,1.1fr)_minmax(0,1.15fr)_minmax(0,1fr)]">
+          <div className="flex min-w-0 flex-col gap-1 sm:col-span-2 xl:col-span-1 xl:gap-2">
             <div className="text-muted-foreground text-xs leading-none md:invisible md:text-sm">
               {t("dashLogistics.overview.cargo")}
             </div>
-            <div className="whitespace-nowrap text-sm leading-none">{shipment.cargo}</div>
+            <div className="min-w-0 truncate text-sm leading-none" title={shipment.cargo}>
+              {shipment.cargo}
+            </div>
           </div>
 
-          <div className="flex flex-col gap-2">
+          <div className="flex min-w-0 flex-col gap-2">
             <div className="text-muted-foreground text-xs leading-none md:text-sm">
               {t("dashLogistics.overview.totalWeight")}
             </div>
             <div className="text-sm leading-none">{shipment.weight}</div>
           </div>
 
-          <div className="flex flex-col gap-2">
+          <div className="flex min-w-0 flex-col gap-2">
             <div className="text-muted-foreground text-xs leading-none md:text-sm">
               {t("dashLogistics.overview.transportMode")}
             </div>
-            <div className="text-sm leading-none">
+            <div className="min-w-0 truncate text-sm leading-none">
               {t(modeLabelKeys[shipment.mode])} · {t(routeTypeLabelKeys[shipment.routeType])}
             </div>
           </div>
 
-          <div className="flex flex-col gap-2">
+          <div className="flex min-w-0 flex-col gap-2">
             <div className="text-muted-foreground text-xs leading-none md:text-sm">{transportNumberLabel}</div>
-            <div className="text-sm leading-none">{shipment.transportNumber}</div>
+            <div className="min-w-0 truncate text-sm leading-none">{shipment.transportNumber}</div>
           </div>
 
-          <div className="flex flex-col gap-2 md:text-right">
+          <div className="flex min-w-0 flex-col gap-2 xl:text-right">
             <div className="text-muted-foreground text-xs leading-none md:text-sm">
               {t("dashLogistics.overview.status")}
             </div>
@@ -304,7 +306,7 @@ function ShipmentOverview({ shipment }: { shipment: Shipment }) {
 export function ShipmentDetails({ shipment }: ShipmentDetailsProps) {
   if (!shipment) {
     return (
-      <div className="grid h-full min-h-0 grid-rows-[320px_1fr] overflow-hidden lg:grid-rows-[420px_1fr]">
+      <div className="grid h-full min-h-0 min-w-0 grid-rows-[320px_1fr] overflow-hidden lg:grid-rows-[420px_1fr]">
         <div className="min-h-0 overflow-hidden">
           <ShipmentRouteMap shipment={null} />
         </div>
@@ -316,15 +318,15 @@ export function ShipmentDetails({ shipment }: ShipmentDetailsProps) {
   }
 
   return (
-    <div className="grid h-full min-h-0 grid-rows-[320px_1fr] overflow-hidden lg:grid-rows-[420px_1fr]">
+    <div className="grid h-full min-h-0 min-w-0 grid-rows-[320px_1fr] overflow-hidden lg:grid-rows-[420px_1fr]">
       <div className="min-h-0 overflow-hidden">
         <ShipmentRouteMap shipment={shipment} />
       </div>
       <div className="min-h-0 overflow-hidden">
-        <div className="h-full min-h-0 py-2">
-          <Tabs defaultValue="overview" className="h-full gap-0">
+        <div className="h-full min-h-0 min-w-0 py-2">
+          <Tabs defaultValue="overview" className="h-full min-w-0 gap-0">
             <TabsList
-              className="w-full justify-start gap-2 border-b px-4 **:data-[slot=tabs-trigger]:text-xs sm:gap-4 sm:**:data-[slot=tabs-trigger]:text-sm"
+              className="h-auto min-h-8 w-full justify-start gap-2 overflow-x-auto border-b px-4 **:data-[slot=tabs-trigger]:h-8 **:data-[slot=tabs-trigger]:text-xs sm:gap-4 sm:**:data-[slot=tabs-trigger]:text-sm"
               variant="line"
             >
               <TabsTrigger className="flex-none" value="overview">
@@ -343,25 +345,25 @@ export function ShipmentDetails({ shipment }: ShipmentDetailsProps) {
                 Activity
               </TabsTrigger>
             </TabsList>
-            <TabsContent className="min-h-0 overflow-auto p-4" value="overview">
+            <TabsContent className="min-h-0 min-w-0 overflow-auto p-4" value="overview">
               <ShipmentOverview shipment={shipment} />
             </TabsContent>
-            <TabsContent className="p-4" value="route">
+            <TabsContent className="min-w-0 p-4" value="route">
               <div className="grid h-full place-items-center rounded-md border border-dashed text-muted-foreground text-sm">
                 Route view coming soon.
               </div>
             </TabsContent>
-            <TabsContent className="p-4" value="cargo">
+            <TabsContent className="min-w-0 p-4" value="cargo">
               <div className="grid h-full place-items-center rounded-md border border-dashed text-muted-foreground text-sm">
                 Cargo view coming soon.
               </div>
             </TabsContent>
-            <TabsContent className="p-4" value="documents">
+            <TabsContent className="min-w-0 p-4" value="documents">
               <div className="grid h-full place-items-center rounded-md border border-dashed text-muted-foreground text-sm">
                 Documents view coming soon.
               </div>
             </TabsContent>
-            <TabsContent className="p-4" value="activity">
+            <TabsContent className="min-w-0 p-4" value="activity">
               <div className="grid h-full place-items-center rounded-md border border-dashed text-muted-foreground text-sm">
                 Activity view coming soon.
               </div>

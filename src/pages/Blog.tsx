@@ -6,8 +6,11 @@ import { getAllBlogPosts, getBlogPostsByTag, getAllTags } from '../data/blogPost
 import { useLanguage } from '../contexts/LanguageContext';
 import { Header, Footer } from '../components/Landing/AgeroChrome';
 import SEO from '../components/SEO';
+import { shouldAutoplayMedia } from '../utils/idle';
 import './LandingFramer.css';
 import './BlogTheme.css';
+
+const BLOG_HERO_VIDEO_SRC = 'https://xlzwfkgurrrspcdyqele.supabase.co/storage/v1/object/public/buck/blogvideo.mp4';
 
 const formatDate = (date: string, language: string): string => {
   return new Date(date).toLocaleDateString(language === 'de' ? 'de-DE' : 'en-US', {
@@ -22,6 +25,7 @@ function BlogContent() {
 
   const selectedTag = searchParams.get("tag") || "All";
   const { t, language } = useLanguage();
+  const shouldPlayVideo = shouldAutoplayMedia();
 
   const allBlogs = getAllBlogPosts();
   const filteredBlogs = getBlogPostsByTag(selectedTag);
@@ -44,11 +48,23 @@ function BlogContent() {
         title="Blog"
         description="Latest insights on legal AI, claims automation, and the future of work. Stay updated with ClerkTree."
         canonical="https://clerktree.com/blog"
+        preloadVideos={[{ href: BLOG_HERO_VIDEO_SRC }]}
       />
       <div className="agero-top-area agero-top-area-with-hero">
         <Header />
 
-        <section className="agero-hero-stage">
+        <section className="agero-hero-stage clerktree-blog-hero-stage">
+          <video
+            className="agero-hero-stage-media clerktree-blog-hero-video"
+            src={BLOG_HERO_VIDEO_SRC}
+            autoPlay={shouldPlayVideo}
+            loop
+            muted
+            playsInline
+            preload={shouldPlayVideo ? 'auto' : 'metadata'}
+            crossOrigin="anonymous"
+            aria-label="ClerkTree blog video"
+          />
           <div className="agero-hero-stage-scrim" aria-hidden="true" />
           <div className="agero-hero-stage-content clerktree-blog-hero-copy">
             <p>ClerkTree Journal</p>

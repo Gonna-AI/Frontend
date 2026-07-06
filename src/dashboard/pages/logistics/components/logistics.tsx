@@ -81,16 +81,16 @@ export function Logistics() {
     <>
       <div
         data-content-padding="false"
-        className="grid h-[calc(100dvh-var(--dashboard-header-height))] overflow-hidden lg:grid-cols-[400px_minmax(0,1fr)] lg:divide-x"
+        className="grid h-[calc(100dvh-var(--dashboard-header-height))] min-w-0 overflow-hidden lg:grid-cols-[minmax(320px,400px)_minmax(0,1fr)] lg:divide-x xl:grid-cols-[minmax(340px,430px)_minmax(0,1fr)]"
       >
-        <div className="h-full overflow-hidden">
+        <div className="h-full min-w-0 overflow-hidden">
           <ShipmentList
             shipments={shipments}
             selectedShipmentId={selectedShipmentId}
             onSelectShipment={handleSelectShipment}
           />
         </div>
-        <div className="hidden h-full overflow-hidden lg:block">
+        <div className="hidden h-full min-w-0 overflow-hidden lg:block">
           <ShipmentDetails shipment={selectedShipment} />
         </div>
       </div>

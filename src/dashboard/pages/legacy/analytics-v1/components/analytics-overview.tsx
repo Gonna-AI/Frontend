@@ -117,7 +117,7 @@ function SummaryRow({ revenueSeries }: { revenueSeries: Array<{ day: string; rev
   const halfRange = Math.max((maxRevenue - minRevenue) * 1.6, 4_500);
 
   return (
-    <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
+    <div className="grid grid-cols-1 gap-4 2xl:grid-cols-3">
       <div className="min-w-0 space-y-2">
         <div>
           <div className="font-medium text-muted-foreground text-sm">{t('dashAnalyticsV1.summary.revenue')}</div>
@@ -153,12 +153,12 @@ function SummaryRow({ revenueSeries }: { revenueSeries: Array<{ day: string; rev
         </div>
       </div>
 
-      <Card className="min-w-0 py-4 shadow-xs xl:col-span-2">
+      <Card className="min-w-0 py-4 shadow-xs 2xl:col-span-2">
         <CardHeader className="px-4">
           <CardTitle>{t('dashAnalyticsV1.summary.riskSummary.title')}</CardTitle>
           <CardDescription>{t('dashAnalyticsV1.summary.riskSummary.description')}</CardDescription>
         </CardHeader>
-        <CardContent className="grid grid-cols-1 gap-4 px-4 sm:grid-cols-2 xl:grid-cols-4 xl:gap-0 xl:divide-x xl:[&>div:first-child]:pl-0 xl:[&>div:last-child]:pr-0 xl:[&>div]:px-5">
+        <CardContent className="grid grid-cols-1 gap-4 px-4 sm:grid-cols-2 2xl:grid-cols-4 2xl:gap-0 2xl:divide-x 2xl:[&>div:first-child]:pl-0 2xl:[&>div:last-child]:pr-0 2xl:[&>div]:px-5">
           {RISK_SUMMARY_METRIC_KEYS.map((item) => (
             <div key={item.key} className="min-w-0 space-y-1">
               <div className="text-muted-foreground text-sm">{t(`dashAnalyticsV1.summary.metric.${item.labelKey}`)}</div>
