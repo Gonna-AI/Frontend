@@ -7,7 +7,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 import SEO from '../components/SEO';
 import './LandingFramer.css';
 
-const BASE = 'https://xlzwfkgurrrspcdyqele.supabase.co/storage/v1/object/public/buck';
+const BASE = '/media';
 const HOME_HERO_VIDEO_SRC = `${BASE}/entrybox.mov`;
 const HOME_CONTACT_VIDEO_SRC = `${BASE}/hero.mov`;
 
@@ -55,9 +55,9 @@ const introTagsBase = [
   { key: 'tag6' as const, Icon: Compass },
 ];
 
-const locationImage = 'https://xlzwfkgurrrspcdyqele.supabase.co/storage/v1/object/public/buck/munich.jpg';
+const locationImage = '/media/munich.jpg';
 
-const testimonialImage = 'https://xlzwfkgurrrspcdyqele.supabase.co/storage/v1/object/public/buck/thdbuilding.jpg';
+const testimonialImage = '/media/thdbuilding.jpg';
 
 const plans = [
   {

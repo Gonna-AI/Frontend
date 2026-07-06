@@ -20,9 +20,9 @@ interface SEOProps {
 
 export default function SEO({ title, description, canonical, preloadVideos, openGraph, structuredData }: SEOProps) {
     const siteUrl = 'https://clerktree.com';
-    const mediaHost = 'https://xlzwfkgurrrspcdyqele.supabase.co';
     const currentUrl = canonical || (openGraph?.url ?? siteUrl);
-    const ogImage = openGraph?.image || 'https://xlzwfkgurrrspcdyqele.supabase.co/storage/v1/object/public/buck/logo.svg';
+    // og:image/twitter:image must be absolute URLs per spec — social crawlers don't resolve relative paths.
+    const ogImage = openGraph?.image || `${siteUrl}/media/logo.svg`;
     const faviconHref = `${siteUrl}/favicon.svg`;
     const manifestHref = `${siteUrl}/site.webmanifest`;
 
@@ -36,8 +36,6 @@ export default function SEO({ title, description, canonical, preloadVideos, open
             <link rel="shortcut icon" href={faviconHref} />
             <link rel="apple-touch-icon" href={faviconHref} />
             <link rel="manifest" href={manifestHref} />
-            <link rel="preconnect" href={mediaHost} />
-            <link rel="dns-prefetch" href={mediaHost} />
             {preloadVideos?.map((video) => (
                 <link
                     key={video.href}

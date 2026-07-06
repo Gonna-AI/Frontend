@@ -9,6 +9,7 @@
     "lint": "eslint .",
     "perf:budget": "node scripts/performance-budget.mjs",
     "perf:build": "npm run build",
+    "r2:upload": "node scripts/r2-upload.mjs",
     "test": "vitest",
     "preview": "vite preview"
   },

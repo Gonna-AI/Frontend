@@ -272,7 +272,7 @@ const SupportPage = () => {
                                             >
                                                 <option value="">Select Category...</option>
                                                 {CATEGORIES.map(cat => (
-                                                    <option key={cat.value} value={cat.value}>{cat.label}</option>
+                                                    <option key={cat.value} value={cat.value}>{t(cat.labelKey)}</option>
                                                 ))}
                                             </select>
                                             <ArrowLeft className="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 -rotate-90 pointer-events-none text-[rgba(19,19,19,0.35)]" />
@@ -291,7 +291,7 @@ const SupportPage = () => {
                                                         : 'text-[rgba(19,19,19,0.4)] bg-[rgba(19,19,19,0.03)] border-[rgba(19,19,19,0.08)] hover:bg-[rgba(19,19,19,0.06)] hover:text-[rgba(19,19,19,0.6)]'
                                                         }`}
                                                 >
-                                                    {p.label}
+                                                    {t(p.labelKey)}
                                                 </button>
                                             ))}
                                         </div>

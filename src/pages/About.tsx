@@ -9,7 +9,7 @@ import SEO from '../components/SEO';
 import './LandingFramer.css';
 import './About.css';
 
-const HERO_VIDEO_SRC = 'https://xlzwfkgurrrspcdyqele.supabase.co/storage/v1/object/public/buck/aboutusvideo.mp4';
+const HERO_VIDEO_SRC = '/media/aboutusvideo.mp4';
 
 function HeroBackgroundVideo({ src }: { src: string }) {
   const shouldPlay = shouldAutoplayMedia();
@@ -261,27 +261,27 @@ function getTeamMembers(t: Translate): TeamMember[] {
   return [
     {
       name: 'Animesh Mishra',
-      image: 'https://xlzwfkgurrrspcdyqele.supabase.co/storage/v1/object/public/buck/animeshmishra.PNG',
+      image: '/media/animeshmishra.PNG',
       description: t('about.team.animesh'),
       objectPosition: 'center top',
       linkedin: 'https://www.linkedin.com/in/animeshmishra0',
     },
     {
       name: 'Kenshin Kiriyama',
-      image: 'https://xlzwfkgurrrspcdyqele.supabase.co/storage/v1/object/public/buck/KenshinKiriyama.jpeg',
+      image: '/media/KenshinKiriyama.jpeg',
       description: t('about.team.kenshin'),
       linkedin: 'https://www.linkedin.com/in/kenshin-kiriyama-2b2031357/',
     },
     {
       name: 'Shobhit Mishra',
-      image: 'https://xlzwfkgurrrspcdyqele.supabase.co/storage/v1/object/public/buck/shobhitmishra.jpeg',
+      image: '/media/shobhitmishra.jpeg',
       description: t('about.team.shobhit'),
       objectPosition: 'center top',
       linkedin: 'https://www.linkedin.com/in/shobhit-mishra-8716961bb/',
     },
     {
       name: 'Krishang Sharma',
-      image: 'https://xlzwfkgurrrspcdyqele.supabase.co/storage/v1/object/public/buck/krishangfinal.JPG',
+      image: '/media/krishangfinal.JPG',
       description: t('about.team.krishang'),
       objectPosition: '55% 5%',
       scale: '1.7',
@@ -290,27 +290,27 @@ function getTeamMembers(t: Translate): TeamMember[] {
     },
     {
       name: 'Sinem Koc',
-      image: 'https://xlzwfkgurrrspcdyqele.supabase.co/storage/v1/object/public/buck/KOC.jpeg',
+      image: '/media/KOC.jpeg',
       description: t('about.team.sinem'),
       objectPosition: 'center top',
       linkedin: 'https://www.linkedin.com/in/sinem-koc-450174337?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app',
     },
     {
       name: 'Katharina Krüger',
-      image: 'https://xlzwfkgurrrspcdyqele.supabase.co/storage/v1/object/public/buck/Katharina.jpeg',
+      image: '/media/Katharina.jpeg',
       description: t('about.team.katharina'),
       objectPosition: 'center top',
       linkedin: 'https://www.linkedin.com/in/katharina-krüger-42220a392/',
     },
     {
       name: 'Aryaman Srivastava',
-      image: 'https://xlzwfkgurrrspcdyqele.supabase.co/storage/v1/object/public/buck/aryamansriva.jpeg',
+      image: '/media/aryamansriva.jpeg',
       description: t('about.team.aryaman'),
       objectPosition: 'center top',
     },
     {
       name: 'Urja Shrestha',
-      image: 'https://xlzwfkgurrrspcdyqele.supabase.co/storage/v1/object/public/buck/Urja%20Shrestha.jpeg',
+      image: '/media/Urja%20Shrestha.jpeg',
       description: t('about.team.urja'),
       linkedin: 'https://www.linkedin.com/in/urja-shrestha-a4ba5324a/',
     },

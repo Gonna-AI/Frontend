@@ -11,7 +11,7 @@ import './Contact.css';
 
 const MAP_URL = 'https://www.google.com/maps/search/?api=1&query=Industriestrasse%202%2C%2094315%20Straubing%2C%20Germany';
 const MAP_EMBED_URL = 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2624.175858607497!2d12.573450500000002!3d48.873923999999995!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47756504433cb70d%3A0xfcfd62e8cc9570ce!2sIndustriestra%C3%9Fe%202%2C%2094315%20Straubing%2C%20Germany!5e0!3m2!1sen!2sin!4v1783175769924!5m2!1sen!2sin';
-const CONTACT_VIDEO_SRC = 'https://xlzwfkgurrrspcdyqele.supabase.co/storage/v1/object/public/buck/contactuspagevideo.mp4';
+const CONTACT_VIDEO_SRC = '/media/contactuspagevideo.mp4';
 
 type SubmitStatus = 'idle' | 'success' | 'error';
 

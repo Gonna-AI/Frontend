@@ -30,6 +30,15 @@
   to = "/robots.txt"
   status = 200
 
+# Proxies marketing media (photos/videos) through Netlify's own CDN from the
+# Cloudflare R2 bucket, so the client only ever talks to clerktree.com and
+# Netlify handles edge caching instead of hitting R2 on every request.
+[[redirects]]
+  from = "/media/*"
+  to = "https://pub-0f804855178c4f4e8184c4fef3bd5b2a.r2.dev/:splat"
+  status = 200
+  force = true
+
 [[redirects]]
   from = "/*"
   to = "/index.html"
@@ -73,6 +82,11 @@
 
 [[headers]]
   for = "/*.mov"
+  [headers.values]
+    Cache-Control = "public, max-age=2592000, stale-while-revalidate=86400"
+
+[[headers]]
+  for = "/media/*"
   [headers.values]
     Cache-Control = "public, max-age=2592000, stale-while-revalidate=86400"
 
