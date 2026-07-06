@@ -65,6 +65,7 @@ export function Header() {
   const { t } = useLanguage();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const headerLinks = headerLinkPaths.map(([key, href]) => [t(key), href] as const);
+  const mobileLinks = headerLinks.filter(([, href]) => href !== '/contact');
 
   useEffect(() => {
     if (!isMenuOpen) return;
@@ -93,49 +94,45 @@ export function Header() {
   const closeMenu = () => setIsMenuOpen(false);
 
   return (
-    <header className="agero-header">
-      <nav className="agero-nav" aria-label="Main navigation">
-        <a className="agero-logo agero-logo-text" href="/" aria-label="ClerkTree home">
-          <ClerkTreeLogo markClassName="agero-logo-mark" />
-        </a>
-
-        <div className="agero-nav-actions">
-          <div className="agero-nav-links">
-            {headerLinks.map(([label, href]) => (
-              <a key={label} href={href}>
-                {label}
-              </a>
-            ))}
-          </div>
-          <div className="agero-nav-language">
-            <LanguageSwitcher isExpanded forceLight />
-          </div>
+    <header className={`agero-shell-header${isMenuOpen ? ' is-menu-open' : ''}`}>
+      <a className="agero-shell-logo" href="/" aria-label={t('home.brand.aria')}>
+        <ClerkTreeLogo markClassName="agero-shell-logo-mark" registered />
+      </a>
+      <div className="agero-shell-actions">
+        <nav className="agero-shell-nav" id="agero-shell-nav" aria-label={t('home.nav.aria')}>
+          {headerLinks.map(([label, href]) => (
+            <a href={href} key={label} onClick={closeMenu}>
+              {label}
+            </a>
+          ))}
+        </nav>
+        <div className="agero-shell-lang">
+          <LanguageSwitcher isExpanded forceLight />
         </div>
-
         <button
-          aria-controls="agero-mobile-menu"
+          aria-controls="agero-shell-nav agero-mobile-menu"
           aria-expanded={isMenuOpen}
-          aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
-          className={`agero-menu-button${isMenuOpen ? ' is-open' : ''}`}
+          aria-label={isMenuOpen ? t('home.menu.close') : t('home.menu.open')}
+          className={`agero-shell-menu${isMenuOpen ? ' is-open' : ''}`}
           onClick={() => setIsMenuOpen((open) => !open)}
           type="button"
         >
           <span />
           <span />
         </button>
-      </nav>
+      </div>
 
       {isMenuOpen && (
         <div className="agero-mobile-menu" id="agero-mobile-menu">
           <button
-            aria-label="Close mobile menu"
+            aria-label={t('home.menu.closeMobile')}
             className="agero-mobile-menu-scrim"
             onClick={closeMenu}
             type="button"
           />
 
           <button
-            aria-label="Close menu"
+            aria-label={t('home.menu.close')}
             className="agero-mobile-menu-close-fab"
             onClick={closeMenu}
             type="button"
@@ -144,14 +141,14 @@ export function Header() {
             <span />
           </button>
 
-          <div className="agero-mobile-menu-panel" role="navigation" aria-label="Mobile navigation">
+          <div className="agero-mobile-menu-panel" role="navigation" aria-label={t('home.menu.navAria')}>
             <div className="agero-mobile-menu-top">
               <span>{t('home.menu.title')}</span>
               <LanguageSwitcher isExpanded forceLight />
             </div>
 
             <div className="agero-mobile-menu-links">
-              {headerLinks.map(([label, href]) => (
+              {mobileLinks.map(([label, href]) => (
                 <a href={href} key={label} onClick={closeMenu}>
                   {label}
                 </a>
@@ -160,7 +157,7 @@ export function Header() {
 
             <a className="agero-mobile-menu-cta" href="/contact" onClick={closeMenu}>
               <span>{t('home.menu.cta')}</span>
-              <span aria-hidden="true">→</span>
+              <span aria-hidden="true">-&gt;</span>
             </a>
           </div>
         </div>

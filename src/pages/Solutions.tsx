@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 import { useLanguage } from '../contexts/LanguageContext';
 import { Footer } from '../components/Landing/AgeroChrome';
 import ClerkTreeLogo from '../components/Brand/ClerkTreeLogo';
+import LanguageSwitcher from '../components/Layout/LanguageSwitcher';
 import { shouldAutoplayMedia } from '../utils/idle';
 import SEO from '../components/SEO';
 import './LandingFramer.css';
@@ -13,19 +14,46 @@ import './Solutions.css';
 const SOLUTIONS_HERO_VIDEO_SRC =
   'https://xlzwfkgurrrspcdyqele.supabase.co/storage/v1/object/public/buck/solutiosboagevidoe.mp4';
 
-const solutionsNavLinks = [
-  ['Solutions', '/solutions'],
-  ['About', '/about'],
-  ['Blog', '/blog'],
-  ['Docs', '/docs'],
-];
+const solutionsNavLinkPaths = [
+  ['nav.solutions', '/solutions'],
+  ['nav.about', '/about'],
+  ['nav.blog', '/blog'],
+  ['nav.docs', '/docs'],
+  ['home.nav.contact', '/contact'],
+] as const;
 
 export default function Solutions() {
   const navigate = useNavigate();
   const { t } = useLanguage();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const shouldPlayVideo = shouldAutoplayMedia();
+  const solutionsNavLinks = solutionsNavLinkPaths.map(([key, href]) => [t(key), href] as const);
+  const mobileLinks = solutionsNavLinks.filter(([, href]) => href !== '/contact');
   const closeMenu = () => setIsMenuOpen(false);
+
+  useEffect(() => {
+    if (!isMenuOpen) return undefined;
+
+    const previousOverflow = document.body.style.overflow;
+    const shouldLockScroll = window.matchMedia('(max-width: 767px)').matches;
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setIsMenuOpen(false);
+      }
+    };
+
+    if (shouldLockScroll) {
+      document.body.style.overflow = 'hidden';
+    }
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      if (shouldLockScroll) {
+        document.body.style.overflow = previousOverflow;
+      }
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isMenuOpen]);
 
   const heroServices = [
     t('solutions.card1Title'),
@@ -77,43 +105,47 @@ export default function Solutions() {
       />
       <main className="clerktree-solutions-main">
         <section className="fabric-solution-shell" aria-labelledby="solutions-title">
-          <div className="fabric-solution-topbar">
-            <a className="fabric-solution-logo" href="/" aria-label="ClerkTree home">
-              <ClerkTreeLogo markClassName="fabric-solution-logo-mark" registered />
+          <header className={`fabric-solution-topbar agero-shell-header${isMenuOpen ? ' is-menu-open' : ''}`}>
+            <a className="agero-shell-logo" href="/" aria-label={t('home.brand.aria')}>
+              <ClerkTreeLogo markClassName="agero-shell-logo-mark" registered />
             </a>
 
-            <div className="agero-nav-links">
-              {solutionsNavLinks.map(([label, href]) => (
-                <a key={label} href={href}>
-                  {label}
-                </a>
-              ))}
+            <div className="agero-shell-actions">
+              <nav className="agero-shell-nav" id="agero-shell-nav" aria-label={t('home.nav.aria')}>
+                {solutionsNavLinks.map(([label, href]) => (
+                  <a href={href} key={label} onClick={closeMenu}>
+                    {label}
+                  </a>
+                ))}
+              </nav>
+              <div className="agero-shell-lang">
+                <LanguageSwitcher isExpanded forceLight />
+              </div>
+              <button
+                aria-controls="agero-shell-nav agero-mobile-menu"
+                aria-expanded={isMenuOpen}
+                aria-label={isMenuOpen ? t('home.menu.close') : t('home.menu.open')}
+                className={`agero-shell-menu${isMenuOpen ? ' is-open' : ''}`}
+                onClick={() => setIsMenuOpen((open) => !open)}
+                type="button"
+              >
+                <span />
+                <span />
+              </button>
             </div>
-
-            <button
-              aria-controls="agero-mobile-menu"
-              aria-expanded={isMenuOpen}
-              aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
-              className={`agero-menu-button${isMenuOpen ? ' is-open' : ''}`}
-              onClick={() => setIsMenuOpen((open) => !open)}
-              type="button"
-            >
-              <span />
-              <span />
-            </button>
-          </div>
+          </header>
 
           {isMenuOpen && (
             <div className="agero-mobile-menu" id="agero-mobile-menu">
               <button
-                aria-label="Close mobile menu"
+                aria-label={t('home.menu.closeMobile')}
                 className="agero-mobile-menu-scrim"
                 onClick={closeMenu}
                 type="button"
               />
 
               <button
-                aria-label="Close menu"
+                aria-label={t('home.menu.close')}
                 className="agero-mobile-menu-close-fab"
                 onClick={closeMenu}
                 type="button"
@@ -122,13 +154,14 @@ export default function Solutions() {
                 <span />
               </button>
 
-              <div className="agero-mobile-menu-panel" role="navigation" aria-label="Mobile navigation">
+              <div className="agero-mobile-menu-panel" role="navigation" aria-label={t('home.menu.navAria')}>
                 <div className="agero-mobile-menu-top">
-                  <span>Menu</span>
+                  <span>{t('home.menu.title')}</span>
+                  <LanguageSwitcher isExpanded forceLight />
                 </div>
 
                 <div className="agero-mobile-menu-links">
-                  {solutionsNavLinks.map(([label, href]) => (
+                  {mobileLinks.map(([label, href]) => (
                     <a href={href} key={label} onClick={closeMenu}>
                       {label}
                     </a>
@@ -136,8 +169,8 @@ export default function Solutions() {
                 </div>
 
                 <a className="agero-mobile-menu-cta" href="/contact" onClick={closeMenu}>
-                  <span>Book Demo</span>
-                  <span aria-hidden="true">→</span>
+                  <span>{t('home.menu.cta')}</span>
+                  <span aria-hidden="true">-&gt;</span>
                 </a>
               </div>
             </div>

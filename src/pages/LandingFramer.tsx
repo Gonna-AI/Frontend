@@ -2,10 +2,8 @@ import { type CSSProperties, type ReactNode, type VideoHTMLAttributes, Fragment,
 import { Compass, Globe2, MapPin, PanelTop, PenTool, Sparkles } from 'lucide-react';
 import Lenis from 'lenis';
 import { isSaveDataEnabled, shouldAutoplayMedia } from '../utils/idle';
-import { Footer } from '../components/Landing/AgeroChrome';
+import { Footer, Header } from '../components/Landing/AgeroChrome';
 import { useLanguage } from '../contexts/LanguageContext';
-import LanguageSwitcher from '../components/Layout/LanguageSwitcher';
-import ClerkTreeLogo from '../components/Brand/ClerkTreeLogo';
 import SEO from '../components/SEO';
 import './LandingFramer.css';
 
@@ -47,21 +45,6 @@ const clientLogos = [
 ];
 
 const showcaseImage = '/desktop1.png';
-
-const shellLinkPaths = [
-  ['nav.solutions', '/solutions'],
-  ['nav.about', '/about'],
-  ['nav.blog', '/blog'],
-  ['nav.docs', '/docs'],
-  ['home.nav.contact', '/contact'],
-] as const;
-
-const shellMobileLinkPaths = [
-  ['nav.solutions', '/solutions'],
-  ['nav.docs', '/docs'],
-  ['nav.about', '/about'],
-  ['nav.blog', '/blog'],
-] as const;
 
 const introTagsBase = [
   { key: 'tag1' as const, Icon: Sparkles },
@@ -122,7 +105,7 @@ export default function LandingFramer() {
         ]}
       />
       <div className="agero-top-area">
-        <ShellHeader />
+        <Header />
 
         <HomePrelude
           heroContent={
@@ -200,111 +183,6 @@ function Portfolio() {
         ))}
       </div>
     </section>
-  );
-}
-
-function ShellHeader() {
-  const { t } = useLanguage();
-  const shellLinks = shellLinkPaths.map(([key, href]) => [t(key), href] as const);
-  const shellMobileLinks = shellMobileLinkPaths.map(([key, href]) => [t(key), href] as const);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-
-  useEffect(() => {
-    if (!isMenuOpen) return undefined;
-
-    const previousOverflow = document.body.style.overflow;
-    const shouldLockScroll = window.matchMedia('(max-width: 767px)').matches;
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        setIsMenuOpen(false);
-      }
-    };
-
-    if (shouldLockScroll) {
-      document.body.style.overflow = 'hidden';
-    }
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => {
-      if (shouldLockScroll) {
-        document.body.style.overflow = previousOverflow;
-      }
-      window.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [isMenuOpen]);
-
-  const closeMenu = () => setIsMenuOpen(false);
-
-  return (
-    <header className={`agero-shell-header${isMenuOpen ? ' is-menu-open' : ''}`}>
-      <a className="agero-shell-logo" href="/" aria-label={t('home.brand.aria')}>
-        <ClerkTreeLogo markClassName="agero-shell-logo-mark" registered />
-      </a>
-      <div className="agero-shell-actions">
-        <nav className="agero-shell-nav" id="agero-shell-nav" aria-label={t('home.nav.aria')}>
-          {shellLinks.map(([label, href]) => (
-            <a href={href} key={label} onClick={closeMenu}>
-              {label}
-            </a>
-          ))}
-        </nav>
-        <div className="agero-shell-lang">
-          <LanguageSwitcher isExpanded forceLight />
-        </div>
-        <button
-          aria-controls="agero-shell-nav agero-mobile-menu"
-          aria-expanded={isMenuOpen}
-          aria-label={isMenuOpen ? t('home.menu.close') : t('home.menu.open')}
-          className={`agero-shell-menu${isMenuOpen ? ' is-open' : ''}`}
-          onClick={() => setIsMenuOpen((open) => !open)}
-          type="button"
-        >
-          <span />
-          <span />
-        </button>
-      </div>
-
-      {isMenuOpen && (
-        <div className="agero-mobile-menu" id="agero-mobile-menu">
-          <button
-            aria-label={t('home.menu.closeMobile')}
-            className="agero-mobile-menu-scrim"
-            onClick={closeMenu}
-            type="button"
-          />
-
-          <button
-            aria-label={t('home.menu.close')}
-            className="agero-mobile-menu-close-fab"
-            onClick={closeMenu}
-            type="button"
-          >
-            <span />
-            <span />
-          </button>
-
-          <div className="agero-mobile-menu-panel" role="navigation" aria-label={t('home.menu.navAria')}>
-            <div className="agero-mobile-menu-top">
-              <span>{t('home.menu.title')}</span>
-              <LanguageSwitcher isExpanded forceLight />
-            </div>
-
-            <div className="agero-mobile-menu-links">
-              {shellMobileLinks.map(([label, href]) => (
-                <a href={href} key={label} onClick={closeMenu}>
-                  {label}
-                </a>
-              ))}
-            </div>
-
-            <a className="agero-mobile-menu-cta" href="/contact" onClick={closeMenu}>
-              <span>{t('home.menu.cta')}</span>
-              <span aria-hidden="true">-&gt;</span>
-            </a>
-          </div>
-        </div>
-      )}
-    </header>
   );
 }
 
