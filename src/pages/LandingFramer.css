@@ -1718,8 +1718,8 @@ html.lenis.lenis-stopped {
   .agero-sol-row {
     display: flex;
     flex-direction: column;
-    height: calc(100vh - 100px);
-    min-height: 560px;
+    height: calc(100vh + 160px);
+    min-height: 720px;
   }
 
   .agero-sol-media {
