@@ -13,9 +13,9 @@ export function LanguageSwitcher() {
   return (
     <Button
       size="sm"
-      variant="ghost"
+      variant="outline"
       onClick={toggleLanguage}
-      className="gap-1.5 px-2"
+      className="gap-1.5 rounded-xl border-border bg-background px-2.5 shadow-xs hover:bg-muted"
       aria-label={language === "en" ? t("dashShell.language.switchToGerman") : t("dashShell.language.switchToEnglish")}
       title={t("dashShell.language.toggleAria")}
     >

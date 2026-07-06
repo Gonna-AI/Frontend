@@ -141,12 +141,12 @@ export function SearchDialog() {
     <>
       <Button
         onClick={() => handleOpenChange(true)}
-        variant="link"
-        className="px-0! font-normal text-muted-foreground hover:no-underline"
+        variant="outline"
+        className="h-8 w-[min(46vw,17rem)] justify-start gap-2 rounded-xl border-border bg-background px-3 font-normal text-muted-foreground shadow-xs hover:bg-muted hover:no-underline sm:w-56 md:w-64"
       >
-        <Search data-icon="inline-start" />
-        {t("dashShell.search.button")}
-        <kbd className="inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-medium text-[10px]">
+        <Search className="size-4 shrink-0" data-icon="inline-start" />
+        <span className="min-w-0 flex-1 truncate text-left">{t("dashShell.search.button")}</span>
+        <kbd className="ml-auto inline-flex h-5 shrink-0 select-none items-center gap-1 rounded-md border bg-muted px-1.5 font-medium text-[10px]">
           <span className="text-xs">⌘</span>J
         </kbd>
       </Button>

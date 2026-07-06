@@ -1,6 +1,6 @@
 import type { ChangeEvent, FormEvent } from 'react';
 import { useState } from 'react';
-import { ArrowUpRight, CheckCircle2, Linkedin, Mail, MapPin, Phone, Send, Twitter } from 'lucide-react';
+import { CheckCircle2, Linkedin, Mail, MapPin, Phone, Send, Twitter } from 'lucide-react';
 
 import { useLanguage } from '../contexts/LanguageContext';
 import { Header, Footer } from '../components/Landing/AgeroChrome';
@@ -257,10 +257,6 @@ export default function Contact() {
                 src={MAP_EMBED_URL}
                 title="ClerkTree office map"
               />
-              <a href={MAP_URL} rel="noopener noreferrer" target="_blank">
-                {t('contact.openMap')}
-                <ArrowUpRight size={18} />
-              </a>
             </div>
 
             <aside className="clerktree-contact-info-card">

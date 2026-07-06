@@ -209,7 +209,7 @@ html.lenis.lenis-stopped {
   box-shadow: 0 24px 90px rgba(0, 0, 0, 0.1);
   display: flex;
   flex-direction: column;
-  margin: 16px auto 0;
+  margin: 8px auto 0;
   max-width: 1920px;
   overflow: hidden;
   padding: 34px;
@@ -217,7 +217,7 @@ html.lenis.lenis-stopped {
 }
 
 .agero-top-area-compact {
-  padding: 22px 34px;
+  padding: 34px;
 }
 
 .agero-top-area-compact .agero-header {
@@ -230,7 +230,7 @@ html.lenis.lenis-stopped {
 
 @media (max-width: 767px) {
   .agero-top-area-compact {
-    padding: 16px 18px;
+    padding: 14px;
   }
 }
 
@@ -449,7 +449,7 @@ html.lenis.lenis-stopped {
   display: inline-flex;
   font-family: "Cal Sans", "Inter", system-ui, sans-serif;
   font-size: clamp(2rem, 2.5vw, 3rem);
-  gap: 12px;
+  gap: 14px;
   line-height: 0.9;
   text-decoration: none;
 }
@@ -457,8 +457,8 @@ html.lenis.lenis-stopped {
 .agero-shell-logo-mark {
   display: block;
   flex: 0 0 auto;
-  height: 34px;
-  width: 34px;
+  height: 42px;
+  width: 42px;
 }
 
 .agero-shell-logo > span {
@@ -2943,21 +2943,24 @@ html.lenis.lenis-stopped {
   }
 
   .agero-shell-header {
-    margin-bottom: 20px;
+    gap: 10px;
+    margin-bottom: 16px;
+    padding: 8px 4px 0;
     position: relative;
   }
 
   .agero-shell-logo {
     font-size: 2rem;
-    gap: 10px;
+    gap: 9px;
   }
 
   .agero-shell-logo-mark {
-    height: 28px;
-    width: 28px;
+    height: 34px;
+    width: 34px;
   }
 
   .agero-shell-actions {
+    gap: 10px;
     position: static;
   }
 
@@ -3211,8 +3214,18 @@ html.lenis.lenis-stopped {
   .agero-hero-title {
     column-gap: 8px;
     font-size: 40px;
-    line-height: 40px;
+    line-height: 1.05;
     max-width: 350px;
+  }
+
+  .agero-hero-stage-content--home {
+    padding: 52px 40px 36px;
+  }
+
+  .agero-hero-stage-content--home .agero-hero-title {
+    font-size: clamp(42px, 13vw, 56px);
+    line-height: 1.04;
+    margin-bottom: 22px;
   }
 
   .agero-hero-copy {
@@ -3593,6 +3606,118 @@ html.lenis.lenis-stopped {
     line-height: 0.78;
     margin: 56px -20px 0;
     width: calc(100% + 40px);
+  }
+}
+
+@media (max-width: 430px) {
+  .agero-top-area {
+    border-radius: 26px;
+    padding: 12px;
+  }
+
+  .agero-shell-header {
+    gap: 8px;
+  }
+
+  .agero-shell-logo {
+    font-size: clamp(1.55rem, 8.8vw, 1.92rem);
+    gap: 8px;
+    min-width: 0;
+  }
+
+  .agero-shell-logo-mark {
+    height: 30px;
+    width: 30px;
+  }
+
+  .agero-shell-logo > span {
+    max-width: min(48vw, 190px);
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .agero-shell-actions {
+    gap: 8px;
+  }
+
+  .agero-shell-lang button {
+    border-radius: 12px;
+    height: 36px;
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+
+  .agero-shell-menu,
+  .agero-shell-header.is-menu-open .agero-shell-menu {
+    height: 22px;
+    width: 22px;
+  }
+
+  .agero-shell-menu span,
+  .agero-shell-header.is-menu-open .agero-shell-menu span {
+    width: 18px;
+  }
+
+  .agero-hero-stage--home {
+    border-radius: 26px;
+    min-height: 740px;
+  }
+
+  .agero-hero-stage-content--home {
+    padding: 44px 40px 28px;
+  }
+
+  .agero-hero-stage-content--home .agero-hero-title {
+    font-size: clamp(38px, 12.2vw, 48px);
+    line-height: 1.06;
+    margin-bottom: 18px;
+  }
+
+  .agero-hero-stage-content--home .agero-hero-copy {
+    font-size: clamp(18px, 5.2vw, 24px);
+    line-height: 1.35;
+    max-width: 100%;
+  }
+
+  .agero-hero-actions {
+    gap: 10px;
+  }
+
+  .agero-hero-actions .agero-button {
+    min-height: 54px;
+    padding: 0 28px;
+  }
+
+  .agero-hero-actions .agero-hero-login {
+    min-width: 0;
+    padding-inline: 36px;
+  }
+}
+
+@media (max-width: 360px) {
+  .agero-shell-logo {
+    font-size: 1.42rem;
+  }
+
+  .agero-shell-logo > span {
+    max-width: 43vw;
+  }
+
+  .agero-shell-lang button {
+    font-size: 13px;
+    height: 34px;
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+
+  .agero-hero-stage-content--home {
+    padding-left: 32px;
+    padding-right: 32px;
+  }
+
+  .agero-hero-actions .agero-button {
+    min-height: 50px;
+    padding: 0 22px;
   }
 }
 
