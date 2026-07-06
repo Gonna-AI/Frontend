@@ -8,6 +8,7 @@ import {
 import { Header } from '../components/Landing/AgeroChrome';
 import { useLanguage } from '../contexts/LanguageContext';
 import './LandingFramer.css';
+import './DocsTheme.css';
 
 type DocSection = 'intro' | 'auth' | 'chat' | 'call' | 'dashboard' | 'webhooks';
 interface NavItem { id: string; labelKey: string; section: DocSection; }
@@ -353,15 +354,15 @@ export default function DocsPage() {
     }, [location.hash]);
 
     return (
-        <div className="agero-works clerktree-docs relative min-h-screen font-urbanist selection:bg-[#FF4D00]/30 overflow-hidden">
+        <div className="agero-works clerktree-docs clerktree-docs-page relative min-h-screen font-urbanist selection:bg-[#FF4D00]/30 overflow-hidden">
             <div className="relative z-10">
-                <div className="agero-top-area agero-top-area-compact">
+                <div className="agero-top-area agero-top-area-compact clerktree-docs-header-shell">
                     <Header />
                 </div>
 
-                <div className="max-w-[1600px] mx-auto flex flex-col md:flex-row">
+                <div className="clerktree-docs-shell max-w-[1600px] mx-auto flex flex-col md:flex-row">
                 {/* Sidebar */}
-                <nav className="w-full md:w-72 shrink-0 pt-8 pb-6 md:pb-12 px-4 md:px-6">
+                <nav className="clerktree-docs-sidebar w-full md:w-72 shrink-0 pt-8 pb-6 md:pb-12 px-4 md:px-6">
                     <div className="flex items-center gap-3 mb-6 pb-6 border-b border-[rgba(19,19,19,0.1)]">
                         <button onClick={() => setIsSearchOpen(true)} className="flex-1 flex items-center gap-2 px-3 py-2 rounded-lg border border-[rgba(19,19,19,0.1)] bg-[rgba(19,19,19,0.02)] text-sm text-[rgba(19,19,19,0.5)] hover:text-[rgb(19,19,19)] hover:border-[rgba(19,19,19,0.18)] transition-colors">
                             <Search className="w-4 h-4" />
@@ -388,7 +389,7 @@ export default function DocsPage() {
                 </nav>
 
                 {/* Main Content */}
-                <main className="flex-1 px-4 md:px-12 pt-4 md:pt-8 pb-12 max-w-full md:max-w-5xl overflow-hidden">
+                <main className="clerktree-docs-main flex-1 px-4 md:px-12 pt-4 md:pt-8 pb-12 max-w-full md:max-w-5xl overflow-hidden">
                     <div className="space-y-16">
 
                         {/* ─── INTRODUCTION ─── */}
@@ -664,7 +665,7 @@ ws.onmessage = (event) => {
                 </main>
 
                 {/* Right Table of Contents */}
-                <aside className="hidden xl:block w-64 pt-8 px-6 border-l border-[rgba(19,19,19,0.08)] sticky top-0 h-screen overflow-y-auto">
+                <aside className="clerktree-docs-toc hidden xl:block w-64 pt-8 px-6 border-l border-[rgba(19,19,19,0.08)] sticky top-0 h-screen overflow-y-auto">
                     <h4 className="text-sm font-semibold text-[rgba(19,19,19,0.85)] mb-4">{t('docsPage.onThisPage')}</h4>
                     <ul className="space-y-3 text-sm">
                         {allNavItems.map(item => (

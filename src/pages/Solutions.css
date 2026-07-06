@@ -107,36 +107,18 @@
 .fabric-solution-brand {
   left: 3.2%;
   position: absolute;
-  top: 14%;
-  width: min(58vw, 1120px);
+  top: 15%;
+  width: min(78cqw, 1500px);
   z-index: 2;
 }
 
 .fabric-solution-brand h1 {
   color: rgb(255, 255, 255);
-  font-size: clamp(6rem, 11.8cqw, 15.5rem);
-  letter-spacing: -0.095em;
-  line-height: 0.76;
+  font-size: clamp(8.4rem, 18cqw, 23rem);
+  letter-spacing: -0.09em;
+  line-height: 0.78;
   margin: 0;
   max-width: 100%;
-  overflow-wrap: normal;
-  white-space: nowrap;
-}
-
-.fabric-solution-brand h1 sup {
-  font-size: 0.42em;
-  letter-spacing: 0;
-  margin-left: 0.03em;
-  vertical-align: 0.82em;
-}
-
-.fabric-solution-brand p {
-  color: rgb(255, 255, 255);
-  font-family: "Cal Sans", "Inter", system-ui, sans-serif !important;
-  font-size: clamp(3rem, 4.6cqw, 5.8rem);
-  line-height: 0.88;
-  margin: 1.25rem 0 0 clamp(15rem, 31cqw, 34rem);
-  max-width: min(36cqw, 680px);
   overflow-wrap: normal;
   white-space: nowrap;
 }
@@ -149,7 +131,7 @@
   padding: 0;
   position: absolute;
   right: 5.6%;
-  top: 26%;
+  top: 42%;
   width: min(28cqw, 500px);
   z-index: 3;
 }
@@ -362,24 +344,18 @@
   }
 
   .fabric-solution-brand {
-    top: 12%;
-    width: 92%;
+    top: 13%;
+    width: 94%;
   }
 
   .fabric-solution-brand h1 {
-    font-size: clamp(5.8rem, 12.2cqw, 12rem);
-  }
-
-  .fabric-solution-brand p {
-    font-size: clamp(3.2rem, 5.2cqw, 5.7rem);
-    margin-left: clamp(13rem, 32cqw, 32rem);
-    max-width: min(48cqw, 720px);
+    font-size: clamp(7rem, 19.5cqw, 15rem);
   }
 
   .fabric-solution-list {
     left: 4%;
     right: auto;
-    top: clamp(360px, 41%, 440px);
+    top: clamp(360px, 43%, 470px);
     width: min(62cqw, 760px);
   }
 
@@ -401,7 +377,7 @@
 
   .fabric-solution-list {
     right: 6%;
-    top: 30%;
+    top: 42%;
     width: min(27cqw, 500px);
   }
 }
@@ -444,19 +420,14 @@
   }
 
   .fabric-solution-brand h1 {
-    font-size: clamp(4.2rem, 21vw, 6.5rem);
+    font-size: clamp(4.8rem, 24vw, 7.6rem);
     letter-spacing: -0.08em;
-  }
-
-  .fabric-solution-brand p {
-    font-size: 3rem;
-    margin: 12px 0 0 34%;
   }
 
   .fabric-solution-list {
     gap: 12px;
     left: 20px;
-    top: 255px;
+    top: 235px;
   }
 
   .fabric-solution-list li {

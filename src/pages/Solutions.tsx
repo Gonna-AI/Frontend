@@ -196,11 +196,8 @@ export default function Solutions() {
             <div className="fabric-solution-grain" aria-hidden="true" />
             <div className="fabric-solution-shadow" aria-hidden="true" />
 
-            <div className="fabric-solution-brand">
-              <h1 id="solutions-title">
-                ClerkTree<sup>®</sup>
-              </h1>
-              <p>{t('solutions.eyebrow')}</p>
+            <div className="fabric-solution-brand fabric-solution-brand--single">
+              <h1 id="solutions-title">{t('solutions.eyebrow')}</h1>
             </div>
 
             <ul className="fabric-solution-list" aria-label="ClerkTree solution capabilities">
