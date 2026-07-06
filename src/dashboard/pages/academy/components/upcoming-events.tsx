@@ -3,49 +3,33 @@ import { ArrowRight } from "lucide-react-dash";
 
 import { Badge } from "@/components/dashboard-ui/badge";
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/dashboard-ui/card";
+import { useLanguage } from "@/contexts/LanguageContext";
 
-const upcomingEvents = [
-  {
-    dayOffset: 6,
-    title: "KickOff 1 — Bergmann CNC-Paket 2026",
-    time: "08:30 AM - 12:30 PM",
-    type: "KickOff",
-  },
-  {
-    dayOffset: 9,
-    title: "Freigabe-Review — Weber Rundtisch",
-    time: "02:00 PM - 05:00 PM",
-    type: "Meeting",
-  },
-  {
-    dayOffset: 12,
-    title: "KickOff 2 — Bergmann CNC-Paket 2026",
-    time: "09:00 AM - 04:00 PM",
-    type: "KickOff",
-  },
-  {
-    dayOffset: 15,
-    title: "Reindexierung MK Anlagenbau",
-    time: "09:00 AM - 12:00 PM",
-    type: "Indexierung",
-  },
-  {
-    dayOffset: 18,
-    title: "Projektgedächtnis Planungs-Review",
-    time: "03:30 PM - 04:30 PM",
-    type: "Meeting",
-  },
-];
+const rawUpcomingEvents = [
+  { dayOffset: 6, eventKey: "event1" },
+  { dayOffset: 9, eventKey: "event2" },
+  { dayOffset: 12, eventKey: "event3" },
+  { dayOffset: 15, eventKey: "event4" },
+  { dayOffset: 18, eventKey: "event5" },
+] as const;
 
 export function UpcomingEvents() {
+  const { t } = useLanguage();
   const today = new Date();
+
+  const upcomingEvents = rawUpcomingEvents.map((item) => ({
+    dayOffset: item.dayOffset,
+    title: t(`dashAcademy.upcomingEvents.${item.eventKey}.title`),
+    time: t(`dashAcademy.upcomingEvents.${item.eventKey}.time`),
+    type: t(`dashAcademy.upcomingEvents.${item.eventKey}.type`),
+  }));
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-sm">Upcoming Milestones</CardTitle>
+        <CardTitle className="text-sm">{t('dashAcademy.upcomingEvents.title')}</CardTitle>
         <CardAction className="flex items-center gap-1 text-muted-foreground text-xs">
-          View Calendar <ArrowRight className="size-4" />
+          {t('dashAcademy.upcomingEvents.viewCalendar')} <ArrowRight className="size-4" />
         </CardAction>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">

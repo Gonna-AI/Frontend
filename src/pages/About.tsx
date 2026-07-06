@@ -64,13 +64,6 @@ export default function About() {
           <HeroBackgroundVideo src={HERO_VIDEO_SRC} />
           <div className="agero-hero-stage-scrim" aria-hidden="true" />
           <div className="agero-hero-stage-content">
-            <p className="agero-about-eyebrow">
-              <span className="agero-about-eyebrow-icon">
-                <Sparkles size={16} />
-              </span>
-              {t('about.heroEyebrow')}
-            </p>
-
             <h1 id="about-hero-title">
               {t('about.heroLead')} <em>{t('about.heroEmphasis')}</em>
             </h1>

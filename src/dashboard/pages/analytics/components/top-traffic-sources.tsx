@@ -5,13 +5,7 @@ import { Bar, BarChart, CartesianGrid, LabelList, type LabelProps, XAxis, YAxis 
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/dashboard-ui/card";
 import { type ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/dashboard-ui/chart";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/dashboard-ui/tabs";
-
-const chartConfig = {
-  visitors: {
-    color: "var(--chart-1)",
-    label: "Visitors",
-  },
-} satisfies ChartConfig;
+import { useLanguage } from "@/contexts/LanguageContext";
 
 type TrafficSourceDatum = {
   label: string;
@@ -19,28 +13,28 @@ type TrafficSourceDatum = {
   visitors: number;
 };
 
-const sourcesData: TrafficSourceDatum[] = [
-  { label: "89.4k", source: "Organic Search", visitors: 89_400 },
-  { label: "55.2k", source: "Direct", visitors: 55_200 },
-  { label: "38.1k", source: "Social", visitors: 38_100 },
-  { label: "30.4k", source: "Referral", visitors: 30_400 },
-  { label: "22.7k", source: "Paid", visitors: 22_700 },
+const sourcesDataBase = [
+  { key: "organicSearch" as const, label: "89.4k", visitors: 89_400 },
+  { key: "direct" as const, label: "55.2k", visitors: 55_200 },
+  { key: "social" as const, label: "38.1k", visitors: 38_100 },
+  { key: "referral" as const, label: "30.4k", visitors: 30_400 },
+  { key: "paid" as const, label: "22.7k", visitors: 22_700 },
 ];
 
-const campaignsData: TrafficSourceDatum[] = [
-  { label: "16.8k", source: "Spring Launch", visitors: 16_800 },
-  { label: "12.0k", source: "Newsletter", visitors: 12_000 },
-  { label: "7.7k", source: "Retargeting", visitors: 7700 },
-  { label: "5.9k", source: "Brand Search", visitors: 5900 },
-  { label: "4.3k", source: "Partners", visitors: 4300 },
+const campaignsDataBase = [
+  { key: "springLaunch" as const, label: "16.8k", visitors: 16_800 },
+  { key: "newsletter" as const, label: "12.0k", visitors: 12_000 },
+  { key: "retargeting" as const, label: "7.7k", visitors: 7700 },
+  { key: "brandSearch" as const, label: "5.9k", visitors: 5900 },
+  { key: "partners" as const, label: "4.3k", visitors: 4300 },
 ];
 
-const referrersData: TrafficSourceDatum[] = [
-  { label: "18.4k", source: "Google", visitors: 18_400 },
-  { label: "8.9k", source: "LinkedIn", visitors: 8900 },
-  { label: "5.7k", source: "Product Hunt", visitors: 5700 },
-  { label: "4.8k", source: "GitHub", visitors: 4800 },
-  { label: "3.6k", source: "Medium", visitors: 3600 },
+const referrersDataBase = [
+  { key: "google" as const, label: "18.4k", visitors: 18_400 },
+  { key: "linkedin" as const, label: "8.9k", visitors: 8900 },
+  { key: "productHunt" as const, label: "5.7k", visitors: 5700 },
+  { key: "github" as const, label: "4.8k", visitors: 4800 },
+  { key: "medium" as const, label: "3.6k", visitors: 3600 },
 ];
 
 function renderValueLabel(props: LabelProps) {
@@ -61,7 +55,7 @@ function renderValueLabel(props: LabelProps) {
   );
 }
 
-function TrafficSourceBarChart({ data }: { data: TrafficSourceDatum[] }) {
+function TrafficSourceBarChart({ chartConfig, data }: { chartConfig: ChartConfig; data: TrafficSourceDatum[] }) {
   return (
     <ChartContainer config={chartConfig} className="h-64 w-full">
       <BarChart
@@ -87,10 +81,37 @@ function TrafficSourceBarChart({ data }: { data: TrafficSourceDatum[] }) {
 }
 
 export function TopTrafficSources() {
+  const { t } = useLanguage();
+
+  const chartConfig: ChartConfig = {
+    visitors: {
+      color: "var(--chart-1)",
+      label: t('dashAnalytics.traffic.chart.visitors'),
+    },
+  };
+
+  const sourcesData: TrafficSourceDatum[] = sourcesDataBase.map((d) => ({
+    label: d.label,
+    source: t(`dashAnalytics.traffic.source.${d.key}`),
+    visitors: d.visitors,
+  }));
+
+  const campaignsData: TrafficSourceDatum[] = campaignsDataBase.map((d) => ({
+    label: d.label,
+    source: t(`dashAnalytics.traffic.campaign.${d.key}`),
+    visitors: d.visitors,
+  }));
+
+  const referrersData: TrafficSourceDatum[] = referrersDataBase.map((d) => ({
+    label: d.label,
+    source: t(`dashAnalytics.traffic.referrer.${d.key}`),
+    visitors: d.visitors,
+  }));
+
   return (
     <Card className="h-full gap-2">
       <CardHeader>
-        <CardTitle className="font-normal">Traffic Sources</CardTitle>
+        <CardTitle className="font-normal">{t('dashAnalytics.traffic.title')}</CardTitle>
         <CardAction>
           <Ellipsis className="size-4" />
         </CardAction>
@@ -100,25 +121,25 @@ export function TopTrafficSources() {
         <Tabs defaultValue="sources" className="flex flex-col gap-3">
           <TabsList className="w-full justify-start border-b px-2.5" variant="line">
             <TabsTrigger className="flex-none font-normal" value="sources">
-              Sources
+              {t('dashAnalytics.traffic.tabs.sources')}
             </TabsTrigger>
             <TabsTrigger className="flex-none font-normal" value="campaigns">
-              Campaigns
+              {t('dashAnalytics.traffic.tabs.campaigns')}
             </TabsTrigger>
             <TabsTrigger className="flex-none font-normal" value="referrers">
-              Referrers
+              {t('dashAnalytics.traffic.tabs.referrers')}
             </TabsTrigger>
           </TabsList>
 
           <TabsContent value="sources" className="px-4">
-            <TrafficSourceBarChart data={sourcesData} />
+            <TrafficSourceBarChart chartConfig={chartConfig} data={sourcesData} />
           </TabsContent>
 
           <TabsContent value="campaigns" className="px-4">
-            <TrafficSourceBarChart data={campaignsData} />
+            <TrafficSourceBarChart chartConfig={chartConfig} data={campaignsData} />
           </TabsContent>
           <TabsContent value="referrers" className="px-4">
-            <TrafficSourceBarChart data={referrersData} />
+            <TrafficSourceBarChart chartConfig={chartConfig} data={referrersData} />
           </TabsContent>
         </Tabs>
       </CardContent>

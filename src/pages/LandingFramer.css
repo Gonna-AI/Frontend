@@ -626,6 +626,16 @@ html.lenis.lenis-stopped {
   gap: 16px;
 }
 
+.agero-nav-actions {
+  align-items: center;
+  display: flex;
+  gap: 14px;
+}
+
+.agero-nav-language {
+  display: inline-flex;
+}
+
 .agero-nav-links a {
   align-items: center;
   border-radius: 100px;
@@ -2990,6 +3000,7 @@ html.lenis.lenis-stopped {
   }
 
   .agero-contact-pill,
+  .agero-nav-actions,
   .agero-nav-links {
     display: none;
   }

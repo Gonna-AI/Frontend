@@ -5,6 +5,7 @@ import { Button } from "@/components/dashboard-ui/button";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/dashboard-ui/input-group";
 import { Separator } from "@/components/dashboard-ui/separator";
 import { SidebarTrigger } from "@/components/dashboard-ui/sidebar";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 import type { Mail } from "./data";
 import { MailList } from "./mail-list";
@@ -17,6 +18,7 @@ interface MailInboxProps {
 export function MailInbox({ mails, onSelectMail }: MailInboxProps) {
   const pinnedMails = mails.filter((mail) => mail.isPinned);
   const unpinnedMails = mails.filter((mail) => !mail.isPinned);
+  const { t } = useLanguage();
 
   return (
     <div className="flex h-full min-h-0 flex-col gap-3 pt-3">
@@ -24,7 +26,7 @@ export function MailInbox({ mails, onSelectMail }: MailInboxProps) {
         <div className="flex items-center">
           <SidebarTrigger />
           <Separator orientation="vertical" className="mr-2 ml-1 h-4 data-vertical:self-center" />
-          <h1 className="font-medium text-xl leading-none">Inbox</h1>
+          <h1 className="font-medium text-xl leading-none">{t('dashMail.inboxHeading')}</h1>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="ghost" size="icon-sm">
@@ -45,7 +47,7 @@ export function MailInbox({ mails, onSelectMail }: MailInboxProps) {
 
       <div className="px-2">
         <InputGroup className="h-7 w-full rounded-md">
-          <InputGroupInput className="h-7" placeholder="Search..." />
+          <InputGroupInput className="h-7" placeholder={t('dashMail.searchPlaceholder')} />
           <InputGroupAddon>
             <Search />
           </InputGroupAddon>
@@ -57,12 +59,12 @@ export function MailInbox({ mails, onSelectMail }: MailInboxProps) {
           groups={[
             {
               id: "pinned",
-              title: "Pinned",
+              title: t('dashMail.pinned'),
               items: pinnedMails,
             },
             {
               id: "inbox",
-              title: "Inbox",
+              title: t('dashMail.inboxHeading'),
               items: unpinnedMails,
             },
           ]}

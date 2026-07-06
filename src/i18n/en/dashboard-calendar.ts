@@ -16,6 +16,9 @@ export const enDashboardCalendar = {
   'dashCalendar.addEvent': 'Add Event',
   'dashCalendar.daysCount': '{days} days - {count} events',
 
+  // date-range-picker.tsx
+  'dashCalendar.selectDate': 'Select date',
+
   // events-data.ts - demo events
   'dashCalendar.event.abDeadlineBergmann': 'Order Confirmation Deadline – Bergmann Maschinenbau',
   'dashCalendar.event.kickoff1Bergmann': 'KickOff 1 (PM) – Bergmann Maschinenbau',

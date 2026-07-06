@@ -11,170 +11,193 @@ const taskSchema = z.object({
 
 export type Task = z.infer<typeof taskSchema>;
 
-const tasksData = [
+// Seed rows reference an i18n key (titleKey) instead of a literal title — buildLocalizedTasks()
+// below resolves the key with t() so the demo/mock data is translated along with the rest of the UI.
+const tasksSeed = [
   {
     id: "CHK-88431-1",
-    title: "Sondermotor TM-75 bestellen — Lieferzeit 14 Wochen",
+    titleKey: "dashTasks.task.chk884311.title",
     status: "todo",
     label: "procurement",
     priority: "high",
   },
   {
     id: "CHK-88431-2",
-    title: "Abweichung Spannsystem-Menge (4→5) mit Kunde bestätigen",
+    titleKey: "dashTasks.task.chk884312.title",
     status: "todo",
     label: "review",
     priority: "medium",
   },
   {
     id: "CHK-88431-3",
-    title: "Ersatzartikel Reitstock RS-90 technisch freigeben",
+    titleKey: "dashTasks.task.chk884313.title",
     status: "todo",
     label: "engineering",
     priority: "high",
   },
   {
     id: "CHK-88431-4",
-    title: "Fehlende Position Steuerungsverkabelung klären",
+    titleKey: "dashTasks.task.chk884314.title",
     status: "todo",
     label: "review",
     priority: "high",
   },
   {
     id: "CHK-88431-5",
-    title: "Zahlungskonditionen-Änderung (60 Tage) intern freigeben",
+    titleKey: "dashTasks.task.chk884315.title",
     status: "todo",
     label: "finance",
     priority: "high",
   },
   {
     id: "CHK-88431-6",
-    title: "AB-Entwurf für B-88431 final gegenlesen und freigeben",
+    titleKey: "dashTasks.task.chk884316.title",
     status: "in progress",
     label: "review",
     priority: "high",
   },
   {
     id: "CHK-88431-7",
-    title: "KickOff-Brief für AL/PTL versenden",
+    titleKey: "dashTasks.task.chk884317.title",
     status: "backlog",
     label: "review",
     priority: "medium",
   },
   {
     id: "CHK-0198-1",
-    title: "Weber Präzisionstechnik: Angebot A-2026-0198 mit Bestellung abgleichen",
+    titleKey: "dashTasks.task.chk01981.title",
     status: "in progress",
     label: "review",
     priority: "medium",
   },
   {
     id: "CHK-0198-2",
-    title: "Weber Präzisionstechnik: Ersatzteil-Rückfrage an Einkauf weiterleiten",
+    titleKey: "dashTasks.task.chk01982.title",
     status: "todo",
     label: "procurement",
     priority: "medium",
   },
   {
     id: "CHK-0198-3",
-    title: "Weber Präzisionstechnik: KickOff-Termin (PTL) abstimmen",
+    titleKey: "dashTasks.task.chk01983.title",
     status: "backlog",
     label: "review",
     priority: "low",
   },
   {
     id: "CHK-2044-1",
-    title: "MK Anlagenbau: Liefertermin-Verschiebung mit Kunde klären",
+    titleKey: "dashTasks.task.chk20441.title",
     status: "todo",
     label: "review",
     priority: "medium",
   },
   {
     id: "CHK-2044-2",
-    title: "MK Anlagenbau: Ersatzteile beim Zulieferer anfragen",
+    titleKey: "dashTasks.task.chk20442.title",
     status: "in progress",
     label: "procurement",
     priority: "medium",
   },
   {
     id: "CHK-2044-3",
-    title: "MK Anlagenbau: Zahlungskonditionen intern dokumentieren",
+    titleKey: "dashTasks.task.chk20443.title",
     status: "done",
     label: "finance",
     priority: "low",
   },
   {
     id: "CHK-2044-4",
-    title: "MK Anlagenbau: Abweichungsbericht archivieren",
+    titleKey: "dashTasks.task.chk20444.title",
     status: "done",
     label: "review",
     priority: "low",
   },
 ];
 
-export const tasks = z.array(taskSchema).parse(tasksData);
+// Build the localized fallback/demo task list. Call with the t() function from useLanguage().
+export function buildLocalizedTasks(t: (key: string) => string): Task[] {
+  return z.array(taskSchema).parse(
+    tasksSeed.map(({ titleKey, ...rest }) => ({
+      ...rest,
+      title: t(titleKey),
+    })),
+  );
+}
 
-export const labels = [
+const labelsSeed = [
   {
     value: "procurement",
-    label: "Beschaffung",
+    labelKey: "dashTasks.label.procurement",
   },
   {
     value: "review",
-    label: "Prüfung",
+    labelKey: "dashTasks.label.review",
   },
   {
     value: "engineering",
-    label: "Technik",
+    labelKey: "dashTasks.label.engineering",
   },
   {
     value: "finance",
-    label: "Finanzen",
+    labelKey: "dashTasks.label.finance",
   },
 ];
 
-export const statuses = [
+const statusesSeed = [
   {
     value: "backlog",
-    label: "Backlog",
+    labelKey: "dashTasks.status.backlog",
     icon: HelpCircle,
   },
   {
     value: "todo",
-    label: "Offen",
+    labelKey: "dashTasks.status.todo",
     icon: Circle,
   },
   {
     value: "in progress",
-    label: "In Bearbeitung",
+    labelKey: "dashTasks.status.inProgress",
     icon: Timer,
   },
   {
     value: "done",
-    label: "Erledigt",
+    labelKey: "dashTasks.status.done",
     icon: CheckCircle,
   },
   {
     value: "canceled",
-    label: "Storniert",
+    labelKey: "dashTasks.status.canceled",
     icon: CircleOff,
   },
 ];
 
-export const priorities = [
+const prioritiesSeed = [
   {
-    label: "Niedrig",
+    labelKey: "dashTasks.priority.low",
     value: "low",
     icon: ArrowDown,
   },
   {
-    label: "Mittel",
+    labelKey: "dashTasks.priority.medium",
     value: "medium",
     icon: ArrowRight,
   },
   {
-    label: "Hoch",
+    labelKey: "dashTasks.priority.high",
     value: "high",
     icon: ArrowUp,
   },
 ];
+
+// Localized getters. Call with the t() function from useLanguage() to resolve display labels.
+export function getLocalizedLabels(t: (key: string) => string) {
+  return labelsSeed.map(({ labelKey, ...rest }) => ({ ...rest, label: t(labelKey) }));
+}
+
+export function getLocalizedStatuses(t: (key: string) => string) {
+  return statusesSeed.map(({ labelKey, ...rest }) => ({ ...rest, label: t(labelKey) }));
+}
+
+export function getLocalizedPriorities(t: (key: string) => string) {
+  return prioritiesSeed.map(({ labelKey, ...rest }) => ({ ...rest, label: t(labelKey) }));
+}

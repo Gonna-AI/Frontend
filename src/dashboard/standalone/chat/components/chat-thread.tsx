@@ -43,6 +43,7 @@ import {
 import { Separator } from "@/components/dashboard-ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/dashboard-ui/tabs";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/dashboard-ui/tooltip";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { cn, getInitials } from "@/lib/utils";
 
 import { type Message as ChatMessage, type Contact, currentUser } from "./data";
@@ -70,8 +71,10 @@ export function ChatThread({
   onSendMessage,
   isPending,
 }: ChatThreadProps) {
+  const { t } = useLanguage();
+
   return (
-    <div className={cn("flex h-full flex-col py-3", className)}>
+    <div className={cn("flex h-full min-w-0 flex-col py-3", className)}>
       <div className="flex flex-col gap-3">
         <div className="flex items-center justify-between gap-4 px-2">
           <div className="flex items-center gap-3">
@@ -80,7 +83,7 @@ export function ChatThread({
                 variant="ghost"
                 size="icon-sm"
                 className="md:hidden"
-                aria-label="Back to conversations"
+                aria-label={t('dashChat.thread.backAria')}
                 onClick={onBack}
               >
                 <ArrowLeft />
@@ -99,31 +102,31 @@ export function ChatThread({
           <div className="flex items-center gap-1">
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button variant="ghost" size="icon-sm" aria-label="Call">
+                <Button variant="ghost" size="icon-sm" aria-label={t('dashChat.thread.callAria')}>
                   <PhoneCall />
                 </Button>
               </TooltipTrigger>
-              <TooltipContent>Call</TooltipContent>
+              <TooltipContent>{t('dashChat.thread.callTooltip')}</TooltipContent>
             </Tooltip>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button variant="ghost" size="icon-sm" aria-label="Tag">
+                <Button variant="ghost" size="icon-sm" aria-label={t('dashChat.thread.tagAria')}>
                   <Tag />
                 </Button>
               </TooltipTrigger>
-              <TooltipContent>Tag</TooltipContent>
+              <TooltipContent>{t('dashChat.thread.tagTooltip')}</TooltipContent>
             </Tooltip>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button variant="ghost" size="icon-sm" aria-label="Snooze">
+                <Button variant="ghost" size="icon-sm" aria-label={t('dashChat.thread.snoozeAria')}>
                   <AlarmClock />
                 </Button>
               </TooltipTrigger>
-              <TooltipContent>Snooze</TooltipContent>
+              <TooltipContent>{t('dashChat.thread.snoozeTooltip')}</TooltipContent>
             </Tooltip>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon-sm" aria-label="More actions">
+                <Button variant="ghost" size="icon-sm" aria-label={t('dashChat.thread.moreActionsAria')}>
                   <MoreHorizontal />
                 </Button>
               </DropdownMenuTrigger>
@@ -131,20 +134,20 @@ export function ChatThread({
                 <DropdownMenuGroup>
                   <DropdownMenuItem onSelect={onOpenContact}>
                     <UserRound />
-                    View profile
+                    {t('dashChat.thread.viewProfile')}
                   </DropdownMenuItem>
                   <DropdownMenuItem>
                     <Copy />
-                    Copy email
+                    {t('dashChat.thread.copyEmail')}
                   </DropdownMenuItem>
                   <DropdownMenuItem>
                     <Flag />
-                    Mark priority
+                    {t('dashChat.thread.markPriority')}
                   </DropdownMenuItem>
                 </DropdownMenuGroup>
                 <DropdownMenuSeparator />
                 <DropdownMenuGroup>
-                  <DropdownMenuItem variant="destructive">Block contact</DropdownMenuItem>
+                  <DropdownMenuItem variant="destructive">{t('dashChat.thread.blockContact')}</DropdownMenuItem>
                 </DropdownMenuGroup>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -157,9 +160,9 @@ export function ChatThread({
       <MessageScrollerProvider autoScroll>
         <MessageScroller className="min-h-0 flex-1">
           <MessageScrollerViewport>
-            <MessageScrollerContent className="gap-6 px-2 py-8">
+            <MessageScrollerContent className="gap-5 px-2 py-6">
               <Marker variant="separator">
-                <MarkerContent>May 6, 2026</MarkerContent>
+                <MarkerContent>{t('dashChat.thread.dateMarker')}</MarkerContent>
               </Marker>
 
               {messages.map((message) => {
@@ -187,12 +190,21 @@ export function ChatThread({
                         </Avatar>
                       </MessageAvatar>
 
-                      <MessageContent>
+                      <MessageContent className="max-w-full">
                         <BubbleGroup>
-                          <Bubble variant={isOutbound ? "default" : "muted"} align={message.align}>
-                            <BubbleContent>{message.text}</BubbleContent>
+                          <Bubble
+                            variant={isOutbound ? "default" : "muted"}
+                            align={message.align}
+                            className="max-w-[min(80%,42rem)]"
+                          >
+                            <BubbleContent className="min-w-12 whitespace-pre-wrap break-words [overflow-wrap:break-word]">
+                              {message.text}
+                            </BubbleContent>
                             {message.reaction ? (
-                              <BubbleReactions aria-label={`Reaction: ${message.reaction}`} align={reactionAlign}>
+                              <BubbleReactions
+                                aria-label={t('dashChat.thread.reactionAria').replace('{reaction}', message.reaction)}
+                                align={reactionAlign}
+                              >
                                 <span>{message.reaction}</span>
                               </BubbleReactions>
                             ) : null}
@@ -215,10 +227,10 @@ export function ChatThread({
                         </AvatarFallback>
                       </Avatar>
                     </MessageAvatar>
-                    <MessageContent>
+                    <MessageContent className="max-w-full">
                       <BubbleGroup>
-                        <Bubble variant="muted" align="start">
-                          <BubbleContent>
+                        <Bubble variant="muted" align="start" className="max-w-[min(80%,42rem)]">
+                          <BubbleContent className="min-w-12">
                             <span className="inline-flex items-center gap-1 text-muted-foreground">
                               <span className="size-1.5 animate-bounce rounded-full bg-current [animation-delay:-0.3s]" />
                               <span className="size-1.5 animate-bounce rounded-full bg-current [animation-delay:-0.15s]" />
@@ -238,24 +250,27 @@ export function ChatThread({
       </MessageScrollerProvider>
 
       <div className="px-2">
-        <Tabs defaultValue="reply" className="gap-0 rounded-md border">
+        <Tabs defaultValue="reply" className="gap-2 rounded-xl border bg-background p-2 shadow-xs">
           <TabsList
-            variant="line"
-            className="w-full justify-start gap-2 border-b px-3 **:data-[slot=tabs-trigger]:border-x-0 **:data-[slot=tabs-trigger]:px-6 group-data-horizontal/tabs:h-10"
+            className="h-8 w-fit justify-start"
           >
-            <TabsTrigger value="reply" className="flex-none px-1">
-              Reply
+            <TabsTrigger value="reply" className="h-7 flex-none px-3 text-xs">
+              {t('dashChat.thread.tabReply')}
             </TabsTrigger>
-            <TabsTrigger value="note" className="flex-none px-1">
-              Internal note
+            <TabsTrigger value="note" className="h-7 flex-none px-3 text-xs">
+              {t('dashChat.thread.tabInternalNote')}
             </TabsTrigger>
           </TabsList>
 
           <TabsContent value="reply" className="m-0">
-            <MessageComposer placeholder="Type your message..." onSubmit={onSendMessage} disabled={isPending} />
+            <MessageComposer
+              placeholder={t('dashChat.thread.composerPlaceholder')}
+              onSubmit={onSendMessage}
+              disabled={isPending}
+            />
           </TabsContent>
           <TabsContent value="note" className="m-0">
-            <MessageComposer placeholder="Write an internal note..." />
+            <MessageComposer placeholder={t('dashChat.thread.notePlaceholder')} />
           </TabsContent>
         </Tabs>
       </div>
@@ -272,6 +287,7 @@ function MessageComposer({
   onSubmit?: (text: string) => Promise<void> | void;
   disabled?: boolean;
 }) {
+  const { t } = useLanguage();
   const [value, setValue] = useState("");
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
@@ -287,7 +303,7 @@ function MessageComposer({
 
   return (
     <form className="w-full" onSubmit={handleSubmit}>
-      <InputGroup className="border-0 bg-transparent shadow-none has-[[data-slot=input-group-control]:focus-visible]:border-0 has-[[data-slot][aria-invalid=true]]:border-0 has-[[data-slot=input-group-control]:focus-visible]:ring-0 has-[[data-slot][aria-invalid=true]]:ring-0 dark:bg-transparent dark:has-[[data-slot][aria-invalid=true]]:ring-0">
+      <InputGroup className="rounded-lg border bg-background shadow-none has-[[data-slot=input-group-control]:focus-visible]:ring-0 has-[[data-slot][aria-invalid=true]]:ring-0 dark:bg-input/20 dark:has-[[data-slot][aria-invalid=true]]:ring-0">
         <InputGroupTextarea
           placeholder={placeholder}
           value={value}
@@ -299,27 +315,27 @@ function MessageComposer({
               event.currentTarget.form?.requestSubmit();
             }
           }}
-          className="min-h-14 px-3 py-2.5 text-sm ring-0 focus-visible:ring-0 aria-invalid:ring-0 dark:aria-invalid:ring-0"
+          className="min-h-16 px-3 py-2.5 text-sm ring-0 focus-visible:ring-0 aria-invalid:ring-0 dark:aria-invalid:ring-0"
         />
-        <InputGroupAddon align="block-end">
-          <InputGroupButton aria-label="Format" type="button" size="icon-sm">
+        <InputGroupAddon align="block-end" className="flex-wrap justify-end border-t px-2 py-2">
+          <InputGroupButton aria-label={t('dashChat.thread.formatAria')} type="button" size="icon-sm">
             <Type />
           </InputGroupButton>
-          <InputGroupButton aria-label="Emoji" type="button" size="icon-sm">
+          <InputGroupButton aria-label={t('dashChat.thread.emojiAria')} type="button" size="icon-sm">
             <Smile />
           </InputGroupButton>
-          <InputGroupButton aria-label="Attach file" type="button" size="icon-sm">
+          <InputGroupButton aria-label={t('dashChat.thread.attachFileAria')} type="button" size="icon-sm">
             <Paperclip />
           </InputGroupButton>
-          <InputGroupButton aria-label="Insert link" type="button" size="icon-sm">
+          <InputGroupButton aria-label={t('dashChat.thread.insertLinkAria')} type="button" size="icon-sm">
             <Link />
           </InputGroupButton>
-          <InputGroupButton aria-label="AI assist" type="button" size="icon-sm" variant="outline">
+          <InputGroupButton aria-label={t('dashChat.thread.aiAssistAria')} type="button" size="icon-sm" variant="outline">
             <Sparkles />
           </InputGroupButton>
           <InputGroupButton type="submit" variant="default" size="icon-sm" className="ml-auto" disabled={disabled}>
             <Send />
-            <span className="sr-only">Send</span>
+            <span className="sr-only">{t('dashChat.thread.sendSr')}</span>
           </InputGroupButton>
         </InputGroupAddon>
       </InputGroup>

@@ -4,6 +4,7 @@ import { ArrowUp, Info } from "lucide-react-dash";
 
 import { Badge } from "@/components/dashboard-ui/badge";
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/dashboard-ui/card";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { fetchAllChatMessages, fetchAllProjects, fetchHistoricalProjects, subscribeToTable } from "@/dashboard/lib/pipelineClient";
 
 interface LiveStats {
@@ -14,6 +15,7 @@ interface LiveStats {
 }
 
 export function KpiCards() {
+  const { t } = useLanguage();
   const [live, setLive] = useState<LiveStats | null>(null);
 
   useEffect(() => {
@@ -53,7 +55,7 @@ export function KpiCards() {
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
         <Card>
           <CardHeader>
-            <CardTitle className="text-sm">Projects Indexed</CardTitle>
+            <CardTitle className="text-sm">{t('dashAcademy.kpi.projectsIndexed.title')}</CardTitle>
             <CardAction>
               <Info className="size-3 text-muted-foreground" />
             </CardAction>
@@ -66,48 +68,48 @@ export function KpiCards() {
               </span>
               {live && live.indexedCount === 0 && (
                 <Badge className="rounded-sm border-amber-600/50 bg-amber-500/10 px-1 font-normal text-amber-700 text-xs dark:border-amber-800/50 dark:bg-amber-500/15 dark:text-amber-300">
-                  Pending
+                  {t('dashAcademy.kpi.projectsIndexed.pending')}
                 </Badge>
               )}
               {!live && (
                 <Badge className="rounded-sm border-green-600/50 bg-green-500/10 px-1 font-normal text-green-700 text-xs dark:border-green-800/50 dark:bg-green-500/15 dark:text-green-300">
                   <ArrowUp />
-                  2.8%
+                  {t('dashAcademy.kpi.projectsIndexed.changeFallback')}
                 </Badge>
               )}
             </div>
             <div className="text-right text-muted-foreground text-xs">
               {live && live.indexedCount === 0
-                ? "embeddings pending — VPS worker not yet deployed"
-                : "across 3 monitored companies"}
+                ? t('dashAcademy.kpi.projectsIndexed.captionPending')
+                : t('dashAcademy.kpi.projectsIndexed.captionFallback')}
             </div>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-sm">Avg. Retrieval Hit Rate</CardTitle>
+            <CardTitle className="text-sm">{t('dashAcademy.kpi.retrievalHitRate.title')}</CardTitle>
             <CardAction>
               <Info className="size-3 text-muted-foreground" />
             </CardAction>
           </CardHeader>
           <CardContent className="flex flex-col">
             <div className="flex items-center gap-2">
-              <span className="text-3xl text-foreground leading-none tracking-tight">94.2%</span>
+              <span className="text-3xl text-foreground leading-none tracking-tight">{t('dashAcademy.kpi.retrievalHitRate.value')}</span>
               <Badge className="rounded-sm border-green-600/50 bg-green-500/10 px-1 font-normal text-green-700 text-xs dark:border-green-800/50 dark:bg-green-500/15 dark:text-green-300">
                 <ArrowUp />
-                1.1%
+                {t('dashAcademy.kpi.retrievalHitRate.change')}
               </Badge>
             </div>
             <div className="text-right text-muted-foreground text-xs">
-              seeded estimate — pg_trgm retrieval is live, this % isn&apos;t tracked yet
+              {t('dashAcademy.kpi.retrievalHitRate.caption')}
             </div>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-sm">Copilot Queries</CardTitle>
+            <CardTitle className="text-sm">{t('dashAcademy.kpi.copilotQueries.title')}</CardTitle>
             <CardAction>
               <Info className="size-3 text-muted-foreground" />
             </CardAction>
@@ -115,13 +117,13 @@ export function KpiCards() {
           <CardContent className="flex flex-col">
             <div className="text-3xl text-foreground leading-none tracking-tight">{live ? live.copilotQueries : 81}</div>
 
-            <div className="text-right text-muted-foreground text-xs">{live ? "live count, all threads" : "63 answered · 18 escalated"}</div>
+            <div className="text-right text-muted-foreground text-xs">{live ? t('dashAcademy.kpi.copilotQueries.captionLive') : t('dashAcademy.kpi.copilotQueries.captionFallback')}</div>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-sm">Active Projects</CardTitle>
+            <CardTitle className="text-sm">{t('dashAcademy.kpi.activeProjects.title')}</CardTitle>
             <CardAction>
               <Info className="size-3 text-muted-foreground" />
             </CardAction>
@@ -129,7 +131,7 @@ export function KpiCards() {
           <CardContent className="flex flex-col">
             <div className="text-3xl text-foreground leading-none tracking-tight">{live ? live.activeProjectsToday : 5}</div>
 
-            <div className="text-right text-muted-foreground text-xs">{live ? "status = active" : "1 processing · 3 in review · 1 flagged"}</div>
+            <div className="text-right text-muted-foreground text-xs">{live ? t('dashAcademy.kpi.activeProjects.captionLive') : t('dashAcademy.kpi.activeProjects.captionFallback')}</div>
           </CardContent>
         </Card>
       </div>

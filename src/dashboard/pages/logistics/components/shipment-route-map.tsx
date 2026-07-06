@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { type GeoPermissibleObjects, geoMercator, geoPath } from "d3-geo";
 import { feature, mesh } from "topojson-client";
 
+import { useLanguage } from "@/contexts/LanguageContext";
+
 import type { GeoCoordinate, Shipment } from "./shipment-data";
 
 type WorldTopology = {
@@ -77,7 +79,7 @@ type ShipmentRouteMapProps = {
   shipment: Shipment | null;
 };
 
-function buildMapGeometry(shipment: Shipment | null) {
+function buildMapGeometry(shipment: Shipment | null, t: (key: string) => string) {
   const routeLine = shipment ? createRouteLine(shipment) : null;
   const projection = geoMercator();
 
@@ -115,12 +117,12 @@ function buildMapGeometry(shipment: Shipment | null) {
           projectPoint({
             coordinates: shipment.origin.coordinates,
             country: shipment.origin.country,
-            label: "Origin",
+            label: t("dashLogistics.map.origin"),
           }),
           projectPoint({
             coordinates: shipment.destination.coordinates,
             country: shipment.destination.country,
-            label: "Destination",
+            label: t("dashLogistics.map.destination"),
           }),
         ]
       : [],
@@ -128,6 +130,7 @@ function buildMapGeometry(shipment: Shipment | null) {
 }
 
 export function ShipmentRouteMap({ shipment }: ShipmentRouteMapProps) {
+  const { t } = useLanguage();
   const [borders, setBorders] = useState<GeoJSON.MultiLineString | null>(null);
   const [land, setLand] = useState<GeoJSON.FeatureCollection | null>(null);
 
@@ -169,12 +172,12 @@ export function ShipmentRouteMap({ shipment }: ShipmentRouteMapProps) {
     };
   }, []);
 
-  const { path, routePath, routePoints } = buildMapGeometry(shipment);
+  const { path, routePath, routePoints } = buildMapGeometry(shipment, t);
 
   return (
     <div className="size-full min-h-0 overflow-hidden bg-[#d4dadc] dark:bg-[#2C353C]">
       <svg
-        aria-label="Germany delivery region map"
+        aria-label={t("dashLogistics.map.regionAria")}
         className="block size-full bg-[#d4dadc] dark:bg-[#2C353C]"
         role="img"
         viewBox={`0 0 ${WIDTH} ${HEIGHT}`}

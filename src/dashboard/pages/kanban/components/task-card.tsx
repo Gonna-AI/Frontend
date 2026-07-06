@@ -197,7 +197,11 @@ export function TaskCard({
               const Icon = taskInsightIcons[insight.label];
 
               return (
-                <span key={insight.label} className="flex items-center gap-1.5 text-sm">
+                <span
+                  key={insight.label}
+                  className="flex items-center gap-1.5 text-sm"
+                  title={t(insightI18nKey[insight.label])}
+                >
                   <Icon className="size-3.5" />
                   {insight.count}
                 </span>

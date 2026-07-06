@@ -25,6 +25,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/dashboard-ui/sidebar";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { getInitials } from "@/lib/utils";
 
 import { channelItems, currentUser, navItems, viewItems } from "./data";
@@ -35,7 +36,33 @@ const channelBrandIcons = {
   facebook: siFacebook,
 } as const;
 
+const navTitleKeys: Record<string, string> = {
+  inbox: "dashChat.sidebar.nav.inbox",
+  mentions: "dashChat.sidebar.nav.mentions",
+  snoozed: "dashChat.sidebar.nav.snoozed",
+  sent: "dashChat.sidebar.nav.sent",
+  all: "dashChat.sidebar.nav.allConversations",
+  unassigned: "dashChat.sidebar.nav.unassigned",
+};
+
+const channelTitleKeys: Record<string, string> = {
+  email: "dashChat.sidebar.channel.email",
+  chat: "dashChat.sidebar.channel.chat",
+  whatsapp: "dashChat.sidebar.channel.whatsapp",
+  instagram: "dashChat.sidebar.channel.instagram",
+  facebook: "dashChat.sidebar.channel.facebook",
+  phone: "dashChat.sidebar.channel.phone",
+};
+
+const viewTitleKeys: Record<string, string> = {
+  vip: "dashChat.sidebar.view.flagshipProjects",
+  orders: "dashChat.sidebar.view.kostencheckReviews",
+  feedback: "dashChat.sidebar.view.projectMemoryQueries",
+};
+
 export function ChatSidebar() {
+  const { t } = useLanguage();
+
   return (
     <Sidebar
       collapsible="offcanvas"
@@ -44,49 +71,58 @@ export function ChatSidebar() {
       <SidebarContent>
         <SidebarGroup>
           <SidebarMenu className="gap-1">
-            {navItems.map((item) => (
-              <SidebarMenuItem key={item.id}>
-                <SidebarMenuButton className="[&_svg]:size-3.5" size="sm" isActive={item.isActive} tooltip={item.title}>
-                  <item.icon />
-                  <span className="font-medium">{item.title}</span>
-                </SidebarMenuButton>
-                {item.label && <SidebarMenuBadge className="font-medium">{item.label}</SidebarMenuBadge>}
-              </SidebarMenuItem>
-            ))}
-          </SidebarMenu>
-        </SidebarGroup>
-
-        <SidebarGroup>
-          <SidebarGroupLabel className="font-normal">Channels</SidebarGroupLabel>
-          <SidebarMenu className="gap-1">
-            {channelItems.map((item) => (
-              <SidebarMenuItem key={item.id}>
-                <SidebarMenuButton className="[&_svg]:size-3.5" size="sm" isActive={item.isActive} tooltip={item.title}>
-                  {item.id in channelBrandIcons ? (
-                    <SimpleIcon icon={channelBrandIcons[item.id as keyof typeof channelBrandIcons]} />
-                  ) : (
+            {navItems.map((item) => {
+              const title = t(navTitleKeys[item.id] ?? item.title);
+              return (
+                <SidebarMenuItem key={item.id}>
+                  <SidebarMenuButton className="[&_svg]:size-3.5" size="sm" isActive={item.isActive} tooltip={title}>
                     <item.icon />
-                  )}
-                  <span className="font-medium">{item.title}</span>
-                </SidebarMenuButton>
-                {item.label && <SidebarMenuBadge className="font-medium">{item.label}</SidebarMenuBadge>}
-              </SidebarMenuItem>
-            ))}
+                    <span className="font-medium">{title}</span>
+                  </SidebarMenuButton>
+                  {item.label && <SidebarMenuBadge className="font-medium">{item.label}</SidebarMenuBadge>}
+                </SidebarMenuItem>
+              );
+            })}
           </SidebarMenu>
         </SidebarGroup>
 
         <SidebarGroup>
-          <SidebarGroupLabel className="font-normal">Views</SidebarGroupLabel>
+          <SidebarGroupLabel className="font-normal">{t('dashChat.sidebar.channelsGroup')}</SidebarGroupLabel>
           <SidebarMenu className="gap-1">
-            {viewItems.map((item) => (
-              <SidebarMenuItem key={item.id}>
-                <SidebarMenuButton className="[&_svg]:size-3.5" size="sm" isActive={item.isActive} tooltip={item.title}>
-                  <item.icon />
-                  <span className="font-medium">{item.title}</span>
-                </SidebarMenuButton>
-                {item.label && <SidebarMenuBadge className="font-medium">{item.label}</SidebarMenuBadge>}
-              </SidebarMenuItem>
-            ))}
+            {channelItems.map((item) => {
+              const title = t(channelTitleKeys[item.id] ?? item.title);
+              return (
+                <SidebarMenuItem key={item.id}>
+                  <SidebarMenuButton className="[&_svg]:size-3.5" size="sm" isActive={item.isActive} tooltip={title}>
+                    {item.id in channelBrandIcons ? (
+                      <SimpleIcon icon={channelBrandIcons[item.id as keyof typeof channelBrandIcons]} />
+                    ) : (
+                      <item.icon />
+                    )}
+                    <span className="font-medium">{title}</span>
+                  </SidebarMenuButton>
+                  {item.label && <SidebarMenuBadge className="font-medium">{item.label}</SidebarMenuBadge>}
+                </SidebarMenuItem>
+              );
+            })}
+          </SidebarMenu>
+        </SidebarGroup>
+
+        <SidebarGroup>
+          <SidebarGroupLabel className="font-normal">{t('dashChat.sidebar.viewsGroup')}</SidebarGroupLabel>
+          <SidebarMenu className="gap-1">
+            {viewItems.map((item) => {
+              const title = t(viewTitleKeys[item.id] ?? item.title);
+              return (
+                <SidebarMenuItem key={item.id}>
+                  <SidebarMenuButton className="[&_svg]:size-3.5" size="sm" isActive={item.isActive} tooltip={title}>
+                    <item.icon />
+                    <span className="font-medium">{title}</span>
+                  </SidebarMenuButton>
+                  {item.label && <SidebarMenuBadge className="font-medium">{item.label}</SidebarMenuBadge>}
+                </SidebarMenuItem>
+              );
+            })}
           </SidebarMenu>
         </SidebarGroup>
       </SidebarContent>
@@ -127,17 +163,17 @@ export function ChatSidebar() {
                 <DropdownMenuGroup>
                   <DropdownMenuItem>
                     <UserRound />
-                    Account
+                    {t('dashChat.sidebar.account')}
                   </DropdownMenuItem>
                   <DropdownMenuItem>
                     <Settings />
-                    Settings
+                    {t('dashChat.sidebar.settings')}
                   </DropdownMenuItem>
                 </DropdownMenuGroup>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem>
                   <LogOut />
-                  Log out
+                  {t('dashChat.sidebar.logOut')}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

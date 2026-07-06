@@ -1,3 +1,4 @@
+import { useLanguage } from "@/contexts/LanguageContext";
 import { formatCurrency } from "@/lib/utils";
 
 import {
@@ -14,9 +15,13 @@ import {
 } from "./data";
 
 export function InvoicePaper({ invoice }: { invoice: InvoiceFormValues }) {
+  const { t } = useLanguage();
   const taxOption = getInvoiceTaxOption(invoice);
   const discountValue = Number.isFinite(invoice.discountValue) ? invoice.discountValue : 0;
-  const discountLabel = invoice.discountType === "percent" ? `Rabatt ${discountValue}%` : "Rabatt";
+  const discountLabel =
+    invoice.discountType === "percent"
+      ? t('dashInvoice.paper.discountWithPercent').replace('{percent}', String(discountValue))
+      : t('dashInvoice.paper.discount');
 
   return (
     <article
@@ -32,45 +37,45 @@ export function InvoicePaper({ invoice }: { invoice: InvoiceFormValues }) {
             <rect y="28" width="20" height="20" rx="3" fill="currentColor" />
             <rect x="28" y="28" width="20" height="20" rx="3" fill="currentColor" />
           </svg>
-          <h2 className="text-4xl uppercase tracking-widest">Auftragsbestätigung</h2>
+          <h2 className="text-4xl uppercase tracking-widest">{t('dashInvoice.paper.title')}</h2>
         </div>
 
         <section className="grid grid-cols-2 gap-14 text-sm leading-relaxed">
           <div>
-            <p>Referenz: {invoice.referenceNumber}</p>
-            <p>Ausgestellt: {invoice.issuedDate}</p>
-            <p>Zahlungsziel: {invoice.paymentDueDate}</p>
+            <p>{t('dashInvoice.paper.reference')}: {invoice.referenceNumber}</p>
+            <p>{t('dashInvoice.paper.issued')}: {invoice.issuedDate}</p>
+            <p>{t('dashInvoice.paper.paymentDue')}: {invoice.paymentDueDate}</p>
           </div>
           <div>
-            <p>Zahlungskonto</p>
+            <p>{t('dashInvoice.paper.paymentAccount')}</p>
             <p>{invoice.from.paymentAccountName}</p>
-            <p>IBAN {invoice.from.routingNumber}</p>
+            <p>{t('dashInvoice.paper.iban')} {invoice.from.routingNumber}</p>
           </div>
         </section>
 
         <section className="grid grid-cols-2 gap-14 text-sm leading-relaxed">
           <div>
-            <p className="mb-4 font-semibold uppercase">Von</p>
+            <p className="mb-4 font-semibold uppercase">{t('dashInvoice.paper.from')}</p>
             <p>{invoice.from.name}</p>
             {invoice.from.addressLines.map((line) => (
               <p key={line}>{line}</p>
             ))}
-            <p>USt-IdNr.: {invoice.from.taxId}</p>
+            <p>{t('dashInvoice.paper.vatId')}: {invoice.from.taxId}</p>
           </div>
           <div>
-            <p className="mb-4 font-semibold uppercase">Auftraggeber</p>
+            <p className="mb-4 font-semibold uppercase">{t('dashInvoice.paper.billTo')}</p>
             <p>{invoice.to.name}</p>
             {invoice.to.addressLines.map((line) => (
               <p key={line}>{line}</p>
             ))}
-            <p>USt-IdNr.: {invoice.to.taxId}</p>
+            <p>{t('dashInvoice.paper.vatId')}: {invoice.to.taxId}</p>
           </div>
         </section>
       </header>
 
       {invoice.introText ? (
         <section className="-mt-20 text-sm leading-relaxed">
-          <p className="mb-2 font-semibold uppercase">Zusammenfassung</p>
+          <p className="mb-2 font-semibold uppercase">{t('dashInvoice.paper.summary')}</p>
           <p className="line-clamp-4 whitespace-pre-wrap">{invoice.introText}</p>
         </section>
       ) : null}
@@ -78,10 +83,10 @@ export function InvoicePaper({ invoice }: { invoice: InvoiceFormValues }) {
       <div className="flex flex-col gap-5">
         <section className="text-sm">
           <div className="grid grid-cols-[1fr_74px_116px_116px] bg-stone-200 px-3 py-3 font-semibold uppercase">
-            <span>Beschreibung</span>
-            <span className="text-right">Menge</span>
-            <span className="text-right">Einzelpreis</span>
-            <span className="text-right">Gesamt</span>
+            <span>{t('dashInvoice.paper.description')}</span>
+            <span className="text-right">{t('dashInvoice.paper.quantity')}</span>
+            <span className="text-right">{t('dashInvoice.paper.unitPrice')}</span>
+            <span className="text-right">{t('dashInvoice.paper.total')}</span>
           </div>
           {getInvoiceItems(invoice).map((item) => (
             <div
@@ -100,7 +105,7 @@ export function InvoicePaper({ invoice }: { invoice: InvoiceFormValues }) {
           <section className="col-start-2 space-y-2">
             <div>
               <div className="flex justify-between gap-8">
-                <span>Nettobetrag</span>
+                <span>{t('dashInvoice.paper.netAmount')}</span>
                 <span>{formatInvoiceCurrency(getInvoiceSubtotal(invoice))}</span>
               </div>
               <div className="flex justify-between gap-8">
@@ -116,7 +121,7 @@ export function InvoicePaper({ invoice }: { invoice: InvoiceFormValues }) {
             </div>
             <div className="border-current border-y-2 py-3">
               <div className="flex justify-between gap-8">
-                <span className="font-semibold uppercase">Gesamtbetrag</span>
+                <span className="font-semibold uppercase">{t('dashInvoice.paper.grandTotal')}</span>
                 <span className="font-semibold">{formatInvoiceCurrency(getInvoiceTotal(invoice))}</span>
               </div>
             </div>
@@ -131,8 +136,8 @@ export function InvoicePaper({ invoice }: { invoice: InvoiceFormValues }) {
           <p>{invoice.from.website}</p>
         </div>
         <div>
-          <p>Vorbehaltlich Klärung der markierten Abweichungen.</p>
-          <p>Ausgestellt von {invoice.from.issuerName}</p>
+          <p>{t('dashInvoice.paper.footerNote')}</p>
+          <p>{t('dashInvoice.paper.issuedBy').replace('{name}', invoice.from.issuerName)}</p>
         </div>
       </footer>
     </article>

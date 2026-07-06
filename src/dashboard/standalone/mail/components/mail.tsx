@@ -4,6 +4,7 @@ import * as React from "react";
 import { Drawer, DrawerContent, DrawerDescription, DrawerTitle } from "@/components/dashboard-ui/drawer";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/dashboard-ui/resizable";
 import { useSidebar } from "@/components/dashboard-ui/sidebar";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { setClientCookie } from "@/lib/cookie.client";
 
 import type { Mail } from "./data";
@@ -26,6 +27,7 @@ export function MailComponent({ mails, defaultLayout = [...DEFAULT_MAIL_LAYOUT] 
   const { isMobile } = useSidebar();
   const [isMounted, setIsMounted] = React.useState(false);
   const [mail, setMail] = useMail();
+  const { t } = useLanguage();
 
   React.useEffect(() => {
     setIsMounted(true);
@@ -42,7 +44,9 @@ export function MailComponent({ mails, defaultLayout = [...DEFAULT_MAIL_LAYOUT] 
 
   if (!isMounted) {
     return (
-      <div className="flex size-full items-center justify-center text-muted-foreground text-sm">Loading mail...</div>
+      <div className="flex size-full items-center justify-center text-muted-foreground text-sm">
+        {t('dashMail.loadingMail')}
+      </div>
     );
   }
 
@@ -57,6 +61,7 @@ function MailMobileLayout({ mails }: Pick<MailProps, "mails">) {
   const [mail] = useMail();
   const [isMailOpen, setIsMailOpen] = React.useState(false);
   const selectedMail = mails.find((item) => item.id === mail.selected) || null;
+  const { t } = useLanguage();
 
   return (
     <>
@@ -64,8 +69,8 @@ function MailMobileLayout({ mails }: Pick<MailProps, "mails">) {
 
       <Drawer open={isMailOpen} onOpenChange={setIsMailOpen}>
         <DrawerContent>
-          <DrawerTitle className="sr-only">Mail message</DrawerTitle>
-          <DrawerDescription className="sr-only">Read the selected email message</DrawerDescription>
+          <DrawerTitle className="sr-only">{t('dashMail.mailMessage')}</DrawerTitle>
+          <DrawerDescription className="sr-only">{t('dashMail.readSelectedMessage')}</DrawerDescription>
           <MailView mail={selectedMail} onClose={() => setIsMailOpen(false)} />
         </DrawerContent>
       </Drawer>

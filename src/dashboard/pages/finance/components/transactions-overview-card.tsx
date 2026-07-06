@@ -4,6 +4,7 @@ import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts";
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/dashboard-ui/card";
 import { type ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/dashboard-ui/chart";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/dashboard-ui/select";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { formatCurrency } from "@/lib/utils";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -59,22 +60,24 @@ const formatWeekday = (value: number) => weekdayFormatter.format(new Date(value)
 const chartDomain = [weekStart, weekStart + 7 * DAY_MS];
 const formatTooltipCurrency = (value: number | string) => formatCurrency(Number(value), { noDecimals: true });
 
-const chartConfig = {
-  cumulativeImpact: {
-    color: "var(--chart-4)",
-    label: "Cumulative € Impact Caught",
-  },
-  monthlyImpact: {
-    color: "var(--chart-2)",
-    label: "New This Month",
-  },
-} satisfies ChartConfig;
-
 export function TransactionsOverviewCard() {
+  const { t } = useLanguage();
+
+  const chartConfig = {
+    cumulativeImpact: {
+      color: "var(--chart-4)",
+      label: t('dashFinance.transactionsOverview.cumulativeImpact'),
+    },
+    monthlyImpact: {
+      color: "var(--chart-2)",
+      label: t('dashFinance.transactionsOverview.newThisMonth'),
+    },
+  } satisfies ChartConfig;
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="font-normal">€ Impact of Deviations Caught</CardTitle>
+        <CardTitle className="font-normal">{t('dashFinance.transactionsOverview.title')}</CardTitle>
         <CardAction>
           <Select defaultValue="weekly">
             <SelectTrigger className="w-28" size="sm">
@@ -82,9 +85,9 @@ export function TransactionsOverviewCard() {
             </SelectTrigger>
             <SelectContent>
               <SelectGroup>
-                <SelectItem value="weekly">Weekly</SelectItem>
-                <SelectItem value="monthly">Monthly</SelectItem>
-                <SelectItem value="yearly">Yearly</SelectItem>
+                <SelectItem value="weekly">{t('dashFinance.transactionsOverview.weekly')}</SelectItem>
+                <SelectItem value="monthly">{t('dashFinance.transactionsOverview.monthly')}</SelectItem>
+                <SelectItem value="yearly">{t('dashFinance.transactionsOverview.yearly')}</SelectItem>
               </SelectGroup>
             </SelectContent>
           </Select>

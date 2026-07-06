@@ -8,6 +8,7 @@ import type { DateRange } from "react-day-picker";
 import { Button } from "@/components/dashboard-ui/button";
 import { Calendar } from "@/components/dashboard-ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/dashboard-ui/popover";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface DateRangePickerProps {
   value?: DateRange;
@@ -15,6 +16,7 @@ interface DateRangePickerProps {
 }
 
 export function DateRangePicker({ value, onChange }: DateRangePickerProps) {
+  const { t } = useLanguage();
   const [open, setOpen] = React.useState(false);
   const [internalDateRange, setInternalDateRange] = React.useState<DateRange | undefined>(() => {
     const to = new Date();
@@ -22,7 +24,7 @@ export function DateRangePicker({ value, onChange }: DateRangePickerProps) {
     return { from, to };
   });
   const dateRange = value ?? internalDateRange;
-  let dateRangeLabel = "Select date";
+  let dateRangeLabel = t('dashCalendar.selectDate');
 
   if (dateRange?.from) {
     dateRangeLabel = format(dateRange.from, "d MMM yyyy");

@@ -9,35 +9,37 @@ import { Calendar } from "@/components/dashboard-ui/calendar";
 import { Field, FieldGroup, FieldLabel } from "@/components/dashboard-ui/field";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/dashboard-ui/input-group";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/dashboard-ui/popover";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 import type { InvoiceFormValues } from "./data";
 
 const dateFields: Array<{
   id: string;
-  label: string;
+  labelKey: string;
   name: "issuedDate" | "paymentDueDate";
 }> = [
   {
     id: "issued-date",
-    label: "Issued Date",
+    labelKey: "dashInvoice.details.issuedDate",
     name: "issuedDate",
   },
   {
     id: "payment-due-date",
-    label: "Due Date",
+    labelKey: "dashInvoice.details.dueDate",
     name: "paymentDueDate",
   },
 ];
 
 export function InvoiceDetails() {
   const { control, register } = useFormContext<InvoiceFormValues>();
+  const { t } = useLanguage();
 
   return (
     <section className="flex flex-col gap-3">
       <FieldGroup>
         <Field className="gap-1">
           <FieldLabel className="text-xs" htmlFor="reference-number">
-            Reference Number
+            {t('dashInvoice.details.referenceNumber')}
           </FieldLabel>
           <InputGroup>
             <InputGroupInput id="reference-number" {...register("referenceNumber")} />
@@ -56,7 +58,7 @@ export function InvoiceDetails() {
               render={({ field }) => (
                 <Field className="gap-1">
                   <FieldLabel className="text-xs" htmlFor={dateField.id}>
-                    {dateField.label}
+                    {t(dateField.labelKey)}
                   </FieldLabel>
                   <DatePicker id={dateField.id} value={field.value} onChange={field.onChange} />
                 </Field>
@@ -72,6 +74,7 @@ export function InvoiceDetails() {
 function DatePicker({ id, value, onChange }: { id: string; value: string; onChange: (value: string) => void }) {
   const [open, setOpen] = React.useState(false);
   const date = parseDateValue(value);
+  const { t } = useLanguage();
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -82,7 +85,7 @@ function DatePicker({ id, value, onChange }: { id: string; value: string; onChan
           data-empty={!date}
           className="w-full justify-between text-left font-normal data-[empty=true]:text-muted-foreground"
         >
-          {date ? format(date, "PPP") : <span>Pick a date</span>}
+          {date ? format(date, "PPP") : <span>{t('dashInvoice.details.pickDate')}</span>}
           <CalendarIcon className="text-muted-foreground" />
         </Button>
       </PopoverTrigger>

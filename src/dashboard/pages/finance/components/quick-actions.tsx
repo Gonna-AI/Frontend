@@ -15,6 +15,7 @@ import { Button } from "@/components/dashboard-ui/button";
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/dashboard-ui/card";
 import { Field } from "@/components/dashboard-ui/field";
 import { InputGroup, InputGroupAddon, InputGroupInput, InputGroupText } from "@/components/dashboard-ui/input-group";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const contacts = [
   { id: 1, initials: "AL" },
@@ -23,23 +24,25 @@ const contacts = [
   { id: 4, initials: "ED" },
 ];
 
-const shortcuts = [
-  { id: 1, label: "Zusammenfassung", icon: FileText },
-  { id: 2, label: "KickOff-Brief", icon: Send },
-  { id: 3, label: "Abweichungsbericht", icon: FileSearch },
-  { id: 4, label: "AB-Entwurf", icon: FileCheck2 },
-  { id: 5, label: "Re-run diff", icon: RefreshCw },
-  { id: 6, label: "Review queue", icon: ClipboardList },
-  { id: 7, label: "Pending", icon: FileClock },
-  { id: 8, label: "More", icon: MoreHorizontal },
-];
-
 export function QuickActions() {
+  const { t } = useLanguage();
+
+  const shortcuts = [
+    { id: 1, label: t('dashFinance.quickActions.summary'), icon: FileText },
+    { id: 2, label: t('dashFinance.quickActions.kickoffBrief'), icon: Send },
+    { id: 3, label: t('dashFinance.quickActions.deviationReport'), icon: FileSearch },
+    { id: 4, label: t('dashFinance.quickActions.orderConfirmationDraft'), icon: FileCheck2 },
+    { id: 5, label: t('dashFinance.quickActions.rerunDiff'), icon: RefreshCw },
+    { id: 6, label: t('dashFinance.quickActions.reviewQueue'), icon: ClipboardList },
+    { id: 7, label: t('dashFinance.quickActions.pending'), icon: FileClock },
+    { id: 8, label: t('dashFinance.quickActions.more'), icon: MoreHorizontal },
+  ];
+
   return (
     <div className="flex flex-col gap-4">
       <Card>
         <CardHeader>
-          <CardTitle className="font-normal">Send to AL/PTL</CardTitle>
+          <CardTitle className="font-normal">{t('dashFinance.quickActions.sendToAlPtl')}</CardTitle>
           <CardAction>
             <div className="flex items-center gap-1">
               <div className="flex -space-x-2">
@@ -61,17 +64,17 @@ export function QuickActions() {
               </InputGroupAddon>
               <InputGroupInput placeholder="B-88431" />
               <InputGroupAddon align="inline-end">
-                <InputGroupText>Order</InputGroupText>
+                <InputGroupText>{t('dashFinance.quickActions.order')}</InputGroupText>
               </InputGroupAddon>
             </InputGroup>
-            <Button>Send</Button>
+            <Button>{t('dashFinance.quickActions.send')}</Button>
           </Field>
         </CardContent>
       </Card>
 
       <Card>
         <CardHeader>
-          <CardTitle className="font-normal">Generated Documents</CardTitle>
+          <CardTitle className="font-normal">{t('dashFinance.quickActions.generatedDocuments')}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-4 gap-4">

@@ -14,6 +14,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/dashboard-ui/chart";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const trafficIntervalMinutes = 15;
 
@@ -125,40 +126,43 @@ function getTrafficData() {
   }));
 }
 
-const trafficConfig = {
-  visitors: {
-    label: "Dokumente",
-    color: "var(--chart-3)",
-  },
-  anomalies: {
-    label: "Abweichungen",
-    color: "var(--destructive)",
-  },
-} satisfies ChartConfig;
-
 function formatTrafficTooltipLabel(value: string) {
   return format(new Date(value), "h:mm a, do MMMM yyyy");
 }
 
 export function StoreTraffic() {
+  const { t } = useLanguage();
   const [trafficData] = useState(() => getTrafficData());
   const firstTrafficTimestamp = trafficData[0].timestamp;
   const lastTrafficTimestamp = trafficData.at(-1)?.timestamp ?? "";
 
+  const trafficConfig = {
+    visitors: {
+      label: t("dashEcommerce.storeTraffic.visitors"),
+      color: "var(--chart-3)",
+    },
+    anomalies: {
+      label: t("dashEcommerce.storeTraffic.anomalies"),
+      color: "var(--destructive)",
+    },
+  } satisfies ChartConfig;
+
   function formatTrafficTick(value: string) {
     if (value === firstTrafficTimestamp) {
-      return "24h ago";
+      return t("dashEcommerce.storeTraffic.tick.dayAgo");
     }
 
-    return value === lastTrafficTimestamp ? "now" : "";
+    return value === lastTrafficTimestamp ? t("dashEcommerce.storeTraffic.tick.now") : "";
   }
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="font-normal text-muted-foreground text-sm">Dokumenten-Durchsatz</CardTitle>
+        <CardTitle className="font-normal text-muted-foreground text-sm">
+          {t("dashEcommerce.storeTraffic.title")}
+        </CardTitle>
         <CardDescription className="text-foreground text-xl tabular-nums leading-none tracking-tight">
-          12.9K Dokumente
+          {t("dashEcommerce.storeTraffic.value")}
         </CardDescription>
         <CardAction>
           <ArrowUpRight className="size-4" />

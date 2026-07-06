@@ -5,6 +5,7 @@ import { ArrowDownRight, ArrowUpRight, Ellipsis } from "lucide-react-dash";
 import { Badge } from "@/components/dashboard-ui/badge";
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/dashboard-ui/card";
 import { fetchAllDeviations, fetchDocuments, subscribeToTable } from "@/dashboard/lib/pipelineClient";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface LiveStats {
   documentsProcessed: number;
@@ -13,6 +14,7 @@ interface LiveStats {
 }
 
 export function AnalyticsKpiStrip() {
+  const { t } = useLanguage();
   const [live, setLive] = useState<LiveStats | null>(null);
 
   useEffect(() => {
@@ -56,7 +58,7 @@ export function AnalyticsKpiStrip() {
       <div className="grid divide-y *:data-[slot=card]:rounded-none *:data-[slot=card]:ring-0 md:grid-cols-2 md:divide-x md:divide-y-0 xl:grid-cols-5">
         <Card>
           <CardHeader>
-            <CardTitle className="font-normal text-sm">Pages Parsed</CardTitle>
+            <CardTitle className="font-normal text-sm">{t('dashAnalytics.kpi.pagesParsed')}</CardTitle>
             <CardAction>
               <Ellipsis className="size-4" />
             </CardAction>
@@ -72,17 +74,17 @@ export function AnalyticsKpiStrip() {
 
             <div className="flex items-center gap-2 text-muted-foreground text-xs">
               <span>
-                from <span className="text-foreground">1,206</span>
+                {t('dashAnalytics.kpi.pagesParsed.from')} <span className="text-foreground">1,206</span>
               </span>
               <span>•</span>
-              <span>last 4 weeks — no per-page tracking until the worker is deployed</span>
+              <span>{t('dashAnalytics.kpi.pagesParsed.note')}</span>
             </div>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle className="font-normal text-sm">Documents Processed</CardTitle>
+            <CardTitle className="font-normal text-sm">{t('dashAnalytics.kpi.documentsProcessed')}</CardTitle>
             <CardAction>
               <Ellipsis className="size-4" />
             </CardAction>
@@ -98,17 +100,17 @@ export function AnalyticsKpiStrip() {
 
             <div className="flex items-center gap-2 text-muted-foreground text-xs">
               <span>
-                from <span className="text-foreground">305</span>
+                {t('dashAnalytics.kpi.pagesParsed.from')} <span className="text-foreground">305</span>
               </span>
               <span>•</span>
-              <span>{live ? "live count" : "last 4 weeks"}</span>
+              <span>{live ? t('dashAnalytics.kpi.documentsProcessed.liveNote') : t('dashAnalytics.kpi.documentsProcessed.staticNote')}</span>
             </div>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle className="font-normal text-sm">Avg. Processing Time</CardTitle>
+            <CardTitle className="font-normal text-sm">{t('dashAnalytics.kpi.avgProcessingTime')}</CardTitle>
             <CardAction>
               <Ellipsis className="size-4" />
             </CardAction>
@@ -124,17 +126,17 @@ export function AnalyticsKpiStrip() {
 
             <div className="flex items-center gap-2 text-muted-foreground text-xs">
               <span>
-                from <span className="text-foreground">50s</span>
+                {t('dashAnalytics.kpi.pagesParsed.from')} <span className="text-foreground">50s</span>
               </span>
               <span>•</span>
-              <span>last 4 weeks — no timing data until the worker is deployed</span>
+              <span>{t('dashAnalytics.kpi.avgProcessingTime.note')}</span>
             </div>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle className="font-normal text-sm">Avg. Extraction Confidence</CardTitle>
+            <CardTitle className="font-normal text-sm">{t('dashAnalytics.kpi.avgExtractionConfidence')}</CardTitle>
             <CardAction>
               <Ellipsis className="size-4" />
             </CardAction>
@@ -152,17 +154,17 @@ export function AnalyticsKpiStrip() {
 
             <div className="flex items-center gap-2 text-muted-foreground text-xs">
               <span>
-                from <span className="text-foreground">90.4%</span>
+                {t('dashAnalytics.kpi.pagesParsed.from')} <span className="text-foreground">90.4%</span>
               </span>
               <span>•</span>
-              <span>{live ? "avg. across all deviations" : "last 4 weeks"}</span>
+              <span>{live ? t('dashAnalytics.kpi.avgExtractionConfidence.liveNote') : t('dashAnalytics.kpi.avgExtractionConfidence.staticNote')}</span>
             </div>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle className="font-normal text-sm">Deviation Rate</CardTitle>
+            <CardTitle className="font-normal text-sm">{t('dashAnalytics.kpi.deviationRate')}</CardTitle>
             <CardAction>
               <Ellipsis className="size-4" />
             </CardAction>
@@ -180,10 +182,10 @@ export function AnalyticsKpiStrip() {
 
             <div className="flex items-center gap-2 text-muted-foreground text-xs">
               <span>
-                from <span className="text-foreground">8.9%</span>
+                {t('dashAnalytics.kpi.pagesParsed.from')} <span className="text-foreground">8.9%</span>
               </span>
               <span>•</span>
-              <span>{live ? "deviations ÷ documents" : "last 4 weeks"}</span>
+              <span>{live ? t('dashAnalytics.kpi.deviationRate.liveNote') : t('dashAnalytics.kpi.deviationRate.staticNote')}</span>
             </div>
           </CardContent>
         </Card>

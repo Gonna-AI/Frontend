@@ -1,14 +1,17 @@
 import { useEffect, useRef, useState } from 'react';
 
 import ClerkTreeLogo from '../Brand/ClerkTreeLogo';
+import LanguageSwitcher from '../Layout/LanguageSwitcher';
+import { useLanguage } from '../../contexts/LanguageContext';
 import '../../pages/LandingFramer.css';
 
-const headerLinks = [
-  ['Solutions', '/solutions'],
-  ['About', '/about'],
-  ['Blog', '/blog'],
-  ['Docs', '/docs'],
-];
+const headerLinkPaths = [
+  ['nav.solutions', '/solutions'],
+  ['nav.about', '/about'],
+  ['nav.blog', '/blog'],
+  ['nav.docs', '/docs'],
+  ['home.nav.contact', '/contact'],
+] as const;
 
 type FooterLink = {
   label: string;
@@ -59,7 +62,9 @@ function useMunichTime(active = true) {
 }
 
 export function Header() {
+  const { t } = useLanguage();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const headerLinks = headerLinkPaths.map(([key, href]) => [t(key), href] as const);
 
   useEffect(() => {
     if (!isMenuOpen) return;
@@ -94,12 +99,17 @@ export function Header() {
           <ClerkTreeLogo markClassName="agero-logo-mark" />
         </a>
 
-        <div className="agero-nav-links">
-          {headerLinks.map(([label, href]) => (
-            <a key={label} href={href}>
-              {label}
-            </a>
-          ))}
+        <div className="agero-nav-actions">
+          <div className="agero-nav-links">
+            {headerLinks.map(([label, href]) => (
+              <a key={label} href={href}>
+                {label}
+              </a>
+            ))}
+          </div>
+          <div className="agero-nav-language">
+            <LanguageSwitcher isExpanded forceLight />
+          </div>
         </div>
 
         <button
@@ -136,7 +146,8 @@ export function Header() {
 
           <div className="agero-mobile-menu-panel" role="navigation" aria-label="Mobile navigation">
             <div className="agero-mobile-menu-top">
-              <span>Menu</span>
+              <span>{t('home.menu.title')}</span>
+              <LanguageSwitcher isExpanded forceLight />
             </div>
 
             <div className="agero-mobile-menu-links">
@@ -148,7 +159,7 @@ export function Header() {
             </div>
 
             <a className="agero-mobile-menu-cta" href="/contact" onClick={closeMenu}>
-              <span>Book Demo</span>
+              <span>{t('home.menu.cta')}</span>
               <span aria-hidden="true">→</span>
             </a>
           </div>

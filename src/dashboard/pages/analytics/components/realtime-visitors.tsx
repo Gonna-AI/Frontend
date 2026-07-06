@@ -4,6 +4,7 @@ import { Bar, BarChart, XAxis, YAxis } from "recharts";
 
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/dashboard-ui/card";
 import { type ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/dashboard-ui/chart";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface BarShapeProps {
   height?: number | string;
@@ -46,12 +47,14 @@ const realtimeData = [
   { minute: 30, visitors: 4 },
 ];
 
-const chartConfig = {
-  visitors: {
-    color: "var(--chart-3)",
-    label: "Documents",
-  },
-} satisfies ChartConfig;
+function useRealtimeChartConfig(documentsLabel: string): ChartConfig {
+  return {
+    visitors: {
+      color: "var(--chart-3)",
+      label: documentsLabel,
+    },
+  };
+}
 
 function RealtimeBarShape(props: BarShapeProps) {
   const { height, payload, width, x, y } = props;
@@ -96,10 +99,13 @@ function RealtimeBarShape(props: BarShapeProps) {
 }
 
 export function RealtimeVisitors() {
+  const { t } = useLanguage();
+  const localizedChartConfig = useRealtimeChartConfig(t('dashAnalytics.realtime.chart.documents'));
+
   return (
     <Card className="h-full">
       <CardHeader>
-        <CardTitle className="font-normal">Documents by Customer Country</CardTitle>
+        <CardTitle className="font-normal">{t('dashAnalytics.realtime.title')}</CardTitle>
         <CardAction>
           <Ellipsis className="size-4" />
         </CardAction>
@@ -109,17 +115,17 @@ export function RealtimeVisitors() {
         <div className="flex items-end justify-between">
           <div className="flex items-baseline gap-1">
             <span className="text-2xl tabular-nums leading-none tracking-tight">24</span>
-            <span className="text-muted-foreground text-sm">per minute</span>
+            <span className="text-muted-foreground text-sm">{t('dashAnalytics.realtime.perMinute')}</span>
           </div>
           <div className="flex items-center gap-2 text-muted-foreground text-sm">
             <span className="relative flex size-2">
               <span className="absolute inline-flex size-full animate-ping rounded-full bg-green-500 opacity-75" />
               <span className="relative inline-flex size-2 rounded-full bg-green-500" />
             </span>
-            <span>Live</span>
+            <span>{t('dashAnalytics.realtime.live')}</span>
           </div>
         </div>
-        <ChartContainer config={chartConfig} className="h-36 w-full">
+        <ChartContainer config={localizedChartConfig} className="h-36 w-full">
           <BarChart data={realtimeData} margin={{ bottom: 0, left: 0, right: 0, top: 0 }} barCategoryGap={3}>
             <XAxis dataKey="minute" hide />
             <YAxis hide domain={[0, 22]} />
@@ -130,22 +136,22 @@ export function RealtimeVisitors() {
         <div className="grid grid-cols-2">
           <div className="flex items-center gap-3 border-border/50 border-r border-b pt-1 pr-5 pb-4">
             <span aria-hidden="true" className="flag:DE shrink-0 rounded-xs text-lg ring-1 ring-foreground/10" />
-            <span className="min-w-0 flex-1 truncate text-sm">Germany</span>
+            <span className="min-w-0 flex-1 truncate text-sm">{t('dashAnalytics.realtime.country.germany')}</span>
             <span className="text-sm tabular-nums">248</span>
           </div>
           <div className="flex items-center gap-3 border-border/50 border-b pt-1 pb-4 pl-5">
             <span aria-hidden="true" className="flag:AT shrink-0 rounded-xs text-lg ring-1 ring-foreground/10" />
-            <span className="min-w-0 flex-1 truncate text-sm">Austria</span>
+            <span className="min-w-0 flex-1 truncate text-sm">{t('dashAnalytics.realtime.country.austria')}</span>
             <span className="text-sm tabular-nums">31</span>
           </div>
           <div className="flex items-center gap-3 border-border/50 border-r pt-4 pr-5 pb-1">
             <span aria-hidden="true" className="flag:CH shrink-0 rounded-xs text-lg ring-1 ring-foreground/10" />
-            <span className="min-w-0 flex-1 truncate text-sm">Switzerland</span>
+            <span className="min-w-0 flex-1 truncate text-sm">{t('dashAnalytics.realtime.country.switzerland')}</span>
             <span className="text-sm tabular-nums">18</span>
           </div>
           <div className="flex items-center gap-3 pt-4 pb-1 pl-5">
             <span aria-hidden="true" className="flag:CZ shrink-0 rounded-xs text-lg ring-1 ring-foreground/10" />
-            <span className="min-w-0 flex-1 truncate text-sm">Czechia</span>
+            <span className="min-w-0 flex-1 truncate text-sm">{t('dashAnalytics.realtime.country.czechia')}</span>
             <span className="text-sm tabular-nums">9</span>
           </div>
         </div>

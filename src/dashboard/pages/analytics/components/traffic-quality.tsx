@@ -4,6 +4,7 @@ import { CartesianGrid, ComposedChart, Line, XAxis, YAxis } from "recharts";
 
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/dashboard-ui/card";
 import { type ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/dashboard-ui/chart";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const qualitySeries = [
   { date: "2026-04-01T00:00:00.000Z", actualQuality: 0.4, baselineQuality: -1.2 },
@@ -92,17 +93,6 @@ const qualitySeries = [
   { date: "2026-04-28T16:00:00.000Z", actualQuality: 4.8, baselineQuality: 4.8 },
 ];
 
-const chartConfig = {
-  actualQuality: {
-    color: "var(--chart-3)",
-    label: "Processing time delta",
-  },
-  baselineQuality: {
-    color: "var(--muted-foreground)",
-    label: "Baseline",
-  },
-} satisfies ChartConfig;
-
 const chartData = qualitySeries.map((item, index) => ({
   ...item,
   dayIndex: 1 + (index * 27) / (qualitySeries.length - 1),
@@ -110,17 +100,30 @@ const chartData = qualitySeries.map((item, index) => ({
 
 const weeklyTicks = [4, 11, 18, 25];
 
-function formatWeek(value: number) {
-  const weekIndex = weeklyTicks.indexOf(value);
-
-  return weekIndex >= 0 ? `Week ${weekIndex + 1}` : "";
-}
-
 export function TrafficQuality() {
+  const { t } = useLanguage();
+
+  const chartConfig: ChartConfig = {
+    actualQuality: {
+      color: "var(--chart-3)",
+      label: t('dashAnalytics.quality.chart.processingTimeDelta'),
+    },
+    baselineQuality: {
+      color: "var(--muted-foreground)",
+      label: t('dashAnalytics.quality.chart.baseline'),
+    },
+  };
+
+  function formatWeek(value: number) {
+    const weekIndex = weeklyTicks.indexOf(value);
+
+    return weekIndex >= 0 ? t('dashAnalytics.quality.week').replace('{n}', String(weekIndex + 1)) : "";
+  }
+
   return (
     <Card className="h-full">
       <CardHeader>
-        <CardTitle className="font-normal">Processing Time Trend</CardTitle>
+        <CardTitle className="font-normal">{t('dashAnalytics.quality.title')}</CardTitle>
         <CardAction>
           <Ellipsis className="size-4" />
         </CardAction>
@@ -151,7 +154,7 @@ export function TrafficQuality() {
             />
             <ChartTooltip
               cursor={false}
-              content={<ChartTooltipContent className="w-40" labelFormatter={() => "Processing time delta"} />}
+              content={<ChartTooltipContent className="w-40" labelFormatter={() => t('dashAnalytics.quality.chart.processingTimeDelta')} />}
             />
             <Line
               dataKey="baselineQuality"

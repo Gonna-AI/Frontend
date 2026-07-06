@@ -85,12 +85,12 @@ export const en = {
 
     // About Page
     'about.seoTitle': 'About Us',
-    'about.seoDesc': "Learn about ClerkTree's mission to transform claims and back-office operations with intelligent automation, clear workflows, and human-centered AI.",
+    'about.seoDesc': "Learn about ClerkTree's mission to help industrial teams run machine operations with intelligent automation, clear workflows, and human-centered AI.",
     'about.heroPlaceholder': 'Hero photo placeholder',
     'about.heroEyebrow': 'Built for operators who need calm systems',
     'about.heroLead': 'We build operations with clarity, speed, and',
     'about.heroEmphasis': 'care.',
-    'about.heroDesc': 'ClerkTree turns document-heavy, fragmented processes into guided AI workflows that teams can trust, inspect, and improve.',
+    'about.heroDesc': 'ClerkTree helps industrial teams coordinate machines, process signals, and operational decisions through AI workflows built for reliability, uptime, and control.',
     'about.processCardTitle': 'See how we work with you',
     'about.processCardDesc': 'Discovery, workflow mapping, deployment, and measured iteration.',
     'about.introEyebrow': 'About ClerkTree',

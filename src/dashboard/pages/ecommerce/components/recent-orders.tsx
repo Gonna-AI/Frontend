@@ -28,6 +28,7 @@ import {
 } from "@/components/dashboard-ui/pagination";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/dashboard-ui/table";
 import { ToggleGroup, ToggleGroupItem } from "@/components/dashboard-ui/toggle-group";
+import { useLanguage } from "@/contexts/LanguageContext";
 import {
   fetchDocuments,
   fetchProducts,
@@ -36,7 +37,7 @@ import {
   subscribeToTable,
 } from "@/dashboard/lib/pipelineClient";
 
-import { recentOrdersColumns } from "./recent-orders-table/columns";
+import { buildRecentOrdersColumns } from "./recent-orders-table/columns";
 import recentOrdersData from "./recent-orders-table/data.json";
 import {
   formatOrderCount,
@@ -45,7 +46,43 @@ import {
 } from "./recent-orders-table/formatters";
 import { type OrderFilter, type OrderRow, orderFilters } from "./recent-orders-table/schema";
 
-const FALLBACK_ORDERS = recentOrdersData as OrderRow[];
+const RAW_FALLBACK_ORDERS = recentOrdersData as OrderRow[];
+
+// Maps each static demo order id to the i18n keys for its (customer, items) display text,
+// so the seed snapshot in data.json renders localized instead of German-only.
+const fallbackOrderTextKeys: Record<string, { customer: string; items: string }> = {
+  "#PB-2201": { customer: "dashEcommerce.orderData.pb2201.customer", items: "dashEcommerce.orderData.pb2201.items" },
+  "#PB-2198": { customer: "dashEcommerce.orderData.pb2198.customer", items: "dashEcommerce.orderData.pb2198.items" },
+  "#PB-2194": { customer: "dashEcommerce.orderData.pb2194.customer", items: "dashEcommerce.orderData.pb2194.items" },
+  "#PB-2189": { customer: "dashEcommerce.orderData.pb2189.customer", items: "dashEcommerce.orderData.pb2189.items" },
+  "#PB-2183": { customer: "dashEcommerce.orderData.pb2183.customer", items: "dashEcommerce.orderData.pb2183.items" },
+  "#PB-2177": { customer: "dashEcommerce.orderData.pb2177.customer", items: "dashEcommerce.orderData.pb2177.items" },
+  "#PB-2170": { customer: "dashEcommerce.orderData.pb2170.customer", items: "dashEcommerce.orderData.pb2170.items" },
+  "#PB-2165": { customer: "dashEcommerce.orderData.pb2165.customer", items: "dashEcommerce.orderData.pb2165.items" },
+  "#PB-2159": { customer: "dashEcommerce.orderData.pb2159.customer", items: "dashEcommerce.orderData.pb2159.items" },
+  "#PB-2152": { customer: "dashEcommerce.orderData.pb2152.customer", items: "dashEcommerce.orderData.pb2152.items" },
+};
+
+function buildFallbackOrders(t: ReturnType<typeof useLanguage>["t"]): OrderRow[] {
+  return RAW_FALLBACK_ORDERS.map((order) => {
+    const textKeys = fallbackOrderTextKeys[order.id];
+    if (!textKeys) return order;
+
+    return {
+      ...order,
+      customer: t(textKeys.customer),
+      items: t(textKeys.items),
+    };
+  });
+}
+
+const orderFilterLabelKeys: Record<OrderFilter, string> = {
+  All: "dashEcommerce.orders.filter.all",
+  "Needs action": "dashEcommerce.orders.filter.needsAction",
+  Unfulfilled: "dashEcommerce.orders.filter.unfulfilled",
+  Unpaid: "dashEcommerce.orders.filter.unpaid",
+  Returns: "dashEcommerce.orders.filter.returns",
+};
 
 function formatEur(value: number): string {
   return `€${Math.round(value).toLocaleString("de-DE")}`;
@@ -56,7 +93,11 @@ function formatEur(value: number): string {
  * product becomes a procurement need (mirroring the TM-75 style long-lead alert), each paired
  * with the most recent `bestellung` document as a stand-in customer/date context when available.
  */
-function buildFromLiveData(products: PipelineProductRow[], documents: PipelineDocumentRow[]): OrderRow[] {
+function buildFromLiveData(
+  products: PipelineProductRow[],
+  documents: PipelineDocumentRow[],
+  t: ReturnType<typeof useLanguage>["t"],
+): OrderRow[] {
   const longLeadProducts = products.filter((p) => p.is_long_lead);
   if (longLeadProducts.length === 0) return [];
 
@@ -70,18 +111,23 @@ function buildFromLiveData(products: PipelineProductRow[], documents: PipelineDo
       id: `#PROC-${product.article_no}`,
       date: relatedDoc?.uploaded_at ?? new Date().toISOString(),
       customer: relatedDoc
-        ? `Bestellung ${relatedDoc.doc_number ?? relatedDoc.id.slice(0, 8)}`
-        : "Kein zugehöriges Dokument",
+        ? t("dashEcommerce.orders.orderReference").replace("{number}", relatedDoc.doc_number ?? relatedDoc.id.slice(0, 8))
+        : t("dashEcommerce.orders.noRelatedDocument"),
       payment,
       total: formatEur(product.unit_price),
-      items: `${product.article_no} ${product.name} — ${product.lead_time_weeks} Wochen Lieferzeit, jetzt bestellen`,
+      items: t("dashEcommerce.orders.itemsLine")
+        .replace("{article}", product.article_no)
+        .replace("{name}", product.name)
+        .replace("{weeks}", String(product.lead_time_weeks)),
       fulfillment: "Unfulfilled",
     };
   });
 }
 
 export function RecentOrders() {
+  const { t } = useLanguage();
   const [liveOrders, setLiveOrders] = React.useState<OrderRow[]>([]);
+  const recentOrdersColumns = React.useMemo(() => buildRecentOrdersColumns(t), [t]);
 
   React.useEffect(() => {
     let cancelled = false;
@@ -89,7 +135,7 @@ export function RecentOrders() {
     const load = () => {
       Promise.all([fetchProducts(), fetchDocuments()])
         .then(([products, documents]) => {
-          if (!cancelled) setLiveOrders(buildFromLiveData(products, documents));
+          if (!cancelled) setLiveOrders(buildFromLiveData(products, documents, t));
         })
         .catch(() => {
           // Fall back to the static demo snapshot if Supabase is unreachable.
@@ -105,9 +151,10 @@ export function RecentOrders() {
       unsubscribeProducts();
       unsubscribeDocuments();
     };
-  }, []);
+  }, [t]);
 
-  const recentOrders = liveOrders.length > 0 ? liveOrders : FALLBACK_ORDERS;
+  const fallbackOrders = React.useMemo(() => buildFallbackOrders(t), [t]);
+  const recentOrders = liveOrders.length > 0 ? liveOrders : fallbackOrders;
 
   const [rowSelection, setRowSelection] = React.useState({});
   const [sorting, setSorting] = React.useState<SortingState>([]);
@@ -145,7 +192,9 @@ export function RecentOrders() {
   const currentPage = table.getState().pagination.pageIndex + 1;
   const pageCount = table.getPageCount();
   const orderCountDescription =
-    selectedOrderCount > 0 ? formatSelectedOrderCount(selectedOrderCount) : formatOrderCount(activeFilter, orderCount);
+    selectedOrderCount > 0
+      ? formatSelectedOrderCount(selectedOrderCount, t)
+      : formatOrderCount(activeFilter, orderCount, t);
   const pageNumbers = React.useMemo(() => {
     if (pageCount <= 3) {
       return Array.from({ length: pageCount }, (_, index) => index + 1);
@@ -160,15 +209,17 @@ export function RecentOrders() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="font-normal text-muted-foreground text-sm">AI-Detected Procurement Needs</CardTitle>
+        <CardTitle className="font-normal text-muted-foreground text-sm">
+          {t("dashEcommerce.orders.title")}
+        </CardTitle>
         <CardDescription className="text-foreground text-xl tabular-nums leading-none tracking-tight">
           {orderCountDescription}
         </CardDescription>
         <CardAction className="flex items-center gap-1">
-          <Button aria-label="Open orders" size="icon-sm" variant="outline">
+          <Button aria-label={t("dashEcommerce.orders.openAria")} size="icon-sm" variant="outline">
             <ArrowUpRight />
           </Button>
-          <Button aria-label="Download orders" size="icon-sm" variant="outline">
+          <Button aria-label={t("dashEcommerce.orders.downloadAria")} size="icon-sm" variant="outline">
             <Download />
           </Button>
           <Button size="icon-sm" variant="outline">
@@ -193,7 +244,7 @@ export function RecentOrders() {
           >
             {orderFilters.map((filter) => (
               <ToggleGroupItem key={filter} value={filter}>
-                {filter}
+                {t(orderFilterLabelKeys[filter])}
               </ToggleGroupItem>
             ))}
           </ToggleGroup>
@@ -232,7 +283,7 @@ export function RecentOrders() {
               ) : (
                 <TableRow>
                   <TableCell className="h-24 text-center" colSpan={table.getVisibleLeafColumns().length}>
-                    No orders found.
+                    {t("dashEcommerce.orders.noOrdersFound")}
                   </TableCell>
                 </TableRow>
               )}
@@ -242,7 +293,9 @@ export function RecentOrders() {
 
         <div className="flex items-center justify-between gap-4 px-4 pb-1">
           <p className="text-muted-foreground text-sm">
-            Viewing {visibleOrderCount} out of {orderCount.toLocaleString()} orders
+            {t("dashEcommerce.orders.viewingSummary")
+              .replace("{visible}", String(visibleOrderCount))
+              .replace("{total}", orderCount.toLocaleString())}
           </p>
 
           <Pagination className="mx-0 w-auto justify-end">

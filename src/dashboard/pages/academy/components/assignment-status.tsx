@@ -11,14 +11,15 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/dashboard-ui/chart";
+import { useLanguage } from "@/contexts/LanguageContext";
 
-const chartData = [
-  { className: "Bergmann", submitted: 4, pending: 1, overdue: 1 },
-  { className: "Weber", submitted: 1, pending: 1, overdue: 0 },
-  { className: "MK Anl.", submitted: 1, pending: 0, overdue: 0 },
-  { className: "Hartmann", submitted: 1, pending: 0, overdue: 0 },
-  { className: "Andere", submitted: 5, pending: 0, overdue: 0 },
-];
+const rawChartData = [
+  { key: "bergmann", submitted: 4, pending: 1, overdue: 1 },
+  { key: "weber", submitted: 1, pending: 1, overdue: 0 },
+  { key: "mkAnl", submitted: 1, pending: 0, overdue: 0 },
+  { key: "hartmann", submitted: 1, pending: 0, overdue: 0 },
+  { key: "other", submitted: 5, pending: 0, overdue: 0 },
+] as const;
 
 function SubmittedLegendIcon() {
   return <span className="block size-2 rounded-[2px] bg-chart-3" />;
@@ -32,24 +33,6 @@ function OverdueLegendIcon() {
   return <span className="block size-2 rounded-[2px] bg-destructive" />;
 }
 
-const chartConfig = {
-  submitted: {
-    label: "Indexed",
-    color: "var(--chart-3)",
-    icon: SubmittedLegendIcon,
-  },
-  pending: {
-    label: "Processing",
-    color: "var(--chart-2)",
-    icon: PendingLegendIcon,
-  },
-  overdue: {
-    label: "Needs Review",
-    color: "var(--destructive)",
-    icon: OverdueLegendIcon,
-  },
-} satisfies ChartConfig;
-
 function AssignmentDotPattern({ color, id }: { color: string; id: string }) {
   return (
     <pattern id={id} width="6" height="6" patternUnits="userSpaceOnUse">
@@ -61,12 +44,37 @@ function AssignmentDotPattern({ color, id }: { color: string; id: string }) {
 }
 
 export function AssignmentStatus() {
+  const { t } = useLanguage();
+
+  const chartConfig = {
+    submitted: {
+      label: t('dashAcademy.assignmentStatus.submitted'),
+      color: "var(--chart-3)",
+      icon: SubmittedLegendIcon,
+    },
+    pending: {
+      label: t('dashAcademy.assignmentStatus.pending'),
+      color: "var(--chart-2)",
+      icon: PendingLegendIcon,
+    },
+    overdue: {
+      label: t('dashAcademy.assignmentStatus.overdue'),
+      color: "var(--destructive)",
+      icon: OverdueLegendIcon,
+    },
+  } satisfies ChartConfig;
+
+  const chartData = rawChartData.map((item) => ({
+    ...item,
+    className: t(`dashAcademy.assignmentStatus.class.${item.key}`),
+  }));
+
   return (
     <Card className="h-full">
       <CardHeader>
-        <CardTitle className="text-sm">Indexing Status by Customer</CardTitle>
+        <CardTitle className="text-sm">{t('dashAcademy.assignmentStatus.title')}</CardTitle>
         <CardAction className="flex items-center gap-1 text-muted-foreground text-xs">
-          View Report <ArrowRight className="size-4" />
+          {t('dashAcademy.assignmentStatus.viewReport')} <ArrowRight className="size-4" />
         </CardAction>
       </CardHeader>
       <CardContent>

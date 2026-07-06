@@ -5,8 +5,9 @@ import {
   subscribeToTable,
   type PipelineChecklistItemRow,
 } from "@/dashboard/lib/pipelineClient";
+import { useLanguage } from "@/contexts/LanguageContext";
 
-import { tasks as fallbackTasks, type Task } from "./components/data";
+import { buildLocalizedTasks, type Task } from "./components/data";
 import { Tasks } from "./components/tasks";
 
 function checklistItemToTask(item: PipelineChecklistItemRow): Task {
@@ -26,7 +27,9 @@ function checklistItemToTask(item: PipelineChecklistItemRow): Task {
 }
 
 export default function Page() {
-  const [tasks, setTasks] = useState<Task[]>(fallbackTasks);
+  const { t } = useLanguage();
+  const [tasks, setTasks] = useState<Task[]>(() => buildLocalizedTasks(t));
+  const [usingLiveData, setUsingLiveData] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -36,6 +39,7 @@ export default function Page() {
         .then((items) => {
           if (cancelled) return;
           if (items.length === 0) return;
+          setUsingLiveData(true);
           setTasks(items.map(checklistItemToTask));
         })
         .catch(() => {
@@ -52,13 +56,18 @@ export default function Page() {
     };
   }, []);
 
+  // Re-localize the static seed rows whenever the language changes (live rows already
+  // carry their own plain-text title from Supabase, so leave those as-is).
+  useEffect(() => {
+    if (usingLiveData) return;
+    setTasks(buildLocalizedTasks(t));
+  }, [t, usingLiveData]);
+
   return (
     <div className="flex flex-col gap-4">
       <div>
-        <h2 className="text-3xl tracking-tight">Checklisten</h2>
-        <p className="text-muted-foreground">
-          Automatisch generierte To-dos aus dem Abgleich von Angebot und Bestellung.
-        </p>
+        <h2 className="text-3xl tracking-tight">{t("dashTasks.page.title")}</h2>
+        <p className="text-muted-foreground">{t("dashTasks.page.subtitle")}</p>
       </div>
       <Tasks data={tasks} />
     </div>

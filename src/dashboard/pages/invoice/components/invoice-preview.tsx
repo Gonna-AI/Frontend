@@ -5,6 +5,7 @@ import { Download, Printer } from "lucide-react-dash";
 
 import { Button } from "@/components/dashboard-ui/button";
 import { ButtonGroup } from "@/components/dashboard-ui/button-group";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 import { INVOICE_PAPER_HEIGHT, INVOICE_PAPER_SCALE, INVOICE_PAPER_WIDTH, type InvoiceFormValues } from "./data";
 import { InvoicePaper } from "./invoice-paper";
@@ -22,21 +23,22 @@ export function InvoicePreview({ invoice }: { invoice: InvoiceFormValues }) {
     maxScale: INVOICE_PAPER_SCALE,
     width: INVOICE_PAPER_WIDTH,
   });
+  const { t } = useLanguage();
 
   return (
     <>
       <PrintInvoice invoice={invoice} />
       <div className="flex flex-col rounded-xl border bg-card">
         <div className="flex items-center justify-between px-4 py-4">
-          <h2 className="font-medium text-lg">Preview</h2>
+          <h2 className="font-medium text-lg">{t('dashInvoice.preview.heading')}</h2>
           <ButtonGroup>
             <Button type="button" variant="outline" onClick={handlePrint}>
               <Printer data-icon="inline-start" />
-              Print
+              {t('dashInvoice.preview.print')}
             </Button>
             <Button type="button" variant="outline">
               <Download data-icon="inline-start" />
-              Download PDF
+              {t('dashInvoice.preview.downloadPdf')}
             </Button>
           </ButtonGroup>
         </div>
@@ -47,7 +49,7 @@ export function InvoicePreview({ invoice }: { invoice: InvoiceFormValues }) {
         >
           {paperLayout === null ? (
             <div className="absolute inset-0 grid place-items-center text-muted-foreground text-sm">
-              Loading Preview
+              {t('dashInvoice.preview.loading')}
             </div>
           ) : null}
           <div

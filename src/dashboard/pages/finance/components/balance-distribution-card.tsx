@@ -6,6 +6,7 @@ import { Label, Pie, PieChart } from "recharts";
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/dashboard-ui/card";
 import { type ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/dashboard-ui/chart";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/dashboard-ui/select";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { formatCurrency } from "@/lib/utils";
 
 type BalanceKey = "investment" | "main" | "reserve" | "savings";
@@ -14,92 +15,95 @@ type BalanceKey = "investment" | "main" | "reserve" | "savings";
 // represents one of the 5 planted deviations on the Bergmann Maschinenbau project,
 // sized by absolute € impact (or a nominal weight for the two €0-line-impact clause changes).
 const balanceData: {
-  account: string;
+  accountKey: "controlWiringRemoved" | "spQtyChange" | "rsSwap" | "deliveryDateChange";
   amount: number;
   key: BalanceKey;
   percentage: number;
 }[] = [
   {
-    account: "Steuerungsverkabelung removed",
+    accountKey: "controlWiringRemoved",
     amount: 2_100,
     key: "main",
     percentage: 44.2,
   },
   {
-    account: "SP-200 qty 4→5",
+    accountKey: "spQtyChange",
     amount: 1_250,
     key: "savings",
     percentage: 26.3,
   },
   {
-    account: "RS-100 → RS-90 swap",
+    accountKey: "rsSwap",
     amount: 900,
     key: "investment",
     percentage: 18.9,
   },
   {
-    account: "Delivery KW38 → KW36 (nominal risk weight)",
+    accountKey: "deliveryDateChange",
     amount: 500,
     key: "reserve",
     percentage: 10.5,
   },
 ];
 
-const chartConfig = {
-  amount: {
-    label: "€ Impact",
-  },
-  investment: {
-    color: "var(--chart-1)",
-    label: "RS-100 → RS-90 swap",
-  },
-  main: {
-    color: "var(--chart-2)",
-    label: "Steuerungsverkabelung removed",
-  },
-  reserve: {
-    color: "var(--chart-3)",
-    label: "Delivery KW38 → KW36",
-  },
-  savings: {
-    color: "var(--chart-4)",
-    label: "SP-200 qty 4→5",
-  },
-} satisfies ChartConfig;
+type Currency = "EUR" | "GBP" | "USD";
 
-const currencies = {
-  EUR: {
-    label: "EUR Impact",
-  },
-  GBP: {
-    label: "GBP Impact",
-  },
-  USD: {
-    label: "USD Impact",
-  },
-} as const;
-
-type Currency = keyof typeof currencies;
-
-const getAccountColor = (key: BalanceKey) => {
-  const config = chartConfig[key];
-
-  return "color" in config ? config.color : undefined;
-};
-
-const chartData = balanceData.map((item) => ({
-  ...item,
-  fill: getAccountColor(item.key),
-}));
 const totalBalance = balanceData.reduce((total, item) => total + item.amount, 0);
 
 export function BalanceDistributionCard() {
+  const { t } = useLanguage();
   const [currency, setCurrency] = React.useState<Currency>("EUR");
+
+  const chartConfig = {
+    amount: {
+      label: t('dashFinance.balance.eurImpact'),
+    },
+    investment: {
+      color: "var(--chart-1)",
+      label: t('dashFinance.balance.rsSwap'),
+    },
+    main: {
+      color: "var(--chart-2)",
+      label: t('dashFinance.balance.controlWiringRemoved'),
+    },
+    reserve: {
+      color: "var(--chart-3)",
+      label: t('dashFinance.balance.deliveryDateChange'),
+    },
+    savings: {
+      color: "var(--chart-4)",
+      label: t('dashFinance.balance.spQtyChange'),
+    },
+  } satisfies ChartConfig;
+
+  const currencies: Record<Currency, { label: string }> = {
+    EUR: {
+      label: t('dashFinance.balance.eurImpact'),
+    },
+    GBP: {
+      label: t('dashFinance.balance.gbpImpact'),
+    },
+    USD: {
+      label: t('dashFinance.balance.usdImpact'),
+    },
+  };
+
+  const getAccountColor = (key: BalanceKey) => {
+    const config = chartConfig[key];
+
+    return "color" in config ? config.color : undefined;
+  };
+
+  const chartData = balanceData.map((item) => ({
+    ...item,
+    account: t(`dashFinance.balance.${item.accountKey}`),
+    fill: getAccountColor(item.key),
+  }));
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="font-normal">Deviation Breakdown</CardTitle>
+        <CardTitle className="font-normal">{t('dashFinance.balance.title')}</CardTitle>
         <CardAction>
           <Select onValueChange={(value) => setCurrency(value as Currency)} value={currency}>
             <SelectTrigger className="w-36" size="sm">
@@ -144,7 +148,7 @@ export function BalanceDistributionCard() {
                   return (
                     <text dominantBaseline="middle" textAnchor="middle" x={viewBox.cx} y={viewBox.cy}>
                       <tspan className="fill-muted-foreground text-xs" x={viewBox.cx} y={(viewBox.cy ?? 0) - 8}>
-                        Total
+                        {t('dashFinance.balance.total')}
                       </tspan>
                       <tspan
                         className="fill-foreground font-medium text-lg tabular-nums"

@@ -1,10 +1,7 @@
 import { Outlet } from "react-router-dom";
-import { siGithub } from "simple-icons";
 
 import "@/dashboard/styles/dashboard-theme.css";
 import { AppSidebar } from "@/dashboard/layout/app-sidebar";
-import { SimpleIcon } from "@/dashboard/components/simple-icon";
-import { Button } from "@/components/dashboard-ui/button";
 import { Separator } from "@/components/dashboard-ui/separator";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/dashboard-ui/sidebar";
 import { Toaster } from "@/components/dashboard-ui/sonner";
@@ -12,22 +9,22 @@ import { TooltipProvider } from "@/components/dashboard-ui/tooltip";
 import { cn } from "@/lib/utils";
 import { usePreferencesStore } from "@/dashboard/store/preferences-store";
 
-import { AccountSwitcher } from "./account-switcher";
+import { LanguageSwitcher } from "./language-switcher";
 import { LayoutControls } from "./layout-controls";
 import { SearchDialog } from "./search-dialog";
 import { ThemeSwitcher } from "./theme-switcher";
 
 export default function DashboardLayout() {
   const values = usePreferencesStore((s) => s.values);
-  const { content_layout: contentLayout, navbar_style: navbarStyle, theme_preset: themePreset, font, sidebar_variant, sidebar_collapsible } = values;
+  const { content_layout: contentLayout, navbar_style: navbarStyle, sidebar_variant, sidebar_collapsible } = values;
 
   return (
     <div
       className="dashboard-root"
       data-content-layout={contentLayout}
       data-navbar-style={navbarStyle}
-      data-theme-preset={themePreset}
-      data-font={font}
+      data-theme-preset="default"
+      data-font="geist"
       data-sidebar-variant={sidebar_variant}
       data-sidebar-collapsible={sidebar_collapsible}
     >
@@ -66,18 +63,8 @@ export default function DashboardLayout() {
                 </div>
                 <div className="flex items-center gap-2">
                   <LayoutControls />
+                  <LanguageSwitcher />
                   <ThemeSwitcher />
-                  <Button asChild size="icon" variant="ghost">
-                    <a
-                      href="https://github.com/arhamkhnz/next-shadcn-admin-dashboard"
-                      target="_blank"
-                      rel="noreferrer"
-                      aria-label="Open GitHub repository"
-                    >
-                      <SimpleIcon icon={siGithub} className="fill-primary-foreground" />
-                    </a>
-                  </Button>
-                  <AccountSwitcher />
                 </div>
               </div>
             </header>

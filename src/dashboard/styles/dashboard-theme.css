@@ -210,6 +210,79 @@
   border-color: var(--border);
 }
 
+.dashboard-root [data-slot="card"],
+.dashboard-root [data-slot="card-header"],
+.dashboard-root [data-slot="card-content"],
+.dashboard-root [data-slot="card-footer"],
+.dashboard-root [data-slot="item"],
+.dashboard-root [data-slot="item-content"],
+.dashboard-root [data-slot="table"],
+.dashboard-root [data-slot="tabs"],
+.dashboard-root [data-slot="tabs-list"],
+.dashboard-root [data-slot="select-trigger"],
+.dashboard-root [data-slot="button"] {
+  min-width: 0;
+}
+
+.dashboard-root [data-slot="card-title"],
+.dashboard-root [data-slot="card-description"],
+.dashboard-root [data-slot="item-title"],
+.dashboard-root [data-slot="item-description"],
+.dashboard-root [data-slot="label"],
+.dashboard-root th,
+.dashboard-root td,
+.dashboard-root h1,
+.dashboard-root h2,
+.dashboard-root h3,
+.dashboard-root p {
+  overflow-wrap: break-word;
+  word-break: normal;
+}
+
+.dashboard-root th,
+.dashboard-root td {
+  overflow-wrap: anywhere;
+}
+
+.dashboard-root [data-slot="card-header"] {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.dashboard-root [data-slot="card-action"] {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.dashboard-root [data-slot="card-action"],
+.dashboard-root [data-slot="chart-legend"] {
+  flex-wrap: wrap;
+}
+
+.dashboard-root [data-slot="button"]:not([data-size^="icon"]) {
+  max-width: 100%;
+  white-space: normal;
+}
+
+.dashboard-root [data-slot="select-trigger"] {
+  max-width: 100%;
+}
+
+.dashboard-root [data-slot="select-value"] {
+  min-width: 0;
+}
+
+@media (max-width: 900px) {
+  .dashboard-root [data-slot="card-header"]:has([data-slot="card-action"]) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .dashboard-root [data-slot="card-action"] {
+    grid-column: 1;
+    grid-row: auto;
+    justify-self: start;
+  }
+}
+
 /* Radix/vaul portals mount under body, outside .dashboard-root. Give those
    floating dashboard surfaces their own opaque theme contract. */
 [data-slot="dropdown-menu-content"],

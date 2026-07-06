@@ -1,6 +1,7 @@
 export const deDashboardInvoice = {
   // page.tsx
   'dashInvoice.page.title': 'Auftragsbestätigung AB-88431 (Entwurf)',
+  'dashInvoice.page.subtitle': 'Prüfen, bearbeiten und geben Sie die generierte Auftragsbestätigung frei.',
   'dashInvoice.page.description': 'Prüfen Sie den Entwurf der Auftragsbestätigung, kontrollieren Sie die Vorschau und geben Sie sie frei.',
   'dashInvoice.page.saveDraft': 'Als Entwurf speichern',
   'dashInvoice.page.send': 'AB versenden',
@@ -9,6 +10,7 @@ export const deDashboardInvoice = {
   'dashInvoice.client.heading': 'Kunde',
   'dashInvoice.client.addNew': 'Neuen Kunden hinzufügen',
   'dashInvoice.client.selectLabel': 'Kunde',
+  'dashInvoice.client.label': 'Kunde',
   'dashInvoice.client.selectPlaceholder': 'Kunde auswählen',
 
   // invoice-adjustments.tsx
@@ -17,6 +19,7 @@ export const deDashboardInvoice = {
   'dashInvoice.adjustments.selectTax': 'Steuer auswählen',
   'dashInvoice.adjustments.discount': 'Rabatt',
   'dashInvoice.adjustments.discountType': 'Rabattart',
+  'dashInvoice.adjustments.discountTypePlaceholder': 'Rabattart',
   'dashInvoice.adjustments.fixedAmount': 'Festbetrag',
   'dashInvoice.adjustments.percent': 'Prozent',
   'dashInvoice.adjustments.value': 'Wert',
@@ -40,6 +43,7 @@ export const deDashboardInvoice = {
   'dashInvoice.items.units': 'Menge',
   'dashInvoice.items.unitCost': 'Einzelpreis',
   'dashInvoice.items.lineTotal': 'Gesamtbetrag',
+  'dashInvoice.items.lineTotalMobile': 'Gesamtbetrag',
   'dashInvoice.items.reorderAria': '{id} neu anordnen',
   'dashInvoice.items.descriptionAria': 'Beschreibung für Position {index}',
   'dashInvoice.items.quantityAria': 'Menge für Position {index}',
@@ -58,6 +62,7 @@ export const deDashboardInvoice = {
   'dashInvoice.paper.vatId': 'USt-IdNr.',
   'dashInvoice.paper.summary': 'Zusammenfassung',
   'dashInvoice.paper.discount': 'Rabatt',
+  'dashInvoice.paper.discountWithPercent': 'Rabatt {percent}%',
   'dashInvoice.paper.description': 'Beschreibung',
   'dashInvoice.paper.quantity': 'Menge',
   'dashInvoice.paper.unitPrice': 'Einzelpreis',

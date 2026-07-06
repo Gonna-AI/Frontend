@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 
 import { fetchJobQueueSummary, subscribeToJobQueue, type JobStageSummary, type PipelineJobStage } from "@/dashboard/lib/pipelineClient";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 import { infrastructureGroups as staticGroups, type InfrastructureGroup } from "./components/infrastructure-data";
 import { InfrastructureHeader } from "./components/infrastructure-header";
@@ -12,6 +13,7 @@ import "@/dashboard/styles/flag-icons/flags.css";
 function applyLiveJobQueue(
   groups: InfrastructureGroup[],
   summary: Record<PipelineJobStage, JobStageSummary> | null,
+  t: (key: string) => string,
 ): InfrastructureGroup[] {
   if (!summary) return groups;
 
@@ -26,9 +28,9 @@ function applyLiveJobQueue(
         return {
           ...row,
           status: live.status,
-          latency: `${live.queued} pending`,
-          uptime: `${live.processing} running`,
-          plan: `Queue depth: ${live.queued + live.processing}`,
+          latency: t("dashInfra.jobQueue.pending").replace("{count}", String(live.queued)),
+          uptime: t("dashInfra.jobQueue.running").replace("{count}", String(live.processing)),
+          plan: t("dashInfra.jobQueue.queueDepth").replace("{count}", String(live.queued + live.processing)),
         };
       }),
     };
@@ -36,6 +38,7 @@ function applyLiveJobQueue(
 }
 
 export default function Page() {
+  const { t } = useLanguage();
   const [jobSummary, setJobSummary] = useState<Record<PipelineJobStage, JobStageSummary> | null>(null);
 
   useEffect(() => {
@@ -60,7 +63,7 @@ export default function Page() {
     };
   }, []);
 
-  const groups = applyLiveJobQueue(staticGroups, jobSummary);
+  const groups = applyLiveJobQueue(staticGroups, jobSummary, t);
 
   return (
     <div className="flex flex-col gap-4">

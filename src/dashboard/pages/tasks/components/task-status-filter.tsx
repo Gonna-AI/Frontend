@@ -13,15 +13,18 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/dashboard-ui/dropdown-menu";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { cn } from "@/lib/utils";
 
-import { statuses } from "./data";
+import { getLocalizedStatuses } from "./data";
 
 interface TaskStatusFilterProps<TData> {
   table: Table<TData>;
 }
 
 export function TaskStatusFilter<TData>({ table }: TaskStatusFilterProps<TData>) {
+  const { t } = useLanguage();
+  const statuses = getLocalizedStatuses(t);
   const column = table.getColumn("status");
 
   if (!column) {
@@ -56,7 +59,7 @@ export function TaskStatusFilter<TData>({ table }: TaskStatusFilterProps<TData>)
           className={cn("border-dashed", selectedValues.size > 0 && "border-solid bg-muted text-foreground")}
         >
           <ListFilter data-icon="inline-start" />
-          Status
+          {t("dashTasks.toolbar.status")}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-50">
@@ -83,7 +86,7 @@ export function TaskStatusFilter<TData>({ table }: TaskStatusFilterProps<TData>)
             <DropdownMenuGroup>
               <DropdownMenuItem onSelect={clearFilter} className="justify-center text-center">
                 <X />
-                Filter zurücksetzen
+                {t("dashTasks.filter.resetFilters")}
               </DropdownMenuItem>
             </DropdownMenuGroup>
           </>

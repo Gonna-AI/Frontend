@@ -13,15 +13,18 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/dashboard-ui/dropdown-menu";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { cn } from "@/lib/utils";
 
-import { priorities } from "./data";
+import { getLocalizedPriorities } from "./data";
 
 interface TaskPriorityFilterProps<TData> {
   table: Table<TData>;
 }
 
 export function TaskPriorityFilter<TData>({ table }: TaskPriorityFilterProps<TData>) {
+  const { t } = useLanguage();
+  const priorities = getLocalizedPriorities(t);
   const column = table.getColumn("priority");
 
   if (!column) {
@@ -56,7 +59,7 @@ export function TaskPriorityFilter<TData>({ table }: TaskPriorityFilterProps<TDa
           className={cn("border-dashed", selectedValues.size > 0 && "border-solid bg-muted text-foreground")}
         >
           <ListFilter data-icon="inline-start" />
-          Priorität
+          {t("dashTasks.toolbar.priority")}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-50">
@@ -83,7 +86,7 @@ export function TaskPriorityFilter<TData>({ table }: TaskPriorityFilterProps<TDa
             <DropdownMenuGroup>
               <DropdownMenuItem onSelect={clearFilter} className="justify-center text-center">
                 <X />
-                Filter zurücksetzen
+                {t("dashTasks.filter.resetFilters")}
               </DropdownMenuItem>
             </DropdownMenuGroup>
           </>

@@ -44,6 +44,7 @@ import {
 } from "@/components/dashboard-ui/dropdown-menu";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/dashboard-ui/input-group";
 import { Tabs, TabsList, TabsTrigger } from "@/components/dashboard-ui/tabs";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { updateChecklistItemStatus } from "@/dashboard/lib/pipelineClient";
 
 import { columnIdToChecklistStatus, columnIds, columns } from "./data";
@@ -57,6 +58,7 @@ interface KanbanProps {
 }
 
 export function Kanban({ initialBoard }: KanbanProps) {
+  const { t } = useLanguage();
   const [board, setBoard] = React.useState<BoardState>(initialBoard);
   const [columnOrder, setColumnOrder] = React.useState<ColumnId[]>(columnIds);
   const previousInitialBoard = React.useRef(initialBoard);
@@ -199,58 +201,58 @@ export function Kanban({ initialBoard }: KanbanProps) {
           <TabsList className="w-full *:data-[slot=tabs-trigger]:flex-1 sm:w-fit sm:*:data-[slot=tabs-trigger]:flex-none">
             <TabsTrigger value="board" className="gap-2">
               <KanbanIcon />
-              Board
+              {t('dashKanban.toolbar.board')}
             </TabsTrigger>
             <TabsTrigger value="list" className="gap-2">
               <List />
-              Liste
+              {t('dashKanban.toolbar.list')}
             </TabsTrigger>
             <TabsTrigger value="table" className="gap-2">
               <Table2 />
-              Tabelle
+              {t('dashKanban.toolbar.table')}
             </TabsTrigger>
           </TabsList>
         </Tabs>
 
         <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center 2xl:justify-end">
           <InputGroup className="min-w-0 sm:w-64 2xl:w-48">
-            <InputGroupInput type="search" placeholder="Aufgaben durchsuchen" />
+            <InputGroupInput type="search" placeholder={t('dashKanban.toolbar.searchPlaceholder')} />
             <InputGroupAddon>
               <Search />
             </InputGroupAddon>
           </InputGroup>
           <Button variant="outline" className="w-full sm:w-auto">
             <SlidersHorizontal data-icon="inline-start" />
-            Filter
+            {t('dashKanban.toolbar.filter')}
           </Button>
           <Button variant="outline" className="w-full sm:w-auto">
             <ArrowUpDown data-icon="inline-start" />
-            Sortieren
+            {t('dashKanban.toolbar.sort')}
           </Button>
           <ButtonGroup className="w-full sm:w-fit">
             <Button className="flex-1 sm:flex-none">
               <Plus data-icon="inline-start" />
-              Aufgabe hinzufügen
+              {t('dashKanban.toolbar.addTask')}
             </Button>
             <ButtonGroupSeparator />
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button aria-label="Open add task menu">
+                <Button aria-label={t('dashKanban.toolbar.addTaskMenuAria')}>
                   <ChevronDown />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
                 <DropdownMenuItem>
                   <Upload />
-                  CSV importieren
+                  {t('dashKanban.toolbar.importCsv')}
                 </DropdownMenuItem>
                 <DropdownMenuItem>
                   <LayoutTemplate />
-                  Aus Vorlage hinzufügen
+                  {t('dashKanban.toolbar.addFromTemplate')}
                 </DropdownMenuItem>
                 <DropdownMenuItem>
                   <Bot />
-                  Automatisierung erstellen
+                  {t('dashKanban.toolbar.createAutomation')}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

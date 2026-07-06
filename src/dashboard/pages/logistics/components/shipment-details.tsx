@@ -291,7 +291,7 @@ function ShipmentOverview({ shipment }: { shipment: Shipment }) {
                 variant="outline"
               >
                 <TagIcon data-icon="inline-start" />
-                {label}
+                {tagLabelKeys[label] ? t(tagLabelKeys[label]) : label}
               </Badge>
             ))}
           </div>

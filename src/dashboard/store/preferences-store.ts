@@ -68,7 +68,7 @@ interface PreferencesValues {
 }
 
 const PREFERENCE_DEFAULTS: PreferencesValues = {
-  theme_mode: "system",
+  theme_mode: "light",
   theme_preset: "default",
   content_layout: "full-width",
   navbar_style: "sticky",
@@ -115,7 +115,15 @@ export const usePreferencesStore = create<PreferencesState>()(
     {
       name: "dashboard-preferences",
       onRehydrateStorage: () => (state) => {
-        if (state) applyResolvedThemeMode(state.values.theme_mode);
+        if (!state) return;
+
+        state.values = {
+          ...state.values,
+          theme_mode: state.values.theme_mode === "dark" ? "dark" : "light",
+          theme_preset: "default",
+          font: "geist",
+        };
+        applyResolvedThemeMode(state.values.theme_mode);
       },
     },
   ),

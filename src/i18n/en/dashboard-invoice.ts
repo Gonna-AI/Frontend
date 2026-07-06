@@ -1,6 +1,7 @@
 export const enDashboardInvoice = {
   // page.tsx
   'dashInvoice.page.title': 'Order Confirmation AB-88431 (Draft)',
+  'dashInvoice.page.subtitle': 'Review, edit, and release the generated order confirmation.',
   'dashInvoice.page.description': 'Review the order confirmation draft, check the preview, and release it.',
   'dashInvoice.page.saveDraft': 'Save as Draft',
   'dashInvoice.page.send': 'Send AB',
@@ -9,6 +10,7 @@ export const enDashboardInvoice = {
   'dashInvoice.client.heading': 'Client',
   'dashInvoice.client.addNew': 'Add New Client',
   'dashInvoice.client.selectLabel': 'Client',
+  'dashInvoice.client.label': 'Client',
   'dashInvoice.client.selectPlaceholder': 'Select client',
 
   // invoice-adjustments.tsx
@@ -17,6 +19,7 @@ export const enDashboardInvoice = {
   'dashInvoice.adjustments.selectTax': 'Select tax',
   'dashInvoice.adjustments.discount': 'Discount',
   'dashInvoice.adjustments.discountType': 'Discount type',
+  'dashInvoice.adjustments.discountTypePlaceholder': 'Discount type',
   'dashInvoice.adjustments.fixedAmount': 'Fixed amount',
   'dashInvoice.adjustments.percent': 'Percent',
   'dashInvoice.adjustments.value': 'Value',
@@ -40,6 +43,7 @@ export const enDashboardInvoice = {
   'dashInvoice.items.units': 'Units',
   'dashInvoice.items.unitCost': 'Unit cost',
   'dashInvoice.items.lineTotal': 'Line Total',
+  'dashInvoice.items.lineTotalMobile': 'Line total',
   'dashInvoice.items.reorderAria': 'Reorder {id}',
   'dashInvoice.items.descriptionAria': 'Item {index} description',
   'dashInvoice.items.quantityAria': 'Item {index} quantity',
@@ -58,6 +62,7 @@ export const enDashboardInvoice = {
   'dashInvoice.paper.vatId': 'VAT ID',
   'dashInvoice.paper.summary': 'Summary',
   'dashInvoice.paper.discount': 'Discount',
+  'dashInvoice.paper.discountWithPercent': 'Discount {percent}%',
   'dashInvoice.paper.description': 'Description',
   'dashInvoice.paper.quantity': 'Quantity',
   'dashInvoice.paper.unitPrice': 'Unit Price',

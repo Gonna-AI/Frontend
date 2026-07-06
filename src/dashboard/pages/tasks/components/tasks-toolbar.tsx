@@ -14,6 +14,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/dashboard-ui/dropdown-menu";
 import { Input } from "@/components/dashboard-ui/input";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { cn } from "@/lib/utils";
 
 import { TaskPriorityFilter } from "./task-priority-filter";
@@ -24,6 +25,7 @@ interface TasksToolbarProps<TData> {
 }
 
 export function TasksToolbar<TData>({ table }: TasksToolbarProps<TData>) {
+  const { t } = useLanguage();
   const isFiltered = table.getState().columnFilters.length > 0;
   const searchValue = (table.getColumn("title")?.getFilterValue() as string | undefined) ?? "";
   const hideableColumns = table
@@ -35,7 +37,7 @@ export function TasksToolbar<TData>({ table }: TasksToolbarProps<TData>) {
     <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
       <div className="flex flex-1 flex-wrap items-center gap-2">
         <Input
-          placeholder="Checklisten filtern..."
+          placeholder={t("dashTasks.toolbar.searchPlaceholder")}
           value={searchValue}
           onChange={(event) => {
             table.getColumn("title")?.setFilterValue(event.target.value);
@@ -54,7 +56,7 @@ export function TasksToolbar<TData>({ table }: TasksToolbarProps<TData>) {
             }}
           >
             <X data-icon="inline-start" />
-            Zurücksetzen
+            {t("dashTasks.toolbar.resetFilters")}
           </Button>
         )}
       </div>
@@ -67,11 +69,11 @@ export function TasksToolbar<TData>({ table }: TasksToolbarProps<TData>) {
               className={cn("ml-auto hidden lg:flex", hiddenColumns.length > 0 && "bg-muted text-foreground")}
             >
               <Settings2 data-icon="inline-start" />
-              Ansicht
+              {t("dashTasks.toolbar.view")}
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-38">
-            <DropdownMenuLabel>Spalten ein-/ausblenden</DropdownMenuLabel>
+            <DropdownMenuLabel>{t("dashTasks.toolbar.toggleColumns")}</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               {hideableColumns.map((column) => (

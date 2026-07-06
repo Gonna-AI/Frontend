@@ -1,10 +1,10 @@
-import { Monitor, Moon, Sun } from "lucide-react-dash";
+import { Moon, Sun } from "lucide-react-dash";
 
 import { Button } from "@/components/dashboard-ui/button";
 import { usePreferencesStore } from "@/dashboard/store/preferences-store";
 import { useLanguage } from "@/contexts/LanguageContext";
 
-const THEME_CYCLE = ["light", "dark", "system"] as const;
+const THEME_CYCLE = ["light", "dark"] as const;
 
 export function ThemeSwitcher() {
   const themeMode = usePreferencesStore((s) => s.values.theme_mode);
@@ -25,9 +25,8 @@ export function ThemeSwitcher() {
       onClick={cycleTheme}
       aria-label={t("dashShell.theme.currentAria").replace("{theme}", themeMode)}
     >
-      {themeMode === "system" && <Monitor />}
       {themeMode === "dark" && <Sun />}
-      {themeMode === "light" && <Moon />}
+      {(themeMode === "light" || themeMode === "system") && <Moon />}
     </Button>
   );
 }

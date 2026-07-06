@@ -2,6 +2,7 @@
 import { type CSSProperties, useState } from "react";
 
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from "@/components/dashboard-ui/sheet";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { useIsLg } from "@/hooks/use-lg";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
@@ -18,6 +19,7 @@ interface ChatProps {
 }
 
 export function Chat({ conversations, onSendMessage }: ChatProps) {
+  const { t } = useLanguage();
   const [chat] = useChat();
   const [showContact, setShowContact] = useState(false);
   const [showThread, setShowThread] = useState(false);
@@ -79,8 +81,8 @@ export function Chat({ conversations, onSendMessage }: ChatProps) {
       {!isLg && (
         <Sheet open={showContact} onOpenChange={setShowContact}>
           <SheetContent side="right" className="w-80 p-0" showCloseButton={false}>
-            <SheetTitle className="sr-only">Contact profile</SheetTitle>
-            <SheetDescription className="sr-only">View contact details and activity</SheetDescription>
+            <SheetTitle className="sr-only">{t('dashChat.chat.contactProfileTitle')}</SheetTitle>
+            <SheetDescription className="sr-only">{t('dashChat.chat.contactProfileDesc')}</SheetDescription>
             <ChatProfileDetails contact={activeConversation.contact} onClose={() => setShowContact(false)} />
           </SheetContent>
         </Sheet>

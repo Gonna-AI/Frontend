@@ -27,9 +27,10 @@ import {
 } from "@/components/dashboard-ui/pagination";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/dashboard-ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/dashboard-ui/table";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { cn } from "@/lib/utils";
 
-import { columns } from "./columns";
+import { useTaskColumns } from "./columns";
 import type { Task } from "./data";
 import { TasksToolbar } from "./tasks-toolbar";
 
@@ -53,6 +54,8 @@ function getPageNumbers(currentPage: number, pageCount: number) {
 }
 
 export function Tasks({ data }: TasksProps) {
+  const { t } = useLanguage();
+  const columns = useTaskColumns();
   const [rowSelection, setRowSelection] = React.useState({});
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
@@ -125,7 +128,7 @@ export function Tasks({ data }: TasksProps) {
           ) : (
             <TableRow>
               <TableCell colSpan={table.getVisibleLeafColumns().length} className="h-24 text-center">
-                Keine Ergebnisse.
+                {t("dashTasks.table.noResults")}
               </TableCell>
             </TableRow>
           )}
@@ -133,12 +136,13 @@ export function Tasks({ data }: TasksProps) {
       </Table>
       <div className="flex flex-col gap-3 border-t px-4 py-4 md:flex-row md:items-center md:justify-between">
         <div className="text-muted-foreground text-sm">
-          {table.getFilteredSelectedRowModel().rows.length} von {table.getFilteredRowModel().rows.length} Zeile(n)
-          ausgewählt.
+          {t("dashTasks.footer.rowsSelected")
+            .replace("{selected}", String(table.getFilteredSelectedRowModel().rows.length))
+            .replace("{total}", String(table.getFilteredRowModel().rows.length))}
         </div>
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end sm:gap-6 lg:gap-8">
           <div className="flex items-center gap-2">
-            <p className="font-medium text-muted-foreground text-sm">Zeilen pro Seite</p>
+            <p className="font-medium text-muted-foreground text-sm">{t("dashTasks.footer.rowsPerPage")}</p>
             <Select
               value={`${table.getState().pagination.pageSize}`}
               onValueChange={(value) => {
@@ -160,14 +164,16 @@ export function Tasks({ data }: TasksProps) {
             </Select>
           </div>
           <div className="flex w-24 items-center justify-start font-medium text-sm sm:justify-center">
-            Seite {currentPage} von {pageCount}
+            {t("dashTasks.footer.page")
+              .replace("{current}", String(currentPage))
+              .replace("{total}", String(pageCount))}
           </div>
           <Pagination className="mx-0 w-auto justify-start sm:justify-end">
             <PaginationContent className="gap-1">
               <PaginationItem className="hidden lg:block">
                 <PaginationLink
                   href="#"
-                  aria-label="Go to first page"
+                  aria-label={t("dashTasks.pagination.firstPageAria")}
                   aria-disabled={!canPreviousPage}
                   className={cn(!canPreviousPage && "pointer-events-none opacity-50")}
                   onClick={(event) => {
@@ -181,7 +187,7 @@ export function Tasks({ data }: TasksProps) {
               <PaginationItem>
                 <PaginationPrevious
                   href="#"
-                  text="Zurück"
+                  text={t("dashTasks.pagination.previous")}
                   aria-disabled={!canPreviousPage}
                   className={cn(!canPreviousPage && "pointer-events-none opacity-50")}
                   onClick={(event) => {
@@ -217,6 +223,7 @@ export function Tasks({ data }: TasksProps) {
               <PaginationItem>
                 <PaginationNext
                   href="#"
+                  text={t("dashTasks.pagination.next")}
                   aria-disabled={!canNextPage}
                   className={cn(!canNextPage && "pointer-events-none opacity-50")}
                   onClick={(event) => {
@@ -228,7 +235,7 @@ export function Tasks({ data }: TasksProps) {
               <PaginationItem className="hidden lg:block">
                 <PaginationLink
                   href="#"
-                  aria-label="Go to last page"
+                  aria-label={t("dashTasks.pagination.lastPageAria")}
                   aria-disabled={!canNextPage}
                   className={cn(!canNextPage && "pointer-events-none opacity-50")}
                   onClick={(event) => {

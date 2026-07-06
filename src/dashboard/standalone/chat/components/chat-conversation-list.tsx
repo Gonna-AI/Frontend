@@ -8,6 +8,7 @@ import { ScrollArea } from "@/components/dashboard-ui/scroll-area";
 import { Separator } from "@/components/dashboard-ui/separator";
 import { useSidebar } from "@/components/dashboard-ui/sidebar";
 import { Tabs, TabsList, TabsTrigger } from "@/components/dashboard-ui/tabs";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { cn, getInitials } from "@/lib/utils";
 
 import type { Conversation } from "./data";
@@ -19,7 +20,14 @@ interface ChatConversationListProps {
   className?: string;
 }
 
+const groupLabelKeys: Record<Conversation["group"], string> = {
+  Pinned: "dashChat.list.groupPinned",
+  Today: "dashChat.list.groupToday",
+  Yesterday: "dashChat.list.groupYesterday",
+};
+
 export function ChatConversationList({ conversations, onSelectConversation, className }: ChatConversationListProps) {
+  const { t } = useLanguage();
   const [chat, setChat] = useChat();
   const { state, toggleSidebar } = useSidebar();
   const isCollapsed = state === "collapsed";
@@ -49,10 +57,10 @@ export function ChatConversationList({ conversations, onSelectConversation, clas
             {isCollapsed ? <PanelRightClose /> : <PanelRightOpen />}
           </Button>
           <Separator orientation="vertical" className="mr-1.5 h-4 data-vertical:self-center" />
-          <h1 className="font-medium text-xl leading-none">Inbox</h1>
+          <h1 className="font-medium text-xl leading-none">{t('dashChat.list.inbox')}</h1>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon-sm">
+          <Button variant="ghost" size="icon-sm" aria-label={t('dashChat.list.filterAria')}>
             <Filter />
           </Button>
         </div>
@@ -63,18 +71,18 @@ export function ChatConversationList({ conversations, onSelectConversation, clas
       <Tabs defaultValue="all">
         <TabsList variant="line" className="w-full border-b px-0 **:data-[slot=tabs-trigger]:border-x-0">
           <TabsTrigger value="all">
-            All
+            {t('dashChat.list.tabAll')}
             <span className="text-muted-foreground text-xs">(24)</span>
           </TabsTrigger>
           <TabsTrigger value="open">
-            Open
+            {t('dashChat.list.tabOpen')}
             <span className="text-muted-foreground text-xs">(18)</span>
           </TabsTrigger>
           <TabsTrigger value="snoozed">
-            Snoozed
+            {t('dashChat.list.tabSnoozed')}
             <span className="text-muted-foreground text-xs">(2)</span>
           </TabsTrigger>
-          <TabsTrigger value="closed">Closed</TabsTrigger>
+          <TabsTrigger value="closed">{t('dashChat.list.tabClosed')}</TabsTrigger>
         </TabsList>
       </Tabs>
 
@@ -87,7 +95,7 @@ export function ChatConversationList({ conversations, onSelectConversation, clas
             {conversationGroups.map(({ group, conversations }) => (
               <Collapsible key={group} defaultOpen>
                 <CollapsibleTrigger className="flex w-full items-center justify-between gap-1 px-3 py-2 font-medium text-muted-foreground text-xs hover:text-foreground [&[data-state=open]>svg]:rotate-180">
-                  {group}
+                  {t(groupLabelKeys[group])}
                   <ChevronDown className="size-3 transition-transform" />
                 </CollapsibleTrigger>
                 <CollapsibleContent>

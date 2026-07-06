@@ -1,5 +1,6 @@
 import { Separator } from "@/components/dashboard-ui/separator";
 import { Tabs, TabsList, TabsTrigger } from "@/components/dashboard-ui/tabs";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 import { ClientSelector } from "./client-selector";
 import { InvoiceAdjustments } from "./invoice-adjustments";
@@ -7,13 +8,15 @@ import { InvoiceDetails } from "./invoice-details";
 import { InvoiceItems } from "./invoice-items";
 
 export function InvoiceForm() {
+  const { t } = useLanguage();
+
   return (
     <div className="flex flex-col gap-4 rounded-xl border bg-card p-4">
       <Tabs defaultValue="invoice">
         <TabsList className="w-full">
-          <TabsTrigger value="invoice">Auftragsbestätigung</TabsTrigger>
-          <TabsTrigger value="payment">Zahlung</TabsTrigger>
-          <TabsTrigger value="business">Unternehmen</TabsTrigger>
+          <TabsTrigger value="invoice">{t('dashInvoice.form.tabInvoice')}</TabsTrigger>
+          <TabsTrigger value="payment">{t('dashInvoice.form.tabPayment')}</TabsTrigger>
+          <TabsTrigger value="business">{t('dashInvoice.form.tabBusiness')}</TabsTrigger>
         </TabsList>
       </Tabs>
 

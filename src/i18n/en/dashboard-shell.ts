@@ -23,6 +23,7 @@ export const enDashboardShell = {
     // layout-controls.tsx
     'dashShell.layoutControls.preferencesTitle': 'Preferences',
     'dashShell.layoutControls.preferencesDesc': 'Customize your dashboard layout preferences.',
+    'dashShell.layoutControls.displayDesc': 'Switch the dashboard between light and dark mode.',
     'dashShell.layoutControls.themePreset': 'Theme Preset',
     'dashShell.layoutControls.presetPlaceholder': 'Preset',
     'dashShell.layoutControls.fonts': 'Fonts',

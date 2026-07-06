@@ -23,6 +23,7 @@ export const deDashboardShell = {
     // layout-controls.tsx
     'dashShell.layoutControls.preferencesTitle': 'Einstellungen',
     'dashShell.layoutControls.preferencesDesc': 'Passen Sie das Layout Ihres Dashboards an.',
+    'dashShell.layoutControls.displayDesc': 'Schalten Sie das Dashboard zwischen Hell- und Dunkelmodus um.',
     'dashShell.layoutControls.themePreset': 'Design-Vorlage',
     'dashShell.layoutControls.presetPlaceholder': 'Vorlage',
     'dashShell.layoutControls.fonts': 'Schriftarten',

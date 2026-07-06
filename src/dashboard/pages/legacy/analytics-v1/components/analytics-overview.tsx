@@ -16,67 +16,28 @@ import { Command, CommandGroup, CommandItem, CommandList } from "@/components/da
 import { Label } from "@/components/dashboard-ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/dashboard-ui/popover";
 import { cn } from "@/lib/utils";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 type RiskView = "risk-view" | "momentum" | "quality";
 type FilterToggleKey = "enterpriseOnly" | "stalledOnly" | "overdueOnly" | "includeRenewals";
 
-const FILTER_OPTIONS: Array<{ key: FilterToggleKey; label: string; summaryLabel: string }> = [
-  { key: "enterpriseOnly", label: "Enterprise only", summaryLabel: "Enterprise" },
-  { key: "stalledOnly", label: "Stalled deals (>14 days)", summaryLabel: "Stalled" },
-  { key: "overdueOnly", label: "Closing date exceeded", summaryLabel: "Overdue" },
-  { key: "includeRenewals", label: "Include renewals", summaryLabel: "Renewals" },
+const FILTER_OPTION_KEYS: FilterToggleKey[] = ["enterpriseOnly", "stalledOnly", "overdueOnly", "includeRenewals"];
+
+const RISK_VIEW_VALUES: Array<{ value: RiskView; key: "riskView" | "momentum" | "quality" }> = [
+  { value: "risk-view", key: "riskView" },
+  { value: "momentum", key: "momentum" },
+  { value: "quality", key: "quality" },
 ];
 
-const riskViews: Array<{
-  value: RiskView;
-  label: string;
-  description: string;
-}> = [
-  {
-    value: "risk-view",
-    label: "Risk view",
-    description: "Early warnings",
-  },
-  {
-    value: "momentum",
-    label: "Momentum",
-    description: "Trend direction",
-  },
-  {
-    value: "quality",
-    label: "Quality",
-    description: "Pipeline hygiene",
-  },
-];
-
-const RISK_SUMMARY_METRICS = [
-  {
-    key: "stalled",
-    label: "Stalled Deals",
-    value: "8",
-    comparatorLabel: "vs previous period",
-  },
-  {
-    key: "risk",
-    label: "Revenue at Risk",
-    value: "$1,151,000",
-    comparatorLabel: "vs previous period",
-  },
-  {
-    key: "win-rate",
-    label: "Win Rate Trend",
-    value: "+8.3pp",
-    comparatorLabel: "vs previous period",
-  },
-  {
-    key: "cycle",
-    label: "Sales Cycle Drift",
-    value: "+2.3 days",
-    comparatorLabel: "vs previous period",
-  },
+const RISK_SUMMARY_METRIC_KEYS = [
+  { key: "stalled", labelKey: "stalledDeals", value: "8" },
+  { key: "risk", labelKey: "revenueAtRisk", value: "$1,151,000" },
+  { key: "win-rate", labelKey: "winRateTrend", value: "+8.3pp" },
+  { key: "cycle", labelKey: "salesCycleDrift", value: "+2.3 days" },
 ] as const;
 
 export function AnalyticsOverview() {
+  const { t } = useLanguage();
   const [dateRange, setDateRange] = React.useState<{ from: Date; to: Date }>(() => {
     const to = startOfDay(new Date());
     return { from: subDays(to, 29), to };
@@ -113,7 +74,7 @@ export function AnalyticsOverview() {
           <DateRangePicker value={dateRange} onChange={handleDateRangeChange} />
           <Button variant="secondary">
             <Download />
-            Export
+            {t('dashAnalyticsV1.export')}
           </Button>
         </div>
       </div>
@@ -141,9 +102,10 @@ function buildRevenueChartData(from: Date, to: Date) {
 }
 
 function SummaryRow({ revenueSeries }: { revenueSeries: Array<{ day: string; revenue: number }> }) {
+  const { t } = useLanguage();
   const revenueChartConfig = {
     revenue: {
-      label: "Revenue",
+      label: t('dashAnalyticsV1.summary.chart.revenue'),
       color: "var(--chart-1)",
     },
   } satisfies ChartConfig;
@@ -158,7 +120,7 @@ function SummaryRow({ revenueSeries }: { revenueSeries: Array<{ day: string; rev
     <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
       <div className="min-w-0 space-y-2">
         <div>
-          <div className="font-medium text-muted-foreground text-sm">Revenue</div>
+          <div className="font-medium text-muted-foreground text-sm">{t('dashAnalyticsV1.summary.revenue')}</div>
           <div className="font-semibold text-3xl tabular-nums tracking-tight sm:text-4xl">$1,248,000</div>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -167,9 +129,9 @@ function SummaryRow({ revenueSeries }: { revenueSeries: Array<{ day: string; rev
         </div>
 
         <div className="flex flex-wrap items-center gap-2 text-muted-foreground text-sm">
-          <span>Previous $1,141,000</span>
+          <span>{t('dashAnalyticsV1.summary.previous').replace('{value}', '$1,141,000')}</span>
           <Badge variant="outline" className="font-medium text-xs">
-            Risk Ladder 30
+            {t('dashAnalyticsV1.filters.riskLadder30')}
           </Badge>
         </div>
         <div>
@@ -187,21 +149,21 @@ function SummaryRow({ revenueSeries }: { revenueSeries: Array<{ day: string; rev
               />
             </ComposedChart>
           </ChartContainer>
-          <span className="text-muted-foreground text-xs">Selected range</span>
+          <span className="text-muted-foreground text-xs">{t('dashAnalyticsV1.summary.selectedRange')}</span>
         </div>
       </div>
 
       <Card className="min-w-0 py-4 shadow-xs xl:col-span-2">
         <CardHeader className="px-4">
-          <CardTitle>Risk summary</CardTitle>
-          <CardDescription>Core risk signals vs previous period</CardDescription>
+          <CardTitle>{t('dashAnalyticsV1.summary.riskSummary.title')}</CardTitle>
+          <CardDescription>{t('dashAnalyticsV1.summary.riskSummary.description')}</CardDescription>
         </CardHeader>
         <CardContent className="grid grid-cols-1 gap-4 px-4 sm:grid-cols-2 xl:grid-cols-4 xl:gap-0 xl:divide-x xl:[&>div:first-child]:pl-0 xl:[&>div:last-child]:pr-0 xl:[&>div]:px-5">
-          {RISK_SUMMARY_METRICS.map((item) => (
+          {RISK_SUMMARY_METRIC_KEYS.map((item) => (
             <div key={item.key} className="min-w-0 space-y-1">
-              <div className="text-muted-foreground text-sm">{item.label}</div>
+              <div className="text-muted-foreground text-sm">{t(`dashAnalyticsV1.summary.metric.${item.labelKey}`)}</div>
               <div className="font-semibold text-2xl tabular-nums leading-tight">{item.value}</div>
-              <div className="text-muted-foreground text-xs">{item.comparatorLabel}</div>
+              <div className="text-muted-foreground text-xs">{t('dashAnalyticsV1.summary.comparatorLabel')}</div>
             </div>
           ))}
         </CardContent>
@@ -211,9 +173,16 @@ function SummaryRow({ revenueSeries }: { revenueSeries: Array<{ day: string; rev
 }
 
 function RiskViewSelect() {
+  const { t } = useLanguage();
   const [open, setOpen] = React.useState(false);
   const [value, setValue] = React.useState("risk-view");
   const listId = React.useId();
+
+  const riskViews = RISK_VIEW_VALUES.map((view) => ({
+    value: view.value,
+    label: t(`dashAnalyticsV1.riskView.${view.key}.label`),
+    description: t(`dashAnalyticsV1.riskView.${view.key}.description`),
+  }));
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -272,15 +241,32 @@ function FiltersPopover({
   selectedFilters: FilterToggleKey[];
   onToggle: (key: FilterToggleKey, checked: boolean) => void;
 }) {
+  const { t } = useLanguage();
   const [open, setOpen] = React.useState(false);
   const activeCount = selectedFilters.length;
+
+  const filterOptions = FILTER_OPTION_KEYS.map((key) => ({
+    key,
+    label: t(`dashAnalyticsV1.filters.${key}.label`),
+    summaryLabel: t(`dashAnalyticsV1.filters.${key}.summary`),
+  }));
+
+  const summarizeFilterState = () => {
+    if (selectedFilters.length === 0) {
+      return t('dashAnalyticsV1.filters.allDeals');
+    }
+    return filterOptions
+      .filter((item) => selectedFilters.includes(item.key))
+      .map((item) => item.summaryLabel)
+      .join(" · ");
+  };
 
   return (
     <div className="flex items-center gap-2">
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <Button variant="outline" aria-expanded={open}>
-            Filters
+            {t('dashAnalyticsV1.filters.button')}
             <Badge className="tabular-nums" variant="secondary">
               {activeCount}
             </Badge>
@@ -289,13 +275,13 @@ function FiltersPopover({
         <PopoverContent align="start" className="w-72">
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="font-semibold text-sm">Filters</h3>
+              <h3 className="font-semibold text-sm">{t('dashAnalyticsV1.filters.title')}</h3>
               <Badge variant="outline" className="font-medium text-xs tabular-nums">
-                Risk Ladder 30
+                {t('dashAnalyticsV1.filters.riskLadder30')}
               </Badge>
             </div>
             <div className="space-y-3">
-              {FILTER_OPTIONS.map((item) => (
+              {filterOptions.map((item) => (
                 <FilterToggle
                   key={item.key}
                   id={item.key}
@@ -310,7 +296,7 @@ function FiltersPopover({
       </Popover>
 
       <span className="text-muted-foreground text-sm">
-        Showing: <span className="font-medium">{summarizeFilterState(selectedFilters)}</span>
+        {t('dashAnalyticsV1.filters.showing')} <span className="font-medium">{summarizeFilterState()}</span>
       </span>
     </div>
   );
@@ -335,13 +321,4 @@ function FilterToggle({
       </Label>
     </div>
   );
-}
-
-function summarizeFilterState(selectedFilters: FilterToggleKey[]) {
-  if (selectedFilters.length === 0) {
-    return "All deals";
-  }
-  return FILTER_OPTIONS.filter((item) => selectedFilters.includes(item.key))
-    .map((item) => item.summaryLabel)
-    .join(" · ");
 }

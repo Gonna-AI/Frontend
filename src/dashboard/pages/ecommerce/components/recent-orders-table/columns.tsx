@@ -13,6 +13,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/dashboard-ui/dropdown-menu";
+import type { useLanguage } from "@/contexts/LanguageContext";
 
 import type { OrderRow } from "./schema";
 
@@ -20,7 +21,7 @@ function formatOrderDate(date: string) {
   return format(parseISO(date), "h:mm a, d MMM yyyy");
 }
 
-function PaymentBadge({ status }: { status: OrderRow["payment"] }) {
+function PaymentBadge({ status, t }: { status: OrderRow["payment"]; t: ReturnType<typeof useLanguage>["t"] }) {
   if (status === "Paid") {
     return (
       <Badge
@@ -28,7 +29,7 @@ function PaymentBadge({ status }: { status: OrderRow["payment"] }) {
         variant="outline"
       >
         <span className="size-1.5 rounded-full bg-current" />
-        Paid
+        {t("dashEcommerce.orders.badge.paid")}
       </Badge>
     );
   }
@@ -37,7 +38,7 @@ function PaymentBadge({ status }: { status: OrderRow["payment"] }) {
     return (
       <Badge variant="destructive">
         <span className="size-1.5 rounded-full bg-current" />
-        Refunded
+        {t("dashEcommerce.orders.badge.refunded")}
       </Badge>
     );
   }
@@ -48,12 +49,12 @@ function PaymentBadge({ status }: { status: OrderRow["payment"] }) {
       variant="outline"
     >
       <span className="size-1.5 rounded-full bg-current" />
-      Pending
+      {t("dashEcommerce.orders.badge.pending")}
     </Badge>
   );
 }
 
-function FulfillmentBadge({ status }: { status: OrderRow["fulfillment"] }) {
+function FulfillmentBadge({ status, t }: { status: OrderRow["fulfillment"]; t: ReturnType<typeof useLanguage>["t"] }) {
   if (status === "Fulfilled") {
     return (
       <Badge
@@ -61,7 +62,7 @@ function FulfillmentBadge({ status }: { status: OrderRow["fulfillment"] }) {
         variant="outline"
       >
         <span className="size-1.5 rounded-full bg-current" />
-        Fulfilled
+        {t("dashEcommerce.orders.badge.fulfilled")}
       </Badge>
     );
   }
@@ -70,7 +71,7 @@ function FulfillmentBadge({ status }: { status: OrderRow["fulfillment"] }) {
     return (
       <Badge variant="destructive">
         <span className="size-1.5 rounded-full bg-current" />
-        Returned
+        {t("dashEcommerce.orders.badge.returned")}
       </Badge>
     );
   }
@@ -78,117 +79,119 @@ function FulfillmentBadge({ status }: { status: OrderRow["fulfillment"] }) {
   return (
     <Badge variant="destructive">
       <span className="size-1.5 rounded-full bg-current" />
-      Unfulfilled
+      {t("dashEcommerce.orders.badge.unfulfilled")}
     </Badge>
   );
 }
 
-export const recentOrdersColumns: ColumnDef<OrderRow>[] = [
-  {
-    id: "select",
-    header: ({ table }) => (
-      <div className="w-10">
-        <Checkbox
-          aria-label="Select all orders"
-          checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && "indeterminate")}
-          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-        />
-      </div>
-    ),
-    cell: ({ row }) => (
-      <div className="w-10">
-        <Checkbox
-          aria-label={`Select order ${row.original.id}`}
-          checked={row.getIsSelected()}
-          onCheckedChange={(value) => row.toggleSelected(!!value)}
-        />
-      </div>
-    ),
-    enableHiding: false,
-    enableSorting: false,
-  },
-  {
-    accessorKey: "id",
-    header: "Bedarf",
-    cell: ({ row }) => (
-      <div className="flex flex-col gap-0.5">
-        <div className="font-medium leading-none">{row.original.id}</div>
-        <div className="text-muted-foreground text-xs">{row.original.items}</div>
-      </div>
-    ),
-    enableHiding: false,
-  },
-  {
-    accessorKey: "customer",
-    header: "Projekt",
-  },
-  {
-    id: "statusSummary",
-    header: "Status",
-    cell: ({ row }) => (
-      <div className="flex items-center gap-2">
-        <PaymentBadge status={row.original.payment} />
-        <FulfillmentBadge status={row.original.fulfillment} />
-      </div>
-    ),
-    filterFn: (row, _columnId, value) => {
-      if (value === "Needs action") {
-        return (
-          row.original.payment === "Pending" ||
-          row.original.payment === "Refunded" ||
-          row.original.fulfillment === "Unfulfilled" ||
-          row.original.fulfillment === "Returned"
-        );
-      }
-
-      if (value === "Unfulfilled") {
-        return row.original.fulfillment === "Unfulfilled";
-      }
-
-      if (value === "Unpaid") {
-        return row.original.payment === "Pending";
-      }
-
-      if (value === "Returns") {
-        return row.original.payment === "Refunded" || row.original.fulfillment === "Returned";
-      }
-
-      return true;
+export function buildRecentOrdersColumns(t: ReturnType<typeof useLanguage>["t"]): ColumnDef<OrderRow>[] {
+  return [
+    {
+      id: "select",
+      header: ({ table }) => (
+        <div className="w-10">
+          <Checkbox
+            aria-label={t("dashEcommerce.orders.selectAllAria")}
+            checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && "indeterminate")}
+            onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+          />
+        </div>
+      ),
+      cell: ({ row }) => (
+        <div className="w-10">
+          <Checkbox
+            aria-label={t("dashEcommerce.orders.selectOneAria").replace("{id}", row.original.id)}
+            checked={row.getIsSelected()}
+            onCheckedChange={(value) => row.toggleSelected(!!value)}
+          />
+        </div>
+      ),
+      enableHiding: false,
+      enableSorting: false,
     },
-  },
-  {
-    accessorKey: "total",
-    header: () => <div className="w-28">Wert</div>,
-    cell: ({ row }) => <div className="w-28 tabular-nums">{row.original.total}</div>,
-  },
-  {
-    accessorKey: "date",
-    header: () => <div className="w-44">Erkannt am</div>,
-    cell: ({ row }) => <div className="w-44 text-muted-foreground">{formatOrderDate(row.original.date)}</div>,
-  },
-  {
-    id: "actions",
-    header: () => <div className="flex w-full justify-end">Actions</div>,
-    cell: () => (
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <div className="flex w-full justify-end">
-            <Button aria-label="Open order actions" size="icon-sm" variant="ghost">
-              <MoreHorizontal />
-            </Button>
-          </div>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-40">
-          <DropdownMenuLabel>Aktionen</DropdownMenuLabel>
-          <DropdownMenuGroup>
-            <DropdownMenuItem>Bedarf ansehen</DropdownMenuItem>
-            <DropdownMenuItem>Jetzt bestellen</DropdownMenuItem>
-            <DropdownMenuItem>Bedarf-ID kopieren</DropdownMenuItem>
-          </DropdownMenuGroup>
-        </DropdownMenuContent>
-      </DropdownMenu>
-    ),
-    enableHiding: false,
-    enableSorting: false,
-  },
-];
+    {
+      accessorKey: "id",
+      header: t("dashEcommerce.orders.column.need"),
+      cell: ({ row }) => (
+        <div className="flex flex-col gap-0.5">
+          <div className="font-medium leading-none">{row.original.id}</div>
+          <div className="text-muted-foreground text-xs">{row.original.items}</div>
+        </div>
+      ),
+      enableHiding: false,
+    },
+    {
+      accessorKey: "customer",
+      header: t("dashEcommerce.orders.column.project"),
+    },
+    {
+      id: "statusSummary",
+      header: t("dashEcommerce.orders.column.status"),
+      cell: ({ row }) => (
+        <div className="flex items-center gap-2">
+          <PaymentBadge status={row.original.payment} t={t} />
+          <FulfillmentBadge status={row.original.fulfillment} t={t} />
+        </div>
+      ),
+      filterFn: (row, _columnId, value) => {
+        if (value === "Needs action") {
+          return (
+            row.original.payment === "Pending" ||
+            row.original.payment === "Refunded" ||
+            row.original.fulfillment === "Unfulfilled" ||
+            row.original.fulfillment === "Returned"
+          );
+        }
+
+        if (value === "Unfulfilled") {
+          return row.original.fulfillment === "Unfulfilled";
+        }
+
+        if (value === "Unpaid") {
+          return row.original.payment === "Pending";
+        }
+
+        if (value === "Returns") {
+          return row.original.payment === "Refunded" || row.original.fulfillment === "Returned";
+        }
+
+        return true;
+      },
+    },
+    {
+      accessorKey: "total",
+      header: () => <div className="w-28">{t("dashEcommerce.orders.column.value")}</div>,
+      cell: ({ row }) => <div className="w-28 tabular-nums">{row.original.total}</div>,
+    },
+    {
+      accessorKey: "date",
+      header: () => <div className="w-44">{t("dashEcommerce.orders.column.detectedAt")}</div>,
+      cell: ({ row }) => <div className="w-44 text-muted-foreground">{formatOrderDate(row.original.date)}</div>,
+    },
+    {
+      id: "actions",
+      header: () => <div className="flex w-full justify-end">{t("dashEcommerce.orders.column.actions")}</div>,
+      cell: () => (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <div className="flex w-full justify-end">
+              <Button aria-label={t("dashEcommerce.orders.actionsAria")} size="icon-sm" variant="ghost">
+                <MoreHorizontal />
+              </Button>
+            </div>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-40">
+            <DropdownMenuLabel>{t("dashEcommerce.orders.menu.actions")}</DropdownMenuLabel>
+            <DropdownMenuGroup>
+              <DropdownMenuItem>{t("dashEcommerce.orders.menu.viewNeed")}</DropdownMenuItem>
+              <DropdownMenuItem>{t("dashEcommerce.orders.menu.orderNow")}</DropdownMenuItem>
+              <DropdownMenuItem>{t("dashEcommerce.orders.menu.copyNeedId")}</DropdownMenuItem>
+            </DropdownMenuGroup>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      ),
+      enableHiding: false,
+      enableSorting: false,
+    },
+  ];
+}

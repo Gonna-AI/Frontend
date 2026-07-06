@@ -28,11 +28,35 @@ import {
   DropdownMenuTrigger,
 } from "@/components/dashboard-ui/dropdown-menu";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/dashboard-ui/table";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { cn } from "@/lib/utils";
 
 import type { InfrastructureEnvironment, InfrastructureGroup } from "./infrastructure-data";
 
+const GROUP_NAME_KEYS: Record<string, string> = {
+  "Kostencheck Copilot Worker": "dashInfra.groupName.kostencheckCopilotWorker",
+  Inference: "dashInfra.groupName.inference",
+  "Database & Realtime": "dashInfra.groupName.databaseRealtime",
+  "Job Queue": "dashInfra.groupName.jobQueue",
+};
+
+const ENV_VALUE_KEYS: Record<InfrastructureEnvironment["environment"], string> = {
+  Expired: "dashInfra.envValue.expired",
+  Production: "dashInfra.envValue.production",
+  Staging: "dashInfra.envValue.staging",
+};
+
+const STATUS_VALUE_KEYS: Record<InfrastructureEnvironment["status"], string> = {
+  Online: "dashInfra.statusValue.online",
+  Unhealthy: "dashInfra.statusValue.unhealthy",
+  Processing: "dashInfra.statusValue.processing",
+};
+
 export function ProjectEnvironments({ group }: { group: InfrastructureGroup }) {
+  const { t } = useLanguage();
+  const groupNameKey = GROUP_NAME_KEYS[group.name];
+  const localizedGroupName = groupNameKey ? t(groupNameKey) : group.name;
+
   return (
     <Collapsible
       defaultOpen
@@ -47,14 +71,14 @@ export function ProjectEnvironments({ group }: { group: InfrastructureGroup }) {
             <ChevronDown className="group-data-[state=open]:rotate-180" />
             <div className="flex min-w-0 items-baseline gap-1.5 text-left">
               <span className="shrink-0 font-medium leading-none">{group.organization}</span>
-              <span className="min-w-0 truncate text-muted-foreground text-sm">({group.name})</span>
+              <span className="min-w-0 truncate text-muted-foreground text-sm">({localizedGroupName})</span>
             </div>
           </Button>
         </CollapsibleTrigger>
         <div className="flex w-full items-center justify-between gap-2 sm:ml-auto sm:w-auto sm:justify-end">
           <Button variant="ghost" size="sm" className="-ml-1.5 sm:ml-0">
             <Plus data-icon="inline-start" />
-            Add Environment
+            {t("dashInfra.group.addEnvironment")}
           </Button>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -67,31 +91,31 @@ export function ProjectEnvironments({ group }: { group: InfrastructureGroup }) {
                 {group.rows.length > 0 ? (
                   <DropdownMenuItem>
                     <FileText />
-                    Activity Logs
+                    {t("dashInfra.group.activityLogs")}
                   </DropdownMenuItem>
                 ) : null}
                 <DropdownMenuItem>
                   <Terminal />
-                  Open Console
+                  {t("dashInfra.group.openConsole")}
                 </DropdownMenuItem>
                 <DropdownMenuItem>
                   <Settings />
-                  Project Settings
+                  {t("dashInfra.group.projectSettings")}
                 </DropdownMenuItem>
                 <DropdownMenuItem>
                   <RefreshCw />
-                  Sync Status
+                  {t("dashInfra.group.syncStatus")}
                 </DropdownMenuItem>
                 <DropdownMenuItem>
                   <Bell />
-                  Manage Alerts
+                  {t("dashInfra.group.manageAlerts")}
                 </DropdownMenuItem>
               </DropdownMenuGroup>
               <DropdownMenuSeparator />
               <DropdownMenuGroup>
                 <DropdownMenuItem>
                   <Copy />
-                  Copy Project ID
+                  {t("dashInfra.group.copyProjectId")}
                 </DropdownMenuItem>
               </DropdownMenuGroup>
             </DropdownMenuContent>
@@ -107,6 +131,8 @@ export function ProjectEnvironments({ group }: { group: InfrastructureGroup }) {
 }
 
 function EnvironmentTable({ rows }: { rows: InfrastructureEnvironment[] }) {
+  const { t } = useLanguage();
+
   return (
     <div className="scrollbar-thin overflow-x-auto [scrollbar-color:var(--border)_transparent] **:data-[slot=table-container]:overflow-visible [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar]:h-1">
       <Table className="min-w-[1700px] table-fixed **:data-[slot='table-cell']:px-5 **:data-[slot='table-head']:px-5">
@@ -125,16 +151,16 @@ function EnvironmentTable({ rows }: { rows: InfrastructureEnvironment[] }) {
           <TableRow>
             <TableHead className="font-medium">
               <span className="inline-flex items-center gap-1">
-                Domain <ArrowUpDown className="size-4" />
+                {t("dashInfra.table.domain")} <ArrowUpDown className="size-4" />
               </span>
             </TableHead>
-            <TableHead>Platform</TableHead>
-            <TableHead>Environment</TableHead>
-            <TableHead>Health</TableHead>
-            <TableHead>Latency</TableHead>
-            <TableHead>Uptime</TableHead>
-            <TableHead>Resources</TableHead>
-            <TableHead>Server</TableHead>
+            <TableHead>{t("dashInfra.table.platform")}</TableHead>
+            <TableHead>{t("dashInfra.table.environment")}</TableHead>
+            <TableHead>{t("dashInfra.table.health")}</TableHead>
+            <TableHead>{t("dashInfra.table.latency")}</TableHead>
+            <TableHead>{t("dashInfra.table.uptime")}</TableHead>
+            <TableHead>{t("dashInfra.table.resources")}</TableHead>
+            <TableHead>{t("dashInfra.table.server")}</TableHead>
             <TableHead />
           </TableRow>
         </TableHeader>
@@ -142,8 +168,8 @@ function EnvironmentTable({ rows }: { rows: InfrastructureEnvironment[] }) {
           {rows.map((row) => (
             <TableRow key={row.domain}>
               <TableCell>
-                <span className="block truncate font-medium" title={row.domain}>
-                  {row.domain}
+                <span className="block truncate font-medium" title={t(row.domainKey)}>
+                  {t(row.domainKey)}
                 </span>
               </TableCell>
               <TableCell>
@@ -161,7 +187,7 @@ function EnvironmentTable({ rows }: { rows: InfrastructureEnvironment[] }) {
                     row.environment === "Staging" && "bg-sky-500/10 text-sky-600 dark:text-sky-400",
                   )}
                 >
-                  {row.environment}
+                  {t(ENV_VALUE_KEYS[row.environment])}
                 </Badge>
               </TableCell>
               <TableCell>
@@ -181,7 +207,7 @@ function EnvironmentTable({ rows }: { rows: InfrastructureEnvironment[] }) {
                       row.status === "Unhealthy" && "bg-destructive",
                     )}
                   />
-                  {row.status}
+                  {t(STATUS_VALUE_KEYS[row.status])}
                 </Badge>
               </TableCell>
               <TableCell>
@@ -198,20 +224,20 @@ function EnvironmentTable({ rows }: { rows: InfrastructureEnvironment[] }) {
               </TableCell>
               <TableCell>
                 <div className="grid grid-cols-3 gap-4">
-                  <ResourceMeter label="CPU" value={row.resources.cpu} />
-                  <ResourceMeter label="RAM" value={row.resources.ram} />
-                  <ResourceMeter label="Disk" value={row.resources.disk} />
+                  <ResourceMeter label={t("dashInfra.resource.cpu")} value={row.resources.cpu} />
+                  <ResourceMeter label={t("dashInfra.resource.ram")} value={row.resources.ram} />
+                  <ResourceMeter label={t("dashInfra.resource.disk")} value={row.resources.disk} />
                 </div>
               </TableCell>
               <TableCell>
                 <span className="flex flex-col font-medium">
-                  {row.server}
+                  {t(row.serverKey)}
                   <span className="flex items-center gap-1.5 text-muted-foreground text-xs">
                     <span
                       aria-hidden="true"
                       className={cn("shrink-0 rounded-xs text-sm ring-1 ring-foreground/10", `flag:${row.countryCode}`)}
                     />
-                    {row.countryCode} · {row.plan}
+                    {row.countryCode} · {t(row.planKey)}
                   </span>
                 </span>
               </TableCell>
@@ -226,22 +252,22 @@ function EnvironmentTable({ rows }: { rows: InfrastructureEnvironment[] }) {
                     <DropdownMenuGroup>
                       <DropdownMenuItem>
                         <FileText />
-                        View Logs
+                        {t("dashInfra.row.viewLogs")}
                       </DropdownMenuItem>
                       <DropdownMenuItem>
                         <Terminal />
-                        Open Console
+                        {t("dashInfra.row.openConsole")}
                       </DropdownMenuItem>
                       <DropdownMenuItem>
                         <RefreshCw />
-                        Restart
+                        {t("dashInfra.row.restart")}
                       </DropdownMenuItem>
                     </DropdownMenuGroup>
                     <DropdownMenuSeparator />
                     <DropdownMenuGroup>
                       <DropdownMenuItem>
                         <Copy />
-                        Copy URL
+                        {t("dashInfra.row.copyUrl")}
                       </DropdownMenuItem>
                     </DropdownMenuGroup>
                   </DropdownMenuContent>
@@ -288,11 +314,13 @@ function ResourceMeter({ label, value }: { label: string; value: number }) {
 }
 
 function EmptyProjectState() {
+  const { t } = useLanguage();
+
   return (
     <div className="flex min-h-24 items-center justify-center border-t bg-muted/50 p-4">
       <div className="flex items-center gap-2">
         <CircleDashed className="size-4" />
-        <p className="font-medium text-sm">No environments in this project</p>
+        <p className="font-medium text-sm">{t("dashInfra.empty.noEnvironments")}</p>
       </div>
     </div>
   );

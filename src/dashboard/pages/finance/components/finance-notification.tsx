@@ -2,22 +2,25 @@ import { AlertTriangle } from "lucide-react-dash";
 
 import { Button } from "@/components/dashboard-ui/button";
 import { Item, ItemActions, ItemContent, ItemDescription, ItemMedia, ItemTitle } from "@/components/dashboard-ui/item";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export function FinanceNotification() {
+  const { t } = useLanguage();
+
   return (
     <Item className="rounded-xl" variant="outline">
       <ItemMedia variant="icon">
         <AlertTriangle />
       </ItemMedia>
       <ItemContent>
-        <ItemTitle>Payment terms silently changed</ItemTitle>
+        <ItemTitle>{t('dashFinance.notification.title')}</ItemTitle>
         <ItemDescription>
-          "30 Tage netto" → "60 Tage netto" in prose, not visually flagged in the document (confidence 0.62).
+          {t('dashFinance.notification.description')}
         </ItemDescription>
       </ItemContent>
       <ItemActions>
         <Button size="sm" variant="outline">
-          View details
+          {t('dashFinance.notification.viewDetails')}
         </Button>
       </ItemActions>
     </Item>

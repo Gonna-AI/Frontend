@@ -19,9 +19,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/dashboard-ui/dropdown-menu";
 import { updateChecklistItemStatus } from "@/dashboard/lib/pipelineClient";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { cn } from "@/lib/utils";
 
-import { labels, priorities, statuses, type Task } from "./data";
+import { getLocalizedLabels, getLocalizedPriorities, getLocalizedStatuses, type Task } from "./data";
 
 // Tasks has 5 display statuses, pipeline_checklist_items only has 3 — collapse the same way the
 // Kanban board does (backlog/todo -> open, "in progress" -> in_progress, done/canceled -> done).
@@ -54,182 +55,191 @@ function SortIcon({ sortDirection }: { sortDirection: false | "asc" | "desc" }) 
 }
 
 function TitleColumnHeader({ column }: { column: Column<Task, unknown> }) {
+  const { t } = useLanguage();
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="sm" className="-ml-3 text-muted-foreground data-[state=open]:bg-accent">
-          Titel
+          {t("dashTasks.column.title")}
           <SortIcon sortDirection={column.getIsSorted()} />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start">
         <DropdownMenuItem onSelect={() => column.toggleSorting(false)}>
           <ArrowUp />
-          Aufsteigend
+          {t("dashTasks.column.sortAscending")}
         </DropdownMenuItem>
         <DropdownMenuItem onSelect={() => column.toggleSorting(true)}>
           <ArrowDown />
-          Absteigend
+          {t("dashTasks.column.sortDescending")}
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem onSelect={() => column.clearSorting()}>
           <RotateCcw />
-          Zurücksetzen
+          {t("dashTasks.column.sortReset")}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );
 }
 
-export const columns: ColumnDef<Task>[] = [
-  {
-    id: "select",
-    header: ({ table }) => (
-      <Checkbox
-        checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && "indeterminate")}
-        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-        aria-label="Select all"
-        className="translate-y-0.5"
-      />
-    ),
-    cell: ({ row }) => (
-      <Checkbox
-        checked={row.getIsSelected()}
-        onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label="Select row"
-        className="translate-y-0.5"
-      />
-    ),
-    enableSorting: false,
-    enableHiding: false,
-  },
-  {
-    accessorKey: "id",
-    header: "Position",
-    cell: ({ row }) => <div className="w-20 font-mono text-muted-foreground text-sm">{row.getValue("id")}</div>,
-    enableSorting: false,
-    enableHiding: false,
-  },
-  {
-    accessorKey: "title",
-    header: ({ column }) => <TitleColumnHeader column={column} />,
-    cell: ({ row }) => {
-      const label = labels.find((label) => label.value === row.original.label);
+export function useTaskColumns(): ColumnDef<Task>[] {
+  const { t } = useLanguage();
+  const labels = getLocalizedLabels(t);
+  const statuses = getLocalizedStatuses(t);
+  const priorities = getLocalizedPriorities(t);
 
-      return (
-        <div className="flex min-w-0 items-center gap-2">
-          {label && (
-            <Badge className="rounded-sm bg-transparent" variant="outline">
-              {label.label}
-            </Badge>
-          )}
-          <span className="max-w-lg truncate font-medium text-sm">{row.getValue("title")}</span>
-        </div>
-      );
+  return [
+    {
+      id: "select",
+      header: ({ table }) => (
+        <Checkbox
+          checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && "indeterminate")}
+          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+          aria-label={t("dashTasks.column.selectAllAria")}
+          className="translate-y-0.5"
+        />
+      ),
+      cell: ({ row }) => (
+        <Checkbox
+          checked={row.getIsSelected()}
+          onCheckedChange={(value) => row.toggleSelected(!!value)}
+          aria-label={t("dashTasks.column.selectRowAria")}
+          className="translate-y-0.5"
+        />
+      ),
+      enableSorting: false,
+      enableHiding: false,
     },
-  },
-  {
-    accessorKey: "status",
-    header: "Status",
-    cell: ({ row }) => {
-      const status = statuses.find((status) => status.value === row.getValue("status"));
+    {
+      accessorKey: "id",
+      header: t("dashTasks.column.position"),
+      cell: ({ row }) => <div className="w-20 font-mono text-muted-foreground text-sm">{row.getValue("id")}</div>,
+      enableSorting: false,
+      enableHiding: false,
+    },
+    {
+      accessorKey: "title",
+      header: ({ column }) => <TitleColumnHeader column={column} />,
+      cell: ({ row }) => {
+        const label = labels.find((label) => label.value === row.original.label);
 
-      if (!status) {
-        return null;
-      }
+        return (
+          <div className="flex min-w-0 items-center gap-2">
+            {label && (
+              <Badge className="rounded-sm bg-transparent" variant="outline">
+                {label.label}
+              </Badge>
+            )}
+            <span className="max-w-lg truncate font-medium text-sm">{row.getValue("title")}</span>
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: "status",
+      header: t("dashTasks.column.status"),
+      cell: ({ row }) => {
+        const status = statuses.find((status) => status.value === row.getValue("status"));
 
-      return (
-        <Badge className={cn("gap-1.5 rounded-sm border font-medium", statusStyles[status.value])} variant="outline">
-          {status.icon && <status.icon className="size-4" />}
-          {status.label}
-        </Badge>
-      );
-    },
-    filterFn: (row, id, value) => {
-      return value.includes(row.getValue(id));
-    },
-  },
-  {
-    accessorKey: "priority",
-    header: "Priorität",
-    cell: ({ row }) => {
-      const priority = priorities.find((priority) => priority.value === row.getValue("priority"));
+        if (!status) {
+          return null;
+        }
 
-      if (!priority) {
-        return null;
-      }
+        return (
+          <Badge className={cn("gap-1.5 rounded-sm border font-medium", statusStyles[status.value])} variant="outline">
+            {status.icon && <status.icon className="size-4" />}
+            {status.label}
+          </Badge>
+        );
+      },
+      filterFn: (row, id, value) => {
+        return value.includes(row.getValue(id));
+      },
+    },
+    {
+      accessorKey: "priority",
+      header: t("dashTasks.column.priority"),
+      cell: ({ row }) => {
+        const priority = priorities.find((priority) => priority.value === row.getValue("priority"));
 
-      return (
-        <div className="flex items-center gap-2 text-sm">
-          {priority.icon && <priority.icon className="size-4 text-muted-foreground" />}
-          {priority.label}
-        </div>
-      );
-    },
-    filterFn: (row, id, value) => {
-      return value.includes(row.getValue(id));
-    },
-  },
-  {
-    id: "actions",
-    cell: ({ row }) => {
-      const task = row.original as Task;
+        if (!priority) {
+          return null;
+        }
 
-      return (
-        <div className="text-right">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon-sm" className="text-muted-foreground data-[state=open]:bg-muted">
-                <MoreHorizontal />
-                <span className="sr-only">Open menu</span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-40">
-              <DropdownMenuItem>Bearbeiten</DropdownMenuItem>
-              <DropdownMenuItem>Duplizieren</DropdownMenuItem>
-              <DropdownMenuItem>Favorisieren</DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuSub>
-                <DropdownMenuSubTrigger>Status</DropdownMenuSubTrigger>
-                <DropdownMenuSubContent>
-                  <DropdownMenuRadioGroup
-                    value={task.status}
-                    onValueChange={(value) => {
-                      updateChecklistItemStatus(task.id, taskStatusToChecklistStatus[value]).catch(() => {
-                        // Best-effort — a Realtime refetch will reconcile the table if this write fails.
-                      });
-                    }}
-                  >
-                    {statuses.map((status) => (
-                      <DropdownMenuRadioItem key={status.value} value={status.value}>
-                        {status.icon && <status.icon className="mr-2 size-4" />}
-                        {status.label}
-                      </DropdownMenuRadioItem>
-                    ))}
-                  </DropdownMenuRadioGroup>
-                </DropdownMenuSubContent>
-              </DropdownMenuSub>
-              <DropdownMenuSub>
-                <DropdownMenuSubTrigger>Kategorie</DropdownMenuSubTrigger>
-                <DropdownMenuSubContent>
-                  <DropdownMenuRadioGroup value={task.label}>
-                    {labels.map((label) => (
-                      <DropdownMenuRadioItem key={label.value} value={label.value}>
-                        {label.label}
-                      </DropdownMenuRadioItem>
-                    ))}
-                  </DropdownMenuRadioGroup>
-                </DropdownMenuSubContent>
-              </DropdownMenuSub>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem>
-                Löschen
-                <DropdownMenuShortcut>⌘⌫</DropdownMenuShortcut>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      );
+        return (
+          <div className="flex items-center gap-2 text-sm">
+            {priority.icon && <priority.icon className="size-4 text-muted-foreground" />}
+            {priority.label}
+          </div>
+        );
+      },
+      filterFn: (row, id, value) => {
+        return value.includes(row.getValue(id));
+      },
     },
-  },
-];
+    {
+      id: "actions",
+      cell: ({ row }) => {
+        const task = row.original as Task;
+
+        return (
+          <div className="text-right">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon-sm" className="text-muted-foreground data-[state=open]:bg-muted">
+                  <MoreHorizontal />
+                  <span className="sr-only">{t("dashTasks.rowActions.openMenuAria")}</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-40">
+                <DropdownMenuItem>{t("dashTasks.rowActions.edit")}</DropdownMenuItem>
+                <DropdownMenuItem>{t("dashTasks.rowActions.duplicate")}</DropdownMenuItem>
+                <DropdownMenuItem>{t("dashTasks.rowActions.favorite")}</DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuSub>
+                  <DropdownMenuSubTrigger>{t("dashTasks.rowActions.status")}</DropdownMenuSubTrigger>
+                  <DropdownMenuSubContent>
+                    <DropdownMenuRadioGroup
+                      value={task.status}
+                      onValueChange={(value) => {
+                        updateChecklistItemStatus(task.id, taskStatusToChecklistStatus[value]).catch(() => {
+                          // Best-effort — a Realtime refetch will reconcile the table if this write fails.
+                        });
+                      }}
+                    >
+                      {statuses.map((status) => (
+                        <DropdownMenuRadioItem key={status.value} value={status.value}>
+                          {status.icon && <status.icon className="mr-2 size-4" />}
+                          {status.label}
+                        </DropdownMenuRadioItem>
+                      ))}
+                    </DropdownMenuRadioGroup>
+                  </DropdownMenuSubContent>
+                </DropdownMenuSub>
+                <DropdownMenuSub>
+                  <DropdownMenuSubTrigger>{t("dashTasks.rowActions.category")}</DropdownMenuSubTrigger>
+                  <DropdownMenuSubContent>
+                    <DropdownMenuRadioGroup value={task.label}>
+                      {labels.map((label) => (
+                        <DropdownMenuRadioItem key={label.value} value={label.value}>
+                          {label.label}
+                        </DropdownMenuRadioItem>
+                      ))}
+                    </DropdownMenuRadioGroup>
+                  </DropdownMenuSubContent>
+                </DropdownMenuSub>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem>
+                  {t("dashTasks.rowActions.delete")}
+                  <DropdownMenuShortcut>⌘⌫</DropdownMenuShortcut>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        );
+      },
+    },
+  ];
+}

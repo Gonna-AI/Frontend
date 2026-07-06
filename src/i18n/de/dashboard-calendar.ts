@@ -16,6 +16,9 @@ export const deDashboardCalendar = {
   'dashCalendar.addEvent': 'Termin hinzufügen',
   'dashCalendar.daysCount': '{days} Tage - {count} Termine',
 
+  // date-range-picker.tsx
+  'dashCalendar.selectDate': 'Datum auswählen',
+
   // events-data.ts - demo events
   'dashCalendar.event.abDeadlineBergmann': 'AB-Ausstellungsfrist – Bergmann Maschinenbau',
   'dashCalendar.event.kickoff1Bergmann': 'KickOff 1 (AL) – Bergmann Maschinenbau',

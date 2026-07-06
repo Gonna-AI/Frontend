@@ -3,16 +3,18 @@ import { ArrowRight } from "lucide-react-dash";
 
 import { Badge } from "@/components/dashboard-ui/badge";
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/dashboard-ui/card";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export function ClassSchedule() {
+  const { t } = useLanguage();
   const today = format(new Date(), "EEEE, d MMMM");
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-sm">Kostencheck Pipeline Schedule</CardTitle>
+        <CardTitle className="text-sm">{t('dashAcademy.schedule.title')}</CardTitle>
         <CardAction className="flex items-center gap-1 text-muted-foreground text-xs">
-          View Full Schedule <ArrowRight className="size-4" />
+          {t('dashAcademy.schedule.viewFull')} <ArrowRight className="size-4" />
         </CardAction>
       </CardHeader>
       <CardContent className="flex flex-col gap-0">
@@ -28,10 +30,10 @@ export function ClassSchedule() {
 
             <div className="flex min-w-0 flex-col gap-1">
               <div className="truncate font-medium text-foreground text-sm leading-none">
-                Bergmann CNC-Paket 2026 — Extraktion
+                {t('dashAcademy.schedule.item1.title')}
               </div>
               <div className="truncate text-muted-foreground text-xs leading-none">
-                B-88431 vs. A-2026-0142 • Kostencheck Copilot
+                {t('dashAcademy.schedule.item1.subtitle')}
               </div>
             </div>
 
@@ -39,7 +41,7 @@ export function ClassSchedule() {
               variant="secondary"
               className="shrink-0 rounded-md border-green-600/50 bg-green-50 px-2.5 py-1 font-medium text-[10px] text-green-600 dark:border-green-800/50 dark:bg-green-500/10 dark:text-green-400"
             >
-              In Progress
+              {t('dashAcademy.schedule.status.inProgress')}
             </Badge>
           </div>
 
@@ -54,10 +56,10 @@ export function ClassSchedule() {
 
             <div className="flex min-w-0 flex-col gap-1">
               <div className="truncate font-medium text-foreground text-sm leading-none">
-                KickOff 1 — Bergmann CNC-Paket 2026
+                {t('dashAcademy.schedule.item2.title')}
               </div>
               <div className="truncate text-muted-foreground text-xs leading-none">
-                Auftragsleitung • Sondermotor TM-75 Meldung
+                {t('dashAcademy.schedule.item2.subtitle')}
               </div>
             </div>
 
@@ -65,7 +67,7 @@ export function ClassSchedule() {
               variant="secondary"
               className="shrink-0 rounded-md border-yellow-600/50 bg-yellow-50 px-2.5 py-1 font-medium text-[10px] text-yellow-700 dark:border-yellow-800/50 dark:bg-yellow-500/10 dark:text-yellow-300"
             >
-              Upcoming
+              {t('dashAcademy.schedule.status.upcoming')}
             </Badge>
           </div>
 
@@ -80,10 +82,10 @@ export function ClassSchedule() {
 
             <div className="flex min-w-0 flex-col gap-1">
               <div className="truncate font-medium text-foreground text-sm leading-none">
-                Weber Rundtisch-Nachrüstung 2026 — Abweichungsprüfung
+                {t('dashAcademy.schedule.item3.title')}
               </div>
               <div className="truncate text-muted-foreground text-xs leading-none">
-                W-55214 vs. A-2026-0087 • Kostencheck Copilot
+                {t('dashAcademy.schedule.item3.subtitle')}
               </div>
             </div>
 
@@ -91,7 +93,7 @@ export function ClassSchedule() {
               variant="secondary"
               className="shrink-0 rounded-md border-yellow-600/50 bg-yellow-50 px-2.5 py-1 font-medium text-[10px] text-yellow-700 dark:border-yellow-800/50 dark:bg-yellow-500/10 dark:text-yellow-300"
             >
-              Upcoming
+              {t('dashAcademy.schedule.status.upcoming')}
             </Badge>
           </div>
 
@@ -106,10 +108,10 @@ export function ClassSchedule() {
 
             <div className="flex min-w-0 flex-col gap-1">
               <div className="truncate font-medium text-foreground text-sm leading-none">
-                MK Anlagenbau Steuerungsintegration 2026 — Freigabe-Review
+                {t('dashAcademy.schedule.item4.title')}
               </div>
               <div className="truncate text-muted-foreground text-xs leading-none">
-                M-31207 • Zahlungsziel-Rückfrage offen
+                {t('dashAcademy.schedule.item4.subtitle')}
               </div>
             </div>
 
@@ -117,7 +119,7 @@ export function ClassSchedule() {
               variant="secondary"
               className="shrink-0 rounded-md border-destructive/50 bg-destructive/10 px-2.5 py-1 font-medium text-[10px] text-destructive dark:border-destructive/50 dark:bg-destructive/20"
             >
-              Cancelled
+              {t('dashAcademy.schedule.status.cancelled')}
             </Badge>
           </div>
 
@@ -132,10 +134,10 @@ export function ClassSchedule() {
 
             <div className="flex min-w-0 flex-col gap-1">
               <div className="truncate font-medium text-foreground text-sm leading-none">
-                KickOff 2 — Bergmann CNC-Paket 2026
+                {t('dashAcademy.schedule.item5.title')}
               </div>
               <div className="truncate text-muted-foreground text-xs leading-none">
-                Projektleiter Technik • Reitstock RS-90 Prüfung
+                {t('dashAcademy.schedule.item5.subtitle')}
               </div>
             </div>
 
@@ -143,7 +145,7 @@ export function ClassSchedule() {
               variant="secondary"
               className="shrink-0 rounded-md border-yellow-600/50 bg-yellow-50 px-2.5 py-1 font-medium text-[10px] text-yellow-700 dark:border-yellow-800/50 dark:bg-yellow-500/10 dark:text-yellow-300"
             >
-              Upcoming
+              {t('dashAcademy.schedule.status.upcoming')}
             </Badge>
           </div>
         </div>

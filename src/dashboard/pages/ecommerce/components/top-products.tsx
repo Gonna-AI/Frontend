@@ -4,34 +4,53 @@ import { ArrowUpRight } from "lucide-react-dash";
 
 import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/dashboard-ui/card";
 import { Separator } from "@/components/dashboard-ui/separator";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { fetchProducts, type PipelineProductRow, subscribeToTable } from "@/dashboard/lib/pipelineClient";
 
 const CHART_COLORS = ["var(--chart-3)", "var(--chart-2)", "var(--chart-1)", "var(--chart-4)", "var(--chart-5)"];
-
-const FALLBACK_CATEGORIES = [
-  { name: "Rundschalttische", share: 44, color: "var(--chart-3)" },
-  { name: "Spannsysteme", share: 32, color: "var(--chart-2)" },
-  { name: "Sondermotoren", share: 24, color: "var(--chart-1)" },
-];
-
-const FALLBACK_PRODUCTS = [
-  { name: "RT-450 Rundschalttisch", category: "Rundschalttische", share: "31%", sales: "€18,500" },
-  { name: "SP-200 Spannsystem", category: "Spannsysteme", share: "24%", sales: "€1,250" },
-  { name: "TM-75 Sondermotor", category: "Sondermotoren", share: "18%", sales: "€6,400" },
-];
-
-const FALLBACK_TOTAL_LABEL = "73% of Bestellwert";
 
 function formatEur(value: number): string {
   return `€${Math.round(value).toLocaleString("de-DE")}`;
 }
 
-function buildFromProducts(products: PipelineProductRow[]) {
+function buildFallbackCategories(t: (key: string) => string) {
+  return [
+    { name: t("dashEcommerce.topProducts.category.rotaryTables"), share: 44, color: "var(--chart-3)" },
+    { name: t("dashEcommerce.topProducts.category.clampingSystems"), share: 32, color: "var(--chart-2)" },
+    { name: t("dashEcommerce.topProducts.category.customMotors"), share: 24, color: "var(--chart-1)" },
+  ];
+}
+
+function buildFallbackProducts(t: (key: string) => string) {
+  return [
+    {
+      name: t("dashEcommerce.topProducts.product.rt450"),
+      category: t("dashEcommerce.topProducts.category.rotaryTables"),
+      share: "31%",
+      sales: "€18,500",
+    },
+    {
+      name: t("dashEcommerce.topProducts.product.sp200"),
+      category: t("dashEcommerce.topProducts.category.clampingSystems"),
+      share: "24%",
+      sales: "€1,250",
+    },
+    {
+      name: t("dashEcommerce.topProducts.product.tm75"),
+      category: t("dashEcommerce.topProducts.category.customMotors"),
+      share: "18%",
+      sales: "€6,400",
+    },
+  ];
+}
+
+function buildFromProducts(products: PipelineProductRow[], t: (key: string) => string) {
   if (products.length === 0) return null;
 
+  const otherCategoryLabel = t("dashEcommerce.topProducts.category.other");
   const byCategory = new Map<string, number>();
   for (const product of products) {
-    const category = product.category ?? "Sonstige";
+    const category = product.category ?? otherCategoryLabel;
     byCategory.set(category, (byCategory.get(category) ?? 0) + product.unit_price);
   }
 
@@ -51,18 +70,19 @@ function buildFromProducts(products: PipelineProductRow[]) {
     .slice(0, 3)
     .map((product) => ({
       name: `${product.article_no} ${product.name}`,
-      category: product.category ?? "Sonstige",
+      category: product.category ?? otherCategoryLabel,
       share: `${Math.round((product.unit_price / totalValue) * 100)}%`,
       sales: formatEur(product.unit_price),
     }));
 
   const topShare = categories.reduce((sum, c) => sum + c.share, 0);
-  const totalLabel = `${Math.min(topShare, 100)}% of Bestellwert`;
+  const totalLabel = `${Math.min(topShare, 100)}% ${t("dashEcommerce.topProducts.totalLabelSuffix")}`;
 
   return { categories, products: topProducts, totalLabel };
 }
 
 export function TopProducts() {
+  const { t } = useLanguage();
   const [live, setLive] = useState<ReturnType<typeof buildFromProducts>>(null);
 
   useEffect(() => {
@@ -71,7 +91,7 @@ export function TopProducts() {
     const load = () => {
       fetchProducts()
         .then((rows) => {
-          if (!cancelled) setLive(buildFromProducts(rows));
+          if (!cancelled) setLive(buildFromProducts(rows, t));
         })
         .catch(() => {
           // Fall back to the static demo snapshot if Supabase is unreachable.
@@ -85,16 +105,18 @@ export function TopProducts() {
       cancelled = true;
       unsubscribe();
     };
-  }, []);
+  }, [t]);
 
-  const categories = live?.categories ?? FALLBACK_CATEGORIES;
-  const products = live?.products ?? FALLBACK_PRODUCTS;
-  const totalLabel = live?.totalLabel ?? FALLBACK_TOTAL_LABEL;
+  const categories = live?.categories ?? buildFallbackCategories(t);
+  const products = live?.products ?? buildFallbackProducts(t);
+  const totalLabel = live?.totalLabel ?? t("dashEcommerce.topProducts.totalLabelFallback");
 
   return (
     <Card className="h-full">
       <CardHeader>
-        <CardTitle className="font-normal text-muted-foreground text-sm">Top Products</CardTitle>
+        <CardTitle className="font-normal text-muted-foreground text-sm">
+          {t("dashEcommerce.topProducts.title")}
+        </CardTitle>
         <CardDescription className="text-foreground text-xl tabular-nums leading-none tracking-tight">
           {totalLabel}
         </CardDescription>
@@ -105,7 +127,11 @@ export function TopProducts() {
 
       <CardContent className="flex flex-col gap-4">
         <div className="flex flex-col gap-2">
-          <div aria-label="Sales by category" className="flex h-2 gap-1 overflow-hidden bg-muted" role="img">
+          <div
+            aria-label={t("dashEcommerce.topProducts.chartAriaLabel")}
+            className="flex h-2 gap-1 overflow-hidden bg-muted"
+            role="img"
+          >
             {categories.map((category) => (
               <div
                 aria-hidden="true"
@@ -132,9 +158,9 @@ export function TopProducts() {
         <Separator />
 
         <div className="grid grid-cols-[1fr_auto_auto] gap-x-4 gap-y-3">
-          <div className="text-muted-foreground text-xs">Products</div>
-          <div className="text-muted-foreground text-xs">Share</div>
-          <div className="text-muted-foreground text-xs">Sales</div>
+          <div className="text-muted-foreground text-xs">{t("dashEcommerce.topProducts.columnProducts")}</div>
+          <div className="text-muted-foreground text-xs">{t("dashEcommerce.topProducts.columnShare")}</div>
+          <div className="text-muted-foreground text-xs">{t("dashEcommerce.topProducts.columnSales")}</div>
 
           {products.map((product) => (
             <div className="contents text-sm" key={product.name}>

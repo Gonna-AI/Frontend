@@ -5,50 +5,51 @@ import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
 import { Avatar, AvatarFallback } from "@/components/dashboard-ui/avatar";
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/dashboard-ui/card";
 import { type ChartConfig, ChartContainer } from "@/components/dashboard-ui/chart";
+import { useLanguage } from "@/contexts/LanguageContext";
 
-const performanceHighlights = [
+const rawPerformanceHighlights = [
   {
-    className: "Bergmann",
+    classKey: "bergmann",
     start: 1.25,
     duration: 1.45,
-    subject: "Prototypenlinie 2023",
+    subjectKey: "prototypeLine2023",
     score: 96,
     avatars: ["AB", "KC", "TH"],
   },
   {
-    className: "Weiss",
+    classKey: "weiss",
     start: 0.72,
     duration: 1.75,
-    subject: "Torquemotor 2023",
+    subjectKey: "torqueMotor2023",
     score: 93,
     avatars: ["AB"],
   },
   {
-    className: "Trautmann",
+    classKey: "trautmann",
     start: 1.35,
     duration: 1.9,
-    subject: "Reitstock 2023",
+    subjectKey: "tailstock2023",
     score: 91,
     avatars: ["AB", "KC", "TH"],
   },
   {
-    className: "Falk",
+    classKey: "falk",
     start: 2.22,
     duration: 1.66,
-    subject: "Steuerung 2022",
+    subjectKey: "controls2022",
     score: 88,
     avatars: ["AB", "KC"],
   },
-];
+] as const;
 
-const chartConfig = {
-  duration: {
-    label: "Similarity",
-    color: "var(--chart-3)",
-  },
-} satisfies ChartConfig;
-
-type PerformanceHighlight = (typeof performanceHighlights)[number];
+type PerformanceHighlight = {
+  className: string;
+  start: number;
+  duration: number;
+  subject: string;
+  score: number;
+  avatars: string[];
+};
 
 function PerformanceHighlightBar({
   height = 0,
@@ -125,12 +126,38 @@ function PerformanceHighlightBar({
 }
 
 export function PerformanceHighlights() {
+  const { t } = useLanguage();
+
+  const chartConfig = {
+    duration: {
+      label: t('dashAcademy.performanceHighlights.duration'),
+      color: "var(--chart-3)",
+    },
+  } satisfies ChartConfig;
+
+  const performanceHighlights: PerformanceHighlight[] = rawPerformanceHighlights.map((item) => ({
+    className: t(`dashAcademy.performanceHighlights.class.${item.classKey}`),
+    start: item.start,
+    duration: item.duration,
+    subject: t(`dashAcademy.performanceHighlights.subject.${item.subjectKey}`),
+    score: item.score,
+    avatars: [...item.avatars],
+  }));
+
+  const weekdayLabels = [
+    t('dashAcademy.performanceHighlights.day.mon'),
+    t('dashAcademy.performanceHighlights.day.tue'),
+    t('dashAcademy.performanceHighlights.day.wed'),
+    t('dashAcademy.performanceHighlights.day.thu'),
+    t('dashAcademy.performanceHighlights.day.fri'),
+  ];
+
   return (
     <Card className="h-full">
       <CardHeader>
-        <CardTitle className="text-sm">Retrieval Similarity Highlights</CardTitle>
+        <CardTitle className="text-sm">{t('dashAcademy.performanceHighlights.title')}</CardTitle>
         <CardAction className="flex items-center gap-1 text-muted-foreground text-xs">
-          View Insights <ArrowRight className="size-4" />
+          {t('dashAcademy.performanceHighlights.viewInsights')} <ArrowRight className="size-4" />
         </CardAction>
       </CardHeader>
       <CardContent>
@@ -145,7 +172,7 @@ export function PerformanceHighlights() {
             <XAxis
               axisLine={false}
               domain={[0, 4]}
-              tickFormatter={(value) => ["Mon", "Tue", "Wed", "Thu", "Fri"][Number(value)] ?? ""}
+              tickFormatter={(value) => weekdayLabels[Number(value)] ?? ""}
               tickLine={false}
               tickMargin={10}
               ticks={[0, 1, 2, 3, 4]}

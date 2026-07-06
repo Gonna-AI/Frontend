@@ -2,9 +2,10 @@
 import * as React from "react";
 
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/dashboard-ui/sheet";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { fetchShipments, subscribeToTable, type PipelineShipmentRow } from "@/dashboard/lib/pipelineClient";
 
-import { shipments as staticShipments, type Shipment, type ShipmentStatus } from "./shipment-data";
+import { buildShipments, type Shipment, type ShipmentStatus } from "./shipment-data";
 import { ShipmentDetails } from "./shipment-details";
 import { ShipmentList } from "./shipment-list";
 
@@ -37,6 +38,8 @@ function applyLiveStatus(shipments: Shipment[], liveRows: PipelineShipmentRow[] 
 }
 
 export function Logistics() {
+  const { t } = useLanguage();
+  const staticShipments = React.useMemo(() => buildShipments(t), [t]);
   const [liveRows, setLiveRows] = React.useState<PipelineShipmentRow[] | null>(null);
   const [detailsOpen, setDetailsOpen] = React.useState(false);
   const [selectedShipmentId, setSelectedShipmentId] = React.useState<string | null>(staticShipments[0].id);
@@ -63,7 +66,7 @@ export function Logistics() {
     };
   }, []);
 
-  const shipments = React.useMemo(() => applyLiveStatus(staticShipments, liveRows), [liveRows]);
+  const shipments = React.useMemo(() => applyLiveStatus(staticShipments, liveRows), [staticShipments, liveRows]);
   const selectedShipment = shipments.find((shipment) => shipment.id === selectedShipmentId) ?? shipments[0];
 
   function handleSelectShipment(shipmentId: string) {
@@ -98,8 +101,12 @@ export function Logistics() {
           className="gap-0 p-0 data-[side=right]:w-full data-[side=right]:sm:max-w-none data-[side=right]:md:w-3/4"
         >
           <SheetHeader className="sr-only">
-            <SheetTitle>{selectedShipment ? `Shipment ${selectedShipment.id}` : "Shipment details"}</SheetTitle>
-            <SheetDescription>Selected shipment details and route map.</SheetDescription>
+            <SheetTitle>
+              {selectedShipment
+                ? t("dashLogistics.sheet.titleWithId").replace("{id}", selectedShipment.id)
+                : t("dashLogistics.sheet.titleFallback")}
+            </SheetTitle>
+            <SheetDescription>{t("dashLogistics.sheet.description")}</SheetDescription>
           </SheetHeader>
           <ShipmentDetails shipment={selectedShipment} />
         </SheetContent>

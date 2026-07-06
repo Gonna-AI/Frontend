@@ -6,51 +6,47 @@ import { siEbay, siGoogle, siMeta, siShopify, siTiktok } from "simple-icons";
 import { SimpleIcon } from "@/dashboard/components/simple-icon";
 import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/dashboard-ui/card";
 import { type ChartConfig, ChartContainer } from "@/components/dashboard-ui/chart";
+import { useLanguage } from "@/contexts/LanguageContext";
 
-const trafficSources = [
-  {
-    name: "Meta",
-    visits: "5,640",
-    share: 38,
-    change: "+18%",
-    icon: siMeta,
-  },
-  {
-    name: "Google",
-    visits: "3,740",
-    share: 25,
-    change: "-6%",
-    icon: siGoogle,
-  },
-  {
-    name: "Shopify",
-    visits: "2,960",
-    share: 20,
-    change: "+7%",
-    icon: siShopify,
-  },
-  {
-    name: "TikTok",
-    visits: "1,340",
-    share: 10,
-    change: "+9%",
-    icon: siTiktok,
-  },
-  {
-    name: "eBay",
-    visits: "1,080",
-    share: 7,
-    change: "-3%",
-    icon: siEbay,
-  },
-] as const;
-
-const trafficSourcesConfig = {
-  share: {
-    label: "Visits",
-    color: "var(--chart-1)",
-  },
-} satisfies ChartConfig;
+function buildTrafficSources(t: (key: string) => string) {
+  return [
+    {
+      name: t("dashEcommerce.trafficSources.source.meta"),
+      visits: "5,640",
+      share: 38,
+      change: "+18%",
+      icon: siMeta,
+    },
+    {
+      name: t("dashEcommerce.trafficSources.source.google"),
+      visits: "3,740",
+      share: 25,
+      change: "-6%",
+      icon: siGoogle,
+    },
+    {
+      name: t("dashEcommerce.trafficSources.source.shopify"),
+      visits: "2,960",
+      share: 20,
+      change: "+7%",
+      icon: siShopify,
+    },
+    {
+      name: t("dashEcommerce.trafficSources.source.tiktok"),
+      visits: "1,340",
+      share: 10,
+      change: "+9%",
+      icon: siTiktok,
+    },
+    {
+      name: t("dashEcommerce.trafficSources.source.ebay"),
+      visits: "1,080",
+      share: 7,
+      change: "-3%",
+      icon: siEbay,
+    },
+  ] as const;
+}
 
 type IconLabelProps = {
   height?: number | string;
@@ -72,7 +68,14 @@ function getNumber(value: number | string | undefined) {
   return typeof value === "number" ? value : Number(value);
 }
 
-function TrafficSourceIconLabel({ height, index, width, x, y }: IconLabelProps) {
+function TrafficSourceIconLabel({
+  height,
+  index,
+  width,
+  x,
+  y,
+  trafficSources,
+}: IconLabelProps & { trafficSources: ReturnType<typeof buildTrafficSources> }) {
   if (typeof index !== "number") {
     return null;
   }
@@ -104,7 +107,13 @@ function TrafficSourceIconLabel({ height, index, width, x, y }: IconLabelProps) 
   );
 }
 
-function TrafficSourceNameLabel({ height, index, x, y }: SourceLabelProps) {
+function TrafficSourceNameLabel({
+  height,
+  index,
+  x,
+  y,
+  trafficSources,
+}: SourceLabelProps & { trafficSources: ReturnType<typeof buildTrafficSources> }) {
   if (typeof index !== "number") {
     return null;
   }
@@ -156,12 +165,23 @@ function TrafficSourceChangeLabel({ height, value, y }: SourceChangeLabelProps) 
 }
 
 export function TrafficSources() {
+  const { t } = useLanguage();
+  const trafficSources = buildTrafficSources(t);
+  const trafficSourcesConfig = {
+    share: {
+      label: t("dashEcommerce.trafficSources.share.label"),
+      color: "var(--chart-1)",
+    },
+  } satisfies ChartConfig;
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="font-normal text-muted-foreground text-sm">Traffic Sources</CardTitle>
+        <CardTitle className="font-normal text-muted-foreground text-sm">
+          {t("dashEcommerce.trafficSources.title")}
+        </CardTitle>
         <CardDescription className="text-foreground text-xl tabular-nums leading-none tracking-tight">
-          14.8K visits
+          {t("dashEcommerce.trafficSources.value")}
         </CardDescription>
         <CardAction>
           <ArrowUpRight className="size-4" />
@@ -205,14 +225,14 @@ export function TrafficSources() {
               dataKey="share"
               fill="var(--color-share)"
               fillOpacity={0.5}
-              name="Visits"
+              name={t("dashEcommerce.trafficSources.share.label")}
               radius={8}
               stroke="var(--color-share)"
               strokeOpacity={0.1}
               strokeWidth={0.5}
             >
-              <LabelList content={<TrafficSourceNameLabel />} dataKey="name" />
-              <LabelList content={<TrafficSourceIconLabel />} dataKey="share" />
+              <LabelList content={<TrafficSourceNameLabel trafficSources={trafficSources} />} dataKey="name" />
+              <LabelList content={<TrafficSourceIconLabel trafficSources={trafficSources} />} dataKey="share" />
               <LabelList content={<TrafficSourceChangeLabel />} dataKey="change" />
             </Bar>
           </BarChart>

@@ -34,6 +34,7 @@ import {
 import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from "@/components/dashboard-ui/input-group";
 import { Separator } from "@/components/dashboard-ui/separator";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/dashboard-ui/tooltip";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { cn } from "@/lib/utils";
 
 import type { Mail } from "./data";
@@ -46,6 +47,7 @@ interface MailDisplayProps {
 
 export function MailView({ mail, onClose }: MailDisplayProps) {
   const [, setMail] = useMail();
+  const { t } = useLanguage();
 
   function handleClose() {
     setMail({ selected: null });
@@ -58,29 +60,29 @@ export function MailView({ mail, onClose }: MailDisplayProps) {
         <div className="flex items-center gap-2">
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon-sm" aria-label="Close message" onClick={handleClose}>
+              <Button variant="ghost" size="icon-sm" aria-label={t('dashMail.closeMessage')} onClick={handleClose}>
                 <X />
               </Button>
             </TooltipTrigger>
-            <TooltipContent>Close message</TooltipContent>
+            <TooltipContent>{t('dashMail.closeMessage')}</TooltipContent>
           </Tooltip>
           <Separator className="h-4 data-vertical:self-center" orientation="vertical" />
           <div className="flex items-center gap-0">
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button variant="ghost" size="icon-sm" aria-label="Previous message">
+                <Button variant="ghost" size="icon-sm" aria-label={t('dashMail.previousMessage')}>
                   <ChevronLeft />
                 </Button>
               </TooltipTrigger>
-              <TooltipContent>Previous message</TooltipContent>
+              <TooltipContent>{t('dashMail.previousMessage')}</TooltipContent>
             </Tooltip>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button variant="ghost" size="icon-sm" aria-label="Next message">
+                <Button variant="ghost" size="icon-sm" aria-label={t('dashMail.nextMessage')}>
                   <ChevronRight />
                 </Button>
               </TooltipTrigger>
-              <TooltipContent>Next message</TooltipContent>
+              <TooltipContent>{t('dashMail.nextMessage')}</TooltipContent>
             </Tooltip>
           </div>
         </div>
@@ -88,33 +90,33 @@ export function MailView({ mail, onClose }: MailDisplayProps) {
         <div className="ml-auto flex items-center gap-2">
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon-sm" aria-label="Pin thread">
+              <Button variant="ghost" size="icon-sm" aria-label={t('dashMail.pinThread')}>
                 <Pin />
               </Button>
             </TooltipTrigger>
-            <TooltipContent>Pin thread</TooltipContent>
+            <TooltipContent>{t('dashMail.pinThread')}</TooltipContent>
           </Tooltip>
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon-sm" aria-label="Archive">
+              <Button variant="ghost" size="icon-sm" aria-label={t('dashMail.archive')}>
                 <Archive />
               </Button>
             </TooltipTrigger>
-            <TooltipContent>Archive</TooltipContent>
+            <TooltipContent>{t('dashMail.archive')}</TooltipContent>
           </Tooltip>
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon-sm" aria-label="Reply">
+              <Button variant="ghost" size="icon-sm" aria-label={t('dashMail.reply')}>
                 <Reply />
               </Button>
             </TooltipTrigger>
-            <TooltipContent>Reply</TooltipContent>
+            <TooltipContent>{t('dashMail.reply')}</TooltipContent>
           </Tooltip>
           <Tooltip>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <TooltipTrigger asChild>
-                  <Button variant="ghost" size="icon-sm" aria-label="More actions">
+                  <Button variant="ghost" size="icon-sm" aria-label={t('dashMail.moreActions')}>
                     <EllipsisVertical />
                   </Button>
                 </TooltipTrigger>
@@ -123,36 +125,36 @@ export function MailView({ mail, onClose }: MailDisplayProps) {
                 <DropdownMenuGroup>
                   <DropdownMenuItem>
                     <ReplyAll />
-                    Reply all
+                    {t('dashMail.replyAll')}
                   </DropdownMenuItem>
                   <DropdownMenuItem>
                     <Forward />
-                    Forward
+                    {t('dashMail.forward')}
                   </DropdownMenuItem>
                 </DropdownMenuGroup>
                 <DropdownMenuSeparator />
                 <DropdownMenuGroup>
                   <DropdownMenuItem>
                     <MailOpen />
-                    Mark as unread
+                    {t('dashMail.markAsUnread')}
                   </DropdownMenuItem>
                   <DropdownMenuItem>
                     <Tag />
-                    Add label
+                    {t('dashMail.addLabel')}
                   </DropdownMenuItem>
                 </DropdownMenuGroup>
               </DropdownMenuContent>
             </DropdownMenu>
-            <TooltipContent>More actions</TooltipContent>
+            <TooltipContent>{t('dashMail.moreActions')}</TooltipContent>
           </Tooltip>
           <Separator className="h-4 data-vertical:self-center" orientation="vertical" />
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon-sm" aria-label="Move to trash">
+              <Button variant="ghost" size="icon-sm" aria-label={t('dashMail.moveToTrash')}>
                 <Trash2 className="text-destructive" />
               </Button>
             </TooltipTrigger>
-            <TooltipContent>Move to trash</TooltipContent>
+            <TooltipContent>{t('dashMail.moveToTrash')}</TooltipContent>
           </Tooltip>
         </div>
       </div>
@@ -185,12 +187,13 @@ export function MailView({ mail, onClose }: MailDisplayProps) {
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="text-muted-foreground text-xs">
-                    To: <span className="text-foreground">{mail.to.map((recipient) => recipient.name).join(", ")}</span>
+                    {t('dashMail.to')}{" "}
+                    <span className="text-foreground">{mail.to.map((recipient) => recipient.name).join(", ")}</span>
                   </div>
 
                   {mail.cc?.length ? (
                     <div className="text-muted-foreground text-xs">
-                      Cc:{" "}
+                      {t('dashMail.cc')}{" "}
                       <span className="text-foreground">{mail.cc.map((recipient) => recipient.name).join(", ")}</span>
                     </div>
                   ) : null}
@@ -213,7 +216,7 @@ export function MailView({ mail, onClose }: MailDisplayProps) {
                         "data-[state=open]:bg-transparent data-[state=open]:text-muted-foreground",
                       )}
                     >
-                      Attachments ({mail.attachments.length})
+                      {t('dashMail.attachments').replace('{count}', String(mail.attachments.length))}
                       <ChevronDown className="group-data-[state=open]:rotate-180" />
                     </Button>
                   </CollapsibleTrigger>
@@ -243,7 +246,7 @@ export function MailView({ mail, onClose }: MailDisplayProps) {
                 <InputGroupAddon align="inline-start">
                   <Reply />
                 </InputGroupAddon>
-                <InputGroupInput className="text-xs" placeholder={`Reply ${mail.from.name}...`} />
+                <InputGroupInput className="text-xs" placeholder={t('dashMail.replyPlaceholder').replace('{name}', mail.from.name)} />
                 <InputGroupAddon className="gap-1" align="inline-end">
                   <InputGroupButton variant="ghost">
                     <Smile />
@@ -259,7 +262,7 @@ export function MailView({ mail, onClose }: MailDisplayProps) {
             </div>
           </div>
         ) : (
-          <div className="grid h-full place-items-center text-muted-foreground text-sm">No email selected</div>
+          <div className="grid h-full place-items-center text-muted-foreground text-sm">{t('dashMail.noEmailSelected')}</div>
         )}
       </div>
     </div>
