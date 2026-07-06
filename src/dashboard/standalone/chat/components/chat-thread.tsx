@@ -41,7 +41,6 @@ import {
   MessageScrollerViewport,
 } from "@/components/dashboard-ui/message-scroller";
 import { Separator } from "@/components/dashboard-ui/separator";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/dashboard-ui/tabs";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/dashboard-ui/tooltip";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { cn, getInitials } from "@/lib/utils";
@@ -72,6 +71,7 @@ export function ChatThread({
   isPending,
 }: ChatThreadProps) {
   const { t } = useLanguage();
+  const [composerMode, setComposerMode] = useState<"reply" | "note">("reply");
 
   return (
     <div className={cn("flex h-full min-w-0 flex-col py-3", className)}>
@@ -190,14 +190,19 @@ export function ChatThread({
                         </Avatar>
                       </MessageAvatar>
 
-                      <MessageContent className="max-w-full">
+                      <MessageContent
+                        className={cn(
+                          "w-fit min-w-0",
+                          isOutbound ? "max-w-[min(72%,42rem)]" : "max-w-[min(78%,44rem)]",
+                        )}
+                      >
                         <BubbleGroup>
                           <Bubble
                             variant={isOutbound ? "default" : "muted"}
                             align={message.align}
-                            className="max-w-[min(80%,42rem)]"
+                            className="w-fit max-w-full"
                           >
-                            <BubbleContent className="min-w-12 whitespace-pre-wrap break-words [overflow-wrap:break-word]">
+                            <BubbleContent className="min-w-[4.5rem] whitespace-pre-wrap break-normal text-left [overflow-wrap:break-word]">
                               {message.text}
                             </BubbleContent>
                             {message.reaction ? (
@@ -227,9 +232,9 @@ export function ChatThread({
                         </AvatarFallback>
                       </Avatar>
                     </MessageAvatar>
-                    <MessageContent className="max-w-full">
+                    <MessageContent className="w-fit max-w-[min(78%,44rem)]">
                       <BubbleGroup>
-                        <Bubble variant="muted" align="start" className="max-w-[min(80%,42rem)]">
+                        <Bubble variant="muted" align="start" className="w-fit max-w-full">
                           <BubbleContent className="min-w-12">
                             <span className="inline-flex items-center gap-1 text-muted-foreground">
                               <span className="size-1.5 animate-bounce rounded-full bg-current [animation-delay:-0.3s]" />
@@ -249,30 +254,40 @@ export function ChatThread({
         </MessageScroller>
       </MessageScrollerProvider>
 
-      <div className="px-2">
-        <Tabs defaultValue="reply" className="gap-2 rounded-xl border bg-background p-2 shadow-xs">
-          <TabsList
-            className="h-8 w-fit justify-start"
-          >
-            <TabsTrigger value="reply" className="h-7 flex-none px-3 text-xs">
+      <div className="px-3 pb-1">
+        <div className="rounded-2xl border bg-background/95 p-2 shadow-xs dark:bg-background">
+          <div className="mb-2 inline-flex rounded-xl bg-muted/70 p-1 text-xs font-medium text-muted-foreground dark:bg-muted/30">
+            <button
+              type="button"
+              onClick={() => setComposerMode("reply")}
+              className={cn(
+                "h-7 rounded-lg px-3 transition-colors",
+                composerMode === "reply" && "bg-background text-foreground shadow-xs",
+              )}
+            >
               {t('dashChat.thread.tabReply')}
-            </TabsTrigger>
-            <TabsTrigger value="note" className="h-7 flex-none px-3 text-xs">
+            </button>
+            <button
+              type="button"
+              onClick={() => setComposerMode("note")}
+              className={cn(
+                "h-7 rounded-lg px-3 transition-colors",
+                composerMode === "note" && "bg-background text-foreground shadow-xs",
+              )}
+            >
               {t('dashChat.thread.tabInternalNote')}
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="reply" className="m-0">
-            <MessageComposer
-              placeholder={t('dashChat.thread.composerPlaceholder')}
-              onSubmit={onSendMessage}
-              disabled={isPending}
-            />
-          </TabsContent>
-          <TabsContent value="note" className="m-0">
-            <MessageComposer placeholder={t('dashChat.thread.notePlaceholder')} />
-          </TabsContent>
-        </Tabs>
+            </button>
+          </div>
+          <MessageComposer
+            placeholder={
+              composerMode === "reply"
+                ? t('dashChat.thread.composerPlaceholder')
+                : t('dashChat.thread.notePlaceholder')
+            }
+            onSubmit={composerMode === "reply" ? onSendMessage : undefined}
+            disabled={composerMode === "reply" && isPending}
+          />
+        </div>
       </div>
     </div>
   );
@@ -303,7 +318,7 @@ function MessageComposer({
 
   return (
     <form className="w-full" onSubmit={handleSubmit}>
-      <InputGroup className="rounded-lg border bg-background shadow-none has-[[data-slot=input-group-control]:focus-visible]:ring-0 has-[[data-slot][aria-invalid=true]]:ring-0 dark:bg-input/20 dark:has-[[data-slot][aria-invalid=true]]:ring-0">
+      <InputGroup className="rounded-xl border bg-background shadow-none has-[[data-slot=input-group-control]:focus-visible]:ring-0 has-[[data-slot][aria-invalid=true]]:ring-0 dark:bg-input/20 dark:has-[[data-slot][aria-invalid=true]]:ring-0">
         <InputGroupTextarea
           placeholder={placeholder}
           value={value}
@@ -315,25 +330,27 @@ function MessageComposer({
               event.currentTarget.form?.requestSubmit();
             }
           }}
-          className="min-h-16 px-3 py-2.5 text-sm ring-0 focus-visible:ring-0 aria-invalid:ring-0 dark:aria-invalid:ring-0"
+          className="min-h-14 px-3 py-2.5 text-sm leading-5 ring-0 focus-visible:ring-0 aria-invalid:ring-0 dark:aria-invalid:ring-0"
         />
-        <InputGroupAddon align="block-end" className="flex-wrap justify-end border-t px-2 py-2">
-          <InputGroupButton aria-label={t('dashChat.thread.formatAria')} type="button" size="icon-sm">
-            <Type />
-          </InputGroupButton>
-          <InputGroupButton aria-label={t('dashChat.thread.emojiAria')} type="button" size="icon-sm">
-            <Smile />
-          </InputGroupButton>
-          <InputGroupButton aria-label={t('dashChat.thread.attachFileAria')} type="button" size="icon-sm">
-            <Paperclip />
-          </InputGroupButton>
-          <InputGroupButton aria-label={t('dashChat.thread.insertLinkAria')} type="button" size="icon-sm">
-            <Link />
-          </InputGroupButton>
-          <InputGroupButton aria-label={t('dashChat.thread.aiAssistAria')} type="button" size="icon-sm" variant="outline">
-            <Sparkles />
-          </InputGroupButton>
-          <InputGroupButton type="submit" variant="default" size="icon-sm" className="ml-auto" disabled={disabled}>
+        <InputGroupAddon align="block-end" className="justify-between gap-2 border-t px-2 py-2">
+          <div className="flex min-w-0 flex-wrap items-center gap-1">
+            <InputGroupButton aria-label={t('dashChat.thread.formatAria')} type="button" size="icon-sm">
+              <Type />
+            </InputGroupButton>
+            <InputGroupButton aria-label={t('dashChat.thread.emojiAria')} type="button" size="icon-sm">
+              <Smile />
+            </InputGroupButton>
+            <InputGroupButton aria-label={t('dashChat.thread.attachFileAria')} type="button" size="icon-sm">
+              <Paperclip />
+            </InputGroupButton>
+            <InputGroupButton aria-label={t('dashChat.thread.insertLinkAria')} type="button" size="icon-sm">
+              <Link />
+            </InputGroupButton>
+            <InputGroupButton aria-label={t('dashChat.thread.aiAssistAria')} type="button" size="icon-sm" variant="outline">
+              <Sparkles />
+            </InputGroupButton>
+          </div>
+          <InputGroupButton type="submit" variant="default" size="icon-sm" className="shrink-0 rounded-lg" disabled={disabled}>
             <Send />
             <span className="sr-only">{t('dashChat.thread.sendSr')}</span>
           </InputGroupButton>
