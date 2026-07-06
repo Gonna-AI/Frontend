@@ -4,5 +4,9 @@
 
 /reddit-industrial-ai https://clerktree.com 301!
 
+# Proxies marketing media (photos/videos) through Netlify's own CDN from the
+# Cloudflare R2 bucket, so the client only ever talks to clerktree.com.
+/media/* https://pub-0f804855178c4f4e8184c4fef3bd5b2a.r2.dev/:splat 200!
+
 # SPA Catch-all
 /* /index.html 200
