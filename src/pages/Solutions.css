@@ -27,11 +27,21 @@
 }
 
 .fabric-solution-logo {
+  align-items: center;
   color: rgb(6, 6, 6);
+  display: inline-flex;
   font-family: "Cal Sans", "Inter", system-ui, sans-serif;
   font-size: clamp(2rem, 2.5vw, 3rem);
+  gap: 12px;
   line-height: 0.9;
   text-decoration: none;
+}
+
+.fabric-solution-logo-mark {
+  display: block;
+  flex: 0 0 auto;
+  height: 34px;
+  width: 34px;
 }
 
 .fabric-solution-logo sup {
@@ -390,6 +400,12 @@
 
   .fabric-solution-logo {
     font-size: 2rem;
+    gap: 9px;
+  }
+
+  .fabric-solution-logo-mark {
+    height: 28px;
+    width: 28px;
   }
 
   .fabric-solution-stage {

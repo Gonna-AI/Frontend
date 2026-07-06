@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 
 import { useLanguage } from '../contexts/LanguageContext';
 import { Footer } from '../components/Landing/AgeroChrome';
+import ClerkTreeLogo from '../components/Brand/ClerkTreeLogo';
 import { shouldAutoplayMedia } from '../utils/idle';
 import SEO from '../components/SEO';
 import './LandingFramer.css';
@@ -78,7 +79,7 @@ export default function Solutions() {
         <section className="fabric-solution-shell" aria-labelledby="solutions-title">
           <div className="fabric-solution-topbar">
             <a className="fabric-solution-logo" href="/" aria-label="ClerkTree home">
-              ClerkTree<sup>®</sup>
+              <ClerkTreeLogo markClassName="fabric-solution-logo-mark" registered />
             </a>
 
             <div className="agero-nav-links">
