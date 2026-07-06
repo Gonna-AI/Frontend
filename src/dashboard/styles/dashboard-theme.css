@@ -271,6 +271,26 @@
   min-width: 0;
 }
 
+.dashboard-root [data-slot="sidebar-inner"] [data-slot="sidebar-menu-button"] {
+  background-color: transparent !important;
+  box-shadow: none !important;
+}
+
+.dashboard-root [data-slot="sidebar-inner"] [data-slot="sidebar-menu-button"]:hover,
+.dashboard-root [data-slot="sidebar-inner"] [data-slot="sidebar-menu-button"]:active,
+.dashboard-root [data-slot="sidebar-inner"] [data-slot="sidebar-menu-button"][data-active="true"] {
+  background-color: transparent !important;
+  color: var(--sidebar-foreground) !important;
+}
+
+.dashboard-root [data-slot="sidebar-inner"] [data-slot="sidebar-menu-button"][data-active="true"] {
+  font-weight: 700;
+}
+
+.dashboard-root [data-slot="sidebar-inner"] [data-slot="sidebar-menu-button"] svg {
+  color: currentColor !important;
+}
+
 @media (max-width: 900px) {
   .dashboard-root [data-slot="card-header"]:has([data-slot="card-action"]) {
     grid-template-columns: minmax(0, 1fr);
