@@ -1007,6 +1007,7 @@ export const de = {
     'home.menu.navAria': 'Mobile Navigation',
     'home.showcase.aria': 'Kundenübersicht',
     'home.showcase.logosAria': 'Kundenlogos',
+    'home.showcase.supportedBy': 'Supported by',
     'home.work.servicesAria': 'Leistungen',
     'home.office.imageAlt': 'ClerkTree Hauptsitz Straubing',
     'home.office.socialAria': 'Social-Links des Büros',

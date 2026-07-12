@@ -1008,6 +1008,7 @@ export const en = {
     'home.menu.navAria': 'Mobile navigation',
     'home.showcase.aria': 'Client showcase',
     'home.showcase.logosAria': 'Client logos',
+    'home.showcase.supportedBy': 'Supported by',
     'home.work.servicesAria': 'Services',
     'home.office.imageAlt': 'ClerkTree Straubing Headquarters',
     'home.office.socialAria': 'Office social links',

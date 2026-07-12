@@ -39,9 +39,10 @@ const works = [
 ];
 
 const clientLogos = [
-  { alt: 'THD', src: `${BASE}/THD.png`, width: 200 },
-  { alt: 'TUM', src: `${BASE}/TUM1.svg`, width: 210 },
-  { alt: 'Partner', src: `${BASE}/3cWSgJFsUVvZeOw9LdQmTOSVFhE.svg`, width: 120 },
+  { alt: 'Snowflake', natural: true, src: `${BASE}/client-logos/snowflake.svg`, width: 210 },
+  { alt: 'Zendesk', natural: true, src: `${BASE}/client-logos/zendesk.svg`, width: 178 },
+  { alt: 'PostHog', natural: true, src: `${BASE}/client-logos/posthog.svg`, width: 228 },
+  { alt: 'Amplitude', natural: true, src: `${BASE}/client-logos/amplitude.svg`, width: 216 },
 ];
 
 const showcaseImage = '/desktop1.png';
@@ -241,6 +242,7 @@ function HomePrelude({ heroContent }: { heroContent: ReactNode }) {
         </div>
 
         <div className="agero-client-logo-strip">
+          <p className="agero-client-logo-label">{t('home.showcase.supportedBy')}</p>
           <div className="agero-client-logo-track" aria-label={t('home.showcase.logosAria')} ref={logoTrackRef}>
             {Array.from({ length: 2 }).map((_, groupIndex) => (
               <div className="agero-client-logo-set" aria-hidden={groupIndex > 0} key={groupIndex}>

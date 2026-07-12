@@ -824,6 +824,20 @@ html.lenis.lenis-stopped {
   width: 100%;
 }
 
+.agero-client-logo-label {
+  color: rgba(19, 19, 19, 0.42);
+  font-size: 12px;
+  font-weight: 700;
+  left: 50%;
+  line-height: 1;
+  margin: 0;
+  position: absolute;
+  text-transform: uppercase;
+  top: 42px;
+  transform: translateX(-50%);
+  z-index: 3;
+}
+
 .agero-client-logo-strip::before,
 .agero-client-logo-strip::after {
   content: "";
@@ -850,6 +864,7 @@ html.lenis.lenis-stopped {
   animation: ageroLogoTicker 42000ms linear infinite;
   display: flex;
   height: 100%;
+  padding-top: 38px;
   width: max-content;
   will-change: transform;
 }
@@ -3251,6 +3266,11 @@ html.lenis.lenis-stopped {
     height: 132px;
   }
 
+  .agero-client-logo-label {
+    font-size: 10px;
+    top: 22px;
+  }
+
   .agero-client-logo-strip::before,
   .agero-client-logo-strip::after {
     width: 56px;
@@ -3259,6 +3279,10 @@ html.lenis.lenis-stopped {
   .agero-client-logo-track,
   .agero-client-logo-set {
     gap: 52px;
+  }
+
+  .agero-client-logo-track {
+    padding-top: 28px;
   }
 
   .agero-client-logo-set img {
