@@ -328,8 +328,8 @@ export default function AuthPage() {
                 <div className="absolute bottom-5 flex w-full justify-between px-4 sm:px-8">
                     <span className="text-sm text-gray-400">© 2026, ClerkTree.</span>
                     <div className="flex items-center gap-6 text-sm">
-                        <a href="/terms" className="text-gray-400 hover:text-gray-600 hover:underline">Terms</a>
-                        <a href="/privacy" className="text-gray-400 hover:text-gray-600 hover:underline">Privacy</a>
+                        <a href="/terms-of-service" className="text-gray-400 hover:text-gray-600 hover:underline">Terms</a>
+                        <a href="/privacy-policy" className="text-gray-400 hover:text-gray-600 hover:underline">Privacy</a>
                     </div>
                 </div>
             </div>

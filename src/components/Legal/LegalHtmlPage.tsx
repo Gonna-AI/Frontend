@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
 import { ArrowLeft } from 'lucide-react';
-import { cn } from '../../lib/utils';
 import { runWhenIdle, yieldToMain } from '../../utils/idle';
 import { sanitizeTrustedHtml } from '../../utils/sanitizeHtml';
-import SharedHeader from '../Layout/SharedHeader';
+import { Header, Footer } from '../Landing/AgeroChrome';
+import SEO from '../SEO';
+import '../../pages/LandingFramer.css';
 
 type LegalHtmlPageProps = {
   description: string;
@@ -12,21 +13,60 @@ type LegalHtmlPageProps = {
 };
 
 const legalStyles = `
-  .legal-content { color: rgba(255,255,255,0.72); content-visibility: auto; contain-intrinsic-size: auto 4000px; font-size: 0.95rem; line-height: 1.8; }
-  .legal-content h1, .legal-content h2, .legal-content h3, .legal-content h4 { color: #ffffff !important; font-weight: 600; }
-  .legal-content h1 { font-size: 1.9rem; margin-top: 1.6rem; margin-bottom: 0.8rem; }
-  .legal-content h2 { font-size: 1.5rem; margin-top: 1.4rem; margin-bottom: 0.6rem; }
-  .legal-content h3 { font-size: 1.2rem; margin-top: 1.2rem; margin-bottom: 0.5rem; }
+  .legal-content {
+    color: rgba(19, 19, 19, 0.78);
+    content-visibility: auto;
+    contain-intrinsic-size: auto 4000px;
+    font-size: 0.95rem;
+    line-height: 1.85;
+    font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  }
   .legal-content * { background-color: transparent !important; }
-  .legal-content p, .legal-content span, .legal-content li { color: rgba(255,255,255,0.68) !important; }
-  .legal-content a { color: #FFB286 !important; text-decoration: underline; text-underline-offset: 4px; }
-  .legal-content strong { color: #ffffff !important; }
-  .legal-content ul, .legal-content ol { padding-left: 1.25rem; margin-top: 0.6rem; margin-bottom: 0.8rem; }
+  .legal-content h1,
+  .legal-content h2,
+  .legal-content h3,
+  .legal-content h4 {
+    color: rgb(19, 19, 19) !important;
+    font-family: "Cal Sans", "Inter Display", "Inter", system-ui, sans-serif !important;
+    font-weight: 400;
+    letter-spacing: -0.02em;
+  }
+  .legal-content h1 { font-size: 1.75rem; margin-top: 1.6rem; margin-bottom: 0.8rem; }
+  .legal-content h2 { font-size: 1.35rem; margin-top: 1.5rem; margin-bottom: 0.6rem; }
+  .legal-content h3 { font-size: 1.1rem; margin-top: 1.25rem; margin-bottom: 0.5rem; }
+  .legal-content p,
+  .legal-content span,
+  .legal-content li { color: rgba(19, 19, 19, 0.72) !important; }
+  .legal-content a {
+    color: rgb(255, 77, 0) !important;
+    text-decoration: underline;
+    text-underline-offset: 4px;
+    transition: opacity 150ms ease;
+  }
+  .legal-content a:hover { opacity: 0.72; }
+  .legal-content strong { color: rgb(19, 19, 19) !important; font-weight: 600; }
+  .legal-content ul,
+  .legal-content ol { padding-left: 1.25rem; margin-top: 0.6rem; margin-bottom: 0.8rem; }
   .legal-content li { margin-bottom: 0.4rem; }
-  .legal-content hr { border-color: rgba(255,255,255,0.12); margin: 1.5rem 0; }
-  .legal-content table { width: 100%; border-collapse: collapse; margin: 1.2rem 0; }
-  .legal-content th, .legal-content td { border: 1px solid rgba(255,255,255,0.12); padding: 0.6rem 0.75rem; vertical-align: top; }
-  .legal-content th { color: #ffffff !important; background: rgba(255,255,255,0.05) !important; text-align: left; }
+  .legal-content hr {
+    border: none;
+    border-top: 1px solid rgba(19, 19, 19, 0.1);
+    margin: 1.75rem 0;
+  }
+  .legal-content table { width: 100%; border-collapse: collapse; margin: 1.25rem 0; }
+  .legal-content th,
+  .legal-content td {
+    border: 1px solid rgba(19, 19, 19, 0.12);
+    padding: 0.65rem 0.8rem;
+    vertical-align: top;
+    color: rgba(19, 19, 19, 0.72) !important;
+  }
+  .legal-content th {
+    color: rgb(19, 19, 19) !important;
+    background: rgba(19, 19, 19, 0.04) !important;
+    text-align: left;
+    font-weight: 600;
+  }
 `;
 
 export default function LegalHtmlPage({ description, htmlUrl, title }: LegalHtmlPageProps) {
@@ -70,62 +110,55 @@ export default function LegalHtmlPage({ description, htmlUrl, title }: LegalHtml
   }, [htmlUrl]);
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-[#0A0A0A] text-white">
-      <SharedHeader />
+    <div className="agero-works" id="agero-works">
+      <SEO title={`${title} — ClerkTree`} description={description} />
 
-      <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute left-[-12rem] top-[18rem] h-[28rem] w-[28rem] rounded-full bg-[#FF8A5B]/8 blur-[140px]" />
-        <div className="absolute right-[-10rem] top-[10rem] h-[24rem] w-[24rem] rounded-full bg-white/6 blur-[120px]" />
-        <div className="absolute bottom-[-8rem] left-1/2 h-[24rem] w-[40rem] -translate-x-1/2 rounded-full bg-[#FF8A5B]/6 blur-[120px]" />
-        <div className="absolute inset-0 opacity-[0.06]" style={{ backgroundImage: 'url(/noise.webp)', backgroundSize: '35%' }} />
+      {/* Top area with header — matches the pattern used in About, Solutions, etc. */}
+      <div className="agero-top-area agero-top-area-compact">
+        <Header />
       </div>
 
-      <main className="relative z-10 px-4 pb-16 pt-28 sm:px-6 sm:pt-32 lg:px-8">
-        <div className="mx-auto max-w-5xl space-y-8">
-          <div className="space-y-4">
-            <button
-              onClick={() => window.history.back()}
-              className={cn(
-                'inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-white/60 transition-all hover:border-white/20 hover:text-white',
-              )}
-              type="button"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Back
-            </button>
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.28em] text-[#FF8A5B] sm:text-sm">Legal</p>
-              <h1 className="mt-4 text-balance text-[2.2rem] font-semibold tracking-[-0.05em] text-white sm:text-4xl md:text-5xl">
-                {title}
-              </h1>
-              <p className="mt-3 max-w-3xl text-sm leading-7 text-white/60 sm:text-base sm:leading-8">
-                {description}
-              </p>
-            </div>
-          </div>
+      {/* Page hero / title block */}
+      <section className="agero-legal-hero" aria-labelledby="legal-page-title">
+        <div className="agero-legal-hero-inner">
+          <button
+            onClick={() => window.history.back()}
+            className="agero-legal-back-btn"
+            type="button"
+          >
+            <ArrowLeft className="agero-legal-back-icon" aria-hidden="true" />
+            Back
+          </button>
 
-          <div className="relative overflow-hidden rounded-[1.75rem] border border-white/10 bg-[linear-gradient(145deg,#141414_0%,#0C0C0C_100%)] p-6 shadow-[0_30px_80px_rgba(0,0,0,0.45)] sm:rounded-[2rem] sm:p-10">
-            <div className="absolute inset-0 bg-[radial-gradient(120%_120%_at_top,rgba(255,138,91,0.12),transparent)]" />
-            <div className="absolute inset-0 opacity-[0.08]" style={{ backgroundImage: 'url(/noise.webp)', backgroundSize: '30%' }} />
-            <style>{legalStyles}</style>
+          <p className="agero-legal-eyebrow">Legal</p>
+          <h1 id="legal-page-title" className="agero-legal-title">{title}</h1>
+          <p className="agero-legal-description">{description}</p>
+        </div>
+      </section>
 
-            {status === 'loading' && (
-              <div className="relative z-10 h-96 animate-pulse rounded-2xl bg-white/5" aria-label="Loading legal document" />
-            )}
-            {status === 'error' && (
-              <p className="relative z-10 text-sm text-white/70">
-                This document could not be loaded. Please refresh the page and try again.
-              </p>
-            )}
-            {status === 'ready' && (
-              <div
-                className="legal-content relative z-10 max-w-none"
-                dangerouslySetInnerHTML={{ __html: html }}
-              />
-            )}
-          </div>
+      {/* Content card */}
+      <main className="agero-legal-content-wrap" id="main-content">
+        <div className="agero-legal-card">
+          <style>{legalStyles}</style>
+
+          {status === 'loading' && (
+            <div className="agero-legal-skeleton" aria-label="Loading legal document" />
+          )}
+          {status === 'error' && (
+            <p className="agero-legal-error">
+              This document could not be loaded. Please refresh the page and try again.
+            </p>
+          )}
+          {status === 'ready' && (
+            <div
+              className="legal-content"
+              dangerouslySetInnerHTML={{ __html: html }}
+            />
+          )}
         </div>
       </main>
+
+      <Footer />
     </div>
   );
 }
