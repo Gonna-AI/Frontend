@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { ArrowLeft } from 'lucide-react';
 import { runWhenIdle, yieldToMain } from '../../utils/idle';
 import { sanitizeTrustedHtml } from '../../utils/sanitizeHtml';
-import { Header, Footer } from '../Landing/AgeroChrome';
+import { Footer } from '../Landing/AgeroChrome';
 import SEO from '../SEO';
 import '../../pages/LandingFramer.css';
 
@@ -113,12 +113,7 @@ export default function LegalHtmlPage({ description, htmlUrl, title }: LegalHtml
     <div className="agero-works" id="agero-works">
       <SEO title={`${title} — ClerkTree`} description={description} />
 
-      {/* Top area with header — matches the pattern used in About, Solutions, etc. */}
-      <div className="agero-top-area agero-top-area-compact">
-        <Header />
-      </div>
-
-      {/* Page hero / title block */}
+      {/* ── Hero / title block — sits at the very top, no nav, full-width ── */}
       <section className="agero-legal-hero" aria-labelledby="legal-page-title">
         <div className="agero-legal-hero-inner">
           <button
@@ -130,13 +125,15 @@ export default function LegalHtmlPage({ description, htmlUrl, title }: LegalHtml
             Back
           </button>
 
+          {/* Orange eyebrow — bold, identical to how other pages use the accent colour */}
           <p className="agero-legal-eyebrow">Legal</p>
+
           <h1 id="legal-page-title" className="agero-legal-title">{title}</h1>
           <p className="agero-legal-description">{description}</p>
         </div>
       </section>
 
-      {/* Content card */}
+      {/* ── Content — full-width panel matching the main site's content sections ── */}
       <main className="agero-legal-content-wrap" id="main-content">
         <div className="agero-legal-card">
           <style>{legalStyles}</style>

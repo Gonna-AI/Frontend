@@ -9,6 +9,7 @@ import HreflangTags from './components/HreflangTags';
 import { cancelIdle, runWhenIdle } from './utils/idle';
 import { installIntentPrefetch } from './utils/intentPrefetch';
 import { lazyWithRetry } from './utils/lazyWithRetry';
+import { trackPageView } from './lib/amplitude.client';
 
 // Lazy load pages (with auto-retry on chunk load failure after deploys)
 const PrivacyPolicy = lazyWithRetry(() => import('./components/Legal/PrivacyPolicy'), 'PrivacyPolicy');
@@ -116,6 +117,7 @@ function App() {
           <CanonicalLink />
           <HreflangTags />
           <ScrollToTop />
+          <AmplitudeRouteTracker />
           <SEO
             title="ClerkTree"
             description="AI-powered workflow automation for claims and back-office operations. Transform your operations with intelligent automation that reduces turnaround time by 40%."
@@ -229,6 +231,16 @@ function App() {
       </QueryClientProvider>
     </LanguageProvider>
   );
+}
+
+function AmplitudeRouteTracker() {
+  const location = useLocation();
+
+  useEffect(() => {
+    trackPageView();
+  }, [location.pathname, location.search]);
+
+  return null;
 }
 
 function ConditionalCookieConsent() {

@@ -56,6 +56,11 @@ const assetSizes = [...jsFiles, ...cssFiles]
 
 const jsSizes = assetSizes.filter((asset) => asset.type === 'js');
 const cssSizes = assetSizes.filter((asset) => asset.type === 'css');
+const thirdPartyJsPatterns = budget.thirdPartyJsPatterns ?? [];
+const isThirdPartyJs = (asset) =>
+  asset.type === 'js' && thirdPartyJsPatterns.some((pattern) => relative(asset.file).includes(pattern));
+const appJsSizes = jsSizes.filter((asset) => !isThirdPartyJs(asset));
+const thirdPartyJsSizes = jsSizes.filter(isThirdPartyJs);
 
 const getRefSize = (ref) => {
   const filePath = path.join(distDir, ref.replace(/^\//, ''));
@@ -104,10 +109,11 @@ for (const ref of entryJsRefs) {
 
 const entryJsGzipKb = [...entryJsFiles].reduce((total, file) => total + gzipKb(file), 0);
 const entryCssGzipKb = entryCssRefs.reduce((total, ref) => total + getRefSize(ref), 0);
-const largestJsGzipKb = jsSizes[0]?.gzipKb ?? 0;
+const largestJsGzipKb = appJsSizes[0]?.gzipKb ?? 0;
 const largestCssGzipKb = cssSizes[0]?.gzipKb ?? 0;
-const totalJsGzipKb = jsSizes.reduce((total, asset) => total + asset.gzipKb, 0);
+const totalJsGzipKb = appJsSizes.reduce((total, asset) => total + asset.gzipKb, 0);
 const totalCssGzipKb = cssSizes.reduce((total, asset) => total + asset.gzipKb, 0);
+const thirdPartyJsGzipKb = thirdPartyJsSizes.reduce((total, asset) => total + asset.gzipKb, 0);
 
 console.log('\nPerformance budget');
 const failures = [];
@@ -117,6 +123,9 @@ check('largest JS gzip', largestJsGzipKb, budget.largestJsGzipKb, failures);
 check('largest CSS gzip', largestCssGzipKb, budget.largestCssGzipKb, failures);
 check('total JS gzip', totalJsGzipKb, budget.totalJsGzipKb, failures);
 check('total CSS gzip', totalCssGzipKb, budget.totalCssGzipKb, failures);
+if (thirdPartyJsSizes.length) {
+  console.log(`• third-party async JS gzip: ${formatKb(thirdPartyJsGzipKb)} (reported separately)`);
+}
 
 console.log('\nLargest assets');
 for (const asset of assetSizes.slice(0, 12)) {

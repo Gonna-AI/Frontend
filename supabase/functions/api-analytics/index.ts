@@ -45,7 +45,6 @@ interface CallRow {
 
 interface SignalLift { signal: string; lift: number; resolvedRate: number; unresolvedRate: number; totalOccurrences: number; }
 interface CategoryFCR { category: string; totalCalls: number; resolvedCalls: number; fcrRate: number; avgDuration: number; }
-interface KbGap { topic: string; occurrences: number; coverage: number; }
 
 function normalizeName(name: string): string {
   return name.toLowerCase().replace(/[^a-z0-9\s]/g, '').replace(/\s+/g, ' ').trim();
@@ -130,26 +129,6 @@ function computeCategoryFCR(calls: CallRow[]): CategoryFCR[] {
     map.set(cat, existing);
   }
   return [...map.entries()].map(([category, v]) => ({ category, totalCalls: v.total, resolvedCalls: v.resolved, fcrRate: parseFloat((v.resolved / Math.max(v.total, 1)).toFixed(4)), avgDuration: Math.round(v.durationSum / Math.max(v.total, 1)) })).sort((a, b) => b.totalCalls - a.totalCalls);
-}
-
-function computeKbGaps(calls: CallRow[], kbContents: string[], minOcc = 2, coverageThreshold = 0.3) {
-  const kbTokenPool = new Set<string>();
-  for (const content of kbContents) for (const token of tokenize(content)) kbTokenPool.add(token);
-  const unresolved = calls.filter(c => isFollowUpRequired(c));
-  const topicOccurrences = new Map<string, number>();
-  for (const call of unresolved) for (const topic of getTopics(call)) topicOccurrences.set(topic, (topicOccurrences.get(topic) ?? 0) + 1);
-  let coveredCount = 0, totalTopicCount = 0;
-  const gaps: KbGap[] = [];
-  for (const [topic, occurrences] of topicOccurrences) {
-    if (occurrences < minOcc) continue;
-    totalTopicCount++;
-    const topicTokens = tokenize(topic);
-    if (topicTokens.length === 0) { if (kbTokenPool.has(topic.toLowerCase())) coveredCount++; else gaps.push({ topic, occurrences, coverage: 0 }); continue; }
-    const matchCount = topicTokens.filter(t => kbTokenPool.has(t)).length;
-    const coverage = parseFloat((matchCount / topicTokens.length).toFixed(4));
-    if (coverage >= coverageThreshold) coveredCount++; else gaps.push({ topic, occurrences, coverage });
-  }
-  return { gaps: gaps.sort((a, b) => b.occurrences - a.occurrences), coverageScore: totalTopicCount === 0 ? 1 : parseFloat((coveredCount / totalTopicCount).toFixed(4)), totalTopics: totalTopicCount, coveredTopics: coveredCount };
 }
 
 function findCallerHistory(calls: CallRow[], callerName: string, maxCalls = 5) {
@@ -354,22 +333,6 @@ Deno.serve(async (req: Request) => {
       const resolvedTotal = categoryFCR.reduce((s, c) => s + c.resolvedCalls, 0);
       const overallFCR = totalCalls > 0 ? parseFloat((resolvedTotal / totalCalls).toFixed(4)) : 0;
       return json(req, 200, { periodDays: days, totalCalls, overallFCR, winningSignals, riskSignals, categoryFCR });
-    }
-
-    // ─── kb-gaps ─────────────────────────────────────────
-    if (req.method === 'GET' && action === 'kb-gaps') {
-      const days = parseInt(url.searchParams.get('days') ?? '90', 10);
-      const since = new Date(Date.now() - days * 86400000).toISOString();
-      const minOcc = parseInt(url.searchParams.get('min_occ') ?? '2', 10);
-      const threshold = parseFloat(url.searchParams.get('threshold') ?? '0.3');
-      const { data: callRows, error: callErr } = await adminClient.from('call_history').select('id, follow_up_required, tags, summary').eq('user_id', user.id).gte('date', since).limit(2000);
-      if (callErr) throw callErr;
-      const { data: kbRows, error: kbErr } = await adminClient.from('kb_documents').select('content').eq('user_id', user.id).not('content', 'is', null);
-      if (kbErr) throw kbErr;
-      const callData = (callRows ?? []) as CallRow[];
-      const kbContents = (kbRows ?? []).map((r: Record<string, unknown>) => (r.content as string) ?? '');
-      const result = computeKbGaps(callData, kbContents, minOcc, threshold);
-      return json(req, 200, { periodDays: days, kbArticleCount: kbContents.length, ...result });
     }
 
     // ─── precall-brief ─────────────────────────────────────

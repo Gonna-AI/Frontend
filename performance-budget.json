@@ -4,5 +4,8 @@
   "largestJsGzipKb": 150,
   "largestCssGzipKb": 60,
   "totalJsGzipKb": 1100,
-  "totalCssGzipKb": 130
+  "totalCssGzipKb": 130,
+  "thirdPartyJsPatterns": [
+    "assets/analytics-vendor-"
+  ]
 }

@@ -155,6 +155,7 @@ export default defineConfig({
           if (id.includes('/@tanstack/react-query/')) return 'query-vendor';
           if (id.includes('/@tanstack/react-table/')) return 'table-vendor';
           if (id.includes('/@supabase/')) return 'supabase';
+          if (id.includes('/@amplitude/')) return 'analytics-vendor';
           if (id.includes('/framer-motion/') || id.includes('/motion-dom/') || id.includes('/motion-utils/')) return 'animation-vendor';
           if (id.includes('/recharts/') || id.includes('/d3-') || id.includes('/victory-vendor/')) return 'chart-vendor';
           if (id.includes('/lucide-react') || id.includes('/simple-icons/')) return 'icon-vendor';

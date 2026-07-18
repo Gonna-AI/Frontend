@@ -38,8 +38,6 @@ Deno.serve(async (req: Request) => {
     await Promise.all([
       admin.from("google_oauth_tokens")
         .delete().eq("user_id", user.id).eq("service", "workspace"),
-      admin.from("google_calendar_events").delete().eq("user_id", user.id),
-      admin.from("google_tasks").delete().eq("user_id", user.id),
       admin.from("google_drive_files").delete().eq("user_id", user.id),
     ]);
 
