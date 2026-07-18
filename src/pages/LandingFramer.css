@@ -3776,13 +3776,14 @@ html.lenis.lenis-stopped {
 /* ─── Legal Pages (Privacy Policy, Terms of Service, Cookie Policy) ─────── */
 
 .agero-legal-hero {
-  padding: clamp(48px, 7vw, 96px) clamp(20px, 5vw, 80px) clamp(32px, 4vw, 56px);
+  padding: clamp(48px, 7vw, 96px) 8px clamp(32px, 4vw, 56px);
   width: 100%;
 }
 
 .agero-legal-hero-inner {
   margin: 0 auto;
-  max-width: 1120px;
+  max-width: none;
+  padding: 0 clamp(12px, 4vw, 72px);
 }
 
 .agero-legal-back-btn {
@@ -3847,9 +3848,9 @@ html.lenis.lenis-stopped {
   max-width: 560px;
 }
 
-/* Content wrapper */
+/* Content wrapper — outer gutter matches the footer's near-full-bleed frame */
 .agero-legal-content-wrap {
-  padding: 0 clamp(20px, 5vw, 80px) clamp(64px, 8vw, 120px);
+  padding: 0 8px clamp(64px, 8vw, 120px);
   width: 100%;
 }
 
@@ -3863,10 +3864,16 @@ html.lenis.lenis-stopped {
     0 8px 24px rgba(0, 0, 0, 0.06),
     0 24px 56px rgba(0, 0, 0, 0.06);
   margin: 0 auto;
-  max-width: 1120px;
+  max-width: none;
   overflow: hidden;
   padding: clamp(28px, 4vw, 56px) clamp(24px, 4vw, 56px);
   position: relative;
+}
+
+/* Keep prose readable inside the now full-bleed card */
+.agero-legal-card .legal-content {
+  margin: 0 auto;
+  max-width: 760px;
 }
 
 /* Subtle orange top-glow to match the site's accent language */
@@ -3905,7 +3912,11 @@ html.lenis.lenis-stopped {
 /* Responsive */
 @media (max-width: 767px) {
   .agero-legal-hero {
-    padding: 36px 18px 28px;
+    padding: 36px 8px 28px;
+  }
+
+  .agero-legal-hero-inner {
+    padding: 0 10px;
   }
 
   .agero-legal-title {
@@ -3913,7 +3924,7 @@ html.lenis.lenis-stopped {
   }
 
   .agero-legal-content-wrap {
-    padding: 0 12px clamp(48px, 10vw, 80px);
+    padding: 0 8px clamp(48px, 10vw, 80px);
   }
 
   .agero-legal-card {

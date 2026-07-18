@@ -23,10 +23,15 @@ const legalStyles = `
   }
   .legal-content * { background-color: transparent !important; }
   .legal-content h1,
-  .legal-content h2,
-  .legal-content h3,
   .legal-content h4 {
     color: rgb(19, 19, 19) !important;
+    font-family: "Cal Sans", "Inter Display", "Inter", system-ui, sans-serif !important;
+    font-weight: 400;
+    letter-spacing: -0.02em;
+  }
+  .legal-content h2,
+  .legal-content h3 {
+    color: rgb(255, 77, 0) !important;
     font-family: "Cal Sans", "Inter Display", "Inter", system-ui, sans-serif !important;
     font-weight: 400;
     letter-spacing: -0.02em;
@@ -44,7 +49,7 @@ const legalStyles = `
     transition: opacity 150ms ease;
   }
   .legal-content a:hover { opacity: 0.72; }
-  .legal-content strong { color: rgb(19, 19, 19) !important; font-weight: 600; }
+  .legal-content strong { color: rgb(255, 77, 0) !important; font-weight: 700; }
   .legal-content ul,
   .legal-content ol { padding-left: 1.25rem; margin-top: 0.6rem; margin-bottom: 0.8rem; }
   .legal-content li { margin-bottom: 0.4rem; }
@@ -62,8 +67,8 @@ const legalStyles = `
     color: rgba(19, 19, 19, 0.72) !important;
   }
   .legal-content th {
-    color: rgb(19, 19, 19) !important;
-    background: rgba(19, 19, 19, 0.04) !important;
+    color: rgb(255, 77, 0) !important;
+    background: rgba(255, 77, 0, 0.06) !important;
     text-align: left;
     font-weight: 600;
   }
