@@ -7,7 +7,6 @@ import {
   Check,
   CircleDot,
   ExternalLink,
-  FlaskConical,
   GitBranch,
   Sparkles,
 } from 'lucide-react';
@@ -204,12 +203,8 @@ function ResearchLanding({ isResearchHost }: { isResearchHost: boolean }) {
             <source src={RESEARCH_HERO_VIDEO_SRC} type="video/mp4" />
           </video>
           <div className="absolute inset-0 bg-[#090909]/55" />
-          <div className="pointer-events-none absolute -right-24 -top-40 h-[34rem] w-[34rem] rounded-full bg-[#ff4d00]/20 blur-3xl" />
           <div className="relative mx-auto max-w-[1440px]">
-            <div className="mb-20 flex items-start justify-between gap-8">
-              <div className="flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.24em] text-white/60"><FlaskConical className="h-4 w-4 text-[#ff4d00]" />ClerkTree / Research</div>
-              <div className="hidden items-center gap-3 text-xs uppercase tracking-[0.2em] text-white/40 md:flex"><span className="h-2 w-2 rounded-full bg-[#ff4d00]" />{copy ? 'Öffentliches Archiv' : 'Public archive'}</div>
-            </div>
+            <div className="mb-20 h-4" aria-hidden="true" />
             <div className="grid gap-14 lg:grid-cols-[1.15fr_.85fr] lg:items-start">
               <div>
                 <p className="mb-6 max-w-xl text-sm leading-6 text-white/50">{copy ? 'Forschung, die in die Arbeit zurückfließt.' : 'Research that feeds back into the work.'}</p>
