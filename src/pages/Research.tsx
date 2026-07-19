@@ -150,16 +150,19 @@ function projectPath(slug: string, isResearchHost: boolean) {
 
 function ResearchHeader() {
   return (
-    <header className="mx-4 mt-4 flex min-h-16 items-center justify-between rounded-full border border-black/10 bg-[#f4f1eb]/90 px-5 py-3 pr-20 backdrop-blur-md md:px-8 md:pr-32">
+    <header className="mx-4 mt-4 flex min-h-16 items-center gap-5 rounded-full border border-black/10 bg-[#f4f1eb]/90 px-5 py-3 backdrop-blur-md md:gap-8 md:px-8">
       <a href="https://clerktree.com" aria-label="ClerkTree home" className="flex shrink-0 items-center gap-2 whitespace-nowrap">
         <ClerkTreeLogo markClassName="h-8 w-8" labelClassName="text-base font-semibold tracking-[-.04em]" registered />
       </a>
-      <nav className="hidden items-center gap-7 text-[11px] font-bold uppercase tracking-[.18em] text-black/55 md:flex" aria-label="Main navigation">
+      <nav className="ml-auto hidden items-center gap-7 text-[11px] font-bold uppercase tracking-[.18em] text-black/55 md:flex" aria-label="Main navigation">
         <a className="transition-colors hover:text-[#ff4d00]" href="https://clerktree.com/solutions">Solutions</a>
         <a className="transition-colors hover:text-[#ff4d00]" href="https://clerktree.com/about">About</a>
         <a className="transition-colors hover:text-[#ff4d00]" href="https://clerktree.com/blog">Blog</a>
         <a className="transition-colors hover:text-[#ff4d00]" href="https://clerktree.com/contact">Contact</a>
       </nav>
+      <div className="flex h-14 min-w-[9rem] shrink-0 items-center justify-center rounded-full border border-black/10 bg-[#f4f1eb] p-1 shadow-[0_10px_30px_rgba(0,0,0,.12)]">
+        <LanguageSwitcher isExpanded forceDark className="h-11 min-w-[7.5rem] rounded-full border-0 bg-[#252525] px-6 shadow-none" />
+      </div>
     </header>
   );
 }
@@ -167,9 +170,6 @@ function ResearchHeader() {
 function ResearchShell({ children }: { children: ReactNode }) {
   return (
     <div id="agero-works" className="agero-works min-h-screen overflow-x-hidden bg-[#f4f1eb] text-[#151515]">
-      <div className="fixed right-5 top-5 z-50 flex h-14 min-w-[9rem] items-center justify-center rounded-full border border-black/10 bg-[#f4f1eb]/95 p-1 shadow-[0_10px_30px_rgba(0,0,0,.18)] backdrop-blur-md md:right-8 md:top-8">
-        <LanguageSwitcher isExpanded forceDark className="h-11 min-w-[7.5rem] rounded-full border-0 bg-[#252525] px-6 shadow-none" />
-      </div>
       <ResearchHeader />
       <main className="relative z-10">{children}</main>
       <div className="relative z-10 mx-4 mb-4 overflow-hidden rounded-[2rem]"><Footer /></div>
