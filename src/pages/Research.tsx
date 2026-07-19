@@ -208,10 +208,10 @@ function ResearchLanding({ isResearchHost }: { isResearchHost: boolean }) {
           <div className="relative mx-auto max-w-[1440px]">
             <div className="mb-20 flex items-center justify-between gap-6">
               <span className="text-xs font-semibold uppercase tracking-[0.28em] text-white/60">{copy ? 'Forschung' : 'Research'}</span>
-              <a href="https://huggingface.co/clerktree" target="_blank" rel="noopener noreferrer" className="group inline-flex items-center gap-3 rounded-full border border-white/20 bg-black/20 px-4 py-2.5 text-xs font-semibold uppercase tracking-[0.14em] text-white/75 transition-colors hover:border-white/50 hover:bg-white/10 hover:text-white">
-                <SimpleIcon icon={siHuggingface} className="h-4 w-4 fill-[#ffb000]" />
-                <span>{copy ? 'Laufende Forschung' : 'Ongoing research'}</span>
-                <ArrowUpRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+              <a href="https://huggingface.co/clerktree" target="_blank" rel="noopener noreferrer" className="group inline-flex items-center gap-3 rounded-2xl border border-white/20 bg-[#171717]/75 px-4 py-3 text-left text-white transition-all hover:border-[#ffb000]/70 hover:bg-[#171717]">
+                <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#ffb000] text-black shadow-[0_6px_18px_rgba(255,176,0,.2)]"><SimpleIcon icon={siHuggingface} className="h-5 w-5 fill-black" /></span>
+                <span className="flex flex-col gap-0.5"><span className="text-sm font-semibold tracking-[-.02em]">Hugging Face</span><span className="text-[10px] font-semibold uppercase tracking-[.14em] text-white/50">{copy ? 'Laufende Forschung' : 'Ongoing research'}</span></span>
+                <ArrowUpRight className="ml-2 h-4 w-4 text-white/50 transition-all group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-[#ffb000]" />
               </a>
             </div>
             <div className="grid gap-14 lg:grid-cols-[1.15fr_.85fr] lg:items-start">
