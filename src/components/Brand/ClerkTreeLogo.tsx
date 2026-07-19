@@ -14,7 +14,7 @@ export default function ClerkTreeLogo({
       <svg
         className={markClassName}
         xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 464 468"
+        viewBox="0 -10 464 488"
         aria-hidden="true"
         focusable="false"
       >
