@@ -7,10 +7,12 @@ export default function LanguageSwitcher({
     isExpanded = false,
     forceDark = false,
     forceLight = false,
+    className,
 }: {
     isExpanded?: boolean;
     forceDark?: boolean;
     forceLight?: boolean;
+    className?: string;
 }) {
     const { isDark: themeIsDark } = useTheme();
     const isDark = forceDark ? true : forceLight ? false : themeIsDark;
@@ -53,7 +55,8 @@ export default function LanguageSwitcher({
                 isDark
                     ? "bg-white/5 border-white/10 text-white/90 hover:text-white hover:bg-white/10"
                     : "bg-black/5 border-black/10 text-black/90 hover:text-black hover:bg-black/10",
-                "gap-1"
+                "gap-1",
+                className,
             )}
             style={{
                 fontFamily: 'Urbanist, sans-serif',

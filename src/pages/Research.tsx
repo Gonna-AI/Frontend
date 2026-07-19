@@ -158,6 +158,7 @@ function ResearchHeader() {
         <a className="transition-colors hover:text-[#ff4d00]" href="https://clerktree.com/solutions">Solutions</a>
         <a className="transition-colors hover:text-[#ff4d00]" href="https://clerktree.com/about">About</a>
         <a className="transition-colors hover:text-[#ff4d00]" href="https://clerktree.com/blog">Blog</a>
+        <a className="transition-colors hover:text-[#ff4d00]" href="https://research.clerktree.com">Research</a>
         <a className="transition-colors hover:text-[#ff4d00]" href="https://clerktree.com/contact">Contact</a>
       </nav>
     </header>
@@ -167,8 +168,8 @@ function ResearchHeader() {
 function ResearchShell({ children }: { children: ReactNode }) {
   return (
     <div id="agero-works" className="agero-works min-h-screen overflow-x-hidden bg-[#f4f1eb] text-[#151515]">
-      <div className="fixed right-5 top-5 z-50 rounded-full border border-white/15 bg-[#141414]/85 p-1 shadow-[0_10px_30px_rgba(0,0,0,.22)] backdrop-blur-md md:right-8 md:top-8">
-        <LanguageSwitcher isExpanded forceDark />
+      <div className="fixed right-5 top-5 z-50 flex h-14 min-w-[9rem] items-center justify-center rounded-full border border-black/10 bg-[#f4f1eb]/95 p-1 shadow-[0_10px_30px_rgba(0,0,0,.18)] backdrop-blur-md md:right-8 md:top-8">
+        <LanguageSwitcher isExpanded forceDark className="h-11 min-w-[7.5rem] rounded-full border-0 bg-[#252525] px-6 shadow-none" />
       </div>
       <ResearchHeader />
       <main className="relative z-10">{children}</main>
