@@ -37,9 +37,28 @@ CREATE POLICY "own_drive" ON google_drive_files FOR ALL USING (auth.uid() = user
 -- ─── Augment existing tables ─────────────────────────────────────────────────
 
 -- google_tasks: add linked_history_id for call note linking
+CREATE TABLE IF NOT EXISTS google_tasks (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  task_id text NOT NULL,
+  title text,
+  due_at timestamptz,
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+
 ALTER TABLE google_tasks ADD COLUMN IF NOT EXISTS linked_history_id text;
 
 -- google_calendar_events: add meet_link
+CREATE TABLE IF NOT EXISTS google_calendar_events (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  event_id text NOT NULL,
+  title text,
+  starts_at timestamptz,
+  ends_at timestamptz,
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+
 ALTER TABLE google_calendar_events ADD COLUMN IF NOT EXISTS meet_link text;
 
 -- ─── Index ───────────────────────────────────────────────────────────────────
@@ -61,8 +80,8 @@ CREATE OR REPLACE FUNCTION get_google_tokens(p_user_id uuid)
 RETURNS TABLE(access_token text, refresh_token text, expiry_at timestamptz, google_email text)
 LANGUAGE sql SECURITY DEFINER AS $$
   SELECT
-    pgp_sym_decrypt(t.access_token::bytea,  current_setting('app.google_enc_key')) AS access_token,
-    pgp_sym_decrypt(t.refresh_token::bytea, current_setting('app.google_enc_key')) AS refresh_token,
+    extensions.pgp_sym_decrypt(t.access_token::bytea,  current_setting('app.google_enc_key')) AS access_token,
+    extensions.pgp_sym_decrypt(t.refresh_token::bytea, current_setting('app.google_enc_key')) AS refresh_token,
     t.expires_at AS expiry_at,
     t.email AS google_email
   FROM google_oauth_tokens t
@@ -83,8 +102,8 @@ CREATE OR REPLACE FUNCTION upsert_google_tokens(
   VALUES (
     p_user_id,
     'workspace',
-    pgp_sym_encrypt(p_access_token,  current_setting('app.google_enc_key'))::text,
-    pgp_sym_encrypt(p_refresh_token, current_setting('app.google_enc_key'))::text,
+    extensions.pgp_sym_encrypt(p_access_token,  current_setting('app.google_enc_key'))::text,
+    extensions.pgp_sym_encrypt(p_refresh_token, current_setting('app.google_enc_key'))::text,
     p_expiry_at,
     array_to_string(p_scopes, ' '),
     p_google_email
@@ -104,7 +123,7 @@ CREATE OR REPLACE FUNCTION update_google_access_token(
   p_expiry_at    timestamptz
 ) RETURNS void LANGUAGE sql SECURITY DEFINER AS $$
   UPDATE google_oauth_tokens
-  SET access_token = pgp_sym_encrypt(p_access_token, current_setting('app.google_enc_key'))::text,
+  SET access_token = extensions.pgp_sym_encrypt(p_access_token, current_setting('app.google_enc_key'))::text,
       expires_at   = p_expiry_at,
       updated_at   = now()
   WHERE user_id = p_user_id AND service = 'workspace';

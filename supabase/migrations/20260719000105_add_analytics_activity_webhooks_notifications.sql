@@ -99,6 +99,11 @@ CREATE TABLE IF NOT EXISTS public.notifications (
     created_at  TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
+-- The original project had a legacy notifications table without ownership.
+-- Add the columns required by the current RLS model without destroying data.
+ALTER TABLE public.notifications ADD COLUMN IF NOT EXISTS user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE;
+ALTER TABLE public.notifications ADD COLUMN IF NOT EXISTS category TEXT NOT NULL DEFAULT 'system';
+
 CREATE INDEX IF NOT EXISTS idx_notifications_user_id ON public.notifications(user_id);
 CREATE INDEX IF NOT EXISTS idx_notifications_created_at ON public.notifications(created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_notifications_is_read ON public.notifications(user_id, is_read);

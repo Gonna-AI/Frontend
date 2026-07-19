@@ -78,15 +78,15 @@ export const enDashboardInfrastructure = {
   'dashInfra.row.groqApi.server': 'Groq LPU Inference Engine',
   'dashInfra.row.groqApi.plan': 'Pay-as-you-go, us-east',
 
-  'dashInfra.row.supabasePostgres.domain': 'xlzwfkgurrrspcdyqele.supabase.co — Postgres',
+  'dashInfra.row.supabasePostgres.domain': 'cjknqlwfbfikipkmnvfo.supabase.co — Postgres',
   'dashInfra.row.supabasePostgres.server': 'Supabase Managed Postgres 15',
   'dashInfra.row.supabasePostgres.plan': 'eu-central-1, Frankfurt',
 
-  'dashInfra.row.supabaseRealtime.domain': 'xlzwfkgurrrspcdyqele.supabase.co — Realtime',
+  'dashInfra.row.supabaseRealtime.domain': 'cjknqlwfbfikipkmnvfo.supabase.co — Realtime',
   'dashInfra.row.supabaseRealtime.server': 'Supabase Realtime (Phoenix/Elixir)',
   'dashInfra.row.supabaseRealtime.plan': 'eu-central-1, Frankfurt',
 
-  'dashInfra.row.pgvectorIndex.domain': 'xlzwfkgurrrspcdyqele.supabase.co — pgvector',
+  'dashInfra.row.pgvectorIndex.domain': 'cjknqlwfbfikipkmnvfo.supabase.co — pgvector',
   'dashInfra.row.pgvectorIndex.server': 'pgvector extension on Supabase Postgres',
   'dashInfra.row.pgvectorIndex.plan': 'eu-central-1, Frankfurt',
 

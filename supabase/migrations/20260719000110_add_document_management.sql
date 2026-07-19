@@ -21,6 +21,13 @@ CREATE TABLE IF NOT EXISTS kb_uploaded_documents (
 );
 
 -- 2. Add tracking columns to existing kb_documents
+CREATE TABLE IF NOT EXISTS kb_documents (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  kb_id TEXT NOT NULL,
+  content TEXT NOT NULL DEFAULT '',
+  metadata JSONB NOT NULL DEFAULT '{}'::jsonb
+);
+
 ALTER TABLE kb_documents
   ADD COLUMN IF NOT EXISTS user_id UUID REFERENCES auth.users(id),
   ADD COLUMN IF NOT EXISTS document_id UUID REFERENCES kb_uploaded_documents(id) ON DELETE CASCADE,
@@ -29,6 +36,11 @@ ALTER TABLE kb_documents
 
 -- 3. RLS for kb_uploaded_documents
 ALTER TABLE kb_uploaded_documents ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Users can view own documents" ON kb_uploaded_documents;
+DROP POLICY IF EXISTS "Users can insert own documents" ON kb_uploaded_documents;
+DROP POLICY IF EXISTS "Users can update own documents" ON kb_uploaded_documents;
+DROP POLICY IF EXISTS "Users can delete own documents" ON kb_uploaded_documents;
 
 CREATE POLICY "Users can view own documents"
   ON kb_uploaded_documents FOR SELECT
@@ -49,6 +61,8 @@ CREATE POLICY "Users can delete own documents"
 -- 4. RLS for kb_documents
 ALTER TABLE kb_documents ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Users can manage own kb docs" ON kb_documents;
+
 CREATE POLICY "Users can manage own kb docs"
   ON kb_documents FOR ALL
   USING (user_id = auth.uid() OR user_id IS NULL);
@@ -64,6 +78,10 @@ VALUES ('kb-documents', 'kb-documents', false)
 ON CONFLICT (id) DO NOTHING;
 
 -- 7. Storage policies
+DROP POLICY IF EXISTS "Users can upload kb docs" ON storage.objects;
+DROP POLICY IF EXISTS "Users can read own kb docs" ON storage.objects;
+DROP POLICY IF EXISTS "Users can delete own kb docs" ON storage.objects;
+
 CREATE POLICY "Users can upload kb docs"
   ON storage.objects FOR INSERT
   WITH CHECK (

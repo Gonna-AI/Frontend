@@ -1,5 +1,5 @@
 -- supabase/migrations/add_playbook_templates.sql
-CREATE TABLE playbook_templates (
+CREATE TABLE IF NOT EXISTS playbook_templates (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
     name TEXT NOT NULL,
@@ -15,11 +15,16 @@ CREATE TABLE playbook_templates (
     UNIQUE(user_id, name)
 );
 
-CREATE INDEX idx_playbook_templates_user ON playbook_templates(user_id);
-CREATE INDEX idx_playbook_templates_created ON playbook_templates(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_playbook_templates_user ON playbook_templates(user_id);
+CREATE INDEX IF NOT EXISTS idx_playbook_templates_created ON playbook_templates(created_at DESC);
 
 -- Enable RLS
 ALTER TABLE playbook_templates ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Users can view own playbooks" ON playbook_templates;
+DROP POLICY IF EXISTS "Users can create own playbooks" ON playbook_templates;
+DROP POLICY IF EXISTS "Users can update own playbooks" ON playbook_templates;
+DROP POLICY IF EXISTS "Users can delete own playbooks" ON playbook_templates;
 
 CREATE POLICY "Users can view own playbooks"
     ON playbook_templates FOR SELECT

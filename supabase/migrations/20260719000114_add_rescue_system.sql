@@ -22,6 +22,10 @@ CREATE TABLE IF NOT EXISTS rescue_playbooks (
 );
 
 ALTER TABLE rescue_playbooks ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Users can view own playbooks" ON rescue_playbooks;
+DROP POLICY IF EXISTS "Users can insert own playbooks" ON rescue_playbooks;
+DROP POLICY IF EXISTS "Users can update own playbooks" ON rescue_playbooks;
+DROP POLICY IF EXISTS "Users can delete own playbooks" ON rescue_playbooks;
 
 CREATE POLICY "Users can view own playbooks"
   ON rescue_playbooks FOR SELECT
@@ -40,7 +44,7 @@ CREATE POLICY "Users can delete own playbooks"
   ON rescue_playbooks FOR DELETE
   USING (auth.uid() = user_id);
 
-CREATE INDEX idx_rescue_playbooks_user ON rescue_playbooks(user_id);
+CREATE INDEX IF NOT EXISTS idx_rescue_playbooks_user ON rescue_playbooks(user_id);
 
 -- ─── rescue_settings ───────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS rescue_settings (
@@ -67,6 +71,9 @@ CREATE TABLE IF NOT EXISTS rescue_settings (
 );
 
 ALTER TABLE rescue_settings ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Users can view own settings" ON rescue_settings;
+DROP POLICY IF EXISTS "Users can insert own settings" ON rescue_settings;
+DROP POLICY IF EXISTS "Users can update own settings" ON rescue_settings;
 
 CREATE POLICY "Users can view own settings"
   ON rescue_settings FOR SELECT
@@ -114,6 +121,9 @@ CREATE TABLE IF NOT EXISTS rescue_actions (
 );
 
 ALTER TABLE rescue_actions ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Users can view own actions" ON rescue_actions;
+DROP POLICY IF EXISTS "Users can insert own actions" ON rescue_actions;
+DROP POLICY IF EXISTS "Users can update own actions" ON rescue_actions;
 
 CREATE POLICY "Users can view own actions"
   ON rescue_actions FOR SELECT
@@ -128,10 +138,10 @@ CREATE POLICY "Users can update own actions"
   USING (auth.uid() = user_id)
   WITH CHECK (auth.uid() = user_id);
 
-CREATE INDEX idx_rescue_actions_user ON rescue_actions(user_id);
-CREATE INDEX idx_rescue_actions_cluster ON rescue_actions(cluster_id);
-CREATE INDEX idx_rescue_actions_status ON rescue_actions(status);
-CREATE INDEX idx_rescue_actions_trigger ON rescue_actions(trigger_at DESC);
+CREATE INDEX IF NOT EXISTS idx_rescue_actions_user ON rescue_actions(user_id);
+CREATE INDEX IF NOT EXISTS idx_rescue_actions_cluster ON rescue_actions(cluster_id);
+CREATE INDEX IF NOT EXISTS idx_rescue_actions_status ON rescue_actions(status);
+CREATE INDEX IF NOT EXISTS idx_rescue_actions_trigger ON rescue_actions(trigger_at DESC);
 
 -- ─── rescue_audit_log ──────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS rescue_audit_log (
@@ -147,6 +157,8 @@ CREATE TABLE IF NOT EXISTS rescue_audit_log (
 );
 
 ALTER TABLE rescue_audit_log ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Users can view own audits" ON rescue_audit_log;
+DROP POLICY IF EXISTS "Users can insert own audits" ON rescue_audit_log;
 
 CREATE POLICY "Users can view own audits"
   ON rescue_audit_log FOR SELECT
@@ -156,8 +168,8 @@ CREATE POLICY "Users can insert own audits"
   ON rescue_audit_log FOR INSERT
   WITH CHECK (auth.uid() = user_id);
 
-CREATE INDEX idx_rescue_audit_user ON rescue_audit_log(user_id);
-CREATE INDEX idx_rescue_audit_at ON rescue_audit_log(at DESC);
+CREATE INDEX IF NOT EXISTS idx_rescue_audit_user ON rescue_audit_log(user_id);
+CREATE INDEX IF NOT EXISTS idx_rescue_audit_at ON rescue_audit_log(at DESC);
 
 -- ─── rescue_reports ────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS rescue_reports (
@@ -175,6 +187,9 @@ CREATE TABLE IF NOT EXISTS rescue_reports (
 );
 
 ALTER TABLE rescue_reports ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Users can view own reports" ON rescue_reports;
+DROP POLICY IF EXISTS "Users can insert own reports" ON rescue_reports;
+DROP POLICY IF EXISTS "Users can update own reports" ON rescue_reports;
 
 CREATE POLICY "Users can view own reports"
   ON rescue_reports FOR SELECT
@@ -189,8 +204,8 @@ CREATE POLICY "Users can update own reports"
   USING (auth.uid() = user_id)
   WITH CHECK (auth.uid() = user_id);
 
-CREATE INDEX idx_rescue_reports_user ON rescue_reports(user_id);
-CREATE INDEX idx_rescue_reports_month ON rescue_reports(month_key DESC);
+CREATE INDEX IF NOT EXISTS idx_rescue_reports_user ON rescue_reports(user_id);
+CREATE INDEX IF NOT EXISTS idx_rescue_reports_month ON rescue_reports(month_key DESC);
 
 -- ─── Grant service_role full access for edge functions ─────────
 -- (Edge functions use the service role key, which bypasses RLS by default)

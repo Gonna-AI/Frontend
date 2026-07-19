@@ -18,7 +18,7 @@ export interface EndpointDoc {
 }
 
 export const BASE_URL = 'https://api.clerktree.com/v1';
-const EDGE_FUNCTIONS_URL = 'https://xlzwfkgurrrspcdyqele.supabase.co/functions/v1';
+const EDGE_FUNCTIONS_URL = 'https://cjknqlwfbfikipkmnvfo.supabase.co/functions/v1';
 
 export const chatEndpoints: EndpointDoc[] = [
   {

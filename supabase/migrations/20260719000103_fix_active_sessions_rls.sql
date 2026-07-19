@@ -35,6 +35,7 @@ TO authenticated
 USING (user_id = auth.uid());
 
 -- Allow anon users read-only access for public-facing session counts (optional)
+DROP POLICY IF EXISTS "Anon can view active session counts" ON active_sessions;
 CREATE POLICY "Anon can view active session counts"
 ON active_sessions FOR SELECT
 TO anon

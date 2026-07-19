@@ -90,7 +90,7 @@ export const infrastructureGroups: InfrastructureGroup[] = [
     organization: "Supabase",
     rows: [
       {
-        domain: "xlzwfkgurrrspcdyqele.supabase.co — Postgres",
+        domain: "cjknqlwfbfikipkmnvfo.supabase.co — Postgres",
         domainKey: "dashInfra.row.supabasePostgres.domain",
         platform: {
           name: "Supabase Postgres",
@@ -108,7 +108,7 @@ export const infrastructureGroups: InfrastructureGroup[] = [
         resources: { cpu: 21, ram: 39, disk: 17 },
       },
       {
-        domain: "xlzwfkgurrrspcdyqele.supabase.co — Realtime",
+        domain: "cjknqlwfbfikipkmnvfo.supabase.co — Realtime",
         domainKey: "dashInfra.row.supabaseRealtime.domain",
         platform: {
           name: "Supabase Realtime",
@@ -126,7 +126,7 @@ export const infrastructureGroups: InfrastructureGroup[] = [
         resources: { cpu: 9, ram: 14, disk: 2 },
       },
       {
-        domain: "xlzwfkgurrrspcdyqele.supabase.co — pgvector",
+        domain: "cjknqlwfbfikipkmnvfo.supabase.co — pgvector",
         domainKey: "dashInfra.row.pgvectorIndex.domain",
         platform: {
           name: "pgvector Index",

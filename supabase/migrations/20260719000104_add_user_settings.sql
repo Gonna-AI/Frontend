@@ -1,5 +1,5 @@
 -- supabase/migrations/add_user_settings.sql
-CREATE TABLE user_settings (
+CREATE TABLE IF NOT EXISTS user_settings (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id uuid NOT NULL UNIQUE REFERENCES auth.users(id) ON DELETE CASCADE,
     theme TEXT DEFAULT 'dark' CHECK (theme IN ('light', 'dark', 'auto')),
@@ -16,9 +16,13 @@ CREATE TABLE user_settings (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
-CREATE INDEX idx_user_settings_user ON user_settings(user_id);
+CREATE INDEX IF NOT EXISTS idx_user_settings_user ON user_settings(user_id);
 
 ALTER TABLE user_settings ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Users can view own settings" ON user_settings;
+DROP POLICY IF EXISTS "Users can update own settings" ON user_settings;
+DROP POLICY IF EXISTS "Users can insert own settings" ON user_settings;
 
 CREATE POLICY "Users can view own settings"
     ON user_settings FOR SELECT
