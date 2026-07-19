@@ -158,7 +158,6 @@ function ResearchHeader() {
         <a className="transition-colors hover:text-[#ff4d00]" href="https://clerktree.com/solutions">Solutions</a>
         <a className="transition-colors hover:text-[#ff4d00]" href="https://clerktree.com/about">About</a>
         <a className="transition-colors hover:text-[#ff4d00]" href="https://clerktree.com/blog">Blog</a>
-        <a className="transition-colors hover:text-[#ff4d00]" href="https://research.clerktree.com">Research</a>
         <a className="transition-colors hover:text-[#ff4d00]" href="https://clerktree.com/contact">Contact</a>
       </nav>
     </header>
