@@ -20,6 +20,8 @@ import SEO from '../components/SEO';
 import { useLanguage } from '../contexts/LanguageContext';
 import './LandingFramer.css';
 
+const RESEARCH_HERO_VIDEO_SRC = 'https://pub-0f804855178c4f4e8184c4fef3bd5b2a.r2.dev/researchclerktre.mp4';
+
 type LocalizedText = { en: string; de: string };
 
 type ResearchProject = {
@@ -198,6 +200,10 @@ function ResearchLanding({ isResearchHost }: { isResearchHost: boolean }) {
       <SEO title={copy ? 'Forschung' : 'Research'} description={copy ? 'Abgeschlossene Forschungsarbeit von ClerkTree zu Agentensystemen, Operations Intelligence und souveräner KI.' : 'Completed ClerkTree research across agent systems, operations intelligence, and sovereign AI.'} canonical={getResearchCanonical()} />
       <ResearchShell>
         <section className="relative mx-4 mt-4 overflow-hidden rounded-[2rem] bg-[#141414] px-6 pb-20 pt-20 text-[#f4f1eb] md:px-12 md:pb-28 md:pt-28">
+          <video className="absolute inset-0 h-full w-full object-cover opacity-45" autoPlay muted loop playsInline preload="metadata" aria-hidden="true">
+            <source src={RESEARCH_HERO_VIDEO_SRC} type="video/mp4" />
+          </video>
+          <div className="absolute inset-0 bg-[#090909]/55" />
           <div className="pointer-events-none absolute -right-24 -top-40 h-[34rem] w-[34rem] rounded-full bg-[#ff4d00]/20 blur-3xl" />
           <div className="relative mx-auto max-w-[1440px]">
             <div className="mb-20 flex items-start justify-between gap-8">
