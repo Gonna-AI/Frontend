@@ -248,7 +248,7 @@ html.lenis.lenis-stopped {
   background: #000;
   border-radius: 36px;
   height: clamp(720px, 54.5vw, 1080px);
-  margin-top: clamp(34px, 5vw, 72px);
+  margin-top: clamp(12px, 1.5vw, 20px);
   overflow: hidden;
   position: relative;
   width: 100%;
