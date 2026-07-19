@@ -20,18 +20,23 @@ const legalStyles = `
     font-size: 0.95rem;
     line-height: 1.85;
     font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    text-align: left;
   }
   .legal-content * { background-color: transparent !important; }
+  .legal-content div,
+  .legal-content p,
+  .legal-content span,
   .legal-content h1,
+  .legal-content h2,
+  .legal-content h3,
+  .legal-content h4 {
+    text-align: left !important;
+  }
+  .legal-content h1,
+  .legal-content h2,
+  .legal-content h3,
   .legal-content h4 {
     color: rgb(19, 19, 19) !important;
-    font-family: "Cal Sans", "Inter Display", "Inter", system-ui, sans-serif !important;
-    font-weight: 400;
-    letter-spacing: -0.02em;
-  }
-  .legal-content h2,
-  .legal-content h3 {
-    color: rgb(255, 77, 0) !important;
     font-family: "Cal Sans", "Inter Display", "Inter", system-ui, sans-serif !important;
     font-weight: 400;
     letter-spacing: -0.02em;
@@ -49,7 +54,7 @@ const legalStyles = `
     transition: opacity 150ms ease;
   }
   .legal-content a:hover { opacity: 0.72; }
-  .legal-content strong { color: rgb(255, 77, 0) !important; font-weight: 700; }
+  .legal-content strong { color: rgb(19, 19, 19) !important; font-weight: 600; }
   .legal-content ul,
   .legal-content ol { padding-left: 1.25rem; margin-top: 0.6rem; margin-bottom: 0.8rem; }
   .legal-content li { margin-bottom: 0.4rem; }
@@ -67,8 +72,8 @@ const legalStyles = `
     color: rgba(19, 19, 19, 0.72) !important;
   }
   .legal-content th {
-    color: rgb(255, 77, 0) !important;
-    background: rgba(255, 77, 0, 0.06) !important;
+    color: rgb(19, 19, 19) !important;
+    background: rgba(19, 19, 19, 0.04) !important;
     text-align: left;
     font-weight: 600;
   }
@@ -118,9 +123,9 @@ export default function LegalHtmlPage({ description, htmlUrl, title }: LegalHtml
     <div className="agero-works" id="agero-works">
       <SEO title={`${title} — ClerkTree`} description={description} />
 
-      {/* ── Hero / title block — sits at the very top, no nav, full-width ── */}
-      <section className="agero-legal-hero" aria-labelledby="legal-page-title">
-        <div className="agero-legal-hero-inner">
+      <div className="agero-legal-page-container">
+        {/* ── Hero / title block ── */}
+        <section className="agero-legal-hero" aria-labelledby="legal-page-title">
           <button
             onClick={() => window.history.back()}
             className="agero-legal-back-btn"
@@ -135,30 +140,30 @@ export default function LegalHtmlPage({ description, htmlUrl, title }: LegalHtml
 
           <h1 id="legal-page-title" className="agero-legal-title">{title}</h1>
           <p className="agero-legal-description">{description}</p>
-        </div>
-      </section>
+        </section>
 
-      {/* ── Content — full-width panel matching the main site's content sections ── */}
-      <main className="agero-legal-content-wrap" id="main-content">
-        <div className="agero-legal-card">
-          <style>{legalStyles}</style>
+        {/* ── Content Card ── */}
+        <main className="agero-legal-content-wrap" id="main-content">
+          <div className="agero-legal-card">
+            <style>{legalStyles}</style>
 
-          {status === 'loading' && (
-            <div className="agero-legal-skeleton" aria-label="Loading legal document" />
-          )}
-          {status === 'error' && (
-            <p className="agero-legal-error">
-              This document could not be loaded. Please refresh the page and try again.
-            </p>
-          )}
-          {status === 'ready' && (
-            <div
-              className="legal-content"
-              dangerouslySetInnerHTML={{ __html: html }}
-            />
-          )}
-        </div>
-      </main>
+            {status === 'loading' && (
+              <div className="agero-legal-skeleton" aria-label="Loading legal document" />
+            )}
+            {status === 'error' && (
+              <p className="agero-legal-error">
+                This document could not be loaded. Please refresh the page and try again.
+              </p>
+            )}
+            {status === 'ready' && (
+              <div
+                className="legal-content"
+                dangerouslySetInnerHTML={{ __html: html }}
+              />
+            )}
+          </div>
+        </main>
+      </div>
 
       <Footer />
     </div>
