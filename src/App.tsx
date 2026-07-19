@@ -16,6 +16,7 @@ const PrivacyPolicy = lazyWithRetry(() => import('./components/Legal/PrivacyPoli
 const TermsOfService = lazyWithRetry(() => import('./components/Legal/TermsOfService'), 'TermsOfService');
 const Security = lazyWithRetry(() => import('./components/Legal/Security'), 'Security');
 const CookiePolicy = lazyWithRetry(() => import('./components/Legal/CookiePolicy'), 'CookiePolicy');
+const DataAccess = lazyWithRetry(() => import('./components/Legal/DataAccess'), 'DataAccess');
 const Contact = lazyWithRetry(() => import('./pages/Contact'), 'Contact');
 const About = lazyWithRetry(() => import('./pages/About'), 'About');
 const Research = lazyWithRetry(() => import('./pages/Research'), 'Research');
@@ -91,6 +92,7 @@ const routePrefetchers = {
   '/privacy-policy': () => import('./components/Legal/PrivacyPolicy'),
   '/cookie-policy': () => import('./components/Legal/CookiePolicy'),
   '/security': () => import('./components/Legal/Security'),
+  '/data-access': () => import('./components/Legal/DataAccess'),
 };
 
 // Create a client
@@ -220,6 +222,7 @@ function App() {
                 <Route path="/privacy-policy" element={<PrivacyPolicy />} />
                 <Route path="/cookie-policy" element={<CookiePolicy />} />
                 <Route path="/security" element={<Security />} />
+                <Route path="/data-access" element={<DataAccess />} />
 
                 {/* Catch all route */}
                 <Route path="*" element={<NotFound />} />

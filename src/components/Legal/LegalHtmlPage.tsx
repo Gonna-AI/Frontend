@@ -101,12 +101,18 @@ export default function LegalHtmlPage({ description, htmlUrl, title }: LegalHtml
           return;
         }
 
+        // Replace any outgoing Termly DSAR request URLs with our local /data-access page
+        const processedHtml = rawHtml.replace(
+          /https:\/\/app\.termly\.io\/dsar\/[a-zA-Z0-9-]+/g,
+          '/data-access'
+        );
+
         runWhenIdle(() => {
           if (controller.signal.aborted) {
             return;
           }
 
-          setHtml(sanitizeTrustedHtml(rawHtml));
+          setHtml(sanitizeTrustedHtml(processedHtml));
           setStatus('ready');
         }, 1200);
       })
