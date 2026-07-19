@@ -18,7 +18,6 @@ const solutionsNavLinkPaths = [
   ['nav.solutions', '/solutions'],
   ['nav.about', '/about'],
   ['nav.blog', '/blog'],
-  ['nav.docs', '/docs'],
   ['home.nav.contact', '/contact'],
 ] as const;
 
@@ -62,38 +61,7 @@ export default function Solutions() {
     t('solutions.card5Title'),
   ];
 
-  const capabilityCards = [
-    {
-      title: t('solutions.card1Title'),
-      description: t('solutions.card1Desc'),
-      features: [t('solutions.card1Feat1'), t('solutions.card1Feat2'), t('solutions.card1Feat3')],
-    },
-    {
-      title: t('solutions.card2Title'),
-      description: t('solutions.card2Desc'),
-      features: [t('solutions.card2Feat1'), t('solutions.card2Feat2'), t('solutions.card2Feat3')],
-    },
-    {
-      title: t('solutions.card3Title'),
-      description: t('solutions.card3Desc'),
-      features: [t('solutions.card3Feat1'), t('solutions.card3Feat2'), t('solutions.card3Feat3')],
-    },
-    {
-      title: t('solutions.card4Title'),
-      description: t('solutions.card4Desc'),
-      features: [t('solutions.card4Feat1'), t('solutions.card4Feat2'), t('solutions.card4Feat3')],
-    },
-    {
-      title: t('solutions.card5Title'),
-      description: t('solutions.card5Desc'),
-      features: [t('solutions.card5Feat1'), t('solutions.card5Feat2'), t('solutions.card5Feat3')],
-    },
-    {
-      title: t('solutions.card6Title'),
-      description: t('solutions.card6Desc'),
-      features: [t('solutions.card6Feat1'), t('solutions.card6Feat2'), t('solutions.card6Feat3')],
-    },
-  ];
+
 
   return (
     <div className="agero-works clerktree-solutions-page">
@@ -225,27 +193,7 @@ export default function Solutions() {
           </div>
         </section>
 
-        <section className="fabric-capabilities" aria-labelledby="solutions-capabilities-title">
-          <div className="fabric-capabilities-heading">
-            <p>{t('solutions.capabilitiesEyebrow')}</p>
-            <h2 id="solutions-capabilities-title">{t('solutions.capabilitiesTitle')}</h2>
-          </div>
 
-          <div className="fabric-capabilities-grid">
-            {capabilityCards.map((card, index) => (
-              <article className="fabric-capability-card" key={card.title}>
-                <span>{String(index + 1).padStart(2, '0')}</span>
-                <h3>{card.title}</h3>
-                <p>{card.description}</p>
-                <ul>
-                  {card.features.map((feature) => (
-                    <li key={feature}>{feature}</li>
-                  ))}
-                </ul>
-              </article>
-            ))}
-          </div>
-        </section>
 
         <section className="fabric-solution-cta" aria-labelledby="solutions-cta-title">
           <p>{t('solutions.ctaBadge')}</p>

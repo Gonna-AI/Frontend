@@ -58,7 +58,7 @@ const AuthV2Layout = lazyWithRetry(() => import('./dashboard/auth/v2/AuthV2Layou
 const AuthV2Login = lazyWithRetry(() => import('./dashboard/auth/v2/login/page'), 'AuthV2Login');
 const AuthV2Register = lazyWithRetry(() => import('./dashboard/auth/v2/register/page'), 'AuthV2Register');
 const AISettings = lazyWithRetry(() => import('./components/AISettings'), 'AISettings');
-const DocsPage = lazyWithRetry(() => import('./pages/DocsPage'), 'DocsPage');
+
 const SupportPage = lazyWithRetry(() => import('./pages/SupportPage'), 'SupportPage');
 const AuthPage = lazyWithRetry(() => import('./pages/AuthPage'), 'AuthPage');
 const AuthCallback = lazyWithRetry(() => import('./pages/AuthCallback'), 'AuthCallback');
@@ -84,7 +84,7 @@ const routePrefetchers = {
   '/support': () => import('./pages/SupportPage'),
   '/blog': () => import('./pages/Blog'),
   '/blog/:slug': () => import('./pages/BlogPost'),
-  '/docs': () => import('./pages/DocsPage'),
+
   '/login': () => import('./pages/AuthPage'),
   '/client/login': () => import('./pages/client-portal/ClientPortalLoginPage'),
   '/dashboard': () => import('./dashboard/layout/DashboardLayout'),
@@ -214,8 +214,7 @@ function App() {
                 <Route path="/blog" element={<Blog />} />
                 <Route path="/blog/:slug" element={<BlogPost />} />
 
-                {/* Documentation */}
-                <Route path="/docs" element={<DocsPage />} />
+
 
                 {/* Legal */}
                 <Route path="/terms-of-service" element={<TermsOfService />} />

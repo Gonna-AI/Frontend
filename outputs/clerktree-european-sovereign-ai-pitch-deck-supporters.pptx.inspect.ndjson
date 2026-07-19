@@ -1,0 +1,389 @@
+{"kind":"deck","id":"pr/o4lyt1","name":"Deck"}
+{"kind":"layout","layoutId":"7f4a1db3-9638-4897-a3bd-012b261caa54","name":"Master","type":"master"}
+{"kind":"layout","layoutId":"434ec5c6-20eb-4962-a381-95cf644eb789","name":"Title Slide","type":"title"}
+{"kind":"slide","id":"sl/1nk8v2","slide":1,"title":"ClerkTree","textShapes":7}
+{"kind":"shape","id":"sh/pczepszi","slide":1,"name":"cover-left-wash","bbox":[0,0,760,720]}
+{"kind":"shape","id":"sh/obqdwnix","slide":1,"name":"cover-bottom-wash","bbox":[0,540,1280,180]}
+{"kind":"textbox","id":"sh/e5ovqd0v","slide":1,"name":"cover-brand","text":"ClerkTree","textPreview":"ClerkTree","textChars":9,"textLines":1,"bbox":[118,54,180,34]}
+{"kind":"textbox","id":"sh/18fel8z6","slide":1,"name":"cover-right-meta","text":"ENTERPRISE BRIEFING  •  EUROPE","textPreview":"ENTERPRISE BRIEFING  •  EUROPE","textChars":30,"textLines":1,"bbox":[948,57,260,26]}
+{"kind":"shape","id":"sh/076ds3il","slide":1,"name":"cover-pill","bbox":[72,172,220,30]}
+{"kind":"textbox","id":"sh/ridwfyh4","slide":1,"name":"cover-pill-text","text":"SOVEREIGN OPERATIONS AI","textPreview":"SOVEREIGN OPERATIONS AI","textChars":23,"textLines":1,"bbox":[86,180,192,18]}
+{"kind":"textbox","id":"sh/qh4vmt0j","slide":1,"name":"title-AI that works\nin","text":"AI that works\ninside your control plane.","textPreview":"AI that works | inside your control plane.","textChars":40,"textLines":2,"bbox":[72,232,620,160]}
+{"kind":"textbox","id":"sh/0vu54jy5","slide":1,"name":"cover-sub","text":"A governed route from operational signal to trusted action—for Europe’s most demanding enterprises.","textPreview":"A governed route from operational signal to trusted action—for Europe’s most demanding enterprises.","textChars":99,"textLines":1,"bbox":[72,422,536,56]}
+{"kind":"shape","id":"sh/1w36dofa","slide":1,"name":"cover-line","bbox":[72,548,320,0]}
+{"kind":"textbox","id":"sh/e9cn2tgz","slide":1,"name":"cover-foot-left","text":"Automotive  •  Manufacturing  •  Enterprise Services","textPreview":"Automotive  •  Manufacturing  •  Enterprise Services","textChars":52,"textLines":1,"bbox":[72,570,380,22]}
+{"kind":"textbox","id":"sh/fulobyxk","slide":1,"name":"cover-foot-right","text":"© 2026 ClerkTree Inc.  •  All rights reserved","textPreview":"© 2026 ClerkTree Inc.  •  All rights reserved","textChars":45,"textLines":1,"bbox":[908,646,300,18]}
+{"kind":"image","id":"im/3qtwjid8","slide":1,"name":"","alt":"European industrial control room","bbox":[0,0,1280,720]}
+{"kind":"image","id":"im/e1kf6dwb","slide":1,"name":"","alt":"ClerkTree logo","bbox":[72,54,34,34]}
+{"kind":"notes","id":"nt/1nk8v2","slide":1,"text":"Open with the outcome: European enterprises should be able to deploy ambitious AI without trading away operational control. Do not name BMW or Siemens as customers; use them as examples of the buyer profile only if asked."}
+{"kind":"slide","id":"sl/b65bu9","slide":2,"title":"THE ENTERPRISE TENSION","textShapes":17}
+{"kind":"shape","id":"sh/adw7y943","slide":2,"name":"manual-background-tint","bbox":[0,0,1280,720]}
+{"kind":"shape","id":"sh/be587elo","slide":2,"name":"manual-left-wash","bbox":[0,0,930,720]}
+{"kind":"shape","id":"sh/k3ep43m5","slide":2,"name":"manual-bottom-wash","bbox":[0,384,1280,336]}
+{"kind":"shape","id":"sh/l4nqd83q","slide":2,"name":"eyebrow-line-The enterprise tension","bbox":[72,66,22,2]}
+{"kind":"textbox","id":"sh/y1w72t4z","slide":2,"name":"eyebrow-The enterprise tension","text":"THE ENTERPRISE TENSION","textPreview":"THE ENTERPRISE TENSION","textChars":22,"textLines":1,"bbox":[104,58,650,20]}
+{"kind":"textbox","id":"sh/z258bylk","slide":2,"name":"title-Your most valuab","text":"Your most valuable decisions\nstill live between systems.","textPreview":"Your most valuable decisions | still live between systems.","textChars":56,"textLines":2,"bbox":[72,102,790,136]}
+{"kind":"textbox","id":"sh/87yp83mh","slide":2,"name":"problem-copy","text":"The issue is not whether AI can answer. It is whether AI can operate safely across the systems, languages, policies, and people that already run your business.","textPreview":"The issue is not whether AI can answer. It is whether AI can operate safely across the systems, languages, policies, and people that alre...","textChars":159,"textLines":1,"bbox":[72,260,680,58]}
+{"kind":"shape","id":"sh/t87qh832","slide":2,"name":"problem-rule","bbox":[72,356,1136,0]}
+{"kind":"textbox","id":"sh/d4jm5wfe","slide":2,"name":"problem-num-0","text":"01","textPreview":"01","textChars":2,"textLines":1,"bbox":[72,400,80,38]}
+{"kind":"textbox","id":"sh/c3alcryt","slide":2,"name":"problem-head-0","text":"Signal","textPreview":"Signal","textChars":6,"textLines":1,"bbox":[72,448,286,30]}
+{"kind":"textbox","id":"sh/b21436x8","slide":2,"name":"problem-body-0","text":"Calls, documents, messages, telemetry—context is fragmented.","textPreview":"Calls, documents, messages, telemetry—context is fragmented.","textChars":60,"textLines":1,"bbox":[72,488,292,70]}
+{"kind":"textbox","id":"sh/q1s3a1gn","slide":2,"name":"problem-num-1","text":"02","textPreview":"02","textChars":2,"textLines":1,"bbox":[420,400,80,38]}
+{"kind":"textbox","id":"sh/ls3m9gfa","slide":2,"name":"problem-head-1","text":"Decision","textPreview":"Decision","textChars":8,"textLines":1,"bbox":[420,448,286,30]}
+{"kind":"textbox","id":"sh/0rulgbyp","slide":2,"name":"problem-body-1","text":"Teams translate evidence manually before they can act.","textPreview":"Teams translate evidence manually before they can act.","textChars":54,"textLines":1,"bbox":[420,488,292,70]}
+{"kind":"textbox","id":"sh/zql476x4","slide":2,"name":"problem-num-2","text":"03","textPreview":"03","textChars":2,"textLines":1,"bbox":[768,400,80,38]}
+{"kind":"textbox","id":"sh/yps3e1gj","slide":2,"name":"problem-head-2","text":"Control","textPreview":"Control","textChars":7,"textLines":1,"bbox":[768,448,286,30]}
+{"kind":"textbox","id":"sh/1wz2xcf6","slide":2,"name":"problem-body-2","text":"Security, legal, and operations need a proof trail—not a black box.","textPreview":"Security, legal, and operations need a proof trail—not a black box.","textChars":67,"textLines":1,"bbox":[768,488,292,70]}
+{"kind":"textbox","id":"sh/gvql47yl","slide":2,"name":"problem-close","text":"The cost of hesitation is operational drag. The cost of haste is ungoverned AI.","textPreview":"The cost of hesitation is operational drag. The cost of haste is ungoverned AI.","textChars":79,"textLines":1,"bbox":[72,598,810,24]}
+{"kind":"shape","id":"sh/sfulkr6h","slide":2,"name":"footer-rule-2","bbox":[72,664,1136,0]}
+{"kind":"textbox","id":"sh/6dc3ihob","slide":2,"name":"footer-brand-2","text":"ClerkTree","textPreview":"ClerkTree","textChars":9,"textLines":1,"bbox":[94,677,90,18]}
+{"kind":"textbox","id":"sh/7el4rm5w","slide":2,"name":"footer-tag-2","text":"AI harness for growing businesses.","textPreview":"AI harness for growing businesses.","textChars":34,"textLines":1,"bbox":[191,677,300,18]}
+{"kind":"textbox","id":"sh/gjelor6d","slide":2,"name":"footer-conf-2","text":"AI OPERATIONS BRIEFING","textPreview":"AI OPERATIONS BRIEFING","textChars":22,"textLines":1,"bbox":[874,677,246,18]}
+{"kind":"textbox","id":"sh/h4nmxwny","slide":2,"name":"footer-num-2","text":"02","textPreview":"02","textChars":2,"textLines":1,"bbox":[1152,677,56,18]}
+{"kind":"image","id":"im/8b21sr21","slide":2,"name":"","alt":"Technician inspecting industrial machinery with a tablet","bbox":[0,0,1280,720]}
+{"kind":"image","id":"im/ydkvmxsj","slide":2,"name":"","alt":"ClerkTree logo mark","bbox":[72,678,14,14]}
+{"kind":"notes","id":"nt/b65bu9","slide":2,"text":"This slide creates the tension. Move quickly: the enemy is not legacy technology, it is the gap between information, action, and accountable control."}
+{"kind":"slide","id":"sl/vjo00w","slide":3,"title":"WHY NOW","textShapes":14}
+{"kind":"shape","id":"sh/cril0nex","slide":3,"name":"eyebrow-line-Why now","bbox":[72,66,22,2]}
+{"kind":"textbox","id":"sh/bq9k7ixc","slide":3,"name":"eyebrow-Why now","text":"WHY NOW","textPreview":"WHY NOW","textChars":7,"textLines":1,"bbox":[104,58,650,20]}
+{"kind":"textbox","id":"sh/apg3yxwr","slide":3,"name":"title-Europe is settin","text":"Europe is setting a higher\nstandard for how AI is deployed.","textPreview":"Europe is setting a higher | standard for how AI is deployed.","textChars":59,"textLines":2,"bbox":[72,102,820,136]}
+{"kind":"textbox","id":"sh/lwr2dcfe","slide":3,"name":"why-now-copy","text":"The AI Act is risk-based. Data protection expects purpose, proportionality, safeguards, and clarity. Enterprise AI now needs a governance story as strong as its automation story.","textPreview":"The AI Act is risk-based. Data protection expects purpose, proportionality, safeguards, and clarity. Enterprise AI now needs a governance...","textChars":178,"textLines":1,"bbox":[72,250,660,56]}
+{"kind":"shape","id":"sh/kvil47et","slide":3,"name":"why-card-0-surface","bbox":[72,370,346,200]}
+{"kind":"shape","id":"sh/zu9kb2x8","slide":3,"name":"why-stripe-0","bbox":[94,394,46,3]}
+{"kind":"textbox","id":"sh/yt032xwn","slide":3,"name":"why-head-0","text":"Know","textPreview":"Know","textChars":4,"textLines":1,"bbox":[94,424,278,34]}
+{"kind":"textbox","id":"sh/107218fa","slide":3,"name":"why-body-0","text":"Which model, data, policy, and owner shaped each outcome.","textPreview":"Which model, data, policy, and owner shaped each outcome.","textChars":57,"textLines":1,"bbox":[94,474,286,64]}
+{"kind":"shape","id":"sh/0zy1s3ep","slide":3,"name":"why-card-1-surface","bbox":[450,370,346,200]}
+{"kind":"shape","id":"sh/6p8rilcf","slide":3,"name":"why-stripe-1","bbox":[472,394,46,3]}
+{"kind":"textbox","id":"sh/7qhsrqd0","slide":3,"name":"why-head-1","text":"Control","textPreview":"Control","textChars":7,"textLines":1,"bbox":[472,424,278,34]}
+{"kind":"textbox","id":"sh/srq9kvul","slide":3,"name":"why-body-1","text":"Set the region, access boundaries, retention, and action permissions.","textPreview":"Set the region, access boundaries, retention, and action permissions.","textChars":69,"textLines":1,"bbox":[472,474,286,64]}
+{"kind":"shape","id":"sh/tszat0v6","slide":3,"name":"why-card-2-surface","bbox":[828,370,346,200]}
+{"kind":"shape","id":"sh/ut8rm5cr","slide":3,"name":"why-stripe-2","bbox":[850,394,46,3]}
+{"kind":"textbox","id":"sh/fehsvqtc","slide":3,"name":"why-head-2","text":"Prove","textPreview":"Prove","textChars":5,"textLines":1,"bbox":[850,424,278,34]}
+{"kind":"textbox","id":"sh/gfq9ovuh","slide":3,"name":"why-body-2","text":"Give operations, security, and legal an evidence trail they can examine.","textPreview":"Give operations, security, and legal an evidence trail they can examine.","textChars":72,"textLines":1,"bbox":[850,474,286,64]}
+{"kind":"textbox","id":"sh/hgjax0b2","slide":3,"name":"citation-Sources: E","text":"Sources: European Commission — AI Act policy page, accessed 12 Jul 2026  •  Sources: European Commission — GDPR principles, accessed 12 Jul 2026","textPreview":"Sources: European Commission — AI Act policy page, accessed 12 Jul 2026  •  Sources: European Commission — GDPR principles, accessed 12 J...","textChars":144,"textLines":1,"bbox":[72,634,940,18]}
+{"kind":"shape","id":"sh/2hsrq5cn","slide":3,"name":"footer-rule-3","bbox":[72,664,1136,0]}
+{"kind":"textbox","id":"sh/zm187a9g","slide":3,"name":"footer-brand-3","text":"ClerkTree","textPreview":"ClerkTree","textChars":9,"textLines":1,"bbox":[94,677,90,18]}
+{"kind":"textbox","id":"sh/elsre5sv","slide":3,"name":"footer-tag-3","text":"AI harness for growing businesses.","textPreview":"AI harness for growing businesses.","textChars":34,"textLines":1,"bbox":[191,677,300,18]}
+{"kind":"textbox","id":"sh/lo3q9kr6","slide":3,"name":"footer-conf-3","text":"AI OPERATIONS BRIEFING","textPreview":"AI OPERATIONS BRIEFING","textChars":22,"textLines":1,"bbox":[874,677,246,18]}
+{"kind":"textbox","id":"sh/0nu9gfa1","slide":3,"name":"footer-num-3","text":"03","textPreview":"03","textChars":2,"textLines":1,"bbox":[1152,677,56,18]}
+{"kind":"image","id":"im/ofud8bu5","slide":3,"name":"","alt":"ClerkTree logo mark","bbox":[72,678,14,14]}
+{"kind":"notes","id":"nt/vjo00w","slide":3,"text":"Use precise language: this is not legal advice and we do not claim automatic compliance. The buyer’s deployment must be governed appropriately to its use case and risk classification."}
+{"kind":"slide","id":"sl/fd1e8d","slide":4,"title":"A PRACTICAL DEFINITION","textShapes":21}
+{"kind":"shape","id":"sh/m58ni5gj","slide":4,"name":"eyebrow-line-A practical definition","bbox":[72,66,22,2]}
+{"kind":"textbox","id":"sh/9sj6t0fa","slide":4,"name":"eyebrow-A practical definition","text":"A PRACTICAL DEFINITION","textPreview":"A PRACTICAL DEFINITION","textChars":22,"textLines":1,"bbox":[104,58,650,20]}
+{"kind":"textbox","id":"sh/8rapkvyp","slide":4,"name":"title-Sovereignty is a","text":"Sovereignty is a control plane,\nnot a marketing claim.","textPreview":"Sovereignty is a control plane, | not a marketing claim.","textChars":54,"textLines":2,"bbox":[72,102,810,136]}
+{"kind":"textbox","id":"sh/vu1ovax0","slide":4,"name":"sov-copy","text":"For ClerkTree, sovereign AI means you decide where sensitive operations run, what systems can act, and how every decision can be explained.","textPreview":"For ClerkTree, sovereign AI means you decide where sensitive operations run, what systems can act, and how every decision can be explained.","textChars":139,"textLines":1,"bbox":[72,252,670,48]}
+{"kind":"shape","id":"sh/ats7m5gv","slide":4,"name":"sov-card-0-surface","bbox":[796,118,182,194]}
+{"kind":"textbox","id":"sh/xwj6xkf6","slide":4,"name":"sov-num-0","text":"01","textPreview":"01","textChars":2,"textLines":1,"bbox":[816,138,50,22]}
+{"kind":"textbox","id":"sh/wvapofyl","slide":4,"name":"sov-head-0","text":"Data boundary","textPreview":"Data boundary","textChars":13,"textLines":1,"bbox":[816,178,142,46]}
+{"kind":"textbox","id":"sh/ryxoj6xw","slide":4,"name":"sov-body-0","text":"Choose where data is processed and how it is retained.","textPreview":"Choose where data is processed and how it is retained.","textChars":54,"textLines":1,"bbox":[816,239,142,52]}
+{"kind":"shape","id":"sh/qxona1gb","slide":4,"name":"sov-card-1-surface","bbox":[1006,118,182,194]}
+{"kind":"textbox","id":"sh/sn6lsnm5","slide":4,"name":"sov-num-1","text":"02","textPreview":"02","textChars":2,"textLines":1,"bbox":[1026,138,50,22]}
+{"kind":"textbox","id":"sh/toz2ls3q","slide":4,"name":"sov-head-1","text":"Model choice","textPreview":"Model choice","textChars":12,"textLines":1,"bbox":[1026,178,142,46]}
+{"kind":"textbox","id":"sh/6lojqx4z","slide":4,"name":"sov-body-1","text":"Match the model, provider, and policy to the workload.","textPreview":"Match the model, provider, and policy to the workload.","textChars":54,"textLines":1,"bbox":[1026,239,142,52]}
+{"kind":"shape","id":"sh/7mxkjilk","slide":4,"name":"sov-card-2-surface","bbox":[796,348,182,194]}
+{"kind":"textbox","id":"sh/grqlw721","slide":4,"name":"sov-num-2","text":"03","textPreview":"03","textChars":2,"textLines":1,"bbox":[816,368,50,22]}
+{"kind":"textbox","id":"sh/hcz2pc3m","slide":4,"name":"sov-head-2","text":"Action boundary","textPreview":"Action boundary","textChars":15,"textLines":1,"bbox":[816,408,142,46]}
+{"kind":"textbox","id":"sh/up83uxkb","slide":4,"name":"sov-body-2","text":"Define what an agent may do—and when a human must approve.","textPreview":"Define what an agent may do—and when a human must approve.","textChars":58,"textLines":1,"bbox":[816,469,142,52]}
+{"kind":"shape","id":"sh/fqhkn2lg","slide":4,"name":"sov-card-3-surface","bbox":[1006,348,182,194]}
+{"kind":"textbox","id":"sh/wvm1k3mx","slide":4,"name":"sov-num-3","text":"04","textPreview":"04","textChars":2,"textLines":1,"bbox":[1026,368,50,22]}
+{"kind":"textbox","id":"sh/xgv2d83i","slide":4,"name":"sov-head-3","text":"Evidence trail","textPreview":"Evidence trail","textChars":14,"textLines":1,"bbox":[1026,408,142,46]}
+{"kind":"textbox","id":"sh/d0nq10ru","slide":4,"name":"sov-body-3","text":"Keep traceability for inputs, decisions, actions, and exceptions.","textPreview":"Keep traceability for inputs, decisions, actions, and exceptions.","textChars":65,"textLines":1,"bbox":[1026,469,142,52]}
+{"kind":"textbox","id":"sh/czu9svap","slide":4,"name":"sov-foot","text":"This is the platform posture we design toward with every enterprise deployment.","textPreview":"This is the platform posture we design toward with every enterprise deployment.","textChars":79,"textLines":1,"bbox":[72,560,660,44]}
+{"kind":"textbox","id":"sh/ryl8za94","slide":4,"name":"citation-Sources: E","text":"Sources: European Commission — AI Act policy page, accessed 12 Jul 2026","textPreview":"Sources: European Commission — AI Act policy page, accessed 12 Jul 2026","textChars":71,"textLines":1,"bbox":[72,634,940,18]}
+{"kind":"shape","id":"sh/qdcrq5sj","slide":4,"name":"footer-rule-4","bbox":[72,664,1136,0]}
+{"kind":"textbox","id":"sh/03e9wfal","slide":4,"name":"footer-brand-4","text":"ClerkTree","textPreview":"ClerkTree","textChars":9,"textLines":1,"bbox":[94,677,90,18]}
+{"kind":"textbox","id":"sh/z2583a90","slide":4,"name":"footer-tag-4","text":"AI harness for growing businesses.","textPreview":"AI harness for growing businesses.","textChars":34,"textLines":1,"bbox":[191,677,300,18]}
+{"kind":"textbox","id":"sh/y1wru5sf","slide":4,"name":"footer-conf-4","text":"AI OPERATIONS BRIEFING","textPreview":"AI OPERATIONS BRIEFING","textChars":22,"textLines":1,"bbox":[874,677,246,18]}
+{"kind":"textbox","id":"sh/987a9kr2","slide":4,"name":"footer-num-4","text":"04","textPreview":"04","textChars":2,"textLines":1,"bbox":[1152,677,56,18]}
+{"kind":"image","id":"im/q1wjqlwb","slide":4,"name":"","alt":"ClerkTree logo mark","bbox":[72,678,14,14]}
+{"kind":"notes","id":"nt/fd1e8d","slide":4,"text":"This is an important expectation-setting slide. It makes sovereign AI concrete: controls, not slogans. In discovery we turn these controls into the customer’s own blueprint."}
+{"kind":"slide","id":"sl/8q2eco","slide":5,"title":"WHERE WE START","textShapes":17}
+{"kind":"shape","id":"sh/1cr29o7i","slide":5,"name":"quality-background-tint","bbox":[0,0,1280,720]}
+{"kind":"shape","id":"sh/gbi1g36x","slide":5,"name":"quality-left-wash","bbox":[0,0,940,720]}
+{"kind":"shape","id":"sh/76p03ep0","slide":5,"name":"quality-bottom-wash","bbox":[0,380,1280,340]}
+{"kind":"shape","id":"sh/65gja9of","slide":5,"name":"eyebrow-line-Where we start","bbox":[72,66,22,2]}
+{"kind":"textbox","id":"sh/t87i5o76","slide":5,"name":"eyebrow-Where we start","text":"WHERE WE START","textPreview":"WHERE WE START","textChars":14,"textLines":1,"bbox":[104,58,650,20]}
+{"kind":"textbox","id":"sh/s7y1cj6l","slide":5,"name":"title-The first AI win","text":"The first AI win should be\noperational, not theatrical.","textPreview":"The first AI win should be | operational, not theatrical.","textChars":55,"textLines":2,"bbox":[72,102,760,136]}
+{"kind":"textbox","id":"sh/ji50zep4","slide":5,"name":"start-copy","text":"Start with one high-volume workflow where speed matters, human judgement still matters, and a clean baseline makes the outcome undeniable.","textPreview":"Start with one high-volume workflow where speed matters, human judgement still matters, and a clean baseline makes the outcome undeniable.","textChars":138,"textLines":1,"bbox":[72,250,660,48]}
+{"kind":"shape","id":"sh/ihwj69oj","slide":5,"name":"workflow-0-surface","bbox":[72,370,346,210]}
+{"kind":"shape","id":"sh/07y5kna1","slide":5,"name":"tag-AUTOMOTIVE","bbox":[94,394,100,25]}
+{"kind":"textbox","id":"sh/1876tsrm","slide":5,"name":"tag-text-AUTOMOTIVE","text":"AUTOMOTIVE","textPreview":"AUTOMOTIVE","textChars":10,"textLines":1,"bbox":[106,399,76,16]}
+{"kind":"textbox","id":"sh/e5gnidsv","slide":5,"name":"workflow-head-0","text":"Dealer & customer operations","textPreview":"Dealer & customer operations","textChars":28,"textLines":1,"bbox":[94,440,286,46]}
+{"kind":"textbox","id":"sh/f6pori9g","slide":5,"name":"workflow-body-0","text":"Triage service requests, surface urgency, route the right next action.","textPreview":"Triage service requests, surface urgency, route the right next action.","textChars":70,"textLines":1,"bbox":[94,510,292,48]}
+{"kind":"shape","id":"sh/s3y5gnap","slide":5,"name":"workflow-1-surface","bbox":[450,370,346,210]}
+{"kind":"shape","id":"sh/d476psra","slide":5,"name":"tag-INDUSTRIAL","bbox":[472,394,100,25]}
+{"kind":"textbox","id":"sh/q1wnedsz","slide":5,"name":"tag-text-INDUSTRIAL","text":"INDUSTRIAL","textPreview":"INDUSTRIAL","textChars":10,"textLines":1,"bbox":[484,399,76,16]}
+{"kind":"textbox","id":"sh/r25oni94","slide":5,"name":"workflow-head-1","text":"Service & field coordination","textPreview":"Service & field coordination","textChars":28,"textLines":1,"bbox":[472,440,286,46]}
+{"kind":"textbox","id":"sh/czips7q9","slide":5,"name":"workflow-body-1","text":"Transform inbound signals into prioritised work and clearer handoffs.","textPreview":"Transform inbound signals into prioritised work and clearer handoffs.","textChars":69,"textLines":1,"bbox":[472,510,292,48]}
+{"kind":"shape","id":"sh/x0r61cre","slide":5,"name":"workflow-2-surface","bbox":[828,370,346,210]}
+{"kind":"shape","id":"sh/lgn6lcjy","slide":5,"name":"tag-ENTERPRISE","bbox":[850,394,100,25]}
+{"kind":"textbox","id":"sh/kfe5c7id","slide":5,"name":"tag-text-ENTERPRISE","text":"ENTERPRISE","textPreview":"ENTERPRISE","textChars":10,"textLines":1,"bbox":[862,399,76,16]}
+{"kind":"textbox","id":"sh/ju5oj21s","slide":5,"name":"workflow-head-2","text":"Claims & document operations","textPreview":"Claims & document operations","textChars":28,"textLines":1,"bbox":[850,440,286,46]}
+{"kind":"textbox","id":"sh/ytwnax07","slide":5,"name":"workflow-body-2","text":"Extract evidence, classify cases, and move exceptions to experts faster.","textPreview":"Extract evidence, classify cases, and move exceptions to experts faster.","textChars":72,"textLines":1,"bbox":[850,510,292,48]}
+{"kind":"textbox","id":"sh/xsn6hsjm","slide":5,"name":"start-foot","text":"We do not sell a “platform rollout.” We earn the right to scale through a measured operational result.","textPreview":"We do not sell a “platform rollout.” We earn the right to scale through a measured operational result.","textChars":102,"textLines":1,"bbox":[72,610,1000,24]}
+{"kind":"shape","id":"sh/wre58ni1","slide":5,"name":"footer-rule-5","bbox":[72,664,1136,0]}
+{"kind":"textbox","id":"sh/apcn6x0b","slide":5,"name":"footer-brand-5","text":"ClerkTree","textPreview":"ClerkTree","textChars":9,"textLines":1,"bbox":[94,677,90,18]}
+{"kind":"textbox","id":"sh/9o3mdsjq","slide":5,"name":"footer-tag-5","text":"AI harness for growing businesses.","textPreview":"AI harness for growing businesses.","textChars":34,"textLines":1,"bbox":[191,677,300,18]}
+{"kind":"textbox","id":"sh/onu54ni5","slide":5,"name":"footer-conf-5","text":"AI OPERATIONS BRIEFING","textPreview":"AI OPERATIONS BRIEFING","textChars":22,"textLines":1,"bbox":[874,677,246,18]}
+{"kind":"textbox","id":"sh/eh8bypcr","slide":5,"name":"footer-num-5","text":"05","textPreview":"05","textChars":2,"textLines":1,"bbox":[1152,677,56,18]}
+{"kind":"image","id":"im/vux8vyh4","slide":5,"name":"","alt":"Quality engineer using AI-assisted manufacturing tooling","bbox":[0,0,1280,720]}
+{"kind":"image","id":"im/srqdonyx","slide":5,"name":"","alt":"ClerkTree logo mark","bbox":[72,678,14,14]}
+{"kind":"notes","id":"nt/8q2eco","slide":5,"text":"This is the reusable vertical slide. Keep the deck singular by using sectors and workflows—not customer logos or implied client endorsements."}
+{"kind":"slide","id":"sl/wqznak","slide":6,"title":"THE PLATFORM","textShapes":14}
+{"kind":"shape","id":"sh/m10jilkz","slide":6,"name":"eyebrow-line-The platform","bbox":[72,66,22,2]}
+{"kind":"textbox","id":"sh/94bid03q","slide":6,"name":"eyebrow-The platform","text":"THE PLATFORM","textPreview":"THE PLATFORM","textChars":12,"textLines":1,"bbox":[104,58,650,20]}
+{"kind":"textbox","id":"sh/8321kv25","slide":6,"name":"title-One operational ","text":"One operational layer turns\nsignals into decisions—and decisions into action.","textPreview":"One operational layer turns | signals into decisions—and decisions into action.","textChars":77,"textLines":2,"bbox":[72,96,656,136]}
+{"kind":"textbox","id":"sh/zy9076lo","slide":6,"name":"product-copy","text":"ClerkTree brings customer conversations, documents, and operational context into a monitored, action-ready workflow.","textPreview":"ClerkTree brings customer conversations, documents, and operational context into a monitored, action-ready workflow.","textChars":116,"textLines":1,"bbox":[72,232,560,44]}
+{"kind":"shape","id":"sh/yx0jelk3","slide":6,"name":"product-bullet-1-dot","bbox":[72,328,8,8]}
+{"kind":"textbox","id":"sh/l0ri9g3u","slide":6,"name":"product-bullet-1-head","text":"Capture","textPreview":"Capture","textChars":7,"textLines":1,"bbox":[94,320,270,24]}
+{"kind":"textbox","id":"sh/0zi1gb29","slide":6,"name":"product-bullet-1-body","text":"Receive real-time signals from conversations and operational workflows.","textPreview":"Receive real-time signals from conversations and operational workflows.","textChars":71,"textLines":1,"bbox":[94,349,292,46]}
+{"kind":"shape","id":"sh/ba9036lc","slide":6,"name":"product-bullet-2-dot","bbox":[72,420,8,8]}
+{"kind":"textbox","id":"sh/q9gza1kr","slide":6,"name":"product-bullet-2-head","text":"Understand","textPreview":"Understand","textChars":10,"textLines":1,"bbox":[94,412,270,24]}
+{"kind":"textbox","id":"sh/onedkjm9","slide":6,"name":"product-bullet-2-body","text":"Extract structured context: intent, priority, sentiment, and follow-up needs.","textPreview":"Extract structured context: intent, priority, sentiment, and follow-up needs.","textChars":77,"textLines":1,"bbox":[94,441,292,46]}
+{"kind":"shape","id":"sh/9oneto3u","slide":6,"name":"product-bullet-3-dot","bbox":[72,512,8,8]}
+{"kind":"textbox","id":"sh/m1cvi943","slide":6,"name":"product-bullet-3-head","text":"Act","textPreview":"Act","textChars":3,"textLines":1,"bbox":[94,504,270,24]}
+{"kind":"textbox","id":"sh/nm5wrelo","slide":6,"name":"product-bullet-3-body","text":"Route work, trigger approved actions, and keep teams in control of exceptions.","textPreview":"Route work, trigger approved actions, and keep teams in control of exceptions.","textChars":78,"textLines":1,"bbox":[94,533,292,46]}
+{"kind":"shape","id":"sh/0zudgjmx","slide":6,"name":"ai-layer-frame-surface","bbox":[640,136,568,370]}
+{"kind":"textbox","id":"sh/excve94r","slide":6,"name":"ai-layer-caption","text":"SIGNALS  →  AI OPERATIONS LAYER  →  APPROVED ACTIONS","textPreview":"SIGNALS  →  AI OPERATIONS LAYER  →  APPROVED ACTIONS","textChars":52,"textLines":1,"bbox":[652,470,544,22]}
+{"kind":"shape","id":"sh/zylwnelc","slide":6,"name":"footer-rule-6","bbox":[72,664,1136,0]}
+{"kind":"textbox","id":"sh/lw7e183m","slide":6,"name":"footer-brand-6","text":"ClerkTree","textPreview":"ClerkTree","textChars":9,"textLines":1,"bbox":[94,677,90,18]}
+{"kind":"textbox","id":"sh/t0jmp4ru","slide":6,"name":"footer-tag-6","text":"AI harness for growing businesses.","textPreview":"AI harness for growing businesses.","textChars":34,"textLines":1,"bbox":[191,677,300,18]}
+{"kind":"textbox","id":"sh/8za5wja9","slide":6,"name":"footer-conf-6","text":"AI OPERATIONS BRIEFING","textPreview":"AI OPERATIONS BRIEFING","textChars":22,"textLines":1,"bbox":[874,677,246,18]}
+{"kind":"textbox","id":"sh/7y14ne9o","slide":6,"name":"footer-num-6","text":"06","textPreview":"06","textChars":2,"textLines":1,"bbox":[1152,677,56,18]}
+{"kind":"image","id":"im/2pw3a90r","slide":6,"name":"","geometry":"roundRect","alt":"AI operations layer between industrial signals and approved actions","bbox":[652,150,544,306]}
+{"kind":"image","id":"im/3u1krah8","slide":6,"name":"","alt":"ClerkTree logo mark","bbox":[72,678,14,14]}
+{"kind":"notes","id":"nt/wqznak","slide":6,"text":"Product proof comes after the buyer understands the job to be done. Emphasise that this is a monitored workflow, not an autonomous black box."}
+{"kind":"slide","id":"sl/e7u19d","slide":7,"title":"HUMAN-CENTRED BY DESIGN","textShapes":14}
+{"kind":"shape","id":"sh/7ix0bado","slide":7,"name":"eyebrow-line-Human-centred by design","bbox":[72,66,22,2]}
+{"kind":"textbox","id":"sh/8j614fe9","slide":7,"name":"eyebrow-Human-centred by design","text":"HUMAN-CENTRED BY DESIGN","textPreview":"HUMAN-CENTRED BY DESIGN","textChars":23,"textLines":1,"bbox":[104,58,650,20]}
+{"kind":"textbox","id":"sh/tkzid0vu","slide":7,"name":"title-Human teams stay","text":"Human teams stay at the\ndecision boundary.","textPreview":"Human teams stay at the | decision boundary.","textChars":42,"textLines":2,"bbox":[72,102,640,136]}
+{"kind":"textbox","id":"sh/ul8j65wf","slide":7,"name":"decision-copy","text":"The platform should accelerate routine work, not hide consequential judgement. ClerkTree turns interaction into a prepared decision—then applies the policy you define.","textPreview":"The platform should accelerate routine work, not hide consequential judgement. ClerkTree turns interaction into a prepared decision—then ...","textChars":167,"textLines":1,"bbox":[72,244,558,50]}
+{"kind":"textbox","id":"sh/vmh0fadk","slide":7,"name":"human-step-0","text":"1  AI prepares","textPreview":"1  AI prepares","textChars":14,"textLines":1,"bbox":[72,338,128,22]}
+{"kind":"textbox","id":"sh/gnq18fe5","slide":7,"name":"human-body-0","text":"Extracts, classifies, and surfaces the relevant context.","textPreview":"Extracts, classifies, and surfaces the relevant context.","textChars":56,"textLines":1,"bbox":[215,338,380,34]}
+{"kind":"textbox","id":"sh/hozihkvq","slide":7,"name":"human-step-1","text":"2  Policy decides","textPreview":"2  Policy decides","textChars":17,"textLines":1,"bbox":[72,404,128,22]}
+{"kind":"textbox","id":"sh/ip8japwb","slide":7,"name":"human-body-1","text":"Rules determine the permitted action and escalation path.","textPreview":"Rules determine the permitted action and escalation path.","textChars":57,"textLines":1,"bbox":[215,404,380,34]}
+{"kind":"textbox","id":"sh/3qh0judw","slide":7,"name":"human-step-2","text":"3  People approve","textPreview":"3  People approve","textChars":17,"textLines":1,"bbox":[72,470,128,22]}
+{"kind":"textbox","id":"sh/76pobe1g","slide":7,"name":"human-body-2","text":"Teams resolve exceptions and retain accountability.","textPreview":"Teams resolve exceptions and retain accountability.","textChars":51,"textLines":1,"bbox":[215,470,380,34]}
+{"kind":"shape","id":"sh/65gni9kv","slide":7,"name":"rescue-frame-surface","bbox":[666,124,542,454]}
+{"kind":"textbox","id":"sh/87y5kj21","slide":7,"name":"rescue-caption","text":"Example: a high-risk action is scheduled only with verified consent and clear risk context.","textPreview":"Example: a high-risk action is scheduled only with verified consent and clear risk context.","textChars":91,"textLines":1,"bbox":[686,594,502,22]}
+{"kind":"shape","id":"sh/j2547e1k","slide":7,"name":"footer-rule-7","bbox":[72,664,1136,0]}
+{"kind":"textbox","id":"sh/l4769oja","slide":7,"name":"footer-brand-7","text":"ClerkTree","textPreview":"ClerkTree","textChars":9,"textLines":1,"bbox":[94,677,90,18]}
+{"kind":"textbox","id":"sh/k3e5gj25","slide":7,"name":"footer-tag-7","text":"AI harness for growing businesses.","textPreview":"AI harness for growing businesses.","textChars":34,"textLines":1,"bbox":[191,677,300,18]}
+{"kind":"textbox","id":"sh/3y9ojy1o","slide":7,"name":"footer-conf-7","text":"AI OPERATIONS BRIEFING","textPreview":"AI OPERATIONS BRIEFING","textChars":22,"textLines":1,"bbox":[874,677,246,18]}
+{"kind":"textbox","id":"sh/ix0nqt03","slide":7,"name":"footer-num-7","text":"07","textPreview":"07","textChars":2,"textLines":1,"bbox":[1152,677,56,18]}
+{"kind":"image","id":"im/ap4be14n","slide":7,"name":"","geometry":"roundRect","alt":"ClerkTree human approval workflow example","bbox":[686,144,502,402]}
+{"kind":"image","id":"im/pova5w32","slide":7,"name":"","alt":"ClerkTree logo mark","bbox":[72,678,14,14]}
+{"kind":"notes","id":"nt/e7u19d","slide":7,"text":"This slide is especially useful for risk, legal, and works-council conversations. The point is that human oversight is a system design principle, not a manual fallback."}
+{"kind":"slide","id":"sl/3yjr90","slide":8,"title":"HOW WE EARN THE ROLLOUT","textShapes":20}
+{"kind":"shape","id":"sh/exwb61s7","slide":8,"name":"maintenance-background-tint","bbox":[0,0,1280,720]}
+{"kind":"shape","id":"sh/zy5sf6ts","slide":8,"name":"maintenance-left-wash","bbox":[0,0,940,720]}
+{"kind":"shape","id":"sh/onytcba9","slide":8,"name":"maintenance-bottom-wash","bbox":[0,380,1280,340]}
+{"kind":"shape","id":"sh/9o7algru","slide":8,"name":"eyebrow-line-How we earn the rollout","bbox":[72,66,22,2]}
+{"kind":"textbox","id":"sh/mlwba1s3","slide":8,"name":"eyebrow-How we earn the rollout","text":"HOW WE EARN THE ROLLOUT","textPreview":"HOW WE EARN THE ROLLOUT","textChars":23,"textLines":1,"bbox":[104,58,650,20]}
+{"kind":"textbox","id":"sh/nm5sj69o","slide":8,"name":"title-A 90-day pilot d","text":"A 90-day pilot designed to\nprove value before scale.","textPreview":"A 90-day pilot designed to | prove value before scale.","textChars":52,"textLines":2,"bbox":[72,102,760,136]}
+{"kind":"textbox","id":"sh/wrytgva5","slide":8,"name":"pilot-copy","text":"One workflow. One accountable business owner. One shared scorecard. Every step is built to turn evidence into a go/no-go decision.","textPreview":"One workflow. One accountable business owner. One shared scorecard. Every step is built to turn evidence into a go/no-go decision.","textChars":130,"textLines":1,"bbox":[72,250,690,48]}
+{"kind":"shape","id":"sh/xs7up0rq","slide":8,"name":"pilot-top-0","bbox":[72,370,346,0]}
+{"kind":"textbox","id":"sh/5gfmhwb6","slide":8,"name":"pilot-num-0","text":"01","textPreview":"01","textChars":2,"textLines":1,"bbox":[72,398,56,30]}
+{"kind":"textbox","id":"sh/4f658ru1","slide":8,"name":"pilot-head-0","text":"Discover","textPreview":"Discover","textChars":8,"textLines":1,"bbox":[72,440,230,38]}
+{"kind":"textbox","id":"sh/jex4fmtg","slide":8,"name":"pilot-time-0","text":"Weeks 0–2","textPreview":"Weeks 0–2","textChars":9,"textLines":1,"bbox":[72,489,200,22]}
+{"kind":"textbox","id":"sh/idon6hcv","slide":8,"name":"pilot-body-0","text":"Map the workflow, risk controls, data boundary, and baseline.","textPreview":"Map the workflow, risk controls, data boundary, and baseline.","textChars":61,"textLines":1,"bbox":[72,527,302,58]}
+{"kind":"shape","id":"sh/t4z6lwbi","slide":8,"name":"pilot-top-1","bbox":[450,370,346,0]}
+{"kind":"textbox","id":"sh/s3q5crax","slide":8,"name":"pilot-num-1","text":"02","textPreview":"02","textChars":2,"textLines":1,"bbox":[450,398,56,30]}
+{"kind":"textbox","id":"sh/r2h4jmtc","slide":8,"name":"pilot-head-1","text":"Deploy","textPreview":"Deploy","textChars":6,"textLines":1,"bbox":[450,440,230,38]}
+{"kind":"textbox","id":"sh/6h8nahsr","slide":8,"name":"pilot-time-1","text":"Weeks 3–6","textPreview":"Weeks 3–6","textChars":9,"textLines":1,"bbox":[450,489,200,22]}
+{"kind":"textbox","id":"sh/98vm9cby","slide":8,"name":"pilot-body-1","text":"Launch in shadow or supervised mode with named owners and escalation paths.","textPreview":"Launch in shadow or supervised mode with named owners and escalation paths.","textChars":75,"textLines":1,"bbox":[450,527,302,58]}
+{"kind":"shape","id":"sh/87m507ut","slide":8,"name":"pilot-top-2","bbox":[828,370,346,0]}
+{"kind":"textbox","id":"sh/0rq5g72p","slide":8,"name":"pilot-num-2","text":"03","textPreview":"03","textChars":2,"textLines":1,"bbox":[828,398,56,30]}
+{"kind":"textbox","id":"sh/lszmpcju","slide":8,"name":"pilot-head-2","text":"Prove","textPreview":"Prove","textChars":5,"textLines":1,"bbox":[828,440,230,38]}
+{"kind":"textbox","id":"sh/yp8nexkj","slide":8,"name":"pilot-time-2","text":"Weeks 7–12","textPreview":"Weeks 7–12","textChars":10,"textLines":1,"bbox":[828,489,200,22]}
+{"kind":"textbox","id":"sh/zqh4n214","slide":8,"name":"pilot-body-2","text":"Measure the operating result, quality, adoption, and scale decision.","textPreview":"Measure the operating result, quality, adoption, and scale decision.","textChars":68,"textLines":1,"bbox":[828,527,302,58]}
+{"kind":"shape","id":"sh/8va5k72l","slide":8,"name":"pilot-callout-surface","bbox":[72,604,1136,40]}
+{"kind":"textbox","id":"sh/9wj6tcj6","slide":8,"name":"pilot-callout-text","text":"The destination is not a demo. It is an executive decision based on a real operational result.","textPreview":"The destination is not a demo. It is an executive decision based on a real operational result.","textChars":94,"textLines":1,"bbox":[90,614,1100,18]}
+{"kind":"shape","id":"sh/mt8nihkf","slide":8,"name":"footer-rule-8","bbox":[72,664,1136,0]}
+{"kind":"textbox","id":"sh/wja5or2h","slide":8,"name":"footer-brand-8","text":"ClerkTree","textPreview":"ClerkTree","textChars":9,"textLines":1,"bbox":[94,677,90,18]}
+{"kind":"textbox","id":"sh/xkj6xwj2","slide":8,"name":"footer-tag-8","text":"AI harness for growing businesses.","textPreview":"AI harness for growing businesses.","textChars":34,"textLines":1,"bbox":[191,677,300,18]}
+{"kind":"textbox","id":"sh/rq5g3apg","slide":8,"name":"footer-conf-8","text":"AI OPERATIONS BRIEFING","textPreview":"AI OPERATIONS BRIEFING","textChars":22,"textLines":1,"bbox":[874,677,246,18]}
+{"kind":"textbox","id":"sh/6pwzap8v","slide":8,"name":"footer-num-8","text":"08","textPreview":"08","textChars":2,"textLines":1,"bbox":[1152,677,56,18]}
+{"kind":"image","id":"im/8juhczyx","slide":8,"name":"","alt":"Industrial engineers reviewing maintenance action at a machine","bbox":[0,0,1280,720]}
+{"kind":"image","id":"im/8nu1wnud","slide":8,"name":"","alt":"ClerkTree logo mark","bbox":[72,678,14,14]}
+{"kind":"notes","id":"nt/3yjr90","slide":8,"text":"This is the commercial spine. The pilot is intentionally bounded: a controlled proof, not an open-ended transformation programme."}
+{"kind":"slide","id":"sl/7k3oxz","slide":9,"title":"DESIGNED FOR EUROPEAN ENTERPRISES","textShapes":21}
+{"kind":"shape","id":"sh/gzi9kzal","slide":9,"name":"eyebrow-line-Designed for European enterprises","bbox":[72,66,22,2]}
+{"kind":"textbox","id":"sh/vy98rut0","slide":9,"name":"eyebrow-Designed for European enterprises","text":"DESIGNED FOR EUROPEAN ENTERPRISES","textPreview":"DESIGNED FOR EUROPEAN ENTERPRISES","textChars":33,"textLines":1,"bbox":[104,58,650,20]}
+{"kind":"textbox","id":"sh/ux0ripsf","slide":9,"name":"title-Build control in","text":"Build control into\nthe deployment—not\nthe post-mortem.","textPreview":"Build control into | the deployment—not | the post-mortem.","textChars":54,"textLines":3,"bbox":[72,102,630,164]}
+{"kind":"textbox","id":"sh/twrqpkbu","slide":9,"name":"gov-copy","text":"Before launch, agree the operating controls that turn good intentions into deployable governance. The exact configuration follows your use case, risk assessment, and legal requirements.","textPreview":"Before launch, agree the operating controls that turn good intentions into deployable governance. The exact configuration follows your us...","textChars":185,"textLines":1,"bbox":[72,286,630,48]}
+{"kind":"shape","id":"sh/8bi9gfa9","slide":9,"name":"control-0-surface","bbox":[760,122,200,188]}
+{"kind":"textbox","id":"sh/7a98nato","slide":9,"name":"control-n-0","text":"01","textPreview":"01","textChars":2,"textLines":1,"bbox":[780,140,40,22]}
+{"kind":"textbox","id":"sh/69gre5sj","slide":9,"name":"control-h-0","text":"Data use","textPreview":"Data use","textChars":8,"textLines":1,"bbox":[780,176,160,40]}
+{"kind":"textbox","id":"sh/l87qlkby","slide":9,"name":"control-b-0","text":"Purpose, minimisation, retention, and sensitive-data handling.","textPreview":"Purpose, minimisation, retention, and sensitive-data handling.","textChars":62,"textLines":1,"bbox":[780,234,160,54]}
+{"kind":"shape","id":"sh/k7y9cfad","slide":9,"name":"control-1-surface","bbox":[984,122,200,188]}
+{"kind":"textbox","id":"sh/utsnitgv","slide":9,"name":"control-n-1","text":"02","textPreview":"02","textChars":2,"textLines":1,"bbox":[1004,140,40,22]}
+{"kind":"textbox","id":"sh/vu14byhg","slide":9,"name":"control-h-1","text":"System access","textPreview":"System access","textChars":13,"textLines":1,"bbox":[1004,176,160,40]}
+{"kind":"textbox","id":"sh/gva5k3y1","slide":9,"name":"control-b-1","text":"Identity, roles, approved actions, and escalation paths.","textPreview":"Identity, roles, approved actions, and escalation paths.","textChars":56,"textLines":1,"bbox":[1004,234,160,54]}
+{"kind":"shape","id":"sh/hgjmd8zm","slide":9,"name":"control-2-surface","bbox":[760,350,200,188]}
+{"kind":"textbox","id":"sh/6p83e9gz","slide":9,"name":"control-n-2","text":"03","textPreview":"03","textChars":2,"textLines":1,"bbox":[780,368,40,22]}
+{"kind":"textbox","id":"sh/7q147ehk","slide":9,"name":"control-h-2","text":"Model operations","textPreview":"Model operations","textChars":16,"textLines":1,"bbox":[780,404,160,40]}
+{"kind":"textbox","id":"sh/8ralgjyp","slide":9,"name":"control-b-2","text":"Provider/model selection, monitoring, change control, and testing.","textPreview":"Provider/model selection, monitoring, change control, and testing.","textChars":66,"textLines":1,"bbox":[780,462,160,54]}
+{"kind":"shape","id":"sh/tsjm9oza","slide":9,"name":"control-3-surface","bbox":[984,350,200,188]}
+{"kind":"textbox","id":"sh/yl83a9gn","slide":9,"name":"control-n-3","text":"04","textPreview":"04","textChars":2,"textLines":1,"bbox":[1004,368,40,22]}
+{"kind":"textbox","id":"sh/jmh43eh8","slide":9,"name":"control-h-3","text":"Evidence","textPreview":"Evidence","textChars":8,"textLines":1,"bbox":[1004,404,160,40]}
+{"kind":"textbox","id":"sh/n6dkbax0","slide":9,"name":"control-b-3","text":"Logs, documentation, handover context, and reviewable exceptions.","textPreview":"Logs, documentation, handover context, and reviewable exceptions.","textChars":65,"textLines":1,"bbox":[1004,462,160,54]}
+{"kind":"textbox","id":"sh/254j25wf","slide":9,"name":"gov-foot","text":"Sovereign AI is a business design choice: the customer retains the authority to set the boundary.","textPreview":"Sovereign AI is a business design choice: the customer retains the authority to set the boundary.","textChars":97,"textLines":1,"bbox":[72,575,662,34]}
+{"kind":"textbox","id":"sh/psf2dkf6","slide":9,"name":"citation-Sources: E","text":"Sources: European Commission — AI Act policy page, accessed 12 Jul 2026  •  Sources: European Commission — GDPR principles, accessed 12 Jul 2026","textPreview":"Sources: European Commission — AI Act policy page, accessed 12 Jul 2026  •  Sources: European Commission — GDPR principles, accessed 12 J...","textChars":144,"textLines":1,"bbox":[72,634,940,18]}
+{"kind":"shape","id":"sh/or614fel","slide":9,"name":"footer-rule-9","bbox":[72,664,1136,0]}
+{"kind":"textbox","id":"sh/atoj6pwr","slide":9,"name":"footer-brand-9","text":"ClerkTree","textPreview":"ClerkTree","textChars":9,"textLines":1,"bbox":[94,677,90,18]}
+{"kind":"textbox","id":"sh/xwf2hkf2","slide":9,"name":"footer-tag-9","text":"AI harness for growing businesses.","textPreview":"AI harness for growing businesses.","textChars":34,"textLines":1,"bbox":[191,677,300,18]}
+{"kind":"textbox","id":"sh/wv618feh","slide":9,"name":"footer-conf-9","text":"AI OPERATIONS BRIEFING","textPreview":"AI OPERATIONS BRIEFING","textChars":22,"textLines":1,"bbox":[874,677,246,18]}
+{"kind":"textbox","id":"sh/ryt03qxs","slide":9,"name":"footer-num-9","text":"09","textPreview":"09","textChars":2,"textLines":1,"bbox":[1152,677,56,18]}
+{"kind":"image","id":"im/wjilorad","slide":9,"name":"","alt":"ClerkTree logo mark","bbox":[72,678,14,14]}
+{"kind":"notes","id":"nt/7k3oxz","slide":9,"text":"This slide makes the enterprise-ready conversation concrete without presenting a legal opinion. It is also a useful checklist for the initial security and data-protection workshop."}
+{"kind":"slide","id":"sl/k45on8","slide":10,"title":"THE PROOF STANDARD","textShapes":20}
+{"kind":"shape","id":"sh/d8ry18be","slide":10,"name":"eyebrow-line-The proof standard","bbox":[72,66,22,2]}
+{"kind":"textbox","id":"sh/q5gzqdc3","slide":10,"name":"eyebrow-The proof standard","text":"THE PROOF STANDARD","textPreview":"THE PROOF STANDARD","textChars":18,"textLines":1,"bbox":[104,58,650,20]}
+{"kind":"textbox","id":"sh/r6pgzyto","slide":10,"name":"title-Measure outcomes","text":"Measure outcomes, not\nactivity.","textPreview":"Measure outcomes, not | activity.","textChars":31,"textLines":2,"bbox":[72,102,610,136]}
+{"kind":"textbox","id":"sh/0bihwnu5","slide":10,"name":"metrics-copy","text":"A credible enterprise programme starts with the baseline and ends with a decision. We define the business case in operational terms your team already trusts.","textPreview":"A credible enterprise programme starts with the baseline and ends with a decision. We define the business case in operational terms your ...","textChars":157,"textLines":1,"bbox":[72,252,590,52]}
+{"kind":"textbox","id":"sh/1cry5sbq","slide":10,"name":"metrics-promise","text":"No vanity metrics. No unsupported ROI promise.","textPreview":"No vanity metrics. No unsupported ROI promise.","textChars":46,"textLines":1,"bbox":[72,570,590,34]}
+{"kind":"shape","id":"sh/e90zudcz","slide":10,"name":"metric-card-0-surface","bbox":[710,148,222,184]}
+{"kind":"textbox","id":"sh/fa9g3itk","slide":10,"name":"metric-n-0","text":"01","textPreview":"01","textChars":2,"textLines":1,"bbox":[730,166,42,22]}
+{"kind":"textbox","id":"sh/gfexkju1","slide":10,"name":"metric-h-0","text":"Time-to-decision","textPreview":"Time-to-decision","textChars":16,"textLines":1,"bbox":[730,202,178,44]}
+{"kind":"textbox","id":"sh/hg7ytob6","slide":10,"name":"metric-b-0","text":"How quickly the workflow reaches a usable next action.","textPreview":"How quickly the workflow reaches a usable next action.","textChars":54,"textLines":1,"bbox":[730,265,180,50]}
+{"kind":"shape","id":"sh/9wzu947u","slide":10,"name":"metric-card-1-surface","bbox":[960,148,222,184]}
+{"kind":"textbox","id":"sh/8v6t0zqp","slide":10,"name":"metric-n-1","text":"02","textPreview":"02","textChars":2,"textLines":1,"bbox":[980,166,42,22]}
+{"kind":"textbox","id":"sh/7uxc7up4","slide":10,"name":"metric-h-1","text":"Cost per completed case","textPreview":"Cost per completed case","textChars":23,"textLines":1,"bbox":[980,202,178,44]}
+{"kind":"textbox","id":"sh/mtobyp8j","slide":10,"name":"metric-b-1","text":"Where process cost moves—measured against the agreed baseline.","textPreview":"Where process cost moves—measured against the agreed baseline.","textChars":62,"textLines":1,"bbox":[980,265,180,50]}
+{"kind":"shape","id":"sh/h0zud476","slide":10,"name":"metric-card-2-surface","bbox":[710,364,222,184]}
+{"kind":"textbox","id":"sh/wzqt4jql","slide":10,"name":"metric-n-2","text":"03","textPreview":"03","textChars":2,"textLines":1,"bbox":[730,382,42,22]}
+{"kind":"textbox","id":"sh/vyhcbep0","slide":10,"name":"metric-h-2","text":"Quality & escalation","textPreview":"Quality & escalation","textChars":20,"textLines":1,"bbox":[730,418,178,44]}
+{"kind":"textbox","id":"sh/ux8b298f","slide":10,"name":"metric-b-2","text":"Accuracy, exception rate, human acceptance, and rework.","textPreview":"Accuracy, exception rate, human acceptance, and rework.","textChars":55,"textLines":1,"bbox":[730,481,180,50]}
+{"kind":"shape","id":"sh/5ojuho72","slide":10,"name":"metric-card-3-surface","bbox":[960,364,222,184]}
+{"kind":"textbox","id":"sh/4nqt8j6h","slide":10,"name":"metric-n-3","text":"04","textPreview":"04","textChars":2,"textLines":1,"bbox":[980,382,42,22]}
+{"kind":"textbox","id":"sh/47idknet","slide":10,"name":"metric-h-3","text":"Adoption","textPreview":"Adoption","textChars":8,"textLines":1,"bbox":[980,418,178,44]}
+{"kind":"textbox","id":"sh/p8redsfe","slide":10,"name":"metric-b-3","text":"Whether teams choose the workflow in day-to-day operations.","textPreview":"Whether teams choose the workflow in day-to-day operations.","textChars":59,"textLines":1,"bbox":[980,481,180,50]}
+{"kind":"shape","id":"sh/25gvixwn","slide":10,"name":"footer-rule-10","bbox":[72,664,1136,0]}
+{"kind":"textbox","id":"sh/cvido7e5","slide":10,"name":"footer-brand-10","text":"ClerkTree","textPreview":"ClerkTree","textChars":9,"textLines":1,"bbox":[94,677,90,18]}
+{"kind":"textbox","id":"sh/dwrehcfa","slide":10,"name":"footer-tag-10","text":"AI harness for growing businesses.","textPreview":"AI harness for growing businesses.","textChars":34,"textLines":1,"bbox":[191,677,300,18]}
+{"kind":"textbox","id":"sh/qt0vmxwz","slide":10,"name":"footer-conf-10","text":"AI OPERATIONS BRIEFING","textPreview":"AI OPERATIONS BRIEFING","textChars":22,"textLines":1,"bbox":[874,677,246,18]}
+{"kind":"textbox","id":"sh/ru9wf2xk","slide":10,"name":"footer-num-10","text":"10","textPreview":"10","textChars":2,"textLines":1,"bbox":[1152,677,56,18]}
+{"kind":"image","id":"im/onydone5","slide":10,"name":"","alt":"ClerkTree logo mark","bbox":[72,678,14,14]}
+{"kind":"notes","id":"nt/k45on8","slide":10,"text":"If the 40% processing-speed benchmark comes up, say it is an internal target for suitable workflows and that the pilot scorecard is what establishes the customer-specific result."}
+{"kind":"slide","id":"sl/axam3z","slide":11,"title":"A REPEATABLE ENTRY POINT","textShapes":20}
+{"kind":"shape","id":"sh/sba5cvad","slide":11,"name":"eyebrow-line-A repeatable entry point","bbox":[72,66,22,2]}
+{"kind":"textbox","id":"sh/7a14jqts","slide":11,"name":"eyebrow-A repeatable entry point","text":"A REPEATABLE ENTRY POINT","textPreview":"A REPEATABLE ENTRY POINT","textChars":24,"textLines":1,"bbox":[104,58,650,20]}
+{"kind":"textbox","id":"sh/69snals7","slide":11,"name":"title-One workflow.\nOn","text":"One workflow.\nOne owner.\nOne measurable win.","textPreview":"One workflow. | One owner. | One measurable win.","textChars":44,"textLines":3,"bbox":[72,105,460,136]}
+{"kind":"textbox","id":"sh/58jmhgbm","slide":11,"name":"entry-copy","text":"This is how a European enterprise can move from AI interest to a governed operating result—without betting the business on a broad transformation programme.","textPreview":"This is how a European enterprise can move from AI interest to a governed operating result—without betting the business on a broad transf...","textChars":156,"textLines":1,"bbox":[72,334,440,74]}
+{"kind":"textbox","id":"sh/k7a58ba1","slide":11,"name":"entry-foot","text":"A clean yes or no after 90 days.","textPreview":"A clean yes or no after 90 days.","textChars":32,"textLines":1,"bbox":[72,560,460,30]}
+{"kind":"shape","id":"sh/j6h4fqtw","slide":11,"name":"entry-frame-surface","bbox":[582,112,626,468]}
+{"kind":"shape","id":"sh/i58n6lsb","slide":11,"name":"entry-line-0","bbox":[616,248,540,0]}
+{"kind":"textbox","id":"sh/p436tkr6","slide":11,"name":"entry-num-0","text":"01","textPreview":"01","textChars":2,"textLines":1,"bbox":[616,144,38,22]}
+{"kind":"textbox","id":"sh/43u5kfal","slide":11,"name":"entry-sector-0","text":"AUTOMOTIVE OEM","textPreview":"AUTOMOTIVE OEM","textChars":14,"textLines":1,"bbox":[668,144,200,22]}
+{"kind":"textbox","id":"sh/a9kn6t8f","slide":11,"name":"entry-head-0","text":"Triage service & dealer signals","textPreview":"Triage service & dealer signals","textChars":31,"textLines":1,"bbox":[616,176,430,28]}
+{"kind":"textbox","id":"sh/batozyp0","slide":11,"name":"entry-body-0","text":"Prioritise inbound requests, route context, and protect the human decision boundary.","textPreview":"Prioritise inbound requests, route context, and protect the human decision boundary.","textChars":84,"textLines":1,"bbox":[616,214,524,34]}
+{"kind":"shape","id":"sh/wb2p83ql","slide":11,"name":"entry-line-1","bbox":[616,380,540,0]}
+{"kind":"textbox","id":"sh/xcb61876","slide":11,"name":"entry-num-1","text":"02","textPreview":"02","textChars":2,"textLines":1,"bbox":[616,276,38,22]}
+{"kind":"textbox","id":"sh/m50n2t8j","slide":11,"name":"entry-sector-1","text":"INDUSTRIAL MANUFACTURER","textPreview":"INDUSTRIAL MANUFACTURER","textChars":23,"textLines":1,"bbox":[668,276,200,22]}
+{"kind":"textbox","id":"sh/n69ovyp4","slide":11,"name":"entry-head-1","text":"Coordinate field or customer operations","textPreview":"Coordinate field or customer operations","textChars":39,"textLines":1,"bbox":[616,308,430,28]}
+{"kind":"textbox","id":"sh/o7i543qp","slide":11,"name":"entry-body-1","text":"Turn fragmented communications into ready-to-act operational handoffs.","textPreview":"Turn fragmented communications into ready-to-act operational handoffs.","textChars":70,"textLines":1,"bbox":[616,346,524,34]}
+{"kind":"shape","id":"sh/98r6x87a","slide":11,"name":"entry-line-2","bbox":[616,512,540,0]}
+{"kind":"textbox","id":"sh/6147exon","slide":11,"name":"entry-num-2","text":"03","textPreview":"03","textChars":2,"textLines":1,"bbox":[616,408,38,22]}
+{"kind":"textbox","id":"sh/72do7ip8","slide":11,"name":"entry-sector-2","text":"ENTERPRISE SERVICES","textPreview":"ENTERPRISE SERVICES","textChars":19,"textLines":1,"bbox":[668,408,200,22]}
+{"kind":"textbox","id":"sh/3m5kza5k","slide":11,"name":"entry-head-2","text":"Process claims or document cases","textPreview":"Process claims or document cases","textChars":32,"textLines":1,"bbox":[616,440,430,28]}
+{"kind":"textbox","id":"sh/ilw36pof","slide":11,"name":"entry-body-2","text":"Extract evidence, classify work, and accelerate the route to expert review.","textPreview":"Extract evidence, classify work, and accelerate the route to expert review.","textChars":75,"textLines":1,"bbox":[616,478,524,34]}
+{"kind":"shape","id":"sh/58nm1knq","slide":11,"name":"footer-rule-11","bbox":[72,664,1136,0]}
+{"kind":"textbox","id":"sh/rap43u5w","slide":11,"name":"footer-brand-11","text":"ClerkTree","textPreview":"ClerkTree","textChars":9,"textLines":1,"bbox":[94,677,90,18]}
+{"kind":"textbox","id":"sh/q9w3apob","slide":11,"name":"footer-tag-11","text":"AI harness for growing businesses.","textPreview":"AI harness for growing businesses.","textChars":34,"textLines":1,"bbox":[191,677,300,18]}
+{"kind":"textbox","id":"sh/dc7m54n2","slide":11,"name":"footer-conf-11","text":"AI OPERATIONS BRIEFING","textPreview":"AI OPERATIONS BRIEFING","textChars":22,"textLines":1,"bbox":[874,677,246,18]}
+{"kind":"textbox","id":"sh/sbylcz6h","slide":11,"name":"footer-num-11","text":"11","textPreview":"11","textChars":2,"textLines":1,"bbox":[1152,677,56,18]}
+{"kind":"image","id":"im/3a1wr650","slide":11,"name":"","alt":"ClerkTree logo mark","bbox":[72,678,14,14]}
+{"kind":"notes","id":"nt/axam3z","slide":11,"text":"This is where a buyer can recognize their own entry point. Adapt the wording of the first row for a named account, but retain the one-workflow, one-owner, one-win structure."}
+{"kind":"slide","id":"sl/zcp754","slide":12,"title":"WHAT MAKES THE DIFFERENCE","textShapes":14}
+{"kind":"shape","id":"sh/jqtwb6x4","slide":12,"name":"eyebrow-line-What makes the difference","bbox":[72,66,22,2]}
+{"kind":"textbox","id":"sh/kr2dkrep","slide":12,"name":"eyebrow-What makes the difference","text":"WHAT MAKES THE DIFFERENCE","textPreview":"WHAT MAKES THE DIFFERENCE","textChars":25,"textLines":1,"bbox":[104,58,650,20]}
+{"kind":"textbox","id":"sh/5sbedwfa","slide":12,"name":"title-Operational inte","text":"Operational intelligence\nis only useful when it\nstays connected to work.","textPreview":"Operational intelligence | is only useful when it | stays connected to work.","textChars":72,"textLines":3,"bbox":[72,96,560,150]}
+{"kind":"textbox","id":"sh/6tkfm1wv","slide":12,"name":"graph-copy","text":"ClerkTree is built to hold context across interactions, show why an action is recommended, and give operating teams a visible path from signal to execution.","textPreview":"ClerkTree is built to hold context across interactions, show why an action is recommended, and give operating teams a visible path from s...","textChars":156,"textLines":1,"bbox":[72,240,560,54]}
+{"kind":"textbox","id":"sh/7utwf6xg","slide":12,"name":"graph-metric-1-value","text":"Context","textPreview":"Context","textChars":7,"textLines":1,"bbox":[72,340,220,54]}
+{"kind":"textbox","id":"sh/svmxobel","slide":12,"name":"graph-metric-1-label","text":"Information travels with the case—not in a separate queue.","textPreview":"Information travels with the case—not in a separate queue.","textChars":58,"textLines":1,"bbox":[72,398,220,36]}
+{"kind":"textbox","id":"sh/twvehgf6","slide":12,"name":"graph-metric-2-value","text":"Clarity","textPreview":"Clarity","textChars":7,"textLines":1,"bbox":[322,340,220,54]}
+{"kind":"textbox","id":"sh/uh4falwr","slide":12,"name":"graph-metric-2-label","text":"Teams see the evidence, not only a generated answer.","textPreview":"Teams see the evidence, not only a generated answer.","textChars":52,"textLines":1,"bbox":[322,398,220,36]}
+{"kind":"textbox","id":"sh/fidwjqxc","slide":12,"name":"graph-metric-3-value","text":"Action","textPreview":"Action","textChars":6,"textLines":1,"bbox":[72,478,470,54]}
+{"kind":"textbox","id":"sh/r2tgbatg","slide":12,"name":"graph-metric-3-label","text":"Approved playbooks turn insight into a governed next step.","textPreview":"Approved playbooks turn insight into a governed next step.","textChars":58,"textLines":1,"bbox":[72,536,470,36]}
+{"kind":"shape","id":"sh/q1kz25sb","slide":12,"name":"graph-frame-surface","bbox":[676,116,532,456]}
+{"kind":"textbox","id":"sh/c32h4fa1","slide":12,"name":"graph-caption","text":"Operational context rendered as a navigable customer graph.","textPreview":"Operational context rendered as a navigable customer graph.","textChars":59,"textLines":1,"bbox":[694,588,498,20]}
+{"kind":"shape","id":"sh/3etg7qtk","slide":12,"name":"footer-rule-12","bbox":[72,664,1136,0]}
+{"kind":"textbox","id":"sh/p0by90bq","slide":12,"name":"footer-brand-12","text":"ClerkTree","textPreview":"ClerkTree","textChars":9,"textLines":1,"bbox":[94,677,90,18]}
+{"kind":"textbox","id":"sh/4z2h0vu5","slide":12,"name":"footer-tag-12","text":"AI harness for growing businesses.","textPreview":"AI harness for growing businesses.","textChars":34,"textLines":1,"bbox":[191,677,300,18]}
+{"kind":"textbox","id":"sh/nad0juto","slide":12,"name":"footer-conf-12","text":"AI OPERATIONS BRIEFING","textPreview":"AI OPERATIONS BRIEFING","textChars":22,"textLines":1,"bbox":[874,677,246,18]}
+{"kind":"textbox","id":"sh/m94zapsj","slide":12,"name":"footer-num-12","text":"12","textPreview":"12","textChars":2,"textLines":1,"bbox":[1152,677,56,18]}
+{"kind":"image","id":"im/a5sfmds7","slide":12,"name":"","geometry":"roundRect","alt":"ClerkTree customer graph product view","bbox":[692,132,500,424]}
+{"kind":"image","id":"im/lc3y1sru","slide":12,"name":"","alt":"ClerkTree logo mark","bbox":[72,678,14,14]}
+{"kind":"notes","id":"nt/zcp754","slide":12,"text":"Use the screenshot as a product-character cue, not a feature checklist. The buyer should infer that this is an operational system with context and accountability."}
+{"kind":"slide","id":"sl/qq3l7v","slide":13,"title":"THE OPERATING LOOP","textShapes":14}
+{"kind":"shape","id":"sh/ylona1gr","slide":13,"name":"eyebrow-line-The operating loop","bbox":[72,66,22,2]}
+{"kind":"textbox","id":"sh/loz6lwz2","slide":13,"name":"eyebrow-The operating loop","text":"THE OPERATING LOOP","textPreview":"THE OPERATING LOOP","textChars":18,"textLines":1,"bbox":[104,58,650,20]}
+{"kind":"textbox","id":"sh/0nq5cryh","slide":13,"name":"title-One governed loo","text":"One governed loop—\nfrom industrial signal\nto trusted action.","textPreview":"One governed loop— | from industrial signal | to trusted action.","textChars":60,"textLines":3,"bbox":[72,102,536,158]}
+{"kind":"textbox","id":"sh/bixofmh0","slide":13,"name":"loop-copy","text":"The model is only one part of the system. Value appears when data, policies, people, and permitted actions work as one accountable operating loop.","textPreview":"The model is only one part of the system. Value appears when data, policies, people, and permitted actions work as one accountable operat...","textChars":146,"textLines":1,"bbox":[72,278,500,48]}
+{"kind":"shape","id":"sh/qxon6hgf","slide":13,"name":"loop-bullet-1-dot","bbox":[72,380,8,8]}
+{"kind":"textbox","id":"sh/dkf6hwz6","slide":13,"name":"loop-bullet-1-head","text":"Signal","textPreview":"Signal","textChars":6,"textLines":1,"bbox":[94,372,270,24]}
+{"kind":"textbox","id":"sh/cj658ryl","slide":13,"name":"loop-bullet-1-body","text":"Machines, documents, and conversations supply the operational context.","textPreview":"Machines, documents, and conversations supply the operational context.","textChars":70,"textLines":1,"bbox":[94,401,292,46]}
+{"kind":"shape","id":"sh/3ux4b2h4","slide":13,"name":"loop-bullet-2-dot","bbox":[72,466,8,8]}
+{"kind":"textbox","id":"sh/2t4n2xgj","slide":13,"name":"loop-bullet-2-head","text":"Assist","textPreview":"Assist","textChars":6,"textLines":1,"bbox":[94,458,270,24]}
+{"kind":"textbox","id":"sh/s3y5kb6d","slide":13,"name":"loop-bullet-2-body","text":"AI prepares the decision within the controls you define.","textPreview":"AI prepares the decision within the controls you define.","textChars":56,"textLines":1,"bbox":[94,487,292,46]}
+{"kind":"shape","id":"sh/t476dg7y","slide":13,"name":"loop-bullet-3-dot","bbox":[72,552,8,8]}
+{"kind":"textbox","id":"sh/61gni1o7","slide":13,"name":"loop-bullet-3-head","text":"Approve","textPreview":"Approve","textChars":7,"textLines":1,"bbox":[94,544,270,24]}
+{"kind":"textbox","id":"sh/72pob6ps","slide":13,"name":"loop-bullet-3-body","text":"Policy and people set the boundary for trusted action.","textPreview":"Policy and people set the boundary for trusted action.","textChars":54,"textLines":1,"bbox":[94,573,292,46]}
+{"kind":"shape","id":"sh/kzy5grq1","slide":13,"name":"loop-diagram-frame-surface","bbox":[614,104,594,464]}
+{"kind":"textbox","id":"sh/ixgneh8b","slide":13,"name":"loop-caption","text":"A visible loop makes automation auditable, bounded, and easier to scale.","textPreview":"A visible loop makes automation auditable, bounded, and easier to scale.","textChars":72,"textLines":1,"bbox":[630,536,562,22]}
+{"kind":"shape","id":"sh/jypo7mpg","slide":13,"name":"footer-rule-13","bbox":[72,664,1136,0]}
+{"kind":"textbox","id":"sh/pwb6l07q","slide":13,"name":"footer-brand-13","text":"ClerkTree","textPreview":"ClerkTree","textChars":9,"textLines":1,"bbox":[94,677,90,18]}
+{"kind":"textbox","id":"sh/xc765gza","slide":13,"name":"footer-tag-13","text":"AI harness for growing businesses.","textPreview":"AI harness for growing businesses.","textChars":34,"textLines":1,"bbox":[191,677,300,18]}
+{"kind":"textbox","id":"sh/cry5cvyp","slide":13,"name":"footer-conf-13","text":"AI OPERATIONS BRIEFING","textPreview":"AI OPERATIONS BRIEFING","textChars":22,"textLines":1,"bbox":[874,677,246,18]}
+{"kind":"textbox","id":"sh/bq5o3qh4","slide":13,"name":"footer-num-13","text":"13","textPreview":"13","textChars":2,"textLines":1,"bbox":[1152,677,56,18]}
+{"kind":"image","id":"im/ahgfal87","slide":13,"name":"","geometry":"roundRect","alt":"Governed industrial AI operating loop diagram","bbox":[630,120,562,400]}
+{"kind":"image","id":"im/nupwf69w","slide":13,"name":"","alt":"ClerkTree logo mark","bbox":[72,678,14,14]}
+{"kind":"notes","id":"nt/qq3l7v","slide":13,"text":"Use this visual to explain why the AI model is not the product by itself. The operational loop—signals, controls, human approval, and action—is what makes the programme enterprise-ready."}
+{"kind":"slide","id":"sl/2uewji","slide":14,"title":"THE ASSISTANT AT WORK","textShapes":9}
+{"kind":"shape","id":"sh/pw3m5kfi","slide":14,"name":"robot-left-wash","bbox":[0,0,760,720]}
+{"kind":"shape","id":"sh/ovu5cfyd","slide":14,"name":"robot-bottom-wash","bbox":[0,545,1280,175]}
+{"kind":"shape","id":"sh/by547axo","slide":14,"name":"eyebrow-line-The assistant at work","bbox":[72,66,22,2]}
+{"kind":"textbox","id":"sh/qxcnepg3","slide":14,"name":"eyebrow-The assistant at work","text":"THE ASSISTANT AT WORK","textPreview":"THE ASSISTANT AT WORK","textChars":21,"textLines":1,"bbox":[104,58,650,20]}
+{"kind":"textbox","id":"sh/d0nm9kfu","slide":14,"name":"title-The robot does t","text":"The robot does the\nrepetitive work.\nYour people keep the judgement.","textPreview":"The robot does the | repetitive work. | Your people keep the judgement.","textChars":67,"textLines":3,"bbox":[72,112,550,165]}
+{"kind":"textbox","id":"sh/cze5gfy9","slide":14,"name":"robot-copy","text":"AI can recognise patterns and prepare the next step. It should only act where your policies, permissions, and people allow it to act.","textPreview":"AI can recognise patterns and prepare the next step. It should only act where your policies, permissions, and people allow it to act.","textChars":133,"textLines":1,"bbox":[72,308,514,48]}
+{"kind":"shape","id":"sh/zm54bux0","slide":14,"name":"robot-rule","bbox":[72,410,340,0]}
+{"kind":"textbox","id":"sh/ylwnipgf","slide":14,"name":"robot-loop","text":"SEE THE SIGNAL  •  PREPARE THE CASE  •  APPROVE THE ACTION","textPreview":"SEE THE SIGNAL  •  PREPARE THE CASE  •  APPROVE THE ACTION","textChars":58,"textLines":1,"bbox":[72,438,500,52]}
+{"kind":"textbox","id":"sh/0vqd4nah","slide":14,"name":"robot-foot","text":"The point is not to remove expertise. It is to make expertise travel further.","textPreview":"The point is not to remove expertise. It is to make expertise travel further.","textChars":77,"textLines":1,"bbox":[72,572,450,32]}
+{"kind":"shape","id":"sh/1wzexsb2","slide":14,"name":"footer-rule-14","bbox":[72,664,1136,0]}
+{"kind":"textbox","id":"sh/fuhwvitc","slide":14,"name":"footer-brand-14","text":"ClerkTree","textPreview":"ClerkTree","textChars":9,"textLines":1,"bbox":[94,677,90,18]}
+{"kind":"textbox","id":"sh/ojqx87at","slide":14,"name":"footer-tag-14","text":"AI harness for growing businesses.","textPreview":"AI harness for growing businesses.","textChars":34,"textLines":1,"bbox":[191,677,300,18]}
+{"kind":"textbox","id":"sh/pkze1cbe","slide":14,"name":"footer-conf-14","text":"AI OPERATIONS BRIEFING","textPreview":"AI OPERATIONS BRIEFING","textChars":22,"textLines":1,"bbox":[874,677,246,18]}
+{"kind":"textbox","id":"sh/2x8f6xsn","slide":14,"name":"footer-num-14","text":"14","textPreview":"14","textChars":2,"textLines":1,"bbox":[1152,677,56,18]}
+{"kind":"image","id":"im/na9gz61w","slide":14,"name":"","alt":"Human technician and robotic assistant in industrial oversight workflow","bbox":[0,0,1280,720]}
+{"kind":"image","id":"im/d8jihg3q","slide":14,"name":"","alt":"ClerkTree logo mark","bbox":[72,678,14,14]}
+{"kind":"notes","id":"nt/2uewji","slide":14,"text":"This is the visual expression of human oversight. It works particularly well when a buyer fears job displacement or uncontrolled autonomy: AI prepares; people and policy keep authority."}
+{"kind":"slide","id":"sl/xapodd","slide":15,"title":"ClerkTree","textShapes":4}
+{"kind":"shape","id":"sh/0j6lcjup","slide":15,"name":"supporters-surface","bbox":[72,178,1136,392]}
+{"kind":"shape","id":"sh/zidkjet4","slide":15,"name":"supporters-accent","bbox":[72,178,10,392]}
+{"kind":"shape","id":"sh/qd4j6pcn","slide":15,"name":"footer-rule-15","bbox":[72,664,1136,0]}
+{"kind":"textbox","id":"sh/ob214zuh","slide":15,"name":"footer-brand-15","text":"ClerkTree","textPreview":"ClerkTree","textChars":9,"textLines":1,"bbox":[94,677,90,18]}
+{"kind":"textbox","id":"sh/y14ru1kr","slide":15,"name":"footer-tag-15","text":"AI harness for growing businesses.","textPreview":"AI harness for growing businesses.","textChars":34,"textLines":1,"bbox":[191,677,300,18]}
+{"kind":"textbox","id":"sh/z2ds361c","slide":15,"name":"footer-conf-15","text":"AI OPERATIONS BRIEFING","textPreview":"AI OPERATIONS BRIEFING","textChars":22,"textLines":1,"bbox":[874,677,246,18]}
+{"kind":"textbox","id":"sh/k369wb2x","slide":15,"name":"footer-num-15","text":"15","textPreview":"15","textChars":2,"textLines":1,"bbox":[1152,677,56,18]}
+{"kind":"image","id":"im/nqlwnitw","slide":15,"name":"","alt":"Snowflake logo","bbox":[112,322,212,80]}
+{"kind":"image","id":"im/03ads3al","slide":15,"name":"","alt":"Zendesk logo","bbox":[382,286,174,142]}
+{"kind":"image","id":"im/lojel8b6","slide":15,"name":"","alt":"PostHog logo","bbox":[640,316,228,92]}
+{"kind":"image","id":"im/y1svqtcf","slide":15,"name":"","alt":"Amplitude logo","bbox":[940,316,226,92]}
+{"kind":"image","id":"im/4zed47ap","slide":15,"name":"","alt":"ClerkTree logo mark","bbox":[72,678,14,14]}
+{"kind":"notes","id":"nt/xapodd","slide":15,"text":"Show the supporters without on-slide copy. Use spoken context only when needed; do not describe this as customer endorsement."}
+{"kind":"slide","id":"sl/zdj1j0","slide":16,"title":"ClerkTree","textShapes":8}
+{"kind":"shape","id":"sh/p8r2l0ra","slide":16,"name":"close-orb","bbox":[860,78,420,420]}
+{"kind":"textbox","id":"sh/369kjq94","slide":16,"name":"close-brand","text":"ClerkTree","textPreview":"ClerkTree","textChars":9,"textLines":1,"bbox":[118,54,180,34]}
+{"kind":"textbox","id":"sh/cb21gva1","slide":16,"name":"close-top-meta","text":"AI HARNESS FOR GROWING BUSINESSES.","textPreview":"AI HARNESS FOR GROWING BUSINESSES.","textChars":34,"textLines":1,"bbox":[894,58,314,22]}
+{"kind":"textbox","id":"sh/dcb2p0r6","slide":16,"name":"title-The future of Eu","text":"The future of European AI\nis not less ambitious.\nIt is more accountable.","textPreview":"The future of European AI | is not less ambitious. | It is more accountable.","textChars":72,"textLines":3,"bbox":[72,166,760,210]}
+{"kind":"textbox","id":"sh/q90jelsv","slide":16,"name":"close-sub","text":"Let’s identify the first workflow where greater speed, stronger control, and a measurable operating result can all be true at once.","textPreview":"Let’s identify the first workflow where greater speed, stronger control, and a measurable operating result can all be true at once.","textChars":131,"textLines":1,"bbox":[72,418,588,48]}
+{"kind":"shape","id":"sh/ra9knq9g","slide":16,"name":"close-cta","bbox":[72,532,284,48]}
+{"kind":"textbox","id":"sh/8fy14bah","slide":16,"name":"close-cta-text","text":"START A 30-DAY DESIGN WORKSHOP","textPreview":"START A 30-DAY DESIGN WORKSHOP","textChars":30,"textLines":1,"bbox":[92,545,244,20]}
+{"kind":"textbox","id":"sh/tg7idgr2","slide":16,"name":"close-details","text":"Outcome: use-case selection  •  control blueprint  •  90-day pilot business case","textPreview":"Outcome: use-case selection  •  control blueprint  •  90-day pilot business case","textChars":80,"textLines":1,"bbox":[72,604,720,24]}
+{"kind":"shape","id":"sh/tkjydkjm","slide":16,"name":"close-line","bbox":[72,662,1136,0]}
+{"kind":"textbox","id":"sh/sjax4fi1","slide":16,"name":"close-left-foot","text":"© 2026 ClerkTree Inc.  •  All rights reserved","textPreview":"© 2026 ClerkTree Inc.  •  All rights reserved","textChars":45,"textLines":1,"bbox":[72,678,400,16]}
+{"kind":"textbox","id":"sh/ri1gba1g","slide":16,"name":"close-right-foot","text":"clerktree.com","textPreview":"clerktree.com","textChars":13,"textLines":1,"bbox":[1002,678,206,16]}
+{"kind":"image","id":"im/b658fixw","slide":16,"name":"","alt":"ClerkTree logo","bbox":[72,54,34,34]}
+{"kind":"notes","id":"nt/zdj1j0","slide":16,"text":"Close with a concrete next step. The design workshop is the requested meeting, not an abstract invitation to discuss AI."}

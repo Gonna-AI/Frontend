@@ -9,21 +9,19 @@ const headerLinkPaths = [
   ['nav.solutions', '/solutions'],
   ['nav.about', '/about'],
   ['nav.blog', '/blog'],
-  ['nav.docs', '/docs'],
   ['home.nav.contact', '/contact'],
-] as const;
-
-type FooterLink = {
-  label: string;
-  href: string;
-  external?: boolean;
-};
-
-const footerExploreLinks: FooterLink[] = [
-  { label: 'Solutions', href: '/solutions' },
-  { label: 'Docs', href: '/docs' },
-  { label: 'About Us', href: '/about' },
-];
+ ] as const;
+ 
+ type FooterLink = {
+   label: string;
+   href: string;
+   external?: boolean;
+ };
+ 
+ const footerExploreLinks: FooterLink[] = [
+   { label: 'Solutions', href: '/solutions' },
+   { label: 'About Us', href: '/about' },
+ ];
 
 const footerSocialLinks: FooterLink[] = [
   { label: 'LinkedIn', href: 'https://www.linkedin.com/company/clerktree', external: true },
