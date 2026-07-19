@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, CheckCircle2, Shield } from 'lucide-react';
 import { Footer } from '../Landing/AgeroChrome';
 import SEO from '../SEO';
@@ -28,6 +29,7 @@ const initialFormData: DSARFormData = {
 };
 
 export default function DataAccess() {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState<DSARFormData>(initialFormData);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
@@ -123,7 +125,7 @@ ${formData.details || 'No additional details provided.'}
         {/* ── Header Area ── */}
         <section className="agero-legal-hero" aria-labelledby="dsar-page-title">
           <button
-            onClick={() => window.history.back()}
+            onClick={() => navigate('/')}
             className="agero-legal-back-btn"
             type="button"
           >
@@ -154,10 +156,10 @@ ${formData.details || 'No additional details provided.'}
                 </p>
                 <button
                   type="button"
-                  onClick={() => window.history.back()}
+                  onClick={() => navigate('/')}
                   className="px-6 py-3 rounded-xl bg-[rgb(19,19,19)] text-white font-semibold transition-all hover:bg-black"
                 >
-                  Return to Previous Page
+                  Return to Home
                 </button>
               </div>
             ) : (

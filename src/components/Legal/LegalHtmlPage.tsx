@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { runWhenIdle, yieldToMain } from '../../utils/idle';
 import { sanitizeTrustedHtml } from '../../utils/sanitizeHtml';
@@ -80,6 +81,7 @@ const legalStyles = `
 `;
 
 export default function LegalHtmlPage({ description, htmlUrl, title }: LegalHtmlPageProps) {
+  const navigate = useNavigate();
   const [html, setHtml] = useState('');
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
 
@@ -133,7 +135,7 @@ export default function LegalHtmlPage({ description, htmlUrl, title }: LegalHtml
         {/* ── Hero / title block ── */}
         <section className="agero-legal-hero" aria-labelledby="legal-page-title">
           <button
-            onClick={() => window.history.back()}
+            onClick={() => navigate('/')}
             className="agero-legal-back-btn"
             type="button"
           >
