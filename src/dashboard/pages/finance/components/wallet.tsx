@@ -98,7 +98,7 @@ export function Wallet() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1.5">
             <span className="font-medium text-[10px] text-muted-foreground">
-              {t('dashFinance.wallet.dataSource')} <span className="text-foreground">Supabase (project xlzwfkgurrrspcdyqele)</span>
+              {t('dashFinance.wallet.dataSource')} <span className="text-foreground">Supabase (project cjknqlwfbfikipkmnvfo)</span>
             </span>
           </div>
           <div className="flex items-center gap-1.5">
