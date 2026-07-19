@@ -151,8 +151,8 @@ function projectPath(slug: string, isResearchHost: boolean) {
 function ResearchHeader() {
   return (
     <header className="mx-4 mt-4 flex min-h-16 items-center justify-between rounded-full border border-black/10 bg-[#f4f1eb]/90 px-5 py-3 pr-20 backdrop-blur-md md:px-8 md:pr-32">
-      <a href="https://clerktree.com" aria-label="ClerkTree home" className="shrink-0">
-        <ClerkTreeLogo markClassName="h-8 w-8" registered />
+      <a href="https://clerktree.com" aria-label="ClerkTree home" className="flex shrink-0 items-center gap-2 whitespace-nowrap">
+        <ClerkTreeLogo markClassName="h-8 w-8" labelClassName="text-base font-semibold tracking-[-.04em]" registered />
       </a>
       <nav className="hidden items-center gap-7 text-[11px] font-bold uppercase tracking-[.18em] text-black/55 md:flex" aria-label="Main navigation">
         <a className="transition-colors hover:text-[#ff4d00]" href="https://clerktree.com/solutions">Solutions</a>
