@@ -1081,7 +1081,7 @@ html.lenis.lenis-stopped {
   color: rgba(12, 12, 12, 0.1);
   font-size: clamp(100px, 10vw, 204px);
   line-height: 204px;
-  margin: 0;
+  margin: 0 0 clamp(16px, 3vw, 40px);
   text-align: center;
   white-space: nowrap;
 }
@@ -1092,7 +1092,7 @@ html.lenis.lenis-stopped {
   gap: 216px;
   grid-template-columns: minmax(360px, 456px) minmax(360px, 456px);
   justify-content: center;
-  margin-top: -52px;
+  margin-top: 0;
   position: relative;
   z-index: 1;
 }
@@ -1226,7 +1226,7 @@ html.lenis.lenis-stopped {
   color: rgba(12, 12, 12, 0.1);
   font-size: 204px;
   line-height: 204px;
-  margin: 0;
+  margin: 0 0 clamp(16px, 3vw, 40px);
   max-width: 100%;
   overflow: hidden;
   text-align: center;
@@ -1238,7 +1238,7 @@ html.lenis.lenis-stopped {
   display: grid;
   gap: 32px;
   grid-template-columns: minmax(320px, 520px) minmax(0, 1fr);
-  margin-top: -44px;
+  margin-top: 0;
   max-width: 1616px;
   position: relative;
   width: 100%;
@@ -1639,6 +1639,9 @@ html.lenis.lenis-stopped {
   letter-spacing: -0.07em;
   line-height: 0.82;
   margin: 0;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  hyphens: auto;
 }
 
 .agero-sol-arrow {
@@ -2912,7 +2915,7 @@ html.lenis.lenis-stopped {
   .agero-founder-grid {
     gap: 80px;
     grid-template-columns: minmax(320px, 456px) minmax(320px, 456px);
-    margin-top: -38px;
+    margin-top: 0;
   }
 
   .agero-founder-portrait {
