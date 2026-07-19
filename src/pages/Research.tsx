@@ -10,10 +10,12 @@ import {
   GitBranch,
   Sparkles,
 } from 'lucide-react';
+import { siHuggingface } from 'simple-icons';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import { Footer } from '../components/Landing/AgeroChrome';
 import ClerkTreeLogo from '../components/Brand/ClerkTreeLogo';
+import { SimpleIcon } from '../dashboard/components/simple-icon';
 import LanguageSwitcher from '../components/Layout/LanguageSwitcher';
 import SEO from '../components/SEO';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -204,7 +206,14 @@ function ResearchLanding({ isResearchHost }: { isResearchHost: boolean }) {
           </video>
           <div className="absolute inset-0 bg-[#090909]/55" />
           <div className="relative mx-auto max-w-[1440px]">
-            <div className="mb-20 h-4" aria-hidden="true" />
+            <div className="mb-20 flex items-center justify-between gap-6">
+              <span className="text-xs font-semibold uppercase tracking-[0.28em] text-white/60">{copy ? 'Forschung' : 'Research'}</span>
+              <a href="https://huggingface.co/clerktree" target="_blank" rel="noopener noreferrer" className="group inline-flex items-center gap-3 rounded-full border border-white/20 bg-black/20 px-4 py-2.5 text-xs font-semibold uppercase tracking-[0.14em] text-white/75 transition-colors hover:border-white/50 hover:bg-white/10 hover:text-white">
+                <SimpleIcon icon={siHuggingface} className="h-4 w-4 fill-[#ffb000]" />
+                <span>{copy ? 'Laufende Forschung' : 'Ongoing research'}</span>
+                <ArrowUpRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+              </a>
+            </div>
             <div className="grid gap-14 lg:grid-cols-[1.15fr_.85fr] lg:items-start">
               <div>
                 <p className="mb-6 max-w-xl text-sm leading-6 text-white/50">{copy ? 'Forschung, die in die Arbeit zurückfließt.' : 'Research that feeds back into the work.'}</p>
