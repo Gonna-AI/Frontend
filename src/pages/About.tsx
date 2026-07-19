@@ -45,7 +45,7 @@ export default function About() {
   const navigate = useNavigate();
   const { t } = useLanguage();
   const teamMembers = getTeamMembers(t);
-  const workCards = getWorkCards(t);
+
   const principles = getPrinciples(t);
 
   return (
@@ -112,26 +112,7 @@ export default function About() {
           </div>
         </section>
 
-        <section className="agero-about-section">
-          <div className="agero-about-services">
-            {workCards.map((card) => (
-              <article key={card.title} className="agero-about-service-card">
-                <div className="agero-about-service-body">
-                  <h3>{card.title}</h3>
-                  <p>{card.copy}</p>
-                  <div className="agero-about-tags">
-                    {card.tags.map((tag) => (
-                      <span key={tag} className="agero-about-tag">
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-                <div className={`agero-about-service-media bg-gradient-to-br ${card.imageClass}`} />
-              </article>
-            ))}
-          </div>
-        </section>
+
 
         <section className="agero-about-section">
           <div className="agero-about-team-head">
@@ -205,46 +186,7 @@ export default function About() {
   );
 }
 
-function getWorkCards(t: Translate) {
-  return [
-    {
-      title: t('about.service.workflowTitle'),
-      copy: t('about.service.workflowCopy'),
-      tags: [
-        t('about.service.workflowTag1'),
-        t('about.service.workflowTag2'),
-        t('about.service.workflowTag3'),
-        t('about.service.workflowTag4'),
-        t('about.service.more'),
-      ],
-      imageClass: 'from-[#f8d989] via-[#cfd8c8] to-[#6d8fa0]',
-    },
-    {
-      title: t('about.service.aiTitle'),
-      copy: t('about.service.aiCopy'),
-      tags: [
-        t('about.service.aiTag1'),
-        t('about.service.aiTag2'),
-        t('about.service.aiTag3'),
-        t('about.service.aiTag4'),
-        t('about.service.more'),
-      ],
-      imageClass: 'from-[#dceef7] via-[#b8d2a0] to-[#f8f4dd]',
-    },
-    {
-      title: t('about.service.opsTitle'),
-      copy: t('about.service.opsCopy'),
-      tags: [
-        t('about.service.opsTag1'),
-        t('about.service.opsTag2'),
-        t('about.service.opsTag3'),
-        t('about.service.opsTag4'),
-        t('about.service.more'),
-      ],
-      imageClass: 'from-[#c8d5eb] via-[#f0b6a0] to-[#221815]',
-    },
-  ];
-}
+
 
 function getPrinciples(t: Translate) {
   return [
