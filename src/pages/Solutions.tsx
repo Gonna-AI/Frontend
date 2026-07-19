@@ -221,7 +221,7 @@ export default function Solutions() {
             <span className="fabric-solution-plus plus-four" aria-hidden="true">+</span>
 
             <p className="fabric-solution-copy">{t('solutions.subtitle')}</p>
-            <p className="fabric-solution-copyright">© 2026 ClerkTree Systems</p>
+
           </div>
         </section>
 
