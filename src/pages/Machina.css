@@ -30,12 +30,12 @@
 .machina-nav__link { align-items: center; display: inline-flex; gap: 7px; }
 .machina-brand-icon { fill: #ffb000 !important; height: 16px; width: 16px; }
 
-.machina-hero { background: #123fb3; height: 220svh; position: relative; }
+.machina-hero { background: #123fb3; height: 185svh; position: relative; }
 .machina-hero__sticky { background: #123fb3; height: 100svh; isolation: isolate; overflow: hidden; position: sticky; top: 0; }
 .machina-hero__sticky::after { background: linear-gradient(90deg, rgba(5,7,11,.88) 0%, rgba(5,7,11,.63) 39%, rgba(5,7,11,.08) 73%), linear-gradient(180deg, rgba(5,7,11,.36), transparent 38%, rgba(5,7,11,.18)); content: ""; inset: 0; pointer-events: none; position: absolute; z-index: 2; }
 .machina-hero__background { background: #123fb3; inset: 0; overflow: hidden; position: absolute; z-index: 0; }
 .machina-hero__background::after { background: radial-gradient(circle at 65% 45%, transparent 0 22%, rgba(5,7,11,.18) 67%, rgba(5,7,11,.6) 100%); content: ""; inset: 0; position: absolute; }
-.machina-hero__background-media { backface-visibility: hidden; height: 128%; left: -6%; object-fit: cover; object-position: center 28%; position: absolute; top: -14%; transform-origin: 50% 50%; width: 112%; will-change: transform; }
+.machina-hero__background-media { backface-visibility: hidden; height: 128%; left: -1%; object-fit: cover; object-position: center 28%; position: absolute; top: -14%; transform-origin: 50% 50%; width: 118%; will-change: transform; }
 .machina-hero__grid { background-image: linear-gradient(rgba(255,255,255,.09) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.09) 1px, transparent 1px); background-size: 8vw 8vw; inset: 0; mask-image: linear-gradient(to bottom, black, transparent 80%); opacity: .42; position: absolute; z-index: 1; }
 .machina-hero__radar { border: 1px solid rgba(255,255,255,.18); border-radius: 50%; height: min(70vw, 860px); left: 58%; position: absolute; top: 42%; transform: translate(-50%, -50%); width: min(70vw, 860px); z-index: 1; }
 .machina-hero__radar::before, .machina-hero__radar::after { background: rgba(255,255,255,.15); content: ""; left: 50%; position: absolute; top: 0; }
@@ -136,15 +136,15 @@
 .machina-company-footer .agero-footer-inner { background: transparent; }
 .machina-company-footer .agero-footer-inner::before { background: linear-gradient(180deg, rgba(3,7,16,.06), rgba(3,7,16,.12)); }
 .machina-company-footer .agero-footer-back { color: #9cabff; }
-.machina-company-footer .agero-footer-cta-button { color: #0b1023; }
+.machina-company-footer .agero-footer-cta-button { color: #0b1023; margin-top: 18px; }
 .machina-company-footer .agero-footer-cta-button span { color: #e14630; }
 
 @media (max-width: 850px) {
   .machina-nav { padding: 0 20px; }
   .machina-nav nav, .machina-nav__link { display: none; }
-  .machina-hero { height: 205svh; }
+  .machina-hero { height: 180svh; }
   .machina-hero__sticky { height: 100svh; position: sticky; top: 0; }
-  .machina-hero__background-media { height: 124%; left: -10%; object-position: center 24%; top: -12%; width: 120%; }
+  .machina-hero__background-media { height: 124%; left: -1%; object-position: center 24%; top: -12%; width: 126%; }
   .machina-hero__copy { left: 24px; top: 17svh; }
   .machina-hero h1 { font-size: clamp(4rem, 19vw, 6.4rem); }
   .machina-hero__sidecopy { display: none; }

@@ -75,16 +75,16 @@ export default function Machina() {
   });
   const flightY = useTransform(
     scrollYProgress,
-    [0, 0.34, 0.82, 1],
-    reducedMotion ? ['0%', '0%', '0%', '0%'] : isDesktop ? ['5%', '2%', '-11%', '-8%'] : ['5%', '5%', '-10%', '2%'],
+    [0, 0.38, 0.84, 1],
+    reducedMotion ? ['0%', '0%', '0%', '0%'] : isDesktop ? ['4%', '1%', '-8%', '-10%'] : ['4%', '2%', '-7%', '-9%'],
   );
   const flightScale = useTransform(
     scrollYProgress,
-    [0, 0.4, 0.82, 1],
-    reducedMotion ? [1, 1, 1, 1] : isDesktop ? [1, 1.012, 1.045, 1.03] : [1.02, 1.035, 1.08, 1.045],
+    [0, 0.42, 0.84, 1],
+    reducedMotion ? [1, 1, 1, 1] : isDesktop ? [1, 1.01, 1.035, 1.045] : [1.01, 1.025, 1.055, 1.065],
   );
-  const titleY = useTransform(scrollYProgress, [0, 0.48, 0.78], reducedMotion ? [0, 0, 0] : [0, -24, -62]);
-  const titleOpacity = useTransform(scrollYProgress, [0, 0.48, 0.78], [1, 1, 0]);
+  const titleY = useTransform(scrollYProgress, [0, 0.58, 0.94], reducedMotion ? [0, 0, 0] : [0, -18, -48]);
+  const titleOpacity = useTransform(scrollYProgress, [0, 0.58, 0.94, 1], [1, 1, 0.18, 0]);
 
   return (
     <div className="machina-page">
