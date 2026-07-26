@@ -126,7 +126,6 @@ export default function Machina() {
             <div className="machina-hero__grid" aria-hidden="true" />
             <div className="machina-hero__radar" aria-hidden="true" />
             <motion.div className="machina-hero__copy" style={{ y: titleY, opacity: titleOpacity }}>
-              <p className="machina-eyebrow"><span /> MACHINE INTELLIGENCE / 01</p>
               <h1>Make every<br /><em>machine signal</em><br />actionable.</h1>
               <p className="machina-hero__lede">
                 An open model family for understanding equipment signals, visual quality, and the operational context around them.

@@ -42,9 +42,8 @@
 .machina-hero__radar::before { height: 100%; width: 1px; }
 .machina-hero__radar::after { height: 1px; top: 50%; width: 100%; left: 0; }
 .machina-hero__copy { left: 8vw; max-width: 600px; position: absolute; top: 23svh; z-index: 4; }
-.machina-eyebrow, .machina-section-label { align-items: center; color: #a8b5ff; display: flex; font-size: 10px; font-weight: 800; gap: 9px; letter-spacing: .19em; text-transform: uppercase; }
-.machina-eyebrow span { background: #e5442e; border-radius: 50%; height: 7px; width: 7px; }
-.machina-hero h1 { font-size: clamp(4.5rem, 9vw, 9.8rem); letter-spacing: -.08em; line-height: .83; margin: 30px 0 27px; }
+.machina-section-label { align-items: center; color: #a8b5ff; display: flex; font-size: 10px; font-weight: 800; gap: 9px; letter-spacing: .19em; text-transform: uppercase; }
+.machina-hero h1 { font-size: clamp(4.5rem, 9vw, 9.8rem); letter-spacing: -.08em; line-height: .83; margin: 0 0 27px; }
 .machina-hero h1 em { color: #768cff; }
 .machina-hero__lede { color: rgba(238,236,229,.7); font-family: Inter, system-ui, sans-serif; font-size: 15px; line-height: 1.55; max-width: 370px; }
 .machina-button { align-items: center; background: var(--machina-cream); color: #0c0d13 !important; display: inline-flex; font-size: 11px; font-weight: 800; gap: 20px; letter-spacing: .1em; margin-top: 30px; padding: 15px 18px; text-transform: uppercase; transition: transform .2s ease, background .2s ease; }
