@@ -19,7 +19,7 @@ const models = [
     description: 'A compact vibration classifier for bearing-health experiments and condition-monitoring pipelines.',
     metrics: ['CWRU benchmark', 'Macro-F1 0.9844', 'ONNX-ready'],
     image: 'machina7.jpg',
-    href: 'https://huggingface.co/clerktree/machina-bearing-fault-onnx',
+    href: 'https://huggingface.co/clerktree/machina-cwru-bearing-fault',
   },
   {
     number: '02',
@@ -28,7 +28,7 @@ const models = [
     description: 'A regression baseline for estimating degradation trajectories from time-series sensor signals.',
     metrics: ['NASA CMAPSS', 'ONNX-ready', 'Edge baseline'],
     image: 'machina5.jpg',
-    href: 'https://huggingface.co/clerktree/machina-rul-onnx',
+    href: 'https://huggingface.co/clerktree/machina-cmapss-rul',
   },
   {
     number: '03',
@@ -37,7 +37,7 @@ const models = [
     description: 'A compact image-classification foundation for controlled quality-inspection experiments.',
     metrics: ['Image pipeline', 'ONNX-ready', 'Human review'],
     image: 'machina6.jpg',
-    href: 'https://huggingface.co/clerktree/machina-quality-onnx',
+    href: 'https://huggingface.co/clerktree/machina-ai4i-quality',
   },
   {
     number: '04',
@@ -46,7 +46,7 @@ const models = [
     description: 'A Mistral-based instruction adapter for evidence-grounded diagnosis, tool selection, and operator handoff.',
     metrics: ['Tool-aware', 'Adapter weights', 'Review first'],
     image: 'machina3.jpg',
-    href: 'https://huggingface.co/clerktree/machina-agent-mistral-7b',
+    href: 'https://huggingface.co/clerktree/machina-agent-mistral-7b-lora',
   },
 ];
 
