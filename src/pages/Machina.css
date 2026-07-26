@@ -33,7 +33,7 @@
 .machina-hero { height: 260vh; position: relative; }
 .machina-hero__sticky { height: 100svh; overflow: hidden; position: sticky; top: 0; }
 .machina-hero__sticky::after { background: linear-gradient(90deg, rgba(5,7,11,.88) 0%, rgba(5,7,11,.63) 39%, rgba(5,7,11,.08) 73%), linear-gradient(180deg, rgba(5,7,11,.36), transparent 38%, rgba(5,7,11,.18)); content: ""; inset: 0; pointer-events: none; position: absolute; z-index: 2; }
-.machina-hero__background { inset: -9% -5%; position: absolute; transform-origin: 58% 68%; z-index: 0; }
+.machina-hero__background { inset: -9% -5%; position: absolute; transform-origin: 50% 60%; z-index: 0; }
 .machina-hero__background::after { background: radial-gradient(circle at 65% 45%, transparent 0 22%, rgba(5,7,11,.18) 67%, rgba(5,7,11,.6) 100%); content: ""; inset: 0; position: absolute; }
 .machina-hero__background img { height: 100%; object-fit: cover; object-position: center 28%; width: 100%; }
 .machina-hero__grid { background-image: linear-gradient(rgba(255,255,255,.09) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.09) 1px, transparent 1px); background-size: 8vw 8vw; inset: 0; mask-image: linear-gradient(to bottom, black, transparent 80%); opacity: .42; position: absolute; z-index: 1; }
