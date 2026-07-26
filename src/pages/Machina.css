@@ -49,7 +49,7 @@
 .machina-button { align-items: center; background: var(--machina-cream); color: #0c0d13 !important; display: inline-flex; font-size: 11px; font-weight: 800; gap: 20px; letter-spacing: .1em; margin-top: 30px; padding: 15px 18px; text-transform: uppercase; transition: transform .2s ease, background .2s ease; }
 .machina-button:hover { background: #fff; transform: translateY(-3px); }
 .machina-hero__sidecopy { bottom: 40px; display: flex; flex-direction: column; font-family: Inter, sans-serif; font-size: 8px; gap: 8px; letter-spacing: .15em; position: absolute; right: 4.5vw; text-align: right; z-index: 5; }
-.machina-hero__scroll { align-items: center; bottom: 38px; display: flex; font-family: Inter, sans-serif; font-size: 8px; gap: 10px; left: 4.5vw; letter-spacing: .17em; position: absolute; z-index: 5; }
+.machina-hero__scroll { align-items: center; bottom: 18px; display: flex; font-family: Inter, sans-serif; font-size: 8px; gap: 10px; left: 4.5vw; letter-spacing: .17em; position: absolute; z-index: 5; }
 
 .machina-intro { border-top: 1px solid var(--machina-line); display: grid; gap: 10vw; grid-template-columns: minmax(160px, .6fr) 2fr; padding: 140px 8vw; }
 .machina-intro__statement { font-size: clamp(2.5rem, 5vw, 5.7rem); letter-spacing: -.065em; line-height: .97; max-width: 960px; }
