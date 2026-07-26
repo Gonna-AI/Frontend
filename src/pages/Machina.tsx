@@ -68,6 +68,32 @@ export default function Machina() {
     media.addEventListener('change', sync);
     return () => media.removeEventListener('change', sync);
   }, []);
+
+  useEffect(() => {
+    const hero = heroRef.current;
+    if (!hero) return;
+
+    let frame = 0;
+    const updateProgress = () => {
+      const viewportHeight = window.innerHeight || 1;
+      const rect = hero.getBoundingClientRect();
+      const progress = Math.min(1, Math.max(0, (viewportHeight - rect.top) / (viewportHeight + rect.height)));
+      hero.style.setProperty('--scroll-progress', progress.toFixed(4));
+      frame = 0;
+    };
+    const requestUpdate = () => {
+      if (!frame) frame = window.requestAnimationFrame(updateProgress);
+    };
+
+    updateProgress();
+    window.addEventListener('scroll', requestUpdate, { passive: true });
+    window.addEventListener('resize', requestUpdate);
+    return () => {
+      window.cancelAnimationFrame(frame);
+      window.removeEventListener('scroll', requestUpdate);
+      window.removeEventListener('resize', requestUpdate);
+    };
+  }, []);
   const { scrollYProgress } = useScroll({
     target: heroRef,
     offset: ['start start', 'end end'],
@@ -111,12 +137,12 @@ export default function Machina() {
       <main>
         <section className="machina-hero" ref={heroRef}>
           <div className="machina-hero__sticky">
-            <motion.div className="machina-hero__background" style={{ y: flightY, scale: flightScale }} aria-hidden="true">
+            <motion.div className="machina-hero__background" style={isDesktop ? undefined : { y: flightY, scale: flightScale }} aria-hidden="true">
               <img src={`${R2}/machina8.jpg`} alt="" />
             </motion.div>
             <div className="machina-hero__grid" aria-hidden="true" />
             <div className="machina-hero__radar" aria-hidden="true" />
-            <motion.div className="machina-hero__copy" style={{ y: titleY, opacity: titleOpacity }}>
+            <motion.div className="machina-hero__copy" style={isDesktop ? undefined : { y: titleY, opacity: titleOpacity }}>
               <p className="machina-eyebrow"><span /> MACHINE INTELLIGENCE / 01</p>
               <h1>Make every<br /><em>machine signal</em><br />actionable.</h1>
               <p className="machina-hero__lede">
