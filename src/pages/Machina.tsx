@@ -1,4 +1,4 @@
-import { motion, useReducedMotion, useScroll, useSpring, useTransform } from 'framer-motion';
+import { motion, useReducedMotion, useScroll, useTransform } from 'framer-motion';
 import { ArrowDown, ArrowUpRight, Check, Cpu, Radar, ShieldCheck } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { siGithub, siHuggingface } from 'simple-icons';
@@ -72,9 +72,8 @@ export default function Machina() {
     target: heroRef,
     offset: ['start start', 'end end'],
   });
-  const smoothedScrollY = useSpring(scrollYProgress, { damping: 28, mass: 0.42, stiffness: 115 });
-  const flightY = useTransform(smoothedScrollY, [0, 0.44, 0.82, 1], reducedMotion ? [0, 0, 0, 0] : isDesktop ? ['6%', '3%', '-22%', '-9%'] : ['5%', '5%', '-10%', '2%']);
-  const flightScale = useTransform(smoothedScrollY, [0, 0.48, 0.82, 1], reducedMotion ? [1.06, 1.06, 1.06, 1.06] : isDesktop ? [0.98, 1.015, 1.105, 1.045] : [1.06, 1.08, 1.17, 1.12]);
+  const flightY = useTransform(scrollYProgress, [0, 0.44, 0.82, 1], reducedMotion ? [0, 0, 0, 0] : isDesktop ? ['0%', '-3%', '-8%', '-8%'] : ['5%', '5%', '-10%', '2%']);
+  const flightScale = useTransform(scrollYProgress, [0, 0.48, 0.82, 1], reducedMotion ? [1.06, 1.06, 1.06, 1.06] : isDesktop ? [1, 1.01, 1.025, 1.025] : [1.06, 1.08, 1.17, 1.12]);
   const titleY = useTransform(scrollYProgress, [0, 0.55], reducedMotion ? [0, 0] : [0, -70]);
   const titleOpacity = useTransform(scrollYProgress, [0, 0.5, 0.75], [1, 1, 0]);
 

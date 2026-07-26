@@ -30,8 +30,8 @@
 .machina-nav__link { align-items: center; display: inline-flex; gap: 7px; }
 .machina-brand-icon { fill: #ffb000 !important; height: 16px; width: 16px; }
 
-.machina-hero { height: 260vh; position: relative; }
-.machina-hero__sticky { height: 100svh; overflow: hidden; position: sticky; top: 0; }
+.machina-hero { height: 128svh; position: relative; }
+.machina-hero__sticky { height: 100%; overflow: hidden; position: relative; }
 .machina-hero__sticky::after { background: linear-gradient(90deg, rgba(5,7,11,.88) 0%, rgba(5,7,11,.63) 39%, rgba(5,7,11,.08) 73%), linear-gradient(180deg, rgba(5,7,11,.36), transparent 38%, rgba(5,7,11,.18)); content: ""; inset: 0; pointer-events: none; position: absolute; z-index: 2; }
 .machina-hero__background { inset: -9% -5%; position: absolute; transform-origin: 50% 60%; z-index: 0; }
 .machina-hero__background::after { background: radial-gradient(circle at 65% 45%, transparent 0 22%, rgba(5,7,11,.18) 67%, rgba(5,7,11,.6) 100%); content: ""; inset: 0; position: absolute; }
@@ -143,6 +143,7 @@
   .machina-nav { padding: 0 20px; }
   .machina-nav nav, .machina-nav__link { display: none; }
   .machina-hero { height: 205vh; }
+  .machina-hero__sticky { height: 100svh; position: sticky; top: 0; }
   .machina-hero__copy { left: 24px; top: 17svh; }
   .machina-hero h1 { font-size: clamp(4rem, 19vw, 6.4rem); }
   .machina-hero__sidecopy { display: none; }
