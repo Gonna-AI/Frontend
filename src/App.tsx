@@ -66,6 +66,7 @@ const AuthGoogleCallback = lazyWithRetry(() => import('./pages/AuthGoogleCallbac
 const InvitePage = lazyWithRetry(() => import('./pages/InvitePage'), 'InvitePage');
 const CRM = lazyWithRetry(() => import('./pages/CRM'), 'CRM');
 const LandingFramer = lazyWithRetry(() => import('./pages/LandingFramer'), 'LandingFramer');
+const Machina = lazyWithRetry(() => import('./pages/Machina'), 'Machina');
 const ClientPortalLoginPage = lazyWithRetry(() => import('./pages/client-portal/ClientPortalLoginPage'), 'ClientPortalLoginPage');
 const ClientPortalDashboard = lazyWithRetry(() => import('./pages/client-portal/ClientPortalDashboard'), 'ClientPortalDashboard');
 const CookieConsent = lazyWithRetry(() => import('./components/CookieConsent'), 'CookieConsent');
@@ -82,6 +83,7 @@ const routePrefetchers = {
   '/solutions': () => import('./pages/Solutions'),
   '/contact': () => import('./pages/Contact'),
   '/support': () => import('./pages/SupportPage'),
+  '/machina': () => import('./pages/Machina'),
   '/blog': () => import('./pages/Blog'),
   '/blog/:slug': () => import('./pages/BlogPost'),
 
@@ -203,6 +205,7 @@ function App() {
                 <Route path="/about" element={<About />} />
                 <Route path="/research" element={<Research />} />
                 <Route path="/research/:topicSlug" element={<Research />} />
+                <Route path="/machina" element={<Machina />} />
                 <Route path="/careers" element={<Careers />} />
                 <Route path="/solutions" element={<Solutions />} />
                 <Route path="/contact" element={<Contact />} />
