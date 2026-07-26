@@ -238,7 +238,7 @@ export default function Machina() {
         </section>
       </main>
 
-      <div className="machina-company-footer">
+      <div className="machina-company-footer site-display-font">
         <img className="machina-company-footer__image" src={`${R2}/machina4.jpg`} alt="" loading="lazy" />
         <span className="machina-company-footer__shade" aria-hidden="true" />
         <Footer />

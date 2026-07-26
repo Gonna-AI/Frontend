@@ -138,6 +138,11 @@
 .machina-company-footer .agero-footer-back { color: #9cabff; }
 .machina-company-footer .agero-footer-cta-button { color: #0b1023; margin-top: 18px; }
 .machina-company-footer .agero-footer-cta-button span { color: #e14630; }
+.machina-company-footer .agero-footer-logo-text {
+  box-sizing: border-box;
+  margin-bottom: 0;
+  padding-bottom: clamp(18px, 1.35vw, 30px);
+}
 
 @media (max-width: 850px) {
   .machina-nav { padding: 0 20px; }
@@ -173,6 +178,7 @@
   .machina-access__content { padding: 75px 24px; }
   .machina-access__image { height: 350px; min-height: 0; }
   .machina-company-footer__image { object-position: center 38%; }
+  .machina-company-footer .agero-footer-logo-text { padding-bottom: 14px; }
 }
 
 @media (max-width: 440px) {
