@@ -72,8 +72,8 @@ export default function Machina() {
     target: heroRef,
     offset: ['start start', 'end end'],
   });
-  const flightY = useTransform(scrollYProgress, [0, 0.52, 0.84, 1], reducedMotion ? [0, 0, 0, 0] : isDesktop ? ['1%', '1%', '-4%', '1%'] : ['5%', '5%', '-10%', '2%']);
-  const flightScale = useTransform(scrollYProgress, [0, 0.56, 0.86, 1], reducedMotion ? [1.06, 1.06, 1.06, 1.06] : isDesktop ? [1, 1, 1.035, 1.01] : [1.06, 1.08, 1.17, 1.12]);
+  const flightY = useTransform(scrollYProgress, [0, 0.44, 0.82, 1], reducedMotion ? [0, 0, 0, 0] : isDesktop ? ['6%', '3%', '-22%', '-9%'] : ['5%', '5%', '-10%', '2%']);
+  const flightScale = useTransform(scrollYProgress, [0, 0.48, 0.82, 1], reducedMotion ? [1.06, 1.06, 1.06, 1.06] : isDesktop ? [0.98, 1.015, 1.105, 1.045] : [1.06, 1.08, 1.17, 1.12]);
   const titleY = useTransform(scrollYProgress, [0, 0.55], reducedMotion ? [0, 0] : [0, -70]);
   const titleOpacity = useTransform(scrollYProgress, [0, 0.5, 0.75], [1, 1, 0]);
 
