@@ -20,9 +20,9 @@
   backdrop-filter: blur(15px);
 }
 .machina-brand { align-items: center; display: inline-flex; font-size: 10px; font-weight: 800; gap: 9px; letter-spacing: .18em; white-space: nowrap; }
-.machina-brand__mark { color: #f5f2ec; height: 22px; width: 22px; }
-.machina-brand__wordmark { color: #f5f2ec; font-size: 10px; font-weight: 800; letter-spacing: .18em; }
-.machina-brand__wordmark sup { font-size: 5px; }
+.machina-brand__mark { color: #f5f2ec; flex: none; height: 18px; width: 18px; }
+.machina-brand__sr { display: none; }
+.machina-brand__wordmark { color: #f5f2ec; font-family: Inter, system-ui, sans-serif; font-size: 10px; font-weight: 800; letter-spacing: .16em; }
 .machina-brand i { background: #e5442e; display: block; height: 7px; transform: rotate(45deg); width: 7px; }
 .machina-nav nav { display: flex; gap: 32px; margin-left: 10%; }
 .machina-nav nav a, .machina-nav__link { color: rgba(238,236,229,.67); font-size: 10px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; transition: color .2s ease; }
@@ -30,9 +30,9 @@
 .machina-nav__link { align-items: center; display: inline-flex; gap: 7px; }
 .machina-brand-icon { fill: #ffb000 !important; height: 16px; width: 16px; }
 
-.machina-hero { height: 210vh; position: relative; }
+.machina-hero { height: 260vh; position: relative; }
 .machina-hero__sticky { height: 100svh; overflow: hidden; position: sticky; top: 0; }
-.machina-hero__sticky::after { background: linear-gradient(90deg, rgba(5,7,11,.88) 0%, rgba(5,7,11,.63) 39%, rgba(5,7,11,.12) 73%), linear-gradient(180deg, rgba(5,7,11,.5), transparent 34%, rgba(5,7,11,.84)); content: ""; inset: 0; pointer-events: none; position: absolute; z-index: 2; }
+.machina-hero__sticky::after { background: linear-gradient(90deg, rgba(5,7,11,.88) 0%, rgba(5,7,11,.63) 39%, rgba(5,7,11,.08) 73%), linear-gradient(180deg, rgba(5,7,11,.36), transparent 38%, rgba(5,7,11,.18)); content: ""; inset: 0; pointer-events: none; position: absolute; z-index: 2; }
 .machina-hero__background { inset: -9% -5%; position: absolute; transform-origin: 58% 68%; z-index: 0; }
 .machina-hero__background::after { background: radial-gradient(circle at 65% 45%, transparent 0 22%, rgba(5,7,11,.18) 67%, rgba(5,7,11,.6) 100%); content: ""; inset: 0; position: absolute; }
 .machina-hero__background img { height: 100%; object-fit: cover; object-position: center 28%; width: 100%; }
@@ -128,16 +128,19 @@
 .machina-access__repo { align-items: center; color: #252b62; display: flex; font-family: Inter, sans-serif; font-size: 10px; font-weight: 700; gap: 8px; letter-spacing: .1em; margin-top: 25px; text-transform: uppercase; }
 .machina-access__icon { fill: #171b45 !important; height: 16px; width: 16px; }
 .machina-resource__icon { fill: #ffb000 !important; height: 17px; width: 17px; }
-.machina-company-footer { background: #05070b; padding: 8px 0 0; }
-.machina-company-footer .agero-footer { padding: 0 8px 8px; }
-.machina-company-footer .agero-footer-inner { background: linear-gradient(90deg, rgba(3,7,16,.89), rgba(3,7,16,.45)), url("https://pub-0f804855178c4f4e8184c4fef3bd5b2a.r2.dev/machina/machina1.jpg") center 35% / cover; }
-.machina-company-footer .agero-footer-inner::before { background: linear-gradient(180deg, rgba(3,7,16,.05), rgba(3,7,16,.42) 55%, rgba(3,7,16,.1)); }
+.machina-company-footer { background: #05070b; overflow: hidden; padding: 8px 0 0; position: relative; }
+.machina-company-footer__image, .machina-company-footer__shade { border-radius: 32px; inset: 8px 8px 8px; position: absolute; width: calc(100% - 16px); }
+.machina-company-footer__image { height: calc(100% - 16px); object-fit: cover; object-position: center 40%; }
+.machina-company-footer__shade { background: linear-gradient(90deg, rgba(3,7,16,.82), rgba(3,7,16,.42)), linear-gradient(180deg, rgba(3,7,16,.16), rgba(3,7,16,.64)); height: calc(100% - 16px); }
+.machina-company-footer .agero-footer { padding: 0 8px 8px; position: relative; z-index: 1; }
+.machina-company-footer .agero-footer-inner { background: transparent; }
+.machina-company-footer .agero-footer-inner::before { background: linear-gradient(180deg, rgba(3,7,16,.06), rgba(3,7,16,.12)); }
 .machina-company-footer .agero-footer-back { color: #9cabff; }
 
 @media (max-width: 850px) {
   .machina-nav { padding: 0 20px; }
   .machina-nav nav, .machina-nav__link { display: none; }
-  .machina-hero { height: 175vh; }
+  .machina-hero { height: 205vh; }
   .machina-hero__copy { left: 24px; top: 17svh; }
   .machina-hero h1 { font-size: clamp(4rem, 19vw, 6.4rem); }
   .machina-hero__sidecopy { display: none; }
@@ -165,7 +168,7 @@
   .machina-access { display: flex; flex-direction: column-reverse; }
   .machina-access__content { padding: 75px 24px; }
   .machina-access__image { height: 350px; min-height: 0; }
-  .machina-company-footer .agero-footer-inner { background-position: center 38%; }
+  .machina-company-footer__image { object-position: center 38%; }
 }
 
 @media (max-width: 440px) {

@@ -63,8 +63,8 @@ export default function Machina() {
     target: heroRef,
     offset: ['start start', 'end end'],
   });
-  const flightY = useTransform(scrollYProgress, [0, 0.75, 1], reducedMotion ? [0, 0, 0] : ['15%', '1%', '-12%']);
-  const flightScale = useTransform(scrollYProgress, [0, 0.7, 1], reducedMotion ? [1.06, 1.06, 1.06] : [1.06, 1.17, 1.26]);
+  const flightY = useTransform(scrollYProgress, [0, 0.52, 0.84, 1], reducedMotion ? [0, 0, 0, 0] : ['5%', '5%', '-10%', '2%']);
+  const flightScale = useTransform(scrollYProgress, [0, 0.56, 0.86, 1], reducedMotion ? [1.06, 1.06, 1.06, 1.06] : [1.06, 1.08, 1.17, 1.12]);
   const titleY = useTransform(scrollYProgress, [0, 0.55], reducedMotion ? [0, 0] : [0, -70]);
   const titleOpacity = useTransform(scrollYProgress, [0, 0.5, 0.75], [1, 1, 0]);
 
@@ -84,7 +84,8 @@ export default function Machina() {
 
       <header className="machina-nav">
         <a className="machina-brand" href="/" aria-label="ClerkTree home">
-          <ClerkTreeLogo markClassName="machina-brand__mark" labelClassName="machina-brand__wordmark" registered />
+          <ClerkTreeLogo markClassName="machina-brand__mark" labelClassName="machina-brand__sr" />
+          <span className="machina-brand__wordmark">CLERKTREE</span>
           <i />
           <span>MACHINA</span>
         </a>
@@ -220,6 +221,8 @@ export default function Machina() {
       </main>
 
       <div className="machina-company-footer">
+        <img className="machina-company-footer__image" src={`${R2}/machina1.jpg`} alt="" loading="lazy" />
+        <span className="machina-company-footer__shade" aria-hidden="true" />
         <Footer />
       </div>
     </div>
