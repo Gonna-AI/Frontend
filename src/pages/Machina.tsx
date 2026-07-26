@@ -1,8 +1,12 @@
 import { motion, useReducedMotion, useScroll, useTransform } from 'framer-motion';
-import { ArrowDown, ArrowUpRight, Check, Cpu, Database, Radar, ShieldCheck } from 'lucide-react';
+import { ArrowDown, ArrowUpRight, Check, Cpu, Radar, ShieldCheck } from 'lucide-react';
 import { useRef } from 'react';
+import { siGithub, siHuggingface } from 'simple-icons';
 
+import ClerkTreeLogo from '../components/Brand/ClerkTreeLogo';
+import { Footer } from '../components/Landing/AgeroChrome';
 import SEO from '../components/SEO';
+import { SimpleIcon } from '../dashboard/components/simple-icon';
 import './Machina.css';
 
 const R2 = 'https://pub-0f804855178c4f4e8184c4fef3bd5b2a.r2.dev/machina';
@@ -59,7 +63,7 @@ export default function Machina() {
     target: heroRef,
     offset: ['start start', 'end end'],
   });
-  const flightY = useTransform(scrollYProgress, [0, 0.75, 1], reducedMotion ? [0, 0, 0] : ['8%', '-11%', '-18%']);
+  const flightY = useTransform(scrollYProgress, [0, 0.75, 1], reducedMotion ? [0, 0, 0] : ['15%', '1%', '-12%']);
   const flightScale = useTransform(scrollYProgress, [0, 0.7, 1], reducedMotion ? [1.06, 1.06, 1.06] : [1.06, 1.17, 1.26]);
   const titleY = useTransform(scrollYProgress, [0, 0.55], reducedMotion ? [0, 0] : [0, -70]);
   const titleOpacity = useTransform(scrollYProgress, [0, 0.5, 0.75], [1, 1, 0]);
@@ -80,7 +84,7 @@ export default function Machina() {
 
       <header className="machina-nav">
         <a className="machina-brand" href="/" aria-label="ClerkTree home">
-          <span>CLERKTREE</span>
+          <ClerkTreeLogo markClassName="machina-brand__mark" labelClassName="machina-brand__wordmark" registered />
           <i />
           <span>MACHINA</span>
         </a>
@@ -90,7 +94,7 @@ export default function Machina() {
           <a href="#access">Access</a>
         </nav>
         <a className="machina-nav__link" href="https://huggingface.co/clerktree" target="_blank" rel="noreferrer">
-          Model hub <ArrowUpRight size={15} aria-hidden="true" />
+          <SimpleIcon icon={siHuggingface} className="machina-brand-icon" /> Model hub <ArrowUpRight size={15} aria-hidden="true" />
         </a>
       </header>
 
@@ -167,12 +171,12 @@ export default function Machina() {
             <a className="machina-resource machina-resource--hub" href="https://huggingface.co/clerktree" target="_blank" rel="noreferrer">
               <img src={`${R2}/machina.jpg`} alt="Aircraft ascending through a blue atmosphere" loading="lazy" />
               <span className="machina-resource__shade" aria-hidden="true" />
-              <div><p>01 / MODEL HUB</p><h3>Weights, cards,<br />and evaluations.</h3><span>Hugging Face <ArrowUpRight size={16} aria-hidden="true" /></span></div>
+              <div><p>01 / MODEL HUB</p><h3>Weights, cards,<br />and evaluations.</h3><span><SimpleIcon icon={siHuggingface} className="machina-resource__icon" /> Hugging Face <ArrowUpRight size={16} aria-hidden="true" /></span></div>
             </a>
             <a className="machina-resource machina-resource--repo" href="https://github.com/Clerktree/machina-intelligence" target="_blank" rel="noreferrer">
               <img src={`${R2}/machina4.jpg`} alt="Bright point of light above an illuminated horizon" loading="lazy" />
               <span className="machina-resource__shade" aria-hidden="true" />
-              <div><p>02 / OPEN HARNESS</p><h3>The orchestration<br />layer is visible.</h3><span>GitHub <ArrowUpRight size={16} aria-hidden="true" /></span></div>
+              <div><p>02 / OPEN HARNESS</p><h3>The orchestration<br />layer is visible.</h3><span><SimpleIcon icon={siGithub} className="machina-resource__icon" /> GitHub <ArrowUpRight size={16} aria-hidden="true" /></span></div>
             </a>
           </div>
         </section>
@@ -209,17 +213,15 @@ export default function Machina() {
             <p className="machina-section-label">BUILD WITH MACHINA</p>
             <h2>Take the controls.</h2>
             <p>Explore the released weights, evaluation notes, and machine-intelligence experiments on the ClerkTree model hub.</p>
-            <a className="machina-button machina-button--light" href="https://huggingface.co/clerktree" target="_blank" rel="noreferrer">Visit the model hub <ArrowUpRight size={16} aria-hidden="true" /></a>
-            <a className="machina-access__repo" href="https://github.com/Clerktree/machina-intelligence" target="_blank" rel="noreferrer"><Database size={15} aria-hidden="true" /> Explore the open harness</a>
+            <a className="machina-button machina-button--light" href="https://huggingface.co/clerktree" target="_blank" rel="noreferrer"><SimpleIcon icon={siHuggingface} className="machina-button__icon" /> Visit the model hub <ArrowUpRight size={16} aria-hidden="true" /></a>
+            <a className="machina-access__repo" href="https://github.com/Clerktree/machina-intelligence" target="_blank" rel="noreferrer"><SimpleIcon icon={siGithub} className="machina-access__icon" /> Explore the open harness</a>
           </div>
         </section>
       </main>
 
-      <footer className="machina-footer">
-        <a className="machina-brand" href="/"><span>CLERKTREE</span><i /><span>MACHINA</span></a>
-        <p>Machine intelligence for a world that must remain understandable.</p>
-        <span>© {new Date().getFullYear()} CLERKTREE</span>
-      </footer>
+      <div className="machina-company-footer">
+        <Footer />
+      </div>
     </div>
   );
 }
