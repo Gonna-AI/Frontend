@@ -7,17 +7,6 @@ import './Machina.css';
 
 const R2 = 'https://pub-0f804855178c4f4e8184c4fef3bd5b2a.r2.dev/machina';
 
-const gallery = [
-  { name: 'machina.jpg', alt: 'Aircraft rising through a deep-blue atmosphere', className: 'machina-gallery__image--one' },
-  { name: 'machina1.jpg', alt: 'A jet climbing above a glowing horizon', className: 'machina-gallery__image--two' },
-  { name: 'machina2.jpg', alt: 'High-altitude aircraft in flight', className: 'machina-gallery__image--three' },
-  { name: 'machina3.jpg', alt: 'Aircraft silhouette crossing blue sky', className: 'machina-gallery__image--four' },
-  { name: 'machina4.jpg', alt: 'Star above a luminous industrial horizon', className: 'machina-gallery__image--five' },
-  { name: 'machina5.jpg', alt: 'Machine intelligence visual system', className: 'machina-gallery__image--six' },
-  { name: 'machina6.jpg', alt: 'Flight path over a blue atmosphere', className: 'machina-gallery__image--seven' },
-  { name: 'machina7.jpg', alt: 'Jet telemetry and flight path traces', className: 'machina-gallery__image--eight' },
-];
-
 const models = [
   {
     number: '01',
@@ -25,6 +14,7 @@ const models = [
     kind: 'Signal classifier',
     description: 'A compact vibration classifier for bearing-health experiments and condition-monitoring pipelines.',
     metrics: ['CWRU benchmark', 'Macro-F1 0.9844', 'ONNX-ready'],
+    image: 'machina7.jpg',
     href: 'https://huggingface.co/clerktree/machina-bearing-fault-onnx',
   },
   {
@@ -33,6 +23,7 @@ const models = [
     kind: 'Remaining useful life',
     description: 'A regression baseline for estimating degradation trajectories from time-series sensor signals.',
     metrics: ['NASA CMAPSS', 'ONNX-ready', 'Edge baseline'],
+    image: 'machina5.jpg',
     href: 'https://huggingface.co/clerktree/machina-rul-onnx',
   },
   {
@@ -41,6 +32,7 @@ const models = [
     kind: 'Vision inference',
     description: 'A compact image-classification foundation for controlled quality-inspection experiments.',
     metrics: ['Image pipeline', 'ONNX-ready', 'Human review'],
+    image: 'machina6.jpg',
     href: 'https://huggingface.co/clerktree/machina-quality-onnx',
   },
   {
@@ -49,6 +41,7 @@ const models = [
     kind: 'Industrial reasoning',
     description: 'A Mistral-based instruction adapter for evidence-grounded diagnosis, tool selection, and operator handoff.',
     metrics: ['Tool-aware', 'Adapter weights', 'Review first'],
+    image: 'machina3.jpg',
     href: 'https://huggingface.co/clerktree/machina-agent-mistral-7b',
   },
 ];
@@ -66,9 +59,8 @@ export default function Machina() {
     target: heroRef,
     offset: ['start start', 'end end'],
   });
-  const flightY = useTransform(scrollYProgress, [0, 0.75, 1], reducedMotion ? [0, 0, 0] : ['22vh', '-25vh', '-38vh']);
-  const flightScale = useTransform(scrollYProgress, [0, 0.7, 1], reducedMotion ? [1, 1, 1] : [0.82, 1.08, 1.2]);
-  const flightRotate = useTransform(scrollYProgress, [0, 1], reducedMotion ? [0, 0] : [-4, 3]);
+  const flightY = useTransform(scrollYProgress, [0, 0.75, 1], reducedMotion ? [0, 0, 0] : ['8%', '-11%', '-18%']);
+  const flightScale = useTransform(scrollYProgress, [0, 0.7, 1], reducedMotion ? [1.06, 1.06, 1.06] : [1.06, 1.17, 1.26]);
   const titleY = useTransform(scrollYProgress, [0, 0.55], reducedMotion ? [0, 0] : [0, -70]);
   const titleOpacity = useTransform(scrollYProgress, [0, 0.5, 0.75], [1, 1, 0]);
 
@@ -105,6 +97,9 @@ export default function Machina() {
       <main>
         <section className="machina-hero" ref={heroRef}>
           <div className="machina-hero__sticky">
+            <motion.div className="machina-hero__background" style={{ y: flightY, scale: flightScale }} aria-hidden="true">
+              <img src={`${R2}/machina8.jpg`} alt="" />
+            </motion.div>
             <div className="machina-hero__grid" aria-hidden="true" />
             <div className="machina-hero__radar" aria-hidden="true" />
             <motion.div className="machina-hero__copy" style={{ y: titleY, opacity: titleOpacity }}>
@@ -115,11 +110,6 @@ export default function Machina() {
               </p>
               <a className="machina-button" href="#model-family">Explore Machina <ArrowDown size={16} aria-hidden="true" /></a>
             </motion.div>
-
-            <motion.figure className="machina-flight" style={{ y: flightY, scale: flightScale, rotate: flightRotate }}>
-              <img src={`${R2}/machina8.jpg`} alt="Jet rising through a vivid blue sky" />
-              <figcaption>FLIGHT PATH / SIGNAL → UNDERSTANDING → ACTION</figcaption>
-            </motion.figure>
 
             <div className="machina-hero__sidecopy">
               <span>CLERKTREE RESEARCH</span>
@@ -141,31 +131,6 @@ export default function Machina() {
           </div>
         </section>
 
-        <section className="machina-gallery" aria-label="Machina visual field">
-          <div className="machina-gallery__heading">
-            <p className="machina-section-label">THE SIGNAL FIELD</p>
-            <p>Different sensors. One operational picture.</p>
-          </div>
-          <div className="machina-gallery__stage">
-            {gallery.map((image, index) => (
-              <motion.figure
-                className={`machina-gallery__image ${image.className}`}
-                key={image.name}
-                initial={{ opacity: 0, y: reducedMotion ? 0 : 46, rotate: reducedMotion ? 0 : index % 2 ? 3 : -3 }}
-                whileInView={{ opacity: 1, y: 0, rotate: 0 }}
-                viewport={{ once: true, amount: 0.22 }}
-                transition={{ duration: 0.7, delay: index * 0.04, ease: [0.22, 1, 0.36, 1] }}
-              >
-                <img src={`${R2}/${image.name}`} alt={image.alt} loading="lazy" />
-              </motion.figure>
-            ))}
-            <div className="machina-gallery__line machina-gallery__line--one" aria-hidden="true" />
-            <div className="machina-gallery__line machina-gallery__line--two" aria-hidden="true" />
-            <span className="machina-gallery__coordinate machina-gallery__coordinate--one">48.1351° N</span>
-            <span className="machina-gallery__coordinate machina-gallery__coordinate--two">11.5820° E</span>
-          </div>
-        </section>
-
         <section className="machina-models" id="model-family">
           <div className="machina-models__header">
             <div>
@@ -177,6 +142,8 @@ export default function Machina() {
           <div className="machina-model-grid">
             {models.map((model) => (
               <a className="machina-model-card" href={model.href} target="_blank" rel="noreferrer" key={model.title}>
+                <img className="machina-model-card__image" src={`${R2}/${model.image}`} alt="" loading="lazy" />
+                <span className="machina-model-card__shade" aria-hidden="true" />
                 <div className="machina-model-card__top"><span>{model.number}</span><ArrowUpRight size={20} aria-hidden="true" /></div>
                 <p className="machina-model-card__kind">{model.kind}</p>
                 <h3>{model.title}</h3>
@@ -190,9 +157,29 @@ export default function Machina() {
           <p className="machina-models__note">Benchmark metrics describe controlled evaluation, not a promise of field performance. Validate against your equipment, data, and safety case before operation.</p>
         </section>
 
+        <section className="machina-resources">
+          <div className="machina-resources__intro">
+            <p className="machina-section-label">FROM RESEARCH TO INTEGRATION</p>
+            <h2>Choose the layer you need.</h2>
+            <p>Start with a released task model, inspect the evaluation record, or use the open harness as the control plane for machine-aware agent workflows.</p>
+          </div>
+          <div className="machina-resource-grid">
+            <a className="machina-resource machina-resource--hub" href="https://huggingface.co/clerktree" target="_blank" rel="noreferrer">
+              <img src={`${R2}/machina.jpg`} alt="Aircraft ascending through a blue atmosphere" loading="lazy" />
+              <span className="machina-resource__shade" aria-hidden="true" />
+              <div><p>01 / MODEL HUB</p><h3>Weights, cards,<br />and evaluations.</h3><span>Hugging Face <ArrowUpRight size={16} aria-hidden="true" /></span></div>
+            </a>
+            <a className="machina-resource machina-resource--repo" href="https://github.com/Clerktree/machina-intelligence" target="_blank" rel="noreferrer">
+              <img src={`${R2}/machina4.jpg`} alt="Bright point of light above an illuminated horizon" loading="lazy" />
+              <span className="machina-resource__shade" aria-hidden="true" />
+              <div><p>02 / OPEN HARNESS</p><h3>The orchestration<br />layer is visible.</h3><span>GitHub <ArrowUpRight size={16} aria-hidden="true" /></span></div>
+            </a>
+          </div>
+        </section>
+
         <section className="machina-architecture" id="operating-system">
           <div className="machina-architecture__art">
-            <img src={`${R2}/machina7.jpg`} alt="Aircraft telemetry display with coloured flight paths" loading="lazy" />
+            <img src={`${R2}/machina2.jpg`} alt="Aircraft in high-altitude flight" loading="lazy" />
             <div className="machina-architecture__reticle" aria-hidden="true"><span /><span /></div>
           </div>
           <div className="machina-architecture__copy">
@@ -217,7 +204,7 @@ export default function Machina() {
         </section>
 
         <section className="machina-access" id="access">
-          <div className="machina-access__image"><img src={`${R2}/machina4.jpg`} alt="Luminous star above a city-like field of light" loading="lazy" /></div>
+          <div className="machina-access__image"><img src={`${R2}/machina1.jpg`} alt="Jet climbing above a glowing horizon" loading="lazy" /></div>
           <div className="machina-access__content">
             <p className="machina-section-label">BUILD WITH MACHINA</p>
             <h2>Take the controls.</h2>

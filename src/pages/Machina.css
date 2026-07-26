@@ -28,9 +28,12 @@
 
 .machina-hero { height: 210vh; position: relative; }
 .machina-hero__sticky { height: 100svh; overflow: hidden; position: sticky; top: 0; }
-.machina-hero__sticky::after { background: linear-gradient(180deg, rgba(5,7,11,.08), transparent 36%, rgba(5,7,11,.82)); content: ""; inset: 0; pointer-events: none; position: absolute; z-index: 2; }
-.machina-hero__grid { background-image: linear-gradient(rgba(255,255,255,.09) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.09) 1px, transparent 1px); background-size: 8vw 8vw; inset: 0; mask-image: linear-gradient(to bottom, black, transparent 80%); opacity: .42; position: absolute; }
-.machina-hero__radar { border: 1px solid rgba(255,255,255,.18); border-radius: 50%; height: min(70vw, 860px); left: 58%; position: absolute; top: 42%; transform: translate(-50%, -50%); width: min(70vw, 860px); }
+.machina-hero__sticky::after { background: linear-gradient(90deg, rgba(5,7,11,.88) 0%, rgba(5,7,11,.63) 39%, rgba(5,7,11,.12) 73%), linear-gradient(180deg, rgba(5,7,11,.5), transparent 34%, rgba(5,7,11,.84)); content: ""; inset: 0; pointer-events: none; position: absolute; z-index: 2; }
+.machina-hero__background { inset: -14% -5%; position: absolute; transform-origin: 58% 68%; z-index: 0; }
+.machina-hero__background::after { background: radial-gradient(circle at 65% 45%, transparent 0 22%, rgba(5,7,11,.18) 67%, rgba(5,7,11,.6) 100%); content: ""; inset: 0; position: absolute; }
+.machina-hero__background img { height: 100%; object-fit: cover; object-position: center 58%; width: 100%; }
+.machina-hero__grid { background-image: linear-gradient(rgba(255,255,255,.09) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.09) 1px, transparent 1px); background-size: 8vw 8vw; inset: 0; mask-image: linear-gradient(to bottom, black, transparent 80%); opacity: .42; position: absolute; z-index: 1; }
+.machina-hero__radar { border: 1px solid rgba(255,255,255,.18); border-radius: 50%; height: min(70vw, 860px); left: 58%; position: absolute; top: 42%; transform: translate(-50%, -50%); width: min(70vw, 860px); z-index: 1; }
 .machina-hero__radar::before, .machina-hero__radar::after { background: rgba(255,255,255,.15); content: ""; left: 50%; position: absolute; top: 0; }
 .machina-hero__radar::before { height: 100%; width: 1px; }
 .machina-hero__radar::after { height: 1px; top: 50%; width: 100%; left: 0; }
@@ -42,9 +45,6 @@
 .machina-hero__lede { color: rgba(238,236,229,.7); font-family: Inter, system-ui, sans-serif; font-size: 15px; line-height: 1.55; max-width: 370px; }
 .machina-button { align-items: center; background: var(--machina-cream); color: #0c0d13 !important; display: inline-flex; font-size: 11px; font-weight: 800; gap: 20px; letter-spacing: .1em; margin-top: 30px; padding: 15px 18px; text-transform: uppercase; transition: transform .2s ease, background .2s ease; }
 .machina-button:hover { background: #fff; transform: translateY(-3px); }
-.machina-flight { height: min(78vh, 830px); margin: 0; position: absolute; right: 4vw; top: 30vh; width: min(44vw, 600px); z-index: 1; }
-.machina-flight img { height: 100%; object-fit: cover; object-position: center 60%; width: 100%; }
-.machina-flight figcaption { bottom: -22px; color: rgba(238,236,229,.44); font-family: Inter, sans-serif; font-size: 8px; letter-spacing: .16em; position: absolute; right: 0; white-space: nowrap; }
 .machina-hero__sidecopy { bottom: 40px; display: flex; flex-direction: column; font-family: Inter, sans-serif; font-size: 8px; gap: 8px; letter-spacing: .15em; position: absolute; right: 4.5vw; text-align: right; z-index: 5; }
 .machina-hero__scroll { align-items: center; bottom: 38px; display: flex; font-family: Inter, sans-serif; font-size: 8px; gap: 10px; left: 4.5vw; letter-spacing: .17em; position: absolute; z-index: 5; }
 
@@ -53,29 +53,6 @@
 .machina-intro__statement em { color: #8498ff; }
 .machina-intro__detail { color: rgba(238,236,229,.62); font-family: Inter, sans-serif; font-size: 14px; line-height: 1.6; margin: 44px 0 0 auto; max-width: 400px; }
 
-.machina-gallery { background: #121f92; overflow: hidden; padding: 90px 8vw 110px; position: relative; }
-.machina-gallery__heading { align-items: end; display: flex; justify-content: space-between; position: relative; z-index: 5; }
-.machina-gallery__heading .machina-section-label { color: #d6ddff; }
-.machina-gallery__heading > p:last-child { font-size: clamp(1.5rem, 3vw, 3rem); letter-spacing: -.055em; max-width: 360px; }
-.machina-gallery__stage { height: 1050px; margin: 50px auto 0; max-width: 1220px; position: relative; }
-.machina-gallery__image { box-shadow: 0 24px 80px rgba(0,0,0,.3); margin: 0; overflow: hidden; position: absolute; z-index: 2; }
-.machina-gallery__image img { display: block; height: 100%; object-fit: cover; transition: transform .7s cubic-bezier(.22,1,.36,1); width: 100%; }
-.machina-gallery__image:hover img { transform: scale(1.05); }
-.machina-gallery__image--one { height: 370px; left: 4%; top: 3%; width: 245px; }
-.machina-gallery__image--two { height: 410px; left: 26%; top: 16%; width: 280px; }
-.machina-gallery__image--three { height: 285px; right: 6%; top: 4%; width: 310px; }
-.machina-gallery__image--four { height: 365px; left: 9%; top: 50%; width: 245px; }
-.machina-gallery__image--five { height: 310px; left: 44%; top: 43%; width: 350px; }
-.machina-gallery__image--six { height: 225px; right: 1%; top: 48%; width: 230px; }
-.machina-gallery__image--seven { height: 255px; left: 28%; top: 78%; width: 280px; }
-.machina-gallery__image--eight { height: 310px; right: 10%; top: 71%; width: 260px; }
-.machina-gallery__line { background: rgba(220,227,255,.55); height: 1px; position: absolute; transform-origin: left center; z-index: 1; }
-.machina-gallery__line--one { left: 12%; top: 39%; transform: rotate(21deg); width: 77%; }
-.machina-gallery__line--two { left: 20%; top: 72%; transform: rotate(-10deg); width: 72%; }
-.machina-gallery__coordinate { color: rgba(255,255,255,.62); font-family: Inter, sans-serif; font-size: 9px; letter-spacing: .14em; position: absolute; z-index: 3; }
-.machina-gallery__coordinate--one { left: 1%; top: 45%; transform: rotate(-90deg); }
-.machina-gallery__coordinate--two { bottom: 0; right: 4%; }
-
 .machina-models { background: #e9e6dd; color: #11131b; padding: 130px 8vw 100px; }
 .machina-models__header { align-items: end; display: flex; justify-content: space-between; }
 .machina-models .machina-section-label { color: #4451ac; }
@@ -83,8 +60,13 @@
 .machina-models h2 em { color: #e14630; }
 .machina-models__header > p { color: #50525a; font-family: Inter, sans-serif; font-size: 14px; line-height: 1.6; max-width: 330px; }
 .machina-model-grid { border-left: 1px solid #bfc0bd; display: grid; grid-template-columns: repeat(4, 1fr); margin-top: 80px; }
-.machina-model-card { border-bottom: 1px solid #bfc0bd; border-right: 1px solid #bfc0bd; border-top: 1px solid #bfc0bd; min-height: 385px; padding: 22px; transition: background .25s ease, color .25s ease; }
+.machina-model-card { border-bottom: 1px solid #bfc0bd; border-right: 1px solid #bfc0bd; border-top: 1px solid #bfc0bd; min-height: 430px; overflow: hidden; padding: 22px; position: relative; transition: background .25s ease, color .25s ease; }
+.machina-model-card__image { height: 100%; inset: 0; object-fit: cover; opacity: 0; position: absolute; transition: opacity .35s ease, transform .7s cubic-bezier(.22,1,.36,1); width: 100%; }
+.machina-model-card__shade { background: linear-gradient(180deg, rgba(4,6,12,.28), rgba(4,6,12,.88)); inset: 0; opacity: 0; position: absolute; transition: opacity .35s ease; }
+.machina-model-card > *:not(.machina-model-card__image):not(.machina-model-card__shade) { position: relative; z-index: 1; }
 .machina-model-card:hover { background: #121f92; color: #fff; }
+.machina-model-card:hover .machina-model-card__image, .machina-model-card:hover .machina-model-card__shade { opacity: 1; }
+.machina-model-card:hover .machina-model-card__image { transform: scale(1.06); }
 .machina-model-card__top { display: flex; font-family: Inter, sans-serif; font-size: 10px; justify-content: space-between; letter-spacing: .15em; }
 .machina-model-card__kind { color: #4451ac; font-family: Inter, sans-serif; font-size: 10px; font-weight: 700; letter-spacing: .13em; margin-top: 70px !important; text-transform: uppercase; }
 .machina-model-card:hover .machina-model-card__kind { color: #aeb9ff; }
@@ -94,6 +76,22 @@
 .machina-model-card ul { display: flex; flex-direction: column; font-family: Inter, sans-serif; font-size: 10px; gap: 7px; list-style: none; margin: 32px 0 0; padding: 0; }
 .machina-model-card li { align-items: center; display: flex; gap: 6px; }
 .machina-models__note { color: #595b62; font-family: Inter, sans-serif; font-size: 11px; line-height: 1.5; margin-top: 25px; max-width: 610px; }
+
+.machina-resources { background: #121f92; padding: 110px 8vw; }
+.machina-resources__intro { display: grid; gap: 26px; grid-template-columns: .85fr 1.15fr; max-width: 1000px; }
+.machina-resources .machina-section-label { color: #c8d1ff; grid-column: 1 / -1; }
+.machina-resources h2 { font-size: clamp(3rem, 5.8vw, 6.5rem); letter-spacing: -.075em; line-height: .86; }
+.machina-resources__intro > p:last-child { align-self: end; color: rgba(255,255,255,.72); font-family: Inter, sans-serif; font-size: 14px; line-height: 1.6; max-width: 380px; }
+.machina-resource-grid { display: grid; gap: 18px; grid-template-columns: 1.08fr .92fr; margin-top: 70px; }
+.machina-resource { color: #fff; min-height: 470px; overflow: hidden; padding: 28px; position: relative; }
+.machina-resource img, .machina-resource__shade { inset: 0; position: absolute; width: 100%; }
+.machina-resource img { height: 100%; object-fit: cover; transition: transform .7s cubic-bezier(.22,1,.36,1); }
+.machina-resource__shade { background: linear-gradient(180deg, rgba(1,3,8,.08), rgba(1,3,8,.88)); }
+.machina-resource:hover img { transform: scale(1.05); }
+.machina-resource div { bottom: 30px; left: 30px; position: absolute; z-index: 1; }
+.machina-resource p { color: #b5c0ff; font-family: Inter, sans-serif; font-size: 10px; font-weight: 700; letter-spacing: .15em; }
+.machina-resource h3 { font-size: clamp(2.2rem, 3.6vw, 4.2rem); letter-spacing: -.075em; line-height: .87; margin-top: 15px; }
+.machina-resource span:not(.machina-resource__shade) { align-items: center; display: flex; font-family: Inter, sans-serif; font-size: 10px; font-weight: 800; gap: 9px; letter-spacing: .15em; margin-top: 22px; text-transform: uppercase; }
 
 .machina-architecture { align-items: stretch; background: #090b13; display: grid; grid-template-columns: 1.1fr .9fr; min-height: 750px; }
 .machina-architecture__art { min-height: 550px; overflow: hidden; position: relative; }
@@ -133,32 +131,24 @@
   .machina-hero { height: 175vh; }
   .machina-hero__copy { left: 24px; top: 17svh; }
   .machina-hero h1 { font-size: clamp(4rem, 19vw, 6.4rem); }
-  .machina-flight { height: 55svh; right: 6vw; top: 49svh; width: 69vw; }
-  .machina-flight figcaption { font-size: 6px; }
   .machina-hero__sidecopy { display: none; }
   .machina-hero__scroll { left: 24px; }
   .machina-hero__radar { height: 120vw; left: 60%; top: 65%; width: 120vw; }
   .machina-intro { display: block; padding: 85px 24px; }
   .machina-intro__statement { font-size: clamp(2.8rem, 12vw, 4.2rem); margin-top: 28px; }
   .machina-intro__detail { margin: 30px 0 0; }
-  .machina-gallery { padding: 65px 24px 70px; }
-  .machina-gallery__heading { align-items: start; flex-direction: column; gap: 25px; }
-  .machina-gallery__stage { height: 900px; margin-top: 34px; }
-  .machina-gallery__image--one { height: 240px; left: 0; width: 160px; }
-  .machina-gallery__image--two { height: 280px; left: 36%; top: 12%; width: 185px; }
-  .machina-gallery__image--three { height: 180px; right: 0; top: 0; width: 165px; }
-  .machina-gallery__image--four { height: 235px; left: 4%; top: 45%; width: 155px; }
-  .machina-gallery__image--five { height: 200px; left: 43%; top: 43%; width: 205px; }
-  .machina-gallery__image--six { height: 145px; right: 1%; top: 67%; width: 145px; }
-  .machina-gallery__image--seven { height: 180px; left: 19%; top: 73%; width: 190px; }
-  .machina-gallery__image--eight { height: 195px; right: 2%; top: 87%; width: 165px; }
-  .machina-gallery__coordinate--one { display: none; }
   .machina-models { padding: 85px 24px 65px; }
   .machina-models__header { align-items: start; flex-direction: column; gap: 28px; }
   .machina-model-grid { grid-template-columns: 1fr 1fr; margin-top: 48px; }
   .machina-model-card { min-height: 330px; padding: 16px; }
   .machina-model-card__kind { margin-top: 45px !important; }
   .machina-model-card h3 { font-size: 22px; }
+  .machina-resources { padding: 75px 24px; }
+  .machina-resources__intro { display: block; }
+  .machina-resources h2 { margin-top: 28px; }
+  .machina-resources__intro > p:last-child { margin-top: 28px; }
+  .machina-resource-grid { grid-template-columns: 1fr; margin-top: 46px; }
+  .machina-resource { min-height: 390px; }
   .machina-architecture { display: block; }
   .machina-architecture__art { height: 410px; min-height: 0; }
   .machina-architecture__art::after { background: linear-gradient(0deg, #090b13, transparent 70%); }
@@ -172,7 +162,6 @@
 
 @media (max-width: 440px) {
   .machina-model-grid { grid-template-columns: 1fr; }
-  .machina-gallery__stage { height: 825px; transform: scale(.91); transform-origin: top left; width: 110%; }
   .machina-data-line { justify-content: flex-start; }
 }
 
