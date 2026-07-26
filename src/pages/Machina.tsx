@@ -1,6 +1,6 @@
 import { motion, useReducedMotion, useScroll, useTransform } from 'framer-motion';
 import { ArrowDown, ArrowUpRight, Check, Cpu, Radar, ShieldCheck } from 'lucide-react';
-import { useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { siGithub, siHuggingface } from 'simple-icons';
 
 import ClerkTreeLogo from '../components/Brand/ClerkTreeLogo';
@@ -59,12 +59,21 @@ const principles = [
 export default function Machina() {
   const heroRef = useRef<HTMLElement>(null);
   const reducedMotion = useReducedMotion();
+  const [isDesktop, setIsDesktop] = useState(() => typeof window !== 'undefined' && window.innerWidth > 850);
+
+  useEffect(() => {
+    const media = window.matchMedia('(min-width: 851px)');
+    const sync = () => setIsDesktop(media.matches);
+    sync();
+    media.addEventListener('change', sync);
+    return () => media.removeEventListener('change', sync);
+  }, []);
   const { scrollYProgress } = useScroll({
     target: heroRef,
     offset: ['start start', 'end end'],
   });
-  const flightY = useTransform(scrollYProgress, [0, 0.52, 0.84, 1], reducedMotion ? [0, 0, 0, 0] : ['5%', '5%', '-10%', '2%']);
-  const flightScale = useTransform(scrollYProgress, [0, 0.56, 0.86, 1], reducedMotion ? [1.06, 1.06, 1.06, 1.06] : [1.06, 1.08, 1.17, 1.12]);
+  const flightY = useTransform(scrollYProgress, [0, 0.52, 0.84, 1], reducedMotion ? [0, 0, 0, 0] : isDesktop ? ['1%', '1%', '-4%', '1%'] : ['5%', '5%', '-10%', '2%']);
+  const flightScale = useTransform(scrollYProgress, [0, 0.56, 0.86, 1], reducedMotion ? [1.06, 1.06, 1.06, 1.06] : isDesktop ? [1, 1, 1.035, 1.01] : [1.06, 1.08, 1.17, 1.12]);
   const titleY = useTransform(scrollYProgress, [0, 0.55], reducedMotion ? [0, 0] : [0, -70]);
   const titleOpacity = useTransform(scrollYProgress, [0, 0.5, 0.75], [1, 1, 0]);
 
@@ -221,7 +230,7 @@ export default function Machina() {
       </main>
 
       <div className="machina-company-footer">
-        <img className="machina-company-footer__image" src={`${R2}/machina1.jpg`} alt="" loading="lazy" />
+        <img className="machina-company-footer__image" src={`${R2}/machina4.jpg`} alt="" loading="lazy" />
         <span className="machina-company-footer__shade" aria-hidden="true" />
         <Footer />
       </div>

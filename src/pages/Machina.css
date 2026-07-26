@@ -136,6 +136,8 @@
 .machina-company-footer .agero-footer-inner { background: transparent; }
 .machina-company-footer .agero-footer-inner::before { background: linear-gradient(180deg, rgba(3,7,16,.06), rgba(3,7,16,.12)); }
 .machina-company-footer .agero-footer-back { color: #9cabff; }
+.machina-company-footer .agero-footer-cta-button { color: #0b1023; }
+.machina-company-footer .agero-footer-cta-button span { color: #e14630; }
 
 @media (max-width: 850px) {
   .machina-nav { padding: 0 20px; }
