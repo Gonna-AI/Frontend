@@ -4,6 +4,7 @@ import { ArrowLeft, ArrowUpRight } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import { Header, Footer } from '../components/Landing/AgeroChrome';
+import BrandShader from '../components/Brand/BrandShader';
 import SEO from '../components/SEO';
 import { useLanguage } from '../contexts/LanguageContext';
 import './LandingFramer.css';
@@ -269,7 +270,7 @@ function ResearchDetail({ project, isResearchHost }: { project: ResearchProject;
         isResearchHost={isResearchHost}
         hero={
           <section className="agero-hero-stage agero-page-hero" aria-labelledby="research-project-title">
-            <div className="agero-page-hero-grain" aria-hidden="true" />
+            <BrandShader />
             <div className="agero-hero-stage-content">
               <p className="agero-page-hero-eyebrow">{project.number} · {project.category[language]}</p>
               <h1 id="research-project-title">{project.title[language]}</h1>

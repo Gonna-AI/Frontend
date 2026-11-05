@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 
 import ClerkTreeLockup from '../Brand/ClerkTreeLockup';
+import BrandShader from '../Brand/BrandShader';
 import LanguageSwitcher from '../Layout/LanguageSwitcher';
 import { useLanguage } from '../../contexts/LanguageContext';
 import '../../pages/LandingFramer.css';
@@ -188,7 +189,7 @@ export function PageHero({ title, eyebrow, description, children, titleId = 'pag
       <Header linkBase={linkBase} />
 
       <section className="agero-hero-stage agero-page-hero" aria-labelledby={titleId}>
-        <div className="agero-page-hero-grain" aria-hidden="true" />
+        <BrandShader />
         <div className="agero-hero-stage-content">
           {eyebrow && <p className="agero-page-hero-eyebrow">{eyebrow}</p>}
           <h1 id={titleId}>{title}</h1>
