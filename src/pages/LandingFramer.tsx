@@ -906,13 +906,8 @@ function Contact() {
 
   return (
     <section className="agero-contact" id="contact" aria-labelledby="agero-contact-title">
-      <h2
-        aria-label={connectHeading}
-        className="agero-contact-watermark"
-        data-agero-reveal="title"
-        id="agero-contact-title"
-      >
-        <SplitText text={connectHeading} />
+      <h2 className="sr-only" id="agero-contact-title">
+        {connectHeading}
       </h2>
 
       <div className="agero-contact-panel" data-agero-reveal="up">

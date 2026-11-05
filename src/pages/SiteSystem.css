@@ -233,3 +233,9 @@
     background: #ededed;
   }
 }
+
+/* Home contact: the oversized watermark heading is gone (it peeked out
+   behind the panel's corner), so only keep a normal section gap. */
+.agero-works .agero-contact {
+  padding-top: clamp(56px, 7vw, 112px);
+}
