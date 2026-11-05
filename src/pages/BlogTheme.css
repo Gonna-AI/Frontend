@@ -95,6 +95,7 @@
 .clerktree-blog-card-media {
   border-radius: 18px;
   margin: 8px 8px 0;
+  width: auto !important;
 }
 
 .clerktree-blog-card-title {

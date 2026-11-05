@@ -145,7 +145,7 @@ export default function Careers() {
                 {t('careers.title1')}
               </span>
               <br />
-              <span className="bg-gradient-to-r from-[#FF4D00] via-[#FF7A33] to-[#FF4D00] text-transparent bg-clip-text">
+              <span className="text-[#FF4D00]">
                 {t('careers.title2')}
               </span>
             </h1>
@@ -165,7 +165,7 @@ export default function Careers() {
               href="https://www.linkedin.com/company/clerktree/jobs"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-3 px-8 py-4 rounded-full bg-[linear-gradient(120deg,rgba(255,77,0,0.12),rgba(255,77,0,0.04))] border border-[#FF4D00]/25 backdrop-blur-sm text-[#FF4D00] hover:border-[#FF4D00]/45 hover:text-[#D14000] transition-all duration-300 font-medium text-lg group shadow-[0_18px_60px_rgba(0,0,0,0.08)]"
+              className="inline-flex items-center justify-center gap-3 px-6 py-3.5 rounded-full bg-[#131313] text-white hover:bg-black transition-colors duration-200 font-medium text-base text-center group shadow-[0_18px_50px_rgba(0,0,0,0.14)]"
             >
               <span>{t('careers.linkedin')}</span>
               <ExternalLink className="w-5 h-5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
@@ -180,8 +180,8 @@ export default function Careers() {
           </div>
 
           {/* CV Submission Form */}
-          <div className="rounded-[1.75rem] border border-[rgba(19,19,19,0.08)] bg-white p-8 md:p-12 shadow-[0_30px_80px_rgba(0,0,0,0.08)]">
-            <h2 className="text-2xl md:text-3xl font-bold mb-2 bg-gradient-to-r from-[#FF4D00] to-[#FF8A5B] text-transparent bg-clip-text">
+          <div className="ct-card p-6 sm:p-8 md:p-12">
+            <h2 className="text-2xl md:text-3xl mb-2 text-[#131313] tracking-[-0.02em]">
               {t('careers.formTitle')}
             </h2>
             <p className="text-[rgba(19,19,19,0.6)] mb-8">
@@ -393,7 +393,7 @@ export default function Careers() {
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="w-full px-8 py-4 rounded-xl bg-gradient-to-r from-[#FF4D00] via-[#FF7A33] to-[#FF8A5B] text-white font-semibold hover:from-[#FF7A33] hover:via-[#FF4D00] hover:to-[#FF8A5B] focus:outline-none focus:ring-2 focus:ring-[#FF4D00]/40 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg shadow-[#FF4D00]/20"
+                    className="w-full px-8 py-4 rounded-full bg-[#FF4D00] text-white font-semibold hover:bg-[#E64500] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF4D00]/40 focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 shadow-[0_12px_30px_rgba(255,77,0,0.22)]"
                   >
                     {isSubmitting ? t('careers.submitting') : t('careers.submit')}
                   </button>

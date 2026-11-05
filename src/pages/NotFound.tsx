@@ -1,23 +1,60 @@
 import { Link } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, ArrowUpRight } from 'lucide-react';
+
+import { Header, Footer } from '../components/Landing/AgeroChrome';
+import SEO from '../components/SEO';
+import { useLanguage } from '../contexts/LanguageContext';
+import './LandingFramer.css';
+
+const copy = {
+  en: {
+    eyebrow: 'Error 404',
+    title: 'This page drifted off the line.',
+    body: 'The link may be outdated, or the page has moved. Everything else is running as it should.',
+    home: 'Back to home',
+    contact: 'Contact us',
+  },
+  de: {
+    eyebrow: 'Fehler 404',
+    title: 'Diese Seite ist vom Band gelaufen.',
+    body: 'Der Link ist vielleicht veraltet oder die Seite wurde verschoben. Alles andere läuft wie gewohnt.',
+    home: 'Zur Startseite',
+    contact: 'Kontakt',
+  },
+} as const;
 
 const NotFound = () => {
+  const { language } = useLanguage();
+  const text = copy[language === 'de' ? 'de' : 'en'];
+
   return (
-    <div className="flex flex-col items-center justify-center h-screen bg-gray-100">
-      <div className="text-center">
-        <h1 className="text-6xl font-bold text-gray-800">404</h1>
-        <p className="text-2xl font-light text-gray-600">Page Not Found</p>
-        <p className="mt-4 text-gray-500">
-          The page you are looking for does not exist.
-        </p>
-        <Link
-          to="/"
-          className="mt-6 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-        >
-          <ArrowLeft className="mr-2 -ml-1 h-5 w-5" />
-          Go back home
-        </Link>
+    <div className="agero-works" id="agero-works">
+      <SEO title={text.eyebrow} description={text.body} />
+
+      <div className="agero-top-area agero-top-area-with-hero">
+        <Header />
+
+        <section className="agero-hero-stage agero-notfound-stage" aria-labelledby="notfound-title">
+          <span className="agero-notfound-code" aria-hidden="true">404</span>
+          <div className="agero-hero-stage-content">
+            <p className="agero-notfound-eyebrow">{text.eyebrow}</p>
+            <h1 id="notfound-title">{text.title}</h1>
+            <p>{text.body}</p>
+            <div className="agero-notfound-actions">
+              <Link className="agero-notfound-primary" to="/">
+                <ArrowLeft size={16} aria-hidden="true" />
+                {text.home}
+              </Link>
+              <Link className="agero-notfound-secondary" to="/contact">
+                {text.contact}
+                <ArrowUpRight size={16} aria-hidden="true" />
+              </Link>
+            </div>
+          </div>
+        </section>
       </div>
+
+      <Footer />
     </div>
   );
 };

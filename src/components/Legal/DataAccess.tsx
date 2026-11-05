@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, CheckCircle2, Shield } from 'lucide-react';
-import { Footer } from '../Landing/AgeroChrome';
+import { CheckCircle2 } from 'lucide-react';
+import { PageHero, Footer } from '../Landing/AgeroChrome';
 import SEO from '../SEO';
 import '../../pages/LandingFramer.css';
 
@@ -117,28 +117,18 @@ ${formData.details || 'No additional details provided.'}
   return (
     <div className="agero-works" id="agero-works">
       <SEO
-        title="Data Subject Access Request (DSAR) — ClerkTree"
+        title="Data Subject Access Request (DSAR)"
         description="Submit a request to access, correct, delete, or restrict your personal data under GDPR, CCPA, and applicable privacy laws."
       />
 
-      <div className="agero-legal-page-container">
-        {/* ── Header Area ── */}
-        <section className="agero-legal-hero" aria-labelledby="dsar-page-title">
-          <button
-            onClick={() => navigate('/')}
-            className="agero-legal-back-btn"
-            type="button"
-          >
-            <ArrowLeft className="agero-legal-back-icon" aria-hidden="true" />
-            Back
-          </button>
+      <PageHero
+        eyebrow="Privacy rights"
+        title="Data Access Request"
+        description="Submit a request to access, restrict, correct, or delete your personal data. We will verify and process your request within 30 days."
+        titleId="dsar-page-title"
+      />
 
-          <p className="agero-legal-eyebrow">Privacy Rights</p>
-          <h1 id="dsar-page-title" className="agero-legal-title">Data Access Request</h1>
-          <p className="agero-legal-description">
-            Submit a request to access, restrict, correct, or delete your personal data. We will verify and process your request within 30 days.
-          </p>
-        </section>
+      <div className="agero-legal-page-container">
 
         {/* ── Content Card with Form ── */}
         <main className="agero-legal-content-wrap" id="main-content">
@@ -157,16 +147,15 @@ ${formData.details || 'No additional details provided.'}
                 <button
                   type="button"
                   onClick={() => navigate('/')}
-                  className="px-6 py-3 rounded-xl bg-[rgb(19,19,19)] text-white font-semibold transition-all hover:bg-black"
+                  className="px-6 py-3 rounded-full bg-[rgb(19,19,19)] text-white font-semibold transition-colors hover:bg-black"
                 >
                   Return to Home
                 </button>
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="flex flex-col gap-6 max-w-2xl mx-auto">
-                <div className="flex items-center gap-3 p-4 rounded-2xl bg-[rgba(255,77,0,0.06)] border border-[#FF4D00]/15 mb-4">
-                  <Shield className="text-[#FF4D00] flex-shrink-0 w-6 h-6" />
-                  <p className="text-sm text-[rgba(19,19,19,0.75)] leading-normal">
+                <div className="border-l-2 border-[#FF4D00] pl-4 mb-4">
+                  <p className="text-sm text-[rgba(19,19,19,0.72)] leading-relaxed">
                     This secure form allows you to exercise your rights under GDPR, CCPA, and other applicable privacy regulations.
                   </p>
                 </div>
@@ -301,7 +290,7 @@ ${formData.details || 'No additional details provided.'}
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full mt-4 px-8 py-4 rounded-xl bg-gradient-to-r from-[#FF4D00] via-[#FF7A33] to-[#FF8A5B] text-white font-semibold hover:from-[#FF7A33] hover:via-[#FF4D00] hover:to-[#FF8A5B] focus:outline-none focus:ring-2 focus:ring-[#FF4D00]/40 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg shadow-[#FF4D00]/20"
+                  className="w-full mt-4 px-8 py-4 rounded-full bg-[#FF4D00] text-white font-semibold hover:bg-[#E64500] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF4D00]/40 focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 shadow-[0_12px_30px_rgba(255,77,0,0.22)]"
                 >
                   {isSubmitting ? 'Submitting Request...' : 'Submit Request'}
                 </button>

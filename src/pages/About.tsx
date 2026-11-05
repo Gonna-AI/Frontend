@@ -1,6 +1,6 @@
 import type { CSSProperties } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowUpRight, BrainCircuit, CheckCircle2, Clock3, MapPin, Sparkles } from 'lucide-react';
+import { ArrowUpRight } from 'lucide-react';
 
 import { useLanguage } from '../contexts/LanguageContext';
 import { Header, Footer } from '../components/Landing/AgeroChrome';
@@ -94,11 +94,9 @@ export default function About() {
         </section>
 
         <section className="agero-about-principles" aria-label="Operating principles">
-          {principles.map(({ icon: Icon, title, copy }) => (
+          {principles.map(({ title, copy }, index) => (
             <article key={title} className="agero-about-card">
-              <span className="agero-about-card-icon">
-                <Icon size={22} strokeWidth={1.7} />
-              </span>
+              <span className="agero-about-card-index">{String(index + 1).padStart(2, '0')}</span>
               <h3>{title}</h3>
               <p>{copy}</p>
             </article>
@@ -158,7 +156,6 @@ export default function About() {
         <section className="agero-about-section">
           <div className="agero-about-bottom">
             <div className="agero-about-join">
-              <CheckCircle2 size={30} strokeWidth={1.6} />
               <h2>{t('about.joinTitle')}</h2>
               <p>{t('about.joinDesc')}</p>
               <div className="agero-about-join-actions">
@@ -172,7 +169,6 @@ export default function About() {
             </div>
 
             <div className="agero-about-office">
-              <MapPin size={30} strokeWidth={1.6} />
               <p>{t('about.officeTitle')}</p>
               <h3>Straubing, Germany</h3>
               <p>{t('about.officeDesc')}</p>
@@ -191,17 +187,14 @@ export default function About() {
 function getPrinciples(t: Translate) {
   return [
     {
-      icon: Sparkles,
       title: t('about.principle.clarityTitle'),
       copy: t('about.principle.clarityCopy'),
     },
     {
-      icon: Clock3,
       title: t('about.principle.speedTitle'),
       copy: t('about.principle.speedCopy'),
     },
     {
-      icon: BrainCircuit,
       title: t('about.principle.aiTitle'),
       copy: t('about.principle.aiCopy'),
     },

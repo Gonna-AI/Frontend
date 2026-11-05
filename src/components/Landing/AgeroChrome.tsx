@@ -1,9 +1,10 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 
-import ClerkTreeLogo from '../Brand/ClerkTreeLogo';
+import ClerkTreeLockup from '../Brand/ClerkTreeLockup';
 import LanguageSwitcher from '../Layout/LanguageSwitcher';
 import { useLanguage } from '../../contexts/LanguageContext';
 import '../../pages/LandingFramer.css';
+import '../../pages/SiteSystem.css';
 
 const headerLinkPaths = [
   ['nav.solutions', '/solutions'],
@@ -21,11 +22,12 @@ const headerLinkPaths = [
  const footerExploreLinks: FooterLink[] = [
    { label: 'Solutions', href: '/solutions' },
    { label: 'About Us', href: '/about' },
+   { label: 'Brand', href: '/brand' },
  ];
 
 const footerSocialLinks: FooterLink[] = [
   { label: 'LinkedIn', href: 'https://www.linkedin.com/company/clerktree', external: true },
-  { label: 'The X', href: 'https://x.com/teamclerktree', external: true },
+  { label: 'X', href: 'https://x.com/teamclerktree', external: true },
   { label: 'Email', href: 'mailto:team@clerktree.com' },
 ];
 
@@ -59,11 +61,16 @@ function useMunichTime(active = true) {
   return time;
 }
 
-export function Header() {
+type HeaderProps = {
+  /** Prefix for every link, e.g. "https://clerktree.com" when rendered on another host. */
+  linkBase?: string;
+};
+
+export function Header({ linkBase = '' }: HeaderProps = {}) {
   const { t } = useLanguage();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const headerLinks = headerLinkPaths.map(([key, href]) => [t(key), href] as const);
-  const mobileLinks = headerLinks.filter(([, href]) => href !== '/contact');
+  const headerLinks = headerLinkPaths.map(([key, href]) => [t(key), `${linkBase}${href}`] as const);
+  const mobileLinks = headerLinks.filter(([, href]) => href !== `${linkBase}/contact`);
 
   useEffect(() => {
     if (!isMenuOpen) return;
@@ -93,8 +100,8 @@ export function Header() {
 
   return (
     <header className={`agero-shell-header${isMenuOpen ? ' is-menu-open' : ''}`}>
-      <a className="agero-shell-logo" href="/" aria-label={t('home.brand.aria')}>
-        <ClerkTreeLogo markClassName="agero-shell-logo-mark" registered />
+      <a className="agero-shell-logo" href={linkBase || '/'} aria-label={t('home.brand.aria')}>
+        <ClerkTreeLockup className="agero-shell-lockup" title={null} />
       </a>
       <div className="agero-shell-actions">
         <nav className="agero-shell-nav" id="agero-shell-nav" aria-label={t('home.nav.aria')}>
@@ -153,7 +160,7 @@ export function Header() {
               ))}
             </div>
 
-            <a className="agero-mobile-menu-cta" href="/contact" onClick={closeMenu}>
+            <a className="agero-mobile-menu-cta" href={`${linkBase}/contact`} onClick={closeMenu}>
               <span>{t('home.menu.cta')}</span>
               <span aria-hidden="true">-&gt;</span>
             </a>
@@ -161,6 +168,35 @@ export function Header() {
         </div>
       )}
     </header>
+  );
+}
+
+type PageHeroProps = {
+  title: ReactNode;
+  eyebrow?: ReactNode;
+  description?: ReactNode;
+  /** Extra hero content under the description (meta, actions). */
+  children?: ReactNode;
+  titleId?: string;
+  linkBase?: string;
+};
+
+/** The standard page opening: shared header plus the dark rounded hero box. */
+export function PageHero({ title, eyebrow, description, children, titleId = 'page-hero-title', linkBase }: PageHeroProps) {
+  return (
+    <div className="agero-top-area agero-top-area-with-hero">
+      <Header linkBase={linkBase} />
+
+      <section className="agero-hero-stage agero-page-hero" aria-labelledby={titleId}>
+        <div className="agero-page-hero-grain" aria-hidden="true" />
+        <div className="agero-hero-stage-content">
+          {eyebrow && <p className="agero-page-hero-eyebrow">{eyebrow}</p>}
+          <h1 id={titleId}>{title}</h1>
+          {description && <p>{description}</p>}
+          {children}
+        </div>
+      </section>
+    </div>
   );
 }
 

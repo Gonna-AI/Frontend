@@ -1,5 +1,5 @@
 import { type CSSProperties, type ReactNode, type VideoHTMLAttributes, Fragment, useEffect, useRef, useState } from 'react';
-import { Compass, Globe2, MapPin, PanelTop, PenTool, Sparkles } from 'lucide-react';
+import { MapPin } from 'lucide-react';
 import Lenis from 'lenis';
 import { isSaveDataEnabled, shouldAutoplayMedia } from '../utils/idle';
 import { Footer, Header } from '../components/Landing/AgeroChrome';
@@ -48,12 +48,12 @@ const clientLogos = [
 const showcaseImage = '/desktop1.png';
 
 const introTagsBase = [
-  { key: 'tag1' as const, Icon: Sparkles },
-  { key: 'tag2' as const, Icon: Globe2 },
-  { key: 'tag3' as const, Icon: Globe2 },
-  { key: 'tag4' as const, Icon: PenTool },
-  { key: 'tag5' as const, Icon: PanelTop },
-  { key: 'tag6' as const, Icon: Compass },
+  { key: 'tag1' as const },
+  { key: 'tag2' as const },
+  { key: 'tag3' as const },
+  { key: 'tag4' as const },
+  { key: 'tag5' as const },
+  { key: 'tag6' as const },
 ];
 
 const locationImage = 'https://pub-0f804855178c4f4e8184c4fef3bd5b2a.r2.dev/munich.jpg';
@@ -282,7 +282,7 @@ function RibbonStage() {
 
 function IntroStatement() {
   const { t } = useLanguage();
-  const introTags = introTagsBase.map(({ key, Icon }) => ({ Icon, label: t(`home.about.${key}`) }));
+  const introTags = introTagsBase.map(({ key }) => ({ label: t(`home.about.${key}`) }));
 
   return (
     <section className="agero-about-intro" aria-labelledby="agero-about-intro-title">
@@ -302,9 +302,8 @@ function IntroStatement() {
       </h2>
 
       <div className="agero-intro-tags" data-agero-reveal="up">
-        {introTags.map(({ Icon, label }) => (
+        {introTags.map(({ label }) => (
           <span className="agero-intro-tag" key={label}>
-            <Icon aria-hidden="true" size={20} strokeWidth={1.8} />
             {label}
           </span>
         ))}
@@ -496,7 +495,7 @@ function useAgeroPageMotion() {
 
     const worksRoot = document.querySelector<HTMLElement>('.agero-works');
     const bgSections = worksRoot ? (Array.from(worksRoot.children) as HTMLElement[]) : [];
-    const fallbackBg = worksRoot ? window.getComputedStyle(worksRoot).backgroundColor : 'rgb(220, 220, 220)';
+    const fallbackBg = worksRoot ? window.getComputedStyle(worksRoot).backgroundColor : 'rgb(244, 244, 244)';
     const sectionBgs = bgSections.map((section) => {
       // Contact/footer get their dark look from video/image layers, so their
       // backgroundColor computes transparent — pin them to the matching dark.

@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { CheckCircle2, Ticket, AlertTriangle, FileText, MessageSquare, ArrowLeft } from 'lucide-react';
+import { CheckCircle2, AlertTriangle, ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../config/supabase';
-import { Header, Footer } from '../components/Landing/AgeroChrome';
+import { PageHero, Footer } from '../components/Landing/AgeroChrome';
 import { useLanguage } from '../contexts/LanguageContext';
 import './LandingFramer.css';
 
@@ -15,10 +15,10 @@ const CATEGORIES = [
 ];
 
 const PRIORITIES = [
-    { value: 'low', labelKey: 'supportPage.priority.low', color: 'text-emerald-400 border-emerald-500/20 bg-emerald-500/10' },
-    { value: 'medium', labelKey: 'supportPage.priority.medium', color: 'text-amber-400 border-amber-500/20 bg-amber-500/10' },
-    { value: 'high', labelKey: 'supportPage.priority.high', color: 'text-orange-400 border-orange-500/20 bg-orange-500/10' },
-    { value: 'urgent', labelKey: 'supportPage.priority.urgent', color: 'text-red-400 border-red-500/20 bg-red-500/10' },
+    { value: 'low', labelKey: 'supportPage.priority.low', color: 'text-white border-[#131313] bg-[#131313]' },
+    { value: 'medium', labelKey: 'supportPage.priority.medium', color: 'text-white border-[#131313] bg-[#131313]' },
+    { value: 'high', labelKey: 'supportPage.priority.high', color: 'text-white border-[#131313] bg-[#131313]' },
+    { value: 'urgent', labelKey: 'supportPage.priority.urgent', color: 'text-white border-[#FF4D00] bg-[#FF4D00]' },
 ];
 
 interface TicketForm {
@@ -99,40 +99,35 @@ const SupportPage = () => {
 
     return (
         <div className="agero-works min-h-screen font-sans selection:bg-[#FF8A5B]/30 relative overflow-hidden">
-            <div className="agero-top-area agero-top-area-compact">
-                <Header />
-            </div>
+            <PageHero
+                eyebrow="Support"
+                title="Submit a request"
+                description="Encountering an issue? Our engineering team is ready to help. Share the details and we will get back to you fast."
+                titleId="support-title"
+            />
 
             <div className="max-w-[1600px] mx-auto flex flex-col md:flex-row py-8 md:py-12 px-4 md:px-8 gap-8 md:gap-12">
 
                 {/* Left Sidebar - Navigation */}
-                <aside className="w-full md:w-64 shrink-0">
+                <aside className="order-2 w-full md:order-1 md:w-64 shrink-0">
                     <div className="space-y-8">
-                        <div className="flex items-center gap-2 mb-2 md:hidden">
-                            <Link to="/docs" className="text-sm text-[rgba(19,19,19,0.6)] hover:text-[rgb(19,19,19)] transition-colors">Documentation</Link>
-                            <span className="text-[rgba(19,19,19,0.2)]">·</span>
-                            <Link to="/dashboard" className="text-sm text-[rgba(19,19,19,0.6)] hover:text-[rgb(19,19,19)] transition-colors">Dashboard</Link>
-                        </div>
                         <div>
-                            <h3 className="text-xs font-semibold text-[rgba(19,19,19,0.4)] uppercase tracking-wider mb-3 px-2">Support Resources</h3>
+                            <h3 className="text-xs font-semibold text-[rgba(19,19,19,0.5)] uppercase tracking-wider mb-3 px-2">Support Resources</h3>
                             <nav className="space-y-0.5">
-                                <button type="button" className="flex items-center gap-2 px-3 py-2 rounded-lg bg-[#FF8A5B]/10 text-[#FFB286] font-medium">
-                                    <Ticket className="w-4 h-4" />
+                                <button type="button" aria-current="page" className="flex w-full items-center px-4 py-2 rounded-full bg-[#131313] text-white font-medium">
                                     <span>Submit Ticket</span>
                                 </button>
-                                <Link to="/docs" className="flex items-center gap-2 px-3 py-2 rounded-lg text-[rgba(19,19,19,0.6)] hover:text-[rgb(19,19,19)] hover:bg-[rgba(19,19,19,0.03)] transition-colors">
-                                    <FileText className="w-4 h-4" />
+                                <Link to="/docs" className="flex items-center px-4 py-2 rounded-full text-[rgba(19,19,19,0.6)] hover:text-[rgb(19,19,19)] hover:bg-[rgba(19,19,19,0.03)] transition-colors">
                                     <span>Documentation</span>
                                 </Link>
-                                <a href="mailto:team@clerktree.com" className="flex items-center gap-2 px-3 py-2 rounded-lg text-[rgba(19,19,19,0.6)] hover:text-[rgb(19,19,19)] hover:bg-[rgba(19,19,19,0.03)] transition-colors">
-                                    <MessageSquare className="w-4 h-4" />
+                                <a href="mailto:team@clerktree.com" className="flex items-center px-4 py-2 rounded-full text-[rgba(19,19,19,0.6)] hover:text-[rgb(19,19,19)] hover:bg-[rgba(19,19,19,0.03)] transition-colors">
                                     <span>Email Us</span>
                                 </a>
                             </nav>
                         </div>
 
                         <div>
-                            <h3 className="text-xs font-semibold text-[rgba(19,19,19,0.4)] uppercase tracking-wider mb-3 px-2">Common Topics</h3>
+                            <h3 className="text-xs font-semibold text-[rgba(19,19,19,0.5)] uppercase tracking-wider mb-3 px-2">Common Topics</h3>
                             <nav className="space-y-0.5">
                                 <Link to="/docs#auth" className="block px-3 py-1.5 text-sm text-[rgba(19,19,19,0.5)] hover:text-[rgb(19,19,19)] transition-colors">Authentication</Link>
                                 <Link to="/docs#rate-limits" className="block px-3 py-1.5 text-sm text-[rgba(19,19,19,0.5)] hover:text-[rgb(19,19,19)] transition-colors">Rate Limits</Link>
@@ -143,20 +138,8 @@ const SupportPage = () => {
                 </aside>
 
                 {/* Main Content */}
-                <main className="flex-1 min-w-0">
+                <main className="order-1 flex-1 min-w-0 md:order-2">
                     <div className="max-w-3xl">
-
-                        <div className="mb-10">
-                            <div className="flex items-center gap-2 text-sm text-[#FF8A5B] mb-2 font-mono">
-                                <span>Support</span>
-                                <span>/</span>
-                                <span>New Ticket</span>
-                            </div>
-                            <h1 className="text-3xl md:text-4xl font-bold text-[rgb(19,19,19)] mb-4 tracking-tight">Submit a Request</h1>
-                            <p className="text-lg text-[rgba(19,19,19,0.6)] leading-relaxed">
-                                Encountering an issue? Our engineering team is ready to help. Please provide detailed information to ensure a fast resolution.
-                            </p>
-                        </div>
 
                         {/* Status Message */}
                         {submitStatus === 'success' ? (
@@ -203,7 +186,7 @@ const SupportPage = () => {
                                 </div>
                             </div>
                         ) : (
-                            <form onSubmit={handleSubmit} className="space-y-8">
+                            <form onSubmit={handleSubmit} className="ct-card space-y-8 p-5 sm:p-8 md:p-10">
                                 {/* Error Alert */}
                                 {submitStatus === 'error' && (
                                     <div className="rounded-lg border border-red-500/20 bg-red-500/10 p-4 flex items-start gap-3">
@@ -225,7 +208,7 @@ const SupportPage = () => {
                                             required
                                             value={formData.user_name}
                                             onChange={handleChange}
-                                            className="w-full bg-[rgba(19,19,19,0.03)] border border-[rgba(19,19,19,0.1)] rounded-lg px-4 py-2.5 text-[rgb(19,19,19)] placeholder-[rgba(19,19,19,0.35)] focus:outline-none focus:border-[#FF8A5B]/50 focus:ring-1 focus:ring-[#FF8A5B]/50 transition-all font-mono text-sm"
+                                            className="w-full bg-[#F6F6F6] border border-[rgba(19,19,19,0.12)] rounded-xl px-4 py-2.5 text-[rgb(19,19,19)] placeholder-[rgba(19,19,19,0.42)] focus:outline-none focus:bg-white focus:border-[#FF4D00]/50 focus:ring-2 focus:ring-[#FF4D00]/15 transition-all text-[15px]"
                                             placeholder="Jane Doe"
                                         />
                                     </div>
@@ -238,7 +221,7 @@ const SupportPage = () => {
                                             required
                                             value={formData.user_email}
                                             onChange={handleChange}
-                                            className="w-full bg-[rgba(19,19,19,0.03)] border border-[rgba(19,19,19,0.1)] rounded-lg px-4 py-2.5 text-[rgb(19,19,19)] placeholder-[rgba(19,19,19,0.35)] focus:outline-none focus:border-[#FF8A5B]/50 focus:ring-1 focus:ring-[#FF8A5B]/50 transition-all font-mono text-sm"
+                                            className="w-full bg-[#F6F6F6] border border-[rgba(19,19,19,0.12)] rounded-xl px-4 py-2.5 text-[rgb(19,19,19)] placeholder-[rgba(19,19,19,0.42)] focus:outline-none focus:bg-white focus:border-[#FF4D00]/50 focus:ring-2 focus:ring-[#FF4D00]/15 transition-all text-[15px]"
                                             placeholder="jane@company.com"
                                         />
                                     </div>
@@ -253,7 +236,7 @@ const SupportPage = () => {
                                         required
                                         value={formData.subject}
                                         onChange={handleChange}
-                                        className="w-full bg-[rgba(19,19,19,0.03)] border border-[rgba(19,19,19,0.1)] rounded-lg px-4 py-2.5 text-[rgb(19,19,19)] placeholder-[rgba(19,19,19,0.35)] focus:outline-none focus:border-[#FF8A5B]/50 focus:ring-1 focus:ring-[#FF8A5B]/50 transition-all font-mono text-sm"
+                                        className="w-full bg-[#F6F6F6] border border-[rgba(19,19,19,0.12)] rounded-xl px-4 py-2.5 text-[rgb(19,19,19)] placeholder-[rgba(19,19,19,0.42)] focus:outline-none focus:bg-white focus:border-[#FF4D00]/50 focus:ring-2 focus:ring-[#FF4D00]/15 transition-all text-[15px]"
                                         placeholder="API Rate Limit Issues..."
                                     />
                                 </div>
@@ -268,7 +251,7 @@ const SupportPage = () => {
                                                 required
                                                 value={formData.category}
                                                 onChange={handleChange}
-                                                className="w-full bg-[rgba(19,19,19,0.03)] border border-[rgba(19,19,19,0.1)] rounded-lg px-4 py-2.5 text-[rgb(19,19,19)] focus:outline-none focus:border-[#FF8A5B]/50 focus:ring-1 focus:ring-[#FF8A5B]/50 transition-all appearance-none font-mono text-sm"
+                                                className="w-full bg-[#F6F6F6] border border-[rgba(19,19,19,0.12)] rounded-xl px-4 py-2.5 text-[rgb(19,19,19)] focus:outline-none focus:bg-white focus:border-[#FF4D00]/50 focus:ring-2 focus:ring-[#FF4D00]/15 transition-all appearance-none text-[15px]"
                                             >
                                                 <option value="">Select Category...</option>
                                                 {CATEGORIES.map(cat => (
@@ -286,9 +269,9 @@ const SupportPage = () => {
                                                     key={p.value}
                                                     type="button"
                                                     onClick={() => setFormData(prev => ({ ...prev, priority: p.value }))}
-                                                    className={`px-2 py-2 rounded-lg text-xs font-mono font-medium border transition-all ${formData.priority === p.value
+                                                    className={`px-2 py-2.5 rounded-full text-xs font-medium border transition-all ${formData.priority === p.value
                                                         ? p.color
-                                                        : 'text-[rgba(19,19,19,0.4)] bg-[rgba(19,19,19,0.03)] border-[rgba(19,19,19,0.08)] hover:bg-[rgba(19,19,19,0.06)] hover:text-[rgba(19,19,19,0.6)]'
+                                                        : 'text-[rgba(19,19,19,0.68)] bg-[#F6F6F6] border-[rgba(19,19,19,0.12)] hover:bg-white hover:text-[rgb(19,19,19)]'
                                                         }`}
                                                 >
                                                     {t(p.labelKey)}
@@ -307,20 +290,20 @@ const SupportPage = () => {
                                         rows={8}
                                         value={formData.description}
                                         onChange={handleChange}
-                                        className="w-full bg-[rgba(19,19,19,0.03)] border border-[rgba(19,19,19,0.1)] rounded-lg px-4 py-3 text-[rgb(19,19,19)] placeholder-[rgba(19,19,19,0.35)] focus:outline-none focus:border-[#FF8A5B]/50 focus:ring-1 focus:ring-[#FF8A5B]/50 transition-all font-mono text-sm leading-relaxed"
+                                        className="w-full bg-[#F6F6F6] border border-[rgba(19,19,19,0.12)] rounded-xl px-4 py-3 text-[rgb(19,19,19)] placeholder-[rgba(19,19,19,0.42)] focus:outline-none focus:bg-white focus:border-[#FF4D00]/50 focus:ring-2 focus:ring-[#FF4D00]/15 transition-all text-[15px] leading-relaxed"
                                         placeholder={`Steps to reproduce:\n1. ...\n\nExpected behavior:\n...\n\nActual behavior:\n...`}
                                     />
-                                    <p className="text-xs text-[rgba(19,19,19,0.35)]">Please include any relevant error codes or request IDs.</p>
+                                    <p className="text-xs text-[rgba(19,19,19,0.5)]">Please include any relevant error codes or request IDs.</p>
                                 </div>
 
-                                <div className="pt-4 border-t border-[rgba(19,19,19,0.08)] flex items-center justify-between">
-                                    <p className="text-xs text-[rgba(19,19,19,0.4)]">
-                                        By submitting this form, you agree to our <Link to="/terms" className="hover:text-[rgb(19,19,19)] underline">Terms of Service</Link>.
+                                <div className="pt-6 border-t border-[rgba(19,19,19,0.08)] flex flex-col-reverse items-stretch gap-4 sm:flex-row sm:items-center sm:justify-between">
+                                    <p className="text-xs text-[rgba(19,19,19,0.55)]">
+                                        By submitting this form, you agree to our <Link to="/terms-of-service" className="hover:text-[rgb(19,19,19)] underline underline-offset-2">Terms of Service</Link>.
                                     </p>
                                     <button
                                         type="submit"
                                         disabled={isSubmitting}
-                                        className="px-6 py-2.5 rounded-full bg-gradient-to-r from-[#FF8A5B] via-[#FF9E6C] to-[#FFB286] text-white font-semibold text-sm hover:from-[#FF9E6C] hover:via-[#FF8A5B] hover:to-[#FFB286] disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2 shadow-lg shadow-[#FF8A5B]/30"
+                                        className="px-6 py-3 rounded-full bg-[#FF4D00] text-white font-semibold text-sm hover:bg-[#E64500] disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2 shadow-[0_12px_30px_rgba(255,77,0,0.22)]"
                                     >
                                         {isSubmitting ? (
                                             <>

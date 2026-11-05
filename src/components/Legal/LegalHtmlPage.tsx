@@ -1,9 +1,7 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
 import { runWhenIdle, yieldToMain } from '../../utils/idle';
 import { sanitizeTrustedHtml } from '../../utils/sanitizeHtml';
-import { Footer } from '../Landing/AgeroChrome';
+import { PageHero, Footer } from '../Landing/AgeroChrome';
 import SEO from '../SEO';
 import '../../pages/LandingFramer.css';
 
@@ -24,6 +22,8 @@ const legalStyles = `
     text-align: left;
   }
   .legal-content * { background-color: transparent !important; }
+  /* Termly ships inline Arial; keep the document on the brand text face. */
+  .legal-content :where(p, span, li, div, td, th, a, bdt, strong, em) { font-family: inherit !important; }
   .legal-content div,
   .legal-content p,
   .legal-content span,
@@ -81,7 +81,6 @@ const legalStyles = `
 `;
 
 export default function LegalHtmlPage({ description, htmlUrl, title }: LegalHtmlPageProps) {
-  const navigate = useNavigate();
   const [html, setHtml] = useState('');
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
 
@@ -129,26 +128,11 @@ export default function LegalHtmlPage({ description, htmlUrl, title }: LegalHtml
 
   return (
     <div className="agero-works" id="agero-works">
-      <SEO title={`${title} — ClerkTree`} description={description} />
+      <SEO title={title} description={description} />
+
+      <PageHero eyebrow="Legal" title={title} description={description} titleId="legal-page-title" />
 
       <div className="agero-legal-page-container">
-        {/* ── Hero / title block ── */}
-        <section className="agero-legal-hero" aria-labelledby="legal-page-title">
-          <button
-            onClick={() => navigate('/')}
-            className="agero-legal-back-btn"
-            type="button"
-          >
-            <ArrowLeft className="agero-legal-back-icon" aria-hidden="true" />
-            Back
-          </button>
-
-          {/* Orange eyebrow — bold, identical to how other pages use the accent colour */}
-          <p className="agero-legal-eyebrow">Legal</p>
-
-          <h1 id="legal-page-title" className="agero-legal-title">{title}</h1>
-          <p className="agero-legal-description">{description}</p>
-        </section>
 
         {/* ── Content Card ── */}
         <main className="agero-legal-content-wrap" id="main-content">

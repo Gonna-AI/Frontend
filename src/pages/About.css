@@ -73,21 +73,21 @@
   padding: 32px;
 }
 
-.agero-about-card-icon {
-  align-items: center;
-  background: rgba(12, 12, 12, 0.86);
-  border-radius: 12px;
+.agero-about-card-index {
+  border-bottom: 1px solid rgba(19, 19, 19, 0.12);
   color: var(--agero-orange);
-  display: inline-flex;
-  height: 52px;
-  justify-content: center;
-  margin-bottom: 28px;
-  width: 52px;
+  display: block;
+  font-family: "Cal Sans", "Inter", system-ui, sans-serif;
+  font-size: 15px;
+  margin-bottom: 56px;
+  padding-bottom: 18px;
 }
 
 .agero-about-card h3 {
-  font-size: 22px;
-  font-weight: 600;
+  font-family: "Cal Sans", "Inter", system-ui, sans-serif !important;
+  font-size: 24px;
+  font-weight: 400;
+  letter-spacing: -0.01em;
   margin: 0 0 12px;
 }
 
@@ -403,6 +403,7 @@
 }
 
 @media (max-width: 640px) {
+  .agero-about-grid-head,
   .agero-about-principles,
   .agero-about-team-grid {
     grid-template-columns: minmax(0, 1fr);

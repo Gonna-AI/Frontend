@@ -6,7 +6,7 @@ import { getBlogPost, getAllBlogPosts } from '../data/blogPosts';
 import { BlogCard } from '../components/Blog/BlogCard';
 import { useState } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
-import { Header, Footer } from '../components/Landing/AgeroChrome';
+import { PageHero, Footer } from '../components/Landing/AgeroChrome';
 import SEO from '../components/SEO';
 import './LandingFramer.css';
 
@@ -67,69 +67,40 @@ export default function BlogPost() {
         }}
       />
 
-      <div className="agero-top-area agero-top-area-compact">
-        <Header />
-      </div>
+      <PageHero
+        eyebrow="ClerkTree Journal"
+        title={post.title}
+        description={post.description}
+        titleId="blog-post-title"
+      >
+        <div className="agero-page-hero-meta">
+          <a href="/blog" onClick={(event) => { event.preventDefault(); navigate('/blog'); }}>
+            <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
+            {t('blogPost.backToAll')}
+          </a>
+          {post.tags?.map((tag: string) => (
+            <span key={tag}>{tag}</span>
+          ))}
+          <time>{formattedDate}</time>
+          {post.readTime && <span>{post.readTime}</span>}
+        </div>
+      </PageHero>
 
-      <div className="relative z-10 py-12 px-6">
+      <div className="relative z-10 py-8 px-4 md:px-6">
         <div className="max-w-7xl mx-auto">
-          <div className="space-y-4 border-b border-transparent pb-6">
-            <div className="flex flex-col gap-6">
-              <div className="flex flex-wrap items-center gap-3 gap-y-5 text-sm text-[rgba(19,19,19,0.6)]">
-                <button
-                  onClick={() => navigate('/blog')}
-                  className="h-8 w-8 flex items-center justify-center border border-transparent rounded-xl backdrop-blur-sm bg-[rgba(19,19,19,0.04)] hover:bg-[rgba(19,19,19,0.08)] hover:border-[rgba(19,19,19,0.15)] transition-all duration-300 text-[rgba(19,19,19,0.6)] hover:text-[rgb(19,19,19)]"
-                >
-                  <ArrowLeft className="w-4 h-4" />
-                  <span className="sr-only">{t('blogPost.backToAll')}</span>
-                </button>
-                {post.tags && post.tags.length > 0 && (
-                  <div className="flex flex-wrap gap-3">
-                    {post.tags.map((tag: string) => (
-                      <span
-                        key={tag}
-                        className="h-6 w-fit px-3 text-sm font-medium backdrop-blur-sm bg-[rgba(19,19,19,0.04)] text-[rgba(19,19,19,0.6)] rounded-xl border border-[rgba(19,19,19,0.1)] hover:bg-[rgba(19,19,19,0.08)] hover:border-[rgba(19,19,19,0.18)] transition-all duration-300 flex items-center justify-center"
-                      >
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                )}
-                <time className="font-medium text-[rgba(19,19,19,0.6)]">
-                  {formattedDate}
-                </time>
-                {post.readTime && (
-                  <span className="font-medium text-[rgba(19,19,19,0.6)]">
-                    {post.readTime}
-                  </span>
-                )}
-              </div>
-
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-medium tracking-tighter text-[rgb(19,19,19)]">
-                {post.title}
-              </h1>
-
-              {post.description && (
-                <p className="text-[rgba(19,19,19,0.6)] max-w-4xl md:text-lg">
-                  {post.description}
-                </p>
-              )}
-            </div>
-          </div>
-
-          <div className="flex divide-x divide-transparent relative mt-8">
+          <div className="flex divide-x divide-transparent relative">
             <div className="absolute max-w-7xl mx-auto left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] lg:w-full h-full border-x border-transparent p-0 pointer-events-none" />
             <main className="w-full p-0 overflow-hidden">
               {post.thumbnail && (
-                <div className="relative w-full h-[500px] overflow-hidden object-cover rounded-2xl mb-6">
+                <div className="ct-card relative w-full h-[240px] sm:h-[360px] lg:h-[500px] overflow-hidden mb-6">
                   <img
                     src={post.thumbnail}
                     alt={post.title}
-                    className="w-full h-full object-cover rounded-2xl"
+                    className="w-full h-full object-cover"
                   />
                 </div>
               )}
-              <div className="p-6 lg:p-10 rounded-2xl bg-white border border-[rgba(19,19,19,0.08)] shadow-[0_24px_70px_rgba(0,0,0,0.06)] transition-all duration-300">
+              <div className="ct-card p-5 sm:p-6 lg:p-10">
                 {markdownError ? (
                   <div className="text-red-600 mb-4 p-4 bg-red-500/5 rounded-lg border border-red-500/30">
                     <p className="font-semibold">{t('blogPost.errorRendering')}</p>

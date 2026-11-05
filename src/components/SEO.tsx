@@ -32,6 +32,8 @@ interface SEOProps {
 
 export default function SEO({ title, description, canonical, preloadVideos, openGraph, structuredData, videos }: SEOProps) {
     const siteUrl = 'https://clerktree.com';
+    // Pages may already carry the brand ("Terms — ClerkTree", or the bare "ClerkTree" default); never print it twice.
+    const fullTitle = /clerktree/i.test(title) ? title : `${title} | ClerkTree`;
     const currentUrl = canonical || (openGraph?.url ?? siteUrl);
     // og:image/twitter:image must be absolute URLs per spec — social crawlers don't resolve relative paths.
     const ogImage = openGraph?.image || 'https://pub-0f804855178c4f4e8184c4fef3bd5b2a.r2.dev/logo.svg';
@@ -52,7 +54,7 @@ export default function SEO({ title, description, canonical, preloadVideos, open
     return (
         <Helmet>
             {/* Basic Meta Tags */}
-            <title>{title} | ClerkTree</title>
+            <title>{fullTitle}</title>
             <meta name="description" content={description} />
             <link rel="canonical" href={currentUrl} />
             <link rel="icon" type="image/svg+xml" href={faviconHref} />

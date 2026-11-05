@@ -1,13 +1,25 @@
-import React from 'react';
-import { ArrowLeft, Sun, Moon, ShieldCheck, ChevronDown } from 'lucide-react';
+import { useState } from 'react';
+import { ArrowUpRight, ChevronDown } from 'lucide-react';
+
+import { PageHero, Footer } from '../Landing/AgeroChrome';
+import SEO from '../SEO';
+import '../../pages/LandingFramer.css';
+
+const ACRONYMS = new Set(['AI']);
+
+// "5. AI AND DATA PROCESSING SECURITY" -> "5. AI and data processing security"
+function formatSectionTitle(title: string) {
+  const [, number = '', rest = title] = title.match(/^(\d+\.)\s*(.*)$/) ?? [];
+  const words = rest.split(/\s+/).map((word, index) => {
+    if (ACRONYMS.has(word)) return word;
+    const lower = word.toLowerCase();
+    return index === 0 ? lower.charAt(0).toUpperCase() + lower.slice(1) : lower;
+  });
+  return `${number} ${words.join(' ')}`.trim();
+}
 
 const Security = () => {
-  const [isDark, setIsDark] = React.useState(false);
-  const [expandedSection, setExpandedSection] = React.useState(null);
-  
-  const cn = (...classes) => {
-    return classes.filter(Boolean).join(' ');
-  };
+  const [expandedSection, setExpandedSection] = useState<number | null>(0);
 
   const sections = [
     {
@@ -630,188 +642,70 @@ This Security and Data Handling document is reviewed and updated regularly to re
     }
   ];
 
-  const GlassContainer = ({ children, className }) => (
-    <div className={cn(
-      "relative overflow-hidden",
-      "rounded-xl p-6",
-      isDark 
-        ? "bg-black/20 border border-white/10" 
-        : "bg-white/60 border border-black/5",
-      "transition-all duration-200",
-      className
-    )}>
-      {children}
-    </div>
-  );
-
-  const IconContainer = ({ children }) => (
-    <div className={cn(
-      "w-12 h-12 rounded-xl flex items-center justify-center",
-      isDark 
-        ? "bg-black/20 border border-white/10" 
-        : "bg-white/60 border border-black/5"
-    )}>
-      {children}
-    </div>
-  );
-
   return (
-    <div className="min-h-screen w-full overflow-hidden bg-gradient-to-br from-white to-purple-50 dark:from-gray-900 dark:to-gray-800">
-      {/* Background Gradients */}
-      <div className="fixed inset-0 pointer-events-none">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-purple-400/40 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 left-0 w-96 h-96 bg-pink-400/40 rounded-full blur-3xl" />
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-blue-400/40 rounded-full blur-3xl" />
-      </div>
+    <div className="agero-works" id="agero-works">
+      <SEO
+        title="Security & Data Handling"
+        description="How ClerkTree secures infrastructure, encrypts data, controls access and responds to incidents."
+        canonical="https://clerktree.com/security"
+      />
 
-      {/* Main Content */}
-      <div className={cn(
-        "relative min-h-screen p-4 md:p-6 backdrop-blur-sm transition-colors duration-300",
-        isDark ? "bg-black/50" : "bg-white/50"
-      )}>
-        <div className="max-w-4xl mx-auto space-y-6">
-          {/* Header Controls */}
-          <div className="flex items-center justify-between">
-            <button
-              onClick={() => window.history.back()}
-              className={cn(
-                "flex items-center gap-2 px-4 py-2 rounded-xl transition-all duration-200",
-                isDark 
-                  ? "bg-black/20 hover:bg-black/30 text-white border border-white/10" 
-                  : "bg-white/60 hover:bg-white/70 text-black border border-black/5"
-              )}
-            >
-              <ArrowLeft className="w-4 h-4" />
-              Back
-            </button>
+      <PageHero
+        eyebrow="Trust"
+        title="Security & Data Handling"
+        description="The measures we use to protect your information and keep ClerkTree compliant with industry standards and regulations. Last updated November 14, 2025."
+        titleId="security-page-title"
+      />
 
-            <button
-              onClick={() => setIsDark(!isDark)}
-              className={cn(
-                "p-3 rounded-xl transition-all duration-200",
-                isDark 
-                  ? "bg-black/20 hover:bg-black/30 text-white border border-white/10" 
-                  : "bg-white/60 hover:bg-white/70 text-black border border-black/5"
-              )}
-            >
-              {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-            </button>
+      <div className="agero-legal-page-container">
+
+        <main className="agero-legal-content-wrap" id="main-content">
+          <div className="agero-legal-card agero-security-card">
+            <div className="agero-security-notice">
+              <p>
+                This document describes our security measures and data handling practices. Select a section to read it in full.
+              </p>
+            </div>
+
+            <div className="agero-security-sections">
+              {sections.map((section, index) => {
+                const isOpen = expandedSection === index;
+                const panelId = `security-section-${index}`;
+                return (
+                  <div className={`agero-security-section${isOpen ? ' is-open' : ''}`} key={section.title}>
+                    <button
+                      type="button"
+                      aria-expanded={isOpen}
+                      aria-controls={panelId}
+                      onClick={() => setExpandedSection(isOpen ? null : index)}
+                    >
+                      <h2>{formatSectionTitle(section.title)}</h2>
+                      <ChevronDown aria-hidden="true" />
+                    </button>
+                    {isOpen && (
+                      <div className="agero-security-panel" id={panelId}>
+                        {section.content}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+
+            <a className="agero-security-contact" href="mailto:security@clerktree.com">
+              <span>
+                <span>Security inquiries</span>
+                <strong>security@clerktree.com</strong>
+              </span>
+              <ArrowUpRight aria-hidden="true" />
+            </a>
           </div>
-
-          {/* Main Card */}
-          <GlassContainer>
-            {/* Header */}
-            <div className="flex items-center space-x-4 mb-8">
-              <IconContainer>
-                <ShieldCheck className={cn(
-                  "w-6 h-6",
-                  isDark ? "text-purple-400" : "text-purple-600"
-                )} />
-              </IconContainer>
-              <div>
-                <h1 className={cn(
-                  "text-2xl font-semibold",
-                  isDark ? "text-white" : "text-black"
-                )}>
-                  Security & Data Handling
-                </h1>
-                <p className={isDark ? "text-white/60" : "text-black/60"}>
-                  Last Updated: November 14, 2025
-                </p>
-              </div>
-            </div>
-
-            {/* Legal Notice */}
-            <div className={cn(
-              "p-4 rounded-xl mb-6",
-              isDark 
-                ? "bg-green-500/20 border border-green-500/20" 
-                : "bg-green-500/10 border border-green-500/10"
-            )}>
-              <p className={cn(
-                "text-sm",
-                isDark ? "text-green-200" : "text-green-700"
-              )}>
-                This document describes our comprehensive security measures and data handling practices to protect your information and ensure compliance with industry standards and regulations.
-              </p>
-            </div>
-
-            {/* Sections */}
-            <div className="space-y-4">
-              {sections.map((section, index) => (
-                <div
-                  key={index}
-                  className={cn(
-                    "rounded-xl transition-all duration-200",
-                    isDark 
-                      ? "bg-black/20 hover:bg-black/30 border border-white/10" 
-                      : "bg-white/60 hover:bg-white/70 border border-black/5"
-                  )}
-                >
-                  <button
-                    onClick={() => setExpandedSection(expandedSection === index ? null : index)}
-                    className="w-full px-4 py-4 flex items-center justify-between"
-                  >
-                    <h2 className={cn(
-                      "text-lg font-semibold text-left",
-                      isDark ? "text-white" : "text-black"
-                    )}>
-                      {section.title}
-                    </h2>
-                    <ChevronDown 
-                      className={cn(
-                        "w-5 h-5 transition-transform",
-                        isDark ? "text-white/60" : "text-black/60",
-                        expandedSection === index ? "transform rotate-180" : ""
-                      )} 
-                    />
-                  </button>
-                  {expandedSection === index && (
-                    <div className={cn(
-                      "px-4 pb-4",
-                      "font-mono text-sm whitespace-pre-wrap",
-                      isDark ? "text-white/60" : "text-black/60"
-                    )}>
-                      {section.content}
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-
-            {/* Footer */}
-            <div className={cn(
-              "mt-8 pt-6 border-t",
-              isDark ? "border-white/10" : "border-black/5"
-            )}>
-              <p className={cn(
-                "text-center text-sm",
-                isDark ? "text-white/40" : "text-black/40"
-              )}>
-                WE ARE COMMITTED TO MAINTAINING THE HIGHEST STANDARDS OF SECURITY AND DATA PROTECTION TO SAFEGUARD YOUR INFORMATION.
-              </p>
-              <p className={cn(
-                "text-center mt-4",
-                isDark ? "text-white/60" : "text-black/60"
-              )}>
-                For security inquiries, please contact us: {' '}
-                <a 
-                  href="mailto:security@clerktree.com"
-                  className={cn(
-                    "underline hover:no-underline transition-all duration-200",
-                    isDark ? "text-purple-400 hover:text-purple-300" : "text-purple-600 hover:text-purple-700"
-                  )}
-                >
-                  security@clerktree.com
-                </a>
-              </p>
-            </div>
-          </GlassContainer>
-        </div>
+        </main>
       </div>
+
+      <Footer />
     </div>
   );
 };
 
 export default Security;
-

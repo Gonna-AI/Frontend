@@ -21,6 +21,7 @@ const Contact = lazyWithRetry(() => import('./pages/Contact'), 'Contact');
 const About = lazyWithRetry(() => import('./pages/About'), 'About');
 const Research = lazyWithRetry(() => import('./pages/Research'), 'Research');
 const Careers = lazyWithRetry(() => import('./pages/Careers'), 'Careers');
+const Brand = lazyWithRetry(() => import('./pages/Brand'), 'Brand');
 const Solutions = lazyWithRetry(() => import('./pages/Solutions'), 'Solutions');
 const Blog = lazyWithRetry(() => import('./pages/Blog'), 'Blog');
 const BlogPost = lazyWithRetry(() => import('./pages/BlogPost'), 'BlogPost');
@@ -207,6 +208,7 @@ function App() {
                 <Route path="/research/:topicSlug" element={<Research />} />
                 <Route path="/machina" element={<Machina />} />
                 <Route path="/careers" element={<Careers />} />
+                <Route path="/brand" element={<Brand />} />
                 <Route path="/solutions" element={<Solutions />} />
                 <Route path="/contact" element={<Contact />} />
                 <Route path="/support" element={<SupportPage />} />

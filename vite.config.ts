@@ -115,6 +115,7 @@ export default defineConfig({
       hostname: 'https://clerktree.com',
       dynamicRoutes: [
         '/about',
+        '/brand',
         '/solutions',
         '/blog',
         '/contact',

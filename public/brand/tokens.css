@@ -1,0 +1,37 @@
+/* ClerkTree brand tokens — https://clerktree.com/brand */
+:root {
+  --ct-color-black: #000000;
+  --ct-color-logo: #060606;
+  --ct-color-ink: #0A0A0A;
+  --ct-color-muted: #555555;
+  --ct-color-border: #C8C8C8;
+  --ct-color-canvas: #F4F4F4;
+  --ct-color-sunken: #EDEDED;
+  --ct-color-surface: #FFFFFF;
+  --ct-color-panel: #FFFFFF; /* alias of surface */
+  --ct-color-white: #FFFFFF;
+  --ct-color-signal: #FF4D00; /* accent only, never on the logo */
+
+  --ct-font-display: "Cal Sans", "Inter", system-ui, sans-serif;
+  --ct-font-text: "Inter", system-ui, sans-serif;
+
+  --ct-type-display: 400 88px/84px var(--ct-font-display);
+  --ct-type-page-heading: 400 56px/58px var(--ct-font-display);
+  --ct-type-section-heading: 400 36px/40px var(--ct-font-display);
+  --ct-type-subheading: 400 22px/28px var(--ct-font-display);
+  --ct-type-intro: 400 18px/30px var(--ct-font-text);
+  --ct-type-body: 400 16px/26px var(--ct-font-text);
+  --ct-type-metadata: 400 14px/20px var(--ct-font-text);
+  --ct-type-eyebrow: 500 12px/16px var(--ct-font-text);
+
+  --ct-radius-pill: 999px;
+  --ct-radius-control: 14px;
+  --ct-radius-card: 24px;
+  /* Concentric: shell = stage + shell padding (desktop 34 + 20). */
+  --ct-radius-stage: 34px;
+  --ct-shell-padding: 20px;
+  --ct-radius-shell: 54px;
+
+  --ct-logo-min-width-lockup: 120px;
+  --ct-logo-min-width-mark: 24px;
+}

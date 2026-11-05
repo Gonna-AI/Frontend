@@ -1,0 +1,235 @@
+/* ==========================================================================
+   ClerkTree site system — shape, width and surface tokens.
+
+   Shape follows one rule, the way hardware and OS corners nest:
+   an outer corner = the inner corner + the gap between them.
+
+     --r-stage   hero/video boxes inside the white shell
+     --shell-pad gap between the shell edge and the stage
+     --r-edge    every surface that meets the 8px page gutter
+                 (shell, footer, full-width bands, CTAs) = stage + pad
+     --r-card    content cards inside the page container
+     --r-inset   things inset --card-inset inside a card = card − inset
+     --r-control inputs, small tiles
+
+   Surfaces: near-white canvas, white surfaces separated by hairlines and a
+   soft shadow, black stages. No grey-on-grey.
+
+   Loaded after the page stylesheets' own rules lose on specificity
+   (.agero-works .x beats .x), so this file is the single source of truth.
+   ========================================================================== */
+
+.agero-works {
+  /* palette */
+  --agero-bg: #f4f4f4;
+  --agero-panel: #ffffff;
+  --agero-ink: #0a0a0a;
+  --agero-muted: #555555;
+  --line: rgba(10, 10, 10, 0.08);
+  --line-strong: rgba(10, 10, 10, 0.16);
+  --lift: 0 1px 2px rgba(10, 10, 10, 0.04), 0 12px 40px rgba(10, 10, 10, 0.05);
+
+  /* shape */
+  --gutter: 8px;
+  --shell-pad: clamp(12px, 1.4vw, 20px);
+  --r-stage: clamp(22px, 2.4vw, 34px);
+  --r-edge: calc(var(--r-stage) + var(--shell-pad));
+  --r-card: 24px;
+  --card-inset: 8px;
+  --r-inset: calc(var(--r-card) - var(--card-inset));
+  --r-control: 14px;
+
+  /* width */
+  --edge-max: 1920px;
+  --content-max: 1440px;
+  --content-pad: clamp(16px, 4vw, 64px);
+}
+
+@media (max-width: 767px) {
+  .agero-works {
+    --r-card: 20px;
+    --r-control: 12px;
+  }
+}
+
+/* iOS bar tint fallback follows the canvas. */
+.agero-page-active {
+  background: var(--agero-body-bg, #f4f4f4) !important;
+}
+
+/* ---------- Edge surfaces: shell ---------- */
+
+.agero-works .agero-top-area,
+.agero-works .fabric-solution-shell {
+  background: var(--agero-panel);
+  border: 1px solid var(--line);
+  border-radius: var(--r-edge);
+  box-shadow: var(--lift);
+  max-width: var(--edge-max);
+  padding: var(--shell-pad);
+  width: min(100%, calc(100vw - 2 * var(--gutter)));
+}
+
+.agero-works .agero-top-area {
+  margin: var(--gutter) auto 0;
+}
+
+.agero-works .fabric-solution-shell {
+  margin: var(--gutter) auto 0;
+}
+
+/* Header sits in the shell band above the stage with equal air top and bottom. */
+.agero-works .agero-top-area > .agero-shell-header,
+.agero-works .fabric-solution-shell > .agero-shell-header {
+  margin: 0 0 var(--shell-pad);
+  padding: 6px calc(var(--r-stage) * 0.5) 6px;
+}
+
+/* ---------- Stages (concentric with the shell) ---------- */
+
+.agero-works .agero-hero-stage,
+.agero-works .agero-hero-stage--home,
+.agero-works .fabric-solution-stage,
+.agero-works .agero-hero-video-slot {
+  border-radius: var(--r-stage);
+}
+
+/* ---------- Edge surfaces: bands, CTAs, footer ---------- */
+
+.agero-works .agero-footer {
+  padding: var(--gutter);
+}
+
+.agero-works .agero-footer-inner,
+.agero-works .brand-band-dark,
+.agero-works .brand-swatches,
+.agero-works .rs-cta-inner,
+.agero-works .fabric-solution-cta,
+.agero-works .agero-contact-panel {
+  border-radius: var(--r-edge);
+  margin-inline: auto;
+  max-width: var(--edge-max);
+}
+
+.agero-works .brand-band-dark,
+.agero-works .brand-swatches {
+  width: calc(100% - 2 * var(--gutter));
+}
+
+.agero-works .rs-cta {
+  padding-inline: var(--gutter);
+}
+
+/* ---------- Content container ---------- */
+
+.agero-works .agero-about-page {
+  padding-inline: var(--content-pad);
+}
+
+.agero-works .agero-about-section,
+.agero-works .agero-about-principles {
+  margin-inline: auto;
+  max-width: var(--content-max);
+}
+
+.agero-works .agero-about-mission {
+  max-width: none;
+}
+
+.agero-works .clerktree-contact-location {
+  max-width: var(--content-max);
+  padding-inline: var(--content-pad);
+}
+
+/* ---------- Cards ---------- */
+
+.agero-works .agero-about-card,
+.agero-works .agero-about-mission,
+.agero-works .agero-about-team-card,
+.agero-works .agero-plan-card,
+.agero-works .agero-faq-item,
+.agero-works .agero-sol-row,
+.agero-works .agero-stats-card,
+.agero-works .agero-testimonial-card,
+.agero-works .agero-founder-portrait,
+.agero-works .clerktree-blog-card-inner,
+.agero-works .clerktree-contact-map,
+.agero-works .clerktree-contact-info-card,
+.agero-works .agero-legal-card,
+.agero-works .rs-feature,
+.agero-works .rs-article,
+.agero-works .brand-stage,
+.agero-works .brand-misuse-stage,
+.agero-works .brand-type-card,
+.agero-works .brand-token-card,
+.agero-works .brand-contact-card,
+.agero-works .fabric-capability-card,
+.agero-works .agero-about-join,
+.agero-works .agero-about-office,
+.agero-works .ct-card {
+  border-radius: var(--r-card);
+}
+
+/* Light cards separate from the canvas with a hairline, not a grey fill. */
+.agero-works .agero-about-card,
+.agero-works .agero-about-team-card,
+.agero-works .agero-faq-item,
+.agero-works .clerktree-blog-card-inner,
+.agero-works .clerktree-contact-info-card,
+.agero-works .agero-legal-card,
+.agero-works .brand-token-card,
+.agero-works .brand-contact-card,
+.agero-works .ct-card {
+  background: var(--agero-panel);
+  border: 1px solid var(--line);
+  box-shadow: var(--lift);
+}
+
+/* Things inset inside a card follow the card's curve. */
+.agero-works .clerktree-blog-card-media,
+.agero-works .agero-about-team-photo {
+  border-radius: var(--r-inset);
+}
+
+/* ---------- Controls ---------- */
+
+.agero-works .agero-security-notice + .agero-security-sections,
+.agero-works .agero-security-contact,
+.agero-works .clerktree-contact-form input,
+.agero-works .clerktree-contact-form select,
+.agero-works .clerktree-contact-form textarea {
+  border-radius: var(--r-control);
+}
+
+/* White chips that used to sit on a grey card need an edge now. */
+.agero-works .clerktree-contact-socials a {
+  border: 1px solid var(--line-strong);
+}
+
+.agero-works .agero-security-contact {
+  background: var(--agero-bg);
+}
+
+/* Orange is an accent, never a fill: the About join card is a black stage. */
+.agero-works .agero-about-join {
+  background:
+    radial-gradient(80% 90% at 0% 0%, rgba(255, 255, 255, 0.08), transparent 60%),
+    #0a0a0a;
+}
+
+.agero-works .agero-about-office {
+  background: var(--agero-panel);
+  border: 1px solid var(--line);
+  box-shadow: var(--lift);
+}
+
+.agero-works .agero-about-join-primary {
+  background: #fff;
+  color: #0a0a0a;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .agero-works .agero-about-join-primary:hover {
+    background: #ededed;
+  }
+}

@@ -1,6 +1,8 @@
 import type { ChangeEvent, FormEvent } from 'react';
 import { useState } from 'react';
-import { CheckCircle2, Linkedin, Mail, MapPin, Phone, Send, Twitter } from 'lucide-react';
+import { ArrowUpRight, CheckCircle2, Linkedin } from 'lucide-react';
+import { siX } from 'simple-icons';
+import { SimpleIcon } from '../dashboard/components/simple-icon';
 
 import { useLanguage } from '../contexts/LanguageContext';
 import { Header, Footer } from '../components/Landing/AgeroChrome';
@@ -117,7 +119,7 @@ export default function Contact() {
           <ContactHeroVideo src={CONTACT_VIDEO_SRC} />
           <div className="agero-hero-stage-scrim" aria-hidden="true" />
           <div className="agero-hero-stage-content">
-            <p className="clerktree-contact-kicker">ClerkTree • {t('contact.sendMsgTitle')}</p>
+            <p className="clerktree-contact-kicker">{t('home.nav.contact')}</p>
             <h1 id="contact-title">{t('contact.sendMsgTitle')}</h1>
             <p>{t('contact.subtitle')}</p>
           </div>
@@ -231,7 +233,6 @@ export default function Contact() {
 
                 <button className="clerktree-contact-submit" disabled={isSubmitting} type="submit">
                   <span>{isSubmitting ? t('contact.sending') : t('contact.sendButton')}</span>
-                  {!isSubmitting && <Send size={18} strokeWidth={1.8} />}
                 </button>
 
                 <p className="clerktree-contact-legal">
@@ -260,19 +261,16 @@ export default function Contact() {
             </div>
 
             <aside className="clerktree-contact-info-card">
-              <ContactInfoItem icon={MapPin} label={t('contact.location')} value="Industriestrasse 2, 94315 Straubing" href={MAP_URL} />
-              <ContactInfoItem icon={Mail} label={t('contact.email')} value="team@clerktree.com" href="mailto:team@clerktree.com" />
-              <ContactInfoItem icon={Phone} label={t('contact.phone')} value="+49 176 83075116" href="tel:+4917683075116" />
+              <ContactInfoItem label={t('contact.location')} value="Industriestrasse 2, 94315 Straubing" href={MAP_URL} />
+              <ContactInfoItem label={t('contact.email')} value="team@clerktree.com" href="mailto:team@clerktree.com" />
+              <ContactInfoItem label={t('contact.phone')} value="+49 176 83075116" href="tel:+4917683075116" />
 
               <div className="clerktree-contact-socials" aria-label="Social links">
                 <a href="https://www.linkedin.com/company/clerktree" rel="noopener noreferrer" target="_blank" aria-label="LinkedIn">
                   <Linkedin size={20} />
                 </a>
                 <a href="https://x.com/teamclerktree" rel="noopener noreferrer" target="_blank" aria-label="X">
-                  <Twitter size={20} />
-                </a>
-                <a href="mailto:team@clerktree.com" aria-label="Email">
-                  <Mail size={20} />
+                  <SimpleIcon icon={siX} className="size-[17px] fill-current" aria-hidden="true" />
                 </a>
               </div>
             </aside>
@@ -285,26 +283,15 @@ export default function Contact() {
   );
 }
 
-function ContactInfoItem({
-  icon: Icon,
-  label,
-  value,
-  href,
-}: {
-  icon: typeof MapPin;
-  label: string;
-  value: string;
-  href: string;
-}) {
+function ContactInfoItem({ label, value, href }: { label: string; value: string; href: string }) {
+  const external = href.startsWith('http');
   return (
-    <a className="clerktree-contact-info-item" href={href} rel={href.startsWith('http') ? 'noopener noreferrer' : undefined} target={href.startsWith('http') ? '_blank' : undefined}>
-      <span>
-        <Icon size={22} strokeWidth={1.8} />
-      </span>
+    <a className="clerktree-contact-info-item" href={href} rel={external ? 'noopener noreferrer' : undefined} target={external ? '_blank' : undefined}>
       <span>
         <small>{label}</small>
         <strong>{value}</strong>
       </span>
+      <ArrowUpRight className="clerktree-contact-info-arrow" aria-hidden="true" />
     </a>
   );
 }

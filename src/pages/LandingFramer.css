@@ -61,16 +61,16 @@ html.lenis.lenis-stopped {
    theme-color for Liquid Glass), so LandingFramer.tsx keeps --agero-body-bg
    in sync with the section at the viewport's bottom edge. */
 .agero-page-active {
-  background: var(--agero-body-bg, rgb(220, 220, 220)) !important;
+  background: var(--agero-body-bg, #f4f4f4) !important;
 }
 
 .agero-works {
   --agero-ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   --agero-ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
-  --agero-bg: rgb(220, 220, 220);
-  --agero-panel: rgb(240, 240, 240);
-  --agero-ink: rgb(19, 19, 19);
-  --agero-muted: rgb(92, 92, 92);
+  --agero-bg: #f4f4f4;
+  --agero-panel: #ffffff;
+  --agero-ink: #0a0a0a;
+  --agero-muted: #555555;
   --agero-orange: rgb(255, 77, 0);
   background: var(--agero-bg);
   color: var(--agero-ink);
@@ -1045,19 +1045,14 @@ html.lenis.lenis-stopped {
 
 .agero-intro-tag {
   align-items: center;
-  background: rgba(12, 12, 12, 0.72);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: transparent;
+  border: 1px solid rgba(19, 19, 19, 0.2);
   border-radius: 999px;
-  box-shadow:
-    inset 0 0.5px 0.5px rgba(255, 255, 255, 0.24),
-    inset 0 4px 16px rgba(255, 255, 255, 0.16),
-    0 1px 2px rgba(26, 26, 26, 0.08),
-    0 2px 6px rgba(26, 26, 26, 0.04);
-  color: rgba(255, 255, 255, 0.8);
+  color: rgba(19, 19, 19, 0.78);
   display: inline-flex;
-  font-size: 16px;
+  font-size: 15px;
   gap: 12px;
-  height: 44px;
+  height: 42px;
   justify-content: center;
   line-height: 24px;
   padding: 0 24px;
@@ -3937,4 +3932,417 @@ html.lenis.lenis-stopped {
     border-radius: 18px;
     padding: 22px 18px;
   }
+}
+
+/* ==========================================================================
+   Polish layer — cross-page guards so nothing clips, collides or shrinks
+   below a usable size. Kept last so it wins over page-level rules.
+   ========================================================================== */
+
+/* Long words (German compounds like "Maschinenintelligenz") must wrap inside
+   their box instead of running under the page's overflow clip. */
+.agero-works :where(h1, h2, h3, h4, p, li, dt, dd, figcaption, blockquote) {
+  overflow-wrap: break-word;
+}
+
+@media (max-width: 767px) {
+  /* Only headings whose longest word cannot fit a phone line get hyphenated;
+     everywhere else the type is sized to fit so words stay whole. */
+  .fabric-solution-cta h2 {
+    -webkit-hyphens: auto;
+    hyphens: auto;
+  }
+
+  .agero-about-heading {
+    font-size: clamp(30px, 8.6vw, 48px);
+    line-height: 1.2;
+    max-width: 100%;
+  }
+
+  /* 44px touch targets without changing the visual size. */
+  .agero-shell-menu {
+    position: relative;
+  }
+
+  .agero-shell-menu::before {
+    content: "";
+    inset: -11px;
+    position: absolute;
+  }
+
+  .agero-footer-bottom-right a,
+  .agero-footer-column a {
+    display: inline-block;
+    margin-block: -13px;
+    padding-block: 13px;
+  }
+}
+
+/* Hero copy sits on live video: a soft centre vignette plus a faint text
+   shadow keeps it legible over bright frames without dimming the edges. */
+.agero-hero-stage-scrim {
+  background:
+    radial-gradient(ellipse 58% 46% at 50% 52%, rgba(0, 0, 0, 0.34), transparent 78%),
+    linear-gradient(180deg, rgba(0, 0, 0, 0.18) 0%, rgba(0, 0, 0, 0.1) 38%, rgba(0, 0, 0, 0.6) 100%);
+}
+
+.agero-hero-stage-content :where(h1, p, span) {
+  text-shadow: 0 2px 28px rgba(0, 0, 0, 0.28);
+}
+
+/* Small eyebrows over video read as frosted chips instead of loose 11px text. */
+.agero-hero-stage-content .clerktree-contact-kicker,
+.clerktree-blog-hero-copy > p:first-child {
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  background: rgba(10, 10, 10, 0.46);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 999px;
+  display: inline-block;
+  font-size: 12px;
+  letter-spacing: 0.16em;
+  line-height: 1;
+  padding: 9px 14px;
+  text-shadow: none;
+}
+
+/* ---------- 404 ---------- */
+.agero-hero-stage.agero-notfound-stage {
+  background:
+    radial-gradient(90% 70% at 50% 0%, rgba(255, 255, 255, 0.09), transparent 62%),
+    linear-gradient(180deg, #111 0%, #000 100%);
+  height: clamp(600px, 48vw, 860px);
+}
+
+.agero-notfound-code {
+  -webkit-background-clip: text;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.02) 78%);
+  background-clip: text;
+  color: transparent;
+  font-family: "Cal Sans", "Inter Display", "Inter", system-ui, sans-serif;
+  font-size: clamp(14rem, 34vw, 34rem);
+  left: 50%;
+  letter-spacing: -0.06em;
+  line-height: 0.8;
+  pointer-events: none;
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -52%);
+  user-select: none;
+  white-space: nowrap;
+}
+
+.agero-hero-stage-content .agero-notfound-eyebrow {
+  color: var(--agero-orange);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.agero-hero-stage-content .agero-notfound-stage h1,
+.agero-notfound-stage h1 {
+  font-size: clamp(44px, 6.2vw, 104px);
+  max-width: 14ch;
+}
+
+.agero-notfound-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 36px !important;
+}
+
+.agero-notfound-primary,
+.agero-notfound-secondary {
+  align-items: center;
+  border-radius: 999px;
+  display: inline-flex;
+  font-size: 15px;
+  font-weight: 500;
+  gap: 8px;
+  min-height: 48px;
+  padding: 0 22px;
+  text-decoration: none;
+  transition: background-color 180ms ease, border-color 180ms ease, transform 180ms var(--agero-ease-out);
+}
+
+.agero-notfound-primary {
+  background: #fff;
+  color: #060606;
+}
+
+.agero-notfound-secondary {
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  color: #fff;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .agero-notfound-primary:hover {
+    transform: translateY(-1px);
+  }
+
+  .agero-notfound-secondary:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.4);
+  }
+}
+
+@media (max-width: 767px) {
+  .agero-hero-stage.agero-notfound-stage {
+    height: auto;
+    min-height: 620px;
+  }
+}
+
+/* ---------- Security & data handling ---------- */
+.agero-security-notice {
+  border-left: 2px solid var(--agero-orange);
+  color: rgba(19, 19, 19, 0.72);
+  font-size: 15px;
+  line-height: 1.6;
+  margin-bottom: 28px;
+  padding-left: 16px;
+}
+
+.agero-security-notice svg {
+  color: var(--agero-orange);
+  flex: 0 0 auto;
+  height: 22px;
+  margin-top: 1px;
+  width: 22px;
+}
+
+.agero-security-notice p {
+  margin: 0;
+}
+
+.agero-security-sections {
+  border-top: 1px solid rgba(19, 19, 19, 0.1);
+}
+
+.agero-security-section {
+  border-bottom: 1px solid rgba(19, 19, 19, 0.1);
+}
+
+.agero-security-section > button {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  color: rgb(19, 19, 19);
+  cursor: pointer;
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+  min-height: 64px;
+  padding: 16px 4px;
+  text-align: left;
+  width: 100%;
+}
+
+.agero-security-section h2 {
+  font-family: "Cal Sans", "Inter Display", "Inter", system-ui, sans-serif !important;
+  font-size: clamp(18px, 1.6vw, 22px);
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+  margin: 0;
+}
+
+.agero-security-section > button svg {
+  color: rgba(19, 19, 19, 0.5);
+  flex: 0 0 auto;
+  height: 20px;
+  transition: transform 220ms var(--agero-ease-out), color 180ms ease;
+  width: 20px;
+}
+
+.agero-security-section.is-open > button svg {
+  color: var(--agero-orange);
+  transform: rotate(180deg);
+}
+
+.agero-security-panel {
+  color: rgba(19, 19, 19, 0.72);
+  font-size: 15px;
+  line-height: 1.75;
+  padding: 0 4px 24px;
+  white-space: pre-wrap;
+}
+
+.agero-security-contact {
+  align-items: center;
+  background: #fff;
+  border: 1px solid rgba(19, 19, 19, 0.08);
+  border-radius: 18px;
+  color: rgb(19, 19, 19);
+  display: flex;
+  gap: 14px;
+  margin-top: 28px;
+  padding: 16px 18px;
+  text-decoration: none;
+  transition: border-color 180ms ease;
+}
+
+.agero-security-contact:hover {
+  border-color: rgba(19, 19, 19, 0.3);
+}
+
+.agero-security-contact {
+  justify-content: space-between;
+}
+
+.agero-security-contact > svg {
+  color: rgba(19, 19, 19, 0.4);
+  height: 20px;
+  width: 20px;
+}
+
+.agero-security-contact > span {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.agero-security-contact > span span {
+  color: rgba(19, 19, 19, 0.55);
+  font-size: 13px;
+}
+
+.agero-security-contact strong {
+  font-size: 15px;
+  font-weight: 500;
+}
+
+/* ---------- Header lockup (brand artwork, no ®) ----------
+   Same outlined lockup as /brand downloads, so mark/word spacing is exact.
+   Height = the mark's height; the wordmark scales with it. */
+.agero-shell-logo {
+  flex: 0 0 auto;
+  line-height: 0;
+}
+
+.agero-shell-lockup {
+  display: block;
+  height: clamp(36px, 2.8vw, 48px);
+  width: auto;
+}
+
+@media (max-width: 767px) {
+  .agero-shell-lockup {
+    height: 32px;
+  }
+}
+
+@media (max-width: 430px) {
+  .agero-shell-lockup {
+    height: 28px;
+  }
+}
+
+@media (max-width: 360px) {
+  .agero-shell-lockup {
+    height: 25px;
+  }
+}
+
+/* ---------- Page hero box (PageHero) ----------
+   The standard opening for content pages: same white shell + dark rounded
+   stage as Home/About, sized for a title rather than a full-bleed film. */
+.agero-hero-stage.agero-page-hero {
+  align-items: center;
+  background:
+    radial-gradient(110% 80% at 50% 0%, rgba(255, 255, 255, 0.1), transparent 60%),
+    radial-gradient(60% 60% at 50% 120%, rgba(255, 77, 0, 0.12), transparent 70%),
+    linear-gradient(180deg, #121212 0%, #000 100%);
+  display: flex;
+  height: auto;
+  min-height: clamp(400px, 32vw, 580px);
+}
+
+.agero-page-hero-grain {
+  background: url("/noise.webp") center / 220px repeat;
+  inset: 0;
+  mix-blend-mode: overlay;
+  opacity: 0.16;
+  pointer-events: none;
+  position: absolute;
+}
+
+.agero-page-hero .agero-hero-stage-content {
+  padding: clamp(64px, 7vw, 112px) clamp(20px, 4vw, 64px);
+}
+
+.agero-hero-stage-content .agero-page-hero-eyebrow {
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 999px;
+  color: var(--agero-orange);
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  line-height: 1;
+  padding: 9px 14px;
+  text-shadow: none;
+  text-transform: uppercase;
+}
+
+.agero-hero-stage-content .agero-page-hero-eyebrow + h1 {
+  margin-top: 26px;
+}
+
+.agero-page-hero h1 {
+  font-size: clamp(42px, 6vw, 104px) !important;
+  max-width: 16ch;
+}
+
+.agero-page-hero .agero-hero-stage-content > p:not(.agero-page-hero-eyebrow) {
+  max-width: 640px;
+}
+
+@media (max-width: 767px) {
+  .agero-hero-stage.agero-page-hero {
+    min-height: 420px;
+  }
+
+  .agero-page-hero h1 {
+    font-size: clamp(38px, 11vw, 56px) !important;
+  }
+}
+
+/* Meta row (tags, date) inside a page hero. */
+.agero-page-hero-meta {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin-top: 28px !important;
+}
+
+.agero-page-hero-meta > * {
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 999px;
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 13px;
+  line-height: 1;
+  padding: 8px 12px;
+  text-shadow: none;
+}
+
+.agero-page-hero-meta a {
+  align-items: center;
+  display: inline-flex;
+  gap: 6px;
+  text-decoration: none;
+  transition: background-color 180ms ease, color 180ms ease;
+}
+
+.agero-page-hero-meta a:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
 }
