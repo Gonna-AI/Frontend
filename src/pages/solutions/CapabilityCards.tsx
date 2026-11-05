@@ -1,484 +1,1069 @@
 import {
-  createContext,
-  useContext,
   useEffect,
   useRef,
   useState,
   type CSSProperties,
-  type PointerEvent as ReactPointerEvent,
   type ReactNode,
-} from 'react';
+} from "react";
+import { Check, CheckCheck, ChevronRight, FileText } from "lucide-react";
+import ClerkTreeLogo from "../../components/Brand/ClerkTreeLogo";
+import { useLanguage } from "../../contexts/LanguageContext";
+import { operationsCopy, type Labels } from "./operationsCopy";
+import "./CapabilityCards.css";
 
-import ClerkTreeLogo from '../../components/Brand/ClerkTreeLogo';
-import { useLanguage } from '../../contexts/LanguageContext';
-import './CapabilityCards.css';
+const vars = (v: Record<string, string | number>) => v as CSSProperties;
+const VALUES = ["6205-2RS", "45 Nm", "± 0.02 mm", "2,000 h"];
+const WAVE = Array.from(
+  { length: 150 },
+  (_, i) =>
+    `${i ? "L" : "M"}${i * 4},${(43 + Math.sin(i * 2.23) * (i > 70 ? 13 : 4) + Math.sin(i * 0.69) * (i > 70 ? 8 : 3)).toFixed(1)}`,
+).join(" ");
 
-/*
- * Capability wall for /solutions — agents visibly at work.
- *
- * Everything is HTML/SVG (no video). Two layers of motion:
- *   1. Entrance: pieces carry `cx-p` + an index (--i); the card carries --d.
- *      An IntersectionObserver adds `is-visible` and CSS staggers them in.
- *   2. Live: while the grid is on screen (and motion is allowed) a shared
- *      ticker advances each card's loop — agent steps, extracted fields,
- *      supplier ranking, telemetry. Off-screen or reduced motion: frozen in
- *      the finished state.
- * Effects follow common open-source patterns (Magic UI / React Bits):
- * border beam, shimmer "thinking" text, animated beams along graph edges.
- */
-
-type Lang = 'en' | 'de';
-
-const LABELS = {
-  en: {
-    vibration: 'Vibration', temperature: 'Temperature', alarms: 'Alarms', health: 'Health',
-    model: 'Machina Agent', running: 'Running', done: 'Complete', thinking: 'Thinking',
-    steps: [
-      'Reading alarm SP-204 · spindle vibration 7.8 mm/s',
-      'Searching CNC-07 manual · §4.2 bearing replacement',
-      'Checking stock · bearing 6205-2RS, 4 on hand',
-      'Drafting work order WO-2481',
-      'Routed to technician · awaiting approval',
-    ],
-    docTitle: 'CNC-07 Service Manual', docPage: 'p. 37 · §4.2',
-    fields: [
-      ['Part no.', '6205-2RS'],
-      ['Torque', '45 Nm'],
-      ['Tolerance', '± 0.02 mm'],
-      ['Interval', '2,000 h'],
-    ],
-    cited: 'Cited', extracting: 'Extracting',
-    rfq: 'RFQ-1182', rfqMeta: '3 line items · 12 suppliers matched', supplier: 'Supplier', price: 'Price', lead: 'Lead time', risk: 'Risk',
-    low: 'Low', medium: 'Medium', recommended: 'Recommended', parsing: 'Parsing drawing', comparing: 'Comparing quotes',
-    asset: 'Press 12', similar: 'Similar failure', bearing: 'Bearing', drive: 'Drive', hydraulics: 'Hydraulics', sensor: 'Sensor',
-    throughput: 'Throughput', oee: 'OEE', queue: 'Queue pressure',
-    docCardTitle: 'Documentation Agent',
-    docCardBody: 'Reads manuals, drawings and service reports, then turns torque specs, tolerances and part numbers into structured fields with a citation for every value.',
-    rfqCardTitle: 'RFQ Intelligence',
-    rfqCardBody: 'Parses incoming RFQs, matches line items to drawings and past quotes, and ranks supplier offers by price, lead time and risk before anyone opens a spreadsheet.',
-  },
-  de: {
-    vibration: 'Vibration', temperature: 'Temperatur', alarms: 'Alarme', health: 'Zustand',
-    model: 'Machina Agent', running: 'Läuft', done: 'Fertig', thinking: 'Denkt nach',
-    steps: [
-      'Alarm SP-204 lesen · Spindelvibration 7,8 mm/s',
-      'Handbuch CNC-07 durchsuchen · §4.2 Lagertausch',
-      'Lager prüfen · Lager 6205-2RS, 4 vorrätig',
-      'Arbeitsauftrag WO-2481 entwerfen',
-      'An Techniker übergeben · Freigabe ausstehend',
-    ],
-    docTitle: 'CNC-07 Servicehandbuch', docPage: 'S. 37 · §4.2',
-    fields: [
-      ['Teilenr.', '6205-2RS'],
-      ['Drehmoment', '45 Nm'],
-      ['Toleranz', '± 0,02 mm'],
-      ['Intervall', '2.000 h'],
-    ],
-    cited: 'Belegt', extracting: 'Extrahiert',
-    rfq: 'RFQ-1182', rfqMeta: '3 Positionen · 12 Lieferanten gefunden', supplier: 'Lieferant', price: 'Preis', lead: 'Lieferzeit', risk: 'Risiko',
-    low: 'Gering', medium: 'Mittel', recommended: 'Empfohlen', parsing: 'Zeichnung wird gelesen', comparing: 'Angebote im Vergleich',
-    asset: 'Presse 12', similar: 'Ähnlicher Ausfall', bearing: 'Lager', drive: 'Antrieb', hydraulics: 'Hydraulik', sensor: 'Sensor',
-    throughput: 'Durchsatz', oee: 'OEE', queue: 'Rückstau',
-    docCardTitle: 'Dokumentations-Agent',
-    docCardBody: 'Liest Handbücher, Zeichnungen und Serviceberichte und überführt Drehmomente, Toleranzen und Teilenummern in strukturierte Felder – jeder Wert mit Quelle.',
-    rfqCardTitle: 'RFQ-Intelligenz',
-    rfqCardBody: 'Liest eingehende Anfragen, ordnet Positionen Zeichnungen und früheren Angeboten zu und bewertet Lieferanten nach Preis, Lieferzeit und Risiko – bevor jemand eine Tabelle öffnet.',
-  },
-} as const;
-
-type Labels = (typeof LABELS)[Lang];
-
-const piece = (i: number, extra?: CSSProperties) => ({ '--i': i, ...extra }) as CSSProperties;
-
-/* ---------- Live ticker ---------- */
-
-const LiveContext = createContext(false);
-
-/** Counts up every `ms` while the wall is live; frozen otherwise. */
-function useTick(ms: number) {
-  const live = useContext(LiveContext);
-  const [tick, setTick] = useState(0);
-  useEffect(() => {
-    if (!live) return undefined;
-    const id = window.setInterval(() => setTick((value) => value + 1), ms);
-    return () => window.clearInterval(id);
-  }, [live, ms]);
-  return { tick, live };
-}
-
-/** A looping phase 0..length-1, or the last phase when not live. */
-function usePhase(length: number, ms: number) {
-  const { tick, live } = useTick(ms);
-  return live ? tick % length : length - 1;
-}
-
-function ModelChip({ l, running }: { l: Labels; running: boolean }) {
+function Chip({
+  children,
+  hot = false,
+}: {
+  children: ReactNode;
+  hot?: boolean;
+}) {
   return (
-    <span className="cx-model">
-      <ClerkTreeLogo markClassName="cx-model__mark" labelClassName="sr-only" />
-      <span>{l.model}</span>
-      <span className={`cx-model__state${running ? ' is-running' : ''}`}>
-        <span className="cx-live" />
-        {running ? l.running : l.done}
-      </span>
+    <span className={`cx-status${hot ? " is-hot" : ""}`}>
+      <i />
+      {children}
     </span>
   );
 }
 
-/* ---------- 1. Machine signal capture ---------- */
-function SignalVis({ l }: { l: Labels }) {
-  const { tick } = useTick(1600);
-  const scores = [94, 93, 95, 94, 92, 94, 96, 95];
-  const streams = [
-    { label: l.vibration, d: 'M0 22 C 30 6, 52 38, 84 20 S 136 30, 168 18 S 220 34, 260 24' },
-    { label: l.temperature, d: 'M0 26 C 40 24, 70 16, 110 20 S 170 30, 210 18 S 240 22, 260 24' },
-    { label: l.alarms, d: 'M0 24 L 70 24 L 78 8 L 86 34 L 94 24 L 180 24 L 186 14 L 192 24 L 260 24' },
-  ];
+function SpindleModel({
+  l,
+  recovered = false,
+}: {
+  l: Labels;
+  recovered?: boolean;
+}) {
   return (
-    <div className="cx-sig">
-      <div className="cx-sig__rows">
-        {streams.map((s, index) => (
-          <div className="cx-sig__row" key={s.label}>
-            <span className="cx-p cx-sig__label" style={piece(index)}>{s.label}</span>
-            <svg className="cx-sig__wave" viewBox="0 0 260 48" preserveAspectRatio="none">
-              <path className="cx-draw" d={s.d} pathLength={1} style={piece(index)} />
-              <circle className="cx-pulse" r="2.6">
-                <animateMotion dur={`${2.6 + index * 0.7}s`} repeatCount="indefinite" path={s.d} />
-              </circle>
-            </svg>
-          </div>
-        ))}
+    <div className={`cx-model${recovered ? " is-recovered" : ""}`}>
+      <div className="cx-model__coordinate">
+        CNC-07 / SPINDLE · X 024 / Y 018 / Z 007
       </div>
-      <svg className="cx-sig__merge" viewBox="0 0 40 150" preserveAspectRatio="none" aria-hidden="true">
-        <path className="cx-draw" d="M0 25 C 24 25, 16 75, 40 75" pathLength={1} style={piece(3)} />
-        <path className="cx-draw" d="M0 75 L 40 75" pathLength={1} style={piece(3)} />
-        <path className="cx-draw" d="M0 125 C 24 125, 16 75, 40 75" pathLength={1} style={piece(3)} />
-      </svg>
-      <div className="cx-p cx-score" style={piece(4)}>
-        <span className="cx-score__label"><span className="cx-live" />{l.health}</span>
-        <span className="cx-score__value" key={tick}>{scores[tick % scores.length]}</span>
-      </div>
-    </div>
-  );
-}
-
-/* ---------- 2. Maintenance agent: a run log, step by step ---------- */
-function AgentRunVis({ l }: { l: Labels }) {
-  const total = l.steps.length;
-  // phases 0..total-1 = working on that step; total..total+1 = holding finished
-  const phase = usePhase(total + 2, 1500);
-  const running = phase < total;
-  return (
-    <div className="cx-run">
-      <div className="cx-p cx-run__head" style={piece(0)}>
-        <ModelChip l={l} running={running} />
-      </div>
-      <ol className="cx-run__steps">
-        {l.steps.map((step, index) => {
-          const state = index < phase ? 'done' : index === phase ? 'active' : 'idle';
-          return (
-            <li className={`cx-p cx-run__step is-${state}`} key={step} style={piece(1 + index * 0.6)}>
-              <span className="cx-run__marker" aria-hidden="true" />
-              <span className={state === 'active' ? 'cx-shimmer' : undefined}>{step}</span>
-            </li>
-          );
-        })}
-      </ol>
-      <div className="cx-p cx-run__foot" style={piece(5)}>
-        {running ? <span className="cx-shimmer">{l.thinking}…</span> : <span>WO-2481 · {l.done}</span>}
-        <span className="cx-run__count">{Math.min(phase, total)}/{total}</span>
-      </div>
-    </div>
-  );
-}
-
-/* ---------- 3. Documentation agent: read a page, extract cited fields ---------- */
-function DocVis({ l }: { l: Labels }) {
-  const fields = l.fields;
-  const phase = usePhase(fields.length + 2, 1300);
-  const filled = Math.min(phase, fields.length);
-  const live = useContext(LiveContext);
-  return (
-    <div className="cx-doc">
-      <div className={`cx-p cx-doc__page${live ? ' is-scanning' : ''}`} style={piece(0)}>
-        <div className="cx-doc__title">
-          <span>{l.docTitle}</span>
-          <small>{l.docPage}</small>
-        </div>
-        {Array.from({ length: 9 }, (_, row) => (
-          <span
-            className={`cx-doc__line${[1, 3, 5, 7].includes(row) && filled > [1, 3, 5, 7].indexOf(row) ? ' is-hit' : ''}`}
-            key={row}
-            style={{ width: `${[92, 78, 88, 64, 90, 72, 84, 58, 80][row]}%` }}
-          />
-        ))}
-        <span className="cx-doc__scan" aria-hidden="true" />
-      </div>
-      <dl className="cx-doc__fields">
-        {fields.map(([label, value], index) => (
-          <div className={`cx-p cx-doc__field${index < filled ? ' is-filled' : ''}`} key={label} style={piece(1 + index)}>
-            <dt>{label}</dt>
-            <dd>{index < filled ? value : <span className="cx-shimmer">{l.extracting}…</span>}</dd>
-            {index < filled && <span className="cx-doc__cite">{l.cited}</span>}
-          </div>
-        ))}
-      </dl>
-    </div>
-  );
-}
-
-/* ---------- 4. RFQ intelligence: parse, compare, recommend ---------- */
-function RfqVis({ l }: { l: Labels }) {
-  const suppliers = [
-    { name: 'Kessler GmbH', price: '€ 18,420', lead: '12 d', risk: l.low, best: true },
-    { name: 'Nordwerk AG', price: '€ 17,980', lead: '28 d', risk: l.medium },
-    { name: 'Präzision Bayern', price: '€ 19,150', lead: '9 d', risk: l.low },
-  ];
-  // 0 parsing, 1..3 rows appear, 4 recommend, 5 hold
-  const phase = usePhase(6, 1200);
-  const status = phase === 0 ? l.parsing : phase < 4 ? l.comparing : l.recommended;
-  return (
-    <div className="cx-rfq">
-      <div className="cx-p cx-rfq__head" style={piece(0)}>
-        <span className="cx-rfq__id">
-          <strong>{l.rfq}</strong>
-          <small>{l.rfqMeta}</small>
-        </span>
-        <span className={`cx-rfq__status${phase >= 4 ? ' is-done' : ''}`}>
-          {phase < 4 ? <span className="cx-shimmer">{status}…</span> : status}
-        </span>
-      </div>
-      <div className="cx-p cx-rfq__table" role="presentation" style={piece(1)}>
-        <div className="cx-rfq__row is-head">
-          <span>{l.supplier}</span>
-          <span>{l.price}</span>
-          <span>{l.lead}</span>
-          <span>{l.risk}</span>
-        </div>
-        {suppliers.map((s, index) => (
-          <div
-            className={`cx-rfq__row${phase > index ? ' is-in' : ''}${s.best && phase >= 4 ? ' is-best' : ''}`}
-            key={s.name}
+      <svg
+        viewBox="0 0 600 300"
+        role="img"
+        aria-label={`${l.spindle}: ${l.bearing}`}
+      >
+        <defs>
+          <linearGradient id="cx-metal" x1="0" y1="0" x2="0" y2="1">
+            <stop stopColor="#777b7f" />
+            <stop offset=".19" stopColor="#393b3d" />
+            <stop offset=".46" stopColor="#585a5d" />
+            <stop offset=".53" stopColor="#252627" />
+            <stop offset="1" stopColor="#0e0e0e" />
+          </linearGradient>
+          <linearGradient id="cx-face" x1="0" y1="0" x2="1" y2="1">
+            <stop stopColor="#8c9093" />
+            <stop offset=".5" stopColor="#292a2b" />
+            <stop offset="1" stopColor="#161718" />
+          </linearGradient>
+          <linearGradient id="cx-shaft" x1="0" y1="0" x2="0" y2="1">
+            <stop stopColor="#a4a7aa" />
+            <stop offset=".28" stopColor="#4c4e50" />
+            <stop offset=".52" stopColor="#c4c5c7" />
+            <stop offset=".63" stopColor="#46484b" />
+            <stop offset="1" stopColor="#18191a" />
+          </linearGradient>
+          <radialGradient id="cx-halo">
+            <stop
+              stopColor={recovered ? "#94989b" : "#ff7337"}
+              stopOpacity=".19"
+            />
+            <stop offset="1" stopColor="#161617" stopOpacity="0" />
+          </radialGradient>
+          <pattern
+            id="cx-grid"
+            width="30"
+            height="30"
+            patternUnits="userSpaceOnUse"
           >
-            <span>{s.name}</span>
-            <span>{s.price}</span>
-            <span>{s.lead}</span>
-            <span>{s.risk}</span>
-            {s.best && <span className="cx-rfq__pick">{l.recommended}</span>}
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-/* ---------- 5. Asset intelligence: beams travel the relationship graph ---------- */
-function GraphVis({ l }: { l: Labels }) {
-  const nodes = [
-    { x: 58, y: 46, label: l.bearing, hot: true },
-    { x: 250, y: 40, label: l.drive },
-    { x: 266, y: 150, label: l.hydraulics },
-    { x: 44, y: 156, label: l.sensor },
-  ];
-
-  return (
-    <div className="cx-graph">
-      <svg viewBox="0 0 310 200" aria-hidden="true">
-        {nodes.map((n, index) => {
-          const d = `M155 98 L ${n.x} ${n.y}`;
-          return (
-            <g key={n.label}>
-              <path className={`cx-draw cx-graph__edge${n.hot ? ' cx-hot' : ''}`} d={d} pathLength={1} style={piece(1 + index)} />
-              <circle className={`cx-beam-dot${n.hot ? ' is-hot' : ''}`} r={n.hot ? 3 : 2.2}>
-                <animateMotion dur={`${1.8 + index * 0.45}s`} begin={`${index * 0.35}s`} repeatCount="indefinite" path={d} />
-              </circle>
-            </g>
-          );
-        })}
-        <path className="cx-draw cx-graph__edge cx-dim" d="M58 46 L 44 156" pathLength={1} style={piece(5)} />
-      </svg>
-      <div className="cx-p cx-graph__core" style={piece(0)}>{l.asset}</div>
-      {nodes.map((n, index) => (
-        <div
-          className={`cx-p cx-graph__node${n.hot ? ' is-hot' : ''}`}
-          key={n.label}
-          style={piece(2 + index, { left: `${(n.x / 310) * 100}%`, top: `${(n.y / 200) * 100}%` })}
-        >
-          {n.label}
-        </div>
-      ))}
-      <div className="cx-p cx-graph__note" style={piece(6)}>
-        <span className="cx-dot cx-dot--signal" />
-        {l.similar} · 0.91
-      </div>
-    </div>
-  );
-}
-
-/* ---------- 6. Production analytics: live hourly throughput ---------- */
-const BASE_BARS = [46, 58, 64, 61, 72, 78, 34, 69, 82, 88, 84, 90];
-
-function ThroughputVis({ l }: { l: Labels }) {
-  const { tick, live } = useTick(2200);
-  const shift = live ? tick % BASE_BARS.length : 0;
-  const bars = BASE_BARS.map((_, index) => BASE_BARS[(index + shift) % BASE_BARS.length]);
-  const dip = bars.indexOf(Math.min(...bars));
-  const peak = bars.indexOf(Math.max(...bars));
-  const oee = (86.2 + ((tick * 7) % 19) / 10).toFixed(1);
-  return (
-    <div className="cx-tp">
-      <div className="cx-tp__head">
-        <span className="cx-p cx-tp__metric" style={piece(0)}>
-          <small><span className="cx-live" />{l.oee}</small>
-          <strong>{oee}%</strong>
-        </span>
-        <span className="cx-p cx-tp__metric" style={piece(1)}>
-          <small>{l.throughput}</small>
-          <strong>{(1240 + ((tick * 37) % 90)).toLocaleString('en-US')}/h</strong>
-        </span>
-      </div>
-      <div className="cx-tp__plot">
-        {bars.map((h, index) => (
-          <span
-            className={`cx-p cx-tp__bar${index === dip ? ' is-flag' : ''}${index === peak ? ' is-peak' : ''}`}
-            key={index}
-            style={piece(2 + index * 0.5, { '--h': `${h}%` } as CSSProperties)}
+            <path
+              d="M30 0H0V30"
+              fill="none"
+              stroke="#939699"
+              strokeOpacity=".075"
+            />
+          </pattern>
+        </defs>
+        <rect width="600" height="300" fill="url(#cx-grid)" />
+        <ellipse cx="320" cy="165" rx="210" ry="130" fill="url(#cx-halo)" />
+        <g transform="translate(72 40) rotate(-12 235 125)">
+          <path
+            d="M24 179H450M87 52V222M387 52V222"
+            stroke="#7c8084"
+            strokeOpacity=".22"
+            strokeDasharray="3 5"
           />
-        ))}
-        <span className="cx-p cx-tp__flag" style={piece(9, { left: `clamp(0%, calc(${dip} / 12 * 100%), calc(100% - 96px))` })}>{l.queue}</span>
+          <path
+            d="M131 71H338V173H131Z"
+            fill="url(#cx-metal)"
+            stroke="#73777b"
+            strokeWidth=".7"
+          />
+          <ellipse
+            cx="131"
+            cy="122"
+            rx="28"
+            ry="51"
+            fill="url(#cx-face)"
+            stroke="#95989c"
+            strokeWidth=".8"
+          />
+          <ellipse
+            cx="338"
+            cy="122"
+            rx="28"
+            ry="51"
+            fill="url(#cx-face)"
+            stroke="#83868a"
+            strokeWidth=".8"
+          />
+          {Array.from({ length: 15 }, (_, i) => (
+            <path
+              key={i}
+              d={`M${149 + i * 11} 73V171`}
+              stroke="#b0b2b4"
+              strokeOpacity=".12"
+            />
+          ))}
+          <path
+            d="M61 109H407V135H61Z"
+            fill="url(#cx-shaft)"
+            stroke="#a1a3a6"
+            strokeWidth=".6"
+          />
+          <ellipse
+            cx="61"
+            cy="122"
+            rx="8"
+            ry="13"
+            fill="url(#cx-face)"
+            stroke="#a6a8ab"
+            strokeWidth=".7"
+          />
+          <ellipse
+            cx="407"
+            cy="122"
+            rx="8"
+            ry="13"
+            fill="url(#cx-face)"
+            stroke="#a6a8ab"
+            strokeWidth=".7"
+          />
+          <g
+            className="cx-model__bearing"
+            fill="none"
+            stroke={recovered ? "#a3a6a9" : "#f78250"}
+          >
+            <ellipse cx="298" cy="122" rx="24" ry="45" strokeWidth="1.3" />
+            <ellipse cx="298" cy="122" rx="16" ry="33" strokeWidth=".6" />
+            {Array.from({ length: 12 }, (_, i) => {
+              const a = (i / 12) * Math.PI * 2;
+              return (
+                <ellipse
+                  key={i}
+                  cx={298 + Math.cos(a) * 20}
+                  cy={122 + Math.sin(a) * 39}
+                  rx="3"
+                  ry="4"
+                  fill={recovered ? "#6c6f72" : "#6f7275"}
+                  strokeWidth=".5"
+                />
+              );
+            })}
+          </g>
+          <path
+            d="M103 71V173M112 71V173M349 80V164"
+            stroke="#a7aaad"
+            strokeOpacity=".4"
+          />
+          <path
+            d="M184 175L173 201H224L235 175M281 175L270 201H321L332 175"
+            fill="url(#cx-metal)"
+            stroke="#6f7276"
+            strokeWidth=".7"
+          />
+          <path
+            d="M124 204H370M124 200V208M370 200V208"
+            stroke="#7b7f83"
+            strokeOpacity=".55"
+          />
+          <text
+            x="240"
+            y="220"
+            fill="#7b7f83"
+            fontSize="8"
+            textAnchor="middle"
+            fontFamily="monospace"
+          >
+            246.00 mm
+          </text>
+        </g>
+        <path
+          d="M353 134L403 73H546"
+          fill="none"
+          stroke={recovered ? "#94979a" : "#eb8559"}
+          strokeWidth=".8"
+        />
+        <circle
+          cx="353"
+          cy="134"
+          r="3"
+          fill={recovered ? "#94979a" : "#ff8754"}
+        />
+        <text
+          x="418"
+          y="62"
+          fill={recovered ? "#bcbebf" : "#f6a481"}
+          fontSize="9"
+          fontFamily="monospace"
+        >
+          6205-2RS / DE
+        </text>
+        <path
+          d="M54 260h18m-9-9v18M546 260h18m-9-9v18"
+          stroke="#7b7f83"
+          strokeOpacity=".4"
+        />
+      </svg>
+      <div className="cx-model__legend">
+        <span>
+          <i />
+          {l.spindle}
+        </span>
+        <span className="cx-model__focus">{l.bearing}</span>
       </div>
-      <div className="cx-tp__axis">
+    </div>
+  );
+}
+
+function SignalScene({ l, frame }: { l: Labels; frame: number }) {
+  const alarm = frame >= 9 && frame < 34;
+  const status =
+    frame < 9
+      ? l.live
+      : frame < 17
+        ? l.correlating
+        : frame < 28
+          ? l.detected
+          : frame < 34
+            ? l.incident
+            : l.normal;
+  return (
+    <div className={`cx-signal-scene${alarm ? " has-anomaly" : ""}`}>
+      <div className="cx-source-chips">
+        <span>OPC UA</span>
+        <span>CNC-07</span>
+        <span>SP-204</span>
+      </div>
+      <SpindleModel l={l} recovered={!alarm} />
+      <div className="cx-signal-stream">
+        <div className="cx-signal-stream__labels">
+          <span>
+            {l.vibration}
+            <strong>
+              {alarm ? "7.8" : "2.1"}
+              <small>mm/s</small>
+            </strong>
+          </span>
+          <span>
+            {l.temperature}
+            <strong>
+              {alarm ? "84" : "62"}
+              <small>°C</small>
+            </strong>
+          </span>
+          <Chip hot={alarm}>{status}</Chip>
+        </div>
+        <div className="cx-wave">
+          <svg
+            viewBox="0 0 600 86"
+            preserveAspectRatio="none"
+            aria-hidden="true"
+          >
+            <path d="M0 17H600M0 43H600M0 69H600" className="cx-wave__grid" />
+            <path d={WAVE} className="cx-wave__trace" />
+            <path d={WAVE} className="cx-wave__energy" />
+          </svg>
+          <span className="cx-wave__sweep" />
+        </div>
+      </div>
+      <div
+        className={`cx-signal-result${frame >= 22 && frame < 34 ? " is-in" : ""}`}
+      >
+        <div>
+          <strong>
+            SP-204 <span>→</span> INC-0248
+          </strong>
+          <small>{l.linked}</small>
+        </div>
+        <Check size={14} />
+      </div>
+    </div>
+  );
+}
+
+function StreamingResponse({
+  text,
+  frame,
+  start = 8,
+}: {
+  text: string;
+  frame: number;
+  start?: number;
+}) {
+  const length = Math.max(0, (frame - start) * 16);
+  const streaming = length < text.length;
+  return (
+    <p className="cx-ai-response">
+      {length ? (
+        text.slice(0, length)
+      ) : (
+        <span className="cx-ai-placeholder">
+          <i />
+          <i />
+        </span>
+      )}
+      {length > 0 && streaming && <span className="cx-ai-caret" />}
+    </p>
+  );
+}
+
+function AssistantHeader({ l, working }: { l: Labels; working: boolean }) {
+  return (
+    <div className={`cx-assistant-header${working ? " is-generating" : ""}`}>
+      <span className="cx-ai-mark">
+        <ClerkTreeLogo markClassName="cx-logo" labelClassName="sr-only" />
+      </span>
+      <strong>{l.assistant}</strong>
+      <span className="cx-ai-state">
+        {working ? <span className="cx-shimmer">{l.generating}</span> : l.done}
+        {!working && <CheckCheck size={11} />}
+      </span>
+    </div>
+  );
+}
+
+function Attachment({
+  title,
+  meta,
+  type = "PDF",
+}: {
+  title: string;
+  meta: string;
+  type?: string;
+}) {
+  return (
+    <div className="cx-attachment">
+      <span>
+        <FileText size={14} />
+      </span>
+      <div>
+        <strong>{title}</strong>
+        <small>{meta}</small>
+      </div>
+      <code>{type}</code>
+    </div>
+  );
+}
+
+function AgentScene({ l, frame }: { l: Labels; frame: number }) {
+  const step = Math.min(4, Math.floor(frame / 7));
+  const complete = frame >= 28;
+  return (
+    <div className="cx-product-scene cx-product-scene--agent">
+      <div className="cx-glass cx-product-window">
+        <div className="cx-product-tube">
+          <div className="cx-product-context">
+            <span>
+              <span className="cx-tiny-dot" />
+              INC-0248
+            </span>
+            <span>
+              CNC-07 <ChevronRight size={9} /> SP-204
+            </span>
+          </div>
+          <div className="cx-user-request">
+            <p>{l.agentPrompt}</p>
+          </div>
+          <AssistantHeader l={l} working={frame < 18} />
+          <StreamingResponse text={l.agentResponse} frame={frame} start={3} />
+          <div className="cx-tool-results">
+            {l.steps.map((text, i) => (
+              <div
+                key={text}
+                className={`${step > i ? "is-done" : step === i ? "is-working" : ""}`}
+              >
+                <span>{step > i ? <Check size={9} /> : <i />}</span>
+                <div>
+                  <strong>{text}</strong>
+                  <small>
+                    {step > i ? l.results[i] : step === i ? l.running : "—"}
+                  </small>
+                </div>
+                {step === i && <span className="cx-tool-spinner" />}
+              </div>
+            ))}
+          </div>
+          <div className={`cx-generated-order${complete ? " is-ready" : ""}`}>
+            <div>
+              <strong>
+                {l.workorder}
+                <span> · </span>
+                {l.workorderTitle}
+              </strong>
+              <small>{complete ? l.waiting : l.workorderMeta}</small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function DocumentScene({ l, frame }: { l: Labels; frame: number }) {
+  const count = Math.min(4, Math.floor(Math.max(0, frame - 3) / 6));
+  const values =
+    l.fields[0] === "Teilenummer"
+      ? ["6205-2RS", "45 Nm", "± 0,02 mm", "2.000 h"]
+      : VALUES;
+  return (
+    <div className="cx-source-extraction">
+      <div className="cx-glass cx-product-window">
+        <div className="cx-product-tube">
+          <Attachment title={l.manual} meta="CNC-07 · REV C · 64 p." />
+          <div className="cx-extract-heading">
+            <strong className={count < 4 ? "cx-shimmer" : undefined}>
+              {count < 4 ? l.extracting : l.cited}
+            </strong>
+            <span>{String(count).padStart(2, "0")} / 04</span>
+          </div>
+          <div className="cx-source-excerpt">
+            <div>
+              <span>SOURCE DOCUMENT</span>
+              <code>§4.2 / P.37</code>
+            </div>
+            {l.sentences
+              .filter((_, i) => i === Math.min(count, 3))
+              .map((sentence) => (
+                <p
+                  key={sentence}
+                  className={count < 4 ? "is-reading" : "is-extracted"}
+                >
+                  <span>{String(Math.min(count, 3) + 1).padStart(2, "0")}</span>
+                  <span>{sentence}</span>
+                  {count === 4 && <Check size={8} />}
+                </p>
+              ))}
+          </div>
+          <div className="cx-extract-transfer">
+            <span />
+            <small>{l.structured}</small>
+            <span />
+          </div>
+          <div className="cx-data-fields">
+            {l.fields.map((field, i) => (
+              <div
+                key={field}
+                className={`cx-answer-field${count > i ? " is-filled" : ""}`}
+              >
+                <span>{field}</span>
+                <strong>
+                  {count > i ? values[i] : <i className="cx-value-skeleton" />}
+                </strong>
+                <small>
+                  {count > i ? (
+                    <>§{i < 2 ? "4.2" : i === 2 ? "4.3" : "6.1"}</>
+                  ) : (
+                    "···"
+                  )}
+                </small>
+              </div>
+            ))}
+          </div>
+          <div className="cx-product-footer">
+            <span>{count === 4 ? l.cited : l.reading}</span>
+            <code>CNC-07</code>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function RfqScene({
+  l,
+  frame,
+  language,
+}: {
+  l: Labels;
+  frame: number;
+  language: string;
+}) {
+  const recommended = frame >= 22;
+  return (
+    <div className="cx-quote-workspace">
+      <div className="cx-glass cx-product-window">
+        <div className="cx-product-tube">
+          <Attachment
+            title="RFQ-1182 · 6205-2RS"
+            meta={`${language === "de" ? "3 Angebote" : "3 offers"} · Ø25 × Ø52 × 15 mm`}
+            type="RFQ"
+          />
+          <div className="cx-quote-heading">
+            <div>
+              <strong>{l.compareTitle}</strong>
+              <span>{l.replenishment}</span>
+            </div>
+            <Chip hot={!recommended}>{recommended ? l.done : l.comparing}</Chip>
+          </div>
+          <div className="cx-quote-requirements">
+            <span>
+              <Check size={8} />
+              DIN 625
+            </span>
+            <span>6205-2RS</span>
+            <span>Ø25 × Ø52</span>
+            <span>× 4</span>
+          </div>
+          <div className="cx-quote-progress">
+            <i style={{ width: `${Math.min(100, (frame / 22) * 100)}%` }} />
+          </div>
+          <div className="cx-comparison">
+            <div className="cx-comparison__head">
+              <span>{l.supplier}</span>
+              <span>{l.price}</span>
+              <span>{l.lead}</span>
+            </div>
+            {["Kessler Industrie", "Nordwerk Supply", "Präzision Bayern"].map(
+              (name, i) => (
+                <div
+                  key={name}
+                  className={`cx-comparison-row${frame > 3 + i * 5 ? " is-in" : ""}${recommended && i === 0 ? " is-best" : ""}`}
+                >
+                  <div>
+                    <span>{name[0]}</span>
+                    <div>
+                      <strong>{name}</strong>
+                      <small>
+                        {recommended && i === 0
+                          ? l.recommended
+                          : "DIN 625 · 6205-2RS"}
+                      </small>
+                    </div>
+                  </div>
+                  <code>
+                    {new Intl.NumberFormat(
+                      language === "de" ? "de-DE" : "en-IE",
+                      { style: "currency", currency: "EUR" },
+                    ).format([38.6, 44, 41.2][i])}
+                  </code>
+                  <span>
+                    {[2, 1, 5][i]} {l.days}
+                  </span>
+                </div>
+              ),
+            )}
+          </div>
+          <div
+            className={`cx-supplier-recommendation${recommended ? " is-ready" : ""}`}
+          >
+            <div>
+              <small>{l.recommended}</small>
+              <strong>Kessler Industrie</strong>
+              <p>{l.quoteReason}</p>
+            </div>
+            <CheckCheck size={14} />
+          </div>
+          <div className="cx-product-footer">
+            <span className={recommended ? undefined : "cx-shimmer"}>
+              {recommended ? l.sourceCount : l.reading}
+            </span>
+            <code>RFQ-1182</code>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function GraphScene({ l, frame }: { l: Labels; frame: number }) {
+  const paths = [
+    "M97 74C97 47 179 56 179 42",
+    "M97 120C97 151 130 159 151 159",
+    "M97 120C97 156 75 177 75 207",
+  ];
+  const nodes = [
+    { x: 150.5, y: 12.5, name: "CNC-07", meta: "ASSET", at: 3 },
+    { x: 150.5, y: 144.5, name: "WO-2176", meta: "2025", at: 12 },
+    { x: 14.5, y: 206.5, name: languageLabel(l), meta: "§4.2", at: 20 },
+  ];
+  return (
+    <div className="cx-lattice">
+      <svg viewBox="0 0 280 248" role="presentation">
+        <defs>
+          <linearGradient id="cx-lat-card" x1="0" y1="0" x2="0" y2="1">
+            <stop stopColor="#242627" />
+            <stop offset="1" stopColor="#171818" />
+          </linearGradient>
+          <linearGradient id="cx-lat-chip" x1="0" y1="0" x2="0" y2="1">
+            <stop stopColor="#212223" />
+            <stop offset="1" stopColor="#161718" />
+          </linearGradient>
+          <linearGradient id="cx-lat-lit" x1="0" y1="0" x2="0" y2="1">
+            <stop stopColor="#ffb190" stopOpacity=".1" />
+            <stop offset="1" stopColor="#ff9b70" stopOpacity="0" />
+          </linearGradient>
+          <radialGradient id="cx-lat-glow">
+            <stop stopColor="#ff7d46" stopOpacity=".13" />
+            <stop offset="1" stopColor="#ff7d46" stopOpacity="0" />
+          </radialGradient>
+          <pattern
+            id="cx-lat-dots"
+            width="16"
+            height="16"
+            patternUnits="userSpaceOnUse"
+          >
+            <rect width="1.2" height="1.2" fill="#ffffff" opacity=".11" />
+          </pattern>
+          <radialGradient id="cx-lat-mask">
+            <stop stopColor="white" />
+            <stop offset="1" stopColor="black" />
+          </radialGradient>
+          <mask id="cx-lat-fade">
+            <rect width="280" height="248" fill="url(#cx-lat-mask)" />
+          </mask>
+        </defs>
+        <rect
+          width="280"
+          height="248"
+          fill="url(#cx-lat-dots)"
+          mask="url(#cx-lat-fade)"
+        />
+        <ellipse cx="100" cy="97" rx="124" ry="78" fill="url(#cx-lat-glow)" />
+        {paths.map((d, i) => (
+          <g
+            key={d}
+            className={`cx-lattice-link${frame > i * 6 + 4 ? " is-in" : ""}`}
+          >
+            <path d={d} />
+            <path
+              className="cx-lattice-energy"
+              d={d}
+              style={vars({ "--flow-delay": `${i * -0.9}s` })}
+            />
+          </g>
+        ))}
+        <g className="cx-lattice-hub">
+          <rect
+            x="12"
+            y="72"
+            width="170"
+            height="50"
+            rx="14"
+            fill="#ff834e"
+            opacity=".035"
+          />
+          <rect
+            x="14.5"
+            y="74.5"
+            width="165"
+            height="45"
+            rx="12"
+            fill="url(#cx-lat-card)"
+            stroke="#717478"
+            strokeWidth=".65"
+          />
+          <rect
+            x="15"
+            y="75"
+            width="164"
+            height="23"
+            rx="12"
+            fill="url(#cx-lat-lit)"
+          />
+          <rect
+            x="23"
+            y="83"
+            width="28"
+            height="28"
+            rx="8"
+            fill="#3c3e3f"
+            fillOpacity=".55"
+          />
+          <g stroke="#93969a" fill="none" strokeWidth=".9">
+            <circle cx="37" cy="97" r="6.5" />
+            <circle cx="37" cy="97" r="2.5" />
+            <path d="M37 89v3M37 102v3M29 97h3M42 97h3" />
+          </g>
+          <text x="60" y="91" className="cx-lattice-title">
+            {l.failure}
+          </text>
+          <text x="60" y="106" className="cx-lattice-fact">
+            {l.similarity}
+          </text>
+          <circle
+            cx="97"
+            cy="74"
+            r="2.2"
+            fill="#262728"
+            stroke="#979a9d"
+            strokeWidth=".6"
+          />
+          <circle
+            cx="97"
+            cy="120"
+            r="2.2"
+            fill="#262728"
+            stroke="#979a9d"
+            strokeWidth=".6"
+          />
+        </g>
+        {nodes.map((node, i) => (
+          <g
+            key={node.name}
+            className={`cx-lattice-node${frame >= node.at ? " is-in" : ""}`}
+          >
+            <rect
+              x={node.x}
+              y={node.y}
+              width="121"
+              height="29"
+              rx="8"
+              fill="url(#cx-lat-chip)"
+              stroke="#8c8f92"
+              strokeOpacity=".4"
+              strokeWidth=".65"
+            />
+            <g
+              transform={`translate(${node.x + 15} ${node.y + 14.5})`}
+              stroke="#9a9da0"
+              fill="none"
+              strokeWidth=".8"
+            >
+              {i === 0 ? (
+                <>
+                  <rect x="-4" y="-5" width="8" height="9" rx="1.4" />
+                  <path d="M-2 6h4M0 4v2M-2-2h4" />
+                </>
+              ) : i === 1 ? (
+                <>
+                  <path d="M-4-5h7v10h-7zM-2-2h3M-2 0h3M-2 2h2" />
+                </>
+              ) : (
+                <>
+                  <path d="M-5-5h4q1 0 1 1v10q-1-2-5-1zM5-5H1q-1 0-1 1v10q1-2 5-1z" />
+                </>
+              )}
+            </g>
+            <text x={node.x + 28.5} y={node.y + 18} className="cx-lattice-name">
+              {node.name}
+            </text>
+            <text
+              x={node.x + 111}
+              y={node.y + 18}
+              textAnchor="end"
+              className="cx-lattice-more"
+            >
+              {node.meta}
+            </text>
+          </g>
+        ))}
+      </svg>
+      <div className={`cx-lattice-result${frame >= 28 ? " is-in" : ""}`}>
+        <CheckCheck size={11} />
+        {l.resolved}
+      </div>
+    </div>
+  );
+}
+const languageLabel = (l: Labels) =>
+  l.knowledge.startsWith("Manual") ? "Manual" : "Handbuch";
+
+function ProductionScene({ l, frame }: { l: Labels; frame: number }) {
+  const pressure = frame >= 9 && frame < 24;
+  const recovered = frame >= 28;
+  const index = 3 + (Math.floor(frame / 5) % 3);
+  const heights = Array.from({ length: 12 }, (_, i) =>
+    Math.round(
+      [24, 30, 38, 48, 57, 69, 82, 96, 86, 74, 65, 72][i] -
+        (pressure && i >= index && i <= index + 2 ? 22 : 0) +
+        (recovered ? 4 : 0),
+    ),
+  );
+  return (
+    <div
+      className={`cx-production-scene${pressure ? " has-pressure" : ""}${recovered ? " is-recovered" : ""}`}
+    >
+      <div className="cx-production-metrics">
+        <div>
+          <span>{l.oee}</span>
+          <strong>
+            {recovered ? "91.2" : pressure ? "78.4" : "86.8"}
+            <small>%</small>
+          </strong>
+          <i>{recovered ? "+12.8 pp" : "LINE 03 / CNC"}</i>
+        </div>
+        <div>
+          <span>{l.throughput}</span>
+          <strong>
+            {recovered ? "248" : pressure ? "186" : "232"}
+            <small>{l.units}</small>
+          </strong>
+          <i>{recovered ? l.cleared : l.monitoring}</i>
+        </div>
+        <Chip hot={pressure}>
+          {pressure ? l.queue : recovered ? l.normal : l.live}
+        </Chip>
+      </div>
+      <div className="cx-production-plot">
+        <div className="cx-production-grid">
+          <span>300</span>
+          <span>200</span>
+          <span>100</span>
+        </div>
+        <div className="cx-production-bars">
+          {heights.map((h, i) => (
+            <span
+              key={i}
+              className={
+                pressure && i >= index && i <= index + 2 ? "is-dip" : ""
+              }
+              style={vars({
+                "--bar-height": `${h}%`,
+                "--bar-delay": `${i * -0.16}s`,
+              })}
+            >
+              <i />
+            </span>
+          ))}
+        </div>
+        <div
+          className={`cx-queue-label${pressure ? " is-in" : ""}`}
+          style={{ left: `${Math.min(62, (index / 12) * 100)}%` }}
+        >
+          <span />
+          {l.queue}
+        </div>
+      </div>
+      <div className="cx-production-axis">
         <span>06:00</span>
+        <span>09:00</span>
         <span>12:00</span>
+        <span>15:00</span>
         <span>18:00</span>
       </div>
+      <div className="cx-schedule">
+        <div className="cx-schedule__title">
+          <span>
+            {pressure
+              ? l.reschedule
+              : recovered
+                ? l.proposal
+                : "LINE 03 / " + l.batch}
+          </span>
+          <code>14:30–15:15</code>
+        </div>
+        <div className="cx-schedule__lanes">
+          <span>CNC-07</span>
+          <div>
+            <i style={{ width: recovered ? "29%" : "45%" }}>{l.batch} 12</i>
+            <i className={`cx-schedule__window${frame >= 23 ? " is-in" : ""}`}>
+              45m
+            </i>
+            <i>{l.batch} 13</i>
+          </div>
+          <span>CNC-08</span>
+          <div>
+            <i style={{ width: recovered ? "50%" : "33%" }}>{l.batch} 09</i>
+            <i>{l.batch} 10</i>
+          </div>
+        </div>
+      </div>
+      <div className={`cx-production-result${recovered ? " is-in" : ""}`}>
+        <CheckCheck size={12} />
+        {l.cleared}
+        <span>186 → 248 {l.units}</span>
+      </div>
     </div>
   );
 }
 
-/* ---------- Card + wall ---------- */
-
-type Card = { key: string; title: string; body: string; vis: ReactNode; wide?: boolean; beam?: boolean };
-
-function CapabilityCard({ card, index }: { card: Card; index: number }) {
+function AnimatedCard({
+  title,
+  body,
+  id,
+  wide,
+  children,
+  index,
+  reduced,
+}: {
+  title: string;
+  body: string;
+  id: string;
+  wide?: boolean;
+  children: (frame: number) => ReactNode;
+  index: number;
+  reduced: boolean;
+}) {
   const ref = useRef<HTMLElement>(null);
-  const frame = useRef(0);
-  const point = useRef({ x: 0, y: 0 });
-
-  const paint = () => {
-    frame.current = 0;
-    const el = ref.current;
-    if (!el) return;
-    const rect = el.getBoundingClientRect();
-    el.style.setProperty('--mx', `${(point.current.x - rect.left).toFixed(1)}px`);
-    el.style.setProperty('--my', `${(point.current.y - rect.top).toFixed(1)}px`);
-  };
-
-  const onPointer = (event: ReactPointerEvent<HTMLElement>) => {
-    if (event.pointerType === 'touch') return;
-    point.current = { x: event.clientX, y: event.clientY };
-    if (!frame.current) frame.current = requestAnimationFrame(paint);
-  };
-
-  useEffect(() => () => cancelAnimationFrame(frame.current), []);
-
+  const [visible, setVisible] = useState(false);
+  const [revealed, setRevealed] = useState(false);
+  const [pageVisible, setPageVisible] = useState(!document.hidden);
+  const [frame, setFrame] = useState(0);
+  const live = visible && pageVisible && !reduced;
+  const intervalMs = id === "agent" ? 160 : 320;
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setVisible(entry.isIntersecting);
+        if (entry.isIntersecting) setRevealed(true);
+      },
+      { threshold: 0.12 },
+    );
+    if (ref.current) observer.observe(ref.current);
+    const visibility = () => setPageVisible(!document.hidden);
+    document.addEventListener("visibilitychange", visibility);
+    return () => {
+      observer.disconnect();
+      document.removeEventListener("visibilitychange", visibility);
+    };
+  }, []);
+  useEffect(() => {
+    if (!live) return;
+    const timer = window.setInterval(
+      () => setFrame((n) => (n + 1) % 40),
+      intervalMs,
+    );
+    return () => window.clearInterval(timer);
+  }, [live, intervalMs]);
   return (
     <article
-      className={`cx-card${card.wide ? ' cx-card--wide' : ''}${card.beam ? ' has-beam' : ''}`}
       ref={ref}
-      style={{ '--d': `${index * 120}ms` } as CSSProperties}
-      onPointerEnter={onPointer}
-      onPointerMove={onPointer}
-      aria-labelledby={`cx-${card.key}-t`}
+      id={`cx-${id}`}
+      className={`cx-card cx-card--${id}${wide ? " cx-card--wide" : ""}${live ? " is-live" : ""}${revealed ? " is-revealed" : ""}`}
+      style={vars({ "--reveal-delay": `${(index % 2) * 100}ms` })}
+      aria-labelledby={`cx-${id}-title`}
+      onPointerMove={(event) => {
+        if (event.pointerType === "touch") return;
+        const box = event.currentTarget.getBoundingClientRect();
+        event.currentTarget.style.setProperty(
+          "--mx",
+          `${event.clientX - box.left}px`,
+        );
+        event.currentTarget.style.setProperty(
+          "--my",
+          `${event.clientY - box.top}px`,
+        );
+      }}
     >
-      <span className="cx-light" aria-hidden="true" />
-      {card.beam && <span className="cx-border-beam" aria-hidden="true" />}
-      <div className="cx-vis" aria-hidden="true">{card.vis}</div>
-      <div className="cx-copy">
-        <h3 id={`cx-${card.key}-t`}>{card.title}</h3>
-        <p>{card.body}</p>
+      <div className="cx-spotlight" aria-hidden="true" />
+      {id === "agent" && <span className="cx-border-beam" aria-hidden="true" />}
+      <div className="cx-card__visual" aria-hidden="true">
+        {children(reduced ? 32 : frame)}
+      </div>
+      <div className="cx-card__copy">
+        <h3 id={`cx-${id}-title`}>{title}</h3>
+        <p>{body}</p>
       </div>
     </article>
   );
 }
 
-function usePrefersReducedMotion() {
+export default function CapabilityCards() {
+  const { language, t } = useLanguage();
+  const l = operationsCopy[language === "de" ? "de" : "en"];
   const [reduced, setReduced] = useState(
-    () => typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches,
+    () => window.matchMedia("(prefers-reduced-motion: reduce)").matches,
   );
   useEffect(() => {
-    const query = window.matchMedia('(prefers-reduced-motion: reduce)');
-    const sync = () => setReduced(query.matches);
-    query.addEventListener('change', sync);
-    return () => query.removeEventListener('change', sync);
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const sync = () => setReduced(mq.matches);
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
   }, []);
-  return reduced;
-}
-
-export default function CapabilityCards() {
-  const { t, language } = useLanguage();
-  const l = LABELS[language === 'de' ? 'de' : 'en'];
-  const gridRef = useRef<HTMLDivElement>(null);
-  const [onScreen, setOnScreen] = useState(false);
-  const [revealed, setRevealed] = useState(false);
-  const reducedMotion = usePrefersReducedMotion();
-  const live = onScreen && !reducedMotion;
-
-  // SVG <animateMotion> beams/pulses run on their own clock: pause them with the wall.
-  useEffect(() => {
-    gridRef.current?.querySelectorAll('svg').forEach((svg) => {
-      if (live) svg.unpauseAnimations();
-      else svg.pauseAnimations();
-    });
-  }, [live]);
-
-  useEffect(() => {
-    const grid = gridRef.current;
-    if (!grid) return undefined;
-    if (typeof IntersectionObserver === 'undefined') {
-      setRevealed(true);
-      return undefined;
-    }
-    // Entrance: once. Live loop: only while any part of the wall is on screen.
-    const reveal = new IntersectionObserver(
-      ([entry]) => {
-        if (!entry?.isIntersecting) return;
-        setRevealed(true);
-        reveal.disconnect();
-      },
-      { threshold: 0.14, rootMargin: '0px 0px -8% 0px' },
-    );
-    const presence = new IntersectionObserver(([entry]) => setOnScreen(Boolean(entry?.isIntersecting)), { threshold: 0 });
-    reveal.observe(grid);
-    presence.observe(grid);
-    return () => {
-      reveal.disconnect();
-      presence.disconnect();
-    };
-  }, []);
-
-  const cards: Card[] = [
-    { key: 'signal', title: t('solutions.card1Title'), body: t('solutions.card1Desc'), vis: <SignalVis l={l} />, wide: true },
-    { key: 'agent', title: t('solutions.card2Title'), body: t('solutions.card2Desc'), vis: <AgentRunVis l={l} />, beam: true },
-    { key: 'docs', title: l.docCardTitle, body: l.docCardBody, vis: <DocVis l={l} /> },
-    { key: 'rfq', title: l.rfqCardTitle, body: l.rfqCardBody, vis: <RfqVis l={l} />, wide: true },
-    { key: 'graph', title: t('solutions.card3Title'), body: t('solutions.card3Desc'), vis: <GraphVis l={l} /> },
-    { key: 'throughput', title: t('solutions.card5Title'), body: t('solutions.card5Desc'), vis: <ThroughputVis l={l} />, wide: true },
+  const cards = [
+    {
+      id: "signal",
+      title: t("solutions.card1Title"),
+      body: t("solutions.card1Desc"),
+      wide: true,
+      render: (frame: number) => <SignalScene l={l} frame={frame} />,
+    },
+    {
+      id: "agent",
+      title: t("solutions.card2Title"),
+      body: t("solutions.card2Desc"),
+      render: (frame: number) => <AgentScene l={l} frame={frame} />,
+    },
+    {
+      id: "docs",
+      title: l.docTitle,
+      body: l.docBody,
+      render: (frame: number) => <DocumentScene l={l} frame={frame} />,
+    },
+    {
+      id: "rfq",
+      title: l.rfqTitle,
+      body: l.rfqBody,
+      wide: true,
+      render: (frame: number) => (
+        <RfqScene l={l} frame={frame} language={language} />
+      ),
+    },
+    {
+      id: "graph",
+      title: t("solutions.card3Title"),
+      body: t("solutions.card3Desc"),
+      render: (frame: number) => <GraphScene l={l} frame={frame} />,
+    },
+    {
+      id: "production",
+      title: t("solutions.card5Title"),
+      body: t("solutions.card5Desc"),
+      wide: true,
+      render: (frame: number) => <ProductionScene l={l} frame={frame} />,
+    },
   ];
-
   return (
     <section className="cx-section" aria-labelledby="cx-title">
-      <header className="cx-head">
-        <p className="cx-eyebrow">{t('solutions.capabilitiesEyebrow')}</p>
-        <h2 id="cx-title">{t('solutions.capabilitiesTitle')}</h2>
-      </header>
-      <LiveContext.Provider value={live}>
-        <div className={`cx-grid${revealed ? ' is-visible' : ''}${live ? ' is-live' : ''}`} ref={gridRef}>
-          {cards.map((card, index) => (
-            <CapabilityCard card={card} index={index} key={card.key} />
-          ))}
+      <header className="cx-heading">
+        <p className="cx-eyebrow">
+          <span />
+          {l.eyebrow}
+        </p>
+        <h2 id="cx-title">
+          {l.title[0]}
+          <br />
+          <span>{l.title[1]}</span>
+        </h2>
+        <div>
+          <p>{l.intro}</p>
+          <span className="cx-demo-label">{l.demo}</span>
         </div>
-      </LiveContext.Provider>
+      </header>
+      <div className="cx-grid">
+        {cards.map((card, index) => (
+          <AnimatedCard
+            key={card.id}
+            title={card.title}
+            body={card.body}
+            id={card.id}
+            wide={card.wide}
+            index={index}
+            reduced={reduced}
+          >
+            {card.render}
+          </AnimatedCard>
+        ))}
+      </div>
     </section>
   );
 }
