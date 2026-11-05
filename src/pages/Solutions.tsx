@@ -5,6 +5,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { Header, Footer } from '../components/Landing/AgeroChrome';
 import { shouldAutoplayMedia } from '../utils/idle';
 import SEO from '../components/SEO';
+import CapabilityCards from './solutions/CapabilityCards';
 import './LandingFramer.css';
 import './Solutions.css';
 
@@ -88,6 +89,8 @@ export default function Solutions() {
         </section>
 
 
+
+        <CapabilityCards />
 
         <section className="fabric-solution-cta" aria-labelledby="solutions-cta-title">
           <p>{t('solutions.ctaBadge')}</p>
