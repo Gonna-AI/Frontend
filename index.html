@@ -3,47 +3,40 @@
 
 <head>
   <meta charset="UTF-8" />
-  <meta name="description"
-    content="Stop losing revenue to missed calls. ClerkTree provides autonomous, human-sounding AI Voice Agents that handle Gäubodenvolksfest crowds, reservations, and customer support. State-subsidized up to 50% for Bavarian SMEs." />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>ClerkTree – Industrial AI for Machine Operations</title>
+  <meta name="description" content="Industrial AI for machine operations. ClerkTree turns machine signals, manuals and RFQs into predictive maintenance and agent-driven work orders. Built in Bavaria." />
 
   <!-- CSP is enforced via Netlify response headers (public/_headers, netlify.toml). -->
   <meta http-equiv="X-Content-Type-Options" content="nosniff">
 
-
-  <!-- Cookie consent is now handled by our custom CookieConsent React component -->
-
-  <!-- Favicon - White Logo -->
-  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-  <link rel="icon" type="image/png" sizes="32x32" href="/favicon.svg" />
-  <link rel="icon" type="image/png" sizes="16x16" href="/favicon.svg" />
-  <link rel="apple-touch-icon" sizes="180x180" href="/favicon.svg" />
+  <!-- Icons. Google Search needs a square icon (multiple of 48px) it can crawl:
+       favicon.ico + favicon.svg + 96px PNG, all black tiles with the white mark. -->
+  <link rel="icon" href="/favicon.ico" sizes="48x48" />
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <link rel="icon" href="/favicon-96.png" type="image/png" sizes="96x96" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
   <link rel="manifest" href="/site.webmanifest" />
 
-  <!-- Site Icon for Google Search (must be accessible at root) -->
-  <link rel="icon" href="/favicon.svg" />
-
-  <!-- Open Graph / Facebook -->
+  <!-- Open Graph / Facebook / LinkedIn -->
   <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="ClerkTree" />
   <meta property="og:url" content="https://clerktree.com/" />
-  <meta property="og:title" content="ClerkTree – Your Autonomous Voice & Digital AI Concierge" />
-  <meta property="og:description"
-    content="Stop losing revenue to missed calls. ClerkTree provides autonomous, human-sounding AI Voice Agents that handle Gäubodenvolksfest crowds, reservations, and customer support. State-subsidized up to 50% for Bavarian SMEs." />
-  <meta property="og:image" content="https://cjknqlwfbfikipkmnvfo.supabase.co/storage/v1/object/public/buck/logo.svg" />
+  <meta property="og:title" content="ClerkTree – Industrial AI for Machine Operations" />
+  <meta property="og:description" content="Industrial AI for machine operations. ClerkTree turns machine signals, manuals and RFQs into predictive maintenance and agent-driven work orders. Built in Bavaria." />
+  <meta property="og:image" content="https://clerktree.com/og-image.png" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
-  <meta property="og:image:type" content="image/svg+xml" />
+  <meta property="og:image:type" content="image/png" />
+  <meta property="og:image:alt" content="ClerkTree – Industrial AI for machine operations" />
 
-  <!-- Twitter -->
+  <!-- X / Twitter -->
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:url" content="https://clerktree.com/" />
-  <meta name="twitter:title" content="ClerkTree – Your Autonomous Voice & Digital AI Concierge" />
-  <meta name="twitter:description"
-    content="Stop losing revenue to missed calls. ClerkTree provides autonomous, human-sounding AI Voice Agents that handle Gäubodenvolksfest crowds, reservations, and customer support. State-subsidized up to 50% for Bavarian SMEs." />
-  <meta name="twitter:image"
-    content="https://cjknqlwfbfikipkmnvfo.supabase.co/storage/v1/object/public/buck/logo.svg" />
+  <meta name="twitter:site" content="@teamclerktree" />
+  <meta name="twitter:title" content="ClerkTree – Industrial AI for Machine Operations" />
+  <meta name="twitter:description" content="Industrial AI for machine operations. ClerkTree turns machine signals, manuals and RFQs into predictive maintenance and agent-driven work orders. Built in Bavaria." />
+  <meta name="twitter:image" content="https://clerktree.com/og-image.png" />
 
-  <!-- Additional meta for Google -->
   <meta name="theme-color" content="#0a0a0a" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
@@ -60,8 +53,8 @@
       "@type": "Organization",
       "name": "ClerkTree",
       "url": "https://clerktree.com",
-      "logo": "https://cjknqlwfbfikipkmnvfo.supabase.co/storage/v1/object/public/buck/logo.svg",
-      "description": "Autonomous Voice & Digital AI Concierge for local businesses, gastronomy, and retail",
+      "logo": "https://clerktree.com/icon-512.png",
+      "description": "Industrial AI for machine operations: predictive maintenance, machine signal intelligence and AI agents for documentation, RFQs and maintenance work orders.",
       "address": {
         "@type": "PostalAddress",
         "streetAddress": "Industriestraße 2",
@@ -111,29 +104,24 @@
         }
       ],
       "sameAs": [
-        "https://github.com/clerktree",
-        "https://linkedin.com/company/clerktree",
-        "https://x.com/clerktree"
+        "https://www.linkedin.com/company/clerktree",
+        "https://x.com/teamclerktree",
+        "https://huggingface.co/clerktree",
+        "https://github.com/Clerktree"
       ],
       "contactPoint": {
         "@type": "ContactPoint",
         "contactType": "customer support",
         "url": "https://clerktree.com/contact"
-      },
-      "hasPart": [
-        {
-          "@type": "FAQPage",
-          "name": "ClerkTree FAQ",
-          "url": "https://clerktree.com/faq"
-        }
-      ],
-      "potentialAction": [
-        {
-          "@type": "SearchAction",
-          "target": "https://clerktree.com/search?q={search_term_string}",
-          "query-input": "required name=search_term_string"
-        }
-      ]
+      }
+    }
+    </script>
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "ClerkTree",
+      "url": "https://clerktree.com/"
     }
     </script>
   <script type="application/ld+json">
@@ -141,35 +129,16 @@
       "@context": "https://schema.org",
       "@type": "FAQPage",
       "mainEntity": [
-        {
-          "@type": "Question",
-          "name": "What is ClerkTree?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "ClerkTree provides autonomous, human-sounding AI Voice Agents and Chatbots that handle bookings, answer questions, and scale your local business 24/7."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "How does ClerkTree work?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "ClerkTree integrates with your phone lines and digital channels to act as a tireless 'Schankhelfer AI', capturing every call and reservation without fatigue."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Kann ich Digitalbonus Bayern für ClerkTree nutzen?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Ja, Sie erhalten bis zu 50% Zuschuss (bis zu 50.000€) für Straubinger KMU durch bayerische Förderprogramme. Kombinierbar mit kostenloser Trainings-Unterstützung durch das Zukunftszentrum Süd."
-          }
-        }
+        {"@type": "Question", "name": "How does ClerkTree integrate with our existing MES/SCADA systems?", "acceptedAnswer": {"@type": "Answer", "text": "ClerkTree connects directly to your existing historians, PLC controllers, and MES systems via industry standard protocols like OPC-UA, Modbus, and custom APIs, with zero rip-and-replace."}},
+        {"@type": "Question", "name": "Can your AI models be deployed on the factory edge?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. ClerkTree supports deployment of lightweight, high-frequency models directly on edge hardware next to your machines for ultra-low latency diagnostics and air-gapped security."}},
+        {"@type": "Question", "name": "How is ClerkTree priced?", "acceptedAnswer": {"@type": "Answer", "text": "We offer flexible pricing based on your connected assets, data ingestion volume, and features. Contact our engineering team for a customized quote that fits your operations."}},
+        {"@type": "Question", "name": "How long does implementation take?", "acceptedAnswer": {"@type": "Answer", "text": "A standard deployment takes 2 to 4 weeks depending on your data pipelines. We provide dedicated industrial engineering support to map your signals and validate the models."}},
+        {"@type": "Question", "name": "Do you support physics-informed AI models?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. For mechanical assets, we combine neural networks with first-principles physical models of wear and thermodynamic stress to increase predictive accuracy and eliminate false alarms."}},
+        {"@type": "Question", "name": "Is our operational data kept private and secure?", "acceptedAnswer": {"@type": "Answer", "text": "Absolutely. We support fully isolated, on-premise, virtual private cloud, or air-gapped deployments. Your proprietary machinery and process data never leaves your secure network."}}
       ]
     }
     </script>
 
-  <title>ClerkTree – Autonomous AI Voice & Reception Agents</title>
 
 
 </head>

@@ -36,8 +36,7 @@ export default function SEO({ title, description, canonical, preloadVideos, open
     const fullTitle = /clerktree/i.test(title) ? title : `${title} | ClerkTree`;
     const currentUrl = canonical || (openGraph?.url ?? siteUrl);
     // og:image/twitter:image must be absolute URLs per spec — social crawlers don't resolve relative paths.
-    const ogImage = openGraph?.image || 'https://pub-0f804855178c4f4e8184c4fef3bd5b2a.r2.dev/logo.svg';
-    const faviconHref = `${siteUrl}/favicon.svg`;
+    const ogImage = openGraph?.image || `${siteUrl}/og-image.png`;
     const manifestHref = `${siteUrl}/site.webmanifest`;
 
     const videoSchemas = videos?.map((video) => ({
@@ -57,9 +56,10 @@ export default function SEO({ title, description, canonical, preloadVideos, open
             <title>{fullTitle}</title>
             <meta name="description" content={description} />
             <link rel="canonical" href={currentUrl} />
-            <link rel="icon" type="image/svg+xml" href={faviconHref} />
-            <link rel="shortcut icon" href={faviconHref} />
-            <link rel="apple-touch-icon" href={faviconHref} />
+            <link rel="icon" href={`${siteUrl}/favicon.ico`} sizes="48x48" />
+            <link rel="icon" type="image/svg+xml" href={`${siteUrl}/favicon.svg`} />
+            <link rel="icon" type="image/png" sizes="96x96" href={`${siteUrl}/favicon-96.png`} />
+            <link rel="apple-touch-icon" href={`${siteUrl}/apple-touch-icon.png`} />
             <link rel="manifest" href={manifestHref} />
             {preloadVideos?.map((video) => (
                 <link

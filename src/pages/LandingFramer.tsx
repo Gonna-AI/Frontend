@@ -96,8 +96,8 @@ export default function LandingFramer() {
   return (
     <div className="agero-works" id="agero-works">
       <SEO
-        title="ClerkTree"
-        description="AI-powered workflow automation for claims and back-office operations. Transform your operations with intelligent automation that reduces turnaround time by 40%."
+        title="ClerkTree – Industrial AI for Machine Operations"
+        description="Industrial AI for machine operations. ClerkTree turns machine signals, manuals and RFQs into predictive maintenance and agent-driven work orders. Built in Bavaria."
         canonical="https://clerktree.com/"
         preloadVideos={[
           { href: HOME_HERO_VIDEO_SRC, type: 'video/quicktime' },

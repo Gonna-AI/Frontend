@@ -98,7 +98,7 @@ export default function Contact() {
     <div className="agero-works" id="agero-contact-page">
       <SEO
         title="Contact Us"
-        description="Get in touch with ClerkTree. Speak with our team about automating legal, claims, and back-office operations."
+        description="Talk to the ClerkTree team about industrial AI for your machines: predictive maintenance, signal intelligence and AI agents for documentation, RFQs and work orders."
         canonical="https://clerktree.com/contact"
         preloadVideos={[{ href: CONTACT_VIDEO_SRC }]}
         videos={[

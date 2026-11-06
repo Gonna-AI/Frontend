@@ -124,8 +124,8 @@ function App() {
           <ScrollToTop />
           <AmplitudeRouteTracker />
           <SEO
-            title="ClerkTree"
-            description="AI-powered workflow automation for claims and back-office operations. Transform your operations with intelligent automation that reduces turnaround time by 40%."
+            title="ClerkTree – Industrial AI for Machine Operations"
+            description="Industrial AI for machine operations. ClerkTree turns machine signals, manuals and RFQs into predictive maintenance and agent-driven work orders. Built in Bavaria."
           />
           <Suspense fallback={<LoadingScreen />}>
             <main className="flex-1 flex flex-col">

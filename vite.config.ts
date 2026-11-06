@@ -95,19 +95,13 @@ export default defineConfig({
       manifest: {
         name: 'ClerkTree',
         short_name: 'ClerkTree',
-        description: 'AI-powered workflow automation for claims and back-office operations',
+        description: 'Industrial AI for machine operations',
         theme_color: '#0a0a0a',
+        background_color: '#0a0a0a',
         icons: [
-          {
-            src: '/favicon.svg',
-            sizes: '192x192',
-            type: 'image/svg+xml',
-          },
-          {
-            src: '/favicon.svg',
-            sizes: '512x512',
-            type: 'image/svg+xml',
-          },
+          { src: '/icon-192.png', sizes: '192x192', type: 'image/png' },
+          { src: '/icon-512.png', sizes: '512x512', type: 'image/png' },
+          { src: '/icon-maskable-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
         ],
       },
     }),

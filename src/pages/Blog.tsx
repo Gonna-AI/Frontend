@@ -46,7 +46,7 @@ function BlogContent() {
     <div className="agero-works clerktree-blog-page">
       <SEO
         title="Blog"
-        description="Latest insights on legal AI, claims automation, and the future of work. Stay updated with ClerkTree."
+        description="Notes from ClerkTree on industrial AI, machine intelligence, predictive maintenance and agents for industrial operations."
         canonical="https://clerktree.com/blog"
         preloadVideos={[{ href: BLOG_HERO_VIDEO_SRC }]}
         videos={[
