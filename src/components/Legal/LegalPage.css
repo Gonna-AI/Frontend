@@ -2,8 +2,8 @@
    normalized here so their inline vendor styles match the rest of the site. */
 .agero-works .agero-legal-page-container {
   margin: 0 auto;
-  max-width: 1180px;
-  padding: 24px clamp(16px, 3vw, 32px) clamp(72px, 9vw, 128px);
+  max-width: calc(var(--edge-max, 1920px) + 2 * var(--gutter, 8px));
+  padding: 24px var(--gutter, 8px) clamp(72px, 9vw, 128px);
 }
 .agero-works .agero-legal-card {
   background: #fff;
@@ -23,7 +23,7 @@
   contain-intrinsic-size: auto 4000px;
   font: 400 16px/1.75 "Geist", "Inter", system-ui, sans-serif;
   margin: 0 auto;
-  max-width: 760px;
+  max-width: 1440px;
   overflow-wrap: anywhere;
   text-align: left;
   width: 100%;
@@ -46,7 +46,7 @@
   text-align: left !important;
 }
 .agero-works .legal-content h1 { font-size: clamp(28px, 3vw, 38px); margin: 0 0 14px; }
-.agero-works .legal-content h2 { font-size: clamp(21px, 2vw, 26px); margin: 2.2em 0 .7em; }
+.agero-works .legal-content h2 { font-size: clamp(21px, 2vw, 26px); margin: 1.5em 0 .7em; }
 .agero-works .legal-content h3, .agero-works .legal-content h4 { font-size: 18px; margin: 1.8em 0 .6em; }
 .agero-works .legal-content :where(strong, b) { color: #191919 !important; font-weight: 600; }
 .agero-works .legal-content a, .agero-works .legal-content a :where(span, bdt, strong) {
@@ -66,7 +66,7 @@
 .agero-works .legal-content th { color: #191919 !important; font-weight: 600; }
 .agero-works .legal-content :where(img, iframe) { max-width: 100%; }
 @media (max-width: 640px) {
-  .agero-works .agero-legal-page-container { padding: 16px 12px 72px; }
+  .agero-works .agero-legal-page-container { padding: 16px var(--gutter, 8px) 72px; }
   .agero-works .agero-legal-card { padding: 32px 22px 40px; }
   .agero-works .agero-legal-card .legal-content { font-size: 15px; line-height: 1.7; }
   .agero-works .legal-content :where(th, td) { padding: .5em; }
