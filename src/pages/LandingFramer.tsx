@@ -4,9 +4,9 @@ import { isSaveDataEnabled, shouldAutoplayMedia } from '../utils/idle';
 import { Footer, Header } from '../components/Landing/AgeroChrome';
 import { useLanguage } from '../contexts/LanguageContext';
 import SEO from '../components/SEO';
-import CapabilityCards from './solutions/CapabilityCards';
 import Grainient from '../components/Brand/Grainient';
-import { CaseStudy, ConnectorPanel, HeroAgentCard, LogoWall, ProofChart, Spotlight, StoryTabs, useHomeCopy } from './home/HomeStory';
+import CapabilityShowcase from './solutions/CapabilityShowcase';
+import { CaseStudy, ConnectorPanel, HeroAgentCard, LogoWall, ProofChart, Spotlight, StoryTabs } from './home/HomeStory';
 import './LandingFramer.css';
 
 const BASE = 'https://pub-0f804855178c4f4e8184c4fef3bd5b2a.r2.dev';
@@ -104,7 +104,7 @@ export default function LandingFramer() {
         stats={[1, 2, 3].map((n) => [t(`home.testimonials.stat${n}Value`), t(`home.testimonials.stat${n}Label`)] as [string, string])}
       />
       <ProofChart />
-      <HomeCapabilities />
+      <CapabilityShowcase />
       <ConnectorPanel />
 
       <Pricing />
@@ -115,10 +115,6 @@ export default function LandingFramer() {
   );
 }
 
-function HomeCapabilities() {
-  const c = useHomeCopy();
-  return <CapabilityCards heading={{ eyebrow: c.bentoEyebrow, title: c.bentoTitle, intro: c.bentoIntro }} />;
-}
 
 function useAgeroPageMotion() {
   useEffect(() => {

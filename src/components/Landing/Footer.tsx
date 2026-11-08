@@ -59,7 +59,7 @@ export default function Footer() {
                 </p>
                 <ul className="space-y-3.5">
                   {[
-                    { label: t('nav.solutions'), path: '/solutions' },
+                    { label: t('nav.solutions'), path: '/#solutions' },
                     { label: t('footer.docs'),    path: '/docs' },
                     { label: t('footer.aboutUs'), path: '/about' },
                   ].map(({ label, path }) => (

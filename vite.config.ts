@@ -111,7 +111,6 @@ export default defineConfig({
         '/about',
         '/brand',
         '/careers',
-        '/solutions',
         '/blog',
         '/contact',
         '/terms-of-service',

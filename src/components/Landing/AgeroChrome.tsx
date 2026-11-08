@@ -12,7 +12,7 @@ import '../../pages/SiteSystem.css';
 const RESEARCH_URL = 'https://research.clerktree.com';
 
 const headerLinkPaths = [
-  ['nav.solutions', '/solutions'],
+  ['nav.solutions', '/#solutions'],
   ['nav.about', '/about'],
   ['nav.research', RESEARCH_URL],
   ['nav.blog', '/blog'],
@@ -27,12 +27,12 @@ function buildDesktopNav(language: string, t: (key: string) => string, linkBase:
   return [
     {
       label: t('nav.solutions'),
-      href: local('/solutions'),
+      href: local('/#solutions'),
       items: [
-        { label: t('solutions.card1Title'), href: local('/solutions#cx-signal'), icon: <Activity /> },
-        { label: t('solutions.card2Title'), href: local('/solutions#cx-agent'), icon: <Wrench /> },
-        { label: de ? 'Lieferantenentscheidungen' : 'Supplier decisions', href: local('/solutions#cx-rfq'), icon: <Scale /> },
-        { label: t('solutions.card5Title'), href: local('/solutions#cx-production'), icon: <Factory /> },
+        { label: t('solutions.card1Title'), href: local('/#cx-signal'), icon: <Activity /> },
+        { label: t('solutions.card2Title'), href: local('/#cx-agent'), icon: <Wrench /> },
+        { label: de ? 'Lieferantenentscheidungen' : 'Supplier decisions', href: local('/#cx-rfq'), icon: <Scale /> },
+        { label: t('solutions.card5Title'), href: local('/#cx-production'), icon: <Factory /> },
       ],
     },
     {
@@ -77,7 +77,7 @@ const footerCompanyLinks: FooterLink[] = [
 ];
 
 const footerProductLinks: FooterLink[] = [
-  { label: 'Solutions', href: '/solutions' },
+  { label: 'Solutions', href: '/#solutions' },
   { label: 'Security', href: '/security' },
   { label: 'Contact', href: '/contact' },
 ];

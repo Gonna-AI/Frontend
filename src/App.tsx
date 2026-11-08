@@ -22,7 +22,6 @@ const About = lazyWithRetry(() => import('./pages/About'), 'About');
 const Research = lazyWithRetry(() => import('./pages/Research'), 'Research');
 const Careers = lazyWithRetry(() => import('./pages/Careers'), 'Careers');
 const Brand = lazyWithRetry(() => import('./pages/Brand'), 'Brand');
-const Solutions = lazyWithRetry(() => import('./pages/Solutions'), 'Solutions');
 const Blog = lazyWithRetry(() => import('./pages/Blog'), 'Blog');
 const BlogPost = lazyWithRetry(() => import('./pages/BlogPost'), 'BlogPost');
 
@@ -81,7 +80,6 @@ const routePrefetchers = {
   '/research': () => import('./pages/Research'),
   '/research/:topicSlug': () => import('./pages/Research'),
   '/careers': () => import('./pages/Careers'),
-  '/solutions': () => import('./pages/Solutions'),
   '/contact': () => import('./pages/Contact'),
   '/support': () => import('./pages/SupportPage'),
   '/machina': () => import('./pages/Machina'),
@@ -209,7 +207,7 @@ function App() {
                 <Route path="/machina" element={<Machina />} />
                 <Route path="/careers" element={<Careers />} />
                 <Route path="/brand" element={<Brand />} />
-                <Route path="/solutions" element={<Solutions />} />
+                <Route path="/solutions" element={<Navigate to="/#solutions" replace />} />
                 <Route path="/contact" element={<Contact />} />
                 <Route path="/support" element={<SupportPage />} />
                 {/* CRM App (auth-gated) */}

@@ -1,13 +1,13 @@
 // The three "Work that follows the signal" scenes, in the hero card's language:
 // CRT card, typed query, live agent status, streamed reasoning, cited output.
 import { type CSSProperties, type ReactNode, useEffect, useRef, useState } from 'react';
-import { Activity, BookOpen, Check, FileText, History, ScanSearch, Wrench } from 'lucide-react';
+import { Activity, BookOpen, Check, FileText, Gauge, History, Scale, ScanSearch, Wrench } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
 
-const TYPE_MS = 34;
+export const TYPE_MS = 34;
 
 /** Looping clock in ms that only advances while the scene is on screen. */
-function useLoop(total: number) {
+export function useLoop(total: number) {
   const ref = useRef<HTMLDivElement>(null);
   const [ms, setMs] = useState(0);
   useEffect(() => {
@@ -21,9 +21,9 @@ function useLoop(total: number) {
   return [ms, ref] as const;
 }
 
-const at = (ms: number, start: number, span = 1) => Math.min(1, Math.max(0, (ms - start) / span));
+export const at = (ms: number, start: number, span = 1) => Math.min(1, Math.max(0, (ms - start) / span));
 
-function Seed({ icon, text, ms, slot, slotState = '' }: { icon: ReactNode; text: string; ms: number; slot: string; slotState?: string }) {
+export function Seed({ icon, text, ms, slot, slotState = '' }: { icon: ReactNode; text: string; ms: number; slot: string; slotState?: string }) {
   const typed = text.slice(0, Math.floor(ms / TYPE_MS));
   const typing = typed.length < text.length;
   return (
@@ -243,3 +243,100 @@ export function WorkOrderScene() {
 }
 
 export const STORY_SCENES = [SignalMonitorScene, ReasoningScene, WorkOrderScene];
+
+/* ---------- 4. Supplier quotes (RFQ) ---------- */
+
+const rfqCopy = {
+  en: {
+    seed: 'RFQ: 50 × bearing 6205-2RS', working: 'Comparing 3 quotes', done: 'Best value picked',
+    cols: ['Supplier', 'Price / unit', 'Lead time', 'Quality'], days: 'days', day: 'day', best: 'Recommended',
+    saving: 'Saves €1,240 against the last order and arrives before Tuesday’s planned stop.',
+  },
+  de: {
+    seed: 'Anfrage: 50 × Lager 6205-2RS', working: 'Vergleicht 3 Angebote', done: 'Bestes Angebot gewählt',
+    cols: ['Lieferant', 'Preis / Stück', 'Lieferzeit', 'Qualität'], days: 'Tage', day: 'Tag', best: 'Empfohlen',
+    saving: 'Spart 1.240 € gegenüber der letzten Bestellung und kommt vor dem geplanten Stopp am Dienstag.',
+  },
+};
+const QUOTES: [string, string, number, number][] = [
+  ['Kugeltech AG', '€7.90', 9, 91],
+  ['Rhein Bearings', '€9.10', 1, 96],
+  ['Nordlager GmbH', '€8.40', 2, 98],
+];
+
+export function SupplierQuotesScene() {
+  const { language } = useLanguage();
+  const c = rfqCopy[language === 'de' ? 'de' : 'en'];
+  const total = 9000;
+  const [ms, ref] = useLoop(total);
+  const start = c.seed.length * TYPE_MS + 250;
+  const shown = Math.floor((ms - start) / 700);
+  const decided = ms > start + QUOTES.length * 700 + 500;
+  return (
+    <div className="hs-crt hs-scene" ref={ref}>
+      <Seed icon={<Scale size={14} strokeWidth={1.75} />} text={c.seed} ms={ms} slot={decided ? c.done : c.working} slotState={decided ? 'is-done' : ''} />
+      <div className="hs-rfq">
+        <div className="hs-rfq-row is-head">{c.cols.map((col) => <span key={col}>{col}</span>)}</div>
+        {QUOTES.map(([name, price, lead, q], i) => (
+          <div className={`hs-rfq-row${i < shown ? ' is-in' : ''}${decided && i === 2 ? ' is-best' : ''}`} key={name}>
+            <strong>{name}{decided && i === 2 && <em>{c.best}</em>}</strong>
+            <span>{price}</span>
+            <span className={lead > 5 ? 'is-warn' : undefined}>{lead} {lead === 1 ? c.day : c.days}</span>
+            <span className="hs-rfq-q"><i style={{ '--q': i < shown ? q / 100 : 0 } as CSSProperties} />{q}%</span>
+          </div>
+        ))}
+      </div>
+      <div className={`hs-sig-finding${decided ? ' is-in' : ''}`}><Check size={14} strokeWidth={2} />{c.saving}</div>
+    </div>
+  );
+}
+
+/* ---------- 5. Production line (bottleneck) ---------- */
+
+const lineCopy = {
+  en: {
+    seed: 'Line 2, live throughput', working: 'Watching 5 stations', done: 'Bottleneck found',
+    stations: ['Saw', 'CNC-07', 'CNC-09', 'Wash', 'Assembly'], queue: 'queue', load: 'load',
+    finding: 'CNC-07 is the bottleneck: 14 parts waiting, line output down 18%. Rebalance to CNC-09.',
+  },
+  de: {
+    seed: 'Linie 2, Durchsatz live', working: 'Überwacht 5 Stationen', done: 'Engpass gefunden',
+    stations: ['Säge', 'CNC-07', 'CNC-09', 'Waschen', 'Montage'], queue: 'Puffer', load: 'Last',
+    finding: 'CNC-07 ist der Engpass: 14 Teile warten, Ausbringung 18 % niedriger. Auf CNC-09 umverteilen.',
+  },
+};
+const LOADS: [number, number, number, number][] = [
+  [62, 66, 2, 3], [74, 98, 3, 14], [58, 61, 2, 2], [45, 41, 1, 1], [70, 52, 2, 0],
+];
+
+export function ProductionLineScene() {
+  const { language } = useLanguage();
+  const c = lineCopy[language === 'de' ? 'de' : 'en'];
+  const total = 9000;
+  const [ms, ref] = useLoop(total);
+  const start = c.seed.length * TYPE_MS + 250;
+  const k = at(ms, start + 300, 3600);
+  const found = k > 0.85;
+  return (
+    <div className="hs-crt hs-scene" ref={ref}>
+      <Seed icon={<Gauge size={14} strokeWidth={1.75} />} text={c.seed} ms={ms} slot={found ? c.done : c.working} slotState={found ? 'is-hot' : ''} />
+      <div className="hs-pline">
+        {c.stations.map((name, i) => {
+          const [l0, l1, q0, q1] = LOADS[i];
+          const load = Math.round(l0 + (l1 - l0) * k);
+          const queue = Math.round(q0 + (q1 - q0) * k);
+          const hot = found && i === 1;
+          return (
+            <div className={`hs-st${hot ? ' is-hot' : ''}`} key={name}>
+              <div className="hs-st-bar"><i style={{ height: `${ms > start ? load : 0}%` }} /></div>
+              <strong>{load}%</strong>
+              <span>{name}</span>
+              <small>{queue} {c.queue}</small>
+            </div>
+          );
+        })}
+      </div>
+      <div className={`hs-sig-finding${found ? ' is-in' : ''}`}><ScanSearch size={14} strokeWidth={1.75} />{c.finding}</div>
+    </div>
+  );
+}

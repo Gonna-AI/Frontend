@@ -1,6 +1,6 @@
 // Homepage story, following sixtyfour's narrative order with ClerkTree content:
 // hero demo card → logo wall → how it works (tabs) → spotlight → case study →
-// proof chart → (capability bento, rendered by LandingFramer) → connector panel.
+// proof chart → connector panel.
 import { type CSSProperties, type RefObject, useEffect, useRef, useState } from 'react';
 import { Activity, ArrowRight, BookOpen, ClipboardList, Cpu, History, Package, Wrench } from 'lucide-react';
 import Grainient from '../../components/Brand/Grainient';
@@ -52,9 +52,6 @@ const copy = {
       ['Rule-based CMMS alerts', 41.3, false],
       ['Keyword search over work orders', 40.7, false],
     ] as [string, number, boolean][],
-    bentoEyebrow: 'Capabilities',
-    bentoTitle: ['Where teams use', 'ClerkTree'] as [string, string],
-    bentoIntro: 'From the first signal to the finished work order, each agent does one job well and hands the evidence to the next.',
     apiTitle: ['One connection.', 'Every machine signal.'],
     apiBody: 'Connect historians, PLCs and MES over OPC UA, Modbus or REST. ClerkTree maps each signal to its asset and keeps that context with every finding.',
     apiCta: 'Talk to engineering',
@@ -101,9 +98,6 @@ const copy = {
       ['Regelbasierte CMMS-Alarme', 41.3, false],
       ['Stichwortsuche in Aufträgen', 40.7, false],
     ] as [string, number, boolean][],
-    bentoEyebrow: 'Fähigkeiten',
-    bentoTitle: ['Wo Teams', 'ClerkTree einsetzen'] as [string, string],
-    bentoIntro: 'Vom ersten Signal bis zum fertigen Auftrag erledigt jeder Agent eine Aufgabe gut und gibt die Belege weiter.',
     apiTitle: ['Eine Verbindung.', 'Jedes Maschinensignal.'],
     apiBody: 'Historians, SPS und MES über OPC UA, Modbus oder REST anbinden. ClerkTree ordnet jedes Signal seiner Anlage zu und behält den Kontext bei jedem Befund.',
     apiCta: 'Mit Engineering sprechen',
