@@ -477,7 +477,7 @@ function Faq() {
                   >
                     <span className="agero-faq-question">
                       <span>{faq.question}</span>
-                      <span aria-hidden="true">{isOpen ? '−' : '+'}</span>
+                      <span aria-hidden="true" className="agero-faq-icon" />
                     </span>
                     <span aria-hidden={!isOpen} className="agero-faq-answer">
                       <span>{faq.answer}</span>

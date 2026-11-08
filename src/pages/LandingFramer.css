@@ -1222,25 +1222,32 @@ a:hover > .ct-roll > .ct-roll-inner { transform: translateY(-50%); }
   min-width: 0;
 }
 
-.agero-faq-question span:last-child {
-  align-items: center;
+.agero-faq-icon {
   background: var(--agero-ink);
   border-radius: 50%;
-  color: #fff;
-  display: flex;
-  font-size: 20px;
-  font-weight: 300;
   flex: 0 0 auto;
   height: 30px;
-  justify-content: center;
-  line-height: 1;
-  transition: background-color 220ms ease;
+  position: relative;
   width: 30px;
 }
 
-.agero-faq-item.is-open .agero-faq-question span:last-child {
-  background: var(--agero-ink);
+/* Plus drawn with two bars so it is optically centred; the vertical bar folds away when open. */
+.agero-faq-icon::before,
+.agero-faq-icon::after {
+  background: #fff;
+  border-radius: 1px;
+  content: "";
+  height: 1.5px;
+  left: 50%;
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  transition: transform 260ms var(--agero-ease-out);
+  width: 12px;
 }
+
+.agero-faq-icon::after { transform: translate(-50%, -50%) rotate(90deg); }
+.agero-faq-item.is-open .agero-faq-icon::after { transform: translate(-50%, -50%) rotate(0deg); }
 
 .agero-faq-answer {
   display: grid;
@@ -1264,8 +1271,15 @@ a:hover > .ct-roll > .ct-roll-inner { transform: translateY(-50%); }
   display: block;
   font-size: 14px;
   line-height: 20px;
-  margin: 20px 0 0;
+  min-height: 0;
   overflow: hidden;
+}
+
+/* Spacing lives inside the collapsing row, so a closed card is symmetric. */
+.agero-faq-answer > span::before {
+  content: "";
+  display: block;
+  height: 20px;
 }
 
 @media (hover: hover) and (pointer: fine) {
