@@ -50,6 +50,8 @@ export default function LanguageSwitcher({
     return (
         <button
             onClick={toggleLanguage}
+            type="button"
+            aria-label={language === 'en' ? 'Switch to German' : 'Auf Englisch wechseln'}
             className={cn(
                 "inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all outline-none border shadow-xs h-8 rounded-md px-3 backdrop-blur-md",
                 isDark

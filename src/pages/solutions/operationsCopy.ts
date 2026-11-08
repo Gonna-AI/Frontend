@@ -1,11 +1,11 @@
 export const operationsCopy = {
   en: {
-    eyebrow: "INTELLIGENCE, IN MOTION",
+    eyebrow: "WHAT HAPPENS NEXT",
     structured: "STRUCTURED OUTPUT",
     compareTitle: "Supplier comparison",
-    title: ["Every signal. Every agent.", "One connected operation."],
+    title: ["The whole operation.", "In context."],
     intro:
-      "From machine signals to coordinated action. Watch the intelligence layer connect your factory, find the context and move the work forward.",
+      "The right decision depends on more than a single reading. See how machine data, records and people come together when something needs attention.",
     demo: "Illustrative workflows · demo data",
     assistant: "Machina",
     generating: "Generating response",
@@ -65,9 +65,9 @@ export const operationsCopy = {
     scanning: "Reading source document",
     extracting: "Extracting parameters",
     cited: "Source linked",
-    docTitle: "Documentation Agent",
+    docTitle: "Technical knowledge",
     docBody:
-      "From manuals and drawings to usable machine knowledge. Parts, tolerances and procedures arrive with the source attached.",
+      "Manuals and drawings hold the details. Find the part numbers, tolerances and procedures you need, with the source alongside each answer.",
     fields: ["Part number", "Torque", "Tolerance", "Interval"],
     sentences: [
       "Replace using bearing 6205-2RS.",
@@ -75,9 +75,9 @@ export const operationsCopy = {
       "Radial tolerance: ± 0.02 mm.",
       "Service interval: 2,000 h.",
     ],
-    rfqTitle: "RFQ Intelligence",
+    rfqTitle: "Supplier decisions",
     rfqBody:
-      "Drawings become requirements. Offers become a comparable shortlist. Your team gets the recommendation and the reasoning behind it.",
+      "Compare offers against the part requirements, price and delivery time. See the trade-offs before your team makes a decision.",
     drawing: "Bearing specification",
     matched: "Specification matched",
     comparing: "Comparing 3 offers",
@@ -107,12 +107,12 @@ export const operationsCopy = {
     monitoring: "Monitoring line capacity",
   },
   de: {
-    eyebrow: "INTELLIGENZ IN BEWEGUNG",
+    eyebrow: "WAS DANACH GESCHIEHT",
     structured: "STRUKTURIERTE DATEN",
     compareTitle: "Lieferantenvergleich",
-    title: ["Jedes Signal. Jeder Agent.", "Ein vernetzter Betrieb."],
+    title: ["Der ganze Betrieb.", "Im Zusammenhang."],
     intro:
-      "Von Maschinensignalen zu koordinierten Aktionen. Erleben Sie, wie die Intelligenzschicht Ihre Fertigung verbindet, Kontext findet und Arbeit voranbringt.",
+      "Eine einzelne Messung zeigt nicht das ganze Bild. Sehen Sie, wie Maschinendaten, Unterlagen und Menschen zusammenkommen, wenn etwas Aufmerksamkeit braucht.",
     demo: "Beispielabläufe · Demodaten",
     assistant: "Machina",
     generating: "Antwort wird erstellt",
@@ -173,9 +173,9 @@ export const operationsCopy = {
     scanning: "Quelldokument lesen",
     extracting: "Parameter extrahieren",
     cited: "Quelle verknüpft",
-    docTitle: "Dokumentations-Agent",
+    docTitle: "Technisches Wissen",
     docBody:
-      "Aus Handbüchern und Zeichnungen wird nutzbares Maschinenwissen. Teile, Toleranzen und Verfahren kommen mit verknüpfter Quelle.",
+      "Handbücher und Zeichnungen enthalten die Details. Finden Sie Teilenummern, Toleranzen und Verfahren – mit der jeweiligen Quelle direkt daneben.",
     fields: ["Teilenummer", "Drehmoment", "Toleranz", "Intervall"],
     sentences: [
       "Lager 6205-2RS für den Austausch verwenden.",
@@ -183,9 +183,9 @@ export const operationsCopy = {
       "Radialtoleranz: ± 0,02 mm.",
       "Serviceintervall: 2.000 h.",
     ],
-    rfqTitle: "RFQ-Intelligenz",
+    rfqTitle: "Lieferantenentscheidungen",
     rfqBody:
-      "Zeichnungen werden zu Anforderungen. Angebote werden vergleichbar. Ihr Team erhält eine Empfehlung mit nachvollziehbarer Begründung.",
+      "Vergleichen Sie Angebote nach Teileanforderungen, Preis und Lieferzeit. Sehen Sie die Unterschiede, bevor Ihr Team entscheidet.",
     drawing: "Lagerspezifikation",
     matched: "Spezifikation zugeordnet",
     comparing: "3 Angebote vergleichen",

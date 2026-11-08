@@ -39,10 +39,13 @@ const works = [
 ];
 
 const clientLogos = [
-  { alt: 'Snowflake', natural: true, src: `${BASE}/client-logos/snowflake.svg`, width: 210 },
-  { alt: 'Zendesk', natural: true, src: `${BASE}/client-logos/zendesk.svg`, width: 178 },
-  { alt: 'PostHog', natural: true, src: `${BASE}/client-logos/posthog.svg`, width: 228 },
-  { alt: 'Amplitude', natural: true, src: `${BASE}/client-logos/amplitude.svg`, width: 216 },
+  { alt: 'BMW', src: '/client-logos/bmw.svg?v=2', width: 40, mobileWidth: 28 },
+  { alt: 'Snowflake', src: `${BASE}/client-logos/snowflake.svg`, width: 150, mobileWidth: 80 },
+  { alt: 'HAWE Hydraulik SE', src: '/client-logos/hawe.svg', width: 120, mobileWidth: 64 },
+  { alt: 'PostHog', src: `${BASE}/client-logos/posthog.svg`, width: 160, mobileWidth: 80 },
+  { alt: 'Dacia', src: '/client-logos/dacia.svg', width: 105, mobileWidth: 60 },
+  { alt: 'Zendesk', src: `${BASE}/client-logos/zendesk.svg`, width: 56, mobileWidth: 39 },
+  { alt: 'Amplitude', src: `${BASE}/client-logos/amplitude.svg`, width: 140, mobileWidth: 80 },
 ];
 
 const showcaseImage = '/desktop1.png';
@@ -94,7 +97,7 @@ export default function LandingFramer() {
   const { t } = useLanguage();
 
   return (
-    <div className="agero-works" id="agero-works">
+    <div className="agero-works agero-home-page" id="agero-works">
       <SEO
         title="ClerkTree – Industrial AI for Machine Operations"
         description="Industrial AI for machine operations. ClerkTree turns machine signals, manuals and RFQs into predictive maintenance and agent-driven work orders. Built in Bavaria."
@@ -140,10 +143,10 @@ export default function LandingFramer() {
               aria-labelledby="agero-works-title"
               data-agero-reveal="hero"
             >
-              <h1 className="agero-hero-title" id="agero-works-title">
+              <h1 className="agero-hero-title" id="agero-works-title" style={{ columnGap: "0.22em" }}>
                 <span>{t('home.hero.word1')}</span>
                 <span className="agero-orange">{t('home.hero.word2')}</span>
-                <span className="agero-muted">{t('home.hero.word3')}</span>
+                <span>{t('home.hero.word3')}</span>
                 <span>{t('home.hero.word4')}</span>
               </h1>
 
@@ -155,9 +158,6 @@ export default function LandingFramer() {
                 <a className="agero-button agero-hero-cta" href="/contact">
                   <span>{t('home.hero.cta')}</span>
                   <span aria-hidden="true">→</span>
-                </a>
-                <a className="agero-button agero-hero-login" href="/login">
-                  <span>{t('nav.login')}</span>
                 </a>
               </div>
             </div>
@@ -214,18 +214,6 @@ function Portfolio() {
 
 function HomePrelude({ heroContent }: { heroContent: ReactNode }) {
   const { t } = useLanguage();
-  const logoTrackRef = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    const track = logoTrackRef.current;
-    if (!track) return;
-    const firstSet = track.querySelector('.agero-client-logo-set') as HTMLElement | null;
-    if (!firstSet) return;
-    const update = () => track.style.setProperty('--ticker-offset', `-${firstSet.offsetWidth}px`);
-    update();
-    window.addEventListener('resize', update);
-    return () => window.removeEventListener('resize', update);
-  }, []);
-
   return (
     <section className="agero-home-prelude" aria-label={t('home.showcase.aria')}>
       <div className="agero-showcase-shell" data-agero-reveal="up">
@@ -243,8 +231,8 @@ function HomePrelude({ heroContent }: { heroContent: ReactNode }) {
 
         <div className="agero-client-logo-strip">
           <p className="agero-client-logo-label">{t('home.showcase.supportedBy')}</p>
-          <div className="agero-client-logo-track" aria-label={t('home.showcase.logosAria')} ref={logoTrackRef}>
-            {Array.from({ length: 2 }).map((_, groupIndex) => (
+          <div className="agero-client-logo-track" aria-label={t('home.showcase.logosAria')}>
+            {Array.from({ length: 3 }).map((_, groupIndex) => (
               <div className="agero-client-logo-set" aria-hidden={groupIndex > 0} key={groupIndex}>
                 {clientLogos.map((logo) => (
                   <img
@@ -254,7 +242,7 @@ function HomePrelude({ heroContent }: { heroContent: ReactNode }) {
                     key={`${groupIndex}-${logo.src}`}
                     loading="lazy"
                     src={logo.src}
-                    style={{ '--logo-width': `${logo.width}px`, ...(logo.natural ? { filter: 'none' } : {}) } as CSSProperties}
+                    style={{ '--logo-width': `${logo.width}px`, '--logo-mobile-width': `${logo.mobileWidth}px`, ...(logo.alt === 'BMW' ? { filter: 'grayscale(1)' } : {}) } as CSSProperties}
                     width={logo.width}
                   />
                 ))}

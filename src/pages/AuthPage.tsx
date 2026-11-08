@@ -17,7 +17,7 @@ const BrandPanel = () => (
                 className="absolute inset-0 h-full w-full"
                 width="100%"
                 height="100%"
-                image="/favicon.svg"
+                image="/brand-mark-tile.svg"
                 colorBack="#0a0a0a"
                 colorTint="#ffffff"
                 repetition={2}
@@ -167,7 +167,7 @@ export default function AuthPage() {
                     ) : (
                         <>
                             <div className="space-y-2 text-center">
-                                <img src="/favicon.svg" alt="ClerkTree" className="mx-auto mb-2 h-8 w-8" />
+                                <img src="/brand-mark-tile.svg" alt="ClerkTree" className="mx-auto mb-2 h-8 w-8" />
                                 <h1 className="text-3xl font-medium">
                                     {view === 'signup' ? 'Create an account' : view === 'forgot_password' ? 'Reset password' : 'Login to your account'}
                                 </h1>

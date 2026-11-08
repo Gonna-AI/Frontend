@@ -98,10 +98,16 @@ export function Header({ linkBase = '' }: HeaderProps = {}) {
   }, [isMenuOpen]);
 
   const closeMenu = () => setIsMenuOpen(false);
+  const playLogoMotion = (logo: HTMLAnchorElement) => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    logo.querySelector('animateMotion')?.beginElement?.();
+  };
 
   return (
     <header className={`agero-shell-header${isMenuOpen ? ' is-menu-open' : ''}`}>
-      <a className="agero-shell-logo" href={linkBase || '/'} aria-label={t('home.brand.aria')}>
+      <a className="agero-shell-logo" href={linkBase || '/'} aria-label={t('home.brand.aria')}
+        onPointerEnter={(event) => { if (event.pointerType === 'mouse') playLogoMotion(event.currentTarget); }}
+        onFocus={(event) => { if (event.currentTarget.matches(':focus-visible')) playLogoMotion(event.currentTarget); }}>
         <ClerkTreeLockup className="agero-shell-lockup" title={null} />
       </a>
       <div className="agero-shell-actions">
@@ -112,9 +118,6 @@ export function Header({ linkBase = '' }: HeaderProps = {}) {
             </a>
           ))}
         </nav>
-        <div className="agero-shell-lang">
-          <LanguageSwitcher isExpanded forceLight />
-        </div>
         <button
           aria-controls="agero-shell-nav agero-mobile-menu"
           aria-expanded={isMenuOpen}
@@ -223,6 +226,7 @@ function FooterColumn({ title, links }: { title: string; links: FooterLink[] }) 
 }
 
 export function Footer() {
+  const { language } = useLanguage();
   const footerRef = useRef<HTMLElement>(null);
   const [isFooterNearViewport, setIsFooterNearViewport] = useState(false);
   const munichTime = useMunichTime(isFooterNearViewport);
@@ -250,13 +254,11 @@ export function Footer() {
         <div className="agero-footer-main">
           <div className="agero-footer-cta">
             <p>
-              AI harness for
-              <br />
-              industrial machinery.
+              {language === 'de' ? <>KI-Harness für<br />Industriemaschinen.</> : <>Industrial AI harness<br />for machinery.</>}
             </p>
             <a className="agero-footer-cta-button" href="/contact">
               <span aria-hidden="true">+</span>
-              Get in touch
+              {language === 'de' ? 'Kontakt aufnehmen' : 'Get in touch'}
             </a>
           </div>
 

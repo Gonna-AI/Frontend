@@ -37,7 +37,6 @@ export default function SEO({ title, description, canonical, preloadVideos, open
     const currentUrl = canonical || (openGraph?.url ?? siteUrl);
     // og:image/twitter:image must be absolute URLs per spec — social crawlers don't resolve relative paths.
     const ogImage = openGraph?.image || `${siteUrl}/og-image.png`;
-    const manifestHref = `${siteUrl}/site.webmanifest`;
 
     const videoSchemas = videos?.map((video) => ({
         '@context': 'https://schema.org',
@@ -56,11 +55,6 @@ export default function SEO({ title, description, canonical, preloadVideos, open
             <title>{fullTitle}</title>
             <meta name="description" content={description} />
             <link rel="canonical" href={currentUrl} />
-            <link rel="icon" href={`${siteUrl}/favicon.ico`} sizes="48x48" />
-            <link rel="icon" type="image/svg+xml" href={`${siteUrl}/favicon.svg`} />
-            <link rel="icon" type="image/png" sizes="96x96" href={`${siteUrl}/favicon-96.png`} />
-            <link rel="apple-touch-icon" href={`${siteUrl}/apple-touch-icon.png`} />
-            <link rel="manifest" href={manifestHref} />
             {preloadVideos?.map((video) => (
                 <link
                     key={video.href}

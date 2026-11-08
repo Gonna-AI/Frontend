@@ -314,3 +314,37 @@
     padding-right: var(--gutter);
   }
 }
+
+/* Trace the original white curve with a moving dot. */
+.ct-lockup-cover,
+.ct-lockup-tracing-dot { opacity: 0; }
+.ct-lockup-cover { stroke-dasharray: 1; stroke-dashoffset: 0; }
+@keyframes ctDraw {
+  0% { opacity: 1; stroke-dashoffset: 0; }
+  100% { opacity: 1; stroke-dashoffset: -1; }
+}
+@keyframes ctMove {
+  0%, 94% { opacity: 1; }
+ 100% { opacity: 0; }
+}
+@keyframes ctEye {
+  0%, 92% { opacity: 0; }
+  100% { opacity: 1; }
+}
+@keyframes ctWeight {
+  0%, 100% { transform: scale(1); }
+  18% { transform: scale(1.08, .96); }
+  90% { transform: scale(.97, 1.04); }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .agero-shell-logo:focus-visible .ct-lockup-cover { animation: ctDraw .9s cubic-bezier(.55, .02, .25, 1); }
+  .agero-shell-logo:focus-visible .ct-lockup-tracing-dot { animation: ctMove .9s linear; }
+  .agero-shell-logo:focus-visible .ct-lockup-ball { animation: ctWeight .9s ease-out; }
+  .agero-shell-logo:focus-visible .ct-lockup-dot { animation: ctEye .9s linear; }
+}
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .agero-shell-logo:hover .ct-lockup-cover { animation: ctDraw .9s cubic-bezier(.55, .02, .25, 1); }
+  .agero-shell-logo:hover .ct-lockup-tracing-dot { animation: ctMove .9s linear; }
+  .agero-shell-logo:hover .ct-lockup-ball { animation: ctWeight .9s ease-out; }
+  .agero-shell-logo:hover .ct-lockup-dot { animation: ctEye .9s linear; }
+}
