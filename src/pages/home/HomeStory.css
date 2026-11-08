@@ -119,12 +119,6 @@
   max-width: 620px;
 }
 .agero-works .agero-home-hero-copy .agero-hero-actions { justify-content: center; margin: 0; }
-.agero-works .agero-hero-stage--home.has-demo {
-  align-items: center;
-  display: flex;
-  justify-content: center;
-  min-height: clamp(420px, 46vw, 680px);
-}
 
 /* CRT card: grainy bezel, glass glare + scanlines + RGB sub-pixels, dotted corner light. */
 .agero-works {
@@ -245,24 +239,26 @@
 .agero-works .hs-crt-foot.is-done .hs-crt-progress i { background: #a6db98; }
 .agero-works .hs-crt-cited { color: rgba(245, 245, 245, .5); font-size: 11.5px; white-space: nowrap; }
 
-/* ---------- Logo wall ---------- */
+/* ---------- Logo strip under the hero ---------- */
 
-.agero-works .hs-logos { text-align: center; }
-.agero-works .hs-logos h2 { font-size: clamp(24px, 2.4vw, 34px); margin: 0 auto 40px; max-width: 760px; }
-.agero-works .hs-logo-track {
-  display: flex;
-  mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+.agero-works .hs-strip {
+  margin-top: var(--shell-pad, 16px);
+  mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent);
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent);
   overflow: hidden;
+  padding: clamp(10px, 1.4vw, 18px) 0 clamp(4px, .6vw, 8px);
 }
+.agero-works .hs-strip-track { display: flex; width: max-content; }
 .agero-works .hs-logo-set {
   align-items: center;
-  animation: hsMarquee 38s linear infinite;
+  animation: hsMarquee 40s linear infinite;
   display: flex;
   flex: none;
-  gap: clamp(48px, 6vw, 96px);
-  padding-right: clamp(48px, 6vw, 96px);
+  gap: clamp(44px, 5.5vw, 96px);
+  padding-right: clamp(44px, 5.5vw, 96px);
 }
-.agero-works .hs-logo-set img { filter: grayscale(1) contrast(1.1); height: 32px; object-fit: contain; opacity: .78; width: var(--logo-width); }
+.agero-works .hs-logo-set img { display: block; filter: grayscale(1) contrast(1.1); height: clamp(22px, 2vw, 30px); object-fit: contain; opacity: .72; width: var(--logo-width); }
+.agero-works .hs-strip:hover .hs-logo-set { animation-play-state: paused; }
 @keyframes hsMarquee { to { transform: translateX(-100%); } }
 
 /* ---------- Story tabs ---------- */
@@ -472,7 +468,7 @@
   .agero-works .hs-bars li { gap: 8px; grid-template-columns: 1fr 44px; }
   .agero-works .hs-bar-label { grid-column: 1 / -1; }
   .agero-works .hs-chart-axis { margin-left: 0; margin-right: 52px; }
-  .agero-works .hs-logo-set img { height: 24px; width: var(--logo-mobile-width); }
+  .agero-works .hs-logo-set img { height: 22px; width: var(--logo-mobile-width); }
   .agero-works .hs-step { padding: 14px; }
   .agero-works .hs-row-k em, .agero-works .hs-row-src { display: none; }
   .agero-works .hs-slot { max-width: 46%; overflow: hidden; text-overflow: ellipsis; }
@@ -846,4 +842,57 @@
 }
 @media (prefers-reduced-motion: reduce) {
   .agero-works .cs-hub-wire i, .agero-works .cs-hub-mark, .agero-works .cs-tile.is-crit::after, .agero-works .cs-job.is-clash { animation: none !important; }
+}
+
+/* ---------- First screen = sixtyfour's fold ----------
+   Header, headline, copy, button, a 1024px panel and the logo strip all fit in
+   one viewport. The panel takes the remaining height; the agent card sits near
+   its top and may be cut by the panel edge, like sixtyfour's teaser card. */
+.agero-works.agero-home-page .agero-top-area {
+  display: flex;
+  flex-direction: column;
+  height: calc(100svh - 2 * var(--gutter, 8px));
+  min-height: 600px;
+}
+.agero-works.agero-home-page .agero-top-area > .agero-shell-header { margin-bottom: 0; }
+.agero-works.agero-home-page .agero-home-hero-copy {
+  gap: clamp(12px, 2.3vh, 22px);
+  margin: clamp(18px, 5.6vh, 52px) auto 0;
+  max-width: 1184px;
+}
+.agero-works.agero-home-page .agero-home-hero-copy .agero-hero-title {
+  font-size: clamp(32px, 3.9vw, 56px);
+  letter-spacing: -0.02em;
+  line-height: 1.06;
+}
+.agero-works.agero-home-page .agero-home-hero-copy .agero-hero-copy { font-size: 17px; line-height: 1.5; max-width: 600px; }
+.agero-works.agero-home-page .agero-home-hero-copy .agero-hero-actions .agero-button { min-height: 44px; }
+.agero-works.agero-home-page .agero-home-prelude {
+  align-items: center;
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+  padding: 0;
+}
+.agero-works.agero-home-page .agero-hero-stage--home.has-demo {
+  align-items: flex-start;
+  aspect-ratio: auto;
+  border-radius: clamp(19px, 1.9vw, 27px);
+  display: flex;
+  flex: 1 1 0;
+  height: auto;
+  justify-content: center;
+  margin: clamp(20px, 5.6vh, 51px) auto 0;
+  max-height: none;
+  min-height: 220px;
+  overflow: hidden;
+  padding: clamp(16px, 3.1vh, 28px) 12px 0;
+  width: min(1024px, 100%);
+}
+.agero-works.agero-home-page .hs-strip { flex: none; margin: clamp(12px, 3.5vh, 32px) auto 0; width: min(1024px, 100%); }
+.agero-works.agero-home-page .agero-home-hero-copy, .agero-works.agero-home-page .agero-top-area > .agero-shell-header { flex: none; }
+@media (max-width: 600px) {
+  .agero-works.agero-home-page .agero-home-hero-copy .agero-hero-copy { font-size: 15px; }
+  .agero-works.agero-home-page .agero-hero-stage--home.has-demo { min-height: 200px; padding-top: 14px; }
 }

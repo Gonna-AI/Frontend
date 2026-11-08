@@ -1,5 +1,5 @@
 // Homepage story, following sixtyfour's narrative order with ClerkTree content:
-// hero demo card → logo wall → how it works (tabs) → spotlight → case study →
+// hero (video + agent card + logo strip) → how it works (tabs) → spotlight → case study →
 // proof chart → connector panel.
 import { type CSSProperties, type RefObject, useEffect, useRef, useState } from 'react';
 import { Activity, ArrowRight, BookOpen, ClipboardList, Cpu, History, Package, Wrench } from 'lucide-react';
@@ -23,7 +23,6 @@ const copy = {
       { icon: 'plan', agent: 'Planner agent', tool: 'draft_work_order()', wait: 'drafting', value: 'WO-2291, Tue 06:00 shift, 1.5 h', src: 'Work order' },
     ],
     cited: '5 agents · 9 sources cited',
-    logosTitle: 'Maintenance, operations and engineering teams run on ClerkTree.',
     storyTitle: ['Work that follows', 'the signal'],
     steps: [
       { icon: 'activity', scene: 'signal', title: 'Start with any machine signal', body: 'Vibration, temperature, an alarm or a note from the floor. ClerkTree connects to the line and notices when something changes.' },
@@ -69,7 +68,6 @@ const copy = {
       { icon: 'plan', agent: 'Planungs-Agent', tool: 'draft_work_order()', wait: 'erstellt', value: 'WO-2291, Di 06:00 Schicht, 1,5 h', src: 'Auftrag' },
     ],
     cited: '5 Agenten · 9 Quellen belegt',
-    logosTitle: 'Instandhaltung, Betrieb und Engineering arbeiten mit ClerkTree.',
     storyTitle: ['Arbeit, die dem', 'Signal folgt'],
     steps: [
       { icon: 'activity', scene: 'signal', title: 'Mit jedem Maschinensignal starten', body: 'Vibration, Temperatur, ein Alarm oder eine Notiz aus der Halle. ClerkTree ist mit der Linie verbunden und erkennt Veränderungen.' },
@@ -195,21 +193,19 @@ export function HeroAgentCard() {
 
 export type ClientLogo = { alt: string; src: string; width: number; mobileWidth: number };
 
-export function LogoWall({ logos }: { logos: ClientLogo[] }) {
-  const c = useHomeCopy();
+/** Endless client-logo strip under the hero (sixtyfour-style): three copies scroll as one track. */
+export function LogoStrip({ logos, label }: { logos: ClientLogo[]; label: string }) {
   return (
-    <section className="hs-section hs-logos" aria-labelledby="hs-logos-title">
-      <h2 id="hs-logos-title" data-agero-reveal="up">{c.logosTitle}</h2>
-      <div className="hs-logo-track" data-agero-reveal="up">
-        {[0, 1].map((group) => (
+    <div className="hs-strip" aria-label={label} role="region">
+      <div className="hs-strip-track">
+        {[0, 1, 2].map((group) => (
           <div className="hs-logo-set" aria-hidden={group > 0} key={group}>
             {logos.map((logo) => (
               <img
                 alt={group === 0 ? logo.alt : ''}
                 decoding="async"
-                height="32"
+                height="28"
                 key={`${group}-${logo.src}`}
-                loading="lazy"
                 src={logo.src}
                 style={{ '--logo-width': `${logo.width}px`, '--logo-mobile-width': `${logo.mobileWidth}px` } as CSSProperties}
                 width={logo.width}
@@ -218,7 +214,7 @@ export function LogoWall({ logos }: { logos: ClientLogo[] }) {
           </div>
         ))}
       </div>
-    </section>
+    </div>
   );
 }
 

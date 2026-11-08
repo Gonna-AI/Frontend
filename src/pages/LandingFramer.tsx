@@ -4,9 +4,9 @@ import { isSaveDataEnabled, shouldAutoplayMedia } from '../utils/idle';
 import { Footer, Header } from '../components/Landing/AgeroChrome';
 import { useLanguage } from '../contexts/LanguageContext';
 import SEO from '../components/SEO';
-import Grainient from '../components/Brand/Grainient';
 import CapabilityShowcase from './solutions/CapabilityShowcase';
-import { CaseStudy, ConnectorPanel, HeroAgentCard, LogoWall, ProofChart, Spotlight, StoryTabs } from './home/HomeStory';
+import Grainient from '../components/Brand/Grainient';
+import { CaseStudy, ConnectorPanel, HeroAgentCard, LogoStrip, ProofChart, Spotlight, StoryTabs } from './home/HomeStory';
 import './LandingFramer.css';
 
 const BASE = 'https://pub-0f804855178c4f4e8184c4fef3bd5b2a.r2.dev';
@@ -90,10 +90,10 @@ export default function LandingFramer() {
             <Grainient preset="silver" />
             <HeroAgentCard />
           </div>
+          <LogoStrip logos={clientLogos} label={t('home.showcase.logosAria')} />
         </section>
       </div>
 
-      <LogoWall logos={clientLogos} />
       <StoryTabs />
       <Spotlight />
       <CaseStudy
