@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 
 import { Activity, Briefcase, ChevronDown, Factory, FlaskConical, Scale, Shapes, Users, Wrench } from 'lucide-react';
 
 import ClerkTreeLockup from '../Brand/ClerkTreeLockup';
+import { playFirstVisitIntro, playLogoPortal, shouldPlayFirstVisitIntro } from '../Brand/logoPortal';
 import BrandShader from '../Brand/BrandShader';
 import LanguageSwitcher from '../Layout/LanguageSwitcher';
 import { useLanguage } from '../../contexts/LanguageContext';
@@ -157,16 +158,21 @@ export function Header({ linkBase = '' }: HeaderProps = {}) {
   }, [isMenuOpen]);
 
   const closeMenu = () => setIsMenuOpen(false);
-  const playLogoMotion = (logo: HTMLAnchorElement) => {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    logo.querySelector('animateMotion')?.beginElement?.();
-  };
+  const logoRef = useRef<HTMLAnchorElement>(null);
+  const playLogo = () => playLogoPortal(logoRef.current?.querySelector('svg'));
+
+  // First page of a visit: the portal intro plays once, after the page fades in.
+  useEffect(() => {
+    if (!shouldPlayFirstVisitIntro()) return undefined;
+    const timer = window.setTimeout(() => playFirstVisitIntro(logoRef.current?.querySelector('svg')), 450);
+    return () => window.clearTimeout(timer);
+  }, []);
 
   return (
     <header className={`agero-shell-header${isMenuOpen ? ' is-menu-open' : ''}`}>
-      <a className="agero-shell-logo" href={linkBase || '/'} aria-label={t('home.brand.aria')}
-        onPointerEnter={(event) => { if (event.pointerType === 'mouse') playLogoMotion(event.currentTarget); }}
-        onFocus={(event) => { if (event.currentTarget.matches(':focus-visible')) playLogoMotion(event.currentTarget); }}>
+      <a className="agero-shell-logo" href={linkBase || '/'} aria-label={t('home.brand.aria')} ref={logoRef}
+        onPointerEnter={(event) => { if (event.pointerType === 'mouse') playLogo(); }}
+        onFocus={(event) => { if (event.currentTarget.matches(':focus-visible')) playLogo(); }}>
         <ClerkTreeLockup className="agero-shell-lockup" title={null} />
       </a>
 

@@ -26,7 +26,6 @@ const WORD_PATH =
 export default function ClerkTreeLockup({ className, title = "ClerkTree" }: ClerkTreeLockupProps) {
   const labelled = title !== null;
   const eyeMaskId = `ct-eye-${useId().replace(/:/g, '')}`;
-  const ballGradientId = `ct-ball-${useId().replace(/:/g, '')}`;
   return (
     <svg
       className={className}
@@ -39,11 +38,6 @@ export default function ClerkTreeLockup({ className, title = "ClerkTree" }: Cler
       aria-hidden={labelled ? undefined : true}
     >
       <defs>
-        <radialGradient id={ballGradientId} cx="35%" cy="28%" r="75%">
-          <stop offset="0" stopColor="#fff" />
-          <stop offset="0.7" stopColor="#f7f7f7" />
-          <stop offset="1" stopColor="#c9c9c9" />
-        </radialGradient>
         <mask id={eyeMaskId} maskUnits="userSpaceOnUse" x="0" y="0" width="500" height="500">
           <rect x="0" y="0" width="500" height="500" fill="white" />
           <path className="ct-lockup-dot" d={MARK_DOT_PATH} fill="black" />
@@ -51,11 +45,6 @@ export default function ClerkTreeLockup({ className, title = "ClerkTree" }: Cler
       </defs>
       <g className="ct-lockup-mark" transform={MARK_TRANSFORM}>
         <path className="ct-lockup-ring" d={MARK_RING_PATH} mask={`url(#${eyeMaskId})`} />
-        <path className="ct-lockup-cover" d="M367 296 C358 353 307 393 244 393 C174 393 122 348 122 275 C122 214 158 163 240 162" pathLength="1" fill="none" stroke="currentColor" strokeWidth="38" />
-        <g className="ct-lockup-tracing-dot">
-          <animateMotion begin="indefinite" dur="0.9s" fill="freeze" rotate="auto" calcMode="spline" keyPoints="0;1" keyTimes="0;1" keySplines="0.55 0.02 0.25 1" path="M367 296 C358 353 307 393 244 393 C174 393 122 348 122 275 C122 214 158 163 240 162" />
-          <circle className="ct-lockup-ball" cx="0" cy="0" r="19" fill={`url(#${ballGradientId})`} />
-        </g>
       </g>
       <path className="ct-lockup-word" d={WORD_PATH} />
     </svg>
