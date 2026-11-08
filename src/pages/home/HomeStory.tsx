@@ -1,24 +1,28 @@
 // Homepage story, following sixtyfour's narrative order with ClerkTree content:
 // hero demo card → logo wall → how it works (tabs) → spotlight → case study →
 // proof chart → (capability bento, rendered by LandingFramer) → connector panel.
-import { type CSSProperties, useEffect, useRef, useState } from 'react';
-import { Activity, ArrowRight, BookOpen, Wrench } from 'lucide-react';
+import { type CSSProperties, type RefObject, useEffect, useRef, useState } from 'react';
+import { Activity, ArrowRight, BookOpen, ClipboardList, Cpu, History, Package, Wrench } from 'lucide-react';
+import Grainient from '../../components/Brand/Grainient';
 import { useLanguage } from '../../contexts/LanguageContext';
-import { CapabilityStage, type CapabilitySceneId } from '../solutions/CapabilityCards';
+import AssetGraph from './AssetGraph';
 import ClerkTreeLockup from '../../components/Brand/ClerkTreeLockup';
+import { STORY_SCENES } from './StoryScenes';
 import './HomeStory.css';
 
 const copy = {
   en: {
-    agent: 'ClerkTree Agent',
-    investigating: 'Investigating',
+    seed: 'CNC-07 spindle vibration alarm',
+    orchestrating: 'Orchestrating 5 agents',
     done: 'Work order ready',
-    agentRows: [
-      ['Signal', 'CNC-07 spindle vibration 7.8 mm/s, up 3.7×'],
-      ['Context', 'Matches bearing 6205-2RS wear, manual §4.3'],
-      ['Action', 'Work order WO-2291 drafted, part reserved'],
+    chain: [
+      { icon: 'signal', agent: 'Signal agent', tool: 'query_historian(CNC-07, 24h)', wait: 'reading', value: '7.8 mm/s RMS, up 3.7× in 6 h', src: 'OPC UA' },
+      { icon: 'book', agent: 'Manual agent', tool: 'search_manuals("6205-2RS")', wait: 'searching', value: 'Outer-race wear, manual §4.3', src: 'Manual' },
+      { icon: 'history', agent: 'History agent', tool: 'similar_incidents()', wait: 'matching', value: '2 matching failures, last in March', src: 'CMMS' },
+      { icon: 'parts', agent: 'Parts agent', tool: 'check_stock("6205-2RS")', wait: 'checking', value: '4 in stock, bay B-12', src: 'SAP MM' },
+      { icon: 'plan', agent: 'Planner agent', tool: 'draft_work_order()', wait: 'drafting', value: 'WO-2291, Tue 06:00 shift, 1.5 h', src: 'Work order' },
     ],
-    cited: '3 sources cited',
+    cited: '5 agents · 9 sources cited',
     logosTitle: 'Maintenance, operations and engineering teams run on ClerkTree.',
     storyTitle: ['Work that follows', 'the signal'],
     steps: [
@@ -30,8 +34,6 @@ const copy = {
     spotTag: 'Asset graph',
     spotTitle: 'See how your plant connects',
     spotBody: 'ClerkTree links every machine to its components, incidents, parts and suppliers, so a single fault shows its full chain of causes and the people who can fix it.',
-    spotFoot: 'One spindle. Every linked part, incident and supplier.',
-    legend: ['Machine', 'Component', 'Incident', 'Part', 'Supplier'],
     caseTitle: ['Proven on the line,', 'in their words'],
     caseIntro: 'See how plant teams use ClerkTree to catch failures early, plan maintenance and keep lines running.',
     proofEyebrow: 'Internal evaluation',
@@ -59,15 +61,17 @@ const copy = {
     apiWindow: 'Example connector',
   },
   de: {
-    agent: 'ClerkTree Agent',
-    investigating: 'Analysiert',
+    seed: 'CNC-07 Alarm Spindelvibration',
+    orchestrating: '5 Agenten koordinieren',
     done: 'Auftrag bereit',
-    agentRows: [
-      ['Signal', 'CNC-07 Spindelvibration 7,8 mm/s, 3,7× erhöht'],
-      ['Kontext', 'Passt zu Verschleiß Lager 6205-2RS, Handbuch §4.3'],
-      ['Aktion', 'Auftrag WO-2291 erstellt, Teil reserviert'],
+    chain: [
+      { icon: 'signal', agent: 'Signal-Agent', tool: 'query_historian(CNC-07, 24h)', wait: 'liest', value: '7,8 mm/s RMS, 3,7× in 6 h', src: 'OPC UA' },
+      { icon: 'book', agent: 'Handbuch-Agent', tool: 'search_manuals("6205-2RS")', wait: 'sucht', value: 'Verschleiß Außenring, Handbuch §4.3', src: 'Handbuch' },
+      { icon: 'history', agent: 'Historie-Agent', tool: 'similar_incidents()', wait: 'gleicht ab', value: '2 ähnliche Ausfälle, zuletzt im März', src: 'CMMS' },
+      { icon: 'parts', agent: 'Teile-Agent', tool: 'check_stock("6205-2RS")', wait: 'prüft', value: '4 auf Lager, Fach B-12', src: 'SAP MM' },
+      { icon: 'plan', agent: 'Planungs-Agent', tool: 'draft_work_order()', wait: 'erstellt', value: 'WO-2291, Di 06:00 Schicht, 1,5 h', src: 'Auftrag' },
     ],
-    cited: '3 Quellen belegt',
+    cited: '5 Agenten · 9 Quellen belegt',
     logosTitle: 'Instandhaltung, Betrieb und Engineering arbeiten mit ClerkTree.',
     storyTitle: ['Arbeit, die dem', 'Signal folgt'],
     steps: [
@@ -79,8 +83,6 @@ const copy = {
     spotTag: 'Anlagengraph',
     spotTitle: 'Sehen, wie Ihr Werk zusammenhängt',
     spotBody: 'ClerkTree verknüpft jede Maschine mit Komponenten, Störungen, Teilen und Lieferanten. So zeigt ein einzelner Fehler die ganze Ursachenkette und wer ihn beheben kann.',
-    spotFoot: 'Eine Spindel. Alle verknüpften Teile, Störungen und Lieferanten.',
-    legend: ['Maschine', 'Komponente', 'Störung', 'Teil', 'Lieferant'],
     caseTitle: ['Bewährt an der Linie,', 'in ihren Worten'],
     caseIntro: 'So nutzen Werksteams ClerkTree, um Ausfälle früh zu erkennen, Wartung zu planen und Linien am Laufen zu halten.',
     proofEyebrow: 'Interne Auswertung',
@@ -114,31 +116,83 @@ export function useHomeCopy() {
   return copy[language === 'de' ? 'de' : 'en'];
 }
 
-/* ---------------- Hero demo card (sits on the hero video) ---------------- */
+/* ---------------- Hero: agent chain on a CRT card over a silver Grainient ---------------- */
+
+const chainIcon = { signal: Activity, book: BookOpen, history: History, parts: Package, plan: ClipboardList };
+const TYPE_MS = 34;
+const ROW_MS = 950;
+const HOLD_MS = 3200;
+
+function useChainClock(total: number, ref: RefObject<HTMLElement | null>) {
+  const [ms, setMs] = useState(0);
+  useEffect(() => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) { setMs(total - HOLD_MS + 1); return undefined; }
+    let timer = 0;
+    let visible = true;
+    const observer = new IntersectionObserver(([entry]) => { visible = entry.isIntersecting; });
+    if (ref.current) observer.observe(ref.current);
+    timer = window.setInterval(() => { if (visible && !document.hidden) setMs((v) => (v + 50) % total); }, 50);
+    return () => { window.clearInterval(timer); observer.disconnect(); };
+  }, [total, ref]);
+  return ms;
+}
 
 export function HeroAgentCard() {
   const c = useHomeCopy();
-  const [step, setStep] = useState(0);
-  useEffect(() => {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) { setStep(4); return undefined; }
-    const timer = window.setInterval(() => setStep((s) => (s + 1) % 6), 1400);
-    return () => window.clearInterval(timer);
-  }, []);
-  const shown = Math.min(step, 3);
-  const done = step >= 3;
+  const ref = useRef<HTMLDivElement>(null);
+  const typeEnd = c.seed.length * TYPE_MS + 300;
+  const total = typeEnd + c.chain.length * ROW_MS + HOLD_MS;
+  const ms = useChainClock(total, ref);
+  const typed = c.seed.slice(0, Math.floor(ms / TYPE_MS));
+  const runMs = ms - typeEnd;
+  const active = runMs < 0 ? -1 : Math.min(c.chain.length, Math.floor(runMs / ROW_MS));
+  const within = runMs - active * ROW_MS;
+  const done = active >= c.chain.length;
+  const slot = done ? c.done : active < 0 ? c.orchestrating : `${c.chain[active].agent}: ${c.chain[active].wait}`;
+  const progress = done ? 1 : Math.max(0, runMs / (c.chain.length * ROW_MS));
+
   return (
-    <div className="hs-agent" aria-hidden="true">
-      <div className="hs-agent-head">
-        <span className="hs-agent-name"><i />{c.agent}</span>
-        <span className={`hs-agent-status${done ? ' is-done' : ''}`}><i />{done ? c.done : c.investigating}</span>
+    <div className="hs-crt" ref={ref} aria-hidden="true">
+      <div className="hs-seed">
+        <span className="hs-seed-ico"><Cpu size={14} strokeWidth={1.75} /></span>
+        <span className="hs-seed-id">{typed}<span className={`hs-caret${runMs >= 0 ? ' is-hidden' : ''}`} /></span>
+        <span className={`hs-slot${done ? ' is-done' : ''}`} key={slot}>
+          <span className="hs-slot-label">{slot}</span>
+          <span className="hs-slot-dot" />
+        </span>
       </div>
-      {c.agentRows.map(([label, value], i) => (
-        <div className={`hs-agent-row${i < shown ? ' is-in' : ''}`} key={label}>
-          <span>{label}</span>
-          <strong>{value}</strong>
-        </div>
-      ))}
-      <div className={`hs-agent-foot${done ? ' is-in' : ''}`}>{c.cited}</div>
+      {c.chain.map((row, i) => {
+        const Icon = chainIcon[row.icon as keyof typeof chainIcon];
+        const state = i < active ? 'is-done' : i === active ? (within > ROW_MS * 0.62 ? 'is-done is-active' : 'is-active') : '';
+        const resolved = state.includes('is-done');
+        return (
+          <div className={`hs-row ${state}`} key={row.agent} style={{ '--row': i } as CSSProperties}>
+            <svg className="hs-row-branch" viewBox="0 0 30 42" aria-hidden="true">
+              <path d={i === 0 ? 'M9 0V15Q9 21 15 21H30' : 'M9 -6V15Q9 21 15 21H30'} pathLength={1} />
+            </svg>
+            <div className="hs-row-box">
+              <span className="hs-row-ico"><Icon size={14} strokeWidth={1.75} /></span>
+              <span className="hs-row-text">
+                <span className="hs-row-k">{row.agent}<em>{row.tool}</em></span>
+                <span className="hs-row-v">
+                  {!resolved && (
+                    <span className="hs-loader">
+                      <span className="hs-loader-grid">{[1, 2, 3, 0, 1, 2, 1, 2, 3].map((d, k) => <i key={k} style={{ '--pixel-delay': `${d * 90}ms` } as CSSProperties} />)}</span>
+                      {row.wait}
+                    </span>
+                  )}
+                  <span className="hs-row-val">{row.value}</span>
+                </span>
+              </span>
+              <span className="hs-row-src">{row.src}</span>
+            </div>
+          </div>
+        );
+      })}
+      <div className={`hs-crt-foot${done ? ' is-done' : ''}`}>
+        <span className="hs-crt-progress"><i style={{ transform: `scaleX(${progress})` }} /></span>
+        <span className="hs-crt-cited">{c.cited}</span>
+      </div>
     </div>
   );
 }
@@ -176,7 +230,7 @@ export function LogoWall({ logos }: { logos: ClientLogo[] }) {
 
 /* ---------------- How it works: step tabs + live scene ---------------- */
 
-const STEP_MS = 6500;
+const STEP_MS = 9000;
 const stepIcon = { activity: Activity, book: BookOpen, wrench: Wrench };
 
 export function StoryTabs() {
@@ -225,12 +279,16 @@ export function StoryTabs() {
           })}
         </div>
       </div>
-      <div className="hs-story-stage" data-agero-reveal="up">
-        {c.steps.map((step, i) => (
-          <div className={`hs-story-scene${i === active ? ' is-active' : ''}`} key={step.scene}>
-            {i === active && <CapabilityStage scene={step.scene as CapabilitySceneId} />}
-          </div>
-        ))}
+      <div className="hs-story-stage hs-visual" data-agero-reveal="up">
+        <Grainient preset="silver" still />
+        {c.steps.map((step, i) => {
+          const Scene = STORY_SCENES[i];
+          return (
+            <div className={`hs-story-scene${i === active ? ' is-active' : ''}`} key={step.scene}>
+              {i === active && <Scene />}
+            </div>
+          );
+        })}
       </div>
     </section>
   );
@@ -242,19 +300,14 @@ export function Spotlight() {
   const c = useHomeCopy();
   return (
     <section className="hs-section hs-panel hs-dark hs-spot" aria-labelledby="hs-spot-title">
+      <Grainient preset="black" />
       <div className="hs-spot-copy" data-agero-reveal="up">
         <span className="hs-pill">{c.spotPill}<b>{c.spotTag}</b></span>
         <h2 id="hs-spot-title">{c.spotTitle}</h2>
         <p>{c.spotBody}</p>
       </div>
       <div className="hs-spot-stage" data-agero-reveal="up">
-        <CapabilityStage scene="graph" />
-        <div className="hs-spot-foot">
-          <span>{c.spotFoot}</span>
-          <ul>
-            {c.legend.map((item, i) => <li key={item} style={{ '--dot': i } as CSSProperties}>{item}</li>)}
-          </ul>
-        </div>
+        <AssetGraph />
       </div>
     </section>
   );
@@ -274,6 +327,7 @@ export function CaseStudy({ quote, name, role, image, stats }: CaseStudyProps) {
   const c = useHomeCopy();
   return (
     <section className="hs-section hs-panel hs-silver hs-case" aria-labelledby="hs-case-title">
+      <Grainient preset="silver" />
       <div className="hs-case-head" data-agero-reveal="up">
         <h2 id="hs-case-title">{c.caseTitle[0]}<br />{c.caseTitle[1]}</h2>
         <p>{c.caseIntro}</p>
@@ -318,6 +372,7 @@ export function ProofChart() {
   }, []);
   return (
     <section className="hs-section hs-panel hs-dark hs-proof" aria-labelledby="hs-proof-title">
+      <Grainient preset="black" />
       <div className="hs-proof-copy" data-agero-reveal="up">
         <span className="hs-eyebrow">{c.proofEyebrow}</span>
         <h2 id="hs-proof-title">{c.proofTitle[0]}<br />{c.proofTitle[1]}</h2>
@@ -396,6 +451,7 @@ export function ConnectorPanel() {
   const [tab, setTab] = useState<keyof typeof SNIPPETS>('OPC UA');
   return (
     <section className="hs-section hs-panel hs-silver hs-api" aria-labelledby="hs-api-title">
+      <Grainient preset="silver" />
       <div className="hs-api-copy" data-agero-reveal="up">
         <h2 id="hs-api-title">{c.apiTitle[0]}<br />{c.apiTitle[1]}</h2>
         <p>{c.apiBody}</p>

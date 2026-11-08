@@ -5,11 +5,11 @@ import { Footer, Header } from '../components/Landing/AgeroChrome';
 import { useLanguage } from '../contexts/LanguageContext';
 import SEO from '../components/SEO';
 import CapabilityCards from './solutions/CapabilityCards';
+import Grainient from '../components/Brand/Grainient';
 import { CaseStudy, ConnectorPanel, HeroAgentCard, LogoWall, ProofChart, Spotlight, StoryTabs, useHomeCopy } from './home/HomeStory';
 import './LandingFramer.css';
 
 const BASE = 'https://pub-0f804855178c4f4e8184c4fef3bd5b2a.r2.dev';
-const HOME_HERO_VIDEO_SRC = `${BASE}/entrybox.mov`;
 const HOME_CONTACT_VIDEO_SRC = `${BASE}/hero.mov`;
 
 const clientLogos = [
@@ -54,17 +54,9 @@ export default function LandingFramer() {
         description="Industrial AI for machine operations. ClerkTree turns machine signals, manuals and RFQs into predictive maintenance and agent-driven work orders. Built in Bavaria."
         canonical="https://clerktree.com/"
         preloadVideos={[
-          { href: HOME_HERO_VIDEO_SRC, type: 'video/quicktime' },
           { href: HOME_CONTACT_VIDEO_SRC, type: 'video/quicktime' },
         ]}
         videos={[
-          {
-            name: t('home.hero.word1') + ' ' + t('home.hero.word2') + ' ' + t('home.hero.word3') + ' ' + t('home.hero.word4'),
-            description: t('home.hero.copy'),
-            contentUrl: HOME_HERO_VIDEO_SRC,
-            thumbnailUrl: 'https://framerusercontent.com/images/x3RMizQqFhQ9G8jF5dqqcbxY8M.png?scale-down-to=2048',
-            uploadDate: HOME_VIDEO_UPLOAD_DATE,
-          },
           {
             name: t('home.contact.heading'),
             description: t('home.contact.tagline'),
@@ -94,9 +86,8 @@ export default function LandingFramer() {
         </div>
 
         <section className="agero-home-prelude" aria-label={t('home.showcase.aria')}>
-          <div className="agero-hero-stage agero-hero-stage--home has-demo" data-agero-reveal="up">
-            <LazyVideo className="agero-hero-stage-media" muted loop playsInline src={HOME_HERO_VIDEO_SRC} />
-            <div className="agero-hero-stage-scrim" aria-hidden="true" />
+          <div className="agero-hero-stage agero-hero-stage--home has-demo hs-hero-panel" data-agero-reveal="up">
+            <Grainient preset="silver" />
             <HeroAgentCard />
           </div>
         </section>
