@@ -4,6 +4,7 @@ import { ExternalLink, Upload, CheckCircle2 } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { Header, Footer } from '../components/Landing/AgeroChrome';
 import './LandingFramer.css';
+import Grainient from '../components/Brand/Grainient';
 
 const MAX_RESUME_SIZE_BYTES = 5 * 1024 * 1024; // 5 MB
 const ALLOWED_RESUME_EXTENSIONS = /\.(pdf|doc|docx)$/i;
@@ -138,6 +139,7 @@ export default function Careers() {
         <Header />
 
         <section className="agero-hero-stage">
+          <Grainient preset="black" />
           <div className="agero-hero-stage-scrim" aria-hidden="true" />
           <div className="agero-hero-stage-content">
             <h1>

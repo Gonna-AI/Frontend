@@ -3,7 +3,7 @@ import { Activity, Briefcase, ChevronDown, Factory, FlaskConical, Scale, Shapes,
 
 import ClerkTreeLockup from '../Brand/ClerkTreeLockup';
 import { playFirstVisitIntro, playLogoPortal, shouldPlayFirstVisitIntro } from '../Brand/logoPortal';
-import BrandShader from '../Brand/BrandShader';
+import Grainient from '../Brand/Grainient';
 import LanguageSwitcher from '../Layout/LanguageSwitcher';
 import { useLanguage } from '../../contexts/LanguageContext';
 import '../../pages/LandingFramer.css';
@@ -294,7 +294,7 @@ export function PageHero({ title, eyebrow, description, children, titleId = 'pag
       <Header linkBase={linkBase} />
 
       <section className="agero-hero-stage agero-page-hero" aria-labelledby={titleId}>
-        <BrandShader />
+        <Grainient preset="black" />
         <div className="agero-hero-stage-content">
           {eyebrow && <p className="agero-page-hero-eyebrow">{eyebrow}</p>}
           <h1 id={titleId}>{title}</h1>

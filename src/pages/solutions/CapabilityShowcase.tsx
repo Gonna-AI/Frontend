@@ -11,7 +11,6 @@ import { BrandMark, ConnectorHubScene, FloorMapScene, ManualExtractScene, WeekPl
 
 const heading = {
   en: {
-    eyebrow: 'Solutions',
     title: ['Where teams use', 'ClerkTree'],
     intro: 'The right decision depends on more than a single reading. See how machine data, records and people come together when something needs attention.',
     docTitle: 'Technical knowledge',
@@ -21,7 +20,6 @@ const heading = {
     connects: 'Connects to',
   },
   de: {
-    eyebrow: 'Lösungen',
     title: ['Wo Teams', 'ClerkTree einsetzen'],
     intro: 'Eine einzelne Messung zeigt nicht das ganze Bild. Sehen Sie, wie Maschinendaten, Unterlagen und Menschen zusammenkommen, wenn etwas Aufmerksamkeit braucht.',
     docTitle: 'Technisches Wissen',
@@ -70,7 +68,6 @@ export default function CapabilityShowcase() {
   return (
     <section className="cs-section" id="solutions" aria-labelledby="cs-title">
       <header className="cs-heading">
-        <p className="cs-eyebrow"><span />{h.eyebrow}</p>
         <h2 id="cs-title">{h.title[0]}<br /><span>{h.title[1]}</span></h2>
         <div>
           <p>{h.intro}</p>

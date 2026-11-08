@@ -4,13 +4,12 @@ import { ArrowLeft, ArrowUpRight } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import { Header, Footer } from '../components/Landing/AgeroChrome';
-import BrandShader from '../components/Brand/BrandShader';
+import Grainient from '../components/Brand/Grainient';
 import SEO from '../components/SEO';
 import { useLanguage } from '../contexts/LanguageContext';
 import './LandingFramer.css';
 import './Research.css';
 
-const RESEARCH_HERO_VIDEO_SRC = 'https://pub-0f804855178c4f4e8184c4fef3bd5b2a.r2.dev/researchclerktre.mp4';
 
 type LocalizedText = { en: string; de: string };
 
@@ -168,10 +167,7 @@ function ResearchLanding({ isResearchHost }: { isResearchHost: boolean }) {
         isResearchHost={isResearchHost}
         hero={
           <section className="agero-hero-stage rs-hero" aria-labelledby="research-title">
-            <video className="rs-hero-video" autoPlay muted loop playsInline preload="metadata" aria-hidden="true">
-              <source src={RESEARCH_HERO_VIDEO_SRC} type="video/mp4" />
-            </video>
-            <div className="rs-hero-scrim" aria-hidden="true" />
+            <Grainient preset="black" />
             <div className="rs-hero-inner">
               <p className="rs-hero-label">{copy ? 'ClerkTree Forschung' : 'ClerkTree Research'}</p>
               <h1 id="research-title">
@@ -270,7 +266,7 @@ function ResearchDetail({ project, isResearchHost }: { project: ResearchProject;
         isResearchHost={isResearchHost}
         hero={
           <section className="agero-hero-stage agero-page-hero" aria-labelledby="research-project-title">
-            <BrandShader />
+            <Grainient preset="black" />
             <div className="agero-hero-stage-content">
               <p className="agero-page-hero-eyebrow">{project.number} · {project.category[language]}</p>
               <h1 id="research-project-title">{project.title[language]}</h1>

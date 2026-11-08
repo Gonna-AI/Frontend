@@ -3,7 +3,7 @@ import { ArrowDown, Check, Copy, FileJson, FileCode2, Mail, X } from 'lucide-rea
 
 import ClerkTreeLogo from '../components/Brand/ClerkTreeLogo';
 import ClerkTreeLockup from '../components/Brand/ClerkTreeLockup';
-import BrandShader from '../components/Brand/BrandShader';
+import Grainient from '../components/Brand/Grainient';
 import { Header, Footer } from '../components/Landing/AgeroChrome';
 import SEO from '../components/SEO';
 import './LandingFramer.css';
@@ -191,7 +191,7 @@ export default function Brand() {
         <Header />
 
         <section className="agero-hero-stage brand-hero" aria-labelledby="brand-hero-title">
-          <BrandShader />
+          <Grainient preset="black" />
           <div className="brand-hero-content">
             <img className="brand-hero-lockup" src={`${BRAND}/clerktree-lockup-inverse.svg`} alt="ClerkTree" width={300} height={65} />
             <h1 id="brand-hero-title">The ClerkTree brand</h1>

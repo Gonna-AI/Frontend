@@ -704,8 +704,6 @@
 /* ---------- Solutions capability showcase ---------- */
 .agero-works .cs-section { box-sizing: border-box; margin: 0 auto; max-width: 1360px; padding: clamp(72px, 9vw, 120px) clamp(16px, 4vw, 48px) clamp(56px, 6vw, 96px); }
 .agero-works .cs-heading { color: var(--agero-ink); margin-bottom: 44px; }
-.agero-works .cs-eyebrow { align-items: center; color: #6a6d70; display: flex; font: 500 11px/1 var(--font-ui) !important; gap: 9px; letter-spacing: .12em; margin: 0 0 24px; text-transform: uppercase; }
-.agero-works .cs-eyebrow > span { background: var(--agero-orange); border-radius: 50%; box-shadow: 0 0 0 4px rgba(255, 77, 0, .08); height: 5px; width: 5px; }
 .agero-works .cs-heading h2 { font-family: "Cal Sans", "Cal Sans Placeholder", sans-serif !important; font-size: clamp(38px, 4.8vw, 70px); font-weight: 400; letter-spacing: -.01em; line-height: 1.04; margin: 0; }
 .agero-works .cs-heading h2 > span { color: #8e9295; }
 .agero-works .cs-heading > div { align-items: end; display: flex; gap: 32px; justify-content: space-between; margin-top: 24px; }
@@ -906,3 +904,27 @@
 .agero-works .hs-model-svg { height: 12px; width: 12px; }
 .agero-works .hs-model.is-ours { background: #fff; box-shadow: 0 0 12px rgba(255, 255, 255, .25); color: #0a0a0a; }
 .agero-works .hs-model.is-ours .hs-model-svg { height: 14px; width: 14px; }
+
+/* Hero CTA: solid ink, crisp edge, arrow tile that slides on hover (matches the header button). */
+.agero-works .hs-cta {
+  align-items: center;
+  background: var(--agero-ink);
+  border-radius: 12px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .12), 0 1px 2px rgba(10, 10, 10, .2), 0 8px 18px -8px rgba(10, 10, 10, .45);
+  color: #fff;
+  display: inline-flex;
+  font: 500 15px/1 var(--font-ui) !important;
+  gap: 10px;
+  height: 44px;
+  padding: 0 6px 0 18px;
+  text-decoration: none;
+  transition: background-color .2s ease, transform .16s ease, box-shadow .2s ease;
+}
+.agero-works .hs-cta:hover { background: #222; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .14), 0 1px 2px rgba(10, 10, 10, .2), 0 12px 24px -10px rgba(10, 10, 10, .5); }
+.agero-works .hs-cta:active { transform: scale(.97); }
+.agero-works .hs-cta:focus-visible { outline: 2px solid var(--agero-orange); outline-offset: 3px; }
+.agero-works .hs-cta-icon { background: rgba(255, 255, 255, .1); border-radius: 8px; display: flex; height: 32px; overflow: hidden; position: relative; width: 32px; }
+.agero-works .hs-cta-track { display: flex; inset: 0; position: absolute; transform: translateX(-50%); transition: transform .6s cubic-bezier(.22, 1, .36, 1); width: 200%; }
+.agero-works .hs-cta-track svg { flex: 0 0 50%; height: 16px; margin: auto; }
+.agero-works .hs-cta:hover .hs-cta-track { transform: translateX(0); }
+@media (prefers-reduced-motion: reduce) { .agero-works .hs-cta-track { transition: none; } }

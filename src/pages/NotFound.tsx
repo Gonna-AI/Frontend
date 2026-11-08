@@ -3,7 +3,7 @@ import { ArrowLeft, ArrowUpRight } from 'lucide-react';
 
 import { Header, Footer } from '../components/Landing/AgeroChrome';
 import SEO from '../components/SEO';
-import BrandShader from '../components/Brand/BrandShader';
+import Grainient from '../components/Brand/Grainient';
 import { useLanguage } from '../contexts/LanguageContext';
 import './LandingFramer.css';
 
@@ -36,7 +36,7 @@ const NotFound = () => {
         <Header />
 
         <section className="agero-hero-stage agero-notfound-stage" aria-labelledby="notfound-title">
-          <BrandShader variant="ember" />
+          <Grainient preset="black" />
           <span className="agero-notfound-code" aria-hidden="true">404</span>
           <div className="agero-hero-stage-content">
             <p className="agero-notfound-eyebrow">{text.eyebrow}</p>

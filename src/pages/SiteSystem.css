@@ -248,25 +248,8 @@
 }
 
 /* ---------- Brand shader (live grain gradient behind dark stages) ---------- */
-.brand-shader {
-  inset: 0;
-  opacity: 0;
-  pointer-events: none;
-  position: absolute;
-  transition: opacity 900ms var(--agero-ease-out, ease);
-  z-index: 0;
-}
 
-.brand-shader.is-ready {
-  opacity: 1;
-}
 
-.brand-shader-canvas,
-.brand-shader-canvas canvas {
-  display: block;
-  height: 100%;
-  width: 100%;
-}
 
 /* ---------- Home "Über uns": expanding card ----------
    A white surface that starts inset with rounded corners (like the hero

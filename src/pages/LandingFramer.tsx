@@ -45,7 +45,7 @@ const HOME_VIDEO_UPLOAD_DATE = '2026-06-29';
 
 export default function LandingFramer() {
   useAgeroPageMotion();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
 
   return (
     <div className="agero-works agero-home-page" id="agero-works">
@@ -78,9 +78,14 @@ export default function LandingFramer() {
           </h1>
           <p className="agero-hero-copy">{t('home.hero.copy')}</p>
           <div className="agero-hero-actions">
-            <a className="agero-button agero-hero-cta" href="/contact">
-              <span>{t('home.hero.cta')}</span>
-              <span aria-hidden="true">→</span>
+            <a className="hs-cta" href="#solutions">
+              <span>{language === 'de' ? 'Mehr erfahren' : 'Learn more'}</span>
+              <span className="hs-cta-icon" aria-hidden="true">
+                <span className="hs-cta-track">
+                  <svg viewBox="0 0 16 16" fill="none"><path d="M6 3.5 10.5 8 6 12.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                  <svg viewBox="0 0 16 16" fill="none"><path d="M6 3.5 10.5 8 6 12.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                </span>
+              </span>
             </a>
           </div>
         </div>
