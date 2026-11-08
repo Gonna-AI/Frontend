@@ -14,7 +14,6 @@ const heading = {
     eyebrow: 'Solutions',
     title: ['Where teams use', 'ClerkTree'],
     intro: 'The right decision depends on more than a single reading. See how machine data, records and people come together when something needs attention.',
-    demo: 'Illustrative workflows · demo data',
     docTitle: 'Technical knowledge',
     docBody: 'Manuals and drawings hold the details. Find the part numbers, tolerances and procedures you need, with the source alongside each answer.',
     rfqTitle: 'Supplier decisions',
@@ -25,7 +24,6 @@ const heading = {
     eyebrow: 'Lösungen',
     title: ['Wo Teams', 'ClerkTree einsetzen'],
     intro: 'Eine einzelne Messung zeigt nicht das ganze Bild. Sehen Sie, wie Maschinendaten, Unterlagen und Menschen zusammenkommen, wenn etwas Aufmerksamkeit braucht.',
-    demo: 'Beispielabläufe · Demodaten',
     docTitle: 'Technisches Wissen',
     docBody: 'Handbücher und Zeichnungen enthalten die Details. Finden Sie Teilenummern, Toleranzen und Verfahren, mit der jeweiligen Quelle direkt daneben.',
     rfqTitle: 'Lieferantenentscheidungen',
@@ -76,7 +74,6 @@ export default function CapabilityShowcase() {
         <h2 id="cs-title">{h.title[0]}<br /><span>{h.title[1]}</span></h2>
         <div>
           <p>{h.intro}</p>
-          <small>{h.demo}</small>
         </div>
       </header>
       <div className="cs-grid">
