@@ -1,42 +1,16 @@
-import { type CSSProperties, type ReactNode, type VideoHTMLAttributes, Fragment, useEffect, useRef, useState } from 'react';
-import { MapPin } from 'lucide-react';
+import { type CSSProperties, type VideoHTMLAttributes, Fragment, useEffect, useState } from 'react';
 import Lenis from 'lenis';
 import { isSaveDataEnabled, shouldAutoplayMedia } from '../utils/idle';
 import { Footer, Header } from '../components/Landing/AgeroChrome';
 import { useLanguage } from '../contexts/LanguageContext';
 import SEO from '../components/SEO';
+import CapabilityCards from './solutions/CapabilityCards';
+import { CaseStudy, ConnectorPanel, HeroAgentCard, LogoWall, ProofChart, Spotlight, StoryTabs, useHomeCopy } from './home/HomeStory';
 import './LandingFramer.css';
 
 const BASE = 'https://pub-0f804855178c4f4e8184c4fef3bd5b2a.r2.dev';
 const HOME_HERO_VIDEO_SRC = `${BASE}/entrybox.mov`;
 const HOME_CONTACT_VIDEO_SRC = `${BASE}/hero.mov`;
-
-const works = [
-  {
-    key: 'work1' as const,
-    accent: '#e8651a',
-    page: '01',
-    bg: 'https://framerusercontent.com/images/x3RMizQqFhQ9G8jF5dqqcbxY8M.png?scale-down-to=2048',
-    cover: `${BASE}/VIDEO1.mp4`,
-    href: '/solutions',
-  },
-  {
-    key: 'work2' as const,
-    accent: '#232323',
-    page: '02',
-    bg: 'https://framerusercontent.com/images/MHwFX5PK3mWp7JJNseH8110qdg.png?scale-down-to=2048',
-    cover: `${BASE}/VIDEO2.mp4`,
-    href: '/solutions',
-  },
-  {
-    key: 'work3' as const,
-    accent: '#ffffff',
-    page: '03',
-    bg: 'https://framerusercontent.com/images/jXErNhJ75aLqKEeFiIYT76adrM8.png?scale-down-to=2048',
-    cover: `${BASE}/VIDEO3.mp4`,
-    href: '/contact',
-  },
-];
 
 const clientLogos = [
   { alt: 'BMW', src: '/client-logos/bmw.svg?v=2', width: 40, mobileWidth: 28 },
@@ -47,19 +21,6 @@ const clientLogos = [
   { alt: 'Zendesk', src: `${BASE}/client-logos/zendesk.svg`, width: 56, mobileWidth: 39 },
   { alt: 'Amplitude', src: `${BASE}/client-logos/amplitude.svg`, width: 140, mobileWidth: 80 },
 ];
-
-const showcaseImage = '/desktop1.png';
-
-const introTagsBase = [
-  { key: 'tag1' as const },
-  { key: 'tag2' as const },
-  { key: 'tag3' as const },
-  { key: 'tag4' as const },
-  { key: 'tag5' as const },
-  { key: 'tag6' as const },
-];
-
-const locationImage = 'https://pub-0f804855178c4f4e8184c4fef3bd5b2a.r2.dev/munich.jpg';
 
 const testimonialImage = 'https://pub-0f804855178c4f4e8184c4fef3bd5b2a.r2.dev/thdbuilding.jpg';
 
@@ -77,18 +38,8 @@ const plans = [
 
 const faqKeys = ['q1', 'q2', 'q3', 'q4', 'q5', 'q6'] as const;
 
-type LocalizedWork = (typeof works)[number] & {
-  title: string;
-  role: string;
-  description: string;
-  services: string[];
-};
-
 const flowerIcon =
   'https://framerusercontent.com/images/bPFUMYGmKDGU6pubiY2MFnjtBAk.svg?width=16&height=16';
-
-const ribbonFlower = 'https://framerusercontent.com/images/InxDM6L8xjRn2ZsMquQwkLQ0VLA.svg';
-const ribbonFlowerOrange = 'https://framerusercontent.com/images/7LCWzuhI2N54jKdu359awJ6cKLU.svg';
 
 const HOME_VIDEO_UPLOAD_DATE = '2026-06-29';
 
@@ -104,9 +55,6 @@ export default function LandingFramer() {
         canonical="https://clerktree.com/"
         preloadVideos={[
           { href: HOME_HERO_VIDEO_SRC, type: 'video/quicktime' },
-          { href: works[0].cover },
-          { href: works[1].cover },
-          { href: works[2].cover },
           { href: HOME_CONTACT_VIDEO_SRC, type: 'video/quicktime' },
         ]}
         videos={[
@@ -114,63 +62,59 @@ export default function LandingFramer() {
             name: t('home.hero.word1') + ' ' + t('home.hero.word2') + ' ' + t('home.hero.word3') + ' ' + t('home.hero.word4'),
             description: t('home.hero.copy'),
             contentUrl: HOME_HERO_VIDEO_SRC,
-            thumbnailUrl: works[0].bg,
+            thumbnailUrl: 'https://framerusercontent.com/images/x3RMizQqFhQ9G8jF5dqqcbxY8M.png?scale-down-to=2048',
             uploadDate: HOME_VIDEO_UPLOAD_DATE,
           },
           {
             name: t('home.contact.heading'),
             description: t('home.contact.tagline'),
             contentUrl: HOME_CONTACT_VIDEO_SRC,
-            thumbnailUrl: works[2].bg,
+            thumbnailUrl: 'https://framerusercontent.com/images/jXErNhJ75aLqKEeFiIYT76adrM8.png?scale-down-to=2048',
             uploadDate: HOME_VIDEO_UPLOAD_DATE,
           },
-          ...works.map((work) => ({
-            name: t(`home.${work.key}.title`),
-            description: t(`home.${work.key}.description`),
-            contentUrl: work.cover,
-            thumbnailUrl: work.bg,
-            uploadDate: HOME_VIDEO_UPLOAD_DATE,
-          })),
         ]}
       />
       <div className="agero-top-area">
         <Header />
 
-        <HomePrelude
-          heroContent={
-            <div
-              className="agero-hero-stage-content agero-hero-stage-content--home"
-              aria-labelledby="agero-works-title"
-              data-agero-reveal="hero"
-            >
-              <h1 className="agero-hero-title" id="agero-works-title" style={{ columnGap: "0.22em" }}>
-                <span>{t('home.hero.word1')}</span>
-                <span className="agero-orange">{t('home.hero.word2')}</span>
-                <span>{t('home.hero.word3')}</span>
-                <span>{t('home.hero.word4')}</span>
-              </h1>
+        <div className="agero-home-hero-copy" data-agero-reveal="hero">
+          <h1 className="agero-hero-title" id="agero-works-title" style={{ columnGap: "0.22em" }}>
+            <span>{t('home.hero.word1')}</span>
+            <span className="agero-orange">{t('home.hero.word2')}</span>
+            <span>{t('home.hero.word3')}</span>
+            <span>{t('home.hero.word4')}</span>
+          </h1>
+          <p className="agero-hero-copy">{t('home.hero.copy')}</p>
+          <div className="agero-hero-actions">
+            <a className="agero-button agero-hero-cta" href="/contact">
+              <span>{t('home.hero.cta')}</span>
+              <span aria-hidden="true">→</span>
+            </a>
+          </div>
+        </div>
 
-              <p className="agero-hero-copy">
-                {t('home.hero.copy')}
-              </p>
-
-              <div className="agero-hero-actions">
-                <a className="agero-button agero-hero-cta" href="/contact">
-                  <span>{t('home.hero.cta')}</span>
-                  <span aria-hidden="true">→</span>
-                </a>
-              </div>
-            </div>
-          }
-        />
+        <section className="agero-home-prelude" aria-label={t('home.showcase.aria')}>
+          <div className="agero-hero-stage agero-hero-stage--home has-demo" data-agero-reveal="up">
+            <LazyVideo className="agero-hero-stage-media" muted loop playsInline src={HOME_HERO_VIDEO_SRC} />
+            <div className="agero-hero-stage-scrim" aria-hidden="true" />
+            <HeroAgentCard />
+          </div>
+        </section>
       </div>
 
-      <RibbonStage />
-      <IntroStatement />
-      <LocationIntro />
-      <Testimonials />
-
-      <Portfolio />
+      <LogoWall logos={clientLogos} />
+      <StoryTabs />
+      <Spotlight />
+      <CaseStudy
+        quote={t('home.testimonial.quote')}
+        name={t('home.testimonial.name')}
+        role={t('home.testimonial.role')}
+        image={testimonialImage}
+        stats={[1, 2, 3].map((n) => [t(`home.testimonials.stat${n}Value`), t(`home.testimonials.stat${n}Label`)] as [string, string])}
+      />
+      <ProofChart />
+      <HomeCapabilities />
+      <ConnectorPanel />
 
       <Pricing />
       <Faq />
@@ -180,303 +124,9 @@ export default function LandingFramer() {
   );
 }
 
-function Portfolio() {
-  const { t } = useLanguage();
-  const localizedWorks = works.map((work) => ({
-    ...work,
-    title: t(`home.${work.key}.title`),
-    role: t(`home.${work.key}.role`),
-    description: t(`home.${work.key}.description`),
-    services: [1, 2, 3, 4].map((n) => t(`home.${work.key}.service${n}`)),
-  }));
-
-  return (
-    <section className="agero-portfolio" aria-labelledby="agero-portfolio-title">
-      <p className="agero-section-kicker" data-agero-reveal="up">
-        ({t('home.portfolio.kicker')})
-      </p>
-      <h2
-        className="agero-portfolio-title"
-        data-agero-reveal="title"
-        id="agero-portfolio-title"
-      >
-        {t('home.portfolio.heading')}
-      </h2>
-
-      <div className="agero-work-list">
-        {localizedWorks.map((work, index) => (
-          <WorkCard index={index} key={work.key} work={work} />
-        ))}
-      </div>
-    </section>
-  );
-}
-
-function HomePrelude({ heroContent }: { heroContent: ReactNode }) {
-  const { t } = useLanguage();
-  return (
-    <section className="agero-home-prelude" aria-label={t('home.showcase.aria')}>
-      <div className="agero-showcase-shell" data-agero-reveal="up">
-        <div className="agero-hero-stage agero-hero-stage--home">
-          <LazyVideo
-            className="agero-hero-stage-media"
-            muted
-            loop
-            playsInline
-            src={HOME_HERO_VIDEO_SRC}
-          />
-          <div className="agero-hero-stage-scrim" aria-hidden="true" />
-          {heroContent}
-        </div>
-
-        <div className="agero-client-logo-strip">
-          <p className="agero-client-logo-label">{t('home.showcase.supportedBy')}</p>
-          <div className="agero-client-logo-track" aria-label={t('home.showcase.logosAria')}>
-            {Array.from({ length: 3 }).map((_, groupIndex) => (
-              <div className="agero-client-logo-set" aria-hidden={groupIndex > 0} key={groupIndex}>
-                {clientLogos.map((logo) => (
-                  <img
-                    alt={groupIndex === 0 ? logo.alt : ''}
-                    decoding="async"
-                    height="32"
-                    key={`${groupIndex}-${logo.src}`}
-                    loading="lazy"
-                    src={logo.src}
-                    style={{ '--logo-width': `${logo.width}px`, '--logo-mobile-width': `${logo.mobileWidth}px`, ...(logo.alt === 'BMW' ? { filter: 'grayscale(1)' } : {}) } as CSSProperties}
-                    width={logo.width}
-                  />
-                ))}
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function RibbonStage() {
-  const { t } = useLanguage();
-  const metricItems = [1, 2, 3].map((n) => t(`home.ribbon.metric${n}`));
-  const serviceItems = [1, 2, 3].map((n) => t(`home.ribbon.service${n}`));
-
-  return (
-    <section className="agero-ribbon-stage" aria-hidden="true">
-      <RibbonRow items={metricItems} variant="black" />
-      <RibbonRow items={serviceItems} variant="orange" />
-    </section>
-  );
-}
-
-/**
- * Scroll-driven "expanding card": writes --expand (0..1) on the element.
- * 0 = inset rounded panel, 1 = full bleed. It grows as the section scrolls in
- * and contracts again as it scrolls out, so neither edge is a hard cut.
- * One passive listener, rAF-throttled, only while the section is near the
- * viewport. Reduced motion keeps the static inset panel.
- */
-function useScrollExpand<T extends HTMLElement>() {
-  const ref = useRef<T>(null);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return undefined;
-
-    let frame = 0;
-    let active = false;
-    const clamp = (v: number) => Math.min(1, Math.max(0, v));
-    const update = () => {
-      frame = 0;
-      const vh = window.innerHeight || 1;
-      const rect = el.getBoundingClientRect();
-      const enter = clamp((vh - rect.top) / (vh * 0.7));
-      const exit = clamp(rect.bottom / (vh * 0.7));
-      const p = Math.min(enter, exit);
-      const eased = p * p * (3 - 2 * p);
-      el.style.setProperty('--expand', eased.toFixed(4));
-    };
-    const onScroll = () => {
-      if (active && !frame) frame = requestAnimationFrame(update);
-    };
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        active = Boolean(entry?.isIntersecting);
-        if (active) update();
-      },
-      { rootMargin: '25% 0px' },
-    );
-
-    observer.observe(el);
-    window.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('resize', onScroll, { passive: true });
-    return () => {
-      observer.disconnect();
-      window.removeEventListener('scroll', onScroll);
-      window.removeEventListener('resize', onScroll);
-      cancelAnimationFrame(frame);
-    };
-  }, []);
-
-  return ref;
-}
-
-function IntroStatement() {
-  const { t } = useLanguage();
-  const introTags = introTagsBase.map(({ key }) => ({ label: t(`home.about.${key}`) }));
-  const sectionRef = useScrollExpand<HTMLElement>();
-
-  return (
-    <section className="agero-about-intro is-expandable" aria-labelledby="agero-about-intro-title" ref={sectionRef}>
-      <div className="agero-hello" data-agero-reveal="up">
-        <span aria-hidden="true">(</span>
-        <span className="agero-hello-script">{t('home.about.kicker')}</span>
-        <span aria-hidden="true">)</span>
-      </div>
-
-      <h2
-        className="agero-about-heading"
-        data-agero-reveal="title"
-        id="agero-about-intro-title"
-      >
-        {t('home.about.headingPre')}{' '}
-        <span>{t('home.about.headingEmphasis')}</span> {t('home.about.headingPost')}
-      </h2>
-
-      <div className="agero-intro-tags" data-agero-reveal="up">
-        {introTags.map(({ label }) => (
-          <span className="agero-intro-tag" key={label}>
-            {label}
-          </span>
-        ))}
-      </div>
-    </section>
-  );
-}
-
-function LocationIntro() {
-  const { t } = useLanguage();
-  const locationDetails = [
-    [t('home.office.addressLabel'), t('home.office.address')],
-    [t('home.office.regionLabel'), t('home.office.region')],
-  ];
-
-  return (
-    <section className="agero-founder" aria-labelledby="agero-founder-title">
-      <p className="agero-section-kicker" data-agero-reveal="up">
-        ({t('home.office.kicker')})
-      </p>
-      <h2 className="agero-founder-watermark" data-agero-reveal="title">
-        {t('home.office.heading')}
-      </h2>
-
-      <div className="agero-founder-grid">
-        <figure className="agero-founder-portrait" data-agero-reveal="up">
-          <img alt={t('home.office.imageAlt')} className="agero-founder-image" decoding="async" loading="lazy" src={locationImage} />
-          <div className="agero-founder-socials" aria-label={t('home.office.socialAria')}>
-            <a
-              aria-label={t('home.office.mapAria')}
-              href="https://maps.app.goo.gl/6p7fB1u5Qbk3fNB18"
-              target="_blank"
-              rel="noreferrer"
-            >
-              <MapPin aria-hidden="true" size={18} strokeWidth={1.8} />
-            </a>
-          </div>
-        </figure>
-
-        <div className="agero-founder-copy" data-agero-reveal="up">
-          <div>
-            <h3 id="agero-founder-title">{t('home.office.title')}</h3>
-            <p>
-              {t('home.office.desc')}
-            </p>
-          </div>
-
-          <span className="agero-founder-rule" aria-hidden="true" />
-
-          <div className="agero-founder-history">
-            {locationDetails.map(([key, val]) => (
-              <div className="agero-founder-history-row" key={key}>
-                <span>{key}</span>
-                <span>{val}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function RibbonRow({ items, variant }: { items: string[]; variant: 'black' | 'orange' }) {
-  const repeatedItems = Array.from({ length: 4 }).flatMap(() => items);
-
-  return (
-    <div className={`agero-diagonal-ribbon agero-ribbon-${variant}`}>
-      <div className="agero-ribbon-track">
-        {repeatedItems.map((item, index) => (
-          <span className="agero-ribbon-item" key={`${variant}-${item}-${index}`}>
-            <span>{item}</span>
-            <img alt="" decoding="async" loading="lazy" src={variant === 'orange' ? ribbonFlowerOrange : ribbonFlower} />
-          </span>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function Testimonials() {
-  const { t } = useLanguage();
-  const testimonialStats = [1, 2, 3].map((n) => [t(`home.testimonials.stat${n}Value`), t(`home.testimonials.stat${n}Label`)]);
-  const testimonial = {
-    quote: t('home.testimonial.quote'),
-    name: t('home.testimonial.name'),
-    role: t('home.testimonial.role'),
-  };
-
-  return (
-    <section className="agero-testimonials" aria-labelledby="agero-testimonials-title">
-      <p className="agero-section-kicker" data-agero-reveal="up">
-        ({t('home.testimonials.kicker')})
-      </p>
-      <h2
-        className="agero-testimonial-watermark"
-        data-agero-reveal="title"
-        id="agero-testimonials-title"
-      >
-        {t('home.testimonials.heading')}
-      </h2>
-
-      <div className="agero-testimonial-grid">
-        <aside className="agero-stats-card" data-agero-reveal="up">
-          {testimonialStats.map(([value, label]) => (
-            <div className="agero-stat" key={label}>
-              <strong>{value}</strong>
-              <span>{label}</span>
-            </div>
-          ))}
-        </aside>
-
-        <article
-          className="agero-testimonial-card"
-          data-agero-reveal="up"
-          style={{ '--testimonial-image': `url("${testimonialImage}")` } as CSSProperties}
-        >
-          <img alt="THD GmbH plant" className="agero-testimonial-image" decoding="async" loading="lazy" src={testimonialImage} />
-          <div className="agero-testimonial-shade" aria-hidden="true" />
-          <div className="agero-testimonial-content">
-            <div className="agero-testimonial-bottom">
-              <blockquote>{testimonial.quote}</blockquote>
-              <div className="agero-testimonial-author">
-                <span>{testimonial.name}</span>
-                <span>{testimonial.role}</span>
-              </div>
-            </div>
-          </div>
-        </article>
-      </div>
-    </section>
-  );
+function HomeCapabilities() {
+  const c = useHomeCopy();
+  return <CapabilityCards heading={{ eyebrow: c.bentoEyebrow, title: c.bentoTitle, intro: c.bentoIntro }} />;
 }
 
 function useAgeroPageMotion() {
@@ -514,7 +164,7 @@ function useAgeroPageMotion() {
         const target = document.querySelector(hash);
         if (!target) return;
         event.preventDefault();
-        lenis.scrollTo(target, { offset: 0 });
+        lenis.scrollTo(target as HTMLElement, { offset: 0 });
       };
       anchor.addEventListener('click', handler);
       anchorHandlers.push(() => anchor.removeEventListener('click', handler));
@@ -701,62 +351,6 @@ function SplitText({ text }: { text: string }) {
         );
       })}
     </span>
-  );
-}
-
-
-function WorkCard({ index, work }: { index: number; work: LocalizedWork }) {
-  const { t } = useLanguage();
-  return (
-    <article
-      className="agero-sol-row"
-      data-agero-reveal="card"
-      style={
-        {
-          '--accent': work.accent,
-          '--card-index': String(index),
-          '--reveal-delay': `${index * 150}ms`,
-        } as CSSProperties
-      }
-    >
-      <div className="agero-sol-header">
-        <span className="agero-sol-role">{work.role}</span>
-      </div>
-
-      <div className="agero-sol-body">
-        <div className="agero-sol-title-row">
-          <h3 className="agero-sol-title">{work.title}</h3>
-          <a aria-label={t('home.work.viewAria').replace('{title}', work.title)} className="agero-sol-arrow" href={work.href}>
-            ↗
-          </a>
-        </div>
-        <p className="agero-sol-desc">{work.description}</p>
-        <div className="agero-sol-tags" aria-label={t('home.work.servicesAria')}>
-          {work.services.map((service) => (
-            <span className="agero-sol-tag" key={service}>{service}</span>
-          ))}
-        </div>
-      </div>
-
-      <a aria-label={t('home.work.seeActionAria').replace('{title}', work.title)} className="agero-sol-media" href={work.href}>
-        <LazyVideo
-          className="agero-sol-video"
-          loop
-          muted
-          playsInline
-          src={work.cover}
-        />
-      </a>
-    </article>
-  );
-}
-
-function MetaBlock({ label, value }: { label: string; value: string }) {
-  return (
-    <div>
-      <p className="agero-meta-label">{label}</p>
-      <p className="agero-meta-value">{value}</p>
-    </div>
   );
 }
 

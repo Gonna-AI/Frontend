@@ -161,9 +161,6 @@
 .agero-works .agero-plan-card,
 .agero-works .agero-faq-item,
 .agero-works .agero-sol-row,
-.agero-works .agero-stats-card,
-.agero-works .agero-testimonial-card,
-.agero-works .agero-founder-portrait,
 .agero-works .clerktree-blog-card-inner,
 .agero-works .clerktree-contact-map,
 .agero-works .clerktree-contact-info-card,
@@ -277,40 +274,9 @@
    shell) and widens to full bleed as it scrolls in, then contracts on the
    way out. Drawn with clip-path on a background layer so scrolling never
    triggers layout; --expand comes from useScrollExpand(). */
-.agero-works .agero-about-intro.is-expandable {
-  --expand: 0;
-  --expand-inset: clamp(var(--gutter), 3.2vw, 56px);
-  isolation: isolate;
-  padding-top: clamp(72px, 8vw, 120px);
-  position: relative;
-}
-
-.agero-works .agero-about-intro.is-expandable::before {
-  background:
-    radial-gradient(90% 60% at 50% 0%, #ffffff, #fbfbfb 70%),
-    #fff;
-  clip-path: inset(
-    0 calc(var(--expand-inset) * (1 - var(--expand)))
-    round calc(var(--r-edge) * (1 - var(--expand)))
-  );
-  content: "";
-  inset: 0;
-  pointer-events: none;
-  position: absolute;
-  z-index: -1;
-}
-
-@media (max-width: 767px) {
-  .agero-works .agero-about-intro.is-expandable {
-    --expand-inset: var(--gutter);
-  }
-}
 
 /* The ribbon band used to fade toward the old #DCDCDC canvas, leaving a
    darker strip with a hard bottom edge on the new canvas. Fade to canvas. */
-.agero-works .agero-ribbon-stage::before {
-  background: linear-gradient(180deg, rgba(244, 244, 244, 0), rgba(244, 244, 244, 0.6));
-}
 
 /* Solutions keeps the same 8px page gutter on phones as every other page. */
 @media (max-width: 767px) {

@@ -977,9 +977,14 @@ function AnimatedCard({
   );
 }
 
-export default function CapabilityCards() {
+type CapabilityHeading = { eyebrow?: string; title?: [string, string]; intro?: string };
+
+export default function CapabilityCards({ heading }: { heading?: CapabilityHeading } = {}) {
   const { language, t } = useLanguage();
   const l = operationsCopy[language === "de" ? "de" : "en"];
+  const eyebrow = heading?.eyebrow ?? l.eyebrow;
+  const title = heading?.title ?? l.title;
+  const intro = heading?.intro ?? l.intro;
   const [reduced, setReduced] = useState(
     () => window.matchMedia("(prefers-reduced-motion: reduce)").matches,
   );
@@ -1037,15 +1042,15 @@ export default function CapabilityCards() {
       <header className="cx-heading">
         <p className="cx-eyebrow">
           <span />
-          {l.eyebrow}
+          {eyebrow}
         </p>
         <h2 id="cx-title">
-          {l.title[0]}
+          {title[0]}
           <br />
-          <span>{l.title[1]}</span>
+          <span>{title[1]}</span>
         </h2>
         <div>
-          <p>{l.intro}</p>
+          <p>{intro}</p>
           <span className="cx-demo-label">{l.demo}</span>
         </div>
       </header>
@@ -1065,5 +1070,42 @@ export default function CapabilityCards() {
         ))}
       </div>
     </section>
+  );
+}
+
+export type CapabilitySceneId = "signal" | "agent" | "docs" | "rfq" | "graph" | "production";
+
+/** One capability scene on its own dark stage (used by the homepage story and spotlight). */
+export function CapabilityStage({ scene, className = "" }: { scene: CapabilitySceneId; className?: string }) {
+  const { language } = useLanguage();
+  const l = operationsCopy[language === "de" ? "de" : "en"];
+  const ref = useRef<HTMLDivElement>(null);
+  const [visible, setVisible] = useState(false);
+  const [frame, setFrame] = useState(0);
+  const reduced = typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const live = visible && !reduced;
+  useEffect(() => {
+    const observer = new IntersectionObserver(([entry]) => setVisible(entry.isIntersecting), { threshold: 0.12 });
+    if (ref.current) observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, []);
+  useEffect(() => {
+    if (!live) return;
+    const timer = window.setInterval(() => setFrame((n) => (n + 1) % 40), scene === "agent" ? 160 : 320);
+    return () => window.clearInterval(timer);
+  }, [live, scene]);
+  const f = reduced ? 32 : frame;
+  const render = {
+    signal: () => <SignalScene l={l} frame={f} />,
+    agent: () => <AgentScene l={l} frame={f} />,
+    docs: () => <DocumentScene l={l} frame={f} />,
+    rfq: () => <RfqScene l={l} frame={f} language={language} />,
+    graph: () => <GraphScene l={l} frame={f} />,
+    production: () => <ProductionScene l={l} frame={f} />,
+  }[scene];
+  return (
+    <div ref={ref} className={`cx-card cx-card--${scene} cx-stage is-revealed${live ? " is-live" : ""} ${className}`} aria-hidden="true">
+      <div className="cx-card__visual">{render()}</div>
+    </div>
   );
 }
