@@ -341,8 +341,19 @@ function SplitText({ text }: { text: string }) {
   );
 }
 
+const planMeta = {
+  en: [
+    { badge: 'Standard', chips: ['Cloud or VPC', 'Live in 2–4 weeks'] },
+    { badge: 'Custom', chips: ['On-prem or edge', 'Custom models'] },
+  ],
+  de: [
+    { badge: 'Standard', chips: ['Cloud oder VPC', 'Live in 2–4 Wochen'] },
+    { badge: 'Individuell', chips: ['On-Prem oder Edge', 'Eigene Modelle'] },
+  ],
+};
+
 function Pricing() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const localizedPlans = plans.map((plan) => ({
     ...plan,
     name: t(`home.${plan.key}.name`),
@@ -383,8 +394,9 @@ function Pricing() {
             }
           >
             <div className="agero-plan-left">
-              <div className="agero-plan-icon" aria-hidden="true">
-                {plan.featured ? '⌁' : '✦'}
+              <div className="agero-plan-tags">
+                <span className="agero-plan-badge">{planMeta[language === 'de' ? 'de' : 'en'][index].badge}</span>
+                {planMeta[language === 'de' ? 'de' : 'en'][index].chips.map((chip) => <span className="agero-plan-chip" key={chip}>{chip}</span>)}
               </div>
               <div>
                 <h3>{plan.name}</h3>
