@@ -4,81 +4,13 @@ import { sanitizeTrustedHtml } from '../../utils/sanitizeHtml';
 import { PageHero, Footer } from '../Landing/AgeroChrome';
 import SEO from '../SEO';
 import '../../pages/LandingFramer.css';
+import './LegalPage.css';
 
 type LegalHtmlPageProps = {
   description: string;
   htmlUrl: string;
   title: string;
 };
-
-const legalStyles = `
-  .legal-content {
-    color: rgba(19, 19, 19, 0.78);
-    content-visibility: auto;
-    contain-intrinsic-size: auto 4000px;
-    font-size: 0.95rem;
-    line-height: 1.85;
-    font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    text-align: left;
-  }
-  .legal-content * { background-color: transparent !important; }
-  /* Termly ships inline Arial; keep the document on the brand text face. */
-  .legal-content :where(p, span, li, div, td, th, a, bdt, strong, em) { font-family: inherit !important; }
-  .legal-content div,
-  .legal-content p,
-  .legal-content span,
-  .legal-content h1,
-  .legal-content h2,
-  .legal-content h3,
-  .legal-content h4 {
-    text-align: left !important;
-  }
-  .legal-content h1,
-  .legal-content h2,
-  .legal-content h3,
-  .legal-content h4 {
-    color: rgb(19, 19, 19) !important;
-    font-family: "Cal Sans", "Inter Display", "Inter", system-ui, sans-serif !important;
-    font-weight: 400;
-    letter-spacing: -0.02em;
-  }
-  .legal-content h1 { font-size: 1.75rem; margin-top: 1.6rem; margin-bottom: 0.8rem; }
-  .legal-content h2 { font-size: 1.35rem; margin-top: 1.5rem; margin-bottom: 0.6rem; }
-  .legal-content h3 { font-size: 1.1rem; margin-top: 1.25rem; margin-bottom: 0.5rem; }
-  .legal-content p,
-  .legal-content span,
-  .legal-content li { color: rgba(19, 19, 19, 0.72) !important; }
-  .legal-content a {
-    color: rgb(255, 77, 0) !important;
-    text-decoration: underline;
-    text-underline-offset: 4px;
-    transition: opacity 150ms ease;
-  }
-  .legal-content a:hover { opacity: 0.72; }
-  .legal-content strong { color: rgb(19, 19, 19) !important; font-weight: 600; }
-  .legal-content ul,
-  .legal-content ol { padding-left: 1.25rem; margin-top: 0.6rem; margin-bottom: 0.8rem; }
-  .legal-content li { margin-bottom: 0.4rem; }
-  .legal-content hr {
-    border: none;
-    border-top: 1px solid rgba(19, 19, 19, 0.1);
-    margin: 1.75rem 0;
-  }
-  .legal-content table { width: 100%; border-collapse: collapse; margin: 1.25rem 0; }
-  .legal-content th,
-  .legal-content td {
-    border: 1px solid rgba(19, 19, 19, 0.12);
-    padding: 0.65rem 0.8rem;
-    vertical-align: top;
-    color: rgba(19, 19, 19, 0.72) !important;
-  }
-  .legal-content th {
-    color: rgb(19, 19, 19) !important;
-    background: rgba(19, 19, 19, 0.04) !important;
-    text-align: left;
-    font-weight: 600;
-  }
-`;
 
 export default function LegalHtmlPage({ description, htmlUrl, title }: LegalHtmlPageProps) {
   const [html, setHtml] = useState('');
@@ -137,8 +69,6 @@ export default function LegalHtmlPage({ description, htmlUrl, title }: LegalHtml
         {/* ── Content Card ── */}
         <main className="agero-legal-content-wrap" id="main-content">
           <div className="agero-legal-card">
-            <style>{legalStyles}</style>
-
             {status === 'loading' && (
               <div className="agero-legal-skeleton" aria-label="Loading legal document" />
             )}

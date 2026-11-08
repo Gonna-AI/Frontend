@@ -42,51 +42,37 @@ export default function FooterAscii() {
 
     function draw() {
       if (video.readyState < 2 || !video.videoWidth || !cols) return;
-      // Fit in CSS pixels first: the character cells are taller than they are
-      // wide, so fitting directly in grid coordinates distorts the picture.
+      // Fit the complete video in CSS pixels: character cells are taller than
+      // they are wide, so fitting in grid coordinates would distort the image.
       const scale = Math.min(width / video.videoWidth, height / video.videoHeight);
       const sourceWidth = video.videoWidth * scale / width * cols;
       const sourceHeight = video.videoHeight * scale / height * rows;
       sampleContext!.fillStyle = '#000';
       sampleContext!.fillRect(0, 0, cols, rows);
-      // The mobile footer is tall: anchor the landscape frame to the bottom
-      // so it sits behind the wordmark instead of floating between link groups.
-      const sourceTop = width <= 640 ? rows - sourceHeight : (rows - sourceHeight) / 2;
+      // Center the full image behind the wordmark on every screen.
+      const sourceTop = (rows - sourceHeight) / 2;
       const sourceLeft = (cols - sourceWidth) / 2;
       sampleContext!.drawImage(video, sourceLeft, sourceTop, sourceWidth, sourceHeight);
       const pixels = sampleContext!.getImageData(0, 0, cols, rows).data;
       const cellWidth = width / cols;
       const cellHeight = height / rows;
-      context!.fillStyle = '#090b0c';
-      context!.fillRect(0, 0, width, height);
+      context!.clearRect(0, 0, width, height);
       context!.font = `${Math.max(5, cellHeight * 0.86)}px ui-monospace, SFMono-Regular, Menlo, monospace`;
       context!.textAlign = 'center';
       context!.textBaseline = 'middle';
-      // Mirror narrow strips from the footage itself into the unused space.
-      // This continues its real texture and motion without distorting the
-      // central image or introducing a different procedural pattern.
-      const edgeCoordinate = (value: number, start: number, size: number, limit: number) => {
-        const first = Math.max(0, Math.ceil(start));
-        const last = Math.min(limit - 1, Math.floor(start + size - 1));
-        const strip = Math.max(1, Math.min(14, Math.floor((last - first + 1) / 3)));
-        const mirror = (distance: number) => {
-          const cycle = distance % (strip * 2);
-          return cycle < strip ? cycle : strip * 2 - cycle - 1;
-        };
-        if (value < first) return Math.min(last, first + mirror(first - value - 1));
-        if (value > last) return Math.max(first, last - mirror(value - last - 1));
-        return value;
-      };
-      const xSamples = Array.from({ length: cols }, (_, x) => edgeCoordinate(x, sourceLeft, sourceWidth, cols));
-      const ySamples = Array.from({ length: rows }, (_, y) => edgeCoordinate(y, sourceTop, sourceHeight, rows));
       // Quantized tones keep the animation legible without thousands of style changes.
       for (let tone = 1; tone <= 5; tone++) {
         context!.fillStyle = `rgba(244, 221, 200, ${0.13 + tone * 0.15})`;
         for (let y = 0; y < rows; y++) {
           for (let x = 0; x < cols; x++) {
-            const i = (ySamples[y] * cols + xSamples[x]) * 4;
-            const light = (pixels[i] * 0.2126 + pixels[i + 1] * 0.7152 + pixels[i + 2] * 0.0722) / 255;
-            if (Math.min(5, Math.ceil(light * 5)) !== tone || light < 0.035) continue;
+            const nx = (x - sourceLeft) / sourceWidth * 2 - 1;
+            const ny = (y - sourceTop) / sourceHeight * 2 - 1;
+            const distance = Math.sqrt(nx * nx * 0.49 + ny * ny);
+            const fade = Math.max(0, Math.min(1, (1 - distance) / 0.38));
+            if (!fade) continue;
+            const i = (y * cols + x) * 4;
+            const light = (pixels[i] * 0.2126 + pixels[i + 1] * 0.7152 + pixels[i + 2] * 0.0722) / 255 * fade;
+            if (Math.min(5, Math.ceil(light * 5)) !== tone || light < 0.1) continue;
             const glyph = characters[Math.min(characters.length - 1, Math.floor(Math.sqrt(light) * (characters.length - 1)))];
             context!.fillText(glyph, (x + 0.5) * cellWidth, (y + 0.5) * cellHeight);
           }

@@ -25,6 +25,10 @@ export const GRAINIENT_PRESETS = {
     colors: ['#6e6e70', '#0b0b0b', '#2c2c2e'],
     settings: { uTimeSpeed: 1.3, uColorBalance: 0.3, uWarpFrequency: 6, uContrast: 1.2 },
   },
+  footer: {
+    colors: ['#777779', '#161618', '#343436'],
+    settings: { uTimeSpeed: 0.6, uColorBalance: -0.1, uWarpFrequency: 5, uContrast: 1.05, uGrainAmount: 0.13 },
+  },
 } as const;
 
 export type GrainientPreset = keyof typeof GRAINIENT_PRESETS;

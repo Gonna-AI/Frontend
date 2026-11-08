@@ -1,3 +1,11 @@
+.agero-footer-grain {
+  background: linear-gradient(145deg, #404044, #111113 64%, #080809);
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  position: absolute;
+  z-index: 0;
+}
 .agero-footer-ascii {
   inset: 0;
   overflow: hidden;
@@ -8,7 +16,7 @@
 .agero-footer-ascii video { height: 1px; opacity: 0; position: absolute; width: 1px; }
 .agero-footer-ascii canvas { display: block; height: 100%; width: 100%; }
 .agero-footer-inner:has(.agero-footer-ascii)::before {
-  background: linear-gradient(180deg, rgba(8, 10, 11, .6), rgba(8, 10, 11, .5) 54%, rgba(8, 10, 11, .24));
+  background: linear-gradient(180deg, rgba(4, 4, 5, .18), rgba(4, 4, 5, .38) 65%, rgba(4, 4, 5, .52));
   z-index: 1;
 }
 .agero-footer-inner:has(.agero-footer-ascii) :is(.agero-footer-main, .agero-footer-bottom, .agero-footer-logo) { z-index: 2; }

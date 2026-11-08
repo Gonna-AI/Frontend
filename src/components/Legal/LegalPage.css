@@ -1,0 +1,73 @@
+/* The generated legal documents keep their text and anchors; presentation is
+   normalized here so their inline vendor styles match the rest of the site. */
+.agero-works .agero-legal-page-container {
+  margin: 0 auto;
+  max-width: 1180px;
+  padding: 24px clamp(16px, 3vw, 32px) clamp(72px, 9vw, 128px);
+}
+.agero-works .agero-legal-card {
+  background: #fff;
+  border: 1px solid rgba(19, 19, 19, .07);
+  border-radius: clamp(24px, 3vw, 36px);
+  box-shadow: 0 12px 40px rgba(19, 19, 19, .035);
+  padding: clamp(32px, 6vw, 80px) clamp(24px, 7vw, 96px);
+}
+.agero-works .agero-legal-card:hover {
+  border-color: rgba(19, 19, 19, .07);
+  box-shadow: 0 12px 40px rgba(19, 19, 19, .035);
+}
+.agero-works .agero-legal-card::before { content: none; }
+.agero-works .agero-legal-card .legal-content {
+  color: #525252;
+  content-visibility: auto;
+  contain-intrinsic-size: auto 4000px;
+  font: 400 16px/1.75 "Geist", "Inter", system-ui, sans-serif;
+  margin: 0 auto;
+  max-width: 760px;
+  overflow-wrap: anywhere;
+  text-align: left;
+  width: 100%;
+}
+.agero-works .legal-content * { background-color: transparent !important; }
+.agero-works .legal-content :where(div, p, span, li, td, th, bdt, a, strong, b, em, i) {
+  font-family: inherit !important;
+  font-size: inherit !important;
+  line-height: inherit !important;
+  text-align: left !important;
+}
+.agero-works .legal-content :where(div, p, span, li, td, bdt) { color: inherit !important; }
+.agero-works .legal-content :where(h1, h2, h3, h4) {
+  color: #161616 !important;
+  font-family: "Geist", "Inter", system-ui, sans-serif !important;
+  font-weight: 500;
+  letter-spacing: -.035em;
+  line-height: 1.2 !important;
+  overflow-wrap: anywhere;
+  text-align: left !important;
+}
+.agero-works .legal-content h1 { font-size: clamp(28px, 3vw, 38px); margin: 0 0 14px; }
+.agero-works .legal-content h2 { font-size: clamp(21px, 2vw, 26px); margin: 2.2em 0 .7em; }
+.agero-works .legal-content h3, .agero-works .legal-content h4 { font-size: 18px; margin: 1.8em 0 .6em; }
+.agero-works .legal-content :where(strong, b) { color: #191919 !important; font-weight: 600; }
+.agero-works .legal-content a, .agero-works .legal-content a :where(span, bdt, strong) {
+  color: #252525 !important;
+  text-decoration: underline;
+  text-decoration-color: rgba(255, 77, 0, .7);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+.agero-works .legal-content a:hover { color: #ed4e18 !important; }
+.agero-works .legal-content :where(ul, ol) { margin: .65em 0 1em; padding-left: 1.4em; }
+.agero-works .legal-content li { margin-bottom: .45em; }
+.agero-works .legal-content li::marker { color: #a6a6a6; }
+.agero-works .legal-content hr { border: 0; border-top: 1px solid #e8e8e8; margin: 2em 0; }
+.agero-works .legal-content table { border-collapse: collapse; margin: 1.5em 0; max-width: 100%; table-layout: fixed; width: 100% !important; }
+.agero-works .legal-content :where(th, td) { border: 1px solid #e5e5e5; overflow-wrap: anywhere; padding: .75em; vertical-align: top; width: auto !important; }
+.agero-works .legal-content th { color: #191919 !important; font-weight: 600; }
+.agero-works .legal-content :where(img, iframe) { max-width: 100%; }
+@media (max-width: 640px) {
+  .agero-works .agero-legal-page-container { padding: 16px 12px 72px; }
+  .agero-works .agero-legal-card { padding: 32px 22px 40px; }
+  .agero-works .agero-legal-card .legal-content { font-size: 15px; line-height: 1.7; }
+  .agero-works .legal-content :where(th, td) { padding: .5em; }
+}
