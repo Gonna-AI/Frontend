@@ -312,37 +312,136 @@
   color: var(--agero-ink);
 }
 
-/* Clear space: the shaded band is 1X = half the mark height. The lockup is
-   drawn at height H, so the band is H / 2 on every side. */
+/* Clear space: a measured construction drawing. Strokes stay hairline at any size. */
 .brand-clearspace {
-  padding: 0 6%;
+  padding: 3% 7%;
 }
 
-.brand-clearspace-box {
-  --h: clamp(34px, 4.2vw, 64px);
-  background:
-    repeating-linear-gradient(135deg, rgba(255, 77, 0, 0.16) 0 1px, transparent 1px 7px),
-    rgba(255, 77, 0, 0.06);
-  outline: 1px dashed rgba(255, 77, 0, 0.55);
-  padding: calc(var(--h) / 2);
-  position: relative;
-}
-
-.brand-clearspace-box img {
-  background: #fff;
-  display: block;
-  height: var(--h);
-  width: auto;
-}
-
-.brand-clearspace-x {
+.brand-clearspace-diagram {
   color: rgb(255, 77, 0);
-  font-size: 11px;
+  display: block;
+  height: auto;
+  overflow: visible;
+  width: 100%;
+}
+
+.brand-clearspace-diagram :is(line, rect, circle, path) {
+  vector-effect: non-scaling-stroke;
+}
+
+.brand-clearspace-diagram .cs-grid line {
+  stroke: rgba(19, 19, 19, 0.14);
+  stroke-dasharray: 2 4;
+  stroke-width: 1;
+}
+
+.brand-clearspace-diagram .cs-grid .cs-diag {
+  stroke: rgba(19, 19, 19, 0.07);
+  stroke-dasharray: none;
+}
+
+.brand-clearspace-diagram .cs-band { fill: url(#brand-cs-hatch); }
+.brand-clearspace-diagram .cs-unit { fill: rgba(255, 77, 0, 0.07); stroke: rgba(255, 77, 0, 0.45); stroke-width: 1; }
+.brand-clearspace-diagram .cs-outline { fill: none; stroke: rgba(255, 77, 0, 0.7); stroke-dasharray: 4 3; stroke-width: 1; }
+.brand-clearspace-diagram .cs-bounds { fill: #fff; stroke: rgba(19, 19, 19, 0.28); stroke-width: 1; }
+
+.brand-clearspace-diagram .cs-curves :is(circle, line, path) {
+  fill: none;
+  stroke: rgba(255, 77, 0, 0.55);
+  stroke-width: 1;
+}
+
+.brand-clearspace-diagram .cs-curves .is-reach { stroke: rgba(255, 77, 0, 0.4); stroke-dasharray: 3 4; }
+.brand-clearspace-diagram .cs-curves .is-faint { stroke: rgba(19, 19, 19, 0.16); }
+.brand-clearspace-diagram .cs-curves .is-angle { stroke: rgba(19, 19, 19, 0.35); }
+
+.brand-clearspace-diagram .cs-points circle { fill: #fff; stroke: rgb(255, 77, 0); stroke-width: 1.2; }
+.brand-clearspace-diagram .cs-points rect { fill: #fff; stroke: rgba(19, 19, 19, 0.5); stroke-width: 1; }
+
+.brand-clearspace-diagram .cs-dims line { color: rgba(19, 19, 19, 0.55); stroke: currentColor; stroke-width: 1; }
+.brand-clearspace-diagram .cs-dims .is-x line { color: rgb(255, 77, 0); }
+.brand-clearspace-diagram .cs-dims text {
+  fill: rgba(19, 19, 19, 0.6);
+  font: 500 48px/1 var(--font-ui, sans-serif);
+  letter-spacing: 0.04em;
+}
+.brand-clearspace-diagram .cs-dims text.is-x { fill: rgb(255, 77, 0); }
+.brand-clearspace-diagram .cs-dims text.is-unit { fill: rgba(255, 77, 0, 0.85); font-size: 54px; }
+
+/* Application guidance */
+.brand-application {
+  border-top: 1px solid var(--brand-line-light);
+  display: grid;
+  gap: 28px;
+  margin-top: clamp(40px, 4vw, 64px);
+  padding-top: 32px;
+}
+
+.brand-application-head {
+  align-items: baseline;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 24px;
+  justify-content: space-between;
+}
+
+.brand-application-head span {
+  color: rgb(255, 77, 0);
+  font: 500 12px/1 var(--font-ui, sans-serif);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.brand-application-head p {
+  color: var(--brand-text-light);
+  font-size: 14px;
+  margin: 0;
+}
+
+.brand-application-grid {
+  display: grid;
+  gap: 1px;
+  background: var(--brand-line-light);
+  border: 1px solid var(--brand-line-light);
+  border-radius: 20px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  overflow: hidden;
+}
+
+.brand-application-item {
+  background: #fff;
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  padding: clamp(18px, 2vw, 26px);
+}
+
+.brand-application-item span {
+  color: rgba(19, 19, 19, 0.4);
+  font: 500 12px/1 var(--font-ui, sans-serif);
+  letter-spacing: 0.06em;
+  margin-bottom: 14px;
+}
+
+.brand-application-item h4 {
+  font-size: 15px;
   font-weight: 500;
-  left: calc(var(--h) / 4);
-  position: absolute;
-  top: 50%;
-  transform: translate(-50%, -50%);
+  margin: 0;
+}
+
+.brand-application-item p {
+  color: var(--brand-text-light);
+  font-size: 14px;
+  line-height: 1.6;
+  margin: 0;
+}
+
+@media (max-width: 900px) {
+  .brand-application-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 560px) {
+  .brand-application-grid { grid-template-columns: 1fr; }
 }
 
 .brand-minsize {

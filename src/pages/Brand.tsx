@@ -176,6 +176,99 @@ function InlineLogo({ kind }: { kind: 'lockup' | 'mark' }) {
   );
 }
 
+const applicationRules = [
+  { title: 'Start with the lockup', body: 'Use the full name when introducing ClerkTree. Use the mark alone where the brand is already clear, such as app icons and avatars.' },
+  { title: 'Choose for contrast', body: 'Black artwork on light surfaces, white artwork on dark ones. On photos, place the logo over a calm, even area.' },
+  { title: 'Keep the artwork intact', body: 'Scale the supplied files proportionally. Use SVG wherever possible and PNG only when a raster file is required.' },
+  { title: 'Align to the edges', body: 'Anchor the logo to a corner or the left edge of a layout, aligned to the same margin as the text beside it.' },
+  { title: 'Partner logos', body: 'Separate a partner mark with a thin vertical rule and 2X of space on each side, at matching optical height.' },
+  { title: 'Signal orange is an accent', body: 'Use orange for one highlight per view. The logo itself stays black or white and is never drawn in orange.' },
+];
+
+/** A dimension line with short perpendicular ticks at both ends. */
+function Dim({ x1, y1, x2, y2, accent = false }: { x1: number; y1: number; x2: number; y2: number; accent?: boolean }) {
+  const len = Math.hypot(x2 - x1, y2 - y1) || 1;
+  const nx = (-(y2 - y1) / len) * 22, ny = ((x2 - x1) / len) * 22;
+  return (
+    <g className={accent ? 'is-x' : undefined}>
+      <line x1={x1} y1={y1} x2={x2} y2={y2} />
+      <line x1={x1 - nx} y1={y1 - ny} x2={x1 + nx} y2={y1 + ny} />
+      <line x1={x2 - nx} y1={y2 - ny} x2={x2 + nx} y2={y2 + ny} />
+    </g>
+  );
+}
+
+function ClearSpaceDiagram() {
+  // Lockup artwork is 1862.02 × 406.47 and the mark is as tall as the lockup.
+  // One X is half the mark height (203.235), so the protected band is X on every side.
+  // Mark geometry (lockup units): ring centre (198.4, 203.24), r 203.23; eye (260.88, 120.43), r 27.74.
+  const X = 203.235;
+  const W = 1862.02 + 2 * X;
+  const H = 406.47 + 2 * X;
+  const ring = { x: X + 198.4, y: X + 203.24, r: 203.23 };
+  const eye = { x: X + 260.88, y: X + 120.43, r: 27.74 };
+  const corners = [[0, 0], [W - X, 0], [0, H - X], [W - X, H - X]];
+  return (
+    <svg className="brand-clearspace-diagram" viewBox="-180 -130 2630 1150" role="img" aria-label="ClerkTree lockup with a clear space of one X on every side. One X is half the height of the mark.">
+      <defs>
+        <pattern id="brand-cs-hatch" width="22" height="22" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+          <rect width="22" height="22" fill="rgba(255, 77, 0, 0.045)" />
+          <line x1="0" y1="0" x2="0" y2="22" stroke="rgba(255, 77, 0, 0.32)" strokeWidth="2.4" />
+        </pattern>
+      </defs>
+
+      {/* Construction grid: lockup edges and the mark's axes, extended past the band */}
+      <g className="cs-grid">
+        {[X, W - X].map((x) => <line key={`v${x}`} x1={x} y1={-90} x2={x} y2={H + 90} />)}
+        {[X, H - X].map((y) => <line key={`h${y}`} x1={-90} y1={y} x2={W + 90} y2={y} />)}
+        <line x1={ring.x} y1={-90} x2={ring.x} y2={H + 90} />
+        <line x1={-90} y1={ring.y} x2={W + 90} y2={ring.y} />
+        <line x1={0} y1={0} x2={W} y2={H} className="cs-diag" />
+        <line x1={W} y1={0} x2={0} y2={H} className="cs-diag" />
+      </g>
+
+      {/* Protected band */}
+      <path className="cs-band" fillRule="evenodd" d={`M0 0H${W}V${H}H0Z M${X} ${X}V${H - X}H${W - X}V${X}Z`} />
+      {corners.map(([x, y]) => <rect className="cs-unit" key={`${x}-${y}`} x={x} y={y} width={X} height={X} />)}
+      <rect className="cs-outline" x="0" y="0" width={W} height={H} />
+      <rect className="cs-bounds" x={X} y={X} width={1862.02} height={406.47} />
+
+      {/* Mark construction: ring, clear-space radius, eye and its axis */}
+      <g className="cs-curves">
+        <circle cx={ring.x} cy={ring.y} r={ring.r + X} className="is-reach" />
+        <circle cx={ring.x} cy={ring.y} r={ring.r} />
+        <circle cx={ring.x} cy={ring.y} r={ring.r * 0.62} className="is-faint" />
+        <circle cx={eye.x} cy={eye.y} r={eye.r * 2.2} className="is-faint" />
+        <line x1={ring.x} y1={ring.y} x2={eye.x + (eye.x - ring.x) * 1.9} y2={eye.y + (eye.y - ring.y) * 1.9} />
+        <path d={`M ${ring.x + 120} ${ring.y} A 120 120 0 0 0 ${ring.x + 120 * Math.cos(-0.92)} ${ring.y + 120 * Math.sin(-0.92)}`} className="is-angle" />
+      </g>
+
+      <image href={`${BRAND}/clerktree-lockup-black.svg`} x={X} y={X} width="1862.02" height="406.47" />
+
+      <g className="cs-points">
+        <circle cx={ring.x} cy={ring.y} r="9" />
+        <circle cx={eye.x} cy={eye.y} r="7" />
+        {[[X, X], [W - X, X], [X, H - X], [W - X, H - X]].map(([x, y]) => <rect key={`p${x}${y}`} x={x - 7} y={y - 7} width="14" height="14" />)}
+      </g>
+
+      {/* Dimensions */}
+      <g className="cs-dims">
+        <Dim x1={-70} y1={X} x2={-70} y2={H - X} />
+        <text x={-100} y={ring.y + 16} textAnchor="end">2X</text>
+        <Dim x1={W + 70} y1={0} x2={W + 70} y2={X} accent />
+        <Dim x1={W + 70} y1={H - X} x2={W + 70} y2={H} accent />
+        <Dim x1={0} y1={H + 70} x2={X} y2={H + 70} accent />
+        <Dim x1={W - X} y1={-70} x2={W} y2={-70} accent />
+        <text x={W + 100} y={X / 2 + 16} className="is-x">X</text>
+        <text x={W + 100} y={H - X / 2 + 16} className="is-x">X</text>
+        <text x={X / 2} y={H + 140} textAnchor="middle" className="is-x">X</text>
+        <text x={W - X / 2} y={-100} textAnchor="middle" className="is-x">X</text>
+        <text x={X / 2} y={X / 2 + 16} textAnchor="middle" className="is-unit">X</text>
+      </g>
+    </svg>
+  );
+}
+
 export default function Brand() {
   const { copied, copy } = useCopy();
 
@@ -250,10 +343,7 @@ export default function Brand() {
               <div className="brand-rules-grid">
                 <figure className="brand-rule">
                   <div className="brand-stage is-light brand-clearspace">
-                    <div className="brand-clearspace-box">
-                      <img src={`${BRAND}/clerktree-lockup-black.svg`} alt="" />
-                      <span className="brand-clearspace-x" aria-hidden="true">X</span>
-                    </div>
+                    <ClearSpaceDiagram />
                   </div>
                   <figcaption>
                     <p className="brand-variant-name">Clear space</p>
@@ -279,6 +369,21 @@ export default function Brand() {
                     <p>Both shown at actual size. Below these widths the mark's eye closes up and the wordmark fills in.</p>
                   </figcaption>
                 </figure>
+              </div>
+              <div className="brand-application" aria-label="Logo application guidance">
+                <div className="brand-application-head">
+                  <span>Application</span>
+                  <p>A few details keep the identity consistent wherever it appears.</p>
+                </div>
+                <div className="brand-application-grid">
+                  {applicationRules.map((rule, i) => (
+                    <div className="brand-application-item" key={rule.title}>
+                      <span>{String(i + 1).padStart(2, '0')}</span>
+                      <h4>{rule.title}</h4>
+                      <p>{rule.body}</p>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
