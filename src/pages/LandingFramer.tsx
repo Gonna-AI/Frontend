@@ -280,12 +280,65 @@ function RibbonStage() {
   );
 }
 
+/**
+ * Scroll-driven "expanding card": writes --expand (0..1) on the element.
+ * 0 = inset rounded panel, 1 = full bleed. It grows as the section scrolls in
+ * and contracts again as it scrolls out, so neither edge is a hard cut.
+ * One passive listener, rAF-throttled, only while the section is near the
+ * viewport. Reduced motion keeps the static inset panel.
+ */
+function useScrollExpand<T extends HTMLElement>() {
+  const ref = useRef<T>(null);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return undefined;
+
+    let frame = 0;
+    let active = false;
+    const clamp = (v: number) => Math.min(1, Math.max(0, v));
+    const update = () => {
+      frame = 0;
+      const vh = window.innerHeight || 1;
+      const rect = el.getBoundingClientRect();
+      const enter = clamp((vh - rect.top) / (vh * 0.7));
+      const exit = clamp(rect.bottom / (vh * 0.7));
+      const p = Math.min(enter, exit);
+      const eased = p * p * (3 - 2 * p);
+      el.style.setProperty('--expand', eased.toFixed(4));
+    };
+    const onScroll = () => {
+      if (active && !frame) frame = requestAnimationFrame(update);
+    };
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        active = Boolean(entry?.isIntersecting);
+        if (active) update();
+      },
+      { rootMargin: '25% 0px' },
+    );
+
+    observer.observe(el);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll, { passive: true });
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onScroll);
+      cancelAnimationFrame(frame);
+    };
+  }, []);
+
+  return ref;
+}
+
 function IntroStatement() {
   const { t } = useLanguage();
   const introTags = introTagsBase.map(({ key }) => ({ label: t(`home.about.${key}`) }));
+  const sectionRef = useScrollExpand<HTMLElement>();
 
   return (
-    <section className="agero-about-intro" aria-labelledby="agero-about-intro-title">
+    <section className="agero-about-intro is-expandable" aria-labelledby="agero-about-intro-title" ref={sectionRef}>
       <div className="agero-hello" data-agero-reveal="up">
         <span aria-hidden="true">(</span>
         <span className="agero-hello-script">{t('home.about.kicker')}</span>
