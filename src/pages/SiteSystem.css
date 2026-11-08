@@ -270,3 +270,37 @@
 
 /* Header logo: the portal intro (logoPortal.ts) draws outside the mark's box. */
 .agero-shell-lockup { overflow: visible; }
+
+/* Page heroes on silver Grainient: a soft scrim keeps white type readable over the light. */
+.agero-works .agero-hero-stage:has(> .grainient):not(.has-demo)::after {
+  background:
+    radial-gradient(140% 100% at 50% 35%, rgba(0, 0, 0, 0) 40%, rgba(0, 0, 0, .28)),
+    linear-gradient(180deg, rgba(0, 0, 0, 0) 55%, rgba(0, 0, 0, .18));
+  content: "";
+  inset: 0;
+  pointer-events: none;
+  position: absolute;
+  z-index: 1;
+}
+.agero-works .agero-hero-stage:has(> .grainient) > :is(.agero-hero-stage-content, .rs-hero-inner, .brand-hero-content) { position: relative; z-index: 2; }
+.agero-works .agero-hero-stage:has(> .grainient) > .agero-notfound-code { z-index: 2; }
+
+/* Inner-page heroes size to their content (like the journal hero) instead of a fixed tall box. */
+.agero-works .agero-hero-stage:not(.agero-hero-stage--home) {
+  display: flex;
+  flex-direction: column;
+  height: auto !important;
+  justify-content: center;
+  min-height: clamp(340px, 46vh, 540px);
+}
+.agero-works .agero-hero-stage:not(.agero-hero-stage--home) > .agero-hero-stage-content {
+  flex: 1 1 auto;
+  height: auto;
+  min-height: 0;
+  padding-block: clamp(56px, 7vw, 96px);
+}
+.agero-works .agero-hero-stage.rs-hero { min-height: clamp(380px, 48vh, 560px); }
+@media (max-width: 640px) {
+  .agero-works .agero-hero-stage:not(.agero-hero-stage--home) { min-height: 0; }
+  .agero-works .agero-hero-stage:not(.agero-hero-stage--home) > .agero-hero-stage-content { padding-block: 56px 48px; }
+}

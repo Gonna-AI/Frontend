@@ -139,7 +139,7 @@ export default function Careers() {
         <Header />
 
         <section className="agero-hero-stage">
-          <Grainient preset="black" />
+          <Grainient preset="silver" />
           <div className="agero-hero-stage-scrim" aria-hidden="true" />
           <div className="agero-hero-stage-content">
             <h1>

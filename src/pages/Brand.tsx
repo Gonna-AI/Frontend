@@ -191,7 +191,7 @@ export default function Brand() {
         <Header />
 
         <section className="agero-hero-stage brand-hero" aria-labelledby="brand-hero-title">
-          <Grainient preset="black" />
+          <Grainient preset="silver" />
           <div className="brand-hero-content">
             <img className="brand-hero-lockup" src={`${BRAND}/clerktree-lockup-inverse.svg`} alt="ClerkTree" width={300} height={65} />
             <h1 id="brand-hero-title">The ClerkTree brand</h1>

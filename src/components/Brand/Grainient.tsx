@@ -20,9 +20,10 @@ const BASE: Settings = {
 
 export const GRAINIENT_PRESETS = {
   silver: { colors: ['#1a1919', '#939393', '#f8f8f8'], settings: {} },
+  // Dark panels: deep base with a soft silver light drifting through it.
   black: {
-    colors: ['#3c3c3c', '#0e0e0e', '#3c3c3c'],
-    settings: { uTimeSpeed: 1.15, uColorBalance: 0.42, uWarpFrequency: 8.2, uContrast: 1 },
+    colors: ['#6e6e70', '#0b0b0b', '#2c2c2e'],
+    settings: { uTimeSpeed: 1.3, uColorBalance: 0.3, uWarpFrequency: 6, uContrast: 1.2 },
   },
 } as const;
 

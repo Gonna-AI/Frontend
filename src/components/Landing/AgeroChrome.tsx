@@ -77,7 +77,6 @@ const footerCompanyLinks: FooterLink[] = [
 ];
 
 const footerProductLinks: FooterLink[] = [
-  { label: 'Solutions', href: '/#solutions' },
   { label: 'Security', href: '/security' },
   { label: 'Contact', href: '/contact' },
 ];
@@ -294,7 +293,7 @@ export function PageHero({ title, eyebrow, description, children, titleId = 'pag
       <Header linkBase={linkBase} />
 
       <section className="agero-hero-stage agero-page-hero" aria-labelledby={titleId}>
-        <Grainient preset="black" />
+        <Grainient preset="silver" />
         <div className="agero-hero-stage-content">
           {eyebrow && <p className="agero-page-hero-eyebrow">{eyebrow}</p>}
           <h1 id={titleId}>{title}</h1>

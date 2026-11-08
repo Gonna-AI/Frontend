@@ -36,7 +36,7 @@ const NotFound = () => {
         <Header />
 
         <section className="agero-hero-stage agero-notfound-stage" aria-labelledby="notfound-title">
-          <Grainient preset="black" />
+          <Grainient preset="silver" />
           <span className="agero-notfound-code" aria-hidden="true">404</span>
           <div className="agero-hero-stage-content">
             <p className="agero-notfound-eyebrow">{text.eyebrow}</p>

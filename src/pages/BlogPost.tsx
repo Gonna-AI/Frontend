@@ -87,7 +87,7 @@ export default function BlogPost() {
       <div className="agero-top-area jr-top">
         <Header />
         <section className={`jr-post-hero is-${post.tone ?? 'silver'}`} aria-labelledby="jr-post-title">
-          <Grainient preset={post.tone === 'black' ? 'black' : 'silver'} />
+          <Grainient preset="silver" />
           <div className="jr-post-hero-copy">
             <a className="jr-back" href="/blog"><ArrowLeft size={14} aria-hidden="true" />{de ? 'Alle Beiträge' : 'All posts'}</a>
             <span className="jr-pill">{post.category ?? post.tags?.[0] ?? 'Journal'}</span>
