@@ -896,3 +896,13 @@
   .agero-works.agero-home-page .agero-home-hero-copy .agero-hero-copy { font-size: 15px; }
   .agero-works.agero-home-page .agero-hero-stage--home.has-demo { min-height: 200px; padding-top: 14px; }
 }
+
+/* Model logos on the proof chart. */
+.agero-works .hs-bar-label { align-items: center; display: flex; gap: 9px; }
+.agero-works .hs-model {
+  align-items: center; background: rgba(255, 255, 255, .06); border-radius: 6px; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .1);
+  color: rgba(245, 245, 245, .85); display: inline-flex; flex: none; font: 600 8.5px/1 var(--font-ui); height: 22px; justify-content: center; letter-spacing: .02em; width: 22px;
+}
+.agero-works .hs-model-svg { height: 12px; width: 12px; }
+.agero-works .hs-model.is-ours { background: #fff; box-shadow: 0 0 12px rgba(255, 255, 255, .25); color: #0a0a0a; }
+.agero-works .hs-model.is-ours .hs-model-svg { height: 14px; width: 14px; }

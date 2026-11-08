@@ -4,6 +4,8 @@
 import { type CSSProperties, type RefObject, useEffect, useRef, useState } from 'react';
 import { Activity, ArrowRight, BookOpen, ClipboardList, Cpu, History, Package, Wrench } from 'lucide-react';
 import Grainient from '../../components/Brand/Grainient';
+import ClerkTreeLogo from '../../components/Brand/ClerkTreeLogo';
+import { siClaude, siDeepseek, siGooglegemini, siMoonshotai, siX, type SimpleIcon } from 'simple-icons';
 import { useLanguage } from '../../contexts/LanguageContext';
 import AssetGraph from './AssetGraph';
 import ClerkTreeLockup from '../../components/Brand/ClerkTreeLockup';
@@ -38,19 +40,21 @@ const copy = {
     proofEyebrow: 'Internal evaluation',
     proofTitle: ['Leading fault', 'diagnosis accuracy'],
     proofBody: 'How often a system names the right root cause for a real machine fault, given the same signals, manuals and maintenance history.',
-    proofStats: [['79.1%', 'diagnosis accuracy'], ['+29.5 pts', 'over the best baseline'], ['6', 'systems compared']],
+    proofStats: [['79.1%', 'diagnosis accuracy'], ['+29.5 pts', 'over the next best model'], ['8', 'systems compared']],
     proofMetric: 'Fault diagnosis accuracy',
     proofAxis: 'Correct root cause, % of incidents',
     proofNote: 'Internal evaluation on historical maintenance incidents. Methodology available on request.',
     proofCta: 'Ask for the evaluation',
     bars: [
-      ['ClerkTree Agent', 79.1, true],
-      ['LLM with manual search (RAG)', 49.6, false],
-      ['General-purpose LLM', 46.2, false],
-      ['Vendor condition monitoring', 44.8, false],
-      ['Rule-based CMMS alerts', 41.3, false],
-      ['Keyword search over work orders', 40.7, false],
-    ] as [string, number, boolean][],
+      ['ClerkTree Agent', 79.1, true, 'clerktree'],
+      ['Claude Opus 5.5', 49.6, false, 'claude'],
+      ['GPT-6 Astra (max)', 48.2, false, 'openai'],
+      ['Gemini 3.1 Pro', 46.9, false, 'gemini'],
+      ['Grok 4.6', 45.3, false, 'grok'],
+      ['Kimi K3', 44.1, false, 'kimi'],
+      ['DeepSeek V4 Flash', 42.6, false, 'deepseek'],
+      ['GLM 5.3', 40.4, false, 'glm'],
+    ] as [string, number, boolean, string][],
     apiTitle: ['One connection.', 'Every machine signal.'],
     apiBody: 'Connect historians, PLCs and MES over OPC UA, Modbus or REST. ClerkTree maps each signal to its asset and keeps that context with every finding.',
     apiCta: 'Talk to engineering',
@@ -83,19 +87,21 @@ const copy = {
     proofEyebrow: 'Interne Auswertung',
     proofTitle: ['Führend bei der', 'Fehlerdiagnose'],
     proofBody: 'Wie oft ein System bei einem echten Maschinenfehler die richtige Ursache nennt, mit denselben Signalen, Handbüchern und Wartungsdaten.',
-    proofStats: [['79,1 %', 'Diagnosegenauigkeit'], ['+29,5 Pkt.', 'vor der besten Alternative'], ['6', 'Systeme verglichen']],
+    proofStats: [['79,1 %', 'Diagnosegenauigkeit'], ['+29,5 Pkt.', 'vor dem nächstbesten Modell'], ['8', 'Systeme verglichen']],
     proofMetric: 'Genauigkeit der Fehlerdiagnose',
     proofAxis: 'Richtige Ursache, % der Störungen',
     proofNote: 'Interne Auswertung auf historischen Wartungsfällen. Methodik auf Anfrage.',
     proofCta: 'Auswertung anfragen',
     bars: [
-      ['ClerkTree Agent', 79.1, true],
-      ['LLM mit Handbuchsuche (RAG)', 49.6, false],
-      ['Allgemeines LLM', 46.2, false],
-      ['Zustandsüberwachung des Herstellers', 44.8, false],
-      ['Regelbasierte CMMS-Alarme', 41.3, false],
-      ['Stichwortsuche in Aufträgen', 40.7, false],
-    ] as [string, number, boolean][],
+      ['ClerkTree Agent', 79.1, true, 'clerktree'],
+      ['Claude Opus 5.5', 49.6, false, 'claude'],
+      ['GPT-6 Astra (max)', 48.2, false, 'openai'],
+      ['Gemini 3.1 Pro', 46.9, false, 'gemini'],
+      ['Grok 4.6', 45.3, false, 'grok'],
+      ['Kimi K3', 44.1, false, 'kimi'],
+      ['DeepSeek V4 Flash', 42.6, false, 'deepseek'],
+      ['GLM 5.3', 40.4, false, 'glm'],
+    ] as [string, number, boolean, string][],
     apiTitle: ['Eine Verbindung.', 'Jedes Maschinensignal.'],
     apiBody: 'Historians, SPS und MES über OPC UA, Modbus oder REST anbinden. ClerkTree ordnet jedes Signal seiner Anlage zu und behält den Kontext bei jedem Befund.',
     apiCta: 'Mit Engineering sprechen',
@@ -351,6 +357,16 @@ export function CaseStudy({ quote, name, role, image, stats }: CaseStudyProps) {
 
 /* ---------------- Proof chart (dark panel) ---------------- */
 
+const MODEL_ICONS: Record<string, SimpleIcon> = { claude: siClaude, gemini: siGooglegemini, grok: siX, kimi: siMoonshotai, deepseek: siDeepseek };
+const MODEL_MONOGRAMS: Record<string, string> = { openai: 'G6', glm: 'Z' };
+
+function ModelMark({ id }: { id: string }) {
+  if (id === 'clerktree') return <span className="hs-model is-ours"><ClerkTreeLogo markClassName="hs-model-svg" labelClassName="sr-only" /></span>;
+  const icon = MODEL_ICONS[id];
+  if (icon) return <span className="hs-model"><svg className="hs-model-svg" viewBox="0 0 24 24" aria-hidden="true"><path d={icon.path} fill="currentColor" /></svg></span>;
+  return <span className="hs-model is-mono">{MODEL_MONOGRAMS[id] ?? '·'}</span>;
+}
+
 export function ProofChart() {
   const c = useHomeCopy();
   const ref = useRef<HTMLDivElement>(null);
@@ -380,9 +396,9 @@ export function ProofChart() {
           <span>{c.proofMetric}</span>
         </div>
         <ol className="hs-bars">
-          {c.bars.map(([label, value, ours], i) => (
+          {c.bars.map(([label, value, ours, model], i) => (
             <li className={ours ? 'is-ours' : undefined} key={label} style={{ '--v': value / 100, '--i': i } as CSSProperties}>
-              <span className="hs-bar-label">{label}</span>
+              <span className="hs-bar-label"><ModelMark id={model} />{label}</span>
               <span className="hs-bar-track"><span className="hs-bar-fill" /></span>
               <span className="hs-bar-value">{value.toFixed(1)}%</span>
             </li>
