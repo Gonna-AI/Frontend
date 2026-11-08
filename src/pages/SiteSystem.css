@@ -19,8 +19,7 @@
    (.agero-works .x beats .x), so this file is the single source of truth.
    ========================================================================== */
 
-/* UI chrome (header, footer, small controls): Geist, the quiet grotesk
-   sixtyfour uses. Headings stay Cal Sans. */
+/* UI chrome (header, footer, small controls): Geist. Headings stay Cal Sans. */
 :root {
   --font-ui: "Geist", "Satoshi", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }

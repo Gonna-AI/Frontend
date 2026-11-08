@@ -1,4 +1,4 @@
-// Homepage story, following sixtyfour's narrative order with ClerkTree content:
+// Homepage story, in narrative order:
 // hero (video + agent card + logo strip) → how it works (tabs) → spotlight → case study →
 // proof chart → connector panel.
 import { type CSSProperties, type RefObject, useEffect, useRef, useState } from 'react';
@@ -199,7 +199,7 @@ export function HeroAgentCard() {
 
 export type ClientLogo = { alt: string; src: string; width: number; mobileWidth: number };
 
-/** Endless client-logo strip under the hero (sixtyfour-style): three copies scroll as one track. */
+/** Endless client-logo strip under the hero: three copies scroll as one track. */
 export function LogoStrip({ logos, label }: { logos: ClientLogo[]; label: string }) {
   return (
     <div className="hs-strip" aria-label={label} role="region">

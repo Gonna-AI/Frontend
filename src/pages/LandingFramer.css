@@ -368,7 +368,7 @@ html.lenis.lenis-stopped {
   margin-top: 0;
 }
 
-/* ---------- Header (sixtyfour pattern) ----------
+/* ---------- Header ----------
    Lockup left, links centred, language + CTA right. Burger only <=900px. */
 .agero-shell-header {
   align-items: center;
@@ -408,7 +408,7 @@ html.lenis.lenis-stopped {
 .agero-shell-nav > a:hover { color: var(--agero-ink); }
 
 /* Dropdown: a white tab grows out of the trigger (inverted corners) and
-   morphs into the panel; items stagger in. Same build as sixtyfour's nav. */
+   morphs into the panel; items stagger in. */
 @property --nav-pw { syntax: "<number>"; inherits: true; initial-value: 0; }
 @property --nav-ph { syntax: "<number>"; inherits: true; initial-value: 0; }
 
@@ -792,7 +792,7 @@ a:hover > .ct-roll > .ct-roll-inner { transform: translateY(-50%); }
   text-align: center;
 }
 
-/* ── Nitro-style solution rows ─────────────────────────── */
+/* ── Solution rows ─────────────────────────── */
 
 .agero-sol-row {
   background: var(--accent, #ff4d00);

@@ -1,142 +1,92 @@
+import { useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Suspense } from 'react';
-import { BlogCard } from '../components/Blog/BlogCard';
-import { TagFilter } from '../components/Blog/TagFilter';
-import { getAllBlogPosts, getBlogPostsByTag, getAllTags } from '../data/blogPosts';
+import { Search } from 'lucide-react';
+import { getAllBlogPosts, getAllTags, getPostAuthors } from '../data/blogPosts';
+import { PostCard } from '../components/Blog/Journal';
 import { useLanguage } from '../contexts/LanguageContext';
 import { Header, Footer } from '../components/Landing/AgeroChrome';
+import Grainient from '../components/Brand/Grainient';
 import SEO from '../components/SEO';
-import { shouldAutoplayMedia } from '../utils/idle';
 import './LandingFramer.css';
-import './BlogTheme.css';
+import './Journal.css';
 
-const BLOG_HERO_VIDEO_SRC = 'https://pub-0f804855178c4f4e8184c4fef3bd5b2a.r2.dev/blogvideo.mp4';
+export default function Blog() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const { language } = useLanguage();
+  const de = language === 'de';
+  const [query, setQuery] = useState('');
+  const selectedTag = searchParams.get('tag') || 'All';
+  const posts = getAllBlogPosts();
+  const tags = ['All', ...getAllTags()];
+  const count = (tag: string) => (tag === 'All' ? posts.length : posts.filter((p) => p.tags?.includes(tag)).length);
 
-const formatDate = (date: string, language: string): string => {
-  return new Date(date).toLocaleDateString(language === 'de' ? 'de-DE' : 'en-US', {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
-};
+  const visible = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return posts.filter((p) => {
+      if (selectedTag !== 'All' && !p.tags?.includes(selectedTag)) return false;
+      if (!q) return true;
+      const authors = getPostAuthors(p).map((a) => a.name).join(' ');
+      return `${p.title} ${p.description} ${p.tags?.join(' ')} ${authors}`.toLowerCase().includes(q);
+    });
+  }, [posts, query, selectedTag]);
 
-function BlogContent() {
-  const [searchParams] = useSearchParams();
-
-  const selectedTag = searchParams.get("tag") || "All";
-  const { t, language } = useLanguage();
-  const shouldPlayVideo = shouldAutoplayMedia();
-
-  const allBlogs = getAllBlogPosts();
-  const filteredBlogs = getBlogPostsByTag(selectedTag);
-  const allTags = ["All", ...getAllTags()];
-
-  const tagCounts = allTags.reduce((acc, tag) => {
-    if (tag === "All") {
-      acc[tag] = allBlogs.length;
-    } else {
-      acc[tag] = allBlogs.filter((blog) =>
-        blog.tags?.includes(tag)
-      ).length;
-    }
-    return acc;
-  }, {} as Record<string, number>);
+  const pickTag = (tag: string) => {
+    const next = new URLSearchParams(searchParams);
+    if (tag === 'All') next.delete('tag'); else next.set('tag', tag);
+    setSearchParams(next, { replace: true });
+  };
 
   return (
-    <div className="agero-works clerktree-blog-page">
+    <div className="agero-works jr-page">
       <SEO
         title="Blog"
-        description="Notes from ClerkTree on industrial AI, machine intelligence, predictive maintenance and agents for industrial operations."
+        description="Field notes from ClerkTree on industrial AI, predictive maintenance and agents for machine operations."
         canonical="https://clerktree.com/blog"
-        preloadVideos={[{ href: BLOG_HERO_VIDEO_SRC }]}
-        videos={[
-          {
-            name: t('blogPage.title'),
-            description: t('blogPage.subtitle'),
-            contentUrl: BLOG_HERO_VIDEO_SRC,
-            thumbnailUrl: 'https://framerusercontent.com/images/MHwFX5PK3mWp7JJNseH8110qdg.png?scale-down-to=2048',
-            uploadDate: '2026-07-06',
-          },
-        ]}
       />
-      <div className="agero-top-area agero-top-area-with-hero">
+      <div className="agero-top-area jr-top">
         <Header />
-
-        <section className="agero-hero-stage clerktree-blog-hero-stage">
-          <video
-            className="agero-hero-stage-media clerktree-blog-hero-video"
-            src={BLOG_HERO_VIDEO_SRC}
-            autoPlay={shouldPlayVideo}
-            loop
-            muted
-            playsInline
-            preload={shouldPlayVideo ? 'auto' : 'metadata'}
-            crossOrigin="anonymous"
-            aria-label="ClerkTree blog video"
-          />
-          <div className="agero-hero-stage-scrim" aria-hidden="true" />
-          <div className="agero-hero-stage-content clerktree-blog-hero-copy">
-            <p>ClerkTree Journal</p>
-            <h1>
-                {t('blogPage.title')}
-            </h1>
-            <span>
-                {t('blogPage.subtitle')}
-            </span>
+        <section className="jr-hero" aria-labelledby="jr-title">
+          <Grainient preset="silver" />
+          <div className="jr-hero-copy">
+            <h1 id="jr-title">{de ? 'Das ClerkTree Journal' : 'The ClerkTree journal'}</h1>
+            <p>{de
+              ? 'Notizen aus der Praxis zu industrieller KI, vorausschauender Wartung und Agenten für den Maschinenbetrieb.'
+              : 'Field notes on industrial AI, predictive maintenance and the agents that run machine operations.'}</p>
+            <label className="jr-search">
+              <Search size={16} aria-hidden="true" />
+              <input
+                aria-label={de ? 'Beiträge durchsuchen' : 'Search posts'}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder={de ? 'Beiträge durchsuchen…' : 'Search posts…'}
+                type="search"
+                value={query}
+              />
+            </label>
           </div>
         </section>
       </div>
 
-      <main className="clerktree-blog-main">
-        {allTags.length > 0 && (
-          <section className="clerktree-blog-filters-wrap">
-            <div className="clerktree-blog-filters">
-              <TagFilter
-                tags={allTags}
-                selectedTag={selectedTag}
-                tagCounts={tagCounts}
-              />
-            </div>
-          </section>
+      <main className="jr-main">
+        <div className="jr-filters">
+          <div className="jr-chips" role="tablist" aria-label={de ? 'Themen' : 'Topics'}>
+            {tags.map((tag) => (
+              <button aria-selected={tag === selectedTag} className={tag === selectedTag ? 'is-active' : undefined} key={tag} onClick={() => pickTag(tag)} role="tab" type="button">
+                {tag === 'All' ? (de ? 'Alle' : 'All') : tag}<span>{count(tag)}</span>
+              </button>
+            ))}
+          </div>
+          <span className="jr-count">{visible.length} {de ? (visible.length === 1 ? 'Beitrag' : 'Beiträge') : visible.length === 1 ? 'post' : 'posts'}</span>
+        </div>
+
+        {visible.length ? (
+          <div className="jr-grid">
+            {visible.map((post) => <PostCard key={post.slug} language={language} post={post} />)}
+          </div>
+        ) : (
+          <p className="jr-empty">{de ? 'Keine Beiträge gefunden.' : 'No posts match that search.'}</p>
         )}
-
-        <section className="clerktree-blog-grid-wrap">
-          <Suspense fallback={<div className="text-white px-6">{t('blogPage.loadingArticles')}</div>}>
-            <div
-              className="clerktree-blog-grid"
-            >
-              {filteredBlogs.map((blog) => {
-                const formattedDate = formatDate(blog.date, language);
-
-                return (
-                  <div
-                    key={blog.slug}
-                    className="clerktree-blog-card-shell"
-                  >
-                    <BlogCard
-                      url={`/blog/${blog.slug}`}
-                      title={blog.title}
-                      description={blog.description}
-                      date={formattedDate}
-                      thumbnail={blog.thumbnail}
-                      showRightBorder={filteredBlogs.length < 3}
-                    />
-                  </div>
-                );
-              })}
-            </div>
-          </Suspense>
-        </section>
       </main>
       <Footer />
     </div>
-  );
-}
-
-export default function Blog() {
-  return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <BlogContent />
-    </Suspense>
   );
 }

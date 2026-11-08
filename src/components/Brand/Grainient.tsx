@@ -1,5 +1,4 @@
-// Grainient: animated warped gradient with film grain (port of the React Bits
-// "Grainient" background, MIT). WebGL2, no dependencies. Renders a canvas that
+// Grainient: animated warped gradient with film grain. WebGL2, no dependencies. Renders a canvas that
 // fills its positioned parent; animates only while on screen; draws one still
 // frame under reduced motion; hides itself if WebGL2 is unavailable so the
 // parent's CSS gradient shows instead.
@@ -69,7 +68,7 @@ const hex = (value: string) => [1, 3, 5].map((i) => parseInt(value.slice(i, i + 
 
 type GrainientProps = {
   preset?: GrainientPreset;
-  /** Draw one frame and stop (like sixtyfour's still panels). */
+  /** Draw one frame and stop. */
   still?: boolean;
   className?: string;
 };
@@ -161,5 +160,13 @@ export default function Grainient({ preset = 'silver', still = false, className 
     };
   }, [preset, still]);
 
-  return <canvas ref={ref} className={`grainient ${className}`} aria-hidden="true" />;
+  // Positioned inline so the canvas never joins the layout (it sizes itself from its parent).
+  return (
+    <canvas
+      ref={ref}
+      className={`grainient ${className}`}
+      aria-hidden="true"
+      style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', display: 'block', pointerEvents: 'none', zIndex: 0 }}
+    />
+  );
 }
