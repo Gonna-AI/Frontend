@@ -32,8 +32,9 @@ const copy = {
       { icon: 'wrench', scene: 'agent', title: 'Act with a cited work order', body: 'Get a work order with the evidence, parts and people attached, ready for your team to approve.' },
     ],
     spotPill: 'Introducing',
-    spotTag: 'Asset graph',
+    spotTag: 'Hive',
     spotTitle: 'See how your plant connects',
+    spotLink: 'Explore Hive',
     spotBody: 'ClerkTree links every machine to its components, incidents, parts and suppliers, so a single fault shows its full chain of causes and the people who can fix it.',
     caseTitle: ['Proven on the line,', 'in their words'],
     caseIntro: 'See how plant teams use ClerkTree to catch failures early, plan maintenance and keep lines running.',
@@ -82,8 +83,9 @@ const copy = {
       { icon: 'wrench', scene: 'agent', title: 'Mit belegtem Auftrag handeln', body: 'Ein Arbeitsauftrag mit Belegen, Teilen und Zuständigen, bereit zur Freigabe durch Ihr Team.' },
     ],
     spotPill: 'Neu',
-    spotTag: 'Anlagengraph',
+    spotTag: 'Hive',
     spotTitle: 'Sehen, wie Ihr Werk zusammenhängt',
+    spotLink: 'Hive entdecken',
     spotBody: 'ClerkTree verknüpft jede Maschine mit Komponenten, Störungen, Teilen und Lieferanten. So zeigt ein einzelner Fehler die ganze Ursachenkette und wer ihn beheben kann.',
     caseTitle: ['Bewährt an der Linie,', 'in ihren Worten'],
     caseIntro: 'So nutzen Werksteams ClerkTree, um Ausfälle früh zu erkennen, Wartung zu planen und Linien am Laufen zu halten.',
@@ -307,6 +309,7 @@ export function Spotlight() {
         <span className="hs-pill">{c.spotPill}<b>{c.spotTag}</b></span>
         <h2 id="hs-spot-title">{c.spotTitle}</h2>
         <p>{c.spotBody}</p>
+        <a className="hs-spot-link" href="/hive">{c.spotLink}<span aria-hidden="true">→</span></a>
       </div>
       <div className="hs-spot-stage" data-agero-reveal="up">
         <AssetGraph />

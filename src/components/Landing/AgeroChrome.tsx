@@ -4,6 +4,7 @@ import { Activity, Briefcase, ChevronDown, Factory, FlaskConical, Scale, Shapes,
 import ClerkTreeLockup from '../Brand/ClerkTreeLockup';
 import { playFirstVisitIntro, playLogoPortal, shouldPlayFirstVisitIntro } from '../Brand/logoPortal';
 import Grainient from '../Brand/Grainient';
+import FooterAscii from './FooterAscii';
 import LanguageSwitcher from '../Layout/LanguageSwitcher';
 import { useLanguage } from '../../contexts/LanguageContext';
 import '../../pages/LandingFramer.css';
@@ -45,6 +46,7 @@ function buildDesktopNav(language: string, t: (key: string) => string, linkBase:
         { label: 'Brand', href: local('/brand'), icon: <Shapes /> },
       ],
     },
+    { label: 'Hive', href: local('/hive') },
     { label: de ? 'Sicherheit' : 'Security', href: local('/security') },
     { label: t('nav.blog'), href: local('/blog') },
   ];
@@ -77,6 +79,7 @@ const footerCompanyLinks: FooterLink[] = [
 ];
 
 const footerProductLinks: FooterLink[] = [
+  { label: 'Hive', href: '/hive' },
   { label: 'Security', href: '/security' },
   { label: 'Contact', href: '/contact' },
 ];
@@ -352,6 +355,7 @@ export function Footer() {
   return (
     <footer className="agero-footer" ref={footerRef}>
       <div className="agero-footer-inner">
+        {isFooterNearViewport && <FooterAscii />}
         <div className="agero-footer-main">
           <div className="agero-footer-cta">
             <p>

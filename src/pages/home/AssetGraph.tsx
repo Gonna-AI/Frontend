@@ -1,4 +1,4 @@
-// Asset graph for the homepage spotlight: a camera-driven story.
+// Hive graph for the homepage spotlight: a camera-driven story.
 // 1 alarm on CNC-07 (tight zoom) → 2 the cause, a worn bearing → 3 pull back,
 // clusters of linked machines/parts/docs/people bloom in → 4 swoop to CNC-09,
 // next at risk → 5 spare in stock + technician free → 6 the whole picture.
@@ -58,7 +58,7 @@ const STEPS: { cam: Cam; ms: number; focus?: string[] }[] = [
 
 const copy = {
   en: {
-    title: 'Asset graph', crumb: 'Line 2 · Why did CNC-07 alarm?', nodes: 'entities', links: 'links', risk: 'at risk',
+    title: 'Hive', crumb: 'Line 2 · Why did CNC-07 alarm?', nodes: 'entities', links: 'links', risk: 'at risk',
     captions: [
       'A vibration alarm goes off on CNC-07.',
       'ClerkTree traces it to the cause: a worn bearing.',
@@ -70,7 +70,7 @@ const copy = {
     legend: ['Machine', 'Component', 'Part', 'Cause', 'Document', 'Person', 'Supplier'],
   },
   de: {
-    title: 'Anlagengraph', crumb: 'Linie 2 · Warum alarmiert CNC-07?', nodes: 'Elemente', links: 'Verbindungen', risk: 'gefährdet',
+    title: 'Hive', crumb: 'Linie 2 · Warum alarmiert CNC-07?', nodes: 'Elemente', links: 'Verbindungen', risk: 'gefährdet',
     captions: [
       'An CNC-07 geht ein Vibrationsalarm los.',
       'ClerkTree findet die Ursache: ein verschlissenes Lager.',

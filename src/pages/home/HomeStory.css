@@ -928,3 +928,6 @@
 .agero-works .hs-cta-track svg { flex: 0 0 50%; height: 16px; margin: auto; }
 .agero-works .hs-cta:hover .hs-cta-track { transform: translateX(0); }
 @media (prefers-reduced-motion: reduce) { .agero-works .hs-cta-track { transition: none; } }
+.agero-works .hs-spot-link { align-items: center; color: #fff; display: inline-flex; font: 500 14px/1 var(--font-ui); gap: 8px; margin-top: 22px; text-decoration: none; }
+.agero-works .hs-spot-link span { color: var(--agero-orange); transition: transform .2s ease; }
+.agero-works .hs-spot-link:hover span { transform: translateX(3px); }

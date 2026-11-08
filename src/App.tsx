@@ -22,6 +22,7 @@ const About = lazyWithRetry(() => import('./pages/About'), 'About');
 const Research = lazyWithRetry(() => import('./pages/Research'), 'Research');
 const Careers = lazyWithRetry(() => import('./pages/Careers'), 'Careers');
 const Brand = lazyWithRetry(() => import('./pages/Brand'), 'Brand');
+const Hive = lazyWithRetry(() => import('./pages/hive/Hive'), 'Hive');
 const Blog = lazyWithRetry(() => import('./pages/Blog'), 'Blog');
 const BlogPost = lazyWithRetry(() => import('./pages/BlogPost'), 'BlogPost');
 
@@ -80,6 +81,7 @@ const routePrefetchers = {
   '/research': () => import('./pages/Research'),
   '/research/:topicSlug': () => import('./pages/Research'),
   '/careers': () => import('./pages/Careers'),
+  '/hive': () => import('./pages/hive/Hive'),
   '/contact': () => import('./pages/Contact'),
   '/support': () => import('./pages/SupportPage'),
   '/machina': () => import('./pages/Machina'),
@@ -107,6 +109,13 @@ const queryClient = new QueryClient({
   },
 });
 
+function RouteLoadingFallback() {
+  const { pathname } = useLocation();
+  const isWorkspace = /^\/(dashboard|auth|login|invite|client|mail|chat|ai-settings|crm)(\/|$)/.test(pathname);
+  if (isWorkspace) return <LoadingScreen />;
+  return <div aria-hidden="true" style={{ minHeight: '100vh', background: pathname === '/hive' ? '#0d0d0e' : '#f4f4f4' }} />;
+}
+
 function App() {
   const isResearchHost =
     typeof window !== 'undefined' && window.location.hostname === 'research.clerktree.com';
@@ -125,7 +134,7 @@ function App() {
             title="ClerkTree – Industrial AI for Machine Operations"
             description="Industrial AI for machine operations. ClerkTree turns machine signals, manuals and RFQs into predictive maintenance and agent-driven work orders. Built in Bavaria."
           />
-          <Suspense fallback={<LoadingScreen />}>
+          <Suspense fallback={<RouteLoadingFallback />}>
             <main className="flex-1 flex flex-col">
               <Routes>
                 {/* Public Routes */}
@@ -207,6 +216,7 @@ function App() {
                 <Route path="/machina" element={<Machina />} />
                 <Route path="/careers" element={<Careers />} />
                 <Route path="/brand" element={<Brand />} />
+                <Route path="/hive" element={<Hive />} />
                 <Route path="/solutions" element={<Navigate to="/#solutions" replace />} />
                 <Route path="/contact" element={<Contact />} />
                 <Route path="/support" element={<SupportPage />} />
