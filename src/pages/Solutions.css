@@ -19,37 +19,6 @@
   width: min(100%, calc(100vw - 16px));
 }
 
-.fabric-solution-topbar {
-  align-items: center;
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 30px;
-}
-
-.fabric-solution-logo {
-  align-items: center;
-  color: rgb(6, 6, 6);
-  display: inline-flex;
-  font-family: "Cal Sans", "Inter", system-ui, sans-serif;
-  font-size: clamp(2rem, 2.5vw, 3rem);
-  gap: 12px;
-  line-height: 0.9;
-  text-decoration: none;
-}
-
-.fabric-solution-logo-mark {
-  display: block;
-  flex: 0 0 auto;
-  height: 34px;
-  width: 34px;
-}
-
-.fabric-solution-logo sup {
-  font-size: 0.42em;
-  margin-left: 0.08em;
-  vertical-align: super;
-}
-
 .fabric-solution-stage {
   background: rgb(12, 12, 12);
   border-radius: 36px;
@@ -184,30 +153,6 @@
   width: 46%;
 }
 
-.fabric-solution-copyright {
-  bottom: 4.8%;
-  color: rgba(255, 255, 255, 0.72);
-  font-size: clamp(1rem, 1.35vw, 1.7rem);
-  left: 3.2%;
-  margin: 0;
-  position: absolute;
-}
-
-.fabric-capabilities {
-  margin: 90px auto 0;
-  max-width: 1680px;
-  padding: 0 36px;
-}
-
-.fabric-capabilities-heading {
-  align-items: end;
-  display: grid;
-  gap: 28px;
-  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.4fr);
-  margin-bottom: 28px;
-}
-
-.fabric-capabilities-heading p,
 .fabric-solution-cta p {
   color: rgba(19, 19, 19, 0.58);
   font-size: 0.95rem;
@@ -217,66 +162,11 @@
   text-transform: uppercase;
 }
 
-.fabric-capabilities-heading h2,
 .fabric-solution-cta h2 {
   font-size: clamp(3.5rem, 7.8vw, 9.5rem);
   line-height: 0.86;
   margin: 0;
   max-width: 1100px;
-}
-
-.fabric-capabilities-grid {
-  display: grid;
-  gap: 12px;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-}
-
-.fabric-capability-card {
-  background: rgb(248, 248, 248);
-  border: 1px solid rgba(19, 19, 19, 0.1);
-  border-radius: 28px;
-  min-height: 420px;
-  padding: 28px;
-}
-
-.fabric-capability-card > span {
-  color: rgba(19, 19, 19, 0.38);
-  display: block;
-  font-size: 0.95rem;
-  font-weight: 800;
-  margin-bottom: 58px;
-}
-
-.fabric-capability-card h3 {
-  font-size: clamp(2rem, 2.7vw, 3.6rem);
-  line-height: 0.92;
-  margin: 0;
-  max-width: 12ch;
-}
-
-.fabric-capability-card p {
-  color: rgba(19, 19, 19, 0.68);
-  font-size: 1rem;
-  line-height: 1.45;
-  margin: 24px 0 0;
-  max-width: 38ch;
-}
-
-.fabric-capability-card ul {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  list-style: none;
-  margin: 32px 0 0;
-  padding: 0;
-}
-
-.fabric-capability-card li {
-  border: 1px solid rgba(19, 19, 19, 0.16);
-  border-radius: 999px;
-  color: rgba(19, 19, 19, 0.76);
-  font-size: 0.82rem;
-  padding: 8px 12px;
 }
 
 .fabric-solution-cta {
@@ -363,11 +253,6 @@
     bottom: 11.5%;
     width: 62%;
   }
-
-  .fabric-capabilities-heading,
-  .fabric-capabilities-grid {
-    grid-template-columns: 1fr;
-  }
 }
 
 @media (min-width: 1681px) and (max-width: 1920px) {
@@ -391,21 +276,6 @@
     border-radius: 28px;
     padding: 14px;
     width: min(100%, calc(100vw - 12px));
-  }
-
-  .fabric-solution-topbar {
-    margin-bottom: 16px;
-    padding: 8px 4px 0;
-  }
-
-  .fabric-solution-logo {
-    font-size: 2rem;
-    gap: 9px;
-  }
-
-  .fabric-solution-logo-mark {
-    height: 28px;
-    width: 28px;
   }
 
   .fabric-solution-stage {
@@ -446,39 +316,9 @@
     width: calc(100% - 40px);
   }
 
-  .fabric-solution-copyright {
-    bottom: 54px;
-    font-size: 0.95rem;
-    left: 20px;
-  }
-
-  .fabric-capabilities {
-    margin-top: 52px;
-    padding: 0 10px;
-  }
-
-  .fabric-capabilities-heading {
-    gap: 18px;
-  }
-
-  .fabric-capabilities-heading h2,
   .fabric-solution-cta h2 {
     font-size: clamp(2.5rem, 12.5vw, 5rem);
     line-height: 0.92;
-  }
-
-  .fabric-capability-card {
-    border-radius: 22px;
-    min-height: auto;
-    padding: 22px;
-  }
-
-  .fabric-capability-card > span {
-    margin-bottom: 42px;
-  }
-
-  .fabric-capability-card h3 {
-    font-size: 2.2rem;
   }
 
   .fabric-solution-cta {

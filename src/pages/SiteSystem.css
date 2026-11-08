@@ -19,6 +19,12 @@
    (.agero-works .x beats .x), so this file is the single source of truth.
    ========================================================================== */
 
+/* UI chrome (header, footer, small controls): Geist, the quiet grotesk
+   sixtyfour uses. Headings stay Cal Sans. */
+:root {
+  --font-ui: "Geist", "Satoshi", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
 .agero-works {
   /* palette */
   --agero-bg: #f4f4f4;
@@ -169,7 +175,6 @@
 .agero-works .brand-type-card,
 .agero-works .brand-token-card,
 .agero-works .brand-contact-card,
-.agero-works .fabric-capability-card,
 .agero-works .agero-about-join,
 .agero-works .agero-about-office,
 .agero-works .ct-card {

@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
+import { Activity, Briefcase, ChevronDown, Factory, FlaskConical, Scale, Shapes, Users, Wrench } from 'lucide-react';
 
 import ClerkTreeLockup from '../Brand/ClerkTreeLockup';
 import BrandShader from '../Brand/BrandShader';
@@ -7,24 +8,78 @@ import { useLanguage } from '../../contexts/LanguageContext';
 import '../../pages/LandingFramer.css';
 import '../../pages/SiteSystem.css';
 
+const RESEARCH_URL = 'https://research.clerktree.com';
+
 const headerLinkPaths = [
   ['nav.solutions', '/solutions'],
   ['nav.about', '/about'],
+  ['nav.research', RESEARCH_URL],
   ['nav.blog', '/blog'],
-  ['home.nav.contact', '/contact'],
- ] as const;
- 
- type FooterLink = {
-   label: string;
-   href: string;
-   external?: boolean;
- };
- 
- const footerExploreLinks: FooterLink[] = [
-   { label: 'Solutions', href: '/solutions' },
-   { label: 'About Us', href: '/about' },
-   { label: 'Brand', href: '/brand' },
- ];
+] as const;
+
+type NavMenuItem = { label: string; href: string; icon: ReactNode };
+type NavEntry = { label: string; href: string; items?: NavMenuItem[] };
+
+function buildDesktopNav(language: string, t: (key: string) => string, linkBase: string): NavEntry[] {
+  const de = language === 'de';
+  const local = (path: string) => `${linkBase}${path}`;
+  return [
+    {
+      label: t('nav.solutions'),
+      href: local('/solutions'),
+      items: [
+        { label: t('solutions.card1Title'), href: local('/solutions#cx-signal'), icon: <Activity /> },
+        { label: t('solutions.card2Title'), href: local('/solutions#cx-agent'), icon: <Wrench /> },
+        { label: de ? 'Lieferantenentscheidungen' : 'Supplier decisions', href: local('/solutions#cx-rfq'), icon: <Scale /> },
+        { label: t('solutions.card5Title'), href: local('/solutions#cx-production'), icon: <Factory /> },
+      ],
+    },
+    {
+      label: de ? 'Unternehmen' : 'Company',
+      href: local('/about'),
+      items: [
+        { label: t('nav.about'), href: local('/about'), icon: <Users /> },
+        { label: t('nav.research'), href: RESEARCH_URL, icon: <FlaskConical /> },
+        { label: de ? 'Karriere' : 'Careers', href: local('/careers'), icon: <Briefcase /> },
+        { label: 'Brand', href: local('/brand'), icon: <Shapes /> },
+      ],
+    },
+    { label: de ? 'Sicherheit' : 'Security', href: local('/security') },
+    { label: t('nav.blog'), href: local('/blog') },
+  ];
+}
+
+/** Text that rolls up to a copy of itself on hover (pure CSS, see .ct-roll). */
+function Roll({ children }: { children: ReactNode }) {
+  return (
+    <span className="ct-roll">
+      <span className="ct-roll-inner">
+        <span>{children}</span>
+        <span aria-hidden="true">{children}</span>
+      </span>
+    </span>
+  );
+}
+
+type FooterLink = {
+  label: string;
+  href: string;
+  external?: boolean;
+};
+
+const footerCompanyLinks: FooterLink[] = [
+  { label: 'About Us', href: '/about' },
+  { label: 'Research', href: RESEARCH_URL },
+  { label: 'Blog', href: '/blog' },
+  { label: 'Careers', href: '/careers' },
+  { label: 'Brand', href: '/brand' },
+];
+
+const footerProductLinks: FooterLink[] = [
+  { label: 'Solutions', href: '/solutions' },
+  { label: 'Security', href: '/security' },
+  { label: 'Contact', href: '/contact' },
+];
 
 const footerSocialLinks: FooterLink[] = [
   { label: 'LinkedIn', href: 'https://www.linkedin.com/company/clerktree', external: true },
@@ -68,10 +123,14 @@ type HeaderProps = {
 };
 
 export function Header({ linkBase = '' }: HeaderProps = {}) {
-  const { t } = useLanguage();
+  const { t, language, setLanguage } = useLanguage();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const headerLinks = headerLinkPaths.map(([key, href]) => [t(key), `${linkBase}${href}`] as const);
-  const mobileLinks = headerLinks.filter(([, href]) => href !== `${linkBase}/contact`);
+  const headerLinks = headerLinkPaths.map(([key, href]) => [
+    t(key),
+    href.startsWith('http') ? href : `${linkBase}${href}`,
+  ] as const);
+  const contactHref = `${linkBase}/contact`;
+  const desktopNav = buildDesktopNav(language, t, linkBase);
 
   useEffect(() => {
     if (!isMenuOpen) return;
@@ -110,16 +169,53 @@ export function Header({ linkBase = '' }: HeaderProps = {}) {
         onFocus={(event) => { if (event.currentTarget.matches(':focus-visible')) playLogoMotion(event.currentTarget); }}>
         <ClerkTreeLockup className="agero-shell-lockup" title={null} />
       </a>
+
+      <nav className="agero-shell-nav" aria-label={t('home.nav.aria')}>
+        {desktopNav.map((entry) => entry.items ? (
+          <div className="agero-nav-item" key={entry.label}>
+            <button className="agero-nav-trigger" type="button" aria-haspopup="true">
+              <Roll>{entry.label}</Roll>
+              <ChevronDown className="agero-nav-caret" aria-hidden="true" />
+            </button>
+            <div className="agero-nav-menu">
+              <div className="agero-nav-panel">
+                {entry.items.map((item, index) => (
+                  <a className="agero-nav-menu-item" href={item.href} key={item.href} style={{ '--i': index } as CSSProperties}>
+                    <span className="agero-nav-menu-ico" aria-hidden="true">{item.icon}</span>
+                    <Roll>{item.label}</Roll>
+                  </a>
+                ))}
+              </div>
+            </div>
+          </div>
+        ) : (
+          <a href={entry.href} key={entry.label}>
+            <Roll>{entry.label}</Roll>
+          </a>
+        ))}
+      </nav>
+
       <div className="agero-shell-actions">
-        <nav className="agero-shell-nav" id="agero-shell-nav" aria-label={t('home.nav.aria')}>
-          {headerLinks.map(([label, href]) => (
-            <a href={href} key={label} onClick={closeMenu}>
-              {label}
-            </a>
-          ))}
-        </nav>
         <button
-          aria-controls="agero-shell-nav agero-mobile-menu"
+          aria-label={language === 'en' ? 'Auf Deutsch wechseln' : 'Switch to English'}
+          className="agero-shell-lang"
+          onClick={() => setLanguage(language === 'en' ? 'de' : 'en')}
+          type="button"
+        >
+          <span className={language === 'en' ? 'is-active' : undefined}>EN</span>
+          <span className={language === 'de' ? 'is-active' : undefined}>DE</span>
+        </button>
+        <a className="agero-shell-cta" href={contactHref}>
+          <span className="agero-shell-cta-label">{t('home.menu.cta')}</span>
+          <span className="agero-shell-cta-icon" aria-hidden="true">
+            <span className="agero-shell-cta-track">
+              <svg viewBox="0 0 16 16" fill="none"><path d="M6 3.5 10.5 8 6 12.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" /></svg>
+              <svg viewBox="0 0 16 16" fill="none"><path d="M6 3.5 10.5 8 6 12.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" /></svg>
+            </span>
+          </span>
+        </a>
+        <button
+          aria-controls="agero-mobile-menu"
           aria-expanded={isMenuOpen}
           aria-label={isMenuOpen ? t('home.menu.close') : t('home.menu.open')}
           className={`agero-shell-menu${isMenuOpen ? ' is-open' : ''}`}
@@ -157,14 +253,14 @@ export function Header({ linkBase = '' }: HeaderProps = {}) {
             </div>
 
             <div className="agero-mobile-menu-links">
-              {mobileLinks.map(([label, href]) => (
-                <a href={href} key={label} onClick={closeMenu}>
+              {headerLinks.map(([label, href]) => (
+                <a href={href} key={href} onClick={closeMenu}>
                   {label}
                 </a>
               ))}
             </div>
 
-            <a className="agero-mobile-menu-cta" href={`${linkBase}/contact`} onClick={closeMenu}>
+            <a className="agero-mobile-menu-cta" href={contactHref} onClick={closeMenu}>
               <span>{t('home.menu.cta')}</span>
               <span aria-hidden="true">-&gt;</span>
             </a>
@@ -263,7 +359,8 @@ export function Footer() {
           </div>
 
           <div className="agero-footer-columns">
-            <FooterColumn title="Explore" links={footerExploreLinks} />
+            <FooterColumn title="Company" links={footerCompanyLinks} />
+            <FooterColumn title="Product" links={footerProductLinks} />
             <FooterColumn title="Socials" links={footerSocialLinks} />
           </div>
         </div>

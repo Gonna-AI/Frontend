@@ -2,6 +2,7 @@ export const de = {
     // Navigation
     'nav.about': 'Über uns',
     'nav.blog': 'Blog',
+    'nav.research': 'Forschung',
     'nav.solutions': 'Lösungen',
     'nav.contact': 'Kundenportal', // Adjusted legacy contact translation to match login behavior
     'nav.login': 'Kundenportal',

@@ -11,10 +11,10 @@
   <meta http-equiv="X-Content-Type-Options" content="nosniff">
 
   <!-- Transparent mark with SVG and raster fallbacks. -->
-  <link rel="icon" href="/favicon.ico?v=3" sizes="any" />
-  <link rel="icon" href="/favicon-32.png?v=3" type="image/png" sizes="32x32" />
-  <link rel="icon" href="/favicon-96.png?v=3" type="image/png" sizes="96x96" />
-  <link rel="icon" href="/favicon.svg?v=3" type="image/svg+xml" />
+  <link rel="icon" href="/favicon.ico?v=4" sizes="any" />
+  <link rel="icon" href="/favicon-32.png?v=4" type="image/png" sizes="32x32" />
+  <link rel="icon" href="/favicon-96.png?v=4" type="image/png" sizes="96x96" />
+  <link rel="icon" href="/favicon.svg?v=4" type="image/svg+xml" />
   <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
   <link rel="manifest" href="/site.webmanifest" />
 
@@ -41,6 +41,26 @@
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <link rel="canonical" href="https://clerktree.com/" />
+
+  <!-- First paint: the site canvas, not a dark loader. App routes keep their own dark shell. -->
+  <script>
+    (function () {
+      if (!/^\/(dashboard|mail|chat|crm|client|login|auth|ai-settings|invite)(\/|$)/.test(location.pathname)) {
+        document.documentElement.classList.add('ct-site');
+      }
+    })();
+  </script>
+  <style>
+    html.ct-site, html.ct-site body { background: #f4f4f4; }
+    @keyframes ct-page-in { from { opacity: 0; } to { opacity: 1; } }
+    html.ct-site .agero-works { animation: ct-page-in .5s cubic-bezier(.22, 1, .36, 1) both; }
+    @media (prefers-reduced-motion: reduce) { html.ct-site .agero-works { animation: none; } }
+  </style>
+
+  <!-- Geist for UI chrome (header, footer). -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500&display=swap" rel="stylesheet" />
 
   <!-- Fontshare - Satoshi (10 Styles + Variable) -->
   <link href="https://api.fontshare.com/v2/css?f[]=satoshi@1,2,900,700,500,300,400,901,701,501,301,401&display=swap"

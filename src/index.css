@@ -1,6 +1,9 @@
 @import './styles/animations.css';
 
 @import "tailwindcss";
+
+/* Wide AND tall enough for the roomy cookie banner; phones in landscape get the compact one. */
+@custom-variant roomy (@media (min-width: 640px) and (min-height: 560px));
 @config "../tailwind.config.js";
 
 @font-face {

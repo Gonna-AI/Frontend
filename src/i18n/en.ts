@@ -2,6 +2,7 @@ export const en = {
     // Navigation
     'nav.about': 'About',
     'nav.blog': 'Blog',
+    'nav.research': 'Research',
     'nav.solutions': 'Solutions',
     'nav.contact': 'Login', // Contact is unused, we'll keep it for legacy safety but add explicit login
     'nav.login': 'Login',

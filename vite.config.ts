@@ -110,6 +110,7 @@ export default defineConfig({
       dynamicRoutes: [
         '/about',
         '/brand',
+        '/careers',
         '/solutions',
         '/blog',
         '/contact',
