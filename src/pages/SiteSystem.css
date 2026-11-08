@@ -112,8 +112,14 @@
 }
 
 .agero-works .brand-band-dark,
-.agero-works .brand-swatches {
+.agero-works .brand-swatches,
+.agero-works .agero-contact-panel {
   width: calc(100% - 2 * var(--gutter));
+}
+
+/* Solutions CTA already sits inside an 8px-inset container. */
+.agero-works .fabric-solution-cta {
+  width: 100%;
 }
 
 .agero-works .rs-cta {
@@ -299,4 +305,12 @@
    darker strip with a hard bottom edge on the new canvas. Fade to canvas. */
 .agero-works .agero-ribbon-stage::before {
   background: linear-gradient(180deg, rgba(244, 244, 244, 0), rgba(244, 244, 244, 0.6));
+}
+
+/* Solutions keeps the same 8px page gutter on phones as every other page. */
+@media (max-width: 767px) {
+  .agero-works .clerktree-solutions-main {
+    padding-left: var(--gutter);
+    padding-right: var(--gutter);
+  }
 }
