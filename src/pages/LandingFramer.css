@@ -964,7 +964,7 @@ a:hover > .ct-roll > .ct-roll-inner { transform: translateY(-50%); }
 }
 
 .agero-plan-card-featured {
-  background: url("https://framerusercontent.com/images/rPO1CKOqIOzSAvaQ1EYPMHZ0Ps.png?scale-down-to=1024") center / cover;
+  background: radial-gradient(90% 70% at 80% 0%, #3a3a3c, #0b0b0b 70%);
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.16);
   color: #fff;
   z-index: 3;
@@ -1293,18 +1293,6 @@ a:hover > .ct-roll > .ct-roll-inner { transform: translateY(-50%); }
   position: relative;
 }
 
-.agero-contact-bg-video {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  z-index: 0;
-  pointer-events: none;
-  filter: brightness(0.75);
-}
-
 .agero-contact-top {
   position: relative;
   z-index: 2;
@@ -1486,8 +1474,7 @@ a:hover > .ct-roll > .ct-roll-inner { transform: translateY(-50%); }
 
 .agero-footer-inner {
   background:
-    linear-gradient(90deg, rgba(0, 0, 0, 0.14), rgba(0, 0, 0, 0.04)),
-    url("https://framerusercontent.com/images/PdDBhDZBbpUwCIAstL4W9sLO5M.png?scale-down-to=2048") center / cover;
+    radial-gradient(80% 90% at 20% 0%, #2a2a2c, #0b0b0b 70%);
   border-radius: 32px;
   isolation: isolate;
   overflow: hidden;

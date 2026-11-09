@@ -1,6 +1,6 @@
-import { type CSSProperties, type VideoHTMLAttributes, Fragment, useEffect, useState } from 'react';
+import { type CSSProperties, Fragment, useEffect, useState } from 'react';
 import Lenis from 'lenis';
-import { isSaveDataEnabled, shouldAutoplayMedia } from '../utils/idle';
+import { isSaveDataEnabled } from '../utils/idle';
 import { Footer, Header } from '../components/Landing/AgeroChrome';
 import { useLanguage } from '../contexts/LanguageContext';
 import SEO from '../components/SEO';
@@ -10,7 +10,6 @@ import { CaseStudy, ConnectorPanel, HeroAgentCard, LogoStrip, ProofChart, Spotli
 import './LandingFramer.css';
 
 const BASE = 'https://pub-0f804855178c4f4e8184c4fef3bd5b2a.r2.dev';
-const HOME_CONTACT_VIDEO_SRC = `${BASE}/hero.mov`;
 
 const clientLogos = [
   { alt: 'BMW', src: '/client-logos/bmw.svg?v=2', width: 40, mobileWidth: 28 },
@@ -38,10 +37,7 @@ const plans = [
 
 const faqKeys = ['q1', 'q2', 'q3', 'q4', 'q5', 'q6'] as const;
 
-const flowerIcon =
-  'https://framerusercontent.com/images/bPFUMYGmKDGU6pubiY2MFnjtBAk.svg?width=16&height=16';
-
-const HOME_VIDEO_UPLOAD_DATE = '2026-06-29';
+const flowerIcon = '/favicon.svg';
 
 export default function LandingFramer() {
   useAgeroPageMotion();
@@ -53,18 +49,6 @@ export default function LandingFramer() {
         title="ClerkTree – Industrial AI for Machine Operations"
         description="Industrial AI for machine operations. ClerkTree turns machine signals, manuals and RFQs into predictive maintenance and agent-driven work orders. Built in Bavaria."
         canonical="https://clerktree.com/"
-        preloadVideos={[
-          { href: HOME_CONTACT_VIDEO_SRC, type: 'video/quicktime' },
-        ]}
-        videos={[
-          {
-            name: t('home.contact.heading'),
-            description: t('home.contact.tagline'),
-            contentUrl: HOME_CONTACT_VIDEO_SRC,
-            thumbnailUrl: 'https://framerusercontent.com/images/jXErNhJ75aLqKEeFiIYT76adrM8.png?scale-down-to=2048',
-            uploadDate: HOME_VIDEO_UPLOAD_DATE,
-          },
-        ]}
       />
       <div className="agero-top-area">
         <Header />
@@ -282,25 +266,6 @@ function useAgeroPageMotion() {
 
 function clamp(value: number, min: number, max: number) {
   return Math.min(max, Math.max(min, value));
-}
-
-function LazyVideo({
-  autoPlay = true,
-  preload,
-  src,
-  ...props
-}: VideoHTMLAttributes<HTMLVideoElement> & { src: string }) {
-  const shouldPlay = shouldAutoplayMedia();
-
-  return (
-    <video
-      {...props}
-      autoPlay={autoPlay && shouldPlay}
-      crossOrigin="anonymous"
-      preload={preload || (shouldPlay ? 'auto' : 'metadata')}
-      src={src}
-    />
-  );
 }
 
 function SplitText({ text }: { text: string }) {
@@ -550,14 +515,7 @@ function Contact() {
       </h2>
 
       <div className="agero-contact-panel" data-agero-reveal="up">
-        <LazyVideo
-          autoPlay
-          loop
-          muted
-          playsInline
-          className="agero-contact-bg-video"
-          src={HOME_CONTACT_VIDEO_SRC}
-        />
+        <Grainient preset="black" />
         <div className="agero-contact-top">
           <div className="agero-contact-copy">
             <h3 aria-label={subheading}>

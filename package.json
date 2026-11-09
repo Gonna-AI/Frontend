@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build && node scripts/performance-budget.mjs",
+    "build": "tsc && vite build && node scripts/prerender-routes.mjs && node scripts/performance-budget.mjs",
     "lint": "eslint .",
     "perf:budget": "node scripts/performance-budget.mjs",
     "perf:build": "npm run build",

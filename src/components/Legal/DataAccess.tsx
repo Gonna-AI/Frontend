@@ -119,6 +119,7 @@ ${formData.details || 'No additional details provided.'}
       <SEO
         title="Data Subject Access Request (DSAR)"
         description="Submit a request to access, correct, delete, or restrict your personal data under GDPR, CCPA, and applicable privacy laws."
+        noindex
       />
 
       <PageHero

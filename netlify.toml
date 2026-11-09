@@ -36,6 +36,79 @@
   to = "/robots.txt"
   status = 200
 
+# Old product and template files: gone for good, so search engines drop them.
+[[redirects]]
+  from = "/callsumary.png"
+  to = "/404"
+  status = 410
+  force = true
+
+[[redirects]]
+  from = "/graphofcalls.png"
+  to = "/404"
+  status = 410
+  force = true
+
+[[redirects]]
+  from = "/graphofsimilarpeople.png"
+  to = "/404"
+  status = 410
+  force = true
+
+[[redirects]]
+  from = "/cluster-copilot.png"
+  to = "/404"
+  status = 410
+  force = true
+
+[[redirects]]
+  from = "/clusterrescueforhighrisk.png"
+  to = "/404"
+  status = 410
+  force = true
+
+[[redirects]]
+  from = "/desktop1.png"
+  to = "/404"
+  status = 410
+  force = true
+
+[[redirects]]
+  from = "/desktop3.png"
+  to = "/404"
+  status = 410
+  force = true
+
+[[redirects]]
+  from = "/hero-logo-video.mp4"
+  to = "/404"
+  status = 410
+  force = true
+
+[[redirects]]
+  from = "/mobile.jpeg"
+  to = "/404"
+  status = 410
+  force = true
+
+[[redirects]]
+  from = "/blog-thumbnails/*"
+  to = "/404"
+  status = 410
+  force = true
+
+[[redirects]]
+  from = "/logo-lab"
+  to = "/404"
+  status = 410
+  force = true
+
+[[redirects]]
+  from = "/logo-lab.html"
+  to = "/404"
+  status = 410
+  force = true
+
 [[redirects]]
   from = "/*"
   to = "/index.html"

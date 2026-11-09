@@ -28,9 +28,11 @@ interface SEOProps {
     /** VideoObject schema for every <video> embedded on the page — Google Search
      * Console won't index a video without a thumbnailUrl in structured data. */
     videos?: VideoMeta[];
+    /** Keep the page out of search results (legal pages). */
+    noindex?: boolean;
 }
 
-export default function SEO({ title, description, canonical, preloadVideos, openGraph, structuredData, videos }: SEOProps) {
+export default function SEO({ title, description, canonical, preloadVideos, openGraph, structuredData, videos, noindex }: SEOProps) {
     const siteUrl = 'https://clerktree.com';
     // Pages may already carry the brand ("Terms — ClerkTree", or the bare "ClerkTree" default); never print it twice.
     const fullTitle = /clerktree/i.test(title) ? title : `${title} | ClerkTree`;
@@ -55,6 +57,7 @@ export default function SEO({ title, description, canonical, preloadVideos, open
             <title>{fullTitle}</title>
             <meta name="description" content={description} />
             <link rel="canonical" href={currentUrl} />
+            {noindex && <meta name="robots" content="noindex, follow" />}
             {preloadVideos?.map((video) => (
                 <link
                     key={video.href}

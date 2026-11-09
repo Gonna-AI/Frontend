@@ -60,7 +60,7 @@ export default function LegalHtmlPage({ description, htmlUrl, title }: LegalHtml
 
   return (
     <div className="agero-works" id="agero-works">
-      <SEO title={title} description={description} />
+      <SEO title={title} description={description} noindex />
 
       <PageHero eyebrow="Legal" title={title} description={description} titleId="legal-page-title" />
 
