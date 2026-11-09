@@ -2412,14 +2412,19 @@ a:hover > .ct-roll > .ct-roll-inner { transform: translateY(-50%); }
 }
 .ct-mnav-sheet {
   --mnav-pl: 20px; --mnav-pr: 20px; --mnav-pt: 12px; --mnav-row: 40px;
-  animation: ctMnavIn .42s cubic-bezier(.22, 1, .36, 1) both; background: #fff; border-radius: var(--r-edge, 32px);
+  background: #fff; border-radius: var(--r-edge, 32px);
   box-shadow: 0 1px 0 rgba(255, 255, 255, .8) inset, 0 0 0 1px rgba(10, 10, 10, .06), 0 30px 80px rgba(10, 10, 10, .18);
   box-sizing: border-box; display: flex; flex-direction: column; font-family: var(--font-ui);
-  left: var(--gutter, 8px); max-height: calc(100dvh - 2 * var(--gutter, 8px)); overflow-y: auto; overscroll-behavior: contain;
+  left: var(--gutter, 8px); max-height: calc(100dvh - 2 * var(--gutter, 8px)); overflow: hidden; overscroll-behavior: contain;
+  transition: height .5s cubic-bezier(.65, 0, .25, 1), box-shadow .4s ease;
   padding: var(--mnav-pt) var(--mnav-pr) var(--mnav-pl) var(--mnav-pl); position: absolute; right: var(--gutter, 8px); top: var(--gutter, 8px);
   transform-origin: top right;
 }
 @keyframes ctMnavIn { from { opacity: 0; transform: translateY(-6px) scale(.985); } }
+.ct-mnav-sheet.is-settled { overflow-y: auto; }
+.ct-mnav-scrim { transition: opacity .4s ease; }
+.ct-mnav.is-closing .ct-mnav-scrim { opacity: 0; }
+.ct-mnav.is-closing :is(.ct-mnav-primary, .ct-mnav-cta) { opacity: 0; transform: translateY(-6px); transition: opacity .2s ease, transform .3s ease; }
 @keyframes ctMnavFade { from { opacity: 0; } }
 @keyframes ctMnavItem { from { opacity: 0; transform: translateY(8px); } }
 

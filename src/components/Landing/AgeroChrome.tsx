@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import { Activity, ArrowUpRight, Briefcase, ChevronDown, ChevronRight, Factory, FlaskConical, Mail, Scale, Shapes, Users, Wrench } from 'lucide-react';
 import { siX } from 'simple-icons';
 
@@ -125,6 +125,10 @@ export function Header({ linkBase = '' }: HeaderProps = {}) {
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const [openSection, setOpenSection] = useState<string | null>(null);
   const [sheetGeo, setSheetGeo] = useState<CSSProperties>({});
+  const [closing, setClosing] = useState(false);
+  const sheetRef = useRef<HTMLElement>(null);
+  const headHeight = useRef(64);
+  const closeTimer = useRef(0);
   const contactHref = `${linkBase}/contact`;
   const desktopNav = buildDesktopNav(language, t, linkBase);
 
@@ -141,7 +145,7 @@ export function Header({ linkBase = '' }: HeaderProps = {}) {
     body.style.width = '100%';
     html.style.overflow = 'hidden';
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') setIsMenuOpen(false);
+      if (event.key === 'Escape') closeRef.current();
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => {
@@ -157,7 +161,41 @@ export function Header({ linkBase = '' }: HeaderProps = {}) {
     };
   }, [isMenuOpen]);
 
-  const closeMenu = () => setIsMenuOpen(false);
+  // The sheet grows out of the header: it starts at the header's height and
+  // expands to fit, and closing shrinks it back before it unmounts.
+  const reduceMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const closeMenu = () => {
+    const sheet = sheetRef.current;
+    if (!sheet || reduceMotion()) { setIsMenuOpen(false); return; }
+    if (closing) return;
+    sheet.classList.remove('is-settled');
+    sheet.style.height = `${sheet.offsetHeight}px`;
+    void sheet.offsetHeight;
+    sheet.style.height = `${headHeight.current}px`;
+    setClosing(true);
+    window.clearTimeout(closeTimer.current);
+    closeTimer.current = window.setTimeout(() => { setIsMenuOpen(false); setClosing(false); }, 420);
+  };
+  const closeRef = useRef(closeMenu);
+  closeRef.current = closeMenu;
+  useEffect(() => () => window.clearTimeout(closeTimer.current), []);
+  useLayoutEffect(() => {
+    const sheet = sheetRef.current;
+    if (!isMenuOpen || !sheet) return undefined;
+    if (reduceMotion()) { sheet.classList.add('is-settled'); return undefined; }
+    const target = Math.min(sheet.scrollHeight, window.innerHeight - 16);
+    sheet.style.height = `${headHeight.current}px`;
+    void sheet.offsetHeight;
+    sheet.style.height = `${target}px`;
+    const done = (event: TransitionEvent) => {
+      if (event.propertyName !== 'height' || event.target !== sheet) return;
+      sheet.style.height = '';
+      sheet.classList.add('is-settled');
+      sheet.removeEventListener('transitionend', done);
+    };
+    sheet.addEventListener('transitionend', done);
+    return () => sheet.removeEventListener('transitionend', done);
+  }, [isMenuOpen]);
   // The sheet's top row reuses the closed header's exact geometry, so the
   // close button lands where the menu button was and the logo does not move.
   const openMenu = () => {
@@ -165,13 +203,16 @@ export function Header({ linkBase = '' }: HeaderProps = {}) {
     const btn = menuButtonRef.current?.getBoundingClientRect();
     if (logo && btn && btn.top >= 0) {
       const edge = 8;
+      const pt = Math.max(10, btn.top - edge);
+      headHeight.current = Math.round(pt * 2 + btn.height);
       setSheetGeo({
-        '--mnav-pt': `${Math.max(10, btn.top - edge)}px`,
+        '--mnav-pt': `${pt}px`,
         '--mnav-pl': `${Math.max(14, logo.left - edge)}px`,
         '--mnav-pr': `${Math.max(14, window.innerWidth - btn.right - edge)}px`,
         '--mnav-row': `${btn.height}px`,
       } as CSSProperties);
     } else {
+      headHeight.current = 64;
       setSheetGeo({});
     }
     setOpenSection(null);
@@ -254,9 +295,9 @@ export function Header({ linkBase = '' }: HeaderProps = {}) {
       </div>
 
       {isMenuOpen && (
-        <div className="ct-mnav" data-lenis-prevent="" id="agero-mobile-menu">
+        <div className={`ct-mnav${closing ? ' is-closing' : ''}`} data-lenis-prevent="" id="agero-mobile-menu">
           <button aria-label={t('home.menu.closeMobile')} className="ct-mnav-scrim" onClick={closeMenu} type="button" />
-          <nav className="ct-mnav-sheet" aria-label={t('home.menu.navAria')} style={sheetGeo}>
+          <nav className="ct-mnav-sheet" aria-label={t('home.menu.navAria')} ref={sheetRef} style={sheetGeo}>
             <div className="ct-mnav-top">
               <a className="ct-mnav-logo" href={linkBase || '/'} aria-label={t('home.brand.aria')} onClick={closeMenu}>
                 <ClerkTreeLockup className="agero-shell-lockup" title={null} />
