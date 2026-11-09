@@ -18,7 +18,7 @@
 .agero-works .hv-head .agero-shell-menu span { background: #fff; }
 
 .agero-works .hv-scroll { height: 1950svh; position: relative; }
-.agero-works .hv-sticky { height: 100svh; overflow: hidden; position: sticky; top: 0; will-change: transform; }
+.agero-works .hv-sticky { height: 100svh; overflow: hidden; position: sticky; top: 0; }
 /* The scene owns the right of the frame; copy owns a column on the left (top on phones). */
 .agero-works .hv-stage { bottom: 6%; left: 38%; position: absolute; right: 0; top: 0; }
 .agero-works .hv-canvas { display: block; height: 100%; inset: 0; position: absolute; width: 100%; }
@@ -59,8 +59,9 @@
 .agero-works .hv-scrollhint.is-hidden { opacity: 0; }
 
 /* Chapters: one steady column, vertically centred, so the eye never hunts for the copy. */
-.agero-works .hv-chapter { inset: 0; opacity: 0; pointer-events: none; position: absolute; visibility: hidden; will-change: opacity, transform, filter; z-index: 2; }
+.agero-works .hv-chapter { inset: 0; opacity: 0; pointer-events: none; position: absolute; visibility: hidden; z-index: 2; }
 .agero-works .hv-chapter-main {
+  will-change: translate, filter;
   left: var(--hv-col-x); position: absolute; top: 50%; transform: translateY(-50%); width: var(--hv-col-w);
 }
 .agero-works .hv-chapter-eyebrow, .agero-works .hv-chapter-detail > span {

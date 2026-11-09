@@ -105,7 +105,6 @@ function HiveStory() {
     sceneRef.current = scene;
     const host = canvas.parentElement!;
     const sticky = host.parentElement!;
-    let scrollFrame = 0;
     let storyTop = 0;
     let span = 0;
     let currentChapter = -1;
@@ -113,23 +112,25 @@ function HiveStory() {
       storyTop = wrap.getBoundingClientRect().top + window.scrollY;
       span = wrap.offsetHeight - sticky.clientHeight;
     };
-    const update = () => {
-      scrollFrame = 0;
-      const p = span > 0 ? Math.min(1, Math.max(0, (window.scrollY - storyTop) / span)) : 0;
-      scene.setProgress(p);
+    const readTarget = () => (span > 0 ? Math.min(1, Math.max(0, (window.scrollY - storyTop) / span)) : 0);
+
+    // Copy follows an eased copy of the scroll position (the same easing the scene
+    // uses), so text and scene glide together instead of stepping with each scroll event.
+    const render = (p: number) => {
       let nextChapter = -1;
       CHAPTERS.forEach(({ start, end }, i) => {
-        // Copy drifts up through the frame: it rises in softly, settles, then lifts away.
-        // Chapters overlap by 0.03, so leave fully before the next one arrives.
+        // Rises in softly, settles, then lifts away; chapters overlap by 0.03, so one
+        // leaves fully before the next arrives.
         const enter = ease(ss(start + 0.015, start + 0.06, p));
         const exit = ease(ss(end - 0.045, end - 0.015, p));
         const opacity = Math.min(enter, 1 - exit);
         const chapter = chapterRefs.current[i];
-        if (chapter) {
-          chapter.style.opacity = String(opacity);
+        const main = chapter?.firstElementChild as HTMLElement | null;
+        if (chapter && main) {
+          chapter.style.opacity = opacity.toFixed(3);
           chapter.style.visibility = opacity > 0 ? 'visible' : 'hidden';
-          chapter.style.transform = `translate3d(0, ${((1 - enter) * 36 - exit * 36).toFixed(1)}px, 0)`;
-          chapter.style.filter = opacity < 1 ? `blur(${((1 - opacity) * 6).toFixed(2)}px)` : '';
+          main.style.translate = `0 ${((1 - enter) * 32 - exit * 32).toFixed(2)}px`;
+          main.style.filter = opacity > 0 && opacity < 1 ? `blur(${((1 - opacity) * 5).toFixed(2)}px)` : '';
         }
         if (p >= start + 0.012 && p < end - 0.012) nextChapter = i;
       });
@@ -141,12 +142,34 @@ function HiveStory() {
         hero.style.visibility = out >= 1 ? 'hidden' : 'visible';
       }
     };
-    const onScroll = () => { if (!scrollFrame) scrollFrame = requestAnimationFrame(update); };
+
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let target = 0;
+    let shown = 0;
+    let last = 0;
+    let loop = 0;
+    const step = (now: number) => {
+      loop = 0;
+      const dt = last ? Math.min(0.05, (now - last) / 1000) : 1 / 60;
+      last = now;
+      shown += (target - shown) * (1 - Math.exp(-dt * 14));
+      if (Math.abs(target - shown) < 0.00005) shown = target;
+      render(shown);
+      if (shown !== target) loop = requestAnimationFrame(step); else last = 0;
+    };
+    const onScroll = () => {
+      target = readTarget();
+      scene.setProgress(target);
+      if (reduced) { shown = target; render(shown); return; }
+      if (!loop) loop = requestAnimationFrame(step);
+    };
     const onResize = () => { measure(); onScroll(); };
     const ro = new ResizeObserver(() => { const r = host.getBoundingClientRect(); scene.resize(r.width, r.height); onResize(); });
     ro.observe(host);
     measure();
-    update();
+    target = shown = readTarget();
+    scene.setProgress(target);
+    render(shown);
     window.addEventListener('scroll', onScroll, { passive: true });
     window.addEventListener('resize', onResize);
     let visible = false;
@@ -159,7 +182,7 @@ function HiveStory() {
     document.addEventListener('visibilitychange', onVis);
     return () => {
       ro.disconnect(); io.disconnect();
-      if (scrollFrame) cancelAnimationFrame(scrollFrame);
+      if (loop) cancelAnimationFrame(loop);
       window.removeEventListener('scroll', onScroll);
       window.removeEventListener('resize', onResize);
       document.removeEventListener('visibilitychange', onVis);
