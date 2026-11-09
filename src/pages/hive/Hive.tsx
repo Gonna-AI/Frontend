@@ -8,14 +8,14 @@ import { HiveScene, type HiveCopy } from './HiveScene';
 import '../LandingFramer.css';
 import './Hive.css';
 
-// Each chapter overlaps the next so the product story moves with the same
-// continuous scene, without moving the pinned frame itself.
+// Each chapter overlaps the next so the story moves with one continuous scene.
+// Copy sits in its own column (left on desktop, top on phones) and never covers it.
 const CHAPTERS = [
-  { start: 0.055, end: 0.245, placement: 'left' },
-  { start: 0.215, end: 0.425, placement: 'right' },
-  { start: 0.395, end: 0.625, placement: 'left' },
-  { start: 0.595, end: 0.82, placement: 'right' },
-  { start: 0.79, end: 1.04, placement: 'center' },
+  { start: 0.055, end: 0.245 },
+  { start: 0.215, end: 0.425 },
+  { start: 0.395, end: 0.625 },
+  { start: 0.595, end: 0.82 },
+  { start: 0.79, end: 1.04 },
 ] as const;
 
 const COPY = {
@@ -86,6 +86,7 @@ const COPY = {
 };
 
 const ss = (a: number, b: number, x: number) => Math.min(1, Math.max(0, (x - a) / (b - a)));
+const ease = (t: number) => t * t * (3 - 2 * t);
 
 function HiveStory() {
   const { language } = useLanguage();
@@ -103,13 +104,14 @@ function HiveStory() {
     const scene = new HiveScene(canvas);
     sceneRef.current = scene;
     const host = canvas.parentElement!;
+    const sticky = host.parentElement!;
     let scrollFrame = 0;
     let storyTop = 0;
     let span = 0;
     let currentChapter = -1;
     const measure = () => {
       storyTop = wrap.getBoundingClientRect().top + window.scrollY;
-      span = wrap.offsetHeight - host.clientHeight;
+      span = wrap.offsetHeight - sticky.clientHeight;
     };
     const update = () => {
       scrollFrame = 0;
@@ -117,11 +119,17 @@ function HiveStory() {
       scene.setProgress(p);
       let nextChapter = -1;
       CHAPTERS.forEach(({ start, end }, i) => {
-        const opacity = Math.min(ss(start, start + 0.025, p), 1 - ss(end - 0.025, end, p));
+        // Copy drifts up through the frame: it rises in softly, settles, then lifts away.
+        // Chapters overlap by 0.03, so leave fully before the next one arrives.
+        const enter = ease(ss(start + 0.015, start + 0.06, p));
+        const exit = ease(ss(end - 0.045, end - 0.015, p));
+        const opacity = Math.min(enter, 1 - exit);
         const chapter = chapterRefs.current[i];
         if (chapter) {
           chapter.style.opacity = String(opacity);
           chapter.style.visibility = opacity > 0 ? 'visible' : 'hidden';
+          chapter.style.transform = `translate3d(0, ${((1 - enter) * 36 - exit * 36).toFixed(1)}px, 0)`;
+          chapter.style.filter = opacity < 1 ? `blur(${((1 - opacity) * 6).toFixed(2)}px)` : '';
         }
         if (p >= start + 0.012 && p < end - 0.012) nextChapter = i;
       });
@@ -173,7 +181,7 @@ function HiveStory() {
     <div className="hv-scroll" ref={wrapRef}>
       <div className="hv-head"><Header /></div>
       <div className="hv-sticky">
-        <canvas className="hv-canvas" ref={canvasRef} aria-hidden="true" />
+        <div className="hv-stage"><canvas className="hv-canvas" ref={canvasRef} aria-hidden="true" /></div>
         <div className="hv-hero" ref={heroRef}>
           <span className="hv-hero-eyebrow">{c.heroEyebrow}</span>
           <h1>{c.heroTitle}</h1>
@@ -187,7 +195,7 @@ function HiveStory() {
         {c.chapters.map((chapter, i) => (
           <section
             aria-hidden={activeChapter !== i}
-            className={`hv-chapter hv-chapter--${CHAPTERS[i].placement}`}
+            className="hv-chapter"
             key={i}
             ref={(element) => { chapterRefs.current[i] = element; }}
           >
@@ -195,10 +203,10 @@ function HiveStory() {
               <span className="hv-chapter-eyebrow">{chapter.eyebrow}</span>
               <h2>{chapter.title}</h2>
               <p>{chapter.body}</p>
-            </div>
-            <div className="hv-chapter-detail">
-              <span>{chapter.detailLabel}</span>
-              <p>{chapter.detail}</p>
+              <div className="hv-chapter-detail">
+                <span>{chapter.detailLabel}</span>
+                <p>{chapter.detail}</p>
+              </div>
             </div>
           </section>
         ))}

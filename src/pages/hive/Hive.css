@@ -19,8 +19,16 @@
 
 .agero-works .hv-scroll { height: 1950svh; position: relative; }
 .agero-works .hv-sticky { height: 100svh; overflow: hidden; position: sticky; top: 0; will-change: transform; }
+/* The scene owns the right of the frame; copy owns a column on the left (top on phones). */
+.agero-works .hv-stage { bottom: 6%; left: 38%; position: absolute; right: 0; top: 0; }
 .agero-works .hv-canvas { display: block; height: 100%; inset: 0; position: absolute; width: 100%; }
-.agero-works .hv-sticky::after { background: linear-gradient(90deg, rgba(13, 13, 14, .88), transparent 48%), linear-gradient(180deg, rgba(13, 13, 14, .72), transparent 26%), linear-gradient(0deg, rgba(13, 13, 14, .86), transparent 34%); content: ''; inset: 0; pointer-events: none; position: absolute; z-index: 1; }
+.agero-works .hv-sticky::after {
+  background:
+    linear-gradient(90deg, #0d0d0e 36%, rgba(13, 13, 14, .82) 41%, rgba(13, 13, 14, 0) 54%),
+    linear-gradient(180deg, rgba(13, 13, 14, .7), transparent 18%),
+    linear-gradient(0deg, rgba(13, 13, 14, .7), transparent 18%);
+  content: ''; inset: 0; pointer-events: none; position: absolute; z-index: 1;
+}
 
 .agero-works .hv-hero {
   align-items: flex-start; display: flex; flex-direction: column; gap: 18px; inset: 0; justify-content: center;
@@ -50,48 +58,42 @@
 .agero-works .hv-scrollhint i { background: linear-gradient(rgba(255, 255, 255, .5), transparent); height: 28px; width: 1px; }
 .agero-works .hv-scrollhint.is-hidden { opacity: 0; }
 
-/* The story lives in the scene, with an open composition instead of cards. */
-.agero-works .hv-chapter {
-  inset: 0; opacity: 0; pointer-events: none; position: absolute; visibility: hidden; z-index: 2;
-}
+/* Chapters: one steady column, vertically centred, so the eye never hunts for the copy. */
+.agero-works .hv-chapter { inset: 0; opacity: 0; pointer-events: none; position: absolute; visibility: hidden; will-change: opacity, transform, filter; z-index: 2; }
 .agero-works .hv-chapter-main {
-  left: clamp(32px, 7vw, 112px); max-width: 570px; position: absolute; top: 29%; width: 43%;
+  left: var(--hv-col-x); position: absolute; top: 50%; transform: translateY(-50%); width: var(--hv-col-w);
 }
-.agero-works .hv-chapter-main::before {
-  background: radial-gradient(ellipse at center, rgba(13, 13, 14, .92), rgba(13, 13, 14, .69) 45%, transparent 75%);
-  content: ''; inset: -90px -100px; pointer-events: none; position: absolute; z-index: -1;
-}
-.agero-works .hv-chapter--right .hv-chapter-main { left: auto; right: clamp(32px, 7vw, 112px); top: 26%; }
-.agero-works .hv-chapter--center .hv-chapter-main { left: 50%; max-width: 690px; text-align: center; top: 27%; transform: translateX(-50%); width: 62%; }
 .agero-works .hv-chapter-eyebrow, .agero-works .hv-chapter-detail > span {
-  color: rgba(232, 233, 235, .56); display: block; font: 500 10px/1.3 "Geist", "Inter", sans-serif; letter-spacing: .13em;
+  color: var(--agero-orange); display: block; font: 500 11px/1.3 "Geist", "Inter", sans-serif; letter-spacing: .13em;
 }
 .agero-works .hv-chapter h2 {
-  color: #fff; font-family: "Geist", "Inter", sans-serif !important; font-size: clamp(34px, 3.7vw, 56px); font-weight: 500;
-  letter-spacing: -.045em; line-height: 1.07; margin: 21px 0 20px; text-wrap: balance;
+  color: #fff; font-family: "Geist", "Inter", sans-serif !important; font-size: clamp(32px, 3.2vw, 50px); font-weight: 500;
+  letter-spacing: -.04em; line-height: 1.07; margin: 18px 0 18px; text-wrap: balance;
 }
-.agero-works .hv-chapter-main > p { color: rgba(240, 241, 243, .78); font-family: "Geist", "Inter", sans-serif !important; font-size: clamp(15px, 1.15vw, 17px); line-height: 1.55; margin: 0; max-width: 490px; text-wrap: pretty; }
-.agero-works .hv-chapter--center .hv-chapter-main > p { margin-inline: auto; }
-.agero-works .hv-chapter-detail { bottom: 10%; position: absolute; right: clamp(32px, 7vw, 112px); text-align: right; }
-.agero-works .hv-chapter--right .hv-chapter-detail { left: clamp(32px, 7vw, 112px); right: auto; text-align: left; }
-.agero-works .hv-chapter--center .hv-chapter-detail { left: 0; right: 0; text-align: center; }
-.agero-works .hv-chapter-detail p { color: rgba(255, 255, 255, .82); font: 400 14px/1.5 "Geist", "Inter", sans-serif; margin: 9px 0 0; text-shadow: 0 1px 14px #000; }
+.agero-works .hv-chapter-main > p { color: rgba(240, 241, 243, .72); font-family: "Geist", "Inter", sans-serif !important; font-size: clamp(15px, 1.1vw, 17px); line-height: 1.6; margin: 0; text-wrap: pretty; }
+.agero-works .hv-chapter-detail { border-top: 1px solid rgba(255, 255, 255, .12); margin-top: 28px; padding-top: 16px; }
+.agero-works .hv-chapter-detail > span { color: rgba(232, 233, 235, .45); }
+.agero-works .hv-chapter-detail p { color: rgba(255, 255, 255, .86); font: 400 14px/1.5 "Geist", "Inter", sans-serif; margin: 8px 0 0; }
 
-@media (max-width: 640px) {
+.agero-works .hv-sticky { --hv-col-x: clamp(28px, 5vw, 96px); --hv-col-w: min(34vw, 500px); }
+.agero-works .hv-hero { padding-left: var(--hv-col-x); padding-right: 0; }
+.agero-works .hv-hero h1, .agero-works .hv-hero p { max-width: var(--hv-col-w); }
+
+/* Phones and small tablets: copy on top, scene below. */
+@media (max-width: 900px) {
   .agero-works .hv-scroll { height: 1850svh; }
-  .agero-works .hv-sticky::after { background: linear-gradient(180deg, rgba(13, 13, 14, .87), transparent 36%), linear-gradient(0deg, rgba(13, 13, 14, .9), transparent 32%); }
-  .agero-works .hv-hero { align-items: center; justify-content: flex-start; padding: 112px 24px 0; text-align: center; }
-  .agero-works .hv-hero h1 { font-size: clamp(36px, 9.2vw, 42px); }
-  .agero-works .hv-hero p { font-size: 16px; }
-  .agero-works .hv-hero-actions { justify-content: center; }
-  .agero-works .hv-chapter-main, .agero-works .hv-chapter--right .hv-chapter-main, .agero-works .hv-chapter--center .hv-chapter-main {
-    left: 24px; max-width: none; right: 24px; text-align: left; top: 16%; transform: none; width: auto;
+  .agero-works .hv-sticky { --hv-col-x: 24px; --hv-col-w: calc(100% - 48px); }
+  .agero-works .hv-stage { bottom: 5%; left: 0; top: 33%; }
+  .agero-works .hv-sticky::after {
+    background: linear-gradient(180deg, #0d0d0e 34%, rgba(13, 13, 14, .6) 41%, rgba(13, 13, 14, 0) 50%), linear-gradient(0deg, rgba(13, 13, 14, .8), transparent 12%);
   }
-  .agero-works .hv-chapter-main::before { inset: -50px -45px; }
-  .agero-works .hv-chapter h2 { font-size: clamp(31px, 8vw, 42px); margin: 15px 0; }
-  .agero-works .hv-chapter-main > p, .agero-works .hv-chapter--center .hv-chapter-main > p { font-size: 15px; margin: 0; }
-  .agero-works .hv-chapter-detail, .agero-works .hv-chapter--right .hv-chapter-detail, .agero-works .hv-chapter--center .hv-chapter-detail { bottom: 8%; left: 24px; right: 24px; text-align: left; }
-  .agero-works .hv-chapter-detail p { font-size: 13px; }
+  .agero-works .hv-hero { align-items: flex-start; justify-content: flex-start; padding: 104px 24px 0; text-align: left; }
+  .agero-works .hv-hero h1 { font-size: clamp(34px, 8.6vw, 44px); }
+  .agero-works .hv-hero p { font-size: 15px; }
+  .agero-works .hv-chapter-main { top: 10svh; transform: none; }
+  .agero-works .hv-chapter h2 { font-size: clamp(26px, 6.8vw, 36px); margin: 12px 0; }
+  .agero-works .hv-chapter-main > p { font-size: 14.5px; line-height: 1.5; }
+  .agero-works .hv-chapter-detail { display: none; }
 }
 @media (prefers-reduced-motion: reduce) {
   .agero-works .hv-chapter { transition: none; }
