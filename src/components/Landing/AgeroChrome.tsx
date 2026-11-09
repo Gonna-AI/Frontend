@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import { Activity, ArrowUpRight, Briefcase, ChevronDown, ChevronRight, Factory, FlaskConical, Mail, Scale, Shapes, Users, Wrench } from 'lucide-react';
 import { siX } from 'simple-icons';
+import { NavigationMenu } from 'radix-ui';
 
 import ClerkTreeLockup from '../Brand/ClerkTreeLockup';
 import { playFirstVisitIntro, playLogoPortal, shouldPlayFirstVisitIntro } from '../Brand/logoPortal';
@@ -236,30 +237,30 @@ export function Header({ linkBase = '' }: HeaderProps = {}) {
         <ClerkTreeLockup className="agero-shell-lockup" title={null} />
       </a>
 
-      <nav className="agero-shell-nav" aria-label={t('home.nav.aria')}>
+      <NavigationMenu.Root className="agero-shell-nav" aria-label={t('home.nav.aria')} delayDuration={120} skipDelayDuration={300}>
+        <NavigationMenu.List className="agero-nav-list">
         {desktopNav.map((entry) => entry.items ? (
-          <div className="agero-nav-item" key={entry.label}>
-            <button className="agero-nav-trigger" type="button" aria-haspopup="true">
+          <NavigationMenu.Item className="agero-nav-item" key={entry.label}>
+            <NavigationMenu.Trigger className="agero-nav-trigger">
               <Roll>{entry.label}</Roll>
               <ChevronDown className="agero-nav-caret" aria-hidden="true" />
-            </button>
-            <div className="agero-nav-menu">
-              <div className="agero-nav-panel">
+            </NavigationMenu.Trigger>
+            <NavigationMenu.Content className="agero-nav-panel">
                 {entry.items.map((item, index) => (
-                  <a className="agero-nav-menu-item" href={item.href} key={item.href} style={{ '--i': index } as CSSProperties}>
+                  <NavigationMenu.Link className="agero-nav-menu-item" href={item.href} key={item.href} style={{ '--i': index } as CSSProperties}>
                     <span className="agero-nav-menu-ico" aria-hidden="true">{item.icon}</span>
                     <Roll>{item.label}</Roll>
-                  </a>
+                  </NavigationMenu.Link>
                 ))}
-              </div>
-            </div>
-          </div>
+            </NavigationMenu.Content>
+          </NavigationMenu.Item>
         ) : (
-          <a href={entry.href} key={entry.label}>
-            <Roll>{entry.label}</Roll>
-          </a>
+          <NavigationMenu.Item key={entry.label}>
+            <NavigationMenu.Link className="agero-nav-link" href={entry.href}><Roll>{entry.label}</Roll></NavigationMenu.Link>
+          </NavigationMenu.Item>
         ))}
-      </nav>
+        </NavigationMenu.List>
+      </NavigationMenu.Root>
 
       <div className="agero-shell-actions">
         <button
