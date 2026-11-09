@@ -881,11 +881,11 @@ export const en = {
     'home.menu.title': 'Menu',
     'home.menu.cta': 'Book Demo',
 
-    'home.hero.word1': "Industrial",
-    'home.hero.word2': "AI harness",
-    'home.hero.word3': "for",
-    'home.hero.word4': "operations.",
-    'home.hero.copy': "ClerkTree is an intelligence layer for industrial operations. It connects machine signals, technical knowledge and workflows, so teams can understand what is happening and decide what to do next.",
+    'home.hero.word1': "The world's",
+    'home.hero.word2': "industrial",
+    'home.hero.word3': "intelligence",
+    'home.hero.word4': "layer.",
+    'home.hero.copy': "ClerkTree is an industrial AI harness for machine operations. Agents connect machine signals, technical knowledge and workflows, helping teams understand issues and coordinate work.",
     'home.hero.cta': 'Book Demo',
 
     'home.about.kicker': "The bigger picture",

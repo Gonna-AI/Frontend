@@ -880,11 +880,11 @@ export const de = {
     'home.menu.title': 'Menü',
     'home.menu.cta': 'Demo buchen',
 
-    'home.hero.word1': "Der",
-    'home.hero.word2': "KI-Harness",
-    'home.hero.word3': "für",
-    'home.hero.word4': "Maschinen.",
-    'home.hero.copy': "ClerkTree ist eine Intelligenzschicht für industrielle Abläufe. Sie verbindet Maschinensignale, technisches Wissen und Aufgaben, damit Teams verstehen, was geschieht und was als Nächstes zu tun ist.",
+    'home.hero.word1': "Die",
+    'home.hero.word2': "Intelligenzschicht",
+    'home.hero.word3': "der",
+    'home.hero.word4': "industriellen Welt.",
+    'home.hero.copy': "ClerkTree ist ein industrieller KI-Harness für den Maschinenbetrieb. Agenten verbinden Maschinensignale, technisches Wissen und Arbeitsabläufe, damit Teams Probleme verstehen und ihre Arbeit koordinieren können.",
     'home.hero.cta': 'Demo buchen',
 
     'home.about.kicker': "Das Gesamtbild",

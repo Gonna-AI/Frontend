@@ -46,8 +46,8 @@ export default function LandingFramer() {
   return (
     <div className="agero-works agero-home-page" id="agero-works">
       <SEO
-        title="ClerkTree – Industrial AI for Machine Operations"
-        description="Industrial AI for machine operations. ClerkTree turns machine signals, manuals and RFQs into predictive maintenance and agent-driven work orders. Built in Bavaria."
+        title="ClerkTree – The World's Industrial Intelligence Layer"
+        description="ClerkTree is an industrial AI harness for machine operations. Agents connect signals, technical knowledge and workflows to help teams understand issues and coordinate work."
         canonical="https://clerktree.com/"
       />
       <div className="agero-top-area">
@@ -56,7 +56,7 @@ export default function LandingFramer() {
         <div className="agero-home-hero-copy" data-agero-reveal="hero">
           <h1 className="agero-hero-title" id="agero-works-title" style={{ columnGap: "0.22em" }}>
             <span>{t('home.hero.word1')}</span>
-            <span className="agero-orange">{t('home.hero.word2')}</span>
+            <span>{t('home.hero.word2')}</span>
             <span>{t('home.hero.word3')}</span>
             <span>{t('home.hero.word4')}</span>
           </h1>

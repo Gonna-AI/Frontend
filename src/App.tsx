@@ -131,8 +131,8 @@ function App() {
           <ScrollToTop />
           <AmplitudeRouteTracker />
           <SEO
-            title="ClerkTree – Industrial AI for Machine Operations"
-            description="Industrial AI for machine operations. ClerkTree turns machine signals, manuals and RFQs into predictive maintenance and agent-driven work orders. Built in Bavaria."
+            title="ClerkTree – The World's Industrial Intelligence Layer"
+            description="ClerkTree is an industrial AI harness for machine operations. Agents connect signals, technical knowledge and workflows to help teams understand issues and coordinate work."
           />
           <Suspense fallback={<RouteLoadingFallback />}>
             <main className="flex-1 flex flex-col">
