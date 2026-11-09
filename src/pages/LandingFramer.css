@@ -2425,6 +2425,12 @@ a:hover > .ct-roll > .ct-roll-inner { transform: translateY(-50%); }
 .ct-mnav-scrim { transition: opacity .4s ease; }
 .ct-mnav.is-closing .ct-mnav-scrim { opacity: 0; }
 .ct-mnav.is-closing :is(.ct-mnav-primary, .ct-mnav-cta) { opacity: 0; transform: translateY(-6px); transition: opacity .2s ease, transform .3s ease; }
+.ct-mnav.is-closing .ct-mnav-sheet {
+  box-shadow: 0 0 0 1px rgba(10, 10, 10, 0), 0 30px 80px rgba(10, 10, 10, 0); opacity: 0;
+  transition: height .45s cubic-bezier(.65, 0, .25, 1), box-shadow .35s ease, opacity .18s ease .42s;
+}
+.ct-mnav.is-closing :is(.ct-mnav-lang, .ct-mnav-close) { opacity: 0; transition: opacity .25s ease .2s; }
+.agero-shell-menu { transition: opacity .25s ease; }
 @keyframes ctMnavFade { from { opacity: 0; } }
 @keyframes ctMnavItem { from { opacity: 0; transform: translateY(8px); } }
 

@@ -174,7 +174,7 @@ export function Header({ linkBase = '' }: HeaderProps = {}) {
     sheet.style.height = `${headHeight.current}px`;
     setClosing(true);
     window.clearTimeout(closeTimer.current);
-    closeTimer.current = window.setTimeout(() => { setIsMenuOpen(false); setClosing(false); }, 420);
+    closeTimer.current = window.setTimeout(() => { setIsMenuOpen(false); setClosing(false); }, 620);
   };
   const closeRef = useRef(closeMenu);
   closeRef.current = closeMenu;
@@ -229,7 +229,7 @@ export function Header({ linkBase = '' }: HeaderProps = {}) {
   }, []);
 
   return (
-    <header className={`agero-shell-header${isMenuOpen ? ' is-menu-open' : ''}`}>
+    <header className={`agero-shell-header${isMenuOpen && !closing ? ' is-menu-open' : ''}`}>
       <a className="agero-shell-logo" href={linkBase || '/'} aria-label={t('home.brand.aria')} ref={logoRef}
         onPointerEnter={(event) => { if (event.pointerType === 'mouse') playLogo(); }}
         onFocus={(event) => { if (event.currentTarget.matches(':focus-visible')) playLogo(); }}>
