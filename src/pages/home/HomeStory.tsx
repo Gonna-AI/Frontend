@@ -10,6 +10,7 @@ import { useLanguage } from '../../contexts/LanguageContext';
 import AssetGraph from './AssetGraph';
 import ClerkTreeLockup from '../../components/Brand/ClerkTreeLockup';
 import { STORY_SCENES } from './StoryScenes';
+import SourceGraph, { ANSWER_MARKS, ANSWER_MS, AnswerCard, CHAIN_MS, CausalChain, GRAPH_MS, graphSlot, type AnswerCopy, type ChainGraphCopy, type GraphCopy } from './SourceGraph';
 import './HomeStory.css';
 
 const copy = {
@@ -25,6 +26,49 @@ const copy = {
       { icon: 'plan', agent: 'Planner agent', tool: 'draft_work_order()', wait: 'drafting', value: 'WO-2291, Tue 06:00 shift, 1.5 h', src: 'Work order' },
     ],
     cited: '5 agents · 9 sources cited',
+    graphLabels: { building: 'Building source graph', tracing: 'Tracing citations', verified: '9/9 claims cited' },
+    graphFoot: '9 sources · 13 links',
+    graph: {
+      answer: 'WO-2291 · Replace spindle bearing',
+      answerSub: 'Tue 06:00 shift · 1.5 h',
+      verified: 'Every claim traced to a source',
+      sources: { sig: 'Signal · OPC UA', man: 'Manual · §4.3', his: 'History · CMMS', par: 'Parts · SAP MM' },
+      leaves: ['7.8 mm/s RMS', 'Temp 71 °C', 'p.212 Bearing wear', 'Torque table p.88', 'WO-1874 · March', 'WO-1502 · Nov', 'Shift note A', '6205-2RS · B-12', 'Supplier quote'],
+      manual: { head: 'Manual §4.3 · p.212', before: 'Rising RMS at the bearing defect frequency indicates ', mark: 'outer-race wear', after: '. Replace above 7.1 mm/s.' },
+      signal: { head: 'OPC UA · CNC-07 spindle · 24 h', value: '7.8 mm/s RMS · limit 4.5' },
+      history: { head: 'CMMS · WO-1874 · March', body: 'Same alarm on CNC-07. Bearing 6205-2RS replaced in 1.4 h, fault cleared.' },
+    } as GraphCopy,
+    answerLabels: { ready: 'Answer ready', approved: 'Approved', followup: 'Asking a follow-up' },
+    answer: {
+      label: 'Answer', meta: '9 sources',
+      parts: ['Outer-race wear on the CNC-07 spindle bearing', 1, 2, '. Same fault as WO-1874 in March', 3, '. Replace 6205-2RS from bay B-12', 4, ' on the Tue 06:00 shift.'],
+      wo: { id: 'WO-2291', title: 'Replace spindle bearing', when: 'Tue 06:00 · 1.5 h · 1 technician' },
+      approve: 'Approve', approved: 'Approved · sent to SAP PM',
+    } as AnswerCopy,
+    followUp: {
+      seed: 'Why did Line 2 OEE drop 8% this week?',
+      cited: '5 agents · 7 sources cited',
+      foot: '7 sources · 4 causal links',
+      labels: { building: 'Tracing cause and effect', tracing: 'Root cause found', verified: '7/7 claims cited' },
+      chain: [
+        { icon: 'signal', agent: 'Production agent', tool: 'query_mes(line_2, 7d)', wait: 'reading', value: 'OEE 71%, down 8 pts, changeovers +22 min', src: 'MES' },
+        { icon: 'history', agent: 'Shift agent', tool: 'read_shift_notes(line_2)', wait: 'reading', value: 'New torque tool TQ-40 since Monday', src: 'Shift log' },
+        { icon: 'book', agent: 'Quality agent', tool: 'scrap_by_cause(7d)', wait: 'grouping', value: 'Scrap 3.1%, thread torque out of spec', src: 'QMS' },
+        { icon: 'parts', agent: 'Tooling agent', tool: 'compare_spec("TQ-40")', wait: 'comparing', value: 'Preset 18 Nm, spec 22 Nm', src: 'Tool DB' },
+        { icon: 'plan', agent: 'Planner agent', tool: 'draft_actions()', wait: 'drafting', value: 'Recalibrate TQ-40, update changeover SOP', src: 'Action plan' },
+      ],
+      graph: {
+        nodes: ['OEE 71% · down 8 pts', 'Changeovers +22 min', 'Scrap 3.1% · thread torque', 'TQ-40 preset 18 Nm, spec 22'],
+        root: 'Root cause', fix: 'Recalibrate TQ-40 · update SOP',
+        chips: ['MES · 7 days', 'Changeover log', 'Shift note · Mon', 'QMS · 214 parts', 'Tool DB · TQ-40', 'Torque spec rev. C'],
+      } as ChainGraphCopy,
+      answer: {
+        label: 'Answer', meta: '7 sources',
+        parts: ['The new TQ-40 torque tool is preset to 18 Nm, below the 22 Nm spec', 1, 2, '. Under-torqued threads drive the scrap', 3, ' and the longer changeovers', 4, '. Recalibrate TQ-40 and update the changeover SOP.'],
+        wo: { id: 'ACT-118', title: 'Recalibrate TQ-40', when: 'Today · Line 2 · quality lead' },
+        approve: 'Approve', approved: 'Approved · assigned',
+      } as AnswerCopy,
+    },
     storyTitle: ['Work that follows', 'the signal'],
     steps: [
       { icon: 'activity', scene: 'signal', title: 'Start with any machine signal', body: 'Vibration, temperature, an alarm or a note from the floor. ClerkTree connects to the line and notices when something changes.' },
@@ -76,6 +120,49 @@ const copy = {
       { icon: 'plan', agent: 'Planungs-Agent', tool: 'draft_work_order()', wait: 'erstellt', value: 'WO-2291, Di 06:00 Schicht, 1,5 h', src: 'Auftrag' },
     ],
     cited: '5 Agenten · 9 Quellen belegt',
+    graphLabels: { building: 'Quellengraph entsteht', tracing: 'Belege werden geprüft', verified: '9/9 Aussagen belegt' },
+    graphFoot: '9 Quellen · 13 Verbindungen',
+    graph: {
+      answer: 'WO-2291 · Spindellager tauschen',
+      answerSub: 'Di 06:00 Schicht · 1,5 h',
+      verified: 'Jede Aussage mit Quelle belegt',
+      sources: { sig: 'Signal · OPC UA', man: 'Handbuch · §4.3', his: 'Historie · CMMS', par: 'Teile · SAP MM' },
+      leaves: ['7,8 mm/s RMS', 'Temp. 71 °C', 'S. 212 Lagerverschleiß', 'Drehmomente S. 88', 'WO-1874 · März', 'WO-1502 · Nov.', 'Schichtnotiz A', '6205-2RS · B-12', 'Lieferantenangebot'],
+      manual: { head: 'Handbuch §4.3 · S. 212', before: 'Steigender RMS-Wert bei der Lagerschadensfrequenz zeigt ', mark: 'Verschleiß am Außenring', after: '. Tausch ab 7,1 mm/s.' },
+      signal: { head: 'OPC UA · CNC-07 Spindel · 24 h', value: '7,8 mm/s RMS · Grenze 4,5' },
+      history: { head: 'CMMS · WO-1874 · März', body: 'Gleicher Alarm an CNC-07. Lager 6205-2RS in 1,4 h getauscht, Fehler behoben.' },
+    } as GraphCopy,
+    answerLabels: { ready: 'Antwort bereit', approved: 'Freigegeben', followup: 'Folgefrage' },
+    answer: {
+      label: 'Antwort', meta: '9 Quellen',
+      parts: ['Verschleiß am Außenring des Spindellagers von CNC-07', 1, 2, '. Gleicher Fehler wie WO-1874 im März', 3, '. 6205-2RS aus Fach B-12 tauschen', 4, ', Schicht Di 06:00.'],
+      wo: { id: 'WO-2291', title: 'Spindellager tauschen', when: 'Di 06:00 · 1,5 h · 1 Techniker' },
+      approve: 'Freigeben', approved: 'Freigegeben · an SAP PM',
+    } as AnswerCopy,
+    followUp: {
+      seed: 'Warum fiel die OEE von Linie 2 um 8 %?',
+      cited: '5 Agenten · 7 Quellen belegt',
+      foot: '7 Quellen · 4 Ursachen',
+      labels: { building: 'Ursachenkette entsteht', tracing: 'Ursache gefunden', verified: '7/7 Aussagen belegt' },
+      chain: [
+        { icon: 'signal', agent: 'Produktions-Agent', tool: 'query_mes(line_2, 7d)', wait: 'liest', value: 'OEE 71 %, minus 8 Pkt., Rüsten +22 min', src: 'MES' },
+        { icon: 'history', agent: 'Schicht-Agent', tool: 'read_shift_notes(line_2)', wait: 'liest', value: 'Neues Drehmomentwerkzeug TQ-40 seit Montag', src: 'Schichtbuch' },
+        { icon: 'book', agent: 'Qualitäts-Agent', tool: 'scrap_by_cause(7d)', wait: 'gruppiert', value: 'Ausschuss 3,1 %, Gewindemoment außer Toleranz', src: 'QMS' },
+        { icon: 'parts', agent: 'Werkzeug-Agent', tool: 'compare_spec("TQ-40")', wait: 'vergleicht', value: 'Voreinstellung 18 Nm, Vorgabe 22 Nm', src: 'Werkzeug-DB' },
+        { icon: 'plan', agent: 'Planungs-Agent', tool: 'draft_actions()', wait: 'erstellt', value: 'TQ-40 kalibrieren, Rüst-SOP anpassen', src: 'Maßnahmen' },
+      ],
+      graph: {
+        nodes: ['OEE 71 % · minus 8 Pkt.', 'Rüsten +22 min', 'Ausschuss 3,1 % · Gewinde', 'TQ-40 18 Nm statt 22'],
+        root: 'Ursache', fix: 'TQ-40 kalibrieren · SOP anpassen',
+        chips: ['MES · 7 Tage', 'Rüstprotokoll', 'Schichtnotiz · Mo', 'QMS · 214 Teile', 'Werkzeug-DB · TQ-40', 'Drehmoment-Vorgabe C'],
+      } as ChainGraphCopy,
+      answer: {
+        label: 'Antwort', meta: '7 Quellen',
+        parts: ['Das neue Werkzeug TQ-40 ist auf 18 Nm eingestellt, unter der Vorgabe von 22 Nm', 1, 2, '. Zu schwach angezogene Gewinde treiben den Ausschuss', 3, ' und die längeren Rüstzeiten', 4, '. TQ-40 kalibrieren und die Rüst-SOP anpassen.'],
+        wo: { id: 'ACT-118', title: 'TQ-40 kalibrieren', when: 'Heute · Linie 2 · Qualitätsleitung' },
+        approve: 'Freigeben', approved: 'Freigegeben · zugewiesen',
+      } as AnswerCopy,
+    },
     storyTitle: ['Arbeit, die dem', 'Signal folgt'],
     steps: [
       { icon: 'activity', scene: 'signal', title: 'Mit jedem Maschinensignal starten', body: 'Vibration, Temperatur, ein Alarm oder eine Notiz aus der Halle. ClerkTree ist mit der Linie verbunden und erkennt Veränderungen.' },
@@ -127,52 +214,109 @@ export function useHomeCopy() {
 const chainIcon = { signal: Activity, book: BookOpen, history: History, parts: Package, plan: ClipboardList };
 const TYPE_MS = 34;
 const ROW_MS = 950;
-const HOLD_MS = 3200;
+const HOLD_MS = 1300;
 
-function useChainClock(total: number, ref: RefObject<HTMLElement | null>) {
+function useChainClock(total: number, ref: RefObject<HTMLElement | null>, still: number) {
   const [ms, setMs] = useState(0);
   useEffect(() => {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) { setMs(total - HOLD_MS + 1); return undefined; }
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) { setMs(still); return undefined; }
     let timer = 0;
     let visible = true;
     const observer = new IntersectionObserver(([entry]) => { visible = entry.isIntersecting; });
     if (ref.current) observer.observe(ref.current);
     timer = window.setInterval(() => { if (visible && !document.hidden) setMs((v) => (v + 50) % total); }, 50);
     return () => { window.clearInterval(timer); observer.disconnect(); };
-  }, [total, ref]);
+  }, [total, ref, still]);
   return ms;
+}
+
+/** Scales the card down so it always fits inside the hero stage, whatever the screen. */
+function useFitToStage(ref: RefObject<HTMLElement | null>) {
+  useEffect(() => {
+    const card = ref.current;
+    const stage = card?.parentElement;
+    if (!card || !stage) return undefined;
+    const fit = () => {
+      const cs = getComputedStyle(stage);
+      const availH = stage.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
+      const availW = stage.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+      const scale = Math.min(1, availH / card.offsetHeight, availW / card.offsetWidth);
+      card.style.setProperty('--hs-fit', String(Math.max(0.4, scale)));
+    };
+    const ro = new ResizeObserver(fit);
+    ro.observe(stage);
+    ro.observe(card);
+    fit();
+    return () => ro.disconnect();
+  }, [ref]);
+}
+
+type ChainRow = { icon: string; agent: string; tool: string; wait: string; value: string; src: string };
+
+/** One question's timeline: type → agents → graph → answer (ending with the question erased). */
+function timeline(seed: string, rows: number, graphMs: number) {
+  const typeEnd = seed.length * TYPE_MS + 300;
+  const chainEnd = typeEnd + rows * ROW_MS;
+  const graphAt = chainEnd + HOLD_MS;
+  const answerAt = graphAt + graphMs;
+  return { typeEnd, chainEnd, graphAt, answerAt, total: answerAt + ANSWER_MS };
 }
 
 export function HeroAgentCard() {
   const c = useHomeCopy();
+  const f = c.followUp;
   const ref = useRef<HTMLDivElement>(null);
-  const typeEnd = c.seed.length * TYPE_MS + 300;
-  const total = typeEnd + c.chain.length * ROW_MS + HOLD_MS;
-  const ms = useChainClock(total, ref);
-  const typed = c.seed.slice(0, Math.floor(ms / TYPE_MS));
-  const runMs = ms - typeEnd;
-  const active = runMs < 0 ? -1 : Math.min(c.chain.length, Math.floor(runMs / ROW_MS));
+  const scenes = [
+    { seed: c.seed, chain: c.chain as ChainRow[], cited: c.cited, foot: c.graphFoot, labels: c.graphLabels, answer: c.answer, t: timeline(c.seed, c.chain.length, GRAPH_MS), verifiedAt: 6600 },
+    { seed: f.seed, chain: f.chain as ChainRow[], cited: f.cited, foot: f.foot, labels: f.labels, answer: f.answer, t: timeline(f.seed, f.chain.length, CHAIN_MS), verifiedAt: 4500 },
+  ];
+  const cycle = scenes[0].t.total + scenes[1].t.total;
+  useFitToStage(ref);
+  const clock = useChainClock(cycle, ref, scenes[0].t.chainEnd + 400);
+  const idx = clock < scenes[0].t.total ? 0 : 1;
+  const sc = scenes[idx];
+  const { t } = sc;
+  const ms = idx === 0 ? clock : clock - scenes[0].t.total;
+
+  const gms = ms - t.graphAt;
+  const ams = ms - t.answerAt;
+  const inGraph = gms >= 0 && ams < 0;
+  const inAnswer = ams >= 0;
+  const runMs = ms - t.typeEnd;
+  const active = runMs < 0 ? -1 : Math.min(sc.chain.length, Math.floor(runMs / ROW_MS));
   const within = runMs - active * ROW_MS;
-  const done = active >= c.chain.length;
-  const slot = done ? c.done : active < 0 ? c.orchestrating : `${c.chain[active].agent}: ${c.chain[active].wait}`;
-  const progress = done ? 1 : Math.max(0, runMs / (c.chain.length * ROW_MS));
+  const done = active >= sc.chain.length;
+
+  // The question types in, and at the end of the answer it is erased for the next one.
+  const erase = inAnswer ? Math.min(1, Math.max(0, (ams - ANSWER_MARKS.erase) / 500)) : 0;
+  const typed = erase > 0 ? sc.seed.slice(0, Math.round(sc.seed.length * (1 - erase))) : sc.seed.slice(0, Math.floor(ms / TYPE_MS));
+  const caret = runMs < 0 || erase > 0;
+
+  const chainSlot = (gm: number) => (gm < (idx === 0 ? 2700 : 3100) ? sc.labels.building : gm < sc.verifiedAt ? sc.labels.tracing : sc.labels.verified);
+  let slot: string;
+  if (inAnswer) slot = ams >= ANSWER_MARKS.erase ? c.answerLabels.followup : ams >= ANSWER_MARKS.done ? c.answerLabels.approved : c.answerLabels.ready;
+  else if (inGraph) slot = idx === 0 ? graphSlot(gms, sc.labels) : chainSlot(gms);
+  else slot = done ? c.done : active < 0 ? c.orchestrating : `${sc.chain[active].agent}: ${sc.chain[active].wait}`;
+  const slotDone = inAnswer ? ams < ANSWER_MARKS.erase : inGraph ? gms >= sc.verifiedAt : done;
+  const progress = inAnswer ? 1 - erase : inGraph ? Math.min(1, gms / sc.verifiedAt) : done ? 1 : Math.max(0, runMs / (sc.chain.length * ROW_MS));
 
   return (
-    <div className="hs-crt" ref={ref} aria-hidden="true">
+    <div className={`hs-crt${inGraph || inAnswer ? ' is-graph' : ''}`} ref={ref} aria-hidden="true">
       <div className="hs-seed">
         <span className="hs-seed-ico"><Cpu size={14} strokeWidth={1.75} /></span>
-        <span className="hs-seed-id">{typed}<span className={`hs-caret${runMs >= 0 ? ' is-hidden' : ''}`} /></span>
-        <span className={`hs-slot${done ? ' is-done' : ''}`} key={slot}>
+        <span className="hs-seed-id">{typed}<span className={`hs-caret${caret ? '' : ' is-hidden'}`} /></span>
+        <span className={`hs-slot${slotDone ? ' is-done' : ''}`} key={slot}>
           <span className="hs-slot-label">{slot}</span>
           <span className="hs-slot-dot" />
         </span>
       </div>
-      {c.chain.map((row, i) => {
+      <div className="hs-rows">
+      {sc.chain.map((row, i) => {
         const Icon = chainIcon[row.icon as keyof typeof chainIcon];
         const state = i < active ? 'is-done' : i === active ? (within > ROW_MS * 0.62 ? 'is-done is-active' : 'is-active') : '';
         const resolved = state.includes('is-done');
         return (
-          <div className={`hs-row ${state}`} key={row.agent} style={{ '--row': i } as CSSProperties}>
+          <div className={`hs-row ${state}`} key={`${idx}-${row.agent}`} style={{ '--row': i } as CSSProperties}>
             <svg className="hs-row-branch" viewBox="0 0 30 42" aria-hidden="true">
               <path d={i === 0 ? 'M9 0V15Q9 21 15 21H30' : 'M9 -6V15Q9 21 15 21H30'} pathLength={1} />
             </svg>
@@ -195,9 +339,13 @@ export function HeroAgentCard() {
           </div>
         );
       })}
-      <div className={`hs-crt-foot${done ? ' is-done' : ''}`}>
+      {inGraph && idx === 0 && <SourceGraph copy={c.graph} gms={gms} />}
+      {inGraph && idx === 1 && <CausalChain copy={f.graph} gms={gms} />}
+      {inAnswer && <AnswerCard ams={ams} copy={sc.answer} key={idx} />}
+      </div>
+      <div className={`hs-crt-foot${slotDone ? ' is-done' : ''}`}>
         <span className="hs-crt-progress"><i style={{ transform: `scaleX(${progress})` }} /></span>
-        <span className="hs-crt-cited">{c.cited}</span>
+        <span className="hs-crt-cited">{inGraph || inAnswer ? sc.foot : sc.cited}</span>
       </div>
     </div>
   );
