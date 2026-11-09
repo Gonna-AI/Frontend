@@ -385,6 +385,22 @@ export default function Brand() {
                   ))}
                 </div>
               </div>
+              <div className="brand-compositions">
+                <h3>Brand compositions</h3>
+                <p>Examples of the ClerkTree lockup alongside other company marks.</p>
+                <div className="brand-compositions-grid">
+                  {[
+                    { name: 'BMW', src: '/og/cobrand-bmw.png' },
+                    { name: 'Dacia', src: '/og/cobrand-dacia.png' },
+                    { name: 'HAWE Hydraulik', src: '/og/cobrand-hawe.png' },
+                  ].map(({ name, src }) => (
+                    <figure key={src}>
+                      <img src={src} alt={`ClerkTree and ${name} logo composition`} loading="lazy" width="1200" height="630" />
+                      <figcaption>ClerkTree × {name}</figcaption>
+                    </figure>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
         </section>

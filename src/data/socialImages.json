@@ -1,0 +1,15 @@
+{
+  "/": "/og/home.png",
+  "/hive": "/og/hive.png",
+  "/about": "/og/about.png",
+  "/careers": "/og/careers.png",
+  "/blog": "/og/blog.png",
+  "/contact": "/og/contact.png",
+  "/security": "/og/security.png",
+  "/brand": "/og/brand.png",
+  "/blog/devops-for-agents-on-the-shop-floor": "/og/post-devops-for-agents-on-the-shop-floor.png",
+  "/blog/the-hard-part-isnt-the-ai": "/og/post-the-hard-part-isnt-the-ai.png",
+  "/blog/rolling-out-ai-with-a-maintenance-team": "/og/post-rolling-out-ai-with-a-maintenance-team.png",
+  "/blog/from-vibration-alarm-to-root-cause": "/og/post-from-vibration-alarm-to-root-cause.png",
+  "/blog/juris-comprehensive-case-study": "/og/post-juris-comprehensive-case-study.png"
+}

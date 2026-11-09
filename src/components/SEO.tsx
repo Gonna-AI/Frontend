@@ -1,4 +1,5 @@
 import { Helmet } from 'react-helmet-async';
+import socialImages from '../data/socialImages.json';
 
 interface VideoMeta {
     name: string;
@@ -38,7 +39,8 @@ export default function SEO({ title, description, canonical, preloadVideos, open
     const fullTitle = /clerktree/i.test(title) ? title : `${title} | ClerkTree`;
     const currentUrl = canonical || (openGraph?.url ?? siteUrl);
     // og:image/twitter:image must be absolute URLs per spec — social crawlers don't resolve relative paths.
-    const ogImage = openGraph?.image || `${siteUrl}/og-image.png`;
+    const imagePath = socialImages[(new URL(currentUrl).pathname.replace(/\/$/, '') || '/') as keyof typeof socialImages];
+    const ogImage = openGraph?.image || (imagePath ? `${siteUrl}${imagePath}` : `${siteUrl}/og-image.png`);
 
     const videoSchemas = videos?.map((video) => ({
         '@context': 'https://schema.org',

@@ -987,3 +987,14 @@
     animation: none;
   }
 }
+
+/* Co-brand compositions are real images, so the visual examples are accessible
+   to visitors and discoverable by image search. */
+.brand-compositions { border-top: 1px solid var(--brand-line-light); margin-top: 48px; padding-top: 32px; }
+.brand-compositions h3 { color: #111; font-size: 20px; font-weight: 500; letter-spacing: -.02em; margin: 0 0 8px; }
+.brand-compositions > p { color: var(--brand-text-light); font-size: 14px; line-height: 1.6; margin: 0 0 24px; }
+.brand-compositions-grid { display: grid; gap: 16px; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.brand-compositions-grid figure { margin: 0; min-width: 0; }
+.brand-compositions-grid img { aspect-ratio: 1200 / 630; border: 1px solid var(--brand-line-light); border-radius: 16px; display: block; height: auto; width: 100%; }
+.brand-compositions-grid figcaption { color: #454545; font-size: 13px; margin-top: 10px; }
+@media (max-width: 640px) { .brand-compositions-grid { grid-template-columns: 1fr; gap: 22px; } }

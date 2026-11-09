@@ -2,12 +2,16 @@
 // canonical and social tags. The site is a single-page app, so without this every
 // URL is served the homepage's head, and search engines see one page instead of many.
 // Legal pages are marked noindex and the sitemap is cleaned to match.
-import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 
 const DIST = 'dist';
 const SITE = 'https://clerktree.com';
 const base = readFileSync(join(DIST, 'index.html'), 'utf8');
+const socialImages = JSON.parse(readFileSync('src/data/socialImages.json', 'utf8'));
+for (const image of Object.values(socialImages)) {
+  if (!existsSync(join(DIST, image.slice(1)))) throw new Error(`Missing social image: ${image}`);
+}
 
 const routes = [
   { path: '/hive', title: 'Hive: your plant as one living graph | ClerkTree', description: 'Hive connects every machine, part, document, work order and person on your shop floor, so every answer arrives with its full context and sources.' },
@@ -45,6 +49,12 @@ function render(route) {
   html = setMeta(html, 'property', 'og:description', route.description);
   html = setMeta(html, 'name', 'twitter:title', route.title);
   html = setMeta(html, 'name', 'twitter:description', route.description);
+  if (socialImages[route.path]) {
+    const image = `${SITE}${socialImages[route.path]}`;
+    html = setMeta(html, 'property', 'og:image', image);
+    html = setMeta(html, 'property', 'og:image:alt', route.title);
+    html = setMeta(html, 'name', 'twitter:image', image);
+  }
   if (route.article) html = setMeta(html, 'property', 'og:type', 'article');
   html = html.replace(/<link rel="canonical" href="[^"]*"\s*\/?>/, `<link rel="canonical" href="${url}" />`);
   // The FAQ markup describes the homepage only.
@@ -73,9 +83,20 @@ const noindex = new Set(routes.filter((r) => r.noindex).map((r) => r.path));
 const priority = { '/': '1.0', '/hive': '0.9', '/about': '0.8', '/careers': '0.8', '/blog': '0.8', '/contact': '0.7', '/security': '0.6', '/brand': '0.4' };
 const today = new Date().toISOString().slice(0, 10);
 const paths = ['/', ...routes.filter((r) => !r.noindex).map((r) => r.path)].filter((p, i, a) => a.indexOf(p) === i && !noindex.has(p));
+// Image sitemap entries tie the generated artwork to the pages it describes.
+// The three co-brand compositions and logo files are also visible on /brand.
+const extraImages = { '/brand': [
+  '/brand/clerktree-lockup-black.svg', '/brand/clerktree-lockup-inverse.svg',
+  '/brand/clerktree-mark-black.svg', '/brand/clerktree-mark-inverse.svg',
+  '/og/cobrand-bmw.png', '/og/cobrand-dacia.png', '/og/cobrand-hawe.png',
+] };
+const imageUrls = (p) => [socialImages[p], ...(extraImages[p] || [])].filter(Boolean);
+for (const image of Object.values(extraImages).flat()) {
+  if (!existsSync(join(DIST, image.slice(1)))) throw new Error(`Missing sitemap image: ${image}`);
+}
 const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${paths.map((p) => `  <url><loc>${SITE}${p === '/' ? '/' : p}</loc><lastmod>${today}</lastmod><priority>${priority[p] ?? (p.startsWith('/blog/') ? '0.6' : '0.5')}</priority></url>`).join('\n')}
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+${paths.map((p) => `  <url><loc>${SITE}${p === '/' ? '/' : p}</loc><lastmod>${today}</lastmod><priority>${priority[p] ?? (p.startsWith('/blog/') ? '0.6' : '0.5')}</priority>${imageUrls(p).map((image) => `<image:image><image:loc>${SITE}${image}</image:loc></image:image>`).join('')}</url>`).join('\n')}
 </urlset>
 `;
 writeFileSync(join(DIST, 'sitemap.xml'), sitemap);
