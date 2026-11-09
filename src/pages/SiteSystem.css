@@ -145,7 +145,6 @@
 
 .agero-works .agero-about-card,
 .agero-works .agero-about-mission,
-.agero-works .agero-about-team-card,
 .agero-works .agero-plan-card,
 .agero-works .agero-faq-item,
 .agero-works .agero-sol-row,
@@ -167,7 +166,6 @@
 
 /* Light cards separate from the canvas with a hairline, not a grey fill. */
 .agero-works .agero-about-card,
-.agero-works .agero-about-team-card,
 .agero-works .agero-faq-item,
 .agero-works .clerktree-contact-info-card,
 .agero-works .agero-legal-card,
@@ -180,10 +178,6 @@
 }
 
 /* Things inset inside a card follow the card's curve. */
-.agero-works .agero-about-team-photo {
-  border-radius: var(--r-inset);
-}
-
 /* ---------- Controls ---------- */
 
 .agero-works .agero-security-notice + .agero-security-sections,

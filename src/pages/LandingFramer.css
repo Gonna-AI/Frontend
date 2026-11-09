@@ -727,6 +727,8 @@ a:hover > .ct-roll > .ct-roll-inner { transform: translateY(-50%); }
   max-width: 1128px;
 }
 
+.agero-home-page .agero-hero-title .agero-hero-accent { color: #f15a24; }
+
 .agero-hero-title span {
   display: inline-flex;
   white-space: nowrap;

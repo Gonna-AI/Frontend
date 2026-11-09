@@ -56,8 +56,8 @@ export default function LandingFramer() {
         <div className="agero-home-hero-copy" data-agero-reveal="hero">
           <h1 className="agero-hero-title" id="agero-works-title" style={{ columnGap: "0.22em" }}>
             <span>{t('home.hero.word1')}</span>
-            <span>{t('home.hero.word2')}</span>
-            <span>{t('home.hero.word3')}</span>
+            <span className={language === 'de' ? 'agero-hero-accent' : undefined}>{t('home.hero.word2')}</span>
+            <span className={language === 'en' ? 'agero-hero-accent' : undefined}>{t('home.hero.word3')}</span>
             <span>{t('home.hero.word4')}</span>
           </h1>
           <p className="agero-hero-copy">{t('home.hero.copy')}</p>

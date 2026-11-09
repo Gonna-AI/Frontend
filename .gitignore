@@ -10,3 +10,6 @@ dist
 # Claude local data
 .claude
 .vercel
+
+# macOS metadata
+.DS_Store
