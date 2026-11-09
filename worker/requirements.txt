@@ -7,4 +7,4 @@ pdfplumber==0.11.4
 pytesseract==0.3.13
 groq==0.13.1
 rapidfuzz==3.11.0
-sentence-transformers==3.3.1
+sentence-transformers==5.6.0
