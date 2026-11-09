@@ -242,6 +242,7 @@ export function Header({ linkBase = '' }: HeaderProps = {}) {
         {desktopNav.map((entry) => entry.items ? (
           <NavigationMenu.Item className="agero-nav-item" key={entry.label}>
             <NavigationMenu.Trigger className="agero-nav-trigger">
+              <span className="agero-nav-shoulders" aria-hidden="true" />
               <Roll>{entry.label}</Roll>
               <ChevronDown className="agero-nav-caret" aria-hidden="true" />
             </NavigationMenu.Trigger>
