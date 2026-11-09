@@ -401,6 +401,16 @@ export function StoryTabs() {
     const timer = window.setTimeout(() => setActive((a) => (a + 1) % c.steps.length), STEP_MS);
     return () => window.clearTimeout(timer);
   }, [active, inView, paused, c.steps.length]);
+  // Keep the outgoing scene mounted while it fades out, so scenes cross-fade.
+  const last = useRef(0);
+  const [leaving, setLeaving] = useState<number | null>(null);
+  useEffect(() => {
+    if (last.current === active) return undefined;
+    setLeaving(last.current);
+    last.current = active;
+    const timer = window.setTimeout(() => setLeaving(null), 750);
+    return () => window.clearTimeout(timer);
+  }, [active]);
 
   return (
     <section className="hs-section hs-story" aria-labelledby="hs-story-title" ref={ref}>
@@ -423,7 +433,7 @@ export function StoryTabs() {
                 <span className="hs-step-ico" aria-hidden="true"><Icon size={16} strokeWidth={1.6} /></span>
                 <span className="hs-step-text">
                   <strong>{step.title}</strong>
-                  <span>{step.body}</span>
+                  <span className="hs-step-body"><span>{step.body}</span></span>
                 </span>
                 <span className="hs-step-progress" aria-hidden="true" />
               </button>
@@ -437,7 +447,7 @@ export function StoryTabs() {
           const Scene = STORY_SCENES[i];
           return (
             <div className={`hs-story-scene${i === active ? ' is-active' : ''}`} key={step.scene}>
-              {i === active && <Scene />}
+              {(i === active || i === leaving) && <Scene />}
             </div>
           );
         })}

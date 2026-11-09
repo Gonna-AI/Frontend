@@ -1,12 +1,11 @@
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
-import { Activity, ArrowUpRight, Briefcase, ChevronDown, Factory, FlaskConical, Mail, Scale, Shapes, Users, Wrench } from 'lucide-react';
+import { Activity, ArrowUpRight, Briefcase, ChevronDown, ChevronRight, Factory, FlaskConical, Mail, Scale, Shapes, Users, Wrench } from 'lucide-react';
 import { siX } from 'simple-icons';
 
 import ClerkTreeLockup from '../Brand/ClerkTreeLockup';
 import { playFirstVisitIntro, playLogoPortal, shouldPlayFirstVisitIntro } from '../Brand/logoPortal';
 import Grainient from '../Brand/Grainient';
 import FooterAscii from './FooterAscii';
-import LanguageSwitcher from '../Layout/LanguageSwitcher';
 import { useLanguage } from '../../contexts/LanguageContext';
 import '../../pages/LandingFramer.css';
 import '../../pages/SiteSystem.css';
@@ -14,14 +13,7 @@ import './FooterDesign.css';
 
 const RESEARCH_URL = 'https://research.clerktree.com';
 
-const headerLinkPaths = [
-  ['nav.solutions', '/#solutions'],
-  ['nav.about', '/about'],
-  ['nav.research', RESEARCH_URL],
-  ['nav.blog', '/blog'],
-] as const;
-
-type NavMenuItem = { label: string; href: string; icon: ReactNode };
+type NavMenuItem = { label: string; href: string; icon: ReactNode; desc?: string };
 type NavEntry = { label: string; href: string; items?: NavMenuItem[] };
 
 function buildDesktopNav(language: string, t: (key: string) => string, linkBase: string): NavEntry[] {
@@ -32,20 +24,20 @@ function buildDesktopNav(language: string, t: (key: string) => string, linkBase:
       label: t('nav.solutions'),
       href: local('/#solutions'),
       items: [
-        { label: t('solutions.card1Title'), href: local('/#cx-signal'), icon: <Activity /> },
-        { label: t('solutions.card2Title'), href: local('/#cx-agent'), icon: <Wrench /> },
-        { label: de ? 'Lieferantenentscheidungen' : 'Supplier decisions', href: local('/#cx-rfq'), icon: <Scale /> },
-        { label: t('solutions.card5Title'), href: local('/#cx-production'), icon: <Factory /> },
+        { label: t('solutions.card1Title'), href: local('/#cx-signal'), icon: <Activity />, desc: de ? 'Veränderungen an der Linie früh erkennen' : 'Catch changes on the line early' },
+        { label: t('solutions.card2Title'), href: local('/#cx-agent'), icon: <Wrench />, desc: de ? 'Aufträge mit Belegen planen' : 'Plan work orders with evidence' },
+        { label: de ? 'Lieferantenentscheidungen' : 'Supplier decisions', href: local('/#cx-rfq'), icon: <Scale />, desc: de ? 'Angebote und Risiken vergleichen' : 'Compare quotes and risk' },
+        { label: t('solutions.card5Title'), href: local('/#cx-production'), icon: <Factory />, desc: de ? 'Ausstoß, Ausschuss und Stillstand' : 'Output, scrap and downtime' },
       ],
     },
     {
       label: de ? 'Unternehmen' : 'Company',
       href: local('/about'),
       items: [
-        { label: t('nav.about'), href: local('/about'), icon: <Users /> },
-        { label: t('nav.research'), href: RESEARCH_URL, icon: <FlaskConical /> },
-        { label: de ? 'Karriere' : 'Careers', href: local('/careers'), icon: <Briefcase /> },
-        { label: 'Brand', href: local('/brand'), icon: <Shapes /> },
+        { label: t('nav.about'), href: local('/about'), icon: <Users />, desc: de ? 'Team und Mission' : 'Team and mission' },
+        { label: t('nav.research'), href: RESEARCH_URL, icon: <FlaskConical />, desc: de ? 'Paper und Benchmarks' : 'Papers and benchmarks' },
+        { label: de ? 'Karriere' : 'Careers', href: local('/careers'), icon: <Briefcase />, desc: de ? 'Offene Stellen' : 'Open roles' },
+        { label: 'Brand', href: local('/brand'), icon: <Shapes />, desc: de ? 'Logos und Richtlinien' : 'Logos and guidelines' },
       ],
     },
     { label: 'Hive', href: local('/hive') },
@@ -130,38 +122,61 @@ type HeaderProps = {
 export function Header({ linkBase = '' }: HeaderProps = {}) {
   const { t, language, setLanguage } = useLanguage();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const headerLinks = headerLinkPaths.map(([key, href]) => [
-    t(key),
-    href.startsWith('http') ? href : `${linkBase}${href}`,
-  ] as const);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
+  const [openSection, setOpenSection] = useState<string | null>(null);
+  const [sheetGeo, setSheetGeo] = useState<CSSProperties>({});
   const contactHref = `${linkBase}/contact`;
   const desktopNav = buildDesktopNav(language, t, linkBase);
 
   useEffect(() => {
     if (!isMenuOpen) return;
 
-    const previousOverflow = document.body.style.overflow;
-    const shouldLockScroll = window.matchMedia('(max-width: 767px)').matches;
+    // Freeze the page behind the menu (works on iOS and with smooth scrolling):
+    // pin the body at the current offset and restore it exactly on close.
+    const { body, documentElement: html } = document;
+    const y = window.scrollY;
+    const prev = { position: body.style.position, top: body.style.top, width: body.style.width, overflow: html.style.overflow };
+    body.style.position = 'fixed';
+    body.style.top = `-${y}px`;
+    body.style.width = '100%';
+    html.style.overflow = 'hidden';
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        setIsMenuOpen(false);
-      }
+      if (event.key === 'Escape') setIsMenuOpen(false);
     };
-
-    if (shouldLockScroll) {
-      document.body.style.overflow = 'hidden';
-    }
-
     window.addEventListener('keydown', handleKeyDown);
     return () => {
-      if (shouldLockScroll) {
-        document.body.style.overflow = previousOverflow;
-      }
+      body.style.position = prev.position;
+      body.style.top = prev.top;
+      body.style.width = prev.width;
+      html.style.overflow = prev.overflow;
+      const behavior = html.style.scrollBehavior;
+      html.style.scrollBehavior = 'auto';
+      window.scrollTo(0, y);
+      html.style.scrollBehavior = behavior;
       window.removeEventListener('keydown', handleKeyDown);
     };
   }, [isMenuOpen]);
 
   const closeMenu = () => setIsMenuOpen(false);
+  // The sheet's top row reuses the closed header's exact geometry, so the
+  // close button lands where the menu button was and the logo does not move.
+  const openMenu = () => {
+    const logo = logoRef.current?.getBoundingClientRect();
+    const btn = menuButtonRef.current?.getBoundingClientRect();
+    if (logo && btn && btn.top >= 0) {
+      const edge = 8;
+      setSheetGeo({
+        '--mnav-pt': `${Math.max(10, btn.top - edge)}px`,
+        '--mnav-pl': `${Math.max(14, logo.left - edge)}px`,
+        '--mnav-pr': `${Math.max(14, window.innerWidth - btn.right - edge)}px`,
+        '--mnav-row': `${btn.height}px`,
+      } as CSSProperties);
+    } else {
+      setSheetGeo({});
+    }
+    setOpenSection(null);
+    setIsMenuOpen(true);
+  };
   const logoRef = useRef<HTMLAnchorElement>(null);
   const playLogo = () => playLogoPortal(logoRef.current?.querySelector('svg'));
 
@@ -229,7 +244,8 @@ export function Header({ linkBase = '' }: HeaderProps = {}) {
           aria-expanded={isMenuOpen}
           aria-label={isMenuOpen ? t('home.menu.close') : t('home.menu.open')}
           className={`agero-shell-menu${isMenuOpen ? ' is-open' : ''}`}
-          onClick={() => setIsMenuOpen((open) => !open)}
+          onClick={openMenu}
+          ref={menuButtonRef}
           type="button"
         >
           <span />
@@ -238,43 +254,69 @@ export function Header({ linkBase = '' }: HeaderProps = {}) {
       </div>
 
       {isMenuOpen && (
-        <div className="agero-mobile-menu" id="agero-mobile-menu">
-          <button
-            aria-label={t('home.menu.closeMobile')}
-            className="agero-mobile-menu-scrim"
-            onClick={closeMenu}
-            type="button"
-          />
-
-          <button
-            aria-label={t('home.menu.close')}
-            className="agero-mobile-menu-close-fab"
-            onClick={closeMenu}
-            type="button"
-          >
-            <span />
-            <span />
-          </button>
-
-          <div className="agero-mobile-menu-panel" role="navigation" aria-label={t('home.menu.navAria')}>
-            <div className="agero-mobile-menu-top">
-              <span>{t('home.menu.title')}</span>
-              <LanguageSwitcher isExpanded forceLight />
+        <div className="ct-mnav" data-lenis-prevent="" id="agero-mobile-menu">
+          <button aria-label={t('home.menu.closeMobile')} className="ct-mnav-scrim" onClick={closeMenu} type="button" />
+          <nav className="ct-mnav-sheet" aria-label={t('home.menu.navAria')} style={sheetGeo}>
+            <div className="ct-mnav-top">
+              <a className="ct-mnav-logo" href={linkBase || '/'} aria-label={t('home.brand.aria')} onClick={closeMenu}>
+                <ClerkTreeLockup className="agero-shell-lockup" title={null} />
+              </a>
+              <button
+                aria-label={language === 'en' ? 'Auf Deutsch wechseln' : 'Switch to English'}
+                className="ct-mnav-lang"
+                onClick={() => setLanguage(language === 'en' ? 'de' : 'en')}
+                type="button"
+              >
+                <span className={language === 'en' ? 'is-active' : undefined}>EN</span>
+                <span className={language === 'de' ? 'is-active' : undefined}>DE</span>
+              </button>
+              <button aria-label={t('home.menu.close')} className="ct-mnav-close" onClick={closeMenu} type="button">
+                <span />
+                <span />
+              </button>
             </div>
 
-            <div className="agero-mobile-menu-links">
-              {headerLinks.map(([label, href]) => (
-                <a href={href} key={href} onClick={closeMenu}>
-                  {label}
-                </a>
-              ))}
-            </div>
+            <ul className="ct-mnav-primary">
+              {desktopNav.map((entry, i) => {
+                const open = openSection === entry.label;
+                return (
+                  <li className={entry.items ? `has-sub${open ? ' is-open' : ''}` : undefined} key={entry.label} style={{ '--i': i } as CSSProperties}>
+                    {entry.items ? (
+                      <>
+                        <button aria-expanded={open} className="ct-mnav-row" onClick={() => setOpenSection(open ? null : entry.label)} type="button">
+                          {entry.label}
+                          <span aria-hidden="true"><ChevronDown /></span>
+                        </button>
+                        <div aria-hidden={!open} className="ct-mnav-sub">
+                          <div className="ct-mnav-clip">
+                          <div className="ct-mnav-list">
+                            {entry.items.map((item, k) => (
+                              <a href={item.href} key={item.href} onClick={closeMenu} style={{ '--k': k } as CSSProperties} tabIndex={open ? undefined : -1}>
+                                <span className="ct-mnav-ico" aria-hidden="true">{item.icon}</span>
+                                <span className="ct-mnav-txt"><b>{item.label}</b>{item.desc && <small>{item.desc}</small>}</span>
+                                <ChevronRight className="ct-mnav-go" aria-hidden="true" />
+                              </a>
+                            ))}
+                          </div>
+                          </div>
+                        </div>
+                      </>
+                    ) : (
+                      <a className="ct-mnav-row" href={entry.href} onClick={closeMenu}>
+                        {entry.label}
+                        <span aria-hidden="true"><ChevronRight /></span>
+                      </a>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
 
-            <a className="agero-mobile-menu-cta" href={contactHref} onClick={closeMenu}>
-              <span>{t('home.menu.cta')}</span>
-              <span aria-hidden="true">-&gt;</span>
+            <a className="ct-mnav-cta" href={contactHref} onClick={closeMenu} style={{ '--i': desktopNav.length } as CSSProperties}>
+              {t('home.menu.cta')}
+              <span aria-hidden="true"><ChevronRight /></span>
             </a>
-          </div>
+          </nav>
         </div>
       )}
     </header>
