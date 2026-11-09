@@ -1,0 +1,13 @@
+/* Careers: the hero carries a single Wellfound button. */
+.agero-works .ct-wellfound {
+  align-items: center; background: #fff; border-radius: var(--r-control, 14px); box-shadow: 0 1px 2px rgba(10, 10, 10, .08), 0 16px 32px -12px rgba(10, 10, 10, .35);
+  color: #0a0a0a; display: inline-flex; font: 500 15px/1 var(--font-ui); gap: 10px; margin-top: 28px; min-height: 50px; padding: 0 7px 0 16px;
+  text-decoration: none; text-shadow: none; transition: transform .2s ease;
+}
+.agero-works .ct-wellfound svg { fill: currentColor; height: 20px; width: 20px; }
+.agero-works .ct-wellfound > span {
+  align-items: center; background: #0a0a0a; border-radius: 10px; color: #fff; display: inline-flex; height: 36px; justify-content: center;
+  margin-left: 6px; transition: transform .25s ease; width: 36px;
+}
+.agero-works .ct-wellfound:hover > span { transform: translate(2px, -2px); }
+.agero-works .ct-wellfound:active { transform: scale(.98); }

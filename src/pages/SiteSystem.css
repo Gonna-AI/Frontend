@@ -64,8 +64,7 @@
 
 /* ---------- Edge surfaces: shell ---------- */
 
-.agero-works .agero-top-area,
-.agero-works .fabric-solution-shell {
+.agero-works .agero-top-area {
   background: var(--agero-panel);
   border: 1px solid var(--line);
   border-radius: var(--r-edge);
@@ -79,13 +78,8 @@
   margin: var(--gutter) auto 0;
 }
 
-.agero-works .fabric-solution-shell {
-  margin: var(--gutter) auto 0;
-}
-
 /* Header sits in the shell band above the stage with equal air top and bottom. */
-.agero-works .agero-top-area > .agero-shell-header,
-.agero-works .fabric-solution-shell > .agero-shell-header {
+.agero-works .agero-top-area > .agero-shell-header {
   margin: 0 0 var(--shell-pad);
   padding: 6px calc(var(--r-stage) * 0.5) 6px;
 }
@@ -94,7 +88,6 @@
 
 .agero-works .agero-hero-stage,
 .agero-works .agero-hero-stage--home,
-.agero-works .fabric-solution-stage,
 .agero-works .agero-hero-video-slot {
   border-radius: var(--r-stage);
 }
@@ -109,7 +102,6 @@
 .agero-works .brand-band-dark,
 .agero-works .brand-swatches,
 .agero-works .rs-cta-inner,
-.agero-works .fabric-solution-cta,
 .agero-works .agero-contact-panel {
   border-radius: var(--r-edge);
   margin-inline: auto;
@@ -123,9 +115,6 @@
 }
 
 /* Solutions CTA already sits inside an 8px-inset container. */
-.agero-works .fabric-solution-cta {
-  width: 100%;
-}
 
 .agero-works .rs-cta {
   padding-inline: var(--gutter);
@@ -160,7 +149,6 @@
 .agero-works .agero-plan-card,
 .agero-works .agero-faq-item,
 .agero-works .agero-sol-row,
-.agero-works .clerktree-blog-card-inner,
 .agero-works .clerktree-contact-map,
 .agero-works .clerktree-contact-info-card,
 .agero-works .agero-legal-card,
@@ -181,7 +169,6 @@
 .agero-works .agero-about-card,
 .agero-works .agero-about-team-card,
 .agero-works .agero-faq-item,
-.agero-works .clerktree-blog-card-inner,
 .agero-works .clerktree-contact-info-card,
 .agero-works .agero-legal-card,
 .agero-works .brand-token-card,
@@ -193,7 +180,6 @@
 }
 
 /* Things inset inside a card follow the card's curve. */
-.agero-works .clerktree-blog-card-media,
 .agero-works .agero-about-team-photo {
   border-radius: var(--r-inset);
 }
@@ -261,12 +247,6 @@
    darker strip with a hard bottom edge on the new canvas. Fade to canvas. */
 
 /* Solutions keeps the same 8px page gutter on phones as every other page. */
-@media (max-width: 767px) {
-  .agero-works .clerktree-solutions-main {
-    padding-left: var(--gutter);
-    padding-right: var(--gutter);
-  }
-}
 
 /* Header logo: the portal intro (logoPortal.ts) draws outside the mark's box. */
 .agero-shell-lockup { overflow: visible; }

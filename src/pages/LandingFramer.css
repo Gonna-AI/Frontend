@@ -231,15 +231,6 @@ html.lenis.lenis-stopped {
   width: 100%;
 }
 
-.agero-hero-stage-media {
-  display: block;
-  height: 100%;
-  inset: 0;
-  object-fit: cover;
-  position: absolute;
-  width: 100%;
-}
-
 .agero-hero-stage-scrim {
   background: linear-gradient(180deg, rgba(0, 0, 0, 0.18) 0%, rgba(0, 0, 0, 0.1) 38%, rgba(0, 0, 0, 0.6) 100%);
   inset: 0;
@@ -286,8 +277,7 @@ html.lenis.lenis-stopped {
 
 /* Page-specific eyebrow/emphasis accents keep their orange brand color even
    though the generic paragraph color above them is white for video contrast. */
-.agero-hero-stage-content .clerktree-contact-kicker,
-.agero-hero-stage-content .clerktree-blog-hero-copy > p:first-child {
+.agero-hero-stage-content .clerktree-contact-kicker {
   color: var(--agero-orange);
 }
 
@@ -754,22 +744,12 @@ a:hover > .ct-roll > .ct-roll-inner { transform: translateY(-50%); }
   max-width: 552px;
 }
 
-.agero-hero-cta {
-  height: 44px;
-  margin-top: 28px;
-  width: auto;
-}
-
 .agero-hero-actions {
   align-items: center;
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
   margin-top: 28px;
-}
-
-.agero-hero-actions .agero-hero-cta {
-  margin-top: 0;
 }
 
 .agero-home-prelude {
@@ -2032,10 +2012,6 @@ a:hover > .ct-roll > .ct-roll-inner { transform: translateY(-50%); }
 @media (max-width: 767px) {
   /* Only headings whose longest word cannot fit a phone line get hyphenated;
      everywhere else the type is sized to fit so words stay whole. */
-  .fabric-solution-cta h2 {
-    -webkit-hyphens: auto;
-    hyphens: auto;
-  }
 
   /* 44px touch targets without changing the visual size. */
   .agero-shell-menu::before {
@@ -2359,37 +2335,6 @@ a:hover > .ct-roll > .ct-roll-inner { transform: translateY(-50%); }
 }
 
 /* Meta row (tags, date) inside a page hero. */
-.agero-page-hero-meta {
-  align-items: center;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  justify-content: center;
-  margin-top: 28px !important;
-}
-
-.agero-page-hero-meta > * {
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  border-radius: 999px;
-  color: rgba(255, 255, 255, 0.72);
-  font-size: 13px;
-  line-height: 1;
-  padding: 8px 12px;
-  text-shadow: none;
-}
-
-.agero-page-hero-meta a {
-  align-items: center;
-  display: inline-flex;
-  gap: 6px;
-  text-decoration: none;
-  transition: background-color 180ms ease, color 180ms ease;
-}
-
-.agero-page-hero-meta a:hover {
-  background: rgba(255, 255, 255, 0.08);
-  color: #fff;
-}
 
 /* Mobile menu: a sheet whose top row mirrors the closed header (logo left,
    close button exactly where the menu button was), equal padding on both sides. */
