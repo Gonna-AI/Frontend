@@ -123,7 +123,7 @@
 /* ---------- Content container ---------- */
 
 .agero-works .agero-about-page {
-  padding-inline: var(--content-pad);
+  padding-inline: var(--gutter);
 }
 
 .agero-works .agero-about-section,
@@ -149,7 +149,6 @@
 .agero-works .agero-sol-row,
 .agero-works .clerktree-contact-map,
 .agero-works .clerktree-contact-info-card,
-.agero-works .agero-legal-card,
 .agero-works .rs-feature,
 .agero-works .rs-article,
 .agero-works .brand-stage,

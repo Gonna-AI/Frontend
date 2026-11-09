@@ -13,7 +13,7 @@
 /* A calm, centered story with space between each idea. */
 .agero-about-story {
   background: #fff;
-  border-radius: clamp(28px, 3vw, 48px);
+  border-radius: var(--r-edge, 36px);
   margin: 0 auto;
   max-width: var(--edge-max, 1920px);
   padding: 0 clamp(24px, 5vw, 72px);

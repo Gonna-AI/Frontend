@@ -8,7 +8,7 @@
 .agero-works .agero-legal-card {
   background: #fff;
   border: 1px solid rgba(19, 19, 19, .07);
-  border-radius: clamp(24px, 3vw, 36px);
+  border-radius: var(--r-edge, 36px);
   box-shadow: 0 12px 40px rgba(19, 19, 19, .035);
   padding: clamp(32px, 6vw, 80px) clamp(24px, 7vw, 96px);
 }

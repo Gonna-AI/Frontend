@@ -1,7 +1,7 @@
 /* A pair of continuous, counter-moving strips, with profiles on request. */
 .about-team {
   background: #d8d8d8;
-  border-radius: clamp(24px, 3vw, 40px);
+  border-radius: var(--r-edge, 36px);
   color: #111;
   margin: clamp(56px, 8vw, 112px) auto;
   max-width: var(--edge-max, 1920px);
@@ -48,7 +48,6 @@
 .about-team-dialog-copy a { align-items: center; color: #111; display: inline-flex; gap: 8px; margin-top: 24px; }
 .about-team-dialog-close { align-items: center; background: rgba(255,255,255,.85); border: 1px solid #e0e0e0; border-radius: 50%; color: #111; cursor: pointer; display: inline-flex; height: 38px; justify-content: center; position: absolute; right: 16px; top: 16px; width: 38px; z-index: 1; }
 @media (max-width: 640px) {
-  .about-team { border-radius: 26px; }
   .about-team-person { height: 112px; width: 300px; }
   .about-team-dialog-inner { display: block; }
   .about-team-dialog-photo { height: 220px; min-height: 0; }

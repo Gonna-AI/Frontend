@@ -383,7 +383,7 @@
 .agero-works .clerktree-contact-form-section {
   background: #fff;
   border: 1px solid rgba(19, 19, 19, .07);
-  border-radius: var(--r-card, 32px);
+  border-radius: var(--r-edge, 36px);
   box-shadow: 0 12px 40px rgba(19, 19, 19, .035);
   max-width: var(--edge-max, 1920px);
   padding: clamp(32px, 6vw, 80px) clamp(24px, 7vw, 96px);
