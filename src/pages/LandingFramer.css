@@ -368,7 +368,9 @@ html.lenis.lenis-stopped {
   grid-template-columns: minmax(max-content, 1fr) auto minmax(max-content, 1fr);
   margin: 0 auto 28px;
   min-height: 52px;
+  position: relative;
   width: min(100%, 1920px);
+  z-index: 10;
 }
 
 .agero-shell-logo {
