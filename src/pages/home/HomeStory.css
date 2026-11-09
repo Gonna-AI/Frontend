@@ -904,6 +904,10 @@
 .agero-works.agero-home-page .hs-strip { flex: none; margin: clamp(12px, 3.5vh, 32px) auto 0; width: min(1024px, 100%); }
 .agero-works.agero-home-page .agero-home-hero-copy, .agero-works.agero-home-page .agero-top-area > .agero-shell-header { flex: none; }
 @media (max-width: 600px) {
+  /* Let long translations and small phone screens grow naturally. */
+  .agero-works.agero-home-page .agero-top-area { height: auto; min-height: calc(100svh - 2 * var(--gutter, 8px)); }
+  .agero-works.agero-home-page .agero-home-prelude { flex: none; width: 100%; }
+  .agero-works.agero-home-page .agero-hero-stage--home.has-demo { flex: none; height: clamp(230px, 65vw, 330px); }
   .agero-works.agero-home-page .agero-home-hero-copy .agero-hero-copy { font-size: 15px; }
   .agero-works.agero-home-page .agero-hero-stage--home.has-demo { min-height: 200px; padding: 12px 8px; }
 }
@@ -1085,6 +1089,15 @@
   .agero-works .hs-ac-wo { margin-top: 0; }
   .agero-works .hs-slot { max-width: 52%; overflow: hidden; }
   .agero-works .hs-slot-label { overflow: hidden; text-overflow: ellipsis; }
+  /* A second line leaves room for both the typed request and its status. */
+  .agero-works :is(.cs-visual, .hs-story) .hs-seed { display: grid; gap: 6px 8px; grid-template-columns: 24px minmax(0, 1fr); height: auto; min-height: 38px; padding: 7px; }
+  .agero-works :is(.cs-visual, .hs-story) .hs-seed-id { overflow: visible; overflow-wrap: anywhere; white-space: normal; }
+  .agero-works :is(.cs-visual, .hs-story) .hs-slot { grid-column: 2; justify-self: start; max-width: 100%; white-space: normal; }
+  .agero-works :is(.cs-visual, .hs-story) .hs-slot-label { overflow: visible; }
+  .agero-works .cs-hub-name strong { overflow: visible; overflow-wrap: anywhere; white-space: normal; }
+  .agero-works .hs-rfq-row strong { display: block; overflow: visible; overflow-wrap: anywhere; white-space: normal; }
+  .agero-works .hs-rfq-row { padding-block: 7px; }
+  .agero-works .hs-rfq-row.is-best { padding: 7px 12px; }
 }
 
 .agero-works.agero-home-page .hs-hero-panel > .hs-crt { flex: none; transform: scale(var(--hs-fit, 1)); transform-origin: center; }

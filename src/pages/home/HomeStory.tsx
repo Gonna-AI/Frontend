@@ -416,17 +416,16 @@ export function StoryTabs() {
     <section className="hs-section hs-story" aria-labelledby="hs-story-title" ref={ref}>
       <div className="hs-story-copy">
         <h2 id="hs-story-title" data-agero-reveal="up">{c.storyTitle[0]}<br />{c.storyTitle[1]}</h2>
-        <div className="hs-steps" role="tablist" aria-orientation="vertical" onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)}>
+        <div className="hs-steps" role="group" aria-label={c.storyTitle.join(' ')} onMouseEnter={() => setPaused(true)} onMouseLeave={(event) => { if (!event.currentTarget.contains(document.activeElement)) setPaused(false); }} onFocus={() => setPaused(true)} onBlur={(event) => { if (!event.currentTarget.contains(event.relatedTarget)) setPaused(false); }}>
           {c.steps.map((step, i) => {
             const Icon = stepIcon[step.icon as keyof typeof stepIcon];
             const on = i === active;
             return (
               <button
-                aria-selected={on}
+                aria-pressed={on}
                 className={`hs-step${on ? ' is-active' : ''}${on && inView && !paused ? ' is-running' : ''}`}
                 key={step.title}
                 onClick={() => setActive(i)}
-                role="tab"
                 style={{ '--step-ms': `${STEP_MS}ms` } as CSSProperties}
                 type="button"
               >
