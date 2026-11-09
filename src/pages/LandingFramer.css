@@ -2064,22 +2064,6 @@ a:hover > .ct-roll > .ct-roll-inner { transform: translateY(-50%); }
   text-shadow: 0 2px 28px rgba(0, 0, 0, 0.28);
 }
 
-/* Small eyebrows over video read as frosted chips instead of loose 11px text. */
-.agero-hero-stage-content .clerktree-contact-kicker,
-.clerktree-blog-hero-copy > p:first-child {
-  -webkit-backdrop-filter: blur(12px);
-  backdrop-filter: blur(12px);
-  background: rgba(10, 10, 10, 0.46);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  border-radius: 999px;
-  display: inline-block;
-  font-size: 12px;
-  letter-spacing: 0.16em;
-  line-height: 1;
-  padding: 9px 14px;
-  text-shadow: none;
-}
-
 /* ---------- 404 ---------- */
 .agero-hero-stage.agero-notfound-stage {
   background:
@@ -2325,34 +2309,44 @@ a:hover > .ct-roll > .ct-roll-inner { transform: translateY(-50%); }
   padding: clamp(64px, 7vw, 112px) clamp(20px, 4vw, 64px);
 }
 
+/* Page heroes follow the journal hero: centred, content-sized, on silver grain.
+   The eyebrow is a quiet label (orange dot + small caps), not a chip. */
 .agero-hero-stage-content .agero-page-hero-eyebrow {
-  -webkit-backdrop-filter: blur(12px);
-  backdrop-filter: blur(12px);
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  border-radius: 999px;
-  color: var(--agero-orange);
-  display: inline-block;
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.16em;
-  line-height: 1;
-  padding: 9px 14px;
+  align-items: center;
+  color: rgba(255, 255, 255, 0.84);
+  display: inline-flex;
+  font: 500 12px/1 var(--font-ui, "Geist", sans-serif);
+  gap: 10px;
+  letter-spacing: 0.14em;
   text-shadow: none;
   text-transform: uppercase;
 }
 
+.agero-hero-stage-content .agero-page-hero-eyebrow::before {
+  background: var(--agero-orange);
+  border-radius: 50%;
+  box-shadow: 0 0 0 3px rgba(255, 77, 0, 0.2);
+  content: "";
+  height: 6px;
+  width: 6px;
+}
+
 .agero-hero-stage-content .agero-page-hero-eyebrow + h1 {
-  margin-top: 26px;
+  margin-top: 18px;
 }
 
 .agero-page-hero h1 {
-  font-size: clamp(42px, 6vw, 104px) !important;
-  max-width: 16ch;
+  font-size: clamp(38px, 5vw, 68px) !important;
+  letter-spacing: -0.01em;
+  line-height: 1.04 !important;
+  max-width: 18ch;
 }
 
 .agero-page-hero .agero-hero-stage-content > p:not(.agero-page-hero-eyebrow) {
-  max-width: 640px;
+  color: rgba(255, 255, 255, 0.86);
+  font-size: 17px;
+  line-height: 1.5;
+  max-width: 560px;
 }
 
 @media (max-width: 767px) {
@@ -2361,7 +2355,11 @@ a:hover > .ct-roll > .ct-roll-inner { transform: translateY(-50%); }
   }
 
   .agero-page-hero h1 {
-    font-size: clamp(38px, 11vw, 56px) !important;
+    font-size: clamp(32px, 9vw, 44px) !important;
+  }
+
+  .agero-page-hero .agero-hero-stage-content > p:not(.agero-page-hero-eyebrow) {
+    font-size: 15px;
   }
 }
 

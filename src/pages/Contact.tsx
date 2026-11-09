@@ -5,15 +5,13 @@ import { siX } from 'simple-icons';
 import { SimpleIcon } from '../dashboard/components/simple-icon';
 
 import { useLanguage } from '../contexts/LanguageContext';
-import { Header, Footer } from '../components/Landing/AgeroChrome';
-import { shouldAutoplayMedia } from '../utils/idle';
+import { PageHero, Footer } from '../components/Landing/AgeroChrome';
 import SEO from '../components/SEO';
 import './LandingFramer.css';
 import './Contact.css';
 
 const MAP_URL = 'https://www.google.com/maps/search/?api=1&query=Industriestrasse%202%2C%2094315%20Straubing%2C%20Germany';
 const MAP_EMBED_URL = 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2624.175858607497!2d12.573450500000002!3d48.873923999999995!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47756504433cb70d%3A0xfcfd62e8cc9570ce!2sIndustriestra%C3%9Fe%202%2C%2094315%20Straubing%2C%20Germany!5e0!3m2!1sen!2sin!4v1783175769924!5m2!1sen!2sin';
-const CONTACT_VIDEO_SRC = 'https://pub-0f804855178c4f4e8184c4fef3bd5b2a.r2.dev/contactuspagevideo.mp4';
 
 type SubmitStatus = 'idle' | 'success' | 'error';
 
@@ -36,24 +34,6 @@ const emptyForm: ContactFormData = {
   employeeCount: '',
   message: '',
 };
-
-function ContactHeroVideo({ src }: { src: string }) {
-  const shouldPlay = shouldAutoplayMedia();
-
-  return (
-    <video
-      autoPlay={shouldPlay}
-      className="agero-hero-stage-media"
-      loop
-      muted
-      playsInline
-      preload={shouldPlay ? 'auto' : 'metadata'}
-      src={src}
-      crossOrigin="anonymous"
-      aria-hidden="true"
-    />
-  );
-}
 
 export default function Contact() {
   const { t } = useLanguage();
@@ -95,36 +75,14 @@ export default function Contact() {
   };
 
   return (
-    <div className="agero-works" id="agero-contact-page">
+    <div className="agero-works" id="agero-works">
       <SEO
         title="Contact Us"
         description="Talk to the ClerkTree team about industrial AI for your machines: predictive maintenance, signal intelligence and AI agents for documentation, RFQs and work orders."
         canonical="https://clerktree.com/contact"
-        preloadVideos={[{ href: CONTACT_VIDEO_SRC }]}
-        videos={[
-          {
-            name: `${t('contact.title1')} ${t('contact.title2')}`,
-            description: t('contact.subtitle'),
-            contentUrl: CONTACT_VIDEO_SRC,
-            thumbnailUrl: 'https://pub-0f804855178c4f4e8184c4fef3bd5b2a.r2.dev/munich.jpg',
-            uploadDate: '2026-07-04',
-          },
-        ]}
       />
 
-      <div className="agero-top-area agero-top-area-with-hero">
-        <Header />
-
-        <section className="agero-hero-stage" aria-labelledby="contact-title">
-          <ContactHeroVideo src={CONTACT_VIDEO_SRC} />
-          <div className="agero-hero-stage-scrim" aria-hidden="true" />
-          <div className="agero-hero-stage-content">
-            <p className="clerktree-contact-kicker">{t('home.nav.contact')}</p>
-            <h1 id="contact-title">{t('contact.sendMsgTitle')}</h1>
-            <p>{t('contact.subtitle')}</p>
-          </div>
-        </section>
-      </div>
+      <PageHero eyebrow={t('home.nav.contact')} title={t('contact.sendMsgTitle')} description={t('contact.subtitle')} titleId="contact-title" />
 
       <main className="clerktree-contact-page">
         <section className="clerktree-contact-form-section" aria-label="Contact form">

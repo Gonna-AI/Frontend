@@ -4,6 +4,8 @@ import { ArrowUpRight, ChevronDown } from 'lucide-react';
 import { PageHero, Footer } from '../Landing/AgeroChrome';
 import SEO from '../SEO';
 import '../../pages/LandingFramer.css';
+import './LegalPage.css';
+import './Security.css';
 
 const ACRONYMS = new Set(['AI']);
 
@@ -19,7 +21,7 @@ function formatSectionTitle(title: string) {
 }
 
 const Security = () => {
-  const [expandedSection, setExpandedSection] = useState<number | null>(0);
+  const [expandedSection, setExpandedSection] = useState<number | null>(null);
 
   const sections = [
     {

@@ -377,3 +377,72 @@
     border-radius: 24px;
   }
 }
+
+/* Match the site's full-width light surfaces and quieter controls. */
+.agero-works .clerktree-contact-page { padding: 24px var(--gutter, 8px) 80px; }
+.agero-works .clerktree-contact-form-section {
+  background: #fff;
+  border: 1px solid rgba(19, 19, 19, .07);
+  border-radius: var(--r-card, 32px);
+  box-shadow: 0 12px 40px rgba(19, 19, 19, .035);
+  max-width: var(--edge-max, 1920px);
+  padding: clamp(32px, 6vw, 80px) clamp(24px, 7vw, 96px);
+}
+.agero-works .clerktree-contact-form-shell { margin: 0 auto; max-width: 1180px; }
+.agero-works .clerktree-contact-form { align-items: stretch; gap: 26px; }
+.agero-works .clerktree-contact-field-grid { gap: 24px; }
+.agero-works .clerktree-contact-form label > span {
+  color: #454545;
+  font: 500 14px/1.4 "Geist", "Inter", system-ui, sans-serif;
+  letter-spacing: 0;
+  text-transform: none;
+}
+.agero-works .clerktree-contact-form :is(input, select, textarea) {
+  background-color: #f8f8f8;
+  border: 1px solid #e3e3e3;
+  border-radius: 12px;
+  font: 400 16px/1.5 "Geist", "Inter", system-ui, sans-serif;
+  min-height: 56px;
+  padding: 0 18px;
+}
+.agero-works .clerktree-contact-form select { background-position: calc(100% - 24px) 25px, calc(100% - 17px) 25px; }
+.agero-works .clerktree-contact-form textarea { min-height: 180px; padding: 16px 18px; }
+.agero-works .clerktree-contact-form :is(input, select, textarea):focus {
+  background-color: #fff;
+  border-color: #777;
+  box-shadow: 0 0 0 3px rgba(19, 19, 19, .08);
+}
+.agero-works .clerktree-contact-submit {
+  align-self: flex-start;
+  background: #111;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 500;
+  min-height: 48px;
+  min-width: 0;
+  padding: 0 24px;
+}
+.agero-works .clerktree-contact-submit:not(:disabled):hover { background: #333; }
+.agero-works .clerktree-contact-legal { margin: -8px 0 0; max-width: 560px; text-align: left; }
+.agero-works .clerktree-contact-location {
+  max-width: var(--edge-max, 1920px);
+  padding: clamp(72px, 8vw, 120px) clamp(24px, 6vw, 96px) 0;
+}
+.agero-works .clerktree-contact-location h2 {
+  font-family: "Geist", "Inter", system-ui, sans-serif !important;
+  font-size: clamp(34px, 4.5vw, 64px);
+  font-weight: 500;
+  letter-spacing: -.045em;
+  line-height: 1.06;
+}
+.agero-works .clerktree-contact-location-grid { gap: 16px; margin-top: clamp(32px, 4vw, 60px); }
+.agero-works .clerktree-contact-map, .agero-works .clerktree-contact-info-card { border-radius: var(--r-card, 32px); }
+.agero-works .clerktree-contact-info-item strong { font-family: "Geist", "Inter", system-ui, sans-serif; font-size: clamp(18px, 1.6vw, 22px); font-weight: 500; }
+@media (max-width: 720px) {
+  .agero-works .clerktree-contact-page { padding: 16px var(--gutter, 8px) 64px; }
+  .agero-works .clerktree-contact-form-section { padding: 32px 22px 40px; }
+  .agero-works .clerktree-contact-field-grid { gap: 20px; }
+  .agero-works .clerktree-contact-submit { align-self: stretch; }
+  .agero-works .clerktree-contact-location { padding: 72px 12px 0; }
+  .agero-works .clerktree-contact-map { min-height: 340px; }
+}

@@ -1,0 +1,34 @@
+/* Security uses the same full-width document surface as the legal pages. */
+.agero-works .agero-security-notice {
+  border: 0;
+  color: #555;
+  font: 400 16px/1.65 "Geist", "Inter", system-ui, sans-serif;
+  margin: 0 0 36px;
+  max-width: 760px;
+  padding: 0;
+}
+.agero-works .agero-security-sections { border-radius: 0; border-top: 1px solid #e7e7e7; }
+.agero-works .agero-security-section { border-bottom: 1px solid #e7e7e7; }
+.agero-works .agero-security-section > button { min-height: 76px; padding: 20px 0; }
+.agero-works .agero-security-section > button:focus-visible { outline: 2px solid #555; outline-offset: 3px; }
+.agero-works .agero-security-section h2 {
+  font-family: "Geist", "Inter", system-ui, sans-serif !important;
+  font-size: clamp(18px, 1.7vw, 22px);
+  font-weight: 500;
+  letter-spacing: -.025em;
+}
+.agero-works .agero-security-section.is-open > button svg { color: #111; }
+.agero-works .agero-security-panel {
+  color: #525252;
+  font: 400 16px/1.7 "Geist", "Inter", system-ui, sans-serif;
+  max-width: 1100px;
+  overflow-wrap: anywhere;
+  padding: 0 0 32px;
+}
+.agero-works .agero-security-contact { background: #f6f6f6; border: 1px solid #eaeaea; border-radius: 14px; margin-top: 32px; padding: 20px 22px; }
+.agero-works .agero-security-contact strong { font-size: 16px; }
+@media (max-width: 640px) {
+  .agero-works .agero-security-notice { font-size: 15px; margin-bottom: 28px; }
+  .agero-works .agero-security-section > button { min-height: 68px; }
+  .agero-works .agero-security-panel { font-size: 15px; }
+}

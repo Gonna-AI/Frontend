@@ -210,7 +210,11 @@
 .agero-works .jr-post-hero-copy { align-content: end; color: #fff; display: grid; gap: 14px; justify-items: start; max-width: 860px; position: relative; z-index: 2; }
 .agero-works .jr-post-hero .jr-back { color: rgba(255, 255, 255, .78); margin-bottom: auto; }
 .agero-works .jr-post-hero .jr-back:hover { color: #fff; }
-.agero-works .jr-post-hero .jr-pill { background: rgba(255, 255, 255, .14); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .22); color: #fff; }
+.agero-works .jr-post-hero .jr-pill {
+  align-items: center; background: none; box-shadow: none; color: rgba(255, 255, 255, .84); display: inline-flex; font: 500 12px/1 var(--font-ui);
+  gap: 10px; letter-spacing: .14em; padding: 0; text-transform: uppercase;
+}
+.agero-works .jr-post-hero .jr-pill::before { background: var(--agero-orange); border-radius: 50%; box-shadow: 0 0 0 3px rgba(255, 77, 0, .2); content: ""; height: 6px; width: 6px; }
 .agero-works .jr-post-hero h1 { color: #fff; font: 400 clamp(32px, 4.2vw, 56px)/1.04 "Cal Sans", "Cal Sans Placeholder", sans-serif !important; letter-spacing: -.01em; margin: 0; text-shadow: 0 2px 30px rgba(0, 0, 0, .3); text-wrap: balance; }
 .agero-works .jr-post-hero .jr-lede { color: rgba(255, 255, 255, .82); font-size: 17px; line-height: 1.6; margin: 0; max-width: 680px; }
 .agero-works .jr-post-hero .jr-byline-names strong { color: #fff; }

@@ -3,31 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowUpRight } from 'lucide-react';
 
 import { useLanguage } from '../contexts/LanguageContext';
-import { Header, Footer } from '../components/Landing/AgeroChrome';
-import { shouldAutoplayMedia } from '../utils/idle';
+import { PageHero, Footer } from '../components/Landing/AgeroChrome';
 import SEO from '../components/SEO';
 import './LandingFramer.css';
 import './About.css';
-
-const HERO_VIDEO_SRC = 'https://pub-0f804855178c4f4e8184c4fef3bd5b2a.r2.dev/aboutusvideo.mp4';
-
-function HeroBackgroundVideo({ src }: { src: string }) {
-  const shouldPlay = shouldAutoplayMedia();
-
-  return (
-    <video
-      className="agero-hero-stage-media"
-      autoPlay={shouldPlay}
-      loop
-      muted
-      playsInline
-      preload={shouldPlay ? 'auto' : 'metadata'}
-      src={src}
-      crossOrigin="anonymous"
-      aria-hidden="true"
-    />
-  );
-}
 
 type TeamMember = {
   name: string;
@@ -54,33 +33,13 @@ export default function About() {
         title={t('about.seoTitle')}
         description={t('about.seoDesc')}
         canonical="https://clerktree.com/about"
-        preloadVideos={[{ href: HERO_VIDEO_SRC }]}
-        videos={[
-          {
-            name: t('about.heroLead') + ' ' + t('about.heroEmphasis'),
-            description: t('about.heroDesc'),
-            contentUrl: HERO_VIDEO_SRC,
-            thumbnailUrl: 'https://pub-0f804855178c4f4e8184c4fef3bd5b2a.r2.dev/thdbuilding.jpg',
-            uploadDate: '2026-07-04',
-          },
-        ]}
       />
 
-      <div className="agero-top-area agero-top-area-with-hero">
-        <Header />
-
-        <section className="agero-hero-stage" aria-labelledby="about-hero-title">
-          <HeroBackgroundVideo src={HERO_VIDEO_SRC} />
-          <div className="agero-hero-stage-scrim" aria-hidden="true" />
-          <div className="agero-hero-stage-content">
-            <h1 id="about-hero-title">
-              {t('about.heroLead')} <em>{t('about.heroEmphasis')}</em>
-            </h1>
-
-            <p>{t('about.heroDesc')}</p>
-          </div>
-        </section>
-      </div>
+      <PageHero
+        title={<>{t('about.heroLead')} <em>{t('about.heroEmphasis')}</em></>}
+        description={t('about.heroDesc')}
+        titleId="about-hero-title"
+      />
 
       <main className="agero-about-page">
         <section className="agero-about-section">
