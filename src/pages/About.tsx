@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type CSSProperties } from 'react';
+import { lazy, Suspense, useEffect, useRef, useState, type CSSProperties } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowUpRight, UsersRound, X } from 'lucide-react';
 
@@ -8,6 +8,31 @@ import SEO from '../components/SEO';
 import './LandingFramer.css';
 import './About.css';
 import './AboutTeam.css';
+
+// The ClerkTree mark in liquid metal (same shader as the sign-in page), loaded only near the viewport.
+const LiquidMetalMark = lazy(() => import('../components/Brand/LiquidMetalMark'));
+
+function LiquidMark() {
+  const ref = useRef<HTMLDivElement>(null);
+  const [near, setNear] = useState(false);
+  const still = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return undefined;
+    const io = new IntersectionObserver(([entry]) => setNear(entry.isIntersecting), { rootMargin: '200px 0px' });
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+  return (
+    <div className="agero-about-mark" ref={ref} aria-hidden="true">
+      {near && (
+        <Suspense fallback={null}>
+          <LiquidMetalMark className="agero-about-mark-canvas" still={still} />
+        </Suspense>
+      )}
+    </div>
+  );
+}
 
 type TeamMember = {
   name: string;
@@ -52,12 +77,15 @@ export default function About() {
 
       <main className="agero-about-page">
         <div className="agero-about-story">
-        <section className="agero-about-section">
-          <div className="agero-about-grid-head">
-            <h2>{t('about.introTitle')}</h2>
-            <div className="agero-about-copy">
-              <p>{t('about.whyDesc1')}</p>
-              <p>{t('about.whyDesc2')}</p>
+        <section className="agero-about-section agero-about-intro">
+          <div className="agero-about-intro-grid">
+            <LiquidMark />
+            <div className="agero-about-grid-head">
+              <h2>{t('about.introTitle')}</h2>
+              <div className="agero-about-copy">
+                <p>{t('about.whyDesc1')}</p>
+                <p>{t('about.whyDesc2')}</p>
+              </div>
             </div>
           </div>
         </section>

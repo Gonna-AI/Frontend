@@ -1,10 +1,11 @@
-import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
+import { lazy, Suspense, useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import { Activity, ArrowUpRight, Briefcase, ChevronDown, ChevronRight, Factory, FlaskConical, Mail, Scale, Shapes, Users, Wrench } from 'lucide-react';
 import { siX } from 'simple-icons';
 import { NavigationMenu } from 'radix-ui';
 
 import ClerkTreeLockup from '../Brand/ClerkTreeLockup';
-import { playFirstVisitIntro, playLogoPortal, shouldPlayFirstVisitIntro } from '../Brand/logoPortal';
+import { shouldPlayFirstVisitIntro } from '../Brand/logoPortal';
+import { cancelIdle, runWhenIdle } from '../../utils/idle';
 import Grainient from '../Brand/Grainient';
 import FooterAscii from './FooterAscii';
 import { useLanguage } from '../../contexts/LanguageContext';
@@ -120,6 +121,39 @@ type HeaderProps = {
   linkBase?: string;
 };
 
+const loadLiquidMetalMark = () => import('../Brand/LiquidMetalMark');
+const LiquidMetalMark = lazy(loadLiquidMetalMark);
+const LOGO_INTRO_KEY = 'ct-logo-portal';
+
+/**
+ * Logo moment: the mark flows into liquid metal, then the metal fades back off the solid mark.
+ * phase: idle → chrome (metal flowing) → cooling (metal fades over the mark) → idle.
+ */
+function useLogoChrome() {
+  const [phase, setPhase] = useState<'idle' | 'chrome' | 'cooling'>('idle');
+  const [loaded, setLoaded] = useState(false);
+  const timers = useRef<number[]>([]);
+  const play = () => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    timers.current.forEach((id) => window.clearTimeout(id));
+    setLoaded(true);
+    setPhase('chrome');
+    timers.current = [
+      window.setTimeout(() => setPhase('cooling'), 2600),
+      window.setTimeout(() => setPhase('idle'), 3300),
+    ];
+  };
+  useEffect(() => {
+    // Fetch the shader ahead of time so the first hover starts instantly.
+    const handle = runWhenIdle(() => { void loadLiquidMetalMark(); });
+    return () => {
+      cancelIdle(handle);
+      timers.current.forEach((id) => window.clearTimeout(id));
+    };
+  }, []);
+  return { phase, loaded, play };
+}
+
 export function Header({ linkBase = '' }: HeaderProps = {}) {
   const { t, language, setLanguage } = useLanguage();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -220,21 +254,44 @@ export function Header({ linkBase = '' }: HeaderProps = {}) {
     setIsMenuOpen(true);
   };
   const logoRef = useRef<HTMLAnchorElement>(null);
-  const playLogo = () => playLogoPortal(logoRef.current?.querySelector('svg'));
+  const logoChrome = useLogoChrome();
+  const playLogo = logoChrome.play;
 
-  // First page of a visit: the portal intro plays once, after the page fades in.
+  // First page of a visit: the chrome moment plays once, after the page fades in.
   useEffect(() => {
     if (!shouldPlayFirstVisitIntro()) return undefined;
-    const timer = window.setTimeout(() => playFirstVisitIntro(logoRef.current?.querySelector('svg')), 450);
+    const timer = window.setTimeout(() => {
+      try { window.sessionStorage.setItem(LOGO_INTRO_KEY, '1'); } catch { /* storage blocked: harmless */ }
+      playLogo();
+    }, 600);
     return () => window.clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
     <header className={`agero-shell-header${isMenuOpen && !closing ? ' is-menu-open' : ''}`}>
-      <a className="agero-shell-logo" href={linkBase || '/'} aria-label={t('home.brand.aria')} ref={logoRef}
+      <a className={`agero-shell-logo is-${logoChrome.phase}`} href={linkBase || '/'} aria-label={t('home.brand.aria')} ref={logoRef}
         onPointerEnter={(event) => { if (event.pointerType === 'mouse') playLogo(); }}
         onFocus={(event) => { if (event.currentTarget.matches(':focus-visible')) playLogo(); }}>
         <ClerkTreeLockup className="agero-shell-lockup" title={null} />
+        <span className="agero-logo-chrome" aria-hidden="true">
+          {logoChrome.loaded && (
+            <Suspense fallback={null}>
+              <LiquidMetalMark className="agero-logo-chrome-canvas" scale={1} colorBack="#00000000" repetition={2.6} dispersion={0} speed={logoChrome.phase === 'idle' ? 0 : 2.4} contour={0.7} softness={0} pixelRatio={20} />
+            </Suspense>
+          )}
+        </span>
+        {/* Maps the metal's tones onto the brand orange: deep orange shadows, orange body, light-gold glints. */}
+        <svg className="agero-logo-filter" width="0" height="0" aria-hidden="true" focusable="false">
+          <filter id="ct-logo-orange" colorInterpolationFilters="sRGB">
+            <feColorMatrix type="matrix" values=".2126 .7152 .0722 0 0  .2126 .7152 .0722 0 0  .2126 .7152 .0722 0 0  0 0 0 1 0" />
+            <feComponentTransfer>
+              <feFuncR type="table" tableValues=".3 .78 1 1 1" />
+              <feFuncG type="table" tableValues=".05 .17 .3 .55 .88" />
+              <feFuncB type="table" tableValues="0 0 0 .12 .66" />
+            </feComponentTransfer>
+          </filter>
+        </svg>
       </a>
 
       <NavigationMenu.Root className="agero-shell-nav" aria-label={t('home.nav.aria')} delayDuration={120} skipDelayDuration={300}>
@@ -242,7 +299,12 @@ export function Header({ linkBase = '' }: HeaderProps = {}) {
         {desktopNav.map((entry) => entry.items ? (
           <NavigationMenu.Item className="agero-nav-item" key={entry.label}>
             <NavigationMenu.Trigger className="agero-nav-trigger">
-              <span className="agero-nav-shoulders" aria-hidden="true" />
+              {(['is-left', 'is-right'] as const).map((side) => (
+                <svg className={`agero-nav-shoulder ${side}`} key={side} viewBox="0 0 12 12" aria-hidden="true">
+                  <path className="fill" d="M0 11.5A11.5 11.5 0 0 0 11.5 0H12V12H0Z" />
+                  <path className="line" d="M0 11.5A11.5 11.5 0 0 0 11.5 0" />
+                </svg>
+              ))}
               <Roll>{entry.label}</Roll>
               <ChevronDown className="agero-nav-caret" aria-hidden="true" />
             </NavigationMenu.Trigger>

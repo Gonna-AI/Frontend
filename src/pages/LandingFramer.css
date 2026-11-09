@@ -388,24 +388,27 @@ html.lenis.lenis-stopped {
 .agero-nav-link, .agero-nav-trigger { color: #5c5c5c; text-decoration: none; transition: color .16s ease; }
 .agero-nav-link:hover, .agero-nav-trigger:hover, .agero-nav-trigger[data-state="open"] { color: var(--agero-ink); }
 .agero-nav-trigger { align-items: center; background: transparent; border: 0; cursor: pointer; display: inline-flex; font-size: inherit; gap: 4px; isolation: isolate; letter-spacing: inherit; padding: 8px 0; position: relative; white-space: nowrap; z-index: 2; }
-.agero-nav-trigger::before { background: linear-gradient(180deg, #fff, #fdfdfd); border: 1px solid #d6d6d6; border-bottom: 0; border-radius: 10px 10px 0 0; box-shadow: 0 -1px 2px #00000009; content: ''; inset: 0 -12px -1px; opacity: 0; position: absolute; transition: opacity .16s ease; z-index: -1; }
+/* Open tab: rounded on top, open at the bottom, sitting on the panel's top border.
+   Its two inside corners are SVG fillets so the curves stay smooth at any zoom. */
+.agero-nav-trigger::before { background: linear-gradient(180deg, #ffffff 0%, #f6f7f8 100%); border: 1px solid #c6c8cd; border-bottom: 0; border-radius: 11px 11px 0 0; box-shadow: inset 0 1px 0 #fff, 0 1px 0 #f6f7f8, 0 -2px 8px -4px rgba(10, 10, 10, .12); content: ''; inset: 0 -12px 0; opacity: 0; position: absolute; transition: opacity .16s ease; z-index: -1; }
 .agero-nav-trigger[data-state="open"]::before { opacity: 1; }
-.agero-nav-shoulders { bottom: -1px; left: -12px; opacity: 0; pointer-events: none; position: absolute; right: -12px; transition: opacity .16s ease; z-index: -1; }
-.agero-nav-shoulders::before, .agero-nav-shoulders::after { bottom: 0; content: ''; height: 12px; position: absolute; width: 12px; }
-.agero-nav-shoulders::before { background: radial-gradient(circle at 0 0, transparent 11px, #d6d6d6 11px, #fff 12px); right: 100%; }
-.agero-nav-shoulders::after { background: radial-gradient(circle at 100% 0, transparent 11px, #d6d6d6 11px, #fff 12px); left: 100%; }
-.agero-nav-trigger[data-state="open"] .agero-nav-shoulders { opacity: 1; }
+.agero-nav-shoulder { bottom: 0; height: 12px; opacity: 0; overflow: visible; pointer-events: none; position: absolute; transition: opacity .16s ease; width: 12px; }
+.agero-nav-shoulder.is-left { left: -23px; }
+.agero-nav-shoulder.is-right { right: -23px; transform: scaleX(-1); }
+.agero-nav-shoulder .fill { fill: #f6f7f8; }
+.agero-nav-shoulder .line { fill: none; stroke: #c6c8cd; stroke-width: 1; }
+.agero-nav-trigger[data-state="open"] .agero-nav-shoulder { opacity: 1; }
 .agero-nav-trigger:hover .ct-roll-inner { transform: translateY(-50%); }
 .agero-nav-caret { flex: none; height: 14px; margin-right: -7px; transition: transform .2s ease; width: 14px; }
 .agero-nav-trigger[data-state="open"] .agero-nav-caret { transform: rotate(180deg); }
-.agero-nav-panel { animation: ageroNavIn .3s cubic-bezier(.22,1,.36,1); background: linear-gradient(145deg,#fff 65%,#fafafa); border: 1px solid #d6d6d6; border-radius: 16px; box-shadow: 0 1px 2px #0000000d, 0 18px 42px #00000018, inset 0 1px #fff; display: grid; gap: 2px; left: 50%; min-width: 248px; padding: 8px; position: absolute; top: calc(100% - 1px); transform: translateX(-50%); width: max-content; z-index: 1; }
+.agero-nav-panel { animation: ageroNavIn .3s cubic-bezier(.22,1,.36,1); background: linear-gradient(180deg, #f6f7f8 0, #fdfdfd 36px, #f7f8f9 70%, #eef0f2 100%); border: 1px solid #c6c8cd; border-radius: 16px; box-shadow: inset 0 -1px 0 rgba(10, 10, 10, .04), 0 1px 2px rgba(10, 10, 10, .06), 0 24px 56px -16px rgba(10, 10, 10, .3); overflow: hidden; display: grid; gap: 2px; left: 50%; min-width: 248px; padding: 8px; position: absolute; top: calc(100% - 1px); transform: translateX(-50%); width: max-content; z-index: 1; }
 @keyframes ageroNavIn { from { opacity: 0; transform: translate(-50%, -6px); } to { opacity: 1; transform: translate(-50%, 0); } }
 .agero-shell-nav .agero-nav-menu-item { align-items: center; animation: ageroNavItem .3s cubic-bezier(.22,1,.36,1) both; animation-delay: calc(var(--i, 0) * 35ms); border-radius: 8px; color: var(--agero-ink); display: flex; font-size: 14px; gap: 10px; line-height: 1.2; padding: 9px 8px; text-decoration: none; transition: background .16s ease; }
 @keyframes ageroNavItem { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-.agero-shell-nav .agero-nav-menu-item:hover, .agero-shell-nav .agero-nav-menu-item:focus-visible { background: #f1f1f1; outline: none; }
-.agero-nav-menu-ico { background: #efefef; border-radius: 8px; display: grid; flex: none; height: 30px; place-items: center; width: 30px; }
+.agero-shell-nav .agero-nav-menu-item:hover, .agero-shell-nav .agero-nav-menu-item:focus-visible { background: linear-gradient(90deg, rgba(10, 10, 10, .05), rgba(10, 10, 10, .015)); box-shadow: inset 0 0 0 1px rgba(10, 10, 10, .04); outline: none; }
+.agero-nav-menu-ico { background: linear-gradient(160deg, #ffffff 0%, #e4e5e8 100%); border-radius: 8px; box-shadow: inset 0 1px 0 #fff, inset 0 -1px 0 rgba(10, 10, 10, .06), 0 0 0 1px rgba(10, 10, 10, .09), 0 1px 2px rgba(10, 10, 10, .08); color: #2a2a2c; display: grid; flex: none; height: 30px; place-items: center; transition: background .2s ease, box-shadow .2s ease, color .2s ease; width: 30px; }
 .agero-nav-menu-ico svg { height: 16px; stroke-width: 1.6; width: 16px; }
-.agero-nav-menu-item:hover .agero-nav-menu-ico { background: var(--agero-ink); color: #fff; }
+.agero-nav-menu-item:hover .agero-nav-menu-ico { background: linear-gradient(160deg, #3c3c3f 0%, #0b0b0c 100%); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .2), 0 0 0 1px #000, 0 4px 10px -2px rgba(0, 0, 0, .35); color: #fff; }
 @media (prefers-reduced-motion: reduce) { .agero-nav-panel, .agero-shell-nav .agero-nav-menu-item { animation: none; } }
 
 .agero-shell-actions {
@@ -2317,3 +2320,18 @@ a.ct-mnav-row:hover > span, .ct-mnav-cta:hover > span { transform: translateX(3p
   .ct-mnav-sheet, .ct-mnav-scrim, .ct-mnav-primary li, .ct-mnav-cta, .ct-mnav-close span { animation: none; }
   .ct-mnav-sub, .ct-mnav-list, .ct-mnav-sub .ct-mnav-list a, .ct-mnav-row svg { transition: none !important; }
 }
+
+/* ---------- Logo moment: mark turns to liquid metal, then fades back to the solid mark ---------- */
+.agero-shell-logo { --lk: 26px; position: relative; }
+.agero-logo-chrome {
+  filter: url(#ct-logo-orange); height: var(--lk); left: 0; opacity: 0; pointer-events: none; position: absolute;
+  top: 50%; transform: translateY(-50%); transition: none; width: calc(var(--lk) * 396.79 / 406.47);
+}
+.agero-logo-chrome-canvas { inset: 0; position: absolute; }
+.agero-logo-filter { pointer-events: none; position: absolute; }
+/* The real mark hides while the metal flows in, then sits back underneath as the metal fades off it. */
+.agero-shell-logo .ct-lockup-mark { transition: none; }
+.agero-shell-logo.is-chrome .ct-lockup-mark { opacity: 0; transition: opacity .16s ease; }
+.agero-shell-logo.is-chrome .agero-logo-chrome { opacity: 1; transition: opacity .16s ease; }
+.agero-shell-logo.is-cooling .agero-logo-chrome { opacity: 0; transition: opacity .7s cubic-bezier(.4, 0, .2, 1); }
+@media (max-width: 430px) { .agero-shell-logo { --lk: 24px; } }

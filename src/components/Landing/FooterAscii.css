@@ -13,7 +13,9 @@
   position: absolute;
   z-index: 0;
 }
-.agero-footer-ascii video { height: 1px; opacity: 0; position: absolute; width: 1px; }
+/* Kept on screen (under the canvas, nearly transparent) so iOS Safari treats it as visible and plays it. */
+.agero-footer-ascii video { height: 100%; inset: 0; object-fit: cover; opacity: .01; pointer-events: none; position: absolute; width: 100%; z-index: 0; }
+.agero-footer-ascii canvas { position: relative; z-index: 1; }
 .agero-footer-ascii canvas { display: block; height: 100%; width: 100%; }
 .agero-footer-inner:has(.agero-footer-ascii)::before {
   background: linear-gradient(180deg, rgba(4, 4, 5, .18), rgba(4, 4, 5, .38) 65%, rgba(4, 4, 5, .52));

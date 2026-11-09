@@ -68,8 +68,8 @@ type Job = { row: number; day: number; len: number; label: string; hot?: boolean
 const JOBS: Job[] = [
   { row: 0, day: 0, len: 1, label: 'Press PM' },
   { row: 1, day: 1, len: 2, label: 'Robot cell audit' },
-  { row: 2, day: 3, len: 1, label: 'Coolant change' },
-  { row: 0, day: 2, len: 1, label: 'CNC-07 bearing', hot: true, moveTo: [0, 1] },
+  { row: 2, day: 3, len: 2, label: 'Coolant change' },
+  { row: 0, day: 2, len: 2, label: 'CNC-07 bearing', hot: true, moveTo: [0, 1] },
   { row: 2, day: 0, len: 2, label: 'Line 2 calibration' },
 ];
 

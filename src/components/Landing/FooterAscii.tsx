@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import './FooterAscii.css';
 
 // Render a small, silent video as text only while the footer is on screen.
+const POSTER = '/media/footer-ascii-poster.jpg';
 export default function FooterAscii() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -14,6 +15,17 @@ export default function FooterAscii() {
     const sample = document.createElement('canvas');
     const sampleContext = sample.getContext('2d', { willReadFrequently: true });
     if (!context || !sampleContext) return undefined;
+
+    // iOS Safari only plays muted inline video it considers visible, and skips preload,
+    // so set the attributes it checks and keep a still frame to draw when it won't play.
+    video.muted = true;
+    video.defaultMuted = true;
+    video.setAttribute('muted', '');
+    video.setAttribute('playsinline', '');
+    video.setAttribute('webkit-playsinline', '');
+    const poster = new Image();
+    poster.src = POSTER;
+    poster.onload = () => draw();
 
     const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
     const characters = ' .,:;irsXA253hMHGS#9B&@';
@@ -41,18 +53,23 @@ export default function FooterAscii() {
     };
 
     function draw() {
-      if (video.readyState < 2 || !video.videoWidth || !cols) return;
-      // Fit the complete video in CSS pixels: character cells are taller than
+      if (!cols) return;
+      const live = video!.readyState >= 2 && video!.videoWidth > 0;
+      const source: CanvasImageSource | null = live ? video! : poster.complete && poster.naturalWidth ? poster : null;
+      if (!source) return;
+      const srcW = live ? video!.videoWidth : poster.naturalWidth;
+      const srcH = live ? video!.videoHeight : poster.naturalHeight;
+      // Fit the complete frame in CSS pixels: character cells are taller than
       // they are wide, so fitting in grid coordinates would distort the image.
-      const scale = Math.min(width / video.videoWidth, height / video.videoHeight);
-      const sourceWidth = video.videoWidth * scale / width * cols;
-      const sourceHeight = video.videoHeight * scale / height * rows;
+      const scale = Math.min(width / srcW, height / srcH);
+      const sourceWidth = srcW * scale / width * cols;
+      const sourceHeight = srcH * scale / height * rows;
       sampleContext!.fillStyle = '#000';
       sampleContext!.fillRect(0, 0, cols, rows);
       // Center the full image behind the wordmark on every screen.
       const sourceTop = (rows - sourceHeight) / 2;
       const sourceLeft = (cols - sourceWidth) / 2;
-      sampleContext!.drawImage(video, sourceLeft, sourceTop, sourceWidth, sourceHeight);
+      sampleContext!.drawImage(source, sourceLeft, sourceTop, sourceWidth, sourceHeight);
       const pixels = sampleContext!.getImageData(0, 0, cols, rows).data;
       const cellWidth = width / cols;
       const cellHeight = height / rows;
@@ -89,6 +106,7 @@ export default function FooterAscii() {
       if (frame) cancelAnimationFrame(frame);
       frame = 0;
       if (visible && !motion.matches && !document.hidden) {
+        if (video.readyState === 0) video.load();
         void video.play().then(() => { if (!frame && visible && !motion.matches && !document.hidden) frame = requestAnimationFrame(tick); }).catch(() => draw());
       } else {
         video.pause();
@@ -117,7 +135,7 @@ export default function FooterAscii() {
 
   return (
     <div className="agero-footer-ascii" aria-hidden="true">
-      <video ref={videoRef} src="/media/footer-ascii-source.mp4" muted loop playsInline preload="auto" />
+      <video ref={videoRef} src="/media/footer-ascii-source.mp4" poster={POSTER} muted loop playsInline preload="auto" />
       <canvas ref={canvasRef} />
     </div>
   );
