@@ -62,14 +62,17 @@ export default function About() {
           </div>
         </section>
 
-        <section className="agero-about-principles" aria-label="Operating principles">
-          {principles.map(({ title, copy }, index) => (
+        <section className="agero-about-values" aria-labelledby="about-values-title">
+          <h2 id="about-values-title">{language === 'de' ? 'Was uns wichtig ist.' : 'What matters to us.'}</h2>
+          <p>{language === 'de' ? 'Klar im Denken. Sorgfältig im Machen.' : 'Clear thinking. Thoughtful work.'}</p>
+          <div className="agero-about-principles">
+          {principles.map(({ title, copy }) => (
             <article key={title} className="agero-about-card">
-              <span className="agero-about-card-index">{String(index + 1).padStart(2, '0')}</span>
-              <h3>{title}</h3>
+              <h3><span aria-hidden="true">✳</span> {title}</h3>
               <p>{copy}</p>
             </article>
           ))}
+          </div>
         </section>
 
         <section className="agero-about-section">
