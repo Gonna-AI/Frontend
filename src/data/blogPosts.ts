@@ -31,6 +31,10 @@ export const blogAuthors: Record<string, BlogAuthor> = {
     bio: 'Kenshin runs customer operations and maintenance at ClerkTree. He studies Sustainable Management at TUM and is a Deutschlandstipendium recipient.',
     linkedin: 'https://www.linkedin.com/in/kenshin-kiriyama-2b2031357/',
   },
+  aryaman: {
+    id: 'aryaman', name: 'Aryaman Srivastava', role: 'Engineer', image: `${R2}/aryamansriva.jpeg`, objectPosition: 'center top',
+    bio: 'Aryaman studies computer science at Shiv Nadar Institute of Eminence, focusing on machine learning, scalable systems and agentic AI. He has worked on GPU-accelerated image segmentation and reinforcement learning, built data applications with Fractal Analytics, and works on the platform that ships ClerkTree agents to production.',
+  },
   katharina: {
     id: 'katharina', name: 'Katharina Krüger', role: 'Executive Assistant', image: `${R2}/Katharina.jpeg`, objectPosition: 'center top',
     bio: 'Katharina brings strategy experience from roles including Head of Strategy and Tchibo, and a Business Administration degree from the University of Mannheim.',
@@ -58,6 +62,17 @@ export interface BlogPost {
 export const postContentUrl = (slug: string) => `/journal/${slug}.md`;
 
 export const blogPosts: BlogPost[] = [
+  {
+    slug: "devops-for-agents-on-the-shop-floor",
+    title: "Shipping agents to the shop floor: what DevOps looks like for agentic AI",
+    description: "Agents fail differently from services: the failures look like answers. How we version reasoning, gate releases on evaluations, use shadow mode as staging, and keep tool access narrow inside industrial plants.",
+    date: "2026-11-09",
+    tags: ["Engineering", "Agents", "DevOps"],
+    category: "Engineering",
+    tone: "black",
+    readTime: "12 min read",
+    authors: ["aryaman"],
+  },
   {
     slug: "the-hard-part-isnt-the-ai",
     title: "The hard part isn't the AI: Animesh and Katharina in conversation",

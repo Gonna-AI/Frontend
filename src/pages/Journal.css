@@ -150,6 +150,9 @@
 .agero-works .jr-prose ul, .agero-works .jr-prose ol { margin: 0 0 22px; padding-left: 1.3em; }
 .agero-works .jr-prose li { margin: 6px 0; padding-left: 4px; }
 .agero-works .jr-prose li::marker { color: #9a9a9a; }
+.agero-works .jr-prose img { background: #fafafa; border-radius: 16px; box-shadow: 0 0 0 1px var(--jr-line); display: block; height: auto; margin: 32px 0 10px; max-width: 100%; width: 100%; }
+.agero-works .jr-prose p:has(> img) { margin: 0; }
+.agero-works .jr-prose p:has(> img) + p > em:only-child { color: #7a7a7a; display: block; font-size: 14px; font-style: normal; line-height: 1.5; margin-bottom: 28px; }
 .agero-works .jr-prose hr { border: 0; border-top: 1px solid var(--jr-line); margin: 40px 0; }
 .agero-works .jr-prose blockquote {
   background: #fff; border-left: 3px solid var(--agero-orange); border-radius: 0 14px 14px 0; box-shadow: inset 0 0 0 1px var(--jr-line);
@@ -210,11 +213,7 @@
 .agero-works .jr-post-hero-copy { align-content: end; color: #fff; display: grid; gap: 14px; justify-items: start; max-width: 860px; position: relative; z-index: 2; }
 .agero-works .jr-post-hero .jr-back { color: rgba(255, 255, 255, .78); margin-bottom: auto; }
 .agero-works .jr-post-hero .jr-back:hover { color: #fff; }
-.agero-works .jr-post-hero .jr-pill {
-  align-items: center; background: none; box-shadow: none; color: rgba(255, 255, 255, .84); display: inline-flex; font: 500 12px/1 var(--font-ui);
-  gap: 10px; letter-spacing: .14em; padding: 0; text-transform: uppercase;
-}
-.agero-works .jr-post-hero .jr-pill::before { background: var(--agero-orange); border-radius: 50%; box-shadow: 0 0 0 3px rgba(255, 77, 0, .2); content: ""; height: 6px; width: 6px; }
+.agero-works .jr-post-hero .jr-pill { background: rgba(255, 255, 255, .78); box-shadow: inset 0 0 0 1px rgba(10, 10, 10, .08), 0 1px 2px rgba(10, 10, 10, .06); color: var(--jr-ink, #0a0a0a); font-size: 13px; padding: 7px 10px; }
 .agero-works .jr-post-hero h1 { color: #fff; font: 400 clamp(32px, 4.2vw, 56px)/1.04 "Cal Sans", "Cal Sans Placeholder", sans-serif !important; letter-spacing: -.01em; margin: 0; text-shadow: 0 2px 30px rgba(0, 0, 0, .3); text-wrap: balance; }
 .agero-works .jr-post-hero .jr-lede { color: rgba(255, 255, 255, .82); font-size: 17px; line-height: 1.6; margin: 0; max-width: 680px; }
 .agero-works .jr-post-hero .jr-byline-names strong { color: #fff; }

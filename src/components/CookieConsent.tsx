@@ -244,6 +244,30 @@ function CategoryAccordion({
 }
 
 /* ─── Main Component ─── */
+/** Freezes the page behind a modal (works on iOS and with smooth scrolling) and restores the exact position. */
+function useLockPageScroll(active: boolean) {
+    useEffect(() => {
+        if (!active) return undefined;
+        const { body, documentElement: html } = document;
+        const y = window.scrollY;
+        const prev = { position: body.style.position, top: body.style.top, width: body.style.width, overflow: html.style.overflow };
+        body.style.position = 'fixed';
+        body.style.top = `-${y}px`;
+        body.style.width = '100%';
+        html.style.overflow = 'hidden';
+        return () => {
+            body.style.position = prev.position;
+            body.style.top = prev.top;
+            body.style.width = prev.width;
+            html.style.overflow = prev.overflow;
+            const behavior = html.style.scrollBehavior;
+            html.style.scrollBehavior = 'auto';
+            window.scrollTo(0, y);
+            html.style.scrollBehavior = behavior;
+        };
+    }, [active]);
+}
+
 export default function CookieConsent() {
     const { t } = useLanguage();
     const [visible, setVisible] = useState(false);
@@ -356,6 +380,8 @@ export default function CookieConsent() {
         persistConsent(consent);
     }, [consent, persistConsent]);
 
+    useLockPageScroll(visible && view === 'preferences');
+
     if (!visible) return null;
 
     const bannerChoices = [
@@ -368,6 +394,7 @@ export default function CookieConsent() {
     return (
         <div
             className="fixed inset-0 z-[9999] flex items-end sm:items-center justify-center isolate pointer-events-none"
+            data-lenis-prevent=""
         >
             {/* ─── PREFERENCES BACKDROP ─── */}
             {view === 'preferences' && (

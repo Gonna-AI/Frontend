@@ -1,0 +1,97 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 680" width="1200" height="680" role="img" aria-label="ClerkTree runtime inside a plant">
+  <defs>
+    <marker id="g" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#9a9a9a"/></marker>
+    <marker id="o" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#ff4d00"/></marker>
+    <style>
+      text { font-family: Inter, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; fill: #0a0a0a; }
+      .t { font-size: 14px; font-weight: 600; }
+      .s { font-size: 12px; fill: #6b6b6b; }
+      .k { font-size: 11px; font-weight: 600; letter-spacing: .12em; fill: #8a8a8a; }
+      .w { fill: #fff; }
+      .ws { font-size: 12px; fill: rgba(255,255,255,.7); }
+      .box { fill: #fff; stroke: #e2e2e2; }
+      .soft { fill: #f5f5f5; stroke: #e8e8e8; }
+      .read { stroke: #9a9a9a; stroke-width: 1.4; fill: none; }
+      .write { stroke: #ff4d00; stroke-width: 1.8; fill: none; }
+    </style>
+  </defs>
+  <rect x="0.5" y="0.5" width="1199" height="679" rx="24" fill="#fafafa" stroke="#e6e6e6"/>
+  <text x="40" y="50" style="font-size:18px;font-weight:600">ClerkTree runtime inside a plant</text>
+  <text x="40" y="74" class="s">Reads flow in from plant systems. The only write path goes through a person.</text>
+
+  <!-- Plant systems -->
+  <text x="40" y="120" class="k">PLANT SYSTEMS</text>
+  <g>
+    <rect x="40" y="134" width="210" height="64" rx="12" class="box"/>
+    <text x="56" y="162" class="t">Historian · OPC UA</text><text x="56" y="182" class="s">signals, alarms</text>
+    <rect x="40" y="214" width="210" height="64" rx="12" class="box"/>
+    <text x="56" y="242" class="t">CMMS · SAP PM</text><text x="56" y="262" class="s">work orders, history</text>
+    <rect x="40" y="294" width="210" height="64" rx="12" class="box"/>
+    <text x="56" y="322" class="t">ERP</text><text x="56" y="342" class="s">parts, stock, suppliers</text>
+    <rect x="40" y="374" width="210" height="64" rx="12" class="box"/>
+    <text x="56" y="402" class="t">Document store</text><text x="56" y="422" class="s">manuals, drawings</text>
+  </g>
+
+  <!-- Runtime -->
+  <rect x="300" y="104" width="600" height="500" rx="20" fill="#fff" stroke="#0a0a0a" stroke-width="1.2"/>
+  <text x="324" y="138" class="k">CLERKTREE RUNTIME</text>
+  <text x="876" y="138" class="s" text-anchor="end">on-prem · private cloud · edge</text>
+
+  <rect x="324" y="160" width="120" height="346" rx="12" class="soft"/>
+  <text x="384" y="456" class="t" text-anchor="middle">Connectors</text>
+  <text x="384" y="476" class="s" text-anchor="middle">read-only</text>
+
+  <path d="M250 166H322" class="read" marker-end="url(#g)"/>
+  <path d="M250 246H322" class="read" marker-end="url(#g)"/>
+  <path d="M250 326H322" class="read" marker-end="url(#g)"/>
+  <path d="M250 406H322" class="read" marker-end="url(#g)"/>
+
+  <rect x="468" y="160" width="408" height="76" rx="12" class="soft"/>
+  <text x="484" y="188" class="t">Evidence layer</text>
+  <text x="484" y="212" class="s">signal baselines · manual passages with revision · past work orders · stock</text>
+  <path d="M444 198H466" class="read" marker-end="url(#g)"/>
+
+  <g>
+    <rect x="468" y="262" width="92" height="68" rx="12" class="box"/>
+    <text x="514" y="292" class="t" text-anchor="middle">Signal</text><text x="514" y="312" class="s" text-anchor="middle">agent</text>
+    <rect x="572" y="262" width="92" height="68" rx="12" class="box"/>
+    <text x="618" y="292" class="t" text-anchor="middle">Manual</text><text x="618" y="312" class="s" text-anchor="middle">agent</text>
+    <rect x="676" y="262" width="92" height="68" rx="12" class="box"/>
+    <text x="722" y="292" class="t" text-anchor="middle">History</text><text x="722" y="312" class="s" text-anchor="middle">agent</text>
+    <rect x="780" y="262" width="92" height="68" rx="12" class="box"/>
+    <text x="826" y="292" class="t" text-anchor="middle">Parts</text><text x="826" y="312" class="s" text-anchor="middle">agent</text>
+  </g>
+  <path d="M514 236V260M618 236V260M722 236V260M826 236V260" class="read" marker-end="url(#g)"/>
+
+  <rect x="572" y="356" width="200" height="64" rx="12" fill="#0a0a0a"/>
+  <text x="672" y="384" class="t w" text-anchor="middle">Planner</text>
+  <text x="672" y="404" class="ws" text-anchor="middle">combines findings · drafts</text>
+  <path d="M514 330L612 354M618 330L646 354M722 330L698 354M826 330L732 354" class="read" marker-end="url(#g)"/>
+
+  <rect x="468" y="438" width="408" height="68" rx="12" fill="#fff" stroke="#ff4d00" stroke-width="1.4"/>
+  <text x="484" y="464" class="t">Tool gateway · policy</text>
+  <text x="484" y="486" class="s">read-only by default · drafts need approval · no control-system writes</text>
+  <path d="M672 420V436" class="read" marker-end="url(#g)"/>
+
+  <rect x="324" y="522" width="552" height="60" rx="12" class="soft"/>
+  <text x="340" y="548" class="t">Trace &amp; audit log</text>
+  <text x="340" y="568" class="s">every step, source, tool call and bundle version</text>
+
+  <!-- Approval and write path -->
+  <text x="940" y="120" class="k">PEOPLE</text>
+  <rect x="940" y="334" width="220" height="72" rx="12" fill="#fff" stroke="#ff4d00" stroke-width="1.6"/>
+  <text x="956" y="364" class="t">Human approval</text>
+  <text x="956" y="386" class="s">planner reviews the draft</text>
+  <path d="M772 388H938" class="write" marker-end="url(#o)"/>
+  <text x="856" y="378" class="s" text-anchor="middle" style="fill:#c23a00">draft</text>
+
+  <rect x="940" y="456" width="220" height="72" rx="12" class="box"/>
+  <text x="956" y="486" class="t">CMMS · work order</text>
+  <text x="956" y="508" class="s">written only after approval</text>
+  <path d="M1050 406V454" class="write" marker-end="url(#o)"/>
+  <text x="1060" y="436" class="s" style="fill:#c23a00">approved</text>
+
+  <!-- Legend -->
+  <path d="M40 640H76" class="read" marker-end="url(#g)"/><text x="86" y="644" class="s">read</text>
+  <path d="M150 640H186" class="write" marker-end="url(#o)"/><text x="196" y="644" class="s">write path: draft, then approval</text>
+</svg>

@@ -2310,25 +2310,20 @@ a:hover > .ct-roll > .ct-roll-inner { transform: translateY(-50%); }
 }
 
 /* Page heroes follow the journal hero: centred, content-sized, on silver grain.
-   The eyebrow is a quiet label (orange dot + small caps), not a chip. */
+   The eyebrow uses the same small frosted tag as the journal cards. */
 .agero-hero-stage-content .agero-page-hero-eyebrow {
-  align-items: center;
-  color: rgba(255, 255, 255, 0.84);
-  display: inline-flex;
-  font: 500 12px/1 var(--font-ui, "Geist", sans-serif);
-  gap: 10px;
-  letter-spacing: 0.14em;
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  background: rgba(255, 255, 255, 0.78);
+  border-radius: 8px;
+  box-shadow: inset 0 0 0 1px rgba(10, 10, 10, 0.08), 0 1px 2px rgba(10, 10, 10, 0.06);
+  color: var(--agero-ink);
+  display: inline-block;
+  font: 500 13px/1 var(--font-ui, "Geist", sans-serif);
+  letter-spacing: 0;
+  padding: 7px 10px;
   text-shadow: none;
-  text-transform: uppercase;
-}
-
-.agero-hero-stage-content .agero-page-hero-eyebrow::before {
-  background: var(--agero-orange);
-  border-radius: 50%;
-  box-shadow: 0 0 0 3px rgba(255, 77, 0, 0.2);
-  content: "";
-  height: 6px;
-  width: 6px;
+  text-transform: none;
 }
 
 .agero-hero-stage-content .agero-page-hero-eyebrow + h1 {

@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 440" width="1200" height="440" role="img" aria-label="Release path for an agent bundle">
+  <defs>
+    <marker id="g" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#9a9a9a"/></marker>
+    <marker id="o" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#ff4d00"/></marker>
+    <style>
+      text { font-family: Inter, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; fill: #0a0a0a; }
+      .n { font-size: 11px; font-weight: 600; letter-spacing: .1em; fill: #9a9a9a; }
+      .t { font-size: 15px; font-weight: 600; }
+      .s { font-size: 12px; fill: #6b6b6b; }
+      .gate { font-size: 11.5px; font-weight: 500; fill: #b33600; }
+      .card { fill: #fff; stroke: #e2e2e2; }
+      .chip { fill: #fff3ec; stroke: #ffd3bf; }
+      .arrow { stroke: #9a9a9a; stroke-width: 1.4; fill: none; }
+    </style>
+  </defs>
+  <rect x="0.5" y="0.5" width="1199" height="439" rx="24" fill="#fafafa" stroke="#e6e6e6"/>
+  <text x="50" y="52" style="font-size:18px;font-weight:600">How a bundle reaches a plant</text>
+  <text x="50" y="76" class="s">Every stage has a gate. Nothing skips shadow mode.</text>
+
+  <!-- 01 -->
+  <rect x="50" y="110" width="160" height="128" rx="14" class="card"/>
+  <text x="66" y="136" class="n">01</text><text x="66" y="162" class="t">Commit</text>
+  <text x="66" y="186" class="s">prompt, schema, index</text><text x="66" y="203" class="s">or model change</text>
+  <rect x="50" y="252" width="160" height="30" rx="8" class="chip"/><text x="130" y="272" class="gate" text-anchor="middle">gate · review</text>
+
+  <!-- 02 -->
+  <rect x="238" y="110" width="160" height="128" rx="14" class="card"/>
+  <text x="254" y="136" class="n">02</text><text x="254" y="162" class="t">Static checks</text>
+  <text x="254" y="186" class="s">schemas, policy lint,</text><text x="254" y="203" class="s">unit tests</text>
+  <rect x="238" y="252" width="160" height="30" rx="8" class="chip"/><text x="318" y="272" class="gate" text-anchor="middle">gate · all pass</text>
+
+  <!-- 03 -->
+  <rect x="426" y="110" width="160" height="128" rx="14" class="card"/>
+  <text x="442" y="136" class="n">03</text><text x="442" y="162" class="t">Offline eval</text>
+  <text x="442" y="186" class="s">golden incidents,</text><text x="442" y="203" class="s">six measures</text>
+  <rect x="426" y="252" width="160" height="30" rx="8" class="chip"/><text x="506" y="272" class="gate" text-anchor="middle">gate · citations 100%</text>
+
+  <!-- 04 shadow -->
+  <rect x="614" y="110" width="160" height="128" rx="14" fill="#0a0a0a"/>
+  <text x="630" y="136" class="n" style="fill:#ff7a3d">04</text><text x="630" y="162" class="t" style="fill:#fff">Shadow mode</text>
+  <text x="630" y="186" class="s" style="fill:rgba(255,255,255,.7)">live plant data,</text><text x="630" y="203" class="s" style="fill:rgba(255,255,255,.7)">read-only, no actions</text>
+  <rect x="614" y="252" width="160" height="30" rx="8" class="chip"/><text x="694" y="272" class="gate" text-anchor="middle">gate · disagreements reviewed</text>
+
+  <!-- 05 -->
+  <rect x="802" y="110" width="160" height="128" rx="14" class="card"/>
+  <text x="818" y="136" class="n">05</text><text x="818" y="162" class="t">Canary</text>
+  <text x="818" y="186" class="s">one line, approval</text><text x="818" y="203" class="s">on every draft</text>
+  <rect x="802" y="252" width="160" height="30" rx="8" class="chip"/><text x="882" y="272" class="gate" text-anchor="middle">gate · overrides in band</text>
+
+  <!-- 06 -->
+  <rect x="990" y="110" width="160" height="128" rx="14" class="card"/>
+  <text x="1006" y="136" class="n">06</text><text x="1006" y="162" class="t">Rollout</text>
+  <text x="1006" y="186" class="s">all lines, timed to</text><text x="1006" y="203" class="s">planned shutdowns</text>
+  <rect x="990" y="252" width="160" height="30" rx="8" class="chip"/><text x="1070" y="272" class="gate" text-anchor="middle">gate · signed bundle</text>
+
+  <path d="M210 174H236M398 174H424M586 174H612M774 174H800M962 174H988" class="arrow" marker-end="url(#g)"/>
+
+  <!-- rollback -->
+  <path d="M1070 296V336H694V310" fill="none" stroke="#ff4d00" stroke-width="1.6" stroke-dasharray="5 5" marker-end="url(#o)"/>
+  <path d="M882 296V336" fill="none" stroke="#ff4d00" stroke-width="1.6" stroke-dasharray="5 5"/>
+  <text x="882" y="368" text-anchor="middle" style="font-size:13px;font-weight:600;fill:#b33600">Rollback is one version pin</text>
+  <text x="882" y="390" text-anchor="middle" class="s">restores prompts, model and index snapshot together</text>
+</svg>
