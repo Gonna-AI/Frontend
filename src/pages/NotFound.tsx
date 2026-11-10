@@ -30,7 +30,7 @@ const NotFound = () => {
 
   return (
     <div className="agero-works" id="agero-works">
-      <SEO title={text.eyebrow} description={text.body} />
+      <SEO title={text.eyebrow} description={text.body} noindex />
 
       <div className="agero-top-area agero-top-area-with-hero">
         <Header />

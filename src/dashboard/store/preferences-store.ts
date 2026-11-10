@@ -9,52 +9,13 @@ export type SidebarVariant = "inset" | "sidebar" | "floating";
 export type SidebarCollapsible = "icon" | "offcanvas";
 export type ContentLayout = "centered" | "full-width";
 export type NavbarStyle = "sticky" | "scroll";
-export type FontKey =
-  | "geist"
-  | "inter"
-  | "notoSans"
-  | "nunitoSans"
-  | "figtree"
-  | "roboto"
-  | "raleway"
-  | "dmSans"
-  | "publicSans"
-  | "outfit"
-  | "geistMono"
-  | "geistPixelSquare"
-  | "jetBrainsMono"
-  | "notoSerif"
-  | "robotoSlab"
-  | "merriweather"
-  | "lora"
-  | "playfairDisplay";
+export type FontKey = "geist" | "inter" | "geistMono";
 
 export const THEME_PRESET_OPTIONS: { value: ThemePreset; label: string; primary: { light: string; dark: string } }[] = [
   { value: "default", label: "Default", primary: { light: "oklch(0.205 0 0)", dark: "oklch(0.922 0 0)" } },
   { value: "tangerine", label: "Tangerine", primary: { light: "oklch(0.64 0.17 36.44)", dark: "oklch(0.64 0.17 36.44)" } },
   { value: "brutalist", label: "Neo Brutalism", primary: { light: "oklch(0.65 0.24 26.97)", dark: "oklch(0.7 0.19 23.19)" } },
   { value: "soft-pop", label: "Soft Pop", primary: { light: "oklch(0.62 0.19 259.81)", dark: "oklch(0.68 0.16 259.49)" } },
-];
-
-export const fontOptions: { key: FontKey; label: string }[] = [
-  { key: "geist", label: "Geist" },
-  { key: "inter", label: "Inter" },
-  { key: "notoSans", label: "Noto Sans" },
-  { key: "nunitoSans", label: "Nunito Sans" },
-  { key: "figtree", label: "Figtree" },
-  { key: "roboto", label: "Roboto" },
-  { key: "raleway", label: "Raleway" },
-  { key: "dmSans", label: "DM Sans" },
-  { key: "publicSans", label: "Public Sans" },
-  { key: "outfit", label: "Outfit" },
-  { key: "geistMono", label: "Geist Mono" },
-  { key: "geistPixelSquare", label: "Geist Pixel Square" },
-  { key: "jetBrainsMono", label: "JetBrains Mono" },
-  { key: "notoSerif", label: "Noto Serif" },
-  { key: "robotoSlab", label: "Roboto Slab" },
-  { key: "merriweather", label: "Merriweather" },
-  { key: "lora", label: "Lora" },
-  { key: "playfairDisplay", label: "Playfair Display" },
 ];
 
 interface PreferencesValues {

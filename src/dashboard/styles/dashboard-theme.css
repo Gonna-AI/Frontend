@@ -2,46 +2,14 @@
    globals.css exactly, but every rule is scoped under .dashboard-root instead of
    :root so it never touches the rest of the site's colors/fonts. */
 
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans:wght@400;500;600;700&family=Roboto:wght@400;500;700&family=Outfit:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&family=Nunito+Sans:wght@400;600;700&family=Figtree:wght@400;500;600;700&family=Raleway:wght@400;500;600;700&family=Public+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Noto+Serif:wght@400;600;700&family=Roboto+Slab:wght@400;500;700&family=Merriweather:wght@400;700&family=Lora:wght@400;500;600;700&family=Playfair+Display:wght@400;600;700&display=swap");
 @import "./tangerine.css";
 @import "./brutalist.css";
 @import "./soft-pop.css";
 
-@font-face {
-  font-family: "Geist";
-  src: url("/fonts/dashboard/Geist-Variable.woff2") format("woff2");
-  font-weight: 100 900;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "Geist Mono";
-  src: url("/fonts/dashboard/GeistMono-Variable.woff2") format("woff2");
-  font-weight: 100 900;
-  font-style: normal;
-  font-display: swap;
-}
-
 .dashboard-root {
   --font-geist: "Geist", ui-sans-serif, system-ui, sans-serif;
   --font-geist-mono: "Geist Mono", ui-monospace, monospace;
-  --font-geist-pixel-square: "Geist Mono", ui-monospace, monospace;
   --font-inter: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-noto-sans: "Noto Sans", ui-sans-serif, system-ui, sans-serif;
-  --font-nunito-sans: "Nunito Sans", ui-sans-serif, system-ui, sans-serif;
-  --font-figtree: "Figtree", ui-sans-serif, system-ui, sans-serif;
-  --font-roboto: "Roboto", ui-sans-serif, system-ui, sans-serif;
-  --font-raleway: "Raleway", ui-sans-serif, system-ui, sans-serif;
-  --font-dm-sans: "DM Sans", ui-sans-serif, system-ui, sans-serif;
-  --font-public-sans: "Public Sans", ui-sans-serif, system-ui, sans-serif;
-  --font-outfit: "Outfit", ui-sans-serif, system-ui, sans-serif;
-  --font-jetbrains-mono: "JetBrains Mono", ui-monospace, monospace;
-  --font-noto-serif: "Noto Serif", ui-serif, serif;
-  --font-roboto-slab: "Roboto Slab", ui-serif, serif;
-  --font-merriweather: "Merriweather", ui-serif, serif;
-  --font-lora: "Lora", ui-serif, serif;
-  --font-playfair-display: "Playfair Display", ui-serif, serif;
 
   --font-sans: var(--font-geist);
   font-family: var(--font-sans), system-ui, sans-serif;
@@ -197,23 +165,8 @@
 }
 
 .dashboard-root[data-font="inter"] { --font-sans: var(--font-inter); }
-.dashboard-root[data-font="notoSans"] { --font-sans: var(--font-noto-sans); }
-.dashboard-root[data-font="nunitoSans"] { --font-sans: var(--font-nunito-sans); }
-.dashboard-root[data-font="figtree"] { --font-sans: var(--font-figtree); }
-.dashboard-root[data-font="roboto"] { --font-sans: var(--font-roboto); }
 .dashboard-root[data-font="geist"] { --font-sans: var(--font-geist); }
-.dashboard-root[data-font="raleway"] { --font-sans: var(--font-raleway); }
-.dashboard-root[data-font="dmSans"] { --font-sans: var(--font-dm-sans); }
-.dashboard-root[data-font="publicSans"] { --font-sans: var(--font-public-sans); }
-.dashboard-root[data-font="outfit"] { --font-sans: var(--font-outfit); }
 .dashboard-root[data-font="geistMono"] { --font-sans: var(--font-geist-mono); }
-.dashboard-root[data-font="geistPixelSquare"] { --font-sans: var(--font-geist-pixel-square); }
-.dashboard-root[data-font="jetBrainsMono"] { --font-sans: var(--font-jetbrains-mono); }
-.dashboard-root[data-font="notoSerif"] { --font-sans: var(--font-noto-serif); }
-.dashboard-root[data-font="robotoSlab"] { --font-sans: var(--font-roboto-slab); }
-.dashboard-root[data-font="merriweather"] { --font-sans: var(--font-merriweather); }
-.dashboard-root[data-font="lora"] { --font-sans: var(--font-lora); }
-.dashboard-root[data-font="playfairDisplay"] { --font-sans: var(--font-playfair-display); }
 
 .dashboard-root * {
   border-color: var(--border);

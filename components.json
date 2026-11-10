@@ -4,14 +4,14 @@
     "rsc": false,
     "tsx": true,
     "tailwind": {
-        "config": "tailwind.config.ts",
+        "config": "tailwind.config.js",
         "css": "src/index.css",
         "baseColor": "slate",
         "cssVariables": true
     },
     "aliases": {
         "components": "@/components",
-        "utils": "@/utils/cn",
-        "ui": "@/components/ui"
+        "utils": "@/lib/utils",
+        "ui": "@/components/dashboard-ui"
     }
 }

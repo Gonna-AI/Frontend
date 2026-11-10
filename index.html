@@ -5,10 +5,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>ClerkTree – The World&#39;s Industrial Intelligence Layer</title>
-  <meta name="description" content="ClerkTree is an industrial AI harness for machine operations. Agents connect signals, technical knowledge and workflows to help teams understand issues and coordinate work." />
+  <meta name="description" content="ClerkTree is an industrial AI harness for machine operations. Agents connect signals, technical knowledge and workflows to help teams understand issues and coordinate work." data-rh="true" />
 
-  <!-- CSP is enforced via Netlify response headers (public/_headers, netlify.toml). -->
-  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <!-- Security headers, including the CSP, are sent as response headers (public/_headers). -->
 
   <!-- Transparent mark with SVG and raster fallbacks. -->
   <link rel="icon" href="/favicon.ico?v=4" sizes="any" />
@@ -19,33 +18,33 @@
   <link rel="manifest" href="/site.webmanifest" />
 
   <!-- Open Graph / Facebook / LinkedIn -->
-  <meta property="og:type" content="website" />
+  <meta property="og:type" content="website" data-rh="true" />
   <meta property="og:site_name" content="ClerkTree" />
-  <meta property="og:url" content="https://clerktree.com/" />
-  <meta property="og:title" content="ClerkTree – The World&#39;s Industrial Intelligence Layer" />
-  <meta property="og:description" content="ClerkTree is an industrial AI harness for machine operations. Agents connect signals, technical knowledge and workflows to help teams understand issues and coordinate work." />
-  <meta property="og:image" content="https://clerktree.com/og/home.png" />
+  <meta property="og:url" content="https://clerktree.com/" data-rh="true" />
+  <meta property="og:title" content="ClerkTree – The World&#39;s Industrial Intelligence Layer" data-rh="true" />
+  <meta property="og:description" content="ClerkTree is an industrial AI harness for machine operations. Agents connect signals, technical knowledge and workflows to help teams understand issues and coordinate work." data-rh="true" />
+  <meta property="og:image" content="https://clerktree.com/og/home.png" data-rh="true" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
   <meta property="og:image:type" content="image/png" />
   <meta property="og:image:alt" content="ClerkTree – Industrial AI for machine operations" />
 
   <!-- X / Twitter -->
-  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:card" content="summary_large_image" data-rh="true" />
   <meta name="twitter:site" content="@teamclerktree" />
-  <meta name="twitter:title" content="ClerkTree – The World&#39;s Industrial Intelligence Layer" />
-  <meta name="twitter:description" content="ClerkTree is an industrial AI harness for machine operations. Agents connect signals, technical knowledge and workflows to help teams understand issues and coordinate work." />
-  <meta name="twitter:image" content="https://clerktree.com/og/home.png" />
+  <meta name="twitter:title" content="ClerkTree – The World&#39;s Industrial Intelligence Layer" data-rh="true" />
+  <meta name="twitter:description" content="ClerkTree is an industrial AI harness for machine operations. Agents connect signals, technical knowledge and workflows to help teams understand issues and coordinate work." data-rh="true" />
+  <meta name="twitter:image" content="https://clerktree.com/og/home.png" data-rh="true" />
 
   <meta name="theme-color" content="#0a0a0a" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <link rel="canonical" href="https://clerktree.com/" />
+  <link rel="canonical" href="https://clerktree.com/" data-rh="true" />
 
   <!-- First paint: the site canvas, not a dark loader. App routes keep their own dark shell. -->
   <script>
     (function () {
-      if (!/^\/(dashboard|mail|chat|crm|client|login|auth|ai-settings|invite)(\/|$)/.test(location.pathname)) {
+      if (!/^\/(dashboard|mail|chat|client|login|auth|ai-settings|invite)(\/|$)/.test(location.pathname)) {
         document.documentElement.classList.add('ct-site');
       }
     })();
@@ -57,14 +56,10 @@
     @media (prefers-reduced-motion: reduce) { html.ct-site .agero-works { animation: none; } }
   </style>
 
-  <!-- Geist for UI chrome (header, footer). -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500&display=swap" rel="stylesheet" />
-
-  <!-- Fontshare - Satoshi (10 Styles + Variable) -->
-  <link href="https://api.fontshare.com/v2/css?f[]=satoshi@1,2,900,700,500,300,400,901,701,501,301,401&display=swap"
-    rel="stylesheet">
+  <!-- Fonts are self-hosted (src/styles/fonts.css). Preload the three faces used above the fold. -->
+  <link rel="preload" href="/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="preload" href="/fonts/cal-sans-latin.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="preload" href="/fonts/geist-latin.woff2" as="font" type="font/woff2" crossorigin />
 
   <!-- Structured Data for Google -->
   <script type="application/ld+json">
@@ -159,12 +154,10 @@
       ]
     }
     </script>
-
-
-
 </head>
 
 <body>
+  <noscript>ClerkTree needs JavaScript to run. Please enable it, or write to team@clerktree.com.</noscript>
   <div id="root"></div>
   <script type="module" src="/src/main.tsx"></script>
 </body>

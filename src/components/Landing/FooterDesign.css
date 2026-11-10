@@ -79,7 +79,11 @@
 }
 .agero-footer .agero-footer-copyright, .agero-footer .agero-footer-copyright p, .agero-footer .agero-footer-time { color: rgba(255,255,255,.78); font-size: 12px; line-height: 18px; }
 .agero-footer .agero-footer-bottom-right { gap: 16px; }
-.agero-footer .agero-footer-bottom-right a { color: rgba(255,255,255,.78); font-size: 12px; letter-spacing: .02em; text-shadow: 0 1px 12px rgba(0, 0, 0, .7); text-transform: none; }
+.agero-footer .agero-footer-bottom-right :where(a, button) { color: rgba(255,255,255,.78); font-size: 12px; letter-spacing: .02em; line-height: 18px; text-decoration: none; text-shadow: 0 1px 12px rgba(0, 0, 0, .7); text-transform: none; transition: color 180ms ease; }
+/* "Cookie settings" opens the consent dialog, so it is a button that reads as a footer link. */
+.agero-footer .agero-footer-link-button { background: none; border: 0; cursor: pointer; font-family: inherit; padding: 0; }
+@media (hover: hover) { .agero-footer .agero-footer-link-button:hover { color: #fff; } }
+@media (pointer: coarse) { .agero-footer .agero-footer-link-button { margin-block: -13px; padding-block: 13px; } }
 .agero-footer .agero-footer-bottom-right .agero-footer-back { color: var(--agero-orange); }
 .agero-footer .agero-footer-logo-text {
   aspect-ratio: 736 / 414;

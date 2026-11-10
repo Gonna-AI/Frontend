@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Database, Bot, MessageSquare, CheckCircle, Plus, Trash2, Save, Edit2, Check, X } from 'lucide-react';
 import { useTheme } from '../hooks/useTheme';
 import { useLanguage } from '../contexts/LanguageContext';
-import { cn } from '../utils/cn';
+import { cn } from '../lib/utils';
 import api from '../config/api';
 
 interface KnowledgeData {

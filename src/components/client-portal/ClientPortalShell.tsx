@@ -23,7 +23,7 @@ export default function ClientPortalShell({
     const navigate = useNavigate();
 
     return (
-        <div className="min-h-screen overflow-x-hidden bg-[rgb(10,10,10)] font-urbanist text-white selection:bg-[#FF4D00]/30">
+        <div className="min-h-screen overflow-x-hidden bg-[rgb(10,10,10)] font-sans text-white selection:bg-[#FF4D00]/30">
             <div className="pointer-events-none fixed inset-0 z-0 bg-[rgb(10,10,10)]">
                 <div
                     className="absolute right-[-10%] top-[-12%] h-[90%] w-[78%]"

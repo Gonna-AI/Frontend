@@ -1,204 +1,90 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
-import { en } from '../i18n/en';
-import { enDashboardShell } from '../i18n/en/dashboard-shell';
-import { enDashboardDefault } from '../i18n/en/dashboard-default';
-import { enDashboardAnalytics } from '../i18n/en/dashboard-analytics';
-import { enDashboardAnalyticsV1 } from '../i18n/en/dashboard-analytics-v1';
-import { enDashboardCrm } from '../i18n/en/dashboard-crm';
-import { enDashboardFinance } from '../i18n/en/dashboard-finance';
-import { enDashboardEcommerce } from '../i18n/en/dashboard-ecommerce';
-import { enDashboardAcademy } from '../i18n/en/dashboard-academy';
-import { enDashboardLogistics } from '../i18n/en/dashboard-logistics';
-import { enDashboardInfrastructure } from '../i18n/en/dashboard-infrastructure';
-import { enDashboardProductivity } from '../i18n/en/dashboard-productivity';
-import { enDashboardCalendar } from '../i18n/en/dashboard-calendar';
-import { enDashboardKanban } from '../i18n/en/dashboard-kanban';
-import { enDashboardTasks } from '../i18n/en/dashboard-tasks';
-import { enDashboardInvoice } from '../i18n/en/dashboard-invoice';
-import { enDashboardUsers } from '../i18n/en/dashboard-users';
-import { enDashboardRoles } from '../i18n/en/dashboard-roles';
-import { enDashboardMail } from '../i18n/en/dashboard-mail';
-import { enDashboardChat } from '../i18n/en/dashboard-chat';
-import { enMarketingExtra } from '../i18n/en/marketing-extra';
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 
-type Language = 'en' | 'de';
+import {
+  isBundleLoaded,
+  loadBundle,
+  rememberLanguage,
+  resolveInitialLanguage,
+  translate,
+  type Bundle,
+  type Language,
+} from '../i18n';
 
 type LanguageContextType = {
-    language: Language;
-    setLanguage: (lang: Language) => void;
-    t: (key: string) => string;
+  language: Language;
+  setLanguage: (language: Language) => Promise<void>;
+  t: (key: string) => string;
+  /** Makes a bundle available in the active language (and keeps it loaded across language switches). */
+  requireBundle: (bundle: Bundle) => Promise<void>;
 };
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
-// Base translations merged with feature-module translations (e.g. dashboard verticals).
-// New modules should be spread in here rather than edited into en.ts/de.ts directly.
-const mergedEn = {
-    ...en,
-    ...enDashboardShell,
-    ...enDashboardDefault,
-    ...enDashboardAnalytics,
-    ...enDashboardAnalyticsV1,
-    ...enDashboardCrm,
-    ...enDashboardFinance,
-    ...enDashboardEcommerce,
-    ...enDashboardAcademy,
-    ...enDashboardLogistics,
-    ...enDashboardInfrastructure,
-    ...enDashboardProductivity,
-    ...enDashboardCalendar,
-    ...enDashboardKanban,
-    ...enDashboardTasks,
-    ...enDashboardInvoice,
-    ...enDashboardUsers,
-    ...enDashboardRoles,
-    ...enDashboardMail,
-    ...enDashboardChat,
-    ...enMarketingExtra,
-};
+/**
+ * The initial language's strings are loaded by main.tsx before the first
+ * render, so the page never paints in one language and flips to another.
+ */
+export function LanguageProvider({ children }: { children: ReactNode }) {
+  const [language, setLanguageState] = useState<Language>(resolveInitialLanguage);
+  // Bumped whenever new strings arrive, so consumers re-render with them.
+  const [revision, setRevision] = useState(0);
+  const activeBundles = useRef(new Set<Bundle>(['site']));
 
-async function loadMergedDe() {
-    const [
-        { de },
-        { deDashboardShell },
-        { deDashboardDefault },
-        { deDashboardAnalytics },
-        { deDashboardAnalyticsV1 },
-        { deDashboardCrm },
-        { deDashboardFinance },
-        { deDashboardEcommerce },
-        { deDashboardAcademy },
-        { deDashboardLogistics },
-        { deDashboardInfrastructure },
-        { deDashboardProductivity },
-        { deDashboardCalendar },
-        { deDashboardKanban },
-        { deDashboardTasks },
-        { deDashboardInvoice },
-        { deDashboardUsers },
-        { deDashboardRoles },
-        { deDashboardMail },
-        { deDashboardChat },
-        { deMarketingExtra },
-    ] = await Promise.all([
-        import('../i18n/de'),
-        import('../i18n/de/dashboard-shell'),
-        import('../i18n/de/dashboard-default'),
-        import('../i18n/de/dashboard-analytics'),
-        import('../i18n/de/dashboard-analytics-v1'),
-        import('../i18n/de/dashboard-crm'),
-        import('../i18n/de/dashboard-finance'),
-        import('../i18n/de/dashboard-ecommerce'),
-        import('../i18n/de/dashboard-academy'),
-        import('../i18n/de/dashboard-logistics'),
-        import('../i18n/de/dashboard-infrastructure'),
-        import('../i18n/de/dashboard-productivity'),
-        import('../i18n/de/dashboard-calendar'),
-        import('../i18n/de/dashboard-kanban'),
-        import('../i18n/de/dashboard-tasks'),
-        import('../i18n/de/dashboard-invoice'),
-        import('../i18n/de/dashboard-users'),
-        import('../i18n/de/dashboard-roles'),
-        import('../i18n/de/dashboard-mail'),
-        import('../i18n/de/dashboard-chat'),
-        import('../i18n/de/marketing-extra'),
-    ]);
+  useEffect(() => {
+    rememberLanguage(language);
+    // Covers the rare start where the preload in main.tsx failed (offline, blocked chunk).
+    if (!isBundleLoaded('site', language)) {
+      loadBundle('site', language).then(() => setRevision((value) => value + 1)).catch(() => undefined);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-    return {
-        ...de,
-        ...deDashboardShell,
-        ...deDashboardDefault,
-        ...deDashboardAnalytics,
-        ...deDashboardAnalyticsV1,
-        ...deDashboardCrm,
-        ...deDashboardFinance,
-        ...deDashboardEcommerce,
-        ...deDashboardAcademy,
-        ...deDashboardLogistics,
-        ...deDashboardInfrastructure,
-        ...deDashboardProductivity,
-        ...deDashboardCalendar,
-        ...deDashboardKanban,
-        ...deDashboardTasks,
-        ...deDashboardInvoice,
-        ...deDashboardUsers,
-        ...deDashboardRoles,
-        ...deDashboardMail,
-        ...deDashboardChat,
-        ...deMarketingExtra,
-    };
-}
+  const setLanguage = useCallback(async (next: Language) => {
+    try {
+      await Promise.all([...activeBundles.current].map((bundle) => loadBundle(bundle, next)));
+    } catch {
+      return; // Keep the current language rather than show untranslated keys.
+    }
+    rememberLanguage(next);
+    setLanguageState(next);
+    window.dispatchEvent(new CustomEvent('language-change', { detail: next }));
+  }, []);
 
-export function LanguageProvider({ children }: { children: React.ReactNode }) {
-    const [language, setLanguageState] = useState<Language>('en');
-    const [translations, setTranslations] = useState<Record<string, Record<string, string>>>({ en: mergedEn });
+  const requireBundle = useCallback(
+    async (bundle: Bundle) => {
+      activeBundles.current.add(bundle);
+      const wanted = language === 'en' ? [loadBundle(bundle, 'en')] : [loadBundle(bundle, 'en'), loadBundle(bundle, language)];
+      await Promise.all(wanted);
+      setRevision((value) => value + 1);
+    },
+    [language],
+  );
 
-    useEffect(() => {
-        // Check URL params first
-        const params = new URLSearchParams(window.location.search);
-        const urlLang = params.get('lang') as Language;
+  const value = useMemo<LanguageContextType>(
+    () => ({ language, setLanguage, requireBundle, t: (key: string) => translate(language, key) }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [language, revision, setLanguage, requireBundle],
+  );
 
-        const loadLanguage = async (lang: Language) => {
-            if (lang === 'de' && !translations.de) {
-                try {
-                    const merged = await loadMergedDe();
-                    setTranslations(prev => ({ ...prev, de: merged }));
-                } catch (error) {
-                    console.error('Failed to load German translations', error);
-                }
-            }
-            setLanguageState(lang);
-            localStorage.setItem('app-language', lang);
-            document.documentElement.lang = lang;
-        };
-
-        if (urlLang === 'en' || urlLang === 'de') {
-            loadLanguage(urlLang);
-        } else {
-            // Fallback to local storage
-            const savedLang = localStorage.getItem('app-language') as Language;
-            if (savedLang === 'en' || savedLang === 'de') {
-                loadLanguage(savedLang);
-            } else {
-                loadLanguage('de'); // Changed default to German
-            }
-        }
-    }, []);
-
-    const setLanguage = async (lang: Language) => {
-        if (lang === 'de' && !translations.de) {
-            try {
-                const merged = await loadMergedDe();
-                setTranslations(prev => ({ ...prev, de: merged }));
-            } catch (error) {
-                console.error('Failed to load German translations', error);
-                return;
-            }
-        }
-
-        setLanguageState(lang);
-        localStorage.setItem('app-language', lang);
-        document.documentElement.lang = lang;
-        window.dispatchEvent(new CustomEvent('language-change', { detail: lang }));
-    };
-
-    const t = (key: string): string => {
-        const langTrans = translations[language];
-        if (!langTrans) return key; // Fallback if somehow language is set but translations not loaded
-        return langTrans[key] || translations['en'][key] || key;
-    };
-
-    return (
-        <LanguageContext.Provider value={{ language, setLanguage, t }}>
-            {children}
-        </LanguageContext.Provider>
-    );
+  return <LanguageContext.Provider value={value}>{children}</LanguageContext.Provider>;
 }
 
 export function useLanguage() {
-    const context = useContext(LanguageContext);
-    if (context === undefined) {
-        throw new Error('useLanguage must be used within a LanguageProvider');
-    }
-    return context;
+  const context = useContext(LanguageContext);
+  if (context === undefined) {
+    throw new Error('useLanguage must be used within a LanguageProvider');
+  }
+  return context;
+}
+
+/** Renders its children once a translation bundle is ready, e.g. the workspace strings around the dashboard. */
+export function TranslationBundle({ name, fallback = null, children }: { name: Bundle; fallback?: ReactNode; children: ReactNode }) {
+  const { language, requireBundle } = useLanguage();
+  const ready = isBundleLoaded(name, 'en') && isBundleLoaded(name, language);
+
+  useEffect(() => {
+    if (!ready) requireBundle(name).catch(() => undefined);
+  }, [name, ready, requireBundle]);
+
+  return <>{ready ? children : fallback}</>;
 }

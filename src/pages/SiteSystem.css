@@ -21,7 +21,7 @@
 
 /* UI chrome (header, footer, small controls): Geist. Headings stay Cal Sans. */
 :root {
-  --font-ui: "Geist", "Satoshi", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-ui: "Geist", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 .agero-works {

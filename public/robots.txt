@@ -1,27 +1,15 @@
 User-agent: *
 Allow: /
 
-# Disallow crawling of private dashboard and auth routes
-Disallow: /dashboard/
+# Signed-in areas and sign-in flows: nothing to index.
+Disallow: /dashboard
 Disallow: /auth/
-Disallow: /settings/
-Disallow: /profile/
-Disallow: /billing/
-Disallow: /invite/
-Disallow: /chat/
-Disallow: /demo-dashboard/
-Disallow: /ai-settings/
-Disallow: /admin/
-Disallow: /404
-
-# Allow crawling of valid content
-Allow: /blog/
-Allow: /docs/
-Allow: /about/
-Allow: /solutions/
-Allow: /contact/
-Allow: /terms-of-service/
-Allow: /privacy-policy/
-Allow: /cookie-policy/
+Disallow: /login
+Disallow: /invite
+Disallow: /client
+Disallow: /mail
+Disallow: /chat
+Disallow: /ai-settings
+Disallow: /api/
 
 Sitemap: https://clerktree.com/sitemap.xml

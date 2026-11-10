@@ -479,10 +479,10 @@ Deno.serve(async (req: Request) => {
     return jsonResponse({ error: 'Not found' }, 404, cors);
   } catch (err) {
     console.error('customer-insights error:', err);
-    return jsonResponse(
-      { error: err instanceof Error ? err.message : 'Internal server error' },
-      500,
-      { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
-    );
+    // Same origin allowlist as every other response; internals stay in the logs.
+    return jsonResponse({ error: 'Internal server error' }, 500, {
+      'Content-Type': 'application/json',
+      ...getCorsHeaders(req),
+    });
   }
 });

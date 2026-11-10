@@ -1,3 +1,5 @@
-Contact: mailto:team@clerktree.com
-Expires: 2027-01-01T00:00:00.000Z
-Preferred-Languages: en
+Contact: mailto:security@clerktree.com
+Expires: 2027-11-01T00:00:00.000Z
+Preferred-Languages: en, de
+Canonical: https://clerktree.com/.well-known/security.txt
+Policy: https://clerktree.com/security#disclosure

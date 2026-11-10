@@ -4,7 +4,7 @@
 .rs-page {
   --rs-line: rgba(19, 19, 19, 0.12);
   --rs-soft: rgba(19, 19, 19, 0.58);
-  --rs-display: "Cal Sans", "Inter Display", "Inter", system-ui, sans-serif;
+  --rs-display: "Cal Sans", "Cal Sans Placeholder", "Inter", system-ui, sans-serif;
   --rs-text: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   color: var(--agero-ink);
   font-family: var(--rs-text);

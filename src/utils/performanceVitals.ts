@@ -8,7 +8,6 @@ type VitalMetric = {
   id?: string;
   navigationType?: string;
   route: string;
-  url: string;
   ts: number;
 };
 
@@ -48,7 +47,6 @@ function enqueue(name: string, value: number, data: Partial<VitalMetric> = {}) {
     value,
     rating: getRating(name, value),
     route: getRoute(),
-    url: window.location.href,
     ts: Date.now(),
     ...data,
   });

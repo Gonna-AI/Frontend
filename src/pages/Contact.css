@@ -236,6 +236,50 @@
   position: relative;
 }
 
+.clerktree-contact-map-consent {
+  align-items: center;
+  color: #4a4a4a;
+  display: flex;
+  flex-direction: column;
+  font: 400 15px/1.5 "Geist", "Inter", system-ui, sans-serif;
+  gap: 16px;
+  inset: 0;
+  justify-content: center;
+  padding: 32px;
+  position: absolute;
+  text-align: center;
+}
+
+.clerktree-contact-map-consent p {
+  margin: 0;
+  max-width: 34ch;
+}
+
+.clerktree-contact-map-consent > div {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  justify-content: center;
+}
+
+.clerktree-contact-map-consent button {
+  background: #131313;
+  border: 0;
+  border-radius: 999px;
+  color: #fff;
+  cursor: pointer;
+  font: 500 15px/1 "Geist", "Inter", system-ui, sans-serif;
+  min-height: 46px;
+  padding: 0 22px;
+}
+
+.clerktree-contact-map-consent a {
+  color: #131313;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
 .clerktree-contact-map iframe {
   border: 0;
   height: 100%;

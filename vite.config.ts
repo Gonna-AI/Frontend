@@ -1,144 +1,49 @@
-import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react';
-import tailwindcss from '@tailwindcss/vite';
-import viteCompression from 'vite-plugin-compression';
-import { VitePWA } from 'vite-plugin-pwa';
-import Sitemap from 'vite-plugin-sitemap';
-import netlifyPlugin from '@netlify/vite-plugin';
-import path from "path"
-import { blogPosts } from './src/data/blogPosts';
+import path from 'node:path';
 
-// https://vitejs.dev/config/
+import netlifyPlugin from '@netlify/vite-plugin';
+import tailwindcss from '@tailwindcss/vite';
+import react from '@vitejs/plugin-react';
+import { defineConfig } from 'vite';
+import { VitePWA } from 'vite-plugin-pwa';
+
+// https://vite.dev/config/
 export default defineConfig({
   plugins: [
     react(),
     tailwindcss(),
     netlifyPlugin(),
-    viteCompression(),
-    viteCompression({
-      algorithm: 'brotliCompress',
-      ext: '.br',
-    }),
-    VitePWA({
-      registerType: 'autoUpdate',
-      includeAssets: ['favicon.svg', 'robots.txt', 'sitemap.xml'],
-      workbox: {
-        // Remove outdated precached assets when deploying new builds
-        cleanupOutdatedCaches: true,
-        // Activate new SW immediately (don't wait for all tabs to close)
-        skipWaiting: true,
-        clientsClaim: true,
-        // ⚠️ CRITICAL: Do NOT precache build assets — this was causing stale content
-        // Precaching stores the entire app shell at install time, so new deploys
-        // would NOT appear until the SW updated AND the user reloaded twice.
-        globPatterns: [],
-        // Don't precache source maps
-        globIgnores: ['**/node_modules/**', '**/*.map'],
-        // Disable navigateFallback so the SW doesn't serve cached index.html
-        // for navigation requests — let the network handle it
-        navigateFallback: null,
-        // Prevent the service worker from handling auth callback routes
-        navigateFallbackDenylist: [/^\/auth\//, /^\/api\//],
-        runtimeCaching: [
-          {
-            // HTML pages: always fetch from network first, fall back to cache only if offline
-            urlPattern: ({ request }) => request.mode === 'navigate',
-            handler: 'NetworkFirst',
-            options: {
-              cacheName: 'pages',
-              expiration: {
-                maxEntries: 50,
-                maxAgeSeconds: 60 * 60, // 1 hour
-              },
-              networkTimeoutSeconds: 5,
-            },
-          },
-          {
-            // Hashed JS and CSS assets are immutable. Cache-first avoids repeat
-            // network trips while new deploys still work because filenames change.
-            urlPattern: /\.(?:js|css)$/,
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'static-assets',
-              expiration: {
-                maxEntries: 200,
-                maxAgeSeconds: 60 * 60 * 24 * 365, // 1 year
-              },
-            },
-          },
-          {
-            // Images: cache-first is fine since they rarely change
-            urlPattern: /\.(?:avif|png|jpg|jpeg|svg|gif|webp|ico)$/,
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'images',
-              expiration: {
-                maxEntries: 100,
-                maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
-              },
-            },
-          },
-          {
-            // Fonts: cache-first since they basically never change
-            urlPattern: /\.(?:woff|woff2|ttf|eot|otf)$/,
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'fonts',
-              expiration: {
-                maxEntries: 30,
-                maxAgeSeconds: 60 * 60 * 24 * 365, // 1 year
-              },
-            },
-          },
-        ],
-      },
-      manifest: {
-        name: 'ClerkTree',
-        short_name: 'ClerkTree',
-        description: 'Industrial AI for machine operations',
-        theme_color: '#0a0a0a',
-        background_color: '#0a0a0a',
-        icons: [
-          { src: '/icon-192.png', sizes: '192x192', type: 'image/png' },
-          { src: '/icon-512.png', sizes: '512x512', type: 'image/png' },
-          { src: '/icon-maskable-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
-        ],
-      },
-    }),
-    Sitemap({
-      hostname: 'https://clerktree.com',
-      dynamicRoutes: [
-        '/about',
-        '/brand',
-        '/careers',
-        '/hive',
-        '/blog',
-        '/contact',
-        '/security',
-        ...blogPosts.map((post) => `/blog/${post.slug}`),
-      ],
-    }),
+    // The site no longer runs a service worker: hashed assets are cached by the
+    // CDN and the browser, and a worker only added stale-content risk. This
+    // ships a self-destroying worker so browsers that installed the old one
+    // unregister it and drop its caches. Remove the plugin a few months after
+    // this release, once returning visitors have picked it up.
+    VitePWA({ selfDestroying: true, manifest: false }),
   ],
   resolve: {
     dedupe: ['react', 'react-dom', 'framer-motion'],
     alias: {
-      "@": path.resolve(process.cwd(), "src"),
-      "react": path.resolve("./node_modules/react"),
-      "react-dom": path.resolve("./node_modules/react-dom"),
+      '@': path.resolve(process.cwd(), 'src'),
     },
   },
   optimizeDeps: {
     exclude: ['lucide-react', 'lucide-react-dash'],
   },
   server: {
-    host: '0.0.0.0', // Expose on local network
+    host: '0.0.0.0', // reachable from other devices on the local network
     port: 5173,
   },
   build: {
-    modulePreload: false,
+    // Preload each route's own chunks in parallel instead of discovering them
+    // one import at a time; the polyfill is only needed by browsers we do not target.
+    modulePreload: { polyfill: false },
     cssCodeSplit: true,
-    chunkSizeWarningLimit: 200, // Warn if any chunk exceeds 200KB
+    chunkSizeWarningLimit: 200,
     rollupOptions: {
+      onwarn(warning, warn) {
+        // "use no memo" is a React Compiler hint in the dashboard tables; bundling ignores it by design.
+        if (warning.code === 'MODULE_LEVEL_DIRECTIVE') return;
+        warn(warning);
+      },
       output: {
         manualChunks(id) {
           if (!id.includes('/node_modules/')) return undefined;
@@ -148,7 +53,6 @@ export default defineConfig({
           if (id.includes('/@tanstack/react-query/')) return 'query-vendor';
           if (id.includes('/@tanstack/react-table/')) return 'table-vendor';
           if (id.includes('/@supabase/')) return 'supabase';
-          if (id.includes('/@amplitude/')) return 'analytics-vendor';
           if (id.includes('/framer-motion/') || id.includes('/motion-dom/') || id.includes('/motion-utils/')) return 'animation-vendor';
           if (id.includes('/recharts/') || id.includes('/d3-') || id.includes('/victory-vendor/')) return 'chart-vendor';
           if (id.includes('/lucide-react') || id.includes('/simple-icons/')) return 'icon-vendor';
@@ -163,8 +67,8 @@ export default defineConfig({
     },
   },
   esbuild: {
-    // Strip console.log and debugger from production builds
-    // Keeps console.warn and console.error for monitoring
-    drop: process.env.NODE_ENV === 'production' ? ['console', 'debugger'] : [],
+    // Production builds drop debug logging but keep console.warn/error for monitoring.
+    drop: process.env.NODE_ENV === 'production' ? ['debugger'] : [],
+    pure: process.env.NODE_ENV === 'production' ? ['console.log', 'console.debug', 'console.info'] : [],
   },
 });

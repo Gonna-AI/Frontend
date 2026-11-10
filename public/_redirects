@@ -1,8 +1,0 @@
-# Static files should be passed through
-/sitemap.xml /sitemap.xml 200
-/robots.txt /robots.txt 200
-
-/reddit-industrial-ai https://clerktree.com 301!
-
-# SPA Catch-all
-/* /index.html 200

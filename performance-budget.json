@@ -1,11 +1,12 @@
 {
-  "entryJsGzipKb": 70,
-  "entryCssGzipKb": 70,
+  "entryJsGzipKb": 30,
+  "entryCssGzipKb": 45,
   "largestJsGzipKb": 150,
   "largestCssGzipKb": 60,
-  "totalJsGzipKb": 1110,
-  "totalCssGzipKb": 139,
+  "totalJsGzipKb": 1060,
+  "totalCssGzipKb": 136,
   "thirdPartyJsPatterns": [
-    "assets/analytics-vendor-"
+    "assets/amplitudeSdk-",
+    "assets/rrweb-"
   ]
 }

@@ -8,7 +8,9 @@ import { shouldPlayFirstVisitIntro } from '../Brand/logoPortal';
 import { cancelIdle, runWhenIdle } from '../../utils/idle';
 import Grainient from '../Brand/Grainient';
 import FooterAscii from './FooterAscii';
+import { COMPANY } from '../../config/company';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { openConsentSettings } from '../../lib/consent';
 import '../../pages/LandingFramer.css';
 import '../../pages/SiteSystem.css';
 import './FooterDesign.css';
@@ -66,31 +68,46 @@ type FooterLink = {
   external?: boolean;
 };
 
-const footerCompanyLinks: FooterLink[] = [
-  { label: 'About Us', href: '/about' },
-  { label: 'Research', href: RESEARCH_URL },
-  { label: 'Blog', href: '/blog' },
-  { label: 'Careers', href: '/careers' },
-  { label: 'Brand', href: '/brand' },
-];
-
-const footerProductLinks: FooterLink[] = [
-  { label: 'Hive', href: '/hive' },
-  { label: 'Security', href: '/security' },
-  { label: 'Contact', href: '/contact' },
-];
-
-const footerSocialLinks: FooterLink[] = [
-  { label: 'LinkedIn', href: 'https://www.linkedin.com/company/clerktree', external: true },
-  { label: 'X', href: 'https://x.com/teamclerktree', external: true },
-  { label: 'Email', href: 'mailto:team@clerktree.com' },
-];
-
-const footerLegalLinks: FooterLink[] = [
-  { label: 'Terms', href: '/terms-of-service' },
-  { label: 'Privacy Policy', href: '/privacy-policy' },
-  { label: 'Cookie Policy', href: '/cookie-policy' },
-];
+function buildFooter(de: boolean) {
+  return {
+    company: {
+      title: de ? 'Unternehmen' : 'Company',
+      links: [
+        { label: de ? 'Über uns' : 'About Us', href: '/about' },
+        { label: de ? 'Forschung' : 'Research', href: RESEARCH_URL },
+        { label: 'Blog', href: '/blog' },
+        { label: de ? 'Karriere' : 'Careers', href: '/careers' },
+        { label: 'Brand', href: '/brand' },
+      ] satisfies FooterLink[],
+    },
+    product: {
+      title: de ? 'Produkt' : 'Product',
+      links: [
+        { label: 'Hive', href: '/hive' },
+        { label: de ? 'Sicherheit' : 'Security', href: '/security' },
+        { label: de ? 'Kontakt' : 'Contact', href: '/contact' },
+      ] satisfies FooterLink[],
+    },
+    social: {
+      title: de ? 'Soziale Medien' : 'Socials',
+      links: [
+        { label: 'LinkedIn', href: 'https://www.linkedin.com/company/clerktree', external: true },
+        { label: 'X', href: 'https://x.com/teamclerktree', external: true },
+        { label: de ? 'E-Mail' : 'Email', href: `mailto:${COMPANY.email}` },
+      ] satisfies FooterLink[],
+    },
+    legal: [
+      { label: de ? 'Impressum' : 'Imprint', href: '/imprint' },
+      { label: de ? 'Datenschutz' : 'Privacy', href: '/privacy-policy' },
+      { label: de ? 'Nutzungsbedingungen' : 'Terms', href: '/terms-of-service' },
+      { label: 'Cookies', href: '/cookie-policy' },
+    ] satisfies FooterLink[],
+    cookieSettings: de ? 'Cookie-Einstellungen' : 'Cookie settings',
+    rights: de ? 'Alle Rechte vorbehalten.' : 'All rights reserved.',
+    backToTop: de ? 'Nach oben' : 'Back to top',
+    munich: de ? 'München' : 'Munich',
+  };
+}
 
 function formatMunichTime() {
   return new Intl.DateTimeFormat('en-GB', {
@@ -483,6 +500,7 @@ function FooterColumn({ title, links, social = false }: { title: string; links: 
 
 export function Footer() {
   const { language } = useLanguage();
+  const footer = buildFooter(language === 'de');
   const footerRef = useRef<HTMLElement>(null);
   const [isFooterNearViewport, setIsFooterNearViewport] = useState(false);
   const munichTime = useMunichTime(isFooterNearViewport);
@@ -514,7 +532,7 @@ export function Footer() {
         )}
         <div className="agero-footer-main">
           <div className="agero-footer-cta">
-            <a className="agero-footer-brand" href="/" aria-label="ClerkTree home"><ClerkTreeLockup title={null} /></a>
+            <a className="agero-footer-brand" href="/" aria-label={language === 'de' ? 'ClerkTree Startseite' : 'ClerkTree home'}><ClerkTreeLockup title={null} /></a>
             <p>
               {language === 'de' ? <>KI-Harness für<br />Industriemaschinen.</> : <>Industrial AI harness<br />for machinery.</>}
             </p>
@@ -525,29 +543,31 @@ export function Footer() {
           </div>
 
           <div className="agero-footer-columns">
-            <FooterColumn title="Company" links={footerCompanyLinks} />
-            <FooterColumn title="Product" links={footerProductLinks} />
-            <FooterColumn title="Socials" links={footerSocialLinks} social />
+            <FooterColumn title={footer.company.title} links={footer.company.links} />
+            <FooterColumn title={footer.product.title} links={footer.product.links} />
+            <FooterColumn title={footer.social.title} links={footer.social.links} social />
           </div>
         </div>
 
         <div className="agero-footer-bottom">
           <div className="agero-footer-copyright">
-            <p>© 2026 ClerkTree. All rights reserved.</p>
-            <img alt="GDPR Compliant" decoding="async" loading="lazy" src="/gdpr-compliant.webp" />
+            <p>© {new Date().getFullYear()} ClerkTree. {footer.rights}</p>
           </div>
-          <div className="agero-footer-time" aria-label={`Munich time ${munichTime}`}>
-            <span>Munich →</span>
-            <time dateTime={munichTime}>{munichTime}</time>
+          <div className="agero-footer-time" aria-label={`${footer.munich} ${munichTime}`}>
+            <span>{footer.munich} →</span>
+            <time>{munichTime}</time>
           </div>
           <div className="agero-footer-bottom-right">
-            {footerLegalLinks.map((link) => (
+            {footer.legal.map((link) => (
               <a href={link.href} key={link.href}>
                 {link.label}
               </a>
             ))}
+            <button className="agero-footer-link-button" onClick={openConsentSettings} type="button">
+              {footer.cookieSettings}
+            </button>
             <a className="agero-footer-back" href="#agero-works">
-              Back to top
+              {footer.backToTop}
             </a>
           </div>
         </div>

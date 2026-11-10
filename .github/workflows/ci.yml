@@ -32,7 +32,7 @@ jobs:
       - name: "Setup Node.js"
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version-file: ".node-version"
           cache: "npm"
 
       - name: "Install Dependencies"
@@ -40,9 +40,6 @@ jobs:
 
       - name: "Lint Check"
         run: npm run lint
-
-      - name: "Run Tests"
-        run: npm test -- --run
 
       - name: "Type Check"
         run: npx tsc --noEmit

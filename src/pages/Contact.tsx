@@ -1,10 +1,13 @@
 import type { ChangeEvent, FormEvent } from 'react';
 import { useState } from 'react';
-import { ArrowUpRight, CheckCircle2, Linkedin } from 'lucide-react';
+import { ArrowUpRight, CheckCircle2, Linkedin, MapPin } from 'lucide-react';
 import { siX } from 'simple-icons';
 import { SimpleIcon } from '../dashboard/components/simple-icon';
 
+import { COMPANY } from '../config/company';
 import { useLanguage } from '../contexts/LanguageContext';
+import { useConsent } from '../hooks/useConsent';
+import { grantConsent } from '../lib/consent';
 import { PageHero, Footer } from '../components/Landing/AgeroChrome';
 import SEO from '../components/SEO';
 import './LandingFramer.css';
@@ -40,6 +43,7 @@ export default function Contact() {
   const [formData, setFormData] = useState<ContactFormData>(emptyForm);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<SubmitStatus>('idle');
+  const mapAllowed = useConsent('externalMedia');
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -55,17 +59,14 @@ export default function Contact() {
         },
       );
 
-      const result = await response.json();
-      if (!response.ok) throw new Error(result.error || 'Submission failed');
+      if (!response.ok) throw new Error(`Contact form rejected: ${response.status}`);
 
       setSubmitStatus('success');
       setFormData(emptyForm);
-    } catch (error) {
-      console.error('Submission error:', error);
+    } catch {
       setSubmitStatus('error');
     } finally {
       setIsSubmitting(false);
-      window.setTimeout(() => setSubmitStatus('idle'), 5000);
     }
   };
 
@@ -194,8 +195,7 @@ export default function Contact() {
                 </button>
 
                 <p className="clerktree-contact-legal">
-                  {t('contact.legalPrefix')}{' '}
-                  <a href="/terms-of-service">{t('footer.terms')}</a>,{' '}
+                  {t('contact.legalNotice')}{' '}
                   <a href="/privacy-policy">{t('footer.privacy')}</a>.
                 </p>
               </form>
@@ -209,19 +209,31 @@ export default function Contact() {
 
           <div className="clerktree-contact-location-grid">
             <div className="clerktree-contact-map">
-              <iframe
-                allowFullScreen
-                loading="lazy"
-                referrerPolicy="strict-origin-when-cross-origin"
-                src={MAP_EMBED_URL}
-                title="ClerkTree office map"
-              />
+              {mapAllowed ? (
+                <iframe
+                  allowFullScreen
+                  loading="lazy"
+                  referrerPolicy="strict-origin-when-cross-origin"
+                  src={MAP_EMBED_URL}
+                  title={t('contact.mapTitle')}
+                />
+              ) : (
+                // Google only hears about the visitor once they ask for the map.
+                <div className="clerktree-contact-map-consent">
+                  <MapPin aria-hidden="true" size={28} strokeWidth={1.6} />
+                  <p>{t('contact.mapNotice')}</p>
+                  <div>
+                    <button type="button" onClick={() => grantConsent('externalMedia')}>{t('contact.mapLoad')}</button>
+                    <a href={MAP_URL} rel="noopener noreferrer" target="_blank">{t('contact.mapOpen')}</a>
+                  </div>
+                </div>
+              )}
             </div>
 
             <aside className="clerktree-contact-info-card">
               <ContactInfoItem label={t('contact.location')} value="Industriestrasse 2, 94315 Straubing" href={MAP_URL} />
-              <ContactInfoItem label={t('contact.email')} value="team@clerktree.com" href="mailto:team@clerktree.com" />
-              <ContactInfoItem label={t('contact.phone')} value="+49 176 83075116" href="tel:+4917683075116" />
+              <ContactInfoItem label={t('contact.email')} value={COMPANY.email} href={`mailto:${COMPANY.email}`} />
+              <ContactInfoItem label={t('contact.phone')} value={COMPANY.phone} href={COMPANY.phoneHref} />
 
               <div className="clerktree-contact-socials" aria-label="Social links">
                 <a href="https://www.linkedin.com/company/clerktree" rel="noopener noreferrer" target="_blank" aria-label="LinkedIn">

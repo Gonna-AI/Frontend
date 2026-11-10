@@ -5,7 +5,7 @@
   --brand-line-dark: rgba(255, 255, 255, 0.12);
   --brand-text-light: rgba(19, 19, 19, 0.62);
   --brand-text-dark: rgba(255, 255, 255, 0.62);
-  --brand-display: "Cal Sans", "Inter Display", "Inter", system-ui, sans-serif;
+  --brand-display: "Cal Sans", "Cal Sans Placeholder", "Inter", system-ui, sans-serif;
   --brand-text: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
