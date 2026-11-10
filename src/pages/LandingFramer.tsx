@@ -37,7 +37,6 @@ const plans = [
 
 const faqKeys = ['q1', 'q2', 'q3', 'q4', 'q5', 'q6'] as const;
 
-const flowerIcon = '/favicon.svg';
 
 export default function LandingFramer() {
   useAgeroPageMotion();
@@ -547,7 +546,6 @@ function Contact() {
         <div className="agero-mail-ticker" aria-hidden="true">
           {Array.from({ length: 12 }).map((_, index) => (
             <a className="agero-mail-card" href="mailto:team@clerktree.com" key={index} tabIndex={-1}>
-              <img alt="" decoding="async" loading="lazy" src={flowerIcon} />
               <span>
                 team<b>@</b>clerktree.com
               </span>

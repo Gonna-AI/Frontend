@@ -1250,7 +1250,7 @@ a:hover > .ct-roll > .ct-roll-inner { transform: translateY(-50%); }
   z-index: 2;
   display: flex;
   flex: none;
-  gap: 32px;
+  gap: 0;
   height: 40px;
   margin: 0 auto;
   padding: 0;
@@ -1266,16 +1266,10 @@ a:hover > .ct-roll > .ct-roll-inner { transform: translateY(-50%); }
   display: inline-flex;
   flex: 0 0 auto;
   font-family: "Cal Sans", "Inter", system-ui, sans-serif !important;
-  gap: 32px;
   height: 40px;
+  /* The gap lives in the card, so half the track is exactly half the loop. */
+  padding-right: 96px;
   text-decoration: none;
-  width: 343px;
-}
-
-.agero-mail-card img {
-  flex: 0 0 auto;
-  height: 16px;
-  width: 16px;
 }
 
 .agero-mail-card span {
