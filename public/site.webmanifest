@@ -25,7 +25,7 @@
       "type": "image/svg+xml"
     }
   ],
-  "theme_color": "#0a0a0a",
+  "theme_color": "#ff4d00",
   "background_color": "#0a0a0a",
   "display": "standalone",
   "start_url": "/"
