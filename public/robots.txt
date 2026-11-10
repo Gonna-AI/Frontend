@@ -1,6 +1,8 @@
+# ClerkTree welcomes search engines and AI assistants on all public pages.
+# A plain-language map of the site for language models: /llms.txt
+
 User-agent: *
 Allow: /
-
 # Signed-in areas and sign-in flows: nothing to index.
 Disallow: /dashboard
 Disallow: /auth/
@@ -10,6 +12,29 @@ Disallow: /client
 Disallow: /mail
 Disallow: /chat
 Disallow: /ai-settings
+Disallow: /api/
+
+# AI search and answer engines, named explicitly so that no default blocks them.
+User-agent: GPTBot
+User-agent: OAI-SearchBot
+User-agent: ChatGPT-User
+User-agent: ClaudeBot
+User-agent: Claude-SearchBot
+User-agent: Claude-User
+User-agent: PerplexityBot
+User-agent: Perplexity-User
+User-agent: Google-Extended
+User-agent: Applebot-Extended
+User-agent: Amazonbot
+User-agent: meta-externalagent
+User-agent: DuckAssistBot
+User-agent: MistralAI-User
+User-agent: CCBot
+Allow: /
+Disallow: /dashboard
+Disallow: /auth/
+Disallow: /login
+Disallow: /client
 Disallow: /api/
 
 Sitemap: https://clerktree.com/sitemap.xml

@@ -74,15 +74,6 @@ export default function BlogPost() {
         description={post.description}
         canonical={`https://clerktree.com/blog/${post.slug}`}
         openGraph={{ type: 'article' }}
-        structuredData={{
-          '@context': 'https://schema.org',
-          '@type': 'Article',
-          headline: post.title,
-          description: post.description,
-          datePublished: post.date,
-          author: authors.map((a) => ({ '@type': 'Person', name: a.name, jobTitle: a.role, url: a.linkedin ?? 'https://clerktree.com/about' })),
-          publisher: { '@type': 'Organization', name: 'ClerkTree', url: 'https://clerktree.com' },
-        }}
       />
       <div className="agero-top-area jr-top">
         <Header />

@@ -10,7 +10,7 @@ export const en = {
     'footer.privacy': 'Privacy Policy',
 
     // About Page
-    'about.seoTitle': 'About Us',
+    'about.seoTitle': 'About ClerkTree: team and mission',
     'about.seoDesc': "Learn about ClerkTree's mission to help industrial teams run machine operations with intelligent automation, clear workflows, and human-centered AI.",
     'about.heroLead': 'We build operations with clarity, speed, and',
     'about.heroEmphasis': 'care.',

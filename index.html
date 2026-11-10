@@ -61,99 +61,12 @@
   <link rel="preload" href="/fonts/cal-sans-latin.woff2" as="font" type="font/woff2" crossorigin />
   <link rel="preload" href="/fonts/geist-latin.woff2" as="font" type="font/woff2" crossorigin />
 
-  <!-- Structured Data for Google -->
-  <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "Organization",
-      "name": "ClerkTree",
-      "url": "https://clerktree.com",
-      "logo": "https://clerktree.com/icon-512.png",
-      "description": "Industrial AI for machine operations: predictive maintenance, machine signal intelligence and AI agents for documentation, RFQs and maintenance work orders.",
-      "address": {
-        "@type": "PostalAddress",
-        "streetAddress": "Industriestraße 2",
-        "addressLocality": "Straubing",
-        "postalCode": "94315",
-        "addressCountry": "DE"
-      },
-      "founder": {
-        "@type": "Person",
-        "name": "Animesh Mishra",
-        "jobTitle": "Founder",
-        "sameAs": [
-          "https://www.linkedin.com/in/animeshmishra0",
-          "https://github.com/amethystani"
-        ]
-      },
-      "employee": [
-        {
-          "@type": "Person",
-          "name": "Shobhit Mishra",
-          "jobTitle": "CEO",
-          "sameAs": "https://www.linkedin.com/in/shobhit-mishra-8716961bb/"
-        },
-        {
-          "@type": "Person",
-          "name": "Kenshin Kiriyama",
-          "jobTitle": "COO",
-          "sameAs": "https://www.linkedin.com/in/kenshin-kiriyama-2b2031357/"
-        },
-        {
-          "@type": "Person",
-          "name": "Krishang Sharma",
-          "jobTitle": "AI Solutions Engineer",
-          "sameAs": "https://www.linkedin.com/in/krishangsharma118/"
-        },
-        {
-          "@type": "Person",
-          "name": "Urja Shrestha",
-          "jobTitle": "Customer Success Manager",
-          "sameAs": "https://www.linkedin.com/in/urja-shrestha-a4ba5324a/"
-        },
-        {
-          "@type": "Person",
-          "name": "Sinem Koc",
-          "jobTitle": "Legal Analyst",
-          "sameAs": "https://www.linkedin.com/in/sinem-koc-450174337"
-        }
-      ],
-      "sameAs": [
-        "https://www.linkedin.com/company/clerktree",
-        "https://x.com/teamclerktree",
-        "https://huggingface.co/clerktree",
-        "https://github.com/Clerktree",
-        "https://wellfound.com/company/clerktree-1"
-      ],
-      "contactPoint": {
-        "@type": "ContactPoint",
-        "contactType": "customer support",
-        "url": "https://clerktree.com/contact"
-      }
-    }
-    </script>
-  <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "WebSite",
-      "name": "ClerkTree",
-      "url": "https://clerktree.com/"
-    }
-    </script>
-  <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "FAQPage",
-      "mainEntity": [
-        {"@type": "Question", "name": "How does ClerkTree integrate with our existing MES/SCADA systems?", "acceptedAnswer": {"@type": "Answer", "text": "ClerkTree connects directly to your existing historians, PLC controllers, and MES systems via industry standard protocols like OPC-UA, Modbus, and custom APIs, with zero rip-and-replace."}},
-        {"@type": "Question", "name": "Can your AI models be deployed on the factory edge?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. ClerkTree supports deployment of lightweight, high-frequency models directly on edge hardware next to your machines for ultra-low latency diagnostics and air-gapped security."}},
-        {"@type": "Question", "name": "How is ClerkTree priced?", "acceptedAnswer": {"@type": "Answer", "text": "We offer flexible pricing based on your connected assets, data ingestion volume, and features. Contact our engineering team for a customized quote that fits your operations."}},
-        {"@type": "Question", "name": "How long does implementation take?", "acceptedAnswer": {"@type": "Answer", "text": "A standard deployment takes 2 to 4 weeks depending on your data pipelines. We provide dedicated industrial engineering support to map your signals and validate the models."}},
-        {"@type": "Question", "name": "Do you support physics-informed AI models?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. For mechanical assets, we combine neural networks with first-principles physical models of wear and thermodynamic stress to increase predictive accuracy and eliminate false alarms."}},
-        {"@type": "Question", "name": "Is our operational data kept private and secure?", "acceptedAnswer": {"@type": "Answer", "text": "Absolutely. We support fully isolated, on-premise, virtual private cloud, or air-gapped deployments. Your proprietary machinery and process data never leaves your secure network."}}
-      ]
-    }
-    </script>
+  <link rel="alternate" type="application/rss+xml" title="ClerkTree Journal" href="/feed.xml" />
+
+  <!-- Who ClerkTree is, for search engines and AI assistants. Page-specific structured
+       data (FAQ, articles, breadcrumbs) is added per route by scripts/prerender-routes.mjs. -->
+  <script type="application/ld+json">{"@context": "https://schema.org", "@type": "Organization", "@id": "https://clerktree.com/#organization", "name": "ClerkTree", "alternateName": ["Clerk Tree", "Clerktree", "ClerkTree AI"], "url": "https://clerktree.com/", "logo": {"@type": "ImageObject", "url": "https://clerktree.com/icon-512.png", "width": 512, "height": 512}, "image": "https://clerktree.com/og/home.png", "slogan": "The world's industrial intelligence layer", "description": "ClerkTree is an industrial AI harness for machine operations. Agents connect machine signals, technical knowledge and workflows, helping teams understand issues and coordinate work.", "email": "team@clerktree.com", "telephone": "+4917683075116", "address": {"@type": "PostalAddress", "streetAddress": "Industriestraße 2", "addressLocality": "Straubing", "addressRegion": "Bavaria", "postalCode": "94315", "addressCountry": "DE"}, "areaServed": "Europe", "knowsAbout": ["Industrial AI", "Predictive maintenance", "Machine signal intelligence", "AI agents for maintenance", "Knowledge graphs for manufacturing", "Condition monitoring"], "founder": {"@type": "Person", "name": "Animesh Mishra", "jobTitle": "Founder", "sameAs": ["https://www.linkedin.com/in/animeshmishra0", "https://github.com/amethystani"]}, "employee": [{"@type": "Person", "name": "Shobhit Mishra", "jobTitle": "CEO", "sameAs": "https://www.linkedin.com/in/shobhit-mishra-8716961bb/"}, {"@type": "Person", "name": "Kenshin Kiriyama", "jobTitle": "COO", "sameAs": "https://www.linkedin.com/in/kenshin-kiriyama-2b2031357/"}, {"@type": "Person", "name": "Krishang Sharma", "jobTitle": "AI Solutions Engineer", "sameAs": "https://www.linkedin.com/in/krishangsharma118/"}], "sameAs": ["https://www.linkedin.com/company/clerktree", "https://x.com/teamclerktree", "https://github.com/Clerktree", "https://huggingface.co/clerktree", "https://wellfound.com/company/clerktree-1", "https://research.clerktree.com"], "contactPoint": {"@type": "ContactPoint", "contactType": "sales", "email": "team@clerktree.com", "telephone": "+4917683075116", "url": "https://clerktree.com/contact", "availableLanguage": ["German", "English"]}}</script>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebSite", "@id": "https://clerktree.com/#website", "name": "ClerkTree", "alternateName": ["Clerk Tree", "clerktree.com"], "url": "https://clerktree.com/", "inLanguage": ["de", "en"], "publisher": {"@id": "https://clerktree.com/#organization"}}</script>
 </head>
 
 <body>

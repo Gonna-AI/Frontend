@@ -78,7 +78,7 @@ export default function Contact() {
   return (
     <div className="agero-works" id="agero-works">
       <SEO
-        title="Contact Us"
+        title="Contact ClerkTree"
         description="Talk to the ClerkTree team about industrial AI for your machines: predictive maintenance, signal intelligence and AI agents for documentation, RFQs and work orders."
         canonical="https://clerktree.com/contact"
       />

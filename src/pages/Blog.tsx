@@ -39,7 +39,7 @@ export default function Blog() {
   return (
     <div className="agero-works jr-page">
       <SEO
-        title="Blog"
+        title="ClerkTree Journal: field notes on industrial AI"
         description="Field notes from ClerkTree on industrial AI, predictive maintenance and agents for machine operations."
         canonical="https://clerktree.com/blog"
       />

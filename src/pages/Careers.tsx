@@ -19,7 +19,7 @@ export default function Careers() {
 
   return (
     <div className="agero-works" id="agero-works">
-      <SEO title="Careers" description={c.seo} canonical="https://clerktree.com/careers" />
+      <SEO title="Careers at ClerkTree" description={c.seo} canonical="https://clerktree.com/careers" />
       <PageHero
         title={<>{t('careers.title1')} <span className="agero-orange">{t('careers.title2')}</span></>}
         description={c.line}

@@ -40,7 +40,7 @@ export default function SEO({ title, description, canonical, openGraph, structur
       <title>{fullTitle}</title>
       <meta name="description" content={description} />
       <link rel="canonical" href={currentUrl} />
-      {noindex && <meta name="robots" content="noindex, follow" />}
+      <meta name="robots" content={noindex ? 'noindex, follow' : 'index, follow, max-image-preview:large, max-snippet:-1'} />
 
       <meta property="og:type" content={openGraph?.type || 'website'} />
       <meta property="og:url" content={currentUrl} />
