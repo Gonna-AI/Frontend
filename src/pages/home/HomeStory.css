@@ -718,7 +718,7 @@
 .agero-works .cs-section { box-sizing: border-box; margin: 0 auto; max-width: 1360px; padding: clamp(72px, 9vw, 120px) clamp(16px, 4vw, 48px) clamp(56px, 6vw, 96px); }
 .agero-works .cs-heading { color: var(--agero-ink); margin-bottom: 44px; }
 .agero-works .cs-heading h2 { font-family: "Cal Sans", "Cal Sans Placeholder", sans-serif !important; font-size: clamp(38px, 4.8vw, 70px); font-weight: 400; letter-spacing: -.01em; line-height: 1.04; margin: 0; }
-.agero-works .cs-heading h2 > span { color: #8e9295; }
+.agero-works .cs-heading h2 > span { color: var(--agero-orange); }
 .agero-works .cs-heading > div { align-items: end; display: flex; gap: 32px; justify-content: space-between; margin-top: 24px; }
 .agero-works .cs-heading p { color: var(--agero-muted); font-size: 15px; line-height: 1.6; margin: 0; max-width: 580px; }
 .agero-works .cs-grid { display: grid; gap: 14px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
