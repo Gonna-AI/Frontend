@@ -35,7 +35,8 @@
   color: #fff;
   display: flex;
   flex-direction: column;
-  padding: 0 24px;
+  /* The hero sizes to its content, so the bottom padding reserves the room the "Assets" cue sits in. */
+  padding: clamp(48px, 6vw, 80px) 24px clamp(96px, 9vw, 120px);
   position: relative;
   text-align: center;
   z-index: 1;

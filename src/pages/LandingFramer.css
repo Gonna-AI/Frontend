@@ -68,9 +68,17 @@ html.lenis.lenis-stopped {
 
 .agero-works [data-agero-reveal].is-visible,
 .agero-works [data-agero-visible='true'] {
-  filter: blur(0);
+  /* "none", not blur(0): a filter keeps the element in its own layer, and Safari
+     clips anything past the line box (descenders of g, y, p in large headings). */
+  filter: none;
   opacity: 1;
   transform: translate3d(0, 0, 0) scale(1);
+  will-change: auto;
+}
+
+/* Room for descenders in tight-leading display headings. */
+.agero-works h2[data-agero-reveal] {
+  padding-bottom: 0.12em;
 }
 
 .agero-split {
