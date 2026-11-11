@@ -128,43 +128,37 @@ function getProject(slug?: string) {
   return researchProjects.find((project) => project.slug === slug);
 }
 
+const RESEARCH_ORIGIN = 'https://research.clerktree.com';
+
 function getResearchCanonical(slug?: string) {
-  if (typeof window === 'undefined') return slug ? `https://research.clerktree.com/${slug}` : 'https://research.clerktree.com';
-  const { hostname, origin } = window.location;
-  if (hostname === 'research.clerktree.com') return slug ? `${origin}/${slug}` : origin;
-  return slug ? `${origin}/research/${slug}` : `${origin}/research`;
+  return slug ? `${RESEARCH_ORIGIN}/${slug}` : RESEARCH_ORIGIN;
 }
 
-function projectPath(slug: string, isResearchHost: boolean) {
-  return isResearchHost ? `/${slug}` : `/research/${slug}`;
-}
-
-function ResearchShell({ children, hero, isResearchHost }: { children: ReactNode; hero: ReactNode; isResearchHost: boolean }) {
+function ResearchShell({ children, hero }: { children: ReactNode; hero: ReactNode }) {
   return (
     <div id="ct-works" className="ct-works rs-page">
       <div className="ct-top-area ct-top-area-with-hero">
-        <Header linkBase={isResearchHost ? 'https://clerktree.com' : ''} />
+        <Header linkBase="https://clerktree.com" />
         {hero}
       </div>
       <main>{children}</main>
-      <Footer linkBase={isResearchHost ? 'https://clerktree.com' : ''} />
+      <Footer linkBase="https://clerktree.com" />
     </div>
   );
 }
 
-function ResearchLanding({ isResearchHost }: { isResearchHost: boolean }) {
+function ResearchLanding() {
   const navigate = useNavigate();
   const { language } = useLanguage();
   const featured = researchProjects[0];
   const archive = researchProjects.slice(1);
   const copy = language === 'de';
-  const open = (slug: string) => navigate(projectPath(slug, isResearchHost));
+  const open = (slug: string) => navigate(`/${slug}`);
 
   return (
     <>
       <SEO title={copy ? 'Forschung' : 'Research'} description={copy ? 'Abgeschlossene Forschungsarbeit von ClerkTree zu Agentensystemen, Operations Intelligence und souveräner KI.' : 'Completed ClerkTree research across agent systems, operations intelligence, and sovereign AI.'} canonical={getResearchCanonical()} />
       <ResearchShell
-        isResearchHost={isResearchHost}
         hero={
           <section className="ct-hero-stage rs-hero" aria-labelledby="research-title">
             <Grainient preset="silver" />
@@ -254,7 +248,7 @@ function ResearchLanding({ isResearchHost }: { isResearchHost: boolean }) {
   );
 }
 
-function ResearchDetail({ project, isResearchHost }: { project: ResearchProject; isResearchHost: boolean }) {
+function ResearchDetail({ project }: { project: ResearchProject }) {
   const navigate = useNavigate();
   const { language } = useLanguage();
   const copy = language === 'de';
@@ -263,7 +257,6 @@ function ResearchDetail({ project, isResearchHost }: { project: ResearchProject;
     <>
       <SEO title={project.title[language]} description={project.summary[language]} canonical={getResearchCanonical(project.slug)} />
       <ResearchShell
-        isResearchHost={isResearchHost}
         hero={
           <section className="ct-hero-stage ct-page-hero" aria-labelledby="research-project-title">
             <Grainient preset="silver" />
@@ -278,7 +271,7 @@ function ResearchDetail({ project, isResearchHost }: { project: ResearchProject;
         <article className="rs-band">
           <div className="rs-split">
             <aside className="rs-aside">
-              <button type="button" className="rs-back" onClick={() => navigate(isResearchHost ? '/' : '/research')}>
+              <button type="button" className="rs-back" onClick={() => navigate('/')}>
                 <ArrowLeft aria-hidden="true" />
                 {copy ? 'Alle Forschung' : 'All research'}
               </button>
@@ -326,7 +319,6 @@ function ResearchDetail({ project, isResearchHost }: { project: ResearchProject;
 
 export default function Research() {
   const { topicSlug } = useParams<{ topicSlug?: string }>();
-  const isResearchHost = typeof window !== 'undefined' && window.location.hostname === 'research.clerktree.com';
   const project = getProject(topicSlug);
-  return project ? <ResearchDetail project={project} isResearchHost={isResearchHost} /> : <ResearchLanding isResearchHost={isResearchHost} />;
+  return project ? <ResearchDetail project={project} /> : <ResearchLanding />;
 }

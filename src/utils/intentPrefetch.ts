@@ -25,10 +25,6 @@ function findPrefetcher(pathname: string, routes: Record<string, Prefetcher>) {
     return routes['/blog/:slug'];
   }
 
-  if (pathname.startsWith('/research/') && routes['/research/:topicSlug']) {
-    return routes['/research/:topicSlug'];
-  }
-
   if (pathname.startsWith('/dashboard/') && routes['/dashboard']) {
     return routes['/dashboard'];
   }

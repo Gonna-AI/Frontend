@@ -44,12 +44,12 @@
   <!-- First paint: the site canvas, not a dark loader. App routes keep their own dark shell. -->
   <script>
     (function () {
-      if (!/^\/(dashboard|mail|chat|client|login|auth|ai-settings|invite)(\/|$)/.test(location.pathname)) {
+      if (!/^\/(dashboard|mail|chat|client|login|auth|invite)(\/|$)/.test(location.pathname)) {
         document.documentElement.classList.add('ct-site');
       }
       // Browser bar colour for the first paint (kept in step with src/utils/browserChrome.ts).
       var p = location.pathname, c = '#f4f4f4';
-      if (/^\/(dashboard|auth|login|invite|client|mail|chat|ai-settings)(\/|$)/.test(p)) c = '#0a0a0a';
+      if (/^\/(dashboard|auth|login|invite|client|mail|chat)(\/|$)/.test(p)) c = '#0a0a0a';
       else if (p === '/hive') c = '#0d0d0e';
       document.documentElement.style.setProperty('--ct-top-color', c);
       var m = document.querySelector('meta[name="theme-color"]');

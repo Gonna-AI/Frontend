@@ -6,7 +6,7 @@ const SITE = '#f4f4f4'; // the page canvas behind the rounded panels
 const DARK_HERO = '#0d0d0e'; // pages that open on a dark full-bleed hero
 const APP = '#0a0a0a'; // sign-in and workspace
 
-const WORKSPACE = /^\/(dashboard|auth|login|invite|client|mail|chat|ai-settings)(\/|$)/;
+const WORKSPACE = /^\/(dashboard|auth|login|invite|client|mail|chat)(\/|$)/;
 
 function chromeColorFor(pathname: string): string {
   if (WORKSPACE.test(pathname)) return APP;

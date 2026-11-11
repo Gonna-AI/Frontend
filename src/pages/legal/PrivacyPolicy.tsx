@@ -40,13 +40,6 @@ function English() {
       </p>
       <h3>Fonts</h3>
       <p>All fonts are served from our own domain. No request is made to third-party font services.</p>
-      <h3>Performance measurement</h3>
-      <p>
-        For a random sample of page views we record technical loading metrics (for example how long the page took to
-        render) together with the page path and the country derived from your IP address. This uses no cookies and no
-        identifier and cannot be traced back to you. Legal basis: our legitimate interest in a fast website
-        (Art. 6(1)(f) GDPR).
-      </p>
       <h3>Storage on your device</h3>
       <p>
         We store a small number of entries in your browser that are strictly necessary, such as your language and your
@@ -232,13 +225,6 @@ function German() {
       </p>
       <h3>Schriftarten</h3>
       <p>Alle Schriftarten werden von unserer eigenen Domain geladen. Es erfolgt kein Abruf bei externen Schriftdiensten.</p>
-      <h3>Leistungsmessung</h3>
-      <p>
-        Für eine zufällige Stichprobe von Seitenaufrufen erfassen wir technische Ladezeiten (zum Beispiel, wie lange der
-        Seitenaufbau dauerte) zusammen mit dem Seitenpfad und dem aus Ihrer IP-Adresse abgeleiteten Land. Dabei werden
-        weder Cookies noch Kennungen verwendet; ein Rückschluss auf Ihre Person ist nicht möglich. Rechtsgrundlage: unser
-        berechtigtes Interesse an einer schnellen Website (Art. 6 Abs. 1 lit. f DSGVO).
-      </p>
       <h3>Speicherung auf Ihrem Gerät</h3>
       <p>
         Wir speichern in Ihrem Browser wenige, unbedingt erforderliche Einträge, etwa Ihre Sprache und Ihre

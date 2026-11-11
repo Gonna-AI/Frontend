@@ -1,7 +1,7 @@
 # Response headers for every deploy. Single source: netlify.toml defines none.
 # scripts/csp.mjs fills in the placeholders at build time: the hashes of the inline
 # scripts in the built HTML (so script-src needs no 'unsafe-inline') and the backend
-# origins this build was configured with (VITE_SUPABASE_URL, VITE_API_BASE_URL).
+# origin this build was configured with (VITE_SUPABASE_URL).
 
 /*
   Cache-Control: public, max-age=0, must-revalidate
@@ -12,7 +12,7 @@
   Referrer-Policy: strict-origin-when-cross-origin
   Cross-Origin-Opener-Policy: same-origin-allow-popups
   Permissions-Policy: accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=(), browsing-topics=()
-  Content-Security-Policy: default-src 'self'; script-src 'self' {{INLINE_SCRIPT_HASHES}}; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; media-src 'self' data: blob: https:; connect-src 'self' {{SUPABASE_ORIGINS}} https://*.clerktree.com {{API_ORIGIN}} https://*.amplitude.com https://cdn.jsdelivr.net; worker-src 'self' blob:; frame-src 'self' https://www.google.com; frame-ancestors 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests
+  Content-Security-Policy: default-src 'self'; script-src 'self' {{INLINE_SCRIPT_HASHES}}; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; media-src 'self' data: blob: https:; connect-src 'self' {{SUPABASE_ORIGINS}} https://*.clerktree.com https://*.amplitude.com https://cdn.jsdelivr.net; worker-src 'self' blob:; frame-src 'self' https://www.google.com; frame-ancestors 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests
 
 # Fingerprinted build output never changes under the same name.
 /assets/*
@@ -59,8 +59,6 @@
 /mail
   X-Robots-Tag: noindex, nofollow
 /chat
-  X-Robots-Tag: noindex, nofollow
-/ai-settings
   X-Robots-Tag: noindex, nofollow
 
 /*.webp

@@ -16,7 +16,6 @@ import {
   ReceiptText,
   Server,
   ShoppingBag,
-  SquareArrowUpRight,
   Users,
 } from "lucide-react-dash";
 
@@ -201,22 +200,6 @@ export const sidebarItems: NavGroup[] = [
         titleKey: "dashShell.nav.item.roles",
         url: "/dashboard/roles",
         icon: Lock,
-      },
-    ],
-  },
-  {
-    id: 3,
-    label: "Misc",
-    labelKey: "dashShell.nav.group.misc",
-    items: [
-      {
-        id: "others",
-        title: "Others",
-        titleKey: "dashShell.nav.item.others",
-        url: "/dashboard/coming-soon",
-        icon: SquareArrowUpRight,
-        badge: "soon",
-        disabled: true,
       },
     ],
   },

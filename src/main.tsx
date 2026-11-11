@@ -6,7 +6,6 @@ import App from './App.tsx';
 import ErrorFallback from './components/ErrorFallback.tsx';
 import { loadBundle, resolveInitialLanguage } from './i18n/index.ts';
 import { initAnalytics } from './lib/analytics.ts';
-import { initPerformanceVitals } from './utils/performanceVitals.ts';
 import './index.css';
 
 // Production prints nothing to the visitor's console: our own calls are stripped at build time,
@@ -18,7 +17,6 @@ if (import.meta.env.PROD) {
   }
 }
 
-initPerformanceVitals();
 initAnalytics();
 
 // A page opened before a deploy can still point at files the new build removed.

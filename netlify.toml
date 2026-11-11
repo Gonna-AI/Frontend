@@ -18,6 +18,19 @@
   status = 301
   force = true
 
+# Research lives on its own host.
+[[redirects]]
+  from = "/research"
+  to = "https://research.clerktree.com"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/research/*"
+  to = "https://research.clerktree.com/:splat"
+  status = 301
+  force = true
+
 [[redirects]]
   from = "/crm"
   to = "https://crm.clerktree.com"

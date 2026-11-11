@@ -69,10 +69,8 @@ const DashboardInvoice = lazyWithRetry(() => import('./dashboard/pages/invoice/p
 const DashboardUsers = lazyWithRetry(() => import('./dashboard/pages/users/page'), 'DashboardUsers');
 const DashboardRoles = lazyWithRetry(() => import('./dashboard/pages/roles/page'), 'DashboardRoles');
 const DashboardAnalyticsV1 = lazyWithRetry(() => import('./dashboard/pages/legacy/analytics-v1/page'), 'DashboardAnalyticsV1');
-const DashboardComingSoon = lazyWithRetry(() => import('./dashboard/pages/coming-soon/page'), 'DashboardComingSoon');
 const MailApp = lazyWithRetry(() => import('./dashboard/standalone/mail/MailApp'), 'MailApp');
 const ChatApp = lazyWithRetry(() => import('./dashboard/standalone/chat/ChatApp'), 'ChatApp');
-const AISettings = lazyWithRetry(() => import('./components/AISettings'), 'AISettings');
 
 const CookieConsent = lazyWithRetry(() => import('./components/CookieConsent'), 'CookieConsent');
 
@@ -80,8 +78,6 @@ const CookieConsent = lazyWithRetry(() => import('./components/CookieConsent'), 
 const routePrefetchers = {
   '/': () => import('./pages/LandingFramer'),
   '/about': () => import('./pages/About'),
-  '/research': () => import('./pages/Research'),
-  '/research/:topicSlug': () => import('./pages/Research'),
   '/careers': () => import('./pages/Careers'),
   '/brand': () => import('./pages/Brand'),
   '/hive': () => import('./pages/hive/Hive'),
@@ -101,7 +97,7 @@ const routePrefetchers = {
 };
 
 /** Signed-in and sign-in surfaces: dark shell, no public-site chrome, no consent banner. */
-const WORKSPACE_PATH = /^\/(dashboard|auth|login|invite|client|mail|chat|ai-settings)(\/|$)/;
+const WORKSPACE_PATH = /^\/(dashboard|auth|login|invite|client|mail|chat)(\/|$)/;
 /** Paths answered by the server (edge redirects, functions), which the router must not swallow. */
 const SERVER_PATH = /^\/(crm|api)(\/|$)/;
 /** A path ending in a file extension is a static asset, not a page. */
@@ -240,13 +236,10 @@ function App() {
               <Route path="/" element={isResearchHost ? <Research /> : <Landing />} />
               <Route path="/:topicSlug" element={isResearchHost ? <Research /> : <NotFound />} />
               <Route path="/about" element={<About />} />
-              <Route path="/research" element={<Research />} />
-              <Route path="/research/:topicSlug" element={<Research />} />
               <Route path="/machina" element={<Machina />} />
               <Route path="/careers" element={<Careers />} />
               <Route path="/brand" element={<Brand />} />
               <Route path="/hive" element={<Hive />} />
-              <Route path="/solutions" element={<Navigate to="/#solutions" replace />} />
               <Route path="/contact" element={<Contact />} />
               <Route path="/blog" element={<Blog />} />
               <Route path="/blog/:slug" element={<BlogPost />} />
@@ -256,7 +249,6 @@ function App() {
               <Route path="/privacy-policy" element={<PrivacyPolicy />} />
               <Route path="/cookie-policy" element={<CookiePolicy />} />
               <Route path="/imprint" element={<Imprint />} />
-              <Route path="/impressum" element={<Navigate to="/imprint" replace />} />
               <Route path="/security" element={<Security />} />
               <Route path="/data-access" element={<DataAccess />} />
 
@@ -291,12 +283,10 @@ function App() {
                 <Route path="users" element={<DashboardUsers />} />
                 <Route path="roles" element={<DashboardRoles />} />
                 <Route path="analytics-v1" element={<DashboardAnalyticsV1 />} />
-                <Route path="coming-soon" element={<DashboardComingSoon />} />
               </Route>
               {/* Full-screen apps the dashboard embeds through preview iframes */}
               <Route path="/mail" element={<Workspace><MailApp /></Workspace>} />
               <Route path="/chat" element={<Workspace><ChatApp /></Workspace>} />
-              <Route path="/ai-settings" element={<Workspace><AISettings /></Workspace>} />
 
               <Route path="*" element={<NotFound />} />
             </Routes>

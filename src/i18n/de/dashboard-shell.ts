@@ -68,7 +68,6 @@ export const deDashboardShell = {
     // sidebar-items.ts — group labels
     'dashShell.nav.group.dashboards': 'Dashboards',
     'dashShell.nav.group.pages': 'Seiten',
-    'dashShell.nav.group.misc': 'Sonstiges',
 
     // sidebar-items.ts — item titles
     'dashShell.nav.item.default': 'Kommandozentrale',
@@ -89,7 +88,6 @@ export const deDashboardShell = {
     'dashShell.nav.item.invoice': 'Auftragsbestätigung (AB)',
     'dashShell.nav.item.users': 'Team & Kontakte',
     'dashShell.nav.item.roles': 'Zugriffskontrolle',
-    'dashShell.nav.item.others': 'Weitere',
 
     // auth forms — login-form.tsx / register-form.tsx
     'dashShell.auth.emailLabel': 'E-Mail-Adresse',

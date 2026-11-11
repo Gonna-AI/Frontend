@@ -2,8 +2,7 @@
 //   {{INLINE_SCRIPT_HASHES}}  SHA-256 hashes of every executable inline <script>
 //                             in the built HTML, so no 'unsafe-inline' is needed;
 //   {{SUPABASE_ORIGINS}}      the https and wss origins of the Supabase project
-//                             this build talks to (VITE_SUPABASE_URL);
-//   {{API_ORIGIN}}            the backend origin (VITE_API_BASE_URL), if one is configured.
+//                             this build talks to (VITE_SUPABASE_URL).
 import { createHash } from 'node:crypto';
 import { readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -35,8 +34,6 @@ if (!env.VITE_SUPABASE_URL) throw new Error('VITE_SUPABASE_URL is not set: the C
 const supabase = new URL(env.VITE_SUPABASE_URL);
 const supabaseOrigins = `https://${supabase.host} wss://${supabase.host}`;
 
-const apiOrigin = env.VITE_API_BASE_URL ? new URL(env.VITE_API_BASE_URL).origin : '';
-
 const headersPath = join(DIST, '_headers');
 const lines = readFileSync(headersPath, 'utf8').split('\n');
 const index = lines.findIndex((line) => line.trim().startsWith('Content-Security-Policy:'));
@@ -44,8 +41,7 @@ if (index === -1) throw new Error(`${headersPath}: no Content-Security-Policy he
 
 lines[index] = lines[index]
   .replace('{{INLINE_SCRIPT_HASHES}}', [...hashes].join(' '))
-  .replace('{{SUPABASE_ORIGINS}}', supabaseOrigins)
-  .replace(' {{API_ORIGIN}}', apiOrigin ? ` ${apiOrigin}` : '');
+  .replace('{{SUPABASE_ORIGINS}}', supabaseOrigins);
 if (lines[index].includes('{{')) throw new Error(`${headersPath}: unresolved placeholder in the Content-Security-Policy`);
 
 writeFileSync(headersPath, lines.join('\n'));
