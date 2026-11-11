@@ -293,7 +293,7 @@ uniform sampler2D tCells, tSheet, tText;
 uniform vec2 uGrid, uCell, uRes;
 uniform float uN, uTime, uDpr, uHeroDim;
 uniform float uRamp[${RAMP.length}];
-uniform vec4 uBox[${MAX_BOX}]; uniform vec4 uBoxP[${MAX_BOX}];
+uniform vec4 uBox[${MAX_BOX}]; uniform vec4 uBoxP[${MAX_BOX}]; uniform vec2 uBoxO[${MAX_BOX}];
 uniform vec4 uLine[${MAX_LINE}]; uniform vec4 uLineP[${MAX_LINE}];
 out vec4 outColor;
 float hash(vec2 p){ return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453); }
@@ -304,7 +304,6 @@ void main(){
   vec2 cell = floor(p / uCell);
   vec2 local = fract(p / uCell);
   vec4 cs = texture(tCells, (cell + .5) / uGrid);
-  vec4 tx = texelFetch(tText, ivec2(cell), 0);
   float ex = clamp((cs.r - .045) / .955, 0., 1.);
   float ev = ex > 0. ? pow(ex, .78) : 0.;
   int ri = ev <= 0. ? 0 : int(min(${RAMP.length - 1}., 1. + floor(ev * ${RAMP.length - 1}.)));
@@ -314,6 +313,7 @@ void main(){
   vec3 silver = vec3(.92, .93, .95), orange = vec3(1., .36, .08);
 
   // cards: dim what is behind them, dotted border with solid corners
+  // Cards sit at exact (sub-cell) positions, so they glide instead of hopping a cell at a time.
   float fillDim = 0., inside = 0., border = 0., bacc = 0.;
   for (int i = 0; i < ${MAX_BOX}; i++){
     vec4 r = uBox[i], q = uBoxP[i];
@@ -323,7 +323,8 @@ void main(){
     vec2 c = (r.xy + r.zw) * .5, hh = (r.zw - r.xy) * .5;
     vec2 e = hh - abs(p - c);
     float corner = step(e.x, 7. * uDpr) * step(e.y, 7. * uDpr);
-    float dots = step(.5, fract((p.x + p.y) / (3. * uDpr)));
+    // dotted border measured from the card's own corner, so the dots travel with it
+    float dots = step(.5, fract((p.x - r.x + p.y - r.y) / (3. * uDpr)));
     float b = (1. - smoothstep(.45 * uDpr, 1.05 * uDpr, abs(d + .5 * uDpr))) * mix(dots, 1., corner) * q.x;
     if (b > border){ border = b; bacc = q.y; }
   }
@@ -331,8 +332,21 @@ void main(){
   acc *= 1. - fillDim;
   vec2 qn = (p / uRes - .5) * vec2(uRes.x / uRes.y, 1.);
   bright *= 1. - uHeroDim * .72 * exp(-dot(qn * vec2(.9, 1.5), qn * vec2(.9, 1.5)) * 6.);
+  // Text is stored per cell. Text that belongs to a card (alpha = card number) is written at the
+  // card's snapped cell and drawn shifted by the card's remainder, so it moves with the card;
+  // free-standing text (alpha 0) stays on the grid.
+  // Where cards overlap, the topmost card that has text at this spot wins.
+  vec4 tx = vec4(0.); vec2 tl = local;
+  for (int i = ${MAX_BOX - 1}; i >= 0; i--){
+    if (uBoxP[i].x <= 0. || sdRect(p, uBox[i]) >= 0.) continue;
+    vec2 pt = p - uBoxO[i], tc = floor(pt / uCell);
+    if (any(lessThan(tc, vec2(0.))) || any(greaterThanEqual(tc, uGrid))) continue;
+    vec4 t = texelFetch(tText, ivec2(tc), 0);
+    if (t.r > 0. && abs(t.a * 255. - float(i + 1)) < .5){ tx = t; tl = fract(pt / uCell); break; }
+  }
+  if (tx.r <= 0.){ vec4 t = texelFetch(tText, ivec2(cell), 0); if (t.a < .002) tx = t; }
   if (tx.r > 0.){ idx = floor(tx.r * 255. + .5); bright = tx.g; acc = tx.b; }
-  float a = texture(tSheet, vec2((idx + local.x) / uN, local.y)).r;
+  float a = texture(tSheet, vec2((idx + tl.x) / uN, tl.y)).r;
   vec3 col = mix(silver, orange, acc) * bright * a;
 
   // connections: dotted lines that grow, with a pulse travelling inward
@@ -385,6 +399,8 @@ const randUnit = (): V3 => {
 };
 const label = (s: string) => s.padEnd(9, ' ');
 const RAMP_UNIFORM = new Float32Array(RAMP_INDEX);
+// The glyph font is requested as soon as this module loads, so it is usually ready by first paint.
+if (typeof document !== 'undefined') document.fonts?.load('500 12px "Geist Mono"').catch(() => undefined);
 
 // Scroll progress follows the scroll position through a critically damped spring: its speed changes
 // smoothly, so a wheel notch or a flick starts the scene moving gently instead of with a jolt, and
@@ -421,6 +437,7 @@ export class HiveScene {
   private nodeBuf = new Float32Array(12);
   private boxBuf = new Float32Array(MAX_BOX * 4);
   private boxParamBuf = new Float32Array(MAX_BOX * 4);
+  private boxOffsetBuf = new Float32Array(MAX_BOX * 2);
   private lineBuf = new Float32Array(MAX_LINE * 4);
   private lineParamBuf = new Float32Array(MAX_LINE * 4);
   /** Called once per displayed frame with the progress the scene is drawn at, so copy can move in step. */
@@ -512,19 +529,37 @@ export class HiveScene {
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8, gw, gh, 0, gl.RGBA, gl.UNSIGNED_BYTE, this.text);
     this.params(this.textTex, gl.NEAREST);
 
+    this.drawSheet();
+    this.draw();
+  }
+
+  /**
+   * The glyph sheet, drawn in Geist Mono. Text drawn into a canvas does not make the browser fetch a
+   * web font, so the font is requested explicitly; until it arrives the sheet uses the system
+   * monospace, and it is redrawn once (not rebuilt) when the font is ready.
+   */
+  private drawSheet() {
+    const gl = this.gl, { cw, ch } = this.grid;
+    const font = `500 ${Math.round(ch * 0.78)}px "Geist Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace`;
     const sheet = document.createElement('canvas');
     sheet.width = cw * SHEET_CHARS.length; sheet.height = ch;
     const ctx = sheet.getContext('2d')!;
     ctx.fillStyle = '#000'; ctx.fillRect(0, 0, sheet.width, sheet.height);
     ctx.fillStyle = '#fff'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    ctx.font = `500 ${Math.round(ch * 0.78)}px "Geist Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace`;
+    ctx.font = font;
     SHEET_CHARS.forEach((chr, i) => { if (i) ctx.fillText(chr, i * cw + cw / 2, ch * 0.54); });
     gl.bindTexture(gl.TEXTURE_2D, this.sheetTex);
     gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, sheet);
     gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
     this.params(this.sheetTex, gl.LINEAR);
-    this.draw();
+    if (!document.fonts || document.fonts.check(font)) return;
+    const grid = this.grid;
+    document.fonts.load(font).then(() => {
+      if (!this.ok || this.grid !== grid || !document.fonts.check(font)) return;
+      this.drawSheet();
+      if (!this.frame) this.draw();
+    }, () => undefined);
   }
 
   // ---------- geometry (grid cells, top-left origin) ----------
@@ -584,7 +619,8 @@ export class HiveScene {
 
   // ---------- text grid ----------
 
-  private put(col: number, row: number, str: string, k: number, bright: number, accent: number, maxW = Infinity) {
+  /** Writes text into the grid. owner = card number (1-based) the text travels with, 0 for none. */
+  private put(col: number, row: number, str: string, k: number, bright: number, accent: number, maxW = Infinity, owner = 0) {
     const { w, h } = this.grid;
     const r = Math.round(row), c0 = Math.round(col);
     if (r < 0 || r >= h || k <= 0) return;
@@ -600,6 +636,7 @@ export class HiveScene {
       this.text[o] = SHEET_INDEX.get(glyph) ?? (SHEET_INDEX.get('?') as number);
       this.text[o + 1] = Math.round((real ? bright : bright * 0.6) * 255);
       this.text[o + 2] = real ? Math.round(accent * 255) : 0;
+      this.text[o + 3] = owner;
     });
   }
 
@@ -626,7 +663,10 @@ export class HiveScene {
 
     const small = this.small;
     const cx = gw / 2, cy = this.centerY;
-    const rect = (c: number, r: number, w: number, h: number): Rect => ({ c: c - w / 2, r: r - h / 2, w, h });
+    // Resting positions sit on whole cells (so a card at rest looks exactly as it always did);
+    // in between, cards move continuously.
+    const rect = (c: number, r: number, w: number, h: number): Rect => ({ c: Math.round(c - w / 2), r: Math.round(r - h / 2), w, h });
+    const rectAt = (c: number, r: number, w: number, h: number): Rect => ({ c: c - w / 2, r: r - h / 2, w, h });
     const px = (x: number, y: number): [number, number] => [x * cw, (gh - y) * ch];
     const mid = (r: Rect): [number, number] => [r.c + r.w / 2, r.r + r.h / 2];
 
@@ -645,7 +685,7 @@ export class HiveScene {
     const valueW = stackW - 13;
     const pitch = 4;
     const top = cy - (rows.length * pitch) / 2 + 0.5;
-    const stackRect = (i: number): Rect => ({ c: cx - stackW / 2, r: top + i * pitch, w: stackW, h: 3 });
+    const stackRect = (i: number): Rect => ({ c: Math.round(cx - stackW / 2), r: Math.round(top + i * pitch), w: stackW, h: 3 });
 
     // question card → centre node → title row
     const cardIn = ss(0.2, 0.25, p);
@@ -653,6 +693,7 @@ export class HiveScene {
     const toStack0 = ss(0.66, 0.72, p);
     const cRect = toStack0 > 0 ? lerpRect(centerRect, stackRect(0), toStack0) : lerpRect(cardRect, centerRect, toCenter);
     if (cardIn > 0) boxes.push({ rect: cRect, alpha: cardIn, accent: toCenter * (1 - toStack0), fill: 1 });
+    const cOwner = cardIn > 0 ? boxes.length : 0;
     const cardK = 1 - ss(0.4, 0.44, p);
     if (cardK > 0) {
       const tx = cardRect.c + 4, maxW = cardRect.w - 6;
@@ -662,11 +703,11 @@ export class HiveScene {
       this.put(tx, cardRect.r + 5, copy.card[2], ss(0.31, 0.36, p) * cardK, 0.5, 0, maxW);
     }
     if (toStack0 < 0.5) {
-      this.put(cRect.c + 2, cRect.r + 1, copy.center, ss(0.44, 0.48, p) * (1 - toStack0 * 2), 1, 1);
+      this.put(cRect.c + 2, cRect.r + 1, copy.center, ss(0.44, 0.48, p) * (1 - toStack0 * 2), 1, 1, Infinity, cOwner);
     } else {
       const k = (toStack0 - 0.5) * 2;
-      this.put(cRect.c + 2, cRect.r + 1, label(copy.title[0]), k, 1, 1);
-      this.put(cRect.c + 11, cRect.r + 1, copy.title[1], k, 1, 0, valueW);
+      this.put(cRect.c + 2, cRect.r + 1, label(copy.title[0]), k, 1, 1, Infinity, cOwner);
+      this.put(cRect.c + 11, cRect.r + 1, copy.title[1], k, 1, 0, valueW, cOwner);
     }
     const cMid = mid(cRect);
     nodes.push(this.toUv(...cMid));
@@ -683,12 +724,13 @@ export class HiveScene {
         lines.push({ a: px(...cMid), b: px(...mid(graphRects[i])), alpha: linesOut, prog: grow, pulse: this.time * 0.45 + i * 0.37, accent: 0 });
       }
       if (boxA > 0) boxes.push({ rect: r, alpha: boxA, accent: 0, fill: 1 });
+      const owner = boxA > 0 ? boxes.length : 0;
       if (toStack < 0.5) {
-        this.put(r.c + 2, r.r + 1, n.short, ss(0.51 + d, 0.56 + d, p) * (1 - toStack * 2), 0.92, 0);
+        this.put(r.c + 2, r.r + 1, n.short, ss(0.51 + d, 0.56 + d, p) * (1 - toStack * 2), 0.92, 0, Infinity, owner);
       } else {
         const k = (toStack - 0.5) * 2;
-        this.put(r.c + 2, r.r + 1, label(n.label), k, 0.5, 0);
-        this.put(r.c + 11, r.r + 1, n.long, k, 0.95, 0, valueW);
+        this.put(r.c + 2, r.r + 1, label(n.label), k, 0.5, 0, Infinity, owner);
+        this.put(r.c + 11, r.r + 1, n.long, k, 0.95, 0, valueW, owner);
       }
       nodes.push(this.toUv(...mid(r)));
     });
@@ -707,8 +749,8 @@ export class HiveScene {
       const r = stackRect(rows.length - 1);
       boxes.push({ rect: r, alpha: draftA, accent: 1, fill: 1 });
       const k = ss(0.85, 0.91, p);
-      this.put(r.c + 2, r.r + 1, label(copy.draft[0]), k, 1, 1);
-      this.put(r.c + 11, r.r + 1, copy.draft[1], k, 1, 0, valueW);
+      this.put(r.c + 2, r.r + 1, label(copy.draft[0]), k, 1, 1, Infinity, boxes.length);
+      this.put(r.c + 11, r.r + 1, copy.draft[1], k, 1, 0, valueW, boxes.length);
     }
     if (journey >= 0.60) {
       boxes.length = 0; lines.length = 0; nodes.length = 0; this.text.fill(0);
@@ -729,7 +771,7 @@ export class HiveScene {
       const positions = short.map((text, i) => {
         const angle = -Math.PI / 2 + i * Math.PI * 2 / short.length + diamond * .3;
         const [x, y] = orbitPoint(angle);
-        const orbit = rect(x, y, Math.min(gw * .28, text.length + 4), 3);
+        const orbit = rectAt(x, y, Math.round(Math.min(gw * .28, text.length + 4)), 3);
         const source = stackRect(i);
         const compact = rect(cx, source.r + source.h / 2, orbit.w, source.h);
         return lerpRect(lerpRect(source, compact, fold), orbit, gather);
@@ -748,8 +790,8 @@ export class HiveScene {
           // Same brightness and accent the rows had when the list formed, so nothing flickers at the hand-over.
           const k = 1 - fold * 2;
           const lead = i === 0 || i === 6;
-          this.put(current.c + 2, current.r + 1, label(rows[i][0]), 1, (lead ? 1 : .5) * k, lead ? k : 0, 9);
-          this.put(current.c + 11, current.r + 1, rows[i][1], 1, (lead ? 1 : .95) * k, 0, current.w - 13);
+          this.put(current.c + 2, current.r + 1, label(rows[i][0]), 1, (lead ? 1 : .5) * k, lead ? k : 0, 9, boxes.length);
+          this.put(current.c + 11, current.r + 1, rows[i][1], 1, (lead ? 1 : .95) * k, 0, current.w - 13, boxes.length);
         }
         nodes.push(this.toUv(...mid(current)));
       });
@@ -816,15 +858,16 @@ export class HiveScene {
     gl.uniform1f(g('uDpr'), dpr);
     gl.uniform1f(g('uHeroDim'), 1 - ss(0.02, 0.08, core));
     gl.uniform1fv(g('uRamp'), RAMP_UNIFORM);
-    const bx = this.boxBuf.fill(0), bp = this.boxParamBuf.fill(0);
+    const bx = this.boxBuf.fill(0), bp = this.boxParamBuf.fill(0), bo = this.boxOffsetBuf.fill(0);
     boxes.slice(0, MAX_BOX).forEach(({ rect: r, alpha, accent, fill }, i) => {
-      // Snap each edge to the grid on its own: rounding position and size separately lets an edge
-      // flick back and forth by a cell while a card glides.
-      const c0 = Math.round(r.c), c1 = Math.round(r.c + r.w), r0 = Math.round(r.r), r1 = Math.round(r.r + r.h);
-      bx.set([c0 * cw, (h - r1) * ch, c1 * cw, (h - r0) * ch], i * 4);
+      // The card is drawn where it really is; its text was written at the nearest whole cell
+      // (put() rounds the same way) and is shifted back by the remainder in the shader.
+      bx.set([r.c * cw, (h - r.r - r.h) * ch, (r.c + r.w) * cw, (h - r.r) * ch], i * 4);
       bp.set([alpha, accent, fill, 0], i * 4);
+      // Whole device pixels, so the glyphs stay as sharp as at rest.
+      bo.set([Math.round((r.c - Math.round(r.c)) * cw), Math.round(-(r.r - Math.round(r.r)) * ch)], i * 2);
     });
-    gl.uniform4fv(g('uBox'), bx); gl.uniform4fv(g('uBoxP'), bp);
+    gl.uniform4fv(g('uBox'), bx); gl.uniform4fv(g('uBoxP'), bp); gl.uniform2fv(g('uBoxO'), bo);
     const lx = this.lineBuf.fill(0), lp = this.lineParamBuf.fill(0);
     lines.slice(0, MAX_LINE).forEach((l, i) => {
       lx.set([l.a[0], l.a[1], l.b[0], l.b[1]], i * 4);
@@ -917,6 +960,7 @@ export class HiveScene {
   dispose() {
     this.stop();
     if (!this.gl) return;
+    this.ok = false;
     this.gl.deleteProgram(this.scene);
     this.gl.deleteProgram(this.glyph);
     this.gl.deleteFramebuffer(this.fbo);
