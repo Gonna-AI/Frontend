@@ -1,5 +1,6 @@
 import { type CSSProperties, Fragment, useEffect, useState } from 'react';
 import Lenis from 'lenis';
+import { ArrowRight } from 'lucide-react';
 import { isSaveDataEnabled } from '../utils/idle';
 import { Footer, Header } from '../components/Landing/SiteChrome';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -567,18 +568,19 @@ function Contact() {
           <form className="ct-contact-form" onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
             <label>
               <span>{t('home.contact.nameLabel')}</span>
-              <input onChange={(e) => setName(e.target.value)} placeholder={t('home.contact.namePlaceholder')} type="text" value={name} />
+              <input autoComplete="name" name="name" onChange={(e) => setName(e.target.value)} placeholder={t('home.contact.namePlaceholder')} required type="text" value={name} />
             </label>
             <label>
               <span>{t('home.contact.emailLabel')}</span>
-              <input onChange={(e) => setEmail(e.target.value)} placeholder={t('home.contact.emailPlaceholder')} type="email" value={email} />
+              <input autoComplete="email" name="email" onChange={(e) => setEmail(e.target.value)} placeholder={t('home.contact.emailPlaceholder')} required type="email" value={email} />
             </label>
             <label>
               <span>{t('home.contact.messageLabel')}</span>
-              <textarea onChange={(e) => setMessage(e.target.value)} placeholder={t('home.contact.messagePlaceholder')} value={message} />
+              <textarea name="message" onChange={(e) => setMessage(e.target.value)} placeholder={t('home.contact.messagePlaceholder')} value={message} />
             </label>
             <button className={`ct-submit-button is-${status}`} type="submit">
               <span>{status === 'sent' ? t('home.contact.sent') : status === 'error' ? t('home.contact.error') : t('home.contact.send')}</span>
+              {status === 'idle' && <ArrowRight aria-hidden="true" size={16} strokeWidth={1.75} />}
               {status === 'sending' && <i aria-hidden="true" />}
             </button>
           </form>
