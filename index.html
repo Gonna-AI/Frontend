@@ -58,9 +58,13 @@
   </script>
   <style>
     html.ct-site, html.ct-site body { background: #f4f4f4; }
-    /* Newer iOS Safari tints its top bar from a fixed element touching the top edge, not from
-       theme-color. This strip sits inside the page's own top margin, so it is not visible as such. */
-    #ct-top-edge { background: var(--ct-top-color, #f4f4f4); height: 4px; left: 0; pointer-events: none; position: fixed; right: 0; top: 0; z-index: 2147483000; }
+    /* Newer iOS Safari tints its top bar from a fixed element touching the top edge. This strip carries
+       the page canvas colour while the page is at the very top, where it sits inside the page's own
+       margin and cannot be seen. Once the page scrolls it is removed, so it never shows as a line over
+       content and the bar simply reflects what is under it. It is hit-testable on purpose: Safari skips
+       elements that ignore pointer events. */
+    html.ct-scrolled #ct-top-edge { display: none; }
+    #ct-top-edge { background: var(--ct-top-color, #f4f4f4); height: 3px; left: 0; position: fixed; right: 0; top: 0; z-index: 2147483000; }
     @keyframes ct-page-in { from { opacity: 0; } to { opacity: 1; } }
     html.ct-site .ct-works { animation: ct-page-in .5s cubic-bezier(.22, 1, .36, 1) both; }
     @media (prefers-reduced-motion: reduce) { html.ct-site .ct-works { animation: none; } }

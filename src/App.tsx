@@ -173,6 +173,15 @@ function RouteEffects() {
     applyChromeColor(pathname);
   }, [pathname]);
 
+  // The top-edge strip (index.html) exists only while the page is at the very top.
+  useEffect(() => {
+    const root = document.documentElement;
+    const update = () => root.classList.toggle('ct-scrolled', window.scrollY > 6);
+    update();
+    window.addEventListener('scroll', update, { passive: true });
+    return () => window.removeEventListener('scroll', update);
+  }, []);
+
   return null;
 }
 

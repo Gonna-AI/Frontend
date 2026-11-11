@@ -270,8 +270,11 @@ function useCtPageMotion() {
       for (let i = bgSections.length - 1; i >= 0; i -= 1) {
         const rect = sectionRects[i];
         if (rect.top <= bottomEdge && rect.bottom > bottomEdge) {
-          if (sectionBgs[i] !== currentBodyBg) {
-            currentBodyBg = sectionBgs[i];
+          // At the very top the same colour also tints the status bar above the page, which should
+          // match the canvas around the hero card rather than the white card itself.
+          const wanted = window.scrollY < 6 ? fallbackBg : sectionBgs[i];
+          if (wanted !== currentBodyBg) {
+            currentBodyBg = wanted;
             document.body.style.setProperty('--ct-body-bg', currentBodyBg);
           }
           break;
