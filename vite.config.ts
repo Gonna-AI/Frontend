@@ -49,12 +49,14 @@ export default defineConfig({
       output: {
         // Opaque file names: the public bundle should not spell out the app's internal structure
         // (page and feature names). Library chunks keep a neutral name for the size budget.
-        chunkFileNames: (chunk) => (chunk.name.endsWith('-vendor') ? 'assets/[name]-[hash].js' : 'assets/[hash].js'),
+        chunkFileNames: (chunk) =>
+          chunk.name.endsWith('-vendor') ? 'assets/[name]-[hash].js'
+            // The analytics SDK and its recorder load only after consent; the neutral name lets the size budget find them.
+            : /^(amplitudeSdk|rrweb)/.test(chunk.name) ? 'assets/analytics-vendor-[hash].js'
+            : 'assets/[hash].js',
         entryFileNames: 'assets/[hash].js',
         assetFileNames: 'assets/[hash][extname]',
         manualChunks(id) {
-          // The analytics SDK and its guard load together, only after consent.
-          if (id.includes('/@amplitude/') || id.includes('/rrweb') || id.includes('/src/lib/amplitudeSdk') || id.includes('/src/lib/analyticsGuard')) return 'analytics-vendor';
           if (!id.includes('/node_modules/')) return undefined;
 
           // Exact package folders only: a loose '/react/' match also swept in @fullcalendar/react (the
