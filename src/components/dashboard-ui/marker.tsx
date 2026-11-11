@@ -74,4 +74,4 @@ const MarkerContent = React.forwardRef<HTMLSpanElement, React.ComponentProps<"sp
 )
 MarkerContent.displayName = "MarkerContent"
 
-export { Marker, MarkerIcon, MarkerContent, markerVariants }
+export { Marker,  MarkerContent,  }

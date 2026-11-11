@@ -134,7 +134,7 @@ function sparkPath(seed: number, spikeFrom: number, spikeGain: number) {
 const SPARKS = [sparkPath(0, 38, 18), sparkPath(2, 44, 7), sparkPath(4, 60, 1)];
 const VALUES: [number, number][] = [[2.1, 7.8], [62, 84], [71, 74]];
 
-export function SignalMonitorScene() {
+function SignalMonitorScene() {
   const c = useSceneCopy().signal;
   const total = 9000;
   const [ms, ref] = useLoop(total);
@@ -170,7 +170,7 @@ export function SignalMonitorScene() {
 
 /* ---------- 2. Reasoning across knowledge ---------- */
 
-export function ReasoningScene() {
+function ReasoningScene() {
   const c = useSceneCopy().reason;
   const total = 10500;
   const [ms, ref] = useLoop(total);
@@ -206,7 +206,7 @@ export function ReasoningScene() {
 
 /* ---------- 3. Work order, drafted and approved ---------- */
 
-export function WorkOrderScene() {
+function WorkOrderScene() {
   const c = useSceneCopy().order;
   const total = 10000;
   const [ms, ref] = useLoop(total);

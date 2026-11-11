@@ -18,12 +18,12 @@ const minutesAgo = (minutes: number) => new Date(Date.now() - minutes * 60_000).
 const hoursAgo = (hours: number) => minutesAgo(hours * 60);
 const daysAgo = (days: number) => hoursAgo(days * 24);
 
-export type Recipient = {
+type Recipient = {
   name: string;
   email: string;
 };
 
-export type Attachment = {
+type Attachment = {
   id: string;
   name: string;
   size: string;
@@ -443,7 +443,7 @@ const GENERATED_DOC_KIND_META: Record<
 };
 
 /** Maps a live pipeline_generated_docs row onto the inbox's Mail shape. */
-export function mapGeneratedDocToMail(doc: PipelineGeneratedDocRow): Mail {
+function mapGeneratedDocToMail(doc: PipelineGeneratedDocRow): Mail {
   const meta = GENERATED_DOC_KIND_META[doc.kind];
   const subject = doc.title?.trim() ? doc.title : `${meta.prefix} – ${doc.id.slice(0, 8)}`;
 

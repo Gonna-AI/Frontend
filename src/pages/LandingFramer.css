@@ -185,14 +185,6 @@ html[data-perf='low'] .ct-works [data-ct-reveal] {
   width: min(100%, calc(100vw - 16px));
 }
 
-.ct-hero-video-slot {
-  background: #000;
-  border-radius: 34px;
-  height: clamp(420px, 37vw, 760px);
-  margin-top: clamp(34px, 5vw, 72px);
-  width: 100%;
-}
-
 /* Solutions-style hero: headline/copy/CTA overlaid directly on the video box,
    instead of sitting above it as a separate light-background block. */
 .ct-hero-stage {
@@ -203,13 +195,6 @@ html[data-perf='low'] .ct-works [data-ct-reveal] {
   overflow: hidden;
   position: relative;
   width: 100%;
-}
-
-.ct-hero-stage-scrim {
-  background: linear-gradient(180deg, rgba(0, 0, 0, 0.18) 0%, rgba(0, 0, 0, 0.1) 38%, rgba(0, 0, 0, 0.6) 100%);
-  inset: 0;
-  pointer-events: none;
-  position: absolute;
 }
 
 .ct-hero-stage-content {
@@ -500,7 +485,7 @@ a:hover > .ct-roll > .ct-roll-inner { transform: translateY(-50%); }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .ct-roll-inner, .ct-shell-cta-track, .ct-nav-menu, .ct-nav-menu-item { transition: none !important; }
+  .ct-roll-inner, .ct-shell-cta-track, .ct-nav-menu-item { transition: none !important; }
   .ct-nav-menu-item { translate: none; }
   a:hover > .ct-roll > .ct-roll-inner, .ct-nav-item:hover .ct-nav-trigger .ct-roll-inner { transform: none; }
 }
@@ -1792,14 +1777,6 @@ a:hover > .ct-roll > .ct-roll-inner { transform: translateY(-50%); }
 }
 
 /* Loading skeleton */
-.ct-legal-skeleton {
-  animation: ctLegalPulse 1.6s ease-in-out infinite;
-  background: rgba(19, 19, 19, 0.06);
-  border-radius: 14px;
-  height: 480px;
-  position: relative;
-  z-index: 1;
-}
 
 @keyframes ctLegalPulse {
   0%, 100% { opacity: 1; }
@@ -1807,13 +1784,6 @@ a:hover > .ct-roll > .ct-roll-inner { transform: translateY(-50%); }
 }
 
 /* Error state */
-.ct-legal-error {
-  color: rgba(19, 19, 19, 0.58);
-  font-size: 0.9rem;
-  line-height: 1.7;
-  position: relative;
-  z-index: 1;
-}
 
 /* Responsive */
 @media (max-width: 767px) {
@@ -1859,11 +1829,6 @@ a:hover > .ct-roll > .ct-roll-inner { transform: translateY(-50%); }
 
 /* Hero copy sits on live video: a soft centre vignette plus a faint text
    shadow keeps it legible over bright frames without dimming the edges. */
-.ct-hero-stage-scrim {
-  background:
-    radial-gradient(ellipse 58% 46% at 50% 52%, rgba(0, 0, 0, 0.34), transparent 78%),
-    linear-gradient(180deg, rgba(0, 0, 0, 0.18) 0%, rgba(0, 0, 0, 0.1) 38%, rgba(0, 0, 0, 0.6) 100%);
-}
 
 .ct-hero-stage-content :where(h1, p, span) {
   text-shadow: 0 2px 28px rgba(0, 0, 0, 0.28);
@@ -1960,123 +1925,6 @@ a:hover > .ct-roll > .ct-roll-inner { transform: translateY(-50%); }
 }
 
 /* ---------- Security & data handling ---------- */
-.ct-security-notice {
-  border-left: 2px solid var(--ct-orange);
-  color: rgba(19, 19, 19, 0.72);
-  font-size: 15px;
-  line-height: 1.6;
-  margin-bottom: 28px;
-  padding-left: 16px;
-}
-
-.ct-security-notice svg {
-  color: var(--ct-orange);
-  flex: 0 0 auto;
-  height: 22px;
-  margin-top: 1px;
-  width: 22px;
-}
-
-.ct-security-notice p {
-  margin: 0;
-}
-
-.ct-security-sections {
-  border-top: 1px solid rgba(19, 19, 19, 0.1);
-}
-
-.ct-security-section {
-  border-bottom: 1px solid rgba(19, 19, 19, 0.1);
-}
-
-.ct-security-section > button {
-  align-items: center;
-  background: transparent;
-  border: 0;
-  color: rgb(19, 19, 19);
-  cursor: pointer;
-  display: flex;
-  gap: 16px;
-  justify-content: space-between;
-  min-height: 64px;
-  padding: 16px 4px;
-  text-align: left;
-  width: 100%;
-}
-
-.ct-security-section h2 {
-  font-family: "Cal Sans", "Inter", system-ui, sans-serif !important;
-  font-size: clamp(18px, 1.6vw, 22px);
-  font-weight: 400;
-  letter-spacing: -0.01em;
-  line-height: 1.2;
-  margin: 0;
-}
-
-.ct-security-section > button svg {
-  color: rgba(19, 19, 19, 0.5);
-  flex: 0 0 auto;
-  height: 20px;
-  transition: transform 220ms var(--ct-ease-out), color 180ms ease;
-  width: 20px;
-}
-
-.ct-security-section.is-open > button svg {
-  color: var(--ct-orange);
-  transform: rotate(180deg);
-}
-
-.ct-security-panel {
-  color: rgba(19, 19, 19, 0.72);
-  font-size: 15px;
-  line-height: 1.75;
-  padding: 0 4px 24px;
-  white-space: pre-wrap;
-}
-
-.ct-security-contact {
-  align-items: center;
-  background: #fff;
-  border: 1px solid rgba(19, 19, 19, 0.08);
-  border-radius: 18px;
-  color: rgb(19, 19, 19);
-  display: flex;
-  gap: 14px;
-  margin-top: 28px;
-  padding: 16px 18px;
-  text-decoration: none;
-  transition: border-color 180ms ease;
-}
-
-.ct-security-contact:hover {
-  border-color: rgba(19, 19, 19, 0.3);
-}
-
-.ct-security-contact {
-  justify-content: space-between;
-}
-
-.ct-security-contact > svg {
-  color: rgba(19, 19, 19, 0.4);
-  height: 20px;
-  width: 20px;
-}
-
-.ct-security-contact > span {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.ct-security-contact > span span {
-  color: rgba(19, 19, 19, 0.55);
-  font-size: 13px;
-}
-
-.ct-security-contact strong {
-  font-size: 15px;
-  font-weight: 500;
-}
 
 /* ---------- Header lockup (brand artwork, no ®) ----------
    Same outlined lockup as /brand downloads, so mark/word spacing is exact.

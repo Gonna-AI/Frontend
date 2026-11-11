@@ -18,15 +18,6 @@ function useMessageScroller() {
   return ctx
 }
 
-function useMessageScrollerScrollable() {
-  return useMessageScroller()
-}
-
-function useMessageScrollerVisibility() {
-  const { isAtBottom } = useMessageScroller()
-  return !isAtBottom
-}
-
 function MessageScrollerProvider({
   autoScroll = false,
   children,
@@ -159,7 +150,7 @@ export {
   MessageScrollerContent,
   MessageScrollerItem,
   MessageScrollerButton,
-  useMessageScroller,
-  useMessageScrollerScrollable,
-  useMessageScrollerVisibility,
+  
+  
+  
 }

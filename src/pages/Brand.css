@@ -21,15 +21,6 @@
   justify-content: center;
 }
 
-.brand-hero-grain {
-  background: url("/noise.webp") center / 220px repeat;
-  inset: 0;
-  mix-blend-mode: overlay;
-  opacity: 0.18;
-  pointer-events: none;
-  position: absolute;
-}
-
 .brand-hero-content {
   align-items: center;
   color: #fff;

@@ -21,8 +21,6 @@ const MAX_AGE_MS = 365 * 24 * 60 * 60 * 1000;
 const CHANGE_EVENT = 'clerktree:consent-change';
 const OPEN_EVENT = 'clerktree:consent-open';
 
-export const CONSENT_CATEGORIES: ConsentCategory[] = ['analytics', 'externalMedia'];
-
 export function getConsent(): ConsentRecord | null {
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);

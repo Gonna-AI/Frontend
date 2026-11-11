@@ -5,7 +5,7 @@ export const formatPostDate = (date: string, language: string) =>
   new Date(date).toLocaleDateString(language === 'de' ? 'de-DE' : 'en-US', { year: 'numeric', month: 'short', day: 'numeric' });
 
 /** Typographic cover on grainy silver or black light; no stock imagery. */
-export function JournalCover({ post, large = false }: { post: BlogPost; large?: boolean }) {
+function JournalCover({ post, large = false }: { post: BlogPost; large?: boolean }) {
   return (
     <div className={`jr-cover is-${post.tone ?? 'silver'}${large ? ' is-large' : ''}`} aria-hidden="true">
       <span className="jr-cover-top">

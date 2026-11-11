@@ -21,13 +21,13 @@ export interface InvoiceTaxOption {
   rate: number;
 }
 
-export type InvoiceDiscountType = "fixed" | "percent";
+type InvoiceDiscountType = "fixed" | "percent";
 
 export const INVOICE_PAPER_WIDTH = 816;
 export const INVOICE_PAPER_HEIGHT = 1056;
 export const INVOICE_PAPER_SCALE = 0.6;
 
-export interface InvoiceFromDetails {
+interface InvoiceFromDetails {
   name: string;
   email: string;
   phone: string;

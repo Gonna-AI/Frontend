@@ -2,7 +2,7 @@ import type { ConsentCategory } from '../lib/consent';
 
 type Localized = { en: string; de: string };
 
-export type StorageEntry = {
+type StorageEntry = {
   name: string;
   provider: string;
   kind: 'Cookie' | 'Local storage' | 'Session storage' | 'IndexedDB';
@@ -66,12 +66,12 @@ export const STORAGE_INVENTORY: StorageGroup[] = [
         duration: { en: 'Until you sign out', de: 'Bis zur Abmeldung' },
       },
       {
-        name: 'theme, dashboard-preferences, clerktree_groq_settings_*',
+        name: 'theme, dashboard-preferences',
         provider: 'ClerkTree',
         kind: 'Local storage',
         purpose: {
-          en: 'Your display and assistant settings inside the workspace',
-          de: 'Ihre Anzeige- und Assistenten-Einstellungen im Workspace',
+          en: 'Your display settings inside the workspace',
+          de: 'Ihre Anzeige-Einstellungen im Workspace',
         },
         duration: { en: 'Until you clear it', de: 'Bis zur Löschung durch Sie' },
       },

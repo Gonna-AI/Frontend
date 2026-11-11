@@ -1,9 +1,9 @@
 import { supabase } from "@/config/supabase";
 
 export type PipelineJobStage = "parse" | "extract" | "diff" | "generate";
-export type PipelineJobStatus = "queued" | "processing" | "done" | "error";
+type PipelineJobStatus = "queued" | "processing" | "done" | "error";
 
-export interface PipelineJobRow {
+interface PipelineJobRow {
   id: string;
   document_id: string;
   stage: PipelineJobStage;
@@ -302,11 +302,6 @@ export async function fetchShipments(): Promise<PipelineShipmentRow[]> {
   const { data, error } = await supabase.from("pipeline_shipments").select("*").order("created_at", { ascending: false });
   if (error) throw error;
   return (data ?? []) as PipelineShipmentRow[];
-}
-
-export async function updateShipmentStatus(id: string, status: PipelineShipmentRow["status"]): Promise<void> {
-  const { error } = await supabase.from("pipeline_shipments").update({ status }).eq("id", id);
-  if (error) throw error;
 }
 
 export interface PipelineTeamMemberRow {

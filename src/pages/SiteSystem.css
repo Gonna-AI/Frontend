@@ -87,8 +87,7 @@
 /* ---------- Stages (concentric with the shell) ---------- */
 
 .ct-works .ct-hero-stage,
-.ct-works .ct-hero-stage--home,
-.ct-works .ct-hero-video-slot {
+.ct-works .ct-hero-stage--home {
   border-radius: var(--r-stage);
 }
 
@@ -155,8 +154,7 @@
 .ct-works .brand-misuse-stage,
 .ct-works .brand-type-card,
 .ct-works .brand-token-card,
-.ct-works .brand-contact-card,
-.ct-works .ct-card {
+.ct-works .brand-contact-card {
   border-radius: var(--r-card);
 }
 
@@ -165,8 +163,7 @@
 .ct-works .clerktree-contact-info-card,
 .ct-works .ct-legal-card,
 .ct-works .brand-token-card,
-.ct-works .brand-contact-card,
-.ct-works .ct-card {
+.ct-works .brand-contact-card {
   background: var(--ct-panel);
   border: 1px solid var(--line);
   box-shadow: var(--lift);
@@ -175,8 +172,6 @@
 /* Things inset inside a card follow the card's curve. */
 /* ---------- Controls ---------- */
 
-.ct-works .ct-security-notice + .ct-security-sections,
-.ct-works .ct-security-contact,
 .ct-works .clerktree-contact-form input,
 .ct-works .clerktree-contact-form select,
 .ct-works .clerktree-contact-form textarea {
@@ -186,10 +181,6 @@
 /* White chips that used to sit on a grey card need an edge now. */
 .ct-works .clerktree-contact-socials a {
   border: 1px solid var(--line-strong);
-}
-
-.ct-works .ct-security-contact {
-  background: var(--ct-bg);
 }
 
 /* Home contact: the oversized watermark heading is gone (it peeked out

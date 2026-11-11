@@ -43,10 +43,6 @@ function applyTier() {
 }
 applyTier();
 
-export function getTier(): Tier {
-  return tier;
-}
-
 export function onTierChange(listener: (tier: Tier) => void): () => void {
   listeners.add(listener);
   return () => listeners.delete(listener);
@@ -74,7 +70,7 @@ export function frameInterval(): number {
 }
 
 /** Decorative animation (background gradients, text video) rests while the page scrolls on weaker tiers. */
-export function shouldRestDuringScroll(): boolean {
+function shouldRestDuringScroll(): boolean {
   return tier !== 'high';
 }
 
@@ -96,7 +92,7 @@ if (typeof window !== 'undefined') {
 }
 
 /** True while the page is being scrolled (and for a moment after). */
-export function isScrolling(): boolean {
+function isScrolling(): boolean {
   return performance.now() - lastScroll < 140;
 }
 

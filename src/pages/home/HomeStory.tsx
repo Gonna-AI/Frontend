@@ -205,7 +205,7 @@ const copy = {
   },
 };
 
-export function useHomeCopy() {
+function useHomeCopy() {
   const { language } = useLanguage();
   return copy[language === 'de' ? 'de' : 'en'];
 }

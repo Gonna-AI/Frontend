@@ -55,4 +55,4 @@ const ScrollBar = React.forwardRef<React.ElementRef<typeof ScrollAreaPrimitive.S
 )
 ScrollBar.displayName = "ScrollBar"
 
-export { ScrollArea, ScrollBar }
+export { ScrollArea,  }

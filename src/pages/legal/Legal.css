@@ -46,8 +46,6 @@
 .ct-works .legal-content ol { list-style: decimal; }
 .ct-works .legal-content li { margin-bottom: .45em; }
 .ct-works .legal-content li::marker { color: #a6a6a6; }
-.ct-works .legal-content .legal-toc { background: #f7f7f6; border-radius: 16px; margin: 0 0 2.4em; padding: 20px 24px 12px; }
-.ct-works .legal-content .legal-toc ol { margin: 0; }
 .ct-works .legal-content .legal-table { margin: 1.2em 0 1.6em; overflow-x: auto; }
 .ct-works .legal-content table { border-collapse: collapse; font-size: 14px; line-height: 1.55; min-width: 560px; width: 100%; }
 .ct-works .legal-content :where(th, td) { border: 1px solid #e5e5e5; padding: .7em .8em; text-align: left; vertical-align: top; }

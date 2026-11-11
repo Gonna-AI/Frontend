@@ -2,9 +2,6 @@
    globals.css exactly, but every rule is scoped under .dashboard-root instead of
    :root so it never touches the rest of the site's colors/fonts. */
 
-@import "./tangerine.css";
-@import "./brutalist.css";
-@import "./soft-pop.css";
 
 .dashboard-root {
   --font-geist: "Geist", ui-sans-serif, system-ui, sans-serif;

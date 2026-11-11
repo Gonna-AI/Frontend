@@ -22,7 +22,7 @@ import {
 
 export type NavBadge = "new" | "soon";
 
-export interface NavSubItem {
+interface NavSubItem {
   id: string;
   title: string;
   titleKey: string;

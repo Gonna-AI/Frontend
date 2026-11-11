@@ -63,7 +63,6 @@ export default defineConfig({
           // dashboard calendar, ~100 KB) and made every page download it.
           if (id.includes('/node_modules/react/') || id.includes('/node_modules/react-dom/') || id.includes('/node_modules/scheduler/')) return 'react-vendor';
           if (id.includes('/react-router') || id.includes('/react-helmet-async/')) return 'router-vendor';
-          if (id.includes('/@tanstack/react-query/')) return 'query-vendor';
           if (id.includes('/@tanstack/react-table/')) return 'table-vendor';
           if (id.includes('/@supabase/')) return 'supabase';
           if (id.includes('/framer-motion/') || id.includes('/motion-dom/') || id.includes('/motion-utils/')) return 'animation-vendor';

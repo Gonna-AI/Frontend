@@ -27,7 +27,7 @@ const BASE: Settings = {
   uGrainAnimated: 0, uContrast: 1.5, uGamma: 1, uSaturation: 1, uZoom: 0.9,
 };
 
-export const GRAINIENT_PRESETS = {
+const GRAINIENT_PRESETS = {
   silver: { colors: ['#1a1919', '#939393', '#f8f8f8'], settings: {} },
   // Dark panels: deep base with a soft silver light drifting through it.
   black: {
@@ -40,7 +40,7 @@ export const GRAINIENT_PRESETS = {
   },
 } as const;
 
-export type GrainientPreset = keyof typeof GRAINIENT_PRESETS;
+type GrainientPreset = keyof typeof GRAINIENT_PRESETS;
 
 const VERTEX = `#version 300 es
 const vec2 P[3]=vec2[3](vec2(-1.,-1.),vec2(3.,-1.),vec2(-1.,3.));

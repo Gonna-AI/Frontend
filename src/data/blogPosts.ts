@@ -139,13 +139,6 @@ export function getAllBlogPosts(): BlogPost[] {
   });
 }
 
-export function getBlogPostsByTag(tag: string): BlogPost[] {
-  if (tag === "All") {
-    return getAllBlogPosts();
-  }
-  return getAllBlogPosts().filter(post => post.tags?.includes(tag));
-}
-
 export function getAllTags(): string[] {
   const tags = new Set<string>();
   blogPosts.forEach(post => {

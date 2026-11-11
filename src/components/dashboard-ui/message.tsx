@@ -105,10 +105,10 @@ const MessageFooter = React.forwardRef<HTMLDivElement, React.ComponentProps<"div
 MessageFooter.displayName = "MessageFooter"
 
 export {
-  MessageGroup,
+  
   Message,
   MessageAvatar,
   MessageContent,
   MessageFooter,
-  MessageHeader,
+  
 }

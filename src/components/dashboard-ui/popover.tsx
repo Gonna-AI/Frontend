@@ -40,12 +40,6 @@ function PopoverContent({
   )
 }
 
-function PopoverAnchor({
-  ...props
-}: React.ComponentProps<typeof PopoverPrimitive.Anchor>) {
-  return <PopoverPrimitive.Anchor data-slot="popover-anchor" {...props} />
-}
-
 const PopoverHeader = React.forwardRef<HTMLDivElement, React.ComponentProps<"div">>(
   ({ className, ...props }, ref) => {
     return (
@@ -91,10 +85,10 @@ PopoverDescription.displayName = "PopoverDescription"
 
 export {
   Popover,
-  PopoverAnchor,
+  
   PopoverContent,
-  PopoverDescription,
-  PopoverHeader,
-  PopoverTitle,
+  
+  
+  
   PopoverTrigger,
 }

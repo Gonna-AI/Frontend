@@ -22,20 +22,20 @@ export type ShipmentStatus =
   | "On Hold"
   | "Customs Hold";
 
-export type TransportMode = "land" | "air" | "sea";
-export type RouteType = "road" | "flight" | "ship";
-export type CustomerTier = "Priority" | "Standard" | "Non-priority";
+type TransportMode = "land" | "air" | "sea";
+type RouteType = "road" | "flight" | "ship";
+type CustomerTier = "Priority" | "Standard" | "Non-priority";
 
 export type GeoCoordinate = [longitude: number, latitude: number];
 
-export type ShipmentLocation = {
+type ShipmentLocation = {
   coordinates: GeoCoordinate;
   display: string;
   country: string;
   countryCode: string;
 };
 
-export type ShipmentCustomer = {
+type ShipmentCustomer = {
   name: string;
   initials: string;
   id: string;
@@ -43,12 +43,12 @@ export type ShipmentCustomer = {
   tierLabel: string;
 };
 
-export type HandlingTag = {
+type HandlingTag = {
   label: string;
   icon: LucideIcon;
 };
 
-export type ShipmentHandling = {
+type ShipmentHandling = {
   label: string;
   note: string;
   tags: HandlingTag[];

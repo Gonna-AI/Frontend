@@ -1,6 +1,5 @@
 import { Suspense, useEffect, useState } from 'react';
 import { BrowserRouter, Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import LoadingScreen from './components/LoadingScreen';
 import ScrollToTop from './components/ScrollToTop';
@@ -100,16 +99,6 @@ const routePrefetchers = {
   '/security': () => import('./pages/legal/Security'),
   '/data-access': () => import('./pages/legal/DataAccess'),
 };
-
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 5 * 60 * 1000,
-      retry: 2,
-      refetchOnWindowFocus: false,
-    },
-  },
-});
 
 /** Signed-in and sign-in surfaces: dark shell, no public-site chrome, no consent banner. */
 const WORKSPACE_PATH = /^\/(dashboard|auth|login|invite|client|mail|chat|ai-settings)(\/|$)/;
@@ -236,87 +225,85 @@ function App() {
 
   return (
     <LanguageProvider>
-      <QueryClientProvider client={queryClient}>
-        <BrowserRouter>
-          <InternalLinkNavigation />
-          <ScrollToTop />
-          <RouteEffects />
-          <SEO
-            title="ClerkTree – The World's Industrial Intelligence Layer"
-            description="ClerkTree is an industrial AI harness for machine operations. Agents connect signals, technical knowledge and workflows to help teams understand issues and coordinate work."
-          />
-          <Suspense fallback={<RouteLoadingFallback />}>
-            <div className="flex flex-1 flex-col">
-              <Routes>
-                {/* Public site */}
-                <Route path="/" element={isResearchHost ? <Research /> : <Landing />} />
-                <Route path="/:topicSlug" element={isResearchHost ? <Research /> : <NotFound />} />
-                <Route path="/about" element={<About />} />
-                <Route path="/research" element={<Research />} />
-                <Route path="/research/:topicSlug" element={<Research />} />
-                <Route path="/machina" element={<Machina />} />
-                <Route path="/careers" element={<Careers />} />
-                <Route path="/brand" element={<Brand />} />
-                <Route path="/hive" element={<Hive />} />
-                <Route path="/solutions" element={<Navigate to="/#solutions" replace />} />
-                <Route path="/contact" element={<Contact />} />
-                <Route path="/blog" element={<Blog />} />
-                <Route path="/blog/:slug" element={<BlogPost />} />
+      <BrowserRouter>
+        <InternalLinkNavigation />
+        <ScrollToTop />
+        <RouteEffects />
+        <SEO
+          title="ClerkTree – The World's Industrial Intelligence Layer"
+          description="ClerkTree is an industrial AI harness for machine operations. Agents connect signals, technical knowledge and workflows to help teams understand issues and coordinate work."
+        />
+        <Suspense fallback={<RouteLoadingFallback />}>
+          <div className="flex flex-1 flex-col">
+            <Routes>
+              {/* Public site */}
+              <Route path="/" element={isResearchHost ? <Research /> : <Landing />} />
+              <Route path="/:topicSlug" element={isResearchHost ? <Research /> : <NotFound />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/research" element={<Research />} />
+              <Route path="/research/:topicSlug" element={<Research />} />
+              <Route path="/machina" element={<Machina />} />
+              <Route path="/careers" element={<Careers />} />
+              <Route path="/brand" element={<Brand />} />
+              <Route path="/hive" element={<Hive />} />
+              <Route path="/solutions" element={<Navigate to="/#solutions" replace />} />
+              <Route path="/contact" element={<Contact />} />
+              <Route path="/blog" element={<Blog />} />
+              <Route path="/blog/:slug" element={<BlogPost />} />
 
-                {/* Legal */}
-                <Route path="/terms-of-service" element={<TermsOfService />} />
-                <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-                <Route path="/cookie-policy" element={<CookiePolicy />} />
-                <Route path="/imprint" element={<Imprint />} />
-                <Route path="/impressum" element={<Navigate to="/imprint" replace />} />
-                <Route path="/security" element={<Security />} />
-                <Route path="/data-access" element={<DataAccess />} />
+              {/* Legal */}
+              <Route path="/terms-of-service" element={<TermsOfService />} />
+              <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+              <Route path="/cookie-policy" element={<CookiePolicy />} />
+              <Route path="/imprint" element={<Imprint />} />
+              <Route path="/impressum" element={<Navigate to="/imprint" replace />} />
+              <Route path="/security" element={<Security />} />
+              <Route path="/data-access" element={<DataAccess />} />
 
-                {/* Sign-in */}
-                <Route path="/login" element={<AuthRouteProvider><AuthPage /></AuthRouteProvider>} />
-                <Route path="/auth/callback" element={<AuthRouteProvider><AuthCallback /></AuthRouteProvider>} />
-                <Route path="/auth/google/callback" element={<AuthRouteProvider><AuthGoogleCallback /></AuthRouteProvider>} />
-                <Route path="/invite" element={<AuthRouteProvider><InvitePage /></AuthRouteProvider>} />
+              {/* Sign-in */}
+              <Route path="/login" element={<AuthRouteProvider><AuthPage /></AuthRouteProvider>} />
+              <Route path="/auth/callback" element={<AuthRouteProvider><AuthCallback /></AuthRouteProvider>} />
+              <Route path="/auth/google/callback" element={<AuthRouteProvider><AuthGoogleCallback /></AuthRouteProvider>} />
+              <Route path="/invite" element={<AuthRouteProvider><InvitePage /></AuthRouteProvider>} />
 
-                {/* Client portal */}
-                <Route path="/client/login" element={<ClientPortalProviderRoute><ClientPortalLoginPage /></ClientPortalProviderRoute>} />
-                <Route path="/client" element={<ProtectedClientPortalRoute><ClientPortalDashboard /></ProtectedClientPortalRoute>} />
+              {/* Client portal */}
+              <Route path="/client/login" element={<ClientPortalProviderRoute><ClientPortalLoginPage /></ClientPortalProviderRoute>} />
+              <Route path="/client" element={<ProtectedClientPortalRoute><ClientPortalDashboard /></ProtectedClientPortalRoute>} />
 
-                {/* Workspace */}
-                <Route path="/dashboard" element={<Workspace><DashboardLayout /></Workspace>}>
-                  <Route index element={<Navigate to="/dashboard/default" replace />} />
-                  <Route path="default" element={<DashboardDefault />} />
-                  <Route path="crm" element={<DashboardCrm />} />
-                  <Route path="finance" element={<DashboardFinance />} />
-                  <Route path="analytics" element={<DashboardAnalytics />} />
-                  <Route path="productivity" element={<DashboardProductivity />} />
-                  <Route path="ecommerce" element={<DashboardEcommerce />} />
-                  <Route path="academy" element={<DashboardAcademy />} />
-                  <Route path="logistics" element={<DashboardLogistics />} />
-                  <Route path="infrastructure" element={<DashboardInfrastructure />} />
-                  <Route path="mail" element={<DashboardMailPreview />} />
-                  <Route path="chat" element={<DashboardChatPreview />} />
-                  <Route path="calendar" element={<DashboardCalendar />} />
-                  <Route path="kanban" element={<DashboardKanban />} />
-                  <Route path="tasks" element={<DashboardTasks />} />
-                  <Route path="invoice" element={<DashboardInvoice />} />
-                  <Route path="users" element={<DashboardUsers />} />
-                  <Route path="roles" element={<DashboardRoles />} />
-                  <Route path="analytics-v1" element={<DashboardAnalyticsV1 />} />
-                  <Route path="coming-soon" element={<DashboardComingSoon />} />
-                </Route>
-                {/* Full-screen apps the dashboard embeds through preview iframes */}
-                <Route path="/mail" element={<Workspace><MailApp /></Workspace>} />
-                <Route path="/chat" element={<Workspace><ChatApp /></Workspace>} />
-                <Route path="/ai-settings" element={<Workspace><AISettings /></Workspace>} />
+              {/* Workspace */}
+              <Route path="/dashboard" element={<Workspace><DashboardLayout /></Workspace>}>
+                <Route index element={<Navigate to="/dashboard/default" replace />} />
+                <Route path="default" element={<DashboardDefault />} />
+                <Route path="crm" element={<DashboardCrm />} />
+                <Route path="finance" element={<DashboardFinance />} />
+                <Route path="analytics" element={<DashboardAnalytics />} />
+                <Route path="productivity" element={<DashboardProductivity />} />
+                <Route path="ecommerce" element={<DashboardEcommerce />} />
+                <Route path="academy" element={<DashboardAcademy />} />
+                <Route path="logistics" element={<DashboardLogistics />} />
+                <Route path="infrastructure" element={<DashboardInfrastructure />} />
+                <Route path="mail" element={<DashboardMailPreview />} />
+                <Route path="chat" element={<DashboardChatPreview />} />
+                <Route path="calendar" element={<DashboardCalendar />} />
+                <Route path="kanban" element={<DashboardKanban />} />
+                <Route path="tasks" element={<DashboardTasks />} />
+                <Route path="invoice" element={<DashboardInvoice />} />
+                <Route path="users" element={<DashboardUsers />} />
+                <Route path="roles" element={<DashboardRoles />} />
+                <Route path="analytics-v1" element={<DashboardAnalyticsV1 />} />
+                <Route path="coming-soon" element={<DashboardComingSoon />} />
+              </Route>
+              {/* Full-screen apps the dashboard embeds through preview iframes */}
+              <Route path="/mail" element={<Workspace><MailApp /></Workspace>} />
+              <Route path="/chat" element={<Workspace><ChatApp /></Workspace>} />
+              <Route path="/ai-settings" element={<Workspace><AISettings /></Workspace>} />
 
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </div>
-          </Suspense>
-          <ConsentHost />
-        </BrowserRouter>
-      </QueryClientProvider>
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </div>
+        </Suspense>
+        <ConsentHost />
+      </BrowserRouter>
     </LanguageProvider>
   );
 }

@@ -8,7 +8,7 @@ const APP = '#0a0a0a'; // sign-in and workspace
 
 const WORKSPACE = /^\/(dashboard|auth|login|invite|client|mail|chat|ai-settings)(\/|$)/;
 
-export function chromeColorFor(pathname: string): string {
+function chromeColorFor(pathname: string): string {
   if (WORKSPACE.test(pathname)) return APP;
   if (pathname === '/hive') return DARK_HERO;
   return SITE;

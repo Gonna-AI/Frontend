@@ -56,24 +56,3 @@ export function isSaveDataEnabled() {
 
   return Boolean(connection?.saveData);
 }
-
-export function shouldAutoplayMedia() {
-  if (typeof window === 'undefined') {
-    return false;
-  }
-
-  return !isSaveDataEnabled() && !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-}
-
-export async function yieldToMain() {
-  const scheduler = (globalThis as typeof globalThis & {
-    scheduler?: { yield?: () => Promise<void> };
-  }).scheduler;
-
-  if (typeof scheduler?.yield === 'function') {
-    await scheduler.yield();
-    return;
-  }
-
-  await new Promise<void>((resolve) => window.setTimeout(resolve, 0));
-}
