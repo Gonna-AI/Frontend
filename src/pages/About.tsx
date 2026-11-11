@@ -1,6 +1,6 @@
 import { lazy, Suspense, useEffect, useRef, useState, type CSSProperties } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowUpRight, UsersRound, X } from 'lucide-react';
+import { ArrowUpRight, Gauge, ScanSearch, ShieldCheck, UsersRound, X } from 'lucide-react';
 
 import { useLanguage } from '../contexts/LanguageContext';
 import { PageHero, Footer } from '../components/Landing/SiteChrome';
@@ -91,26 +91,36 @@ export default function About() {
           </div>
         </section>
 
-        <section className="ct-about-values" aria-labelledby="about-values-title">
-          <h2 id="about-values-title">{language === 'de' ? 'Was uns wichtig ist.' : 'What matters to us.'}</h2>
-          <p>{language === 'de' ? 'Klar im Denken. Sorgfältig im Machen.' : 'Clear thinking. Thoughtful work.'}</p>
-          <div className="ct-about-principles">
-          {principles.map(({ title, copy }) => (
-            <article key={title} className="ct-about-card">
-              <h3><span aria-hidden="true">✳</span> {title}</h3>
-              <p>{copy}</p>
-            </article>
-          ))}
-          </div>
-        </section>
+        </div>
 
-        <section className="ct-about-section">
+        <section className="ct-about-ethos" aria-labelledby="about-values-title">
+          <div className="ct-about-ethos-top">
+            <header>
+              <span className="ct-about-kicker">{language === 'de' ? 'Unsere Haltung' : 'How we work'}</span>
+              <h2 id="about-values-title">{language === 'de' ? 'Was uns wichtig ist.' : 'What matters to us.'}</h2>
+              <p>{language === 'de' ? 'Klar im Denken. Sorgfältig im Machen.' : 'Clear thinking. Thoughtful work.'}</p>
+            </header>
+            <ol className="ct-about-values">
+              {principles.map(({ title, copy }, i) => {
+                const Icon = [ScanSearch, Gauge, ShieldCheck][i];
+                return (
+                  <li key={title}>
+                    <span className="ct-about-value-num">{String(i + 1).padStart(2, '0')}</span>
+                    <span className="ct-about-value-icon" aria-hidden="true"><Icon size={20} strokeWidth={1.6} /></span>
+                    <div>
+                      <h3>{title}</h3>
+                      <p>{copy}</p>
+                    </div>
+                  </li>
+                );
+              })}
+            </ol>
+          </div>
           <div className="ct-about-mission">
             <p>{t('about.missionTitle')}</p>
             <p>{t('about.missionDesc')}</p>
           </div>
         </section>
-        </div>
 
         <section className={`about-team${selectedMember ? ' is-paused' : ''}`} aria-labelledby="about-team-title">
           <div className="about-team-heading">

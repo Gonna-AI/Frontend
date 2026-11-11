@@ -24,18 +24,6 @@
 .ct-about-copy { margin: auto; max-width: 590px; }
 .ct-about-copy p { color: #777; font-size: clamp(16px, 1.25vw, 19px); line-height: 1.6; margin: 0 0 20px; }
 .ct-about-copy p:last-child { margin-bottom: 0; }
-.ct-about-values { padding: clamp(20px, 3vw, 44px) 0 clamp(76px, 8vw, 120px); text-align: center; }
-.ct-about-values h2 { color: #171717; font-family: Geist, sans-serif !important; font-size: clamp(26px, 3vw, 38px); font-weight: 500; letter-spacing: -.04em; margin: 0; }
-.ct-about-values > p { color: #929292; font-size: clamp(20px, 2.2vw, 29px); letter-spacing: -.03em; margin: 8px 0 38px; }
-.ct-works .ct-about-principles { display: flex; flex-wrap: wrap; gap: 28px; justify-content: center; max-width: 1000px; }
-.ct-about-card { flex: 1 1 190px; max-width: 270px; }
-.ct-about-card h3 { background: #f5f5f3; border: 1px solid #ededeb; border-radius: 999px; color: #202020; display: inline-block; font-family: Geist, sans-serif !important; font-size: 15px; font-weight: 500; margin: 0 0 14px; padding: 10px 16px; }
-.ct-about-card h3 span { color: #f15a24; font-size: 14px; }
-.ct-about-card p { color: #888; font-size: 14px; line-height: 1.5; margin: 0; }
-.ct-about-story .ct-about-section:last-child { border-top: 1px solid #eee; padding: clamp(72px, 8vw, 120px) 0; }
-.ct-about-mission { margin: auto; max-width: 660px !important; text-align: center; }
-.ct-about-mission p:first-child { color: #f15a24; font-size: 11px; font-weight: 600; letter-spacing: .14em; margin: 0 0 20px; text-transform: uppercase; }
-.ct-about-mission p:last-child { color: #858585; font-size: clamp(21px, 2.5vw, 32px); letter-spacing: -.035em; line-height: 1.3; margin: 0; }
 .ct-about-bottom { align-items: center; display: flex; flex-direction: column; gap: 72px; text-align: center; }
 .ct-about-join h2 { color: #171717; font-family: Geist, sans-serif !important; font-size: clamp(34px, 4vw, 54px); font-weight: 500; letter-spacing: -.05em; line-height: 1.08; margin: 0; }
 .ct-about-join p { color: #858585; font-size: 17px; line-height: 1.55; margin: 18px auto 0; max-width: 44ch; }
@@ -56,16 +44,9 @@
 @media (max-width: 640px) {
   .ct-about-page { padding: 24px 14px 24px; }
   .ct-about-story { padding-inline: 24px; }
-  .ct-about-principles { flex-direction: column; align-items: center; }
-  .ct-about-card { flex: auto; }
   .ct-about-bottom { gap: 56px; }
 }
 
-/* Equal-width values keep every label and description on the same baseline. */
-.ct-works .ct-about-principles { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:28px; }
-.ct-about-card { max-width:none; }
-.ct-about-card h3 { align-items:center; display:inline-flex; justify-content:center; min-height:48px; white-space:nowrap; }
-@media (max-width:640px) { .ct-works .ct-about-principles { grid-template-columns:1fr; max-width:300px; } }
 
 /* Intro: the liquid-metal mark beside the story. */
 .ct-about-intro-grid {
@@ -90,4 +71,76 @@
   .ct-about-mark { aspect-ratio: 4 / 3; margin: 0 auto; max-width: 560px; width: 100%; }
   .ct-about-intro .ct-about-grid-head { margin: 0 auto; text-align: center; }
   .ct-about-intro .ct-about-grid-head h2, .ct-about-intro .ct-about-copy { margin-inline: auto; }
+}
+
+
+/* ---------- Ethos: values and mission on a dark graphite panel ----------
+   Same material as the footer and the Hive menu: graphite, a fine hairline, silver tiles, a warm
+   glow at the foot. */
+.ct-works .ct-about-ethos {
+  background: radial-gradient(80% 90% at 20% 0%, #2a2a2c, #0b0b0b 70%);
+  border-radius: var(--r-edge, 36px);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .07), 0 40px 80px -48px rgba(0, 0, 0, .7);
+  color: #fff;
+  isolation: isolate;
+  margin: 8px auto 0;
+  max-width: var(--edge-max, 1920px);
+  overflow: hidden;
+  padding: clamp(48px, 7vw, 112px) clamp(22px, 5vw, 96px);
+  position: relative;
+}
+.ct-works .ct-about-ethos::before {
+  background: radial-gradient(circle at 50% 100%, rgba(255, 78, 17, .16), transparent 42%), linear-gradient(180deg, rgba(0, 0, 0, .05), rgba(0, 0, 0, .18) 60%, transparent);
+  content: ""; inset: 0; pointer-events: none; position: absolute; z-index: -1;
+}
+.ct-about-ethos-top {
+  align-items: start; display: grid; gap: clamp(36px, 6vw, 104px); grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  margin: 0 auto; max-width: 1180px;
+}
+.ct-about-kicker { color: var(--ct-orange); display: block; font: 600 11px/1 var(--font-ui, "Geist", sans-serif); letter-spacing: .14em; margin-bottom: 22px; text-transform: uppercase; }
+.ct-works .ct-about-ethos h2 {
+  color: #fff; font-family: "Cal Sans", "Cal Sans Placeholder", "Inter", sans-serif !important; font-size: clamp(36px, 4.4vw, 62px);
+  font-weight: 400; letter-spacing: -.01em; line-height: 1.04; margin: 0; text-wrap: balance;
+}
+.ct-about-ethos header p { color: rgba(255, 255, 255, .5); font-size: clamp(17px, 1.6vw, 21px); line-height: 1.45; margin: 18px 0 0; max-width: 30ch; text-wrap: balance; }
+
+.ct-about-values { counter-reset: none; list-style: none; margin: 0; padding: 0; }
+.ct-about-values li {
+  align-items: start; border-top: 1px solid rgba(255, 255, 255, .09); display: grid; gap: 0 clamp(14px, 2vw, 24px);
+  grid-template-columns: 28px 48px minmax(0, 1fr); padding: clamp(26px, 3vw, 38px) 0; position: relative; transition: background-color .3s ease;
+}
+.ct-about-values li:last-child { border-bottom: 1px solid rgba(255, 255, 255, .09); }
+.ct-about-value-num { color: rgba(255, 255, 255, .34); font: 500 11px/48px ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .04em; }
+.ct-about-value-icon {
+  align-items: center; background: linear-gradient(160deg, #323236 0%, #1b1b1e 100%); border-radius: 14px; color: #d6d6db; display: flex;
+  height: 48px; justify-content: center; width: 48px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .1), inset 0 -1px 0 rgba(0, 0, 0, .4), 0 0 0 1px rgba(255, 255, 255, .08), 0 1px 2px rgba(0, 0, 0, .5);
+  transition: background .35s ease, color .35s ease, box-shadow .35s ease;
+}
+.ct-works .ct-about-values h3 { color: #fff; font: 500 clamp(19px, 1.7vw, 23px)/1.25 var(--font-ui, "Geist", sans-serif) !important; letter-spacing: -.015em; margin: 12px 0 10px; }
+.ct-about-values p { color: rgba(245, 245, 245, .58); font-size: 15.5px; line-height: 1.6; margin: 0; max-width: 46ch; }
+@media (hover: hover) and (pointer: fine) {
+  .ct-about-values li:hover .ct-about-value-icon {
+    background: linear-gradient(160deg, #fafafa 0%, #b4b6bb 100%); color: #0b0b0c;
+    box-shadow: inset 0 1px 0 #fff, 0 0 0 1px rgba(255, 255, 255, .35), 0 8px 20px -6px rgba(0, 0, 0, .6);
+  }
+  .ct-about-values li:hover .ct-about-value-num { color: rgba(255, 255, 255, .7); }
+}
+
+.ct-about-mission { margin: clamp(64px, 8vw, 128px) auto 0; max-width: 1040px; padding-top: clamp(40px, 5vw, 72px); position: relative; text-align: center; }
+.ct-about-mission::before { background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .16), transparent); content: ""; height: 1px; left: 0; position: absolute; right: 0; top: 0; }
+.ct-about-mission p:first-child { color: var(--ct-orange); font: 600 11px/1 var(--font-ui, "Geist", sans-serif); letter-spacing: .14em; margin: 0 0 26px; text-transform: uppercase; }
+.ct-about-mission p:last-child {
+  background: linear-gradient(180deg, #fff 20%, #a9abb1 100%); -webkit-background-clip: text; background-clip: text; color: transparent;
+  font: 500 clamp(26px, 3.4vw, 48px)/1.16 var(--font-ui, "Geist", "Inter", sans-serif); letter-spacing: -.03em; margin: 0; text-wrap: balance;
+}
+
+@media (max-width: 900px) {
+  .ct-about-ethos-top { grid-template-columns: 1fr; }
+  .ct-about-ethos header p { max-width: none; }
+}
+@media (max-width: 560px) {
+  .ct-about-values li { gap: 0 14px; grid-template-columns: 44px minmax(0, 1fr); }
+  .ct-about-value-num { display: none; }
+  .ct-about-value-icon { height: 44px; width: 44px; }
 }
