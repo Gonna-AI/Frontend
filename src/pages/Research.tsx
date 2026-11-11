@@ -147,7 +147,7 @@ function ResearchShell({ children, hero, isResearchHost }: { children: ReactNode
         {hero}
       </div>
       <main>{children}</main>
-      <Footer />
+      <Footer linkBase={isResearchHost ? 'https://clerktree.com' : ''} />
     </div>
   );
 }

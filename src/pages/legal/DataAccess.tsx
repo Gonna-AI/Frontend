@@ -3,8 +3,52 @@ import { useNavigate } from 'react-router-dom';
 import { CheckCircle2 } from 'lucide-react';
 import { PageHero, Footer } from '../../components/Landing/SiteChrome';
 import SEO from '../../components/SEO';
+import { useLanguage } from '../../contexts/LanguageContext';
 import '../LandingFramer.css';
 import './Legal.css';
+
+const COPY = {
+  en: {
+    seoTitle: 'Data Subject Access Request (DSAR)',
+    seoDescription: 'Submit a request to access, correct, delete, or restrict your personal data under the GDPR.',
+    eyebrow: 'Privacy rights',
+    title: 'Data Access Request',
+    description: 'Submit a request to access, restrict, correct, or delete your personal data. We verify and answer your request within one month.',
+    successTitle: 'Request Submitted Successfully',
+    successBody: 'We have received your request and will answer within one month. We may contact you first to verify your identity.',
+    home: 'Return to Home',
+    intro: 'Use this form to exercise your rights under the GDPR. You can also email us at team@clerktree.com.',
+    error: 'Failed to submit request. Please verify your connection or try again later.',
+    fullName: 'Full Name *', email: 'Email Address *', phone: 'Phone Number (Optional)', relationship: 'Relationship to ClerkTree *',
+    relationships: { customer: 'Customer / User', applicant: 'Job Applicant', employee: 'Former or Current Employee', other: 'Other / No Relationship' },
+    requestType: 'Type of Request *',
+    requestTypes: { access: 'Access / Export Personal Data', deletion: 'Delete / Erase Personal Data', rectification: 'Correct / Rectify Personal Data', restrict: 'Restrict Processing of Data', objection: 'Object to Processing of Data' },
+    details: 'Details of Request (Optional)', detailsHint: 'Please specify any details that will help us locate your records.',
+    detailsPlaceholder: 'Provide details about the data you are referencing...',
+    confirm: 'I confirm that I am the data subject whose name appears on this form, or that I am legally authorized to submit this request on their behalf.',
+    submitting: 'Submitting Request...', submit: 'Submit Request',
+  },
+  de: {
+    seoTitle: 'Antrag auf Auskunft nach Datenschutzrecht',
+    seoDescription: 'Beantragen Sie Auskunft über Ihre personenbezogenen Daten oder deren Berichtigung, Löschung oder Einschränkung nach der DSGVO.',
+    eyebrow: 'Datenschutzrechte',
+    title: 'Anfrage zu Ihren Daten',
+    description: 'Beantragen Sie Auskunft, Einschränkung, Berichtigung oder Löschung Ihrer personenbezogenen Daten. Wir prüfen und beantworten Ihre Anfrage innerhalb eines Monats.',
+    successTitle: 'Anfrage erfolgreich gesendet',
+    successBody: 'Wir haben Ihre Anfrage erhalten und antworten innerhalb eines Monats. Gegebenenfalls melden wir uns vorab, um Ihre Identität zu prüfen.',
+    home: 'Zur Startseite',
+    intro: 'Mit diesem Formular üben Sie Ihre Rechte nach der DSGVO aus. Sie können uns auch per E-Mail an team@clerktree.com schreiben.',
+    error: 'Die Anfrage konnte nicht gesendet werden. Bitte prüfen Sie Ihre Verbindung oder versuchen Sie es später erneut.',
+    fullName: 'Vollständiger Name *', email: 'E-Mail-Adresse *', phone: 'Telefonnummer (optional)', relationship: 'Ihre Beziehung zu ClerkTree *',
+    relationships: { customer: 'Kunde / Nutzer', applicant: 'Bewerber', employee: 'Ehemalige oder aktuelle Mitarbeitende', other: 'Sonstiges / keine Beziehung' },
+    requestType: 'Art der Anfrage *',
+    requestTypes: { access: 'Auskunft / Export personenbezogener Daten', deletion: 'Löschung personenbezogener Daten', rectification: 'Berichtigung personenbezogener Daten', restrict: 'Einschränkung der Verarbeitung', objection: 'Widerspruch gegen die Verarbeitung' },
+    details: 'Details zur Anfrage (optional)', detailsHint: 'Bitte nennen Sie Angaben, die uns helfen, Ihre Daten zu finden.',
+    detailsPlaceholder: 'Beschreiben Sie, auf welche Daten sich Ihre Anfrage bezieht ...',
+    confirm: 'Ich bestätige, dass ich die betroffene Person bin, deren Name in diesem Formular steht, oder dass ich rechtlich befugt bin, diese Anfrage in deren Namen zu stellen.',
+    submitting: 'Anfrage wird gesendet ...', submit: 'Anfrage senden',
+  },
+} as const;
 
 type RequestType = 'access' | 'deletion' | 'rectification' | 'portability' | 'objection' | 'restrict';
 type RelationshipType = 'customer' | 'applicant' | 'employee' | 'other';
@@ -30,6 +74,8 @@ const initialFormData: DSARFormData = {
 };
 
 export default function DataAccess() {
+  const { language } = useLanguage();
+  const c = COPY[language === 'de' ? 'de' : 'en'];
   const navigate = useNavigate();
   const [formData, setFormData] = useState<DSARFormData>(initialFormData);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -111,15 +157,15 @@ ${formData.details || 'No additional details provided.'}
   return (
     <div className="ct-works" id="ct-works">
       <SEO
-        title="Data Subject Access Request (DSAR)"
-        description="Submit a request to access, correct, delete, or restrict your personal data under the GDPR."
+        title={c.seoTitle}
+        description={c.seoDescription}
         noindex
       />
 
       <PageHero
-        eyebrow="Privacy rights"
-        title="Data Access Request"
-        description="Submit a request to access, restrict, correct, or delete your personal data. We verify and answer your request within one month."
+        eyebrow={c.eyebrow}
+        title={c.title}
+        description={c.description}
         titleId="dsar-page-title"
       />
 
@@ -134,37 +180,37 @@ ${formData.details || 'No additional details provided.'}
                   <CheckCircle2 size={36} strokeWidth={1.5} />
                 </div>
                 <h2 className="text-2xl font-bold tracking-tight text-[rgb(19,19,19)] mb-3">
-                  Request Submitted Successfully
+                  {c.successTitle}
                 </h2>
                 <p className="text-[rgba(19,19,19,0.7)] leading-relaxed mb-6">
-                  We have received your request and will answer within one month. We may contact you first to verify your identity.
+                  {c.successBody}
                 </p>
                 <button
                   type="button"
                   onClick={() => navigate('/')}
                   className="px-6 py-3 rounded-full bg-[rgb(19,19,19)] text-white font-semibold transition-colors hover:bg-black"
                 >
-                  Return to Home
+                  {c.home}
                 </button>
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="flex flex-col gap-6 max-w-2xl mx-auto">
                 <div className="border-l-2 border-[#FF4D00] pl-4 mb-4">
                   <p className="text-sm text-[rgba(19,19,19,0.72)] leading-relaxed">
-                    Use this form to exercise your rights under the GDPR. You can also email us at team@clerktree.com.
+                    {c.intro}
                   </p>
                 </div>
 
                 {submitStatus === 'error' && (
                   <div className="p-4 rounded-xl bg-red-50 border border-red-100 text-red-600 text-sm">
-                    Failed to submit request. Please verify your connection or try again later.
+                    {c.error}
                   </div>
                 )}
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="flex flex-col gap-2">
                     <label htmlFor="fullName" className="text-sm font-semibold text-[rgb(19,19,19)]">
-                      Full Name *
+                      {c.fullName}
                     </label>
                     <input
                       id="fullName"
@@ -181,7 +227,7 @@ ${formData.details || 'No additional details provided.'}
 
                   <div className="flex flex-col gap-2">
                     <label htmlFor="email" className="text-sm font-semibold text-[rgb(19,19,19)]">
-                      Email Address *
+                      {c.email}
                     </label>
                     <input
                       id="email"
@@ -200,7 +246,7 @@ ${formData.details || 'No additional details provided.'}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="flex flex-col gap-2">
                     <label htmlFor="phone" className="text-sm font-semibold text-[rgb(19,19,19)]">
-                      Phone Number (Optional)
+                      {c.phone}
                     </label>
                     <input
                       id="phone"
@@ -215,7 +261,7 @@ ${formData.details || 'No additional details provided.'}
 
                   <div className="flex flex-col gap-2">
                     <label htmlFor="relationship" className="text-sm font-semibold text-[rgb(19,19,19)]">
-                      Relationship to ClerkTree *
+                      {c.relationship}
                     </label>
                     <select
                       id="relationship"
@@ -224,17 +270,17 @@ ${formData.details || 'No additional details provided.'}
                       onChange={handleChange}
                       className="w-full px-4 py-3 rounded-lg bg-[rgba(19,19,19,0.03)] border border-[rgba(19,19,19,0.1)] text-[rgb(19,19,19)] focus:outline-none focus:border-[#FF4D00]/50 focus:ring-2 focus:ring-[#FF4D00]/15 transition-all"
                     >
-                      <option value="customer">Customer / User</option>
-                      <option value="applicant">Job Applicant</option>
-                      <option value="employee">Former or Current Employee</option>
-                      <option value="other">Other / No Relationship</option>
+                      <option value="customer">{c.relationships.customer}</option>
+                      <option value="applicant">{c.relationships.applicant}</option>
+                      <option value="employee">{c.relationships.employee}</option>
+                      <option value="other">{c.relationships.other}</option>
                     </select>
                   </div>
                 </div>
 
                 <div className="flex flex-col gap-2">
                   <label htmlFor="requestType" className="text-sm font-semibold text-[rgb(19,19,19)]">
-                    Type of Request *
+                    {c.requestType}
                   </label>
                   <select
                     id="requestType"
@@ -243,19 +289,19 @@ ${formData.details || 'No additional details provided.'}
                     onChange={handleChange}
                     className="w-full px-4 py-3 rounded-lg bg-[rgba(19,19,19,0.03)] border border-[rgba(19,19,19,0.1)] text-[rgb(19,19,19)] focus:outline-none focus:border-[#FF4D00]/50 focus:ring-2 focus:ring-[#FF4D00]/15 transition-all"
                   >
-                    <option value="access">Access / Export Personal Data</option>
-                    <option value="deletion">Delete / Erase Personal Data</option>
-                    <option value="rectification">Correct / Rectify Personal Data</option>
-                    <option value="restrict">Restrict Processing of Data</option>
-                    <option value="objection">Object to Processing of Data</option>
+                    <option value="access">{c.requestTypes.access}</option>
+                    <option value="deletion">{c.requestTypes.deletion}</option>
+                    <option value="rectification">{c.requestTypes.rectification}</option>
+                    <option value="restrict">{c.requestTypes.restrict}</option>
+                    <option value="objection">{c.requestTypes.objection}</option>
                   </select>
                 </div>
 
                 <div className="flex flex-col gap-2">
                   <label htmlFor="details" className="text-sm font-semibold text-[rgb(19,19,19)]">
-                    Details of Request (Optional)
+                    {c.details}
                     <span className="block text-xs font-normal text-[rgba(19,19,19,0.5)] mt-0.5">
-                      Please specify any details that will help us locate your records.
+                      {c.detailsHint}
                     </span>
                   </label>
                   <textarea
@@ -263,7 +309,7 @@ ${formData.details || 'No additional details provided.'}
                     maxLength={3000}
                     name="details"
                     rows={4}
-                    placeholder="Provide details about the data you are referencing..."
+                    placeholder={c.detailsPlaceholder}
                     value={formData.details}
                     onChange={handleChange}
                     className="w-full px-4 py-3 rounded-lg bg-[rgba(19,19,19,0.03)] border border-[rgba(19,19,19,0.1)] text-[rgb(19,19,19)] placeholder-[rgba(19,19,19,0.35)] focus:outline-none focus:border-[#FF4D00]/50 focus:ring-2 focus:ring-[#FF4D00]/15 transition-all resize-none"
@@ -281,7 +327,7 @@ ${formData.details || 'No additional details provided.'}
                     className="mt-1 accent-[#FF4D00]"
                   />
                   <label htmlFor="identityConfirmed" className="text-xs text-[rgba(19,19,19,0.65)] leading-normal select-none cursor-pointer">
-                    I confirm that I am the data subject whose name appears on this form, or that I am legally authorized to submit this request on their behalf.
+                    {c.confirm}
                   </label>
                 </div>
 
@@ -290,7 +336,7 @@ ${formData.details || 'No additional details provided.'}
                   disabled={isSubmitting}
                   className="w-full mt-4 px-8 py-4 rounded-full bg-[#FF4D00] text-white font-semibold hover:bg-[#E64500] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF4D00]/40 focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 shadow-[0_12px_30px_rgba(255,77,0,0.22)]"
                 >
-                  {isSubmitting ? 'Submitting Request...' : 'Submit Request'}
+                  {isSubmitting ? c.submitting : c.submit}
                 </button>
               </form>
             )}

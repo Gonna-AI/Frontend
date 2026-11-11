@@ -112,7 +112,7 @@ export default function BlogPost() {
           )}
         </aside>
 
-        <article className="jr-article">
+        <article className="jr-article" lang="en">
           {post.tags && <div className="jr-tags">{post.tags.map((tag) => <a href={`/blog?tag=${encodeURIComponent(tag)}`} key={tag}>{tag}</a>)}</div>}
 
           <div className="jr-prose">

@@ -24,7 +24,6 @@ const Careers = lazyWithRetry(() => import('./pages/Careers'), 'Careers');
 const Brand = lazyWithRetry(() => import('./pages/Brand'), 'Brand');
 const Hive = lazyWithRetry(() => import('./pages/hive/Hive'), 'Hive');
 const Contact = lazyWithRetry(() => import('./pages/Contact'), 'Contact');
-const SupportPage = lazyWithRetry(() => import('./pages/SupportPage'), 'SupportPage');
 const Blog = lazyWithRetry(() => import('./pages/Blog'), 'Blog');
 const BlogPost = lazyWithRetry(() => import('./pages/BlogPost'), 'BlogPost');
 const NotFound = lazyWithRetry(() => import('./pages/NotFound'), 'NotFound');
@@ -88,7 +87,6 @@ const routePrefetchers = {
   '/brand': () => import('./pages/Brand'),
   '/hive': () => import('./pages/hive/Hive'),
   '/contact': () => import('./pages/Contact'),
-  '/support': () => import('./pages/SupportPage'),
   '/machina': () => import('./pages/Machina'),
   '/blog': () => import('./pages/Blog'),
   '/blog/:slug': () => import('./pages/BlogPost'),
@@ -262,7 +260,6 @@ function App() {
                 <Route path="/hive" element={<Hive />} />
                 <Route path="/solutions" element={<Navigate to="/#solutions" replace />} />
                 <Route path="/contact" element={<Contact />} />
-                <Route path="/support" element={<SupportPage />} />
                 <Route path="/blog" element={<Blog />} />
                 <Route path="/blog/:slug" element={<BlogPost />} />
 

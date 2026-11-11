@@ -247,17 +247,4 @@ export const en = {
     'home.showcase.logosAria': 'Client logos',
 
     // Support page
-    'supportPage.category.technical': 'Technical',
-    'supportPage.category.billing': 'Billing',
-    'supportPage.category.account': 'Account',
-    'supportPage.category.api': 'API',
-    'supportPage.category.general': 'General',
-    'supportPage.priority.low': 'Low',
-    'supportPage.priority.medium': 'Medium',
-    'supportPage.priority.high': 'High',
-    'supportPage.priority.urgent': 'Urgent',
-    'supportPage.error.serviceNotConfigured': 'Support service is not configured. Please email us directly.',
-    'supportPage.error.signInRequired': 'Please sign in to submit a support ticket.',
-    'supportPage.error.createFailed': 'Failed to create ticket. Please try again.',
-    'supportPage.error.generic': 'Something went wrong. Please try again later.',
 };

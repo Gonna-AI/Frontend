@@ -18,12 +18,27 @@ import './FooterDesign.css';
 
 const RESEARCH_URL = 'https://research.clerktree.com';
 
+/**
+ * Links that leave this origin (to the research or main site) cannot share localStorage, so the
+ * visitor's language travels in the URL instead and the other site starts in the same language.
+ */
+function crossSite(url: string, language: string): string {
+  try {
+    const target = new URL(url, window.location.origin);
+    if (target.origin === window.location.origin) return url;
+    target.searchParams.set('lang', language);
+    return target.href;
+  } catch {
+    return url;
+  }
+}
+
 type NavMenuItem = { label: string; href: string; icon: ReactNode; desc?: string };
 type NavEntry = { label: string; href: string; items?: NavMenuItem[] };
 
 function buildDesktopNav(language: string, t: (key: string) => string, linkBase: string): NavEntry[] {
   const de = language === 'de';
-  const local = (path: string) => `${linkBase}${path}`;
+  const local = (path: string) => (linkBase ? crossSite(`${linkBase}${path}`, language) : path);
   return [
     {
       label: t('nav.solutions'),
@@ -40,7 +55,7 @@ function buildDesktopNav(language: string, t: (key: string) => string, linkBase:
       href: local('/about'),
       items: [
         { label: t('nav.about'), href: local('/about'), icon: <Users />, desc: de ? 'Team und Mission' : 'Team and mission' },
-        { label: t('nav.research'), href: RESEARCH_URL, icon: <FlaskConical />, desc: de ? 'Paper und Benchmarks' : 'Papers and benchmarks' },
+        { label: t('nav.research'), href: crossSite(RESEARCH_URL, language), icon: <FlaskConical />, desc: de ? 'Paper und Benchmarks' : 'Papers and benchmarks' },
         { label: de ? 'Karriere' : 'Careers', href: local('/careers'), icon: <Briefcase />, desc: de ? 'Offene Stellen' : 'Open roles' },
         { label: 'Brand', href: local('/brand'), icon: <Shapes />, desc: de ? 'Logos und Richtlinien' : 'Logos and guidelines' },
       ],
@@ -182,7 +197,7 @@ export function Header({ linkBase = '' }: HeaderProps = {}) {
   const sheetRef = useRef<HTMLElement>(null);
   const headHeight = useRef(64);
   const closeTimer = useRef(0);
-  const contactHref = `${linkBase}/contact`;
+  const contactHref = linkBase ? crossSite(`${linkBase}/contact`, language) : '/contact';
   const desktopNav = buildDesktopNav(language, t, linkBase);
 
   useEffect(() => {
@@ -280,7 +295,7 @@ export function Header({ linkBase = '' }: HeaderProps = {}) {
 
   return (
     <header className={`ct-shell-header${isMenuOpen && !closing ? ' is-menu-open' : ''}`}>
-      <a className={`ct-shell-logo is-${logoChrome.phase}`} href={linkBase || '/'} aria-label={t('home.brand.aria')} ref={logoRef}
+      <a className={`ct-shell-logo is-${logoChrome.phase}`} href={linkBase ? crossSite(linkBase, language) : '/'} aria-label={t('home.brand.aria')} ref={logoRef}
         onPointerEnter={(event) => { if (event.pointerType === 'mouse') playLogo(); }}
         onFocus={(event) => { if (event.currentTarget.matches(':focus-visible')) playLogo(); }}>
         <ClerkTreeLockup className="ct-shell-lockup" title={null} />
@@ -373,7 +388,7 @@ export function Header({ linkBase = '' }: HeaderProps = {}) {
           <button aria-label={t('home.menu.closeMobile')} className="ct-mnav-scrim" onClick={closeMenu} type="button" />
           <nav className="ct-mnav-sheet" aria-label={t('home.menu.navAria')} ref={sheetRef} style={sheetGeo}>
             <div className="ct-mnav-top">
-              <a className="ct-mnav-logo" href={linkBase || '/'} aria-label={t('home.brand.aria')} onClick={closeMenu}>
+              <a className="ct-mnav-logo" href={linkBase ? crossSite(linkBase, language) : '/'} aria-label={t('home.brand.aria')} onClick={closeMenu}>
                 <ClerkTreeLockup className="ct-shell-lockup" title={null} />
               </a>
               <button
@@ -491,9 +506,13 @@ function FooterColumn({ title, links, social = false }: { title: string; links: 
   );
 }
 
-export function Footer() {
+export function Footer({ linkBase = '' }: { linkBase?: string } = {}) {
   const { language } = useLanguage();
   const footer = buildFooter(language === 'de');
+  // On another site (research.clerktree.com) the footer's own-site paths must lead back to the main
+  // site, and every cross-site link carries the visitor's language.
+  const href = (path: string) => (path.startsWith('/') && linkBase ? crossSite(`${linkBase}${path}`, language) : crossSite(path, language));
+  const withBase = (links: FooterLink[]): FooterLink[] => links.map((link) => (link.external ? link : { ...link, href: href(link.href) }));
   const footerRef = useRef<HTMLElement>(null);
   const [isFooterNearViewport, setIsFooterNearViewport] = useState(false);
   const munichTime = useMunichTime(isFooterNearViewport);
@@ -525,19 +544,19 @@ export function Footer() {
         )}
         <div className="ct-footer-main">
           <div className="ct-footer-cta">
-            <a className="ct-footer-brand" href="/" aria-label={language === 'de' ? 'ClerkTree Startseite' : 'ClerkTree home'}><ClerkTreeLockup title={null} /></a>
+            <a className="ct-footer-brand" href={href('/')} aria-label={language === 'de' ? 'ClerkTree Startseite' : 'ClerkTree home'}><ClerkTreeLockup title={null} /></a>
             <p>
               {language === 'de' ? <>KI-Harness für<br />Industriemaschinen.</> : <>Industrial AI harness<br />for machinery.</>}
             </p>
-            <a className="ct-footer-cta-button" href="/contact">
+            <a className="ct-footer-cta-button" href={href('/contact')}>
               {language === 'de' ? 'Kontakt aufnehmen' : 'Get in touch'}
               <ArrowUpRight aria-hidden="true" size={16} />
             </a>
           </div>
 
           <div className="ct-footer-columns">
-            <FooterColumn title={footer.company.title} links={footer.company.links} />
-            <FooterColumn title={footer.product.title} links={footer.product.links} />
+            <FooterColumn title={footer.company.title} links={withBase(footer.company.links)} />
+            <FooterColumn title={footer.product.title} links={withBase(footer.product.links)} />
             <FooterColumn title={footer.social.title} links={footer.social.links} social />
           </div>
         </div>
@@ -552,7 +571,7 @@ export function Footer() {
           </div>
           <div className="ct-footer-bottom-right">
             {footer.legal.map((link) => (
-              <a href={link.href} key={link.href}>
+              <a href={href(link.href)} key={link.href}>
                 {link.label}
               </a>
             ))}

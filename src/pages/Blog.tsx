@@ -78,8 +78,10 @@ export default function Blog() {
           <span className="jr-count">{visible.length} {de ? (visible.length === 1 ? 'Beitrag' : 'Beiträge') : visible.length === 1 ? 'post' : 'posts'}</span>
         </div>
 
+        {de && <p className="jr-note">Die Beiträge erscheinen auf Englisch.</p>}
+
         {visible.length ? (
-          <div className="jr-grid">
+          <div className="jr-grid" lang="en">
             {visible.map((post) => <PostCard key={post.slug} language={language} post={post} />)}
           </div>
         ) : (

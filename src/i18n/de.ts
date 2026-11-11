@@ -246,17 +246,4 @@ export const de = {
     'home.showcase.logosAria': 'Kundenlogos',
 
     // Support page
-    'supportPage.category.technical': 'Technisch',
-    'supportPage.category.billing': 'Abrechnung',
-    'supportPage.category.account': 'Konto',
-    'supportPage.category.api': 'API',
-    'supportPage.category.general': 'Allgemein',
-    'supportPage.priority.low': 'Niedrig',
-    'supportPage.priority.medium': 'Mittel',
-    'supportPage.priority.high': 'Hoch',
-    'supportPage.priority.urgent': 'Dringend',
-    'supportPage.error.serviceNotConfigured': 'Der Support-Dienst ist nicht konfiguriert. Bitte kontaktieren Sie uns direkt per E-Mail.',
-    'supportPage.error.signInRequired': 'Bitte melden Sie sich an, um ein Support-Ticket einzureichen.',
-    'supportPage.error.createFailed': 'Ticket konnte nicht erstellt werden. Bitte versuchen Sie es erneut.',
-    'supportPage.error.generic': 'Etwas ist schief gelaufen. Bitte versuchen Sie es später erneut.',
 };
