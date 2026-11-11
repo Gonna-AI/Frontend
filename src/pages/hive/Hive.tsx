@@ -89,6 +89,27 @@ const COPY = {
 const ss = (a: number, b: number, x: number) => Math.min(1, Math.max(0, (x - a) / (b - a)));
 const ease = (t: number) => t * t * (3 - 2 * t);
 
+/** How a chapter's copy looks at story progress p: rises in, settles, lifts away. */
+function chapterState(i: number, p: number, reduced: boolean) {
+  const { start, end } = CHAPTERS[i];
+  // Chapters overlap by 0.03, so one leaves fully before the next arrives.
+  const enter = ease(ss(start + 0.015, start + 0.06, p));
+  const exit = ease(ss(end - 0.045, end - 0.015, p));
+  const opacity = Math.min(enter, 1 - exit);
+  return {
+    opacity,
+    y: reduced ? 0 : (1 - enter) * 32 - exit * 32,
+    blur: reduced || opacity >= 1 ? 0 : (1 - opacity) * 5,
+  };
+}
+const chapterRange = (i: number): [number, number] => [CHAPTERS[i].start + 0.015, CHAPTERS[i].end - 0.015];
+const HERO_RANGE: [number, number] = [0.009, 0.041];
+
+// Where the browser can run scroll-linked animations itself, the copy is animated that way: it then
+// moves in lockstep with the scroll position on the compositor, untouched by anything the main
+// thread is doing (drawing the scene, collecting garbage). Elsewhere it is updated per frame in JS.
+const scrollTimelinesAvailable = typeof window !== 'undefined' && 'ScrollTimeline' in window && 'rangeStart' in Animation.prototype;
+
 function HiveStory() {
   const { language } = useLanguage();
   const c = language === 'de' ? COPY.de : COPY.en;
@@ -106,6 +127,8 @@ function HiveStory() {
     sceneRef.current = scene;
     const host = canvas.parentElement!;
     const sticky = host.parentElement!;
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const mains = () => chapterRefs.current.map((chapter) => chapter?.firstElementChild as HTMLElement | null);
     let storyTop = 0;
     let span = 0;
     let currentChapter = -2;
@@ -115,52 +138,114 @@ function HiveStory() {
     };
     const readTarget = () => (span > 0 ? Math.min(1, Math.max(0, (window.scrollY - storyTop) / span)) : 0);
 
-    // Everything here is written straight to the DOM: a React update in the middle of a scroll
-    // would re-render the header with it and cost a frame exactly when a chapter changes.
+    // ---- copy on scroll timelines -------------------------------------------------------------
+    // Ranges are absolute scroll offsets (not a share of the page), so the mobile toolbar growing
+    // or shrinking the viewport never shifts them.
+    let scrollTimelines = scrollTimelinesAvailable;
+    let animations: Animation[] = [];
+    let builtFor = '';
+    let probeFrame = 0;
+    const buildTimelines = () => {
+      if (!scrollTimelines || span <= 0) return;
+      const key = `${storyTop}|${span}`;
+      if (key === builtFor) return;
+      builtFor = key;
+      animations.forEach((animation) => animation.cancel());
+      animations = [];
+      const timeline = new ScrollTimeline({ source: document.scrollingElement ?? document.documentElement, axis: 'block' });
+      const at = (p: number) => `${(storyTop + p * span).toFixed(1)}px`;
+      const add = (el: HTMLElement | null, frames: Keyframe[], [from, to]: [number, number]) => {
+        if (!el) return;
+        animations.push(el.animate(frames, { timeline, rangeStart: at(from), rangeEnd: at(to), fill: 'both', duration: 'auto' } as KeyframeAnimationOptions));
+      };
+      mains().forEach((main, i) => {
+        const [from, to] = chapterRange(i);
+        // Sampled densely from the same curve the JS path uses; the browser interpolates linearly between.
+        const motion: Keyframe[] = [];
+        const soften: Keyframe[] = [];
+        for (let k = 0; k <= 48; k++) {
+          const f = k / 48;
+          const st = chapterState(i, from + (to - from) * f, reduced);
+          motion.push({ offset: f, opacity: st.opacity, translate: `0 ${st.y.toFixed(2)}px` });
+          soften.push({ offset: f, filter: `blur(${st.blur.toFixed(2)}px)` });
+        }
+        // Position and fade run on the compositor. The blur cannot (it spreads beyond the box), so it
+        // is a separate animation: if the main thread is busy only the softness lags, never the text.
+        add(main, motion, [from, to]);
+        if (!reduced) add(main, soften, [from, to]);
+        // Visibility is not a compositor property, so it gets its own (discrete) animation.
+        add(main, [{ visibility: 'hidden' }, { visibility: 'visible', offset: 0.001 }, { visibility: 'visible', offset: 0.999 }, { visibility: 'hidden' }], [from, to]);
+      });
+      add(heroRef.current, [{ opacity: 1 }, { opacity: 0 }], HERO_RANGE);
+      add(heroRef.current, [{ visibility: 'visible' }, { visibility: 'visible', offset: 0.999 }, { visibility: 'hidden' }], HERO_RANGE);
+    };
+    // A browser that has scroll timelines but ignores pixel ranges would show the copy at the wrong
+    // places without any error. A range that ends before the top of the page must read as finished;
+    // if it does not, the copy goes back to the per-frame path.
+    const verifyTimelines = () => {
+      if (!scrollTimelines) return;
+      const timeline = new ScrollTimeline({ source: document.scrollingElement ?? document.documentElement, axis: 'block' });
+      const probe = wrap.animate([{ opacity: 1 }, { opacity: 1 }], { timeline, rangeStart: '-2px', rangeEnd: '-1px', fill: 'both', duration: 'auto' } as KeyframeAnimationOptions);
+      probeFrame = requestAnimationFrame(() => { probeFrame = requestAnimationFrame(() => {
+        probeFrame = 0;
+        const ok = probe.effect?.getComputedTiming().progress === 1;
+        probe.cancel();
+        if (ok) return;
+        scrollTimelines = false;
+        animations.forEach((animation) => animation.cancel());
+        animations = [];
+        render(readTarget());
+      }); });
+    };
+
+    // ---- copy per frame (fallback) ------------------------------------------------------------
+    const dpr = () => window.devicePixelRatio || 1;
+    const snap = (v: number) => Math.round(v * dpr()) / dpr();
     const render = (p: number) => {
       let nextChapter = -1;
       CHAPTERS.forEach(({ start, end }, i) => {
-        // Rises in softly, settles, then lifts away; chapters overlap by 0.03, so one
-        // leaves fully before the next arrives.
-        const enter = ease(ss(start + 0.015, start + 0.06, p));
-        const exit = ease(ss(end - 0.045, end - 0.015, p));
-        const opacity = Math.min(enter, 1 - exit);
-        const chapter = chapterRefs.current[i];
-        const main = chapter?.firstElementChild as HTMLElement | null;
-        if (chapter && main) {
-          chapter.style.opacity = opacity.toFixed(3);
-          chapter.style.visibility = opacity > 0 ? 'visible' : 'hidden';
-          main.style.translate = `0 ${((1 - enter) * 32 - exit * 32).toFixed(2)}px`;
-          main.style.filter = opacity > 0 && opacity < 1 ? `blur(${((1 - opacity) * 5).toFixed(2)}px)` : '';
-        }
         if (p >= start + 0.012 && p < end - 0.012) nextChapter = i;
       });
+      // Screen-reader state and the scroll hint follow the story in both modes; written straight to
+      // the DOM, since a React update mid-scroll would re-render the header with it.
       if (nextChapter !== currentChapter) {
         currentChapter = nextChapter;
         chapterRefs.current.forEach((chapter, i) => chapter?.setAttribute('aria-hidden', String(i !== nextChapter)));
         hintRef.current?.classList.toggle('is-hidden', nextChapter >= 0);
       }
+      if (scrollTimelines) return;
+      mains().forEach((main, i) => {
+        if (!main) return;
+        const st = chapterState(i, p, reduced);
+        main.style.opacity = st.opacity.toFixed(3);
+        main.style.visibility = st.opacity > 0 ? 'visible' : 'hidden';
+        // Whole device pixels and no blur at rest, so the text is never drawn between pixels.
+        main.style.translate = `0 ${snap(st.y)}px`;
+        main.style.filter = st.blur > 0.01 ? `blur(${st.blur.toFixed(2)}px)` : '';
+      });
       const hero = heroRef.current;
       if (hero) {
-        const out = ss(0.009, 0.041, p);
+        const out = ss(HERO_RANGE[0], HERO_RANGE[1], p);
         hero.style.opacity = String(1 - out);
         hero.style.visibility = out >= 1 ? 'hidden' : 'visible';
       }
     };
 
-    // The scene owns the clock: each frame it eases towards the scroll position and hands the
-    // value it draws at to the copy, so text and scene always move together. Without the scene
-    // (no WebGL, reduced motion, off screen) the copy simply follows the scroll position.
+    // Without scroll timelines the scene owns the clock: each frame it eases towards the scroll
+    // position and hands the value it draws at to the copy, so text and scene move together.
+    // Without the scene (no WebGL, reduced motion, off screen) the copy follows the scroll position.
     scene.onFrame = render;
     const onScroll = () => {
       const target = readTarget();
       scene.setTarget(target);
       if (!scene.running) render(target);
     };
-    const onResize = () => { measure(); onScroll(); };
+    const onResize = () => { measure(); buildTimelines(); onScroll(); };
     const ro = new ResizeObserver(() => { const r = host.getBoundingClientRect(); scene.resize(r.width, r.height); onResize(); });
     ro.observe(host);
     measure();
+    buildTimelines();
+    verifyTimelines();
     const initial = readTarget();
     scene.setProgress(initial);
     render(initial);
@@ -182,6 +267,8 @@ function HiveStory() {
       window.removeEventListener('scroll', onScroll);
       window.removeEventListener('resize', onResize);
       document.removeEventListener('visibilitychange', onVis);
+      if (probeFrame) cancelAnimationFrame(probeFrame);
+      animations.forEach((animation) => animation.cancel());
       scene.onFrame = null;
       scene.dispose();
       sceneRef.current = null;
