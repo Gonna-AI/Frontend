@@ -6,6 +6,8 @@
 // Scroll progress (0..1) scrubs the story: plant → question → agents → findings.
 // WebGL2 only, no dependencies.
 
+import { frameInterval, pixelRatioFor, reportFrame } from '../../utils/perf';
+
 const RAMP = ' .:;-=+xX80S#@';
 const SHEET = ` !"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_\`abcdefghijklmnopqrstuvwxyz{|}~·→—äöüÄÖÜß`;
 const SHEET_CHARS = [...SHEET];
@@ -397,6 +399,7 @@ export class HiveScene {
   private last = 0;
   private time = 0;
   private angle = 0.4;
+  private built = false;
   private grid = { w: 1, h: 1, cw: 7, ch: 12, dpr: 1 };
   private arcs: Arc[] = [];
   private arcBuf = new Float32Array(ARCS * ARC_PTS * 3);
@@ -460,8 +463,12 @@ export class HiveScene {
   resize(width: number, height: number) {
     if (!this.ok) return;
     const gl = this.gl;
-    const dpr = Math.min(window.devicePixelRatio || 1, 1.25);
+    const dpr = pixelRatioFor(1.25, { mid: 1, low: 0.75 });
     const W = Math.max(1, Math.round(width * dpr)), H = Math.max(1, Math.round(height * dpr));
+    // Rebuilding the textures is the expensive part; a resize that changes nothing (the mobile address
+    // bar sliding, a tier re-check) must not pay for it.
+    if (this.built && W === this.canvas.width && H === this.canvas.height) return;
+    this.built = true;
     this.canvas.width = W; this.canvas.height = H;
     const small = width < 640;
     const cw = Math.round((small ? 5 : 7) * dpr), ch = Math.round((small ? 9 : 12) * dpr);
@@ -798,8 +805,16 @@ export class HiveScene {
     gl.drawArrays(gl.TRIANGLES, 0, 3);
   }
 
+  private lastRaf = 0;
+
   private tick = (now: number) => {
     this.frame = 0;
+    // Report the real frame spacing (so a device that cannot keep up is noticed), then keep to the
+    // frame rate its tier allows: a steady 30 fps looks smoother than an uneven 45.
+    if (this.lastRaf) reportFrame(now - this.lastRaf);
+    this.lastRaf = now;
+    const interval = frameInterval();
+    if (interval && this.last && now - this.last < interval - 2) { this.frame = requestAnimationFrame(this.tick); return; }
     const dt = Math.min(0.05, (now - (this.last || now)) / 1000);
     this.last = now;
     this.time += dt;
@@ -812,7 +827,7 @@ export class HiveScene {
   start() {
     if (!this.ok) return;
     if (this.reduced) { this.time = 2; this.draw(); return; }
-    if (!this.frame) { this.last = 0; this.frame = requestAnimationFrame(this.tick); }
+    if (!this.frame) { this.last = 0; this.lastRaf = 0; this.frame = requestAnimationFrame(this.tick); }
   }
 
   stop() { if (this.frame) cancelAnimationFrame(this.frame); this.frame = 0; }

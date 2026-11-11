@@ -5,6 +5,7 @@ import { Header, Footer } from '../../components/Landing/SiteChrome';
 import SEO from '../../components/SEO';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { HiveScene, type HiveCopy } from './HiveScene';
+import { onTierChange } from '../../utils/perf';
 import '../LandingFramer.css';
 import './Hive.css';
 
@@ -179,9 +180,11 @@ function HiveStory() {
     });
     io.observe(host);
     const onVis = () => (document.hidden || !visible ? scene.stop() : scene.start());
+    // The device proved slower than it reported: rebuild the scene at the lower internal resolution.
+    const offTier = onTierChange(() => { const r = host.getBoundingClientRect(); scene.resize(r.width, r.height); });
     document.addEventListener('visibilitychange', onVis);
     return () => {
-      ro.disconnect(); io.disconnect();
+      ro.disconnect(); io.disconnect(); offTier();
       if (loop) cancelAnimationFrame(loop);
       window.removeEventListener('scroll', onScroll);
       window.removeEventListener('resize', onResize);

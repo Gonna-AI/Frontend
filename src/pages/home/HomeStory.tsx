@@ -12,6 +12,7 @@ import ClerkTreeLockup from '../../components/Brand/ClerkTreeLockup';
 import { STORY_SCENES } from './StoryScenes';
 import SourceGraph, { ANSWER_MARKS, ANSWER_MS, AnswerCard, CHAIN_MS, CausalChain, GRAPH_MS, graphSlot, type AnswerCopy, type ChainGraphCopy, type GraphCopy } from './SourceGraph';
 import './HomeStory.css';
+import { isScrolling, shouldRestDuringScroll } from '../../utils/perf';
 
 const copy = {
   en: {
@@ -224,7 +225,7 @@ function useChainClock(total: number, ref: RefObject<HTMLElement | null>, still:
     let visible = true;
     const observer = new IntersectionObserver(([entry]) => { visible = entry.isIntersecting; });
     if (ref.current) observer.observe(ref.current);
-    timer = window.setInterval(() => { if (visible && !document.hidden) setMs((v) => (v + 50) % total); }, 50);
+    timer = window.setInterval(() => { if (visible && !document.hidden && !(shouldRestDuringScroll() && isScrolling())) setMs((v) => (v + 50) % total); }, 50);
     return () => { window.clearInterval(timer); observer.disconnect(); };
   }, [total, ref, still]);
   return ms;

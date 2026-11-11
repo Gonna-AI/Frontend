@@ -118,19 +118,24 @@ function useCtPageMotion() {
       };
     }
 
-    const lenis = new Lenis({
-      duration: 1,
-      easing: (t: number) => Math.min(1, 1.001 - 2 ** (-10 * t)),
-    });
+    // Smooth-scroll easing is for wheels and trackpads. Touch screens already have the operating
+    // system's own momentum scrolling, which is smoother than anything done in script, so phones
+    // and tablets skip the library (and its per-frame scroll reads) entirely.
+    const smoothing = window.matchMedia('(pointer: fine)').matches;
+    const lenis = smoothing
+      ? new Lenis({ duration: 1, easing: (t: number) => Math.min(1, 1.001 - 2 ** (-10 * t)) })
+      : null;
 
     let frame = 0;
     const raf = (time: number) => {
-      lenis.raf(time);
+      lenis?.raf(time);
       frame = requestAnimationFrame(raf);
     };
 
-    frame = requestAnimationFrame(raf);
-    root.classList.add('lenis');
+    if (lenis) {
+      frame = requestAnimationFrame(raf);
+      root.classList.add('lenis');
+    }
 
     const anchorHandlers: Array<() => void> = [];
     document.querySelectorAll<HTMLAnchorElement>('.ct-works a[href^="#"]').forEach((anchor) => {
@@ -140,7 +145,8 @@ function useCtPageMotion() {
         const target = document.querySelector(hash);
         if (!target) return;
         event.preventDefault();
-        lenis.scrollTo(target as HTMLElement, { offset: 0 });
+        if (lenis) lenis.scrollTo(target as HTMLElement, { offset: 0 });
+        else (target as HTMLElement).scrollIntoView({ behavior: 'smooth', block: 'start' });
       };
       anchor.addEventListener('click', handler);
       anchorHandlers.push(() => anchor.removeEventListener('click', handler));
@@ -149,7 +155,7 @@ function useCtPageMotion() {
     return () => {
       cancelAnimationFrame(frame);
       anchorHandlers.forEach((cleanup) => cleanup());
-      lenis.destroy();
+      lenis?.destroy();
       root.classList.remove('lenis', 'lenis-smooth', 'lenis-scrolling', 'lenis-stopped');
       document.body.classList.remove('ct-page-active');
     };
@@ -188,52 +194,81 @@ function useCtPageMotion() {
 
     revealTargets.forEach((target) => revealObserver.observe(target));
 
+    // Looping animations (agent pulses, packets, shimmers, tickers) only need to run while their
+    // section can be seen. Off screen they would still cost style work on every frame.
+    const sectionObserver = new IntersectionObserver(
+      (entries) => entries.forEach((entry) => { (entry.target as HTMLElement).dataset.offscreen = entry.isIntersecting ? 'false' : 'true'; }),
+      { rootMargin: '200px 0px' },
+    );
+    bgSections.forEach((section) => sectionObserver.observe(section));
+
+    // Sticky offsets come from CSS and only change with the viewport, so read them once per resize
+    // instead of asking the browser to compute styles on every scroll frame.
+    let solStickyTops: number[] = [];
+    let planStickyTop = 50;
+    const measureStickyTops = () => {
+      solStickyTops = Array.from(solRows).map((row) => Number.parseFloat(window.getComputedStyle(row).top) || 56);
+      if (pricingCards.length > 1) planStickyTop = Number.parseFloat(window.getComputedStyle(pricingCards[1]).top) || 50;
+    };
+    measureStickyTops();
+
+    // Only write a custom property when its value changed: a write invalidates style even if equal.
+    const applied = new WeakMap<HTMLElement, Record<string, string>>();
+    const setVar = (element: HTMLElement, name: string, value: string) => {
+      let known = applied.get(element);
+      if (!known) { known = {}; applied.set(element, known); }
+      if (known[name] === value) return;
+      known[name] = value;
+      element.style.setProperty(name, value);
+    };
+
     let ticking = false;
     const updateCards = () => {
+      // Phase 1: read every measurement. Reads and writes are never interleaved, so the browser
+      // lays the page out once per frame instead of once per element.
       const viewportHeight = window.innerHeight || 1;
+      const rowRects = Array.from(solRows, (row) => row.getBoundingClientRect());
+      const standardHeight = pricingCards.length > 1 ? pricingCards[0].offsetHeight || 1 : 1;
+      const proRect = pricingCards.length > 1 ? pricingCards[1].getBoundingClientRect() : null;
+      const sectionRects = bgSections.map((section) => section.getBoundingClientRect());
+
+      // Phase 2: write.
       solRows.forEach((row, i) => {
-        const rect = row.getBoundingClientRect();
+        const rect = rowRects[i];
         const progress = clamp((viewportHeight - rect.top) / (viewportHeight + rect.height), 0, 1);
-        row.style.setProperty('--scroll-progress', progress.toFixed(4));
+        setVar(row, '--scroll-progress', progress.toFixed(4));
 
         if (i < solRows.length - 1) {
-          const nextRow = solRows[i + 1];
-          const nextRect = nextRow.getBoundingClientRect();
           const rowHeight = rect.height || 1;
-          const stickyTop = Number.parseFloat(window.getComputedStyle(nextRow).top) || 56;
-          const overlapProgress = clamp((stickyTop + rowHeight - nextRect.top) / rowHeight, 0, 1);
-          row.style.setProperty('--sol-y', `${(-18 * overlapProgress).toFixed(2)}px`);
-          row.style.setProperty('--sol-scale', (1 - overlapProgress * 0.035).toFixed(4));
-          row.style.setProperty('--sol-opacity', (1 - overlapProgress * 0.28).toFixed(4));
+          const overlapProgress = clamp((solStickyTops[i + 1] + rowHeight - rowRects[i + 1].top) / rowHeight, 0, 1);
+          setVar(row, '--sol-y', `${(-18 * overlapProgress).toFixed(2)}px`);
+          setVar(row, '--sol-scale', (1 - overlapProgress * 0.035).toFixed(4));
+          setVar(row, '--sol-opacity', (1 - overlapProgress * 0.28).toFixed(4));
         } else {
-          row.style.setProperty('--sol-y', '0px');
-          row.style.setProperty('--sol-scale', '1');
-          row.style.setProperty('--sol-opacity', '1');
+          setVar(row, '--sol-y', '0px');
+          setVar(row, '--sol-scale', '1');
+          setVar(row, '--sol-opacity', '1');
         }
       });
 
-      if (pricingCards.length > 1) {
+      if (proRect) {
         const standardCard = pricingCards[0];
         const proCard = pricingCards[1];
-        const standardHeight = standardCard.offsetHeight || 1;
-        const proRect = proCard.getBoundingClientRect();
-        const stickyTop = Number.parseFloat(window.getComputedStyle(proCard).top) || 50;
-        const overlapProgress = clamp((stickyTop + standardHeight - proRect.top) / standardHeight, 0, 1);
+        const overlapProgress = clamp((planStickyTop + standardHeight - proRect.top) / standardHeight, 0, 1);
 
-        standardCard.style.setProperty('--plan-y', `${(-18 * overlapProgress).toFixed(2)}px`);
-        standardCard.style.setProperty('--plan-scale', (1 - overlapProgress * 0.035).toFixed(4));
-        standardCard.style.setProperty('--plan-opacity', (1 - overlapProgress * 0.28).toFixed(4));
-
-        proCard.style.setProperty('--plan-y', '0px');
-        proCard.style.setProperty('--plan-scale', '1');
-        proCard.style.setProperty('--plan-opacity', '1');
+        setVar(standardCard, '--plan-y', `${(-18 * overlapProgress).toFixed(2)}px`);
+        setVar(standardCard, '--plan-scale', (1 - overlapProgress * 0.035).toFixed(4));
+        setVar(standardCard, '--plan-opacity', (1 - overlapProgress * 0.28).toFixed(4));
+        setVar(proCard, '--plan-y', '0px');
+        setVar(proCard, '--plan-scale', '1');
+        setVar(proCard, '--plan-opacity', '1');
       }
 
       // iOS Safari tints its floating bar from the sampled body color, so the
       // body background must track the section currently at the bottom edge.
       const bottomEdge = viewportHeight - 1;
       for (let i = bgSections.length - 1; i >= 0; i -= 1) {
-        const rect = bgSections[i].getBoundingClientRect();
+        const rect = sectionRects[i];
         if (rect.top <= bottomEdge && rect.bottom > bottomEdge) {
           if (sectionBgs[i] !== currentBodyBg) {
             currentBodyBg = sectionBgs[i];
@@ -254,12 +289,14 @@ function useCtPageMotion() {
 
     updateCards();
     window.addEventListener('scroll', requestUpdate, { passive: true });
-    window.addEventListener('resize', requestUpdate);
+    const onResize = () => { measureStickyTops(); requestUpdate(); };
+    window.addEventListener('resize', onResize);
 
     return () => {
       revealObserver.disconnect();
+      sectionObserver.disconnect();
       window.removeEventListener('scroll', requestUpdate);
-      window.removeEventListener('resize', requestUpdate);
+      window.removeEventListener('resize', onResize);
     };
   }, []);
 }

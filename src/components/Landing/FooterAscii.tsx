@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { isScrolling, onTierChange, pixelRatioFor, reportFrame, shouldRestDuringScroll } from '../../utils/perf';
 import './FooterAscii.css';
 
 // Render a small, silent video as text only while the footer is on screen.
@@ -31,17 +32,22 @@ export default function FooterAscii() {
     const characters = ' .,:;irsXA253hMHGS#9B&@';
     let frame = 0;
     let lastDraw = 0;
+    let lastTick = 0;
     let visible = false;
     let width = 0;
     let height = 0;
     let cols = 0;
     let rows = 0;
+    let fade: Float32Array | null = null;
+    let fadeKey = '';
+    let tonesBuffer = new Uint8Array(0);
+    let glyphBuffer = new Uint8Array(0);
 
     const resize = () => {
       const rect = canvas.getBoundingClientRect();
       width = Math.max(1, rect.width);
       height = Math.max(1, rect.height);
-      const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+      const dpr = pixelRatioFor(1.5);
       canvas.width = Math.round(width * dpr);
       canvas.height = Math.round(height * dpr);
       context.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -73,33 +79,60 @@ export default function FooterAscii() {
       const pixels = sampleContext!.getImageData(0, 0, cols, rows).data;
       const cellWidth = width / cols;
       const cellHeight = height / rows;
-      context!.clearRect(0, 0, width, height);
-      context!.font = `${Math.max(5, cellHeight * 0.86)}px ui-monospace, SFMono-Regular, Menlo, monospace`;
-      context!.textAlign = 'center';
-      context!.textBaseline = 'middle';
-      // Quantized tones keep the animation legible without thousands of style changes.
-      for (let tone = 1; tone <= 5; tone++) {
-        context!.fillStyle = `rgba(244, 221, 200, ${0.13 + tone * 0.15})`;
+
+      // The edge fade depends only on the grid and where the image sits in it, not on the frame, so
+      // it is worked out once per layout instead of once per cell per frame.
+      if (!fade || fadeKey !== `${cols}x${rows}:${sourceLeft}:${sourceTop}:${sourceWidth}:${sourceHeight}`) {
+        fadeKey = `${cols}x${rows}:${sourceLeft}:${sourceTop}:${sourceWidth}:${sourceHeight}`;
+        fade = new Float32Array(cols * rows);
         for (let y = 0; y < rows; y++) {
           for (let x = 0; x < cols; x++) {
             const nx = (x - sourceLeft) / sourceWidth * 2 - 1;
             const ny = (y - sourceTop) / sourceHeight * 2 - 1;
             const distance = Math.sqrt(nx * nx * 0.49 + ny * ny);
-            const fade = Math.max(0, Math.min(1, (1 - distance) / 0.38));
-            if (!fade) continue;
-            const i = (y * cols + x) * 4;
-            const light = (pixels[i] * 0.2126 + pixels[i + 1] * 0.7152 + pixels[i + 2] * 0.0722) / 255 * fade;
-            if (Math.min(5, Math.ceil(light * 5)) !== tone || light < 0.1) continue;
-            const glyph = characters[Math.min(characters.length - 1, Math.floor(Math.sqrt(light) * (characters.length - 1)))];
-            context!.fillText(glyph, (x + 0.5) * cellWidth, (y + 0.5) * cellHeight);
+            fade[y * cols + x] = Math.max(0, Math.min(1, (1 - distance) / 0.38));
           }
+        }
+      }
+
+      // One pass over the cells sorts each glyph into its tone; tones are then painted in order.
+      // (Same output as testing every cell once per tone, in a fifth of the work.)
+      const counts = [0, 0, 0, 0, 0, 0];
+      const tones = tonesBuffer.length >= cols * rows ? tonesBuffer : (tonesBuffer = new Uint8Array(cols * rows));
+      const glyphs = glyphBuffer.length >= cols * rows ? glyphBuffer : (glyphBuffer = new Uint8Array(cols * rows));
+      for (let cell = 0; cell < cols * rows; cell++) {
+        const weight = fade![cell];
+        if (!weight) { tones[cell] = 0; continue; }
+        const i = cell * 4;
+        const light = (pixels[i] * 0.2126 + pixels[i + 1] * 0.7152 + pixels[i + 2] * 0.0722) / 255 * weight;
+        if (light < 0.1) { tones[cell] = 0; continue; }
+        const tone = Math.min(5, Math.ceil(light * 5));
+        tones[cell] = tone;
+        glyphs[cell] = Math.min(characters.length - 1, Math.floor(Math.sqrt(light) * (characters.length - 1)));
+        counts[tone]++;
+      }
+
+      context!.clearRect(0, 0, width, height);
+      context!.font = `${Math.max(5, cellHeight * 0.86)}px ui-monospace, SFMono-Regular, Menlo, monospace`;
+      context!.textAlign = 'center';
+      context!.textBaseline = 'middle';
+      for (let tone = 1; tone <= 5; tone++) {
+        if (!counts[tone]) continue;
+        context!.fillStyle = `rgba(244, 221, 200, ${0.13 + tone * 0.15})`;
+        for (let cell = 0; cell < cols * rows; cell++) {
+          if (tones[cell] !== tone) continue;
+          context!.fillText(characters[glyphs[cell]], (cell % cols + 0.5) * cellWidth, (Math.floor(cell / cols) + 0.5) * cellHeight);
         }
       }
     }
 
     const tick = (time: number) => {
       if (!visible || motion.matches) { frame = 0; return; }
-      if (time - lastDraw >= 1000 / 15) { draw(); lastDraw = time; }
+      if (lastTick) reportFrame(time - lastTick);
+      lastTick = time;
+      // Weaker devices keep the text still while the page is moving, so scrolling stays smooth.
+      const resting = shouldRestDuringScroll() && isScrolling();
+      if (!resting && time - lastDraw >= 1000 / 15) { draw(); lastDraw = time; }
       frame = requestAnimationFrame(tick);
     };
     const syncPlayback = () => {
@@ -120,8 +153,10 @@ export default function FooterAscii() {
     video.addEventListener('loadeddata', draw);
     document.addEventListener('visibilitychange', syncPlayback);
     motion.addEventListener('change', syncPlayback);
+    const offTier = onTierChange(resize);
     resize();
     return () => {
+      offTier();
       visible = false;
       observer.disconnect();
       resizeObserver.disconnect();

@@ -3,6 +3,7 @@
 import { type CSSProperties, type ReactNode, useEffect, useRef, useState } from 'react';
 import { Activity, BookOpen, Check, FileText, Gauge, History, Scale, ScanSearch, Wrench } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { isScrolling, shouldRestDuringScroll } from '../../utils/perf';
 
 export const TYPE_MS = 34;
 
@@ -15,7 +16,7 @@ export function useLoop(total: number) {
     let visible = true;
     const io = new IntersectionObserver(([e]) => { visible = e.isIntersecting; });
     if (ref.current) io.observe(ref.current);
-    const timer = window.setInterval(() => { if (visible && !document.hidden) setMs((v) => (v + 50) % total); }, 50);
+    const timer = window.setInterval(() => { if (visible && !document.hidden && !(shouldRestDuringScroll() && isScrolling())) setMs((v) => (v + 50) % total); }, 50);
     return () => { window.clearInterval(timer); io.disconnect(); };
   }, [total]);
   return [ms, ref] as const;

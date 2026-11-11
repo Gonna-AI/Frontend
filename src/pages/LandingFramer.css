@@ -76,6 +76,18 @@ html.lenis.lenis-stopped {
   will-change: auto;
 }
 
+/* Sections scrolled well out of view stop their looping animations (see LandingFramer.tsx). */
+.ct-works [data-offscreen='true'] *,
+.ct-works [data-offscreen='true'] *::before,
+.ct-works [data-offscreen='true'] *::after {
+  animation-play-state: paused !important;
+}
+
+/* Weakest devices: the reveal fades and rises but skips the blur, which is the costly part of it. */
+html[data-perf='low'] .ct-works [data-ct-reveal] {
+  filter: none;
+}
+
 /* Room for descenders in tight-leading display headings. */
 .ct-works h2[data-ct-reveal] {
   padding-bottom: 0.12em;

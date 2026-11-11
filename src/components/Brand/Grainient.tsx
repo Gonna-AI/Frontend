@@ -5,6 +5,7 @@
 import { useEffect, useRef } from 'react';
 
 import { cancelIdle, runWhenIdle } from '../../utils/idle';
+import { frameInterval, isScrolling, onTierChange, pixelRatioFor, reportFrame, shouldRestDuringScroll } from '../../utils/perf';
 
 type Settings = {
   uTimeSpeed: number; uColorBalance: number; uWarpStrength: number; uWarpFrequency: number;
@@ -80,6 +81,39 @@ type GrainientProps = {
   className?: string;
 };
 
+
+// One animation loop drives every Grainient on the page. Separate loops would each wake the browser
+// every frame; one loop wakes it once, draws only the canvases that are on screen, keeps to the
+// frame rate the device tier allows, and rests while a weaker device is scrolling.
+const jobs = new Set<(now: number) => void>();
+let loopHandle = 0;
+let lastRaf = 0;
+let lastDraw = 0;
+
+function loop(now: number) {
+  loopHandle = 0;
+  if (!jobs.size) { lastRaf = 0; return; }
+  if (lastRaf) reportFrame(now - lastRaf);
+  lastRaf = now;
+
+  const due = now - lastDraw >= frameInterval() - 2;
+  if (due && !(shouldRestDuringScroll() && isScrolling())) {
+    lastDraw = now;
+    jobs.forEach((draw) => draw(now));
+  }
+  loopHandle = requestAnimationFrame(loop);
+}
+
+function addJob(draw: (now: number) => void) {
+  jobs.add(draw);
+  if (!loopHandle) loopHandle = requestAnimationFrame(loop);
+}
+
+function removeJob(draw: (now: number) => void) {
+  jobs.delete(draw);
+  if (!jobs.size && loopHandle) { cancelAnimationFrame(loopHandle); loopHandle = 0; lastRaf = 0; }
+}
+
 export default function Grainient({ preset = 'silver', still = false, className = '' }: GrainientProps) {
   const ref = useRef<HTMLCanvasElement>(null);
 
@@ -102,15 +136,24 @@ export default function Grainient({ preset = 'silver', still = false, className 
       const shader = gl.createShader(type)!;
       gl.shaderSource(shader, source);
       gl.compileShader(shader);
-      return gl.getShaderParameter(shader, gl.COMPILE_STATUS) ? shader : null;
+      // Not checked here: asking for the compile status makes the browser wait for the compiler.
+      // A failure shows up as a failed link below, once compiling has finished in the background.
+      return shader;
     };
     const vs = compile(gl.VERTEX_SHADER, VERTEX);
     const fs = compile(gl.FRAGMENT_SHADER, FRAGMENT);
-    if (!vs || !fs) { fail(); return undefined; }
     const program = gl.createProgram()!;
     gl.attachShader(program, vs);
     gl.attachShader(program, fs);
     gl.linkProgram(program);
+
+    // Compiling this shader takes tens to hundreds of milliseconds. With KHR_parallel_shader_compile
+    // the browser does it on another thread, so the page keeps scrolling while it happens.
+    const parallel = gl.getExtension('KHR_parallel_shader_compile');
+    let waiting = 0;
+    let running: (() => void) | undefined;
+
+    const begin = (): (() => void) | undefined => {
     if (!gl.getProgramParameter(program, gl.LINK_STATUS)) { fail(); return undefined; }
     gl.useProgram(program);
     gl.bindVertexArray(gl.createVertexArray());
@@ -126,13 +169,13 @@ export default function Grainient({ preset = 'silver', still = false, className 
     const frozen = still || reduced;
     let elapsed = frozen ? 6 : 0;
     let start = performance.now() - elapsed * 1000;
-    let frame = 0;
+    let playing = false;
     let visible = false;
 
     const draw = (time: number) => { elapsed = time; gl.uniform1f(uTime, time); gl.drawArrays(gl.TRIANGLES, 0, 3); };
     const resize = () => {
       const rect = host.getBoundingClientRect();
-      const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+      const dpr = pixelRatioFor(1.5);
       const w = Math.max(1, Math.round(rect.width * dpr));
       const h = Math.max(1, Math.round(rect.height * dpr));
       if (canvas.width !== w || canvas.height !== h) {
@@ -142,17 +185,18 @@ export default function Grainient({ preset = 'silver', still = false, className 
       }
       draw(elapsed);
     };
-    const loop = (now: number) => {
-      frame = 0;
-      draw((now - start) / 1000);
-      if (visible && !document.hidden) frame = requestAnimationFrame(loop);
-    };
+    const paint = (now: number) => draw((now - start) / 1000);
     const play = () => {
-      if (frozen || frame || !visible || document.hidden) return;
+      if (frozen || playing || !visible || document.hidden) return;
       start = performance.now() - elapsed * 1000;
-      frame = requestAnimationFrame(loop);
+      playing = true;
+      addJob(paint);
     };
-    const stop = () => { if (frame) cancelAnimationFrame(frame); frame = 0; };
+    const stop = () => {
+      if (!playing) return;
+      playing = false;
+      removeJob(paint);
+    };
 
     const ro = new ResizeObserver(resize);
     ro.observe(host);
@@ -162,15 +206,32 @@ export default function Grainient({ preset = 'silver', still = false, className 
     document.addEventListener('visibilitychange', onVisibility);
     const onLost = (event: Event) => { event.preventDefault(); stop(); fail(); };
     canvas.addEventListener('webglcontextlost', onLost);
+    // A tier change (the device proved slower than it reported) changes the internal resolution.
+    const offTier = onTierChange(resize);
     resize();
 
     return () => {
       stop();
       ro.disconnect();
       io.disconnect();
+      offTier();
       document.removeEventListener('visibilitychange', onVisibility);
       canvas.removeEventListener('webglcontextlost', onLost);
       gl.getExtension('WEBGL_lose_context')?.loseContext();
+    };
+    };
+
+    const wait = () => {
+      waiting = 0;
+      if (!parallel || gl.getProgramParameter(program, parallel.COMPLETION_STATUS_KHR)) running = begin();
+      else waiting = window.setTimeout(wait, 16);
+    };
+    wait();
+
+    return () => {
+      window.clearTimeout(waiting);
+      running?.();
+      if (!running) gl.getExtension('WEBGL_lose_context')?.loseContext();
     };
     };
 
