@@ -854,8 +854,8 @@
   width: 30px;
 }
 
-.brand-icon-button:hover {
-  border-color: rgba(19, 19, 19, 0.35);
+@media (hover: hover) and (pointer: fine) {
+  .brand-icon-button:hover { border-color: rgba(19, 19, 19, 0.35); }
 }
 
 .brand-contact-card {

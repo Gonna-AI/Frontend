@@ -135,6 +135,11 @@ html[data-perf='low'] .ct-works [data-ct-reveal] {
   box-sizing: border-box;
 }
 
+/* Taps on links and buttons do not flash the system grey box; each control has its own press state. */
+.ct-works :is(a, button) {
+  -webkit-tap-highlight-color: transparent;
+}
+
 .ct-home-prelude,
 .ct-pricing,
 .ct-faq,
@@ -424,7 +429,6 @@ a:hover > .ct-roll > .ct-roll-inner { transform: translateY(-50%); }
   white-space: nowrap;
 }
 
-.ct-shell-cta:hover { background: #262626; }
 .ct-shell-cta:active { transform: scale(.97); }
 
 .ct-shell-cta-icon {
@@ -446,7 +450,10 @@ a:hover > .ct-roll > .ct-roll-inner { transform: translateY(-50%); }
 }
 
 .ct-shell-cta-track svg { flex: 0 0 50%; height: 16px; margin: auto; }
-.ct-shell-cta:hover .ct-shell-cta-track { transform: translateX(0); }
+@media (hover: hover) and (pointer: fine) {
+  .ct-shell-cta:hover { background: #262626; }
+  .ct-shell-cta:hover .ct-shell-cta-track { transform: translateX(0); }
+}
 
 .ct-shell-menu {
   align-items: center;
@@ -543,12 +550,11 @@ a:hover > .ct-roll > .ct-roll-inner { transform: translateY(-50%); }
 @media (hover: hover) and (pointer: fine) {
 
   .ct-button:hover {
-    background: rgba(12, 12, 12, 0.86);
+    background: rgba(12, 12, 12, 0.88);
     box-shadow:
-      inset 0 0.5px 0.5px rgba(255, 255, 255, 0.16),
-      0 14px 16px rgba(0, 0, 0, 0.2),
-      0 30px 18px rgba(0, 0, 0, 0.11);
-    transform: translateY(-2px);
+      inset 0 0.5px 0.5px rgba(255, 255, 255, 0.2),
+      0 14px 18px rgba(0, 0, 0, 0.22),
+      0 30px 22px rgba(0, 0, 0, 0.12);
   }
 }
 
@@ -1240,17 +1246,29 @@ a:hover > .ct-roll > .ct-roll-inner { transform: translateY(-50%); }
   overflow: hidden;
   position: relative;
   transition:
-    box-shadow 200ms ease,
-    filter 180ms ease,
+    box-shadow 240ms var(--ct-ease-out),
     opacity 180ms ease,
     transform 160ms var(--ct-ease-out);
 }
 
+/* Hover light: a layer that fades in, so the button itself is never re-filtered mid-hover. */
+.ct-contact-form button::after {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.04));
+  content: "";
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+  position: absolute;
+  transition: opacity 240ms var(--ct-ease-out);
+}
+
+.ct-contact-form button > * { position: relative; z-index: 1; }
+
 @media (hover: hover) and (pointer: fine) {
   .ct-contact-form button:hover {
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.32), inset 0 -1px 0 rgba(0, 0, 0, 0.18), 0 18px 40px -14px rgba(255, 77, 0, 0.85);
-    filter: brightness(1.06);
   }
+  .ct-contact-form button:hover::after { opacity: 1; }
   .ct-contact-form button:hover svg { transform: translateX(2px); }
 }
 
@@ -1407,9 +1425,12 @@ a:hover > .ct-roll > .ct-roll-inner { transform: translateY(-50%); }
   padding: 0 28px;
   text-decoration: none;
   transition:
-    background-color 180ms ease,
-    transform 180ms var(--ct-ease-out);
+    background-color 200ms ease,
+    box-shadow 240ms var(--ct-ease-out),
+    transform 160ms var(--ct-ease-out);
 }
+
+.ct-footer-cta-button:active { transform: scale(0.97); }
 
 .ct-footer-cta-button span {
   font-size: 18px;
@@ -1558,8 +1579,8 @@ a:hover > .ct-roll > .ct-roll-inner { transform: translateY(-50%); }
 
 @media (hover: hover) and (pointer: fine) {
   .ct-footer-cta-button:hover {
-    background: rgba(255, 255, 255, 0.9);
-    transform: translateY(-2px);
+    background: #ececee;
+    box-shadow: 0 10px 28px -12px rgba(255, 255, 255, 0.35);
   }
 
   .ct-footer-column a:hover,

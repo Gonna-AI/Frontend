@@ -48,7 +48,7 @@
   display: inline-flex; font: 500 13px/1 var(--font-ui) !important; gap: 7px; height: 34px; padding: 0 12px; transition: background-color .2s ease, color .2s ease;
 }
 .ct-works .jr-chips button span { background: rgba(10, 10, 10, .06); border-radius: 999px; color: var(--jr-muted); font-size: 11px; padding: 3px 6px; }
-.ct-works .jr-chips button:hover { background: #f7f7f7; }
+@media (hover: hover) and (pointer: fine) { .ct-works .jr-chips button:not(.is-active):hover { background: #f7f7f7; } }
 .ct-works .jr-chips button.is-active { background: var(--jr-ink); color: #fff; }
 .ct-works .jr-chips button.is-active span { background: rgba(255, 255, 255, .16); color: rgba(255, 255, 255, .85); }
 .ct-works .jr-count { color: var(--jr-muted); font: 400 13px/1 var(--font-ui); }

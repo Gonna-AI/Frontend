@@ -55,7 +55,9 @@
   background: #131313; border: 0; border-radius: 999px; color: #fff; cursor: pointer;
   font: 500 15px/1 "Geist", "Inter", system-ui, sans-serif; min-height: 46px; padding: 0 22px;
 }
-.ct-works .legal-content .legal-action:hover { background: #000; }
+.ct-works .legal-content .legal-action { transition: background-color .2s ease, transform .16s ease; }
+.ct-works .legal-content .legal-action:active { transform: scale(.97); }
+@media (hover: hover) and (pointer: fine) { .ct-works .legal-content .legal-action:hover { background: #000; } }
 @media (max-width: 640px) {
   .ct-works .ct-legal-page-container { padding: 16px var(--gutter, 8px) 72px; }
   .ct-works .ct-legal-card { padding: 32px 22px 40px; }
