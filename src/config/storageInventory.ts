@@ -46,7 +46,7 @@ export const STORAGE_INVENTORY: StorageGroup[] = [
         duration: { en: 'Until you clear it', de: 'Bis zur Löschung durch Sie' },
       },
       {
-        name: 'ct-logo-portal, chunk_retry_*',
+        name: 'ct-logo-portal, ct-build-reload-at',
         provider: 'ClerkTree',
         kind: 'Session storage',
         purpose: {

@@ -1,24 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
+import { isStaleBuildError, reloadForNewBuild } from '../utils/staleBuild';
 
 interface ErrorFallbackProps {
     error: Error;
     resetErrorBoundary: () => void;
-}
-
-/**
- * Detects if the error is a chunk/module load failure (common after deploys).
- */
-function isChunkLoadError(error: Error): boolean {
-    const msg = error.message || '';
-    return (
-        msg.includes('Failed to fetch dynamically imported module') ||
-        msg.includes('Loading chunk') ||
-        msg.includes('Loading CSS chunk') ||
-        msg.includes('Unable to preload') ||
-        msg.includes("'text/html' is not a valid JavaScript MIME type") ||
-        msg.includes('Importing a module script failed')
-    );
 }
 
 /**
@@ -41,10 +27,8 @@ async function hardReload() {
         // Swallow — we'll still reload
     }
 
-    // Navigate with a cache-busting param to defeat any HTTP cache
-    const url = new URL(window.location.href);
-    url.searchParams.set('_cb', Date.now().toString());
-    window.location.replace(url.toString());
+    // A reload revalidates the page itself, so no query parameter is needed.
+    window.location.reload();
 }
 
 function useSafeTranslation() {
@@ -70,21 +54,9 @@ const ErrorFallback: React.FC<ErrorFallbackProps> = ({ error, resetErrorBoundary
     const t = useSafeTranslation();
     const [autoReloading, setAutoReloading] = useState(false);
 
-    // Auto-reload once for chunk load errors (deploy mismatch)
+    // A page file from an older build (deploy while the tab was open): reload to the current build.
     useEffect(() => {
-        if (isChunkLoadError(error)) {
-            const reloadKey = 'error_boundary_reload';
-            const hasReloaded = sessionStorage.getItem(reloadKey);
-
-            if (!hasReloaded) {
-                sessionStorage.setItem(reloadKey, '1');
-                setAutoReloading(true);
-                hardReload();
-            } else {
-                // Already reloaded once — clear the flag so future visits work
-                sessionStorage.removeItem(reloadKey);
-            }
-        }
+        if (isStaleBuildError(error) && reloadForNewBuild()) setAutoReloading(true);
     }, [error]);
 
     if (autoReloading) {
@@ -98,7 +70,7 @@ const ErrorFallback: React.FC<ErrorFallbackProps> = ({ error, resetErrorBoundary
         );
     }
 
-    const chunkError = isChunkLoadError(error);
+    const chunkError = isStaleBuildError(error);
 
     return (
         <div className="min-h-screen flex flex-col items-center justify-center bg-black text-white p-4">

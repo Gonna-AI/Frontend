@@ -4,6 +4,7 @@ import { HelmetProvider } from 'react-helmet-async';
 
 import App from './App.tsx';
 import ErrorFallback from './components/ErrorFallback.tsx';
+import { reloadForNewBuild } from './utils/staleBuild.ts';
 import { loadBundle, resolveInitialLanguage } from './i18n/index.ts';
 import { initAnalytics } from './lib/analytics.ts';
 import './index.css';
@@ -19,18 +20,11 @@ if (import.meta.env.PROD) {
 
 initAnalytics();
 
-// A page opened before a deploy can still point at files the new build removed.
-// Reload once to pick up the current build instead of showing a broken page.
-window.addEventListener('vite:preloadError', (event) => {
-  event.preventDefault();
-  try {
-    if (window.sessionStorage.getItem('ct-preload-reload')) return;
-    window.sessionStorage.setItem('ct-preload-reload', '1');
-  } catch {
-    return;
-  }
-  window.location.reload();
-});
+// A page opened before a deploy can still point at files the new build removed: reload to pick up
+// the current build. The event is deliberately not cancelled: cancelling makes Vite resolve the
+// failed import with nothing, which React then fails on ("reading 'default'"). Left alone, the
+// import rejects and lazyWithRetry / the error screen handle it (see utils/staleBuild.ts).
+window.addEventListener('vite:preloadError', () => { reloadForNewBuild(); });
 
 const language = resolveInitialLanguage();
 document.documentElement.lang = language;

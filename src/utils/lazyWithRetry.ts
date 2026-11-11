@@ -1,63 +1,25 @@
 import React from 'react';
+import { isStaleBuildError, reloadForNewBuild } from './staleBuild';
 
 /**
- * A wrapper around React.lazy() that gracefully handles chunk loading failures.
+ * React.lazy for route pages that survives a deploy happening while the tab is open.
  *
- * After a deploy, old cached HTML may reference JS chunks that no longer exist.
- * The server returns a 404 or stale index.html, causing:
- *   "Failed to fetch dynamically imported module: ..."
- *
- * This utility:
- * 1. Retries the dynamic import once with a cache-busting query param
- * 2. If retry fails, clears SW caches and force-reloads to get fresh HTML
- * 3. Uses sessionStorage to prevent infinite reload loops
+ * A failed load, or a module that arrives without a component, means the page file belongs to an
+ * older build: reload once (see staleBuild.ts). While the reload happens the promise stays pending,
+ * so React keeps showing the loading state instead of an error.
  */
 export function lazyWithRetry<T extends React.ComponentType<any>>(
-    importFn: () => Promise<{ default: T }>,
-    chunkName?: string
+  importFn: () => Promise<{ default: T }>,
+  _chunkName?: string,
 ): React.LazyExoticComponent<T> {
-    return React.lazy(() => {
-        const storageKey = `chunk_retry_${chunkName || 'page'}_${window.location.pathname}`;
-
-        return importFn().catch((error: Error) => {
-            // Check if we've already tried reloading for this chunk
-            const hasReloaded = sessionStorage.getItem(storageKey);
-
-            if (!hasReloaded) {
-                // Mark that we're about to reload so we don't loop infinitely
-                sessionStorage.setItem(storageKey, '1');
-
-                // Clear service worker caches so the reload fetches fresh assets
-                if ('caches' in window) {
-                    caches.keys().then(names => {
-                        names.forEach(name => caches.delete(name));
-                    });
-                }
-
-                // Unregister service workers to prevent them from serving stale HTML
-                if ('serviceWorker' in navigator) {
-                    navigator.serviceWorker.getRegistrations().then(registrations => {
-                        registrations.forEach(reg => reg.unregister());
-                    });
-                }
-
-                // Small delay to let cache clearing complete, then hard reload
-                setTimeout(() => {
-                    // Force a cache-busting reload by navigating with a query param
-                    const url = new URL(window.location.href);
-                    url.searchParams.set('_cb', Date.now().toString());
-                    window.location.replace(url.toString());
-                }, 100);
-
-                // Return a never-resolving promise to prevent React from rendering
-                // an error while the page is reloading
-                return new Promise<{ default: T }>(() => { });
-            }
-
-            // We already reloaded once — clear the flag and throw the error
-            // so the ErrorBoundary catches it
-            sessionStorage.removeItem(storageKey);
-            throw error;
-        });
-    });
+  return React.lazy(async () => {
+    try {
+      const module = await importFn();
+      if (!module || !module.default) throw new Error('Importing a module script failed: the page file was empty');
+      return module;
+    } catch (error) {
+      if (isStaleBuildError(error) && reloadForNewBuild()) return new Promise<{ default: T }>(() => undefined);
+      throw error;
+    }
+  });
 }
