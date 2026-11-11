@@ -75,7 +75,7 @@
 
 .ct-works .hs-btn {
   align-items: center;
-  border-radius: 12px;
+  border-radius: var(--cta-r);
   display: inline-flex;
   font: 500 15px/1 var(--font-ui) !important;
   gap: 10px;
@@ -977,7 +977,7 @@
 .ct-works .hs-cta {
   align-items: center;
   background: var(--ct-ink);
-  border-radius: 12px;
+  border-radius: var(--cta-r);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, .12), 0 1px 2px rgba(10, 10, 10, .2), 0 8px 18px -8px rgba(10, 10, 10, .45);
   color: #fff;
   display: inline-flex;
@@ -994,7 +994,7 @@
 }
 .ct-works .hs-cta:active { transform: scale(.97); }
 .ct-works .hs-cta:focus-visible { outline: 2px solid var(--ct-orange); outline-offset: 3px; }
-.ct-works .hs-cta-icon { background: rgba(255, 255, 255, .1); border-radius: 8px; display: flex; height: 32px; overflow: hidden; position: relative; width: 32px; }
+.ct-works .hs-cta-icon { background: rgba(255, 255, 255, .1); border-radius: calc(var(--cta-r) - 6px); display: flex; height: 32px; overflow: hidden; position: relative; width: 32px; }
 .ct-works .hs-cta-track { display: flex; inset: 0; position: absolute; transform: translateX(-50%); transition: transform .6s cubic-bezier(.22, 1, .36, 1); width: 200%; }
 .ct-works .hs-cta-track svg { flex: 0 0 50%; height: 16px; margin: auto; }
 @media (prefers-reduced-motion: reduce) { .ct-works .hs-cta-track { transition: none; } }

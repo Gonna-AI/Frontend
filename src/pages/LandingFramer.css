@@ -19,6 +19,9 @@ html.lenis.lenis-stopped {
 }
 
 .ct-works {
+  /* The Book Demo buttons share one corner everywhere (not responsive); each inner tile is
+     concentric: outer radius minus the gap between tile and edge. */
+  --cta-r: 14px;
   --ct-ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   --ct-ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
   --ct-bg: #f4f4f4;
@@ -416,7 +419,7 @@ a:hover > .ct-roll > .ct-roll-inner { transform: translateY(-50%); }
 .ct-shell-cta {
   align-items: center;
   background: var(--ct-ink);
-  border-radius: var(--r-control, 12px);
+  border-radius: var(--cta-r);
   color: #fff;
   display: inline-flex;
   font-size: 15px;
@@ -432,7 +435,7 @@ a:hover > .ct-roll > .ct-roll-inner { transform: translateY(-50%); }
 .ct-shell-cta:active { transform: scale(.97); }
 
 .ct-shell-cta-icon {
-  border-radius: 8px;
+  border-radius: calc(var(--cta-r) - 4px);
   display: flex;
   height: 32px;
   overflow: hidden;
@@ -2221,10 +2224,10 @@ a.ct-mnav-row:hover > span, .ct-mnav-cta:hover > span { transform: translateX(3p
 .ct-mnav-list a:hover .ct-mnav-go { color: var(--ct-ink); transform: translateX(2px); }
 .ct-mnav-cta {
   align-items: center; animation: ctMnavItem .45s cubic-bezier(.22, 1, .36, 1) calc(80ms + var(--i) * 45ms) both; background: var(--ct-ink);
-  border-radius: var(--r-control, 14px); color: #fff; display: flex; font-size: 16px; font-weight: 500; justify-content: space-between;
-  margin-top: 20px; min-height: 52px; padding: 0 8px 0 18px; text-decoration: none;
+  border-radius: var(--cta-r); color: #fff; display: flex; font-size: 16px; font-weight: 500; justify-content: space-between;
+  margin-top: 20px; min-height: 52px; padding: 0 6px 0 18px; text-decoration: none;
 }
-.ct-mnav-cta > span { background: rgba(255, 255, 255, .12); border-radius: 10px; height: 36px; width: 36px; }
+.ct-mnav-cta > span { background: rgba(255, 255, 255, .12); border-radius: calc(var(--cta-r) - 6px); height: 40px; width: 40px; }
 @media (min-width: 640px) {
   .ct-mnav-sheet { left: auto; width: min(440px, calc(100vw - 2 * var(--gutter, 8px))); }
 }

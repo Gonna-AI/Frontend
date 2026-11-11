@@ -79,7 +79,7 @@
 .ct-works .hv-hero-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
 
 .ct-works .hv-btn {
-  align-items: center; background: #fff; border: 0; border-radius: 12px; color: #0a0a0a; cursor: pointer; display: inline-flex; flex: none;
+  align-items: center; background: #fff; border: 0; border-radius: var(--cta-r); color: #0a0a0a; cursor: pointer; display: inline-flex; flex: none;
   font: 500 15px/1 var(--font-ui); gap: 8px; height: 44px; padding: 0 18px; text-decoration: none; transition: transform .2s ease, background-color .2s ease;
 }
 .ct-works .hv-btn:active { transform: scale(.97); }
