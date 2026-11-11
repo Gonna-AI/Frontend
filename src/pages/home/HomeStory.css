@@ -694,7 +694,7 @@
 .ct-works .hs-rfq-row.is-head { border-top: 0; color: rgba(245, 245, 245, .45); font-size: 11px; min-height: 30px; opacity: 1; }
 .ct-works .hs-rfq-row.is-in { opacity: 1; }
 .ct-works .hs-rfq-row strong { align-items: center; color: #fff; display: flex; font-weight: 500; gap: 7px; min-width: 0; overflow: hidden; white-space: nowrap; }
-.ct-works .hs-rfq-row em { animation: agIn .35s ease; background: rgba(85, 118, 79, .35); border-radius: 5px; color: #d8ead1; font-size: 10px; font-style: normal; padding: 2px 6px; }
+.ct-works .hs-rfq-row em { animation: agIn .35s ease; background: rgba(85, 118, 79, .35); border-radius: 5px; color: #d8ead1; display: inline-block; font-size: 10px; font-style: normal; padding: 2px 6px; white-space: nowrap; }
 .ct-works .hs-rfq-row > span { color: rgba(245, 245, 245, .8); font-variant-numeric: tabular-nums; }
 .ct-works .hs-rfq-row .is-warn { color: #ffb08a; }
 .ct-works .hs-rfq-row.is-best { background: linear-gradient(90deg, rgba(166, 219, 152, .08), transparent); margin: 0 -12px; padding: 0 12px; }
@@ -721,27 +721,74 @@
 .ct-works .cs-heading h2 > span { color: var(--ct-orange); }
 .ct-works .cs-heading > div { align-items: end; display: flex; gap: 32px; justify-content: space-between; margin-top: 24px; }
 .ct-works .cs-heading p { color: var(--ct-muted); font-size: 15px; line-height: 1.6; margin: 0; max-width: 580px; }
-.ct-works .cs-grid { display: grid; gap: 14px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
-.ct-works .cs-card {
-  background: linear-gradient(180deg, #161616, #0d0d0d); border-radius: 18px; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .07), 0 24px 50px -30px rgba(0, 0, 0, .55);
-  display: flex; flex-direction: column; min-width: 0; opacity: 0; overflow: hidden; padding: 8px; transform: translateY(16px);
-  transition: opacity .7s cubic-bezier(.22, 1, .36, 1), transform .7s cubic-bezier(.22, 1, .36, 1);
+/* One stage, six capabilities: a numbered list beside a single silver stage. */
+.ct-works .cx {
+  background: linear-gradient(180deg, #161616, #0c0c0c); border-radius: 26px;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .07), 0 40px 80px -48px rgba(0, 0, 0, .7);
+  display: grid; gap: 8px; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); padding: 8px; position: relative;
 }
-.ct-works .cs-card.is-in { opacity: 1; transform: none; }
-.ct-works .cs-card.is-wide { grid-column: 1 / -1; }
-.ct-works .cs-visual { align-items: center; border-radius: 12px; display: flex; justify-content: center; min-height: clamp(360px, 32vw, 460px); padding: clamp(18px, 3vw, 40px); }
-.ct-works .cs-visual > * { position: relative; z-index: 2; }
-.ct-works .cs-card.is-wide .cs-visual .ag { max-width: 980px; width: 100%; }
-.ct-works .cs-card.is-wide .cs-visual .hs-scene { max-width: 760px; }
-.ct-works .cs-copy { display: grid; gap: 8px; padding: 18px 16px 14px; }
-.ct-works .cs-copy h3 { color: #f5f5f5; font: 500 18px/1.25 var(--font-ui); margin: 0; }
-.ct-works .cs-copy p { color: rgba(245, 245, 245, .58); font-size: 14px; line-height: 1.55; margin: 0; max-width: 62ch; }
+.ct-works .cx-anchor { left: 0; position: absolute; scroll-margin-top: 24px; top: 0; }
+.ct-works .cx-list { display: flex; flex-direction: column; justify-content: center; padding: clamp(20px, 3vw, 44px) clamp(20px, 2.6vw, 40px); }
+.ct-works .cx-item { border-top: 1px solid rgba(255, 255, 255, .07); position: relative; }
+.ct-works .cx-item:last-child { border-bottom: 1px solid rgba(255, 255, 255, .07); }
+.ct-works .cx-tab {
+  align-items: baseline; background: none; border: 0; color: rgba(245, 245, 245, .4); cursor: pointer; display: grid; gap: 14px;
+  grid-template-columns: 26px minmax(0, 1fr); padding: 20px 0; text-align: left; transition: color .3s ease; width: 100%;
+}
+.ct-works .cx-tab:focus-visible { outline: 2px solid rgba(255, 255, 255, .6); outline-offset: 4px; border-radius: 6px; }
+.ct-works .cx-num { font: 500 11px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .04em; transition: color .3s ease; }
+.ct-works .cx-title { font: 500 clamp(17px, 1.5vw, 21px)/1.25 var(--font-ui); letter-spacing: -.015em; }
+.ct-works .cx-item.is-active .cx-tab { color: #fff; }
+.ct-works .cx-item.is-active .cx-num { color: rgba(245, 245, 245, .55); }
+@media (hover: hover) { .ct-works .cx-item:not(.is-active) .cx-tab:hover { color: rgba(245, 245, 245, .75); } }
+/* The open item reveals its text by height, so the list never jumps. */
+.ct-works .cx-detail { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .55s cubic-bezier(.22, 1, .36, 1); }
+.ct-works .cx-detail > div { min-height: 0; overflow: hidden; padding-left: 40px; }
+.ct-works .cx-item.is-active .cx-detail { grid-template-rows: 1fr; }
+.ct-works .cx-detail p { color: rgba(245, 245, 245, .58); font-size: 14.5px; line-height: 1.6; margin: -6px 0 0; max-width: 46ch; opacity: 0; transition: opacity .4s ease; }
+.ct-works .cx-item.is-active .cx-detail p { opacity: 1; transition-delay: .12s; }
+.ct-works .cx-detail .cs-logos { margin: 14px 0 22px; }
+/* Progress of the scene now playing, along the top edge of the open item. */
+.ct-works .cx-bar { display: none; height: 1px; left: 0; overflow: hidden; position: absolute; right: 0; top: -1px; }
+.ct-works .cx.is-auto .cx-bar { display: block; }
+.ct-works .cx-bar > span { background: linear-gradient(90deg, rgba(255, 255, 255, .2), rgba(255, 255, 255, .85)); display: block; height: 100%; transform: scaleX(0); transform-origin: left; }
+.ct-works .cx-stage { align-items: center; border-radius: 20px; display: flex; justify-content: center; min-height: clamp(500px, 44vw, 620px); padding: clamp(20px, 3vw, 48px); }
+.ct-works .cx-scene { display: flex; justify-content: center; position: relative; width: 100%; z-index: 2; animation: cxIn .7s cubic-bezier(.22, 1, .36, 1) both; }
+.ct-works .cx-scene .hs-scene { max-width: 620px; }
+@keyframes cxIn { from { filter: blur(6px); opacity: 0; transform: translateY(10px) scale(.985); } }
+@media (prefers-reduced-motion: reduce) { .ct-works .cx-scene { animation: none; } .ct-works .cx-detail, .ct-works .cx-detail p { transition: none; } }
 @media (max-width: 900px) {
-  .ct-works .cs-grid { grid-template-columns: 1fr; }
   .ct-works .cs-heading > div { align-items: start; flex-direction: column; gap: 12px; }
 }
+/* Phones: one card at a time, swiped or stepped with thin arrows; dots show where you are. */
+.ct-works .cxm-track {
+  display: grid; gap: 12px; grid-auto-columns: 100%; grid-auto-flow: column; overflow-x: auto; overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory; scrollbar-width: none; -webkit-overflow-scrolling: touch;
+}
+.ct-works .cxm-track::-webkit-scrollbar { display: none; }
+.ct-works .cxm-card {
+  scroll-margin-top: 24px;
+  background: linear-gradient(180deg, #161616, #0d0d0d); border-radius: 18px; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .07);
+  display: flex; flex-direction: column; min-width: 0; padding: 6px; scroll-snap-align: start; scroll-snap-stop: always;
+}
+.ct-works .cxm-visual { align-items: center; border-radius: 13px; display: flex; flex: 1; justify-content: center; min-height: 340px; padding: 14px; }
+.ct-works .cxm-visual > * { position: relative; z-index: 2; }
+.ct-works .cxm-copy { display: grid; gap: 8px; padding: 16px 12px 12px; }
+.ct-works .cxm-copy h3 { color: #f5f5f5; font: 500 18px/1.25 var(--font-ui); margin: 0; }
+.ct-works .cxm-copy p { color: rgba(245, 245, 245, .58); font-size: 14px; line-height: 1.55; margin: 0; }
+.ct-works .cxm-nav { align-items: center; display: flex; justify-content: space-between; margin-top: 16px; }
+.ct-works .cxm-arrow {
+  align-items: center; background: none; border: 0; border-radius: 50%; box-shadow: inset 0 0 0 1px rgba(10, 10, 10, .14); color: var(--ct-ink);
+  cursor: pointer; display: inline-flex; height: 40px; justify-content: center; transition: opacity .2s ease, box-shadow .2s ease; width: 40px;
+}
+.ct-works .cxm-arrow:disabled { cursor: default; opacity: .3; }
+.ct-works .cxm-dots { align-items: center; display: flex; gap: 2px; }
+.ct-works .cxm-dots button { background: none; border: 0; cursor: pointer; height: 24px; padding: 0 3px; }
+.ct-works .cxm-dots button::before {
+  background: rgba(10, 10, 10, .2); border-radius: 999px; content: ""; display: block; height: 6px; transition: width .3s cubic-bezier(.22, 1, .36, 1), background-color .3s ease; width: 6px;
+}
+.ct-works .cxm-dots button.is-on::before { background: var(--ct-ink); width: 18px; }
 @media (max-width: 600px) {
-  .ct-works .cs-visual { min-height: 0; padding: 14px; }
   .ct-works .hs-rfq-row { grid-template-columns: minmax(0, 1.4fr) .8fr .8fr; }
   .ct-works .hs-rfq-row > :last-child { display: none; }
   .ct-works .hs-st-bar { height: 70px; }
@@ -1092,10 +1139,10 @@
   .ct-works .hs-slot { max-width: 52%; overflow: hidden; }
   .ct-works .hs-slot-label { overflow: hidden; text-overflow: ellipsis; }
   /* A second line leaves room for both the typed request and its status. */
-  .ct-works :is(.cs-visual, .hs-story) .hs-seed { display: grid; gap: 6px 8px; grid-template-columns: 24px minmax(0, 1fr); height: auto; min-height: 38px; padding: 7px; }
-  .ct-works :is(.cs-visual, .hs-story) .hs-seed-id { overflow: visible; overflow-wrap: anywhere; white-space: normal; }
-  .ct-works :is(.cs-visual, .hs-story) .hs-slot { grid-column: 2; justify-self: start; max-width: 100%; white-space: normal; }
-  .ct-works :is(.cs-visual, .hs-story) .hs-slot-label { overflow: visible; }
+  .ct-works :is(.cxm-visual, .hs-story) .hs-seed { display: grid; gap: 6px 8px; grid-template-columns: 24px minmax(0, 1fr); height: auto; min-height: 38px; padding: 7px; }
+  .ct-works :is(.cxm-visual, .hs-story) .hs-seed-id { overflow: visible; overflow-wrap: anywhere; white-space: normal; }
+  .ct-works :is(.cxm-visual, .hs-story) .hs-slot { grid-column: 2; justify-self: start; max-width: 100%; white-space: normal; }
+  .ct-works :is(.cxm-visual, .hs-story) .hs-slot-label { overflow: visible; }
   .ct-works .cs-hub-name strong { overflow: visible; overflow-wrap: anywhere; white-space: normal; }
   .ct-works .hs-rfq-row strong { display: block; overflow: visible; overflow-wrap: anywhere; white-space: normal; }
   .ct-works .hs-rfq-row { padding-block: 7px; }
