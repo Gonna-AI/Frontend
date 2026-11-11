@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 
-import { Footer, PageHero } from '../../components/Landing/AgeroChrome';
+import { Footer, PageHero } from '../../components/Landing/SiteChrome';
 import SEO from '../../components/SEO';
 import { LEGAL_LAST_UPDATED, SITE_URL } from '../../config/company';
 import { useLanguage } from '../../contexts/LanguageContext';
@@ -28,12 +28,12 @@ export default function LegalLayout({ title, description, dated = true, eyebrow,
   );
 
   return (
-    <div className="agero-works" id="agero-works">
+    <div className="ct-works" id="ct-works">
       <SEO title={title} description={description} noindex={!indexable} canonical={canonicalPath ? `${SITE_URL}${canonicalPath}` : undefined} />
       <PageHero eyebrow={eyebrow ?? (language === 'de' ? 'Rechtliches' : 'Legal')} title={title} description={description} titleId="legal-page-title" />
 
-      <div className="agero-legal-page-container">
-        <main className="agero-legal-card" id="main-content">
+      <div className="ct-legal-page-container">
+        <main className="ct-legal-card" id="main-content">
           <article className="legal-content">
             {dated && (
               <p className="legal-updated">

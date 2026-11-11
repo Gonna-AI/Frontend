@@ -1,20 +1,20 @@
 /* Footer navigation sits quietly over the moving gradient and ASCII scene. */
-.agero-footer .agero-footer-inner {
+.ct-footer .ct-footer-inner {
   padding: clamp(48px, 6.5vw, 104px) clamp(28px, 6vw, 96px) 0;
 }
-.agero-footer .agero-footer-main {
+.ct-footer .ct-footer-main {
   align-items: start;
   gap: clamp(48px, 7vw, 112px);
   grid-template-columns: minmax(260px, 1fr) minmax(0, 1.2fr);
 }
-.agero-footer .agero-footer-brand {
+.ct-footer .ct-footer-brand {
   color: #fff;
   display: inline-flex;
   margin-bottom: 34px;
   width: 150px;
 }
-.agero-footer .agero-footer-brand svg { display: block; height: auto; width: 100%; }
-.agero-footer .agero-footer-cta p {
+.ct-footer .ct-footer-brand svg { display: block; height: auto; width: 100%; }
+.ct-footer .ct-footer-cta p {
   font-family: "Geist", "Inter", system-ui, sans-serif !important;
   font-size: clamp(26px, 2.5vw, 38px);
   font-weight: 500;
@@ -22,21 +22,21 @@
   line-height: 1.15;
   margin: 0 0 26px;
 }
-.agero-footer .agero-footer-cta-button {
+.ct-footer .ct-footer-cta-button {
   border-radius: 9px;
   font-size: 14px;
   font-weight: 500;
   min-height: 44px;
   padding: 0 16px;
 }
-.agero-footer .agero-footer-cta-button svg { margin-left: 12px; }
-.agero-footer .agero-footer-columns {
+.ct-footer .ct-footer-cta-button svg { margin-left: 12px; }
+.ct-footer .ct-footer-columns {
   display: grid;
   gap: clamp(24px, 3.8vw, 64px);
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 /* Column headings read as labels (small, dim, spaced caps); links are the bright, larger items. */
-.agero-footer .agero-footer-column p {
+.ct-footer .ct-footer-column p {
   color: rgba(255, 255, 255, .45);
   font-size: 11px;
   font-weight: 500;
@@ -45,18 +45,18 @@
   margin: 0 0 20px;
   text-transform: uppercase;
 }
-.agero-footer .agero-footer-column ul { gap: 15px; }
-.agero-footer .agero-footer-column a {
+.ct-footer .ct-footer-column ul { gap: 15px; }
+.ct-footer .ct-footer-column a {
   color: rgba(255, 255, 255, .92);
   font-size: 15px;
   line-height: 20px;
   text-shadow: 0 1px 12px rgba(0, 0, 0, .7);
   transition: color .2s ease;
 }
-.agero-footer .agero-footer-column a:hover { color: #fff; }
-.agero-footer .agero-footer-social ul { gap: 12px; }
-.agero-footer .agero-footer-social a { align-items: center; display: inline-flex; gap: 10px; }
-.agero-footer .agero-footer-social-icon {
+.ct-footer .ct-footer-column a:hover { color: #fff; }
+.ct-footer .ct-footer-social ul { gap: 12px; }
+.ct-footer .ct-footer-social a { align-items: center; display: inline-flex; gap: 10px; }
+.ct-footer .ct-footer-social-icon {
   align-items: center;
   background: rgba(255, 255, 255, .06);
   border: 1px solid rgba(255, 255, 255, .12);
@@ -68,24 +68,24 @@
   transition: background-color .2s ease, border-color .2s ease;
   width: 32px;
 }
-.agero-footer .agero-footer-social-icon svg { height: 14px; width: 14px; }
-.agero-footer .agero-footer-social a:hover .agero-footer-social-icon { background: rgba(255,255,255,.14); border-color: rgba(255,255,255,.25); }
-.agero-footer .agero-footer-bottom {
+.ct-footer .ct-footer-social-icon svg { height: 14px; width: 14px; }
+.ct-footer .ct-footer-social a:hover .ct-footer-social-icon { background: rgba(255,255,255,.14); border-color: rgba(255,255,255,.25); }
+.ct-footer .ct-footer-bottom {
   border-top: 1px solid rgba(255, 255, 255, .13);
   gap: 20px;
   grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   margin-top: clamp(64px, 8vw, 112px);
   padding-top: 24px;
 }
-.agero-footer .agero-footer-copyright, .agero-footer .agero-footer-copyright p, .agero-footer .agero-footer-time { color: rgba(255,255,255,.78); font-size: 12px; line-height: 18px; }
-.agero-footer .agero-footer-bottom-right { gap: 16px; }
-.agero-footer .agero-footer-bottom-right :where(a, button) { color: rgba(255,255,255,.78); font-size: 12px; letter-spacing: .02em; line-height: 18px; text-decoration: none; text-shadow: 0 1px 12px rgba(0, 0, 0, .7); text-transform: none; transition: color 180ms ease; }
+.ct-footer .ct-footer-copyright, .ct-footer .ct-footer-copyright p, .ct-footer .ct-footer-time { color: rgba(255,255,255,.78); font-size: 12px; line-height: 18px; }
+.ct-footer .ct-footer-bottom-right { gap: 16px; }
+.ct-footer .ct-footer-bottom-right :where(a, button) { color: rgba(255,255,255,.78); font-size: 12px; letter-spacing: .02em; line-height: 18px; text-decoration: none; text-shadow: 0 1px 12px rgba(0, 0, 0, .7); text-transform: none; transition: color 180ms ease; }
 /* "Cookie settings" opens the consent dialog, so it is a button that reads as a footer link. */
-.agero-footer .agero-footer-link-button { background: none; border: 0; cursor: pointer; font-family: inherit; padding: 0; }
-@media (hover: hover) { .agero-footer .agero-footer-link-button:hover { color: #fff; } }
-@media (pointer: coarse) { .agero-footer .agero-footer-link-button { margin-block: -13px; padding-block: 13px; } }
-.agero-footer .agero-footer-bottom-right .agero-footer-back { color: var(--agero-orange); }
-.agero-footer .agero-footer-logo-text {
+.ct-footer .ct-footer-link-button { background: none; border: 0; cursor: pointer; font-family: inherit; padding: 0; }
+@media (hover: hover) { .ct-footer .ct-footer-link-button:hover { color: #fff; } }
+@media (pointer: coarse) { .ct-footer .ct-footer-link-button { margin-block: -13px; padding-block: 13px; } }
+.ct-footer .ct-footer-bottom-right .ct-footer-back { color: var(--ct-orange); }
+.ct-footer .ct-footer-logo-text {
   aspect-ratio: 736 / 414;
   color: #fff;
   font-size: clamp(80px, 20vw, 300px);
@@ -96,21 +96,21 @@
   opacity: 1;
   width: calc(100% + 2 * clamp(28px, 6vw, 96px));
 }
-.agero-footer .agero-footer-logo-text > span { position: relative; z-index: 1; }
+.ct-footer .ct-footer-logo-text > span { position: relative; z-index: 1; }
 @media (max-width: 900px) {
-  .agero-footer .agero-footer-main { display: grid; gap: 52px; grid-template-columns: 1fr; }
-  .agero-footer .agero-footer-columns { max-width: 620px; }
-  .agero-footer .agero-footer-bottom { grid-template-columns: 1fr auto; }
-  .agero-footer .agero-footer-bottom-right { grid-column: 1 / -1; justify-content: flex-start; justify-self: start; }
+  .ct-footer .ct-footer-main { display: grid; gap: 52px; grid-template-columns: 1fr; }
+  .ct-footer .ct-footer-columns { max-width: 620px; }
+  .ct-footer .ct-footer-bottom { grid-template-columns: 1fr auto; }
+  .ct-footer .ct-footer-bottom-right { grid-column: 1 / -1; justify-content: flex-start; justify-self: start; }
 }
 @media (max-width: 640px) {
-  .agero-footer .agero-footer-inner { padding: 42px 24px 0; }
-  .agero-footer .agero-footer-brand { margin-bottom: 26px; width: 132px; }
-  .agero-footer .agero-footer-cta p { font-size: 29px; margin-bottom: 22px; }
-  .agero-footer .agero-footer-main { gap: 46px; }
-  .agero-footer .agero-footer-columns { gap: 40px 24px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .agero-footer .agero-footer-column p { margin-bottom: 18px; }
-  .agero-footer .agero-footer-bottom { align-items: flex-start; display: flex; gap: 18px; margin-top: 52px; padding-top: 22px; }
-  .agero-footer .agero-footer-bottom-right { gap: 12px 18px; }
-  .agero-footer .agero-footer-logo-text { font-size: clamp(56px, 18vw, 110px); height: auto; margin: 28px -24px 0; width: calc(100% + 48px); }
+  .ct-footer .ct-footer-inner { padding: 42px 24px 0; }
+  .ct-footer .ct-footer-brand { margin-bottom: 26px; width: 132px; }
+  .ct-footer .ct-footer-cta p { font-size: 29px; margin-bottom: 22px; }
+  .ct-footer .ct-footer-main { gap: 46px; }
+  .ct-footer .ct-footer-columns { gap: 40px 24px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .ct-footer .ct-footer-column p { margin-bottom: 18px; }
+  .ct-footer .ct-footer-bottom { align-items: flex-start; display: flex; gap: 18px; margin-top: 52px; padding-top: 22px; }
+  .ct-footer .ct-footer-bottom-right { gap: 12px 18px; }
+  .ct-footer .ct-footer-logo-text { font-size: clamp(56px, 18vw, 110px); height: auto; margin: 28px -24px 0; width: calc(100% + 48px); }
 }

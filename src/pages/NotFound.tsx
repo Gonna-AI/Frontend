@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { ArrowLeft, ArrowUpRight } from 'lucide-react';
 
-import { Header, Footer } from '../components/Landing/AgeroChrome';
+import { Header, Footer } from '../components/Landing/SiteChrome';
 import SEO from '../components/SEO';
 import Grainient from '../components/Brand/Grainient';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -29,25 +29,25 @@ const NotFound = () => {
   const text = copy[language === 'de' ? 'de' : 'en'];
 
   return (
-    <div className="agero-works" id="agero-works">
+    <div className="ct-works" id="ct-works">
       <SEO title={text.eyebrow} description={text.body} noindex />
 
-      <div className="agero-top-area agero-top-area-with-hero">
+      <div className="ct-top-area ct-top-area-with-hero">
         <Header />
 
-        <section className="agero-hero-stage agero-notfound-stage" aria-labelledby="notfound-title">
+        <section className="ct-hero-stage ct-notfound-stage" aria-labelledby="notfound-title">
           <Grainient preset="silver" />
-          <span className="agero-notfound-code" aria-hidden="true">404</span>
-          <div className="agero-hero-stage-content">
-            <p className="agero-notfound-eyebrow">{text.eyebrow}</p>
+          <span className="ct-notfound-code" aria-hidden="true">404</span>
+          <div className="ct-hero-stage-content">
+            <p className="ct-notfound-eyebrow">{text.eyebrow}</p>
             <h1 id="notfound-title">{text.title}</h1>
             <p>{text.body}</p>
-            <div className="agero-notfound-actions">
-              <Link className="agero-notfound-primary" to="/">
+            <div className="ct-notfound-actions">
+              <Link className="ct-notfound-primary" to="/">
                 <ArrowLeft size={16} aria-hidden="true" />
                 {text.home}
               </Link>
-              <Link className="agero-notfound-secondary" to="/contact">
+              <Link className="ct-notfound-secondary" to="/contact">
                 {text.contact}
                 <ArrowUpRight size={16} aria-hidden="true" />
               </Link>

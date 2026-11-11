@@ -1,88 +1,88 @@
-.agero-about-page {
+.ct-about-page {
   overflow: hidden;
   padding: 24px 8px 40px;
   width: 100%;
 }
 
-.agero-about-section {
+.ct-about-section {
   margin: 0 auto;
   max-width: 1300px;
   padding: clamp(56px, 8vw, 112px) 0;
 }
 
 /* A calm, centered story with space between each idea. */
-.agero-about-story {
+.ct-about-story {
   background: #fff;
   border-radius: var(--r-edge, 36px);
   margin: 0 auto;
   max-width: var(--edge-max, 1920px);
   padding: 0 clamp(24px, 5vw, 72px);
 }
-.agero-about-story .agero-about-section { max-width: none; padding: clamp(90px, 11vw, 160px) 0; }
-.agero-about-grid-head { margin: auto; max-width: 760px; text-align: center; }
-.agero-about-grid-head h2 { color: #161616; font-family: Geist, sans-serif !important; font-size: clamp(34px, 4.2vw, 58px); font-weight: 500; letter-spacing: -.05em; line-height: 1.08; margin: 0 auto 38px; max-width: 18ch; }
-.agero-about-copy { margin: auto; max-width: 590px; }
-.agero-about-copy p { color: #777; font-size: clamp(16px, 1.25vw, 19px); line-height: 1.6; margin: 0 0 20px; }
-.agero-about-copy p:last-child { margin-bottom: 0; }
-.agero-about-values { padding: clamp(20px, 3vw, 44px) 0 clamp(76px, 8vw, 120px); text-align: center; }
-.agero-about-values h2 { color: #171717; font-family: Geist, sans-serif !important; font-size: clamp(26px, 3vw, 38px); font-weight: 500; letter-spacing: -.04em; margin: 0; }
-.agero-about-values > p { color: #929292; font-size: clamp(20px, 2.2vw, 29px); letter-spacing: -.03em; margin: 8px 0 38px; }
-.agero-works .agero-about-principles { display: flex; flex-wrap: wrap; gap: 28px; justify-content: center; max-width: 1000px; }
-.agero-about-card { flex: 1 1 190px; max-width: 270px; }
-.agero-about-card h3 { background: #f5f5f3; border: 1px solid #ededeb; border-radius: 999px; color: #202020; display: inline-block; font-family: Geist, sans-serif !important; font-size: 15px; font-weight: 500; margin: 0 0 14px; padding: 10px 16px; }
-.agero-about-card h3 span { color: #f15a24; font-size: 14px; }
-.agero-about-card p { color: #888; font-size: 14px; line-height: 1.5; margin: 0; }
-.agero-about-story .agero-about-section:last-child { border-top: 1px solid #eee; padding: clamp(72px, 8vw, 120px) 0; }
-.agero-about-mission { margin: auto; max-width: 660px !important; text-align: center; }
-.agero-about-mission p:first-child { color: #f15a24; font-size: 11px; font-weight: 600; letter-spacing: .14em; margin: 0 0 20px; text-transform: uppercase; }
-.agero-about-mission p:last-child { color: #858585; font-size: clamp(21px, 2.5vw, 32px); letter-spacing: -.035em; line-height: 1.3; margin: 0; }
-.agero-about-bottom { align-items: center; display: flex; flex-direction: column; gap: 72px; text-align: center; }
-.agero-about-join h2 { color: #171717; font-family: Geist, sans-serif !important; font-size: clamp(34px, 4vw, 54px); font-weight: 500; letter-spacing: -.05em; line-height: 1.08; margin: 0; }
-.agero-about-join p { color: #858585; font-size: 17px; line-height: 1.55; margin: 18px auto 0; max-width: 44ch; }
-.agero-about-join-actions { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 30px; }
-.agero-about-join-actions button { border: 0; border-radius: 999px; cursor: pointer; font-size: 14px; font-weight: 600; min-height: 48px; padding: 0 24px; transition: transform 180ms ease, background 180ms ease; }
-.agero-about-join-actions button:hover { transform: translateY(-2px); }
-.agero-about-join-primary { background: #141414; color: #fff; }
-.agero-about-join-secondary { background: #e9e9e7; color: #222; }
-.agero-about-office { border-top: 1px solid #d9d9d9; max-width: 480px; padding: 32px 12px 0; }
-.agero-about-office p:first-of-type { color: #f15a24; font-size: 11px; font-weight: 600; letter-spacing: .14em; margin: 0 0 14px; text-transform: uppercase; }
-.agero-about-office h3 { color: #171717; font-size: 22px; font-weight: 500; margin: 0; }
-.agero-about-office p:last-child { color: #858585; font-size: 15px; line-height: 1.6; margin: 12px 0 0; }
+.ct-about-story .ct-about-section { max-width: none; padding: clamp(90px, 11vw, 160px) 0; }
+.ct-about-grid-head { margin: auto; max-width: 760px; text-align: center; }
+.ct-about-grid-head h2 { color: #161616; font-family: Geist, sans-serif !important; font-size: clamp(34px, 4.2vw, 58px); font-weight: 500; letter-spacing: -.05em; line-height: 1.08; margin: 0 auto 38px; max-width: 18ch; }
+.ct-about-copy { margin: auto; max-width: 590px; }
+.ct-about-copy p { color: #777; font-size: clamp(16px, 1.25vw, 19px); line-height: 1.6; margin: 0 0 20px; }
+.ct-about-copy p:last-child { margin-bottom: 0; }
+.ct-about-values { padding: clamp(20px, 3vw, 44px) 0 clamp(76px, 8vw, 120px); text-align: center; }
+.ct-about-values h2 { color: #171717; font-family: Geist, sans-serif !important; font-size: clamp(26px, 3vw, 38px); font-weight: 500; letter-spacing: -.04em; margin: 0; }
+.ct-about-values > p { color: #929292; font-size: clamp(20px, 2.2vw, 29px); letter-spacing: -.03em; margin: 8px 0 38px; }
+.ct-works .ct-about-principles { display: flex; flex-wrap: wrap; gap: 28px; justify-content: center; max-width: 1000px; }
+.ct-about-card { flex: 1 1 190px; max-width: 270px; }
+.ct-about-card h3 { background: #f5f5f3; border: 1px solid #ededeb; border-radius: 999px; color: #202020; display: inline-block; font-family: Geist, sans-serif !important; font-size: 15px; font-weight: 500; margin: 0 0 14px; padding: 10px 16px; }
+.ct-about-card h3 span { color: #f15a24; font-size: 14px; }
+.ct-about-card p { color: #888; font-size: 14px; line-height: 1.5; margin: 0; }
+.ct-about-story .ct-about-section:last-child { border-top: 1px solid #eee; padding: clamp(72px, 8vw, 120px) 0; }
+.ct-about-mission { margin: auto; max-width: 660px !important; text-align: center; }
+.ct-about-mission p:first-child { color: #f15a24; font-size: 11px; font-weight: 600; letter-spacing: .14em; margin: 0 0 20px; text-transform: uppercase; }
+.ct-about-mission p:last-child { color: #858585; font-size: clamp(21px, 2.5vw, 32px); letter-spacing: -.035em; line-height: 1.3; margin: 0; }
+.ct-about-bottom { align-items: center; display: flex; flex-direction: column; gap: 72px; text-align: center; }
+.ct-about-join h2 { color: #171717; font-family: Geist, sans-serif !important; font-size: clamp(34px, 4vw, 54px); font-weight: 500; letter-spacing: -.05em; line-height: 1.08; margin: 0; }
+.ct-about-join p { color: #858585; font-size: 17px; line-height: 1.55; margin: 18px auto 0; max-width: 44ch; }
+.ct-about-join-actions { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 30px; }
+.ct-about-join-actions button { border: 0; border-radius: 999px; cursor: pointer; font-size: 14px; font-weight: 600; min-height: 48px; padding: 0 24px; transition: transform 180ms ease, background 180ms ease; }
+.ct-about-join-actions button:hover { transform: translateY(-2px); }
+.ct-about-join-primary { background: #141414; color: #fff; }
+.ct-about-join-secondary { background: #e9e9e7; color: #222; }
+.ct-about-office { border-top: 1px solid #d9d9d9; max-width: 480px; padding: 32px 12px 0; }
+.ct-about-office p:first-of-type { color: #f15a24; font-size: 11px; font-weight: 600; letter-spacing: .14em; margin: 0 0 14px; text-transform: uppercase; }
+.ct-about-office h3 { color: #171717; font-size: 22px; font-weight: 500; margin: 0; }
+.ct-about-office p:last-child { color: #858585; font-size: 15px; line-height: 1.6; margin: 12px 0 0; }
 @media (max-width: 640px) {
-  .agero-about-page { padding: 24px 14px 24px; }
-  .agero-about-story { padding-inline: 24px; }
-  .agero-about-principles { flex-direction: column; align-items: center; }
-  .agero-about-card { flex: auto; }
-  .agero-about-bottom { gap: 56px; }
+  .ct-about-page { padding: 24px 14px 24px; }
+  .ct-about-story { padding-inline: 24px; }
+  .ct-about-principles { flex-direction: column; align-items: center; }
+  .ct-about-card { flex: auto; }
+  .ct-about-bottom { gap: 56px; }
 }
 
 /* Equal-width values keep every label and description on the same baseline. */
-.agero-works .agero-about-principles { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:28px; }
-.agero-about-card { max-width:none; }
-.agero-about-card h3 { align-items:center; display:inline-flex; justify-content:center; min-height:48px; white-space:nowrap; }
-@media (max-width:640px) { .agero-works .agero-about-principles { grid-template-columns:1fr; max-width:300px; } }
+.ct-works .ct-about-principles { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:28px; }
+.ct-about-card { max-width:none; }
+.ct-about-card h3 { align-items:center; display:inline-flex; justify-content:center; min-height:48px; white-space:nowrap; }
+@media (max-width:640px) { .ct-works .ct-about-principles { grid-template-columns:1fr; max-width:300px; } }
 
 /* Intro: the liquid-metal mark beside the story. */
-.agero-about-intro-grid {
+.ct-about-intro-grid {
   align-items: center; display: grid; gap: clamp(32px, 5.5vw, 96px); grid-template-columns: minmax(0, .9fr) minmax(0, 1fr);
   margin: 0 auto; max-width: 1180px; padding: 0 clamp(16px, 3vw, 32px);
 }
-.agero-about-mark {
+.ct-about-mark {
   aspect-ratio: 1; background: radial-gradient(70% 60% at 50% 40%, #1a1a1b, #0a0a0a 70%); border-radius: var(--r-card, 28px); isolation: isolate;
   overflow: hidden; position: relative;
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .07), 0 1px 2px rgba(10, 10, 10, .08), 0 40px 80px -40px rgba(10, 10, 10, .55);
 }
-.agero-about-mark-canvas { inset: 0; position: absolute; }
-.agero-about-mark::after {
+.ct-about-mark-canvas { inset: 0; position: absolute; }
+.ct-about-mark::after {
   background: linear-gradient(180deg, rgba(255, 255, 255, .06), transparent 30%), radial-gradient(120% 90% at 50% 120%, rgba(0, 0, 0, .55), transparent 60%);
   content: ''; inset: 0; pointer-events: none; position: absolute; z-index: 1;
 }
-.agero-about-intro .agero-about-grid-head { margin: 0; max-width: 560px; text-align: left; }
-.agero-about-intro .agero-about-grid-head h2 { margin: 0 0 28px; max-width: 16ch; }
-.agero-about-intro .agero-about-copy { margin: 0; max-width: 520px; }
+.ct-about-intro .ct-about-grid-head { margin: 0; max-width: 560px; text-align: left; }
+.ct-about-intro .ct-about-grid-head h2 { margin: 0 0 28px; max-width: 16ch; }
+.ct-about-intro .ct-about-copy { margin: 0; max-width: 520px; }
 @media (max-width: 860px) {
-  .agero-about-intro-grid { grid-template-columns: 1fr; }
-  .agero-about-mark { aspect-ratio: 4 / 3; margin: 0 auto; max-width: 560px; width: 100%; }
-  .agero-about-intro .agero-about-grid-head { margin: 0 auto; text-align: center; }
-  .agero-about-intro .agero-about-grid-head h2, .agero-about-intro .agero-about-copy { margin-inline: auto; }
+  .ct-about-intro-grid { grid-template-columns: 1fr; }
+  .ct-about-mark { aspect-ratio: 4 / 3; margin: 0 auto; max-width: 560px; width: 100%; }
+  .ct-about-intro .ct-about-grid-head { margin: 0 auto; text-align: center; }
+  .ct-about-intro .ct-about-grid-head h2, .ct-about-intro .ct-about-copy { margin-inline: auto; }
 }

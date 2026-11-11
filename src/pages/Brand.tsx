@@ -4,7 +4,7 @@ import { ArrowDown, Check, Copy, FileJson, FileCode2, Mail, X } from 'lucide-rea
 import ClerkTreeLogo from '../components/Brand/ClerkTreeLogo';
 import ClerkTreeLockup from '../components/Brand/ClerkTreeLockup';
 import Grainient from '../components/Brand/Grainient';
-import { Header, Footer } from '../components/Landing/AgeroChrome';
+import { Header, Footer } from '../components/Landing/SiteChrome';
 import SEO from '../components/SEO';
 import './LandingFramer.css';
 import './Brand.css';
@@ -273,17 +273,17 @@ export default function Brand() {
   const { copied, copy } = useCopy();
 
   return (
-    <div className="agero-works brand-page" id="agero-works">
+    <div className="ct-works brand-page" id="ct-works">
       <SEO
         title="Brand assets and logos"
         description="Download the ClerkTree logo, mark, colors, typography and design tokens, with guidance on how to use them."
         canonical="https://clerktree.com/brand"
       />
 
-      <div className="agero-top-area agero-top-area-with-hero">
+      <div className="ct-top-area ct-top-area-with-hero">
         <Header />
 
-        <section className="agero-hero-stage brand-hero" aria-labelledby="brand-hero-title">
+        <section className="ct-hero-stage brand-hero" aria-labelledby="brand-hero-title">
           <Grainient preset="silver" />
           <div className="brand-hero-content">
             <img className="brand-hero-lockup" src={`${BRAND}/clerktree-lockup-inverse.svg`} alt="ClerkTree" width={300} height={65} />

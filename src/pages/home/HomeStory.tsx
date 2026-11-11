@@ -415,7 +415,7 @@ export function StoryTabs() {
   return (
     <section className="hs-section hs-story" aria-labelledby="hs-story-title" ref={ref}>
       <div className="hs-story-copy">
-        <h2 id="hs-story-title" data-agero-reveal="up">{c.storyTitle[0]}<br />{c.storyTitle[1]}</h2>
+        <h2 id="hs-story-title" data-ct-reveal="up">{c.storyTitle[0]}<br />{c.storyTitle[1]}</h2>
         <div className="hs-steps" role="group" aria-label={c.storyTitle.join(' ')} onMouseEnter={() => setPaused(true)} onMouseLeave={(event) => { if (!event.currentTarget.contains(document.activeElement)) setPaused(false); }} onFocus={() => setPaused(true)} onBlur={(event) => { if (!event.currentTarget.contains(event.relatedTarget)) setPaused(false); }}>
           {c.steps.map((step, i) => {
             const Icon = stepIcon[step.icon as keyof typeof stepIcon];
@@ -440,7 +440,7 @@ export function StoryTabs() {
           })}
         </div>
       </div>
-      <div className="hs-story-stage hs-visual" data-agero-reveal="up">
+      <div className="hs-story-stage hs-visual" data-ct-reveal="up">
         <Grainient preset="silver" still />
         {c.steps.map((step, i) => {
           const Scene = STORY_SCENES[i];
@@ -462,13 +462,13 @@ export function Spotlight() {
   return (
     <section className="hs-section hs-panel hs-dark hs-spot" aria-labelledby="hs-spot-title">
       <Grainient preset="black" />
-      <div className="hs-spot-copy" data-agero-reveal="up">
+      <div className="hs-spot-copy" data-ct-reveal="up">
         <span className="hs-pill">{c.spotPill}<b>{c.spotTag}</b></span>
         <h2 id="hs-spot-title">{c.spotTitle}</h2>
         <p>{c.spotBody}</p>
         <a className="hs-spot-link" href="/hive">{c.spotLink}<span aria-hidden="true">→</span></a>
       </div>
-      <div className="hs-spot-stage" data-agero-reveal="up">
+      <div className="hs-spot-stage" data-ct-reveal="up">
         <AssetGraph />
       </div>
     </section>
@@ -490,11 +490,11 @@ export function CaseStudy({ quote, name, role, image, stats }: CaseStudyProps) {
   return (
     <section className="hs-section hs-panel hs-silver hs-case" aria-labelledby="hs-case-title">
       <Grainient preset="silver" />
-      <div className="hs-case-head" data-agero-reveal="up">
+      <div className="hs-case-head" data-ct-reveal="up">
         <h2 id="hs-case-title">{c.caseTitle[0]}<br />{c.caseTitle[1]}</h2>
         <p>{c.caseIntro}</p>
       </div>
-      <article className="hs-case-card" data-agero-reveal="up">
+      <article className="hs-case-card" data-ct-reveal="up">
         <div className="hs-case-quote">
           <div className="hs-case-brands">
             <ClerkTreeLockup className="hs-case-lockup" title="ClerkTree" />
@@ -512,7 +512,7 @@ export function CaseStudy({ quote, name, role, image, stats }: CaseStudyProps) {
           <img alt="THD GmbH plant" decoding="async" loading="lazy" src={image} />
         </div>
       </article>
-      <dl className="hs-case-stats" data-agero-reveal="up">
+      <dl className="hs-case-stats" data-ct-reveal="up">
         {stats.map(([value, label]) => (
           <div key={label}><dt>{value}</dt><dd>{label}</dd></div>
         ))}
@@ -548,7 +548,7 @@ export function ProofChart() {
   return (
     <section className="hs-section hs-panel hs-dark hs-proof" aria-labelledby="hs-proof-title">
       <Grainient preset="black" />
-      <div className="hs-proof-copy" data-agero-reveal="up">
+      <div className="hs-proof-copy" data-ct-reveal="up">
         <span className="hs-eyebrow">{c.proofEyebrow}</span>
         <h2 id="hs-proof-title">{c.proofTitle[0]}<br />{c.proofTitle[1]}</h2>
         <p>{c.proofBody}</p>
@@ -560,7 +560,7 @@ export function ProofChart() {
         <p className="hs-proof-note">{c.proofNote}</p>
         <a className="hs-btn hs-btn-light" href="/contact">{c.proofCta}<ArrowRight size={16} aria-hidden="true" /></a>
       </div>
-      <div className={`hs-chart${shown ? ' is-in' : ''}`} ref={ref} data-agero-reveal="up">
+      <div className={`hs-chart${shown ? ' is-in' : ''}`} ref={ref} data-ct-reveal="up">
         <div className="hs-chart-head">
           <span>{c.proofMetric}</span>
         </div>
@@ -627,12 +627,12 @@ export function ConnectorPanel() {
   return (
     <section className="hs-section hs-panel hs-silver hs-api" aria-labelledby="hs-api-title">
       <Grainient preset="silver" />
-      <div className="hs-api-copy" data-agero-reveal="up">
+      <div className="hs-api-copy" data-ct-reveal="up">
         <h2 id="hs-api-title">{c.apiTitle[0]}<br />{c.apiTitle[1]}</h2>
         <p>{c.apiBody}</p>
         <a className="hs-btn hs-btn-light" href="/contact">{c.apiCta}<ArrowRight size={16} aria-hidden="true" /></a>
       </div>
-      <div className="hs-code" data-agero-reveal="up">
+      <div className="hs-code" data-ct-reveal="up">
         <div className="hs-code-bar">
           <strong>{c.apiWindow}</strong>
           <div className="hs-code-tabs" role="tablist">

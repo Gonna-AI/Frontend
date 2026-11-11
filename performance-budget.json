@@ -6,7 +6,6 @@
   "totalJsGzipKb": 1060,
   "totalCssGzipKb": 136,
   "thirdPartyJsPatterns": [
-    "assets/amplitudeSdk-",
-    "assets/rrweb-"
+    "assets/analytics-vendor-"
   ]
 }

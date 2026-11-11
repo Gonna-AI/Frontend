@@ -1,7 +1,7 @@
 import { ArrowUpRight } from 'lucide-react';
 import { siWellfound } from 'simple-icons';
 import { useLanguage } from '../contexts/LanguageContext';
-import { PageHero, Footer } from '../components/Landing/AgeroChrome';
+import { PageHero, Footer } from '../components/Landing/SiteChrome';
 import SEO from '../components/SEO';
 import './LandingFramer.css';
 import './Careers.css';
@@ -18,10 +18,10 @@ export default function Careers() {
   const c = language === 'de' ? COPY.de : COPY.en;
 
   return (
-    <div className="agero-works" id="agero-works">
+    <div className="ct-works" id="ct-works">
       <SEO title="Careers at ClerkTree" description={c.seo} canonical="https://clerktree.com/careers" />
       <PageHero
-        title={<>{t('careers.title1')} <span className="agero-orange">{t('careers.title2')}</span></>}
+        title={<>{t('careers.title1')} <span className="ct-orange">{t('careers.title2')}</span></>}
         description={c.line}
         titleId="careers-title"
       >

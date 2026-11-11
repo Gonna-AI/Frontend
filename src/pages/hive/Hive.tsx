@@ -1,7 +1,7 @@
 // A scroll-driven journey through Hive's connected plant graph.
 import { useEffect, useRef, useState } from 'react';
 import { ArrowRight } from 'lucide-react';
-import { Header, Footer } from '../../components/Landing/AgeroChrome';
+import { Header, Footer } from '../../components/Landing/SiteChrome';
 import SEO from '../../components/SEO';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { HiveScene, type HiveCopy } from './HiveScene';
@@ -249,7 +249,7 @@ export default function Hive() {
     return () => els.forEach((el, i) => { el.style.background = prev[i]; });
   }, []);
   return (
-    <div className="agero-works hv-page" id="agero-works">
+    <div className="ct-works hv-page" id="ct-works">
       <SEO title={c.seoTitle} description={c.seoDesc} canonical="https://clerktree.com/hive" />
       <HiveStory />
 

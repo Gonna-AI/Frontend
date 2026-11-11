@@ -1,4 +1,4 @@
-.agero-footer-grain {
+.ct-footer-grain {
   background: linear-gradient(145deg, #404044, #111113 64%, #080809);
   inset: 0;
   overflow: hidden;
@@ -6,7 +6,7 @@
   position: absolute;
   z-index: 0;
 }
-.agero-footer-ascii {
+.ct-footer-ascii {
   inset: 0;
   overflow: hidden;
   pointer-events: none;
@@ -14,11 +14,11 @@
   z-index: 0;
 }
 /* Kept on screen (under the canvas, nearly transparent) so iOS Safari treats it as visible and plays it. */
-.agero-footer-ascii video { height: 100%; inset: 0; object-fit: cover; opacity: .01; pointer-events: none; position: absolute; width: 100%; z-index: 0; }
-.agero-footer-ascii canvas { position: relative; z-index: 1; }
-.agero-footer-ascii canvas { display: block; height: 100%; width: 100%; }
-.agero-footer-inner:has(.agero-footer-ascii)::before {
+.ct-footer-ascii video { height: 100%; inset: 0; object-fit: cover; opacity: .01; pointer-events: none; position: absolute; width: 100%; z-index: 0; }
+.ct-footer-ascii canvas { position: relative; z-index: 1; }
+.ct-footer-ascii canvas { display: block; height: 100%; width: 100%; }
+.ct-footer-inner:has(.ct-footer-ascii)::before {
   background: linear-gradient(180deg, rgba(4, 4, 5, .18), rgba(4, 4, 5, .38) 65%, rgba(4, 4, 5, .52));
   z-index: 1;
 }
-.agero-footer-inner:has(.agero-footer-ascii) :is(.agero-footer-main, .agero-footer-bottom, .agero-footer-logo) { z-index: 2; }
+.ct-footer-inner:has(.ct-footer-ascii) :is(.ct-footer-main, .ct-footer-bottom, .ct-footer-logo) { z-index: 2; }

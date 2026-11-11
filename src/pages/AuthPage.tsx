@@ -8,7 +8,7 @@ import { ArrowRight, CheckCircle2, AlertCircle, Loader2, ArrowLeft } from 'lucid
 type AuthView = 'signin' | 'signup' | 'forgot_password';
 
 // Outer padding + rounded panel matches the main site's floating-card treatment
-// (.agero-top-area / .agero-footer both sit a few pixels off the viewport edge with large
+// (.ct-top-area / .ct-footer both sit a few pixels off the viewport edge with large
 // border-radius) instead of the panel running flush to the browser edge.
 const BrandPanel = () => (
     <div className="hidden h-full p-2 lg:block">

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowUpRight, UsersRound, X } from 'lucide-react';
 
 import { useLanguage } from '../contexts/LanguageContext';
-import { PageHero, Footer } from '../components/Landing/AgeroChrome';
+import { PageHero, Footer } from '../components/Landing/SiteChrome';
 import SEO from '../components/SEO';
 import './LandingFramer.css';
 import './About.css';
@@ -25,10 +25,10 @@ function LiquidMark() {
     return () => io.disconnect();
   }, []);
   return (
-    <div className="agero-about-mark" ref={ref} aria-hidden="true">
+    <div className="ct-about-mark" ref={ref} aria-hidden="true">
       {near && (
         <Suspense fallback={null}>
-          <LiquidMetalMark className="agero-about-mark-canvas" still={still} />
+          <LiquidMetalMark className="ct-about-mark-canvas" still={still} />
         </Suspense>
       )}
     </div>
@@ -63,7 +63,7 @@ export default function About() {
   const principles = getPrinciples(t);
 
   return (
-    <div className="agero-works" id="agero-works">
+    <div className="ct-works" id="ct-works">
       <SEO
         title={t('about.seoTitle')}
         description={t('about.seoDesc')}
@@ -76,14 +76,14 @@ export default function About() {
         titleId="about-hero-title"
       />
 
-      <main className="agero-about-page">
-        <div className="agero-about-story">
-        <section className="agero-about-section agero-about-intro">
-          <div className="agero-about-intro-grid">
+      <main className="ct-about-page">
+        <div className="ct-about-story">
+        <section className="ct-about-section ct-about-intro">
+          <div className="ct-about-intro-grid">
             <LiquidMark />
-            <div className="agero-about-grid-head">
+            <div className="ct-about-grid-head">
               <h2>{t('about.introTitle')}</h2>
-              <div className="agero-about-copy">
+              <div className="ct-about-copy">
                 <p>{t('about.whyDesc1')}</p>
                 <p>{t('about.whyDesc2')}</p>
               </div>
@@ -91,12 +91,12 @@ export default function About() {
           </div>
         </section>
 
-        <section className="agero-about-values" aria-labelledby="about-values-title">
+        <section className="ct-about-values" aria-labelledby="about-values-title">
           <h2 id="about-values-title">{language === 'de' ? 'Was uns wichtig ist.' : 'What matters to us.'}</h2>
           <p>{language === 'de' ? 'Klar im Denken. Sorgfältig im Machen.' : 'Clear thinking. Thoughtful work.'}</p>
-          <div className="agero-about-principles">
+          <div className="ct-about-principles">
           {principles.map(({ title, copy }) => (
-            <article key={title} className="agero-about-card">
+            <article key={title} className="ct-about-card">
               <h3><span aria-hidden="true">✳</span> {title}</h3>
               <p>{copy}</p>
             </article>
@@ -104,8 +104,8 @@ export default function About() {
           </div>
         </section>
 
-        <section className="agero-about-section">
-          <div className="agero-about-mission">
+        <section className="ct-about-section">
+          <div className="ct-about-mission">
             <p>{t('about.missionTitle')}</p>
             <p>{t('about.missionDesc')}</p>
           </div>
@@ -151,22 +151,22 @@ export default function About() {
           </div>}
         </dialog>
 
-        <section className="agero-about-section">
-          <div className="agero-about-bottom">
-            <div className="agero-about-join">
+        <section className="ct-about-section">
+          <div className="ct-about-bottom">
+            <div className="ct-about-join">
               <h2>{t('about.joinTitle')}</h2>
               <p>{t('about.joinDesc')}</p>
-              <div className="agero-about-join-actions">
-                <button className="agero-about-join-primary" onClick={() => navigate('/contact')} type="button">
+              <div className="ct-about-join-actions">
+                <button className="ct-about-join-primary" onClick={() => navigate('/contact')} type="button">
                   {t('about.getInTouch')}
                 </button>
-                <button className="agero-about-join-secondary" onClick={() => navigate('/careers')} type="button">
+                <button className="ct-about-join-secondary" onClick={() => navigate('/careers')} type="button">
                   {t('about.joinTeam')}
                 </button>
               </div>
             </div>
 
-            <div className="agero-about-office">
+            <div className="ct-about-office">
               <p>{t('about.officeTitle')}</p>
               <h3>Straubing, Germany</h3>
               <p>{t('about.officeDesc')}</p>

@@ -1,4 +1,4 @@
-/* /brand — brand assets page. Built on the agero-works shell (LandingFramer.css). */
+/* /brand — brand assets page. Built on the ct-works shell (LandingFramer.css). */
 
 .brand-page {
   --brand-line-light: rgba(19, 19, 19, 0.12);
@@ -11,7 +11,7 @@
 
 /* ---------- Hero ---------- */
 
-.agero-hero-stage.brand-hero {
+.ct-hero-stage.brand-hero {
   align-items: center;
   background:
     radial-gradient(120% 90% at 50% 0%, rgba(255, 255, 255, 0.08), transparent 60%),
@@ -94,7 +94,7 @@
 }
 
 .brand-hero-cue svg {
-  animation: brand-cue 2.4s var(--agero-ease-in-out) infinite;
+  animation: brand-cue 2.4s var(--ct-ease-in-out) infinite;
 }
 
 @keyframes brand-cue {
@@ -118,7 +118,7 @@
 }
 
 .brand-band-light {
-  color: var(--agero-ink);
+  color: var(--ct-ink);
 }
 
 .brand-band-dark {
@@ -303,14 +303,14 @@
 }
 
 .brand-downloads a strong {
-  color: var(--agero-ink);
+  color: var(--ct-ink);
   font-weight: 500;
 }
 
 .brand-downloads a:hover {
   background: #fff;
   border-color: rgba(19, 19, 19, 0.3);
-  color: var(--agero-ink);
+  color: var(--ct-ink);
 }
 
 /* Clear space: a measured construction drawing. Strokes stay hairline at any size. */
@@ -609,7 +609,7 @@
 }
 
 .brand-swatch.is-light {
-  color: var(--agero-ink);
+  color: var(--ct-ink);
 }
 
 .brand-swatch:hover {
@@ -633,7 +633,7 @@
 }
 
 .brand-swatch-token {
-  font-family: var(--agero-mono, ui-monospace, "SFMono-Regular", Menlo, monospace);
+  font-family: var(--ct-mono, ui-monospace, "SFMono-Regular", Menlo, monospace);
   font-size: 10.5px;
   margin-top: 6px;
   opacity: 0.55;
@@ -792,7 +792,7 @@
 
 .brand-token-card,
 .brand-contact-card {
-  background: var(--agero-panel);
+  background: var(--ct-panel);
   border: 1px solid var(--brand-line-light);
   border-radius: 20px;
   padding: 18px 20px;
@@ -812,9 +812,9 @@
 
 .brand-token-card-head a {
   align-items: center;
-  color: var(--agero-ink);
+  color: var(--ct-ink);
   display: inline-flex;
-  font-family: var(--agero-mono, ui-monospace, "SFMono-Regular", Menlo, monospace);
+  font-family: var(--ct-mono, ui-monospace, "SFMono-Regular", Menlo, monospace);
   font-size: 14px;
   font-weight: 500;
   gap: 8px;
@@ -854,7 +854,7 @@
   background: #fff;
   border: 1px solid var(--brand-line-light);
   border-radius: 8px;
-  color: var(--agero-ink);
+  color: var(--ct-ink);
   cursor: pointer;
   display: inline-flex;
   height: 30px;
@@ -869,7 +869,7 @@
 
 .brand-contact-card {
   align-items: center;
-  color: var(--agero-ink);
+  color: var(--ct-ink);
   display: flex;
   gap: 14px;
   text-decoration: none;
@@ -896,7 +896,7 @@
   font-weight: 500;
 }
 
-.brand-page .agero-footer {
+.brand-page .ct-footer {
   margin-top: clamp(56px, 7vw, 112px);
 }
 

@@ -4,7 +4,7 @@ import { Search } from 'lucide-react';
 import { getAllBlogPosts, getAllTags, getPostAuthors } from '../data/blogPosts';
 import { PostCard } from '../components/Blog/Journal';
 import { useLanguage } from '../contexts/LanguageContext';
-import { Header, Footer } from '../components/Landing/AgeroChrome';
+import { Header, Footer } from '../components/Landing/SiteChrome';
 import Grainient from '../components/Brand/Grainient';
 import SEO from '../components/SEO';
 import './LandingFramer.css';
@@ -37,13 +37,13 @@ export default function Blog() {
   };
 
   return (
-    <div className="agero-works jr-page">
+    <div className="ct-works jr-page">
       <SEO
         title="ClerkTree Journal: field notes on industrial AI"
         description="Field notes from ClerkTree on industrial AI, predictive maintenance and agents for machine operations."
         canonical="https://clerktree.com/blog"
       />
-      <div className="agero-top-area jr-top">
+      <div className="ct-top-area jr-top">
         <Header />
         <section className="jr-hero" aria-labelledby="jr-title">
           <Grainient preset="silver" />

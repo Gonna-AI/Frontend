@@ -47,7 +47,14 @@ export default defineConfig({
         warn(warning);
       },
       output: {
+        // Opaque file names: the public bundle should not spell out the app's internal structure
+        // (page and feature names). Library chunks keep a neutral name for the size budget.
+        chunkFileNames: (chunk) => (chunk.name.endsWith('-vendor') ? 'assets/[name]-[hash].js' : 'assets/[hash].js'),
+        entryFileNames: 'assets/[hash].js',
+        assetFileNames: 'assets/[hash][extname]',
         manualChunks(id) {
+          // The analytics SDK and its guard load together, only after consent.
+          if (id.includes('/@amplitude/') || id.includes('/rrweb') || id.includes('/src/lib/amplitudeSdk') || id.includes('/src/lib/analyticsGuard')) return 'analytics-vendor';
           if (!id.includes('/node_modules/')) return undefined;
 
           // Exact package folders only: a loose '/react/' match also swept in @fullcalendar/react (the
@@ -71,8 +78,8 @@ export default defineConfig({
     },
   },
   esbuild: {
-    // Production builds drop debug logging but keep console.warn/error for monitoring.
-    drop: process.env.NODE_ENV === 'production' ? ['debugger'] : [],
-    pure: process.env.NODE_ENV === 'production' ? ['console.log', 'console.debug', 'console.info'] : [],
+    // Production builds print nothing to the visitor's console and carry no comments.
+    drop: process.env.NODE_ENV === 'production' ? ['console', 'debugger'] : [],
+    legalComments: 'none',
   },
 });

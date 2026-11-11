@@ -9,6 +9,15 @@ import { initAnalytics } from './lib/analytics.ts';
 import { initPerformanceVitals } from './utils/performanceVitals.ts';
 import './index.css';
 
+// Production prints nothing to the visitor's console: our own calls are stripped at build time,
+// and this silences libraries that log on their own. Development keeps the console.
+if (import.meta.env.PROD) {
+  const silent = () => undefined;
+  for (const method of ['log', 'debug', 'info', 'warn', 'error', 'trace', 'table', 'dir'] as const) {
+    console[method] = silent;
+  }
+}
+
 initPerformanceVitals();
 initAnalytics();
 

@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 import { ArrowLeft, ArrowUpRight } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 
-import { Header, Footer } from '../components/Landing/AgeroChrome';
+import { Header, Footer } from '../components/Landing/SiteChrome';
 import Grainient from '../components/Brand/Grainient';
 import SEO from '../components/SEO';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -141,8 +141,8 @@ function projectPath(slug: string, isResearchHost: boolean) {
 
 function ResearchShell({ children, hero, isResearchHost }: { children: ReactNode; hero: ReactNode; isResearchHost: boolean }) {
   return (
-    <div id="agero-works" className="agero-works rs-page">
-      <div className="agero-top-area agero-top-area-with-hero">
+    <div id="ct-works" className="ct-works rs-page">
+      <div className="ct-top-area ct-top-area-with-hero">
         <Header linkBase={isResearchHost ? 'https://clerktree.com' : ''} />
         {hero}
       </div>
@@ -166,7 +166,7 @@ function ResearchLanding({ isResearchHost }: { isResearchHost: boolean }) {
       <ResearchShell
         isResearchHost={isResearchHost}
         hero={
-          <section className="agero-hero-stage rs-hero" aria-labelledby="research-title">
+          <section className="ct-hero-stage rs-hero" aria-labelledby="research-title">
             <Grainient preset="silver" />
             <div className="rs-hero-inner">
               <p className="rs-hero-label">{copy ? 'ClerkTree Forschung' : 'ClerkTree Research'}</p>
@@ -265,10 +265,10 @@ function ResearchDetail({ project, isResearchHost }: { project: ResearchProject;
       <ResearchShell
         isResearchHost={isResearchHost}
         hero={
-          <section className="agero-hero-stage agero-page-hero" aria-labelledby="research-project-title">
+          <section className="ct-hero-stage ct-page-hero" aria-labelledby="research-project-title">
             <Grainient preset="silver" />
-            <div className="agero-hero-stage-content">
-              <p className="agero-page-hero-eyebrow">{project.number} · {project.category[language]}</p>
+            <div className="ct-hero-stage-content">
+              <p className="ct-page-hero-eyebrow">{project.number} · {project.category[language]}</p>
               <h1 id="research-project-title">{project.title[language]}</h1>
               <p>{project.subtitle[language]}</p>
             </div>

@@ -286,20 +286,20 @@ export function Header({ linkBase = '' }: HeaderProps = {}) {
   }, []);
 
   return (
-    <header className={`agero-shell-header${isMenuOpen && !closing ? ' is-menu-open' : ''}`}>
-      <a className={`agero-shell-logo is-${logoChrome.phase}`} href={linkBase || '/'} aria-label={t('home.brand.aria')} ref={logoRef}
+    <header className={`ct-shell-header${isMenuOpen && !closing ? ' is-menu-open' : ''}`}>
+      <a className={`ct-shell-logo is-${logoChrome.phase}`} href={linkBase || '/'} aria-label={t('home.brand.aria')} ref={logoRef}
         onPointerEnter={(event) => { if (event.pointerType === 'mouse') playLogo(); }}
         onFocus={(event) => { if (event.currentTarget.matches(':focus-visible')) playLogo(); }}>
-        <ClerkTreeLockup className="agero-shell-lockup" title={null} />
-        <span className="agero-logo-chrome" aria-hidden="true">
+        <ClerkTreeLockup className="ct-shell-lockup" title={null} />
+        <span className="ct-logo-chrome" aria-hidden="true">
           {logoChrome.loaded && (
             <Suspense fallback={null}>
-              <LiquidMetalMark className="agero-logo-chrome-canvas" scale={1} colorBack="#00000000" repetition={2.6} dispersion={0} speed={logoChrome.phase === 'idle' ? 0 : 2.4} contour={0.7} softness={0} pixelRatio={20} />
+              <LiquidMetalMark className="ct-logo-chrome-canvas" scale={1} colorBack="#00000000" repetition={2.6} dispersion={0} speed={logoChrome.phase === 'idle' ? 0 : 2.4} contour={0.7} softness={0} pixelRatio={20} />
             </Suspense>
           )}
         </span>
         {/* Maps the metal's tones onto the brand orange: deep orange shadows, orange body, light-gold glints. */}
-        <svg className="agero-logo-filter" width="0" height="0" aria-hidden="true" focusable="false">
+        <svg className="ct-logo-filter" width="0" height="0" aria-hidden="true" focusable="false">
           <filter id="ct-logo-orange" colorInterpolationFilters="sRGB">
             <feColorMatrix type="matrix" values=".2126 .7152 .0722 0 0  .2126 .7152 .0722 0 0  .2126 .7152 .0722 0 0  0 0 0 1 0" />
             <feComponentTransfer>
@@ -311,24 +311,24 @@ export function Header({ linkBase = '' }: HeaderProps = {}) {
         </svg>
       </a>
 
-      <NavigationMenu.Root className="agero-shell-nav" aria-label={t('home.nav.aria')} delayDuration={120} skipDelayDuration={300}>
-        <NavigationMenu.List className="agero-nav-list">
+      <NavigationMenu.Root className="ct-shell-nav" aria-label={t('home.nav.aria')} delayDuration={120} skipDelayDuration={300}>
+        <NavigationMenu.List className="ct-nav-list">
         {desktopNav.map((entry) => entry.items ? (
-          <NavigationMenu.Item className="agero-nav-item" key={entry.label}>
-            <NavigationMenu.Trigger className="agero-nav-trigger">
+          <NavigationMenu.Item className="ct-nav-item" key={entry.label}>
+            <NavigationMenu.Trigger className="ct-nav-trigger">
               {(['is-left', 'is-right'] as const).map((side) => (
-                <svg className={`agero-nav-shoulder ${side}`} key={side} viewBox="0 0 12 12" aria-hidden="true">
+                <svg className={`ct-nav-shoulder ${side}`} key={side} viewBox="0 0 12 12" aria-hidden="true">
                   <path className="fill" d="M0 11.5A11.5 11.5 0 0 0 11.5 0H12V12H0Z" />
                   <path className="line" d="M0 11.5A11.5 11.5 0 0 0 11.5 0" />
                 </svg>
               ))}
               <Roll>{entry.label}</Roll>
-              <ChevronDown className="agero-nav-caret" aria-hidden="true" />
+              <ChevronDown className="ct-nav-caret" aria-hidden="true" />
             </NavigationMenu.Trigger>
-            <NavigationMenu.Content className="agero-nav-panel">
+            <NavigationMenu.Content className="ct-nav-panel">
                 {entry.items.map((item, index) => (
-                  <NavigationMenu.Link className="agero-nav-menu-item" href={item.href} key={item.href} style={{ '--i': index } as CSSProperties}>
-                    <span className="agero-nav-menu-ico" aria-hidden="true">{item.icon}</span>
+                  <NavigationMenu.Link className="ct-nav-menu-item" href={item.href} key={item.href} style={{ '--i': index } as CSSProperties}>
+                    <span className="ct-nav-menu-ico" aria-hidden="true">{item.icon}</span>
                     <Roll>{item.label}</Roll>
                   </NavigationMenu.Link>
                 ))}
@@ -336,36 +336,36 @@ export function Header({ linkBase = '' }: HeaderProps = {}) {
           </NavigationMenu.Item>
         ) : (
           <NavigationMenu.Item key={entry.label}>
-            <NavigationMenu.Link className="agero-nav-link" href={entry.href}><Roll>{entry.label}</Roll></NavigationMenu.Link>
+            <NavigationMenu.Link className="ct-nav-link" href={entry.href}><Roll>{entry.label}</Roll></NavigationMenu.Link>
           </NavigationMenu.Item>
         ))}
         </NavigationMenu.List>
       </NavigationMenu.Root>
 
-      <div className="agero-shell-actions">
+      <div className="ct-shell-actions">
         <button
           aria-label={language === 'en' ? 'Auf Deutsch wechseln' : 'Switch to English'}
-          className="agero-shell-lang"
+          className="ct-shell-lang"
           onClick={() => setLanguage(language === 'en' ? 'de' : 'en')}
           type="button"
         >
           <span className={language === 'en' ? 'is-active' : undefined}>EN</span>
           <span className={language === 'de' ? 'is-active' : undefined}>DE</span>
         </button>
-        <a className="agero-shell-cta" href={contactHref}>
-          <span className="agero-shell-cta-label">{t('home.menu.cta')}</span>
-          <span className="agero-shell-cta-icon" aria-hidden="true">
-            <span className="agero-shell-cta-track">
+        <a className="ct-shell-cta" href={contactHref}>
+          <span className="ct-shell-cta-label">{t('home.menu.cta')}</span>
+          <span className="ct-shell-cta-icon" aria-hidden="true">
+            <span className="ct-shell-cta-track">
               <svg viewBox="0 0 16 16" fill="none"><path d="M6 3.5 10.5 8 6 12.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" /></svg>
               <svg viewBox="0 0 16 16" fill="none"><path d="M6 3.5 10.5 8 6 12.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" /></svg>
             </span>
           </span>
         </a>
         <button
-          aria-controls="agero-mobile-menu"
+          aria-controls="ct-mobile-menu"
           aria-expanded={isMenuOpen}
           aria-label={isMenuOpen ? t('home.menu.close') : t('home.menu.open')}
-          className={`agero-shell-menu${isMenuOpen ? ' is-open' : ''}`}
+          className={`ct-shell-menu${isMenuOpen ? ' is-open' : ''}`}
           onClick={openMenu}
           ref={menuButtonRef}
           type="button"
@@ -376,12 +376,12 @@ export function Header({ linkBase = '' }: HeaderProps = {}) {
       </div>
 
       {isMenuOpen && (
-        <div className={`ct-mnav${closing ? ' is-closing' : ''}`} data-lenis-prevent="" id="agero-mobile-menu">
+        <div className={`ct-mnav${closing ? ' is-closing' : ''}`} data-lenis-prevent="" id="ct-mobile-menu">
           <button aria-label={t('home.menu.closeMobile')} className="ct-mnav-scrim" onClick={closeMenu} type="button" />
           <nav className="ct-mnav-sheet" aria-label={t('home.menu.navAria')} ref={sheetRef} style={sheetGeo}>
             <div className="ct-mnav-top">
               <a className="ct-mnav-logo" href={linkBase || '/'} aria-label={t('home.brand.aria')} onClick={closeMenu}>
-                <ClerkTreeLockup className="agero-shell-lockup" title={null} />
+                <ClerkTreeLockup className="ct-shell-lockup" title={null} />
               </a>
               <button
                 aria-label={language === 'en' ? 'Auf Deutsch wechseln' : 'Switch to English'}
@@ -458,13 +458,13 @@ type PageHeroProps = {
 /** The standard page opening: shared header plus the dark rounded hero box. */
 export function PageHero({ title, eyebrow, description, children, titleId = 'page-hero-title', linkBase }: PageHeroProps) {
   return (
-    <div className="agero-top-area agero-top-area-with-hero">
+    <div className="ct-top-area ct-top-area-with-hero">
       <Header linkBase={linkBase} />
 
-      <section className="agero-hero-stage agero-page-hero" aria-labelledby={titleId}>
+      <section className="ct-hero-stage ct-page-hero" aria-labelledby={titleId}>
         <Grainient preset="silver" />
-        <div className="agero-hero-stage-content">
-          {eyebrow && <p className="agero-page-hero-eyebrow">{eyebrow}</p>}
+        <div className="ct-hero-stage-content">
+          {eyebrow && <p className="ct-page-hero-eyebrow">{eyebrow}</p>}
           <h1 id={titleId}>{title}</h1>
           {description && <p>{description}</p>}
           {children}
@@ -476,7 +476,7 @@ export function PageHero({ title, eyebrow, description, children, titleId = 'pag
 
 function FooterColumn({ title, links, social = false }: { title: string; links: FooterLink[]; social?: boolean }) {
   return (
-    <div className={`agero-footer-column${social ? ' agero-footer-social' : ''}`}>
+    <div className={`ct-footer-column${social ? ' ct-footer-social' : ''}`}>
       <p>{title}</p>
       <ul>
         {links.map((link) => {
@@ -485,7 +485,7 @@ function FooterColumn({ title, links, social = false }: { title: string; links: 
           return (
             <li key={link.href}>
               <a href={link.href} {...externalProps}>
-                {social && <span className="agero-footer-social-icon" aria-hidden="true">
+                {social && <span className="ct-footer-social-icon" aria-hidden="true">
                   {link.label === 'LinkedIn' ? <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.13 1.45-2.13 2.94v5.67H9.36V9h3.41v1.56h.05a3.74 3.74 0 0 1 3.37-1.85c3.6 0 4.26 2.37 4.26 5.45v6.29ZM5.34 7.43a2.06 2.06 0 1 1 0-4.12 2.06 2.06 0 0 1 0 4.12ZM7.12 20.45H3.56V9h3.56v11.45Z" /></svg> : link.label === 'X' ? <svg viewBox="0 0 24 24" fill="currentColor"><path d={siX.path} /></svg> : <Mail />}
                 </span>}
                 {link.label}
@@ -523,56 +523,56 @@ export function Footer() {
   }, []);
 
   return (
-    <footer className="agero-footer" ref={footerRef}>
-      <div className="agero-footer-inner">
+    <footer className="ct-footer" ref={footerRef}>
+      <div className="ct-footer-inner">
         {isFooterNearViewport && (
           <>
-            <div className="agero-footer-grain" aria-hidden="true"><Grainient preset="footer" /></div>
+            <div className="ct-footer-grain" aria-hidden="true"><Grainient preset="footer" /></div>
           </>
         )}
-        <div className="agero-footer-main">
-          <div className="agero-footer-cta">
-            <a className="agero-footer-brand" href="/" aria-label={language === 'de' ? 'ClerkTree Startseite' : 'ClerkTree home'}><ClerkTreeLockup title={null} /></a>
+        <div className="ct-footer-main">
+          <div className="ct-footer-cta">
+            <a className="ct-footer-brand" href="/" aria-label={language === 'de' ? 'ClerkTree Startseite' : 'ClerkTree home'}><ClerkTreeLockup title={null} /></a>
             <p>
               {language === 'de' ? <>KI-Harness für<br />Industriemaschinen.</> : <>Industrial AI harness<br />for machinery.</>}
             </p>
-            <a className="agero-footer-cta-button" href="/contact">
+            <a className="ct-footer-cta-button" href="/contact">
               {language === 'de' ? 'Kontakt aufnehmen' : 'Get in touch'}
               <ArrowUpRight aria-hidden="true" size={16} />
             </a>
           </div>
 
-          <div className="agero-footer-columns">
+          <div className="ct-footer-columns">
             <FooterColumn title={footer.company.title} links={footer.company.links} />
             <FooterColumn title={footer.product.title} links={footer.product.links} />
             <FooterColumn title={footer.social.title} links={footer.social.links} social />
           </div>
         </div>
 
-        <div className="agero-footer-bottom">
-          <div className="agero-footer-copyright">
+        <div className="ct-footer-bottom">
+          <div className="ct-footer-copyright">
             <p>© {new Date().getFullYear()} ClerkTree. {footer.rights}</p>
           </div>
-          <div className="agero-footer-time" aria-label={`${footer.munich} ${munichTime}`}>
+          <div className="ct-footer-time" aria-label={`${footer.munich} ${munichTime}`}>
             <span>{footer.munich} →</span>
             <time>{munichTime}</time>
           </div>
-          <div className="agero-footer-bottom-right">
+          <div className="ct-footer-bottom-right">
             {footer.legal.map((link) => (
               <a href={link.href} key={link.href}>
                 {link.label}
               </a>
             ))}
-            <button className="agero-footer-link-button" onClick={openConsentSettings} type="button">
+            <button className="ct-footer-link-button" onClick={openConsentSettings} type="button">
               {footer.cookieSettings}
             </button>
-            <a className="agero-footer-back" href="#agero-works">
+            <a className="ct-footer-back" href="#ct-works">
               {footer.backToTop}
             </a>
           </div>
         </div>
 
-        <div className="agero-footer-logo agero-footer-logo-text" aria-hidden="true">
+        <div className="ct-footer-logo ct-footer-logo-text" aria-hidden="true">
           {isFooterNearViewport && <FooterAscii />}
           <span>ClerkTree</span>
         </div>

@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { siGithub, siHuggingface } from 'simple-icons';
 
 import ClerkTreeLogo from '../components/Brand/ClerkTreeLogo';
-import { Footer } from '../components/Landing/AgeroChrome';
+import { Footer } from '../components/Landing/SiteChrome';
 import SEO from '../components/SEO';
 import { SimpleIcon } from '../dashboard/components/simple-icon';
 import './Machina.css';

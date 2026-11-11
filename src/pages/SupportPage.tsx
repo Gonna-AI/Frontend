@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { CheckCircle2, AlertTriangle, ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../config/supabase';
-import { PageHero, Footer } from '../components/Landing/AgeroChrome';
+import { PageHero, Footer } from '../components/Landing/SiteChrome';
 import { useLanguage } from '../contexts/LanguageContext';
 import './LandingFramer.css';
 
@@ -98,7 +98,7 @@ const SupportPage = () => {
     };
 
     return (
-        <div className="agero-works min-h-screen font-sans selection:bg-[#FF8A5B]/30 relative overflow-hidden">
+        <div className="ct-works min-h-screen font-sans selection:bg-[#FF8A5B]/30 relative overflow-hidden">
             <PageHero
                 eyebrow="Support"
                 title="Submit a request"

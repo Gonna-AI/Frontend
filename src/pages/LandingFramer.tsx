@@ -1,7 +1,7 @@
 import { type CSSProperties, Fragment, useEffect, useState } from 'react';
 import Lenis from 'lenis';
 import { isSaveDataEnabled } from '../utils/idle';
-import { Footer, Header } from '../components/Landing/AgeroChrome';
+import { Footer, Header } from '../components/Landing/SiteChrome';
 import { useLanguage } from '../contexts/LanguageContext';
 import SEO from '../components/SEO';
 import CapabilityShowcase from './solutions/CapabilityShowcase';
@@ -40,28 +40,28 @@ const faqKeys = ['q1', 'q2', 'q3', 'q4', 'q5', 'q6'] as const;
 
 
 export default function LandingFramer() {
-  useAgeroPageMotion();
+  useCtPageMotion();
   const { t, language } = useLanguage();
 
   return (
-    <div className="agero-works agero-home-page" id="agero-works">
+    <div className="ct-works ct-home-page" id="ct-works">
       <SEO
         title="ClerkTree – The World's Industrial Intelligence Layer"
         description="ClerkTree is an industrial AI harness for machine operations. Agents connect signals, technical knowledge and workflows to help teams understand issues and coordinate work."
         canonical="https://clerktree.com/"
       />
-      <div className="agero-top-area">
+      <div className="ct-top-area">
         <Header />
 
-        <div className="agero-home-hero-copy" data-agero-reveal="hero">
-          <h1 className="agero-hero-title" id="agero-works-title" style={{ columnGap: "0.22em" }}>
+        <div className="ct-home-hero-copy" data-ct-reveal="hero">
+          <h1 className="ct-hero-title" id="ct-works-title" style={{ columnGap: "0.22em" }}>
             <span>{t('home.hero.word1')}</span>
-            <span className={language === 'de' ? 'agero-hero-accent' : undefined}>{t('home.hero.word2')}</span>
-            <span className={language === 'en' ? 'agero-hero-accent' : undefined}>{t('home.hero.word3')}</span>
+            <span className={language === 'de' ? 'ct-hero-accent' : undefined}>{t('home.hero.word2')}</span>
+            <span className={language === 'en' ? 'ct-hero-accent' : undefined}>{t('home.hero.word3')}</span>
             <span>{t('home.hero.word4')}</span>
           </h1>
-          <p className="agero-hero-copy">{t('home.hero.copy')}</p>
-          <div className="agero-hero-actions">
+          <p className="ct-hero-copy">{t('home.hero.copy')}</p>
+          <div className="ct-hero-actions">
             <a className="hs-cta" href="#solutions">
               <span>{language === 'de' ? 'Mehr erfahren' : 'Learn more'}</span>
               <span className="hs-cta-icon" aria-hidden="true">
@@ -74,8 +74,8 @@ export default function LandingFramer() {
           </div>
         </div>
 
-        <section className="agero-home-prelude" aria-label={t('home.showcase.aria')}>
-          <div className="agero-hero-stage agero-hero-stage--home has-demo hs-hero-panel" data-agero-reveal="up">
+        <section className="ct-home-prelude" aria-label={t('home.showcase.aria')}>
+          <div className="ct-hero-stage ct-hero-stage--home has-demo hs-hero-panel" data-ct-reveal="up">
             <Grainient preset="silver" />
             <HeroAgentCard />
           </div>
@@ -105,16 +105,16 @@ export default function LandingFramer() {
 }
 
 
-function useAgeroPageMotion() {
+function useCtPageMotion() {
   useEffect(() => {
     const root = document.documentElement;
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    document.body.classList.add('agero-page-active');
+    document.body.classList.add('ct-page-active');
 
     if (reduceMotion || isSaveDataEnabled()) {
-      document.body.classList.add('agero-reduced-motion');
+      document.body.classList.add('ct-reduced-motion');
       return () => {
-        document.body.classList.remove('agero-page-active', 'agero-reduced-motion');
+        document.body.classList.remove('ct-page-active', 'ct-reduced-motion');
       };
     }
 
@@ -133,7 +133,7 @@ function useAgeroPageMotion() {
     root.classList.add('lenis');
 
     const anchorHandlers: Array<() => void> = [];
-    document.querySelectorAll<HTMLAnchorElement>('.agero-works a[href^="#"]').forEach((anchor) => {
+    document.querySelectorAll<HTMLAnchorElement>('.ct-works a[href^="#"]').forEach((anchor) => {
       const handler = (event: MouseEvent) => {
         const hash = anchor.getAttribute('href');
         if (!hash || hash === '#') return;
@@ -151,22 +151,22 @@ function useAgeroPageMotion() {
       anchorHandlers.forEach((cleanup) => cleanup());
       lenis.destroy();
       root.classList.remove('lenis', 'lenis-smooth', 'lenis-scrolling', 'lenis-stopped');
-      document.body.classList.remove('agero-page-active');
+      document.body.classList.remove('ct-page-active');
     };
   }, []);
 
   useEffect(() => {
-    const revealTargets = document.querySelectorAll<HTMLElement>('.agero-works [data-agero-reveal]');
-    const solRows = document.querySelectorAll<HTMLElement>('.agero-sol-row');
-    const pricingCards = document.querySelectorAll<HTMLElement>('.agero-plan-card');
+    const revealTargets = document.querySelectorAll<HTMLElement>('.ct-works [data-ct-reveal]');
+    const solRows = document.querySelectorAll<HTMLElement>('.ct-sol-row');
+    const pricingCards = document.querySelectorAll<HTMLElement>('.ct-plan-card');
 
-    const worksRoot = document.querySelector<HTMLElement>('.agero-works');
+    const worksRoot = document.querySelector<HTMLElement>('.ct-works');
     const bgSections = worksRoot ? (Array.from(worksRoot.children) as HTMLElement[]) : [];
     const fallbackBg = worksRoot ? window.getComputedStyle(worksRoot).backgroundColor : 'rgb(244, 244, 244)';
     const sectionBgs = bgSections.map((section) => {
       // Contact/footer get their dark look from video/image layers, so their
       // backgroundColor computes transparent — pin them to the matching dark.
-      if (section.classList.contains('agero-contact') || section.classList.contains('agero-footer')) {
+      if (section.classList.contains('ct-contact') || section.classList.contains('ct-footer')) {
         return 'rgb(13, 13, 13)';
       }
       const color = window.getComputedStyle(section).backgroundColor;
@@ -179,7 +179,7 @@ function useAgeroPageMotion() {
         entries.forEach((entry) => {
           if (!entry.isIntersecting) return;
           entry.target.classList.add('is-visible');
-          entry.target.setAttribute('data-agero-visible', 'true');
+          entry.target.setAttribute('data-ct-visible', 'true');
           revealObserver.unobserve(entry.target);
         });
       },
@@ -237,7 +237,7 @@ function useAgeroPageMotion() {
         if (rect.top <= bottomEdge && rect.bottom > bottomEdge) {
           if (sectionBgs[i] !== currentBodyBg) {
             currentBodyBg = sectionBgs[i];
-            document.body.style.setProperty('--agero-body-bg', currentBodyBg);
+            document.body.style.setProperty('--ct-body-bg', currentBodyBg);
           }
           break;
         }
@@ -272,14 +272,14 @@ function SplitText({ text }: { text: string }) {
   let globalCharIndex = 0;
   const words = text.split(' ');
   return (
-    <span className="agero-split" aria-hidden="true">
+    <span className="ct-split" aria-hidden="true">
       {words.map((word, wordIdx) => {
         const chars = Array.from(word);
         const wordSpans = chars.map((letter) => {
           const charIndex = globalCharIndex++;
           return (
             <span
-              className="agero-split-char"
+              className="ct-split-char"
               key={charIndex}
               style={{ '--char-index': charIndex } as CSSProperties}
             >
@@ -292,12 +292,12 @@ function SplitText({ text }: { text: string }) {
 
         return (
           <Fragment key={wordIdx}>
-            <span className="agero-split-word">
+            <span className="ct-split-word">
               {wordSpans}
             </span>
             {wordIdx < words.length - 1 && (
               <span
-                className="agero-split-char agero-split-space"
+                className="ct-split-char ct-split-space"
                 key={`space-${spaceIndex}`}
                 style={{ '--char-index': spaceIndex } as CSSProperties}
               >
@@ -334,24 +334,24 @@ function Pricing() {
   const pricingHeading = t('home.pricing.heading');
 
   return (
-    <section className="agero-pricing" id="pricing" aria-labelledby="agero-pricing-title">
-      <p className="agero-section-kicker" data-agero-reveal="up">
+    <section className="ct-pricing" id="pricing" aria-labelledby="ct-pricing-title">
+      <p className="ct-section-kicker" data-ct-reveal="up">
         ({t('home.pricing.kicker')})
       </p>
       <h2
-        className="agero-section-title"
-        data-agero-reveal="title"
-        id="agero-pricing-title"
+        className="ct-section-title"
+        data-ct-reveal="title"
+        id="ct-pricing-title"
         aria-label={pricingHeading}
       >
         <SplitText text={pricingHeading} />
       </h2>
 
-      <div className="agero-plan-list" data-agero-pricing-stack>
+      <div className="ct-plan-list" data-ct-pricing-stack>
         {localizedPlans.map((plan, index) => (
           <article
-            className={`agero-plan-card${plan.featured ? ' agero-plan-card-featured' : ''}`}
-            data-agero-reveal="up"
+            className={`ct-plan-card${plan.featured ? ' ct-plan-card-featured' : ''}`}
+            data-ct-reveal="up"
             key={plan.key}
             style={
               {
@@ -363,23 +363,23 @@ function Pricing() {
               } as CSSProperties
             }
           >
-            <div className="agero-plan-left">
-              <div className="agero-plan-tags">
-                <span className="agero-plan-badge">{planMeta[language === 'de' ? 'de' : 'en'][index].badge}</span>
-                {planMeta[language === 'de' ? 'de' : 'en'][index].chips.map((chip) => <span className="agero-plan-chip" key={chip}>{chip}</span>)}
+            <div className="ct-plan-left">
+              <div className="ct-plan-tags">
+                <span className="ct-plan-badge">{planMeta[language === 'de' ? 'de' : 'en'][index].badge}</span>
+                {planMeta[language === 'de' ? 'de' : 'en'][index].chips.map((chip) => <span className="ct-plan-chip" key={chip}>{chip}</span>)}
               </div>
               <div>
                 <h3>{plan.name}</h3>
                 <p>{plan.description}</p>
               </div>
-              <div className="agero-delivery">
+              <div className="ct-delivery">
                 <span>{t('home.pricing.setupLabel')}</span>
                 <span>{t('home.pricing.setupValue')}</span>
               </div>
             </div>
 
-            <div className="agero-plan-right">
-              <div className="agero-price">
+            <div className="ct-plan-right">
+              <div className="ct-price">
                 {plan.prefix && <span>{plan.prefix}</span>}
                 <strong>{plan.price}</strong>
               </div>
@@ -388,7 +388,7 @@ function Pricing() {
                   <li key={feature}>{feature}</li>
                 ))}
               </ul>
-              <a className="agero-button agero-plan-button" href="/contact">
+              <a className="ct-button ct-plan-button" href="/contact">
                 <span>{t('home.pricing.bookCall')}</span>
                 <span aria-hidden="true">→</span>
               </a>
@@ -417,28 +417,28 @@ function Faq() {
   };
 
   return (
-    <section className="agero-faq" aria-labelledby="agero-faq-title">
-      <p className="agero-section-kicker" data-agero-reveal="up">
+    <section className="ct-faq" aria-labelledby="ct-faq-title">
+      <p className="ct-section-kicker" data-ct-reveal="up">
         ({t('home.faq.kicker')})
       </p>
-      <h2 className="agero-section-title" data-agero-reveal="title" id="agero-faq-title">
+      <h2 className="ct-section-title" data-ct-reveal="title" id="ct-faq-title">
         {t('home.faq.heading')}
       </h2>
-      <p className="agero-faq-subtitle" data-agero-reveal="up">
+      <p className="ct-faq-subtitle" data-ct-reveal="up">
         {t('home.faq.subtitle')}
       </p>
 
-      <div className="agero-faq-grid">
+      <div className="ct-faq-grid">
         {faqColumns.map((column, columnIndex) => (
-          <div className="agero-faq-column" key={`faq-column-${columnIndex}`}>
+          <div className="ct-faq-column" key={`faq-column-${columnIndex}`}>
             {column.map((faq, itemIndex) => {
               const isOpen = openQuestion === faq.question;
               const revealIndex = itemIndex * 2 + columnIndex;
 
               return (
                 <article
-                  className={`agero-faq-item${isOpen ? ' is-open' : ''}`}
-                  data-agero-reveal="up"
+                  className={`ct-faq-item${isOpen ? ' is-open' : ''}`}
+                  data-ct-reveal="up"
                   key={faq.question}
                   style={
                     {
@@ -449,15 +449,15 @@ function Faq() {
                 >
                   <button
                     aria-expanded={isOpen}
-                    className="agero-faq-toggle"
+                    className="ct-faq-toggle"
                     onClick={() => toggleQuestion(faq.question)}
                     type="button"
                   >
-                    <span className="agero-faq-question">
+                    <span className="ct-faq-question">
                       <span>{faq.question}</span>
-                      <span aria-hidden="true" className="agero-faq-icon" />
+                      <span aria-hidden="true" className="ct-faq-icon" />
                     </span>
-                    <span aria-hidden={!isOpen} className="agero-faq-answer">
+                    <span aria-hidden={!isOpen} className="ct-faq-answer">
                       <span>{faq.answer}</span>
                     </span>
                   </button>
@@ -509,22 +509,22 @@ function Contact() {
   const subheading = t('home.contact.subheading');
 
   return (
-    <section className="agero-contact" id="contact" aria-labelledby="agero-contact-title">
-      <h2 className="sr-only" id="agero-contact-title">
+    <section className="ct-contact" id="contact" aria-labelledby="ct-contact-title">
+      <h2 className="sr-only" id="ct-contact-title">
         {connectHeading}
       </h2>
 
-      <div className="agero-contact-panel" data-agero-reveal="up">
+      <div className="ct-contact-panel" data-ct-reveal="up">
         <Grainient preset="black" />
-        <div className="agero-contact-top">
-          <div className="agero-contact-copy">
+        <div className="ct-contact-top">
+          <div className="ct-contact-copy">
             <h3 aria-label={subheading}>
               <SplitText text={subheading} />
             </h3>
             <p>{t('home.contact.tagline')}</p>
           </div>
 
-          <form className="agero-contact-form" onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
+          <form className="ct-contact-form" onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
             <label>
               <span>{t('home.contact.nameLabel')}</span>
               <input onChange={(e) => setName(e.target.value)} placeholder={t('home.contact.namePlaceholder')} type="text" value={name} />
@@ -537,16 +537,16 @@ function Contact() {
               <span>{t('home.contact.messageLabel')}</span>
               <textarea onChange={(e) => setMessage(e.target.value)} placeholder={t('home.contact.messagePlaceholder')} value={message} />
             </label>
-            <button className={`agero-submit-button is-${status}`} type="submit">
+            <button className={`ct-submit-button is-${status}`} type="submit">
               <span>{status === 'sent' ? t('home.contact.sent') : status === 'error' ? t('home.contact.error') : t('home.contact.send')}</span>
               {status === 'sending' && <i aria-hidden="true" />}
             </button>
           </form>
         </div>
 
-        <div className="agero-mail-ticker" aria-hidden="true">
+        <div className="ct-mail-ticker" aria-hidden="true">
           {Array.from({ length: 12 }).map((_, index) => (
-            <a className="agero-mail-card" href="mailto:team@clerktree.com" key={index} tabIndex={-1}>
+            <a className="ct-mail-card" href="mailto:team@clerktree.com" key={index} tabIndex={-1}>
               <span>
                 team<b>@</b>clerktree.com
               </span>

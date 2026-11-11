@@ -42,14 +42,11 @@ const [{ en }, { blogPosts, blogAuthors }, { COMPANY }] = await Promise.all([
 // (or any crawler) can tell whether they are looking at the current deploy.
 const git = (command) => { try { return execSync(command, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim(); } catch { return ''; } };
 const BUILD = {
-  commit: process.env.COMMIT_REF || git('git rev-parse HEAD') || 'unknown',
-  branch: process.env.HEAD || process.env.BRANCH || git('git rev-parse --abbrev-ref HEAD') || 'unknown',
-  deployId: process.env.DEPLOY_ID || null,
-  context: process.env.CONTEXT || 'local',
+  commit: (process.env.COMMIT_REF || git('git rev-parse HEAD') || 'unknown').slice(0, 12),
   builtAt: new Date().toISOString(),
 };
 writeFileSync(join(DIST, 'version.json'), `${JSON.stringify(BUILD, null, 2)}\n`);
-const base = readFileSync(join(DIST, 'index.html'), 'utf8').replace('</head>', `  <meta name="build" content="${BUILD.commit.slice(0, 12)} ${BUILD.builtAt}" />\n</head>`);
+const base = readFileSync(join(DIST, 'index.html'), 'utf8').replace('</head>', `  <meta name="build" content="${BUILD.commit} ${BUILD.builtAt}" />\n</head>`);
 const socialImages = JSON.parse(readFileSync('src/data/socialImages.json', 'utf8'));
 for (const image of Object.values(socialImages)) {
   if (!existsSync(join(DIST, image.slice(1)))) throw new Error(`Missing social image: ${image}`);
@@ -310,7 +307,11 @@ function render(page) {
 
   const noscript = `<noscript>\n${siteNav}\n<main>${bodyContent(page)}</main>\n${companyFooter}\n</noscript>`;
   if (!/<noscript>[\s\S]*?<\/noscript>/.test(html)) throw new Error('index.html has no <noscript> block to fill');
-  return html.replace(/<noscript>[\s\S]*?<\/noscript>/, () => noscript);
+  // Developer comments are for the source file only; the published page carries none.
+  return html
+    .replace(/<noscript>[\s\S]*?<\/noscript>/, () => noscript)
+    .replace(/<!--[\s\S]*?-->\s*/g, '')
+    .replace(/\n{3,}/g, '\n\n');
 }
 
 // Served (with a 404 status, see netlify.toml) for missing /assets/* files, instead of the app shell.
@@ -377,7 +378,7 @@ ${NAME} is an industrial AI company based in ${COMPANY.city}, Germany. It builds
 - Contact: ${COMPANY.email}, ${COMPANY.phone}
 - Address: ${COMPANY.street}, ${COMPANY.postalCode} ${COMPANY.city}, Germany
 - Profiles: ${profiles.join(', ')}
-- This file was generated ${BUILD.builtAt} from commit ${BUILD.commit.slice(0, 12)} (live build: ${SITE}/version.json)
+- This file was generated ${BUILD.builtAt} from commit ${BUILD.commit} (live build: ${SITE}/version.json)
 `;
 const llmsCapabilities = `## What ${NAME} does
 

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CheckCircle2 } from 'lucide-react';
-import { PageHero, Footer } from '../../components/Landing/AgeroChrome';
+import { PageHero, Footer } from '../../components/Landing/SiteChrome';
 import SEO from '../../components/SEO';
 import '../LandingFramer.css';
 import './Legal.css';
@@ -109,7 +109,7 @@ ${formData.details || 'No additional details provided.'}
   };
 
   return (
-    <div className="agero-works" id="agero-works">
+    <div className="ct-works" id="ct-works">
       <SEO
         title="Data Subject Access Request (DSAR)"
         description="Submit a request to access, correct, delete, or restrict your personal data under the GDPR."
@@ -123,11 +123,11 @@ ${formData.details || 'No additional details provided.'}
         titleId="dsar-page-title"
       />
 
-      <div className="agero-legal-page-container">
+      <div className="ct-legal-page-container">
 
         {/* ── Content Card with Form ── */}
-        <main className="agero-legal-content-wrap" id="main-content">
-          <div className="agero-legal-card">
+        <main className="ct-legal-content-wrap" id="main-content">
+          <div className="ct-legal-card">
             {submitStatus === 'success' ? (
               <div className="flex flex-col items-center text-center py-12 px-4 max-w-xl mx-auto">
                 <div className="w-16 h-16 rounded-full bg-[#FF4D00]/10 flex items-center justify-center text-[#FF4D00] mb-6">

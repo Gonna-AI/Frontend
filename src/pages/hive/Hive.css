@@ -1,28 +1,28 @@
 /* Full-bleed, scroll-driven Hive story. */
 
-.agero-works.hv-page { background: #0d0d0e; color: #e8e9eb; }
+.ct-works.hv-page { background: #0d0d0e; color: #e8e9eb; }
 
 /* Header sits on the scene and scrolls away with the first screen. */
-.agero-works .hv-head {
+.ct-works .hv-head {
   background: linear-gradient(rgba(13, 13, 14, .9), rgba(13, 13, 14, .55) 60%, rgba(13, 13, 14, 0));
   left: 0; padding: 10px clamp(16px, 2.4vw, 32px) 28px; position: absolute; right: 0; top: 0; z-index: 5;
 }
-.agero-works .hv-head .agero-shell-header { margin: 0 auto; }
-.agero-works .hv-head .agero-shell-logo { color: #fff; }
-.agero-works .hv-head .agero-shell-nav > a, .agero-works .hv-head .agero-nav-trigger { color: rgba(255, 255, 255, .66); }
-.agero-works .hv-head .agero-shell-nav > a:hover, .agero-works .hv-head .agero-nav-item:hover .agero-nav-trigger { color: #fff; }
-.agero-works .hv-head .agero-shell-lang { color: rgba(255, 255, 255, .45); }
-.agero-works .hv-head .agero-shell-lang .is-active { color: #fff; }
-.agero-works .hv-head .agero-shell-cta { background: #fff; color: #0a0a0a; }
-.agero-works .hv-head .agero-shell-cta:hover { background: #e9e9e9; }
-.agero-works .hv-head .agero-shell-menu span { background: #fff; }
+.ct-works .hv-head .ct-shell-header { margin: 0 auto; }
+.ct-works .hv-head .ct-shell-logo { color: #fff; }
+.ct-works .hv-head .ct-shell-nav > a, .ct-works .hv-head .ct-nav-trigger { color: rgba(255, 255, 255, .66); }
+.ct-works .hv-head .ct-shell-nav > a:hover, .ct-works .hv-head .ct-nav-item:hover .ct-nav-trigger { color: #fff; }
+.ct-works .hv-head .ct-shell-lang { color: rgba(255, 255, 255, .45); }
+.ct-works .hv-head .ct-shell-lang .is-active { color: #fff; }
+.ct-works .hv-head .ct-shell-cta { background: #fff; color: #0a0a0a; }
+.ct-works .hv-head .ct-shell-cta:hover { background: #e9e9e9; }
+.ct-works .hv-head .ct-shell-menu span { background: #fff; }
 
-.agero-works .hv-scroll { height: 1950svh; position: relative; }
-.agero-works .hv-sticky { height: 100svh; overflow: hidden; position: sticky; top: 0; }
+.ct-works .hv-scroll { height: 1950svh; position: relative; }
+.ct-works .hv-sticky { height: 100svh; overflow: hidden; position: sticky; top: 0; }
 /* The scene owns the right of the frame; copy owns a column on the left (top on phones). */
-.agero-works .hv-stage { bottom: 6%; left: 38%; position: absolute; right: 0; top: 0; }
-.agero-works .hv-canvas { display: block; height: 100%; inset: 0; position: absolute; width: 100%; }
-.agero-works .hv-sticky::after {
+.ct-works .hv-stage { bottom: 6%; left: 38%; position: absolute; right: 0; top: 0; }
+.ct-works .hv-canvas { display: block; height: 100%; inset: 0; position: absolute; width: 100%; }
+.ct-works .hv-sticky::after {
   background:
     linear-gradient(90deg, #0d0d0e 36%, rgba(13, 13, 14, .82) 41%, rgba(13, 13, 14, 0) 54%),
     linear-gradient(180deg, rgba(13, 13, 14, .7), transparent 18%),
@@ -30,72 +30,72 @@
   content: ''; inset: 0; pointer-events: none; position: absolute; z-index: 1;
 }
 
-.agero-works .hv-hero {
+.ct-works .hv-hero {
   align-items: flex-start; display: flex; flex-direction: column; gap: 18px; inset: 0; justify-content: center;
   padding: 0 clamp(24px, 4vw, 64px); position: absolute; text-align: left; will-change: opacity; z-index: 2;
 }
-.agero-works .hv-hero-eyebrow { color: rgba(255, 255, 255, .58); font: 500 11px/1 "Geist", "Inter", sans-serif; letter-spacing: .12em; }
-.agero-works .hv-hero h1 {
+.ct-works .hv-hero-eyebrow { color: rgba(255, 255, 255, .58); font: 500 11px/1 "Geist", "Inter", sans-serif; letter-spacing: .12em; }
+.ct-works .hv-hero h1 {
   color: #fff; font-family: "Geist", "Inter", sans-serif !important; font-size: clamp(40px, 4.4vw, 64px);
   font-weight: 500; letter-spacing: -.04em; line-height: 1.04; margin: 0; max-width: 560px; text-shadow: 0 2px 40px rgba(0, 0, 0, .7);
 }
-.agero-works .hv-hero p { color: rgba(240, 241, 243, .78); font-family: "Geist", "Inter", sans-serif !important; font-size: 17px; line-height: 1.5; margin: 0; max-width: 410px; text-shadow: 0 1px 18px rgba(0, 0, 0, .9); }
-.agero-works .hv-hero-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
+.ct-works .hv-hero p { color: rgba(240, 241, 243, .78); font-family: "Geist", "Inter", sans-serif !important; font-size: 17px; line-height: 1.5; margin: 0; max-width: 410px; text-shadow: 0 1px 18px rgba(0, 0, 0, .9); }
+.ct-works .hv-hero-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
 
-.agero-works .hv-btn {
+.ct-works .hv-btn {
   align-items: center; background: #fff; border: 0; border-radius: 12px; color: #0a0a0a; cursor: pointer; display: inline-flex; flex: none;
   font: 500 15px/1 var(--font-ui); gap: 8px; height: 44px; padding: 0 18px; text-decoration: none; transition: transform .2s ease, background-color .2s ease;
 }
-.agero-works .hv-btn:hover { background: #e9e9e9; }
-.agero-works .hv-btn:active { transform: scale(.97); }
-.agero-works .hv-btn.is-ghost { background: rgba(255, 255, 255, .06); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .16); color: #fff; }
-.agero-works .hv-btn.is-ghost:hover { background: rgba(255, 255, 255, .12); }
+.ct-works .hv-btn:hover { background: #e9e9e9; }
+.ct-works .hv-btn:active { transform: scale(.97); }
+.ct-works .hv-btn.is-ghost { background: rgba(255, 255, 255, .06); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .16); color: #fff; }
+.ct-works .hv-btn.is-ghost:hover { background: rgba(255, 255, 255, .12); }
 
-.agero-works .hv-scrollhint {
+.ct-works .hv-scrollhint {
   align-items: center; bottom: 22px; color: rgba(232, 233, 235, .5); display: flex; flex-direction: column; font: 500 11px/1 var(--font-ui);
   gap: 10px; left: 50%; letter-spacing: .08em; position: absolute; transform: translateX(-50%); transition: opacity .3s; z-index: 2;
 }
-.agero-works .hv-scrollhint i { background: linear-gradient(rgba(255, 255, 255, .5), transparent); height: 28px; width: 1px; }
-.agero-works .hv-scrollhint.is-hidden { opacity: 0; }
+.ct-works .hv-scrollhint i { background: linear-gradient(rgba(255, 255, 255, .5), transparent); height: 28px; width: 1px; }
+.ct-works .hv-scrollhint.is-hidden { opacity: 0; }
 
 /* Chapters: one steady column, vertically centred, so the eye never hunts for the copy. */
-.agero-works .hv-chapter { inset: 0; opacity: 0; pointer-events: none; position: absolute; visibility: hidden; z-index: 2; }
-.agero-works .hv-chapter-main {
+.ct-works .hv-chapter { inset: 0; opacity: 0; pointer-events: none; position: absolute; visibility: hidden; z-index: 2; }
+.ct-works .hv-chapter-main {
   will-change: translate, filter;
   left: var(--hv-col-x); position: absolute; top: 50%; transform: translateY(-50%); width: var(--hv-col-w);
 }
-.agero-works .hv-chapter-eyebrow, .agero-works .hv-chapter-detail > span {
-  color: var(--agero-orange); display: block; font: 500 11px/1.3 "Geist", "Inter", sans-serif; letter-spacing: .13em;
+.ct-works .hv-chapter-eyebrow, .ct-works .hv-chapter-detail > span {
+  color: var(--ct-orange); display: block; font: 500 11px/1.3 "Geist", "Inter", sans-serif; letter-spacing: .13em;
 }
-.agero-works .hv-chapter h2 {
+.ct-works .hv-chapter h2 {
   color: #fff; font-family: "Geist", "Inter", sans-serif !important; font-size: clamp(32px, 3.2vw, 50px); font-weight: 500;
   letter-spacing: -.04em; line-height: 1.07; margin: 18px 0 18px; text-wrap: balance;
 }
-.agero-works .hv-chapter-main > p { color: rgba(240, 241, 243, .72); font-family: "Geist", "Inter", sans-serif !important; font-size: clamp(15px, 1.1vw, 17px); line-height: 1.6; margin: 0; text-wrap: pretty; }
-.agero-works .hv-chapter-detail { border-top: 1px solid rgba(255, 255, 255, .12); margin-top: 28px; padding-top: 16px; }
-.agero-works .hv-chapter-detail > span { color: rgba(232, 233, 235, .45); }
-.agero-works .hv-chapter-detail p { color: rgba(255, 255, 255, .86); font: 400 14px/1.5 "Geist", "Inter", sans-serif; margin: 8px 0 0; }
+.ct-works .hv-chapter-main > p { color: rgba(240, 241, 243, .72); font-family: "Geist", "Inter", sans-serif !important; font-size: clamp(15px, 1.1vw, 17px); line-height: 1.6; margin: 0; text-wrap: pretty; }
+.ct-works .hv-chapter-detail { border-top: 1px solid rgba(255, 255, 255, .12); margin-top: 28px; padding-top: 16px; }
+.ct-works .hv-chapter-detail > span { color: rgba(232, 233, 235, .45); }
+.ct-works .hv-chapter-detail p { color: rgba(255, 255, 255, .86); font: 400 14px/1.5 "Geist", "Inter", sans-serif; margin: 8px 0 0; }
 
-.agero-works .hv-sticky { --hv-col-x: clamp(28px, 5vw, 96px); --hv-col-w: min(34vw, 500px); }
-.agero-works .hv-hero { padding-left: var(--hv-col-x); padding-right: 0; }
-.agero-works .hv-hero h1, .agero-works .hv-hero p { max-width: var(--hv-col-w); }
+.ct-works .hv-sticky { --hv-col-x: clamp(28px, 5vw, 96px); --hv-col-w: min(34vw, 500px); }
+.ct-works .hv-hero { padding-left: var(--hv-col-x); padding-right: 0; }
+.ct-works .hv-hero h1, .ct-works .hv-hero p { max-width: var(--hv-col-w); }
 
 /* Phones and small tablets: copy on top, scene below. */
 @media (max-width: 900px) {
-  .agero-works .hv-scroll { height: 1850svh; }
-  .agero-works .hv-sticky { --hv-col-x: 24px; --hv-col-w: calc(100% - 48px); }
-  .agero-works .hv-stage { bottom: 5%; left: 0; top: 33%; }
-  .agero-works .hv-sticky::after {
+  .ct-works .hv-scroll { height: 1850svh; }
+  .ct-works .hv-sticky { --hv-col-x: 24px; --hv-col-w: calc(100% - 48px); }
+  .ct-works .hv-stage { bottom: 5%; left: 0; top: 33%; }
+  .ct-works .hv-sticky::after {
     background: linear-gradient(180deg, #0d0d0e 34%, rgba(13, 13, 14, .6) 41%, rgba(13, 13, 14, 0) 50%), linear-gradient(0deg, rgba(13, 13, 14, .8), transparent 12%);
   }
-  .agero-works .hv-hero { align-items: flex-start; justify-content: flex-start; padding: 104px 24px 0; text-align: left; }
-  .agero-works .hv-hero h1 { font-size: clamp(34px, 8.6vw, 44px); }
-  .agero-works .hv-hero p { font-size: 15px; }
-  .agero-works .hv-chapter-main { top: 10svh; transform: none; }
-  .agero-works .hv-chapter h2 { font-size: clamp(26px, 6.8vw, 36px); margin: 12px 0; }
-  .agero-works .hv-chapter-main > p { font-size: 14.5px; line-height: 1.5; }
-  .agero-works .hv-chapter-detail { display: none; }
+  .ct-works .hv-hero { align-items: flex-start; justify-content: flex-start; padding: 104px 24px 0; text-align: left; }
+  .ct-works .hv-hero h1 { font-size: clamp(34px, 8.6vw, 44px); }
+  .ct-works .hv-hero p { font-size: 15px; }
+  .ct-works .hv-chapter-main { top: 10svh; transform: none; }
+  .ct-works .hv-chapter h2 { font-size: clamp(26px, 6.8vw, 36px); margin: 12px 0; }
+  .ct-works .hv-chapter-main > p { font-size: 14.5px; line-height: 1.5; }
+  .ct-works .hv-chapter-detail { display: none; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .agero-works .hv-chapter { transition: none; }
+  .ct-works .hv-chapter { transition: none; }
 }

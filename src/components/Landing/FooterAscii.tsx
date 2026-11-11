@@ -134,7 +134,7 @@ export default function FooterAscii() {
   }, []);
 
   return (
-    <div className="agero-footer-ascii" aria-hidden="true">
+    <div className="ct-footer-ascii" aria-hidden="true">
       <video ref={videoRef} src="/media/footer-ascii-source.mp4" poster={POSTER} muted loop playsInline preload="auto" />
       <canvas ref={canvasRef} />
     </div>

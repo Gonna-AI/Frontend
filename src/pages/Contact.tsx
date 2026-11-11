@@ -8,7 +8,7 @@ import { COMPANY } from '../config/company';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useConsent } from '../hooks/useConsent';
 import { grantConsent } from '../lib/consent';
-import { PageHero, Footer } from '../components/Landing/AgeroChrome';
+import { PageHero, Footer } from '../components/Landing/SiteChrome';
 import SEO from '../components/SEO';
 import './LandingFramer.css';
 import './Contact.css';
@@ -82,7 +82,7 @@ export default function Contact() {
   };
 
   return (
-    <div className="agero-works" id="agero-works">
+    <div className="ct-works" id="ct-works">
       <SEO
         title="Contact ClerkTree"
         description="Talk to the ClerkTree team about industrial AI for your machines: predictive maintenance, signal intelligence and AI agents for documentation, RFQs and work orders."

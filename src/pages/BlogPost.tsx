@@ -6,7 +6,7 @@ import remarkGfm from 'remark-gfm';
 import { getAllBlogPosts, getBlogPost, getPostAuthors, postContentUrl } from '../data/blogPosts';
 import { PostCard, formatPostDate } from '../components/Blog/Journal';
 import { useLanguage } from '../contexts/LanguageContext';
-import { Header, Footer } from '../components/Landing/AgeroChrome';
+import { Header, Footer } from '../components/Landing/SiteChrome';
 import Grainient from '../components/Brand/Grainient';
 import SEO from '../components/SEO';
 import './LandingFramer.css';
@@ -68,14 +68,14 @@ export default function BlogPost() {
   const related = getAllBlogPosts().filter((p) => p.slug !== post.slug).slice(0, 3);
 
   return (
-    <div className="agero-works jr-page">
+    <div className="ct-works jr-page">
       <SEO
         title={post.title}
         description={post.description}
         canonical={`https://clerktree.com/blog/${post.slug}`}
         openGraph={{ type: 'article' }}
       />
-      <div className="agero-top-area jr-top">
+      <div className="ct-top-area jr-top">
         <Header />
         <section className={`jr-post-hero is-${post.tone ?? 'silver'}`} aria-labelledby="jr-post-title">
           <Grainient preset="silver" />
