@@ -15,6 +15,7 @@ function isChunkLoadError(error: Error): boolean {
         msg.includes('Failed to fetch dynamically imported module') ||
         msg.includes('Loading chunk') ||
         msg.includes('Loading CSS chunk') ||
+        msg.includes('Unable to preload') ||
         msg.includes("'text/html' is not a valid JavaScript MIME type") ||
         msg.includes('Importing a module script failed')
     );
