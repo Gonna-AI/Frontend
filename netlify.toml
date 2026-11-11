@@ -109,6 +109,14 @@
   status = 410
   force = true
 
+# A missing build file must answer 404, never the app shell: serving HTML for a
+# missing .css or .js is what produces "Unable to preload CSS" for visitors and
+# crawlers holding an old page. Real files are served first (rule is not forced).
+[[redirects]]
+  from = "/assets/*"
+  to = "/404.html"
+  status = 404
+
 # Single-page-app fallback. Not forced, so real files (prerendered pages,
 # assets, robots.txt, sitemap.xml) are always served first.
 [[redirects]]

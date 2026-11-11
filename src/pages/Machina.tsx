@@ -8,8 +8,9 @@ import { Footer } from '../components/Landing/AgeroChrome';
 import SEO from '../components/SEO';
 import { SimpleIcon } from '../dashboard/components/simple-icon';
 import './Machina.css';
+import { MEDIA_BASE_URL } from '../config/media';
 
-const R2 = 'https://pub-0f804855178c4f4e8184c4fef3bd5b2a.r2.dev/machina';
+const R2 = `${MEDIA_BASE_URL}/machina`;
 
 const models = [
   {

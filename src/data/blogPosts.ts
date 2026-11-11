@@ -1,3 +1,5 @@
+import { MEDIA_BASE_URL } from '../config/media';
+
 export interface BlogAuthor {
   id: string;
   name: string;
@@ -8,7 +10,7 @@ export interface BlogAuthor {
   objectPosition?: string;
 }
 
-const R2 = 'https://pub-0f804855178c4f4e8184c4fef3bd5b2a.r2.dev';
+const R2 = MEDIA_BASE_URL;
 
 export const blogAuthors: Record<string, BlogAuthor> = {
   animesh: {

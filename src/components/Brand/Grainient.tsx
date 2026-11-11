@@ -4,6 +4,8 @@
 // parent's CSS gradient shows instead.
 import { useEffect, useRef } from 'react';
 
+import { cancelIdle, runWhenIdle } from '../../utils/idle';
+
 type Settings = {
   uTimeSpeed: number; uColorBalance: number; uWarpStrength: number; uWarpFrequency: number;
   uWarpSpeed: number; uWarpAmplitude: number; uBlendAngle: number; uBlendSoftness: number;
@@ -85,6 +87,13 @@ export default function Grainient({ preset = 'silver', still = false, className 
     const canvas = ref.current;
     const host = canvas?.parentElement;
     if (!canvas || !host) return undefined;
+
+    // The page has several of these. Setting one up (context, shader compile) costs main-thread
+    // time, so none starts until its section is near the viewport and the browser is idle: the
+    // first paint and the first interaction never wait for a background effect.
+    let teardown: (() => void) | undefined;
+    let idle = 0;
+    const boot = (): (() => void) | undefined => {
     const gl = canvas.getContext('webgl2', { alpha: false, antialias: false, depth: false, stencil: false, powerPreference: 'low-power' });
     const fail = () => { canvas.style.display = 'none'; };
     if (!gl) { fail(); return undefined; }
@@ -162,6 +171,20 @@ export default function Grainient({ preset = 'silver', still = false, className 
       document.removeEventListener('visibilitychange', onVisibility);
       canvas.removeEventListener('webglcontextlost', onLost);
       gl.getExtension('WEBGL_lose_context')?.loseContext();
+    };
+    };
+
+    const gate = new IntersectionObserver(([entry]) => {
+      if (!entry.isIntersecting) return;
+      gate.disconnect();
+      idle = runWhenIdle(() => { teardown = boot(); }, 500);
+    }, { rootMargin: '200px 0px' });
+    gate.observe(host);
+
+    return () => {
+      gate.disconnect();
+      cancelIdle(idle);
+      teardown?.();
     };
   }, [preset, still]);
 

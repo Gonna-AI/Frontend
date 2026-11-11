@@ -11,13 +11,15 @@
 //
 // All copy comes from the app's own sources (src/i18n/en.ts, src/data/blogPosts.ts,
 // public/journal/*.md). Nothing here says anything the visible site does not.
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { build } from 'esbuild';
 import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+
+import { execSync } from 'node:child_process';
 
 const DIST = 'dist';
 const SITE = 'https://clerktree.com';
@@ -35,10 +37,72 @@ const [{ en }, { blogPosts, blogAuthors }, { COMPANY }] = await Promise.all([
   loadModule('src/data/blogPosts.ts'),
   loadModule('src/config/company.ts'),
 ]);
-const base = readFileSync(join(DIST, 'index.html'), 'utf8');
+
+// Which build is this? Written to /version.json and into every page, so anyone
+// (or any crawler) can tell whether they are looking at the current deploy.
+const git = (command) => { try { return execSync(command, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim(); } catch { return ''; } };
+const BUILD = {
+  commit: process.env.COMMIT_REF || git('git rev-parse HEAD') || 'unknown',
+  branch: process.env.HEAD || process.env.BRANCH || git('git rev-parse --abbrev-ref HEAD') || 'unknown',
+  deployId: process.env.DEPLOY_ID || null,
+  context: process.env.CONTEXT || 'local',
+  builtAt: new Date().toISOString(),
+};
+writeFileSync(join(DIST, 'version.json'), `${JSON.stringify(BUILD, null, 2)}\n`);
+const base = readFileSync(join(DIST, 'index.html'), 'utf8').replace('</head>', `  <meta name="build" content="${BUILD.commit.slice(0, 12)} ${BUILD.builtAt}" />\n</head>`);
 const socialImages = JSON.parse(readFileSync('src/data/socialImages.json', 'utf8'));
 for (const image of Object.values(socialImages)) {
   if (!existsSync(join(DIST, image.slice(1)))) throw new Error(`Missing social image: ${image}`);
+}
+
+// ---------------------------------------------------------------------------
+// Preload each page's own code. The shared index.html only knows the app
+// shell; the page component is a lazy chunk the browser would otherwise find
+// only after running the shell (one extra round trip). Each prerendered page
+// names its own chunk, its stylesheet and the German strings up front, so they
+// download in parallel with the shell.
+// ---------------------------------------------------------------------------
+
+const manifest = JSON.parse(readFileSync(join(DIST, '.vite', 'manifest.json'), 'utf8'));
+const pageSource = {
+  '/': 'src/pages/LandingFramer.tsx',
+  '/hive': 'src/pages/hive/Hive.tsx',
+  '/about': 'src/pages/About.tsx',
+  '/blog': 'src/pages/Blog.tsx',
+  '/careers': 'src/pages/Careers.tsx',
+  '/contact': 'src/pages/Contact.tsx',
+  '/brand': 'src/pages/Brand.tsx',
+  '/machina': 'src/pages/Machina.tsx',
+  '/security': 'src/pages/legal/Security.tsx',
+  '/privacy-policy': 'src/pages/legal/PrivacyPolicy.tsx',
+  '/terms-of-service': 'src/pages/legal/TermsOfService.tsx',
+  '/cookie-policy': 'src/pages/legal/CookiePolicy.tsx',
+  '/imprint': 'src/pages/legal/Imprint.tsx',
+  '/data-access': 'src/pages/legal/DataAccess.tsx',
+};
+const shell = new Set(); // files index.html already loads
+for (const match of base.matchAll(/(?:src|href)="\/(assets\/[^"]+\.(?:js|css))"/g)) shell.add(match[1]);
+
+function collectChunks(key, seen = new Set()) {
+  const entry = manifest[key];
+  if (!entry || seen.has(key)) return seen;
+  seen.add(key);
+  for (const dependency of entry.imports ?? []) collectChunks(dependency, seen);
+  return seen;
+}
+
+function preloadTags(pagePath) {
+  const source = pagePath.startsWith('/blog/') ? 'src/pages/BlogPost.tsx' : pageSource[pagePath];
+  const keys = new Set();
+  if (source) collectChunks(source, keys);
+  collectChunks('src/i18n/de.ts', keys); // the default language; English ships with the shell
+  const tags = [];
+  for (const key of keys) {
+    const entry = manifest[key];
+    if (!shell.has(entry.file)) tags.push(`<link rel="modulepreload" crossorigin href="/${entry.file}" />`);
+    for (const css of entry.css ?? []) if (!shell.has(css)) tags.push(`<link rel="stylesheet" crossorigin href="/${css}" />`);
+  }
+  return [...new Set(tags)].join('\n  ');
 }
 
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -238,6 +302,7 @@ function render(page) {
   html = html.replace(/(<link rel="canonical" href=")[^"]*(")/, `$1${url}$2`);
 
   const head = [
+    preloadTags(page.path),
     page.noindex ? '<meta name="robots" content="noindex, follow" data-rh="true" />' : '<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" data-rh="true" />',
     structuredData(page),
   ].filter(Boolean).join('\n  ');
@@ -247,6 +312,9 @@ function render(page) {
   if (!/<noscript>[\s\S]*?<\/noscript>/.test(html)) throw new Error('index.html has no <noscript> block to fill');
   return html.replace(/<noscript>[\s\S]*?<\/noscript>/, () => noscript);
 }
+
+// Served (with a 404 status, see netlify.toml) for missing /assets/* files, instead of the app shell.
+writeFileSync(join(DIST, '404.html'), render({ path: '/404', title: `Page not found | ${NAME}`, heading: 'Page not found', description: 'This page does not exist.', noindex: true }));
 
 // Written as /hive.html etc., which Netlify serves for /hive without a trailing-slash redirect.
 for (const page of pages) {
@@ -309,6 +377,7 @@ ${NAME} is an industrial AI company based in ${COMPANY.city}, Germany. It builds
 - Contact: ${COMPANY.email}, ${COMPANY.phone}
 - Address: ${COMPANY.street}, ${COMPANY.postalCode} ${COMPANY.city}, Germany
 - Profiles: ${profiles.join(', ')}
+- This file was generated ${BUILD.builtAt} from commit ${BUILD.commit.slice(0, 12)} (live build: ${SITE}/version.json)
 `;
 const llmsCapabilities = `## What ${NAME} does
 
@@ -357,4 +426,5 @@ ${llmsFaq}
 ${posts.map((post) => `---\n\n# ${post.title}\n\nBy ${authorsOf(post).map((author) => author.name).join(', ')} (${NAME}), ${post.date}. ${SITE}/blog/${post.slug}\n\n${markdownOf(post).trim()}`).join('\n\n')}
 `);
 
+rmSync(join(DIST, '.vite'), { recursive: true, force: true });
 console.log(`prerendered ${pages.length} routes (${posts.length} articles with full text), sitemap ${indexed.length} URLs, feed.xml, llms.txt`);

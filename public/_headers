@@ -21,6 +21,27 @@
 /fonts/*
   Cache-Control: public, max-age=31536000, immutable
 
+# Machine-readable files: short cache, so a new deploy reaches crawlers within minutes.
+/version.json
+  Cache-Control: no-store
+
+/llms.txt
+  Cache-Control: public, max-age=300, must-revalidate
+  Content-Type: text/plain; charset=utf-8
+
+/llms-full.txt
+  Cache-Control: public, max-age=300, must-revalidate
+  Content-Type: text/plain; charset=utf-8
+
+/sitemap.xml
+  Cache-Control: public, max-age=300, must-revalidate
+
+/feed.xml
+  Cache-Control: public, max-age=300, must-revalidate
+
+/robots.txt
+  Cache-Control: public, max-age=300, must-revalidate
+
 /*.webp
   Cache-Control: public, max-age=2592000, stale-while-revalidate=86400
 

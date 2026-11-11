@@ -10,7 +10,8 @@
     "lint": "eslint .",
     "typecheck": "tsc",
     "perf:budget": "node scripts/performance-budget.mjs",
-    "r2:upload": "node scripts/r2-upload.mjs"
+    "r2:upload": "node scripts/r2-upload.mjs",
+    "indexnow": "node scripts/indexnow.mjs"
   },
   "dependencies": {
     "@amplitude/analytics-browser": "^2.49.2",

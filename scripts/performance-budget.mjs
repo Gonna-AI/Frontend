@@ -42,7 +42,9 @@ if (!fs.existsSync(distDir)) {
   throw new Error('dist/ does not exist. Run vite build first.');
 }
 
-const html = fs.readFileSync(path.join(distDir, 'index.html'), 'utf8');
+// Measure the bare app shell. index.html also lists the home page's own chunks
+// (added by prerender-routes), and 404.html is the same shell with none of them.
+const html = fs.readFileSync(path.join(distDir, '404.html'), 'utf8');
 const entryJsRefs = [...html.matchAll(/<script[^>]+src="([^"]+\.js)"/g)].map((match) => match[1]);
 const entryCssRefs = [...html.matchAll(/<link[^>]+rel="stylesheet"[^>]+href="([^"]+\.css)"/g)].map((match) => match[1]);
 

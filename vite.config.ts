@@ -37,6 +37,8 @@ export default defineConfig({
     // one import at a time; the polyfill is only needed by browsers we do not target.
     modulePreload: { polyfill: false },
     cssCodeSplit: true,
+    // Read by scripts/prerender-routes.mjs to preload each page's own chunks (and removed afterwards).
+    manifest: true,
     chunkSizeWarningLimit: 200,
     rollupOptions: {
       onwarn(warning, warn) {
@@ -48,7 +50,9 @@ export default defineConfig({
         manualChunks(id) {
           if (!id.includes('/node_modules/')) return undefined;
 
-          if (id.includes('/react/') || id.includes('/react-dom/') || id.includes('/scheduler/')) return 'react-vendor';
+          // Exact package folders only: a loose '/react/' match also swept in @fullcalendar/react (the
+          // dashboard calendar, ~100 KB) and made every page download it.
+          if (id.includes('/node_modules/react/') || id.includes('/node_modules/react-dom/') || id.includes('/node_modules/scheduler/')) return 'react-vendor';
           if (id.includes('/react-router') || id.includes('/react-helmet-async/')) return 'router-vendor';
           if (id.includes('/@tanstack/react-query/')) return 'query-vendor';
           if (id.includes('/@tanstack/react-table/')) return 'table-vendor';

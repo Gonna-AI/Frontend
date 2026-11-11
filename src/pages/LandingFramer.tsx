@@ -8,8 +8,9 @@ import CapabilityShowcase from './solutions/CapabilityShowcase';
 import Grainient from '../components/Brand/Grainient';
 import { CaseStudy, ConnectorPanel, HeroAgentCard, LogoStrip, ProofChart, Spotlight, StoryTabs } from './home/HomeStory';
 import './LandingFramer.css';
+import { MEDIA_BASE_URL } from '../config/media';
 
-const BASE = 'https://pub-0f804855178c4f4e8184c4fef3bd5b2a.r2.dev';
+const BASE = MEDIA_BASE_URL;
 
 const clientLogos = [
   { alt: 'BMW', src: '/client-logos/bmw.svg?v=2', width: 40, mobileWidth: 28 },
@@ -21,7 +22,7 @@ const clientLogos = [
   { alt: 'Amplitude', src: `${BASE}/client-logos/amplitude.svg`, width: 140, mobileWidth: 80 },
 ];
 
-const testimonialImage = 'https://pub-0f804855178c4f4e8184c4fef3bd5b2a.r2.dev/thdbuilding.jpg';
+const testimonialImage = `${MEDIA_BASE_URL}/thdbuilding.jpg`;
 
 const plans = [
   {

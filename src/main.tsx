@@ -12,6 +12,19 @@ import './index.css';
 initPerformanceVitals();
 initAnalytics();
 
+// A page opened before a deploy can still point at files the new build removed.
+// Reload once to pick up the current build instead of showing a broken page.
+window.addEventListener('vite:preloadError', (event) => {
+  event.preventDefault();
+  try {
+    if (window.sessionStorage.getItem('ct-preload-reload')) return;
+    window.sessionStorage.setItem('ct-preload-reload', '1');
+  } catch {
+    return;
+  }
+  window.location.reload();
+});
+
 const language = resolveInitialLanguage();
 document.documentElement.lang = language;
 
