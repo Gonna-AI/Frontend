@@ -6,7 +6,7 @@
   background: var(--machina-ink);
   color: var(--machina-cream);
   font-family: "Cal Sans", Inter, system-ui, sans-serif;
-  overflow: clip;
+  /* No overflow clip: the hero below is sticky (see the note on .ct-works in LandingFramer.css). */
 }
 
 .machina-page * { box-sizing: border-box; }

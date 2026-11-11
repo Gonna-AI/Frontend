@@ -31,7 +31,10 @@ html.lenis.lenis-stopped {
   font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
   -webkit-font-smoothing: antialiased;
   min-height: 100vh;
-  overflow-x: clip;
+  /* Never clip overflow here or on any wrapper of a sticky section: Safari can only hold
+     position: sticky in place during a scroll when no ancestor clips overflow; otherwise it
+     repositions it from the main thread and the whole section shakes. Clip the element that
+     overflows instead. */
   text-rendering: geometricPrecision;
   width: 100%;
 }
