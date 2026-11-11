@@ -6,7 +6,7 @@
 // Scroll progress (0..1) scrubs the story: plant → question → agents → findings.
 // WebGL2 only, no dependencies.
 
-import { decorHeld, frameInterval, pixelRatioFor, reportFrame } from '../../utils/perf';
+import { decorHeld, frameInterval, getTier, pixelRatioFor, reportFrame } from '../../utils/perf';
 
 const RAMP = ' .:;-=+xX80S#@';
 const SHEET = ` !"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_\`abcdefghijklmnopqrstuvwxyz{|}~·→—äöüÄÖÜß`;
@@ -384,6 +384,12 @@ const randUnit = (): V3 => {
   return [s * Math.cos(th), u, s * Math.sin(th)];
 };
 const label = (s: string) => s.padEnd(9, ' ');
+const RAMP_UNIFORM = new Float32Array(RAMP_INDEX);
+
+// Scroll progress follows the scroll position through a critically damped spring: its speed changes
+// smoothly, so a wheel notch or a flick starts the scene moving gently instead of with a jolt, and
+// it never overshoots. Lag behind the scroll position is about 2/OMEGA seconds.
+const OMEGA = 26;
 
 export class HiveScene {
   private gl: WebGL2RenderingContext;
@@ -406,7 +412,19 @@ export class HiveScene {
   private reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   private copy: HiveCopy | null = null;
   progress = 0;
+  private velocity = 0;
   private targetProgress = 0;
+  private lastStep = 0;
+  private settledAt = 0;
+  private pendingSize: [number, number] | null = null;
+  // Reused every frame instead of allocated, so scrolling produces no garbage to collect.
+  private nodeBuf = new Float32Array(12);
+  private boxBuf = new Float32Array(MAX_BOX * 4);
+  private boxParamBuf = new Float32Array(MAX_BOX * 4);
+  private lineBuf = new Float32Array(MAX_LINE * 4);
+  private lineParamBuf = new Float32Array(MAX_LINE * 4);
+  /** Called once per displayed frame with the progress the scene is drawn at, so copy can move in step. */
+  onFrame: ((progress: number) => void) | null = null;
   ok = false;
 
   constructor(private canvas: HTMLCanvasElement) {
@@ -462,6 +480,13 @@ export class HiveScene {
 
   resize(width: number, height: number) {
     if (!this.ok) return;
+    // While the story is moving, a rebuild would be a visible jump: wait until it rests (see tick).
+    if (this.frame && this.built && this.moving) { this.pendingSize = [width, height]; return; }
+    this.pendingSize = null;
+    this.applySize(width, height);
+  }
+
+  private applySize(width: number, height: number) {
     const gl = this.gl;
     const dpr = pixelRatioFor(1.25, { mid: 1, low: 0.75 });
     const W = Math.max(1, Math.round(width * dpr)), H = Math.max(1, Math.round(height * dpr));
@@ -720,9 +745,11 @@ export class HiveScene {
       positions.forEach((current, i) => {
         boxes.push({ rect: current, alpha: 1 - fold, accent: i === 6 ? 1 : 0, fill: 1 });
         if (fold < .5) {
+          // Same brightness and accent the rows had when the list formed, so nothing flickers at the hand-over.
           const k = 1 - fold * 2;
-          this.put(current.c + 2, current.r + 1, label(rows[i][0]), 1, .55 * k, i === 6 ? k : 0, 9);
-          this.put(current.c + 11, current.r + 1, rows[i][1], 1, .95 * k, 0, current.w - 13);
+          const lead = i === 0 || i === 6;
+          this.put(current.c + 2, current.r + 1, label(rows[i][0]), 1, (lead ? 1 : .5) * k, lead ? k : 0, 9);
+          this.put(current.c + 11, current.r + 1, rows[i][1], 1, (lead ? 1 : .95) * k, 0, current.w - 13);
         }
         nodes.push(this.toUv(...mid(current)));
       });
@@ -767,7 +794,7 @@ export class HiveScene {
     gl.uniform2f(s('uBoxC'), ((ux0 + ux1) / 2) * k, ((uy0 + uy1) / 2) * k);
     gl.uniform2f(s('uBoxW'), (Math.abs(ux1 - ux0) / 2) * k, (Math.abs(uy1 - uy0) / 2) * k);
     gl.uniform3fv(s('uArc'), this.arcBuf);
-    const nb = new Float32Array(12).fill(9);
+    const nb = this.nodeBuf.fill(9);
     nodes.slice(0, 6).forEach(([x, y], i) => { nb[i * 2] = x; nb[i * 2 + 1] = y; });
     gl.uniform2fv(s('uNode'), nb);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
@@ -788,15 +815,17 @@ export class HiveScene {
     gl.uniform1f(g('uTime'), this.time);
     gl.uniform1f(g('uDpr'), dpr);
     gl.uniform1f(g('uHeroDim'), 1 - ss(0.02, 0.08, core));
-    gl.uniform1fv(g('uRamp'), new Float32Array(RAMP_INDEX));
-    const bx = new Float32Array(MAX_BOX * 4), bp = new Float32Array(MAX_BOX * 4);
+    gl.uniform1fv(g('uRamp'), RAMP_UNIFORM);
+    const bx = this.boxBuf.fill(0), bp = this.boxParamBuf.fill(0);
     boxes.slice(0, MAX_BOX).forEach(({ rect: r, alpha, accent, fill }, i) => {
-      const c0 = Math.round(r.c), r0 = Math.round(r.r), bw = Math.round(r.w), bh = Math.round(r.h);
-      bx.set([c0 * cw, (h - r0 - bh) * ch, (c0 + bw) * cw, (h - r0) * ch], i * 4);
+      // Snap each edge to the grid on its own: rounding position and size separately lets an edge
+      // flick back and forth by a cell while a card glides.
+      const c0 = Math.round(r.c), c1 = Math.round(r.c + r.w), r0 = Math.round(r.r), r1 = Math.round(r.r + r.h);
+      bx.set([c0 * cw, (h - r1) * ch, c1 * cw, (h - r0) * ch], i * 4);
       bp.set([alpha, accent, fill, 0], i * 4);
     });
     gl.uniform4fv(g('uBox'), bx); gl.uniform4fv(g('uBoxP'), bp);
-    const lx = new Float32Array(MAX_LINE * 4), lp = new Float32Array(MAX_LINE * 4);
+    const lx = this.lineBuf.fill(0), lp = this.lineParamBuf.fill(0);
     lines.slice(0, MAX_LINE).forEach((l, i) => {
       lx.set([l.a[0], l.a[1], l.b[0], l.b[1]], i * 4);
       lp.set([l.alpha, l.prog, l.pulse, l.accent], i * 4);
@@ -807,35 +836,82 @@ export class HiveScene {
 
   private lastRaf = 0;
 
+  /** Advances the spring by dt seconds (exact solution, stable at any frame rate). */
+  private stepSpring(dt: number) {
+    const e = this.progress - this.targetProgress, v = this.velocity;
+    const decay = Math.exp(-OMEGA * dt), k = v + OMEGA * e;
+    this.progress = this.targetProgress + (e + k * dt) * decay;
+    this.velocity = (v - OMEGA * k * dt) * decay;
+    if (Math.abs(this.progress - this.targetProgress) < 2e-5 && Math.abs(this.velocity) < 2e-4) {
+      this.progress = this.targetProgress;
+      this.velocity = 0;
+    }
+  }
+
+  private get moving() { return this.progress !== this.targetProgress || this.velocity !== 0; }
+
   private tick = (now: number) => {
-    this.frame = 0;
-    // Report the real frame spacing (so a device that cannot keep up is noticed), then keep to the
-    // frame rate its tier allows: a steady 30 fps looks smoother than an uneven 45.
+    this.frame = requestAnimationFrame(this.tick);
+    // Report the real frame spacing, so a device that cannot keep up is noticed.
     if (this.lastRaf) reportFrame(now - this.lastRaf);
     this.lastRaf = now;
-    if (decorHeld()) { this.last = 0; this.frame = requestAnimationFrame(this.tick); return; }
-    const interval = frameInterval();
-    if (interval && this.last && now - this.last < interval - 2) { this.frame = requestAnimationFrame(this.tick); return; }
+    if (decorHeld()) { this.last = 0; this.lastStep = 0; return; }
+
+    const stepDt = this.lastStep ? Math.min(0.1, (now - this.lastStep) / 1000) : 1 / 60;
+    this.lastStep = now;
+    const wasMoving = this.moving;
+    if (wasMoving) {
+      this.stepSpring(stepDt);
+      this.settledAt = now;
+      // Copy moves on every displayed frame, from the same value the scene is drawn at.
+      this.onFrame?.(this.progress);
+    }
+
+    // A size change (e.g. a lower quality tier) waits until the scroll has come to rest: rebuilding
+    // the glyph grid mid-scroll is a visible jump.
+    if (this.pendingSize && !wasMoving && now - this.settledAt > 350) {
+      const [w, h] = this.pendingSize;
+      this.pendingSize = null;
+      this.applySize(w, h);
+      this.last = now;
+      return;
+    }
+
+    // While the story is being scrolled the scene follows at the display rate (at most 60 fps on
+    // mid-range devices, 30 on weak ones), so it moves with the hand. At rest only the ambient motion
+    // runs, and weaker devices draw that at a lower rate.
+    const tier = getTier();
+    const interval = wasMoving ? (tier === 'high' ? 0 : tier === 'mid' ? 1000 / 60 : 1000 / 30) : frameInterval();
+    if (interval && this.last && now - this.last < interval - 2) return;
     const dt = Math.min(0.05, (now - (this.last || now)) / 1000);
     this.last = now;
     this.time += dt;
     this.angle += dt * 0.16;
-    this.progress += (this.targetProgress - this.progress) * (1 - Math.exp(-dt * 14));
     this.draw();
-    this.frame = requestAnimationFrame(this.tick);
   };
 
   start() {
     if (!this.ok) return;
     if (this.reduced) { this.time = 2; this.draw(); return; }
-    if (!this.frame) { this.last = 0; this.lastRaf = 0; this.frame = requestAnimationFrame(this.tick); }
+    if (!this.frame) { this.last = 0; this.lastRaf = 0; this.lastStep = 0; this.frame = requestAnimationFrame(this.tick); }
   }
 
   stop() { if (this.frame) cancelAnimationFrame(this.frame); this.frame = 0; }
 
-  setProgress(p: number) {
+  /** True while the scene is animating and will report progress through onFrame. */
+  get running() { return this.frame !== 0; }
+
+  /** Where the scroll position is now; the scene eases there. */
+  setTarget(p: number) {
     this.targetProgress = p;
-    if (this.reduced || !this.frame) { this.progress = p; this.draw(); }
+    if (this.reduced || !this.frame) { this.progress = p; this.velocity = 0; this.draw(); }
+  }
+
+  /** Jump straight to a position (first paint, a resize that moves the story). */
+  setProgress(p: number) {
+    this.targetProgress = this.progress = p;
+    this.velocity = 0;
+    if (this.reduced || !this.frame) this.draw();
   }
 
   dispose() {

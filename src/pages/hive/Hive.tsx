@@ -1,5 +1,5 @@
 // A scroll-driven journey through Hive's connected plant graph.
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { ArrowRight } from 'lucide-react';
 import { Header, Footer } from '../../components/Landing/SiteChrome';
 import SEO from '../../components/SEO';
@@ -95,9 +95,9 @@ function HiveStory() {
   const wrapRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const heroRef = useRef<HTMLDivElement>(null);
+  const hintRef = useRef<HTMLSpanElement>(null);
   const sceneRef = useRef<HiveScene | null>(null);
   const chapterRefs = useRef<(HTMLElement | null)[]>([]);
-  const [activeChapter, setActiveChapter] = useState(-1);
 
   useEffect(() => {
     const wrap = wrapRef.current, canvas = canvasRef.current;
@@ -108,15 +108,15 @@ function HiveStory() {
     const sticky = host.parentElement!;
     let storyTop = 0;
     let span = 0;
-    let currentChapter = -1;
+    let currentChapter = -2;
     const measure = () => {
       storyTop = wrap.getBoundingClientRect().top + window.scrollY;
       span = wrap.offsetHeight - sticky.clientHeight;
     };
     const readTarget = () => (span > 0 ? Math.min(1, Math.max(0, (window.scrollY - storyTop) / span)) : 0);
 
-    // Copy follows an eased copy of the scroll position (the same easing the scene
-    // uses), so text and scene glide together instead of stepping with each scroll event.
+    // Everything here is written straight to the DOM: a React update in the middle of a scroll
+    // would re-render the header with it and cost a frame exactly when a chapter changes.
     const render = (p: number) => {
       let nextChapter = -1;
       CHAPTERS.forEach(({ start, end }, i) => {
@@ -135,7 +135,11 @@ function HiveStory() {
         }
         if (p >= start + 0.012 && p < end - 0.012) nextChapter = i;
       });
-      if (nextChapter !== currentChapter) { currentChapter = nextChapter; setActiveChapter(nextChapter); }
+      if (nextChapter !== currentChapter) {
+        currentChapter = nextChapter;
+        chapterRefs.current.forEach((chapter, i) => chapter?.setAttribute('aria-hidden', String(i !== nextChapter)));
+        hintRef.current?.classList.toggle('is-hidden', nextChapter >= 0);
+      }
       const hero = heroRef.current;
       if (hero) {
         const out = ss(0.009, 0.041, p);
@@ -144,33 +148,22 @@ function HiveStory() {
       }
     };
 
-    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    let target = 0;
-    let shown = 0;
-    let last = 0;
-    let loop = 0;
-    const step = (now: number) => {
-      loop = 0;
-      const dt = last ? Math.min(0.05, (now - last) / 1000) : 1 / 60;
-      last = now;
-      shown += (target - shown) * (1 - Math.exp(-dt * 14));
-      if (Math.abs(target - shown) < 0.00005) shown = target;
-      render(shown);
-      if (shown !== target) loop = requestAnimationFrame(step); else last = 0;
-    };
+    // The scene owns the clock: each frame it eases towards the scroll position and hands the
+    // value it draws at to the copy, so text and scene always move together. Without the scene
+    // (no WebGL, reduced motion, off screen) the copy simply follows the scroll position.
+    scene.onFrame = render;
     const onScroll = () => {
-      target = readTarget();
-      scene.setProgress(target);
-      if (reduced) { shown = target; render(shown); return; }
-      if (!loop) loop = requestAnimationFrame(step);
+      const target = readTarget();
+      scene.setTarget(target);
+      if (!scene.running) render(target);
     };
     const onResize = () => { measure(); onScroll(); };
     const ro = new ResizeObserver(() => { const r = host.getBoundingClientRect(); scene.resize(r.width, r.height); onResize(); });
     ro.observe(host);
     measure();
-    target = shown = readTarget();
-    scene.setProgress(target);
-    render(shown);
+    const initial = readTarget();
+    scene.setProgress(initial);
+    render(initial);
     window.addEventListener('scroll', onScroll, { passive: true });
     window.addEventListener('resize', onResize);
     let visible = false;
@@ -180,15 +173,16 @@ function HiveStory() {
     });
     io.observe(host);
     const onVis = () => (document.hidden || !visible ? scene.stop() : scene.start());
-    // The device proved slower than it reported: rebuild the scene at the lower internal resolution.
+    // The device proved slower than it reported: rebuild the scene at the lower internal resolution
+    // (the scene waits for the scroll to rest before it does).
     const offTier = onTierChange(() => { const r = host.getBoundingClientRect(); scene.resize(r.width, r.height); });
     document.addEventListener('visibilitychange', onVis);
     return () => {
       ro.disconnect(); io.disconnect(); offTier();
-      if (loop) cancelAnimationFrame(loop);
       window.removeEventListener('scroll', onScroll);
       window.removeEventListener('resize', onResize);
       document.removeEventListener('visibilitychange', onVis);
+      scene.onFrame = null;
       scene.dispose();
       sceneRef.current = null;
     };
@@ -217,10 +211,10 @@ function HiveStory() {
             <button className="hv-btn is-ghost" onClick={seeHow} type="button">{c.heroMore}</button>
           </div>
         </div>
-        <span className={`hv-scrollhint${activeChapter >= 0 ? ' is-hidden' : ''}`} aria-hidden="true">{c.scroll}<i /></span>
+        <span className="hv-scrollhint" aria-hidden="true" ref={hintRef}>{c.scroll}<i /></span>
         {c.chapters.map((chapter, i) => (
           <section
-            aria-hidden={activeChapter !== i}
+            aria-hidden="true"
             className="hv-chapter"
             key={i}
             ref={(element) => { chapterRefs.current[i] = element; }}

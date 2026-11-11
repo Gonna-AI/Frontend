@@ -43,6 +43,10 @@ function applyTier() {
 }
 applyTier();
 
+export function getTier(): Tier {
+  return tier;
+}
+
 export function onTierChange(listener: (tier: Tier) => void): () => void {
   listeners.add(listener);
   return () => listeners.delete(listener);
