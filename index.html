@@ -36,7 +36,7 @@
   <meta name="twitter:description" content="ClerkTree is an industrial AI harness for machine operations. Agents connect signals, technical knowledge and workflows to help teams understand issues and coordinate work." data-rh="true" />
   <meta name="twitter:image" content="https://clerktree.com/og/home.png" data-rh="true" />
 
-  <meta name="theme-color" content="#0a0a0a" />
+  <meta name="theme-color" content="#f4f4f4" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <link rel="canonical" href="https://clerktree.com/" data-rh="true" />
@@ -47,10 +47,20 @@
       if (!/^\/(dashboard|mail|chat|client|login|auth|ai-settings|invite)(\/|$)/.test(location.pathname)) {
         document.documentElement.classList.add('ct-site');
       }
+      // Browser bar colour for the first paint (kept in step with src/utils/browserChrome.ts).
+      var p = location.pathname, c = '#f4f4f4';
+      if (/^\/(dashboard|auth|login|invite|client|mail|chat|ai-settings)(\/|$)/.test(p)) c = '#0a0a0a';
+      else if (p === '/hive') c = '#0d0d0e';
+      document.documentElement.style.setProperty('--ct-top-color', c);
+      var m = document.querySelector('meta[name="theme-color"]');
+      if (m) m.setAttribute('content', c);
     })();
   </script>
   <style>
     html.ct-site, html.ct-site body { background: #f4f4f4; }
+    /* Newer iOS Safari tints its top bar from a fixed element touching the top edge, not from
+       theme-color. This strip sits inside the page's own top margin, so it is not visible as such. */
+    #ct-top-edge { background: var(--ct-top-color, #f4f4f4); height: 4px; left: 0; pointer-events: none; position: fixed; right: 0; top: 0; z-index: 2147483000; }
     @keyframes ct-page-in { from { opacity: 0; } to { opacity: 1; } }
     html.ct-site .ct-works { animation: ct-page-in .5s cubic-bezier(.22, 1, .36, 1) both; }
     @media (prefers-reduced-motion: reduce) { html.ct-site .ct-works { animation: none; } }
@@ -70,6 +80,7 @@
 </head>
 
 <body>
+  <div id="ct-top-edge" aria-hidden="true"></div>
   <noscript>ClerkTree needs JavaScript to run. Please enable it, or write to team@clerktree.com.</noscript>
   <div id="root"></div>
   <script type="module" src="/src/main.tsx"></script>

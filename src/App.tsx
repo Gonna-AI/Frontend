@@ -10,6 +10,7 @@ import { trackPageView } from './lib/analytics';
 import { getConsent, onConsentSettingsRequest } from './lib/consent';
 import { cancelIdle, runWhenIdle } from './utils/idle';
 import { installIntentPrefetch } from './utils/intentPrefetch';
+import { applyChromeColor } from './utils/browserChrome';
 import { lazyWithRetry } from './utils/lazyWithRetry';
 
 // Every page is its own chunk (with auto-retry when a deploy replaced the chunk).
@@ -169,6 +170,7 @@ function RouteEffects() {
 
   useEffect(() => {
     document.documentElement.classList.toggle('ct-site', !WORKSPACE_PATH.test(pathname));
+    applyChromeColor(pathname);
   }, [pathname]);
 
   return null;
