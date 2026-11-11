@@ -2122,9 +2122,10 @@ a:hover > .ct-roll > .ct-roll-inner { transform: translateY(-50%); }
 .ct-mnav { inset: 0; position: fixed; z-index: 1000; }
 /* Scroll lock for the menu: no layout work, no scroll jump. The gutter stays reserved so the page does not shift. */
 html.ct-menu-open { overflow: hidden; scrollbar-gutter: stable; }
+/* A neutral mid-grey dims whatever is behind the menu to the same tone on every page (light or dark). */
 .ct-mnav-scrim {
   animation: ctMnavFade .3s ease both;
-  background: rgba(236, 236, 236, .78); border: 0; touch-action: none; cursor: pointer; inset: 0; padding: 0; position: absolute; width: 100%;
+  background: rgba(172, 172, 175, .9); border: 0; touch-action: none; cursor: pointer; inset: 0; padding: 0; position: absolute; width: 100%;
 }
 .ct-mnav-sheet {
   --mnav-pl: 20px; --mnav-pr: 20px; --mnav-pt: 12px; --mnav-row: 40px;
@@ -2142,7 +2143,7 @@ html.ct-menu-open { overflow: hidden; scrollbar-gutter: stable; }
 .ct-mnav-scrim { transition: opacity .3s ease; }
 /* The frosted look is a full-screen blur over the page; only devices that can afford it get it. */
 html[data-perf='high'] .ct-mnav-scrim {
-  background: rgba(236, 236, 236, .55); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+  background: rgba(165, 165, 168, .8); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
 }
 .ct-mnav.is-closing .ct-mnav-scrim { opacity: 0; }
 .ct-mnav.is-closing :is(.ct-mnav-primary, .ct-mnav-cta) { opacity: 0; transform: translateY(-6px); transition: opacity .2s ease, transform .3s ease; }
