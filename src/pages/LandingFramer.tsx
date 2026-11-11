@@ -513,7 +513,6 @@ function Faq() {
 }
 
 const SUPA_URL = import.meta.env.VITE_SUPABASE_URL as string;
-const SUPA_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
 
 function Contact() {
   const { t } = useLanguage();
@@ -526,15 +525,20 @@ function Contact() {
     if (status === 'sending' || !name || !email) return;
     setStatus('sending');
     try {
-      const res = await fetch(`${SUPA_URL}/rest/v1/contact_submissions`, {
+      // Same endpoint as the contact page and the data request form: it validates the input and
+      // stores it server-side. This short form asks for less, so the rest is filled in plainly.
+      const res = await fetch(`${SUPA_URL}/functions/v1/api-contacts`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          apikey: SUPA_KEY,
-          Authorization: `Bearer ${SUPA_KEY}`,
-          Prefer: 'return=minimal',
-        },
-        body: JSON.stringify({ full_name: name, email, message }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fullName: name.trim(),
+          email: email.trim(),
+          message: message.trim() || '(No message)',
+          companyName: 'Not provided',
+          phone: 'Not provided',
+          interest: 'Website (home page)',
+          employeeCount: 'Not provided',
+        }),
       });
       if (!res.ok) throw new Error('failed');
       setStatus('sent');
