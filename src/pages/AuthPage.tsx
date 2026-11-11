@@ -209,7 +209,7 @@ export default function AuthPage() {
                                             value={fullName}
                                             onChange={(e) => setFullName(e.target.value)}
                                             placeholder="John Doe"
-                                            className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 placeholder-gray-400 outline-none transition-all duration-200 focus:border-orange-300 focus:ring-2 focus:ring-orange-100"
+                                            className="ct-field w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 placeholder-gray-400 outline-none transition-all duration-200 focus:border-orange-300 focus:ring-2 focus:ring-orange-100"
                                         />
                                     </div>
                                 )}
@@ -222,7 +222,7 @@ export default function AuthPage() {
                                         onChange={(e) => setEmail(e.target.value)}
                                         placeholder="you@example.com"
                                         required
-                                        className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 placeholder-gray-400 outline-none transition-all duration-200 focus:border-orange-300 focus:ring-2 focus:ring-orange-100"
+                                        className="ct-field w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 placeholder-gray-400 outline-none transition-all duration-200 focus:border-orange-300 focus:ring-2 focus:ring-orange-100"
                                     />
                                 </div>
 
@@ -250,7 +250,7 @@ export default function AuthPage() {
                                             placeholder={view === 'signup' ? "Create a password" : "Enter your password"}
                                             required
                                             minLength={6}
-                                            className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 placeholder-gray-400 outline-none transition-all duration-200 focus:border-orange-300 focus:ring-2 focus:ring-orange-100"
+                                            className="ct-field w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 placeholder-gray-400 outline-none transition-all duration-200 focus:border-orange-300 focus:ring-2 focus:ring-orange-100"
                                         />
                                     </div>
                                 )}

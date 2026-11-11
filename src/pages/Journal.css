@@ -33,11 +33,11 @@
 .ct-works .jr-hero h1 { color: #fff; font: 400 clamp(36px, 5vw, 64px)/1.02 "Cal Sans", "Cal Sans Placeholder", sans-serif !important; letter-spacing: -.01em; margin: 0; text-shadow: 0 2px 30px rgba(0, 0, 0, .25); }
 .ct-works .jr-hero p { color: rgba(255, 255, 255, .86); font-size: 17px; line-height: 1.5; margin: 0; max-width: 520px; text-shadow: 0 1px 12px rgba(0, 0, 0, .3); }
 .ct-works .jr-search {
-  align-items: center; background: rgba(255, 255, 255, .92); backdrop-filter: blur(12px); border-radius: 12px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, .18); color: var(--jr-muted); display: flex; gap: 10px; height: 46px; margin-top: 10px; max-width: 460px; padding: 0 14px; width: 100%;
+  align-items: center; background: var(--well-light-bg); border-radius: 14px;
+  box-shadow: var(--well-light-shadow), 0 14px 34px rgba(0, 0, 0, .22); color: var(--jr-muted); transition: box-shadow .22s ease, background .22s ease; display: flex; gap: 10px; height: 46px; margin-top: 10px; max-width: 460px; padding: 0 14px; width: 100%;
 }
 .ct-works .jr-search input { background: none; border: 0; color: var(--jr-ink); flex: 1; font: 400 15px/1 var(--font-ui) !important; outline: none; }
-.ct-works .jr-search:focus-within { box-shadow: 0 0 0 2px var(--ct-orange), 0 10px 30px rgba(0, 0, 0, .18); }
+.ct-works .jr-search:focus-within { background: var(--well-light-focus-bg); box-shadow: var(--well-light-focus), 0 14px 34px rgba(0, 0, 0, .22); }
 
 /* ---------- Index list ---------- */
 .ct-works .jr-main { margin: 0 auto; max-width: 1232px; padding: clamp(28px, 4vw, 48px) clamp(16px, 3vw, 24px) clamp(64px, 8vw, 112px); }

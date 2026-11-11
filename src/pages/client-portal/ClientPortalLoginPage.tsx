@@ -196,7 +196,7 @@ export default function ClientPortalLoginPage() {
                                 >
                                     <label htmlFor="portal-username" className="block text-sm font-medium text-white/75">
                                         Workspace username
-                                        <div className="mt-2 flex items-center gap-3 rounded-[1.15rem] border border-white/10 bg-white/[0.04] px-4 py-3 transition focus-within:border-[#FF8A5B]/60 focus-within:bg-white/[0.06]">
+                                        <div className="ct-field-box-dark mt-2 flex items-center gap-3 rounded-[1.15rem] border border-white/10 bg-white/[0.04] px-4 py-3 transition focus-within:border-[#FF8A5B]/60 focus-within:bg-white/[0.06]">
                                             <UserRound className="h-5 w-5 text-white/45" />
                                             <input
                                                 id="portal-username"
@@ -249,7 +249,7 @@ export default function ClientPortalLoginPage() {
 
                                     <label htmlFor="portal-password" className="block text-sm font-medium text-white/75">
                                         Password
-                                        <div className="mt-2 flex items-center gap-3 rounded-[1.15rem] border border-white/10 bg-white/[0.04] px-4 py-3 transition focus-within:border-[#FF8A5B]/60 focus-within:bg-white/[0.06]">
+                                        <div className="ct-field-box-dark mt-2 flex items-center gap-3 rounded-[1.15rem] border border-white/10 bg-white/[0.04] px-4 py-3 transition focus-within:border-[#FF8A5B]/60 focus-within:bg-white/[0.06]">
                                             <LockKeyhole className="h-5 w-5 text-white/45" />
                                             <input
                                                 id="portal-password"

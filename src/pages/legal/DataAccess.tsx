@@ -221,7 +221,7 @@ ${formData.details || 'No additional details provided.'}
                       placeholder="Jane Doe"
                       value={formData.fullName}
                       onChange={handleChange}
-                      className="w-full px-4 py-3 rounded-lg bg-[rgba(19,19,19,0.03)] border border-[rgba(19,19,19,0.1)] text-[rgb(19,19,19)] placeholder-[rgba(19,19,19,0.35)] focus:outline-none focus:border-[#FF4D00]/50 focus:ring-2 focus:ring-[#FF4D00]/15 transition-all"
+                      className="ct-field w-full px-4 py-3 rounded-lg bg-[rgba(19,19,19,0.03)] border border-[rgba(19,19,19,0.1)] text-[rgb(19,19,19)] placeholder-[rgba(19,19,19,0.35)] focus:outline-none focus:border-[#FF4D00]/50 focus:ring-2 focus:ring-[#FF4D00]/15 transition-all"
                     />
                   </div>
 
@@ -238,7 +238,7 @@ ${formData.details || 'No additional details provided.'}
                       placeholder="jane@example.com"
                       value={formData.email}
                       onChange={handleChange}
-                      className="w-full px-4 py-3 rounded-lg bg-[rgba(19,19,19,0.03)] border border-[rgba(19,19,19,0.1)] text-[rgb(19,19,19)] placeholder-[rgba(19,19,19,0.35)] focus:outline-none focus:border-[#FF4D00]/50 focus:ring-2 focus:ring-[#FF4D00]/15 transition-all"
+                      className="ct-field w-full px-4 py-3 rounded-lg bg-[rgba(19,19,19,0.03)] border border-[rgba(19,19,19,0.1)] text-[rgb(19,19,19)] placeholder-[rgba(19,19,19,0.35)] focus:outline-none focus:border-[#FF4D00]/50 focus:ring-2 focus:ring-[#FF4D00]/15 transition-all"
                     />
                   </div>
                 </div>
@@ -255,7 +255,7 @@ ${formData.details || 'No additional details provided.'}
                       placeholder="+1 (555) 000-0000"
                       value={formData.phone}
                       onChange={handleChange}
-                      className="w-full px-4 py-3 rounded-lg bg-[rgba(19,19,19,0.03)] border border-[rgba(19,19,19,0.1)] text-[rgb(19,19,19)] placeholder-[rgba(19,19,19,0.35)] focus:outline-none focus:border-[#FF4D00]/50 focus:ring-2 focus:ring-[#FF4D00]/15 transition-all"
+                      className="ct-field w-full px-4 py-3 rounded-lg bg-[rgba(19,19,19,0.03)] border border-[rgba(19,19,19,0.1)] text-[rgb(19,19,19)] placeholder-[rgba(19,19,19,0.35)] focus:outline-none focus:border-[#FF4D00]/50 focus:ring-2 focus:ring-[#FF4D00]/15 transition-all"
                     />
                   </div>
 
@@ -268,7 +268,7 @@ ${formData.details || 'No additional details provided.'}
                       name="relationship"
                       value={formData.relationship}
                       onChange={handleChange}
-                      className="w-full px-4 py-3 rounded-lg bg-[rgba(19,19,19,0.03)] border border-[rgba(19,19,19,0.1)] text-[rgb(19,19,19)] focus:outline-none focus:border-[#FF4D00]/50 focus:ring-2 focus:ring-[#FF4D00]/15 transition-all"
+                      className="ct-field w-full px-4 py-3 rounded-lg bg-[rgba(19,19,19,0.03)] border border-[rgba(19,19,19,0.1)] text-[rgb(19,19,19)] focus:outline-none focus:border-[#FF4D00]/50 focus:ring-2 focus:ring-[#FF4D00]/15 transition-all"
                     >
                       <option value="customer">{c.relationships.customer}</option>
                       <option value="applicant">{c.relationships.applicant}</option>
@@ -287,7 +287,7 @@ ${formData.details || 'No additional details provided.'}
                     name="requestType"
                     value={formData.requestType}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 rounded-lg bg-[rgba(19,19,19,0.03)] border border-[rgba(19,19,19,0.1)] text-[rgb(19,19,19)] focus:outline-none focus:border-[#FF4D00]/50 focus:ring-2 focus:ring-[#FF4D00]/15 transition-all"
+                    className="ct-field w-full px-4 py-3 rounded-lg bg-[rgba(19,19,19,0.03)] border border-[rgba(19,19,19,0.1)] text-[rgb(19,19,19)] focus:outline-none focus:border-[#FF4D00]/50 focus:ring-2 focus:ring-[#FF4D00]/15 transition-all"
                   >
                     <option value="access">{c.requestTypes.access}</option>
                     <option value="deletion">{c.requestTypes.deletion}</option>
@@ -312,7 +312,7 @@ ${formData.details || 'No additional details provided.'}
                     placeholder={c.detailsPlaceholder}
                     value={formData.details}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 rounded-lg bg-[rgba(19,19,19,0.03)] border border-[rgba(19,19,19,0.1)] text-[rgb(19,19,19)] placeholder-[rgba(19,19,19,0.35)] focus:outline-none focus:border-[#FF4D00]/50 focus:ring-2 focus:ring-[#FF4D00]/15 transition-all resize-none"
+                    className="ct-field w-full px-4 py-3 rounded-lg bg-[rgba(19,19,19,0.03)] border border-[rgba(19,19,19,0.1)] text-[rgb(19,19,19)] placeholder-[rgba(19,19,19,0.35)] focus:outline-none focus:border-[#FF4D00]/50 focus:ring-2 focus:ring-[#FF4D00]/15 transition-all resize-none"
                   />
                 </div>
 

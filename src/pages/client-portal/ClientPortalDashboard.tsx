@@ -16,7 +16,7 @@ import { cn } from '../../lib/utils';
 import { sendSlackSupportMessage } from '../../services/clientPortalService';
 import { formatPortalDate } from '../../utils/clientPortal';
 
-const fieldClassName = 'mt-2 w-full rounded-[1rem] border border-white/10 bg-white/[0.04] px-4 py-3 text-sm text-white outline-none transition focus:border-[#FF8A5B]/60 focus:bg-white/[0.06]';
+const fieldClassName = 'ct-field-dark mt-2 w-full rounded-[1rem] border border-white/10 bg-white/[0.04] px-4 py-3 text-sm text-white outline-none transition focus:border-[#FF8A5B]/60 focus:bg-white/[0.06]';
 const labelClassName = 'text-sm font-medium text-white/75';
 
 function Pill({ children, tone = 'neutral' }: { children: ReactNode; tone?: 'neutral' | 'accent' }) {

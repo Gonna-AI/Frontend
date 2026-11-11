@@ -65,16 +65,17 @@
 .clerktree-contact-form input,
 .clerktree-contact-form select,
 .clerktree-contact-form textarea {
-  background: rgba(255, 255, 255, 0.74);
-  border: 1px solid rgba(12, 12, 12, 0.24);
+  background: var(--well-light-bg);
+  border: 1px solid transparent;
   border-radius: 18px;
+  box-shadow: var(--well-light-shadow);
   color: var(--ct-ink);
   font: inherit;
   font-size: 18px;
   min-height: 68px;
   outline: 0;
   padding: 0 22px;
-  transition: border-color 160ms ease, box-shadow 160ms ease, background-color 160ms ease;
+  transition: box-shadow 220ms ease, background 220ms ease;
   width: 100%;
 }
 
@@ -92,22 +93,37 @@
 
 .clerktree-contact-form select {
   appearance: none;
+  /* chevron on top of the well's floor */
+  --select-floor: var(--well-light-bg);
   background-image:
     linear-gradient(45deg, transparent 50%, rgba(12, 12, 12, 0.7) 50%),
-    linear-gradient(135deg, rgba(12, 12, 12, 0.7) 50%, transparent 50%);
+    linear-gradient(135deg, rgba(12, 12, 12, 0.7) 50%, transparent 50%),
+    var(--select-floor);
   background-position:
     calc(100% - 24px) 31px,
-    calc(100% - 17px) 31px;
+    calc(100% - 17px) 31px,
+    0 0;
   background-repeat: no-repeat;
-  background-size: 7px 7px, 7px 7px;
+  background-size: 7px 7px, 7px 7px, 100% 100%;
+}
+
+.clerktree-contact-form select:focus {
+  --select-floor: var(--well-light-focus-bg);
+  border-color: transparent;
+  box-shadow: var(--well-light-focus);
 }
 
 .clerktree-contact-form input:focus,
-.clerktree-contact-form select:focus,
 .clerktree-contact-form textarea:focus {
-  background: #fff;
-  border-color: var(--ct-orange);
-  box-shadow: 0 0 0 4px rgba(255, 77, 0, 0.12);
+  background: var(--well-light-focus-bg);
+  border-color: transparent;
+  box-shadow: var(--well-light-focus);
+}
+
+@media (hover: hover) {
+  .clerktree-contact-form :is(input, select, textarea):hover:not(:focus) {
+    box-shadow: var(--well-light-hover);
+  }
 }
 
 .clerktree-contact-message {
@@ -442,19 +458,16 @@
   text-transform: none;
 }
 .ct-works .clerktree-contact-form :is(input, select, textarea) {
-  background-color: #f8f8f8;
-  border: 1px solid #e3e3e3;
+  border: 1px solid transparent;
   border-radius: 12px;
   font: 400 16px/1.5 "Geist", "Inter", system-ui, sans-serif;
   min-height: 56px;
   padding: 0 18px;
 }
-.ct-works .clerktree-contact-form select { background-position: calc(100% - 24px) 25px, calc(100% - 17px) 25px; }
+.ct-works .clerktree-contact-form select { background-position: calc(100% - 24px) 25px, calc(100% - 17px) 25px, 0 0; }
 .ct-works .clerktree-contact-form textarea { min-height: 180px; padding: 16px 18px; }
 .ct-works .clerktree-contact-form :is(input, select, textarea):focus {
-  background-color: #fff;
-  border-color: #777;
-  box-shadow: 0 0 0 3px rgba(19, 19, 19, .08);
+  border-color: transparent;
 }
 .ct-works .clerktree-contact-submit {
   align-self: flex-start;
