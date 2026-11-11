@@ -3,6 +3,7 @@ import { useEffect, useRef } from 'react';
 import { ArrowRight } from 'lucide-react';
 import { Header, Footer } from '../../components/Landing/SiteChrome';
 import SEO from '../../components/SEO';
+import HiveLogo from '../../components/Brand/HiveLogo';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { HiveScene, type HiveCopy } from './HiveScene';
 import { onTierChange } from '../../utils/perf';
@@ -23,7 +24,6 @@ const COPY = {
   en: {
     seoTitle: 'Hive: your plant as one living graph',
     seoDesc: 'Hive connects every machine, part, document, work order and person on your shop floor, so every answer arrives with its full context and sources.',
-    heroEyebrow: 'CLERKTREE · HIVE',
     heroTitle: 'Your plant, connected.',
     heroBody: 'Machines, documents, parts and people, connected in one living map of your operation.',
     heroCta: 'Book a demo',
@@ -55,7 +55,6 @@ const COPY = {
   de: {
     seoTitle: 'Hive: Ihr Werk als lebendiger Graph',
     seoDesc: 'Hive verbindet jede Maschine, jedes Teil, Dokument, jeden Auftrag und jede Person in Ihrer Fertigung, damit jede Antwort mit vollem Kontext und Quellen kommt.',
-    heroEyebrow: 'CLERKTREE · HIVE',
     heroTitle: 'Ihr Werk. Verbunden.',
     heroBody: 'Maschinen, Dokumente, Teile und Menschen – verbunden in einem lebendigen Bild Ihres Betriebs.',
     heroCta: 'Demo buchen',
@@ -290,7 +289,7 @@ function HiveStory() {
       <div className="hv-sticky">
         <div className="hv-stage"><canvas className="hv-canvas" ref={canvasRef} aria-hidden="true" /></div>
         <div className="hv-hero" ref={heroRef}>
-          <span className="hv-hero-eyebrow">{c.heroEyebrow}</span>
+          <HiveLogo className="hv-hero-logo" />
           <h1>{c.heroTitle}</h1>
           <p>{c.heroBody}</p>
           <div className="hv-hero-actions">

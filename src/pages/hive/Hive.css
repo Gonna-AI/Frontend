@@ -70,7 +70,7 @@
   align-items: flex-start; display: flex; flex-direction: column; gap: 18px; inset: 0; justify-content: center;
   padding: 0 clamp(24px, 4vw, 64px); position: absolute; text-align: left; will-change: opacity; z-index: 2;
 }
-.ct-works .hv-hero-eyebrow { color: rgba(255, 255, 255, .58); font: 500 11px/1 "Geist", "Inter", sans-serif; letter-spacing: .12em; }
+.ct-works .hv-hero-logo { display: block; height: auto; margin: -22px 0 -12px -26px; max-width: 560px; overflow: visible; width: calc(var(--hv-col-w) + 52px); }
 .ct-works .hv-hero h1 {
   color: #fff; font-family: "Geist", "Inter", sans-serif !important; font-size: clamp(40px, 4.4vw, 64px);
   font-weight: 500; letter-spacing: -.04em; line-height: 1.04; margin: 0; max-width: 560px; text-shadow: 0 2px 40px rgba(0, 0, 0, .7);
@@ -129,6 +129,7 @@
     background: linear-gradient(180deg, #0d0d0e 34%, rgba(13, 13, 14, .6) 41%, rgba(13, 13, 14, 0) 50%), linear-gradient(0deg, rgba(13, 13, 14, .8), transparent 12%);
   }
   .ct-works .hv-hero { align-items: flex-start; justify-content: flex-start; padding: 104px 24px 0; text-align: left; }
+  .ct-works .hv-hero-logo { margin-top: 4px; }
   .ct-works .hv-hero h1 { font-size: clamp(34px, 8.6vw, 44px); }
   .ct-works .hv-hero p { font-size: 15px; }
   .ct-works .hv-chapter { align-items: flex-start; padding-top: 10svh; }

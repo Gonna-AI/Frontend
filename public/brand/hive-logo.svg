@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="250 190 1170 470" role="img" aria-labelledby="hvT">
+  <title id="hvT">Hive by ClerkTree</title>
+  <defs>
+    <radialGradient id="hvEdge" gradientUnits="userSpaceOnUse" cx="532.0" cy="447.0" r="168">
+      <stop offset="0" stop-color="#ffd089"/><stop offset=".22" stop-color="#ff9a2e"/><stop offset=".6" stop-color="#cfa57a"/><stop offset="1" stop-color="#cfcac2"/>
+    </radialGradient>
+    <radialGradient id="hvFace" gradientUnits="userSpaceOnUse" cx="532.0" cy="447.0" r="120">
+      <stop offset="0" stop-color="#ff8a1f" stop-opacity=".34"/><stop offset=".55" stop-color="#ff7a10" stop-opacity=".08"/><stop offset="1" stop-color="#fff" stop-opacity=".02"/>
+    </radialGradient>
+    <radialGradient id="hvCore" gradientUnits="userSpaceOnUse" cx="532.0" cy="447.0" r="46">
+      <stop offset="0" stop-color="#fffaf0"/><stop offset=".18" stop-color="#ffd58a"/><stop offset=".5" stop-color="#ff8a1f" stop-opacity=".55"/><stop offset="1" stop-color="#ff7a10" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="hvDotGlow"><stop offset="0" stop-color="#ff9a2e" stop-opacity=".85"/><stop offset="1" stop-color="#ff9a2e" stop-opacity="0"/></radialGradient>
+    <linearGradient id="hvOrbitA" gradientUnits="userSpaceOnUse" x1="280" y1="0" x2="1400" y2="0">
+      <stop offset="0" stop-color="#d9d4cb" stop-opacity=".55"/><stop offset=".55" stop-color="#d9d4cb" stop-opacity=".3"/><stop offset="1" stop-color="#ff9a2e" stop-opacity=".95"/>
+    </linearGradient>
+    <linearGradient id="hvOrbitB" gradientUnits="userSpaceOnUse" x1="320" y1="590" x2="740" y2="270">
+      <stop offset="0" stop-color="#ff9a2e" stop-opacity=".95"/><stop offset=".5" stop-color="#d9d4cb" stop-opacity=".45"/><stop offset="1" stop-color="#e8c9a0" stop-opacity=".75"/>
+    </linearGradient>
+    <linearGradient id="hvOrbitC" gradientUnits="userSpaceOnUse" x1="270" y1="520" x2="760" y2="440">
+      <stop offset="0" stop-color="#d9d4cb" stop-opacity=".5"/><stop offset=".5" stop-color="#ff9a2e" stop-opacity=".6"/><stop offset="1" stop-color="#d9d4cb" stop-opacity=".15"/>
+    </linearGradient>
+    <linearGradient id="hvWord" gradientUnits="userSpaceOnUse" x1="790" y1="390" x2="1290" y2="505"><stop offset="0" stop-color="#f6f2ea"/><stop offset="1" stop-color="#d9d4cb"/></linearGradient>
+    <filter id="hvGlow" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="7"/></filter>
+    <filter id="hvHalo" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="22"/></filter>
+  </defs>
+  <!-- warm halo behind the cluster -->
+  <circle cx="532.0" cy="447.0" r="120" fill="#ff7a10" opacity=".16" filter="url(#hvHalo)"/>
+  <!-- orbits -->
+  <g fill="none" stroke-width="1.6">
+    <ellipse cx="832" cy="448" rx="562" ry="130" transform="rotate(-2 832 448)" stroke="url(#hvOrbitA)"/>
+    <ellipse cx="528" cy="428" rx="262" ry="98" transform="rotate(-49 528 428)" stroke="url(#hvOrbitB)"/>
+    <ellipse cx="500" cy="480" rx="236" ry="100" transform="rotate(11 500 480)" stroke="url(#hvOrbitC)"/>
+  </g>
+  <!-- the three cells -->
+  <g fill="url(#hvFace)" stroke="none"><path d="M539.8 293.0 Q532.0 288.5 524.2 293.0 L471.8 323.2 Q464.0 327.8 464.0 336.8 L464.0 397.2 Q464.0 406.2 471.8 410.8 L524.2 441.0 Q532.0 445.5 539.8 441.0 L592.2 410.8 Q600.0 406.3 600.0 397.3 L600.0 336.8 Q600.0 327.8 592.2 323.2 Z"/><path d="M470.5 413.0 Q462.7 408.5 454.9 413.0 L402.5 443.2 Q394.7 447.8 394.7 456.8 L394.7 517.2 Q394.7 526.2 402.5 530.8 L454.9 561.0 Q462.7 565.5 470.5 561.0 L522.9 530.8 Q530.7 526.2 530.7 517.2 L530.7 456.8 Q530.7 447.8 522.9 443.2 Z"/><path d="M609.1 413.0 Q601.3 408.5 593.5 413.0 L541.1 443.2 Q533.3 447.8 533.3 456.8 L533.3 517.2 Q533.3 526.2 541.1 530.8 L593.5 561.0 Q601.3 565.5 609.1 561.0 L661.5 530.8 Q669.3 526.2 669.3 517.2 L669.3 456.8 Q669.3 447.8 661.5 443.2 Z"/></g>
+  <g fill="none" stroke="#ff8a1f" stroke-width="5" opacity=".55" filter="url(#hvGlow)"><path d="M539.8 293.0 Q532.0 288.5 524.2 293.0 L471.8 323.2 Q464.0 327.8 464.0 336.8 L464.0 397.2 Q464.0 406.2 471.8 410.8 L524.2 441.0 Q532.0 445.5 539.8 441.0 L592.2 410.8 Q600.0 406.3 600.0 397.3 L600.0 336.8 Q600.0 327.8 592.2 323.2 Z"/><path d="M470.5 413.0 Q462.7 408.5 454.9 413.0 L402.5 443.2 Q394.7 447.8 394.7 456.8 L394.7 517.2 Q394.7 526.2 402.5 530.8 L454.9 561.0 Q462.7 565.5 470.5 561.0 L522.9 530.8 Q530.7 526.2 530.7 517.2 L530.7 456.8 Q530.7 447.8 522.9 443.2 Z"/><path d="M609.1 413.0 Q601.3 408.5 593.5 413.0 L541.1 443.2 Q533.3 447.8 533.3 456.8 L533.3 517.2 Q533.3 526.2 541.1 530.8 L593.5 561.0 Q601.3 565.5 609.1 561.0 L661.5 530.8 Q669.3 526.2 669.3 517.2 L669.3 456.8 Q669.3 447.8 661.5 443.2 Z"/></g>
+  <g fill="none" stroke="url(#hvEdge)" stroke-width="2.6" stroke-linejoin="round"><path d="M539.8 293.0 Q532.0 288.5 524.2 293.0 L471.8 323.2 Q464.0 327.8 464.0 336.8 L464.0 397.2 Q464.0 406.2 471.8 410.8 L524.2 441.0 Q532.0 445.5 539.8 441.0 L592.2 410.8 Q600.0 406.3 600.0 397.3 L600.0 336.8 Q600.0 327.8 592.2 323.2 Z"/><path d="M470.5 413.0 Q462.7 408.5 454.9 413.0 L402.5 443.2 Q394.7 447.8 394.7 456.8 L394.7 517.2 Q394.7 526.2 402.5 530.8 L454.9 561.0 Q462.7 565.5 470.5 561.0 L522.9 530.8 Q530.7 526.2 530.7 517.2 L530.7 456.8 Q530.7 447.8 522.9 443.2 Z"/><path d="M609.1 413.0 Q601.3 408.5 593.5 413.0 L541.1 443.2 Q533.3 447.8 533.3 456.8 L533.3 517.2 Q533.3 526.2 541.1 530.8 L593.5 561.0 Q601.3 565.5 609.1 561.0 L661.5 530.8 Q669.3 526.2 669.3 517.2 L669.3 456.8 Q669.3 447.8 661.5 443.2 Z"/></g>
+  <g fill="none" stroke="#ff9a2e" stroke-width="1" opacity=".38"><path d="M537.2 315.1 Q532.0 312.1 526.8 315.1 L489.6 336.5 Q484.4 339.5 484.4 345.5 L484.4 388.5 Q484.4 394.5 489.6 397.5 L526.8 418.9 Q532.0 421.9 537.2 418.9 L574.4 397.5 Q579.6 394.5 579.6 388.5 L579.6 345.5 Q579.6 339.5 574.4 336.5 Z"/><path d="M467.9 435.1 Q462.7 432.1 457.5 435.1 L420.3 456.5 Q415.1 459.5 415.1 465.5 L415.1 508.5 Q415.1 514.5 420.3 517.5 L457.5 539.0 Q462.7 542.0 467.9 539.0 L505.1 517.5 Q510.3 514.5 510.3 508.5 L510.3 465.5 Q510.3 459.5 505.1 456.5 Z"/><path d="M606.5 435.1 Q601.3 432.1 596.1 435.1 L558.9 456.5 Q553.7 459.5 553.7 465.5 L553.7 508.5 Q553.7 514.5 558.9 517.5 L596.1 539.0 Q601.3 542.0 606.5 539.0 L643.7 517.5 Q648.9 514.5 648.9 508.5 L648.9 465.5 Q648.9 459.5 643.7 456.5 Z"/></g>
+  <g stroke="#ffb454" stroke-width=".8" opacity=".35"><line x1="532.0" y1="447.0" x2="532.0" y2="447.0"/><line x1="532.0" y1="447.0" x2="532.0" y2="447.0"/><line x1="532.0" y1="447.0" x2="532.0" y2="447.0"/></g>
+  <g fill="none" stroke="#ffc27a" stroke-width=".9" stroke-linecap="round" opacity=".3"><path d="M532.0 447.0 Q550.9 385.0 544.6 323.0"/><path d="M532.0 447.0 Q515.8 385.0 521.2 323.0"/><path d="M532.0 447.0 Q468.9 461.6 418.3 498.1"/><path d="M532.0 447.0 Q486.4 492.0 430.0 518.4"/><path d="M532.0 447.0 Q576.2 494.4 633.1 519.9"/><path d="M532.0 447.0 Q593.8 464.0 644.8 499.6"/></g>
+  <!-- the shared vertex -->
+  <circle cx="532.0" cy="447.0" r="46" fill="url(#hvCore)"/>
+  <g stroke="#fff3d9" stroke-linecap="round"><line x1="506.0" y1="447.0" x2="558.0" y2="447.0" stroke-width="1.2" opacity=".7"/><line x1="532.0" y1="421.0" x2="532.0" y2="473.0" stroke-width="1.2" opacity=".7"/></g>
+  <!-- orbiting points -->
+  <g class="hv-dot" data-orbit="a" data-angle="-3"><circle cx="1392.7" cy="421.6" r="19.5" fill="url(#hvDotGlow)"/><circle cx="1392.7" cy="421.6" r="7.5" fill="#ffb454"/><circle cx="1392.7" cy="421.6" r="3.4" fill="#fff1d6"/></g><g class="hv-dot" data-orbit="a" data-angle="84"><circle cx="895.2" cy="575.2" r="13.0" fill="url(#hvDotGlow)"/><circle cx="895.2" cy="575.2" r="5" fill="#ffb454"/><circle cx="895.2" cy="575.2" r="2.2" fill="#fff1d6"/></g><g class="hv-dot" data-orbit="b" data-angle="-14"><circle cx="676.9" cy="220.6" r="18.2" fill="url(#hvDotGlow)"/><circle cx="676.9" cy="220.6" r="7" fill="#ffb454"/><circle cx="676.9" cy="220.6" r="3.1" fill="#fff1d6"/></g><g class="hv-dot" data-orbit="c" data-angle="151"><circle cx="288.1" cy="488.2" r="16.9" fill="url(#hvDotGlow)"/><circle cx="288.1" cy="488.2" r="6.5" fill="#ffb454"/><circle cx="288.1" cy="488.2" r="2.9" fill="#fff1d6"/></g>
+  <g fill="none" stroke="url(#hvWord)" stroke-width="7.6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M800 396 V500 M800 454 Q800 431 823 431 H866 Q889 431 889 454 V500"/>
+    <path d="M962 431 V500"/>
+    <path d="M1031 431 L1073 500 L1115 431"/>
+    <path d="M1193 467 H1279 V454 Q1279 431 1256 431 H1216 Q1193 431 1193 454 V477 Q1193 500 1216 500 H1279"/>
+  </g>
+  <rect x="955.5" y="395" width="13" height="13" rx="3.4" fill="#ff9a2e"/>
+</svg>

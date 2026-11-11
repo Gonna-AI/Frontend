@@ -131,7 +131,10 @@
 .ct-about-mission::before { background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .16), transparent); content: ""; height: 1px; left: 0; position: absolute; right: 0; top: 0; }
 .ct-about-mission p:first-child { color: var(--ct-orange); font: 600 11px/1 var(--font-ui, "Geist", sans-serif); letter-spacing: .14em; margin: 0 0 26px; text-transform: uppercase; }
 .ct-about-mission p:last-child {
-  background: linear-gradient(180deg, #fff 20%, #a9abb1 100%); -webkit-background-clip: text; background-clip: text; color: transparent;
+  /* Light drifts across the statement: a periodic gradient, twice the text width, slid by exactly one period. */
+  animation: ctAboutSheen 9s linear infinite;
+  background: linear-gradient(100deg, #fff 0%, #8d9097 28%, #fff 52%, #c4c6cb 76%, #fff 100%) 0 0 / 200% 100% repeat-x;
+  -webkit-background-clip: text; background-clip: text; color: transparent;
   font: 500 clamp(26px, 3.4vw, 48px)/1.16 var(--font-ui, "Geist", "Inter", sans-serif); letter-spacing: -.03em; margin: 0; text-wrap: balance;
 }
 
@@ -144,3 +147,7 @@
   .ct-about-value-num { display: none; }
   .ct-about-value-icon { height: 44px; width: 44px; }
 }
+
+@keyframes ctAboutSheen { to { background-position: 200% 0; } }
+@media (prefers-reduced-motion: reduce) { .ct-about-mission p:last-child { animation: none; } }
+html[data-perf='low'] .ct-about-mission p:last-child { animation: none; }
