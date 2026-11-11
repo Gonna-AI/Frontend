@@ -19,9 +19,9 @@ html.lenis.lenis-stopped {
 }
 
 .ct-works {
-  /* The Book Demo buttons share one corner everywhere (not responsive); each inner tile is
-     concentric: outer radius minus the gap between tile and edge. */
-  --cta-r: 14px;
+  /* The Book Demo buttons are full pills everywhere (not responsive), like the site's other primary
+     buttons; the arrow tile inside is a circle, so inner and outer curves are always concentric. */
+  --cta-r: 999px;
   --ct-ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   --ct-ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
   --ct-bg: #f4f4f4;
