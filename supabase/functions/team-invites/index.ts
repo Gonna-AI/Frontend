@@ -7,15 +7,24 @@ const corsBaseHeaders = {
   'Access-Control-Max-Age': '86400',
 };
 
-function corsHeadersFor(req: Request): Record<string, string> {
+/** The caller's origin if it is ours (or a local dev server), otherwise the production site. */
+function trustedOrigin(req: Request): string {
   const requestOrigin = req.headers.get('Origin');
-  const allowedOrigin = requestOrigin?.includes('localhost') || requestOrigin?.includes('127.0.0.1')
-    ? requestOrigin
-    : 'https://clerktree.com';
-  return {
-    ...corsBaseHeaders,
-    'Access-Control-Allow-Origin': allowedOrigin,
-  };
+  if (requestOrigin) {
+    try {
+      const url = new URL(requestOrigin);
+      const isLocal = ['localhost', '127.0.0.1'].includes(url.hostname);
+      const isOurs = url.protocol === 'https:' && (url.hostname === 'clerktree.com' || url.hostname.endsWith('.clerktree.com'));
+      if (isLocal || isOurs) return url.origin;
+    } catch {
+      // Malformed Origin header: fall through to the default.
+    }
+  }
+  return 'https://clerktree.com';
+}
+
+function corsHeadersFor(req: Request): Record<string, string> {
+  return { ...corsBaseHeaders, 'Access-Control-Allow-Origin': trustedOrigin(req), Vary: 'Origin' };
 }
 
 function jsonResponse(req: Request, status: number, payload: Record<string, unknown>) {
@@ -27,11 +36,9 @@ function jsonResponse(req: Request, status: number, payload: Record<string, unkn
 
 function generateInviteCode(): string {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  let code = '';
-  for (let i = 0; i < 24; i++) {
-    code += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return code;
+  // Invite codes are bearer secrets: draw them from the CSPRNG, not Math.random().
+  const bytes = crypto.getRandomValues(new Uint8Array(24));
+  return Array.from(bytes, (byte) => chars[byte % chars.length]).join('');
 }
 
 Deno.serve(async (req: Request) => {
@@ -99,7 +106,8 @@ Deno.serve(async (req: Request) => {
 
       if (error) throw error;
 
-      const inviteUrl = `${req.headers.get('origin')}/join/${inviteCode}`;
+      // Never build the link from the request's Origin header: a forged one would put an attacker's domain in invites.
+      const inviteUrl = `${trustedOrigin(req)}/join/${inviteCode}`;
 
       return jsonResponse(req, 201, {
         invite: data,
@@ -115,6 +123,15 @@ Deno.serve(async (req: Request) => {
       if (!teamId) {
         return jsonResponse(req, 400, { error: 'team_id required' });
       }
+
+      // Invite codes grant access to a team, so only its members may list them.
+      const { data: membership } = await adminClient
+        .from('team_members')
+        .select('id')
+        .eq('team_id', teamId)
+        .eq('user_id', user.id)
+        .maybeSingle();
+      if (!membership) return jsonResponse(req, 403, { error: 'Not a team member' });
 
       const { data, error } = await adminClient
         .from('team_invites')
@@ -151,7 +168,7 @@ Deno.serve(async (req: Request) => {
   } catch (error) {
     console.error('[team-invites] error:', error);
     return jsonResponse(req, 500, {
-      error: error instanceof Error ? error.message : 'Internal server error',
+      error: 'Internal server error',
     });
   }
 });

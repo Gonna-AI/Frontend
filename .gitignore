@@ -13,3 +13,18 @@ dist
 
 # macOS metadata
 .DS_Store
+
+# Environment files (the committed template is .env.example)
+.env.*
+!.env.example
+
+# Tooling output
+coverage
+*.tsbuildinfo
+*.log
+npm-debug.log*
+
+# Editor and OS
+.idea
+Thumbs.db
+__pycache__

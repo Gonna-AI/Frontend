@@ -43,7 +43,7 @@ export function SummaryCards() {
             { title: t("dashProductivity.summary.thisWeek.title"), value: `${doneShare}%`, description: t("dashProductivity.summary.thisWeek.description"), icon: TrendingUp },
             {
               title: t("dashProductivity.summary.focus.title"),
-              value: focusProject?.name ?? FALLBACK_CARDS[2].value,
+              value: focusProject?.name ?? t("dashProductivity.summary.focus.value"),
               description: t("dashProductivity.summary.focus.description").replace("{count}", String(focusOpenCount)),
               icon: Focus,
             },
@@ -61,7 +61,7 @@ export function SummaryCards() {
       cancelled = true;
       unsubscribe();
     };
-  }, []);
+  }, [t]);
 
   return (
     <div className="grid gap-4 md:grid-cols-3">

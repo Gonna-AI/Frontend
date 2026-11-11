@@ -128,7 +128,7 @@ Deno.serve(async (req: Request) => {
   } catch (error) {
     console.error('[api-knowledge-base] error:', error);
     return json(req, 500, {
-      error: error instanceof Error ? error.message : 'Internal server error',
+      error: 'Internal server error',
     });
   }
 });

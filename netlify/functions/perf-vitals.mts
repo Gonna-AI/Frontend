@@ -16,13 +16,14 @@ export default async (req: Request, context: Context) => {
     return new Response(null, { status: 405 });
   }
 
-  const contentLength = Number(req.headers.get("content-length") || "0");
-  if (contentLength > MAX_BODY_BYTES) {
+  // Content-Length can be absent or wrong, so measure the body itself before parsing it.
+  const raw = await req.text();
+  if (raw.length > MAX_BODY_BYTES) {
     return new Response(null, { status: 413 });
   }
 
   try {
-    const payload = await req.json();
+    const payload = JSON.parse(raw);
     const metrics = Array.isArray(payload?.metrics) ? payload.metrics as Metric[] : [];
     const sanitized = metrics
       .filter((metric) => (

@@ -41,7 +41,9 @@ export default function AuthPage() {
 
     const [searchParams] = useSearchParams();
     const initialView = searchParams.get('view') as AuthView || 'signin';
-    const initialMessage = searchParams.get('message') || '';
+    // The message comes from the URL, so anyone can link to this page with text of their choosing.
+    // Show it only as short plain text, without links or contact details that could be used to phish.
+    const initialMessage = (searchParams.get('message') || '').replace(/https?:\/\/\S+|\S+@\S+|[+\d][\d\s()-]{7,}/g, '').trim().slice(0, 140);
 
     const [view, setView] = useState<AuthView>(initialView);
     const [email, setEmail] = useState('');

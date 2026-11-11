@@ -7,11 +7,19 @@ const corsBaseHeaders = {
   'Access-Control-Max-Age': '86400',
 };
 
+/** Exact host match: a substring test would also accept hosts like evil-localhost.example. */
+function isLocalOrigin(origin: string | null): origin is string {
+  if (!origin) return false;
+  try {
+    return ['localhost', '127.0.0.1'].includes(new URL(origin).hostname);
+  } catch {
+    return false;
+  }
+}
+
 function corsHeadersFor(req: Request): Record<string, string> {
   const requestOrigin = req.headers.get('Origin');
-  const allowedOrigin = requestOrigin?.includes('localhost') || requestOrigin?.includes('127.0.0.1')
-    ? requestOrigin
-    : 'https://clerktree.com';
+  const allowedOrigin = isLocalOrigin(requestOrigin) ? requestOrigin : 'https://clerktree.com';
   return {
     ...corsBaseHeaders,
     'Access-Control-Allow-Origin': allowedOrigin,
@@ -83,7 +91,7 @@ Deno.serve(async (req: Request) => {
   } catch (error) {
     console.error('[actions] error:', error);
     return jsonResponse(req, 500, {
-      error: error instanceof Error ? error.message : 'Internal server error',
+      error: 'Internal server error',
     });
   }
 });

@@ -1,89 +1,52 @@
-# =============================================================================
-# Build & Deploy Verification
-# =============================================================================
-# Runs on every push to verify build integrity
-# =============================================================================
-
-name: "Build Verification"
+name: CI
 
 on:
   push:
-    branches: [main, master, develop]
+    branches: [main]
   pull_request:
-    branches: [main, master]
+    branches: [main]
+  schedule:
+    # Weekly: new advisories appear against code that has not changed.
+    - cron: "0 6 * * 1"
 
 permissions:
   contents: read
-  pull-requests: write
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  build:
-    name: "Build & Test"
+  verify:
+    name: Lint, typecheck, build
     runs-on: ubuntu-latest
-
+    timeout-minutes: 15
     env:
-      VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
-      VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
-
+      # Public values (they ship in the browser bundle); the build needs them to finalise the CSP.
+      VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL || 'https://placeholder.supabase.co' }}
+      VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY || 'placeholder' }}
     steps:
-      - name: "Checkout Repository"
-        uses: actions/checkout@v4
-
-      - name: "Setup Node.js"
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version-file: ".node-version"
-          cache: "npm"
+          node-version-file: .node-version
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      # `npm run build` runs the typecheck, the production build, prerendering, the CSP step
+      # and the bundle-size budget, so a failure in any of them fails CI.
+      - run: npm run build
 
-      - name: "Install Dependencies"
-        run: npm ci
-
-      - name: "Lint Check"
-        run: npm run lint
-
-      - name: "Type Check"
-        run: npx tsc --noEmit
-
-      - name: "Build Project"
-        run: npm run build
-
-      - name: "Build Stats"
-        run: |
-          echo "# Build Statistics" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          
-          if [ -d "dist" ]; then
-            DIST_SIZE=$(du -sh dist | cut -f1)
-            FILE_COUNT=$(find dist -type f | wc -l)
-            
-            echo "| Metric | Value |" >> $GITHUB_STEP_SUMMARY
-            echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
-            echo "| Bundle Size | $DIST_SIZE |" >> $GITHUB_STEP_SUMMARY
-            echo "| Total Files | $FILE_COUNT |" >> $GITHUB_STEP_SUMMARY
-          fi
-
-      - name: "Upload Build Artifact"
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-output
-          path: dist/
-          retention-days: 7
-
-  # Comment build status on PR
-  comment-on-pr:
-    name: "PR Status Comment"
+  audit:
+    name: Dependency audit
     runs-on: ubuntu-latest
-    needs: build
-    if: github.event_name == 'pull_request'
-    
+    timeout-minutes: 10
     steps:
-      - name: "Comment Build Success"
-        uses: actions/github-script@v7
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          script: |
-            github.rest.issues.createComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.issue.number,
-              body: `## Build Verification Passed\n\n| Check | Status |\n|-------|--------|\n| Build | Success |\n| Lint | Passed |\n\n> Automated check by CI/CD pipeline`
-            });
+          node-version-file: .node-version
+          cache: npm
+      - run: npm ci --ignore-scripts
+      # Only what ships to visitors. Dev tooling advisories are tracked through Dependabot.
+      - run: npm audit --omit=dev --audit-level=high

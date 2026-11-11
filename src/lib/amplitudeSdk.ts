@@ -4,6 +4,7 @@
  * Analytics and session replay only: no experiment or in-app messaging
  * plugins, which would pull further third-party scripts at runtime.
  */
+import './analyticsGuard'; // must stay first: wraps the network functions before the SDK captures them
 import * as amplitude from '@amplitude/analytics-browser';
 import { sessionReplayPlugin } from '@amplitude/plugin-session-replay-browser';
 

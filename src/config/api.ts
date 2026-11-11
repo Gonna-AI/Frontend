@@ -14,7 +14,7 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
-  withCredentials: true, // Important for cookies/sessions
+  // Authentication is a bearer token (below), not a cookie, so no ambient credentials are sent.
 });
 
 // ── Token cache — avoids a Supabase auth read on every request ───────────────
@@ -52,37 +52,42 @@ api.interceptors.request.use(async (config) => {
   return config;
 });
 
-// Add an interceptor to handle retries for 5xx / network errors + 401 redirects
+// Retry only requests that are safe to repeat. Repeating a POST after a timeout can create the
+// same record twice (two users double-clicking, a flaky connection), so writes are never retried.
 const MAX_RETRIES = 3;
 const BASE_DELAY = 500;
+const IDEMPOTENT_METHODS = new Set(['get', 'head', 'options']);
+
+let redirectingToLogin = false;
+function redirectToLogin() {
+  if (redirectingToLogin || window.location.pathname.startsWith('/login')) return;
+  redirectingToLogin = true;
+  window.location.assign('/login');
+}
 
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const config = error.config;
+    if (!config) return Promise.reject(error);
 
-    // Don't retry if config is missing or already exceeded max retries
-    if (!config || config._retryCount >= MAX_RETRIES) {
-      if (error.response?.status === 401) {
-        window.location.href = '/login';
-      }
-      return Promise.reject(error);
-    }
-
-    // Redirect on 401 immediately (no retry)
     if (error.response?.status === 401) {
-      window.location.href = '/login';
+      // The cached token is no longer valid; drop it so the next sign-in starts clean.
+      _cachedToken = null;
+      _tokenExpiry = 0;
+      redirectToLogin();
       return Promise.reject(error);
     }
 
-    // Retry on 5xx or network errors
+    const retriable = IDEMPOTENT_METHODS.has(String(config.method ?? 'get').toLowerCase());
     const isServerError = error.response?.status >= 500;
     const isNetworkError = !error.response && error.code !== 'ERR_CANCELED';
+    config._retryCount = config._retryCount || 0;
 
-    if (isServerError || isNetworkError) {
-      config._retryCount = (config._retryCount || 0) + 1;
-      const delay = BASE_DELAY * Math.pow(2, config._retryCount - 1);
-      console.warn(`[api] Retrying request (attempt ${config._retryCount}/${MAX_RETRIES}) in ${delay}ms`);
+    if (retriable && (isServerError || isNetworkError) && config._retryCount < MAX_RETRIES) {
+      config._retryCount += 1;
+      // Exponential backoff with jitter, so many clients recovering from one outage do not retry in lockstep.
+      const delay = BASE_DELAY * Math.pow(2, config._retryCount - 1) * (0.5 + Math.random());
       await new Promise((resolve) => setTimeout(resolve, delay));
       return api(config);
     }

@@ -11,6 +11,7 @@ consumed by clerktree.com/thd through a Netlify proxy.
 from __future__ import annotations
 
 import asyncio
+import os
 import time
 from collections import deque
 from contextlib import asynccontextmanager
@@ -133,9 +134,9 @@ app = FastAPI(title="THD Predictive Maintenance API", version="1.0.0", lifespan=
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_origins=[o.strip() for o in os.environ.get("ALLOWED_ORIGINS", "https://clerktree.com").split(",") if o.strip()],
+    allow_methods=["GET", "POST"],
+    allow_headers=["Content-Type"],
 )
 
 

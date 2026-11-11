@@ -168,6 +168,7 @@ ${formData.details || 'No additional details provided.'}
                     </label>
                     <input
                       id="fullName"
+                      maxLength={120}
                       name="fullName"
                       type="text"
                       required
@@ -184,6 +185,7 @@ ${formData.details || 'No additional details provided.'}
                     </label>
                     <input
                       id="email"
+                      maxLength={254}
                       name="email"
                       type="email"
                       required
@@ -258,6 +260,7 @@ ${formData.details || 'No additional details provided.'}
                   </label>
                   <textarea
                     id="details"
+                    maxLength={3000}
                     name="details"
                     rows={4}
                     placeholder="Provide details about the data you are referencing..."

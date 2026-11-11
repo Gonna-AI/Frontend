@@ -76,6 +76,8 @@ const EditableInput = ({
 export default function AISettings() {
   const { isDark } = useTheme();
   const { t } = useLanguage();
+  const tRef = useRef(t);
+  tRef.current = t;
   const [aiName, setAiName] = useState('');
   const [tone, setTone] = useState('Professional');
   const [length, setLength] = useState('Moderate');
@@ -129,9 +131,11 @@ export default function AISettings() {
   }, [showError]);
 
   useEffect(() => {
+    let cancelled = false;
     const fetchData = async () => {
       try {
         const response = await api.get<SettingsData>('/api/knowledge');
+        if (cancelled) return;
         const data = response.data;
 
         // Update states with received values
@@ -150,13 +154,17 @@ export default function AISettings() {
         }));
 
         setKnowledgeBase(entries);
-      } catch (error) {
+      } catch {
+        if (cancelled) return;
         setShowError(true);
-        setErrorMessage(t('ai.fetchFailed'));
+        setErrorMessage(tRef.current('ai.fetchFailed'));
       }
     };
 
     fetchData();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const GlassContainer = ({ children, className }: { children: React.ReactNode, className?: string }) => (

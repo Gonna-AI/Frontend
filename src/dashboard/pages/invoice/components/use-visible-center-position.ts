@@ -37,13 +37,6 @@ export function useVisibleCenterPosition(
       const maxTop = Math.max(padding, parent.clientHeight - scaledHeight - padding);
       const nextTop = Math.min(Math.max(visibleCenter - scaledHeight / 2, padding), maxTop);
 
-      if (process.env.NODE_ENV === "development") {
-        console.log("Invoice preview spacing", {
-          above: Math.round(nextTop),
-          below: Math.round(parent.clientHeight - nextTop - scaledHeight),
-          scale: Number(nextScale.toFixed(3)),
-        });
-      }
 
       setLayout((currentLayout) => {
         if (currentLayout?.top === nextTop && currentLayout.scale === nextScale) {

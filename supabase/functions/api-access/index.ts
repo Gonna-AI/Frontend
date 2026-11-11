@@ -154,6 +154,20 @@ Deno.serve(async (req: Request) => {
         return jsonResponse(req, 200, { success: false, error: 'Invalid or expired access code' });
       }
 
+      // Claim one use first, atomically: the update only matches while the counter still has the value
+      // we read, so two people redeeming the last use at once cannot both succeed.
+      const { data: claimed, error: claimError } = await adminClient
+        .from('access_codes')
+        .update({ current_uses: codeRow.current_uses + 1, updated_at: new Date().toISOString() })
+        .eq('id', codeRow.id)
+        .eq('current_uses', codeRow.current_uses)
+        .select('id');
+
+      if (claimError) throw claimError;
+      if (!claimed || claimed.length === 0) {
+        return jsonResponse(req, 200, { success: false, error: 'Invalid or expired access code' });
+      }
+
       // Grant access — upsert in case user retries after a partial failure
       const { error: insertError } = await adminClient
         .from('user_access')
@@ -164,14 +178,6 @@ Deno.serve(async (req: Request) => {
 
       if (insertError) throw insertError;
 
-      // Increment usage count
-      const { error: updateError } = await adminClient
-        .from('access_codes')
-        .update({ current_uses: codeRow.current_uses + 1, updated_at: new Date().toISOString() })
-        .eq('id', codeRow.id);
-
-      if (updateError) console.error('[api-access] Failed to increment usage count:', updateError);
-
       return jsonResponse(req, 200, { success: true });
     }
 
@@ -180,7 +186,7 @@ Deno.serve(async (req: Request) => {
   } catch (error) {
     console.error('[api-access] error:', error);
     return jsonResponse(req, 500, {
-      error: error instanceof Error ? error.message : 'Internal server error',
+      error: 'Internal server error',
     });
   }
 });

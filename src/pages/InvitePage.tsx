@@ -15,23 +15,19 @@ export default function InvitePage() {
     const type = searchParams.get('type');
 
     useEffect(() => {
-        console.log('InvitePage effect running', { loading, session: !!session, token, type });
 
         if (loading) return;
 
         // If user is already logged in, redirect to dashboard
         if (session) {
-            console.log('User logged in, redirecting to dashboard');
             navigate('/dashboard', { replace: true });
             return;
         }
 
         // Simulating invite token handling
         if (token && type === 'invite') {
-            console.log('Invite token found, redirecting to login/signup');
             navigate('/login?view=signup&message=You have been invited to join the team!', { replace: true });
         } else {
-            console.log('No token, redirecting to login');
             navigate('/login', { replace: true });
         }
     }, [session, loading, navigate, token, type]);

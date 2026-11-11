@@ -10,7 +10,6 @@ from __future__ import annotations
 
 import asyncio
 import logging
-import shutil
 import uuid
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -19,7 +18,7 @@ from fastapi import FastAPI, Header, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 
 import db
-from config import POLL_INTERVAL_SECONDS, PORT
+from config import ALLOWED_ORIGINS, MAX_UPLOAD_BYTES, POLL_INTERVAL_SECONDS, PORT
 from pipeline import process_job
 
 logging.basicConfig(level=logging.INFO)
@@ -49,9 +48,9 @@ app = FastAPI(title="Kostencheck Copilot Worker", version="0.1.0", lifespan=life
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_origins=ALLOWED_ORIGINS,
+    allow_methods=["GET", "POST"],
+    allow_headers=["X-API-Key", "Content-Type"],
 )
 
 
@@ -87,9 +86,23 @@ async def submit_document(
 
     company = _authenticate(x_api_key)
 
-    dest = UPLOAD_DIR / f"{uuid.uuid4()}_{file.filename}"
-    with dest.open("wb") as out:
-        shutil.copyfileobj(file.file, out)
+    # Never use the client's file name on disk: it is attacker-controlled. Keep only a safe suffix.
+    suffix = Path(file.filename or "").suffix.lower()
+    if suffix not in (".pdf", ".xml", ".txt"):
+        raise HTTPException(status_code=415, detail="unsupported file type")
+    dest = UPLOAD_DIR / f"{uuid.uuid4()}{suffix}"
+
+    written = 0
+    try:
+        with dest.open("wb") as out:
+            while chunk := await file.read(1024 * 1024):
+                written += len(chunk)
+                if written > MAX_UPLOAD_BYTES:
+                    raise HTTPException(status_code=413, detail="file too large")
+                out.write(chunk)
+    except HTTPException:
+        dest.unlink(missing_ok=True)
+        raise
 
     document_id = db.insert_document(company["id"], kind, doc_number, str(dest))
     job_id = db.enqueue_job(document_id, "parse")

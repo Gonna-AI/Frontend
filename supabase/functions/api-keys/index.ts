@@ -215,7 +215,7 @@ Deno.serve(async (req: Request) => {
   } catch (error) {
     console.error('[api-keys] error:', error);
     return jsonResponse(req, 500, {
-      error: error instanceof Error ? error.message : 'Internal server error',
+      error: 'Internal server error',
     });
   }
 });

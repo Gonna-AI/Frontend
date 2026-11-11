@@ -53,6 +53,20 @@ function json(req: Request, status: number, payload: Record<string, unknown>) {
 }
 
 // ─── Main handler ────────────────────────────────────────────────
+/** Parses a JSON object body; anything else is an empty object, so handlers answer 400 instead of crashing. */
+async function readBody(req: Request): Promise<Record<string, unknown>> {
+  const body = await req.json().catch(() => null);
+  return body && typeof body === 'object' && !Array.isArray(body) ? (body as Record<string, unknown>) : {};
+}
+
+function isSessionId(value: unknown): value is string {
+  return typeof value === 'string' && value.length > 0 && value.length <= 128;
+}
+
+function cleanText(value: unknown, max: number): string | null {
+  return typeof value === 'string' && value.trim() ? value.trim().slice(0, max) : null;
+}
+
 Deno.serve(async (req: Request) => {
   if (!isAllowedOrigin(req.headers.get('Origin'))) {
     return json(req, 403, { error: 'Origin not allowed' });
@@ -77,25 +91,30 @@ Deno.serve(async (req: Request) => {
 
       // Check authentication (optional for GET)
       let isAuthenticated = false;
+      let callerId = '';
       if (authHeader) {
         const anonClient = createClient(supabaseUrl, anonKey, {
           global: { headers: { Authorization: authHeader } },
         });
         const { data: { user: reqUser } } = await anonClient.auth.getUser();
         isAuthenticated = !!reqUser;
+        callerId = reqUser?.id ?? '';
       }
 
       if (isAuthenticated) {
         // Authenticated: clean up stale sessions, then return full list
+        // Only the caller's own sessions: this runs with the service role, so scoping is up to us.
         await admin
           .from('active_sessions')
           .delete()
+          .eq('user_id', callerId)
           .eq('status', 'active')
           .lt('last_activity', fiveMinutesAgo);
 
         const { data, error } = await admin
           .from('active_sessions')
           .select('*')
+          .eq('user_id', callerId)
           .eq('status', 'active')
           .order('started_at', { ascending: false });
 
@@ -131,9 +150,13 @@ Deno.serve(async (req: Request) => {
 
     // ━━━ POST /start — Register a new active session ━━━━━━━━━━
     if (req.method === 'POST' && action === 'start') {
-      const body = await req.json() as Record<string, unknown>;
-      const sessionId = body.id as string;
-      if (!sessionId) return json(req, 400, { error: 'Missing session id' });
+      const body = await readBody(req);
+      const sessionId = body.id;
+      if (!isSessionId(sessionId)) return json(req, 400, { error: 'Missing or invalid session id' });
+
+      // An id that already belongs to another user must never be taken over.
+      const { data: existing } = await admin.from('active_sessions').select('user_id').eq('id', sessionId).maybeSingle();
+      if (existing && existing.user_id !== user.id) return json(req, 403, { error: 'Forbidden' });
 
       const sessionType = body.session_type === 'voice' ? 'voice' : 'text';
       const startedAt = typeof body.started_at === 'string' ? body.started_at : new Date().toISOString();
@@ -148,8 +171,8 @@ Deno.serve(async (req: Request) => {
           started_at: startedAt,
           status: 'active',
           last_activity: new Date().toISOString(),
-          caller_name: (body.caller_name as string) || null,
-          user_agent: (body.user_agent as string) || null,
+          caller_name: cleanText(body.caller_name, 200),
+          user_agent: cleanText(body.user_agent, 400),
           message_count: 0,
         }, { onConflict: 'id' })
         .select()
@@ -162,26 +185,26 @@ Deno.serve(async (req: Request) => {
 
     // ━━━ POST /heartbeat — Update session last_activity ━━━━━━━
     if (req.method === 'POST' && action === 'heartbeat') {
-      const body = await req.json() as Record<string, unknown>;
-      const sessionId = body.id as string;
-      if (!sessionId) return json(req, 400, { error: 'Missing session id' });
+      const body = await readBody(req);
+      const sessionId = body.id;
+      if (!isSessionId(sessionId)) return json(req, 400, { error: 'Missing or invalid session id' });
 
       const updates: Record<string, unknown> = {
         last_activity: new Date().toISOString(),
       };
 
       // Optionally update message count and caller name if provided
-      if (typeof body.message_count === 'number') {
+      if (typeof body.message_count === 'number' && Number.isInteger(body.message_count) && body.message_count >= 0) {
         updates.message_count = body.message_count;
       }
-      if (typeof body.caller_name === 'string' && body.caller_name) {
-        updates.caller_name = body.caller_name;
-      }
+      const callerName = cleanText(body.caller_name, 200);
+      if (callerName) updates.caller_name = callerName;
 
       const { error } = await admin
         .from('active_sessions')
         .update(updates)
-        .eq('id', sessionId);
+        .eq('id', sessionId)
+        .eq('user_id', user.id);
 
       if (error) throw error;
 
@@ -190,16 +213,17 @@ Deno.serve(async (req: Request) => {
 
     // ━━━ POST /end — Mark session as ended ━━━━━━━━━━━━━━━━━━━━
     if (req.method === 'POST' && action === 'end') {
-      const body = await req.json() as Record<string, unknown>;
-      const sessionId = body.id as string;
-      if (!sessionId) return json(req, 400, { error: 'Missing session id' });
+      const body = await readBody(req);
+      const sessionId = body.id;
+      if (!isSessionId(sessionId)) return json(req, 400, { error: 'Missing or invalid session id' });
 
       // Delete the session row outright so the real-time subscription
       // fires a DELETE event for all listeners (dashboard, monitor, etc.)
       const { error } = await admin
         .from('active_sessions')
         .delete()
-        .eq('id', sessionId);
+        .eq('id', sessionId)
+        .eq('user_id', user.id);
 
       if (error) throw error;
 
@@ -211,7 +235,7 @@ Deno.serve(async (req: Request) => {
   } catch (error) {
     console.error('[api-sessions] error:', error);
     return json(req, 500, {
-      error: error instanceof Error ? error.message : 'Internal server error',
+      error: 'Internal server error',
     });
   }
 });

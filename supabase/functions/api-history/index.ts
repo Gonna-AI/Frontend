@@ -122,6 +122,10 @@ Deno.serve(async (req: Request) => {
         agent_id: body.agent_id ?? user.id,
       };
 
+      // The upsert runs with the service role, so make sure the id is not someone else's call.
+      const { data: existing } = await admin.from('call_history').select('user_id').eq('id', id).maybeSingle();
+      if (existing && existing.user_id !== user.id) return json(req, 403, { error: 'Forbidden' });
+
       // Upsert to handle potential race conditions (call end + summary update)
       const { data, error } = await admin
         .from('call_history')
@@ -172,6 +176,8 @@ Deno.serve(async (req: Request) => {
       if (error) {
         // If record doesn't exist yet (race condition), upsert instead
         if (error.code === 'PGRST116') {
+          const { data: existing } = await admin.from('call_history').select('user_id').eq('id', id).maybeSingle();
+          if (existing && existing.user_id !== user.id) return json(req, 403, { error: 'Forbidden' });
           const fullRecord = {
             id,
             caller_name: body.caller_name ?? 'Unknown Caller',
@@ -227,7 +233,7 @@ Deno.serve(async (req: Request) => {
   } catch (error) {
     console.error('[api-history] error:', error);
     return json(req, 500, {
-      error: error instanceof Error ? error.message : 'Internal server error',
+      error: 'Internal server error',
     });
   }
 });

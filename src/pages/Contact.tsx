@@ -1,5 +1,5 @@
 import type { ChangeEvent, FormEvent } from 'react';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { ArrowUpRight, CheckCircle2, Linkedin, MapPin } from 'lucide-react';
 import { siX } from 'simple-icons';
 import { SimpleIcon } from '../dashboard/components/simple-icon';
@@ -44,9 +44,15 @@ export default function Contact() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<SubmitStatus>('idle');
   const mapAllowed = useConsent('externalMedia');
+  const honeypot = useRef<HTMLInputElement>(null);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    // Bots fill every field, including the hidden one; answer them as if it worked and send nothing.
+    if (honeypot.current?.value) {
+      setSubmitStatus('success');
+      return;
+    }
     setIsSubmitting(true);
 
     try {
@@ -98,11 +104,21 @@ export default function Contact() {
               </div>
             ) : (
               <form className="clerktree-contact-form" onSubmit={handleSubmit}>
+                <input
+                  aria-hidden="true"
+                  autoComplete="off"
+                  name="website"
+                  ref={honeypot}
+                  style={{ height: 0, left: -9999, opacity: 0, position: 'absolute', width: 0 }}
+                  tabIndex={-1}
+                  type="text"
+                />
                 <div className="clerktree-contact-field-grid">
                   <label>
                     <span>{t('contact.fullName')} *</span>
                     <input
                       autoComplete="name"
+                      maxLength={120}
                       name="fullName"
                       onChange={handleChange}
                       placeholder={t('contact.fullName')}
@@ -116,6 +132,7 @@ export default function Contact() {
                     <span>{t('contact.email')} *</span>
                     <input
                       autoComplete="email"
+                      maxLength={254}
                       name="email"
                       onChange={handleChange}
                       placeholder="you@company.com"
@@ -129,6 +146,7 @@ export default function Contact() {
                     <span>{t('contact.companyName')} *</span>
                     <input
                       autoComplete="organization"
+                      maxLength={160}
                       name="companyName"
                       onChange={handleChange}
                       placeholder={t('contact.companyName')}
@@ -142,6 +160,7 @@ export default function Contact() {
                     <span>{t('contact.phoneNumber')} *</span>
                     <input
                       autoComplete="tel"
+                      maxLength={40}
                       name="phone"
                       onChange={handleChange}
                       placeholder="+49 176 83075116"
@@ -177,6 +196,7 @@ export default function Contact() {
                 <label className="clerktree-contact-message">
                   <span>{t('contact.message')} *</span>
                   <textarea
+                    maxLength={5000}
                     name="message"
                     onChange={handleChange}
                     placeholder={t('contact.messagePlaceholder')}
