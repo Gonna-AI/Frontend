@@ -2,12 +2,18 @@
 
 .ct-works.hv-page { background: #0d0d0e; color: #e8e9eb; }
 
-/* Header sits on the scene and scrolls away with the first screen. */
+/* Header sits on the scene and scrolls away with the first screen. It takes exactly the place it has on
+   every other page (inside the shell: gutter + border + shell padding, same header padding and height),
+   so the logo, links, button and the opened menu line up from page to page. */
 .ct-works .hv-head {
   background: linear-gradient(rgba(13, 13, 14, .9), rgba(13, 13, 14, .55) 60%, rgba(13, 13, 14, 0));
-  left: 0; padding: 10px clamp(16px, 2.4vw, 32px) 28px; position: absolute; right: 0; top: 0; z-index: 5;
+  left: 0; padding: calc(var(--gutter) + 1px + var(--shell-pad)) calc(var(--gutter) + 1px + var(--shell-pad)) 36px;
+  position: absolute; right: 0; top: 0; z-index: 5;
 }
-.ct-works .hv-head .ct-shell-header { margin: 0 auto; }
+.ct-works .hv-head .ct-shell-header {
+  margin: 0 auto; max-width: calc(var(--edge-max) - 2 * (1px + var(--shell-pad)));
+  padding: 6px calc(var(--r-stage) * 0.5) 6px;
+}
 .ct-works .hv-head .ct-shell-logo { color: #fff; }
 .ct-works .hv-head .ct-shell-nav > a, .ct-works .hv-head .ct-nav-trigger { color: rgba(255, 255, 255, .66); }
 .ct-works .hv-head .ct-shell-nav > a:hover, .ct-works .hv-head .ct-nav-item:hover .ct-nav-trigger { color: #fff; }
