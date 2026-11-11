@@ -2,10 +2,16 @@
 // fills its positioned parent; animates only while on screen; draws one still
 // frame under reduced motion; hides itself if WebGL2 is unavailable so the
 // parent's CSS gradient shows instead.
+//
+// All instances share ONE WebGL context. Each one owns an ordinary 2D canvas that the shared renderer
+// paints into. That has two consequences that matter on phones: browsers allow only a handful of live
+// WebGL contexts (the oldest is dropped when the limit is hit, which used to blank backgrounds that had
+// already been seen), and every section scrolled past keeps its last picture in its own canvas, so
+// scrolling back always shows exactly what was there, with nothing to re-render.
 import { useEffect, useRef } from 'react';
 
 import { cancelIdle, runWhenIdle } from '../../utils/idle';
-import { frameInterval, isScrolling, onTierChange, pixelRatioFor, reportFrame, shouldRestDuringScroll } from '../../utils/perf';
+import { decorPaused, frameInterval, onTierChange, pixelRatioFor, reportFrame } from '../../utils/perf';
 
 type Settings = {
   uTimeSpeed: number; uColorBalance: number; uWarpStrength: number; uWarpFrequency: number;
@@ -81,10 +87,117 @@ type GrainientProps = {
   className?: string;
 };
 
+// ---- The shared renderer ----------------------------------------------------------------------
 
-// One animation loop drives every Grainient on the page. Separate loops would each wake the browser
-// every frame; one loop wakes it once, draws only the canvases that are on screen, keeps to the
-// frame rate the device tier allows, and rests while a weaker device is scrolling.
+type Shared = {
+  canvas: HTMLCanvasElement;
+  gl: WebGL2RenderingContext;
+  program: WebGLProgram;
+  uTime: WebGLUniformLocation | null;
+  uRes: WebGLUniformLocation | null;
+  appliedPreset: string;
+};
+
+const MAX_SIDE = 4096;
+let shared: Shared | null = null;
+let state: 'idle' | 'compiling' | 'ready' | 'failed' = 'idle';
+const waiting = new Set<(ok: boolean) => void>();
+
+function settle(ok: boolean) {
+  waiting.forEach((callback) => callback(ok));
+  waiting.clear();
+}
+
+function startRenderer() {
+  if (state !== 'idle') return;
+  state = 'compiling';
+
+  const canvas = document.createElement('canvas');
+  canvas.width = 2;
+  canvas.height = 2;
+  const gl = canvas.getContext('webgl2', { alpha: false, antialias: false, depth: false, stencil: false, powerPreference: 'low-power' });
+  if (!gl) { state = 'failed'; settle(false); return; }
+
+  const compile = (type: number, source: string) => {
+    const shader = gl.createShader(type)!;
+    gl.shaderSource(shader, source);
+    gl.compileShader(shader);
+    // Status is not read here: asking makes the browser wait for the compiler. A failure shows up as a
+    // failed link below, once compiling has finished in the background.
+    return shader;
+  };
+  const program = gl.createProgram()!;
+  gl.attachShader(program, compile(gl.VERTEX_SHADER, VERTEX));
+  gl.attachShader(program, compile(gl.FRAGMENT_SHADER, FRAGMENT));
+  gl.linkProgram(program);
+
+  // With KHR_parallel_shader_compile the browser compiles on another thread, so scrolling carries on.
+  const parallel = gl.getExtension('KHR_parallel_shader_compile');
+  const finish = () => {
+    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) { state = 'failed'; settle(false); return; }
+    gl.useProgram(program);
+    gl.bindVertexArray(gl.createVertexArray());
+    shared = { canvas, gl, program, uTime: gl.getUniformLocation(program, 'iTime'), uRes: gl.getUniformLocation(program, 'iResolution'), appliedPreset: '' };
+    state = 'ready';
+    settle(true);
+  };
+  const poll = () => {
+    if (!parallel || gl.getProgramParameter(program, parallel.COMPLETION_STATUS_KHR)) finish();
+    else window.setTimeout(poll, 16);
+  };
+  poll();
+
+  // If the browser drops the context, every instance keeps the picture it already has; the renderer
+  // is rebuilt the next time one of them needs a new frame.
+  canvas.addEventListener('webglcontextlost', (event) => {
+    event.preventDefault();
+    shared = null;
+    state = 'idle';
+  });
+}
+
+/** Calls back once the shared renderer is ready (or known to be unavailable). */
+function whenRenderer(callback: (ok: boolean) => void) {
+  if (state === 'ready') { callback(true); return; }
+  if (state === 'failed') { callback(false); return; }
+  waiting.add(callback);
+  startRenderer();
+}
+
+/** Paints one frame of a preset into a 2D canvas. Returns false if there is no renderer right now. */
+function renderInto(target: CanvasRenderingContext2D, width: number, height: number, preset: GrainientPreset, time: number): boolean {
+  if (state === 'idle') startRenderer();
+  if (!shared || state !== 'ready') return false;
+  const { gl, canvas, program } = shared;
+
+  if (canvas.width < width || canvas.height < height) {
+    canvas.width = Math.min(MAX_SIDE, Math.max(canvas.width, width));
+    canvas.height = Math.min(MAX_SIDE, Math.max(canvas.height, height));
+  }
+  gl.viewport(0, 0, width, height);
+
+  if (shared.appliedPreset !== preset) {
+    shared.appliedPreset = preset;
+    const { colors, settings } = GRAINIENT_PRESETS[preset];
+    const values: Settings = { ...BASE, ...settings };
+    (Object.keys(values) as (keyof Settings)[]).forEach((name) => gl.uniform1f(gl.getUniformLocation(program, name), values[name]));
+    colors.forEach((color, i) => gl.uniform3fv(gl.getUniformLocation(program, `uColor${i + 1}`), hex(color)));
+  }
+  gl.uniform2f(shared.uRes, width, height);
+  gl.uniform1f(shared.uTime, time);
+  gl.drawArrays(gl.TRIANGLES, 0, 3);
+
+  // The frame is copied out before it is presented. WebGL's origin is the bottom-left corner.
+  target.drawImage(canvas, 0, canvas.height - height, width, height, 0, 0, width, height);
+  return true;
+}
+
+// ---- One animation loop for every Grainient on the page ---------------------------------------
+//
+// Separate loops would each wake the browser every frame; one loop wakes it once, draws only the
+// canvases that are on screen, keeps to the frame rate the device tier allows, and holds still while
+// something else needs the frame (a weaker device scrolling, the menu animating).
+
 const jobs = new Set<(now: number) => void>();
 let loopHandle = 0;
 let lastRaf = 0;
@@ -97,7 +210,7 @@ function loop(now: number) {
   lastRaf = now;
 
   const due = now - lastDraw >= frameInterval() - 2;
-  if (due && !(shouldRestDuringScroll() && isScrolling())) {
+  if (due && !decorPaused()) {
     lastDraw = now;
     jobs.forEach((draw) => draw(now));
   }
@@ -114,6 +227,8 @@ function removeJob(draw: (now: number) => void) {
   if (!jobs.size && loopHandle) { cancelAnimationFrame(loopHandle); loopHandle = 0; lastRaf = 0; }
 }
 
+// ---- The component ----------------------------------------------------------------------------
+
 export default function Grainient({ preset = 'silver', still = false, className = '' }: GrainientProps) {
   const ref = useRef<HTMLCanvasElement>(null);
 
@@ -121,73 +236,45 @@ export default function Grainient({ preset = 'silver', still = false, className 
     const canvas = ref.current;
     const host = canvas?.parentElement;
     if (!canvas || !host) return undefined;
+    const target = canvas.getContext('2d'); // transparent until the first frame, so the section's own background shows meanwhile
+    if (!target) { canvas.style.display = 'none'; return undefined; }
 
-    // The page has several of these. Setting one up (context, shader compile) costs main-thread
-    // time, so none starts until its section is near the viewport and the browser is idle: the
-    // first paint and the first interaction never wait for a background effect.
-    let teardown: (() => void) | undefined;
-    let idle = 0;
-    const boot = (): (() => void) | undefined => {
-    const gl = canvas.getContext('webgl2', { alpha: false, antialias: false, depth: false, stencil: false, powerPreference: 'low-power' });
-    const fail = () => { canvas.style.display = 'none'; };
-    if (!gl) { fail(); return undefined; }
-
-    const compile = (type: number, source: string) => {
-      const shader = gl.createShader(type)!;
-      gl.shaderSource(shader, source);
-      gl.compileShader(shader);
-      // Not checked here: asking for the compile status makes the browser wait for the compiler.
-      // A failure shows up as a failed link below, once compiling has finished in the background.
-      return shader;
-    };
-    const vs = compile(gl.VERTEX_SHADER, VERTEX);
-    const fs = compile(gl.FRAGMENT_SHADER, FRAGMENT);
-    const program = gl.createProgram()!;
-    gl.attachShader(program, vs);
-    gl.attachShader(program, fs);
-    gl.linkProgram(program);
-
-    // Compiling this shader takes tens to hundreds of milliseconds. With KHR_parallel_shader_compile
-    // the browser does it on another thread, so the page keeps scrolling while it happens.
-    const parallel = gl.getExtension('KHR_parallel_shader_compile');
-    let waiting = 0;
-    let running: (() => void) | undefined;
-
-    const begin = (): (() => void) | undefined => {
-    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) { fail(); return undefined; }
-    gl.useProgram(program);
-    gl.bindVertexArray(gl.createVertexArray());
-
-    const { colors, settings } = GRAINIENT_PRESETS[preset];
-    const values: Settings = { ...BASE, ...settings };
-    (Object.keys(values) as (keyof Settings)[]).forEach((name) => gl.uniform1f(gl.getUniformLocation(program, name), values[name]));
-    colors.forEach((color, i) => gl.uniform3fv(gl.getUniformLocation(program, `uColor${i + 1}`), hex(color)));
-    const uTime = gl.getUniformLocation(program, 'iTime');
-    const uRes = gl.getUniformLocation(program, 'iResolution');
-
-    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const frozen = still || reduced;
+    const frozen = still || window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     let elapsed = frozen ? 6 : 0;
     let start = performance.now() - elapsed * 1000;
+    let width = 0;
+    let height = 0;
+    let ready = false;
     let playing = false;
     let visible = false;
+    let cancelled = false;
+    let idle = 0;
 
-    const draw = (time: number) => { elapsed = time; gl.uniform1f(uTime, time); gl.drawArrays(gl.TRIANGLES, 0, 3); };
-    const resize = () => {
-      const rect = host.getBoundingClientRect();
-      const dpr = pixelRatioFor(1.5);
-      const w = Math.max(1, Math.round(rect.width * dpr));
-      const h = Math.max(1, Math.round(rect.height * dpr));
-      if (canvas.width !== w || canvas.height !== h) {
-        canvas.width = w; canvas.height = h;
-        gl.viewport(0, 0, w, h);
-        gl.uniform2f(uRes, w, h);
+    const draw = (time: number) => {
+      elapsed = time;
+      if (!renderInto(target, width, height, preset, time)) {
+        // The renderer was lost: ask for a new one, and keep the picture that is already here.
+        ready = false;
+        whenRenderer((ok) => { if (ok && !cancelled) { ready = true; draw(elapsed); } });
       }
-      draw(elapsed);
     };
     const paint = (now: number) => draw((now - start) / 1000);
+
+    const resize = () => {
+      const rect = host.getBoundingClientRect();
+      const ratio = pixelRatioFor(1.5);
+      const w = Math.min(MAX_SIDE, Math.max(1, Math.round(rect.width * ratio)));
+      const h = Math.min(MAX_SIDE, Math.max(1, Math.round(rect.height * ratio)));
+      if (w === width && h === height) return;
+      width = w;
+      height = h;
+      canvas.width = w; // resizing clears a canvas, so a frame is painted straight away
+      canvas.height = h;
+      if (ready) draw(elapsed);
+    };
+
     const play = () => {
-      if (frozen || playing || !visible || document.hidden) return;
+      if (frozen || playing || !visible || !ready || document.hidden) return;
       start = performance.now() - elapsed * 1000;
       playing = true;
       addJob(paint);
@@ -200,52 +287,41 @@ export default function Grainient({ preset = 'silver', still = false, className 
 
     const ro = new ResizeObserver(resize);
     ro.observe(host);
+    resize();
+
+    // Nothing is set up until the section is near the viewport and the browser is idle, so first paint
+    // and first interaction never wait for a background effect.
+    const gate = new IntersectionObserver(([entry]) => {
+      if (!entry.isIntersecting) return;
+      gate.disconnect();
+      idle = runWhenIdle(() => {
+        whenRenderer((ok) => {
+          if (cancelled) return;
+          if (!ok) { canvas.style.display = 'none'; return; }
+          ready = true;
+          draw(elapsed);
+          play();
+        });
+      }, 500);
+    }, { rootMargin: '200px 0px' });
+    gate.observe(host);
+
     const io = new IntersectionObserver(([entry]) => { visible = entry.isIntersecting; if (visible) play(); else stop(); }, { rootMargin: '100px 0px' });
     io.observe(host);
     const onVisibility = () => (document.hidden ? stop() : play());
     document.addEventListener('visibilitychange', onVisibility);
-    const onLost = (event: Event) => { event.preventDefault(); stop(); fail(); };
-    canvas.addEventListener('webglcontextlost', onLost);
     // A tier change (the device proved slower than it reported) changes the internal resolution.
     const offTier = onTierChange(resize);
-    resize();
 
     return () => {
+      cancelled = true;
       stop();
-      ro.disconnect();
+      cancelIdle(idle);
+      gate.disconnect();
       io.disconnect();
+      ro.disconnect();
       offTier();
       document.removeEventListener('visibilitychange', onVisibility);
-      canvas.removeEventListener('webglcontextlost', onLost);
-      gl.getExtension('WEBGL_lose_context')?.loseContext();
-    };
-    };
-
-    const wait = () => {
-      waiting = 0;
-      if (!parallel || gl.getProgramParameter(program, parallel.COMPLETION_STATUS_KHR)) running = begin();
-      else waiting = window.setTimeout(wait, 16);
-    };
-    wait();
-
-    return () => {
-      window.clearTimeout(waiting);
-      running?.();
-      if (!running) gl.getExtension('WEBGL_lose_context')?.loseContext();
-    };
-    };
-
-    const gate = new IntersectionObserver(([entry]) => {
-      if (!entry.isIntersecting) return;
-      gate.disconnect();
-      idle = runWhenIdle(() => { teardown = boot(); }, 500);
-    }, { rootMargin: '200px 0px' });
-    gate.observe(host);
-
-    return () => {
-      gate.disconnect();
-      cancelIdle(idle);
-      teardown?.();
     };
   }, [preset, still]);
 

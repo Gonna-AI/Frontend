@@ -6,6 +6,7 @@ import { NavigationMenu } from 'radix-ui';
 import ClerkTreeLockup from '../Brand/ClerkTreeLockup';
 import { shouldPlayFirstVisitIntro } from '../Brand/logoPortal';
 import { cancelIdle, runWhenIdle } from '../../utils/idle';
+import { pauseDecor } from '../../utils/perf';
 import Grainient from '../Brand/Grainient';
 import FooterAscii from './FooterAscii';
 import { COMPANY } from '../../config/company';
@@ -187,28 +188,20 @@ export function Header({ linkBase = '' }: HeaderProps = {}) {
   useEffect(() => {
     if (!isMenuOpen) return;
 
-    // Freeze the page behind the menu (works on iOS and with smooth scrolling):
-    // pin the body at the current offset and restore it exactly on close.
-    const { body, documentElement: html } = document;
-    const y = window.scrollY;
-    const prev = { position: body.style.position, top: body.style.top, width: body.style.width, overflow: html.style.overflow };
-    body.style.position = 'fixed';
-    body.style.top = `-${y}px`;
-    body.style.width = '100%';
-    html.style.overflow = 'hidden';
+    // Freeze the page behind the menu. A class on <html> (see LandingFramer.css) stops scrolling
+    // without moving or re-laying-out the page, so opening costs nothing on a long page and closing
+    // needs no scroll position to be restored. The page's own animations hold still meanwhile, so
+    // the menu animates alone.
+    const html = document.documentElement;
+    html.classList.add('ct-menu-open');
+    const releaseDecor = pauseDecor();
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') closeRef.current();
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => {
-      body.style.position = prev.position;
-      body.style.top = prev.top;
-      body.style.width = prev.width;
-      html.style.overflow = prev.overflow;
-      const behavior = html.style.scrollBehavior;
-      html.style.scrollBehavior = 'auto';
-      window.scrollTo(0, y);
-      html.style.scrollBehavior = behavior;
+      html.classList.remove('ct-menu-open');
+      releaseDecor();
       window.removeEventListener('keydown', handleKeyDown);
     };
   }, [isMenuOpen]);
@@ -226,7 +219,7 @@ export function Header({ linkBase = '' }: HeaderProps = {}) {
     sheet.style.height = `${headHeight.current}px`;
     setClosing(true);
     window.clearTimeout(closeTimer.current);
-    closeTimer.current = window.setTimeout(() => { setIsMenuOpen(false); setClosing(false); }, 620);
+    closeTimer.current = window.setTimeout(() => { setIsMenuOpen(false); setClosing(false); }, 440);
   };
   const closeRef = useRef(closeMenu);
   closeRef.current = closeMenu;

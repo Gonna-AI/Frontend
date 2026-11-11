@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { isScrolling, onTierChange, pixelRatioFor, reportFrame, shouldRestDuringScroll } from '../../utils/perf';
+import { decorPaused, onTierChange, pixelRatioFor, reportFrame } from '../../utils/perf';
 import './FooterAscii.css';
 
 // Render a small, silent video as text only while the footer is on screen.
@@ -131,7 +131,7 @@ export default function FooterAscii() {
       if (lastTick) reportFrame(time - lastTick);
       lastTick = time;
       // Weaker devices keep the text still while the page is moving, so scrolling stays smooth.
-      const resting = shouldRestDuringScroll() && isScrolling();
+      const resting = decorPaused();
       if (!resting && time - lastDraw >= 1000 / 15) { draw(); lastDraw = time; }
       frame = requestAnimationFrame(tick);
     };

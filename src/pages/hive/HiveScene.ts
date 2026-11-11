@@ -6,7 +6,7 @@
 // Scroll progress (0..1) scrubs the story: plant → question → agents → findings.
 // WebGL2 only, no dependencies.
 
-import { frameInterval, pixelRatioFor, reportFrame } from '../../utils/perf';
+import { decorHeld, frameInterval, pixelRatioFor, reportFrame } from '../../utils/perf';
 
 const RAMP = ' .:;-=+xX80S#@';
 const SHEET = ` !"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_\`abcdefghijklmnopqrstuvwxyz{|}~·→—äöüÄÖÜß`;
@@ -813,6 +813,7 @@ export class HiveScene {
     // frame rate its tier allows: a steady 30 fps looks smoother than an uneven 45.
     if (this.lastRaf) reportFrame(now - this.lastRaf);
     this.lastRaf = now;
+    if (decorHeld()) { this.last = 0; this.frame = requestAnimationFrame(this.tick); return; }
     const interval = frameInterval();
     if (interval && this.last && now - this.last < interval - 2) { this.frame = requestAnimationFrame(this.tick); return; }
     const dt = Math.min(0.05, (now - (this.last || now)) / 1000);

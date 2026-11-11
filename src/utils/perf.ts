@@ -78,6 +78,18 @@ export function shouldRestDuringScroll(): boolean {
   return tier !== 'high';
 }
 
+let pauseCount = 0;
+/** Something in front of the page (the menu) is animating: the page behind should stand still until it is done. */
+export function pauseDecor(): () => void {
+  pauseCount += 1;
+  let released = false;
+  return () => {
+    if (released) return;
+    released = true;
+    pauseCount -= 1;
+  };
+}
+
 let lastScroll = 0;
 if (typeof window !== 'undefined') {
   window.addEventListener('scroll', () => { lastScroll = performance.now(); }, { passive: true, capture: true });
@@ -86,6 +98,16 @@ if (typeof window !== 'undefined') {
 /** True while the page is being scrolled (and for a moment after). */
 export function isScrolling(): boolean {
   return performance.now() - lastScroll < 140;
+}
+
+/** True while something in front of the page has asked it to hold still (see pauseDecor). */
+export function decorHeld(): boolean {
+  return pauseCount > 0;
+}
+
+/** Whether decorative animation should hold still right now (menu open, or a weaker device mid-scroll). */
+export function decorPaused(): boolean {
+  return pauseCount > 0 || (shouldRestDuringScroll() && isScrolling());
 }
 
 // ---- Measurement ---------------------------------------------------------------------------

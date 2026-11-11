@@ -2173,9 +2173,11 @@ a:hover > .ct-roll > .ct-roll-inner { transform: translateY(-50%); }
   outline-offset: 3px;
 }
 .ct-mnav { inset: 0; position: fixed; z-index: 1000; }
+/* Scroll lock for the menu: no layout work, no scroll jump. The gutter stays reserved so the page does not shift. */
+html.ct-menu-open { overflow: hidden; scrollbar-gutter: stable; }
 .ct-mnav-scrim {
-  animation: ctMnavFade .3s ease both; backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
-  background: rgba(236, 236, 236, .55); border: 0; cursor: pointer; inset: 0; padding: 0; position: absolute; width: 100%;
+  animation: ctMnavFade .3s ease both;
+  background: rgba(236, 236, 236, .78); border: 0; touch-action: none; cursor: pointer; inset: 0; padding: 0; position: absolute; width: 100%;
 }
 .ct-mnav-sheet {
   --mnav-pl: 20px; --mnav-pr: 20px; --mnav-pt: 12px; --mnav-row: 40px;
@@ -2183,18 +2185,23 @@ a:hover > .ct-roll > .ct-roll-inner { transform: translateY(-50%); }
   box-shadow: 0 1px 0 rgba(255, 255, 255, .8) inset, 0 0 0 1px rgba(10, 10, 10, .06), 0 30px 80px rgba(10, 10, 10, .18);
   box-sizing: border-box; display: flex; flex-direction: column; font-family: var(--font-ui);
   left: var(--gutter, 8px); max-height: calc(100dvh - 2 * var(--gutter, 8px)); overflow: hidden; overscroll-behavior: contain;
-  transition: height .5s cubic-bezier(.65, 0, .25, 1), box-shadow .4s ease;
+  transition: height .42s cubic-bezier(.65, 0, .25, 1), box-shadow .3s ease;
+  contain: layout style;
   padding: var(--mnav-pt) var(--mnav-pr) var(--mnav-pl) var(--mnav-pl); position: absolute; right: var(--gutter, 8px); top: var(--gutter, 8px);
   transform-origin: top right;
 }
 @keyframes ctMnavIn { from { opacity: 0; transform: translateY(-6px) scale(.985); } }
 .ct-mnav-sheet.is-settled { overflow-y: auto; }
-.ct-mnav-scrim { transition: opacity .4s ease; }
+.ct-mnav-scrim { transition: opacity .3s ease; }
+/* The frosted look is a full-screen blur over the page; only devices that can afford it get it. */
+html[data-perf='high'] .ct-mnav-scrim {
+  background: rgba(236, 236, 236, .55); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+}
 .ct-mnav.is-closing .ct-mnav-scrim { opacity: 0; }
 .ct-mnav.is-closing :is(.ct-mnav-primary, .ct-mnav-cta) { opacity: 0; transform: translateY(-6px); transition: opacity .2s ease, transform .3s ease; }
 .ct-mnav.is-closing .ct-mnav-sheet {
   box-shadow: 0 0 0 1px rgba(10, 10, 10, 0), 0 30px 80px rgba(10, 10, 10, 0); opacity: 0;
-  transition: height .45s cubic-bezier(.65, 0, .25, 1), box-shadow .35s ease, opacity .18s ease .42s;
+  transition: height .36s cubic-bezier(.65, 0, .25, 1), box-shadow .3s ease, opacity .12s ease .32s;
 }
 .ct-mnav.is-closing :is(.ct-mnav-lang, .ct-mnav-close) { opacity: 0; transition: opacity .25s ease .2s; }
 .ct-shell-menu { transition: opacity .25s ease; }
