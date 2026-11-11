@@ -506,29 +506,31 @@ function FooterColumn({ title, links, social = false }: { title: string; links: 
   );
 }
 
-// Twelve stars on a ring, the lock in brand orange: our own take on the usual GDPR seal.
+// Twelve stars around a lock, in brushed silver: a quiet GDPR seal for the footer corner.
 const GDPR_STARS: [number, number][] = [[18.00, 5.50], [24.25, 7.17], [28.83, 11.75], [30.50, 18.00], [28.83, 24.25], [24.25, 28.83], [18.00, 30.50], [11.75, 28.83], [7.17, 24.25], [5.50, 18.00], [7.17, 11.75], [11.75, 7.17]];
 const STAR = 'M0,-1.9 L0.56,-0.6 L1.8,-0.59 L0.81,0.23 L1.12,1.54 L0,0.75 L-1.12,1.54 L-0.81,0.23 L-1.8,-0.59 L-0.56,-0.6 Z';
 
 function GdprBadge({ href, de }: { href: string; de: boolean }) {
   return (
     <a className="ct-footer-gdpr" href={href} aria-label={de ? 'DSGVO-konform: Datenschutzerklärung' : 'GDPR compliant: privacy policy'}>
-      <svg viewBox="0 0 36 36" width="36" height="36" aria-hidden="true" focusable="false">
-        <circle cx="18" cy="18" r="17.25" fill="none" stroke="currentColor" strokeOpacity=".18" strokeWidth="1.5" />
-        {GDPR_STARS.map(([x, y]) => <path d={STAR} fill="currentColor" key={`${x}-${y}`} transform={`translate(${x} ${y})`} />)}
-        <path d="M14.6 17.2v-1.7a3.4 3.4 0 0 1 6.8 0v1.7" fill="none" stroke="var(--ct-orange, #ff4d00)" strokeLinecap="round" strokeWidth="1.6" />
-        <rect x="13.2" y="17" width="9.6" height="7.2" rx="1.6" fill="var(--ct-orange, #ff4d00)" />
-        <circle cx="18" cy="20.2" r="1" fill="#0b0b0b" />
-        <path d="M18 20.8v1.5" stroke="#0b0b0b" strokeLinecap="round" strokeWidth="1" />
+      <svg viewBox="0 0 36 36" width="26" height="26" aria-hidden="true" focusable="false">
+        <defs>
+          <linearGradient id="ct-gdpr-silver" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stopColor="#f4f4f6" />
+            <stop offset=".55" stopColor="#b9bbc1" />
+            <stop offset="1" stopColor="#7d8087" />
+          </linearGradient>
+        </defs>
+        <circle cx="18" cy="18" r="17.25" fill="none" stroke="url(#ct-gdpr-silver)" strokeOpacity=".55" strokeWidth="1.2" />
+        {GDPR_STARS.map(([x, y]) => <path d={STAR} fill="url(#ct-gdpr-silver)" key={`${x}-${y}`} transform={`translate(${x} ${y})`} />)}
+        <path d="M14.6 17.2v-1.7a3.4 3.4 0 0 1 6.8 0v1.7" fill="none" stroke="url(#ct-gdpr-silver)" strokeLinecap="round" strokeWidth="1.6" />
+        <rect x="13.2" y="17" width="9.6" height="7.2" rx="1.6" fill="url(#ct-gdpr-silver)" />
+        <circle cx="18" cy="20.2" r="1" fill="#141416" />
       </svg>
-      <span className="ct-footer-gdpr-text">
-        <strong>{de ? 'DSGVO' : 'GDPR'}</strong>
-        <span>{de ? 'konform' : 'Compliant'}</span>
-      </span>
+      <span>{de ? 'DSGVO' : 'GDPR'}</span>
     </a>
   );
 }
-
 
 export function Footer({ linkBase = '' }: { linkBase?: string } = {}) {
   const { language } = useLanguage();
@@ -585,12 +587,9 @@ export function Footer({ linkBase = '' }: { linkBase?: string } = {}) {
           </div>
         </div>
 
-        <div className="ct-footer-trust">
-          <GdprBadge de={language === 'de'} href={href('/privacy-policy')} />
-        </div>
-
         <div className="ct-footer-bottom">
           <div className="ct-footer-copyright">
+            <GdprBadge de={language === 'de'} href={href('/privacy-policy')} />
             <p>© {new Date().getFullYear()} ClerkTree. {footer.rights}</p>
           </div>
           <div className="ct-footer-time" aria-label={`${footer.munich} ${munichTime}`}>

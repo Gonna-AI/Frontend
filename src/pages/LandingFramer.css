@@ -1407,39 +1407,16 @@ a:hover > .ct-roll > .ct-roll-inner { transform: translateY(-50%); }
   white-space: nowrap;
 }
 
-/* Trust row: the GDPR seal centred between two hairlines, so the footer stays symmetric. */
-.ct-footer-trust {
-  align-items: center;
-  display: flex;
-  gap: 24px;
-  margin-top: 96px;
-  position: relative;
-  z-index: 1;
-}
-
-.ct-footer-trust::before,
-.ct-footer-trust::after {
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.14));
-  content: "";
-  flex: 1;
-  height: 1px;
-}
-
-.ct-footer-trust::after {
-  background: linear-gradient(270deg, transparent, rgba(255, 255, 255, 0.14));
-}
-
+/* GDPR seal: small and silver, in the corner beside the copyright. */
 .ct-footer-gdpr {
   align-items: center;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.02));
-  border-radius: 999px;
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.08);
-  color: #e9e9eb;
+  color: rgba(255, 255, 255, 0.64);
   display: inline-flex;
-  gap: 12px;
-  padding: 7px 18px 7px 8px;
+  flex: none;
+  gap: 8px;
+  opacity: 0.85;
   text-decoration: none;
-  transition: box-shadow 180ms ease, background-color 180ms ease;
+  transition: opacity 180ms ease;
 }
 
 .ct-footer-gdpr svg {
@@ -1447,29 +1424,17 @@ a:hover > .ct-roll > .ct-roll-inner { transform: translateY(-50%); }
   flex: none;
 }
 
-.ct-footer-gdpr-text {
-  display: grid;
-  gap: 3px;
-  line-height: 1;
-}
-
-.ct-footer-gdpr-text strong {
-  color: #fff;
-  font: 600 14px/1 var(--font-ui, "Geist", "Inter", sans-serif);
-  letter-spacing: 0.06em;
-}
-
-.ct-footer-gdpr-text span {
-  color: rgba(255, 255, 255, 0.5);
-  font: 500 10px/1 var(--font-ui, "Geist", "Inter", sans-serif);
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
+.ct-footer-gdpr span {
+  background: linear-gradient(180deg, #f4f4f6, #a9abb1);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  font: 600 11px/1 var(--font-ui, "Geist", "Inter", sans-serif);
+  letter-spacing: 0.14em;
 }
 
 @media (hover: hover) {
-  .ct-footer-gdpr:hover {
-    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.26), inset 0 1px 0 rgba(255, 255, 255, 0.1);
-  }
+  .ct-footer-gdpr:hover { opacity: 1; }
 }
 
 .ct-footer-bottom {
@@ -1477,7 +1442,7 @@ a:hover > .ct-roll > .ct-roll-inner { transform: translateY(-50%); }
   display: grid;
   gap: 24px;
   grid-template-columns: 1fr auto 1fr;
-  margin-top: 40px;
+  margin-top: 112px;
 }
 
 .ct-footer-copyright,
@@ -1703,17 +1668,12 @@ a:hover > .ct-roll > .ct-roll-inner { transform: translateY(-50%); }
     width: 100%;
   }
 
-  .ct-footer-trust {
-    gap: 16px;
-    margin-top: 56px;
-  }
-
   .ct-footer-bottom {
     align-items: flex-start;
     flex-direction: column;
     gap: 24px;
     display: flex;
-    margin-top: 32px;
+    margin-top: 64px;
   }
 
   .ct-footer-time {
