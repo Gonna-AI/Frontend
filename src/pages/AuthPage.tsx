@@ -142,19 +142,20 @@ export default function AuthPage() {
         }
     };
 
-    if (loading) {
-        return (
-            <div className="flex min-h-screen w-full items-center justify-center bg-white">
-                <div className="flex items-center gap-3 rounded-2xl border border-gray-200 bg-white px-5 py-4 text-gray-600">
-                    <Loader2 className="h-5 w-5 animate-spin text-gray-500" />
-                    <span className="text-sm font-medium">{c.loading}</span>
-                </div>
+    // While the stored session is checked, the page is already laid out underneath and the loader is an
+    // overlay: swapping a centred loader for the page itself moved the whole layout (CLS 0.47).
+    const loader = loading ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-white" role="status">
+            <div className="flex items-center gap-3 rounded-2xl border border-gray-200 bg-white px-5 py-4 text-gray-600">
+                <Loader2 className="h-5 w-5 animate-spin text-gray-500" />
+                <span className="text-sm font-medium">{c.loading}</span>
             </div>
-        );
-    }
+        </div>
+    ) : null;
 
     return (
         <div className="grid min-h-screen w-full bg-white text-neutral-900 lg:grid-cols-2">
+            {loader}
             <div className="relative flex min-h-screen flex-col justify-center px-4 py-12 sm:px-6">
                 <div className="absolute top-5 right-4 sm:right-8">
                     <span className="text-sm text-gray-500">

@@ -28,3 +28,6 @@ npm-debug.log*
 .idea
 Thumbs.db
 __pycache__
+
+# Stray screenshots from local testing never belong in the repo root.
+/*.png

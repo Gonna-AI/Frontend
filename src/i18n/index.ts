@@ -12,7 +12,8 @@ export type Bundle = 'site' | 'dashboard';
 type Dictionary = Record<string, string>;
 
 const LANGUAGE_STORAGE_KEY = 'app-language';
-const DEFAULT_LANGUAGE: Language = 'de';
+// English is what the prerendered pages (and so search engines and the first paint) are written in.
+const DEFAULT_LANGUAGE: Language = 'en';
 
 const loaders: Record<Bundle, Record<Language, () => Promise<Dictionary>>> = {
   site: {
@@ -33,7 +34,13 @@ function isLanguage(value: unknown): value is Language {
   return value === 'en' || value === 'de';
 }
 
-/** Explicit ?lang= wins, then the visitor's saved choice, then the site default. */
+/** German browsers get German; every other browser gets English. */
+function languageFromBrowser(): Language {
+  const preferred = [...(navigator.languages ?? []), navigator.language].find((tag) => /^(de|en)(-|$)/i.test(tag ?? ''));
+  return preferred?.toLowerCase().startsWith('de') ? 'de' : DEFAULT_LANGUAGE;
+}
+
+/** Explicit ?lang= wins, then the visitor's saved choice, then the browser's language. */
 export function resolveInitialLanguage(): Language {
   if (typeof window === 'undefined') return DEFAULT_LANGUAGE;
 
@@ -44,9 +51,9 @@ export function resolveInitialLanguage(): Language {
     const saved = window.localStorage.getItem(LANGUAGE_STORAGE_KEY);
     if (isLanguage(saved)) return saved;
   } catch {
-    // Storage blocked: fall through to the default.
+    // Storage blocked: fall through to the browser's language.
   }
-  return DEFAULT_LANGUAGE;
+  return languageFromBrowser();
 }
 
 export function rememberLanguage(language: Language) {
