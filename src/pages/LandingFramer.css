@@ -2251,3 +2251,8 @@ a.ct-mnav-row:hover > span, .ct-mnav-cta:hover > span { transform: translateX(3p
 .ct-shell-logo.is-chrome .ct-logo-chrome { opacity: 1; transition: opacity .16s ease; }
 .ct-shell-logo.is-cooling .ct-logo-chrome { opacity: 0; transition: opacity .7s cubic-bezier(.4, 0, .2, 1); }
 @media (max-width: 430px) { .ct-shell-logo { --lk: 24px; } }
+
+/* Hive's own lockup in the header and the opened menu: cells and wordmark, sized like the ClerkTree one. */
+.ct-hive-lockup { display: block; height: 42px; overflow: visible; width: auto; }
+.ct-mnav-logo .ct-hive-lockup { height: 38px; }
+@media (max-width: 430px) { .ct-hive-lockup { height: 38px; } .ct-mnav-logo .ct-hive-lockup { height: 36px; } }

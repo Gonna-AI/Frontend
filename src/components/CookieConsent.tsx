@@ -186,13 +186,13 @@ export default function CookieConsent({ startInSettings = false, onClose }: Cook
   const secondaryButton = 'min-h-[48px] rounded-full border border-black/40 bg-white/70 px-6 text-sm font-semibold text-black transition-transform hover:-translate-y-0.5';
 
   return (
-    <div className="pointer-events-none fixed inset-0 z-[9999] isolate flex items-end justify-center sm:items-center" data-lenis-prevent="" lang={language}>
+    <div className="pointer-events-none fixed inset-0 z-[9999] isolate flex items-end justify-center p-2 pb-[max(8px,env(safe-area-inset-bottom))] sm:items-center" data-lenis-prevent="" lang={language}>
       {view === 'banner' ? (
         <section
           aria-label={t('cookies.bannerTitle')}
-          className={`pointer-events-auto absolute inset-x-0 bottom-0 transform transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${shown ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0'}`}
+          className={`pointer-events-auto absolute inset-x-2 bottom-[max(8px,env(safe-area-inset-bottom))] mx-auto max-w-[1440px] transform transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${shown ? 'translate-y-0 opacity-100' : 'translate-y-[130%] opacity-0'}`}
         >
-          <div className="rounded-t-[22px] bg-[#ff4d00] px-4 pt-5 pb-[max(16px,env(safe-area-inset-bottom))] text-black shadow-[0_-24px_70px_rgba(0,0,0,0.28)] roomy:px-10 roomy:py-8">
+          <div className="rounded-[clamp(36px,3.8vw,54px)] bg-[#ff4d00] p-6 text-black shadow-[0_20px_60px_rgba(0,0,0,0.3)] roomy:p-10">
             <div className="mx-auto grid max-w-[1440px] gap-4 roomy:gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(280px,420px)] lg:items-end">
               <div>
                 <h2 className="text-[21px] font-medium leading-none tracking-[-0.03em] roomy:text-[32px]">{t('cookies.bannerTitle')}</h2>
@@ -242,7 +242,7 @@ export default function CookieConsent({ startInSettings = false, onClose }: Cook
             aria-modal="true"
             aria-labelledby="cookie-settings-title"
             tabIndex={-1}
-            className={`pointer-events-auto relative mx-auto flex max-h-[92dvh] w-full max-w-4xl flex-col overflow-hidden rounded-t-[28px] bg-[#ff4d00] text-black shadow-2xl shadow-black/55 outline-none transition-all duration-300 sm:max-h-[86vh] sm:rounded-[32px] ${shown ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}
+            className={`pointer-events-auto relative mx-auto flex max-h-[calc(100dvh-16px)] w-full max-w-4xl flex-col overflow-hidden rounded-[clamp(36px,3.8vw,54px)] bg-[#ff4d00] text-black shadow-2xl shadow-black/55 outline-none transition-all duration-300 sm:max-h-[86vh] ${shown ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}
           >
             <div className="flex shrink-0 items-start justify-between gap-6 border-b border-black/16 px-5 py-5 sm:px-8 sm:py-6">
               <h2 id="cookie-settings-title" className="text-[30px] font-medium leading-none tracking-[-0.04em] sm:text-[42px]">
@@ -270,7 +270,7 @@ export default function CookieConsent({ startInSettings = false, onClose }: Cook
               ))}
             </div>
 
-            <div className="grid shrink-0 gap-3 border-t border-black/16 px-5 py-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] sm:grid-cols-3 sm:px-8">
+            <div className="grid shrink-0 gap-3 border-t border-black/16 px-5 py-5 sm:grid-cols-3 sm:px-8">
               <button type="button" onClick={() => decide(NOTHING)} className={primaryButton}>{t('cookies.rejectAll')}</button>
               <button type="button" onClick={() => decide(choice)} className={secondaryButton}>{t('cookies.savePreferences')}</button>
               <button type="button" onClick={() => decide(EVERYTHING)} className={primaryButton}>{t('cookies.acceptAll')}</button>

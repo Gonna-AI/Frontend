@@ -4,6 +4,7 @@ import { siX } from 'simple-icons';
 import { NavigationMenu } from 'radix-ui';
 
 import ClerkTreeLockup from '../Brand/ClerkTreeLockup';
+import HiveLogo from '../Brand/HiveLogo';
 import { shouldPlayFirstVisitIntro } from '../Brand/logoPortal';
 import { cancelIdle, runWhenIdle } from '../../utils/idle';
 import { pauseDecor } from '../../utils/perf';
@@ -152,6 +153,8 @@ function useMunichTime(active = true) {
 type HeaderProps = {
   /** Prefix for every link, e.g. "https://clerktree.com" when rendered on another host. */
   linkBase?: string;
+  /** Sub-brand shown in place of the ClerkTree lockup (header and opened menu). */
+  brand?: 'hive';
 };
 
 const loadLiquidMetalMark = () => import('../Brand/LiquidMetalMark');
@@ -187,7 +190,8 @@ function useLogoChrome() {
   return { phase, loaded, play };
 }
 
-export function Header({ linkBase = '' }: HeaderProps = {}) {
+export function Header({ linkBase = '', brand }: HeaderProps = {}) {
+  const hive = brand === 'hive';
   const { t, language, setLanguage } = useLanguage();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
@@ -284,7 +288,7 @@ export function Header({ linkBase = '' }: HeaderProps = {}) {
 
   // First page of a visit: the chrome moment plays once, after the page fades in.
   useEffect(() => {
-    if (!shouldPlayFirstVisitIntro()) return undefined;
+    if (hive || !shouldPlayFirstVisitIntro()) return undefined;
     const timer = window.setTimeout(() => {
       try { window.sessionStorage.setItem(LOGO_INTRO_KEY, '1'); } catch { /* storage blocked: harmless */ }
       playLogo();
@@ -295,17 +299,17 @@ export function Header({ linkBase = '' }: HeaderProps = {}) {
 
   return (
     <header className={`ct-shell-header${isMenuOpen && !closing ? ' is-menu-open' : ''}`}>
-      <a className={`ct-shell-logo is-${logoChrome.phase}`} href={linkBase ? crossSite(linkBase, language) : '/'} aria-label={t('home.brand.aria')} ref={logoRef}
-        onPointerEnter={(event) => { if (event.pointerType === 'mouse') playLogo(); }}
-        onFocus={(event) => { if (event.currentTarget.matches(':focus-visible')) playLogo(); }}>
-        <ClerkTreeLockup className="ct-shell-lockup" title={null} />
-        <span className="ct-logo-chrome" aria-hidden="true">
+      <a className={`ct-shell-logo is-${logoChrome.phase}${hive ? ' is-hive' : ''}`} href={linkBase ? crossSite(linkBase, language) : '/'} aria-label={hive ? 'Hive by ClerkTree' : t('home.brand.aria')} ref={logoRef}
+        onPointerEnter={hive ? undefined : (event) => { if (event.pointerType === 'mouse') playLogo(); }}
+        onFocus={hive ? undefined : (event) => { if (event.currentTarget.matches(':focus-visible')) playLogo(); }}>
+        {hive ? <HiveLogo lockup className="ct-hive-lockup" animate={false} title="Hive by ClerkTree" /> : <ClerkTreeLockup className="ct-shell-lockup" title={null} />}
+        {!hive && <span className="ct-logo-chrome" aria-hidden="true">
           {logoChrome.loaded && (
             <Suspense fallback={null}>
               <LiquidMetalMark className="ct-logo-chrome-canvas" scale={1} colorBack="#00000000" repetition={2.6} dispersion={0} speed={logoChrome.phase === 'idle' ? 0 : 2.4} contour={0.7} softness={0} pixelRatio={20} />
             </Suspense>
           )}
-        </span>
+        </span>}
         {/* Maps the metal's tones onto the brand orange: deep orange shadows, orange body, light-gold glints. */}
         <svg className="ct-logo-filter" width="0" height="0" aria-hidden="true" focusable="false">
           <filter id="ct-logo-orange" colorInterpolationFilters="sRGB">
@@ -388,8 +392,8 @@ export function Header({ linkBase = '' }: HeaderProps = {}) {
           <button aria-label={t('home.menu.closeMobile')} className="ct-mnav-scrim" onClick={closeMenu} type="button" />
           <nav className="ct-mnav-sheet" aria-label={t('home.menu.navAria')} ref={sheetRef} style={sheetGeo}>
             <div className="ct-mnav-top">
-              <a className="ct-mnav-logo" href={linkBase ? crossSite(linkBase, language) : '/'} aria-label={t('home.brand.aria')} onClick={closeMenu}>
-                <ClerkTreeLockup className="ct-shell-lockup" title={null} />
+              <a className="ct-mnav-logo" href={linkBase ? crossSite(linkBase, language) : '/'} aria-label={hive ? 'Hive by ClerkTree' : t('home.brand.aria')} onClick={closeMenu}>
+                {hive ? <HiveLogo lockup light className="ct-hive-lockup" animate={false} title="Hive by ClerkTree" /> : <ClerkTreeLockup className="ct-shell-lockup" title={null} />}
               </a>
               <button
                 aria-label={language === 'en' ? 'Auf Deutsch wechseln' : 'Switch to English'}

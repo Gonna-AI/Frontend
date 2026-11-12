@@ -285,7 +285,7 @@ function HiveStory() {
 
   return (
     <div className="hv-scroll" ref={wrapRef}>
-      <div className="hv-head"><Header /></div>
+      <div className="hv-head"><Header brand="hive" /></div>
       <div className="hv-sticky">
         <div className="hv-stage"><canvas className="hv-canvas" ref={canvasRef} aria-hidden="true" /></div>
         <div className="hv-hero" ref={heroRef}>
