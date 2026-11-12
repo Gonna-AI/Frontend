@@ -44,6 +44,8 @@
 
 # Signed-in and sign-in pages are not for search engines. Said here, per response,
 # rather than listed in robots.txt where anyone can read the route names.
+/dashboard
+  X-Robots-Tag: noindex, nofollow
 /dashboard/*
   X-Robots-Tag: noindex, nofollow
 /login

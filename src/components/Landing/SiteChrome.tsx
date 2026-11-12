@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
+import { lazy, Suspense, useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type MouseEvent, type ReactNode } from 'react';
 import { Activity, ArrowUpRight, Briefcase, ChevronDown, ChevronRight, Factory, FlaskConical, Mail, Scale, Shapes, Users, Wrench } from 'lucide-react';
 import { siX } from 'simple-icons';
 import { NavigationMenu } from 'radix-ui';
@@ -214,14 +214,27 @@ export function Header({ linkBase = '', brand }: HeaderProps = {}) {
     const html = document.documentElement;
     html.classList.add('ct-menu-open');
     const releaseDecor = pauseDecor();
+    // Focus moves into the menu (its close button) and stays there: the page behind is dimmed and frozen,
+    // so Tab cycles through the sheet instead of walking into it.
+    sheetRef.current?.querySelector<HTMLElement>('.ct-mnav-close')?.focus({ preventScroll: true });
+    const opener = menuButtonRef.current;
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') closeRef.current();
+      if (event.key === 'Escape') { closeRef.current(); return; }
+      if (event.key !== 'Tab' || !sheetRef.current) return;
+      const stops = [...sheetRef.current.querySelectorAll<HTMLElement>('a[href], button:not([disabled])')].filter((el) => el.offsetParent !== null);
+      if (!stops.length) return;
+      const at = stops.indexOf(document.activeElement as HTMLElement);
+      const next = at === -1 ? 0 : (at + (event.shiftKey ? -1 : 1) + stops.length) % stops.length;
+      event.preventDefault();
+      stops[next].focus();
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => {
       html.classList.remove('ct-menu-open');
       releaseDecor();
       window.removeEventListener('keydown', handleKeyDown);
+      // The menu is gone: put focus back where the visitor opened it (unless a link already took them elsewhere).
+      if (!document.activeElement || document.activeElement === document.body) opener?.focus({ preventScroll: true });
     };
   }, [isMenuOpen]);
 
@@ -299,6 +312,7 @@ export function Header({ linkBase = '', brand }: HeaderProps = {}) {
 
   return (
     <header className={`ct-shell-header${isMenuOpen && !closing ? ' is-menu-open' : ''}`}>
+      <a className="ct-skip" href="#main-content" onClick={skipToContent}>{language === 'de' ? 'Zum Inhalt springen' : 'Skip to content'}</a>
       <a className={`ct-shell-logo is-${logoChrome.phase}${hive ? ' is-hive' : ''}`} href={linkBase ? crossSite(linkBase, language) : '/'} aria-label={hive ? 'Hive by ClerkTree' : t('home.brand.aria')} ref={logoRef}
         onPointerEnter={hive ? undefined : (event) => { if (event.pointerType === 'mouse') playLogo(); }}
         onFocus={hive ? undefined : (event) => { if (event.currentTarget.matches(':focus-visible')) playLogo(); }}>
@@ -536,6 +550,34 @@ function GdprBadge({ href, de }: { href: string; de: boolean }) {
   );
 }
 
+/** Moves focus to the page's main content, past the header (WCAG 2.4.1). */
+function skipToContent(event: MouseEvent<HTMLAnchorElement>) {
+  event.preventDefault();
+  const main = document.querySelector<HTMLElement>('main');
+  if (!main) return;
+  main.setAttribute('tabindex', '-1');
+  main.focus();
+  main.scrollIntoView({ block: 'start' });
+}
+
+/** The clock owns its own state, so its once-a-second tick re-renders only this, not the whole footer. */
+function FooterClock({ active, label }: { active: boolean; label: string }) {
+  const time = useMunichTime(active);
+  return (
+    <div className="ct-footer-time">
+      <span>{label} →</span>
+      <time>{time}</time>
+    </div>
+  );
+}
+
+/** Not every page has a #ct-works element, so the link scrolls to the top itself (the home page's smooth scroller handles its own). */
+function backToTop(event: MouseEvent<HTMLAnchorElement>) {
+  if (event.defaultPrevented) return;
+  event.preventDefault();
+  window.scrollTo({ top: 0, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+}
+
 export function Footer({ linkBase = '' }: { linkBase?: string } = {}) {
   const { language } = useLanguage();
   const footer = buildFooter(language === 'de');
@@ -545,7 +587,6 @@ export function Footer({ linkBase = '' }: { linkBase?: string } = {}) {
   const withBase = (links: FooterLink[]): FooterLink[] => links.map((link) => (link.external ? link : { ...link, href: href(link.href) }));
   const footerRef = useRef<HTMLElement>(null);
   const [isFooterNearViewport, setIsFooterNearViewport] = useState(false);
-  const munichTime = useMunichTime(isFooterNearViewport);
 
   useEffect(() => {
     const footer = footerRef.current;
@@ -596,10 +637,7 @@ export function Footer({ linkBase = '' }: { linkBase?: string } = {}) {
             <GdprBadge de={language === 'de'} href={href('/privacy-policy')} />
             <p>© {new Date().getFullYear()} ClerkTree. {footer.rights}</p>
           </div>
-          <div className="ct-footer-time" aria-label={`${footer.munich} ${munichTime}`}>
-            <span>{footer.munich} →</span>
-            <time>{munichTime}</time>
-          </div>
+          <FooterClock active={isFooterNearViewport} label={footer.munich} />
           <div className="ct-footer-bottom-right">
             {footer.legal.map((link) => (
               <a href={href(link.href)} key={link.href}>
@@ -609,7 +647,7 @@ export function Footer({ linkBase = '' }: { linkBase?: string } = {}) {
             <button className="ct-footer-link-button" onClick={openConsentSettings} type="button">
               {footer.cookieSettings}
             </button>
-            <a className="ct-footer-back" href="#ct-works">
+            <a className="ct-footer-back" href="#ct-works" onClick={backToTop}>
               {footer.backToTop}
             </a>
           </div>

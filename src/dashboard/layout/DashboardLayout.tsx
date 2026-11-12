@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 import { usePreferencesStore } from "@/dashboard/store/preferences-store";
 
 import { LanguageSwitcher } from "./language-switcher";
+import { PasswordResetDialog } from "./password-reset-dialog";
 import { SearchDialog } from "./search-dialog";
 import { ThemeSwitcher } from "./theme-switcher";
 
@@ -77,6 +78,7 @@ export default function DashboardLayout() {
             </div>
           </SidebarInset>
         </SidebarProvider>
+        <PasswordResetDialog />
         <Toaster />
       </TooltipProvider>
     </div>

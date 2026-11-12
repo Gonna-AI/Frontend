@@ -1,11 +1,39 @@
 import { useState, FormEvent } from 'react';
 import { Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { useLanguage } from '../contexts/LanguageContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { LiquidMetal } from '@paper-design/shaders-react';
 import { ArrowRight, CheckCircle2, AlertCircle, Loader2, ArrowLeft } from 'lucide-react';
 
 type AuthView = 'signin' | 'signup' | 'forgot_password';
+
+const COPY = {
+    en: {
+        loading: 'Loading…', haveAccount: 'Already have an account?', noAccount: "Don't have an account?", signIn: 'Sign in', register: 'Register',
+        createTitle: 'Create an account', resetTitle: 'Reset password', loginTitle: 'Login to your account',
+        createSub: 'Enter your details to get started.', resetSub: 'Enter your email to receive instructions.', loginSub: 'Please enter your details to login.',
+        google: 'Continue with Google', or: 'Or continue with', name: 'Full Name', namePh: 'John Doe', email: 'Email Address', password: 'Password',
+        forgot: 'Forgot your password?', passPhNew: 'Create a password', passPhNow: 'Enter your password', signUpBtn: 'Sign up', resetBtn: 'Send Reset Link', loginBtn: 'Login',
+        back: 'Back to Sign In', checkEmail: 'Check your email', terms: 'Terms', privacy: 'Privacy',
+        confirmSent: (e: string) => `We've sent a confirmation link to ${e}`, resetSent: (e: string) => `Password reset link sent to ${e}`,
+        notConfirmed: 'Please confirm your email before signing in. Check your inbox (and spam folder) for the confirmation link.',
+        invalid: 'Invalid email or password.', network: 'Network error connecting to authentication server. Please try clearing your browser cache and cookies, then try again.',
+        unexpected: 'An unexpected error occurred.',
+    },
+    de: {
+        loading: 'Wird geladen …', haveAccount: 'Sie haben bereits ein Konto?', noAccount: 'Noch kein Konto?', signIn: 'Anmelden', register: 'Registrieren',
+        createTitle: 'Konto erstellen', resetTitle: 'Passwort zurücksetzen', loginTitle: 'Bei Ihrem Konto anmelden',
+        createSub: 'Geben Sie Ihre Daten ein, um zu beginnen.', resetSub: 'Geben Sie Ihre E-Mail-Adresse ein, um eine Anleitung zu erhalten.', loginSub: 'Bitte geben Sie Ihre Zugangsdaten ein.',
+        google: 'Weiter mit Google', or: 'Oder weiter mit', name: 'Vollständiger Name', namePh: 'Max Mustermann', email: 'E-Mail-Adresse', password: 'Passwort',
+        forgot: 'Passwort vergessen?', passPhNew: 'Passwort erstellen', passPhNow: 'Passwort eingeben', signUpBtn: 'Registrieren', resetBtn: 'Link zum Zurücksetzen senden', loginBtn: 'Anmelden',
+        back: 'Zurück zur Anmeldung', checkEmail: 'Prüfen Sie Ihr Postfach', terms: 'Nutzungsbedingungen', privacy: 'Datenschutz',
+        confirmSent: (e: string) => `Wir haben einen Bestätigungslink an ${e} gesendet`, resetSent: (e: string) => `Link zum Zurücksetzen des Passworts an ${e} gesendet`,
+        notConfirmed: 'Bitte bestätigen Sie Ihre E-Mail-Adresse, bevor Sie sich anmelden. Den Bestätigungslink finden Sie in Ihrem Postfach (auch im Spam-Ordner).',
+        invalid: 'E-Mail-Adresse oder Passwort ist falsch.', network: 'Netzwerkfehler bei der Verbindung zum Anmeldeserver. Bitte leeren Sie Cache und Cookies Ihres Browsers und versuchen Sie es erneut.',
+        unexpected: 'Es ist ein unerwarteter Fehler aufgetreten.',
+    },
+} as const;
 
 // Outer padding + rounded panel matches the main site's floating-card treatment
 // (.ct-top-area / .ct-footer both sit a few pixels off the viewport edge with large
@@ -38,6 +66,8 @@ const BrandPanel = () => (
 export default function AuthPage() {
     const { session, loading, signIn, signUp, signInWithGoogle, resetPassword } = useAuth();
     const navigate = useNavigate();
+    const { language } = useLanguage();
+    const c = COPY[language === 'de' ? 'de' : 'en'];
 
     const [searchParams] = useSearchParams();
     const initialView = searchParams.get('view') as AuthView || 'signin';
@@ -49,7 +79,6 @@ export default function AuthPage() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [fullName, setFullName] = useState('');
-    const [rememberMe, setRememberMe] = useState(true);
     const [error, setError] = useState('');
     const [info, setInfo] = useState(initialMessage);
     const [successMessage, setSuccessMessage] = useState('');
@@ -73,17 +102,17 @@ export default function AuthPage() {
                 if (error) {
                     setError(error.message);
                 } else {
-                    setSuccessMessage(`We've sent a confirmation link to ${email}`);
+                    setSuccessMessage(c.confirmSent(email));
                 }
             } else if (view === 'signin') {
                 const { error } = await signIn(email, password);
                 if (error) {
                     if (error.message.includes('Email not confirmed')) {
-                        setError('Please confirm your email before signing in. Check your inbox (and spam folder) for the confirmation link.');
+                        setError(c.notConfirmed);
                     } else if (error.message.includes('Invalid login credentials')) {
-                        setError('Invalid email or password.');
+                        setError(c.invalid);
                     } else if (error.message.toLowerCase().includes('load failed') || error.message.toLowerCase().includes('failed to fetch') || error.message.toLowerCase().includes('networkerror')) {
-                        setError('Network error connecting to authentication server. Please try clearing your browser cache and cookies, then try again.');
+                        setError(c.network);
                     } else {
                         setError(error.message);
                     }
@@ -95,11 +124,11 @@ export default function AuthPage() {
                 if (error) {
                     setError(error.message);
                 } else {
-                    setSuccessMessage(`Password reset link sent to ${email}`);
+                    setSuccessMessage(c.resetSent(email));
                 }
             }
         } catch {
-            setError('An unexpected error occurred.');
+            setError(c.unexpected);
         } finally {
             setSubmitting(false);
         }
@@ -118,7 +147,7 @@ export default function AuthPage() {
             <div className="flex min-h-screen w-full items-center justify-center bg-white">
                 <div className="flex items-center gap-3 rounded-2xl border border-gray-200 bg-white px-5 py-4 text-gray-600">
                     <Loader2 className="h-5 w-5 animate-spin text-gray-500" />
-                    <span className="text-sm font-medium">Loading…</span>
+                    <span className="text-sm font-medium">{c.loading}</span>
                 </div>
             </div>
         );
@@ -129,16 +158,16 @@ export default function AuthPage() {
             <div className="relative flex min-h-screen flex-col justify-center px-4 py-12 sm:px-6">
                 <div className="absolute top-5 right-4 sm:right-8">
                     <span className="text-sm text-gray-500">
-                        {view === 'signup' ? 'Already have an account?' : "Don't have an account?"}{' '}
+                        {view === 'signup' ? c.haveAccount : c.noAccount}{' '}
                         <button
                             type="button"
                             onClick={() => {
                                 setView(view === 'signup' ? 'signin' : 'signup');
                                 setError('');
                             }}
-                            className="font-medium text-gray-900 hover:underline"
+                            className="inline-flex min-h-6 items-center font-medium text-gray-900 hover:underline"
                         >
-                            {view === 'signup' ? 'Sign in' : 'Register'}
+                            {view === 'signup' ? c.signIn : c.register}
                         </button>
                     </span>
                 </div>
@@ -153,7 +182,7 @@ export default function AuthPage() {
                             <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-500">
                                 <CheckCircle2 className="h-8 w-8" />
                             </div>
-                            <h2 className="mb-2 text-2xl font-medium">Check your email</h2>
+                            <h2 className="mb-2 text-2xl font-medium">{c.checkEmail}</h2>
                             <p className="mb-6 text-sm text-gray-500">{successMessage}</p>
                             <button
                                 onClick={() => {
@@ -163,7 +192,7 @@ export default function AuthPage() {
                                 }}
                                 className="w-full rounded-xl bg-black py-2.5 text-sm font-semibold text-white transition-colors hover:bg-gray-800"
                             >
-                                Back to Sign In
+                                {c.back}
                             </button>
                         </motion.div>
                     ) : (
@@ -171,10 +200,10 @@ export default function AuthPage() {
                             <div className="space-y-2 text-center">
                                 <img src="/brand-mark-tile.svg" alt="ClerkTree" className="mx-auto mb-2 h-8 w-8" />
                                 <h1 className="text-3xl font-medium">
-                                    {view === 'signup' ? 'Create an account' : view === 'forgot_password' ? 'Reset password' : 'Login to your account'}
+                                    {view === 'signup' ? c.createTitle : view === 'forgot_password' ? c.resetTitle : c.loginTitle}
                                 </h1>
                                 <p className="text-sm text-gray-500">
-                                    {view === 'signup' ? 'Enter your details to get started.' : view === 'forgot_password' ? 'Enter your email to receive instructions.' : 'Please enter your details to login.'}
+                                    {view === 'signup' ? c.createSub : view === 'forgot_password' ? c.resetSub : c.loginSub}
                                 </p>
                             </div>
 
@@ -190,12 +219,12 @@ export default function AuthPage() {
                                             <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
                                             <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
                                         </svg>
-                                        <span className="text-sm font-medium">Continue with Google</span>
+                                        <span className="text-sm font-medium">{c.google}</span>
                                     </button>
 
                                     <div className="relative text-center text-sm">
                                         <div className="absolute inset-0 top-1/2 flex items-center border-t border-gray-200" />
-                                        <span className="relative bg-white px-2 text-gray-400">Or continue with</span>
+                                        <span className="relative bg-white px-2 text-gray-400">{c.or}</span>
                                     </div>
                                 </div>
                             )}
@@ -203,20 +232,24 @@ export default function AuthPage() {
                             <form onSubmit={handleSubmit} className="space-y-5">
                                 {view === 'signup' && (
                                     <div className="space-y-1.5">
-                                        <label className="text-sm font-medium text-gray-700">Full Name</label>
+                                        <label htmlFor="auth-name" className="text-sm font-medium text-gray-700">{c.name}</label>
                                         <input
+                                            id="auth-name"
+                                            autoComplete="name"
                                             type="text"
                                             value={fullName}
                                             onChange={(e) => setFullName(e.target.value)}
-                                            placeholder="John Doe"
+                                            placeholder={c.namePh}
                                             className="ct-field w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 placeholder-gray-400 outline-none transition-all duration-200 focus:border-orange-300 focus:ring-2 focus:ring-orange-100"
                                         />
                                     </div>
                                 )}
 
                                 <div className="space-y-1.5">
-                                    <label className="text-sm font-medium text-gray-700">Email Address</label>
+                                    <label htmlFor="auth-email" className="text-sm font-medium text-gray-700">{c.email}</label>
                                     <input
+                                        id="auth-email"
+                                        autoComplete="email"
                                         type="email"
                                         value={email}
                                         onChange={(e) => setEmail(e.target.value)}
@@ -229,7 +262,7 @@ export default function AuthPage() {
                                 {view !== 'forgot_password' && (
                                     <div className="space-y-1.5">
                                         <div className="flex items-center justify-between">
-                                            <label className="text-sm font-medium text-gray-700">Password</label>
+                                            <label htmlFor="auth-password" className="text-sm font-medium text-gray-700">{c.password}</label>
                                             {view === 'signin' && (
                                                 <button
                                                     type="button"
@@ -237,34 +270,24 @@ export default function AuthPage() {
                                                         setView('forgot_password');
                                                         setError('');
                                                     }}
-                                                    className="text-xs font-medium text-gray-500 hover:text-gray-900 hover:underline"
+                                                    className="inline-flex min-h-6 items-center text-xs font-medium text-gray-500 hover:text-gray-900 hover:underline"
                                                 >
-                                                    Forgot your password?
+                                                    {c.forgot}
                                                 </button>
                                             )}
                                         </div>
                                         <input
+                                            id="auth-password"
+                                            autoComplete={view === 'signup' ? 'new-password' : 'current-password'}
                                             type="password"
                                             value={password}
                                             onChange={(e) => setPassword(e.target.value)}
-                                            placeholder={view === 'signup' ? "Create a password" : "Enter your password"}
+                                            placeholder={view === 'signup' ? c.passPhNew : c.passPhNow}
                                             required
                                             minLength={6}
                                             className="ct-field w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 placeholder-gray-400 outline-none transition-all duration-200 focus:border-orange-300 focus:ring-2 focus:ring-orange-100"
                                         />
                                     </div>
-                                )}
-
-                                {view === 'signin' && (
-                                    <label className="flex items-center gap-2 text-sm text-gray-700">
-                                        <input
-                                            type="checkbox"
-                                            checked={rememberMe}
-                                            onChange={(e) => setRememberMe(e.target.checked)}
-                                            className="size-4 rounded border-gray-300"
-                                        />
-                                        Remember me for 30 days
-                                    </label>
                                 )}
 
                                 <AnimatePresence>
@@ -302,7 +325,7 @@ export default function AuthPage() {
                                     ) : (
                                         <>
                                             <span>
-                                                {view === 'signup' ? 'Sign up' : view === 'forgot_password' ? 'Send Reset Link' : 'Login'}
+                                                {view === 'signup' ? c.signUpBtn : view === 'forgot_password' ? c.resetBtn : c.loginBtn}
                                             </span>
                                             <ArrowRight className="w-4 h-4" />
                                         </>
@@ -319,7 +342,7 @@ export default function AuthPage() {
                                         className="flex w-full items-center justify-center gap-2 text-sm text-gray-500 transition-colors hover:text-gray-900"
                                     >
                                         <ArrowLeft className="w-4 h-4" />
-                                        Back to Sign In
+                                        {c.back}
                                     </button>
                                 )}
                             </form>
@@ -327,11 +350,11 @@ export default function AuthPage() {
                     )}
                 </div>
 
-                <div className="absolute bottom-5 flex w-full justify-between px-4 sm:px-8">
-                    <span className="text-sm text-gray-400">© 2026, ClerkTree.</span>
-                    <div className="flex items-center gap-6 text-sm">
-                        <a href="/terms-of-service" className="text-gray-400 hover:text-gray-600 hover:underline">Terms</a>
-                        <a href="/privacy-policy" className="text-gray-400 hover:text-gray-600 hover:underline">Privacy</a>
+                <div className="absolute bottom-5 left-0 flex w-full flex-wrap items-center justify-between gap-x-6 gap-y-1 px-4 sm:px-8">
+                    <span className="text-sm text-gray-400">© {new Date().getFullYear()}, ClerkTree.</span>
+                    <div className="flex items-center gap-x-5 text-sm">
+                        <a href="/terms-of-service" className="inline-flex min-h-6 items-center text-gray-400 hover:text-gray-600 hover:underline">{c.terms}</a>
+                        <a href="/privacy-policy" className="inline-flex min-h-6 items-center text-gray-400 hover:text-gray-600 hover:underline">{c.privacy}</a>
                     </div>
                 </div>
             </div>

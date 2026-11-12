@@ -12,7 +12,7 @@ export function ThemeSwitcher() {
   const { t } = useLanguage();
 
   const cycleTheme = () => {
-    const currentIndex = THEME_CYCLE.indexOf(themeMode);
+    const currentIndex = (THEME_CYCLE as readonly string[]).indexOf(themeMode);
     const nextTheme = THEME_CYCLE[(currentIndex + 1) % THEME_CYCLE.length];
 
     setPreference("theme_mode", nextTheme);

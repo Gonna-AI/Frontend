@@ -800,7 +800,9 @@ export class HiveScene {
   }
 
   private draw() {
-    if (!this.ok) return;
+    // Nothing to draw until the first resize has built the textures; drawing earlier raises GL errors
+    // ("framebuffer is incomplete") from setCopy / setProgress, which can arrive before the first size.
+    if (!this.ok || !this.built) return;
     const gl = this.gl, progress = this.progress, { w, h, cw, ch, dpr } = this.grid;
     const p = Math.min(1, progress / .58);
     const core = Math.min(1, p / .62);

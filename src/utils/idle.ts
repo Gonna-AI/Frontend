@@ -1,25 +1,13 @@
 type IdleCallbackHandle = number;
-
-type IdleDeadlineLike = {
-  didTimeout: boolean;
-  timeRemaining: () => number;
-};
-
-type IdleCallback = (deadline: IdleDeadlineLike) => void;
-
-declare global {
-  interface Window {
-    requestIdleCallback?: (callback: IdleCallback, options?: { timeout?: number }) => IdleCallbackHandle;
-    cancelIdleCallback?: (handle: IdleCallbackHandle) => void;
-  }
-}
+type IdleCallback = IdleRequestCallback;
 
 export function runWhenIdle(callback: IdleCallback, timeout = 3000) {
   if (typeof window === 'undefined') {
     return 0;
   }
 
-  if (typeof window.requestIdleCallback === 'function') {
+  // Safari has no requestIdleCallback: the typings say it always exists, the browser says otherwise.
+  if (typeof (window as Partial<Window>).requestIdleCallback === 'function') {
     return window.requestIdleCallback(callback, { timeout });
   }
 
@@ -37,7 +25,7 @@ export function cancelIdle(handle: IdleCallbackHandle) {
     return;
   }
 
-  if (typeof window.cancelIdleCallback === 'function') {
+  if (typeof (window as Partial<Window>).cancelIdleCallback === 'function') {
     window.cancelIdleCallback(handle);
     return;
   }

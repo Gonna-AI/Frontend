@@ -10,3 +10,8 @@ interface ImportMetaEnv {
 interface ImportMeta {
   readonly env: ImportMetaEnv;
 }
+
+/** Scroll-linked animations (Chrome, Edge, Safari 26): not in TypeScript's DOM typings yet. */
+declare class ScrollTimeline extends AnimationTimeline {
+  constructor(options?: { source?: Element | null; axis?: 'block' | 'inline' | 'x' | 'y' });
+}

@@ -10,23 +10,31 @@ if (!supabaseUrl || !supabaseAnonKey) {
 // Hybrid storage: PKCE code verifiers go in sessionStorage (tab-scoped, avoids
 // cross-tab verifier mismatch), everything else (session tokens) stays in
 // localStorage so the user stays logged in across tabs.
+// Browsers can refuse storage altogether (some private modes, blocked site data): every access is
+// guarded, and the session then lives in memory for the page's lifetime instead of crashing sign-in.
+const memory = new Map<string, string>();
+const area = (key: string) => (key.includes('code-verifier') ? 'sessionStorage' : 'localStorage');
 const hybridStorage = {
     getItem: (key: string): string | null => {
-        if (key.includes('code-verifier')) {
-            return sessionStorage.getItem(key);
+        try {
+            return window[area(key)].getItem(key) ?? memory.get(key) ?? null;
+        } catch {
+            return memory.get(key) ?? null;
         }
-        return localStorage.getItem(key);
     },
     setItem: (key: string, value: string): void => {
-        if (key.includes('code-verifier')) {
-            sessionStorage.setItem(key, value);
-        } else {
-            localStorage.setItem(key, value);
+        try {
+            window[area(key)].setItem(key, value);
+            memory.delete(key);
+        } catch {
+            memory.set(key, value);
         }
     },
     removeItem: (key: string): void => {
-        sessionStorage.removeItem(key);
-        localStorage.removeItem(key);
+        memory.delete(key);
+        for (const name of ['sessionStorage', 'localStorage'] as const) {
+            try { window[name].removeItem(key); } catch { /* storage unavailable: nothing to remove */ }
+        }
     },
 };
 

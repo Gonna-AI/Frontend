@@ -5,10 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build && node scripts/prerender-routes.mjs && node scripts/csp.mjs && node scripts/performance-budget.mjs",
+    "build": "npm run typecheck && vite build && node scripts/prerender-routes.mjs && node scripts/csp.mjs && node scripts/performance-budget.mjs",
     "preview": "vite preview",
     "lint": "eslint .",
-    "typecheck": "tsc",
+    "typecheck": "tsc --noEmit -p tsconfig.app.json && tsc --noEmit -p tsconfig.node.json",
     "perf:budget": "node scripts/performance-budget.mjs",
     "r2:upload": "node scripts/r2-upload.mjs",
     "indexnow": "node scripts/indexnow.mjs"

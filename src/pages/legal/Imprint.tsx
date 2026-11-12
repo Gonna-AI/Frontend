@@ -10,7 +10,7 @@ export default function Imprint() {
   return (
     <LegalLayout
       title={de ? 'Impressum' : 'Imprint'}
-      description={de ? 'Anbieterkennzeichnung nach § 5 DDG.' : 'Provider identification under § 5 DDG (German Digital Services Act).'}
+      description={de ? 'Impressum von ClerkTree: Anbieterkennzeichnung nach § 5 DDG mit Anschrift, Vertretungsberechtigten und Kontakt.' : 'ClerkTree imprint: provider identification under § 5 DDG (German Digital Services Act) with address, representatives and contact.'}
       dated={false}
     >
       <h2>{de ? 'Anbieter' : 'Provider'}</h2>

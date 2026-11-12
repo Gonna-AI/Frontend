@@ -163,7 +163,14 @@ export default function CookieConsent({ startInSettings = false, onClose }: Cook
     if (view !== 'settings') return undefined;
     dialogRef.current?.focus();
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') leaveSettings();
+      if (event.key === 'Escape') { leaveSettings(); return; }
+      // The dialog is modal: Tab cycles through its own controls instead of reaching the page behind it.
+      if (event.key !== 'Tab' || !dialogRef.current) return;
+      const stops = [...dialogRef.current.querySelectorAll<HTMLElement>('a[href], button:not([disabled]), input:not([disabled]), [tabindex]:not([tabindex="-1"])')].filter((el) => el.offsetParent !== null);
+      if (!stops.length) return;
+      const at = stops.indexOf(document.activeElement as HTMLElement);
+      event.preventDefault();
+      stops[at === -1 ? 0 : (at + (event.shiftKey ? -1 : 1) + stops.length) % stops.length].focus();
     };
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);

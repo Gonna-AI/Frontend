@@ -117,7 +117,7 @@
   margin: 0 auto; max-width: 1232px; padding: clamp(28px, 5vw, 56px) clamp(16px, 3vw, 24px) 0;
 }
 .ct-works .jr-toc { align-self: start; display: grid; gap: 10px; position: sticky; top: 24px; }
-.ct-works .jr-back { align-items: center; color: var(--jr-muted); display: inline-flex; font: 500 13px/1 var(--font-ui) !important; gap: 6px; margin-bottom: 18px; text-decoration: none; }
+.ct-works .jr-back { align-items: center; color: var(--jr-muted); display: inline-flex; min-height: 24px; font: 500 13px/1 var(--font-ui) !important; gap: 6px; margin-bottom: 18px; text-decoration: none; }
 .ct-works .jr-back:hover { color: var(--jr-ink); }
 .ct-works .jr-toc-label { color: var(--jr-muted); display: block; font: 500 11px/1 var(--font-ui); letter-spacing: .08em; text-transform: uppercase; }
 .ct-works .jr-toc ol { border-left: 1px solid var(--jr-line); display: grid; gap: 2px; list-style: none; margin: 4px 0 0; padding: 0; }

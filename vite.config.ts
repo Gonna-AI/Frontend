@@ -17,7 +17,10 @@ export default defineConfig({
     // ships a self-destroying worker so browsers that installed the old one
     // unregister it and drop its caches. Remove the plugin a few months after
     // this release, once returning visitors have picked it up.
-    VitePWA({ selfDestroying: true, manifest: false }),
+    // A kill switch for visitors who still have an old service worker installed: their worker re-checks
+    // /sw.js by itself, finds this one, and removes itself and its caches. Pages do not need to register
+    // it (injectRegister: false), which saves a pointless worker install on every visit.
+    VitePWA({ selfDestroying: true, manifest: false, injectRegister: false }),
   ],
   resolve: {
     dedupe: ['react', 'react-dom', 'framer-motion'],
