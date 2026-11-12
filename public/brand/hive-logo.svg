@@ -11,7 +11,7 @@
       <stop offset="0" stop-color="#fffaf0"/><stop offset=".18" stop-color="#ffd58a"/><stop offset=".5" stop-color="#ff8a1f" stop-opacity=".55"/><stop offset="1" stop-color="#ff7a10" stop-opacity="0"/>
     </radialGradient>
     <radialGradient id="hvDotGlow"><stop offset="0" stop-color="#ff9a2e" stop-opacity=".85"/><stop offset="1" stop-color="#ff9a2e" stop-opacity="0"/></radialGradient>
-    <linearGradient id="hvOrbitA" gradientUnits="userSpaceOnUse" x1="280" y1="0" x2="1400" y2="0">
+    <linearGradient id="hvOrbitA" gradientUnits="userSpaceOnUse" x1="668" y1="0" x2="1400" y2="0">
       <stop offset="0" stop-color="#d9d4cb" stop-opacity=".55"/><stop offset=".55" stop-color="#d9d4cb" stop-opacity=".3"/><stop offset="1" stop-color="#ff9a2e" stop-opacity=".95"/>
     </linearGradient>
     <linearGradient id="hvOrbitB" gradientUnits="userSpaceOnUse" x1="320" y1="590" x2="740" y2="270">
@@ -28,7 +28,7 @@
   <circle cx="532.0" cy="447.0" r="120" fill="#ff7a10" opacity=".16" filter="url(#hvHalo)"/>
   <!-- orbits -->
   <g fill="none" stroke-width="1.6">
-    <ellipse cx="832" cy="448" rx="562" ry="130" transform="rotate(-2 832 448)" stroke="url(#hvOrbitA)"/>
+    <ellipse cx="1034" cy="448" rx="366" ry="130" transform="rotate(-2 1034 448)" stroke="url(#hvOrbitA)"/>
     <ellipse cx="528" cy="428" rx="262" ry="98" transform="rotate(-49 528 428)" stroke="url(#hvOrbitB)"/>
     <ellipse cx="500" cy="480" rx="236" ry="100" transform="rotate(11 500 480)" stroke="url(#hvOrbitC)"/>
   </g>
@@ -43,12 +43,14 @@
   <circle cx="532.0" cy="447.0" r="46" fill="url(#hvCore)"/>
   <g stroke="#fff3d9" stroke-linecap="round"><line x1="506.0" y1="447.0" x2="558.0" y2="447.0" stroke-width="1.2" opacity=".7"/><line x1="532.0" y1="421.0" x2="532.0" y2="473.0" stroke-width="1.2" opacity=".7"/></g>
   <!-- orbiting points -->
-  <g class="hv-dot" data-orbit="a" data-angle="-3"><circle cx="1392.7" cy="421.6" r="19.5" fill="url(#hvDotGlow)"/><circle cx="1392.7" cy="421.6" r="7.5" fill="#ffb454"/><circle cx="1392.7" cy="421.6" r="3.4" fill="#fff1d6"/></g><g class="hv-dot" data-orbit="a" data-angle="84"><circle cx="895.2" cy="575.2" r="13.0" fill="url(#hvDotGlow)"/><circle cx="895.2" cy="575.2" r="5" fill="#ffb454"/><circle cx="895.2" cy="575.2" r="2.2" fill="#fff1d6"/></g><g class="hv-dot" data-orbit="b" data-angle="-14"><circle cx="676.9" cy="220.6" r="18.2" fill="url(#hvDotGlow)"/><circle cx="676.9" cy="220.6" r="7" fill="#ffb454"/><circle cx="676.9" cy="220.6" r="3.1" fill="#fff1d6"/></g><g class="hv-dot" data-orbit="c" data-angle="151"><circle cx="288.1" cy="488.2" r="16.9" fill="url(#hvDotGlow)"/><circle cx="288.1" cy="488.2" r="6.5" fill="#ffb454"/><circle cx="288.1" cy="488.2" r="2.9" fill="#fff1d6"/></g>
+  <g class="hv-dot" data-orbit="a" data-angle="-3"><circle cx="1399.0" cy="428.4" r="19.5" fill="url(#hvDotGlow)"/><circle cx="1399.0" cy="428.4" r="7.5" fill="#ffb454"/><circle cx="1399.0" cy="428.4" r="3.4" fill="#fff1d6"/></g><g class="hv-dot" data-orbit="a" data-angle="84"><circle cx="1076.7" cy="575.9" r="13.0" fill="url(#hvDotGlow)"/><circle cx="1076.7" cy="575.9" r="5" fill="#ffb454"/><circle cx="1076.7" cy="575.9" r="2.2" fill="#fff1d6"/></g><g class="hv-dot" data-orbit="b" data-angle="-14"><circle cx="676.9" cy="220.6" r="18.2" fill="url(#hvDotGlow)"/><circle cx="676.9" cy="220.6" r="7" fill="#ffb454"/><circle cx="676.9" cy="220.6" r="3.1" fill="#fff1d6"/></g><g class="hv-dot" data-orbit="c" data-angle="151"><circle cx="288.1" cy="488.2" r="16.9" fill="url(#hvDotGlow)"/><circle cx="288.1" cy="488.2" r="6.5" fill="#ffb454"/><circle cx="288.1" cy="488.2" r="2.9" fill="#fff1d6"/></g>
+  <g transform="translate(3.5 0)">
   <g fill="none" stroke="url(#hvWord)" stroke-width="7.6" stroke-linecap="round" stroke-linejoin="round">
     <path d="M800 396 V500 M800 454 Q800 431 823 431 H866 Q889 431 889 454 V500"/>
-    <path d="M962 431 V500"/>
-    <path d="M1031 431 L1073 500 L1115 431"/>
-    <path d="M1193 467 H1279 V454 Q1279 431 1256 431 H1216 Q1193 431 1193 454 V477 Q1193 500 1216 500 H1279"/>
+    <path d="M961 431 V500"/>
+    <path d="M1023 431 L1065 500 L1107 431"/>
+    <path d="M1175 467 H1261 V454 Q1261 431 1238 431 H1198 Q1175 431 1175 454 V477 Q1175 500 1198 500 H1261"/>
   </g>
-  <rect x="955.5" y="395" width="13" height="13" rx="3.4" fill="#ff9a2e"/>
+  <rect x="954.5" y="395" width="13" height="13" rx="3.4" fill="#ff9a2e"/>
+  </g>
 </svg>
