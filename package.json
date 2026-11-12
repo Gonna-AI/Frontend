@@ -11,7 +11,8 @@
     "typecheck": "tsc --noEmit -p tsconfig.app.json && tsc --noEmit -p tsconfig.node.json",
     "perf:budget": "node scripts/performance-budget.mjs",
     "r2:upload": "node scripts/r2-upload.mjs",
-    "indexnow": "node scripts/indexnow.mjs"
+    "indexnow": "node scripts/indexnow.mjs",
+    "audio": "node scripts/audio/generate.mjs"
   },
   "dependencies": {
     "@amplitude/analytics-browser": "^2.49.2",

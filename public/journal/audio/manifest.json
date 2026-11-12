@@ -1,0 +1,103 @@
+{
+  "devops-for-agents-on-the-shop-floor": {
+    "file": "devops-for-agents-on-the-shop-floor.mp3",
+    "hash": "3cdab77b3fd850e1944b780f",
+    "duration": 767.3,
+    "bytes": 4604483,
+    "chapters": [
+      {
+        "title": "What we actually ship",
+        "id": "what-we-actually-ship",
+        "start": 68.12
+      },
+      {
+        "title": "The agent bundle",
+        "id": "the-agent-bundle",
+        "start": 183.51
+      },
+      {
+        "title": "Evaluations are the test suite",
+        "id": "evaluations-are-the-test-suite",
+        "start": 224.38
+      },
+      {
+        "title": "The release path",
+        "id": "the-release-path",
+        "start": 305.99
+      },
+      {
+        "title": "Tool access is the blast radius",
+        "id": "tool-access-is-the-blast-radius",
+        "start": 440.16
+      },
+      {
+        "title": "Observability for reasoning",
+        "id": "observability-for-reasoning",
+        "start": 494.59
+      },
+      {
+        "title": "Running where the data lives",
+        "id": "running-where-the-data-lives",
+        "start": 600.98
+      },
+      {
+        "title": "Where ClerkTree and industrial teams meet",
+        "id": "where-clerktree-and-industrial-teams-meet",
+        "start": 659.09
+      },
+      {
+        "title": "What I would tell my earlier self",
+        "id": "what-i-would-tell-my-earlier-self",
+        "start": 695.46
+      }
+    ]
+  },
+  "the-hard-part-isnt-the-ai": {
+    "file": "the-hard-part-isnt-the-ai.mp3",
+    "hash": "6c072fc1719eddf048e03083",
+    "duration": 734.9,
+    "bytes": 4410364,
+    "chapters": [
+      {
+        "title": "How this started",
+        "id": "how-this-started",
+        "start": 27.13
+      },
+      {
+        "title": "What a maintenance team actually wants",
+        "id": "what-a-maintenance-team-actually-wants",
+        "start": 120.22
+      },
+      {
+        "title": "Why every answer shows its sources",
+        "id": "why-every-answer-shows-its-sources",
+        "start": 219.61
+      },
+      {
+        "title": "Building trust is slower than building software",
+        "id": "building-trust-is-slower-than-building-software",
+        "start": 314.44
+      },
+      {
+        "title": "Germany, data and the works council",
+        "id": "germany-data-and-the-works-council",
+        "start": 420.31
+      },
+      {
+        "title": "What \"agents\" means on a shop floor",
+        "id": "what-agents-means-on-a-shop-floor",
+        "start": 506.39
+      },
+      {
+        "title": "What we got wrong",
+        "id": "what-we-got-wrong",
+        "start": 587.77
+      },
+      {
+        "title": "What comes next",
+        "id": "what-comes-next",
+        "start": 669.65
+      }
+    ]
+  }
+}

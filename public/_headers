@@ -78,5 +78,11 @@
 /*.mp4
   Cache-Control: public, max-age=2592000, stale-while-revalidate=86400
 
+/journal/audio/*.mp3
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
+
+/journal/audio/manifest.json
+  Cache-Control: public, max-age=300, must-revalidate
+
 /sw.js
   Cache-Control: public, max-age=0, must-revalidate

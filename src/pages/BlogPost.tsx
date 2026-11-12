@@ -9,11 +9,10 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { Header, Footer } from '../components/Landing/SiteChrome';
 import Grainient from '../components/Brand/Grainient';
 import SEO from '../components/SEO';
+import ListenPlayer from '../components/Blog/ListenPlayer';
+import { slugify } from '../utils/articleSpeech';
 import './LandingFramer.css';
 import './Journal.css';
-
-const slugify = (text: string) =>
-  text.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, '-').replace(/^-+|-+$/g, '').slice(0, 64);
 
 function textOf(node: ReactNode): string {
   return Children.toArray(node).map((child) => {
@@ -65,6 +64,7 @@ export default function BlogPost() {
   if (!post) return <Navigate to="/blog" replace />;
 
   const authors = getPostAuthors(post);
+  const authorNames = authors.map((a) => a.name);
   const related = getAllBlogPosts().filter((p) => p.slug !== post.slug).slice(0, 3);
 
   return (
@@ -114,6 +114,8 @@ export default function BlogPost() {
 
         <article className="jr-article" lang="en">
           {post.tags && <div className="jr-tags">{post.tags.map((tag) => <a href={`/blog?tag=${encodeURIComponent(tag)}`} key={tag}>{tag}</a>)}</div>}
+
+          {content && <ListenPlayer authors={authorNames} de={de} key={post.slug} markdown={content} slug={post.slug} title={post.title} />}
 
           <div className="jr-prose">
             <ReactMarkdown

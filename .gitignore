@@ -31,3 +31,8 @@ __pycache__
 
 # Stray screenshots from local testing never belong in the repo root.
 /*.png
+
+# Audio tooling: the Python environment, the downloaded voice model and scratch files.
+scripts/audio/.venv/
+scripts/audio/.models/
+scripts/audio/.work/
