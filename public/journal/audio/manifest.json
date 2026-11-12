@@ -99,5 +99,144 @@
         "start": 669.65
       }
     ]
+  },
+  "rolling-out-ai-with-a-maintenance-team": {
+    "file": "rolling-out-ai-with-a-maintenance-team.mp3",
+    "hash": "165d87939ad9059319f3afd9",
+    "duration": 878.2,
+    "bytes": 5270180,
+    "chapters": [
+      {
+        "title": "Before day one: choose the first assets carefully",
+        "id": "before-day-one-choose-the-first-assets-carefully",
+        "start": 67.05
+      },
+      {
+        "title": "Days 1, 15: baseline and access",
+        "id": "days-1-15-baseline-and-access",
+        "start": 138.56
+      },
+      {
+        "title": "Days 16, 45: shadow mode",
+        "id": "days-16-45-shadow-mode",
+        "start": 347.8
+      },
+      {
+        "title": "Days 46, 75: assisted work",
+        "id": "days-46-75-assisted-work",
+        "start": 498.27
+      },
+      {
+        "title": "Days 76, 90: measure and decide",
+        "id": "days-76-90-measure-and-decide",
+        "start": 614.32
+      },
+      {
+        "title": "The people part",
+        "id": "the-people-part",
+        "start": 732.83
+      },
+      {
+        "title": "Common pitfalls",
+        "id": "common-pitfalls",
+        "start": 791.66
+      },
+      {
+        "title": "A one-page checklist",
+        "id": "a-one-page-checklist",
+        "start": 837.32
+      },
+      {
+        "title": "Closing",
+        "id": "closing",
+        "start": 842.77
+      }
+    ]
+  },
+  "from-vibration-alarm-to-root-cause": {
+    "file": "from-vibration-alarm-to-root-cause.mp3",
+    "hash": "65ca80a6b0e8c794a9bbde1c",
+    "duration": 1158.6,
+    "bytes": 6952425,
+    "chapters": [
+      {
+        "title": "The four facts behind every root cause",
+        "id": "the-four-facts-behind-every-root-cause",
+        "start": 79
+      },
+      {
+        "title": "Step 1: Turning a signal into evidence",
+        "id": "step-1-turning-a-signal-into-evidence",
+        "start": 156.18
+      },
+      {
+        "title": "Step 2: Making manuals retrievable",
+        "id": "step-2-making-manuals-retrievable",
+        "start": 439.58
+      },
+      {
+        "title": "Step 3: Work order history as memory",
+        "id": "step-3-work-order-history-as-memory",
+        "start": 642.63
+      },
+      {
+        "title": "Step 4: Reasoning with citations, and knowing when to stop",
+        "id": "step-4-reasoning-with-citations-and-knowing-when-to-stop",
+        "start": 772.49
+      },
+      {
+        "title": "Step 5: Evaluating it honestly",
+        "id": "step-5-evaluating-it-honestly",
+        "start": 945.6
+      },
+      {
+        "title": "What still goes wrong",
+        "id": "what-still-goes-wrong",
+        "start": 1039.84
+      },
+      {
+        "title": "Closing",
+        "id": "closing",
+        "start": 1122.69
+      }
+    ]
+  },
+  "juris-comprehensive-case-study": {
+    "file": "juris-comprehensive-case-study.mp3",
+    "hash": "931903d144a2eb0033457c01",
+    "duration": 1512.8,
+    "bytes": 9077365,
+    "chapters": [
+      {
+        "title": "1. Juris versus State-of-the-Art Systems",
+        "id": "1-juris-versus-state-of-the-art-systems",
+        "start": 30.48
+      },
+      {
+        "title": "2. Novelty Assessment Framework",
+        "id": "2-novelty-assessment-framework",
+        "start": 758.68
+      },
+      {
+        "title": "3. Competitive Positioning Analysis",
+        "id": "3-competitive-positioning-analysis",
+        "start": 893.03
+      },
+      {
+        "title": "4. Limitations and Future Directions",
+        "id": "4-limitations-and-future-directions",
+        "start": 1066.91
+      },
+      {
+        "title": "5. Conclusions",
+        "id": "5-conclusions",
+        "start": 1312.97
+      },
+      {
+        "title": "6. References",
+        "id": "6-references",
+        "start": 1455.45
+      }
+    ]
   }
 }
