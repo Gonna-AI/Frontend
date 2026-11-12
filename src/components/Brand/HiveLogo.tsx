@@ -13,20 +13,20 @@ const DOTS: Dot[] = [
   {
     orbit: 'a',
     r: 7.5,
-    path: 'M1393.7 428.4 A562 130 -2 1 1 270.3 467.6 A562 130 -2 1 1 1393.7 428.4Z',
+    path: 'M1399.8 435.2 A366 130 -2 1 1 668.2 460.8 A366 130 -2 1 1 1399.8 435.2Z',
     dur: 70,
-    at: 0.9971,
-    x: 1392.7,
-    y: 421.6
+    at: 0.9958,
+    x: 1399.0,
+    y: 428.4
   },
   {
     orbit: 'a',
     r: 5,
-    path: 'M1393.7 428.4 A562 130 -2 1 1 270.3 467.6 A562 130 -2 1 1 1393.7 428.4Z',
+    path: 'M1399.8 435.2 A366 130 -2 1 1 668.2 460.8 A366 130 -2 1 1 1399.8 435.2Z',
     dur: 70,
-    at: 0.2253,
-    x: 895.2,
-    y: 575.2
+    at: 0.2267,
+    x: 1076.7,
+    y: 575.9
   },
   {
     orbit: 'b',
@@ -70,7 +70,7 @@ export default function HiveLogo({ className, mark = false, title = 'Hive by Cle
       <stop offset="0" stopColor="#fffaf0"/><stop offset=".18" stopColor="#ffd58a"/><stop offset=".5" stopColor="#ff8a1f" stopOpacity=".55"/><stop offset="1" stopColor="#ff7a10" stopOpacity="0"/>
     </radialGradient>
     <radialGradient id={`${p}DotGlow`}><stop offset="0" stopColor="#ff9a2e" stopOpacity=".85"/><stop offset="1" stopColor="#ff9a2e" stopOpacity="0"/></radialGradient>
-    <linearGradient id={`${p}OrbitA`} gradientUnits="userSpaceOnUse" x1="280" y1="0" x2="1400" y2="0">
+    <linearGradient id={`${p}OrbitA`} gradientUnits="userSpaceOnUse" x1="668" y1="0" x2="1400" y2="0">
       <stop offset="0" stopColor="#d9d4cb" stopOpacity=".55"/><stop offset=".55" stopColor="#d9d4cb" stopOpacity=".3"/><stop offset="1" stopColor="#ff9a2e" stopOpacity=".95"/>
     </linearGradient>
     <linearGradient id={`${p}OrbitB`} gradientUnits="userSpaceOnUse" x1="320" y1="590" x2="740" y2="270">
@@ -87,7 +87,7 @@ export default function HiveLogo({ className, mark = false, title = 'Hive by Cle
   <circle cx="532.0" cy="447.0" r="120" fill="#ff7a10" opacity=".16" filter={`url(#${p}Halo)`}/>
   {/* orbits */}
   <g fill="none" strokeWidth="1.6">
-    {!mark && (<ellipse cx="832" cy="448" rx="562" ry="130" transform="rotate(-2 832 448)" stroke={`url(#${p}OrbitA)`}/>)}
+    {!mark && (<ellipse cx="1034" cy="448" rx="366" ry="130" transform="rotate(-2 1034 448)" stroke={`url(#${p}OrbitA)`}/>)}
     <ellipse cx="528" cy="428" rx="262" ry="98" transform="rotate(-49 528 428)" stroke={`url(#${p}OrbitB)`}/>
     <ellipse cx="500" cy="480" rx="236" ry="100" transform="rotate(11 500 480)" stroke={`url(#${p}OrbitC)`}/>
   </g>
@@ -104,13 +104,15 @@ export default function HiveLogo({ className, mark = false, title = 'Hive by Cle
   
   
 {!mark && (<>
+  <g transform="translate(3.5 0)">
   <g fill="none" stroke={`url(#${p}Word)`} strokeWidth="7.6" strokeLinecap="round" strokeLinejoin="round">
     <path d="M800 396 V500 M800 454 Q800 431 823 431 H866 Q889 431 889 454 V500"/>
-    <path d="M962 431 V500"/>
-    <path d="M1031 431 L1073 500 L1115 431"/>
-    <path d="M1193 467 H1279 V454 Q1279 431 1256 431 H1216 Q1193 431 1193 454 V477 Q1193 500 1216 500 H1279"/>
+    <path d="M961 431 V500"/>
+    <path d="M1023 431 L1065 500 L1107 431"/>
+    <path d="M1175 467 H1261 V454 Q1261 431 1238 431 H1198 Q1175 431 1175 454 V477 Q1175 500 1198 500 H1261"/>
   </g>
-  <rect x="955.5" y="395" width="13" height="13" rx="3.4" fill="#ff9a2e"/>
+  <rect x="954.5" y="395" width="13" height="13" rx="3.4" fill="#ff9a2e"/>
+  </g>
 </>)}
       {DOTS.filter((d) => !(mark && d.orbit === 'a')).map((d) => (
         <g key={`${d.orbit}${d.at}`} transform={moving ? undefined : `translate(${d.x} ${d.y})`}>
