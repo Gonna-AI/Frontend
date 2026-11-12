@@ -3,7 +3,6 @@ import { useEffect, useRef } from 'react';
 import { ArrowRight } from 'lucide-react';
 import { Header, Footer } from '../../components/Landing/SiteChrome';
 import SEO from '../../components/SEO';
-import HiveLogo from '../../components/Brand/HiveLogo';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { HiveScene, type HiveCopy } from './HiveScene';
 import { onTierChange } from '../../utils/perf';
@@ -289,7 +288,6 @@ function HiveStory() {
       <div className="hv-sticky">
         <div className="hv-stage"><canvas className="hv-canvas" ref={canvasRef} aria-hidden="true" /></div>
         <div className="hv-hero" ref={heroRef}>
-          <HiveLogo className="hv-hero-logo" />
           <h1>{c.heroTitle}</h1>
           <p>{c.heroBody}</p>
           <div className="hv-hero-actions">
