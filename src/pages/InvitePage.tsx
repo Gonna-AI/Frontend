@@ -3,11 +3,13 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Loader2 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { useLanguage } from '../contexts/LanguageContext';
 
 export default function InvitePage() {
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const { session, loading } = useAuth();
+    const de = useLanguage().language === 'de';
     const [showManual, setShowManual] = useState(false);
 
     // Check for invite token or specific logic
@@ -26,11 +28,11 @@ export default function InvitePage() {
 
         // Simulating invite token handling
         if (token && type === 'invite') {
-            navigate('/login?view=signup&message=You have been invited to join the team!', { replace: true });
+            navigate(`/login?view=signup&message=${encodeURIComponent(de ? 'Sie wurden eingeladen, dem Team beizutreten!' : 'You have been invited to join the team!')}`, { replace: true });
         } else {
             navigate('/login', { replace: true });
         }
-    }, [session, loading, navigate, token, type]);
+    }, [session, loading, navigate, token, type, de]);
 
     useEffect(() => {
         // Show manual redirect option after 3 seconds
@@ -47,7 +49,7 @@ export default function InvitePage() {
             >
                 <div className="flex flex-col items-center gap-4">
                     <Loader2 className="w-8 h-8 animate-spin text-primary" />
-                    <p className="text-gray-500 dark:text-gray-400">Processing invitation...</p>
+                    <p className="text-gray-500 dark:text-gray-400">{de ? 'Einladung wird verarbeitet …' : 'Processing invitation...'}</p>
                 </div>
 
                 {showManual && (
@@ -59,7 +61,7 @@ export default function InvitePage() {
                             onClick={() => navigate('/login', { replace: true })}
                             className="text-sm text-primary hover:underline"
                         >
-                            Taking too long? Click here to continue
+                            {de ? 'Dauert es zu lange? Hier klicken, um fortzufahren' : 'Taking too long? Click here to continue'}
                         </button>
                     </motion.div>
                 )}

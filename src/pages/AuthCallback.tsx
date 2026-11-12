@@ -1,10 +1,14 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../config/supabase';
+import { useLanguage } from '../contexts/LanguageContext';
 
 export default function AuthCallback() {
     const navigate = useNavigate();
     const [error, setError] = useState<string | null>(null);
+    const de = useLanguage().language === 'de';
+    // Read inside the one-time callback below without re-running it when the language changes.
+    const deRef = useRef(de);
 
     useEffect(() => {
         const handleCallback = async () => {
@@ -18,7 +22,7 @@ export default function AuthCallback() {
                 // Handle explicit error from Supabase redirect
                 if (errorParam) {
                     console.error('Auth callback error:', errorParam, errorDescription);
-                    navigate(`/login?message=${encodeURIComponent(errorDescription || 'Authentication failed')}`, { replace: true });
+                    navigate(`/login?message=${encodeURIComponent(errorDescription || (deRef.current ? 'Anmeldung fehlgeschlagen' : 'Authentication failed'))}`, { replace: true });
                     return;
                 }
 
@@ -83,11 +87,11 @@ export default function AuthCallback() {
                     navigate('/dashboard', { replace: true });
                 } else {
                     // No session found, redirect to login with a message
-                    navigate('/login?view=signin&message=Please sign in to continue', { replace: true });
+                    navigate(`/login?view=signin&message=${encodeURIComponent(deRef.current ? 'Bitte melden Sie sich an, um fortzufahren' : 'Please sign in to continue')}`, { replace: true });
                 }
             } catch (err) {
                 console.error('Auth callback unexpected error:', err);
-                setError('An unexpected error occurred. Please try signing in again.');
+                setError(deRef.current ? 'Es ist ein unerwarteter Fehler aufgetreten. Bitte melden Sie sich erneut an.' : 'An unexpected error occurred. Please try signing in again.');
                 // Auto-redirect after 3 seconds
                 setTimeout(() => navigate('/login', { replace: true }), 3000);
             }
@@ -106,7 +110,7 @@ export default function AuthCallback() {
                         </svg>
                     </div>
                     <p className="text-red-400 text-sm">{error}</p>
-                    <p className="text-white/40 text-xs">Redirecting to sign in...</p>
+                    <p className="text-white/40 text-xs">{de ? 'Weiterleitung zur Anmeldung …' : 'Redirecting to sign in...'}</p>
                 </div>
             </div>
         );
@@ -116,7 +120,7 @@ export default function AuthCallback() {
         <div className="min-h-screen flex items-center justify-center bg-[#0A0A0A]">
             <div className="flex flex-col items-center gap-4">
                 <div className="w-10 h-10 border-2 border-white/20 border-t-white rounded-full animate-spin" />
-                <p className="text-white/60 text-sm">Completing sign in...</p>
+                <p className="text-white/60 text-sm">{de ? 'Anmeldung wird abgeschlossen …' : 'Completing sign in...'}</p>
             </div>
         </div>
     );

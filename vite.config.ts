@@ -1,6 +1,5 @@
 import path from 'node:path';
 
-import netlifyPlugin from '@netlify/vite-plugin';
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
@@ -11,7 +10,6 @@ export default defineConfig({
   plugins: [
     react(),
     tailwindcss(),
-    netlifyPlugin(),
     // The site no longer runs a service worker: hashed assets are cached by the
     // CDN and the browser, and a worker only added stale-content risk. This
     // ships a self-destroying worker so browsers that installed the old one

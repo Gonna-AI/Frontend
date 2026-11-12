@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useLanguage } from '../contexts/LanguageContext';
 
 export default function AuthGoogleCallback() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const [error, setError] = useState<string | null>(null);
+  const de = useLanguage().language === 'de';
 
   useEffect(() => {
     // The google-oauth-callback edge function handles the token exchange
@@ -43,8 +45,8 @@ export default function AuthGoogleCallback() {
                 d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </div>
-          <p className="text-red-400 text-sm">Google connection failed: {error}</p>
-          <p className="text-white/40 text-xs">Redirecting back to settings…</p>
+          <p className="text-red-400 text-sm">{de ? 'Google-Verbindung fehlgeschlagen:' : 'Google connection failed:'} {error}</p>
+          <p className="text-white/40 text-xs">{de ? 'Weiterleitung zu den Einstellungen …' : 'Redirecting back to settings…'}</p>
         </div>
       </div>
     );
