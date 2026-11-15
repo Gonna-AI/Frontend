@@ -278,8 +278,10 @@
 .ct-works.ct-works .cx-stage { border-radius: calc(var(--r-edge) - 8px); }
 .ct-works.ct-works .cxm-visual { border-radius: calc(var(--r-edge) - 6px); }
 
-/* Hero: shell -> stage (shell minus its padding and border) -> device (small-tile curve). */
-.ct-works.ct-works.ct-home-page .ct-hero-stage--home,
+/* Hero, on every page: shell -> stage (shell minus its padding and border) -> device (small-tile curve).
+   The stage holds the WebGL background, which is clipped by this curve. */
+.ct-works.ct-works .ct-hero-stage,
+.ct-works.ct-works .ct-hero-stage--home,
 .ct-works.ct-works.ct-home-page .ct-hero-stage--home.has-demo {
   border-radius: calc(var(--r-edge) - var(--shell-pad) - 1px);
 }
