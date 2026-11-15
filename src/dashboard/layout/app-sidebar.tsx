@@ -34,7 +34,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton asChild>
-              <Link to="/dashboard/default" className="flex items-center gap-2">
+              <Link to="/dashboard/hive" className="flex items-center gap-2">
                 {/* The brand tile is drawn in solid white (built for dark surfaces) — brightness-0
                     forces it fully black on light sidebars, while dark mode keeps it white.
                     The -mt-px nudge corrects the mark sitting slightly low within its own

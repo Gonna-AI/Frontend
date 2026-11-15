@@ -90,8 +90,10 @@ const routePrefetchers = {
   '/blog/:slug': () => import('./pages/BlogPost'),
   '/login': () => import('./pages/AuthPage'),
   '/client/login': () => import('./pages/client-portal/ClientPortalLoginPage'),
-  '/dashboard': () => import('./dashboard/layout/DashboardLayout'),
+  // /dashboard sends people to the Hive dashboard; the older workspace dashboards stay at /dashboard/<name>.
+  '/dashboard': () => import('./dashboard/hive/HiveDashboardRoute'),
   '/dashboard/hive': () => import('./dashboard/hive/HiveDashboardRoute'),
+  '/dashboard/default': () => import('./dashboard/layout/DashboardLayout'),
   '/terms-of-service': () => import('./pages/legal/TermsOfService'),
   '/privacy-policy': () => import('./pages/legal/PrivacyPolicy'),
   '/cookie-policy': () => import('./pages/legal/CookiePolicy'),
@@ -297,26 +299,27 @@ function App() {
               <Route path="/dashboard/hive/*" element={<HiveDashboard />} />
 
               {/* Workspace */}
-              <Route path="/dashboard" element={<Workspace><DashboardLayout /></Workspace>}>
-                <Route index element={<Navigate to="/dashboard/default" replace />} />
-                <Route path="default" element={<DashboardDefault />} />
-                <Route path="crm" element={<DashboardCrm />} />
-                <Route path="finance" element={<DashboardFinance />} />
-                <Route path="analytics" element={<DashboardAnalytics />} />
-                <Route path="productivity" element={<DashboardProductivity />} />
-                <Route path="ecommerce" element={<DashboardEcommerce />} />
-                <Route path="academy" element={<DashboardAcademy />} />
-                <Route path="logistics" element={<DashboardLogistics />} />
-                <Route path="infrastructure" element={<DashboardInfrastructure />} />
-                <Route path="mail" element={<DashboardMailPreview />} />
-                <Route path="chat" element={<DashboardChatPreview />} />
-                <Route path="calendar" element={<DashboardCalendar />} />
-                <Route path="kanban" element={<DashboardKanban />} />
-                <Route path="tasks" element={<DashboardTasks />} />
-                <Route path="invoice" element={<DashboardInvoice />} />
-                <Route path="users" element={<DashboardUsers />} />
-                <Route path="roles" element={<DashboardRoles />} />
-                <Route path="analytics-v1" element={<DashboardAnalyticsV1 />} />
+              {/* /dashboard is the Hive dashboard for everyone; the Hive page itself is public */}
+              <Route path="/dashboard" element={<Navigate to="/dashboard/hive" replace />} />
+              <Route element={<Workspace><DashboardLayout /></Workspace>}>
+                <Route path="/dashboard/default" element={<DashboardDefault />} />
+                <Route path="/dashboard/crm" element={<DashboardCrm />} />
+                <Route path="/dashboard/finance" element={<DashboardFinance />} />
+                <Route path="/dashboard/analytics" element={<DashboardAnalytics />} />
+                <Route path="/dashboard/productivity" element={<DashboardProductivity />} />
+                <Route path="/dashboard/ecommerce" element={<DashboardEcommerce />} />
+                <Route path="/dashboard/academy" element={<DashboardAcademy />} />
+                <Route path="/dashboard/logistics" element={<DashboardLogistics />} />
+                <Route path="/dashboard/infrastructure" element={<DashboardInfrastructure />} />
+                <Route path="/dashboard/mail" element={<DashboardMailPreview />} />
+                <Route path="/dashboard/chat" element={<DashboardChatPreview />} />
+                <Route path="/dashboard/calendar" element={<DashboardCalendar />} />
+                <Route path="/dashboard/kanban" element={<DashboardKanban />} />
+                <Route path="/dashboard/tasks" element={<DashboardTasks />} />
+                <Route path="/dashboard/invoice" element={<DashboardInvoice />} />
+                <Route path="/dashboard/users" element={<DashboardUsers />} />
+                <Route path="/dashboard/roles" element={<DashboardRoles />} />
+                <Route path="/dashboard/analytics-v1" element={<DashboardAnalyticsV1 />} />
               </Route>
               {/* Full-screen apps the dashboard embeds through preview iframes */}
               <Route path="/mail" element={<Workspace><MailApp /></Workspace>} />
