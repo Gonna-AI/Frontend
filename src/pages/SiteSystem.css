@@ -240,3 +240,44 @@
   .ct-works .ct-hero-stage:not(.ct-hero-stage--home) { min-height: 0; }
   .ct-works .ct-hero-stage:not(.ct-hero-stage--home) > .ct-hero-stage-content { padding-block: 56px 48px; }
 }
+
+/* ---------- Phones: one outer width for every container ----------
+   The hero shell sits on the 8px page gutter with the --r-edge curve. On a phone every other outer
+   container (story panels, the story tabs and stage, case-study cards, pricing cards, FAQ items)
+   used its own inset, 16 or 20px, and its own radius, so edges and corners did not line up.
+   Here each one reaches the same gutter and takes the same curve. Sections keep their own padding;
+   a container widens with a negative margin, so headings and body text stay where they were.
+   The doubled .ct-works makes these win over the page stylesheets whatever order they load in. */
+@media (max-width: 767px) {
+  /* Story panels (dark and silver). */
+  .ct-works.ct-works .hs-panel {
+    border-radius: var(--r-edge);
+    width: calc(100% - 2 * var(--gutter));
+  }
+
+  /* Story tabs and their stage sit inside the story's own padding (--hs-pad). */
+  .ct-works.ct-works .hs-story-stage {
+    border-radius: var(--r-edge);
+    margin-inline: calc(var(--gutter) - var(--hs-pad));
+  }
+  .ct-works.ct-works .hs-step {
+    border-radius: var(--r-edge);
+    margin-inline: calc(var(--gutter) - var(--hs-pad));
+    /* Text keeps its position: the card grows outward, the padding grows with it. */
+    padding-inline: calc(14px + var(--hs-pad) - var(--gutter));
+  }
+
+  /* Case-study cards: the track bleeds out to the gutter so each card is full gutter width. */
+  .ct-works.ct-works .cxm-track {
+    margin-inline: calc(var(--gutter) - clamp(16px, 4vw, 48px));
+  }
+  .ct-works.ct-works .cxm-card { border-radius: var(--r-edge); }
+  .ct-works.ct-works .cxm-visual { border-radius: calc(var(--r-edge) - 6px); }
+
+  /* Pricing and FAQ sit in 20px of section padding. */
+  .ct-works.ct-works .ct-plan-card,
+  .ct-works.ct-works .ct-faq-item {
+    border-radius: var(--r-edge);
+    margin-inline: calc(var(--gutter) - 20px);
+  }
+}
