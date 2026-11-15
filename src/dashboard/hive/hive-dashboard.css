@@ -3285,3 +3285,186 @@ a.hd-btn { text-decoration: none; display: inline-flex; align-items: center; jus
 }
 .hd-form label { min-width: 0; }
 .hd-form input[type='file'] { max-width: 100%; width: 100%; font-size: 12px; }
+
+/* ======================================================================
+   v4: design language aligned with clerktree.com
+   Black glass pills (translucent fill, light edge, inner highlight, layered soft shadows),
+   large soft panels, frosted floating layers, gradient icon chips, Cal Sans headings.
+   Small refinements only: layout and the Finexy structure are unchanged.
+   ====================================================================== */
+.hd-root {
+  --hd-ease: cubic-bezier(0.23, 1, 0.32, 1);
+  --hd-glass: rgba(255, 255, 255, 0.8);
+  --hd-glass-strong: rgba(255, 255, 255, 0.86);
+  --hd-ring: inset 0 0 0 1px rgba(10, 10, 10, 0.06);
+  --hd-edge: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  --hd-card-shadow: 0 1px 2px rgba(10, 10, 10, 0.04), 0 20px 50px -28px rgba(10, 10, 10, 0.18);
+  --hd-float-shadow: 0 30px 80px rgba(10, 10, 10, 0.18);
+  --hd-black-glass: rgba(12, 12, 12, 0.86);
+  --hd-black-shadow: inset 0 0.5px 0.5px rgba(255, 255, 255, 0.18), 0 10px 10px rgba(0, 0, 0, 0.13), 0 23px 14px rgba(0, 0, 0, 0.07);
+  --hd-chip-bg: linear-gradient(160deg, #ffffff 0%, #e4e5e8 100%);
+  --hd-chip-shadow: inset 0 1px 0 #fff, inset 0 -1px 0 rgba(10, 10, 10, 0.06), 0 0 0 1px rgba(10, 10, 10, 0.06);
+}
+.hd-root.is-dark {
+  --hd-glass: rgba(36, 36, 36, 0.74);
+  --hd-glass-strong: rgba(30, 30, 30, 0.86);
+  --hd-ring: inset 0 0 0 1px rgba(255, 255, 255, 0.07);
+  --hd-edge: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  --hd-card-shadow: 0 1px 2px rgba(0, 0, 0, 0.35), 0 20px 50px -28px rgba(0, 0, 0, 0.7);
+  --hd-float-shadow: 0 30px 80px rgba(0, 0, 0, 0.55);
+  --hd-chip-bg: linear-gradient(160deg, #3b3b3d 0%, #262628 100%);
+  --hd-chip-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), inset 0 -1px 0 rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.06);
+}
+
+/* the floating shell and the cards: bigger radius, hairline ring, soft depth */
+.hd-shell {
+  border-radius: 36px;
+  box-shadow: 0 24px 90px rgba(10, 10, 10, 0.07), inset 0 0 0 1px rgba(255, 255, 255, 0.7);
+}
+.hd-root.is-dark .hd-shell { box-shadow: 0 24px 90px rgba(0, 0, 0, 0.5), inset 0 0 0 1px rgba(255, 255, 255, 0.04); }
+.hd-card,
+.hd-tiles,
+.hd-stat {
+  border-radius: 26px;
+  box-shadow: var(--hd-card-shadow), inset 0 0 0 1px rgba(10, 10, 10, 0.035);
+}
+.hd-root.is-dark .hd-card,
+.hd-root.is-dark .hd-tiles,
+.hd-root.is-dark .hd-stat { box-shadow: var(--hd-card-shadow), inset 0 0 0 1px rgba(255, 255, 255, 0.05); }
+.hd-panel,
+.hd-tile,
+.hd-linebox,
+.hd-machine,
+.hd-doc,
+.hd-site { border-radius: 18px; }
+
+/* the pills of the top bar and rail: frosted tag look (translucent white, hairline ring, soft edge) */
+.hd-brand,
+.hd-tabs,
+.hd-tools-pill,
+.hd-profile,
+.hd-rail-pill,
+.hd-api,
+.hd-back,
+.hd-sitepill {
+  background: var(--hd-glass);
+  box-shadow: var(--hd-ring), var(--hd-edge), 0 1px 2px rgba(10, 10, 10, 0.05);
+  -webkit-backdrop-filter: blur(10px) saturate(1.2);
+  backdrop-filter: blur(10px) saturate(1.2);
+}
+
+/* active controls: black glass, as the site's buttons */
+.hd-root:not(.is-dark) .hd-tab.is-active,
+.hd-root:not(.is-dark) .hd-rail-pill:not(.hd-theme) button.is-on,
+.hd-root:not(.is-dark) .hd-btn.is-dark,
+.hd-root:not(.is-dark) .hd-chip.is-on,
+.hd-root:not(.is-dark) .hd-bn.is-on,
+.hd-root:not(.is-dark) .hd-menu-item.is-on,
+.hd-root:not(.is-dark) .hd-theme-row button.is-on,
+.hd-root:not(.is-dark) .hd-daytile.is-hot,
+.hd-root:not(.is-dark) .hd-roundbtn {
+  background: var(--hd-black-glass);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1), var(--hd-black-shadow);
+}
+.hd-root.is-dark .hd-tab.is-active,
+.hd-root.is-dark .hd-rail-pill:not(.hd-theme) button.is-on,
+.hd-root.is-dark .hd-btn.is-dark,
+.hd-root.is-dark .hd-chip.is-on,
+.hd-root.is-dark .hd-bn.is-on,
+.hd-root.is-dark .hd-roundbtn {
+  box-shadow: inset 0 0.5px 0.5px rgba(255, 255, 255, 0.3), 0 12px 22px -10px rgba(242, 86, 35, 0.55);
+}
+.hd-tab,
+.hd-chip,
+.hd-btn,
+.hd-rail-pill button,
+.hd-bn,
+.hd-roundbtn {
+  transition: background-color 180ms ease, box-shadow 240ms var(--hd-ease), transform 160ms var(--hd-ease), color 160ms ease;
+}
+.hd-tab:active,
+.hd-chip:active,
+.hd-btn:active,
+.hd-bn:active,
+.hd-roundbtn:active { transform: scale(0.97); }
+.hd-btn.is-light {
+  background: var(--hd-glass-strong);
+  box-shadow: var(--hd-ring), var(--hd-edge);
+}
+.hd-chip { box-shadow: var(--hd-ring); }
+.hd-chip.is-on { box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1), var(--hd-black-shadow); }
+
+/* icon chips: the site's gradient chip with an inner highlight */
+.hd-tile-icon,
+.hd-ico-chip,
+.hd-mcard-icon,
+.hd-doc-icon {
+  background: var(--hd-chip-bg);
+  box-shadow: var(--hd-chip-shadow);
+}
+.hd-doc-icon { color: var(--hd-orange); }
+.hd-tile.is-accent .hd-tile-icon { background: rgba(255, 255, 255, 0.22); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35); }
+
+/* the orange tile and the gateway cards get the same inner highlight and a soft coloured glow */
+.hd-tile.is-accent,
+.hd-stat.is-accent {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28), 0 18px 36px -20px rgba(242, 86, 35, 0.6);
+}
+.hd-gw.is-black { box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 16px 30px -18px rgba(0, 0, 0, 0.6); }
+.hd-gw.is-orange { box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28), 0 16px 30px -18px rgba(242, 86, 35, 0.6); }
+
+/* floating layers: frosted glass over a softly blurred scrim */
+.hd-drawer-wrap,
+.hd-menu-wrap {
+  background: rgba(165, 165, 168, 0.42);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+.hd-root.is-dark .hd-drawer-wrap,
+.hd-root.is-dark .hd-menu-wrap { background: rgba(0, 0, 0, 0.5); }
+.hd-drawer,
+.hd-search-dialog,
+.hd-pop,
+.hd-menu {
+  background: var(--hd-glass-strong);
+  box-shadow: var(--hd-ring), var(--hd-edge), var(--hd-float-shadow);
+  -webkit-backdrop-filter: blur(22px) saturate(1.35);
+  backdrop-filter: blur(22px) saturate(1.35);
+}
+.hd-drawer { border-radius: 28px 0 0 28px; }
+.hd-bottomnav {
+  background: var(--hd-glass);
+  box-shadow: var(--hd-ring), var(--hd-edge), 0 14px 40px -12px rgba(10, 10, 10, 0.25);
+  -webkit-backdrop-filter: blur(18px) saturate(1.3);
+  backdrop-filter: blur(18px) saturate(1.3);
+}
+.hd-toast {
+  background: var(--hd-black-glass);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1), var(--hd-black-shadow);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+}
+.hd-root.is-phone .hd-drawer { border-radius: 30px 30px 0 0; }
+.hd-root.is-phone .hd-mcard,
+.hd-root.is-phone .hd-daytile,
+.hd-root.is-phone .hd-stat { box-shadow: var(--hd-ring), 0 14px 34px -22px rgba(10, 10, 10, 0.2); }
+
+/* Cal Sans for headings and the big figures, Inter for everything else */
+.hd-heading h1,
+.hd-mhd h1,
+.hd-big,
+.hd-tile-value,
+.hd-card-title.is-lg,
+.hd-stat b,
+.hd-daytile b {
+  font-family: var(--hd-heading-font, 'Cal Sans', 'Inter', system-ui, sans-serif);
+  font-weight: var(--hd-heading-weight, 400);
+  letter-spacing: -0.03em;
+}
+.hd-heading h1,
+.hd-mhd h1 { letter-spacing: -0.04em; }
+
+@media (prefers-reduced-motion: reduce) {
+  .hd-tab, .hd-chip, .hd-btn, .hd-rail-pill button, .hd-bn, .hd-roundbtn { transition: none; }
+  .hd-tab:active, .hd-chip:active, .hd-btn:active, .hd-bn:active, .hd-roundbtn:active { transform: none; }
+}

@@ -25,7 +25,7 @@ export interface Brand {
   logoDark?: string;
 }
 
-export const DEFAULT_BRAND: Brand = { name: 'Hive', accent: '#f25623', tint: '#f6f6f6', font: 'Inter' };
+export const DEFAULT_BRAND: Brand = { name: 'Hive', accent: '#f25623', tint: '#f6f6f6', font: 'Cal Sans' };
 export const FONT_ALLOW_LIST: Brand['font'][] = ['Inter', 'Geist', 'Cal Sans'];
 export const LOGO_MAX_BYTES = 200 * 1024;
 export const NAME_MAX = 40;
@@ -90,6 +90,7 @@ export function brandStyle(b: Brand): React.CSSProperties {
     ['--hd-on-accent' as string]: onAccent,
     ['--hd-shell-tint' as string]: b.tint,
     ['--hd-heading-font' as string]: `'${b.font}', 'Inter', system-ui, sans-serif`,
+    ['--hd-heading-weight' as string]: b.font === 'Cal Sans' ? '400' : '600',
   };
 }
 
