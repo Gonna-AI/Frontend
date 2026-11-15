@@ -8,7 +8,7 @@ import { Input } from "@/components/dashboard-ui/input";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 
-const MIN_LENGTH = 8;
+const MIN_LENGTH = 10;
 
 const COPY = {
   en: {

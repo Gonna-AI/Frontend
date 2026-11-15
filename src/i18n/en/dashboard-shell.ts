@@ -98,8 +98,8 @@ export const enDashboardShell = {
     'dashShell.auth.loginButton': 'Login',
     'dashShell.auth.registerButton': 'Register',
     'dashShell.auth.emailInvalid': 'Please enter a valid email address.',
-    'dashShell.auth.passwordMinLength': 'Password must be at least 6 characters.',
-    'dashShell.auth.confirmPasswordMinLength': 'Confirm Password must be at least 6 characters.',
+    'dashShell.auth.passwordMinLength': 'Password must be at least 10 characters.',
+    'dashShell.auth.confirmPasswordMinLength': 'Confirm Password must be at least 10 characters.',
     'dashShell.auth.passwordsDoNotMatch': 'Passwords do not match.',
 
     // social-auth/google-button.tsx

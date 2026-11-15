@@ -285,7 +285,7 @@ export default function AuthPage() {
                                             onChange={(e) => setPassword(e.target.value)}
                                             placeholder={view === 'signup' ? c.passPhNew : c.passPhNow}
                                             required
-                                            minLength={6}
+                                            minLength={view === 'signup' ? 10 : undefined}
                                             className="ct-field w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 placeholder-gray-400 outline-none transition-all duration-200 focus:border-orange-300 focus:ring-2 focus:ring-orange-100"
                                         />
                                     </div>

@@ -1,6 +1,10 @@
 [build]
   command = "npm run build"
   publish = "dist"
+  # Free plan = 300 build minutes a month. Skip the build when a push touches nothing
+  # the site is built from (database migrations, docs, the Hive spec, Python workers).
+  # Exit 0 = skip. A missing cached commit makes git fail, which builds as normal.
+  ignore = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF -- src public scripts index.html package.json package-lock.json netlify.toml vite.config.ts tsconfig.json tsconfig.app.json tsconfig.node.json tailwind.config.js components.json performance-budget.json"
 
 # Response headers (CSP, HSTS, caching) live in public/_headers.
 # All redirects live here, in one file, because the first matching rule wins:
