@@ -3728,3 +3728,27 @@ a.hd-btn { text-decoration: none; display: inline-flex; align-items: center; jus
   .hd-machine:hover, .hd-doc:hover, .hd-site:hover, .hd-wallet:hover, .hd-attention button:hover,
   .hd-btn.is-light:hover, .hd-ghost:hover, .hd-filter:hover, .hd-back:hover, .hd-lang-btn:hover, .hd-chip:hover, .hd-menu-item:hover { transform: none; }
 }
+
+/* site selector: the select fills its pill, so the text is never clipped and the focus ring
+   follows the pill's outline instead of a rectangle inside it */
+.hd-select:not(.hd-select-wide) { padding: 0; }
+.hd-select:not(.hd-select-wide) select {
+  height: 100%;
+  max-width: none;
+  padding: 0 30px 0 12px;
+  border-radius: inherit;
+  background: transparent;
+  box-shadow: none;
+  outline: none;
+}
+.hd-select:not(.hd-select-wide) svg { right: 11px; }
+.hd-select select:focus,
+.hd-select select:focus-visible { outline: none; box-shadow: none; }
+.hd-select:focus-within {
+  background: var(--well-light-focus-bg);
+  box-shadow: var(--well-light-focus);
+}
+.hd-root.is-dark .hd-select:focus-within {
+  background: var(--well-dark-focus-bg);
+  box-shadow: var(--well-dark-focus);
+}
