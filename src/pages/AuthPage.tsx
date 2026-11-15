@@ -46,7 +46,7 @@ const BrandPanel = () => (
                 className="absolute inset-0 h-full w-full"
                 width="100%"
                 height="100%"
-                image="/brand-mark-tile.svg"
+                image="/brand/clerktree-mark-black.svg"
                 colorBack="#0a0a0a"
                 colorTint="#ffffff"
                 repetition={2}
