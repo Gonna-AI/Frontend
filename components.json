@@ -13,5 +13,14 @@
         "components": "@/components",
         "utils": "@/lib/utils",
         "ui": "@/components/dashboard-ui"
+    },
+    "registries": {
+        "@knowns-ui": "https://ui.knowns.dev/r/{name}.json",
+        "@knowns-ui-pro": {
+            "url": "https://ui.knowns.dev/r/pro/{name}.json",
+            "headers": {
+                "Authorization": "Bearer ${KNOWNS_LICENSE_KEY}"
+            }
+        }
     }
 }

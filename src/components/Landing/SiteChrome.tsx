@@ -102,6 +102,7 @@ function buildFooter(de: boolean) {
       links: [
         { label: 'Hive', href: '/hive' },
         { label: de ? 'Sicherheit' : 'Security', href: '/security' },
+        { label: 'Status', href: '/status' },
         { label: de ? 'Kontakt' : 'Contact', href: '/contact' },
       ] satisfies FooterLink[],
     },

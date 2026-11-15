@@ -21,6 +21,7 @@ const Research = lazyWithRetry(() => import('./pages/Research'), 'Research');
 const Machina = lazyWithRetry(() => import('./pages/Machina'), 'Machina');
 const Careers = lazyWithRetry(() => import('./pages/Careers'), 'Careers');
 const Brand = lazyWithRetry(() => import('./pages/Brand'), 'Brand');
+const Status = lazyWithRetry(() => import('./pages/Status'), 'Status');
 const Hive = lazyWithRetry(() => import('./pages/hive/Hive'), 'Hive');
 const Contact = lazyWithRetry(() => import('./pages/Contact'), 'Contact');
 const Blog = lazyWithRetry(() => import('./pages/Blog'), 'Blog');
@@ -81,6 +82,7 @@ const routePrefetchers = {
   '/careers': () => import('./pages/Careers'),
   '/brand': () => import('./pages/Brand'),
   '/hive': () => import('./pages/hive/Hive'),
+  '/status': () => import('./pages/Status'),
   '/contact': () => import('./pages/Contact'),
   '/machina': () => import('./pages/Machina'),
   '/blog': () => import('./pages/Blog'),
@@ -216,6 +218,7 @@ function Workspace({ children }: { children: React.ReactNode }) {
 
 function App() {
   const isResearchHost = typeof window !== 'undefined' && window.location.hostname === 'research.clerktree.com';
+  const isStatusHost = typeof window !== 'undefined' && window.location.hostname === 'status.clerktree.com';
 
   useEffect(() => installIntentPrefetch(routePrefetchers), []);
 
@@ -233,13 +236,14 @@ function App() {
           <div className="flex flex-1 flex-col">
             <Routes>
               {/* Public site */}
-              <Route path="/" element={isResearchHost ? <Research /> : <Landing />} />
+              <Route path="/" element={isResearchHost ? <Research /> : isStatusHost ? <Status /> : <Landing />} />
               <Route path="/:topicSlug" element={isResearchHost ? <Research /> : <NotFound />} />
               <Route path="/about" element={<About />} />
               <Route path="/machina" element={<Machina />} />
               <Route path="/careers" element={<Careers />} />
               <Route path="/brand" element={<Brand />} />
               <Route path="/hive" element={<Hive />} />
+              <Route path="/status" element={<Status />} />
               <Route path="/contact" element={<Contact />} />
               <Route path="/blog" element={<Blog />} />
               <Route path="/blog/:slug" element={<BlogPost />} />
