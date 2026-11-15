@@ -122,7 +122,7 @@ export function AssistantView() {
         />
         <div className="hd-composer-foot">
           <small className="hd-muted">{text.length} / {MAX.toLocaleString('en-US')}</small>
-          <button type="submit" className="hd-btn is-dark hd-btn-sm" disabled={!text.trim() || running}>
+          <button type="submit" className="hd-btn is-accent hd-btn-sm" disabled={!text.trim() || running}>
             <Send size={14} /> {t('Send')}
           </button>
         </div>

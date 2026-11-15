@@ -143,7 +143,7 @@ export function DisplaysArea() {
             <button type="button" className="hd-btn is-light hd-btn-sm" onClick={() => void navigator.clipboard?.writeText(full).then(() => notify(t('Address copied'))).catch(() => undefined)}>
               {t('Copy')}
             </button>
-            <a className="hd-btn is-dark hd-btn-sm" href={url} target="_blank" rel="noreferrer">
+            <a className="hd-btn is-dark hd-btn-sm hd-btn-arrow" href={url} target="_blank" rel="noreferrer">
               {t('Open display')}
             </a>
           </div>
@@ -413,7 +413,7 @@ export function BrandingArea() {
           </button>
           <button
             type="button"
-            className="hd-btn is-dark hd-btn-sm"
+            className="hd-btn is-accent hd-btn-sm"
             onClick={() => {
               const bad = save(draft);
               setFailed(bad);

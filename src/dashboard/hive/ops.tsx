@@ -173,7 +173,7 @@ function ReviewDialog({ id, onClose }: { id: string; onClose: () => void }) {
                 </label>
                 <div className="hd-approval-actions">
                   <button type="button" className="hd-btn is-light hd-btn-sm" onClick={() => setRejecting(true)}>{t('Reject')}</button>
-                  <button type="button" className="hd-btn is-dark hd-btn-sm" disabled={!ack} onClick={() => { setApprovalState(a.id, 'Approved'); onClose(); }}>{t('Approve')}</button>
+                  <button type="button" className="hd-btn is-accent hd-btn-sm" disabled={!ack} onClick={() => { setApprovalState(a.id, 'Approved'); onClose(); }}>{t('Approve')}</button>
                 </div>
               </>
             )}

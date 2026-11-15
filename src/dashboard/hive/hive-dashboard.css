@@ -1,16 +1,16 @@
 /* Hive dashboard — orange desktop design.
-   Palette from the brand sheet: black #171717, orange #F25623, dark gray #4D4D4D, light gray #DEDEDE.
+   Palette: black #171717, the site orange #FF4D00, dark gray #4D4D4D, light gray #DEDEDE (the same orange as clerktree.com).
    Everything is scoped under .hd-root so nothing leaks into the rest of the site. */
 
 .hd-root {
   --hd-black: #171717;
-  --hd-orange: #f25623;
-  --hd-status-orange: #f25623;
-  --hd-orange-hi: #f77a47;
+  --hd-orange: #ff4d00;
+  --hd-status-orange: #ff4d00;
+  --hd-orange-hi: #ff6a26;
   --hd-gray-dark: #4d4d4d;
   --hd-gray-light: #dedede;
 
-  --hd-canvas: #ececec;
+  --hd-canvas: #f4f4f4;
   --hd-shell: #f6f6f6;
   --hd-card: #ffffff;
   --hd-panel: #f4f4f4;
@@ -51,7 +51,7 @@
   --hd-text: #f3f3f3;
   --hd-muted: #9b9b9f;
   --hd-line: #303030;
-  --hd-active-bg: #f25623;
+  --hd-active-bg: #ff4d00;
   --hd-active-fg: #ffffff;
   --hd-hover: #2a2a2a;
   --hd-green-bg: rgba(31, 163, 92, 0.16);
@@ -598,7 +598,7 @@
   line-height: 1.1;
 }
 .hd-tile.is-accent {
-  background: linear-gradient(155deg, var(--hd-orange-hi) 0%, var(--hd-orange) 55%, #e8481a 100%);
+  background: linear-gradient(180deg, var(--hd-orange-hi) 0%, var(--hd-orange) 100%);
   color: #fff;
 }
 .hd-tile.is-accent .hd-tile-icon {
@@ -1331,7 +1331,7 @@ a.hd-rail-link {
   letter-spacing: -0.03em;
 }
 .hd-stat.is-accent {
-  background: linear-gradient(155deg, var(--hd-orange-hi), var(--hd-orange) 60%, #e8481a);
+  background: linear-gradient(180deg, var(--hd-orange-hi), var(--hd-orange));
   color: rgba(255, 255, 255, 0.88);
 }
 .hd-stat.is-accent b {
@@ -3372,7 +3372,7 @@ a.hd-btn { text-decoration: none; display: inline-flex; align-items: center; jus
 .hd-root.is-dark .hd-chip.is-on,
 .hd-root.is-dark .hd-bn.is-on,
 .hd-root.is-dark .hd-roundbtn {
-  box-shadow: inset 0 0.5px 0.5px rgba(255, 255, 255, 0.3), 0 12px 22px -10px rgba(242, 86, 35, 0.55);
+  box-shadow: inset 0 0.5px 0.5px rgba(255, 255, 255, 0.3), 0 12px 22px -10px rgba(255, 77, 0, 0.55);
 }
 .hd-tab,
 .hd-chip,
@@ -3408,10 +3408,10 @@ a.hd-btn { text-decoration: none; display: inline-flex; align-items: center; jus
 /* the orange tile and the gateway cards get the same inner highlight and a soft coloured glow */
 .hd-tile.is-accent,
 .hd-stat.is-accent {
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28), 0 18px 36px -20px rgba(242, 86, 35, 0.6);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28), 0 18px 36px -20px rgba(255, 77, 0, 0.6);
 }
 .hd-gw.is-black { box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 16px 30px -18px rgba(0, 0, 0, 0.6); }
-.hd-gw.is-orange { box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28), 0 16px 30px -18px rgba(242, 86, 35, 0.6); }
+.hd-gw.is-orange { box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28), 0 16px 30px -18px rgba(255, 77, 0, 0.6); }
 
 /* floating layers: frosted glass over a softly blurred scrim */
 .hd-drawer-wrap,
@@ -3468,3 +3468,122 @@ a.hd-btn { text-decoration: none; display: inline-flex; align-items: center; jus
   .hd-tab, .hd-chip, .hd-btn, .hd-rail-pill button, .hd-bn, .hd-roundbtn { transition: none; }
   .hd-tab:active, .hd-chip:active, .hd-btn:active, .hd-bn:active, .hd-roundbtn:active { transform: none; }
 }
+
+/* ======================================================================
+   v5: one design language with clerktree.com
+   The site's orange (#ff4d00) and its orange gradient button, pressed-in "well" fields with an
+   orange focus ring, a faint orange glow at the top of cards, orange-tinted hover states and
+   the accent word in the headline. Layout is unchanged.
+   ====================================================================== */
+.hd-accent { color: var(--hd-orange); }
+
+/* the site's orange primary: gradient, inner highlights, coloured glow, light on hover */
+.hd-btn.is-accent {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--hd-orange) 84%, #fff), color-mix(in srgb, var(--hd-orange) 94%, #000));
+  color: var(--hd-on-accent, #fff);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28), inset 0 -1px 0 rgba(0, 0, 0, 0.18), 0 14px 32px -14px color-mix(in srgb, var(--hd-orange) 70%, transparent);
+}
+.hd-btn.is-accent::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.04));
+  transition: opacity 240ms var(--hd-ease);
+}
+.hd-btn.is-accent:hover:not(:disabled) {
+  filter: none;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.32), inset 0 -1px 0 rgba(0, 0, 0, 0.18), 0 18px 40px -14px color-mix(in srgb, var(--hd-orange) 85%, transparent);
+}
+.hd-btn.is-accent:hover:not(:disabled)::after { opacity: 1; }
+.hd-btn.is-accent:disabled { opacity: 0.45; }
+
+/* the site's primary pill ends in a small round arrow tile */
+.hd-btn-arrow { padding-right: 8px; }
+.hd-btn-arrow::after {
+  content: '›';
+  display: inline-grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  margin-left: 4px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.12);
+  font-size: 19px;
+  line-height: 1;
+  padding-bottom: 2px;
+  transition: transform 200ms var(--hd-ease);
+}
+.hd-btn-arrow:hover::after { transform: translateX(2px); }
+.hd-btn-sm.hd-btn-arrow::after { width: 24px; height: 24px; font-size: 17px; }
+
+/* faint orange glow at the top of cards, as on the site's panels */
+.hd-card,
+.hd-tiles {
+  background-image: radial-gradient(ellipse 60% 30% at 50% 0%, rgba(255, 77, 0, 0.05), transparent);
+}
+.hd-root.is-dark .hd-card,
+.hd-root.is-dark .hd-tiles { background-image: radial-gradient(ellipse 60% 30% at 50% 0%, rgba(255, 77, 0, 0.09), transparent); }
+
+/* clickable cards: the site's orange-tinted hover */
+.hd-machine:hover,
+.hd-doc:hover,
+.hd-site:hover,
+.hd-wallet:hover,
+.hd-attention button:hover {
+  box-shadow: inset 0 0 0 1px rgba(255, 77, 0, 0.3), 0 8px 24px rgba(255, 77, 0, 0.05), 0 24px 70px rgba(255, 77, 0, 0.09);
+}
+
+/* fields are wells: pressed into their surface, with an orange focus ring (the site's fields.css) */
+.hd-search,
+.hd-select,
+.hd-form select,
+.hd-form input:not([type='color']):not([type='file']):not([type='checkbox']),
+.hd-form-inline input,
+.hd-inline-form input,
+.hd-composer textarea,
+.hd-lang {
+  background: var(--well-light-bg);
+  border-color: transparent;
+  box-shadow: var(--well-light-shadow);
+  transition: box-shadow 220ms ease, background 220ms ease;
+}
+.hd-root.is-dark .hd-search,
+.hd-root.is-dark .hd-select,
+.hd-root.is-dark .hd-form select,
+.hd-root.is-dark .hd-form input:not([type='color']):not([type='file']):not([type='checkbox']),
+.hd-root.is-dark .hd-form-inline input,
+.hd-root.is-dark .hd-inline-form input,
+.hd-root.is-dark .hd-composer textarea,
+.hd-root.is-dark .hd-lang {
+  background: var(--well-dark-bg);
+  box-shadow: var(--well-dark-shadow);
+}
+.hd-search:focus-within,
+.hd-form select:focus,
+.hd-form input:focus,
+.hd-form-inline input:focus,
+.hd-inline-form input:focus,
+.hd-composer textarea:focus,
+.hd-lang:focus {
+  background: var(--well-light-focus-bg);
+  border-color: transparent;
+  box-shadow: var(--well-light-focus);
+  outline: none;
+}
+.hd-root.is-dark .hd-search:focus-within,
+.hd-root.is-dark .hd-form select:focus,
+.hd-root.is-dark .hd-form input:focus,
+.hd-root.is-dark .hd-form-inline input:focus,
+.hd-root.is-dark .hd-inline-form input:focus,
+.hd-root.is-dark .hd-composer textarea:focus,
+.hd-root.is-dark .hd-lang:focus {
+  background: var(--well-dark-focus-bg);
+  box-shadow: var(--well-dark-focus);
+}
+.hd-search input { box-shadow: none; background: transparent; }
+.hd-filter { box-shadow: var(--hd-ring); background: var(--hd-glass-strong); border-color: transparent; }
+.hd-root.is-phone .hd-search { background: var(--well-light-bg); box-shadow: var(--well-light-shadow); }

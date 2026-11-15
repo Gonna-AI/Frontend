@@ -25,7 +25,7 @@ export interface Brand {
   logoDark?: string;
 }
 
-export const DEFAULT_BRAND: Brand = { name: 'Hive', accent: '#f25623', tint: '#f6f6f6', font: 'Cal Sans' };
+export const DEFAULT_BRAND: Brand = { name: 'Hive', accent: '#ff4d00', tint: '#f6f6f6', font: 'Cal Sans' };
 export const FONT_ALLOW_LIST: Brand['font'][] = ['Inter', 'Geist', 'Cal Sans'];
 export const LOGO_MAX_BYTES = 200 * 1024;
 export const NAME_MAX = 40;
@@ -83,7 +83,8 @@ export function brandIsValid(b: Brand): boolean {
 
 /** CSS variables for a theme; only accent, tint and heading font can change. */
 export function brandStyle(b: Brand): React.CSSProperties {
-  const onAccent = contrast(b.accent, '#171717') > contrast(b.accent, '#ffffff') ? '#171717' : '#ffffff';
+  // White on the accent when it reads at 3:1 or better (bold and large text), as on the site's orange buttons; otherwise black.
+  const onAccent = contrast(b.accent, '#ffffff') >= 3 ? '#ffffff' : '#171717';
   return {
     ['--hd-orange' as string]: b.accent,
     ['--hd-orange-hi' as string]: b.accent,

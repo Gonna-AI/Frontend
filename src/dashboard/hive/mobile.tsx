@@ -189,7 +189,7 @@ export function MobileMenu({
   );
 }
 
-export function MobileHeader({ title, site, onSearch }: { title: string; site: string; onSearch: () => void }) {
+export function MobileHeader({ title, site, onSearch }: { title: React.ReactNode; site: string; onSearch: () => void }) {
   const t = useT();
   return (
     <header className="hd-mhd">

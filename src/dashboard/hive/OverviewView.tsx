@@ -154,7 +154,7 @@ export default function OverviewView({ go }: { go: (section: string) => void }) 
           <span>{t('than last week')}</span>
         </div>
         <div className="hd-actions">
-          <button type="button" className="hd-btn is-dark" onClick={() => go('alarms')}>
+          <button type="button" className="hd-btn is-dark hd-btn-arrow" onClick={() => go('alarms')}>
             <ArrowLeftRight size={16} /> {t('Open alarms')}
           </button>
           <button type="button" className="hd-btn is-light" onClick={() => go('work-orders')}>

@@ -384,7 +384,11 @@ function Shell({ user, onSignOut, guest = false }: HiveDashboardProps) {
       );
   }
 
-  const heading = section === '' || section === null ? `${t(greeting())}, ${firstName}` : first === 'machines' && second ? (data.machines.find((m) => m.id === second)?.key ?? t('Machine')) : t(SECTIONS[section].title);
+  const heading: React.ReactNode = section === '' || section === null ? (
+    <>
+      {t(greeting())}, <span className="hd-accent">{firstName}</span>
+    </>
+  ) : first === 'machines' && second ? (data.machines.find((m) => m.id === second)?.key ?? t('Machine')) : t(SECTIONS[section].title);
   const subtitle = section === '' || section === null ? t('Stay on top of your plant, monitor signals, and track alarms.') : `${data.plant.name} · ${t('placeholder data until the Hive API is connected')}`;
 
   const menuEntries = MENU_GROUPS.map((g) => ({ heading: t(g.heading), items: g.ids.map((id): NavEntry => ({ id, title: t(SECTIONS[id].title), icon: SECTIONS[id].icon })) }));
