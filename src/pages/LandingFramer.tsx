@@ -190,7 +190,8 @@ function useCtPageMotion() {
           revealObserver.unobserve(entry.target);
         });
       },
-      { rootMargin: '0px 0px -10% 0px', threshold: 0 },
+      // Start a little before a block enters the screen, so it is already settling as it arrives.
+      { rootMargin: '0px 0px 10% 0px', threshold: 0 },
     );
 
     revealTargets.forEach((target) => revealObserver.observe(target));

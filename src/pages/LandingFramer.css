@@ -43,15 +43,15 @@ html.lenis.lenis-stopped {
 }
 
 .ct-works [data-ct-reveal] {
-  filter: blur(10px);
+  /* Opacity and transform only: both run on the compositor. A blur here meant a filter pass over
+     every revealed block (and a layer per block held for the whole visit), which froze scrolling
+     for up to a second on the first pass down the page. */
   opacity: 0;
-  transform: translate3d(0, 50px, 0);
+  transform: translate3d(0, 36px, 0);
   transition:
-    opacity 900ms var(--ct-ease-out),
-    filter 900ms var(--ct-ease-out),
-    transform 1000ms var(--ct-ease-out);
+    opacity 700ms var(--ct-ease-out),
+    transform 800ms var(--ct-ease-out);
   transition-delay: var(--reveal-delay, 0ms);
-  will-change: opacity, filter, transform;
 }
 
 .ct-works [data-ct-reveal='hero'] {
@@ -60,12 +60,10 @@ html.lenis.lenis-stopped {
 }
 
 .ct-works [data-ct-reveal='title'] {
-  filter: blur(6px);
-  transform: translate3d(0, 32px, 0);
+  transform: translate3d(0, 28px, 0);
 }
 
 .ct-works [data-ct-reveal='card'] {
-  filter: none;
   transform: translate3d(0, 10px, 0);
   transition:
     opacity 400ms cubic-bezier(0.16, 1, 0.3, 1),
@@ -74,9 +72,6 @@ html.lenis.lenis-stopped {
 
 .ct-works [data-ct-reveal].is-visible,
 .ct-works [data-ct-visible='true'] {
-  /* "none", not blur(0): a filter keeps the element in its own layer, and Safari
-     clips anything past the line box (descenders of g, y, p in large headings). */
-  filter: none;
   opacity: 1;
   transform: translate3d(0, 0, 0) scale(1);
   will-change: auto;
@@ -87,11 +82,6 @@ html.lenis.lenis-stopped {
 .ct-works [data-offscreen='true'] *::before,
 .ct-works [data-offscreen='true'] *::after {
   animation-play-state: paused !important;
-}
-
-/* Weakest devices: the reveal fades and rises but skips the blur, which is the costly part of it. */
-html[data-perf='low'] .ct-works [data-ct-reveal] {
-  filter: none;
 }
 
 /* Room for descenders in tight-leading display headings. */
@@ -113,21 +103,19 @@ html[data-perf='low'] .ct-works [data-ct-reveal] {
 }
 
 .ct-split-char {
+  /* One of these per character of every heading: no filter and no will-change, so a heading is
+     not dozens of GPU layers that stay alive after the animation has finished. */
   display: inline-block;
-  filter: blur(10px);
   opacity: 0;
   transform: translate3d(0, 10px, 0);
   transition:
     opacity 400ms var(--ct-ease-out),
-    filter 400ms var(--ct-ease-out),
     transform 400ms var(--ct-ease-out);
   transition-delay: calc(50ms + var(--char-index) * 18ms);
-  will-change: opacity, filter, transform;
 }
 
 .is-visible .ct-split-char,
 [data-ct-visible='true'] .ct-split-char {
-  filter: blur(0);
   opacity: 1;
   transform: translate3d(0, 0, 0);
 }
@@ -638,9 +626,8 @@ a:hover > .ct-roll > .ct-roll-inner { transform: translateY(-50%); }
   top: 50px;
   transition:
     opacity 320ms var(--ct-ease-out),
-    filter 320ms var(--ct-ease-out),
     transform 420ms var(--ct-ease-out);
-  will-change: filter, opacity, transform;
+  will-change: opacity, transform;
   z-index: calc(20 + var(--card-index, 0));
 }
 
@@ -697,13 +684,11 @@ a:hover > .ct-roll > .ct-roll-inner { transform: translateY(-50%); }
 
 .ct-sol-row.is-visible,
 .ct-sol-row[data-ct-visible='true'] {
-  filter: blur(0);
   opacity: var(--sol-opacity, 1);
   transform: translate3d(0, var(--sol-y, 0px), 0) scale(var(--sol-scale, 1));
 }
 
 .ct-sol-row:not(.is-visible):not([data-ct-visible='true']) {
-  filter: blur(8px);
   opacity: 0;
 }
 
