@@ -1,6 +1,7 @@
 import { useState, FormEvent } from 'react';
 import { Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import Turnstile, { TURNSTILE_SITE_KEY } from '../components/Auth/Turnstile';
 import { useLanguage } from '../contexts/LanguageContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { LiquidMetal } from '@paper-design/shaders-react';
@@ -69,6 +70,9 @@ export default function AuthPage() {
     const { language } = useLanguage();
     const c = COPY[language === 'de' ? 'de' : 'en'];
 
+    const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+    const [captchaReset, setCaptchaReset] = useState(0);
+
     const [searchParams] = useSearchParams();
     const initialView = searchParams.get('view') as AuthView || 'signin';
     // The message comes from the URL, so anyone can link to this page with text of their choosing.
@@ -98,14 +102,14 @@ export default function AuthPage() {
 
         try {
             if (view === 'signup') {
-                const { error } = await signUp(email, password, fullName);
+                const { error } = await signUp(email, password, fullName, captchaToken ?? undefined);
                 if (error) {
                     setError(error.message);
                 } else {
                     setSuccessMessage(c.confirmSent(email));
                 }
             } else if (view === 'signin') {
-                const { error } = await signIn(email, password);
+                const { error } = await signIn(email, password, captchaToken ?? undefined);
                 if (error) {
                     if (error.message.includes('Email not confirmed')) {
                         setError(c.notConfirmed);
@@ -120,7 +124,7 @@ export default function AuthPage() {
                     navigate('/dashboard', { replace: true });
                 }
             } else if (view === 'forgot_password') {
-                const { error } = await resetPassword(email);
+                const { error } = await resetPassword(email, captchaToken ?? undefined);
                 if (error) {
                     setError(error.message);
                 } else {
@@ -131,6 +135,8 @@ export default function AuthPage() {
             setError(c.unexpected);
         } finally {
             setSubmitting(false);
+            // A captcha token works once; ask for a fresh one for the next attempt.
+            if (TURNSTILE_SITE_KEY) setCaptchaReset((n) => n + 1);
         }
     };
 
@@ -316,9 +322,11 @@ export default function AuthPage() {
                                     )}
                                 </AnimatePresence>
 
+                                <Turnstile onToken={setCaptchaToken} resetKey={captchaReset} />
+
                                 <button
                                     type="submit"
-                                    disabled={submitting}
+                                    disabled={submitting || (!!TURNSTILE_SITE_KEY && !captchaToken)}
                                     className="flex w-full items-center justify-center gap-2 rounded-xl bg-black py-3 text-sm font-semibold text-white shadow-lg shadow-black/10 transition-all duration-200 hover:-translate-y-0.5 hover:bg-gray-800 hover:shadow-xl disabled:pointer-events-none disabled:opacity-50"
                                 >
                                     {submitting ? (

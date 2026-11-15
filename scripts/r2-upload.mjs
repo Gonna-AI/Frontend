@@ -106,6 +106,8 @@ async function main() {
     headers: {
       Authorization: `Bearer ${CF_API_TOKEN}`,
       'Content-Type': contentTypeFor(remoteKey),
+      // R2 sends no caching header of its own. 30 days lets browsers keep each file.
+      'Cache-Control': 'public, max-age=2592000',
     },
     body: fileBuffer,
   });

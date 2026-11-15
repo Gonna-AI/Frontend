@@ -2,6 +2,7 @@ import { FormEvent, useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ArrowLeft, ArrowRight, Building2, LockKeyhole, UserRound } from 'lucide-react';
 import { Navigate, useNavigate } from 'react-router-dom';
+import Turnstile, { TURNSTILE_SITE_KEY } from '../../components/Auth/Turnstile';
 import ClientPortalShell from '../../components/client-portal/ClientPortalShell';
 import { useClientPortal } from '../../contexts/ClientPortalContext';
 import { cn } from '../../lib/utils';
@@ -21,6 +22,8 @@ export default function ClientPortalLoginPage() {
     const [password, setPassword] = useState('');
     const [lookup, setLookup] = useState<ClientPortalDirectoryEntry | null>(null);
     const [submitting, setSubmitting] = useState(false);
+    const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+    const [captchaReset, setCaptchaReset] = useState(0);
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
@@ -78,7 +81,7 @@ export default function ClientPortalLoginPage() {
         setSubmitting(true);
 
         try {
-            const result = await signInWithUsername(lookup.username, password);
+            const result = await signInWithUsername(lookup.username, password, captchaToken ?? undefined);
 
             if (result.error) {
                 setError(result.error);
@@ -91,6 +94,7 @@ export default function ClientPortalLoginPage() {
             setError('We could not start the client session.');
         } finally {
             setSubmitting(false);
+            if (TURNSTILE_SITE_KEY) setCaptchaReset((n) => n + 1);
         }
     };
 
@@ -262,6 +266,8 @@ export default function ClientPortalLoginPage() {
                                         </div>
                                     </label>
 
+                                    <Turnstile onToken={setCaptchaToken} resetKey={captchaReset} />
+
                                     <div className="flex gap-3">
                                         <button
                                             type="button"
@@ -277,7 +283,7 @@ export default function ClientPortalLoginPage() {
                                         </button>
                                         <button
                                             type="submit"
-                                            disabled={submitting}
+                                            disabled={submitting || (!!TURNSTILE_SITE_KEY && !captchaToken)}
                                             className="inline-flex h-12 flex-[1.4] items-center justify-center gap-2 rounded-[1rem] bg-[#FF8A5B] px-5 text-sm font-semibold text-black transition hover:bg-[#FF9A71] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-70"
                                         >
                                             {submitting ? 'Signing in...' : 'Open portal'}

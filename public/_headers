@@ -12,7 +12,7 @@
   Referrer-Policy: strict-origin-when-cross-origin
   Cross-Origin-Opener-Policy: same-origin-allow-popups
   Permissions-Policy: accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=(), browsing-topics=()
-  Content-Security-Policy: default-src 'self'; script-src 'self' {{INLINE_SCRIPT_HASHES}}; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; media-src 'self' data: blob: https:; connect-src 'self' {{SUPABASE_ORIGINS}} https://clerktree1.statuspage.io https://*.clerktree.com https://*.amplitude.com https://cdn.jsdelivr.net; worker-src 'self' blob:; frame-src 'self' https://www.google.com; frame-ancestors 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests
+  Content-Security-Policy: default-src 'self'; script-src 'self' {{INLINE_SCRIPT_HASHES}} https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; media-src 'self' data: blob: https:; connect-src 'self' {{SUPABASE_ORIGINS}} https://challenges.cloudflare.com https://clerktree1.statuspage.io https://*.clerktree.com https://*.amplitude.com https://cdn.jsdelivr.net; worker-src 'self' blob:; frame-src 'self' https://www.google.com https://challenges.cloudflare.com; frame-ancestors 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests
 
 # Fingerprinted build output never changes under the same name.
 /assets/*

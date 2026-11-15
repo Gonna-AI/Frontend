@@ -12,7 +12,7 @@ interface ClientPortalContextValue {
     loading: boolean;
     refreshProfile: () => Promise<ClientPortalProfile | null>;
     lookupUsername: (username: string) => Promise<ClientPortalDirectoryEntry | null>;
-    signInWithUsername: (username: string, password: string) => Promise<{ error: string | null }>;
+    signInWithUsername: (username: string, password: string, captchaToken?: string) => Promise<{ error: string | null }>;
     signOut: () => Promise<void>;
 }
 
@@ -213,12 +213,13 @@ export function ClientPortalProvider({ children }: { children: React.ReactNode }
         } satisfies ClientPortalDirectoryEntry;
     };
 
-    const signInWithUsername = async (username: string, password: string) => {
+    const signInWithUsername = async (username: string, password: string, captchaToken?: string) => {
         const normalizedUsername = normalizePortalUsername(username);
 
         const { error } = await clientPortalSupabase.auth.signInWithPassword({
             email: buildPortalEmail(normalizedUsername),
             password,
+            options: { captchaToken },
         });
 
         if (error) {
