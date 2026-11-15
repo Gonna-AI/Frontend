@@ -1,7 +1,11 @@
 import { useEffect, useRef } from 'react';
 
-/** Public Cloudflare Turnstile site key. Leave unset and no captcha is shown or required. */
-export const TURNSTILE_SITE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY as string | undefined;
+/**
+ * Public Cloudflare Turnstile site key (safe to ship; the secret lives in Supabase).
+ * Override with VITE_TURNSTILE_SITE_KEY, or set it to an empty string to turn the challenge off.
+ */
+export const TURNSTILE_SITE_KEY: string | undefined =
+  (import.meta.env.VITE_TURNSTILE_SITE_KEY as string | undefined) ?? '0x4AAAAAAGBxQG6yhRiLgKsd';
 
 type TurnstileApi = {
   render: (el: HTMLElement, options: Record<string, unknown>) => string;
