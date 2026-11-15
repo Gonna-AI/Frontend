@@ -79,6 +79,7 @@ export const deDashboardShell = {
     'dashShell.nav.item.academy': 'Projektgedächtnis',
     'dashShell.nav.item.logistics': 'Lieferungen',
     'dashShell.nav.item.infrastructure': 'Live-Stack',
+    'dashShell.nav.item.hive': 'Hive',
     'dashShell.nav.item.analyticsV1': 'Analytik',
     'dashShell.nav.item.email': 'Generierte Dokumente',
     'dashShell.nav.item.chat': 'Copilot',

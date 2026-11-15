@@ -5,6 +5,7 @@ import {
   CheckSquare,
   Forklift,
   Gauge,
+  Hexagon,
   GraduationCap,
   Kanban,
   LayoutDashboard,
@@ -121,6 +122,14 @@ export const sidebarItems: NavGroup[] = [
         titleKey: "dashShell.nav.item.logistics",
         url: "/dashboard/logistics",
         icon: Forklift,
+      },
+      {
+        id: "hive",
+        title: "Hive",
+        titleKey: "dashShell.nav.item.hive",
+        url: "/dashboard/hive",
+        icon: Hexagon,
+        badge: "new",
       },
       {
         id: "infrastructure",

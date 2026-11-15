@@ -1,42 +1,41 @@
 import {
-  ArrowDownRight,
-  ArrowLeftRight,
-  ArrowUpRight,
   Bell,
-  BellRing,
   Calendar,
   ChevronDown,
   CircleAlert,
-  ClipboardList,
-  Cpu,
-  EllipsisVertical,
+  CircleHelp,
+  Factory,
   FileText,
   Layers,
   LayoutGrid,
+  LayoutPanelLeft,
   LogOut,
   Mail,
   Moon,
-  Plus,
-  Radio,
   Search,
   Settings,
-  SlidersHorizontal,
-  Sparkles,
   Sun,
-  Users,
-  Wifi,
-  CircleHelp,
-  Thermometer,
-  Unplug,
-  Gauge,
-  Wrench,
-  Package,
   type LucideIcon,
 } from 'lucide-react-dash';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 
-import { fetchHiveHealth, fetchHiveOverview, type HiveApiState } from './hiveApi';
-import { placeholderOverview, type HiveEvent, type HiveOverview } from './placeholder';
+import OverviewView from './OverviewView';
+import { HiveStoreProvider, useHive, type DetailRef } from './store';
+import {
+  ActivityView,
+  AlarmsView,
+  ApprovalsView,
+  AssetsView,
+  DetailDrawer,
+  DocumentsView,
+  GatewaysView,
+  ReportsView,
+  SettingsView,
+  SitesView,
+  WorkOrdersView,
+} from './views';
+import type { HiveApiState } from './hiveApi';
 import './hive-dashboard.css';
 
 export interface HiveDashboardUser {
@@ -50,37 +49,39 @@ interface HiveDashboardProps {
   onSignOut?: () => void;
 }
 
-const TABS = ['Overview', 'Activity', 'Assets', 'Alarms', 'Reports'] as const;
+const BASE = '/dashboard/hive';
 
-const RAIL: { icon: LucideIcon; label: string }[] = [
-  { icon: LayoutGrid, label: 'Overview' },
-  { icon: Calendar, label: 'Schedule' },
-  { icon: Mail, label: 'Inbox' },
-  { icon: FileText, label: 'Documents' },
-  { icon: Users, label: 'People' },
-  { icon: Layers, label: 'Graph' },
-  { icon: Settings, label: 'Settings' },
+const SECTIONS: Record<string, { title: string; keywords: string }> = {
+  '': { title: 'Overview', keywords: 'home dashboard' },
+  activity: { title: 'Activity', keywords: 'feed history timeline' },
+  assets: { title: 'Assets', keywords: 'machines equipment graph' },
+  alarms: { title: 'Alarms', keywords: 'alerts faults' },
+  reports: { title: 'Reports', keywords: 'oee trends export csv' },
+  'work-orders': { title: 'Work orders', keywords: 'maintenance cmms erp' },
+  approvals: { title: 'Approvals', keywords: 'decisions pending' },
+  documents: { title: 'Documents', keywords: 'manuals drawings sop' },
+  sites: { title: 'Sites', keywords: 'plants halls' },
+  gateways: { title: 'Gateways', keywords: 'edge devices enroll' },
+  settings: { title: 'Settings', keywords: 'preferences theme' },
+};
+
+const TABS = ['', 'activity', 'assets', 'alarms', 'reports'] as const;
+
+const RAIL: { id: string; icon: LucideIcon }[] = [
+  { id: '', icon: LayoutGrid },
+  { id: 'work-orders', icon: Calendar },
+  { id: 'approvals', icon: Mail },
+  { id: 'documents', icon: FileText },
+  { id: 'sites', icon: Factory },
+  { id: 'gateways', icon: Layers },
+  { id: 'settings', icon: Settings },
 ];
 
-const TILE_ICON: Record<HiveOverview['tiles'][number]['key'], LucideIcon> = {
-  signals: Radio,
-  alarms: BellRing,
-  assets: Cpu,
-  workOrders: ClipboardList,
-};
-
-const EVENT_ICON: Record<HiveEvent['kind'], LucideIcon> = {
-  thermal: Thermometer,
-  link: Unplug,
-  quality: Gauge,
-  maintenance: Wrench,
-  stock: Package,
-};
-
-const STATUS_CLASS: Record<HiveEvent['status'], string> = {
-  Resolved: 'is-done',
-  Open: 'is-open',
-  Acknowledged: 'is-progress',
+const API_LABEL: Record<HiveApiState, string> = {
+  unconfigured: 'Placeholder data',
+  checking: 'Placeholder data · checking API',
+  online: 'Placeholder data · API online',
+  offline: 'Placeholder data · API offline',
 };
 
 function greeting(date = new Date()): string {
@@ -101,113 +102,241 @@ function initials(name: string): string {
   );
 }
 
-function Delta({ up, children }: { up: boolean; children: React.ReactNode }) {
-  const Icon = up ? ArrowUpRight : ArrowDownRight;
-  return (
-    <span className={`hd-delta ${up ? 'is-up' : 'is-down'}`}>
-      <Icon size={11} strokeWidth={2.4} aria-hidden="true" />
-      {children}
-    </span>
-  );
+function readPref(key: string, fallback: boolean): boolean {
+  try {
+    const v = window.localStorage.getItem(key);
+    return v === null ? fallback : v === '1';
+  } catch {
+    return fallback;
+  }
+}
+function writePref(key: string, value: boolean) {
+  try {
+    window.localStorage.setItem(key, value ? '1' : '0');
+  } catch {
+    /* storage can be blocked; the preference then lasts for this page only */
+  }
 }
 
-const API_LABEL: Record<HiveApiState, string> = {
-  unconfigured: 'Placeholder data',
-  checking: 'Placeholder data · checking API',
-  online: 'Placeholder data · API online',
-  offline: 'Placeholder data · API offline',
-};
+/** Closes a popover on outside click or Escape. */
+function useDismiss(open: boolean, close: () => void) {
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!open) return;
+    const onDown = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) close();
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') close();
+    };
+    document.addEventListener('mousedown', onDown);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('mousedown', onDown);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [open, close]);
+  return ref;
+}
 
-function AlarmChart({ data }: { data: HiveOverview['alarmVolume'] }) {
-  const max = 50;
-  const ticks = [50, 40, 30, 20, 10, 0];
+/* ---------- command search ---------- */
+
+interface Hit {
+  key: string;
+  label: string;
+  hint: string;
+  run: () => void;
+}
+
+function SearchDialog({ onClose, go }: { onClose: () => void; go: (section: string) => void }) {
+  const { data, openDetail } = useHive();
+  const [q, setQ] = useState('');
+  const [idx, setIdx] = useState(0);
+
+  const hits = useMemo<Hit[]>(() => {
+    const all: Hit[] = [
+      ...Object.entries(SECTIONS).map(([id, s]) => ({ key: `s-${id}`, label: s.title, hint: `Go to · ${s.keywords}`, run: () => go(id) })),
+      ...data.assets.map((a) => ({ key: a.id, label: a.name, hint: `Asset · ${a.site}`, run: () => { go('assets'); openDetail({ kind: 'asset', id: a.id }); } })),
+      ...data.alarms.map((a) => ({ key: a.id, label: a.title, hint: `Alarm · ${a.asset} · ${a.id}`, run: () => { go('alarms'); openDetail({ kind: 'alarm', id: a.id }); } })),
+      ...data.workOrders.map((w) => ({ key: w.id, label: w.title, hint: `Work order · ${w.id}`, run: () => { go('work-orders'); openDetail({ kind: 'workOrder', id: w.id }); } })),
+      ...data.documents.map((d) => ({ key: d.id, label: d.name, hint: `Document · ${d.asset}`, run: () => { go('documents'); openDetail({ kind: 'document', id: d.id }); } })),
+    ];
+    const t = q.trim().toLowerCase();
+    return (t ? all.filter((h) => `${h.label} ${h.hint}`.toLowerCase().includes(t)) : all.slice(0, 11)).slice(0, 12);
+  }, [q, data, go, openDetail]);
+
+  useEffect(() => setIdx(0), [q]);
+
+  const choose = (h?: Hit) => {
+    if (!h) return;
+    onClose();
+    h.run();
+  };
+
   return (
-    <div className="hd-chart" role="img" aria-label="Alarms raised and resolved per week, last eight weeks (placeholder)">
-      <div className="hd-chart-head">
-        <span>Raised and resolved</span>
-        <span className="hd-legend">
-          <i className="hd-dot is-orange" /> Raised
-          <i className="hd-dot is-black" /> Resolved
-        </span>
-      </div>
-      <div className="hd-chart-plot">
-        <div className="hd-chart-axis" aria-hidden="true">
-          {ticks.map((t) => (
-            <span key={t}>{t === 0 ? '00' : t}</span>
+    <div className="hd-drawer-wrap is-center" onClick={onClose}>
+      <div className="hd-search-dialog" role="dialog" aria-modal="true" aria-label="Search Hive" onClick={(e) => e.stopPropagation()}>
+        <label className="hd-search-input">
+          <Search size={16} aria-hidden="true" />
+          <input
+            autoFocus
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder="Search assets, alarms, work orders, documents…"
+            aria-label="Search"
+            onKeyDown={(e) => {
+              if (e.key === 'Escape') onClose();
+              else if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                setIdx((i) => Math.min(i + 1, hits.length - 1));
+              } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                setIdx((i) => Math.max(i - 1, 0));
+              } else if (e.key === 'Enter') choose(hits[idx]);
+            }}
+          />
+          <kbd>Esc</kbd>
+        </label>
+        <ul className="hd-hits" role="listbox">
+          {hits.map((h, i) => (
+            <li key={h.key} role="option" aria-selected={i === idx}>
+              <button type="button" className={i === idx ? 'is-on' : ''} onMouseEnter={() => setIdx(i)} onClick={() => choose(h)}>
+                <span>{h.label}</span>
+                <small>{h.hint}</small>
+              </button>
+            </li>
           ))}
-        </div>
-        <div className="hd-chart-area">
-          <div className="hd-chart-grid" aria-hidden="true">
-            {ticks.map((t) => (
-              <i key={t} />
-            ))}
-          </div>
-          <div className="hd-bars">
-            {data.map((d) => (
-              <div className="hd-bar-col" key={d.label}>
-                <div className="hd-bar">
-                  <span className="hd-bar-raised" style={{ height: `${(Math.max(d.raised - d.resolved, 0) / max) * 100}%` }} />
-                  <span className="hd-bar-resolved" style={{ height: `${(d.resolved / max) * 100}%` }} />
-                </div>
-                <span className="hd-bar-label">{d.label}</span>
-              </div>
-            ))}
-          </div>
-        </div>
+          {hits.length === 0 && <li className="hd-empty">Nothing found.</li>}
+        </ul>
       </div>
     </div>
   );
 }
 
-export default function HiveDashboard({ user, onSignOut }: HiveDashboardProps) {
-  const [dark, setDark] = useState(false);
-  const [overview, setOverview] = useState<HiveOverview>(placeholderOverview);
-  const [apiState, setApiState] = useState<HiveApiState>('checking');
-  const [query, setQuery] = useState('');
-  const [checked, setChecked] = useState<Set<string>>(new Set(['EVT_000073']));
-  const [site, setSite] = useState(placeholderOverview.plant.name);
+/* ---------- shell ---------- */
+
+function Shell({ user, onSignOut }: HiveDashboardProps) {
+  const params = useParams();
+  const navigate = useNavigate();
+  const { data, apiState, openDetail } = useHive();
+
+  const raw = (params['*'] ?? '').replace(/\/+$/, '');
+  const section = raw in SECTIONS ? raw : null;
+
+  const [dark, setDarkState] = useState(() => readPref('hive.dash.dark', false));
+  const [compact, setCompactState] = useState(() => readPref('hive.dash.compact', false));
+  const setDark = (v: boolean) => {
+    setDarkState(v);
+    writePref('hive.dash.dark', v);
+  };
+  const setCompact = (v: boolean) => {
+    setCompactState(v);
+    writePref('hive.dash.compact', v);
+  };
+
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [bellOpen, setBellOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const closeBell = useCallback(() => setBellOpen(false), []);
+  const closeMenu = useCallback(() => setMenuOpen(false), []);
+  const bellRef = useDismiss(bellOpen, closeBell);
+  const menuRef = useDismiss(menuOpen, closeMenu);
+
+  const go = useCallback(
+    (target: string) => {
+      openDetail(null);
+      navigate(target ? `${BASE}/${target}` : BASE);
+    },
+    [navigate, openDetail],
+  );
 
   useEffect(() => {
-    let live = true;
-    const ctrl = new AbortController();
-    void fetchHiveOverview().then((o) => live && setOverview(o));
-    void fetchHiveHealth(ctrl.signal).then((s) => live && setApiState(s));
-    return () => {
-      live = false;
-      ctrl.abort();
+    const onKey = (e: KeyboardEvent) => {
+      const typing = e.target instanceof Element && e.target.closest('input, textarea, select, [contenteditable]');
+      if ((e.key === 'k' && (e.metaKey || e.ctrlKey)) || (e.key === '/' && !typing)) {
+        e.preventDefault();
+        setSearchOpen(true);
+      } else if (e.key === 'Escape') {
+        openDetail(null);
+      }
     };
-  }, []);
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [openDetail]);
 
-  const events = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    if (!q) return overview.events;
-    return overview.events.filter((e) => [e.id, e.activity, e.asset, e.status].some((v) => v.toLowerCase().includes(q)));
-  }, [overview.events, query]);
+  useEffect(() => {
+    document.title = `${SECTIONS[section ?? '']?.title ?? 'Hive'} · Hive`;
+  }, [section]);
 
-  const allChecked = events.length > 0 && events.every((e) => checked.has(e.id));
-  const toggle = (id: string) =>
-    setChecked((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  const toggleAll = () =>
-    setChecked((prev) => {
-      const next = new Set(prev);
-      if (allChecked) events.forEach((e) => next.delete(e.id));
-      else events.forEach((e) => next.add(e.id));
-      return next;
-    });
-
+  const openAlarms = data.alarms.filter((a) => a.state === 'Open');
   const firstName = user.name.split(/\s+/)[0] || user.name;
-  const usedPct = Math.round((overview.bufferUsedGb / overview.bufferTotalGb) * 100);
+  const { toast } = useHive();
+
+  const open = (d: DetailRef) => {
+    setBellOpen(false);
+    openDetail(d);
+  };
+
+  let view: React.ReactNode;
+  switch (section) {
+    case '':
+      view = <OverviewView go={go} />;
+      break;
+    case 'activity':
+      view = <ActivityView />;
+      break;
+    case 'assets':
+      view = <AssetsView />;
+      break;
+    case 'alarms':
+      view = <AlarmsView />;
+      break;
+    case 'reports':
+      view = <ReportsView />;
+      break;
+    case 'work-orders':
+      view = <WorkOrdersView />;
+      break;
+    case 'approvals':
+      view = <ApprovalsView />;
+      break;
+    case 'documents':
+      view = <DocumentsView />;
+      break;
+    case 'sites':
+      view = <SitesView go={go} />;
+      break;
+    case 'gateways':
+      view = <GatewaysView />;
+      break;
+    case 'settings':
+      view = <SettingsView dark={dark} setDark={setDark} compact={compact} setCompact={setCompact} />;
+      break;
+    default:
+      view = (
+        <section className="hd-card hd-page">
+          <h2 className="hd-card-title is-lg">Page not found</h2>
+          <p className="hd-muted">There is no Hive page at this address.</p>
+          <button type="button" className="hd-btn is-dark hd-btn-sm" onClick={() => go('')}>
+            Back to overview
+          </button>
+        </section>
+      );
+  }
 
   return (
-    <div className={`hd-root${dark ? ' is-dark' : ''}`} data-theme={dark ? 'dark' : 'light'}>
+    <div className={`hd-root${dark ? ' is-dark' : ''}${compact ? ' is-compact' : ''}`} data-theme={dark ? 'dark' : 'light'}>
       <div className="hd-shell">
         <header className="hd-top">
-          <a className="hd-brand" href="/dashboard/hive" aria-label="Hive home">
+          <a
+            className="hd-brand"
+            href={BASE}
+            aria-label="Hive overview"
+            onClick={(e) => {
+              e.preventDefault();
+              go('');
+            }}
+          >
             <span className="hd-brand-mark">
               <img src="/brand-mark-tile.svg" alt="" width={18} height={18} />
             </span>
@@ -215,42 +344,78 @@ export default function HiveDashboard({ user, onSignOut }: HiveDashboardProps) {
           </a>
 
           <nav className="hd-tabs" aria-label="Hive sections">
-            {TABS.map((t, i) => (
+            {TABS.map((id) => (
               <button
-                key={t}
+                key={id || 'overview'}
                 type="button"
-                className={`hd-tab${i === 0 ? ' is-active' : ''}`}
-                aria-current={i === 0 ? 'page' : undefined}
-                disabled={i !== 0}
-                title={i === 0 ? undefined : 'Coming soon'}
+                className={`hd-tab${section === id ? ' is-active' : ''}`}
+                aria-current={section === id ? 'page' : undefined}
+                onClick={() => go(id)}
               >
-                {t}
+                {SECTIONS[id].title}
               </button>
             ))}
           </nav>
 
           <div className="hd-tools">
             <div className="hd-tools-pill">
-              <button type="button" className="hd-icon-btn" aria-label="Search">
+              <button type="button" className="hd-icon-btn" aria-label="Search (Ctrl K)" title="Search (Ctrl K)" onClick={() => setSearchOpen(true)}>
                 <Search size={16} />
               </button>
-              <button type="button" className="hd-icon-btn has-dot" aria-label="Notifications">
-                <Bell size={16} />
-              </button>
-              <button type="button" className="hd-icon-btn" aria-label="Status">
+              <div className="hd-pop-anchor" ref={bellRef}>
+                <button
+                  type="button"
+                  className={`hd-icon-btn${openAlarms.length ? ' has-dot' : ''}`}
+                  aria-label={`Notifications, ${openAlarms.length} open alarms`}
+                  aria-expanded={bellOpen}
+                  onClick={() => setBellOpen((v) => !v)}
+                >
+                  <Bell size={16} />
+                </button>
+                {bellOpen && (
+                  <div className="hd-pop" role="menu">
+                    <div className="hd-pop-head">Open alarms</div>
+                    {openAlarms.slice(0, 4).map((a) => (
+                      <button key={a.id} type="button" role="menuitem" className="hd-pop-item" onClick={() => { setBellOpen(false); go('alarms'); open({ kind: 'alarm', id: a.id }); }}>
+                        <span className={`hd-sev is-${a.severity}`}>{a.severity}</span>
+                        <span>{a.title}<small>{a.asset} · {a.raisedAt}</small></span>
+                      </button>
+                    ))}
+                    {openAlarms.length === 0 && <p className="hd-pop-empty">All clear.</p>}
+                    <button type="button" className="hd-pop-foot" onClick={() => { setBellOpen(false); go('alarms'); }}>
+                      See all alarms
+                    </button>
+                  </div>
+                )}
+              </div>
+              <a className="hd-icon-btn" href="https://status.clerktree.com" target="_blank" rel="noreferrer" aria-label="Platform status" title="Platform status">
                 <CircleAlert size={16} />
-              </button>
+              </a>
             </div>
-            <button type="button" className="hd-profile" aria-label="Account menu">
-              <span className="hd-avatar">
-                {user.avatarUrl ? <img src={user.avatarUrl} alt="" /> : initials(user.name)}
-              </span>
-              <span className="hd-profile-text">
-                <strong>{user.name}</strong>
-                <small>{user.email}</small>
-              </span>
-              <ChevronDown size={14} aria-hidden="true" />
-            </button>
+
+            <div className="hd-pop-anchor" ref={menuRef}>
+              <button type="button" className="hd-profile" aria-label="Account menu" aria-expanded={menuOpen} onClick={() => setMenuOpen((v) => !v)}>
+                <span className="hd-avatar">{user.avatarUrl ? <img src={user.avatarUrl} alt="" /> : initials(user.name)}</span>
+                <span className="hd-profile-text">
+                  <strong>{user.name}</strong>
+                  <small>{user.email}</small>
+                </span>
+                <ChevronDown size={14} aria-hidden="true" />
+              </button>
+              {menuOpen && (
+                <div className="hd-pop is-right" role="menu">
+                  <button type="button" role="menuitem" className="hd-pop-item" onClick={() => { setMenuOpen(false); go('settings'); }}>
+                    <Settings size={15} /> <span>Settings</span>
+                  </button>
+                  <a role="menuitem" className="hd-pop-item" href="/dashboard/default">
+                    <LayoutPanelLeft size={15} /> <span>Workspace dashboards</span>
+                  </a>
+                  <button type="button" role="menuitem" className="hd-pop-item" onClick={() => { setMenuOpen(false); onSignOut?.(); }}>
+                    <LogOut size={15} /> <span>Sign out</span>
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </header>
 
@@ -266,17 +431,25 @@ export default function HiveDashboard({ user, onSignOut }: HiveDashboardProps) {
             </div>
 
             <div className="hd-rail-pill hd-nav">
-              {RAIL.map(({ icon: Icon, label }, i) => (
-                <button key={label} type="button" className={i === 0 ? 'is-on' : ''} aria-label={label} title={label} aria-current={i === 0 ? 'page' : undefined}>
+              {RAIL.map(({ id, icon: Icon }) => (
+                <button
+                  key={id || 'overview'}
+                  type="button"
+                  className={section === id ? 'is-on' : ''}
+                  aria-label={SECTIONS[id].title}
+                  title={SECTIONS[id].title}
+                  aria-current={section === id ? 'page' : undefined}
+                  onClick={() => go(id)}
+                >
                   <Icon size={16} />
                 </button>
               ))}
             </div>
 
             <div className="hd-rail-pill hd-foot">
-              <button type="button" aria-label="Help" title="Help">
+              <a className="hd-rail-link" href="https://clerktree.com/contact" target="_blank" rel="noreferrer" aria-label="Help" title="Help">
                 <CircleHelp size={16} />
-              </button>
+              </a>
               <button type="button" aria-label="Sign out" title="Sign out" onClick={onSignOut}>
                 <LogOut size={16} />
               </button>
@@ -286,244 +459,38 @@ export default function HiveDashboard({ user, onSignOut }: HiveDashboardProps) {
           <main className="hd-main">
             <div className="hd-heading">
               <div>
-                <h1>
-                  {greeting()}, {firstName}
-                </h1>
-                <p>Stay on top of your plant, monitor signals, and track alarms.</p>
+                <h1>{section === '' || section === null ? `${greeting()}, ${firstName}` : SECTIONS[section].title}</h1>
+                <p>
+                  {section === '' || section === null
+                    ? 'Stay on top of your plant, monitor signals, and track alarms.'
+                    : `${data.plant.name} · placeholder data until the Hive API is connected`}
+                </p>
               </div>
               <span className={`hd-api is-${apiState}`} role="status">
                 <i /> {API_LABEL[apiState]}
               </span>
             </div>
 
-            <div className="hd-grid">
-              {/* Plant availability */}
-              <section className="hd-card hd-balance" aria-labelledby="hd-plant">
-                <div className="hd-row">
-                  <span id="hd-plant" className="hd-label">
-                    Plant availability
-                  </span>
-                  <label className="hd-select">
-                    <select value={site} onChange={(e) => setSite(e.target.value)} aria-label="Site">
-                      <option>{overview.plant.name}</option>
-                    </select>
-                    <ChevronDown size={12} aria-hidden="true" />
-                  </label>
-                </div>
-                <div className="hd-big">{overview.plant.availability}</div>
-                <div className="hd-sub">
-                  <Delta up={overview.plant.deltaUp}>{overview.plant.delta}</Delta>
-                  <span>than last week</span>
-                </div>
-                <div className="hd-actions">
-                  <button type="button" className="hd-btn is-dark">
-                    <ArrowLeftRight size={16} /> Open alarms
-                  </button>
-                  <button type="button" className="hd-btn is-light">
-                    <ClipboardList size={16} /> Work order
-                  </button>
-                </div>
-                <div className="hd-panel hd-wallets">
-                  <div className="hd-panel-title">
-                    <strong>Sites</strong>
-                    <span>Total {overview.sites.length} sites</span>
-                  </div>
-                  <div className="hd-wallet-row">
-                    {overview.sites.map((s) => (
-                      <div className="hd-wallet" key={s.id}>
-                        <div className="hd-wallet-top">
-                          <span className="hd-site-chip">{s.name.slice(0, 1)}</span>
-                          <b>{s.name}</b>
-                          <EllipsisVertical size={12} aria-hidden="true" />
-                        </div>
-                        <div className="hd-wallet-amount">{s.oee}</div>
-                        <small>{s.signals}</small>
-                        <em className={s.state === 'Active' ? 'is-active' : 'is-inactive'}>{s.state}</em>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </section>
-
-              {/* Tiles */}
-              <section className="hd-tiles" aria-label="Key figures">
-                {overview.tiles.map((t, i) => {
-                  const Icon = TILE_ICON[t.key];
-                  return (
-                    <div className={`hd-tile${i === 0 ? ' is-accent' : ''}`} key={t.key}>
-                      <div className="hd-row">
-                        <span>{t.label}</span>
-                        <span className="hd-tile-icon">
-                          <Icon size={14} />
-                        </span>
-                      </div>
-                      <div className="hd-tile-value">{t.value}</div>
-                      <div className="hd-sub">
-                        <Delta up={t.up}>{t.delta}</Delta>
-                        <span>This month</span>
-                      </div>
-                    </div>
-                  );
-                })}
-              </section>
-
-              {/* Chart */}
-              <section className="hd-card hd-income" aria-labelledby="hd-alarms">
-                <h2 id="hd-alarms">Alarm volume</h2>
-                <p className="hd-muted">View alarms raised and resolved over the last eight weeks</p>
-                <AlarmChart data={overview.alarmVolume} />
-              </section>
-
-              {/* Buffer */}
-              <section className="hd-card hd-limit" aria-labelledby="hd-buffer">
-                <h2 id="hd-buffer" className="hd-card-title">
-                  Edge buffer usage
-                </h2>
-                <div
-                  className="hd-progress"
-                  role="progressbar"
-                  aria-valuemin={0}
-                  aria-valuemax={100}
-                  aria-valuenow={usedPct}
-                  aria-label="Edge buffer used"
-                >
-                  <span style={{ width: `${usedPct}%` }} />
-                </div>
-                <div className="hd-progress-meta">
-                  <b>{overview.bufferUsedGb.toFixed(1)} GB</b>
-                  <small>used out of</small>
-                  <span>{overview.bufferTotalGb.toFixed(1)} GB</span>
-                </div>
-              </section>
-
-              {/* Gateways */}
-              <section className="hd-card hd-cards" aria-labelledby="hd-gateways">
-                <div className="hd-row">
-                  <div className="hd-title-with-icon">
-                    <span className="hd-ico-chip">
-                      <Wifi size={15} />
-                    </span>
-                    <h2 id="hd-gateways" className="hd-card-title">
-                      Gateways
-                    </h2>
-                  </div>
-                  <button type="button" className="hd-ghost">
-                    <Plus size={12} /> Enroll
-                  </button>
-                </div>
-                <div className="hd-gw-row">
-                  {overview.gateways.map((g, i) => (
-                    <div className={`hd-gw ${i === 0 ? 'is-black' : 'is-orange'}`} key={g.id}>
-                      <div className="hd-gw-top">
-                        <Wifi size={13} aria-hidden="true" />
-                        <span className="hd-gw-state">{g.state}</span>
-                        {i === 0 ? (
-                          <span className="hd-gw-logo" aria-hidden="true">
-                            <i />
-                            <i />
-                          </span>
-                        ) : (
-                          <Sparkles size={22} className="hd-gw-spark" aria-hidden="true" />
-                        )}
-                      </div>
-                      <div className="hd-gw-meta">
-                        <div>
-                          <small>Gateway ID</small>
-                          <span>{g.id.replace(/.*· /, '**** **** ')}</span>
-                        </div>
-                        <div>
-                          <small>Version</small>
-                          <span>{g.version}</span>
-                        </div>
-                        <div>
-                          <small>Uptime</small>
-                          <span>{g.uptime}</span>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </section>
-
-              {/* Events */}
-              <section className="hd-card hd-activity" aria-labelledby="hd-events">
-                <div className="hd-row">
-                  <h2 id="hd-events" className="hd-card-title is-lg">
-                    Recent events
-                  </h2>
-                  <div className="hd-act-tools">
-                    <label className="hd-search">
-                      <Search size={14} aria-hidden="true" />
-                      <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search" aria-label="Search events" />
-                    </label>
-                    <button type="button" className="hd-filter">
-                      Filter <SlidersHorizontal size={13} />
-                    </button>
-                  </div>
-                </div>
-                <div className="hd-table-wrap">
-                  <table className="hd-table">
-                    <thead>
-                      <tr>
-                        <th className="hd-col-check">
-                          <input type="checkbox" checked={allChecked} onChange={toggleAll} aria-label="Select all events" />
-                        </th>
-                        <th>Event ID</th>
-                        <th>Activity</th>
-                        <th>Asset</th>
-                        <th>Status</th>
-                        <th>Date</th>
-                        <th aria-label="Actions" />
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {events.map((e) => {
-                        const Icon = EVENT_ICON[e.kind];
-                        const on = checked.has(e.id);
-                        return (
-                          <tr key={e.id} className={on ? 'is-selected' : ''}>
-                            <td className="hd-col-check">
-                              <input type="checkbox" checked={on} onChange={() => toggle(e.id)} aria-label={`Select ${e.id}`} />
-                            </td>
-                            <td>{e.id}</td>
-                            <td>
-                              <span className="hd-act">
-                                <span className="hd-act-icon">
-                                  <Icon size={13} />
-                                </span>
-                                {e.activity}
-                              </span>
-                            </td>
-                            <td>{e.asset}</td>
-                            <td>
-                              <span className={`hd-status ${STATUS_CLASS[e.status]}`}>
-                                <i /> {e.status}
-                              </span>
-                            </td>
-                            <td>{e.at}</td>
-                            <td>
-                              <button type="button" className="hd-more" aria-label={`Actions for ${e.id}`}>
-                                <EllipsisVertical size={14} />
-                              </button>
-                            </td>
-                          </tr>
-                        );
-                      })}
-                      {events.length === 0 && (
-                        <tr>
-                          <td colSpan={7} className="hd-empty">
-                            No events match “{query}”.
-                          </td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-              </section>
-            </div>
+            {view}
           </main>
         </div>
       </div>
+
+      {searchOpen && <SearchDialog onClose={() => setSearchOpen(false)} go={go} />}
+      <DetailDrawer />
+      {toast && (
+        <div className="hd-toast" role="status">
+          {toast}
+        </div>
+      )}
     </div>
+  );
+}
+
+export default function HiveDashboard(props: HiveDashboardProps) {
+  return (
+    <HiveStoreProvider>
+      <Shell {...props} />
+    </HiveStoreProvider>
   );
 }
