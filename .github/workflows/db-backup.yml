@@ -42,8 +42,8 @@ jobs:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
         run: |
           supabase link --project-ref "$SUPABASE_PROJECT_REF"
-          supabase db dump -f schema.sql
-          supabase db dump --data-only --use-copy --schema public,auth,storage -f data.sql
+          supabase db dump --linked -f schema.sql
+          supabase db dump --linked --data-only --use-copy --schema public,auth,storage -f data.sql
           tar -czf backup.tar.gz schema.sql data.sql
           size=$(stat -c %s backup.tar.gz)
           echo "backup size: $size bytes"
