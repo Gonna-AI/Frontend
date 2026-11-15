@@ -115,14 +115,12 @@ Deno.serve(async (req: Request) => {
         { data: teamMembers },
         { data: apiKeys },
         { data: documents },
-        { data: paymentHistory },
         { data: activityLog },
       ] = await Promise.all([
         adminClient.from('call_history').select('*').eq('user_id', user.id).order('date', { ascending: false }).limit(1000),
         adminClient.from('team_members').select('*').eq('owner_id', user.id),
         adminClient.from('api_keys').select('id, name, permissions, rate_limit, status, created_at, last_used').eq('user_id', user.id),
         adminClient.from('kb_uploaded_documents').select('id, file_name, file_type, file_size, status, created_at').eq('user_id', user.id),
-        adminClient.from('payment_history').select('*').eq('user_id', user.id).order('created_at', { ascending: false }),
         adminClient.from('activity_log').select('*').eq('user_id', user.id).order('created_at', { ascending: false }).limit(500),
       ]);
 
@@ -138,7 +136,6 @@ Deno.serve(async (req: Request) => {
           team_members: teamMembers ?? [],
           api_keys: apiKeys ?? [],
           documents: documents ?? [],
-          payment_history: paymentHistory ?? [],
           activity_log: activityLog ?? [],
         },
       });
