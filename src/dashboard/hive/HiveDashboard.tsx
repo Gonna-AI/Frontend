@@ -47,6 +47,8 @@ export interface HiveDashboardUser {
 interface HiveDashboardProps {
   user: HiveDashboardUser;
   onSignOut?: () => void;
+  /** True when nobody is signed in: the exit actions read "Sign in". */
+  guest?: boolean;
 }
 
 const BASE = '/dashboard/hive';
@@ -215,7 +217,8 @@ function SearchDialog({ onClose, go }: { onClose: () => void; go: (section: stri
 
 /* ---------- shell ---------- */
 
-function Shell({ user, onSignOut }: HiveDashboardProps) {
+function Shell({ user, onSignOut, guest = false }: HiveDashboardProps) {
+  const exitLabel = guest ? 'Sign in' : 'Sign out';
   const params = useParams();
   const navigate = useNavigate();
   const { data, apiState, openDetail } = useHive();
@@ -411,7 +414,7 @@ function Shell({ user, onSignOut }: HiveDashboardProps) {
                     <LayoutPanelLeft size={15} /> <span>Workspace dashboards</span>
                   </a>
                   <button type="button" role="menuitem" className="hd-pop-item" onClick={() => { setMenuOpen(false); onSignOut?.(); }}>
-                    <LogOut size={15} /> <span>Sign out</span>
+                    <LogOut size={15} /> <span>{exitLabel}</span>
                   </button>
                 </div>
               )}
@@ -450,7 +453,7 @@ function Shell({ user, onSignOut }: HiveDashboardProps) {
               <a className="hd-rail-link" href="https://clerktree.com/contact" target="_blank" rel="noreferrer" aria-label="Help" title="Help">
                 <CircleHelp size={16} />
               </a>
-              <button type="button" aria-label="Sign out" title="Sign out" onClick={onSignOut}>
+              <button type="button" aria-label={exitLabel} title={exitLabel} onClick={onSignOut}>
                 <LogOut size={16} />
               </button>
             </div>

@@ -293,8 +293,8 @@ function App() {
               <Route path="/client/login" element={<ClientPortalProviderRoute><ClientPortalLoginPage /></ClientPortalProviderRoute>} />
               <Route path="/client" element={<ProtectedClientPortalRoute><ClientPortalDashboard /></ProtectedClientPortalRoute>} />
 
-              {/* Hive dashboard: its own full-screen shell, outside the dashboard layout */}
-              <Route path="/dashboard/hive/*" element={<Workspace><HiveDashboard /></Workspace>} />
+              {/* Hive dashboard: public, placeholder data only, own full-screen shell outside the dashboard layout */}
+              <Route path="/dashboard/hive/*" element={<HiveDashboard />} />
 
               {/* Workspace */}
               <Route path="/dashboard" element={<Workspace><DashboardLayout /></Workspace>}>
