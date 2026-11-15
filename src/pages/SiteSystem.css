@@ -259,6 +259,17 @@
   --r-row: 34px;
   --r-inner: var(--r-card);
   --r-inner2: calc(var(--r-inner) - 8px);
+
+  /* Device mock-ups inside the WebGL panels: each layer is the one around it minus the border or
+     padding between them, so every corner nests. Floors keep the small ones from going sharp.
+       device  --r-dev     frame, spot stage, chart, case card, code block (= --r-inner)
+       screen  --r-screen  the glass inside the 5px bezel
+       tile    --r-tile    rows and cards inside the screen (6px padding)
+       chip    --r-chip    icons, slots, tags inside a tile */
+  --r-dev: var(--r-inner);
+  --r-screen: calc(var(--r-dev) - 5px);
+  --r-tile: max(calc(var(--r-screen) - 6px), 8px);
+  --r-chip: max(calc(var(--r-tile) - 6px), 6px);
 }
 
 .ct-works.ct-works :is(.hs-panel, .hs-story-stage, .cx.is-auto, .ct-plan-card, .cxm-card) {
@@ -267,11 +278,11 @@
 .ct-works.ct-works :is(.ct-faq-item, .hs-step) {
   border-radius: var(--r-row);
 }
-.ct-works.ct-works :is(.hs-code, .hs-case-card, .hs-chart, .hs-spot-stage, .hs-crt.hs-scene),
+.ct-works.ct-works :is(.hs-code, .hs-case-card, .hs-chart, .hs-spot-stage, .ag),
 .ct-works.ct-works .hs-case-stats > * {
   border-radius: var(--r-inner);
 }
-.ct-works.ct-works :is(.hs-panel, .hs-story-stage) :is(.hs-case-media, .hs-seed, .hs-sig-row, .hs-sig-finding) {
+.ct-works.ct-works :is(.hs-panel, .hs-story-stage) .hs-case-media {
   border-radius: var(--r-inner2);
 }
 /* Small gaps: concentric with the surface around them. */
@@ -285,7 +296,32 @@
 .ct-works.ct-works.ct-home-page .ct-hero-stage--home.has-demo {
   border-radius: calc(var(--r-edge) - var(--shell-pad) - 1px);
 }
-.ct-works.ct-works .ct-hero-stage--home .hs-crt { border-radius: var(--r-inner2); }
+
+/* ---------- Device mock-ups: frame -> screen -> tile -> chip ---------- */
+.ct-works.ct-works .hs-crt { border-radius: var(--r-dev); }
+.ct-works.ct-works .hs-crt::after { border-radius: var(--r-screen); }
+
+.ct-works.ct-works :is(
+  .ag-node, .ag-caption, .cs-floor-stats div, .cs-paper, .cs-param, .cs-floor-grid, .cs-hub-row,
+  .cs-week, .cs-hub-core, .cs-hub-mark, .hs-ac-wo, .hs-graph, .hs-rfq, .hs-row-box, .hs-seed,
+  .hs-sig-finding, .hs-answer, .hs-sig-row, .hs-src, .hs-st, .hs-wo, .hs-gc, .hs-gn, .hs-step-ico,
+  .hs-wo-approve
+) {
+  border-radius: var(--r-tile);
+}
+.ct-works.ct-works .hs-gn.is-answer { border-radius: calc(var(--r-tile) + 4px); }
+.ct-works.ct-works .hs-gn.is-root.is-hit::before,
+.ct-works.ct-works .hs-gn.is-root.is-hit::after { border-radius: calc(var(--r-tile) + 6px); }
+
+.ct-works.ct-works :is(
+  .cs-job, .cs-logo, .ag-ico, .hs-ac-wo-ico, .hs-crt-progress, .hs-seed-ico, .hs-row-ico, .hs-slot, .cs-hub-logo,
+  .cs-tile, .hs-ac-btn, .hs-code-tabs, .hs-gn b, .ag-caption span, .ag-chips b, .hs-gtag, .hs-model,
+  .hs-src-n, .hs-answer i, .hs-wo-evidence i, .hs-wo-title em, .hs-bar-track, .hs-bar-fill, .hs-st-bar,
+  .hs-st-bar i
+) {
+  border-radius: var(--r-chip);
+}
+.ct-works.ct-works .hs-code-tabs button { border-radius: max(calc(var(--r-chip) - 3px), 4px); }
 
 /* ---------- Phones: one outer width for every container ----------
    The hero shell sits on the 8px page gutter. On a phone every other outer container used its own
