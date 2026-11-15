@@ -3587,3 +3587,144 @@ a.hd-btn { text-decoration: none; display: inline-flex; align-items: center; jus
 .hd-search input { box-shadow: none; background: transparent; }
 .hd-filter { box-shadow: var(--hd-ring); background: var(--hd-glass-strong); border-color: transparent; }
 .hd-root.is-phone .hd-search { background: var(--well-light-bg); box-shadow: var(--well-light-shadow); }
+
+/* ======================================================================
+   v6: depth on every clickable, as on the main site
+   Black glass buttons float on a tall layered shadow (the site's .ct-button); light buttons and
+   pills are raised (light top edge, hairline ring, soft drop); hover lifts and deepens; press
+   sinks and scales. Small refinement: shapes, colours and layout are unchanged.
+   ====================================================================== */
+.hd-root {
+  /* black glass, the site's recipe at full depth, and a lighter version for small controls */
+  --hd-black-shadow: inset 0 0.5px 0.5px rgba(255, 255, 255, 0.18), 0 10px 10px rgba(0, 0, 0, 0.17), 0 23px 14px rgba(0, 0, 0, 0.1);
+  --hd-black-shadow-hover: inset 0 0.5px 0.5px rgba(255, 255, 255, 0.22), 0 14px 18px rgba(0, 0, 0, 0.22), 0 30px 22px rgba(0, 0, 0, 0.12);
+  --hd-black-shadow-sm: inset 0 0.5px 0.5px rgba(255, 255, 255, 0.18), 0 6px 8px rgba(0, 0, 0, 0.16), 0 12px 10px -4px rgba(0, 0, 0, 0.1);
+  /* raised light controls */
+  --hd-raise: inset 0 1px 0 rgba(255, 255, 255, 0.95), inset 0 -1px 0 rgba(10, 10, 10, 0.05), 0 0 0 1px rgba(10, 10, 10, 0.06), 0 2px 4px rgba(10, 10, 10, 0.05), 0 8px 14px -6px rgba(10, 10, 10, 0.14);
+  --hd-raise-hover: inset 0 1px 0 rgba(255, 255, 255, 1), inset 0 -1px 0 rgba(10, 10, 10, 0.06), 0 0 0 1px rgba(10, 10, 10, 0.08), 0 3px 6px rgba(10, 10, 10, 0.07), 0 14px 22px -8px rgba(10, 10, 10, 0.2);
+  --hd-press: inset 0 2px 4px rgba(10, 10, 10, 0.16), inset 0 0 0 1px rgba(10, 10, 10, 0.09);
+}
+.hd-root.is-dark {
+  --hd-raise: inset 0 1px 0 rgba(255, 255, 255, 0.09), inset 0 -1px 0 rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.07), 0 6px 14px -6px rgba(0, 0, 0, 0.65);
+  --hd-raise-hover: inset 0 1px 0 rgba(255, 255, 255, 0.13), inset 0 -1px 0 rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.11), 0 14px 24px -8px rgba(0, 0, 0, 0.75);
+  --hd-press: inset 0 2px 5px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.07);
+}
+
+/* ----- black glass: full depth on buttons, lighter on small controls ----- */
+.hd-root:not(.is-dark) .hd-tab.is-active,
+.hd-root:not(.is-dark) .hd-btn.is-dark,
+.hd-root:not(.is-dark) .hd-bn.is-on,
+.hd-root:not(.is-dark) .hd-roundbtn {
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1), var(--hd-black-shadow);
+}
+.hd-root:not(.is-dark) .hd-chip.is-on,
+.hd-root:not(.is-dark) .hd-rail-pill:not(.hd-theme) button.is-on,
+.hd-root:not(.is-dark) .hd-menu-item.is-on,
+.hd-root:not(.is-dark) .hd-theme-row button.is-on,
+.hd-root:not(.is-dark) .hd-daytile.is-hot {
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1), var(--hd-black-shadow-sm);
+}
+@media (hover: hover) and (pointer: fine) {
+  .hd-root:not(.is-dark) .hd-btn.is-dark:hover,
+  .hd-root:not(.is-dark) .hd-roundbtn:hover {
+    background: rgba(12, 12, 12, 0.94);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12), var(--hd-black-shadow-hover);
+  }
+}
+.hd-root:not(.is-dark) .hd-btn.is-dark:active,
+.hd-root:not(.is-dark) .hd-roundbtn:active { box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1), 0 4px 6px rgba(0, 0, 0, 0.2); }
+.hd-root:not(.is-dark) .hd-btn.is-dark:disabled { box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08), 0 3px 4px rgba(0, 0, 0, 0.12); }
+
+/* ----- raised light controls ----- */
+.hd-btn.is-light,
+.hd-ghost,
+.hd-filter,
+.hd-back,
+.hd-lang-btn,
+.hd-chip:not(.is-on),
+.hd-theme-row button:not(.is-on),
+.hd-menu-item:not(.is-on) {
+  box-shadow: var(--hd-raise);
+}
+.hd-lang-btn { background: transparent; }
+.hd-tab:not(.is-active):not(:disabled):hover,
+.hd-rail-pill:not(.hd-theme) button:not(.is-on):hover,
+.hd-icon-btn:hover,
+.hd-bn:not(.is-on):hover {
+  background: var(--hd-glass-strong);
+  box-shadow: var(--hd-raise);
+}
+@media (hover: hover) and (pointer: fine) {
+  .hd-btn.is-light:hover,
+  .hd-ghost:hover,
+  .hd-filter:hover,
+  .hd-back:hover,
+  .hd-lang-btn:hover,
+  .hd-chip:not(.is-on):hover,
+  .hd-menu-item:not(.is-on):hover {
+    transform: translateY(-1px);
+    box-shadow: var(--hd-raise-hover);
+  }
+}
+.hd-btn.is-light:active,
+.hd-ghost:active,
+.hd-filter:active,
+.hd-back:active,
+.hd-lang-btn:active,
+.hd-chip:not(.is-on):active,
+.hd-menu-item:active,
+.hd-icon-btn:active {
+  transform: scale(0.97);
+  box-shadow: var(--hd-press);
+}
+
+/* ----- orange primary: a little more depth, same recipe ----- */
+.hd-btn.is-accent {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28), inset 0 -1px 0 rgba(0, 0, 0, 0.18), 0 10px 10px -4px rgba(0, 0, 0, 0.12), 0 14px 32px -14px color-mix(in srgb, var(--hd-orange) 70%, transparent);
+}
+.hd-btn.is-accent:active:not(:disabled) { transform: scale(0.97); }
+
+/* ----- clickable cards lift on hover and press in ----- */
+.hd-machine,
+.hd-doc,
+.hd-site,
+.hd-wallet,
+.hd-gw,
+.hd-thread,
+.hd-attention button,
+.hd-approval-main,
+.hd-link-row,
+.hd-alarm-row > button:first-child {
+  transition: transform 220ms var(--hd-ease), box-shadow 260ms var(--hd-ease), background-color 180ms ease;
+}
+@media (hover: hover) and (pointer: fine) {
+  .hd-machine:hover,
+  .hd-doc:hover,
+  .hd-site:hover { transform: translateY(-2px); }
+  .hd-wallet:hover,
+  .hd-attention button:hover { transform: translateY(-1px); }
+}
+.hd-machine:active,
+.hd-doc:active,
+.hd-site:active,
+.hd-wallet:active,
+.hd-gw:active,
+.hd-attention button:active { transform: scale(0.985); }
+.hd-root.is-phone .hd-mcard,
+.hd-root.is-phone .hd-daytile { transition: transform 160ms var(--hd-ease), box-shadow 220ms var(--hd-ease); }
+.hd-root.is-phone .hd-mcard:active,
+.hd-root.is-phone .hd-daytile:active { transform: scale(0.98); }
+
+/* ----- small icon tiles and the rail ----- */
+.hd-rail-pill button,
+.hd-icon-btn { transition: background-color 180ms ease, box-shadow 240ms var(--hd-ease), transform 160ms var(--hd-ease); }
+.hd-pop-item,
+.hd-hits button { transition: background-color 160ms ease, box-shadow 200ms var(--hd-ease); }
+.hd-pop-item:hover,
+.hd-hits button.is-on { box-shadow: var(--hd-raise); background: var(--hd-glass-strong); }
+
+@media (prefers-reduced-motion: reduce) {
+  .hd-machine, .hd-doc, .hd-site, .hd-wallet, .hd-gw, .hd-thread, .hd-attention button, .hd-approval-main, .hd-link-row, .hd-alarm-row > button:first-child { transition: none; }
+  .hd-machine:hover, .hd-doc:hover, .hd-site:hover, .hd-wallet:hover, .hd-attention button:hover,
+  .hd-btn.is-light:hover, .hd-ghost:hover, .hd-filter:hover, .hd-back:hover, .hd-lang-btn:hover, .hd-chip:hover, .hd-menu-item:hover { transform: none; }
+}
