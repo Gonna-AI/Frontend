@@ -122,6 +122,8 @@ export function UptimeBar({ days, label, sublabel, uptime, showUptime = true, st
           className={cn("flex w-full items-stretch gap-px rounded-sm outline-none @md:gap-[2px] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring", h)}
         >
           {days.map((d, i) => (
+            // Focus stays on the listbox; options are reached with aria-activedescendant, so they are not tab stops.
+            // eslint-disable-next-line jsx-a11y/interactive-supports-focus
             <div
               key={`${String(d.date)}-${i}`}
               id={optId(i)}
