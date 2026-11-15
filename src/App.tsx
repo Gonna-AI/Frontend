@@ -220,7 +220,15 @@ function App() {
   const isResearchHost = typeof window !== 'undefined' && window.location.hostname === 'research.clerktree.com';
   const isStatusHost = typeof window !== 'undefined' && window.location.hostname === 'status.clerktree.com';
 
+  // The status host serves the status page at its root and nothing else: send any other path to the main site.
+  const leaveStatusHost = isStatusHost && window.location.pathname !== '/';
+  useEffect(() => {
+    if (leaveStatusHost) window.location.replace(`https://clerktree.com${window.location.pathname}${window.location.search}${window.location.hash}`);
+  }, [leaveStatusHost]);
+
   useEffect(() => installIntentPrefetch(routePrefetchers), []);
+
+  if (leaveStatusHost) return null;
 
   return (
     <LanguageProvider>

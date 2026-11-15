@@ -17,6 +17,11 @@ const REFRESH_MS = 60_000;
 const HISTORY_DAYS = 90;
 const PAST_DAYS = 7;
 
+/** On status.clerktree.com every header and footer link goes to the main site, never to a page on this host. */
+const MAIN_SITE = 'https://clerktree.com';
+const onStatusHost = typeof window !== 'undefined' && window.location.hostname === 'status.clerktree.com';
+const linkBase = onStatusHost ? MAIN_SITE : '';
+
 type ComponentStatus =
   | 'operational'
   | 'degraded_performance'
@@ -139,7 +144,7 @@ export default function Status() {
         description="Live status of ClerkTree and the Hive API."
         canonical="https://clerktree.com/status"
       />
-      <PageHero eyebrow="Status" title="System status" titleId="status-page-title" />
+      <PageHero eyebrow="Status" title="System status" titleId="status-page-title" linkBase={linkBase} />
 
       <div className="ct-legal-page-container">
         <main id="main-content">
@@ -233,7 +238,7 @@ export default function Status() {
         </main>
       </div>
 
-      <Footer />
+      <Footer linkBase={linkBase} />
     </div>
   );
 }
