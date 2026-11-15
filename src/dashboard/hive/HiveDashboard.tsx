@@ -1,40 +1,42 @@
 import {
   Bell,
-  Calendar,
+  ChartBar,
   ChevronDown,
   CircleAlert,
   CircleHelp,
-  Factory,
+  ClipboardList,
+  Cpu,
   FileText,
-  Layers,
+  Home,
+  Inbox,
   LayoutGrid,
   LayoutPanelLeft,
+  Lightbulb,
   LogOut,
-  Mail,
   Moon,
+  Network,
+  Package,
   Search,
   Settings,
+  ShieldCheck,
+  Sparkles,
+  Store,
   Sun,
   type LucideIcon,
 } from 'lucide-react-dash';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 
+import { AdminView, SettingsView } from './admin';
+import { AssistantView } from './assistant';
+import { DocumentsView, FindingsView, PartsView, ReportsView, VendorsView } from './business';
+import { PhoneCtx, useMediaQuery } from './common';
+import { GraphView } from './graph';
+import { MachineDetail, MachinesView } from './machines';
+import { BottomNav, MobileHeader, MobileHome, MobileMenu, type NavEntry } from './mobile';
+import { ActivityView, AlarmsView, DetailDrawer, InboxView, WorkOrdersView } from './ops';
 import OverviewView from './OverviewView';
 import { HiveStoreProvider, useHive, type DetailRef } from './store';
-import {
-  ActivityView,
-  AlarmsView,
-  ApprovalsView,
-  AssetsView,
-  DetailDrawer,
-  DocumentsView,
-  GatewaysView,
-  ReportsView,
-  SettingsView,
-  SitesView,
-  WorkOrdersView,
-} from './views';
 import type { HiveApiState } from './hiveApi';
 import './hive-dashboard.css';
 
@@ -53,30 +55,37 @@ interface HiveDashboardProps {
 
 const BASE = '/dashboard/hive';
 
-const SECTIONS: Record<string, { title: string; keywords: string }> = {
-  '': { title: 'Overview', keywords: 'home dashboard' },
-  activity: { title: 'Activity', keywords: 'feed history timeline' },
-  assets: { title: 'Assets', keywords: 'machines equipment graph' },
-  alarms: { title: 'Alarms', keywords: 'alerts faults' },
-  reports: { title: 'Reports', keywords: 'oee trends export csv' },
-  'work-orders': { title: 'Work orders', keywords: 'maintenance cmms erp' },
-  approvals: { title: 'Approvals', keywords: 'decisions pending' },
-  documents: { title: 'Documents', keywords: 'manuals drawings sop' },
-  sites: { title: 'Sites', keywords: 'plants halls' },
-  gateways: { title: 'Gateways', keywords: 'edge devices enroll' },
-  settings: { title: 'Settings', keywords: 'preferences theme' },
+interface SectionDef {
+  title: string;
+  keywords: string;
+  icon: LucideIcon;
+}
+
+const SECTIONS: Record<string, SectionDef> = {
+  '': { title: 'Home', keywords: 'overview dashboard attention', icon: Home },
+  machines: { title: 'Machines', keywords: 'assets equipment lines state', icon: Cpu },
+  alarms: { title: 'Alarms', keywords: 'alerts faults', icon: Bell },
+  inbox: { title: 'Inbox', keywords: 'approvals notifications decisions', icon: Inbox },
+  assistant: { title: 'Assistant', keywords: 'ai chat questions', icon: Sparkles },
+  'work-orders': { title: 'Work orders', keywords: 'maintenance cmms erp', icon: ClipboardList },
+  parts: { title: 'Parts', keywords: 'stock spare inventory', icon: Package },
+  vendors: { title: 'Vendors and RFQs', keywords: 'procurement requisitions suppliers', icon: Store },
+  documents: { title: 'Documents', keywords: 'manuals drawings sop search', icon: FileText },
+  findings: { title: 'Findings', keywords: 'predictions models anomalies', icon: Lightbulb },
+  reports: { title: 'Reports', keywords: 'oee kpi export csv', icon: ChartBar },
+  graph: { title: 'Graph', keywords: 'relationships explorer', icon: Network },
+  admin: { title: 'Admin', keywords: 'users roles connections gateways audit api keys', icon: ShieldCheck },
+  activity: { title: 'Activity', keywords: 'feed history timeline', icon: LayoutGrid },
+  settings: { title: 'Settings', keywords: 'preferences theme diagnostics', icon: Settings },
 };
 
-const TABS = ['', 'activity', 'assets', 'alarms', 'reports'] as const;
+const TABS = ['', 'machines', 'alarms', 'inbox', 'assistant'] as const;
+const RAIL = ['', 'work-orders', 'parts', 'vendors', 'documents', 'findings', 'reports', 'graph', 'admin'] as const;
 
-const RAIL: { id: string; icon: LucideIcon }[] = [
-  { id: '', icon: LayoutGrid },
-  { id: 'work-orders', icon: Calendar },
-  { id: 'approvals', icon: Mail },
-  { id: 'documents', icon: FileText },
-  { id: 'sites', icon: Factory },
-  { id: 'gateways', icon: Layers },
-  { id: 'settings', icon: Settings },
+const MENU_GROUPS: { heading: string; ids: string[] }[] = [
+  { heading: 'Operate', ids: ['', 'machines', 'alarms', 'inbox', 'assistant'] },
+  { heading: 'Work', ids: ['work-orders', 'parts', 'vendors', 'documents', 'findings', 'reports', 'graph'] },
+  { heading: 'Manage', ids: ['activity', 'admin', 'settings'] },
 ];
 
 const API_LABEL: Record<HiveApiState, string> = {
@@ -158,10 +167,11 @@ function SearchDialog({ onClose, go }: { onClose: () => void; go: (section: stri
   const hits = useMemo<Hit[]>(() => {
     const all: Hit[] = [
       ...Object.entries(SECTIONS).map(([id, s]) => ({ key: `s-${id}`, label: s.title, hint: `Go to · ${s.keywords}`, run: () => go(id) })),
-      ...data.assets.map((a) => ({ key: a.id, label: a.name, hint: `Asset · ${a.site}`, run: () => { go('assets'); openDetail({ kind: 'asset', id: a.id }); } })),
-      ...data.alarms.map((a) => ({ key: a.id, label: a.title, hint: `Alarm · ${a.asset} · ${a.id}`, run: () => { go('alarms'); openDetail({ kind: 'alarm', id: a.id }); } })),
+      ...data.machines.map((m) => ({ key: m.id, label: m.key, hint: `Machine · ${m.site}`, run: () => go(`machines/${m.id}`) })),
+      ...data.alarms.map((a) => ({ key: a.id, label: a.title, hint: `Alarm · ${a.machine} · ${a.id}`, run: () => { go('alarms'); openDetail({ kind: 'alarm', id: a.id }); } })),
       ...data.workOrders.map((w) => ({ key: w.id, label: w.title, hint: `Work order · ${w.id}`, run: () => { go('work-orders'); openDetail({ kind: 'workOrder', id: w.id }); } })),
-      ...data.documents.map((d) => ({ key: d.id, label: d.name, hint: `Document · ${d.asset}`, run: () => { go('documents'); openDetail({ kind: 'document', id: d.id }); } })),
+      ...data.documents.map((d) => ({ key: d.id, label: d.name, hint: `Document · ${d.machine}`, run: () => { go('documents'); openDetail({ kind: 'document', id: d.id }); } })),
+      ...data.parts.map((p) => ({ key: p.id, label: `${p.number} · ${p.name}`, hint: `Part · ${p.machine}`, run: () => { go('parts'); openDetail({ kind: 'part', id: p.id }); } })),
     ];
     const t = q.trim().toLowerCase();
     return (t ? all.filter((h) => `${h.label} ${h.hint}`.toLowerCase().includes(t)) : all.slice(0, 11)).slice(0, 12);
@@ -184,7 +194,7 @@ function SearchDialog({ onClose, go }: { onClose: () => void; go: (section: stri
             autoFocus
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            placeholder="Search assets, alarms, work orders, documents…"
+            placeholder="Search machines, alarms, work orders, documents, parts…"
             aria-label="Search"
             onKeyDown={(e) => {
               if (e.key === 'Escape') onClose();
@@ -218,13 +228,16 @@ function SearchDialog({ onClose, go }: { onClose: () => void; go: (section: stri
 /* ---------- shell ---------- */
 
 function Shell({ user, onSignOut, guest = false }: HiveDashboardProps) {
-  const exitLabel = guest ? 'Sign in' : 'Sign out';
   const params = useParams();
   const navigate = useNavigate();
-  const { data, apiState, openDetail } = useHive();
+  const [search] = useSearchParams();
+  const { data, apiState, openDetail, toast, markRead } = useHive();
+  const phone = useMediaQuery('(max-width: 760px)');
+  const exitLabel = guest ? 'Sign in' : 'Sign out';
 
-  const raw = (params['*'] ?? '').replace(/\/+$/, '');
-  const section = raw in SECTIONS ? raw : null;
+  const raw = (params['*'] ?? '').replace(/^\/+|\/+$/g, '');
+  const [first, second] = raw.split('/');
+  const section = first in SECTIONS ? first : null;
 
   const [dark, setDarkState] = useState(() => readPref('hive.dash.dark', false));
   const [compact, setCompactState] = useState(() => readPref('hive.dash.compact', false));
@@ -240,10 +253,11 @@ function Shell({ user, onSignOut, guest = false }: HiveDashboardProps) {
   const [searchOpen, setSearchOpen] = useState(false);
   const [bellOpen, setBellOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
   const closeBell = useCallback(() => setBellOpen(false), []);
-  const closeMenu = useCallback(() => setMenuOpen(false), []);
+  const closeProfile = useCallback(() => setProfileOpen(false), []);
   const bellRef = useDismiss(bellOpen, closeBell);
-  const menuRef = useDismiss(menuOpen, closeMenu);
+  const profileRef = useDismiss(profileOpen, closeProfile);
 
   const go = useCallback(
     (target: string) => {
@@ -253,6 +267,18 @@ function Shell({ user, onSignOut, guest = false }: HiveDashboardProps) {
     [navigate, openDetail],
   );
 
+  // Old addresses keep working.
+  useEffect(() => {
+    const legacy: Record<string, string> = { assets: 'machines', approvals: 'inbox', gateways: 'admin/gateways', sites: '' };
+    if (first in legacy) navigate(legacy[first] ? `${BASE}/${legacy[first]}` : BASE, { replace: true });
+  }, [first, navigate]);
+
+  // The page itself never scrolls: only the content area does.
+  useEffect(() => {
+    document.documentElement.classList.add('hd-lock');
+    return () => document.documentElement.classList.remove('hd-lock');
+  }, []);
+
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const typing = e.target instanceof Element && e.target.closest('input, textarea, select, [contenteditable]');
@@ -261,20 +287,21 @@ function Shell({ user, onSignOut, guest = false }: HiveDashboardProps) {
         setSearchOpen(true);
       } else if (e.key === 'Escape') {
         openDetail(null);
+        setMenuOpen(false);
       }
     };
     document.addEventListener('keydown', onKey);
     return () => document.removeEventListener('keydown', onKey);
   }, [openDetail]);
 
+  const def = section !== null ? SECTIONS[section] : undefined;
   useEffect(() => {
-    document.title = `${SECTIONS[section ?? '']?.title ?? 'Hive'} · Hive`;
-  }, [section]);
+    document.title = `${def?.title ?? 'Hive'} · Hive`;
+  }, [def]);
 
   const openAlarms = data.alarms.filter((a) => a.state === 'Open');
+  const unread = data.notifications.filter((n) => !n.read);
   const firstName = user.name.split(/\s+/)[0] || user.name;
-  const { toast } = useHive();
-
   const open = (d: DetailRef) => {
     setBellOpen(false);
     openDetail(d);
@@ -283,34 +310,46 @@ function Shell({ user, onSignOut, guest = false }: HiveDashboardProps) {
   let view: React.ReactNode;
   switch (section) {
     case '':
-      view = <OverviewView go={go} />;
+      view = phone ? <MobileHome go={go} /> : <OverviewView go={go} />;
       break;
-    case 'activity':
-      view = <ActivityView />;
-      break;
-    case 'assets':
-      view = <AssetsView />;
+    case 'machines':
+      view = second ? <MachineDetail id={second} go={go} /> : <MachinesView go={go} site={search.get('site')} />;
       break;
     case 'alarms':
-      view = <AlarmsView />;
+      view = <AlarmsView go={go} />;
       break;
-    case 'reports':
-      view = <ReportsView />;
+    case 'inbox':
+      view = <InboxView go={go} />;
+      break;
+    case 'assistant':
+      view = <AssistantView />;
       break;
     case 'work-orders':
       view = <WorkOrdersView />;
       break;
-    case 'approvals':
-      view = <ApprovalsView />;
+    case 'parts':
+      view = <PartsView />;
+      break;
+    case 'vendors':
+      view = <VendorsView />;
       break;
     case 'documents':
       view = <DocumentsView />;
       break;
-    case 'sites':
-      view = <SitesView go={go} />;
+    case 'findings':
+      view = <FindingsView />;
       break;
-    case 'gateways':
-      view = <GatewaysView />;
+    case 'reports':
+      view = <ReportsView />;
+      break;
+    case 'graph':
+      view = <GraphView />;
+      break;
+    case 'admin':
+      view = <AdminView area={second ?? 'tenant'} go={go} />;
+      break;
+    case 'activity':
+      view = <ActivityView />;
       break;
     case 'settings':
       view = <SettingsView dark={dark} setDark={setDark} compact={compact} setCompact={setCompact} />;
@@ -321,172 +360,219 @@ function Shell({ user, onSignOut, guest = false }: HiveDashboardProps) {
           <h2 className="hd-card-title is-lg">Page not found</h2>
           <p className="hd-muted">There is no Hive page at this address.</p>
           <button type="button" className="hd-btn is-dark hd-btn-sm" onClick={() => go('')}>
-            Back to overview
+            Back to home
           </button>
         </section>
       );
   }
 
-  return (
-    <div className={`hd-root${dark ? ' is-dark' : ''}${compact ? ' is-compact' : ''}`} data-theme={dark ? 'dark' : 'light'}>
-      <div className="hd-shell">
-        <header className="hd-top">
-          <a
-            className="hd-brand"
-            href={BASE}
-            aria-label="Hive overview"
-            onClick={(e) => {
-              e.preventDefault();
-              go('');
-            }}
-          >
-            <span className="hd-brand-mark">
-              <img src="/brand-mark-tile.svg" alt="" width={18} height={18} />
-            </span>
-            <span className="hd-brand-name">Hive</span>
-          </a>
+  const heading = section === '' || section === null ? `${greeting()}, ${firstName}` : first === 'machines' && second ? (data.machines.find((m) => m.id === second)?.key ?? 'Machine') : SECTIONS[section].title;
+  const subtitle = section === '' || section === null ? 'Stay on top of your plant, monitor signals, and track alarms.' : `${data.plant.name} · placeholder data until the Hive API is connected`;
 
-          <nav className="hd-tabs" aria-label="Hive sections">
-            {TABS.map((id) => (
-              <button
-                key={id || 'overview'}
-                type="button"
-                className={`hd-tab${section === id ? ' is-active' : ''}`}
-                aria-current={section === id ? 'page' : undefined}
-                onClick={() => go(id)}
-              >
-                {SECTIONS[id].title}
-              </button>
-            ))}
-          </nav>
+  const menuEntries = MENU_GROUPS.map((g) => ({ heading: g.heading, items: g.ids.map((id): NavEntry => ({ id, title: SECTIONS[id].title, icon: SECTIONS[id].icon })) }));
+  const rootClass = `hd-root${dark ? ' is-dark' : ''}${compact ? ' is-compact' : ''}${phone ? ' is-phone' : ''}`;
 
-          <div className="hd-tools">
-            <div className="hd-tools-pill">
-              <button type="button" className="hd-icon-btn" aria-label="Search (Ctrl K)" title="Search (Ctrl K)" onClick={() => setSearchOpen(true)}>
-                <Search size={16} />
-              </button>
-              <div className="hd-pop-anchor" ref={bellRef}>
-                <button
-                  type="button"
-                  className={`hd-icon-btn${openAlarms.length ? ' has-dot' : ''}`}
-                  aria-label={`Notifications, ${openAlarms.length} open alarms`}
-                  aria-expanded={bellOpen}
-                  onClick={() => setBellOpen((v) => !v)}
-                >
-                  <Bell size={16} />
-                </button>
-                {bellOpen && (
-                  <div className="hd-pop" role="menu">
-                    <div className="hd-pop-head">Open alarms</div>
-                    {openAlarms.slice(0, 4).map((a) => (
-                      <button key={a.id} type="button" role="menuitem" className="hd-pop-item" onClick={() => { setBellOpen(false); go('alarms'); open({ kind: 'alarm', id: a.id }); }}>
-                        <span className={`hd-sev is-${a.severity}`}>{a.severity}</span>
-                        <span>{a.title}<small>{a.asset} · {a.raisedAt}</small></span>
-                      </button>
-                    ))}
-                    {openAlarms.length === 0 && <p className="hd-pop-empty">All clear.</p>}
-                    <button type="button" className="hd-pop-foot" onClick={() => { setBellOpen(false); go('alarms'); }}>
-                      See all alarms
-                    </button>
-                  </div>
-                )}
-              </div>
-              <a className="hd-icon-btn" href="https://status.clerktree.com" target="_blank" rel="noreferrer" aria-label="Platform status" title="Platform status">
-                <CircleAlert size={16} />
-              </a>
-            </div>
-
-            <div className="hd-pop-anchor" ref={menuRef}>
-              <button type="button" className="hd-profile" aria-label="Account menu" aria-expanded={menuOpen} onClick={() => setMenuOpen((v) => !v)}>
-                <span className="hd-avatar">{user.avatarUrl ? <img src={user.avatarUrl} alt="" /> : initials(user.name)}</span>
-                <span className="hd-profile-text">
-                  <strong>{user.name}</strong>
-                  <small>{user.email}</small>
-                </span>
-                <ChevronDown size={14} aria-hidden="true" />
-              </button>
-              {menuOpen && (
-                <div className="hd-pop is-right" role="menu">
-                  <button type="button" role="menuitem" className="hd-pop-item" onClick={() => { setMenuOpen(false); go('settings'); }}>
-                    <Settings size={15} /> <span>Settings</span>
-                  </button>
-                  <a role="menuitem" className="hd-pop-item" href="/dashboard/default">
-                    <LayoutPanelLeft size={15} /> <span>Workspace dashboards</span>
-                  </a>
-                  <button type="button" role="menuitem" className="hd-pop-item" onClick={() => { setMenuOpen(false); onSignOut?.(); }}>
-                    <LogOut size={15} /> <span>{exitLabel}</span>
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
-        </header>
-
-        <div className="hd-body">
-          <aside className="hd-rail" aria-label="Workspace">
-            <div className="hd-rail-pill hd-theme" role="group" aria-label="Theme">
-              <button type="button" className={!dark ? 'is-on' : ''} onClick={() => setDark(false)} aria-label="Light theme" aria-pressed={!dark}>
-                <Sun size={15} />
-              </button>
-              <button type="button" className={dark ? 'is-on' : ''} onClick={() => setDark(true)} aria-label="Dark theme" aria-pressed={dark}>
-                <Moon size={15} />
-              </button>
-            </div>
-
-            <div className="hd-rail-pill hd-nav">
-              {RAIL.map(({ id, icon: Icon }) => (
-                <button
-                  key={id || 'overview'}
-                  type="button"
-                  className={section === id ? 'is-on' : ''}
-                  aria-label={SECTIONS[id].title}
-                  title={SECTIONS[id].title}
-                  aria-current={section === id ? 'page' : undefined}
-                  onClick={() => go(id)}
-                >
-                  <Icon size={16} />
-                </button>
-              ))}
-            </div>
-
-            <div className="hd-rail-pill hd-foot">
-              <a className="hd-rail-link" href="https://clerktree.com/contact" target="_blank" rel="noreferrer" aria-label="Help" title="Help">
-                <CircleHelp size={16} />
-              </a>
-              <button type="button" aria-label={exitLabel} title={exitLabel} onClick={onSignOut}>
-                <LogOut size={16} />
-              </button>
-            </div>
-          </aside>
-
-          <main className="hd-main">
-            <div className="hd-heading">
-              <div>
-                <h1>{section === '' || section === null ? `${greeting()}, ${firstName}` : SECTIONS[section].title}</h1>
-                <p>
-                  {section === '' || section === null
-                    ? 'Stay on top of your plant, monitor signals, and track alarms.'
-                    : `${data.plant.name} · placeholder data until the Hive API is connected`}
-                </p>
-              </div>
-              <span className={`hd-api is-${apiState}`} role="status">
-                <i /> {API_LABEL[apiState]}
-              </span>
-            </div>
-
-            {view}
-          </main>
-        </div>
-      </div>
-
+  const overlays = (
+    <>
       {searchOpen && <SearchDialog onClose={() => setSearchOpen(false)} go={go} />}
-      <DetailDrawer />
+      <DetailDrawer go={go} />
       {toast && (
         <div className="hd-toast" role="status">
           {toast}
         </div>
       )}
-    </div>
+    </>
+  );
+
+  /* ----- phone ----- */
+  if (phone) {
+    return (
+      <PhoneCtx.Provider value={true}>
+        <div className={rootClass} data-theme={dark ? 'dark' : 'light'}>
+          <div className="hd-mshell">
+            <MobileHeader title={section === '' ? 'Home' : heading} site="Musterwerk" onSearch={() => setSearchOpen(true)} />
+            <div className="hd-mscroll">
+              {section !== '' && (
+                <span className={`hd-api is-${apiState}`} role="status">
+                  <i /> {API_LABEL[apiState]}
+                </span>
+              )}
+              {view}
+            </div>
+            <BottomNav section={first && first in SECTIONS ? first : ''} go={go} onMenu={() => setMenuOpen(true)} unread={unread.length > 0} />
+          </div>
+          {menuOpen && (
+            <MobileMenu
+              entries={menuEntries}
+              section={section ?? ''}
+              go={go}
+              onClose={() => setMenuOpen(false)}
+              dark={dark}
+              setDark={setDark}
+              user={user}
+              guest={guest}
+              onExit={() => {
+                setMenuOpen(false);
+                onSignOut?.();
+              }}
+            />
+          )}
+          {overlays}
+        </div>
+      </PhoneCtx.Provider>
+    );
+  }
+
+  /* ----- desktop ----- */
+  return (
+    <PhoneCtx.Provider value={false}>
+      <div className={rootClass} data-theme={dark ? 'dark' : 'light'}>
+        <div className="hd-shell">
+          <header className="hd-top">
+            <a
+              className="hd-brand"
+              href={BASE}
+              aria-label="Hive home"
+              onClick={(e) => {
+                e.preventDefault();
+                go('');
+              }}
+            >
+              <span className="hd-brand-mark">
+                <img src="/brand-mark-tile.svg" alt="" width={18} height={18} />
+              </span>
+              <span className="hd-brand-name">Hive</span>
+            </a>
+
+            <nav className="hd-tabs" aria-label="Hive sections">
+              {TABS.map((id) => (
+                <button key={id || 'home'} type="button" className={`hd-tab${section === id ? ' is-active' : ''}`} aria-current={section === id ? 'page' : undefined} onClick={() => go(id)}>
+                  {SECTIONS[id].title}
+                  {id === 'inbox' && unread.length > 0 && <i className="hd-tab-dot" />}
+                </button>
+              ))}
+            </nav>
+
+            <div className="hd-tools">
+              <div className="hd-tools-pill">
+                <button type="button" className="hd-icon-btn" aria-label="Search (Ctrl K)" title="Search (Ctrl K)" onClick={() => setSearchOpen(true)}>
+                  <Search size={16} />
+                </button>
+                <div className="hd-pop-anchor" ref={bellRef}>
+                  <button type="button" className={`hd-icon-btn${openAlarms.length ? ' has-dot' : ''}`} aria-label={`Notifications, ${openAlarms.length} open alarms`} aria-expanded={bellOpen} onClick={() => setBellOpen((v) => !v)}>
+                    <Bell size={16} />
+                  </button>
+                  {bellOpen && (
+                    <div className="hd-pop" role="menu">
+                      <div className="hd-pop-head">Open alarms</div>
+                      {openAlarms.slice(0, 4).map((a) => (
+                        <button key={a.id} type="button" role="menuitem" className="hd-pop-item" onClick={() => { setBellOpen(false); go('alarms'); open({ kind: 'alarm', id: a.id }); }}>
+                          <span className={`hd-sev is-${a.severity}`}>{a.severity}</span>
+                          <span>
+                            {a.title}
+                            <small>{a.machine} · {a.raisedAt}</small>
+                          </span>
+                        </button>
+                      ))}
+                      {openAlarms.length === 0 && <p className="hd-pop-empty">All clear.</p>}
+                      <div className="hd-pop-head">Notifications</div>
+                      {data.notifications.slice(0, 3).map((n) => (
+                        <button key={n.id} type="button" role="menuitem" className="hd-pop-item" onClick={() => { markRead(n.id); setBellOpen(false); go(n.to.section); }}>
+                          <span>
+                            {n.text}
+                            <small>{n.at}{n.read ? '' : ' · new'}</small>
+                          </span>
+                        </button>
+                      ))}
+                      <button type="button" className="hd-pop-foot" onClick={() => { setBellOpen(false); go('alarms'); }}>
+                        See all alarms
+                      </button>
+                    </div>
+                  )}
+                </div>
+                <a className="hd-icon-btn" href="https://status.clerktree.com" target="_blank" rel="noreferrer" aria-label="Platform status" title="Platform status">
+                  <CircleAlert size={16} />
+                </a>
+              </div>
+
+              <div className="hd-pop-anchor" ref={profileRef}>
+                <button type="button" className="hd-profile" aria-label="Account menu" aria-expanded={profileOpen} onClick={() => setProfileOpen((v) => !v)}>
+                  <span className="hd-avatar">{user.avatarUrl ? <img src={user.avatarUrl} alt="" /> : initials(user.name)}</span>
+                  <span className="hd-profile-text">
+                    <strong>{user.name}</strong>
+                    <small>{user.email}</small>
+                  </span>
+                  <ChevronDown size={14} aria-hidden="true" />
+                </button>
+                {profileOpen && (
+                  <div className="hd-pop is-right" role="menu">
+                    <button type="button" role="menuitem" className="hd-pop-item" onClick={() => { setProfileOpen(false); go('settings'); }}>
+                      <Settings size={15} /> <span>Settings</span>
+                    </button>
+                    <button type="button" role="menuitem" className="hd-pop-item" onClick={() => { setProfileOpen(false); go('activity'); }}>
+                      <LayoutGrid size={15} /> <span>Activity</span>
+                    </button>
+                    <a role="menuitem" className="hd-pop-item" href="/dashboard/default">
+                      <LayoutPanelLeft size={15} /> <span>Workspace dashboards</span>
+                    </a>
+                    <button type="button" role="menuitem" className="hd-pop-item" onClick={() => { setProfileOpen(false); onSignOut?.(); }}>
+                      <LogOut size={15} /> <span>{exitLabel}</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          </header>
+
+          <div className="hd-body">
+            <aside className="hd-rail" aria-label="Workspace">
+              <div className="hd-rail-pill hd-theme" role="group" aria-label="Theme">
+                <button type="button" className={!dark ? 'is-on' : ''} onClick={() => setDark(false)} aria-label="Light theme" aria-pressed={!dark}>
+                  <Sun size={15} />
+                </button>
+                <button type="button" className={dark ? 'is-on' : ''} onClick={() => setDark(true)} aria-label="Dark theme" aria-pressed={dark}>
+                  <Moon size={15} />
+                </button>
+              </div>
+
+              <div className="hd-rail-pill hd-nav">
+                {RAIL.map((id) => {
+                  const Icon = SECTIONS[id].icon;
+                  return (
+                    <button key={id || 'home'} type="button" className={section === id ? 'is-on' : ''} aria-label={SECTIONS[id].title} title={SECTIONS[id].title} aria-current={section === id ? 'page' : undefined} onClick={() => go(id)}>
+                      <Icon size={16} />
+                    </button>
+                  );
+                })}
+              </div>
+
+              <div className="hd-rail-pill hd-foot">
+                <a className="hd-rail-link" href="https://clerktree.com/contact" target="_blank" rel="noreferrer" aria-label="Help" title="Help">
+                  <CircleHelp size={16} />
+                </a>
+                <button type="button" aria-label={exitLabel} title={exitLabel} onClick={onSignOut}>
+                  <LogOut size={16} />
+                </button>
+              </div>
+            </aside>
+
+            <main className="hd-main">
+              <div className="hd-heading">
+                <div>
+                  <h1>{heading}</h1>
+                  <p>{subtitle}</p>
+                </div>
+                <span className={`hd-api is-${apiState}`} role="status">
+                  <i /> {API_LABEL[apiState]}
+                </span>
+              </div>
+              <div className="hd-scroll">{view}</div>
+            </main>
+          </div>
+        </div>
+        {overlays}
+      </div>
+    </PhoneCtx.Provider>
   );
 }
 

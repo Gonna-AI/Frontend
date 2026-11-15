@@ -7,22 +7,16 @@ import {
   ClipboardList,
   Cpu,
   EllipsisVertical,
-  Gauge,
-  Package,
   Plus,
   Radio,
-  Search,
-  SlidersHorizontal,
   Sparkles,
-  Thermometer,
-  Unplug,
   Wifi,
-  Wrench,
   type LucideIcon,
 } from 'lucide-react-dash';
 import { useMemo, useState } from 'react';
 
-import type { HiveEvent, HiveOverview } from './placeholder';
+import { MACHINE_STATES, STATE_LABEL, type HiveMachine, type HiveOverview } from './placeholder';
+import { formatAge } from './common';
 import { useHive } from './store';
 
 const TILE_ICON: Record<HiveOverview['tiles'][number]['key'], LucideIcon> = {
@@ -30,20 +24,6 @@ const TILE_ICON: Record<HiveOverview['tiles'][number]['key'], LucideIcon> = {
   alarms: BellRing,
   assets: Cpu,
   workOrders: ClipboardList,
-};
-
-const EVENT_ICON: Record<HiveEvent['kind'], LucideIcon> = {
-  thermal: Thermometer,
-  link: Unplug,
-  quality: Gauge,
-  maintenance: Wrench,
-  stock: Package,
-};
-
-const STATUS_CLASS: Record<HiveEvent['status'], string> = {
-  Resolved: 'is-done',
-  Open: 'is-open',
-  Acknowledged: 'is-progress',
 };
 
 export function Delta({ up, children }: { up: boolean; children: React.ReactNode }) {
@@ -98,40 +78,56 @@ export function AlarmChart({ data }: { data: HiveOverview['alarmVolume'] }) {
 }
 
 
-const STATUS_CYCLE = ['All', 'Open', 'Acknowledged', 'Resolved'] as const;
+export interface AttentionItem {
+  key: string;
+  title: string;
+  where: string;
+  label: string;
+  tone: 'red' | 'orange' | 'amber' | 'gray';
+  rank: number;
+  time?: string;
+  open: () => void;
+}
+
+/** The fixed attention order: critical alarms, high alarms, link down, medium alarms, findings, approvals. */
+export function useAttention(go: (section: string) => void): { attention: AttentionItem[]; waiting: number } {
+  const { data, openDetail } = useHive();
+  return useMemo(() => {
+    const items: AttentionItem[] = [];
+    for (const a of data.alarms.filter((x) => x.state === 'Open')) {
+      const rank = a.severity === 'critical' ? 1 : a.severity === 'high' ? 4 : a.severity === 'medium' ? 6 : 9;
+      items.push({ key: a.id, title: a.title, where: `${a.machine}${a.component ? ' · ' + a.component : ''}`, label: a.severity, tone: a.severity === 'critical' ? 'red' : a.severity === 'high' ? 'orange' : 'amber', rank, time: a.time, open: () => { go('alarms'); openDetail({ kind: 'alarm', id: a.id }); } });
+    }
+    for (const g of data.gatewayFleet.filter((x) => x.link !== 'Online')) {
+      items.push({ key: g.id, title: `Gateway ${g.link.toLowerCase()}`, where: g.site, label: 'connection', tone: 'orange', rank: 5, open: () => go('admin/gateways') });
+    }
+    for (const f of data.findings.filter((x) => x.status === 'Awaiting confirmation')) {
+      items.push({ key: f.id, title: f.title, where: f.machine, label: 'finding', tone: 'gray', rank: 7, open: () => go('findings') });
+    }
+    const pending = data.approvals.filter((x) => x.state === 'Pending');
+    for (const p of pending) {
+      items.push({ key: p.id, title: p.title, where: p.machine, label: 'approval', tone: 'gray', rank: 8, open: () => go('inbox') });
+    }
+    items.sort((x, y) => x.rank - y.rank);
+    return { attention: items, waiting: pending.length };
+  }, [data, go, openDetail]);
+}
 
 export default function OverviewView({ go }: { go: (section: string) => void }) {
-  const { data: overview, openDetail } = useHive();
-  const [query, setQuery] = useState('');
-  const [status, setStatus] = useState<(typeof STATUS_CYCLE)[number]>('All');
-  const [checked, setChecked] = useState<Set<string>>(new Set(['EVT_000073']));
+  const { data: overview } = useHive();
   const [site, setSite] = useState(overview.plant.name);
-
-  const events = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    return overview.events.filter(
-      (e) =>
-        (status === 'All' || e.status === status) &&
-        (!q || [e.id, e.activity, e.asset, e.status].some((v) => v.toLowerCase().includes(q))),
-    );
-  }, [overview.events, query, status]);
-
-  const allChecked = events.length > 0 && events.every((e) => checked.has(e.id));
-  const toggle = (id: string) =>
-    setChecked((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  const toggleAll = () =>
-    setChecked((prev) => {
-      const next = new Set(prev);
-      if (allChecked) events.forEach((e) => next.delete(e.id));
-      else events.forEach((e) => next.add(e.id));
-      return next;
-    });
+  const { attention, waiting } = useAttention(go);
   const usedPct = Math.round((overview.bufferUsedGb / overview.bufferTotalGb) * 100);
+
+  const stateCounts = useMemo(
+    () => MACHINE_STATES.map((st) => [st, overview.machines.filter((m) => m.state === st).length] as const),
+    [overview.machines],
+  );
+  const lines = useMemo(() => {
+    const map = new Map<string, HiveMachine[]>();
+    for (const m of overview.machines) map.set(m.line, [...(map.get(m.line) ?? []), m]);
+    return [...map.entries()];
+  }, [overview.machines]);
 
   return (
     <>
@@ -169,7 +165,7 @@ export default function OverviewView({ go }: { go: (section: string) => void }) 
           </div>
           <div className="hd-wallet-row">
             {overview.sites.map((s) => (
-              <button type="button" className="hd-wallet" key={s.id} onClick={() => go('sites')}>
+              <button type="button" className="hd-wallet" key={s.id} onClick={() => go('machines')}>
                 <div className="hd-wallet-top">
                   <span className="hd-site-chip">{s.name.slice(0, 1)}</span>
                   <b>{s.name}</b>
@@ -246,13 +242,13 @@ export default function OverviewView({ go }: { go: (section: string) => void }) 
               Gateways
             </h2>
           </div>
-          <button type="button" className="hd-ghost" onClick={() => go('gateways')}>
+          <button type="button" className="hd-ghost" onClick={() => go('admin/gateways')}>
             <Plus size={12} /> Enroll
           </button>
         </div>
         <div className="hd-gw-row">
           {overview.gateways.map((g, i) => (
-            <button type="button" className={`hd-gw ${i === 0 ? 'is-black' : 'is-orange'}`} key={g.id} onClick={() => go('gateways')}>
+            <button type="button" className={`hd-gw ${i === 0 ? 'is-black' : 'is-orange'}`} key={g.id} onClick={() => go('admin/gateways')}>
               <div className="hd-gw-top">
                 <Wifi size={13} aria-hidden="true" />
                 <span className="hd-gw-state">{g.state}</span>
@@ -284,87 +280,78 @@ export default function OverviewView({ go }: { go: (section: string) => void }) 
         </div>
       </section>
 
-      {/* Events */}
+      {/* Needs attention: ordered by a fixed rule */}
       <section className="hd-card hd-activity" aria-labelledby="hd-events">
         <div className="hd-row">
           <h2 id="hd-events" className="hd-card-title is-lg">
-            Recent events
+            Needs attention
           </h2>
           <div className="hd-act-tools">
-            <label className="hd-search">
-              <Search size={14} aria-hidden="true" />
-              <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search" aria-label="Search events" />
-            </label>
-            <button
-              type="button"
-              className="hd-filter"
-              onClick={() => setStatus(STATUS_CYCLE[(STATUS_CYCLE.indexOf(status) + 1) % STATUS_CYCLE.length])}
-              aria-label={`Filter by status, currently ${status}`}
-            >
-              {status === 'All' ? 'Filter' : status} <SlidersHorizontal size={13} />
+            <button type="button" className="hd-ghost" onClick={() => go('inbox')}>
+              Waiting for me · {waiting}
             </button>
           </div>
         </div>
-        <div className="hd-table-wrap">
-          <table className="hd-table">
-            <thead>
-              <tr>
-                <th className="hd-col-check">
-                  <input type="checkbox" checked={allChecked} onChange={toggleAll} aria-label="Select all events" />
-                </th>
-                <th>Event ID</th>
-                <th>Activity</th>
-                <th>Asset</th>
-                <th>Status</th>
-                <th>Date</th>
-                <th aria-label="Actions" />
-              </tr>
-            </thead>
-            <tbody>
-              {events.map((e) => {
-                const Icon = EVENT_ICON[e.kind];
-                const on = checked.has(e.id);
-                return (
-                  <tr key={e.id} className={`is-clickable${on ? ' is-selected' : ''}`} onClick={() => openDetail({ kind: 'event', id: e.id })}>
-                    <td className="hd-col-check">
-                      <input type="checkbox" checked={on} onChange={() => toggle(e.id)} onClick={(ev) => ev.stopPropagation()} aria-label={`Select ${e.id}`} />
-                    </td>
-                    <td>{e.id}</td>
-                    <td>
-                      <span className="hd-act">
-                        <span className="hd-act-icon">
-                          <Icon size={13} />
-                        </span>
-                        {e.activity}
-                      </span>
-                    </td>
-                    <td>{e.asset}</td>
-                    <td>
-                      <span className={`hd-status ${STATUS_CLASS[e.status]}`}>
-                        <i /> {e.status}
-                      </span>
-                    </td>
-                    <td>{e.at}</td>
-                    <td>
-                      <button type="button" className="hd-more" aria-label={`Details for ${e.id}`}>
-                        <EllipsisVertical size={14} />
-                      </button>
-                    </td>
-                  </tr>
-                );
-              })}
-              {events.length === 0 && (
-                <tr>
-                  <td colSpan={7} className="hd-empty">
-                    No events match the current search or filter.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+        <ol className="hd-attention">
+          {attention.slice(0, 8).map((a) => (
+            <li key={a.key}>
+              <button type="button" onClick={() => a.open()}>
+                <span className={`hd-attn-dot is-${a.tone}`} aria-hidden="true" />
+                <span className="hd-attn-text">
+                  <b>{a.title}</b>
+                  <small>{a.where}</small>
+                </span>
+                <span className="hd-attn-label">{a.label}</span>
+              </button>
+            </li>
+          ))}
+          {attention.length === 0 && <li className="hd-empty">Nothing needs attention. Last checked just now.</li>}
+        </ol>
+        {attention.length > 8 && (
+          <button type="button" className="hd-ghost hd-attn-more" onClick={() => go('alarms')}>
+            {attention.length - 8} more
+          </button>
+        )}
+        <p className="hd-muted hd-attn-note">Alarms shown here are not a replacement for the plant’s safety systems.</p>
+      </section>
+
+      {/* Plant overview by line, using the eight machine states */}
+      <section className="hd-card hd-plant" aria-labelledby="hd-plant-overview">
+        <div className="hd-row">
+          <h2 id="hd-plant-overview" className="hd-card-title is-lg">
+            Plant overview
+          </h2>
+          <button type="button" className="hd-ghost" onClick={() => go('machines')}>
+            All machines
+          </button>
+        </div>
+        <div className="hd-state-row">
+          {stateCounts.map(([st, n]) => (
+            <span key={st} className={`hd-state-count${n ? '' : ' is-zero'}`}>
+              <i className={`hd-sdot is-${st}`} /> {STATE_LABEL[st]} <b>{n}</b>
+            </span>
+          ))}
+        </div>
+        <div className="hd-lines-grid">
+          {lines.map(([line, ms]) => (
+            <div className="hd-linebox" key={line}>
+              <h3>{line}</h3>
+              <div className="hd-tiles-mini">
+                {ms.map((m) => (
+                  <button type="button" key={m.id} className={`hd-mtile is-${m.state}`} onClick={() => go(`machines/${m.id}`)} title={`${STATE_LABEL[m.state]} · ${formatAge(m.stateAgeS)}`}>
+                    <b>{m.key}</b>
+                    <small>
+                      {STATE_LABEL[m.state]} · {formatAge(m.stateAgeS)}
+                    </small>
+                    {m.openAlarms > 0 && <em>{m.openAlarms}</em>}
+                  </button>
+                ))}
+              </div>
+            </div>
+          ))}
         </div>
       </section>
-    </div>
+      </div>
     </>
   );
 }
