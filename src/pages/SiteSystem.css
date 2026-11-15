@@ -362,3 +362,11 @@
     margin-inline: calc(var(--gutter) - 20px);
   }
 }
+
+/* ---------- Focus rings are for the keyboard ----------
+   App.tsx sets html[data-input] to "pointer" on a click or tap and to "keyboard" on Tab or an arrow key.
+   While it is "pointer", controls do not draw an outline ring, so clicking inside a container never
+   redraws it in a different shape. Keyboard users keep every ring. Text fields are left alone. */
+html[data-input='pointer'] .ct-works :is(a, button, summary, [role='tab'], [role='button']):focus-visible {
+  outline: none;
+}

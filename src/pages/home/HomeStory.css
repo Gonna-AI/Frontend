@@ -735,9 +735,13 @@
 .ct-works .cx-item:last-child { border-bottom: 1px solid rgba(255, 255, 255, .07); }
 .ct-works .cx-tab {
   align-items: baseline; background: none; border: 0; color: rgba(245, 245, 245, .4); cursor: pointer; display: grid; gap: 14px;
-  grid-template-columns: 26px minmax(0, 1fr); padding: 20px 0; text-align: left; transition: color .3s ease; width: 100%;
+  grid-template-columns: 26px minmax(0, 1fr); padding: 20px 12px; text-align: left; transition: color .3s ease;
+  /* 12px of room each side for the focus ring, taken back with the margin so the text does not move. */
+  margin-inline: -12px; width: calc(100% + 24px);
 }
-.ct-works .cx-tab:focus-visible { outline: 2px solid rgba(255, 255, 255, .6); outline-offset: 4px; border-radius: 6px; }
+/* Keyboard focus: a ring inside the tab's own box, in the tile curve, so it follows the row and never
+   crosses the description underneath. (Hidden after a pointer click, see SiteSystem.css.) */
+.ct-works .cx-tab:focus-visible { border-radius: var(--r-tile, 12px); outline: 2px solid rgba(255, 255, 255, .6); outline-offset: -2px; }
 .ct-works .cx-num { font: 500 11px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .04em; transition: color .3s ease; }
 .ct-works .cx-title { font: 500 clamp(17px, 1.5vw, 21px)/1.25 var(--font-ui); letter-spacing: -.015em; }
 .ct-works .cx-item.is-active .cx-tab { color: #fff; }

@@ -158,6 +158,23 @@ function RouteEffects() {
     applyChromeColor(pathname);
   }, [pathname]);
 
+  // Keyboard focus rings are for keyboard users. Browsers sometimes show them after a click as well
+  // (after arrow-key scrolling, for instance), which redraws a container in a different shape.
+  // data-input says how the visitor last interacted; styles hide outline rings while it is "pointer".
+  useEffect(() => {
+    const root = document.documentElement;
+    const pointer = () => { root.dataset.input = 'pointer'; };
+    const keyboard = (event: KeyboardEvent) => {
+      if (event.key === 'Tab' || event.key.startsWith('Arrow') || event.key === 'Home' || event.key === 'End') root.dataset.input = 'keyboard';
+    };
+    document.addEventListener('pointerdown', pointer, true);
+    document.addEventListener('keydown', keyboard, true);
+    return () => {
+      document.removeEventListener('pointerdown', pointer, true);
+      document.removeEventListener('keydown', keyboard, true);
+    };
+  }, []);
+
   // The top-edge strip (index.html) exists only while the page is at the very top.
   useEffect(() => {
     const root = document.documentElement;
