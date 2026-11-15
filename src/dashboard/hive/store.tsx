@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 
 import { fetchHiveHealth, fetchHiveOverview, type HiveApiState } from './hiveApi';
+import { translateData, useLang, useT, type Lang } from './i18n';
 import {
   placeholderOverview,
   type AlarmState,
@@ -46,18 +47,39 @@ export function useHive(): HiveStore {
   return v;
 }
 
-const LOCAL = '(placeholder, not saved)';
+/** Fields that drive logic or identify things are never translated; their display sites translate them. */
+const KEEP = new Set(['id', 'machineId', 'key', 'number', 'email', 'prefix', 'state', 'status', 'severity', 'priority', 'kind', 'tier', 'link', 'target', 'quality', 'applicability', 'specMatch', 'scope', 'to', 'section', 'from', 'context', 'site', 'machine', 'asset', 'lineId', 'vendor', 'model', 'scopes', 'created', 'lastUsed', 'updated']);
+
+/** Translates the free text of the dataset for display. User messages and user-typed titles stay as typed. */
+function translateDeep<T>(v: T, lang: Lang): T {
+  if (lang === 'en') return v;
+  const walk = (x: unknown, parentKey?: string, parent?: Record<string, unknown>): unknown => {
+    if (typeof x === 'string') {
+      if (parentKey && KEEP.has(parentKey)) return parentKey === 'updated' || parentKey === 'created' || parentKey === 'lastUsed' ? translateData(x, lang) : x;
+      if (parent && parent.from === 'user' && !parent.seed) return x;
+      if (parent && parentKey === 'title' && parent.userTitle) return x;
+      return translateData(x, lang);
+    }
+    if (Array.isArray(x)) return x.map((i) => walk(i, parentKey, parent));
+    if (x && typeof x === 'object') {
+      const o = x as Record<string, unknown>;
+      return Object.fromEntries(Object.entries(o).map(([k, val]) => [k, walk(val, k, o)]));
+    }
+    return x;
+  };
+  return walk(v) as T;
+}
 
 /** Canned assistant behaviour used until the assistant API exists. It never invents: unknown topics abstain. */
 function answerFor(question: string): Pick<AssistantMessage, 'text' | 'citations' | 'abstained'> {
   const q = question.toLowerCase();
-  if (/(part|stock|spare|bearing 6205)/.test(q)) {
+  if (/(part|stock|spare|bearing 6205|ersatzteil|bestand|lager für|lagerbestand)/.test(q)) {
     return {
       text: 'Bearing 6205-2RS: 1 on hand against a minimum of 2 (stock record synced 2 days ago). A purchase requisition for 2 pieces from Wälzlager Nord GmbH is waiting for approval.',
       citations: [{ label: 'Stock position 6205-2RS', locator: 'Lager A-12', applicability: 'applies' }],
     };
   }
-  if (/(cnc-07|spindle|bearing|vibration|temperature|alarm)/.test(q)) {
+  if (/(cnc-07|spindle|bearing|vibration|temperature|alarm|spindel|lager|schwingung|temperatur|handbuch|manual)/.test(q)) {
     return {
       text: 'The spindle bearing temperature on CNC-07 is above its 80 °C limit (87.4 °C), and vibration on the drive-end bearing has trended up 18% over 24 hours. The manual recommends inspecting the bearing when both occur. I suggest a work order for a bearing inspection, which a person must approve.',
       citations: [
@@ -79,7 +101,10 @@ function answerFor(question: string): Pick<AssistantMessage, 'text' | 'citations
  * says so in a toast. When the write endpoints exist, each action calls the API instead.
  */
 export function HiveStoreProvider({ children }: { children: React.ReactNode }) {
-  const [data, setData] = useState<HiveOverview>(placeholderOverview);
+  const [raw, setData] = useState<HiveOverview>(placeholderOverview);
+  const { lang } = useLang();
+  const t = useT();
+  const data = useMemo(() => translateDeep(raw, lang), [raw, lang]);
   const [apiState, setApiState] = useState<HiveApiState>('checking');
   const [detail, setDetail] = useState<DetailRef>(null);
   const [toast, setToast] = useState<string | null>(null);
@@ -110,15 +135,15 @@ export function HiveStoreProvider({ children }: { children: React.ReactNode }) {
   const mutate = useCallback(
     (fn: (d: HiveOverview) => HiveOverview, message?: string) => {
       setData(fn);
-      if (message) notify(`${message} ${LOCAL}`);
+      if (message) notify(`${message} ${t('(placeholder, not saved)')}`);
     },
-    [notify],
+    [notify, t],
   );
 
   const setAlarmState = useCallback(
     (id: string, state: AlarmState) =>
-      mutate((d) => ({ ...d, alarms: d.alarms.map((a) => (a.id === id ? { ...a, state } : a)), machines: d.machines.map((m) => ({ ...m, openAlarms: d.alarms.filter((a) => a.machineId === m.id && (a.id === id ? state : a.state) === 'Open').length })) }), `${id} marked ${state.toLowerCase()}`),
-    [mutate],
+      mutate((d) => ({ ...d, alarms: d.alarms.map((a) => (a.id === id ? { ...a, state } : a)), machines: d.machines.map((m) => ({ ...m, openAlarms: d.alarms.filter((a) => a.machineId === m.id && (a.id === id ? state : a.state) === 'Open').length })) }), t('{id} marked {state}', { id, state: t(state).toLowerCase() })),
+    [mutate, t],
   );
 
   const setApprovalState = useCallback(
@@ -131,28 +156,28 @@ export function HiveStoreProvider({ children }: { children: React.ReactNode }) {
           next.workOrders = d.workOrders.map((w) => (apr.title.toLowerCase().includes(w.title.toLowerCase()) && w.state === 'Draft' ? { ...w, state: 'Submitted' as const } : w));
         }
         return next;
-      }, `${id} ${state.toLowerCase()}`),
-    [mutate],
+      }, t('{id} {state}', { id, state: t(state).toLowerCase() })),
+    [mutate, t],
   );
 
   const setWorkOrderState = useCallback(
-    (id: string, state: WorkOrderState) => mutate((d) => ({ ...d, workOrders: d.workOrders.map((w) => (w.id === id ? { ...w, state } : w)) }), `${id} set to ${state}`),
-    [mutate],
+    (id: string, state: WorkOrderState) => mutate((d) => ({ ...d, workOrders: d.workOrders.map((w) => (w.id === id ? { ...w, state } : w)) }), t('{id} set to {state}', { id, state: t(state) })),
+    [mutate, t],
   );
 
   const decideFinding = useCallback(
-    (id: string, status: 'Confirmed' | 'Rejected', reason?: string) => mutate((d) => ({ ...d, findings: d.findings.map((f) => (f.id === id ? { ...f, status, reason } : f)) }), `${id} ${status.toLowerCase()}`),
-    [mutate],
+    (id: string, status: 'Confirmed' | 'Rejected', reason?: string) => mutate((d) => ({ ...d, findings: d.findings.map((f) => (f.id === id ? { ...f, status, reason } : f)) }), t('{id} {state}', { id, state: t(status).toLowerCase() })),
+    [mutate, t],
   );
 
   const reservePart = useCallback(
-    (id: string) => mutate((d) => ({ ...d, parts: d.parts.map((p) => (p.id === id && p.onHand - p.reserved > 0 ? { ...p, reserved: p.reserved + 1 } : p)) }), `Reserved one ${id}`),
-    [mutate],
+    (id: string) => mutate((d) => ({ ...d, parts: d.parts.map((p) => (p.id === id && p.onHand - p.reserved > 0 ? { ...p, reserved: p.reserved + 1 } : p)) }), t('Reserved one {id}', { id })),
+    [mutate, t],
   );
 
   const decideRequisition = useCallback(
-    (id: string, state: 'Approved' | 'Rejected') => mutate((d) => ({ ...d, requisitions: d.requisitions.map((r) => (r.id === id ? { ...r, state } : r)) }), `${id} ${state.toLowerCase()}`),
-    [mutate],
+    (id: string, state: 'Approved' | 'Rejected') => mutate((d) => ({ ...d, requisitions: d.requisitions.map((r) => (r.id === id ? { ...r, state } : r)) }), t('{id} {state}', { id, state: t(state).toLowerCase() })),
+    [mutate, t],
   );
 
   const markRead = useCallback((id: string) => setData((d) => ({ ...d, notifications: d.notifications.map((n) => (n.id === id ? { ...n, read: true } : n)) })), []);
@@ -161,27 +186,27 @@ export function HiveStoreProvider({ children }: { children: React.ReactNode }) {
   const addNote = useCallback(
     (machineId: string, text: string) => {
       setNotes((n) => ({ ...n, [machineId]: [{ text, at: 'just now' }, ...(n[machineId] ?? [])] }));
-      notify(`Note added ${LOCAL}`);
+      notify(`${t('Note added')} ${t('(placeholder, not saved)')}`);
     },
-    [notify],
+    [notify, t],
   );
 
   const newThread = useCallback((context: string) => {
     const id = `thr_${Date.now()}`;
-    const t: AssistantThread = { id, title: 'New conversation', context, at: 'now', messages: [] };
-    setData((d) => ({ ...d, threads: [t, ...d.threads] }));
+    const th: AssistantThread = { id, title: 'New conversation', context, at: 'now', messages: [] };
+    setData((d) => ({ ...d, threads: [th, ...d.threads] }));
     return id;
   }, []);
 
   const sendMessage = useCallback(
     (threadId: string, text: string) => {
       const userMsg: AssistantMessage = { id: `m_${Date.now()}`, from: 'user', text };
-      setData((d) => ({ ...d, threads: d.threads.map((t) => (t.id === threadId ? { ...t, title: t.messages.length ? t.title : text.slice(0, 60), messages: [...t.messages, userMsg] } : t)) }));
+      setData((d) => ({ ...d, threads: d.threads.map((t0) => (t0.id === threadId ? { ...t0, title: t0.messages.length ? t0.title : text.slice(0, 60), userTitle: t0.messages.length ? t0.userTitle : true, messages: [...t0.messages, userMsg] } : t0)) }));
       setRunning(threadId);
       window.clearTimeout(runTimer.current);
       runTimer.current = window.setTimeout(() => {
         const a = answerFor(text);
-        setData((d) => ({ ...d, threads: d.threads.map((t) => (t.id === threadId ? { ...t, messages: [...t.messages, { id: `m_${Date.now()}`, from: 'assistant', ...a }] } : t)) }));
+        setData((d) => ({ ...d, threads: d.threads.map((t0) => (t0.id === threadId ? { ...t0, messages: [...t0.messages, { id: `m_${Date.now()}`, from: 'assistant', ...a }] } : t0)) }));
         setRunning(null);
       }, 1400);
     },
@@ -190,21 +215,21 @@ export function HiveStoreProvider({ children }: { children: React.ReactNode }) {
 
   const draftFromAnswer = useCallback(
     (threadId: string) => {
-      const t = data.threads.find((x) => x.id === threadId);
-      if (!t) return;
-      const id = `APR_${String(208 + data.approvals.length - 4).padStart(4, '0')}`;
+      const th = raw.threads.find((x) => x.id === threadId);
+      if (!th) return;
+      const id = `APR_${String(208 + raw.approvals.length - 4).padStart(4, '0')}`;
       mutate(
         (d) => ({
           ...d,
           approvals: [
-            { id, kind: 'work_order', title: `Create work order: ${t.context} follow-up`, machine: t.context, source: 'Assistant recommendation', tier: 'T1', state: 'Pending', requestedAt: 'just now', summary: 'Writes one work order to the maintenance system. Nothing is sent to the machine.', fields: [{ k: 'Priority', v: 'Medium' }, { k: 'Written to', v: 'Maintenance system' }], evidence: [] },
+            { id, kind: 'work_order', title: `Create work order: ${th.context} follow-up`, machine: th.context, source: 'Assistant recommendation', tier: 'T1', state: 'Pending', requestedAt: 'just now', summary: 'Writes one work order to the maintenance system. Nothing is sent to the machine.', fields: [{ k: 'Priority', v: 'Medium' }, { k: 'Written to', v: 'Maintenance system' }], evidence: [] },
             ...d.approvals,
           ],
         }),
-        `Draft ${id} sent to Inbox for a person to decide`,
+        t('Draft {id} sent to Inbox for a person to decide', { id }),
       );
     },
-    [data.threads, data.approvals.length, mutate],
+    [raw.threads, raw.approvals.length, mutate, t],
   );
 
   const value = useMemo<HiveStore>(

@@ -1,12 +1,12 @@
 import { ArrowLeft, Cpu, Info, Lock, Plus, Sparkles } from 'lucide-react-dash';
 import { useEffect, useMemo, useState } from 'react';
 
+import { formatAgo, formatDuration, formatNumber, localize, useT, useTn } from './i18n';
 import {
   ApplicabilityBadge,
   CitationChip,
   Chips,
   Field,
-  formatAge,
   LiveValue,
   MobileCard,
   Note,
@@ -27,6 +27,8 @@ const FILTERS: StateFilter[] = ['all', ...MACHINE_STATES];
 /* ---------- list ---------- */
 
 export function MachinesView({ go, site }: { go: (section: string) => void; site: string | null }) {
+  const t = useT();
+  const tn = useTn();
   const { data } = useHive();
   const phone = usePhone();
   const [q, setQ] = useState('');
@@ -50,9 +52,9 @@ export function MachinesView({ go, site }: { go: (section: string) => void; site
 
   return (
     <PageCard
-      title="Machines"
-      subtitle={site ? `Showing ${site}` : 'Grouped by area and line, with the age of every state'}
-      actions={<SearchBox value={q} onChange={setQ} label="Search machines" />}
+      title={t('Machines')}
+      subtitle={site ? t('Showing {site}', { site }) : t('Grouped by area and line, with the age of every state')}
+      actions={<SearchBox value={q} onChange={setQ} label={t('Search machines')} />}
     >
       <Chips options={FILTERS} value={state} onChange={setState} counts={counts} labels={labels} />
       {groups.map(([group, ms]) => (
@@ -61,7 +63,7 @@ export function MachinesView({ go, site }: { go: (section: string) => void; site
           {phone ? (
             <div className="hd-mlist">
               {ms.map((m) => (
-                <MobileCard key={m.id} onClick={() => go(`machines/${m.id}`)} spec={{ icon: Cpu, title: m.key, sub: `${m.type} · ${m.site}`, pill: <StateBadge state={m.state} ageS={m.stateAgeS} />, meta: m.openAlarms ? `${m.openAlarms} open alarm${m.openAlarms > 1 ? 's' : ''}` : m.oee ? `OEE ${m.oee.toFixed(1)}%` : '' }} />
+                <MobileCard key={m.id} onClick={() => go(`machines/${m.id}`)} spec={{ icon: Cpu, title: m.key, sub: `${m.type} · ${m.site}`, pill: <StateBadge state={m.state} ageS={m.stateAgeS} />, meta: m.openAlarms ? tn(m.openAlarms, '{n} open alarm', '{n} open alarms') : m.oee ? `OEE ${formatNumber(m.oee, 1)} %` : '' }} />
               ))}
             </div>
           ) : (
@@ -74,14 +76,14 @@ export function MachinesView({ go, site }: { go: (section: string) => void; site
                   </div>
                   <small>{m.type}</small>
                   <StateBadge state={m.state} ageS={m.stateAgeS} />
-                  <span className="hd-machine-meta">{m.oee ? `OEE ${m.oee.toFixed(1)}%` : 'OEE not available'}</span>
+                  <span className="hd-machine-meta">{m.oee ? `OEE ${formatNumber(m.oee, 1)} %` : t('OEE not available')}</span>
                 </button>
               ))}
             </div>
           )}
         </div>
       ))}
-      {groups.length === 0 && <p className="hd-empty">No machines match.</p>}
+      {groups.length === 0 && <p className="hd-empty">{t('No machines match.')}</p>}
     </PageCard>
   );
 }
@@ -124,6 +126,7 @@ const TIMELINE: Record<string, { state: MachineState; w: number }[]> = {
 };
 
 export function MachineDetail({ id, go }: { id: string; go: (section: string) => void }) {
+  const t = useT();
   const { data, notes, addNote, openDetail, setAlarmState, decideFinding, reservePart } = useHive();
   const phone = usePhone();
   const machine = data.machines.find((m) => m.id === id);
@@ -142,10 +145,10 @@ export function MachineDetail({ id, go }: { id: string; go: (section: string) =>
 
   if (!machine) {
     return (
-      <PageCard title="Not available">
-        <p className="hd-muted">This machine is not available to you.</p>
+      <PageCard title={t('Not available')}>
+        <p className="hd-muted">{t('This machine is not available to you.')}</p>
         <button type="button" className="hd-btn is-dark hd-btn-sm" onClick={() => go('machines')}>
-          Back to machines
+          {t('Back to machines')}
         </button>
       </PageCard>
     );
@@ -163,7 +166,7 @@ export function MachineDetail({ id, go }: { id: string; go: (section: string) =>
   return (
     <>
       <button type="button" className="hd-back" onClick={() => go('machines')}>
-        <ArrowLeft size={14} /> Machines
+        <ArrowLeft size={14} /> {t('Machines')}
       </button>
 
       <PageCard>
@@ -177,16 +180,16 @@ export function MachineDetail({ id, go }: { id: string; go: (section: string) =>
           <StateBadge state={machine.state} ageS={machine.stateAgeS + tick} />
         </div>
 
-        <div className="hd-control-strip" aria-label="Control status">
-          <span><i className="hd-sdot is-producing" /> Gateway connected</span>
-          <span><Lock size={12} /> Kill switch: not engaged</span>
-          <span>Remote enable: off · {formatAge(machine.stateAgeS)}</span>
-          <span className="hd-muted">Shown from cloud data. The gateway check decides.</span>
+        <div className="hd-control-strip" aria-label={t('Control status')}>
+          <span><i className="hd-sdot is-producing" /> {t('Gateway connected')}</span>
+          <span><Lock size={12} /> {t('Kill switch: not engaged')}</span>
+          <span>{t('Remote enable: off · {age}', { age: formatDuration(machine.stateAgeS) })}</span>
+          <span className="hd-muted">{t('Shown from cloud data. The gateway check decides.')}</span>
         </div>
       </PageCard>
 
       {alarms.length > 0 && (
-        <PageCard title="Open alarms">
+        <PageCard title={t('Open alarms')}>
           <div className="hd-alarm-list">
             {alarms.map((a) => (
               <div className="hd-alarm-row" key={a.id}>
@@ -196,12 +199,12 @@ export function MachineDetail({ id, go }: { id: string; go: (section: string) =>
                     <b>{a.title}</b>
                     <small>
                       {a.component ?? machine.key} · {a.raisedAt}
-                      {a.value ? ` · ${a.value} (limit ${a.limit})` : ''}
+                      {a.value ? ` · ${localize(a.value)} (${t('limit {n}', { n: localize(a.limit ?? '') })})` : ''}
                     </small>
                   </span>
                 </button>
                 <button type="button" className="hd-btn is-light hd-btn-sm" disabled={a.state !== 'Open'} onClick={() => setAlarmState(a.id, 'Acknowledged')}>
-                  Acknowledge
+                  {t('Acknowledge')}
                 </button>
               </div>
             ))}
@@ -209,7 +212,7 @@ export function MachineDetail({ id, go }: { id: string; go: (section: string) =>
         </PageCard>
       )}
 
-      <PageCard title="Live signals" subtitle="Values show their age; limits come from the alarm definition">
+      <PageCard title={t('Live signals')} subtitle={t('Values show their age; limits come from the alarm definition')}>
         <div className="hd-signals">
           {machine.signals.map((s, i) => {
             const jitter = live && s.quality === 'good' ? Math.sin((tick + i * 2) / 2) * Math.max(Math.abs(s.value) * 0.004, 0.02) : 0;
@@ -222,14 +225,14 @@ export function MachineDetail({ id, go }: { id: string; go: (section: string) =>
             );
           })}
         </div>
-        <p className="hd-muted hd-fine">Placeholder values, simulated in this browser. Alarms and states shown are not a replacement for the plant’s safety systems.</p>
+        <p className="hd-muted hd-fine">{t('Placeholder values, simulated in this browser. Alarms and states shown are not a replacement for the plant’s safety systems.')}</p>
       </PageCard>
 
       <PageCard>
         <div className="hd-tabbar" role="tablist">
-          {TABS.map((t) => (
-            <button key={t} type="button" role="tab" aria-selected={tab === t} className={`hd-chip${tab === t ? ' is-on' : ''}`} onClick={() => setTab(t)}>
-              {t}
+          {TABS.map((tab_) => (
+            <button key={tab_} type="button" role="tab" aria-selected={tab === tab_} className={`hd-chip${tab === tab_ ? ' is-on' : ''}`} onClick={() => setTab(tab_)}>
+              {t(tab_)}
             </button>
           ))}
         </div>
@@ -237,7 +240,7 @@ export function MachineDetail({ id, go }: { id: string; go: (section: string) =>
         {tab === 'History' && (
           <>
             <Chips options={RANGES} value={range} onChange={setRange} />
-            <div className="hd-chips" role="group" aria-label="Signals">
+            <div className="hd-chips" role="group" aria-label={t('Signals')}>
               {machine.signals.map((s) => (
                 <button
                   key={s.key}
@@ -252,16 +255,16 @@ export function MachineDetail({ id, go }: { id: string; go: (section: string) =>
             </div>
             <div className="hd-panel">
               <HistoryChart machine={machine} signals={chosen} range={range} />
-              <h4 className="hd-subhead">State timeline</h4>
-              <div className="hd-timeline-bar" role="img" aria-label="State timeline">
-                {timeline.map((t, i) => (
-                  <span key={i} style={{ width: `${t.w}%`, background: stateColor[t.state] }} title={STATE_LABEL[t.state]} />
+              <h4 className="hd-subhead">{t('State timeline')}</h4>
+              <div className="hd-timeline-bar" role="img" aria-label={t('State timeline')}>
+                {timeline.map((seg, i) => (
+                  <span key={i} style={{ width: `${seg.w}%`, background: stateColor[seg.state] }} title={t(STATE_LABEL[seg.state])} />
                 ))}
               </div>
               <div className="hd-state-row">
                 {[...new Set(timeline.map((t) => t.state))].map((st) => (
                   <span className="hd-state-count" key={st}>
-                    <i className={`hd-sdot is-${st}`} /> {STATE_LABEL[st]}
+                    <i className={`hd-sdot is-${st}`} /> {t(STATE_LABEL[st])}
                   </span>
                 ))}
               </div>
@@ -275,7 +278,7 @@ export function MachineDetail({ id, go }: { id: string; go: (section: string) =>
               <div className="hd-doc-block" key={d.id}>
                 <div className="hd-row">
                   <button type="button" className="hd-link" onClick={() => go('documents')}>
-                    <b>{d.name}</b> <small>rev. {d.revision}</small>
+                    <b>{d.name}</b> <small>{t('rev. {r}', { r: d.revision })}</small>
                   </button>
                   <ApplicabilityBadge verdict={d.applicability} />
                 </div>
@@ -289,7 +292,7 @@ export function MachineDetail({ id, go }: { id: string; go: (section: string) =>
                 ))}
                 {d.passages.some((p) => p.applicability === 'does_not_apply') && (
                   <details className="hd-excluded">
-                    <summary>Excluded passages</summary>
+                    <summary>{t('Excluded passages')}</summary>
                     {d.passages.filter((p) => p.applicability === 'does_not_apply').map((p) => (
                       <p className="hd-passage" key={p.text}>
                         <span>{p.text}</span>
@@ -302,7 +305,7 @@ export function MachineDetail({ id, go }: { id: string; go: (section: string) =>
                 )}
               </div>
             ))}
-            {docs.length === 0 && <p className="hd-empty">No documents are bound to this machine.</p>}
+            {docs.length === 0 && <p className="hd-empty">{t('No documents are bound to this machine.')}</p>}
           </div>
         )}
 
@@ -315,54 +318,54 @@ export function MachineDetail({ id, go }: { id: string; go: (section: string) =>
                   <Pill tone={f.status === 'Confirmed' ? 'green' : f.status === 'Rejected' ? 'red' : 'amber'}>{f.status}</Pill>
                 </div>
                 <small className="hd-muted">
-                  {f.kind} · confidence {Math.round(f.confidence * 100)}% · {f.model} · {f.age} ago
+                  {t(f.kind)} · {t('confidence {n} %', { n: Math.round(f.confidence * 100) })} · {f.model} · {formatAgo(f.ageS)}
                 </small>
                 <div className="hd-cites">{f.evidence.map((e) => <CitationChip key={e.label} label={e.label} locator={e.locator} applicability={e.applicability} reason={e.reason} />)}</div>
                 {f.status === 'Awaiting confirmation' &&
                   (rejecting === f.id ? (
                     <div className="hd-inline-form">
-                      <input value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Reason (required)" aria-label="Reason for rejecting" />
+                      <input value={reason} onChange={(e) => setReason(e.target.value)} placeholder={t('Reason (required)')} aria-label={t('Reason for rejecting')} />
                       <button type="button" className="hd-btn is-dark hd-btn-sm" disabled={!reason.trim()} onClick={() => { decideFinding(f.id, 'Rejected', reason.trim()); setRejecting(null); setReason(''); }}>
-                        Reject
+                        {t('Reject')}
                       </button>
                     </div>
                   ) : (
                     <div className="hd-approval-actions">
-                      <button type="button" className="hd-btn is-light hd-btn-sm" onClick={() => setRejecting(f.id)}>Reject</button>
-                      <button type="button" className="hd-btn is-dark hd-btn-sm" onClick={() => decideFinding(f.id, 'Confirmed')}>Confirm</button>
+                      <button type="button" className="hd-btn is-light hd-btn-sm" onClick={() => setRejecting(f.id)}>{t('Reject')}</button>
+                      <button type="button" className="hd-btn is-dark hd-btn-sm" onClick={() => decideFinding(f.id, 'Confirmed')}>{t('Confirm')}</button>
                     </div>
                   ))}
               </article>
             ))}
-            {findings.length === 0 && <p className="hd-empty">No findings or predictions for this machine.</p>}
+            {findings.length === 0 && <p className="hd-empty">{t('No findings or predictions for this machine.')}</p>}
           </div>
         )}
 
         {tab === 'Work' && (
           <>
-            <h4 className="hd-subhead">Work orders</h4>
+            <h4 className="hd-subhead">{t('Work orders')}</h4>
             {wos.map((w) => (
               <button type="button" key={w.id} className="hd-link-row" onClick={() => { go('work-orders'); openDetail({ kind: 'workOrder', id: w.id }); }}>
                 <Pill tone="gray">{w.state}</Pill> {w.id} · {w.title}
               </button>
             ))}
-            {wos.length === 0 && <p className="hd-muted">None.</p>}
-            <h4 className="hd-subhead">Parts bound to this machine</h4>
+            {wos.length === 0 && <p className="hd-muted">{t('None.')}</p>}
+            <h4 className="hd-subhead">{t('Parts bound to this machine')}</h4>
             {parts.map((p) => (
               <div className="hd-kv" key={p.id}>
                 <span>{p.number} · {p.name}</span>
                 <b>
-                  {p.onHand - p.reserved} available · synced {p.syncedDaysAgo} d ago {p.syncedDaysAgo > 7 && <Pill tone="amber">stale</Pill>}{' '}
-                  <button type="button" className="hd-ghost" onClick={() => reservePart(p.id)} disabled={p.onHand - p.reserved <= 0}>Reserve</button>
+                  {t('{n} available · synced {age}', { n: p.onHand - p.reserved, age: formatAgo(p.syncedDaysAgo * 86400) })} {p.syncedDaysAgo > 7 && <Pill tone="amber">{t('stale')}</Pill>}{' '}
+                  <button type="button" className="hd-ghost" onClick={() => reservePart(p.id)} disabled={p.onHand - p.reserved <= 0}>{t('Reserve')}</button>
                 </b>
               </div>
             ))}
-            {parts.length === 0 && <p className="hd-muted">None.</p>}
-            <h4 className="hd-subhead">Notes</h4>
+            {parts.length === 0 && <p className="hd-muted">{t('None.')}</p>}
+            <h4 className="hd-subhead">{t('Notes')}</h4>
             <div className="hd-inline-form">
-              <input value={note} onChange={(e) => setNote(e.target.value)} placeholder="Add a note" aria-label="Add a note" />
+              <input value={note} onChange={(e) => setNote(e.target.value)} placeholder={t('Add a note')} aria-label={t('Add a note')} />
               <button type="button" className="hd-btn is-dark hd-btn-sm" disabled={!note.trim()} onClick={() => { addNote(machine.id, note.trim()); setNote(''); }}>
-                <Plus size={14} /> Add
+                <Plus size={14} /> {t('Add')}
               </button>
             </div>
             {(notes[machine.id] ?? []).map((n, i) => (
@@ -376,7 +379,7 @@ export function MachineDetail({ id, go }: { id: string; go: (section: string) =>
 
         {tab === 'Actions' && (
           <Note icon={Info}>
-            Machine control is not enabled for this tenant, so no commands are offered. Nothing on this page can write a value to a machine; any change to a machine would have to go through the engineered command catalogue with the required approvals.
+            {t('Machine control is not enabled for this tenant, so no commands are offered. Nothing on this page can write a value to a machine; any change to a machine would have to go through the engineered command catalogue with the required approvals.')}
           </Note>
         )}
       </PageCard>
@@ -387,9 +390,9 @@ export function MachineDetail({ id, go }: { id: string; go: (section: string) =>
           className="hd-btn is-light hd-btn-sm"
           onClick={() => go('assistant')}
         >
-          <Sparkles size={14} /> Ask the assistant about {machine.key}
+          <Sparkles size={14} /> {t('Ask the assistant about {key}', { key: machine.key })}
         </button>
-        {!phone && <Field k="Context" v={machine.key} />}
+        {!phone && <Field k={t('Context')} v={machine.key} />}
       </div>
     </>
   );

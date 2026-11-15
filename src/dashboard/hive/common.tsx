@@ -1,6 +1,7 @@
 import { Check, Copy, Search, X, type LucideIcon } from 'lucide-react-dash';
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 
+import { formatAgo, formatDuration, formatNumber, useT } from './i18n';
 import { STATE_LABEL, type Applicability, type MachineState, type Severity } from './placeholder';
 
 /* ---------- phone mode ---------- */
@@ -25,11 +26,12 @@ export function useMediaQuery(query: string): boolean {
 export const includes = (q: string, ...vals: string[]) => !q.trim() || vals.some((v) => v.toLowerCase().includes(q.trim().toLowerCase()));
 
 export function Chips<T extends string>({ options, value, onChange, counts, labels }: { options: readonly T[]; value: T; onChange: (v: T) => void; counts?: Partial<Record<T, number>>; labels?: Partial<Record<T, string>> }) {
+  const t = useT();
   return (
     <div className="hd-chips" role="group">
       {options.map((o) => (
         <button key={o} type="button" className={`hd-chip${o === value ? ' is-on' : ''}`} aria-pressed={o === value} onClick={() => onChange(o)}>
-          <span>{labels?.[o] ?? o}</span>
+          <span>{t(labels?.[o] ?? o)}</span>
           {counts && counts[o] !== undefined && <small>{counts[o]}</small>}
         </button>
       ))}
@@ -38,37 +40,36 @@ export function Chips<T extends string>({ options, value, onChange, counts, labe
 }
 
 export function SearchBox({ value, onChange, label }: { value: string; onChange: (v: string) => void; label: string }) {
+  const t = useT();
   return (
     <label className="hd-search">
       <Search size={14} aria-hidden="true" />
-      <input value={value} onChange={(e) => onChange(e.target.value)} placeholder="Search" aria-label={label} />
+      <input value={value} onChange={(e) => onChange(e.target.value)} placeholder={t('Search')} aria-label={label} />
     </label>
   );
 }
 
 export function Sev({ s }: { s: Severity }) {
-  return <span className={`hd-sev is-${s}`}>{s}</span>;
+  const t = useT();
+  return <span className={`hd-sev is-${s}`}>{t(s)}</span>;
 }
 
 export type Tone = 'green' | 'red' | 'amber' | 'gray' | 'orange' | 'black';
 export function Pill({ tone, children }: { tone: Tone; children: React.ReactNode }) {
-  return <span className={`hd-pillx is-${tone}`}>{children}</span>;
+  const t = useT();
+  return <span className={`hd-pillx is-${tone}`}>{typeof children === 'string' ? t(children) : children}</span>;
 }
 
 const STATE_TONE: Record<MachineState, Tone> = { producing: 'green', idle: 'amber', setup: 'orange', planned_stop: 'gray', unplanned_stop: 'red', fault: 'red', off: 'gray', unknown: 'gray' };
 
-export function formatAge(s: number): string {
-  if (s < 60) return `${Math.round(s)} s`;
-  if (s < 3600) return `${Math.round(s / 60)} min`;
-  if (s < 86400) return `${Math.round(s / 3600)} h`;
-  return `${Math.round(s / 86400)} d`;
-}
+export const formatAge = formatDuration;
 
 /** State of a machine with the age of that state. Unknown is shown as unknown, never as off. */
 export function StateBadge({ state, ageS }: { state: MachineState; ageS?: number }) {
+  const t = useT();
   return (
     <Pill tone={STATE_TONE[state]}>
-      {STATE_LABEL[state]}
+      {t(STATE_LABEL[state])}
       {ageS !== undefined && <em className="hd-age"> · {formatAge(ageS)}</em>}
     </Pill>
   );
@@ -79,23 +80,25 @@ const APPLIC_TONE: Record<Applicability, Tone> = { applies: 'green', does_not_ap
 
 /** Every document passage and citation carries this verdict. */
 export function ApplicabilityBadge({ verdict, reason }: { verdict: Applicability; reason?: string }) {
+  const t = useT();
   return (
-    <span title={reason ? `Reason: ${reason}` : undefined}>
+    <span title={reason ? t('Reason: {reason}', { reason: t(reason) }) : undefined}>
       <Pill tone={APPLIC_TONE[verdict]}>
-        {APPLIC_LABEL[verdict]}
-        {reason ? ` · ${reason}` : ''}
+        {t(APPLIC_LABEL[verdict])}
+        {reason ? ` · ${t(reason)}` : ''}
       </Pill>
     </span>
   );
 }
 
 export function CitationChip({ label, locator, applicability, reason }: { label: string; locator: string; applicability: Applicability; reason?: string }) {
+  const t = useT();
   const unsupported = applicability !== 'applies';
   return (
     <span className={`hd-cite${unsupported ? ' is-unsupported' : ''}`}>
-      <b>{label}</b>
-      <small>{locator}</small>
-      {unsupported && <small className="hd-cite-flag">{applicability === 'unknown' ? 'not confirmed for this machine' : `not supported: ${reason ?? 'does not apply'}`}</small>}
+      <b>{t(label)}</b>
+      <small>{t(locator)}</small>
+      {unsupported && <small className="hd-cite-flag">{applicability === 'unknown' ? t('not confirmed for this machine') : t('not supported: {reason}', { reason: t(reason ?? 'does not apply') })}</small>}
     </span>
   );
 }
@@ -111,16 +114,17 @@ export function Field({ k, v }: { k: string; v: React.ReactNode }) {
 
 /** A live value with its age; quality markers show for estimated or stale readings. */
 export function LiveValue({ value, unit, decimals, limit, quality, ageS }: { value: number; unit: string; decimals: number; limit?: number; quality: 'good' | 'estimated' | 'stale'; ageS: number }) {
+  const t = useT();
   const over = limit !== undefined && value > limit;
   return (
     <span className={`hd-live${over ? ' is-over' : ''}${quality === 'stale' ? ' is-stale' : ''}`}>
       <b>
-        {value.toLocaleString('en-US', { minimumFractionDigits: decimals, maximumFractionDigits: decimals })} <small>{unit}</small>
+        {formatNumber(value, decimals)}&nbsp;<small>{unit}</small>
       </b>
       <i>
-        {quality !== 'good' && <em>{quality}</em>}
-        {limit !== undefined && <em>limit {limit}</em>}
-        <span>{formatAge(ageS)} ago</span>
+        {quality !== 'good' && <em>{t(quality)}</em>}
+        {limit !== undefined && <em>{t('limit {n}', { n: formatNumber(limit, 0) })}</em>}
+        <span>{formatAgo(ageS)}</span>
       </i>
     </span>
   );
@@ -310,6 +314,7 @@ export function DataTable<T extends { id: string }>({ rows, cols, onOpen, empty,
 
 /** A secret is shown once, kept only in this dialog's memory, and cleared when it closes. */
 export function SecretDialog({ title, secret, hint, onClose }: { title: string; secret: string; hint?: string; onClose: () => void }) {
+  const t = useT();
   const [copied, setCopied] = useState(false);
   return (
     <div className="hd-drawer-wrap is-center" onClick={onClose}>
@@ -317,9 +322,9 @@ export function SecretDialog({ title, secret, hint, onClose }: { title: string; 
         <header className="hd-drawer-head">
           <div>
             <h3>{title}</h3>
-            <small>This value is shown once and cannot be shown again.</small>
+            <small>{t('This value is shown once and cannot be shown again.')}</small>
           </div>
-          <button type="button" className="hd-icon-btn" aria-label="Close" onClick={onClose}>
+          <button type="button" className="hd-icon-btn" aria-label={t('Close')} onClick={onClose}>
             <X size={16} />
           </button>
         </header>

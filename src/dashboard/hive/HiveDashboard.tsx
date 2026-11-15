@@ -31,6 +31,10 @@ import { AdminView, SettingsView } from './admin';
 import { AssistantView } from './assistant';
 import { DocumentsView, FindingsView, PartsView, ReportsView, VendorsView } from './business';
 import { PhoneCtx, useMediaQuery } from './common';
+import { BrandProvider, brandStyle, useBrand } from './branding';
+import EmbedHost from './embed';
+import { LangProvider, useLang, useT } from './i18n';
+import Kiosk, { BOARDS, type Board } from './kiosk';
 import { GraphView } from './graph';
 import { MachineDetail, MachinesView } from './machines';
 import { BottomNav, MobileHeader, MobileHome, MobileMenu, type NavEntry } from './mobile';
@@ -102,6 +106,13 @@ function greeting(date = new Date()): string {
   return 'Good evening';
 }
 
+/** The words people search by, in both languages, so a German search finds an English-named section too. */
+const SECTION_TERMS_DE: Record<string, string> = {
+  '': 'start übersicht', machines: 'maschinen anlagen', alarms: 'alarme störungen', inbox: 'posteingang genehmigungen', assistant: 'assistent ki',
+  'work-orders': 'arbeitsaufträge instandhaltung', parts: 'ersatzteile lager', vendors: 'lieferanten anfragen bestellungen', documents: 'dokumente handbücher',
+  findings: 'befunde prognosen', reports: 'berichte kennzahlen', graph: 'graph beziehungen', admin: 'verwaltung benutzer rollen', activity: 'aktivität verlauf', settings: 'einstellungen',
+};
+
 function initials(name: string): string {
   return (
     name
@@ -156,26 +167,28 @@ interface Hit {
   key: string;
   label: string;
   hint: string;
+  extra?: string;
   run: () => void;
 }
 
 function SearchDialog({ onClose, go }: { onClose: () => void; go: (section: string) => void }) {
+  const t = useT();
   const { data, openDetail } = useHive();
   const [q, setQ] = useState('');
   const [idx, setIdx] = useState(0);
 
   const hits = useMemo<Hit[]>(() => {
     const all: Hit[] = [
-      ...Object.entries(SECTIONS).map(([id, s]) => ({ key: `s-${id}`, label: s.title, hint: `Go to · ${s.keywords}`, run: () => go(id) })),
-      ...data.machines.map((m) => ({ key: m.id, label: m.key, hint: `Machine · ${m.site}`, run: () => go(`machines/${m.id}`) })),
-      ...data.alarms.map((a) => ({ key: a.id, label: a.title, hint: `Alarm · ${a.machine} · ${a.id}`, run: () => { go('alarms'); openDetail({ kind: 'alarm', id: a.id }); } })),
-      ...data.workOrders.map((w) => ({ key: w.id, label: w.title, hint: `Work order · ${w.id}`, run: () => { go('work-orders'); openDetail({ kind: 'workOrder', id: w.id }); } })),
-      ...data.documents.map((d) => ({ key: d.id, label: d.name, hint: `Document · ${d.machine}`, run: () => { go('documents'); openDetail({ kind: 'document', id: d.id }); } })),
-      ...data.parts.map((p) => ({ key: p.id, label: `${p.number} · ${p.name}`, hint: `Part · ${p.machine}`, run: () => { go('parts'); openDetail({ kind: 'part', id: p.id }); } })),
+      ...Object.entries(SECTIONS).map(([id, s]) => ({ key: `s-${id}`, label: t(s.title), hint: t('Go to'), extra: `${s.title} ${s.keywords} ${SECTION_TERMS_DE[id] ?? ''}`, run: () => go(id) })),
+      ...data.machines.map((m) => ({ key: m.id, label: m.key, hint: `${t('Machine')} · ${m.site}`, run: () => go(`machines/${m.id}`) })),
+      ...data.alarms.map((a) => ({ key: a.id, label: a.title, hint: `${t('Alarm')} · ${a.machine} · ${a.id}`, run: () => { go('alarms'); openDetail({ kind: 'alarm', id: a.id }); } })),
+      ...data.workOrders.map((w) => ({ key: w.id, label: w.title, hint: `${t('Work order')} · ${w.id}`, run: () => { go('work-orders'); openDetail({ kind: 'workOrder', id: w.id }); } })),
+      ...data.documents.map((d) => ({ key: d.id, label: d.name, hint: `${t('Document')} · ${d.machine}`, run: () => { go('documents'); openDetail({ kind: 'document', id: d.id }); } })),
+      ...data.parts.map((p) => ({ key: p.id, label: `${p.number} · ${p.name}`, hint: `${t('Part')} · ${p.machine}`, run: () => { go('parts'); openDetail({ kind: 'part', id: p.id }); } })),
     ];
-    const t = q.trim().toLowerCase();
-    return (t ? all.filter((h) => `${h.label} ${h.hint}`.toLowerCase().includes(t)) : all.slice(0, 11)).slice(0, 12);
-  }, [q, data, go, openDetail]);
+    const needle = q.trim().toLowerCase();
+    return (needle ? all.filter((h) => `${h.label} ${h.hint} ${h.extra ?? ''}`.toLowerCase().includes(q.trim().toLowerCase())) : all.slice(0, 11)).slice(0, 12);
+  }, [q, data, go, openDetail, t]);
 
   useEffect(() => setIdx(0), [q]);
 
@@ -187,15 +200,15 @@ function SearchDialog({ onClose, go }: { onClose: () => void; go: (section: stri
 
   return (
     <div className="hd-drawer-wrap is-center" onClick={onClose}>
-      <div className="hd-search-dialog" role="dialog" aria-modal="true" aria-label="Search Hive" onClick={(e) => e.stopPropagation()}>
+      <div className="hd-search-dialog" role="dialog" aria-modal="true" aria-label={t('Search Hive')} onClick={(e) => e.stopPropagation()}>
         <label className="hd-search-input">
           <Search size={16} aria-hidden="true" />
           <input
             autoFocus
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            placeholder="Search machines, alarms, work orders, documents, parts…"
-            aria-label="Search"
+            placeholder={t('Search machines, alarms, work orders, documents, parts…')}
+            aria-label={t('Search')}
             onKeyDown={(e) => {
               if (e.key === 'Escape') onClose();
               else if (e.key === 'ArrowDown') {
@@ -207,7 +220,7 @@ function SearchDialog({ onClose, go }: { onClose: () => void; go: (section: stri
               } else if (e.key === 'Enter') choose(hits[idx]);
             }}
           />
-          <kbd>Esc</kbd>
+          <kbd>{t('Esc')}</kbd>
         </label>
         <ul className="hd-hits" role="listbox">
           {hits.map((h, i) => (
@@ -218,7 +231,7 @@ function SearchDialog({ onClose, go }: { onClose: () => void; go: (section: stri
               </button>
             </li>
           ))}
-          {hits.length === 0 && <li className="hd-empty">Nothing found.</li>}
+          {hits.length === 0 && <li className="hd-empty">{t('Nothing found.')}</li>}
         </ul>
       </div>
     </div>
@@ -228,12 +241,17 @@ function SearchDialog({ onClose, go }: { onClose: () => void; go: (section: stri
 /* ---------- shell ---------- */
 
 function Shell({ user, onSignOut, guest = false }: HiveDashboardProps) {
+  const t = useT();
   const params = useParams();
   const navigate = useNavigate();
   const [search] = useSearchParams();
   const { data, apiState, openDetail, toast, markRead } = useHive();
   const phone = useMediaQuery('(max-width: 760px)');
-  const exitLabel = guest ? 'Sign in' : 'Sign out';
+  const exitLabel = guest ? t('Sign in') : t('Sign out');
+  const { lang, setLang } = useLang();
+  const { applied: brand } = useBrand();
+
+  const shownUser = guest ? { ...user, name: t('Guest'), email: t('Demo preview') } : user;
 
   const raw = (params['*'] ?? '').replace(/^\/+|\/+$/g, '');
   const [first, second] = raw.split('/');
@@ -296,12 +314,12 @@ function Shell({ user, onSignOut, guest = false }: HiveDashboardProps) {
 
   const def = section !== null ? SECTIONS[section] : undefined;
   useEffect(() => {
-    document.title = `${def?.title ?? 'Hive'} · Hive`;
-  }, [def]);
+    document.title = `${def ? t(def.title) : brand.name} · ${brand.name}`;
+  }, [def, t, lang, brand.name]);
 
   const openAlarms = data.alarms.filter((a) => a.state === 'Open');
   const unread = data.notifications.filter((n) => !n.read);
-  const firstName = user.name.split(/\s+/)[0] || user.name;
+  const firstName = shownUser.name.split(/\s+/)[0] || shownUser.name;
   const open = (d: DetailRef) => {
     setBellOpen(false);
     openDetail(d);
@@ -357,19 +375,19 @@ function Shell({ user, onSignOut, guest = false }: HiveDashboardProps) {
     default:
       view = (
         <section className="hd-card hd-page">
-          <h2 className="hd-card-title is-lg">Page not found</h2>
-          <p className="hd-muted">There is no Hive page at this address.</p>
+          <h2 className="hd-card-title is-lg">{t('Page not found')}</h2>
+          <p className="hd-muted">{t('There is no Hive page at this address.')}</p>
           <button type="button" className="hd-btn is-dark hd-btn-sm" onClick={() => go('')}>
-            Back to home
+            {t('Back to home')}
           </button>
         </section>
       );
   }
 
-  const heading = section === '' || section === null ? `${greeting()}, ${firstName}` : first === 'machines' && second ? (data.machines.find((m) => m.id === second)?.key ?? 'Machine') : SECTIONS[section].title;
-  const subtitle = section === '' || section === null ? 'Stay on top of your plant, monitor signals, and track alarms.' : `${data.plant.name} · placeholder data until the Hive API is connected`;
+  const heading = section === '' || section === null ? `${t(greeting())}, ${firstName}` : first === 'machines' && second ? (data.machines.find((m) => m.id === second)?.key ?? t('Machine')) : t(SECTIONS[section].title);
+  const subtitle = section === '' || section === null ? t('Stay on top of your plant, monitor signals, and track alarms.') : `${data.plant.name} · ${t('placeholder data until the Hive API is connected')}`;
 
-  const menuEntries = MENU_GROUPS.map((g) => ({ heading: g.heading, items: g.ids.map((id): NavEntry => ({ id, title: SECTIONS[id].title, icon: SECTIONS[id].icon })) }));
+  const menuEntries = MENU_GROUPS.map((g) => ({ heading: t(g.heading), items: g.ids.map((id): NavEntry => ({ id, title: t(SECTIONS[id].title), icon: SECTIONS[id].icon })) }));
   const rootClass = `hd-root${dark ? ' is-dark' : ''}${compact ? ' is-compact' : ''}${phone ? ' is-phone' : ''}`;
 
   const overlays = (
@@ -388,13 +406,13 @@ function Shell({ user, onSignOut, guest = false }: HiveDashboardProps) {
   if (phone) {
     return (
       <PhoneCtx.Provider value={true}>
-        <div className={rootClass} data-theme={dark ? 'dark' : 'light'}>
+        <div className={rootClass} data-theme={dark ? 'dark' : 'light'} style={brandStyle(brand)}>
           <div className="hd-mshell">
-            <MobileHeader title={section === '' ? 'Home' : heading} site="Musterwerk" onSearch={() => setSearchOpen(true)} />
+            <MobileHeader title={section === '' ? t('Home') : heading} site="Musterwerk" onSearch={() => setSearchOpen(true)} />
             <div className="hd-mscroll">
               {section !== '' && (
                 <span className={`hd-api is-${apiState}`} role="status">
-                  <i /> {API_LABEL[apiState]}
+                  <i /> {t(API_LABEL[apiState])}
                 </span>
               )}
               {view}
@@ -409,7 +427,7 @@ function Shell({ user, onSignOut, guest = false }: HiveDashboardProps) {
               onClose={() => setMenuOpen(false)}
               dark={dark}
               setDark={setDark}
-              user={user}
+              user={shownUser}
               guest={guest}
               onExit={() => {
                 setMenuOpen(false);
@@ -426,28 +444,28 @@ function Shell({ user, onSignOut, guest = false }: HiveDashboardProps) {
   /* ----- desktop ----- */
   return (
     <PhoneCtx.Provider value={false}>
-      <div className={rootClass} data-theme={dark ? 'dark' : 'light'}>
+      <div className={rootClass} data-theme={dark ? 'dark' : 'light'} style={brandStyle(brand)}>
         <div className="hd-shell">
           <header className="hd-top">
             <a
               className="hd-brand"
               href={BASE}
-              aria-label="Hive home"
+              aria-label={t('Hive home')}
               onClick={(e) => {
                 e.preventDefault();
                 go('');
               }}
             >
               <span className="hd-brand-mark">
-                <img src="/brand-mark-tile.svg" alt="" width={18} height={18} />
+                {brand.logoLight || brand.logoDark ? <img src={(dark ? brand.logoDark : brand.logoLight) ?? brand.logoLight ?? brand.logoDark} alt="" width={18} height={18} /> : <img src="/brand-mark-tile.svg" alt="" width={18} height={18} />}
               </span>
-              <span className="hd-brand-name">Hive</span>
+              <span className="hd-brand-name">{brand.name}</span>
             </a>
 
-            <nav className="hd-tabs" aria-label="Hive sections">
+            <nav className="hd-tabs" aria-label={t('Hive sections')}>
               {TABS.map((id) => (
                 <button key={id || 'home'} type="button" className={`hd-tab${section === id ? ' is-active' : ''}`} aria-current={section === id ? 'page' : undefined} onClick={() => go(id)}>
-                  {SECTIONS[id].title}
+                  {t(SECTIONS[id].title)}
                   {id === 'inbox' && unread.length > 0 && <i className="hd-tab-dot" />}
                 </button>
               ))}
@@ -455,7 +473,7 @@ function Shell({ user, onSignOut, guest = false }: HiveDashboardProps) {
 
             <div className="hd-tools">
               <div className="hd-tools-pill">
-                <button type="button" className="hd-icon-btn" aria-label="Search (Ctrl K)" title="Search (Ctrl K)" onClick={() => setSearchOpen(true)}>
+                <button type="button" className="hd-icon-btn" aria-label={t('Search (Ctrl K)')} title={t('Search (Ctrl K)')} onClick={() => setSearchOpen(true)}>
                   <Search size={16} />
                 </button>
                 <div className="hd-pop-anchor" ref={bellRef}>
@@ -464,18 +482,18 @@ function Shell({ user, onSignOut, guest = false }: HiveDashboardProps) {
                   </button>
                   {bellOpen && (
                     <div className="hd-pop" role="menu">
-                      <div className="hd-pop-head">Open alarms</div>
+                      <div className="hd-pop-head">{t('Open alarms')}</div>
                       {openAlarms.slice(0, 4).map((a) => (
                         <button key={a.id} type="button" role="menuitem" className="hd-pop-item" onClick={() => { setBellOpen(false); go('alarms'); open({ kind: 'alarm', id: a.id }); }}>
-                          <span className={`hd-sev is-${a.severity}`}>{a.severity}</span>
+                          <span className={`hd-sev is-${a.severity}`}>{t(a.severity)}</span>
                           <span>
                             {a.title}
                             <small>{a.machine} · {a.raisedAt}</small>
                           </span>
                         </button>
                       ))}
-                      {openAlarms.length === 0 && <p className="hd-pop-empty">All clear.</p>}
-                      <div className="hd-pop-head">Notifications</div>
+                      {openAlarms.length === 0 && <p className="hd-pop-empty">{t('All clear.')}</p>}
+                      <div className="hd-pop-head">{t('Notifications')}</div>
                       {data.notifications.slice(0, 3).map((n) => (
                         <button key={n.id} type="button" role="menuitem" className="hd-pop-item" onClick={() => { markRead(n.id); setBellOpen(false); go(n.to.section); }}>
                           <span>
@@ -485,35 +503,38 @@ function Shell({ user, onSignOut, guest = false }: HiveDashboardProps) {
                         </button>
                       ))}
                       <button type="button" className="hd-pop-foot" onClick={() => { setBellOpen(false); go('alarms'); }}>
-                        See all alarms
+                        {t('See all alarms')}
                       </button>
                     </div>
                   )}
                 </div>
-                <a className="hd-icon-btn" href="https://status.clerktree.com" target="_blank" rel="noreferrer" aria-label="Platform status" title="Platform status">
+                <button type="button" className="hd-lang-btn" aria-label={t('Language')} title={t('Language')} onClick={() => setLang(lang === 'de' ? 'en' : 'de')}>
+                  {lang === 'de' ? 'DE' : 'EN'}
+                </button>
+                <a className="hd-icon-btn" href="https://status.clerktree.com" target="_blank" rel="noreferrer" aria-label={t('Platform status')} title={t('Platform status')}>
                   <CircleAlert size={16} />
                 </a>
               </div>
 
               <div className="hd-pop-anchor" ref={profileRef}>
-                <button type="button" className="hd-profile" aria-label="Account menu" aria-expanded={profileOpen} onClick={() => setProfileOpen((v) => !v)}>
-                  <span className="hd-avatar">{user.avatarUrl ? <img src={user.avatarUrl} alt="" /> : initials(user.name)}</span>
+                <button type="button" className="hd-profile" aria-label={t('Account menu')} aria-expanded={profileOpen} onClick={() => setProfileOpen((v) => !v)}>
+                  <span className="hd-avatar">{shownUser.avatarUrl ? <img src={shownUser.avatarUrl} alt="" /> : initials(shownUser.name)}</span>
                   <span className="hd-profile-text">
-                    <strong>{user.name}</strong>
-                    <small>{user.email}</small>
+                    <strong>{shownUser.name}</strong>
+                    <small>{shownUser.email}</small>
                   </span>
                   <ChevronDown size={14} aria-hidden="true" />
                 </button>
                 {profileOpen && (
                   <div className="hd-pop is-right" role="menu">
                     <button type="button" role="menuitem" className="hd-pop-item" onClick={() => { setProfileOpen(false); go('settings'); }}>
-                      <Settings size={15} /> <span>Settings</span>
+                      <Settings size={15} /> <span>{t('Settings')}</span>
                     </button>
                     <button type="button" role="menuitem" className="hd-pop-item" onClick={() => { setProfileOpen(false); go('activity'); }}>
-                      <LayoutGrid size={15} /> <span>Activity</span>
+                      <LayoutGrid size={15} /> <span>{t('Activity')}</span>
                     </button>
                     <a role="menuitem" className="hd-pop-item" href="/dashboard/default">
-                      <LayoutPanelLeft size={15} /> <span>Workspace dashboards</span>
+                      <LayoutPanelLeft size={15} /> <span>{t('Workspace dashboards')}</span>
                     </a>
                     <button type="button" role="menuitem" className="hd-pop-item" onClick={() => { setProfileOpen(false); onSignOut?.(); }}>
                       <LogOut size={15} /> <span>{exitLabel}</span>
@@ -525,12 +546,12 @@ function Shell({ user, onSignOut, guest = false }: HiveDashboardProps) {
           </header>
 
           <div className="hd-body">
-            <aside className="hd-rail" aria-label="Workspace">
-              <div className="hd-rail-pill hd-theme" role="group" aria-label="Theme">
-                <button type="button" className={!dark ? 'is-on' : ''} onClick={() => setDark(false)} aria-label="Light theme" aria-pressed={!dark}>
+            <aside className="hd-rail" aria-label={t('Workspace')}>
+              <div className="hd-rail-pill hd-theme" role="group" aria-label={t('Theme')}>
+                <button type="button" className={!dark ? 'is-on' : ''} onClick={() => setDark(false)} aria-label={t('Light theme')} aria-pressed={!dark}>
                   <Sun size={15} />
                 </button>
-                <button type="button" className={dark ? 'is-on' : ''} onClick={() => setDark(true)} aria-label="Dark theme" aria-pressed={dark}>
+                <button type="button" className={dark ? 'is-on' : ''} onClick={() => setDark(true)} aria-label={t('Dark theme')} aria-pressed={dark}>
                   <Moon size={15} />
                 </button>
               </div>
@@ -539,7 +560,7 @@ function Shell({ user, onSignOut, guest = false }: HiveDashboardProps) {
                 {RAIL.map((id) => {
                   const Icon = SECTIONS[id].icon;
                   return (
-                    <button key={id || 'home'} type="button" className={section === id ? 'is-on' : ''} aria-label={SECTIONS[id].title} title={SECTIONS[id].title} aria-current={section === id ? 'page' : undefined} onClick={() => go(id)}>
+                    <button key={id || 'home'} type="button" className={section === id ? 'is-on' : ''} aria-label={t(SECTIONS[id].title)} title={t(SECTIONS[id].title)} aria-current={section === id ? 'page' : undefined} onClick={() => go(id)}>
                       <Icon size={16} />
                     </button>
                   );
@@ -547,7 +568,7 @@ function Shell({ user, onSignOut, guest = false }: HiveDashboardProps) {
               </div>
 
               <div className="hd-rail-pill hd-foot">
-                <a className="hd-rail-link" href="https://clerktree.com/contact" target="_blank" rel="noreferrer" aria-label="Help" title="Help">
+                <a className="hd-rail-link" href="https://clerktree.com/contact" target="_blank" rel="noreferrer" aria-label={t('Help')} title={t('Help')}>
                   <CircleHelp size={16} />
                 </a>
                 <button type="button" aria-label={exitLabel} title={exitLabel} onClick={onSignOut}>
@@ -563,7 +584,7 @@ function Shell({ user, onSignOut, guest = false }: HiveDashboardProps) {
                   <p>{subtitle}</p>
                 </div>
                 <span className={`hd-api is-${apiState}`} role="status">
-                  <i /> {API_LABEL[apiState]}
+                  <i /> {t(API_LABEL[apiState])}
                 </span>
               </div>
               <div className="hd-scroll">{view}</div>
@@ -576,10 +597,39 @@ function Shell({ user, onSignOut, guest = false }: HiveDashboardProps) {
   );
 }
 
+/** Picks the screen: a shop-floor display, an embeddable component, or the console. */
+function Root(props: HiveDashboardProps) {
+  const params = useParams();
+  const [kind, a, b] = (params['*'] ?? '').replace(/^\/+|\/+$/g, '').split('/');
+  useEffect(() => {
+    if (kind === 'kiosk' || kind === 'embed') document.documentElement.classList.add('hd-lock');
+  }, [kind]);
+  if (kind === 'kiosk') return BOARDS.includes(a as Board) ? <Kiosk board={a as Board} id={b ?? ''} /> : <KioskUnknown />;
+  if (kind === 'embed') return <EmbedHost component={a ?? ''} />;
+  return <Shell {...props} />;
+}
+
+function KioskUnknown() {
+  const t = useT();
+  return (
+    <div className="kb-root is-hc is-far">
+      <main className="kb-body">
+        <div className="kb-center" role="status">
+          <h2>{t('Not available')}</h2>
+        </div>
+      </main>
+    </div>
+  );
+}
+
 export default function HiveDashboard(props: HiveDashboardProps) {
   return (
-    <HiveStoreProvider>
-      <Shell {...props} />
-    </HiveStoreProvider>
+    <LangProvider>
+      <BrandProvider>
+        <HiveStoreProvider>
+          <Root {...props} />
+        </HiveStoreProvider>
+      </BrandProvider>
+    </LangProvider>
   );
 }

@@ -51,6 +51,8 @@ export interface HiveMachine {
   site: string;
   area: string;
   line: string;
+  /** Stable identifier of the line (never translated). */
+  lineId: string;
   state: MachineState;
   stateAgeS: number;
   oee: number;
@@ -126,7 +128,7 @@ export interface HiveFinding {
   machine: string;
   confidence: number;
   model: string;
-  age: string;
+  ageS: number;
   evidence: HiveEvidence[];
   status: 'Awaiting confirmation' | 'Confirmed' | 'Rejected';
   reason?: string;
@@ -225,6 +227,8 @@ export interface AssistantCitation {
 export interface AssistantMessage {
   id: string;
   from: 'user' | 'assistant';
+  /** Seed (demo) message: translated for display, unlike text a person typed. */
+  seed?: boolean;
   text: string;
   citations?: AssistantCitation[];
   abstained?: boolean;
@@ -232,6 +236,8 @@ export interface AssistantMessage {
 export interface AssistantThread {
   id: string;
   title: string;
+  /** True when the title is the user's own text (never translated). */
+  userTitle?: boolean;
   context: string;
   at: string;
   messages: AssistantMessage[];
@@ -384,7 +390,7 @@ export const placeholderOverview: HiveOverview = {
   ],
   machines: [
     {
-      id: 'ast_cnc07', key: 'CNC-07', name: 'CNC machining centre 07', type: 'CNC machining centre', site: 'Halle 1', area: 'Machining', line: 'Line 2', state: 'fault', stateAgeS: 1260, oee: 71.2, openAlarms: 2,
+      id: 'ast_cnc07', key: 'CNC-07', name: 'CNC machining centre 07', type: 'CNC machining centre', site: 'Halle 1', area: 'Machining', line: 'Line 2', lineId: 'line-2', state: 'fault', stateAgeS: 1260, oee: 71.2, openAlarms: 2,
       signals: [
         sig('spindle_temp', 'Spindle temperature', '°C', 87.4, 1, 80),
         sig('spindle_load', 'Spindle load', '%', 62, 0, 95),
@@ -395,31 +401,31 @@ export const placeholderOverview: HiveOverview = {
       ],
     },
     {
-      id: 'ast_cnc08', key: 'CNC-08', name: 'CNC machining centre 08', type: 'CNC machining centre', site: 'Halle 1', area: 'Machining', line: 'Line 2', state: 'producing', stateAgeS: 5400, oee: 88.9, openAlarms: 0,
+      id: 'ast_cnc08', key: 'CNC-08', name: 'CNC machining centre 08', type: 'CNC machining centre', site: 'Halle 1', area: 'Machining', line: 'Line 2', lineId: 'line-2', state: 'producing', stateAgeS: 5400, oee: 88.9, openAlarms: 0,
       signals: [sig('spindle_temp', 'Spindle temperature', '°C', 61.2, 1, 80), sig('spindle_load', 'Spindle load', '%', 71, 0, 95), sig('vib_rms', 'Vibration RMS', 'mm/s', 2.4, 1, 7.1), sig('feed', 'Feed rate', 'mm/min', 1800, 0)],
     },
     {
-      id: 'ast_press03', key: 'Press 03', name: 'Hydraulic press 03', type: 'Hydraulic press', site: 'Halle 1', area: 'Forming', line: 'Line 1', state: 'producing', stateAgeS: 2200, oee: 84.1, openAlarms: 0,
+      id: 'ast_press03', key: 'Press 03', name: 'Hydraulic press 03', type: 'Hydraulic press', site: 'Halle 1', area: 'Forming', line: 'Line 1', lineId: 'line-1', state: 'producing', stateAgeS: 2200, oee: 84.1, openAlarms: 0,
       signals: [sig('oil_temp', 'Oil temperature', '°C', 48.1, 1, 70), sig('press_force', 'Press force', 'kN', 412, 0, 500), sig('cycle', 'Cycle time', 's', 6.4, 1)],
     },
     {
-      id: 'ast_comp02', key: 'Compressor 02', name: 'Compressor 02', type: 'Compressed air', site: 'Halle 2', area: 'Utilities', line: 'Utilities', state: 'producing', stateAgeS: 86400, oee: 92.6, openAlarms: 0,
+      id: 'ast_comp02', key: 'Compressor 02', name: 'Compressor 02', type: 'Compressed air', site: 'Halle 2', area: 'Utilities', line: 'Utilities', lineId: 'utilities', state: 'producing', stateAgeS: 86400, oee: 92.6, openAlarms: 0,
       signals: [sig('supply_p', 'Supply pressure', 'bar', 6.5, 1), sig('motor_temp', 'Motor temperature', '°C', 66.0, 1, 90)],
     },
     {
-      id: 'ast_conv_a', key: 'Conveyor A', name: 'Conveyor line A', type: 'Conveyor line', site: 'Halle 2', area: 'Logistics', line: 'Line 3', state: 'idle', stateAgeS: 540, oee: 64.0, openAlarms: 0,
+      id: 'ast_conv_a', key: 'Conveyor A', name: 'Conveyor line A', type: 'Conveyor line', site: 'Halle 2', area: 'Logistics', line: 'Line 3', lineId: 'line-3', state: 'idle', stateAgeS: 540, oee: 64.0, openAlarms: 0,
       signals: [sig('belt_speed', 'Belt speed', 'm/s', 0, 2), sig('motor_current', 'Motor current', 'A', 0.4, 1)],
     },
     {
-      id: 'ast_robot1', key: 'Robot cell 1', name: 'Handling robot cell 1', type: 'Handling robot', site: 'Halle 2', area: 'Assembly', line: 'Line 3', state: 'setup', stateAgeS: 900, oee: 90.3, openAlarms: 0,
+      id: 'ast_robot1', key: 'Robot cell 1', name: 'Handling robot cell 1', type: 'Handling robot', site: 'Halle 2', area: 'Assembly', line: 'Line 3', lineId: 'line-3', state: 'setup', stateAgeS: 900, oee: 90.3, openAlarms: 0,
       signals: [sig('cycle', 'Cycle time', 's', 11.2, 1), sig('gripper_p', 'Gripper pressure', 'bar', 4.8, 1)],
     },
     {
-      id: 'ast_lift1', key: 'Hoist 1', name: 'Overhead hoist 1', type: 'Overhead hoist', site: 'Lager', area: 'Warehouse', line: 'Warehouse', state: 'unknown', stateAgeS: 7200, oee: 0, openAlarms: 0,
+      id: 'ast_lift1', key: 'Hoist 1', name: 'Overhead hoist 1', type: 'Overhead hoist', site: 'Lager', area: 'Warehouse', line: 'Warehouse', lineId: 'warehouse', state: 'unknown', stateAgeS: 7200, oee: 0, openAlarms: 0,
       signals: [sig('load', 'Load', 'kg', 0, 0, undefined, 'stale', 7200)],
     },
     {
-      id: 'ast_oven2', key: 'Curing oven 2', name: 'Curing oven 2', type: 'Industrial oven', site: 'Halle 2', area: 'Finishing', line: 'Line 3', state: 'planned_stop', stateAgeS: 3600, oee: 79.5, openAlarms: 0,
+      id: 'ast_oven2', key: 'Curing oven 2', name: 'Curing oven 2', type: 'Industrial oven', site: 'Halle 2', area: 'Finishing', line: 'Line 3', lineId: 'line-3', state: 'planned_stop', stateAgeS: 3600, oee: 79.5, openAlarms: 0,
       signals: [sig('chamber_temp', 'Chamber temperature', '°C', 42.0, 1, 220), sig('fan', 'Fan speed', 'rpm', 0, 0)],
     },
   ],
@@ -451,9 +457,9 @@ export const placeholderOverview: HiveOverview = {
     { id: 'n4', text: 'Finding awaiting confirmation on CNC-07', at: '10:05 AM', read: true, to: { section: 'findings' } },
   ],
   findings: [
-    { id: 'FND_0031', kind: 'Finding', title: 'Drive-end bearing wear signature', machine: 'CNC-07', confidence: 0.82, model: 'bearing-anomaly v1.3', age: '2 h', evidence: cncEvidence.slice(0, 2), status: 'Awaiting confirmation' },
-    { id: 'FND_0030', kind: 'Prediction', title: 'Hydraulic filter clogging within 9 days', machine: 'Press 03', confidence: 0.71, model: 'filter-forecast v0.9', age: '1 d', evidence: [{ label: 'Differential pressure trend', locator: 'signal · 14 d', applicability: 'applies', observed: '14 Nov' }], status: 'Confirmed' },
-    { id: 'FND_0028', kind: 'Finding', title: 'Compressor short-cycling at night', machine: 'Compressor 02', confidence: 0.55, model: 'cycling-detect v1.0', age: '3 d', evidence: [{ label: 'Motor current', locator: 'signal · 3 nights', applicability: 'unknown', reason: 'no variant data', observed: '12 Nov' }], status: 'Awaiting confirmation' },
+    { id: 'FND_0031', kind: 'Finding', title: 'Drive-end bearing wear signature', machine: 'CNC-07', confidence: 0.82, model: 'bearing-anomaly v1.3', ageS: 7200, evidence: cncEvidence.slice(0, 2), status: 'Awaiting confirmation' },
+    { id: 'FND_0030', kind: 'Prediction', title: 'Hydraulic filter clogging within 9 days', machine: 'Press 03', confidence: 0.71, model: 'filter-forecast v0.9', ageS: 86400, evidence: [{ label: 'Differential pressure trend', locator: 'signal · 14 d', applicability: 'applies', observed: '14 Nov' }], status: 'Confirmed' },
+    { id: 'FND_0028', kind: 'Finding', title: 'Compressor short-cycling at night', machine: 'Compressor 02', confidence: 0.55, model: 'cycling-detect v1.0', ageS: 259200, evidence: [{ label: 'Motor current', locator: 'signal · 3 nights', applicability: 'unknown', reason: 'no variant data', observed: '12 Nov' }], status: 'Awaiting confirmation' },
   ],
   documents: [
     { id: 'DOC_311', name: 'CNC-07 operating manual', kind: 'Manual', machine: 'CNC-07', pages: 212, updated: '02 Nov, 2026', revision: 'C', applicability: 'applies', passages: [{ text: 'Spindle bearing service interval: inspect every 2,000 operating hours; replace on measured wear.', page: 118, applicability: 'applies' }, { text: 'Coolant concentration limits for the 24 kW spindle variant.', page: 131, applicability: 'unknown', reason: 'variant not recorded' }, { text: 'Alternate spindle (40 kW) torque table.', page: 140, applicability: 'does_not_apply', reason: 'different spindle variant' }] },
@@ -526,7 +532,7 @@ export const placeholderOverview: HiveOverview = {
   threads: [
     {
       id: 'thr_1', title: 'Why did CNC-07 raise an alarm at 3:45 PM?', context: 'CNC-07', at: '15 Nov', messages: [
-        { id: 'm1', from: 'user', text: 'Why did CNC-07 raise an alarm at 3:45 PM?' },
+        { id: 'm1', from: 'user', seed: true, text: 'Why did CNC-07 raise an alarm at 3:45 PM?' },
         {
           id: 'm2', from: 'assistant',
           text: 'The spindle bearing temperature rose above its 80 °C limit for three minutes and reached 87.4 °C. Vibration on the drive-end bearing has also trended up 18% over 24 hours. The manual recommends inspecting the bearing when both occur.',

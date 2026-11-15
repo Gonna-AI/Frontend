@@ -5,6 +5,7 @@ import { MobileCard, StateBadge } from './common';
 import { useAttention } from './OverviewView';
 import { MACHINE_STATES, STATE_LABEL } from './placeholder';
 import { useHive } from './store';
+import { useLang, useT } from './i18n';
 
 export interface NavEntry {
   id: string;
@@ -15,6 +16,7 @@ export interface NavEntry {
 /* ---------- home on a phone ---------- */
 
 export function MobileHome({ go }: { go: (section: string) => void }) {
+  const t = useT();
   const { data } = useHive();
   const { attention, waiting } = useAttention(go);
   const critical = attention.filter((a) => a.tone === 'red').length;
@@ -22,11 +24,11 @@ export function MobileHome({ go }: { go: (section: string) => void }) {
   const faults = data.machines.filter((m) => m.state === 'fault' || m.state === 'unplanned_stop').length;
 
   const tiles: { label: string; value: number; sub: string; to: string; hot?: boolean }[] = [
-    { label: 'Critical', value: critical, sub: critical === 1 ? 'alarm' : 'alarms', to: 'alarms', hot: critical > 0 },
-    { label: 'Alarms', value: open, sub: 'open', to: 'alarms' },
-    { label: 'Inbox', value: waiting, sub: 'waiting', to: 'inbox' },
-    { label: 'Faults', value: faults, sub: 'machines', to: 'machines' },
-    { label: 'Online', value: data.machines.filter((m) => m.state !== 'unknown' && m.state !== 'off').length, sub: `of ${data.machines.length}`, to: 'machines' },
+    { label: t('Critical'), value: critical, sub: t(critical === 1 ? 'alarm' : 'alarms'), to: 'alarms', hot: critical > 0 },
+    { label: t('Alarms'), value: open, sub: t('open'), to: 'alarms' },
+    { label: t('Inbox'), value: waiting, sub: t('waiting'), to: 'inbox' },
+    { label: t('Faults'), value: faults, sub: t('machines'), to: 'machines' },
+    { label: t('Online'), value: data.machines.filter((m) => m.state !== 'unknown' && m.state !== 'off').length, sub: t('of {n}', { n: data.machines.length }), to: 'machines' },
   ];
 
   const lines = useMemo(() => {
@@ -47,7 +49,7 @@ export function MobileHome({ go }: { go: (section: string) => void }) {
         ))}
       </div>
 
-      <h3 className="hd-msection">Needs attention</h3>
+      <h3 className="hd-msection">{t('Needs attention')}</h3>
       <div className="hd-mlist">
         {attention.slice(0, 6).map((a) => (
           <MobileCard
@@ -58,21 +60,21 @@ export function MobileHome({ go }: { go: (section: string) => void }) {
               title: a.title,
               sub: a.where,
               time: a.time,
-              pill: <span className={`hd-pillx is-${a.tone === 'red' ? 'red' : a.tone === 'orange' ? 'orange' : 'gray'}`}>{a.label}</span>,
+              pill: <span className={`hd-pillx is-${a.tone === 'red' ? 'red' : a.tone === 'orange' ? 'orange' : 'gray'}`}>{t(a.label)}</span>,
             }}
           />
         ))}
-        {attention.length === 0 && <p className="hd-empty">Nothing needs attention. Last checked just now.</p>}
+        {attention.length === 0 && <p className="hd-empty">{t('Nothing needs attention. Last checked just now.')}</p>}
         <button type="button" className="hd-dashed" onClick={() => go('alarms')}>
-          <span>＋</span> See all alarms{attention.length > 6 ? ` · ${attention.length - 6} more` : ''}
+          <span>＋</span> {t('See all alarms')}{attention.length > 6 ? ` · ${t('{n} more', { n: attention.length - 6 })}` : ''}
         </button>
       </div>
 
-      <h3 className="hd-msection">Plant overview</h3>
+      <h3 className="hd-msection">{t('Plant overview')}</h3>
       <div className="hd-state-row">
         {MACHINE_STATES.filter((st) => data.machines.some((m) => m.state === st)).map((st) => (
           <span className="hd-state-count" key={st}>
-            <i className={`hd-sdot is-${st}`} /> {STATE_LABEL[st]} <b>{data.machines.filter((m) => m.state === st).length}</b>
+            <i className={`hd-sdot is-${st}`} /> {t(STATE_LABEL[st])} <b>{data.machines.filter((m) => m.state === st).length}</b>
           </span>
         ))}
       </div>
@@ -81,12 +83,12 @@ export function MobileHome({ go }: { go: (section: string) => void }) {
           <h3>{line}</h3>
           <div className="hd-mlist">
             {ms.map((m) => (
-              <MobileCard key={m.id} onClick={() => go(`machines/${m.id}`)} spec={{ icon: Cpu, title: m.key, sub: m.type, pill: <StateBadge state={m.state} ageS={m.stateAgeS} />, meta: m.openAlarms ? `${m.openAlarms} open` : '' }} />
+              <MobileCard key={m.id} onClick={() => go(`machines/${m.id}`)} spec={{ icon: Cpu, title: m.key, sub: m.type, pill: <StateBadge state={m.state} ageS={m.stateAgeS} />, meta: m.openAlarms ? t('{n} open', { n: m.openAlarms }) : '' }} />
             ))}
           </div>
         </div>
       ))}
-      <p className="hd-muted hd-fine">Alarms shown here are not a replacement for the plant’s safety systems.</p>
+      <p className="hd-muted hd-fine">{t('Alarms shown here are not a replacement for the plant’s safety systems.')}</p>
     </>
   );
 }
@@ -94,14 +96,15 @@ export function MobileHome({ go }: { go: (section: string) => void }) {
 /* ---------- bottom navigation and menu ---------- */
 
 export function BottomNav({ section, go, onMenu, unread }: { section: string; go: (s: string) => void; onMenu: () => void; unread: boolean }) {
+  const t = useT();
   const items: { id: string; label: string; icon: LucideIcon; dot?: boolean }[] = [
-    { id: '', label: 'Home', icon: Home },
-    { id: 'machines', label: 'Machines', icon: Cpu },
-    { id: 'inbox', label: 'Inbox', icon: Inbox, dot: unread },
-    { id: 'assistant', label: 'Assistant', icon: Sparkles },
+    { id: '', label: t('Home'), icon: Home },
+    { id: 'machines', label: t('Machines'), icon: Cpu },
+    { id: 'inbox', label: t('Inbox'), icon: Inbox, dot: unread },
+    { id: 'assistant', label: t('Assistant'), icon: Sparkles },
   ];
   return (
-    <nav className="hd-bottomnav" aria-label="Main">
+    <nav className="hd-bottomnav" aria-label={t('Main')}>
       {items.map(({ id, label, icon: Icon, dot }) => {
         const on = section === id;
         return (
@@ -112,7 +115,7 @@ export function BottomNav({ section, go, onMenu, unread }: { section: string; go
           </button>
         );
       })}
-      <button type="button" className="hd-bn" aria-label="Menu" onClick={onMenu}>
+      <button type="button" className="hd-bn" aria-label={t('Menu')} onClick={onMenu}>
         <Menu size={20} />
       </button>
     </nav>
@@ -140,9 +143,11 @@ export function MobileMenu({
   guest: boolean;
   onExit: () => void;
 }) {
+  const t = useT();
+  const { lang, setLang } = useLang();
   return (
     <div className="hd-menu-wrap" onClick={onClose}>
-      <aside className="hd-menu" role="dialog" aria-modal="true" aria-label="Menu" onClick={(e) => e.stopPropagation()}>
+      <aside className="hd-menu" role="dialog" aria-modal="true" aria-label={t('Menu')} onClick={(e) => e.stopPropagation()}>
         <header className="hd-menu-head">
           <div className="hd-menu-user">
             <span className="hd-avatar">{user.name.slice(0, 1).toUpperCase()}</span>
@@ -151,7 +156,7 @@ export function MobileMenu({
               <small>{user.email}</small>
             </span>
           </div>
-          <button type="button" className="hd-icon-btn" aria-label="Close menu" onClick={onClose}>
+          <button type="button" className="hd-icon-btn" aria-label={t('Close menu')} onClick={onClose}>
             <X size={18} />
           </button>
         </header>
@@ -168,11 +173,15 @@ export function MobileMenu({
           ))}
         </div>
         <footer className="hd-menu-foot">
-          <div className="hd-theme-row" role="group" aria-label="Theme">
-            <button type="button" className={!dark ? 'is-on' : ''} aria-pressed={!dark} onClick={() => setDark(false)}><Sun size={15} /> Light</button>
-            <button type="button" className={dark ? 'is-on' : ''} aria-pressed={dark} onClick={() => setDark(true)}><Moon size={15} /> Dark</button>
+          <div className="hd-theme-row" role="group" aria-label={t('Theme')}>
+            <button type="button" className={!dark ? 'is-on' : ''} aria-pressed={!dark} onClick={() => setDark(false)}><Sun size={15} /> {t('Light')}</button>
+            <button type="button" className={dark ? 'is-on' : ''} aria-pressed={dark} onClick={() => setDark(true)}><Moon size={15} /> {t('Dark')}</button>
           </div>
-          <a className="hd-menu-item" href="/dashboard/default"><LayoutPanelLeft size={18} /> <span>Workspace dashboards</span></a>
+          <div className="hd-theme-row" role="group" aria-label={t('Language')}>
+            <button type="button" className={lang === 'de' ? 'is-on' : ''} aria-pressed={lang === 'de'} onClick={() => setLang('de')}>Deutsch</button>
+            <button type="button" className={lang === 'en' ? 'is-on' : ''} aria-pressed={lang === 'en'} onClick={() => setLang('en')}>English</button>
+          </div>
+          <a className="hd-menu-item" href="/dashboard/default"><LayoutPanelLeft size={18} /> <span>{t('Workspace dashboards')}</span></a>
           <button type="button" className="hd-menu-item" onClick={onExit}><LogOut size={18} /> <span>{guest ? 'Sign in' : 'Sign out'}</span></button>
         </footer>
       </aside>
@@ -181,6 +190,7 @@ export function MobileMenu({
 }
 
 export function MobileHeader({ title, site, onSearch }: { title: string; site: string; onSearch: () => void }) {
+  const t = useT();
   return (
     <header className="hd-mhd">
       <h1>{title}</h1>
@@ -188,7 +198,7 @@ export function MobileHeader({ title, site, onSearch }: { title: string; site: s
         <span className="hd-sitepill">
           <Factory size={15} /> {site}
         </span>
-        <button type="button" className="hd-roundbtn" aria-label="Search" onClick={onSearch}>
+        <button type="button" className="hd-roundbtn" aria-label={t('Search')} onClick={onSearch}>
           <Search size={20} />
         </button>
       </div>

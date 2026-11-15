@@ -18,6 +18,7 @@ import {
 } from './common';
 import type { AlarmState, ApprovalState, Severity, WorkOrderState } from './placeholder';
 import { useHive } from './store';
+import { formatAgo, localize, useT } from './i18n';
 
 export const ALARM_TONE: Record<AlarmState, Tone> = { Open: 'red', Acknowledged: 'amber', Resolved: 'green' };
 export const WO_TONE: Record<WorkOrderState, Tone> = { Draft: 'gray', Submitted: 'amber', 'In progress': 'orange', Done: 'green' };
@@ -29,6 +30,7 @@ export const SEV_RANK: Record<Severity, number> = { critical: 0, high: 1, medium
 const ALARM_FILTERS = ['All', 'Open', 'Acknowledged', 'Resolved'] as const;
 
 export function AlarmsView({ go }: { go: (section: string) => void }) {
+  const t = useT();
   const { data, openDetail } = useHive();
   const [q, setQ] = useState('');
   const [state, setState] = useState<(typeof ALARM_FILTERS)[number]>('All');
@@ -39,28 +41,28 @@ export function AlarmsView({ go }: { go: (section: string) => void }) {
     <>
       <StatRow
         items={[
-          { label: 'Open', value: String(counts.Open), tone: 'orange' },
-          { label: 'Critical open', value: String(open.filter((a) => a.severity === 'critical').length) },
-          { label: 'Acknowledged', value: String(counts.Acknowledged) },
-          { label: 'Resolved', value: String(counts.Resolved) },
+          { label: t('Open'), value: String(counts.Open), tone: 'orange' },
+          { label: t('Critical open'), value: String(open.filter((a) => a.severity === 'critical').length) },
+          { label: t('Acknowledged'), value: String(counts.Acknowledged) },
+          { label: t('Resolved'), value: String(counts.Resolved) },
         ]}
       />
-      <PageCard title="Alarms" subtitle="Raised by rules on live signals. Not a replacement for the plant’s safety systems." actions={<SearchBox value={q} onChange={setQ} label="Search alarms" />}>
+      <PageCard title={t('Alarms')} subtitle={t('Raised by rules on live signals. Not a replacement for the plant’s safety systems.')} actions={<SearchBox value={q} onChange={setQ} label={t('Search alarms')} />}>
         <Chips options={ALARM_FILTERS} value={state} onChange={setState} counts={counts} />
         <DataTable
           rows={rows}
           onOpen={(r) => openDetail({ kind: 'alarm', id: r.id })}
-          empty="No alarms match."
-          card={(r) => ({ icon: Bell, title: r.title, sub: `${r.machine}${r.component ? ' · ' + r.component : ''}`, pill: <Pill tone={ALARM_TONE[r.state]}>{r.state}</Pill>, meta: r.severity, time: r.time })}
+          empty={t('No alarms match.')}
+          card={(r) => ({ icon: Bell, title: r.title, sub: `${r.machine}${r.component ? ' · ' + r.component : ''}`, pill: <Pill tone={ALARM_TONE[r.state]}>{r.state}</Pill>, meta: t(r.severity), time: r.time })}
           cols={[
-            { header: 'ID', render: (r) => r.id },
-            { header: 'Alarm', render: (r) => <span className="hd-strong">{r.title}</span> },
-            { header: 'Machine', sort: (a, b) => a.machine.localeCompare(b.machine), render: (r) => (
+            { header: t('ID'), render: (r) => r.id },
+            { header: t('Alarm'), render: (r) => <span className="hd-strong">{r.title}</span> },
+            { header: t('Machine'), sort: (a, b) => a.machine.localeCompare(b.machine), render: (r) => (
               <button type="button" className="hd-link" onClick={(e) => { e.stopPropagation(); if (r.machineId) go(`machines/${r.machineId}`); }}>{r.machine}</button>
             ) },
-            { header: 'Severity', sort: (a, b) => SEV_RANK[a.severity] - SEV_RANK[b.severity], render: (r) => <Sev s={r.severity} /> },
-            { header: 'State', render: (r) => <Pill tone={ALARM_TONE[r.state]}>{r.state}</Pill> },
-            { header: 'Raised', render: (r) => r.raisedAt },
+            { header: t('Severity'), sort: (a, b) => SEV_RANK[a.severity] - SEV_RANK[b.severity], render: (r) => <Sev s={r.severity} /> },
+            { header: t('State'), render: (r) => <Pill tone={ALARM_TONE[r.state]}>{r.state}</Pill> },
+            { header: t('Raised'), render: (r) => r.raisedAt },
           ]}
         />
       </PageCard>
@@ -73,6 +75,7 @@ export function AlarmsView({ go }: { go: (section: string) => void }) {
 const WO_FILTERS = ['All', 'Draft', 'Submitted', 'In progress', 'Done'] as const;
 
 export function WorkOrdersView() {
+  const t = useT();
   const { data, openDetail, notify } = useHive();
   const [q, setQ] = useState('');
   const [state, setState] = useState<(typeof WO_FILTERS)[number]>('All');
@@ -80,13 +83,13 @@ export function WorkOrdersView() {
   const rows = data.workOrders.filter((w) => (state === 'All' || w.state === state) && includes(q, w.id, w.title, w.machine));
   return (
     <PageCard
-      title="Work orders"
-      subtitle="Drafted here, written to the maintenance or ERP system after a person approves"
+      title={t('Work orders')}
+      subtitle={t('Drafted here, written to the maintenance or ERP system after a person approves')}
       actions={
         <>
-          <SearchBox value={q} onChange={setQ} label="Search work orders" />
-          <button type="button" className="hd-btn is-dark hd-btn-sm" onClick={() => notify('Creating work orders needs the work-order API (placeholder)')}>
-            New
+          <SearchBox value={q} onChange={setQ} label={t('Search work orders')} />
+          <button type="button" className="hd-btn is-dark hd-btn-sm" onClick={() => notify(t('Creating work orders needs the work-order API (placeholder)'))}>
+            {t('New')}
           </button>
         </>
       }
@@ -95,16 +98,16 @@ export function WorkOrdersView() {
       <DataTable
         rows={rows}
         onOpen={(r) => openDetail({ kind: 'workOrder', id: r.id })}
-        empty="No work orders match."
-        card={(r) => ({ icon: ClipboardList, title: r.title, sub: `${r.id} · ${r.machine}`, pill: <Pill tone={WO_TONE[r.state]}>{r.state}</Pill>, meta: `Due ${r.due}` })}
+        empty={t('No work orders match.')}
+        card={(r) => ({ icon: ClipboardList, title: r.title, sub: `${r.id} · ${r.machine}`, pill: <Pill tone={WO_TONE[r.state]}>{r.state}</Pill>, meta: t('Due {date}', { date: localize(r.due) }) })}
         cols={[
-          { header: 'ID', render: (r) => r.id },
-          { header: 'Work order', render: (r) => <span className="hd-strong">{r.title}</span> },
-          { header: 'Machine', sort: (a, b) => a.machine.localeCompare(b.machine), render: (r) => r.machine },
-          { header: 'Priority', sort: (a, b) => SEV_RANK[a.priority] - SEV_RANK[b.priority], render: (r) => <Sev s={r.priority} /> },
-          { header: 'System', render: (r) => r.target },
-          { header: 'State', render: (r) => <Pill tone={WO_TONE[r.state]}>{r.state}</Pill> },
-          { header: 'Due', render: (r) => r.due },
+          { header: t('ID'), render: (r) => r.id },
+          { header: t('Work order'), render: (r) => <span className="hd-strong">{r.title}</span> },
+          { header: t('Machine'), sort: (a, b) => a.machine.localeCompare(b.machine), render: (r) => r.machine },
+          { header: t('Priority'), sort: (a, b) => SEV_RANK[a.priority] - SEV_RANK[b.priority], render: (r) => <Sev s={r.priority} /> },
+          { header: t('System'), render: (r) => r.target },
+          { header: t('State'), render: (r) => <Pill tone={WO_TONE[r.state]}>{r.state}</Pill> },
+          { header: t('Due'), render: (r) => r.due },
         ]}
       />
     </PageCard>
@@ -114,6 +117,7 @@ export function WorkOrdersView() {
 /* ---------- inbox: approvals and notifications ---------- */
 
 function ReviewDialog({ id, onClose }: { id: string; onClose: () => void }) {
+  const t = useT();
   const { data, setApprovalState } = useHive();
   const a = data.approvals.find((x) => x.id === id);
   const [ack, setAck] = useState(false);
@@ -131,45 +135,45 @@ function ReviewDialog({ id, onClose }: { id: string; onClose: () => void }) {
               {a.id} · {a.machine} · {a.source}
             </small>
           </div>
-          <button type="button" className="hd-icon-btn" aria-label="Close" onClick={onClose}>
+          <button type="button" className="hd-icon-btn" aria-label={t('Close')} onClick={onClose}>
             <X size={16} />
           </button>
         </header>
         <div className="hd-drawer-body">
           <Note icon={ShieldCheck}>{a.summary}</Note>
-          <Field k="Tier" v={a.tier} />
-          <Field k="State" v={<Pill tone={APR_TONE[a.state]}>{a.state}</Pill>} />
-          <Field k="Requested" v={a.requestedAt} />
+          <Field k={t('Tier')} v={a.tier} />
+          <Field k={t('State')} v={<Pill tone={APR_TONE[a.state]}>{a.state}</Pill>} />
+          <Field k={t('Requested')} v={a.requestedAt} />
           {a.fields.map((f) => (
             <Field key={f.k} k={f.k} v={f.v} />
           ))}
-          <h4>Evidence</h4>
-          {a.evidence.length === 0 && <p className="hd-muted">No evidence attached.</p>}
+          <h4>{t('Evidence')}</h4>
+          {a.evidence.length === 0 && <p className="hd-muted">{t('No evidence attached.')}</p>}
           <div className="hd-cites">
             {a.evidence.map((e) => (
               <CitationChip key={e.label} label={e.label} locator={e.locator} applicability={e.applicability} reason={e.reason} />
             ))}
           </div>
-          {a.rejectReason && <p className="hd-detail-text">Rejected: {a.rejectReason}</p>}
-          <p className="hd-detail-text">A person decides this. The assistant can recommend it but cannot approve it.</p>
+          {a.rejectReason && <p className="hd-detail-text">{t('Rejected: {reason}', { reason: a.rejectReason })}</p>}
+          <p className="hd-detail-text">{t('A person decides this. The assistant can recommend it but cannot approve it.')}</p>
         </div>
         {pending && (
           <footer className="hd-drawer-foot is-col">
             {rejecting ? (
               <div className="hd-inline-form">
-                <input value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Reason (required)" aria-label="Reason for rejecting" />
+                <input value={reason} onChange={(e) => setReason(e.target.value)} placeholder={t('Reason (required)')} aria-label={t('Reason for rejecting')} />
                 <button type="button" className="hd-btn is-dark hd-btn-sm" disabled={!reason.trim()} onClick={() => { setApprovalState(a.id, 'Rejected', reason.trim()); onClose(); }}>
-                  Reject
+                  {t('Reject')}
                 </button>
               </div>
             ) : (
               <>
                 <label className="hd-check">
-                  <input type="checkbox" checked={ack} onChange={(e) => setAck(e.target.checked)} /> I reviewed the evidence above
+                  <input type="checkbox" checked={ack} onChange={(e) => setAck(e.target.checked)} /> {t('I reviewed the evidence above')}
                 </label>
                 <div className="hd-approval-actions">
-                  <button type="button" className="hd-btn is-light hd-btn-sm" onClick={() => setRejecting(true)}>Reject</button>
-                  <button type="button" className="hd-btn is-dark hd-btn-sm" disabled={!ack} onClick={() => { setApprovalState(a.id, 'Approved'); onClose(); }}>Approve</button>
+                  <button type="button" className="hd-btn is-light hd-btn-sm" onClick={() => setRejecting(true)}>{t('Reject')}</button>
+                  <button type="button" className="hd-btn is-dark hd-btn-sm" disabled={!ack} onClick={() => { setApprovalState(a.id, 'Approved'); onClose(); }}>{t('Approve')}</button>
                 </div>
               </>
             )}
@@ -181,6 +185,7 @@ function ReviewDialog({ id, onClose }: { id: string; onClose: () => void }) {
 }
 
 export function InboxView({ go }: { go: (section: string) => void }) {
+  const t = useT();
   const { data, markRead, markAllRead } = useHive();
   const [tab, setTab] = useState<'Approvals' | 'Notifications'>('Approvals');
   const [review, setReview] = useState<string | null>(null);
@@ -189,12 +194,12 @@ export function InboxView({ go }: { go: (section: string) => void }) {
   return (
     <>
       <Note icon={ShieldCheck}>
-        Approvals are decisions for people. An assistant can recommend an action, but it never approves one. Only low-risk business-system actions (tier T1) appear here; nothing on this page can reach a machine.
+        {t('Approvals are decisions for people. An assistant can recommend an action, but it never approves one. Only low-risk business-system actions (tier T1) appear here; nothing on this page can reach a machine.')}
       </Note>
       <PageCard
-        title="Inbox"
-        subtitle={`${pending.length} approvals waiting · ${unread} unread`}
-        actions={tab === 'Notifications' ? <button type="button" className="hd-ghost" onClick={markAllRead}>Mark all read</button> : undefined}
+        title={t('Inbox')}
+        subtitle={t('{a} approvals waiting · {u} unread', { a: pending.length, u: unread })}
+        actions={tab === 'Notifications' ? <button type="button" className="hd-ghost" onClick={markAllRead}>{t('Mark all read')}</button> : undefined}
       >
         <Chips options={['Approvals', 'Notifications'] as const} value={tab} onChange={setTab} counts={{ Approvals: pending.length, Notifications: unread }} />
         {tab === 'Approvals' ? (
@@ -209,7 +214,7 @@ export function InboxView({ go }: { go: (section: string) => void }) {
                 </button>
                 <Pill tone="gray">{a.tier}</Pill>
                 {a.state === 'Pending' ? (
-                  <button type="button" className="hd-btn is-dark hd-btn-sm" onClick={() => setReview(a.id)}>Review</button>
+                  <button type="button" className="hd-btn is-dark hd-btn-sm" onClick={() => setReview(a.id)}>{t('Review')}</button>
                 ) : (
                   <Pill tone={APR_TONE[a.state]}>{a.state}</Pill>
                 )}
@@ -234,7 +239,7 @@ export function InboxView({ go }: { go: (section: string) => void }) {
                   <span className="hd-strong">{n.text}</span>
                   <small>{n.at}</small>
                 </button>
-                {!n.read && <Pill tone="orange">New</Pill>}
+                {!n.read && <Pill tone="orange">{t('New')}</Pill>}
               </article>
             ))}
           </div>
@@ -251,12 +256,13 @@ const FEED_FILTERS = ['All', 'alarm', 'work_order', 'approval', 'gateway', 'docu
 const FEED_LABEL = { All: 'All', alarm: 'Alarms', work_order: 'Work orders', approval: 'Approvals', gateway: 'Gateways', document: 'Documents' } as const;
 
 export function ActivityView() {
+  const t = useT();
   const { data } = useHive();
   const [kind, setKind] = useState<(typeof FEED_FILTERS)[number]>('All');
   const items = data.feed.filter((f) => kind === 'All' || f.kind === kind);
   const days = [...new Set(items.map((i) => i.day))];
   return (
-    <PageCard title="Activity" subtitle="What happened across the plant, newest first. Events show the action and time, never a person.">
+    <PageCard title={t('Activity')} subtitle={t('What happened across the plant, newest first. Events show the action and time, never a person.')}>
       <Chips options={FEED_FILTERS} value={kind} onChange={setKind} labels={FEED_LABEL} />
       {days.map((day) => (
         <div key={day} className="hd-day">
@@ -271,7 +277,7 @@ export function ActivityView() {
           </ol>
         </div>
       ))}
-      {items.length === 0 && <p className="hd-empty">Nothing here yet.</p>}
+      {items.length === 0 && <p className="hd-empty">{t('Nothing here yet.')}</p>}
     </PageCard>
   );
 }
@@ -279,6 +285,7 @@ export function ActivityView() {
 /* ---------- detail drawer (alarm, work order, document, event, part) ---------- */
 
 export function DetailDrawer({ go }: { go: (section: string) => void }) {
+  const t = useT();
   const { data, detail, openDetail, setAlarmState, setWorkOrderState } = useHive();
   if (!detail) return null;
   const close = () => openDetail(null);
@@ -295,25 +302,25 @@ export function DetailDrawer({ go }: { go: (section: string) => void }) {
       sub = `${a.id} · ${a.machine}`;
       body = (
         <>
-          <Field k="Severity" v={<Sev s={a.severity} />} />
-          <Field k="State" v={<Pill tone={ALARM_TONE[a.state]}>{a.state}</Pill>} />
-          <Field k="Where" v={`${a.machine}${a.component ? ' · ' + a.component : ''}`} />
-          {a.value && <Field k="Value / limit" v={`${a.value} / ${a.limit}`} />}
-          <Field k="Raised" v={a.raisedAt} />
+          <Field k={t('Severity')} v={<Sev s={a.severity} />} />
+          <Field k={t('State')} v={<Pill tone={ALARM_TONE[a.state]}>{a.state}</Pill>} />
+          <Field k={t('Where')} v={`${a.machine}${a.component ? ' · ' + a.component : ''}`} />
+          {a.value && <Field k={t('Value / limit')} v={`${a.value} / ${a.limit}`} />}
+          <Field k={t('Raised')} v={a.raisedAt} />
           <p className="hd-detail-text">{a.detail}</p>
           <div className="hd-link-actions">
-            <button type="button" className="hd-ghost" onClick={() => { close(); go(`machines/${a.machineId}`); }}><Cpu size={12} /> Open machine</button>
-            <button type="button" className="hd-ghost" onClick={() => { close(); go('assistant'); }}><Sparkles size={12} /> Ask assistant</button>
+            <button type="button" className="hd-ghost" onClick={() => { close(); go(`machines/${a.machineId}`); }}><Cpu size={12} /> {t('Open machine')}</button>
+            <button type="button" className="hd-ghost" onClick={() => { close(); go('assistant'); }}><Sparkles size={12} /> {t('Ask assistant')}</button>
           </div>
         </>
       );
       foot = (
         <>
           <button type="button" className="hd-btn is-light hd-btn-lg" disabled={a.state !== 'Open'} onClick={() => setAlarmState(a.id, 'Acknowledged')}>
-            Acknowledge
+            {t('Acknowledge')}
           </button>
           <button type="button" className="hd-btn is-dark hd-btn-lg" disabled={a.state === 'Resolved'} onClick={() => setAlarmState(a.id, 'Resolved')}>
-            Resolve
+            {t('Resolve')}
           </button>
         </>
       );
@@ -325,14 +332,14 @@ export function DetailDrawer({ go }: { go: (section: string) => void }) {
       sub = `${w.id} · ${w.machine}`;
       body = (
         <>
-          <Field k="Priority" v={<Sev s={w.priority} />} />
-          <Field k="State" v={<Pill tone={WO_TONE[w.state]}>{w.state}</Pill>} />
-          <Field k="Written to" v={w.target === 'CMMS' ? 'Maintenance system' : 'ERP'} />
-          <Field k="Due" v={w.due} />
-          <h4>Parts</h4>
-          {w.parts.length ? w.parts.map((p) => <p className="hd-detail-text" key={p}>{p}</p>) : <p className="hd-muted">None.</p>}
-          <h4>Evidence</h4>
-          {w.evidence.length ? w.evidence.map((p) => <p className="hd-detail-text" key={p}>{p}</p>) : <p className="hd-muted">None.</p>}
+          <Field k={t('Priority')} v={<Sev s={w.priority} />} />
+          <Field k={t('State')} v={<Pill tone={WO_TONE[w.state]}>{w.state}</Pill>} />
+          <Field k={t('Written to')} v={w.target === 'CMMS' ? 'Maintenance system' : 'ERP'} />
+          <Field k={t('Due')} v={w.due} />
+          <h4>{t('Parts')}</h4>
+          {w.parts.length ? w.parts.map((p) => <p className="hd-detail-text" key={p}>{p}</p>) : <p className="hd-muted">{t('None.')}</p>}
+          <h4>{t('Evidence')}</h4>
+          {w.evidence.length ? w.evidence.map((p) => <p className="hd-detail-text" key={p}>{p}</p>) : <p className="hd-muted">{t('None.')}</p>}
         </>
       );
       foot = (
@@ -345,14 +352,14 @@ export function DetailDrawer({ go }: { go: (section: string) => void }) {
     const d = data.documents.find((x) => x.id === detail.id);
     if (d) {
       title = d.name;
-      sub = `${d.id} · revision ${d.revision}`;
+      sub = `${d.id} · ${t('revision {r}', { r: d.revision })}`;
       body = (
         <>
-          <Field k="Type" v={d.kind} />
-          <Field k="Machine" v={d.machine} />
-          <Field k="Pages" v={d.pages} />
-          <Field k="Updated" v={d.updated} />
-          <h4>Passages</h4>
+          <Field k={t('Type')} v={d.kind} />
+          <Field k={t('Machine')} v={d.machine} />
+          <Field k={t('Pages')} v={d.pages} />
+          <Field k={t('Updated')} v={d.updated} />
+          <h4>{t('Passages')}</h4>
           {d.passages.filter((p) => p.applicability !== 'does_not_apply').map((p) => (
             <p className="hd-passage" key={p.text}>
               <span>{p.text}</span>
@@ -361,7 +368,7 @@ export function DetailDrawer({ go }: { go: (section: string) => void }) {
           ))}
           {d.passages.some((p) => p.applicability === 'does_not_apply') && (
             <details className="hd-excluded">
-              <summary>Excluded passages</summary>
+              <summary>{t('Excluded passages')}</summary>
               {d.passages.filter((p) => p.applicability === 'does_not_apply').map((p) => (
                 <p className="hd-passage" key={p.text}>
                   <span>{p.text}</span>
@@ -380,11 +387,11 @@ export function DetailDrawer({ go }: { go: (section: string) => void }) {
       sub = p.machine;
       body = (
         <>
-          <Field k="On hand" v={p.onHand} />
-          <Field k="Reserved" v={p.reserved} />
-          <Field k="Minimum" v={p.min} />
-          <Field k="Location" v={p.location} />
-          <Field k="Stock record" v={`synced ${p.syncedDaysAgo} d ago${p.syncedDaysAgo > 7 ? ' (stale)' : ''}`} />
+          <Field k={t('On hand')} v={p.onHand} />
+          <Field k={t('Reserved')} v={p.reserved} />
+          <Field k={t('Minimum')} v={p.min} />
+          <Field k={t('Location')} v={p.location} />
+          <Field k={t('Stock record')} v={`${t('synced {age}', { age: formatAgo(p.syncedDaysAgo * 86400) })}${p.syncedDaysAgo > 7 ? ` (${t('stale')})` : ''}`} />
         </>
       );
     }
@@ -395,9 +402,9 @@ export function DetailDrawer({ go }: { go: (section: string) => void }) {
       sub = `${e.id} · ${e.asset}`;
       body = (
         <>
-          <Field k="Status" v={e.status} />
-          <Field k="Where" v={e.asset} />
-          <Field k="When" v={e.at} />
+          <Field k={t('Status')} v={e.status} />
+          <Field k={t('Where')} v={e.asset} />
+          <Field k={t('When')} v={e.at} />
         </>
       );
     }
@@ -412,7 +419,7 @@ export function DetailDrawer({ go }: { go: (section: string) => void }) {
             <h3>{title}</h3>
             <small>{sub}</small>
           </div>
-          <button type="button" className="hd-icon-btn" aria-label="Close details" onClick={close}>
+          <button type="button" className="hd-icon-btn" aria-label={t('Close details')} onClick={close}>
             <X size={16} />
           </button>
         </header>

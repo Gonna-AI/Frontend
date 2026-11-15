@@ -3,6 +3,7 @@ import { useMemo, useState } from 'react';
 import { Chips, Field, PageCard } from './common';
 import type { GraphNode } from './placeholder';
 import { useHive } from './store';
+import { useT } from './i18n';
 
 const KINDS: GraphNode['kind'][] = ['Machine', 'Component', 'Document', 'Work order', 'Vendor', 'Part'];
 const KIND_COLOR: Record<GraphNode['kind'], string> = {
@@ -15,6 +16,7 @@ const KIND_COLOR: Record<GraphNode['kind'], string> = {
 };
 
 export function GraphView() {
+  const t = useT();
   const { data } = useHive();
   const [view, setView] = useState<'Graph' | 'List'>('Graph');
   const [hidden, setHidden] = useState<Set<GraphNode['kind']>>(new Set());
@@ -28,10 +30,10 @@ export function GraphView() {
   const links = data.graph.edges.filter((e) => e.from === selected || e.to === selected);
 
   return (
-    <PageCard title="Graph" subtitle="The plant as one connected picture: machines, parts, documents, work and vendors">
+    <PageCard title={t('Graph')} subtitle={t('The plant as one connected picture: machines, parts, documents, work and vendors')}>
       <div className="hd-row hd-graph-bar">
         <Chips options={['Graph', 'List'] as const} value={view} onChange={setView} />
-        <div className="hd-chips" role="group" aria-label="Node kinds">
+        <div className="hd-chips" role="group" aria-label={t('Node kinds')}>
           {KINDS.map((k) => (
             <button
               key={k}
@@ -40,7 +42,7 @@ export function GraphView() {
               aria-pressed={!hidden.has(k)}
               onClick={() => setHidden((h) => { const n = new Set(h); if (n.has(k)) n.delete(k); else n.add(k); return n; })}
             >
-              {k}
+              {t(k)}
             </button>
           ))}
         </div>
@@ -48,7 +50,7 @@ export function GraphView() {
 
       <div className="hd-graph-wrap">
         {view === 'Graph' ? (
-          <svg viewBox="0 0 640 400" className="hd-graph" role="img" aria-label="Relationship graph around CNC-07 (placeholder). The List view shows the same data as text.">
+          <svg viewBox="0 0 640 400" className="hd-graph" role="img" aria-label={t('Relationship graph around CNC-07 (placeholder). The List view shows the same data as text.')}>
             {edges.map((e) => {
               const a = byId.get(e.from)!;
               const b = byId.get(e.to)!;
@@ -61,7 +63,7 @@ export function GraphView() {
               );
             })}
             {nodes.map((n) => (
-              <g key={n.id} className={`hd-node${n.id === selected ? ' is-on' : ''}`} tabIndex={0} role="button" aria-label={`${n.kind} ${n.label}`} onClick={() => setSelected(n.id)} onKeyDown={(e) => { if (e.key === 'Enter') setSelected(n.id); }}>
+              <g key={n.id} className={`hd-node${n.id === selected ? ' is-on' : ''}`} tabIndex={0} role="button" aria-label={`${t(n.kind)} ${n.label}`} onClick={() => setSelected(n.id)} onKeyDown={(e) => { if (e.key === 'Enter') setSelected(n.id); }}>
                 <circle cx={n.x} cy={n.y} r={n.kind === 'Machine' ? 22 : 16} fill={KIND_COLOR[n.kind]} />
                 <text x={n.x} y={n.y + (n.kind === 'Machine' ? 38 : 31)} textAnchor="middle">{n.label}</text>
               </g>
@@ -72,7 +74,7 @@ export function GraphView() {
             {nodes.map((n) => (
               <li key={n.id}>
                 <button type="button" onClick={() => setSelected(n.id)} className={n.id === selected ? 'is-on' : ''}>
-                  <b>{n.label}</b> <small>{n.kind}</small>
+                  <b>{n.label}</b> <small>{t(n.kind)}</small>
                 </button>
                 <ul>
                   {data.graph.edges.filter((e) => e.from === n.id).map((e) => (
@@ -87,20 +89,20 @@ export function GraphView() {
         )}
 
         {sel && (
-          <aside className="hd-panel hd-graph-detail" aria-label="Selected node">
+          <aside className="hd-panel hd-graph-detail" aria-label={t('Selected node')}>
             <h3>{sel.label}</h3>
-            <small className="hd-muted">{sel.kind}</small>
+            <small className="hd-muted">{t(sel.kind)}</small>
             <p className="hd-detail-text">{sel.detail}</p>
-            <h4>Connections</h4>
+            <h4>{t('Connections')}</h4>
             {links.map((e) => {
               const other = byId.get(e.from === selected ? e.to : e.from)!;
               return (
                 <button key={`${e.from}${e.to}`} type="button" className="hd-link-row" onClick={() => setSelected(other.id)}>
-                  <small>{e.from === selected ? e.rel : `is ${e.rel} by`}</small> {other.label}
+                  <small>{e.from === selected ? t(e.rel) : t('is {rel} by', { rel: t(e.rel) })}</small> {other.label}
                 </button>
               );
             })}
-            <Field k="Connections" v={links.length} />
+            <Field k={t('Connections')} v={links.length} />
           </aside>
         )}
       </div>

@@ -16,8 +16,8 @@ import {
 import { useMemo, useState } from 'react';
 
 import { MACHINE_STATES, STATE_LABEL, type HiveMachine, type HiveOverview } from './placeholder';
-import { formatAge } from './common';
 import { useHive } from './store';
+import { formatDuration, formatQuantity, localize, useT } from './i18n';
 
 const TILE_ICON: Record<HiveOverview['tiles'][number]['key'], LucideIcon> = {
   signals: Radio,
@@ -37,15 +37,16 @@ export function Delta({ up, children }: { up: boolean; children: React.ReactNode
 }
 
 export function AlarmChart({ data }: { data: HiveOverview['alarmVolume'] }) {
+  const t = useT();
   const max = 50;
   const ticks = [50, 40, 30, 20, 10, 0];
   return (
-    <div className="hd-chart" role="img" aria-label="Alarms raised and resolved per week, last eight weeks (placeholder)">
+    <div className="hd-chart" role="img" aria-label={t('Alarms raised and resolved per week, last eight weeks (placeholder)')}>
       <div className="hd-chart-head">
-        <span>Raised and resolved</span>
+        <span>{t('Raised and resolved')}</span>
         <span className="hd-legend">
-          <i className="hd-dot is-orange" /> Raised
-          <i className="hd-dot is-black" /> Resolved
+          <i className="hd-dot is-orange" /> {t('Raised')}
+          <i className="hd-dot is-black" /> {t('Resolved')}
         </span>
       </div>
       <div className="hd-chart-plot">
@@ -92,6 +93,7 @@ export interface AttentionItem {
 /** The fixed attention order: critical alarms, high alarms, link down, medium alarms, findings, approvals. */
 export function useAttention(go: (section: string) => void): { attention: AttentionItem[]; waiting: number } {
   const { data, openDetail } = useHive();
+  const t = useT();
   return useMemo(() => {
     const items: AttentionItem[] = [];
     for (const a of data.alarms.filter((x) => x.state === 'Open')) {
@@ -99,7 +101,7 @@ export function useAttention(go: (section: string) => void): { attention: Attent
       items.push({ key: a.id, title: a.title, where: `${a.machine}${a.component ? ' · ' + a.component : ''}`, label: a.severity, tone: a.severity === 'critical' ? 'red' : a.severity === 'high' ? 'orange' : 'amber', rank, time: a.time, open: () => { go('alarms'); openDetail({ kind: 'alarm', id: a.id }); } });
     }
     for (const g of data.gatewayFleet.filter((x) => x.link !== 'Online')) {
-      items.push({ key: g.id, title: `Gateway ${g.link.toLowerCase()}`, where: g.site, label: 'connection', tone: 'orange', rank: 5, open: () => go('admin/gateways') });
+      items.push({ key: g.id, title: t('Gateway {state}', { state: t(g.link).toLowerCase() }), where: g.site, label: 'connection', tone: 'orange', rank: 5, open: () => go('admin/gateways') });
     }
     for (const f of data.findings.filter((x) => x.status === 'Awaiting confirmation')) {
       items.push({ key: f.id, title: f.title, where: f.machine, label: 'finding', tone: 'gray', rank: 7, open: () => go('findings') });
@@ -110,10 +112,11 @@ export function useAttention(go: (section: string) => void): { attention: Attent
     }
     items.sort((x, y) => x.rank - y.rank);
     return { attention: items, waiting: pending.length };
-  }, [data, go, openDetail]);
+  }, [data, go, openDetail, t]);
 }
 
 export default function OverviewView({ go }: { go: (section: string) => void }) {
+  const t = useT();
   const { data: overview } = useHive();
   const [site, setSite] = useState(overview.plant.name);
   const { attention, waiting } = useAttention(go);
@@ -136,10 +139,10 @@ export default function OverviewView({ go }: { go: (section: string) => void }) 
       <section className="hd-card hd-balance" aria-labelledby="hd-plant">
         <div className="hd-row">
           <span id="hd-plant" className="hd-label">
-            Plant availability
+            {t('Plant availability')}
           </span>
           <label className="hd-select">
-            <select value={site} onChange={(e) => setSite(e.target.value)} aria-label="Site">
+            <select value={site} onChange={(e) => setSite(e.target.value)} aria-label={t('Site')}>
               <option>{overview.plant.name}</option>
             </select>
             <ChevronDown size={12} aria-hidden="true" />
@@ -148,20 +151,20 @@ export default function OverviewView({ go }: { go: (section: string) => void }) 
         <div className="hd-big">{overview.plant.availability}</div>
         <div className="hd-sub">
           <Delta up={overview.plant.deltaUp}>{overview.plant.delta}</Delta>
-          <span>than last week</span>
+          <span>{t('than last week')}</span>
         </div>
         <div className="hd-actions">
           <button type="button" className="hd-btn is-dark" onClick={() => go('alarms')}>
-            <ArrowLeftRight size={16} /> Open alarms
+            <ArrowLeftRight size={16} /> {t('Open alarms')}
           </button>
           <button type="button" className="hd-btn is-light" onClick={() => go('work-orders')}>
-            <ClipboardList size={16} /> Work order
+            <ClipboardList size={16} /> {t('Work order')}
           </button>
         </div>
         <div className="hd-panel hd-wallets">
           <div className="hd-panel-title">
-            <strong>Sites</strong>
-            <span>Total {overview.sites.length} sites</span>
+            <strong>{t('Sites')}</strong>
+            <span>{t('Total {n} sites', { n: overview.sites.length })}</span>
           </div>
           <div className="hd-wallet-row">
             {overview.sites.map((s) => (
@@ -173,7 +176,7 @@ export default function OverviewView({ go }: { go: (section: string) => void }) 
                 </div>
                 <div className="hd-wallet-amount">{s.oee}</div>
                 <small>{s.signals}</small>
-                <em className={s.state === 'Active' ? 'is-active' : 'is-inactive'}>{s.state}</em>
+                <em className={s.state === 'Active' ? 'is-active' : 'is-inactive'}>{t(s.state)}</em>
               </button>
             ))}
           </div>
@@ -181,21 +184,21 @@ export default function OverviewView({ go }: { go: (section: string) => void }) 
       </section>
 
       {/* Tiles */}
-      <section className="hd-tiles" aria-label="Key figures">
-        {overview.tiles.map((t, i) => {
-          const Icon = TILE_ICON[t.key];
+      <section className="hd-tiles" aria-label={t('Key figures')}>
+        {overview.tiles.map((tile, i) => {
+          const Icon = TILE_ICON[tile.key];
           return (
-            <div className={`hd-tile${i === 0 ? ' is-accent' : ''}`} key={t.key}>
+            <div className={`hd-tile${i === 0 ? ' is-accent' : ''}`} key={tile.key}>
               <div className="hd-row">
-                <span>{t.label}</span>
+                <span>{t(tile.label)}</span>
                 <span className="hd-tile-icon">
                   <Icon size={14} />
                 </span>
               </div>
-              <div className="hd-tile-value">{t.value}</div>
+              <div className="hd-tile-value">{localize(tile.value)}</div>
               <div className="hd-sub">
-                <Delta up={t.up}>{t.delta}</Delta>
-                <span>This month</span>
+                <Delta up={tile.up}>{localize(tile.delta)}</Delta>
+                <span>{t('This month')}</span>
               </div>
             </div>
           );
@@ -204,15 +207,15 @@ export default function OverviewView({ go }: { go: (section: string) => void }) 
 
       {/* Chart */}
       <section className="hd-card hd-income" aria-labelledby="hd-alarms">
-        <h2 id="hd-alarms">Alarm volume</h2>
-        <p className="hd-muted">View alarms raised and resolved over the last eight weeks</p>
+        <h2 id="hd-alarms">{t('Alarm volume')}</h2>
+        <p className="hd-muted">{t('View alarms raised and resolved over the last eight weeks')}</p>
         <AlarmChart data={overview.alarmVolume} />
       </section>
 
       {/* Buffer */}
       <section className="hd-card hd-limit" aria-labelledby="hd-buffer">
         <h2 id="hd-buffer" className="hd-card-title">
-          Edge buffer usage
+          {t('Edge buffer usage')}
         </h2>
         <div
           className="hd-progress"
@@ -220,14 +223,14 @@ export default function OverviewView({ go }: { go: (section: string) => void }) 
           aria-valuemin={0}
           aria-valuemax={100}
           aria-valuenow={usedPct}
-          aria-label="Edge buffer used"
+          aria-label={t('Edge buffer used')}
         >
           <span style={{ width: `${usedPct}%` }} />
         </div>
         <div className="hd-progress-meta">
-          <b>{overview.bufferUsedGb.toFixed(1)} GB</b>
-          <small>used out of</small>
-          <span>{overview.bufferTotalGb.toFixed(1)} GB</span>
+          <b>{formatQuantity(overview.bufferUsedGb, 'GB')}</b>
+          <small>{t('used out of')}</small>
+          <span>{formatQuantity(overview.bufferTotalGb, 'GB')}</span>
         </div>
       </section>
 
@@ -239,11 +242,11 @@ export default function OverviewView({ go }: { go: (section: string) => void }) 
               <Wifi size={15} />
             </span>
             <h2 id="hd-gateways" className="hd-card-title">
-              Gateways
+              {t('Gateways')}
             </h2>
           </div>
           <button type="button" className="hd-ghost" onClick={() => go('admin/gateways')}>
-            <Plus size={12} /> Enroll
+            <Plus size={12} /> {t('Enroll')}
           </button>
         </div>
         <div className="hd-gw-row">
@@ -251,7 +254,7 @@ export default function OverviewView({ go }: { go: (section: string) => void }) 
             <button type="button" className={`hd-gw ${i === 0 ? 'is-black' : 'is-orange'}`} key={g.id} onClick={() => go('admin/gateways')}>
               <div className="hd-gw-top">
                 <Wifi size={13} aria-hidden="true" />
-                <span className="hd-gw-state">{g.state}</span>
+                <span className="hd-gw-state">{t(g.state)}</span>
                 {i === 0 ? (
                   <span className="hd-gw-logo" aria-hidden="true">
                     <i />
@@ -263,15 +266,15 @@ export default function OverviewView({ go }: { go: (section: string) => void }) 
               </div>
               <div className="hd-gw-meta">
                 <div>
-                  <small>Gateway ID</small>
+                  <small>{t('Gateway ID')}</small>
                   <span>{g.id.replace(/.*· /, '**** **** ')}</span>
                 </div>
                 <div>
-                  <small>Version</small>
+                  <small>{t('Version')}</small>
                   <span>{g.version}</span>
                 </div>
                 <div>
-                  <small>Uptime</small>
+                  <small>{t('Uptime')}</small>
                   <span>{g.uptime}</span>
                 </div>
               </div>
@@ -284,11 +287,11 @@ export default function OverviewView({ go }: { go: (section: string) => void }) 
       <section className="hd-card hd-activity" aria-labelledby="hd-events">
         <div className="hd-row">
           <h2 id="hd-events" className="hd-card-title is-lg">
-            Needs attention
+            {t('Needs attention')}
           </h2>
           <div className="hd-act-tools">
             <button type="button" className="hd-ghost" onClick={() => go('inbox')}>
-              Waiting for me · {waiting}
+              {t('Waiting for me · {n}', { n: waiting })}
             </button>
           </div>
         </div>
@@ -301,34 +304,34 @@ export default function OverviewView({ go }: { go: (section: string) => void }) 
                   <b>{a.title}</b>
                   <small>{a.where}</small>
                 </span>
-                <span className="hd-attn-label">{a.label}</span>
+                <span className="hd-attn-label">{t(a.label)}</span>
               </button>
             </li>
           ))}
-          {attention.length === 0 && <li className="hd-empty">Nothing needs attention. Last checked just now.</li>}
+          {attention.length === 0 && <li className="hd-empty">{t('Nothing needs attention. Last checked just now.')}</li>}
         </ol>
         {attention.length > 8 && (
           <button type="button" className="hd-ghost hd-attn-more" onClick={() => go('alarms')}>
-            {attention.length - 8} more
+            {t('{n} more', { n: attention.length - 8 })}
           </button>
         )}
-        <p className="hd-muted hd-attn-note">Alarms shown here are not a replacement for the plant’s safety systems.</p>
+        <p className="hd-muted hd-attn-note">{t('Alarms shown here are not a replacement for the plant’s safety systems.')}</p>
       </section>
 
       {/* Plant overview by line, using the eight machine states */}
       <section className="hd-card hd-plant" aria-labelledby="hd-plant-overview">
         <div className="hd-row">
           <h2 id="hd-plant-overview" className="hd-card-title is-lg">
-            Plant overview
+            {t('Plant overview')}
           </h2>
           <button type="button" className="hd-ghost" onClick={() => go('machines')}>
-            All machines
+            {t('All machines')}
           </button>
         </div>
         <div className="hd-state-row">
           {stateCounts.map(([st, n]) => (
             <span key={st} className={`hd-state-count${n ? '' : ' is-zero'}`}>
-              <i className={`hd-sdot is-${st}`} /> {STATE_LABEL[st]} <b>{n}</b>
+              <i className={`hd-sdot is-${st}`} /> {t(STATE_LABEL[st])} <b>{n}</b>
             </span>
           ))}
         </div>
@@ -338,10 +341,10 @@ export default function OverviewView({ go }: { go: (section: string) => void }) 
               <h3>{line}</h3>
               <div className="hd-tiles-mini">
                 {ms.map((m) => (
-                  <button type="button" key={m.id} className={`hd-mtile is-${m.state}`} onClick={() => go(`machines/${m.id}`)} title={`${STATE_LABEL[m.state]} · ${formatAge(m.stateAgeS)}`}>
+                  <button type="button" key={m.id} className={`hd-mtile is-${m.state}`} onClick={() => go(`machines/${m.id}`)} title={`${t(STATE_LABEL[m.state])} · ${formatDuration(m.stateAgeS)}`}>
                     <b>{m.key}</b>
                     <small>
-                      {STATE_LABEL[m.state]} · {formatAge(m.stateAgeS)}
+                      {t(STATE_LABEL[m.state])} · {formatDuration(m.stateAgeS)}
                     </small>
                     {m.openAlarms > 0 && <em>{m.openAlarms}</em>}
                   </button>

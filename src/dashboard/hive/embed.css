@@ -1,0 +1,118 @@
+/* Embeddable components: compact, transparent, read-only. Status colours, age labels and the stale
+   presentation use fixed tokens; a partner theme cannot change them. */
+.hd-root.eb-root {
+  position: static;
+  inset: auto;
+  min-height: 0;
+  height: auto;
+  padding: 12px;
+  overflow: visible;
+  background: transparent;
+  font-size: 14px;
+}
+.eb-root.is-hc {
+  --hd-card: #000;
+  --hd-panel: #111;
+  --hd-text: #fff;
+  --hd-muted: #d0d0d0;
+  --hd-line: #7a7a7a;
+  background: #000;
+  color: #fff;
+}
+.eb-card {
+  background: var(--hd-card);
+  border-radius: 16px;
+  padding: 14px;
+  display: grid;
+  gap: 8px;
+  box-shadow: 0 0 0 1px var(--hd-line) inset;
+  color: var(--hd-text);
+}
+.eb-card h3 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+}
+.eb-card small {
+  color: var(--hd-muted);
+  font-size: 12px;
+}
+.eb-big {
+  margin: 0;
+  font-size: 34px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+.eb-alarms {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+.eb-signals {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 8px;
+}
+.eb-signals > div {
+  background: var(--hd-panel);
+  border-radius: 12px;
+  padding: 10px;
+  display: grid;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--hd-muted);
+}
+.eb-bar {
+  display: flex;
+  height: 14px;
+  border-radius: 999px;
+  overflow: hidden;
+  gap: 2px;
+}
+.eb-bar span,
+.eb-legend i {
+  display: inline-block;
+  height: 100%;
+  background: #a9a9ad;
+}
+.eb-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  font-size: 12px;
+}
+.eb-legend i {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: 4px;
+}
+.eb-bar .is-producing, .eb-legend .is-producing { background: #1fa35c; }
+.eb-bar .is-idle, .eb-legend .is-idle { background: #e8a317; }
+.eb-bar .is-fault, .eb-legend .is-fault { background: #c0272d; }
+.eb-msg {
+  display: grid;
+  gap: 4px;
+  padding: 18px;
+  border-radius: 16px;
+  background: var(--hd-card);
+  box-shadow: 0 0 0 1px var(--hd-line) inset;
+  color: var(--hd-text);
+  text-align: center;
+}
+.eb-msg small {
+  color: var(--hd-muted);
+}
+.eb-stale {
+  margin-bottom: 8px;
+  padding: 6px 10px;
+  border-radius: 10px;
+  background: rgba(232, 163, 23, 0.2);
+  color: var(--hd-text);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.eb-card .hd-pillx { justify-self: start; }
