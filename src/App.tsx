@@ -70,6 +70,7 @@ const DashboardInvoice = lazyWithRetry(() => import('./dashboard/pages/invoice/p
 const DashboardUsers = lazyWithRetry(() => import('./dashboard/pages/users/page'), 'DashboardUsers');
 const DashboardRoles = lazyWithRetry(() => import('./dashboard/pages/roles/page'), 'DashboardRoles');
 const DashboardAnalyticsV1 = lazyWithRetry(() => import('./dashboard/pages/legacy/analytics-v1/page'), 'DashboardAnalyticsV1');
+const HiveDashboard = lazyWithRetry(() => import('./dashboard/hive/HiveDashboardRoute'), 'HiveDashboard');
 const MailApp = lazyWithRetry(() => import('./dashboard/standalone/mail/MailApp'), 'MailApp');
 const ChatApp = lazyWithRetry(() => import('./dashboard/standalone/chat/ChatApp'), 'ChatApp');
 
@@ -90,6 +91,7 @@ const routePrefetchers = {
   '/login': () => import('./pages/AuthPage'),
   '/client/login': () => import('./pages/client-portal/ClientPortalLoginPage'),
   '/dashboard': () => import('./dashboard/layout/DashboardLayout'),
+  '/dashboard/hive': () => import('./dashboard/hive/HiveDashboardRoute'),
   '/terms-of-service': () => import('./pages/legal/TermsOfService'),
   '/privacy-policy': () => import('./pages/legal/PrivacyPolicy'),
   '/cookie-policy': () => import('./pages/legal/CookiePolicy'),
@@ -290,6 +292,9 @@ function App() {
               {/* Client portal */}
               <Route path="/client/login" element={<ClientPortalProviderRoute><ClientPortalLoginPage /></ClientPortalProviderRoute>} />
               <Route path="/client" element={<ProtectedClientPortalRoute><ClientPortalDashboard /></ProtectedClientPortalRoute>} />
+
+              {/* Hive dashboard: its own full-screen shell, outside the dashboard layout */}
+              <Route path="/dashboard/hive" element={<Workspace><HiveDashboard /></Workspace>} />
 
               {/* Workspace */}
               <Route path="/dashboard" element={<Workspace><DashboardLayout /></Workspace>}>
