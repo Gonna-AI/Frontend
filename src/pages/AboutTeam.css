@@ -50,7 +50,9 @@
 @media (max-width: 640px) {
   .about-team-person { height: 112px; width: 300px; }
   .about-team-dialog-inner { display: block; }
-  .about-team-dialog-photo { height: 220px; min-height: 0; }
+  /* A square, not a short strip: most portraits are square, so nothing is cropped away, and the
+     cap keeps the text in view on small screens. The face is anchored near the top (see About.tsx). */
+  .about-team-dialog-photo { aspect-ratio: 1 / 1; height: auto; max-height: 46vh; min-height: 0; width: 100%; }
   .about-team-dialog-copy { padding: 28px 24px 32px; }
 }
 @media (prefers-reduced-motion: reduce) {

@@ -151,7 +151,7 @@ export default function About() {
         <dialog className="about-team-dialog" ref={dialogRef} aria-labelledby="about-team-dialog-name" aria-describedby="about-team-dialog-bio" onClose={() => { setSelectedMember(null); triggerRef.current?.focus(); }} onClick={(event) => { if (event.target === event.currentTarget) event.currentTarget.close(); }}>
           {selectedMember && <div className="about-team-dialog-inner">
             <button type="button" className="about-team-dialog-close" aria-label={language === 'de' ? 'Schließen' : 'Close'} onClick={() => dialogRef.current?.close()}><X size={20} /></button>
-            <div className="about-team-dialog-photo"><img src={selectedMember.image} alt="" style={{ objectPosition: selectedMember.objectPosition || 'center', '--team-scale': selectedMember.scale || '1' } as CSSProperties} /></div>
+            <div className="about-team-dialog-photo"><img src={selectedMember.image} alt="" style={{ objectPosition: selectedMember.objectPosition || 'center 24%', '--team-scale': selectedMember.scale || '1' } as CSSProperties} /></div>
             <div className="about-team-dialog-copy">
               <span>{memberRole(selectedMember, language)}</span>
               <h2 id="about-team-dialog-name">{selectedMember.name}</h2>
@@ -226,6 +226,9 @@ function getTeamMembers(t: Translate): TeamMember[] {
       name: 'Kenshin Kiriyama',
       image: `${MEDIA_BASE_URL}/KenshinKiriyama.jpeg`,
       description: t('about.team.kenshin'),
+      // The photo has black bars baked into its left and right edges: zoom past them.
+      objectPosition: '50% 14%',
+      scale: '1.3',
       linkedin: 'https://www.linkedin.com/in/kenshin-kiriyama-2b2031357/',
     },
     {
