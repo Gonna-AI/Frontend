@@ -441,7 +441,7 @@ function DrawerRow({ icon: Icon, label, active, count, href, onClick, external }
       data-active={active ? 'true' : 'false'}
       aria-current={active ? 'page' : undefined}
       {...(external ? { target: '_blank', rel: 'noreferrer' } : {})}
-      className="group flex min-h-12 items-center gap-3 px-4 text-[0.9375rem] outline-none transition-colors focus-visible:bg-accent active:bg-accent data-[active=true]:bg-accent data-[active=true]:font-medium"
+      className="hx-well-item group flex min-h-12 items-center gap-3 rounded-[0.875rem] px-3.5 text-[0.9375rem] outline-none transition-colors data-[active=true]:font-medium"
     >
       <Icon className="size-5 shrink-0 text-muted-foreground group-data-[active=true]:text-foreground" strokeWidth={active ? 2.2 : 1.8} />
       <span className="min-w-0 flex-1 truncate">{label}</span>
@@ -455,21 +455,21 @@ function DrawerList({ title, children }: { title: string; children: React.ReactN
   return (
     <section className="grid gap-2">
       <h3 className="px-1 font-medium text-muted-foreground text-xs uppercase tracking-wider">{title}</h3>
-      <ul className="divide-y overflow-hidden rounded-xl border bg-card [&>li]:contents">{children}</ul>
+      <ul className="hx-well grid gap-0.5 rounded-[1.25rem] p-1.5 [&>li]:contents">{children}</ul>
     </section>
   );
 }
 
 function Segmented<T extends string>({ value, onChange, options, label }: { value: T; onChange: (v: T) => void; options: { id: T; label: string; icon?: LucideIcon }[]; label: string }) {
   return (
-    <div role="group" aria-label={label} className="grid auto-cols-fr grid-flow-col gap-1 rounded-lg bg-muted p-1">
+    <div role="group" aria-label={label} className="hx-well grid auto-cols-fr grid-flow-col gap-1 rounded-xl p-1">
       {options.map(({ id, label: text, icon: Icon }) => (
         <button
           key={id}
           type="button"
           aria-pressed={value === id}
           onClick={() => onChange(id)}
-          className="inline-flex h-9 items-center justify-center gap-2 rounded-md font-medium text-[0.875rem] text-muted-foreground outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring aria-pressed:bg-background aria-pressed:text-foreground aria-pressed:shadow-sm"
+          className="hx-well-item inline-flex h-9 items-center justify-center gap-2 rounded-[0.5rem] font-medium text-[0.875rem] text-muted-foreground outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring aria-pressed:text-foreground"
         >
           {Icon && <Icon className="size-4" />}
           {text}
@@ -573,10 +573,10 @@ function MobileDrawer({
             </div>
           </div>
 
-          <div className="flex items-center gap-3 rounded-xl border bg-card p-3">
-            <Avatar className="size-10 rounded-lg">
+          <div className="hx-well flex items-center gap-3 rounded-[1.25rem] p-2.5">
+            <Avatar className="size-10 rounded-xl">
               <AvatarImage src={user.avatarUrl} alt="" />
-              <AvatarFallback className="rounded-lg">{initials(user.name)}</AvatarFallback>
+              <AvatarFallback className="rounded-xl">{initials(user.name)}</AvatarFallback>
             </Avatar>
             <span className="grid min-w-0 flex-1 leading-tight">
               <span className="truncate font-medium text-[0.9375rem]">{user.name}</span>
@@ -588,7 +588,7 @@ function MobileDrawer({
                 close();
                 onExit?.();
               }}
-              className="inline-flex h-10 shrink-0 items-center gap-2 rounded-lg border px-3 font-medium text-[0.875rem] outline-none transition-colors hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring"
+              className="hx-well-item is-raised inline-flex h-10 shrink-0 items-center gap-2 rounded-xl px-3.5 font-medium text-[0.875rem] outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring"
             >
               <LogOut className="size-4" />
               {guest ? t('Sign in') : t('Sign out')}
