@@ -937,4 +937,10 @@ export const de: Record<string, string> = {
   'Request': 'Anfrage',
   'Time range': 'Zeitraum',
   'What': 'Was',
+  'Comfortable': 'Bequem',
+  'Large': 'Groß',
+  'Makes everything in the dashboard larger or smaller': 'Macht alles im Dashboard größer oder kleiner',
+  'Quick access': 'Schnellzugriff',
+  'Standard': 'Standard',
+  'Text size': 'Schriftgröße',
 };

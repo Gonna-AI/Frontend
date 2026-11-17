@@ -15,19 +15,20 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/dashboard
 
 import { formatDuration, localize, useT } from './i18n';
 import { useAttention } from './OverviewView';
+import { NAV } from './nav';
 import { STATE_LABEL, type MachineState } from './placeholder';
 import { useHive } from './store';
-import { TAB_LIST, TAB_TRIGGER, ToneBadge, type BadgeTone } from './ui';
+import { PILL_LIST, PILL_TRIGGER, TAB_LIST, TAB_TRIGGER, ToneBadge, type BadgeTone } from './ui';
 
 const STATE_TONE: Record<MachineState, BadgeTone> = { producing: 'green', idle: 'amber', setup: 'orange', planned_stop: 'gray', unplanned_stop: 'red', fault: 'red', off: 'gray', unknown: 'gray' };
 
 function Figure({ label, value, unit, trend, up, foot, sub, onClick, accent }: { label: string; value: string; unit?: string; trend?: string; up?: boolean; foot: string; sub: string; onClick: () => void; accent?: boolean }) {
   const Icon = up ? ArrowUpRight : ArrowDownRight;
   return (
-    <Card className="@container/card cursor-pointer gap-2 transition-shadow hover:shadow-md" role="link" tabIndex={0} onClick={onClick} onKeyDown={(e) => e.key === 'Enter' && onClick()}>
+    <Card className="@container/card cursor-pointer gap-2 border-t-[3px] transition-shadow hover:shadow-md" style={{ borderTopColor: accent ? 'var(--hd-orange,#ff4d00)' : 'var(--foreground)' }} role="link" tabIndex={0} onClick={onClick} onKeyDown={(e) => e.key === 'Enter' && onClick()}>
       <CardHeader className="grid-cols-1">
         <div className="flex items-center justify-between gap-2">
-          <CardDescription>{label}</CardDescription>
+          <CardDescription className="text-[0.9375rem] font-medium">{label}</CardDescription>
           {trend && (
             <Badge variant="outline" className={`hidden sm:inline-flex ${accent ? 'border-[var(--hd-orange,#ff4d00)]/40 text-[var(--hd-orange,#ff4d00)]' : ''}`}>
               <Icon />
@@ -35,12 +36,12 @@ function Figure({ label, value, unit, trend, up, foot, sub, onClick, accent }: {
             </Badge>
           )}
         </div>
-        <CardTitle className="font-semibold text-2xl tabular-nums sm:text-3xl">
+        <CardTitle className="font-semibold text-3xl tabular-nums sm:text-4xl">
           {value}
           {unit && <span className="ml-1 font-normal text-base text-muted-foreground">{unit}</span>}
         </CardTitle>
       </CardHeader>
-      <CardContent className="grid gap-0.5 text-sm">
+      <CardContent className="grid gap-0.5 text-[0.9375rem]">
         <span className="font-medium">{foot}</span>
         <span className="hidden text-muted-foreground sm:block">{sub}</span>
         {trend && <span className="text-muted-foreground sm:hidden">{trend}</span>}
@@ -66,7 +67,32 @@ export default function HomeView({ go }: { go: (section: string) => void }) {
   const chartConfig = { raised: { label: t('Raised'), color: 'var(--hd-orange,#ff4d00)' }, resolved: { label: t('Resolved'), color: 'var(--muted-foreground)' } } satisfies ChartConfig;
 
   return (
-    <div className="flex flex-col gap-4 md:gap-6">
+    <div className="flex flex-col gap-5 md:gap-6">
+      {/* No bottom bar on a phone: the four places people go all day are big tiles right here. */}
+      <nav className="grid grid-cols-2 gap-3 md:hidden" aria-label={t('Quick access')}>
+        {(['machines', 'alarms', 'inbox', 'assistant'] as const).map((id) => {
+          const Icon = NAV[id].icon;
+          const n = id === 'alarms' ? openAlarms : id === 'inbox' ? waiting : undefined;
+          return (
+            <a
+              key={id}
+              href={`/dashboard/hive/${id}`}
+              onClick={(e) => {
+                e.preventDefault();
+                go(id);
+              }}
+              className="relative flex min-h-24 flex-col justify-between rounded-2xl bg-card p-4 ring-1 ring-foreground/10 transition-shadow active:shadow-inner"
+            >
+              <span className="grid size-10 place-items-center rounded-xl bg-[color-mix(in_srgb,var(--hd-orange,#ff4d00)_14%,transparent)] text-[var(--hd-orange,#ff4d00)]">
+                <Icon className="size-5" strokeWidth={1.9} />
+              </span>
+              <span className="font-semibold text-[1.0625rem]">{t(NAV[id].title)}</span>
+              {n !== undefined && n > 0 && <span className="absolute top-3 right-3 grid h-7 min-w-7 place-items-center rounded-full bg-[var(--hd-orange,#ff4d00)] px-2 font-semibold text-[var(--hd-on-accent,#fff)] text-sm">{n}</span>}
+            </a>
+          );
+        })}
+      </nav>
+
       <section className="grid grid-cols-2 gap-3 @container/main md:gap-4 xl:grid-cols-4" aria-label={t('Key figures')}>
         <Figure
           label={t('Plant availability')}
@@ -98,9 +124,9 @@ export default function HomeView({ go }: { go: (section: string) => void }) {
           <CardDescription>{t('Alarms raised and resolved per week')}</CardDescription>
           <CardAction>
             <Tabs value={range} onValueChange={(v) => setRange(v as '8' | '4')} aria-label={t('Time range')}>
-              <TabsList className={TAB_LIST}>
-                <TabsTrigger value="8" className={TAB_TRIGGER}>{t('8 weeks')}</TabsTrigger>
-                <TabsTrigger value="4" className={TAB_TRIGGER}>{t('4 weeks')}</TabsTrigger>
+              <TabsList className={PILL_LIST}>
+                <TabsTrigger value="8" className={PILL_TRIGGER}>{t('8 weeks')}</TabsTrigger>
+                <TabsTrigger value="4" className={PILL_TRIGGER}>{t('4 weeks')}</TabsTrigger>
               </TabsList>
             </Tabs>
           </CardAction>

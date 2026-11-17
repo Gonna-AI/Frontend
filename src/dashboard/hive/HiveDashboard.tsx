@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Search } from "lucide-react-dash";
+import { Bell, ClipboardList, Search } from "lucide-react-dash";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 
 import {
@@ -39,13 +39,15 @@ import {
 } from "./ops";
 import {
   HiveSidebar,
-  PageHeader,
-  PhoneTabs,
+  PageBanner,
   SiteHeader,
   SpecFooter,
+  TEXT_PERCENT,
+  TEXT_SIZES,
+  type TextSize,
 } from "./shell";
 import { HiveStoreProvider, useHive } from "./store";
-import { Surface, SurfaceCtx } from "./ui";
+import { BrandButton, InkButton, Surface, SurfaceCtx } from "./ui";
 import "./hive-dashboard.css";
 import "./hive-shell.css";
 
@@ -77,6 +79,14 @@ function readPref(key: string, fallback: boolean): boolean {
     return v === null ? fallback : v === "1";
   } catch {
     return fallback;
+  }
+}
+function readText(): TextSize {
+  try {
+    const v = window.localStorage.getItem('hive.dash.text');
+    return TEXT_SIZES.includes(v as TextSize) ? (v as TextSize) : 'comfortable';
+  } catch {
+    return 'comfortable';
   }
 }
 function writePref(key: string, value: boolean) {
@@ -271,6 +281,27 @@ function Shell({ user, onSignOut, guest = false }: HiveDashboardProps) {
     writePref("hive.dash.compact", v);
   };
 
+  const [textSize, setTextSizeState] = useState<TextSize>(readText);
+  const setTextSize = (v: TextSize) => {
+    setTextSizeState(v);
+    try {
+      window.localStorage.setItem('hive.dash.text', v);
+    } catch {
+      /* the choice then lasts for this page only */
+    }
+  };
+
+  // Text size is the page's root font size: the frame is built in rem and grows with it, and the older
+  // screens (built in pixels) are zoomed by the same factor.
+  useEffect(() => {
+    const root = document.documentElement;
+    const before = root.style.fontSize;
+    root.style.fontSize = `${TEXT_PERCENT[textSize]}%`;
+    return () => {
+      root.style.fontSize = before;
+    };
+  }, [textSize]);
+
   const [searchOpen, setSearchOpen] = useState(false);
 
   const go = useCallback(
@@ -334,7 +365,6 @@ function Shell({ user, onSignOut, guest = false }: HiveDashboardProps) {
     document.title = `${def ? t(def.title) : brand.name} · ${brand.name}`;
   }, [def, t, brand.name]);
 
-  const unread = data.notifications.filter((n) => !n.read);
   const firstName = shownUser.name.split(/\s+/)[0] || shownUser.name;
 
   let view: React.ReactNode;
@@ -360,12 +390,7 @@ function Shell({ user, onSignOut, guest = false }: HiveDashboardProps) {
   else if (section === "activity") view = <ActivityView />;
   else if (section === "settings")
     view = (
-      <SettingsView
-        dark={dark}
-        setDark={setDark}
-        compact={compact}
-        setCompact={setCompact}
-      />
+      <SettingsView dark={dark} setDark={setDark} compact={compact} setCompact={setCompact} textSize={textSize} setTextSize={setTextSize} />
     );
   else if (section && (MODULE_SECTIONS as readonly string[]).includes(section))
     view = <ModuleView id={section} area={second} go={go} />;
@@ -399,7 +424,7 @@ function Shell({ user, onSignOut, guest = false }: HiveDashboardProps) {
       : t(NAV[section].title);
   const title: React.ReactNode = onHome ? (
     <>
-      {t(greeting())}, <span className="hd-accent">{firstName}</span>
+      {t(greeting())}, <span className="text-[var(--hd-orange,#ff4d00)]">{firstName}</span>
     </>
   ) : (
     pageTitle
@@ -410,6 +435,17 @@ function Shell({ user, onSignOut, guest = false }: HiveDashboardProps) {
       ? machine.name
       : t(NAV[section].about);
   const spec = section !== null && !machine ? NAV[section].spec : undefined;
+  const bannerIcon = (onHome ? NAV[""] : machine ? NAV.machines : NAV[section]).icon;
+  const bannerActions = onHome ? (
+    <>
+      <BrandButton onClick={() => go("alarms")}>
+        <Bell className="size-5" /> {t("Open alarms")}
+      </BrandButton>
+      <InkButton onClick={() => go("work-orders")}>
+        <ClipboardList className="size-5" /> {t("Work orders")}
+      </InkButton>
+    </>
+  ) : undefined;
 
   // Home, the module screens and Admin (which wraps its own old parts) are built from the shared components.
   const modern =
@@ -418,7 +454,10 @@ function Shell({ user, onSignOut, guest = false }: HiveDashboardProps) {
     (section !== null &&
       (MODULE_SECTIONS as readonly string[]).includes(section));
   const surfaceClass = `hd-root hx-app is-inset${dark ? " is-dark" : ""}${compact ? " is-compact" : ""}${phone ? " is-phone" : ""}`;
-  const surfaceStyle = brandStyle(brand);
+  const surfaceStyle = {
+    ...brandStyle(brand),
+    ["--hx-zoom" as string]: String(TEXT_PERCENT[textSize] / 100),
+  } as React.CSSProperties;
 
   return (
     <PhoneCtx.Provider value={phone}>
@@ -426,13 +465,15 @@ function Shell({ user, onSignOut, guest = false }: HiveDashboardProps) {
         value={{ className: surfaceClass, style: surfaceStyle }}
       >
         <div
-          className={cn("dashboard-root", dark && "dark")}
+          className={cn("dashboard-root hive-app", dark && "dark")}
           data-font="geist"
           style={surfaceStyle}
         >
           <TooltipProvider>
             <SidebarProvider
-              style={{ "--sidebar-width": "17rem" } as React.CSSProperties}
+              // Open beside the page on wide screens; on tablets and phones the page gets the full width and the Menu button brings the sidebar in.
+              defaultOpen={typeof window === "undefined" || window.innerWidth >= 1024}
+              style={{ "--sidebar-width": "18rem" } as React.CSSProperties}
             >
               <HiveSidebar
                 section={section ?? ""}
@@ -457,35 +498,26 @@ function Shell({ user, onSignOut, guest = false }: HiveDashboardProps) {
                   open={openDetail}
                   dark={dark}
                   setDark={setDark}
+                  textSize={textSize}
+                  setTextSize={setTextSize}
                 />
                 <main
                   id="hx-main"
                   tabIndex={-1}
-                  className="flex min-w-0 flex-1 flex-col gap-4 p-4 outline-none md:gap-6 md:p-6"
-                  style={
-                    phone
-                      ? {
-                          paddingBottom:
-                            "calc(6.5rem + env(safe-area-inset-bottom))",
-                        }
-                      : undefined
-                  }
+                  className="flex min-w-0 flex-1 flex-col gap-5 p-4 pb-[calc(2rem+env(safe-area-inset-bottom))] outline-none md:gap-6 md:p-6"
                 >
-                  <div className="flex min-w-0 flex-col gap-4 md:gap-6">
-                    <PageHeader title={title} about={about} />
-                    {modern ? view : <Surface>{view}</Surface>}
-                    <SpecFooter spec={spec} />
-                  </div>
+                  <PageBanner
+                    icon={bannerIcon}
+                    title={title}
+                    about={about}
+                    actions={bannerActions}
+                    apiState={apiState}
+                  />
+                  {modern ? view : <Surface>{view}</Surface>}
+                  <SpecFooter spec={spec} />
                 </main>
               </SidebarInset>
-              <Surface>
-                {phone && (
-                  <PhoneTabs
-                    section={section ?? ""}
-                    go={go}
-                    unread={unread.length > 0}
-                  />
-                )}
+              <Surface plain>
                 {searchOpen && (
                   <SearchDialog onClose={() => setSearchOpen(false)} go={go} />
                 )}

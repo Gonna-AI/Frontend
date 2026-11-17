@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { DataTable, Field, includes, Note, PageCard, Pill, SearchBox, SecretDialog, StatRow } from './common';
 import { BrandingArea, DisplaysArea, EmbedArea } from './adminExtra';
 import { Tabs } from './modules';
+import { TEXT_LABEL, TEXT_SIZES, type TextSize } from './shell';
 import { Surface } from './ui';
 import { useBrand } from './branding';
 import { localize, useLang } from './i18n';
@@ -343,7 +344,7 @@ function Toggle({ label, hint, on, onChange }: { label: string; hint?: string; o
   );
 }
 
-export function SettingsView({ dark, setDark, compact, setCompact }: { dark: boolean; setDark: (v: boolean) => void; compact: boolean; setCompact: (v: boolean) => void }) {
+export function SettingsView({ dark, setDark, compact, setCompact, textSize, setTextSize }: { dark: boolean; setDark: (v: boolean) => void; compact: boolean; setCompact: (v: boolean) => void; textSize: TextSize; setTextSize: (v: TextSize) => void }) {
   const t = useT();
   const { lang, setLang } = useLang();
   const { apiState, notify } = useHive();
@@ -354,6 +355,14 @@ export function SettingsView({ dark, setDark, compact, setCompact }: { dark: boo
     <>
       <PageCard title={t('Settings')} subtitle={t('Display preferences are saved in this browser only')}>
         <div className="hd-settings">
+          <label className="hd-toggle">
+            <span><b>{t('Text size')}</b><small>{t('Makes everything in the dashboard larger or smaller')}</small></span>
+            <select className="hd-lang" value={textSize} aria-label={t('Text size')} onChange={(e) => setTextSize(e.target.value as TextSize)}>
+              {TEXT_SIZES.map((size) => (
+                <option key={size} value={size}>{t(TEXT_LABEL[size])}</option>
+              ))}
+            </select>
+          </label>
           <Toggle label={t('Dark theme')} hint={t('Switches the whole Hive dashboard')} on={dark} onChange={setDark} />
           <Toggle label={t('Compact tables')} hint={t('Tighter rows, more on screen')} on={compact} onChange={setCompact} />
           <label className="hd-toggle">

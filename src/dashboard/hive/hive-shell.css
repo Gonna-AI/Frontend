@@ -18,12 +18,77 @@
 /* The workspace theme gives every card header two columns (for a card action). A header without one stays a single column. */
 .dashboard-root [data-slot='card-header'].grid-cols-1 { grid-template-columns: minmax(0, 1fr); }
 
+
+/* ------------------------------------------------------------------ palette and frame: silver, ink and the brand orange */
+
+.dashboard-root.hive-app {
+  --radius: 0.75rem;
+  --sidebar: oklch(0.945 0.004 85);
+  --sidebar-foreground: oklch(0.18 0 0);
+  --sidebar-accent: oklch(0.915 0.005 85);
+  --sidebar-accent-foreground: oklch(0.18 0 0);
+  --sidebar-border: oklch(0.88 0.005 85);
+  --background: oklch(0.985 0.002 85);
+  --foreground: oklch(0.16 0 0);
+  --card: oklch(1 0 0);
+  --muted: oklch(0.955 0.003 85);
+  --muted-foreground: oklch(0.44 0 0);
+  --border: oklch(0.89 0.004 85);
+  --input: oklch(0.8 0.004 85);
+  --ring: color-mix(in srgb, var(--hd-orange, #ff4d00) 70%, white);
+}
+.dashboard-root.hive-app.dark {
+  --sidebar: oklch(0.14 0 0);
+  --sidebar-foreground: oklch(0.96 0 0);
+  --sidebar-accent: oklch(0.24 0 0);
+  --sidebar-accent-foreground: oklch(0.98 0 0);
+  --sidebar-border: oklch(1 0 0 / 12%);
+  --background: oklch(0.18 0 0);
+  --foreground: oklch(0.97 0 0);
+  --card: oklch(0.225 0 0);
+  --muted: oklch(0.26 0 0);
+  --muted-foreground: oklch(0.78 0 0);
+  --border: oklch(1 0 0 / 14%);
+  --input: oklch(1 0 0 / 22%);
+}
+
+/* The shared sidebar keys its active look on a data attribute that is present even when false; these rules
+   follow the value instead, so only the current screen is marked. */
+.dashboard-root.hive-app [data-sidebar='menu-button'],
+.dashboard-root.hive-app [data-sidebar='menu-sub-button'] { background: transparent; color: var(--sidebar-foreground); font-weight: 500; border-radius: 0.75rem; }
+@media (hover: hover) {
+  .dashboard-root.hive-app [data-sidebar='menu-button']:hover,
+  .dashboard-root.hive-app [data-sidebar='menu-sub-button']:hover { background: color-mix(in srgb, var(--sidebar-foreground) 7%, transparent); }
+}
+.dashboard-root.hive-app [data-sidebar='menu-button'][data-active='true'] { background: #111; color: #fff; box-shadow: 0 1px 0 rgb(255 255 255 / 0.12) inset, 0 6px 14px -8px rgb(0 0 0 / 0.5); }
+.dashboard-root.hive-app.dark [data-sidebar='menu-button'][data-active='true'] { background: oklch(0.3 0 0); }
+.dashboard-root.hive-app [data-sidebar='menu-sub-button'][data-active='true'] { background: var(--card); color: var(--foreground); font-weight: 600; box-shadow: inset 3px 0 0 var(--hd-orange, #ff4d00), 0 0 0 1px var(--border); }
+.dashboard-root.hive-app [data-sidebar='menu-sub-button'] svg { color: inherit; }
+.hx-navicon { background: color-mix(in srgb, var(--hd-orange, #ff4d00) 14%, transparent); color: var(--hd-orange, #ff4d00); transition: background 0.18s ease, color 0.18s ease; }
+[data-sidebar='menu-button'][data-active='true'] .hx-navicon { background: var(--hd-orange, #ff4d00); color: var(--hd-on-accent, #fff); }
+
+/* Tab strips: the theme paints every border the same grey, so the active tab's marker is set here. */
+.dashboard-root.hive-app [data-slot='tabs-trigger'].rounded-none { border-bottom-color: transparent; }
+.dashboard-root.hive-app [data-slot='tabs-trigger'].rounded-none[data-state='active'] { border-bottom-color: var(--hd-orange, #ff4d00); }
+.dashboard-root.hive-app [data-slot='tabs-list'].rounded-none { border-bottom-color: var(--border); }
+
+/* The inset page: a clear frame on the silver canvas. */
+.dashboard-root.hive-app [data-slot='sidebar-inset'] { box-shadow: 0 1px 2px rgb(0 0 0 / 0.05), 0 12px 32px -20px rgb(0 0 0 / 0.25); }
+.dashboard-root.hive-app [data-slot='card'] { box-shadow: 0 1px 2px rgb(0 0 0 / 0.05); }
+
+/* Large, readable focus for keyboard users. */
+.dashboard-root.hive-app :is(a, button, [role='tab'], [tabindex='0']):focus-visible { outline: 3px solid var(--hd-orange, #ff4d00); outline-offset: 2px; }
+
 /* ------------------------------------------------------------------ older screens inside the frame */
 
 /* The wrapper adds no box of its own: it only carries the tokens the .hd-* markup reads. */
 .hd-root.hx-app.is-inset {
   position: static;
-  display: contents;
+  display: block;
+  /* The older screens are built in pixels; the Text size setting scales them by the same factor as the rest. */
+  zoom: var(--hx-zoom, 1);
+  width: calc(100% / var(--hx-zoom, 1));
+  min-width: 0;
   min-height: 0;
   padding: 0;
   overflow: visible;
@@ -45,6 +110,8 @@
   --hx-gutter: 16px;
 }
 .hd-root.hx-app.is-inset.is-dark { --hd-green-bg: rgba(31, 163, 92, 0.16); --hd-red-bg: rgba(229, 72, 77, 0.16); }
+
+.hd-root.hx-app.is-inset.is-plain { display: contents; zoom: 1; width: auto; }
 
 /* Cards look like shadcn cards: one hairline, one soft shadow, one radius. */
 .hd-root.hx-app.is-inset .hd-card { background: var(--card); color: var(--card-foreground); border: 1px solid var(--border); border-radius: calc(var(--radius) + 6px); box-shadow: 0 1px 2px rgb(0 0 0 / 0.04); padding: 20px; }
@@ -146,33 +213,11 @@
   .hd-root.hx-app.is-phone .hd-mcard-text small { white-space: normal; }
   .hd-root.hx-app.is-phone .hd-mcard { border: 1px solid var(--border); border-radius: calc(var(--radius) + 6px); box-shadow: 0 1px 2px rgb(0 0 0 / 0.04); }
   .hd-root.hx-app.is-phone .hd-mlist { gap: 10px; }
+  .hd-root.hx-app.is-phone .hd-alarm-row { flex-wrap: wrap; }
+  .hd-root.hx-app.is-phone .hd-mrow, .hd-root.hx-app.is-phone .hd-mcard { min-width: 0; max-width: 100%; }
+  .hd-root.hx-app.is-phone .hd-mcard-bottom { flex-wrap: wrap; }
+  .hx-table td [data-slot='badge'] { height: auto; min-height: 1.5rem; white-space: normal; text-align: left; }
 }
-
-/* Bottom bar: a floating glass pill that clears the home indicator and the gesture bar. */
-.hd-root.hx-app .hd-bottomnav {
-  position: fixed;
-  left: max(12px, env(safe-area-inset-left));
-  right: max(12px, env(safe-area-inset-right));
-  bottom: max(10px, env(safe-area-inset-bottom));
-  z-index: 40;
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 2px;
-  height: 64px;
-  max-width: 520px;
-  margin-inline: auto;
-  padding: 5px;
-  border-radius: 32px;
-  background: color-mix(in srgb, var(--card) 88%, transparent);
-  -webkit-backdrop-filter: blur(24px) saturate(1.6);
-  backdrop-filter: blur(24px) saturate(1.6);
-  box-shadow: 0 0 0 1px var(--border), 0 12px 32px -12px rgb(0 0 0 / 0.3);
-}
-.hd-root.hx-app .hd-bn { position: relative; display: grid; align-content: center; justify-items: center; gap: 3px; min-width: 0; height: 100%; padding: 0; border-radius: 27px; color: var(--muted-foreground); font-size: 11px; font-weight: 500; transition: background 0.2s ease, color 0.2s ease; }
-.hd-root.hx-app .hd-bn span { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.hd-root.hx-app .hd-bn.is-on { padding: 0; color: var(--primary); background: var(--muted); font-weight: 600; }
-.hd-root.hx-app .hd-bn-dot { top: 9px; right: calc(50% - 18px); background: var(--hd-orange); }
-@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) { .hd-root.hx-app .hd-bottomnav { background: var(--card); } }
 
 /* ------------------------------------------------------------------ touch, text entry, motion */
 
