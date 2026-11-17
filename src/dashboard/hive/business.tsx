@@ -82,17 +82,17 @@ export function VendorsView() {
               <Pill tone={r.status === 'Replies in' ? 'orange' : 'gray'}>{r.status}</Pill>
               {open === r.id && r.replies.length > 0 && (
                 <div className="hd-compare">
-                  <table className="hd-table">
+                  <table className="hx-table">
                     <thead>
                       <tr><th>{t('Vendor')}</th><th>{t('Price')}</th><th>{t('Lead time')}</th><th>{t('Spec match')}</th></tr>
                     </thead>
                     <tbody>
                       {r.replies.map((x) => (
                         <tr key={x.vendor}>
-                          <td>{x.vendor}</td>
-                          <td>{x.price}</td>
-                          <td>{x.leadTime}</td>
-                          <td><Pill tone={x.specMatch === 'Match' ? 'green' : x.specMatch === 'Partial' ? 'amber' : 'red'}>{x.specMatch}</Pill></td>
+                          <td data-label={t('Vendor')}>{x.vendor}</td>
+                          <td data-label={t('Price')}>{x.price}</td>
+                          <td data-label={t('Lead time')}>{x.leadTime}</td>
+                          <td data-label={t('Spec match')}><Pill tone={x.specMatch === 'Match' ? 'green' : x.specMatch === 'Partial' ? 'amber' : 'red'}>{x.specMatch}</Pill></td>
                         </tr>
                       ))}
                     </tbody>

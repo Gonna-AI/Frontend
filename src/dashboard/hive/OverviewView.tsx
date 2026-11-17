@@ -1,19 +1,5 @@
-import {
-  ArrowDownRight,
-  ArrowLeftRight,
-  ArrowUpRight,
-  BellRing,
-  ChevronDown,
-  ClipboardList,
-  Cpu,
-  EllipsisVertical,
-  Plus,
-  Radio,
-  Sparkles,
-  Wifi,
-  type LucideIcon,
-} from 'lucide-react-dash';
-import { useMemo, useState } from 'react';
+import { ArrowDownRight, ArrowLeftRight, ArrowUpRight, BellRing, ClipboardList, Cpu, Radio, type LucideIcon } from 'lucide-react-dash';
+import { useMemo } from 'react';
 
 import { MACHINE_STATES, STATE_LABEL, type HiveMachine, type HiveOverview } from './placeholder';
 import { useHive } from './store';
@@ -118,223 +104,156 @@ export function useAttention(go: (section: string) => void): { attention: Attent
 export default function OverviewView({ go }: { go: (section: string) => void }) {
   const t = useT();
   const { data: overview } = useHive();
-  const [site, setSite] = useState(overview.plant.name);
   const { attention, waiting } = useAttention(go);
   const usedPct = Math.round((overview.bufferUsedGb / overview.bufferTotalGb) * 100);
 
-  const stateCounts = useMemo(
-    () => MACHINE_STATES.map((st) => [st, overview.machines.filter((m) => m.state === st).length] as const),
-    [overview.machines],
-  );
+  const stateCounts = useMemo(() => MACHINE_STATES.map((st) => [st, overview.machines.filter((m) => m.state === st).length] as const), [overview.machines]);
   const lines = useMemo(() => {
     const map = new Map<string, HiveMachine[]>();
     for (const m of overview.machines) map.set(m.line, [...(map.get(m.line) ?? []), m]);
     return [...map.entries()];
   }, [overview.machines]);
+  const critical = attention.filter((a) => a.tone === 'red').length;
+  const online = overview.machines.filter((m) => m.state !== 'unknown' && m.state !== 'off').length;
 
   return (
-    <>
-      <div className="hd-grid">
-      {/* Plant availability */}
-      <section className="hd-card hd-balance" aria-labelledby="hd-plant">
-        <div className="hd-row">
-          <span id="hd-plant" className="hd-label">
-            {t('Plant availability')}
+    <div className="hx-home">
+      {/* Where the plant stands: the answer to "how is it going" before anything else */}
+      <section className="hx-hero" aria-labelledby="hx-plant">
+        <div className="hx-hero-main">
+          <span id="hx-plant" className="hx-eyebrow">
+            {t('Plant availability')} · {overview.plant.name}
           </span>
-          <label className="hd-select">
-            <select value={site} onChange={(e) => setSite(e.target.value)} aria-label={t('Site')}>
-              <option>{overview.plant.name}</option>
-            </select>
-            <ChevronDown size={12} aria-hidden="true" />
-          </label>
-        </div>
-        <div className="hd-big">{overview.plant.availability}</div>
-        <div className="hd-sub">
-          <Delta up={overview.plant.deltaUp}>{overview.plant.delta}</Delta>
-          <span>{t('than last week')}</span>
-        </div>
-        <div className="hd-actions">
-          <button type="button" className="hd-btn is-dark hd-btn-arrow" onClick={() => go('alarms')}>
-            <ArrowLeftRight size={16} /> {t('Open alarms')}
-          </button>
-          <button type="button" className="hd-btn is-light" onClick={() => go('work-orders')}>
-            <ClipboardList size={16} /> {t('Work order')}
-          </button>
-        </div>
-        <div className="hd-panel hd-wallets">
-          <div className="hd-panel-title">
-            <strong>{t('Sites')}</strong>
-            <span>{t('Total {n} sites', { n: overview.sites.length })}</span>
+          <div className="hx-hero-num">{overview.plant.availability}</div>
+          <div className="hx-hero-sub">
+            <Delta up={overview.plant.deltaUp}>{overview.plant.delta}</Delta>
+            <span>{t('than last week')}</span>
           </div>
-          <div className="hd-wallet-row">
+          <div className="hx-hero-sites">
             {overview.sites.map((s) => (
-              <button type="button" className="hd-wallet" key={s.id} onClick={() => go('machines')}>
-                <div className="hd-wallet-top">
-                  <span className="hd-site-chip">{s.name.slice(0, 1)}</span>
-                  <b>{s.name}</b>
-                  <EllipsisVertical size={12} aria-hidden="true" />
-                </div>
-                <div className="hd-wallet-amount">{s.oee}</div>
-                <small>{s.signals}</small>
-                <em className={s.state === 'Active' ? 'is-active' : 'is-inactive'}>{t(s.state)}</em>
+              <button type="button" key={s.id} onClick={() => go('machines')}>
+                <span>{s.name}</span>
+                <b>{s.oee}</b>
+                <i className={s.state === 'Active' ? 'is-active' : 'is-inactive'} aria-label={t(s.state)} />
               </button>
             ))}
           </div>
         </div>
+        <div className="hx-hero-side">
+          <dl className="hx-hero-stats">
+            <div className={critical ? 'is-hot' : undefined}>
+              <dt>{t('Critical')}</dt>
+              <dd>{critical}</dd>
+            </div>
+            <div>
+              <dt>{t('Waiting for me')}</dt>
+              <dd>{waiting}</dd>
+            </div>
+            <div>
+              <dt>{t('Online')}</dt>
+              <dd>
+                {online}
+                <small> / {overview.machines.length}</small>
+              </dd>
+            </div>
+          </dl>
+          <div className="hx-hero-actions">
+            <button type="button" className="hd-btn is-accent" onClick={() => go('alarms')}>
+              <ArrowLeftRight size={16} /> {t('Open alarms')}
+            </button>
+            <button type="button" className="hd-btn is-light" onClick={() => go('work-orders')}>
+              <ClipboardList size={16} /> {t('Work order')}
+            </button>
+          </div>
+        </div>
       </section>
 
-      {/* Tiles */}
-      <section className="hd-tiles" aria-label={t('Key figures')}>
+      <section className="hx-kpis is-4" aria-label={t('Key figures')}>
         {overview.tiles.map((tile, i) => {
           const Icon = TILE_ICON[tile.key];
           return (
-            <div className={`hd-tile${i === 0 ? ' is-accent' : ''}`} key={tile.key}>
-              <div className="hd-row">
-                <span>{t(tile.label)}</span>
-                <span className="hd-tile-icon">
-                  <Icon size={14} />
-                </span>
-              </div>
-              <div className="hd-tile-value">{localize(tile.value)}</div>
-              <div className="hd-sub">
-                <Delta up={tile.up}>{localize(tile.delta)}</Delta>
+            <div className={`hx-kpi${i === 0 ? ' is-hot' : ''}`} key={tile.key}>
+              <span>
+                <Icon size={14} aria-hidden="true" /> {t(tile.label)}
+              </span>
+              <b>{localize(tile.value)}</b>
+              <small>
+                <em className={tile.up ? 'is-up' : 'is-down'}>
+                  {tile.up ? '↗' : '↘'} {localize(tile.delta)}
+                </em>
                 <span>{t('This month')}</span>
-              </div>
+              </small>
             </div>
           );
         })}
       </section>
 
-      {/* Chart */}
-      <section className="hd-card hd-income" aria-labelledby="hd-alarms">
-        <h2 id="hd-alarms">{t('Alarm volume')}</h2>
-        <p className="hd-muted">{t('View alarms raised and resolved over the last eight weeks')}</p>
-        <AlarmChart data={overview.alarmVolume} />
-      </section>
-
-      {/* Buffer */}
-      <section className="hd-card hd-limit" aria-labelledby="hd-buffer">
-        <h2 id="hd-buffer" className="hd-card-title">
-          {t('Edge buffer usage')}
-        </h2>
-        <div
-          className="hd-progress"
-          role="progressbar"
-          aria-valuemin={0}
-          aria-valuemax={100}
-          aria-valuenow={usedPct}
-          aria-label={t('Edge buffer used')}
-        >
-          <span style={{ width: `${usedPct}%` }} />
-        </div>
-        <div className="hd-progress-meta">
-          <b>{formatQuantity(overview.bufferUsedGb, 'GB')}</b>
-          <small>{t('used out of')}</small>
-          <span>{formatQuantity(overview.bufferTotalGb, 'GB')}</span>
-        </div>
-      </section>
-
-      {/* Gateways */}
-      <section className="hd-card hd-cards" aria-labelledby="hd-gateways">
-        <div className="hd-row">
-          <div className="hd-title-with-icon">
-            <span className="hd-ico-chip">
-              <Wifi size={15} />
-            </span>
-            <h2 id="hd-gateways" className="hd-card-title">
-              {t('Gateways')}
-            </h2>
-          </div>
-          <button type="button" className="hd-ghost" onClick={() => go('admin/gateways')}>
-            <Plus size={12} /> {t('Enroll')}
-          </button>
-        </div>
-        <div className="hd-gw-row">
-          {overview.gateways.map((g, i) => (
-            <button type="button" className={`hd-gw ${i === 0 ? 'is-black' : 'is-orange'}`} key={g.id} onClick={() => go('admin/gateways')}>
-              <div className="hd-gw-top">
-                <Wifi size={13} aria-hidden="true" />
-                <span className="hd-gw-state">{t(g.state)}</span>
-                {i === 0 ? (
-                  <span className="hd-gw-logo" aria-hidden="true">
-                    <i />
-                    <i />
-                  </span>
-                ) : (
-                  <Sparkles size={22} className="hd-gw-spark" aria-hidden="true" />
-                )}
-              </div>
-              <div className="hd-gw-meta">
-                <div>
-                  <small>{t('Gateway ID')}</small>
-                  <span>{g.id.replace(/.*· /, '**** **** ')}</span>
-                </div>
-                <div>
-                  <small>{t('Version')}</small>
-                  <span>{g.version}</span>
-                </div>
-                <div>
-                  <small>{t('Uptime')}</small>
-                  <span>{g.uptime}</span>
-                </div>
-              </div>
-            </button>
-          ))}
-        </div>
-      </section>
-
-      {/* Needs attention: ordered by a fixed rule */}
-      <section className="hd-card hd-activity" aria-labelledby="hd-events">
-        <div className="hd-row">
-          <h2 id="hd-events" className="hd-card-title is-lg">
-            {t('Needs attention')}
-          </h2>
-          <div className="hd-act-tools">
-            <button type="button" className="hd-ghost" onClick={() => go('inbox')}>
+      <div className="hx-split">
+        {/* Needs attention: ordered by a fixed rule */}
+        <section className="hx-panel" aria-labelledby="hx-attn">
+          <header className="hx-panel-head is-row">
+            <div>
+              <h2 id="hx-attn">{t('Needs attention')}</h2>
+              <p>{t('Ordered by priority. Critical first.')}</p>
+            </div>
+            <button type="button" className="hx-link" onClick={() => go('inbox')}>
               {t('Waiting for me · {n}', { n: waiting })}
             </button>
-          </div>
-        </div>
-        <ol className="hd-attention">
-          {attention.slice(0, 8).map((a) => (
-            <li key={a.key}>
-              <button type="button" onClick={() => a.open()}>
-                <span className={`hd-attn-dot is-${a.tone}`} aria-hidden="true" />
-                <span className="hd-attn-text">
-                  <b>{a.title}</b>
-                  <small>{a.where}</small>
-                </span>
-                <span className="hd-attn-label">{t(a.label)}</span>
-              </button>
-            </li>
-          ))}
-          {attention.length === 0 && <li className="hd-empty">{t('Nothing needs attention. Last checked just now.')}</li>}
-        </ol>
-        {attention.length > 8 && (
-          <button type="button" className="hd-ghost hd-attn-more" onClick={() => go('alarms')}>
-            {t('{n} more', { n: attention.length - 8 })}
-          </button>
-        )}
-        <p className="hd-muted hd-attn-note">{t('Alarms shown here are not a replacement for the plant’s safety systems.')}</p>
-      </section>
+          </header>
+          <ol className="hd-attention">
+            {attention.slice(0, 6).map((a) => (
+              <li key={a.key}>
+                <button type="button" onClick={() => a.open()}>
+                  <span className={`hd-attn-dot is-${a.tone}`} aria-hidden="true" />
+                  <span className="hd-attn-text">
+                    <b>{a.title}</b>
+                    <small>{a.where}</small>
+                  </span>
+                  <span className="hd-attn-label">{t(a.label)}</span>
+                </button>
+              </li>
+            ))}
+            {attention.length === 0 && <li className="hd-empty">{t('Nothing needs attention. Last checked just now.')}</li>}
+          </ol>
+          {attention.length > 6 && (
+            <button type="button" className="hx-link is-block" onClick={() => go('alarms')}>
+              {t('{n} more', { n: attention.length - 6 })}
+            </button>
+          )}
+          <p className="hx-fine">{t('Alarms shown here are not a replacement for the plant’s safety systems.')}</p>
+        </section>
 
-      {/* Plant overview by line, using the eight machine states */}
-      <section className="hd-card hd-plant" aria-labelledby="hd-plant-overview">
-        <div className="hd-row">
-          <h2 id="hd-plant-overview" className="hd-card-title is-lg">
-            {t('Plant overview')}
-          </h2>
-          <button type="button" className="hd-ghost" onClick={() => go('machines')}>
-            {t('All machines')}
-          </button>
-        </div>
-        <div className="hd-state-row">
-          {stateCounts.map(([st, n]) => (
-            <span key={st} className={`hd-state-count${n ? '' : ' is-zero'}`}>
-              <i className={`hd-sdot is-${st}`} /> {t(STATE_LABEL[st])} <b>{n}</b>
-            </span>
-          ))}
-        </div>
+        {/* Machine states, all eight, never merged */}
+        <section className="hx-panel" aria-labelledby="hx-states">
+          <header className="hx-panel-head is-row">
+            <div>
+              <h2 id="hx-states">{t('Machine states')}</h2>
+              <p>{t('Unknown is never shown as off.')}</p>
+            </div>
+            <button type="button" className="hx-link" onClick={() => go('machines')}>
+              {t('All machines')}
+            </button>
+          </header>
+          <ul className="hx-states">
+            {stateCounts.map(([st, n]) => (
+              <li key={st} className={n ? undefined : 'is-zero'}>
+                <i className={`hd-sdot is-${st}`} aria-hidden="true" />
+                <span>{t(STATE_LABEL[st])}</span>
+                <b>{n}</b>
+              </li>
+            ))}
+          </ul>
+        </section>
+      </div>
+
+      {/* Plant overview by line */}
+      <section className="hx-panel" aria-labelledby="hx-lines">
+        <header className="hx-panel-head is-row">
+          <div>
+            <h2 id="hx-lines">{t('Plant overview')}</h2>
+            <p>{t('By line, with the age of every state.')}</p>
+          </div>
+        </header>
         <div className="hd-lines-grid">
           {lines.map(([line, ms]) => (
             <div className="hd-linebox" key={line}>
@@ -354,7 +273,52 @@ export default function OverviewView({ go }: { go: (section: string) => void }) 
           ))}
         </div>
       </section>
+
+      <div className="hx-split is-even">
+        <section className="hx-panel" aria-labelledby="hx-volume">
+          <header className="hx-panel-head">
+            <h2 id="hx-volume">{t('Alarm volume')}</h2>
+            <p>{t('View alarms raised and resolved over the last eight weeks')}</p>
+          </header>
+          <AlarmChart data={overview.alarmVolume} />
+        </section>
+
+        <section className="hx-panel" aria-labelledby="hx-conn">
+          <header className="hx-panel-head is-row">
+            <div>
+              <h2 id="hx-conn">{t('Connections')}</h2>
+              <p>{t('Gateways and the edge buffer')}</p>
+            </div>
+            <button type="button" className="hx-link" onClick={() => go('admin/gateways')}>
+              {t('Manage')}
+            </button>
+          </header>
+          <ul className="hx-gws">
+            {overview.gatewayFleet.map((g) => (
+              <li key={g.id}>
+                <button type="button" onClick={() => go('admin/gateways')}>
+                  <i className={`hx-link-dot is-${g.link.toLowerCase()}`} aria-hidden="true" />
+                  <span className="hx-gw-name">
+                    <b>{g.site}</b>
+                    <small>
+                      {g.version} · {g.uptime}
+                    </small>
+                  </span>
+                  <span className={`hx-pill is-${g.link === 'Online' ? 'green' : g.link === 'Buffering' ? 'amber' : 'red'}`}>{t(g.link)}</span>
+                </button>
+              </li>
+            ))}
+          </ul>
+          <div className="hx-buffer">
+            <div className="hd-progress" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={usedPct} aria-label={t('Edge buffer used')}>
+              <span style={{ width: `${usedPct}%` }} />
+            </div>
+            <p>
+              <b>{formatQuantity(overview.bufferUsedGb, 'GB')}</b> <small>{t('used out of')}</small> <span>{formatQuantity(overview.bufferTotalGb, 'GB')}</span>
+            </p>
+          </div>
+        </section>
       </div>
-    </>
+    </div>
   );
 }

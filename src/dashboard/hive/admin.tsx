@@ -1,8 +1,9 @@
 import { Info, KeyRound, Plus, ShieldCheck, Wifi } from 'lucide-react-dash';
 import { useState } from 'react';
 
-import { Chips, DataTable, Field, includes, Note, PageCard, Pill, SearchBox, SecretDialog, StatRow, usePhone } from './common';
+import { DataTable, Field, includes, Note, PageCard, Pill, SearchBox, SecretDialog, StatRow } from './common';
 import { BrandingArea, DisplaysArea, EmbedArea } from './adminExtra';
+import { Tabs } from './modules';
 import { useBrand } from './branding';
 import { localize, useLang } from './i18n';
 import type { AdminConnection } from './placeholder';
@@ -287,7 +288,7 @@ function IntegrationsArea() {
 }
 
 export function AdminView({ area, go }: { area: string; go: (section: string) => void }) {
-  const phone = usePhone();
+  const t = useT();
   const current = (ADMIN_AREAS.find((a) => a.id === area)?.id ?? 'tenant') as AreaId;
   const body =
     current === 'tenant' ? <TenantArea /> :
@@ -301,13 +302,7 @@ export function AdminView({ area, go }: { area: string; go: (section: string) =>
     current === 'branding' ? <BrandingArea /> : <IntegrationsArea />;
   return (
     <>
-      {phone ? (
-        <div className="hd-scrollchips">
-          <Chips options={ADMIN_AREAS.map((a) => a.id)} value={current} onChange={(v) => go(`admin/${v}`)} labels={Object.fromEntries(ADMIN_AREAS.map((a) => [a.id, a.label]))} />
-        </div>
-      ) : (
-        <Chips options={ADMIN_AREAS.map((a) => a.id)} value={current} onChange={(v) => go(`admin/${v}`)} labels={Object.fromEntries(ADMIN_AREAS.map((a) => [a.id, a.label]))} />
-      )}
+      <Tabs tabs={ADMIN_AREAS.map((x) => ({ id: x.id, title: t(x.label) }))} value={current} onChange={(v) => go(`admin/${v}`)} label={t('Admin')} />
       <div className="hd-admin-body">{body}</div>
     </>
   );

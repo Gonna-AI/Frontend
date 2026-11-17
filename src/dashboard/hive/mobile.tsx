@@ -109,14 +109,15 @@ export function BottomNav({ section, go, onMenu, unread }: { section: string; go
         const on = section === id;
         return (
           <button key={id || 'home'} type="button" className={`hd-bn${on ? ' is-on' : ''}`} aria-label={label} aria-current={on ? 'page' : undefined} onClick={() => go(id)}>
-            <Icon size={20} />
-            {on && <span>{label}</span>}
-            {dot && !on && <i className="hd-bn-dot" />}
+            <Icon size={22} strokeWidth={on ? 2.1 : 1.7} />
+            <span>{label}</span>
+            {dot && <i className="hd-bn-dot" />}
           </button>
         );
       })}
       <button type="button" className="hd-bn" aria-label={t('Menu')} onClick={onMenu}>
-        <Menu size={20} />
+        <Menu size={22} strokeWidth={1.7} />
+        <span>{t('More')}</span>
       </button>
     </nav>
   );
@@ -182,7 +183,7 @@ export function MobileMenu({
             <button type="button" className={lang === 'en' ? 'is-on' : ''} aria-pressed={lang === 'en'} onClick={() => setLang('en')}>English</button>
           </div>
           <a className="hd-menu-item" href="/dashboard/default"><LayoutPanelLeft size={18} /> <span>{t('Workspace dashboards')}</span></a>
-          <button type="button" className="hd-menu-item" onClick={onExit}><LogOut size={18} /> <span>{guest ? 'Sign in' : 'Sign out'}</span></button>
+          <button type="button" className="hd-menu-item" onClick={onExit}><LogOut size={18} /> <span>{guest ? t('Sign in') : t('Sign out')}</span></button>
         </footer>
       </aside>
     </div>

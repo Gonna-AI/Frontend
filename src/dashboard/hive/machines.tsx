@@ -57,6 +57,7 @@ export function MachinesView({ go, site }: { go: (section: string) => void; site
       actions={<SearchBox value={q} onChange={setQ} label={t('Search machines')} />}
     >
       <Chips options={FILTERS} value={state} onChange={setState} counts={counts} labels={labels} />
+      <div className="hd-groups">
       {groups.map(([group, ms]) => (
         <div className="hd-group" key={group}>
           <h3>{group}</h3>
@@ -83,6 +84,7 @@ export function MachinesView({ go, site }: { go: (section: string) => void; site
           )}
         </div>
       ))}
+      </div>
       {groups.length === 0 && <p className="hd-empty">{t('No machines match.')}</p>}
     </PageCard>
   );
