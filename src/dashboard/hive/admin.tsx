@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { DataTable, Field, includes, Note, PageCard, Pill, SearchBox, SecretDialog, StatRow } from './common';
 import { BrandingArea, DisplaysArea, EmbedArea } from './adminExtra';
 import { Tabs } from './modules';
+import { Surface } from './ui';
 import { useBrand } from './branding';
 import { localize, useLang } from './i18n';
 import type { AdminConnection } from './placeholder';
@@ -287,24 +288,43 @@ function IntegrationsArea() {
   );
 }
 
+/** Ten areas are too many tabs: related ones share a tab and stack as sections, newest-needed first. */
+const ADMIN_TABS: { id: string; label: string; areas: AreaId[] }[] = [
+  { id: 'tenant', label: 'Tenant', areas: ['tenant'] },
+  { id: 'access', label: 'Access', areas: ['access'] },
+  { id: 'connections', label: 'Connections', areas: ['connections', 'gateways', 'integrations'] },
+  { id: 'policies', label: 'Policies and audit', areas: ['policies', 'audit'] },
+  { id: 'displays', label: 'Displays and embeds', areas: ['displays', 'embed'] },
+  { id: 'branding', label: 'Branding', areas: ['branding'] },
+];
+
+function AdminArea({ id }: { id: AreaId }) {
+  return id === 'tenant' ? <TenantArea /> :
+    id === 'access' ? <AccessArea /> :
+    id === 'connections' ? <ConnectionsArea /> :
+    id === 'gateways' ? <GatewaysArea /> :
+    id === 'policies' ? <PoliciesArea /> :
+    id === 'audit' ? <AuditArea /> :
+    id === 'displays' ? <DisplaysArea /> :
+    id === 'embed' ? <EmbedArea /> :
+    id === 'branding' ? <BrandingArea /> : <IntegrationsArea />;
+}
+
 export function AdminView({ area, go }: { area: string; go: (section: string) => void }) {
   const t = useT();
-  const current = (ADMIN_AREAS.find((a) => a.id === area)?.id ?? 'tenant') as AreaId;
-  const body =
-    current === 'tenant' ? <TenantArea /> :
-    current === 'access' ? <AccessArea /> :
-    current === 'connections' ? <ConnectionsArea /> :
-    current === 'gateways' ? <GatewaysArea /> :
-    current === 'policies' ? <PoliciesArea /> :
-    current === 'audit' ? <AuditArea /> :
-    current === 'displays' ? <DisplaysArea /> :
-    current === 'embed' ? <EmbedArea /> :
-    current === 'branding' ? <BrandingArea /> : <IntegrationsArea />;
+  // Old addresses (admin/gateways, admin/audit, ...) land on the tab that now holds that area.
+  const current = ADMIN_TABS.find((x) => x.id === area || (x.areas as string[]).includes(area)) ?? ADMIN_TABS[0];
   return (
-    <>
-      <Tabs tabs={ADMIN_AREAS.map((x) => ({ id: x.id, title: t(x.label) }))} value={current} onChange={(v) => go(`admin/${v}`)} label={t('Admin')} />
-      <div className="hd-admin-body">{body}</div>
-    </>
+    <div className="flex flex-col gap-4 md:gap-6">
+      <Tabs tabs={ADMIN_TABS.map((x) => ({ id: x.id, title: t(x.label) }))} value={current.id} onChange={(v) => go(`admin/${v}`)} label={t('Admin')} />
+      <Surface>
+        <div className="hd-admin-body" key={current.id}>
+          {current.areas.map((id) => (
+            <AdminArea key={id} id={id} />
+          ))}
+        </div>
+      </Surface>
+    </div>
   );
 }
 

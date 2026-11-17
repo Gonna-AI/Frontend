@@ -1,9 +1,15 @@
 import { Search } from 'lucide-react-dash';
 import { useMemo, useState } from 'react';
 
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/dashboard-ui/card';
+import { Input } from '@/components/dashboard-ui/input';
+import { Tabs as UiTabs, TabsList, TabsTrigger } from '@/components/dashboard-ui/tabs';
+import { Button } from '@/components/dashboard-ui/button';
+
 import { useLang, useT } from './i18n';
 import { MODULES, type Block, type Cell, type CellValue, type Tab, type Txt } from './modulesData';
 import { NAV } from './nav';
+import { TAB_LIST, TAB_TRIGGER, ToneBadge } from './ui';
 
 /**
  * The generic screen for Hive modules that are specified but not built yet. It draws the tabs and blocks
@@ -22,25 +28,17 @@ const isCell = (v: CellValue): v is Cell => typeof v === 'object' && 'text' in v
 
 export function Tabs({ tabs, value, onChange, label }: { tabs: { id: string; title: string }[]; value: string; onChange: (id: string) => void; label: string }) {
   return (
-    <div className="hx-tabs-wrap">
-      <div className="hx-tabs" role="tablist" aria-label={label}>
-        {tabs.map((tab) => (
-          <button
-            key={tab.id}
-            type="button"
-            role="tab"
-            aria-selected={tab.id === value}
-            className={`hx-tab${tab.id === value ? ' is-on' : ''}`}
-            onClick={(e) => {
-              onChange(tab.id);
-              e.currentTarget.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' });
-            }}
-          >
-            {tab.title}
-          </button>
-        ))}
+    <UiTabs value={value} onValueChange={onChange} aria-label={label} className="flex-col">
+      <div className="-mx-1 overflow-x-auto px-1 pb-1">
+        <TabsList className={TAB_LIST}>
+          {tabs.map((tab) => (
+            <TabsTrigger key={tab.id} value={tab.id} className={TAB_TRIGGER}>
+              {tab.title}
+            </TabsTrigger>
+          ))}
+        </TabsList>
       </div>
-    </div>
+    </UiTabs>
   );
 }
 
@@ -48,15 +46,15 @@ export function Tabs({ tabs, value, onChange, label }: { tabs: { id: string; tit
 
 function Panel({ title, sub, children, flush }: { title?: string; sub?: string; children: React.ReactNode; flush?: boolean }) {
   return (
-    <section className={`hx-panel${flush ? ' is-flush' : ''}`}>
+    <Card className={flush ? 'gap-0 overflow-hidden py-0' : undefined}>
       {(title || sub) && (
-        <header className="hx-panel-head">
-          {title && <h2>{title}</h2>}
-          {sub && <p>{sub}</p>}
-        </header>
+        <CardHeader className={flush ? 'grid-cols-1 py-5' : 'grid-cols-1'}>
+          {title && <CardTitle className="text-base">{title}</CardTitle>}
+          {sub && <CardDescription>{sub}</CardDescription>}
+        </CardHeader>
       )}
-      {children}
-    </section>
+      {flush ? children : <CardContent>{children}</CardContent>}
+    </Card>
   );
 }
 
@@ -66,7 +64,7 @@ function CellView({ v, label }: { v: CellValue; label: string }) {
   const text = tr(c.text);
   return (
     <td data-label={label} className={c.mono ? 'is-mono' : undefined}>
-      {c.pill ? <span className={`hx-pill is-${c.tone ?? 'gray'}`}>{text}</span> : text}
+      {c.pill ? <ToneBadge tone={c.tone ?? 'gray'}>{text}</ToneBadge> : text}
     </td>
   );
 }
@@ -94,22 +92,19 @@ function TableBlock({ block }: { block: Extract<Block, { kind: 'table' }> }) {
   return (
     <Panel title={tr(block.title)} sub={block.sub ? tr(block.sub) : undefined} flush>
       {(block.searchable || options.length > 1) && (
-        <div className="hx-toolbar">
+        <div className="flex flex-wrap items-center gap-2 px-6 pb-3">
           {block.searchable && (
-            <label className="hx-find">
-              <Search size={15} aria-hidden="true" />
-              <input value={q} onChange={(e) => setQ(e.target.value)} placeholder={t('Search')} aria-label={t('Search')} />
-            </label>
+            <div className="relative w-full sm:w-64">
+              <Search className="-translate-y-1/2 pointer-events-none absolute top-1/2 left-3 size-4 text-muted-foreground" aria-hidden="true" />
+              <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder={t('Search')} aria-label={t('Search')} className="pl-9" />
+            </div>
           )}
           {options.length > 1 && (
-            <div className="hx-filters" role="group" aria-label={t('Filter')}>
-              <button type="button" className={`hx-chip${pick === null ? ' is-on' : ''}`} aria-pressed={pick === null} onClick={() => setPick(null)}>
-                {t('All')}
-              </button>
+            <div className="flex flex-wrap gap-1.5" role="group" aria-label={t('Filter')}>
               {options.map((o) => (
-                <button key={o} type="button" className={`hx-chip${pick === o ? ' is-on' : ''}`} aria-pressed={pick === o} onClick={() => setPick(pick === o ? null : o)}>
+                <Button key={o} type="button" size="sm" variant={pick === o ? 'default' : 'outline'} aria-pressed={pick === o} onClick={() => setPick(pick === o ? null : o)}>
                   {o}
-                </button>
+                </Button>
               ))}
             </div>
           )}
@@ -151,16 +146,18 @@ function BlockView({ block }: { block: Block }) {
   switch (block.kind) {
     case 'kpis':
       return (
-        <div className={`hx-kpis is-${Math.min(block.items.length, 4)}`}>
+        <div className="grid grid-cols-2 gap-3 md:gap-4 lg:grid-cols-[repeat(auto-fit,minmax(200px,1fr))]">
           {block.items.map((k, i) => (
-            <div key={i} className={`hx-kpi${k.hot ? ' is-hot' : ''}`}>
-              <span>{tr(k.label)}</span>
-              <b>{tr(k.value)}</b>
-              <small>
-                {k.delta && <em className={k.up ? 'is-up' : 'is-down'}>{k.up ? '↗' : '↘'} {k.delta}</em>}
+            <Card key={i} className="gap-2 py-4">
+              <CardHeader className="grid-cols-1 gap-1">
+                <CardDescription>{tr(k.label)}</CardDescription>
+                <CardTitle className="font-semibold text-2xl tabular-nums md:text-3xl">{tr(k.value)}</CardTitle>
+              </CardHeader>
+              <CardContent className="flex flex-wrap items-center gap-2 text-muted-foreground text-xs">
+                {k.delta && <ToneBadge tone={k.up ? 'green' : 'red'}>{k.up ? '↗' : '↘'} {k.delta}</ToneBadge>}
                 {k.sub && <span>{tr(k.sub)}</span>}
-              </small>
-            </div>
+              </CardContent>
+            </Card>
           ))}
         </div>
       );
@@ -213,7 +210,7 @@ function BlockView({ block }: { block: Block }) {
             {block.items.map((c, i) => (
               <article key={i} className="hx-card">
                 <header>
-                  {c.tag && <span className={`hx-pill is-${c.tone ?? 'gray'}`}>{tr(c.tag)}</span>}
+                  {c.tag && <ToneBadge tone={c.tone ?? 'gray'}>{tr(c.tag)}</ToneBadge>}
                   {c.meta && <small>{tr(c.meta)}</small>}
                 </header>
                 <h3>{tr(c.title)}</h3>
@@ -234,7 +231,7 @@ function BlockView({ block }: { block: Block }) {
       );
     case 'note':
       return (
-        <p className="hx-note" role="note">
+        <p className="rounded-xl border bg-muted/50 px-4 py-3 text-muted-foreground text-sm leading-relaxed" role="note">
           {tr(block.text)}
         </p>
       );
@@ -252,9 +249,9 @@ export default function ModuleView({ id, area, go }: { id: string; area?: string
   if (!def || !current) return null;
 
   return (
-    <div className="hx-module">
+    <div className="flex flex-col gap-4 md:gap-6">
       <Tabs tabs={tabs.map((tab) => ({ id: tab.id, title: tr(tab.title) }))} value={current.id} onChange={(tab) => go(`${id}/${tab}`)} label={t(NAV[id].title)} />
-      <div className="hx-blocks" key={current.id}>
+      <div className="flex animate-in flex-col gap-4 fade-in-0 md:gap-6" key={current.id}>
         {current.blocks.map((b, i) => (
           <BlockView key={i} block={b} />
         ))}

@@ -11,6 +11,8 @@ import {
   Bell,
   BookOpen,
   Bot,
+  Briefcase,
+  Building2,
   ChartBar,
   ClipboardList,
   Code,
@@ -73,19 +75,28 @@ export const NAV: Record<string, NavItem> = {
   settings: { id: 'settings', title: 'Settings', icon: Settings, keywords: 'preferences theme diagnostics', terms: 'einstellungen', about: 'Your language, theme and notifications.' },
 };
 
-export interface NavGroup {
+export interface NavSection {
   id: string;
   title: string;
+  icon: LucideIcon;
   ids: string[];
 }
 
-export const NAV_GROUPS: NavGroup[] = [
-  { id: 'operate', title: 'Operate', ids: ['', 'machines', 'alarms', 'inbox', 'assistant'] },
-  { id: 'work', title: 'Work', ids: ['work-orders', 'production', 'quality', 'parts', 'vendors'] },
-  { id: 'knowledge', title: 'Knowledge', ids: ['documents', 'findings', 'graph', 'reports'] },
-  { id: 'automate', title: 'Automate', ids: ['agents', 'automations'] },
-  { id: 'manage', title: 'Organization', ids: ['admin', 'compliance', 'developer', 'activity', 'settings'] },
+/** Always visible: the things a person looks at many times a day. */
+export const NAV_PRIMARY = ['', 'machines', 'alarms', 'inbox', 'assistant'];
+
+/** Collapsed until opened (the one holding the current screen opens by itself): everything else, by what it is for. */
+export const NAV_SECTIONS: NavSection[] = [
+  { id: 'work', title: 'Work', icon: Briefcase, ids: ['work-orders', 'production', 'quality', 'parts', 'vendors'] },
+  { id: 'knowledge', title: 'Knowledge', icon: BookOpen, ids: ['documents', 'findings', 'graph', 'reports'] },
+  { id: 'automation', title: 'Automation', icon: Workflow, ids: ['agents', 'automations'] },
+  { id: 'organization', title: 'Organization', icon: Building2, ids: ['admin', 'compliance', 'developer', 'activity'] },
 ];
+
+/** Which section a screen lives in (for the breadcrumb and for opening the right group). */
+export function sectionOf(id: string): NavSection | undefined {
+  return NAV_SECTIONS.find((s) => s.ids.includes(id));
+}
 
 /** The four destinations a phone keeps one tap away (the fifth is the menu). */
 export const PHONE_TABS = ['', 'machines', 'inbox', 'assistant'] as const;
