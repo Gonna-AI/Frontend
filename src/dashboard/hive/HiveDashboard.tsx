@@ -37,7 +37,13 @@ import {
   InboxView,
   WorkOrdersView,
 } from "./ops";
-import { HiveSidebar, PageHeader, SiteHeader, SpecFooter } from "./shell";
+import {
+  HiveSidebar,
+  MobileTabs,
+  PageHeader,
+  SiteHeader,
+  SpecFooter,
+} from "./shell";
 import { HiveStoreProvider, useHive } from "./store";
 import { Surface, SurfaceCtx } from "./ui";
 import "./hive-dashboard.css";
@@ -458,7 +464,12 @@ function Shell({ user, onSignOut, guest = false }: HiveDashboardProps) {
                 <main
                   id="hx-main"
                   tabIndex={-1}
-                  className="flex min-w-0 flex-1 flex-col gap-4 p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] outline-none md:gap-6 md:p-6"
+                  className={cn(
+                    "flex min-w-0 flex-1 flex-col gap-4 p-4 outline-none md:gap-6 md:p-6",
+                    phone
+                      ? "pb-[calc(5.5rem+env(safe-area-inset-bottom))]"
+                      : "pb-[calc(1rem+env(safe-area-inset-bottom))]",
+                  )}
                 >
                   <div className="flex min-w-0 flex-col gap-4 md:gap-6">
                     <PageHeader title={title} about={about} />
@@ -467,6 +478,7 @@ function Shell({ user, onSignOut, guest = false }: HiveDashboardProps) {
                   </div>
                 </main>
               </SidebarInset>
+              {phone && <MobileTabs section={section ?? ""} go={go} />}
               <Surface>
                 {searchOpen && (
                   <SearchDialog onClose={() => setSearchOpen(false)} go={go} />

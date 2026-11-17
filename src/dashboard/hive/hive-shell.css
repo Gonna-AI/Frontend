@@ -77,6 +77,135 @@
   .hd-root.hx-app.is-inset .hd-table :is(th, td) { padding-inline: 10px; font-size: 13px; }
 }
 
+
+/* ------------------------------------------------------------------ one look: the older components in shadcn's terms
+
+   The older screens were drawn with pills, raised light buttons, black glass and pressed-in fields. Everything
+   below restates those components with the shared tokens (--primary, --border, --input, --muted, --radius), so a
+   button, a field, a badge or a table looks the same on every screen, in light and in dark. */
+
+.hd-root.hx-app.is-inset {
+  --hd-ring: none;
+  --hd-raise: none;
+  --hd-raise-hover: none;
+  --hd-press: none;
+  --hd-black-shadow: none;
+  --hd-black-shadow-hover: none;
+  --hd-black-shadow-sm: none;
+  --hx-r: calc(var(--radius) - 2px);
+}
+
+/* Buttons */
+.hd-root.hx-app.is-inset :is(.hd-btn, .hd-ghost, .hd-filter, .hd-back, .hd-lang-btn) {
+  display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
+  height: 2.25rem; padding: 0 1rem; border-radius: var(--hx-r);
+  font-size: 0.875rem; font-weight: 500; line-height: 1; white-space: nowrap;
+  filter: none; transform: none; transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.hd-root.hx-app.is-inset .hd-btn.is-dark,
+.hd-root.hx-app.is-inset.is-dark .hd-btn.is-dark { background: var(--primary); color: var(--primary-foreground); border: 0; box-shadow: 0 1px 2px rgb(0 0 0 / 0.05); }
+.hd-root.hx-app.is-inset .hd-btn.is-light,
+.hd-root.hx-app.is-inset :is(.hd-ghost, .hd-filter, .hd-back, .hd-lang-btn) { background: var(--background); color: var(--foreground); border: 1px solid var(--border); box-shadow: 0 1px 2px rgb(0 0 0 / 0.04); }
+.hd-root.hx-app.is-inset .hd-btn.is-accent { background: var(--hd-orange); color: var(--hd-on-accent, #fff); border: 0; box-shadow: 0 1px 2px rgb(0 0 0 / 0.08); overflow: visible; }
+.hd-root.hx-app.is-inset .hd-btn.hd-btn-sm { height: 2rem; padding: 0 0.75rem; font-size: 0.8125rem; }
+@media (hover: hover) {
+  .hd-root.hx-app.is-inset .hd-btn.is-dark:hover { background: color-mix(in srgb, var(--primary) 88%, transparent); transform: none; box-shadow: none; filter: none; }
+  .hd-root.hx-app.is-inset .hd-btn.is-light:hover,
+  .hd-root.hx-app.is-inset :is(.hd-ghost, .hd-filter, .hd-back, .hd-lang-btn):hover { background: var(--accent); color: var(--accent-foreground); transform: none; box-shadow: none; filter: none; }
+  .hd-root.hx-app.is-inset .hd-btn.is-accent:hover { background: color-mix(in srgb, var(--hd-orange) 90%, #000); transform: none; filter: none; }
+}
+.hd-root.hx-app.is-inset :is(.hd-btn, .hd-ghost, .hd-filter, .hd-back, .hd-lang-btn):active { transform: none; box-shadow: none; }
+.hd-root.hx-app.is-inset .hd-btn:disabled { opacity: 0.5; }
+.hd-root.hx-app.is-inset .hd-icon-btn { border-radius: var(--hx-r); }
+
+/* Filter chips are small outline buttons; the chosen one is filled. */
+.hd-root.hx-app.is-inset .hd-chip {
+  height: 2rem; padding: 0 0.75rem; border-radius: var(--hx-r);
+  background: var(--background); color: var(--foreground); border: 1px solid var(--border);
+  font-size: 0.8125rem; font-weight: 500; box-shadow: 0 1px 2px rgb(0 0 0 / 0.04); transform: none;
+}
+.hd-root.hx-app.is-inset .hd-chip small { margin-left: 0.375rem; opacity: 0.65; }
+@media (hover: hover) { .hd-root.hx-app.is-inset .hd-chip:not(.is-on):hover { background: var(--accent); color: var(--accent-foreground); transform: none; box-shadow: 0 1px 2px rgb(0 0 0 / 0.04); } }
+.hd-root.hx-app.is-inset .hd-chip.is-on { background: var(--primary); color: var(--primary-foreground); border-color: var(--primary); box-shadow: none; }
+.hd-root.hx-app.is-inset .hd-tabbar { display: flex; flex-wrap: wrap; gap: 0.375rem; margin-bottom: 0.75rem; }
+
+/* Fields: a border, a hairline shadow, a soft focus ring. */
+.hd-root.hx-app.is-inset :is(.hd-search, .hd-select, .hd-lang, .hd-form select, .hd-form input:not([type='color']):not([type='file']):not([type='checkbox']), .hd-form-inline input, .hd-inline-form input, .hd-composer textarea),
+.hd-root.hx-app.is-inset.is-phone .hd-search {
+  background: transparent; border: 1px solid var(--input); border-radius: var(--hx-r);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.04); color: var(--foreground);
+}
+.dashboard-root.dark .hd-root.hx-app.is-inset :is(.hd-search, .hd-select, .hd-lang, .hd-form select, .hd-form input:not([type='color']):not([type='file']):not([type='checkbox']), .hd-form-inline input, .hd-inline-form input, .hd-composer textarea) { background: color-mix(in srgb, var(--input) 30%, transparent); }
+.hd-root.hx-app.is-inset :is(.hd-search, .hd-select) { height: 2.25rem; }
+.hd-root.hx-app.is-inset .hd-search input { box-shadow: none; background: transparent; border: 0; color: inherit; }
+.hd-root.hx-app.is-inset .hd-search svg { color: var(--muted-foreground); }
+.hd-root.hx-app.is-inset :is(.hd-search:focus-within, .hd-form select:focus, .hd-form input:focus, .hd-form-inline input:focus, .hd-inline-form input:focus, .hd-composer textarea:focus, .hd-lang:focus, .hd-select:focus-within) {
+  background: transparent; border-color: var(--ring); box-shadow: 0 0 0 3px color-mix(in srgb, var(--ring) 35%, transparent); outline: none;
+}
+.dashboard-root.dark .hd-root.hx-app.is-inset :is(.hd-search:focus-within, .hd-form select:focus, .hd-form input:focus, .hd-composer textarea:focus, .hd-lang:focus, .hd-select:focus-within) { background: color-mix(in srgb, var(--input) 30%, transparent); }
+.hd-root.hx-app.is-inset .hd-search::placeholder, .hd-root.hx-app.is-inset input::placeholder, .hd-root.hx-app.is-inset textarea::placeholder { color: var(--muted-foreground); }
+
+/* Badges: a soft tint of the colour, never a solid block (except a critical alarm, which should be loud). */
+.hd-root.hx-app.is-inset :is(.hd-pillx, .hd-sev) {
+  display: inline-flex; align-items: center; height: 1.5rem; padding: 0 0.625rem; border-radius: 999px;
+  font-size: 0.75rem; font-weight: 500; letter-spacing: 0; text-transform: none; box-shadow: none; white-space: nowrap;
+}
+.hd-root.hx-app.is-inset .hd-pillx.is-green { background: rgb(16 185 129 / 0.12); color: #047857; }
+.hd-root.hx-app.is-inset .hd-pillx.is-red { background: color-mix(in srgb, var(--destructive) 12%, transparent); color: var(--destructive); }
+.hd-root.hx-app.is-inset .hd-pillx.is-amber { background: rgb(245 158 11 / 0.15); color: #b45309; }
+.hd-root.hx-app.is-inset .hd-pillx.is-gray { background: var(--muted); color: var(--muted-foreground); }
+.hd-root.hx-app.is-inset .hd-pillx.is-orange { background: color-mix(in srgb, var(--hd-orange) 14%, transparent); color: var(--hd-orange); }
+.hd-root.hx-app.is-inset .hd-pillx.is-black { background: var(--primary); color: var(--primary-foreground); }
+.dashboard-root.dark .hd-root.hx-app.is-inset .hd-pillx.is-green { color: #34d399; }
+.dashboard-root.dark .hd-root.hx-app.is-inset .hd-pillx.is-amber { color: #fbbf24; }
+.hd-root.hx-app.is-inset .hd-sev.is-critical { background: var(--destructive); color: #fff; }
+.hd-root.hx-app.is-inset .hd-sev.is-high { background: color-mix(in srgb, var(--hd-orange) 16%, transparent); color: var(--hd-orange); }
+.hd-root.hx-app.is-inset .hd-sev.is-medium { background: rgb(245 158 11 / 0.15); color: #b45309; }
+.hd-root.hx-app.is-inset .hd-sev.is-low { background: var(--muted); color: var(--muted-foreground); }
+.dashboard-root.dark .hd-root.hx-app.is-inset .hd-sev.is-medium { color: #fbbf24; }
+
+/* Figures: the same card as Home's. */
+.hd-root.hx-app.is-inset .hd-stat { gap: 0.25rem; padding: 1rem 1.25rem; background: var(--card); border: 1px solid var(--border); border-radius: calc(var(--radius) + 4px); box-shadow: 0 1px 2px rgb(0 0 0 / 0.04); font-size: 0.875rem; color: var(--muted-foreground); }
+.hd-root.hx-app.is-inset .hd-stat b { font-size: 1.75rem; font-weight: 600; letter-spacing: -0.01em; color: var(--foreground); }
+.hd-root.hx-app.is-inset .hd-stat.is-accent { background: var(--card); border-color: color-mix(in srgb, var(--hd-orange) 45%, var(--border)); color: var(--muted-foreground); }
+.hd-root.hx-app.is-inset .hd-stat.is-accent b { color: var(--hd-orange); }
+
+/* Tables: header in muted text, hairline rows, a light hover. */
+.hd-root.hx-app.is-inset .hd-table { border-collapse: collapse; }
+.hd-root.hx-app.is-inset .hd-table thead tr, .hd-root.hx-app.is-inset .hd-table th { background: transparent; }
+.hd-root.hx-app.is-inset .hd-table th { color: var(--muted-foreground); font-size: 0.8125rem; font-weight: 500; letter-spacing: 0; text-transform: none; border-bottom: 1px solid var(--border); }
+.hd-root.hx-app.is-inset .hd-table td { border-bottom: 1px solid var(--border); }
+.hd-root.hx-app.is-inset .hd-table tbody tr:last-child td { border-bottom: 0; }
+.hd-root.hx-app.is-inset .hd-table tbody tr.is-clickable:hover td { background: color-mix(in srgb, var(--muted) 60%, transparent); }
+
+/* Rows and tiles that can be opened: bordered, no lift, no glow. */
+.hd-root.hx-app.is-inset :is(.hd-machine, .hd-doc, .hd-site, .hd-approval, .hd-alarm-row, .hd-finding, .hd-rfq, .hd-signal, .hd-thread) { box-shadow: none; transform: none; }
+.hd-root.hx-app.is-inset :is(.hd-machine, .hd-doc, .hd-site):hover { transform: none; box-shadow: none; border-color: color-mix(in srgb, var(--foreground) 25%, var(--border)); }
+.hd-root.hx-app.is-inset :is(.hd-machine, .hd-doc, .hd-site) { background: var(--card); border: 1px solid var(--border); border-radius: calc(var(--radius) + 2px); }
+.hd-root.hx-app.is-inset .hd-attention button { box-shadow: none; transform: none; }
+.hd-root.hx-app.is-inset .hd-attention button:hover { box-shadow: none; transform: none; background: var(--accent); }
+
+.hd-root.hx-app.is-inset :is(.hd-mcard-icon, .hd-ico-chip, .hd-tile-icon, .hd-doc-icon) { background: var(--muted); box-shadow: none; border: 0; color: var(--foreground); }
+
+/* Switches */
+.hd-root.hx-app.is-inset .hd-toggle { padding: 0.875rem 0; }
+.hd-root.hx-app.is-inset .hd-toggle i { background: var(--input); width: 2.25rem; height: 1.25rem; }
+.hd-root.hx-app.is-inset .hd-toggle i::after { top: 2px; left: 2px; width: 1rem; height: 1rem; }
+.hd-root.hx-app.is-inset .hd-toggle input:checked + i { background: var(--primary); }
+.hd-root.hx-app.is-inset .hd-toggle input:checked + i::after { transform: translateX(1rem); }
+.hd-root.hx-app.is-inset .hd-toggle input:focus-visible + i { outline: 2px solid var(--ring); outline-offset: 2px; }
+
+/* Layers above the page: the side drawer, the search dialog and the toast are popovers. */
+.hd-root.hx-app.is-inset .hd-drawer-wrap { background: rgb(0 0 0 / 0.5); }
+.hd-root.hx-app.is-inset .hd-drawer { background: var(--popover); color: var(--popover-foreground); border-left: 1px solid var(--border); border-radius: 0; box-shadow: 0 10px 40px -10px rgb(0 0 0 / 0.4); }
+.hd-root.hx-app.is-inset .hd-search-dialog { background: var(--popover); color: var(--popover-foreground); border: 1px solid var(--border); border-radius: calc(var(--radius) + 4px); box-shadow: 0 16px 48px -12px rgb(0 0 0 / 0.4); }
+.hd-root.hx-app.is-inset .hd-search-input { border-bottom: 1px solid var(--border); }
+.hd-root.hx-app.is-inset .hd-search-input kbd { background: var(--muted); color: var(--muted-foreground); border: 1px solid var(--border); border-radius: 0.375rem; }
+.hd-root.hx-app.is-inset .hd-hits button { border-radius: var(--hx-r); box-shadow: none; }
+.hd-root.hx-app.is-inset .hd-hits button.is-on, .hd-root.hx-app.is-inset .hd-hits button:hover { background: var(--accent); color: var(--accent-foreground); box-shadow: none; }
+.hd-root.hx-app.is-inset .hd-toast { background: var(--foreground); color: var(--background); border-radius: var(--hx-r); box-shadow: 0 10px 30px -8px rgb(0 0 0 / 0.4); -webkit-backdrop-filter: none; backdrop-filter: none; bottom: calc(1.5rem + env(safe-area-inset-bottom)); }
+.hd-root.hx-app.is-inset.is-phone .hd-toast { bottom: calc(5.5rem + env(safe-area-inset-bottom)); }
+
 /* ------------------------------------------------------------------ blocks drawn by the module screens */
 
 .hx-tablewrap { padding: 0 12px 12px; overflow-x: auto; -webkit-overflow-scrolling: touch; }

@@ -3,7 +3,7 @@
  * navigation, a slim header with a trigger, breadcrumb and tools, and one scrolling page.
  * The pieces are the same primitives the workspace dashboards use (components/dashboard-ui).
  */
-import { Bell, ChevronRight, ChevronsUpDown, CircleHelp, LayoutPanelLeft, LogOut, Moon, Search, Settings, Sun } from 'lucide-react-dash';
+import { Bell, ChevronRight, ChevronsUpDown, CircleHelp, LayoutPanelLeft, LogOut, Menu, Moon, Search, Settings, Sun, type LucideIcon } from 'lucide-react-dash';
 import { useEffect, useState } from 'react';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/dashboard-ui/avatar';
@@ -415,5 +415,54 @@ export function SpecFooter({ spec }: { spec?: string }) {
     <p className="pt-2 text-muted-foreground text-xs">
       {t('Built for the Hive API module')}: <code className="font-mono">{spec}</code>
     </p>
+  );
+}
+
+/* ---------- phone: a plain bottom toolbar for the four places used all day, plus the sidebar ---------- */
+
+/**
+ * Built from the same tokens as the rest of the frame: a hairline on top, the page background (blurred where the
+ * browser can), muted labels, the current place in the foreground colour on a soft pill. It follows light and dark
+ * with the theme, and keeps clear of the home indicator and the Android gesture bar.
+ */
+export function MobileTabs({ section, go }: { section: string; go: (s: string) => void }) {
+  const t = useT();
+  const { data } = useHive();
+  const { setOpenMobile } = useSidebar();
+  const items: { id: string; icon: LucideIcon; count?: number }[] = [
+    { id: '', icon: NAV[''].icon },
+    { id: 'machines', icon: NAV.machines.icon },
+    { id: 'alarms', icon: NAV.alarms.icon, count: data.alarms.filter((a) => a.state === 'Open').length },
+    { id: 'inbox', icon: NAV.inbox.icon, count: data.approvals.filter((a) => a.state === 'Pending').length },
+  ];
+  const cell = 'group flex h-full w-full flex-col items-center justify-center gap-1 text-[0.6875rem] font-medium text-muted-foreground outline-none transition-colors focus-visible:text-foreground data-[active=true]:text-foreground';
+  const pill = 'relative grid h-7 w-14 place-items-center rounded-full transition-colors group-data-[active=true]:bg-accent group-active:bg-accent';
+  return (
+    <nav aria-label={t('Main')} className="fixed inset-x-0 bottom-0 z-40 border-t bg-background/95 pb-[env(safe-area-inset-bottom)] backdrop-blur supports-[backdrop-filter]:bg-background/80">
+      <ul className="mx-auto grid h-16 max-w-lg grid-cols-5 px-1">
+        {items.map(({ id, icon: Icon, count }) => {
+          const on = section === id;
+          return (
+            <li key={id || 'home'} className="min-w-0">
+              <a {...linkProps(id, go)} data-active={on} aria-current={on ? 'page' : undefined} className={cell}>
+                <span className={pill}>
+                  <Icon className="size-5" strokeWidth={on ? 2.25 : 1.75} />
+                  {count ? <span className="absolute top-0 right-2 grid h-4 min-w-4 place-items-center rounded-full bg-[var(--hd-orange,#ff4d00)] px-1 font-semibold text-[0.625rem] text-[var(--hd-on-accent,#fff)] leading-none">{count}</span> : null}
+                </span>
+                <span className="max-w-full truncate">{t(NAV[id].title)}</span>
+              </a>
+            </li>
+          );
+        })}
+        <li className="min-w-0">
+          <button type="button" onClick={() => setOpenMobile(true)} className={cell} data-active={false}>
+            <span className={pill}>
+              <Menu className="size-5" strokeWidth={1.75} />
+            </span>
+            <span className="max-w-full truncate">{t('More')}</span>
+          </button>
+        </li>
+      </ul>
+    </nav>
   );
 }
