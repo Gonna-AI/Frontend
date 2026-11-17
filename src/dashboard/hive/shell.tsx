@@ -3,7 +3,7 @@
  * navigation, a slim header with a trigger, breadcrumb and tools, and one scrolling page.
  * The pieces are the same primitives the workspace dashboards use (components/dashboard-ui).
  */
-import { Bell, ChevronRight, ChevronsUpDown, CircleHelp, LayoutPanelLeft, LogOut, Menu, Moon, Search, Settings, Sun, type LucideIcon } from 'lucide-react-dash';
+import { Bell, Check, ChevronRight, ChevronsUpDown, CircleHelp, LayoutPanelLeft, LogOut, Moon, Search, Settings, Sun, X, type LucideIcon } from 'lucide-react-dash';
 import { useEffect, useState } from 'react';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/dashboard-ui/avatar';
@@ -79,12 +79,16 @@ export function HiveSidebar({
   user,
   guest,
   onExit,
+  dark,
+  setDark,
 }: {
   section: string;
   go: (s: string) => void;
   user: { name: string; email: string; avatarUrl?: string };
   guest: boolean;
   onExit?: () => void;
+  dark: boolean;
+  setDark: (v: boolean) => void;
 }) {
   const t = useT();
   const { data } = useHive();
@@ -109,6 +113,15 @@ export function HiveSidebar({
   }, [current]);
 
   const logo = brand.logoLight ?? brand.logoDark;
+
+  // On a phone the sidebar is a drawer from the bottom: same places, laid out for a thumb.
+  if (isMobile) {
+    return (
+      <Sidebar variant="inset" collapsible="offcanvas">
+        <MobileDrawer section={section} go={go} counts={counts} user={user} guest={guest} onExit={onExit} dark={dark} setDark={setDark} logo={logo} />
+      </Sidebar>
+    );
+  }
 
   return (
     <Sidebar variant="inset" collapsible="offcanvas">
@@ -418,51 +431,171 @@ export function SpecFooter({ spec }: { spec?: string }) {
   );
 }
 
-/* ---------- phone: a plain bottom toolbar for the four places used all day, plus the sidebar ---------- */
+/* ---------- the phone drawer ---------- */
+
+function DrawerRow({ icon: Icon, label, active, count, href, onClick, external }: { icon: LucideIcon; label: string; active?: boolean; count?: number; href: string; onClick?: (e: React.MouseEvent) => void; external?: boolean }) {
+  return (
+    <a
+      href={href}
+      onClick={onClick}
+      data-active={active ? 'true' : 'false'}
+      aria-current={active ? 'page' : undefined}
+      {...(external ? { target: '_blank', rel: 'noreferrer' } : {})}
+      className="group flex min-h-12 items-center gap-3 px-4 text-[0.9375rem] outline-none transition-colors focus-visible:bg-accent active:bg-accent data-[active=true]:bg-accent data-[active=true]:font-medium"
+    >
+      <Icon className="size-5 shrink-0 text-muted-foreground group-data-[active=true]:text-foreground" strokeWidth={active ? 2.2 : 1.8} />
+      <span className="min-w-0 flex-1 truncate">{label}</span>
+      {count ? <span className="grid h-5 min-w-5 place-items-center rounded-full bg-[var(--hd-orange,#ff4d00)] px-1.5 font-semibold text-[0.6875rem] text-[var(--hd-on-accent,#fff)] leading-none">{count}</span> : null}
+      {active && <Check className="size-4 shrink-0 text-muted-foreground" />}
+    </a>
+  );
+}
+
+function DrawerList({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <section className="grid gap-2">
+      <h3 className="px-1 font-medium text-muted-foreground text-xs uppercase tracking-wider">{title}</h3>
+      <ul className="divide-y overflow-hidden rounded-xl border bg-card [&>li]:contents">{children}</ul>
+    </section>
+  );
+}
+
+function Segmented<T extends string>({ value, onChange, options, label }: { value: T; onChange: (v: T) => void; options: { id: T; label: string; icon?: LucideIcon }[]; label: string }) {
+  return (
+    <div role="group" aria-label={label} className="grid auto-cols-fr grid-flow-col gap-1 rounded-lg bg-muted p-1">
+      {options.map(({ id, label: text, icon: Icon }) => (
+        <button
+          key={id}
+          type="button"
+          aria-pressed={value === id}
+          onClick={() => onChange(id)}
+          className="inline-flex h-9 items-center justify-center gap-2 rounded-md font-medium text-[0.875rem] text-muted-foreground outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring aria-pressed:bg-background aria-pressed:text-foreground aria-pressed:shadow-sm"
+        >
+          {Icon && <Icon className="size-4" />}
+          {text}
+        </button>
+      ))}
+    </div>
+  );
+}
 
 /**
- * Built from the same tokens as the rest of the frame: a hairline on top, the page background (blurred where the
- * browser can), muted labels, the current place in the foreground colour on a soft pill. It follows light and dark
- * with the theme, and keeps clear of the home indicator and the Android gesture bar.
+ * The menu on a phone: a bottom drawer with a handle, the brand, then every place in plain lists under their
+ * group names, and your own settings (theme, language, account) at the end. It is built from the shared tokens,
+ * so it follows light and dark with the rest of the dashboard.
  */
-export function MobileTabs({ section, go }: { section: string; go: (s: string) => void }) {
+function MobileDrawer({
+  section,
+  go,
+  counts,
+  user,
+  guest,
+  onExit,
+  dark,
+  setDark,
+  logo,
+}: {
+  section: string;
+  go: (s: string) => void;
+  counts: Record<string, number>;
+  user: { name: string; email: string; avatarUrl?: string };
+  guest: boolean;
+  onExit?: () => void;
+  dark: boolean;
+  setDark: (v: boolean) => void;
+  logo?: string;
+}) {
   const t = useT();
+  const { lang, setLang } = useLang();
   const { data } = useHive();
+  const { applied: brand } = useBrand();
   const { setOpenMobile } = useSidebar();
-  const items: { id: string; icon: LucideIcon; count?: number }[] = [
-    { id: '', icon: NAV[''].icon },
-    { id: 'machines', icon: NAV.machines.icon },
-    { id: 'alarms', icon: NAV.alarms.icon, count: data.alarms.filter((a) => a.state === 'Open').length },
-    { id: 'inbox', icon: NAV.inbox.icon, count: data.approvals.filter((a) => a.state === 'Pending').length },
-  ];
-  const cell = 'group flex h-full w-full flex-col items-center justify-center gap-1 text-[0.6875rem] font-medium text-muted-foreground outline-none transition-colors focus-visible:text-foreground data-[active=true]:text-foreground';
-  const pill = 'relative grid h-7 w-14 place-items-center rounded-full transition-colors group-data-[active=true]:bg-accent group-active:bg-accent';
+  const close = () => setOpenMobile(false);
+  const row = (id: string, label: string, icon: LucideIcon) => (
+    <li key={id || 'home'}>
+      <DrawerRow icon={icon} label={label} active={section === id} count={counts[id]} {...linkProps(id, go, close)} />
+    </li>
+  );
+
   return (
-    <nav aria-label={t('Main')} className="fixed inset-x-0 bottom-0 z-40 border-t bg-background/95 pb-[env(safe-area-inset-bottom)] backdrop-blur supports-[backdrop-filter]:bg-background/80">
-      <ul className="mx-auto grid h-16 max-w-lg grid-cols-5 px-1">
-        {items.map(({ id, icon: Icon, count }) => {
-          const on = section === id;
-          return (
-            <li key={id || 'home'} className="min-w-0">
-              <a {...linkProps(id, go)} data-active={on} aria-current={on ? 'page' : undefined} className={cell}>
-                <span className={pill}>
-                  <Icon className="size-5" strokeWidth={on ? 2.25 : 1.75} />
-                  {count ? <span className="absolute top-0 right-2 grid h-4 min-w-4 place-items-center rounded-full bg-[var(--hd-orange,#ff4d00)] px-1 font-semibold text-[0.625rem] text-[var(--hd-on-accent,#fff)] leading-none">{count}</span> : null}
-                </span>
-                <span className="max-w-full truncate">{t(NAV[id].title)}</span>
-              </a>
-            </li>
-          );
-        })}
-        <li className="min-w-0">
-          <button type="button" onClick={() => setOpenMobile(true)} className={cell} data-active={false}>
-            <span className={pill}>
-              <Menu className="size-5" strokeWidth={1.75} />
+    <div className="flex h-full min-h-0 flex-col bg-sidebar text-sidebar-foreground">
+      <div className="mx-auto mt-2.5 h-1.5 w-10 shrink-0 rounded-full bg-border" aria-hidden="true" />
+      <header className="flex shrink-0 items-center gap-3 px-4 pt-3 pb-3">
+        <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-[var(--hd-orange,#ff4d00)]">
+          <img src={logo ?? '/brand-mark-tile.svg'} alt="" width={20} height={20} />
+        </span>
+        <span className="grid min-w-0 flex-1 leading-tight">
+          <span className="truncate text-lg" style={{ fontFamily: 'var(--hx-font-head)', fontWeight: 'var(--hx-head-weight)' }}>
+            {brand.name}
+          </span>
+          <span className="truncate text-muted-foreground text-sm">{data.plant.name}</span>
+        </span>
+        <button type="button" onClick={close} aria-label={t('Close menu')} className="grid size-10 shrink-0 place-items-center rounded-lg text-muted-foreground outline-none transition-colors hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring">
+          <X className="size-5" />
+        </button>
+      </header>
+
+      <div className="grid min-h-0 flex-1 content-start gap-5 overflow-y-auto overscroll-contain px-4 pt-1 pb-[calc(1.25rem+env(safe-area-inset-bottom))]">
+        <DrawerList title={t('Operate')}>{NAV_PRIMARY.map((id) => row(id, t(NAV[id].title), NAV[id].icon))}</DrawerList>
+        {NAV_SECTIONS.map((group) => (
+          <DrawerList key={group.id} title={t(group.title)}>
+            {group.ids.map((id) => row(id, t(NAV[id].title), NAV[id].icon))}
+          </DrawerList>
+        ))}
+
+        <DrawerList title={t('Preferences')}>
+          {row('settings', t('Settings'), Settings)}
+          <li>
+            <DrawerRow icon={CircleHelp} label={t('Help')} href="https://clerktree.com/contact" external />
+          </li>
+          <li>
+            <DrawerRow icon={LayoutPanelLeft} label={t('Workspace dashboards')} href="/dashboard/default" />
+          </li>
+        </DrawerList>
+
+        <section className="grid gap-3">
+          <div className="grid grid-cols-2 gap-3">
+            <div className="grid gap-1.5">
+              <span className="px-1 text-muted-foreground text-xs">{t('Theme')}</span>
+              <Segmented
+                label={t('Theme')}
+                value={dark ? 'dark' : 'light'}
+                onChange={(v) => setDark(v === 'dark')}
+                options={[
+                  { id: 'light', label: t('Light'), icon: Sun },
+                  { id: 'dark', label: t('Dark'), icon: Moon },
+                ]}
+              />
+            </div>
+            <div className="grid gap-1.5">
+              <span className="px-1 text-muted-foreground text-xs">{t('Language')}</span>
+              <Segmented label={t('Language')} value={lang} onChange={(v) => setLang(v)} options={[{ id: 'de', label: 'DE' }, { id: 'en', label: 'EN' }]} />
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3 rounded-xl border bg-card p-3">
+            <Avatar className="size-10 rounded-lg">
+              <AvatarImage src={user.avatarUrl} alt="" />
+              <AvatarFallback className="rounded-lg">{initials(user.name)}</AvatarFallback>
+            </Avatar>
+            <span className="grid min-w-0 flex-1 leading-tight">
+              <span className="truncate font-medium text-[0.9375rem]">{user.name}</span>
+              <span className="truncate text-muted-foreground text-sm">{user.email}</span>
             </span>
-            <span className="max-w-full truncate">{t('More')}</span>
-          </button>
-        </li>
-      </ul>
-    </nav>
+            <button
+              type="button"
+              onClick={() => {
+                close();
+                onExit?.();
+              }}
+              className="inline-flex h-10 shrink-0 items-center gap-2 rounded-lg border px-3 font-medium text-[0.875rem] outline-none transition-colors hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              <LogOut className="size-4" />
+              {guest ? t('Sign in') : t('Sign out')}
+            </button>
+          </div>
+        </section>
+      </div>
+    </div>
   );
 }

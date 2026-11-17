@@ -37,13 +37,7 @@ import {
   InboxView,
   WorkOrdersView,
 } from "./ops";
-import {
-  HiveSidebar,
-  MobileTabs,
-  PageHeader,
-  SiteHeader,
-  SpecFooter,
-} from "./shell";
+import { HiveSidebar, PageHeader, SiteHeader, SpecFooter } from "./shell";
 import { HiveStoreProvider, useHive } from "./store";
 import { Surface, SurfaceCtx } from "./ui";
 import "./hive-dashboard.css";
@@ -297,6 +291,24 @@ function Shell({ user, onSignOut, guest = false }: HiveDashboardProps) {
       });
   }, [first, navigate]);
 
+  // Menus, sheets and tooltips are drawn into <body>, outside this page's own tree. Giving <body> the same
+  // theme class, dark class and brand colours while the dashboard is open keeps all of them in step with it.
+  useEffect(() => {
+    const body = document.body;
+    const vars = Object.entries(brandStyle(brand)) as [string, string][];
+    const added = ["dashboard-root"].filter((c) => !body.classList.contains(c));
+    body.classList.add(...added);
+    for (const [k, v] of vars) body.style.setProperty(k, String(v));
+    return () => {
+      body.classList.remove(...added);
+      for (const [k] of vars) body.style.removeProperty(k);
+    };
+  }, [brand]);
+  useEffect(() => {
+    document.body.classList.toggle("dark", dark);
+    return () => document.body.classList.remove("dark");
+  }, [dark]);
+
   // The browser draws the status bar from the page: keep it matching the surface under it.
   useEffect(() => {
     const tag = document.querySelector<HTMLMetaElement>(
@@ -443,6 +455,8 @@ function Shell({ user, onSignOut, guest = false }: HiveDashboardProps) {
                 user={shownUser}
                 guest={guest}
                 onExit={onSignOut}
+                dark={dark}
+                setDark={setDark}
               />
               <SidebarInset className="min-w-0 overflow-x-clip">
                 <a
@@ -464,12 +478,9 @@ function Shell({ user, onSignOut, guest = false }: HiveDashboardProps) {
                 <main
                   id="hx-main"
                   tabIndex={-1}
-                  className={cn(
-                    "flex min-w-0 flex-1 flex-col gap-4 p-4 outline-none md:gap-6 md:p-6",
-                    phone
-                      ? "pb-[calc(5.5rem+env(safe-area-inset-bottom))]"
-                      : "pb-[calc(1rem+env(safe-area-inset-bottom))]",
-                  )}
+                  className={
+                    "flex min-w-0 flex-1 flex-col gap-4 p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] outline-none md:gap-6 md:p-6"
+                  }
                 >
                   <div className="flex min-w-0 flex-col gap-4 md:gap-6">
                     <PageHeader title={title} about={about} />
@@ -478,7 +489,6 @@ function Shell({ user, onSignOut, guest = false }: HiveDashboardProps) {
                   </div>
                 </main>
               </SidebarInset>
-              {phone && <MobileTabs section={section ?? ""} go={go} />}
               <Surface>
                 {searchOpen && (
                   <SearchDialog onClose={() => setSearchOpen(false)} go={go} />

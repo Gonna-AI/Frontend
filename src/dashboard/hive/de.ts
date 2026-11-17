@@ -943,4 +943,5 @@ export const de: Record<string, string> = {
   'Quick access': 'Schnellzugriff',
   'Standard': 'Standard',
   'Text size': 'Schriftgröße',
+  'Preferences': 'Persönlich',
 };

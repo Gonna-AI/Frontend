@@ -18,6 +18,45 @@
 /* The workspace theme gives every card header two columns (for a card action). A header without one stays a single column. */
 .dashboard-root [data-slot='card-header'].grid-cols-1 { grid-template-columns: minmax(0, 1fr); }
 
+
+/* Menus, selects and dialogs are drawn into <body> with a fixed light theme (see dashboard-theme.css). In dark
+   mode they take the dark tokens instead. */
+.dashboard-root.dark :is([data-slot='dropdown-menu-content'], [data-slot='dropdown-menu-sub-content'], [data-slot='popover-content'], [data-slot='select-content'], [data-slot='dialog-content'], [data-slot='drawer-content']) {
+  color-scheme: dark;
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.205 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.205 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.922 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.556 0 0);
+  background-color: var(--popover) !important;
+  color: var(--popover-foreground) !important;
+}
+
+
+/* The shared sidebar keys its highlight on a data attribute that is present even when it is "false", which marks
+   every item. These follow the value, so only the current screen is highlighted (and the one under the pointer). */
+.dashboard-root [data-sidebar='menu-button'][data-active='false'],
+.dashboard-root [data-sidebar='menu-sub-button'][data-active='false'] { background-color: transparent; }
+@media (hover: hover) {
+  .dashboard-root [data-sidebar='menu-button'][data-active='false']:hover,
+  .dashboard-root [data-sidebar='menu-sub-button'][data-active='false']:hover { background-color: var(--sidebar-accent); }
+}
+.dashboard-root [data-sidebar='menu-button']:not([data-active]) { background-color: transparent; }
+@media (hover: hover) { .dashboard-root [data-sidebar='menu-button']:not([data-active]):hover { background-color: var(--sidebar-accent); } }
+
 /* ------------------------------------------------------------------ older screens inside the frame */
 
 /* The wrapper adds no box of its own: it only carries the tokens the .hd-* markup reads. */
@@ -204,7 +243,6 @@
 .hd-root.hx-app.is-inset .hd-hits button { border-radius: var(--hx-r); box-shadow: none; }
 .hd-root.hx-app.is-inset .hd-hits button.is-on, .hd-root.hx-app.is-inset .hd-hits button:hover { background: var(--accent); color: var(--accent-foreground); box-shadow: none; }
 .hd-root.hx-app.is-inset .hd-toast { background: var(--foreground); color: var(--background); border-radius: var(--hx-r); box-shadow: 0 10px 30px -8px rgb(0 0 0 / 0.4); -webkit-backdrop-filter: none; backdrop-filter: none; bottom: calc(1.5rem + env(safe-area-inset-bottom)); }
-.hd-root.hx-app.is-inset.is-phone .hd-toast { bottom: calc(5.5rem + env(safe-area-inset-bottom)); }
 
 /* ------------------------------------------------------------------ blocks drawn by the module screens */
 
