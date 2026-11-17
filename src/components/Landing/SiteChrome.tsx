@@ -18,6 +18,7 @@ import '../../pages/SiteSystem.css';
 import './FooterDesign.css';
 
 const RESEARCH_URL = 'https://research.clerktree.com';
+const DOCS_URL = 'https://docs.hive.clerktree.com';
 
 /**
  * Links that leave this origin (to the research or main site) cannot share localStorage, so the
@@ -101,6 +102,7 @@ function buildFooter(de: boolean) {
       title: de ? 'Produkt' : 'Product',
       links: [
         { label: 'Hive', href: '/hive' },
+        { label: de ? 'API-Dokumentation' : 'API Docs', href: DOCS_URL },
         { label: de ? 'Sicherheit' : 'Security', href: '/security' },
         { label: 'Status', href: '/status' },
         { label: de ? 'Kontakt' : 'Contact', href: '/contact' },
