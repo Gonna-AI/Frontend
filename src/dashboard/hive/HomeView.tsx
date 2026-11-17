@@ -26,7 +26,7 @@ function Figure({ label, value, unit, trend, up, foot, sub, onClick, accent }: {
   return (
     <Card className="@container/card cursor-pointer gap-2 transition-shadow hover:shadow-md" role="link" tabIndex={0} onClick={onClick} onKeyDown={(e) => e.key === 'Enter' && onClick()}>
       <CardHeader className="grid-cols-1">
-        <div className="flex items-center justify-between gap-2">
+        <div className="flex min-h-6 items-center justify-between gap-2">
           <CardDescription>{label}</CardDescription>
           {trend && (
             <Badge variant="outline" className={`hidden sm:inline-flex ${accent ? 'border-[var(--hd-orange,#ff4d00)]/40 text-[var(--hd-orange,#ff4d00)]' : ''}`}>
@@ -151,7 +151,7 @@ export default function HomeView({ go }: { go: (section: string) => void }) {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="pl-4">{t('What')}</TableHead>
+                  <TableHead className="pl-5">{t('What')}</TableHead>
                   <TableHead>{t('Priority')}</TableHead>
                   <TableHead className="hidden sm:table-cell">{t('Where')}</TableHead>
                 </TableRow>
@@ -159,7 +159,7 @@ export default function HomeView({ go }: { go: (section: string) => void }) {
               <TableBody>
                 {attention.slice(0, 8).map((a) => (
                   <TableRow key={a.key} className="cursor-pointer" tabIndex={0} onClick={a.open} onKeyDown={(e) => e.key === 'Enter' && a.open()}>
-                    <TableCell className="py-3 pl-4">
+                    <TableCell className="py-3 pl-5">
                       <span className="block font-medium">{a.title}</span>
                       <span className="block text-muted-foreground text-xs sm:hidden">{a.where}</span>
                     </TableCell>
@@ -178,7 +178,7 @@ export default function HomeView({ go }: { go: (section: string) => void }) {
                 )}
               </TableBody>
             </Table>
-            <p className="border-t px-4 py-3 text-muted-foreground text-xs">{t('Alarms shown here are not a replacement for the plant’s safety systems.')}</p>
+            <p className="border-t px-5 py-3 text-muted-foreground text-xs">{t('Alarms shown here are not a replacement for the plant’s safety systems.')}</p>
           </Card>
         </TabsContent>
 
@@ -187,7 +187,7 @@ export default function HomeView({ go }: { go: (section: string) => void }) {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="pl-4">{t('Request')}</TableHead>
+                  <TableHead className="pl-5">{t('Request')}</TableHead>
                   <TableHead className="hidden sm:table-cell">{t('Machine')}</TableHead>
                   <TableHead>{t('Tier')}</TableHead>
                 </TableRow>
@@ -195,7 +195,7 @@ export default function HomeView({ go }: { go: (section: string) => void }) {
               <TableBody>
                 {pendingApprovals.map((a) => (
                   <TableRow key={a.id} className="cursor-pointer" tabIndex={0} onClick={() => go('inbox')} onKeyDown={(e) => e.key === 'Enter' && go('inbox')}>
-                    <TableCell className="whitespace-normal py-3 pl-4 font-medium">{a.title}</TableCell>
+                    <TableCell className="whitespace-normal py-3 pl-5 font-medium">{a.title}</TableCell>
                     <TableCell className="hidden text-muted-foreground sm:table-cell">{a.machine}</TableCell>
                     <TableCell>
                       <ToneBadge>{a.tier}</ToneBadge>
@@ -219,16 +219,16 @@ export default function HomeView({ go }: { go: (section: string) => void }) {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="pl-4">{t('Machine')}</TableHead>
+                  <TableHead className="pl-5">{t('Machine')}</TableHead>
                   <TableHead>{t('State')}</TableHead>
                   <TableHead className="hidden sm:table-cell">{t('Line')}</TableHead>
-                  <TableHead className="hidden pr-4 text-right md:table-cell">OEE</TableHead>
+                  <TableHead className="hidden pr-5 text-right md:table-cell">OEE</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {data.machines.map((m) => (
                   <TableRow key={m.id} className="cursor-pointer" tabIndex={0} onClick={() => go(`machines/${m.id}`)} onKeyDown={(e) => e.key === 'Enter' && go(`machines/${m.id}`)}>
-                    <TableCell className="py-3 pl-4">
+                    <TableCell className="py-3 pl-5">
                       <span className="block font-medium">{m.key}</span>
                       <span className="block text-muted-foreground text-xs">{m.type}</span>
                     </TableCell>
@@ -238,7 +238,7 @@ export default function HomeView({ go }: { go: (section: string) => void }) {
                       </ToneBadge>
                     </TableCell>
                     <TableCell className="hidden text-muted-foreground sm:table-cell">{m.line}</TableCell>
-                    <TableCell className="hidden pr-4 text-right tabular-nums md:table-cell">{m.oee ? `${localize(String(m.oee))} %` : '–'}</TableCell>
+                    <TableCell className="hidden pr-5 text-right tabular-nums md:table-cell">{m.oee ? `${localize(String(m.oee))} %` : '–'}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -251,23 +251,23 @@ export default function HomeView({ go }: { go: (section: string) => void }) {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="pl-4">{t('Gateway')}</TableHead>
+                  <TableHead className="pl-5">{t('Gateway')}</TableHead>
                   <TableHead>{t('Link')}</TableHead>
                   <TableHead className="hidden sm:table-cell">{t('Version')}</TableHead>
-                  <TableHead className="hidden pr-4 text-right sm:table-cell">{t('Buffer')}</TableHead>
+                  <TableHead className="hidden pr-5 text-right sm:table-cell">{t('Buffer')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {data.gatewayFleet.map((g) => (
                   <TableRow key={g.id} className="cursor-pointer" tabIndex={0} onClick={() => go('admin/connections')} onKeyDown={(e) => e.key === 'Enter' && go('admin/connections')}>
-                    <TableCell className="py-3 pl-4 font-medium">{g.site}</TableCell>
+                    <TableCell className="py-3 pl-5 font-medium">{g.site}</TableCell>
                     <TableCell>
                       <ToneBadge tone={g.link === 'Online' ? 'green' : g.link === 'Buffering' ? 'amber' : 'red'}>{t(g.link)}</ToneBadge>
                     </TableCell>
                     <TableCell className="hidden text-muted-foreground sm:table-cell">
                       {g.version} · {g.uptime}
                     </TableCell>
-                    <TableCell className="hidden pr-4 text-right tabular-nums sm:table-cell">{g.bufferPct} %</TableCell>
+                    <TableCell className="hidden pr-5 text-right tabular-nums sm:table-cell">{g.bufferPct} %</TableCell>
                   </TableRow>
                 ))}
               </TableBody>

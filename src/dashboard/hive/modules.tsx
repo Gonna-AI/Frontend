@@ -101,6 +101,9 @@ function TableBlock({ block }: { block: Extract<Block, { kind: 'table' }> }) {
           )}
           {options.length > 1 && (
             <div className="flex flex-wrap gap-1.5" role="group" aria-label={t('Filter')}>
+              <Button type="button" size="sm" variant={pick === null ? 'default' : 'outline'} aria-pressed={pick === null} onClick={() => setPick(null)}>
+                {t('All')}
+              </Button>
               {options.map((o) => (
                 <Button key={o} type="button" size="sm" variant={pick === o ? 'default' : 'outline'} aria-pressed={pick === o} onClick={() => setPick(pick === o ? null : o)}>
                   {o}

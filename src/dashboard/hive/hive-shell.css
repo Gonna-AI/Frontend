@@ -94,7 +94,10 @@
 /* The wrapper adds no box of its own: it only carries the tokens the .hd-* markup reads. */
 .hd-root.hx-app.is-inset {
   position: static;
-  display: contents;
+  display: flex;
+  flex-direction: column;
+  gap: var(--hx-gap, 1.5rem);
+  min-width: 0;
   min-height: 0;
   padding: 0;
   overflow: visible;
@@ -275,6 +278,91 @@
 .hd-root.hx-app.is-inset .hd-hits button { border-radius: var(--hx-r); box-shadow: none; }
 .hd-root.hx-app.is-inset .hd-hits button.is-on, .hd-root.hx-app.is-inset .hd-hits button:hover { background: var(--accent); color: var(--accent-foreground); box-shadow: none; }
 .hd-root.hx-app.is-inset .hd-toast { background: var(--foreground); color: var(--background); border-radius: var(--hx-r); box-shadow: 0 10px 30px -8px rgb(0 0 0 / 0.4); -webkit-backdrop-filter: none; backdrop-filter: none; bottom: calc(1.5rem + env(safe-area-inset-bottom)); }
+
+
+/* ======================================================================
+   One system for every screen
+
+   Space      a 4 px grid. Blocks on a page are 24 px apart (20 px on a phone); a card's padding is 20 px (16 on a
+              phone); controls inside a card are 12 px apart.
+   Radius     nested: a card 14, a tile or row inside a card 10, a control 8, a badge round.
+   Controls   32 px high (40 px for a finger); chips and small buttons 28.
+   Type       page title 30 (Cal Sans), card title 16/500, body 14, secondary 13 muted, label 12 muted capitals.
+   Edge       text inside a card, a table inside a card and a heading inside a card start on the same line.
+   ====================================================================== */
+
+.dashboard-root {
+  --hx-gap: 1.5rem;
+  --hx-pad: 1.25rem;
+  --hx-r-card: calc(var(--radius) + 4px);
+  --hx-r-inner: var(--radius);
+  --hx-r-ctl: calc(var(--radius) - 2px);
+  --hx-ctl: 2rem;
+  --hx-ctl-sm: 1.75rem;
+}
+@media (pointer: coarse) { .dashboard-root { --hx-ctl: 2.5rem; --hx-ctl-sm: 2.25rem; } }
+@media (max-width: 699px) { .dashboard-root { --hx-gap: 1.25rem; --hx-pad: 1rem; } }
+
+/* Cards, the shared ones and the older ones, share padding and radius. */
+.dashboard-root [data-slot='card'] { --card-spacing: var(--hx-pad); border-radius: var(--hx-r-card); }
+.hd-root.hx-app.is-inset :is(.hd-card, .hd-stat) { border-radius: var(--hx-r-card); padding: var(--hx-pad); }
+.hd-root.hx-app.is-inset .hd-card.hd-page { padding: var(--hx-pad); }
+.hd-root.hx-app.is-inset :is(.hd-machine, .hd-doc, .hd-site, .hd-approval, .hd-alarm-row, .hd-finding, .hd-rfq, .hd-signal, .hd-thread, .hd-panel, .hd-doc-block, .hd-compare, .hd-linebox, .hd-mtile, .hd-state-count, .hd-untrusted, .hd-note, .hd-mcard) { border-radius: var(--hx-r-inner); }
+.hd-root.hx-app.is-inset .hd-groups > .hd-group { border-radius: var(--hx-r-inner); padding: 0.75rem; }
+.hd-root.hx-app.is-inset .hd-groups { gap: 0.75rem; }
+
+/* Blocks on a page sit on one rhythm; nothing adds its own margin on top of it. */
+.hd-root.hx-app.is-inset > * { margin-block: 0; }
+.hd-root.hx-app.is-inset > :is(.hd-back, .hd-btn, .hd-ghost) { align-self: flex-start; }
+.hd-root.hx-app.is-inset .hd-page-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.75rem 1rem; margin-bottom: 1rem; }
+.hd-root.hx-app.is-inset .hd-page-head .hd-muted { margin-top: 0; }
+.hd-root.hx-app.is-inset :is(.hd-tabbar, .hd-page .hd-chips, .hd-chips) { margin-bottom: 1rem; }
+.hd-root.hx-app.is-inset .hd-statrow { margin: 0; gap: 1rem; }
+.hd-root.hx-app.is-inset .hd-table-wrap { margin-top: 0; }
+.hd-root.hx-app.is-inset .hd-card > :last-child { margin-bottom: 0; }
+
+/* Type */
+.hd-root.hx-app.is-inset :is(.hd-card-title, .hd-card-title.is-lg) { font-size: 1rem; font-weight: 500; letter-spacing: 0; line-height: 1.25; }
+.hd-root.hx-app.is-inset .hd-muted { color: var(--muted-foreground); font-size: 0.875rem; }
+.hd-root.hx-app.is-inset :is(.hd-group h3, .hd-subhead, .hd-doc-block h4, .hd-drawer-body h4, .hd-panel-title) { font-size: 0.75rem; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted-foreground); }
+.hd-root.hx-app.is-inset .hd-panel-title strong { font-size: 0.75rem; font-weight: 500; }
+.hd-root.hx-app.is-inset .hd-empty { padding: 2.5rem 1rem !important; color: var(--muted-foreground); font-size: 0.875rem; }
+
+/* Controls: one height. */
+.hd-root.hx-app.is-inset :is(.hd-btn, .hd-ghost, .hd-filter, .hd-back, .hd-lang-btn, .hd-search, .hd-select, .hd-lang, .hd-form select, .hd-form input:not([type='color']):not([type='file']):not([type='checkbox']), .hd-form-inline input, .hd-inline-form input) { height: var(--hx-ctl); border-radius: var(--hx-r-ctl); font-size: 0.875rem; }
+.hd-root.hx-app.is-inset .hd-btn { padding: 0 0.875rem; }
+.hd-root.hx-app.is-inset :is(.hd-btn.hd-btn-sm, .hd-chip, .hd-back) { height: var(--hx-ctl-sm); padding: 0 0.75rem; font-size: 0.8125rem; border-radius: var(--hx-r-ctl); }
+.hd-root.hx-app.is-inset .hd-chip { padding: 0 0.625rem; }
+.hd-root.hx-app.is-inset .hd-search { width: 13.5rem; padding: 0 0.75rem; }
+.hd-root.hx-app.is-inset .hd-btn svg, .hd-root.hx-app.is-inset .hd-search svg, .hd-root.hx-app.is-inset .hd-chip svg { width: 1rem; height: 1rem; }
+.hd-root.hx-app.is-inset :is(.hd-btn, .hd-chip, .hd-back, .hd-ghost):focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
+
+/* Tables: header and cells share one padding, and the first and last column line up with the card's text. */
+.hd-root.hx-app.is-inset .hd-table :is(th, td) { padding: 0.625rem 0.75rem; font-size: 0.875rem; }
+.hd-root.hx-app.is-inset .hd-table th { font-size: 0.8125rem; }
+.hd-root.hx-app.is-inset .hd-table :is(th, td):first-child { padding-left: 0; }
+.hd-root.hx-app.is-inset .hd-table :is(th, td):last-child { padding-right: 0; }
+.hx-tablewrap { padding: 0 var(--hx-pad) 0.75rem; }
+.hx-table :is(th, td) { padding: 0.75rem; }
+.hx-table :is(th, td):first-child { padding-left: 0; }
+.hx-table :is(th, td):last-child { padding-right: 0; }
+.dashboard-root [data-slot='table-head']:first-child, .dashboard-root [data-slot='table-cell']:first-child { padding-left: var(--hx-pad); }
+.dashboard-root [data-slot='table-head']:last-child, .dashboard-root [data-slot='table-cell']:last-child { padding-right: var(--hx-pad); }
+
+/* Settings and other single-column lists span the whole card, so their right edge is the card's. */
+.hd-root.hx-app.is-inset .hd-settings { max-width: none; }
+.hd-root.hx-app.is-inset .hd-toggle:last-child { border-bottom: 0; }
+.hd-root.hx-app.is-inset .hd-toggle small { font-size: 0.8125rem; }
+.hd-root.hx-app.is-inset .hd-toggle b { font-size: 0.875rem; }
+
+/* Phone: the same blocks, one column; an alarm's action sits under its text instead of squeezing it. */
+@media (max-width: 699px) {
+  .hd-root.hx-app.is-inset.is-phone .hd-alarm-row { display: grid; gap: 0.625rem; align-items: start; }
+  .hd-root.hx-app.is-inset.is-phone .hd-alarm-row > .hd-btn, .hd-root.hx-app.is-inset.is-phone .hd-alarm-row > button:last-child { justify-self: start; }
+  .hd-root.hx-app.is-inset.is-phone .hd-search { width: 100%; }
+  .hd-root.hx-app.is-inset.is-phone .hd-page-head > :last-child:not(:first-child) { width: 100%; }
+}
+.hd-root.hx-app.is-inset.is-plain { display: contents; }
 
 /* ------------------------------------------------------------------ blocks drawn by the module screens */
 

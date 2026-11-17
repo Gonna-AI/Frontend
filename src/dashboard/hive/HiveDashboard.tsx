@@ -489,7 +489,7 @@ function Shell({ user, onSignOut, guest = false }: HiveDashboardProps) {
                   </div>
                 </main>
               </SidebarInset>
-              <Surface>
+              <Surface plain>
                 {searchOpen && (
                   <SearchDialog onClose={() => setSearchOpen(false)} go={go} />
                 )}

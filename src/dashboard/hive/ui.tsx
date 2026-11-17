@@ -37,10 +37,10 @@ export const TAB_TRIGGER = 'h-7 flex-none px-3 text-muted-foreground data-[state
  */
 export const SurfaceCtx = createContext<{ className: string; style: React.CSSProperties } | null>(null);
 
-export function Surface({ children }: { children: React.ReactNode }) {
+export function Surface({ children, plain }: { children: React.ReactNode; plain?: boolean }) {
   const surface = useContext(SurfaceCtx);
   return surface ? (
-    <div className={surface.className} style={surface.style}>
+    <div className={plain ? `${surface.className} is-plain` : surface.className} style={surface.style}>
       {children}
     </div>
   ) : (
