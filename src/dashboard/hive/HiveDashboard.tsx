@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { Search } from "lucide-react-dash";
+import { useCallback, useEffect, useState } from "react";
+import { Bell, ClipboardList, Cpu, FileText, Package } from "lucide-react-dash";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 
 import {
@@ -7,6 +7,15 @@ import {
   SidebarProvider,
 } from "@/components/dashboard-ui/sidebar";
 import { TooltipProvider } from "@/components/dashboard-ui/tooltip";
+import {
+  Command,
+  CommandDialog,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/dashboard-ui/command";
 import { cn } from "@/lib/utils";
 import "@/dashboard/styles/dashboard-theme.css";
 
@@ -29,7 +38,9 @@ import { GraphView } from "./graph";
 import { useLayout } from "./layout";
 import { MachineDetail, MachinesView } from "./machines";
 import ModuleView from "./modules";
-import { NAV, MODULE_SECTIONS } from "./nav";
+import ResourceScreen from "./workspace/ResourceScreen";
+import { SCREENS } from "./workspace/registry";
+import { NAV, MODULE_SECTIONS, NAV_PRIMARY, sectionOf } from "./nav";
 import {
   ActivityView,
   AlarmsView,
@@ -83,14 +94,6 @@ function writePref(key: string, value: boolean) {
 
 /* ---------- command search ---------- */
 
-interface Hit {
-  key: string;
-  label: string;
-  hint: string;
-  extra?: string;
-  run: () => void;
-}
-
 function SearchDialog({
   onClose,
   go,
@@ -100,134 +103,106 @@ function SearchDialog({
 }) {
   const t = useT();
   const { data, openDetail } = useHive();
-  const [q, setQ] = useState("");
-  const [idx, setIdx] = useState(0);
-
-  const hits = useMemo<Hit[]>(() => {
-    const all: Hit[] = [
-      ...Object.entries(NAV).map(([id, s]) => ({
-        key: `s-${id}`,
-        label: t(s.title),
-        hint: t("Go to"),
-        extra: `${s.title} ${s.keywords} ${s.terms}`,
-        run: () => go(id),
-      })),
-      ...data.machines.map((m) => ({
-        key: m.id,
-        label: m.key,
-        hint: `${t("Machine")} · ${m.site}`,
-        run: () => go(`machines/${m.id}`),
-      })),
-      ...data.alarms.map((a) => ({
-        key: a.id,
-        label: a.title,
-        hint: `${t("Alarm")} · ${a.machine} · ${a.id}`,
-        run: () => {
-          go("alarms");
-          openDetail({ kind: "alarm", id: a.id });
-        },
-      })),
-      ...data.workOrders.map((w) => ({
-        key: w.id,
-        label: w.title,
-        hint: `${t("Work order")} · ${w.id}`,
-        run: () => {
-          go("work-orders");
-          openDetail({ kind: "workOrder", id: w.id });
-        },
-      })),
-      ...data.documents.map((d) => ({
-        key: d.id,
-        label: d.name,
-        hint: `${t("Document")} · ${d.machine}`,
-        run: () => {
-          go("documents");
-          openDetail({ kind: "document", id: d.id });
-        },
-      })),
-      ...data.parts.map((p) => ({
-        key: p.id,
-        label: `${p.number} · ${p.name}`,
-        hint: `${t("Part")} · ${p.machine}`,
-        run: () => {
-          go("parts");
-          openDetail({ kind: "part", id: p.id });
-        },
-      })),
-    ];
-    const needle = q.trim().toLowerCase();
-    return (
-      needle
-        ? all.filter((h) =>
-            `${h.label} ${h.hint} ${h.extra ?? ""}`
-              .toLowerCase()
-              .includes(q.trim().toLowerCase()),
-          )
-        : all.slice(0, 11)
-    ).slice(0, 12);
-  }, [q, data, go, openDetail, t]);
-
-  useEffect(() => setIdx(0), [q]);
-
-  const choose = (h?: Hit) => {
-    if (!h) return;
+  const run = (fn: () => void) => {
     onClose();
-    h.run();
+    fn();
   };
+  const groupOf = (id: string) => {
+    if (NAV_PRIMARY.includes(id)) return t("Operate");
+    const s = sectionOf(id);
+    return s ? t(s.title) : t("Organization");
+  };
+  const item = "gap-3 rounded-lg px-2.5 py-2 data-[selected=true]:bg-muted";
+  const meta = "ml-auto truncate pl-3 text-muted-foreground text-xs";
 
   return (
-    <div className="hd-drawer-wrap is-center" onClick={onClose}>
-      <div
-        className="hd-search-dialog"
-        role="dialog"
-        aria-modal="true"
-        aria-label={t("Search Hive")}
-        onClick={(e) => e.stopPropagation()}
-      >
-        <label className="hd-search-input">
-          <Search size={16} aria-hidden="true" />
-          <input
-            autoFocus
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            placeholder={t(
-              "Search machines, alarms, work orders, documents, parts…",
-            )}
-            aria-label={t("Search")}
-            onKeyDown={(e) => {
-              if (e.key === "Escape") onClose();
-              else if (e.key === "ArrowDown") {
-                e.preventDefault();
-                setIdx((i) => Math.min(i + 1, hits.length - 1));
-              } else if (e.key === "ArrowUp") {
-                e.preventDefault();
-                setIdx((i) => Math.max(i - 1, 0));
-              } else if (e.key === "Enter") choose(hits[idx]);
-            }}
-          />
-          <kbd>{t("Esc")}</kbd>
-        </label>
-        <ul className="hd-hits" role="listbox">
-          {hits.map((h, i) => (
-            <li key={h.key} role="option" aria-selected={i === idx}>
-              <button
-                type="button"
-                className={i === idx ? "is-on" : ""}
-                onMouseEnter={() => setIdx(i)}
-                onClick={() => choose(h)}
-              >
-                <span>{h.label}</span>
-                <small>{h.hint}</small>
-              </button>
-            </li>
-          ))}
-          {hits.length === 0 && (
-            <li className="hd-empty">{t("Nothing found.")}</li>
-          )}
-        </ul>
-      </div>
-    </div>
+    <CommandDialog
+      open
+      onOpenChange={(o) => !o && onClose()}
+      title={t("Search Hive")}
+      description={t("Search pages, machines, alarms, work orders, documents and parts")}
+      className="top-[12vh] max-w-[calc(100vw-1.5rem)] gap-0 sm:max-w-[640px]"
+    >
+      <Command className="rounded-none! bg-transparent p-0" loop>
+        <div className="border-b p-2">
+          <CommandInput placeholder={t("Search pages, machines, alarms, work orders…")} />
+        </div>
+        <CommandList className="max-h-[min(60vh,520px)] p-1.5">
+          <CommandEmpty className="py-10 text-center text-muted-foreground text-sm">{t("Nothing found.")}</CommandEmpty>
+          <CommandGroup heading={t("Pages")}>
+            {Object.entries(NAV).map(([id, s]) => {
+              const Icon = s.icon;
+              return (
+                <CommandItem key={`p-${id}`} value={`page ${s.title} ${s.keywords} ${s.terms}`} onSelect={() => run(() => go(id))} className={item}>
+                  <span className="flex size-7 shrink-0 items-center justify-center rounded-md border bg-background text-muted-foreground">
+                    <Icon className="size-3.5" />
+                  </span>
+                  <span className="truncate font-medium">{t(s.title)}</span>
+                  <span className={meta}>{groupOf(id)}</span>
+                </CommandItem>
+              );
+            })}
+          </CommandGroup>
+          <CommandGroup heading={t("Machines")}>
+            {data.machines.map((m) => (
+              <CommandItem key={m.id} value={`machine ${m.key} ${m.name} ${m.site}`} onSelect={() => run(() => go(`machines/${m.id}`))} className={item}>
+                <Cpu className="size-4 text-muted-foreground" />
+                <span className="truncate font-medium">{m.key}</span>
+                <span className={meta}>{m.name}</span>
+              </CommandItem>
+            ))}
+          </CommandGroup>
+          <CommandGroup heading={t("Alarms")}>
+            {data.alarms.map((a) => (
+              <CommandItem key={a.id} value={`alarm ${a.title} ${a.machine} ${a.id}`} onSelect={() => run(() => (go("alarms"), openDetail({ kind: "alarm", id: a.id })))} className={item}>
+                <Bell className="size-4 text-muted-foreground" />
+                <span className="truncate">{a.title}</span>
+                <span className={meta}>{a.machine}</span>
+              </CommandItem>
+            ))}
+          </CommandGroup>
+          <CommandGroup heading={t("Work orders")}>
+            {data.workOrders.map((w) => (
+              <CommandItem key={w.id} value={`work order ${w.title} ${w.id}`} onSelect={() => run(() => (go("work-orders"), openDetail({ kind: "workOrder", id: w.id })))} className={item}>
+                <ClipboardList className="size-4 text-muted-foreground" />
+                <span className="truncate">{w.title}</span>
+                <span className={`${meta} font-mono`}>{w.id}</span>
+              </CommandItem>
+            ))}
+          </CommandGroup>
+          <CommandGroup heading={t("Documents")}>
+            {data.documents.map((d) => (
+              <CommandItem key={d.id} value={`document ${d.name} ${d.machine}`} onSelect={() => run(() => (go("documents"), openDetail({ kind: "document", id: d.id })))} className={item}>
+                <FileText className="size-4 text-muted-foreground" />
+                <span className="truncate">{d.name}</span>
+                <span className={meta}>{d.machine}</span>
+              </CommandItem>
+            ))}
+          </CommandGroup>
+          <CommandGroup heading={t("Parts")}>
+            {data.parts.map((p) => (
+              <CommandItem key={p.id} value={`part ${p.number} ${p.name} ${p.machine}`} onSelect={() => run(() => (go("parts"), openDetail({ kind: "part", id: p.id })))} className={item}>
+                <Package className="size-4 text-muted-foreground" />
+                <span className="truncate">
+                  <span className="font-mono">{p.number}</span> · {p.name}
+                </span>
+                <span className={meta}>{p.machine}</span>
+              </CommandItem>
+            ))}
+          </CommandGroup>
+        </CommandList>
+        <div className="flex items-center gap-4 border-t px-3 py-2 text-muted-foreground text-xs">
+          <span className="flex items-center gap-1.5"><Kbd>↑</Kbd><Kbd>↓</Kbd>{t("Move")}</span>
+          <span className="flex items-center gap-1.5"><Kbd>↵</Kbd>{t("Open")}</span>
+          <span className="flex items-center gap-1.5"><Kbd>Esc</Kbd>{t("Close")}</span>
+        </div>
+      </Command>
+    </CommandDialog>
   );
+}
+
+function Kbd({ children }: { children: React.ReactNode }) {
+  return <kbd className="inline-flex h-5 min-w-5 items-center justify-center rounded border bg-muted px-1 font-sans text-[11px] text-muted-foreground">{children}</kbd>;
 }
 
 /* ---------- shell ---------- */
@@ -378,6 +353,8 @@ function Shell({ user, onSignOut, guest = false }: HiveDashboardProps) {
         setCompact={setCompact}
       />
     );
+  else if (section && section in SCREENS)
+    view = <ResourceScreen screen={SCREENS[section]} area={second} go={go} />;
   else if (section && (MODULE_SECTIONS as readonly string[]).includes(section))
     view = <ModuleView id={section} area={second} go={go} />;
   else {
@@ -426,6 +403,7 @@ function Shell({ user, onSignOut, guest = false }: HiveDashboardProps) {
   const modern =
     section === "" ||
     section === "admin" ||
+    (section !== null && section in SCREENS) ||
     (section !== null &&
       (MODULE_SECTIONS as readonly string[]).includes(section));
   const surfaceClass = `hd-root hx-app is-inset${dark ? " is-dark" : ""}${compact ? " is-compact" : ""}${phone ? " is-phone" : ""}`;

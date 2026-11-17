@@ -32,6 +32,10 @@ export default defineConfig({
   server: {
     host: '0.0.0.0', // reachable from other devices on the local network
     port: 5173,
+    // Same path as production (netlify.toml): the HIVE API without CORS and without its host in the bundle.
+    proxy: {
+      '/hive-api': { target: 'https://hive-dev-api.clerktree.com', changeOrigin: true, rewrite: (p) => p.replace(/^\/hive-api/, '') },
+    },
   },
   build: {
     // Preload each route's own chunks in parallel instead of discovering them

@@ -7,7 +7,6 @@ import { Bell, Check, ChevronRight, ChevronsUpDown, CircleHelp, LayoutPanelLeft,
 import { useEffect, useState } from 'react';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/dashboard-ui/avatar';
-import { Badge } from '@/components/dashboard-ui/badge';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/dashboard-ui/breadcrumb';
 import { Button } from '@/components/dashboard-ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/dashboard-ui/collapsible';
@@ -36,6 +35,7 @@ import { useBrand } from './branding';
 import { useLang, useT } from './i18n';
 import { NAV, NAV_PRIMARY, NAV_SECTIONS, sectionOf } from './nav';
 import type { HiveApiState } from './hiveApi';
+import ApiStatus from './workspace/ApiStatus';
 import { useHive, type DetailRef } from './store';
 
 const BASE = '/dashboard/hive';
@@ -285,7 +285,7 @@ function AccountMenu({ user, guest, onExit, go }: { user: { name: string; email:
 export function SiteHeader({
   section,
   title,
-  apiState,
+  apiState: _apiState,
   openSearch,
   go,
   open,
@@ -329,10 +329,7 @@ export function SiteHeader({
         </div>
 
         <div className="flex shrink-0 items-center gap-1.5">
-          <Badge variant="outline" className="mr-1 hidden h-6 gap-1.5 px-2.5 font-normal text-muted-foreground lg:inline-flex" title={t(API_LABEL[apiState])}>
-            <span className={`size-1.5 rounded-full ${apiState === 'online' ? 'bg-emerald-500' : apiState === 'offline' ? 'bg-red-500' : 'bg-amber-500'}`} />
-            {t('Placeholder data')}
-          </Badge>
+          <ApiStatus />
           <Button variant="outline" size="sm" className="hidden w-44 justify-start gap-2 font-normal text-muted-foreground md:inline-flex" onClick={openSearch} aria-label={t('Search (Ctrl K)')}>
             <Search className="size-4" />
             <span className="flex-1 text-left">{t('Search')}</span>

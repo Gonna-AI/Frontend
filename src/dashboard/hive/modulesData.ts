@@ -491,8 +491,8 @@ export const MODULES: Record<string, ModuleDef> = {
           {
             kind: 'code',
             title: tx('Make your first call', 'Ihr erster Aufruf'),
-            sub: tx('Only the health endpoint exists today; the rest of the API is shown here as placeholders', 'Heute gibt es nur den Health-Endpunkt; der Rest der API ist hier als Platzhalter dargestellt'),
-            code: 'curl https://api.example.com/v1/health \\\n  -H "Accept: application/json" \\\n  -H "Hive-Version: 2026-11-01"\n\n# { "status": "ok" }',
+            sub: tx('Every operation with examples in cURL, JavaScript and Python: docs.hive.clerktree.com/reference. The API screen lists them live.', 'Jede Operation mit Beispielen in cURL, JavaScript und Python: docs.hive.clerktree.com/reference. Der Bildschirm API listet sie live.'),
+            code: '# 1. Check the API (no key needed)\ncurl https://api.hive.clerktree.com/v1/health\n\n# 2. List your assets with an API key of a service account\ncurl "https://api.hive.clerktree.com/v1/assets?limit=20" \\\n  -H "Authorization: Bearer $HIVE_API_KEY" \\\n  -H "Hive-Version: 2026-11-01"',
           },
           {
             kind: 'cards',

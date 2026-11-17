@@ -134,6 +134,14 @@
   to = "/404.html"
   status = 404
 
+# The HIVE API, same-origin for the Hive dashboard (src/dashboard/hive/api/client.ts): no CORS and no API host
+# in the bundle. Public operations only until HIVE user sessions exist; credentials are never added here.
+[[redirects]]
+  from = "/hive-api/*"
+  to = "https://hive-dev-api.clerktree.com/:splat"
+  status = 200
+  force = true
+
 # Single-page-app fallback. Not forced, so real files (prerendered pages,
 # assets, robots.txt, sitemap.xml) are always served first.
 [[redirects]]

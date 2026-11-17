@@ -8,7 +8,11 @@
  * `spec` names the Hive API module a screen is built for, so every placeholder screen can be traced to it.
  */
 import {
+  Activity,
   Bell,
+  Brain,
+  Gauge,
+  Router,
   BookOpen,
   Bot,
   Briefcase,
@@ -33,6 +37,8 @@ import {
   Workflow,
   type LucideIcon,
 } from 'lucide-react-dash';
+
+import { SCREENS } from './workspace/registry';
 
 export interface NavItem {
   id: string;
@@ -72,6 +78,9 @@ export const NAV: Record<string, NavItem> = {
   compliance: { id: 'compliance', title: 'Compliance', icon: BookOpen, keywords: 'gdpr nis2 ai act residency retention works council certificates', terms: 'datenschutz betriebsrat aufbewahrung zertifikate', about: 'Where data lives, how long it is kept, and what we can prove.', spec: 'CMP-*' },
   developer: { id: 'developer', title: 'Developer', icon: Code, keywords: 'api keys webhooks mcp sandbox sdk', terms: 'entwickler schnittstelle webhooks sandbox', about: 'API keys, webhooks, the MCP server and the simulated plant.', spec: 'DX-* · API-MCP' },
   activity: { id: 'activity', title: 'Activity', icon: LayoutGrid, keywords: 'feed history timeline', terms: 'aktivität verlauf', about: 'Everything that happened, newest first.', spec: 'API-RT' },
+  ...Object.fromEntries(
+    Object.values(SCREENS).map((s) => [s.id, { id: s.id, title: s.title, icon: s.icon, keywords: s.keywords, terms: '', about: s.about, spec: s.spec } satisfies NavItem]),
+  ),
   settings: { id: 'settings', title: 'Settings', icon: Settings, keywords: 'preferences theme diagnostics', terms: 'einstellungen', about: 'Your language, theme and notifications.' },
 };
 
@@ -85,13 +94,19 @@ export interface NavSection {
 /** Always visible: the things a person looks at many times a day. */
 export const NAV_PRIMARY = ['', 'machines', 'alarms', 'inbox', 'assistant'];
 
-/** Collapsed until opened (the one holding the current screen opens by itself): everything else, by what it is for. */
-export const NAV_SECTIONS: NavSection[] = [
-  { id: 'work', title: 'Work', icon: Briefcase, ids: ['work-orders', 'production', 'quality', 'parts', 'vendors'] },
-  { id: 'knowledge', title: 'Knowledge', icon: BookOpen, ids: ['documents', 'findings', 'graph', 'reports'] },
-  { id: 'automation', title: 'Automation', icon: Workflow, ids: ['agents', 'automations'] },
-  { id: 'organization', title: 'Organization', icon: Building2, ids: ['admin', 'compliance', 'developer', 'activity'] },
+const SECTION_LIST: NavSection[] = [
+  { id: 'work', title: 'Work', icon: Briefcase, ids: ['work-orders', 'maintenance', 'production', 'shift', 'quality', 'traceability', 'parts', 'tools', 'vendors', 'service', 'customers', 'energy', 'tasks'] },
+  { id: 'monitor', title: 'Monitor', icon: Activity, ids: ['signals', 'events', 'incidents', 'rules', 'workflows', 'notifications'] },
+  { id: 'control', title: 'Control', icon: Gauge, ids: ['commands', 'recipes', 'safety'] },
+  { id: 'knowledge', title: 'Knowledge', icon: BookOpen, ids: ['documents', 'notes', 'findings', 'graph', 'reports'] },
+  { id: 'automation', title: 'AI and automation', icon: Workflow, ids: ['agents', 'agent-runs', 'review', 'evaluations', 'guardrails', 'prompts', 'ai-usage', 'ai-governance', 'automations'] },
+  { id: 'models', title: 'Models', icon: Brain, ids: ['models', 'datasets', 'vision'] },
+  { id: 'connectivity', title: 'Connectivity', icon: Router, ids: ['gateways', 'fleet', 'connections', 'discovery', 'it-sync', 'plant-model'] },
+  { id: 'organization', title: 'Organization', icon: Building2, ids: ['admin', 'people', 'security', 'privacy', 'compliance', 'data', 'billing', 'status', 'developer', 'api', 'activity'] },
 ];
+
+/** Collapsed until opened (the one holding the current screen opens by itself): everything else, by what it is for. */
+export const NAV_SECTIONS: NavSection[] = SECTION_LIST.map((s) => ({ ...s, ids: s.ids.filter((id) => id in NAV) })).filter((s) => s.ids.length > 0);
 
 /** Which section a screen lives in (for the breadcrumb and for opening the right group). */
 export function sectionOf(id: string): NavSection | undefined {
