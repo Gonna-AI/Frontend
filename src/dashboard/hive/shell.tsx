@@ -1,16 +1,18 @@
 /**
- * The Hive dashboard frame: the shadcn dashboard-01 structure (inset sidebar, header, one scrolling page),
- * dressed for people who work in it all day. Everything is labelled in words, targets are large, the text
- * size is the user's to change, and the brand colours carry the structure: an ink header with an orange
- * edge, an ink banner on every page, orange where something needs a person.
+ * The Hive dashboard frame, built the way shadcn's dashboard-01 block is: an inset sidebar with grouped
+ * navigation, a slim header with a trigger, breadcrumb and tools, and one scrolling page.
+ * The pieces are the same primitives the workspace dashboards use (components/dashboard-ui).
  */
-import { Bell, ChevronRight, ChevronsUpDown, CircleHelp, LayoutPanelLeft, LogOut, Menu, Moon, Search, Settings, Sun, Type, type LucideIcon } from 'lucide-react-dash';
+import { Bell, ChevronRight, ChevronsUpDown, CircleHelp, LayoutPanelLeft, LogOut, Moon, Search, Settings, Sun } from 'lucide-react-dash';
 import { useEffect, useState } from 'react';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/dashboard-ui/avatar';
+import { Badge } from '@/components/dashboard-ui/badge';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/dashboard-ui/breadcrumb';
+import { Button } from '@/components/dashboard-ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/dashboard-ui/collapsible';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/dashboard-ui/dropdown-menu';
+import { Separator } from '@/components/dashboard-ui/separator';
 import {
   Sidebar,
   SidebarContent,
@@ -26,6 +28,7 @@ import {
   SidebarMenuSub,
   SidebarMenuSubButton,
   SidebarMenuSubItem,
+  SidebarTrigger,
   useSidebar,
 } from '@/components/dashboard-ui/sidebar';
 
@@ -34,7 +37,6 @@ import { useLang, useT } from './i18n';
 import { NAV, NAV_PRIMARY, NAV_SECTIONS, sectionOf } from './nav';
 import type { HiveApiState } from './hiveApi';
 import { useHive, type DetailRef } from './store';
-import { GhostOnInk } from './ui';
 
 const BASE = '/dashboard/hive';
 
@@ -44,12 +46,6 @@ export const API_LABEL: Record<HiveApiState, string> = {
   online: 'Placeholder data · API online',
   offline: 'Placeholder data · API offline',
 };
-
-export type TextSize = 'standard' | 'comfortable' | 'large';
-export const TEXT_SIZES: TextSize[] = ['standard', 'comfortable', 'large'];
-export const TEXT_LABEL: Record<TextSize, string> = { standard: 'Standard', comfortable: 'Comfortable', large: 'Large' };
-/** The page's root font size, so everything built in rem (the whole frame) grows together. */
-export const TEXT_PERCENT: Record<TextSize, number> = { standard: 100, comfortable: 112.5, large: 125 };
 
 export function initials(name: string): string {
   return (
@@ -73,15 +69,6 @@ function linkProps(id: string, go: (s: string) => void, after?: () => void) {
       after?.();
     },
   };
-}
-
-/** The section's icon on a soft orange tile; on the current page the tile is solid. */
-function NavIcon({ icon: Icon }: { icon: LucideIcon }) {
-  return (
-    <span className="hx-navicon grid size-8 shrink-0 place-items-center rounded-lg">
-      <Icon className="size-[1.1rem]" strokeWidth={1.9} />
-    </span>
-  );
 }
 
 /* ---------- sidebar ---------- */
@@ -124,20 +111,20 @@ export function HiveSidebar({
   const logo = brand.logoLight ?? brand.logoDark;
 
   return (
-    <Sidebar variant="inset" collapsible="offcanvas" className="hx-sidebar">
+    <Sidebar variant="inset" collapsible="offcanvas">
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton size="lg" asChild className="h-14">
+            <SidebarMenuButton size="lg" asChild>
               <a {...linkProps('', go, closeOnPhone)} aria-label={t('Hive home')}>
-                <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-[var(--hd-orange,#ff4d00)] shadow-sm">
-                  <img src={logo ?? '/brand-mark-tile.svg'} alt="" width={22} height={22} />
+                <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[var(--hd-orange,#ff4d00)]">
+                  <img src={logo ?? '/brand-mark-tile.svg'} alt="" width={18} height={18} />
                 </span>
                 <span className="grid flex-1 text-left leading-tight">
-                  <span className="truncate" style={{ fontFamily: 'var(--hx-font-head)', fontWeight: 'var(--hx-head-weight)', fontSize: '1.25rem' }}>
+                  <span className="truncate font-semibold" style={{ fontFamily: 'var(--hx-font-head)', fontWeight: 'var(--hx-head-weight)', fontSize: 17 }}>
                     {brand.name}
                   </span>
-                  <span className="truncate text-muted-foreground text-sm">{data.plant.name}</span>
+                  <span className="truncate text-muted-foreground text-xs">{data.plant.name}</span>
                 </span>
               </a>
             </SidebarMenuButton>
@@ -147,21 +134,22 @@ export function HiveSidebar({
 
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel className="font-semibold text-[0.75rem] uppercase tracking-wider">{t('Operate')}</SidebarGroupLabel>
+          <SidebarGroupLabel>{t('Operate')}</SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu className="gap-1">
+            <SidebarMenu>
               {NAV_PRIMARY.map((id) => {
                 const item = NAV[id];
+                const Icon = item.icon;
                 const n = counts[id] ?? 0;
                 return (
                   <SidebarMenuItem key={id || 'home'}>
-                    <SidebarMenuButton asChild isActive={section === id} tooltip={t(item.title)} className="hx-navbtn h-12 gap-3 text-[0.9375rem]">
+                    <SidebarMenuButton asChild isActive={section === id} tooltip={t(item.title)}>
                       <a {...linkProps(id, go, closeOnPhone)} aria-current={section === id ? 'page' : undefined}>
-                        <NavIcon icon={item.icon} />
+                        <Icon />
                         <span>{t(item.title)}</span>
                       </a>
                     </SidebarMenuButton>
-                    {n > 0 && <SidebarMenuBadge className="top-3! right-3! h-6 min-w-6 rounded-full bg-[var(--hd-orange,#ff4d00)] text-[0.75rem] font-semibold text-[var(--hd-on-accent,#fff)]!">{n}</SidebarMenuBadge>}
+                    {n > 0 && <SidebarMenuBadge className="rounded-full bg-[var(--hd-orange,#ff4d00)] px-1.5 text-[11px] text-[var(--hd-on-accent,#fff)]">{n}</SidebarMenuBadge>}
                   </SidebarMenuItem>
                 );
               })}
@@ -170,54 +158,57 @@ export function HiveSidebar({
         </SidebarGroup>
 
         <SidebarGroup>
-          <SidebarGroupLabel className="font-semibold text-[0.75rem] uppercase tracking-wider">{t('Explore')}</SidebarGroupLabel>
+          <SidebarGroupLabel>{t('Explore')}</SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu className="gap-1">
-              {NAV_SECTIONS.map((group) => (
-                <Collapsible key={group.id} asChild open={!!open[group.id]} onOpenChange={(v) => setOpen((o) => ({ ...o, [group.id]: v }))} className="group/collapsible">
-                  <SidebarMenuItem>
-                    <CollapsibleTrigger asChild>
-                      <SidebarMenuButton tooltip={t(group.title)} className="hx-navbtn h-12 gap-3 text-[0.9375rem]">
-                        <NavIcon icon={group.icon} />
-                        <span>{t(group.title)}</span>
-                        <ChevronRight className="ml-auto size-4! transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
-                      </SidebarMenuButton>
-                    </CollapsibleTrigger>
-                    <CollapsibleContent>
-                      <SidebarMenuSub className="mt-1 gap-0.5">
-                        {group.ids.map((id) => (
-                          <SidebarMenuSubItem key={id}>
-                            <SidebarMenuSubButton asChild isActive={section === id} className="hx-subbtn h-11 text-[0.9375rem]">
-                              <a {...linkProps(id, go, closeOnPhone)} aria-current={section === id ? 'page' : undefined}>
-                                <span>{t(NAV[id].title)}</span>
-                              </a>
-                            </SidebarMenuSubButton>
-                          </SidebarMenuSubItem>
-                        ))}
-                      </SidebarMenuSub>
-                    </CollapsibleContent>
-                  </SidebarMenuItem>
-                </Collapsible>
-              ))}
+            <SidebarMenu>
+              {NAV_SECTIONS.map((group) => {
+                const GroupIcon = group.icon;
+                return (
+                  <Collapsible key={group.id} asChild open={!!open[group.id]} onOpenChange={(v) => setOpen((o) => ({ ...o, [group.id]: v }))} className="group/collapsible">
+                    <SidebarMenuItem>
+                      <CollapsibleTrigger asChild>
+                        <SidebarMenuButton tooltip={t(group.title)}>
+                          <GroupIcon />
+                          <span>{t(group.title)}</span>
+                          <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                        </SidebarMenuButton>
+                      </CollapsibleTrigger>
+                      <CollapsibleContent>
+                        <SidebarMenuSub>
+                          {group.ids.map((id) => (
+                            <SidebarMenuSubItem key={id}>
+                              <SidebarMenuSubButton asChild isActive={section === id}>
+                                <a {...linkProps(id, go, closeOnPhone)} aria-current={section === id ? 'page' : undefined}>
+                                  <span>{t(NAV[id].title)}</span>
+                                </a>
+                              </SidebarMenuSubButton>
+                            </SidebarMenuSubItem>
+                          ))}
+                        </SidebarMenuSub>
+                      </CollapsibleContent>
+                    </SidebarMenuItem>
+                  </Collapsible>
+                );
+              })}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
 
       <SidebarFooter>
-        <SidebarMenu className="gap-0.5">
+        <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild isActive={section === 'settings'} className="hx-navbtn h-11 gap-3 text-[0.9375rem]">
+            <SidebarMenuButton asChild isActive={section === 'settings'} size="sm">
               <a {...linkProps('settings', go, closeOnPhone)}>
-                <NavIcon icon={Settings} />
+                <Settings />
                 <span>{t('Settings')}</span>
               </a>
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild className="hx-navbtn h-11 gap-3 text-[0.9375rem]">
+            <SidebarMenuButton asChild size="sm">
               <a href="https://clerktree.com/contact" target="_blank" rel="noreferrer">
-                <NavIcon icon={CircleHelp} />
+                <CircleHelp />
                 <span>{t('Help')}</span>
               </a>
             </SidebarMenuButton>
@@ -237,36 +228,36 @@ function AccountMenu({ user, guest, onExit, go }: { user: { name: string; email:
       <SidebarMenuItem>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <SidebarMenuButton size="lg" className="h-14 data-[state=open]:bg-sidebar-accent">
-              <Avatar className="size-10 rounded-xl">
+            <SidebarMenuButton size="lg" className="data-[state=open]:bg-sidebar-accent">
+              <Avatar className="size-8 rounded-lg">
                 <AvatarImage src={user.avatarUrl} alt="" />
-                <AvatarFallback className="rounded-xl bg-neutral-950 text-white">{initials(user.name)}</AvatarFallback>
+                <AvatarFallback className="rounded-lg">{initials(user.name)}</AvatarFallback>
               </Avatar>
-              <span className="grid flex-1 text-left leading-tight">
-                <span className="truncate font-medium text-[0.9375rem]">{user.name}</span>
-                <span className="truncate text-muted-foreground text-sm">{user.email}</span>
+              <span className="grid flex-1 text-left text-sm leading-tight">
+                <span className="truncate font-medium">{user.name}</span>
+                <span className="truncate text-muted-foreground text-xs">{user.email}</span>
               </span>
               <ChevronsUpDown className="ml-auto size-4" />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-(--radix-dropdown-menu-trigger-width) min-w-60 rounded-xl" side={isMobile ? 'top' : 'right'} align="end" sideOffset={6}>
+          <DropdownMenuContent className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg" side={isMobile ? 'top' : 'right'} align="end" sideOffset={6}>
             <DropdownMenuLabel className="font-normal">
-              <span className="grid leading-tight">
+              <span className="grid text-sm leading-tight">
                 <span className="font-medium">{user.name}</span>
-                <span className="text-muted-foreground text-sm">{user.email}</span>
+                <span className="text-muted-foreground text-xs">{user.email}</span>
               </span>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="h-11 text-[0.9375rem]" onSelect={() => go('settings')}>
+            <DropdownMenuItem onSelect={() => go('settings')}>
               <Settings /> {t('Settings')}
             </DropdownMenuItem>
-            <DropdownMenuItem asChild className="h-11 text-[0.9375rem]">
+            <DropdownMenuItem asChild>
               <a href="/dashboard/default">
                 <LayoutPanelLeft /> {t('Workspace dashboards')}
               </a>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="h-11 text-[0.9375rem]" onSelect={() => onExit?.()}>
+            <DropdownMenuItem onSelect={() => onExit?.()}>
               <LogOut /> {guest ? t('Sign in') : t('Sign out')}
             </DropdownMenuItem>
           </DropdownMenuContent>
@@ -276,7 +267,7 @@ function AccountMenu({ user, guest, onExit, go }: { user: { name: string; email:
   );
 }
 
-/* ---------- header: where you are, search, the two numbers that matter, tools ---------- */
+/* ---------- header: trigger, where you are, tools ---------- */
 
 export function SiteHeader({
   section,
@@ -287,8 +278,6 @@ export function SiteHeader({
   open,
   dark,
   setDark,
-  textSize,
-  setTextSize,
 }: {
   section: string | null;
   title: string;
@@ -298,171 +287,124 @@ export function SiteHeader({
   open: (d: DetailRef) => void;
   dark: boolean;
   setDark: (v: boolean) => void;
-  textSize: TextSize;
-  setTextSize: (v: TextSize) => void;
 }) {
   const t = useT();
   const { lang, setLang } = useLang();
   const { data, markRead } = useHive();
-  const { toggleSidebar } = useSidebar();
   const group = section !== null ? sectionOf(section) : undefined;
   const openAlarms = data.alarms.filter((a) => a.state === 'Open');
-  const waiting = data.approvals.filter((a) => a.state === 'Pending').length;
-  const nextSize = TEXT_SIZES[(TEXT_SIZES.indexOf(textSize) + 1) % TEXT_SIZES.length];
 
   return (
-    <header className="sticky top-0 z-30 shrink-0 rounded-t-[inherit] border-b-[3px] border-b-[var(--hd-orange,#ff4d00)] bg-neutral-950 pt-[env(safe-area-inset-top)] text-white">
-      <div className="flex h-16 w-full min-w-0 items-center gap-2 px-3 md:gap-3 lg:px-6">
-        <GhostOnInk className="shrink-0 gap-2 px-3 text-[0.9375rem]" onClick={toggleSidebar} aria-label={t('Menu')}>
-          <Menu className="size-5" />
-          <span>{t('Menu')}</span>
-        </GhostOnInk>
+    <header className="sticky top-0 z-30 flex h-[calc(3.5rem+env(safe-area-inset-top))] shrink-0 items-center gap-2 rounded-t-[inherit] border-b bg-background/85 pt-[env(safe-area-inset-top)] backdrop-blur-md">
+      <div className="flex w-full min-w-0 items-center justify-between gap-2 px-4 lg:px-6">
+        <div className="flex min-w-0 items-center gap-2">
+          <SidebarTrigger className="-ml-1" aria-label={t('Menu')} />
+          <Separator orientation="vertical" className="mx-1 data-[orientation=vertical]:h-4" />
+          <Breadcrumb className="min-w-0">
+            <BreadcrumbList className="flex-nowrap">
+              {group && (
+                <>
+                  <BreadcrumbItem className="hidden sm:inline-flex">{t(group.title)}</BreadcrumbItem>
+                  <BreadcrumbSeparator className="hidden sm:block" />
+                </>
+              )}
+              <BreadcrumbItem className="min-w-0">
+                <BreadcrumbPage className="truncate">{title}</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
+        </div>
 
-        <Breadcrumb className={`hidden min-w-0 shrink-0 ${group ? '2xl:block' : ''}`}>
-          <BreadcrumbList className="flex-nowrap text-[0.9375rem] text-white/65 sm:gap-2">
-            {group && (
-              <>
-                <BreadcrumbItem>{t(group.title)}</BreadcrumbItem>
-                <BreadcrumbSeparator />
-              </>
-            )}
-            <BreadcrumbItem className="min-w-0">
-              <BreadcrumbPage className="truncate text-white">{title}</BreadcrumbPage>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
-
-        <button
-          type="button"
-          onClick={openSearch}
-          aria-label={t('Search (Ctrl K)')}
-          className="mx-auto hidden h-11 w-full max-w-xl min-w-0 items-center gap-3 rounded-xl bg-white/10 px-4 text-left text-[0.9375rem] text-white/75 ring-1 ring-white/15 transition-colors hover:bg-white/15 hover:text-white md:flex"
-        >
-          <Search className="size-[1.1rem] shrink-0" />
-          <span className="min-w-0 flex-1 truncate">{t('Search machines, alarms, work orders, documents, parts…')}</span>
-          <kbd className="hidden rounded-md bg-white/10 px-2 py-0.5 text-[0.7rem] lg:block">⌘K</kbd>
-        </button>
-
-        <div className="ml-auto flex shrink-0 items-center gap-1.5 md:ml-0">
-          <GhostOnInk className="size-11 md:hidden" onClick={openSearch} aria-label={t('Search')}>
-            <Search className="size-5" />
-          </GhostOnInk>
-
-          {/* The two things to look at most, one tap away from anywhere. */}
-          <button
-            type="button"
-            onClick={() => go('alarms')}
-            className={`hidden h-11 items-center gap-2 rounded-xl px-3.5 font-medium text-[0.9375rem] transition-colors xl:inline-flex ${openAlarms.length ? 'bg-[var(--hd-orange,#ff4d00)] text-[var(--hd-on-accent,#fff)] hover:brightness-110' : 'bg-white/10 text-white/85 hover:bg-white/15'}`}
-          >
-            {t('Alarms')}
-            <span className={`grid h-6 min-w-6 place-items-center rounded-full px-1.5 text-[0.8rem] font-semibold ${openAlarms.length ? 'bg-black/25' : 'bg-white/15'}`}>{openAlarms.length}</span>
-          </button>
-          <button type="button" onClick={() => go('inbox')} className="hidden h-11 items-center gap-2 rounded-xl bg-white/10 px-3.5 font-medium text-[0.9375rem] text-white/90 transition-colors hover:bg-white/15 xl:inline-flex">
-            {t('Inbox')}
-            <span className="grid h-6 min-w-6 place-items-center rounded-full bg-white/15 px-1.5 text-[0.8rem] font-semibold">{waiting}</span>
-          </button>
+        <div className="flex shrink-0 items-center gap-1.5">
+          <Badge variant="outline" className="mr-1 hidden h-6 gap-1.5 px-2.5 font-normal text-muted-foreground lg:inline-flex" title={t(API_LABEL[apiState])}>
+            <span className={`size-1.5 rounded-full ${apiState === 'online' ? 'bg-emerald-500' : apiState === 'offline' ? 'bg-red-500' : 'bg-amber-500'}`} />
+            {t('Placeholder data')}
+          </Badge>
+          <Button variant="outline" size="sm" className="hidden w-44 justify-start gap-2 font-normal text-muted-foreground md:inline-flex" onClick={openSearch} aria-label={t('Search (Ctrl K)')}>
+            <Search className="size-4" />
+            <span className="flex-1 text-left">{t('Search')}</span>
+            <kbd className="rounded border bg-muted px-1.5 text-[10px]">⌘K</kbd>
+          </Button>
+          <Button variant="ghost" size="icon" className="md:hidden" onClick={openSearch} aria-label={t('Search')}>
+            <Search />
+          </Button>
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <GhostOnInk className="relative size-11" aria-label={`${t('Notifications')}, ${openAlarms.length}`}>
-                <Bell className="size-5" />
-                {openAlarms.length > 0 && <span className="absolute top-2.5 right-2.5 size-2.5 rounded-full bg-[var(--hd-orange,#ff4d00)] ring-2 ring-neutral-950" />}
-              </GhostOnInk>
+              <Button variant="ghost" size="icon" className="relative" aria-label={`${t('Notifications')}, ${openAlarms.length}`}>
+                <Bell />
+                {openAlarms.length > 0 && <span className="absolute top-2 right-2 size-2 rounded-full bg-[var(--hd-orange,#ff4d00)] ring-2 ring-background" />}
+              </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-96 max-w-[calc(100vw-1.5rem)] rounded-xl">
+            <DropdownMenuContent align="end" className="w-80 max-w-[calc(100vw-1.5rem)]">
               <DropdownMenuLabel>{t('Open alarms')}</DropdownMenuLabel>
               {openAlarms.slice(0, 4).map((a) => (
                 <DropdownMenuItem
                   key={a.id}
-                  className="items-start py-2.5"
+                  className="items-start"
                   onSelect={() => {
                     go('alarms');
                     open({ kind: 'alarm', id: a.id });
                   }}
                 >
-                  <span className="grid leading-tight">
+                  <span className="grid text-sm leading-tight">
                     <span className="font-medium">{a.title}</span>
-                    <span className="text-muted-foreground text-sm">
+                    <span className="text-muted-foreground text-xs">
                       {a.machine} · {a.raisedAt}
                     </span>
                   </span>
                 </DropdownMenuItem>
               ))}
-              {openAlarms.length === 0 && <p className="px-2 py-1.5 text-muted-foreground">{t('All clear.')}</p>}
+              {openAlarms.length === 0 && <p className="px-2 py-1.5 text-muted-foreground text-sm">{t('All clear.')}</p>}
               <DropdownMenuSeparator />
               <DropdownMenuLabel>{t('Notifications')}</DropdownMenuLabel>
               {data.notifications.slice(0, 3).map((n) => (
                 <DropdownMenuItem
                   key={n.id}
-                  className="items-start py-2.5"
+                  className="items-start"
                   onSelect={() => {
                     markRead(n.id);
                     go(n.to.section);
                   }}
                 >
-                  <span className="grid leading-tight">
+                  <span className="grid text-sm leading-tight">
                     <span className={n.read ? '' : 'font-medium'}>{n.text}</span>
-                    <span className="text-muted-foreground text-sm">{n.at}</span>
+                    <span className="text-muted-foreground text-xs">{n.at}</span>
                   </span>
                 </DropdownMenuItem>
               ))}
               <DropdownMenuSeparator />
-              <DropdownMenuItem onSelect={() => go('alarms')} className="h-11 justify-center font-medium">
+              <DropdownMenuItem onSelect={() => go('alarms')} className="justify-center font-medium">
                 {t('See all alarms')}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
 
-          <GhostOnInk className="hidden h-11 gap-1.5 px-3 sm:inline-flex" onClick={() => setTextSize(nextSize)} aria-label={`${t('Text size')}: ${t(TEXT_LABEL[textSize])}`} title={`${t('Text size')}: ${t(TEXT_LABEL[textSize])}`}>
-            <Type className="size-5" />
-            <span className="hidden text-[0.9375rem] lg:inline">{t(TEXT_LABEL[textSize])}</span>
-          </GhostOnInk>
-          <GhostOnInk className="h-11 min-w-11 px-3 font-semibold" onClick={() => setLang(lang === 'de' ? 'en' : 'de')} aria-label={t('Language')} title={t('Language')}>
+          <Button variant="ghost" size="icon" onClick={() => setLang(lang === 'de' ? 'en' : 'de')} aria-label={t('Language')} title={t('Language')} className="text-xs font-semibold">
             {lang === 'de' ? 'DE' : 'EN'}
-          </GhostOnInk>
-          <GhostOnInk className="size-11" onClick={() => setDark(!dark)} aria-label={dark ? t('Light theme') : t('Dark theme')} aria-pressed={dark}>
-            {dark ? <Sun className="size-5" /> : <Moon className="size-5" />}
-          </GhostOnInk>
+          </Button>
+          <Button variant="ghost" size="icon" onClick={() => setDark(!dark)} aria-label={dark ? t('Light theme') : t('Dark theme')} aria-pressed={dark}>
+            {dark ? <Sun /> : <Moon />}
+          </Button>
         </div>
       </div>
-      <span className="sr-only">{t(API_LABEL[apiState])}</span>
     </header>
   );
 }
 
-/* ---------- page banner: what this is, in plain words ---------- */
+/* ---------- page header and footer ---------- */
 
-const GRAIN =
-  "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .1 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")";
-
-export function PageBanner({ icon: Icon, title, about, actions, apiState, children }: { icon: LucideIcon; title: React.ReactNode; about?: string; actions?: React.ReactNode; apiState: HiveApiState; children?: React.ReactNode }) {
-  const t = useT();
+export function PageHeader({ title, about, actions }: { title: React.ReactNode; about?: string; actions?: React.ReactNode }) {
   return (
-    <section
-      className="relative isolate overflow-hidden rounded-2xl bg-neutral-950 px-5 py-6 text-white shadow-sm md:px-8 md:py-7"
-      style={{ backgroundImage: 'radial-gradient(70% 150% at 100% 0%, color-mix(in srgb, var(--hd-orange,#ff4d00) 44%, transparent), transparent 62%), radial-gradient(55% 110% at 0% 100%, rgb(255 255 255 / 0.06), transparent 60%)' }}
-    >
-      <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10 opacity-50 mix-blend-overlay" style={{ backgroundImage: GRAIN }} />
-      <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-4">
-        <div className="flex min-w-0 items-center gap-4">
-          <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-[var(--hd-orange,#ff4d00)] text-[var(--hd-on-accent,#fff)] shadow-lg sm:size-12 md:size-14">
-            <Icon className="size-6 md:size-7" strokeWidth={1.8} />
-          </span>
-          <div className="min-w-0">
-            <h1 className="text-balance text-[1.5rem] leading-tight sm:text-[1.75rem] md:text-[2.25rem]" style={{ fontFamily: 'var(--hx-font-head)', fontWeight: 'var(--hx-head-weight)' }}>
-              {title}
-            </h1>
-            {about && <p className="mt-1 max-w-prose text-pretty text-[1rem] text-white/75 leading-snug">{about}</p>}
-          </div>
-        </div>
-        {actions && <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto [&>button]:flex-1 sm:[&>button]:flex-none">{actions}</div>}
+    <div className="flex flex-wrap items-end justify-between gap-3">
+      <div className="min-w-0">
+        <h1 className="text-balance text-2xl leading-tight md:text-3xl" style={{ fontFamily: 'var(--hx-font-head)', fontWeight: 'var(--hx-head-weight)' }}>
+          {title}
+        </h1>
+        {about && <p className="mt-1.5 max-w-prose text-pretty text-muted-foreground text-sm">{about}</p>}
       </div>
-      {children && <div className="mt-5">{children}</div>}
-      <p className="mt-4 flex items-center gap-2 text-[0.8rem] text-white/50">
-        <span className={`size-1.5 rounded-full ${apiState === 'online' ? 'bg-emerald-400' : apiState === 'offline' ? 'bg-red-400' : 'bg-amber-400'}`} aria-hidden="true" />
-        {t(API_LABEL[apiState])}
-      </p>
-    </section>
+      {actions && <div className="flex flex-wrap items-center gap-2">{actions}</div>}
+    </div>
   );
 }
 
@@ -470,9 +412,8 @@ export function SpecFooter({ spec }: { spec?: string }) {
   const t = useT();
   if (!spec) return null;
   return (
-    <p className="pt-2 text-muted-foreground text-sm">
+    <p className="pt-2 text-muted-foreground text-xs">
       {t('Built for the Hive API module')}: <code className="font-mono">{spec}</code>
     </p>
   );
 }
-
