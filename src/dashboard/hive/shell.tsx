@@ -12,6 +12,7 @@ import { Button } from '@/components/dashboard-ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/dashboard-ui/collapsible';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/dashboard-ui/dropdown-menu';
 import { Separator } from '@/components/dashboard-ui/separator';
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/dashboard-ui/sheet';
 import {
   Sidebar,
   SidebarContent,
@@ -304,6 +305,8 @@ export function SiteHeader({
   const t = useT();
   const { lang, setLang } = useLang();
   const { data, markRead } = useHive();
+  const { isMobile } = useSidebar();
+  const [bellOpen, setBellOpen] = useState(false);
   const group = section !== null ? sectionOf(section) : undefined;
   const openAlarms = data.alarms.filter((a) => a.state === 'Open');
 
@@ -339,6 +342,85 @@ export function SiteHeader({
             <Search />
           </Button>
 
+{isMobile ? (
+            <>
+              <Button variant="ghost" size="icon" className="relative" aria-label={`${t('Notifications')}, ${openAlarms.length}`} onClick={() => setBellOpen(true)}>
+                <Bell />
+                {openAlarms.length > 0 && <span className="absolute top-2 right-2 size-2 rounded-full bg-[var(--hd-orange,#ff4d00)] ring-2 ring-background" />}
+              </Button>
+              {/* On a phone the list comes up from the bottom like the menu does; on a wide screen it drops from the bell. */}
+              <Sheet open={bellOpen} onOpenChange={setBellOpen}>
+                <SheetContent side="bottom" showCloseButton={false} className="hx-sheet gap-0 p-0">
+                  <div className="hx-sheet-handle" aria-hidden="true" />
+                  <SheetHeader className="flex-row items-center justify-between gap-3 px-5 pt-2 pb-3">
+                    <div className="grid gap-0.5">
+                      <SheetTitle className="text-lg">{t('Notifications')}</SheetTitle>
+                      <SheetDescription className="text-sm">{openAlarms.length ? `${openAlarms.length} ${t('Open alarms').toLowerCase()}` : t('All clear.')}</SheetDescription>
+                    </div>
+                    <button type="button" onClick={() => setBellOpen(false)} aria-label={t('Close')} className="grid size-9 place-items-center rounded-[var(--radius)] text-muted-foreground outline-none transition-colors hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring">
+                      <X className="size-5" />
+                    </button>
+                  </SheetHeader>
+                  <div className="hx-sheet-body grid content-start gap-5 overflow-y-auto overscroll-contain px-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))]">
+                    <section className="grid gap-2">
+                      <h3 className="px-1 font-medium text-muted-foreground text-xs uppercase tracking-wider">{t('Open alarms')}</h3>
+                      <ul className="hx-well grid gap-0.5 rounded-[1.25rem] p-1.5">
+                        {openAlarms.slice(0, 4).map((a) => (
+                          <li key={a.id}>
+                            <button
+                              type="button"
+                              className="hx-well-item grid w-full gap-0.5 rounded-[0.875rem] px-3.5 py-3 text-left outline-none"
+                              onClick={() => {
+                                setBellOpen(false);
+                                go('alarms');
+                                open({ kind: 'alarm', id: a.id });
+                              }}
+                            >
+                              <span className="font-medium text-[0.9375rem]">{a.title}</span>
+                              <span className="text-muted-foreground text-sm">
+                                {a.machine} · {a.raisedAt}
+                              </span>
+                            </button>
+                          </li>
+                        ))}
+                        {openAlarms.length === 0 && <li className="px-3.5 py-3 text-muted-foreground text-sm">{t('All clear.')}</li>}
+                      </ul>
+                    </section>
+                    <section className="grid gap-2">
+                      <h3 className="px-1 font-medium text-muted-foreground text-xs uppercase tracking-wider">{t('Notifications')}</h3>
+                      <ul className="hx-well grid gap-0.5 rounded-[1.25rem] p-1.5">
+                        {data.notifications.slice(0, 3).map((n) => (
+                          <li key={n.id}>
+                            <button
+                              type="button"
+                              className="hx-well-item grid w-full gap-0.5 rounded-[0.875rem] px-3.5 py-3 text-left outline-none"
+                              onClick={() => {
+                                markRead(n.id);
+                                setBellOpen(false);
+                                go(n.to.section);
+                              }}
+                            >
+                              <span className={`text-[0.9375rem] ${n.read ? '' : 'font-medium'}`}>{n.text}</span>
+                              <span className="text-muted-foreground text-sm">{n.at}</span>
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    </section>
+                    <Button
+                      className="h-11 w-full"
+                      onClick={() => {
+                        setBellOpen(false);
+                        go('alarms');
+                      }}
+                    >
+                      {t('See all alarms')}
+                    </Button>
+                  </div>
+                </SheetContent>
+              </Sheet>
+            </>
+          ) : (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="relative" aria-label={`${t('Notifications')}, ${openAlarms.length}`}>
@@ -389,6 +471,7 @@ export function SiteHeader({
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
+          )}
 
           <Button variant="ghost" size="icon" onClick={() => setLang(lang === 'de' ? 'en' : 'de')} aria-label={t('Language')} title={t('Language')} className="text-xs font-semibold">
             {lang === 'de' ? 'DE' : 'EN'}

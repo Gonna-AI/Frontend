@@ -21,7 +21,7 @@
 
 /* Menus, selects and dialogs are drawn into <body> with a fixed light theme (see dashboard-theme.css). In dark
    mode they take the dark tokens instead. */
-.dashboard-root.dark :is([data-slot='dropdown-menu-content'], [data-slot='dropdown-menu-sub-content'], [data-slot='popover-content'], [data-slot='select-content'], [data-slot='dialog-content'], [data-slot='drawer-content']) {
+.dashboard-root.dark :is([data-slot='dropdown-menu-content'], [data-slot='dropdown-menu-sub-content'], [data-slot='popover-content'], [data-slot='select-content'], [data-slot='dialog-content'], [data-slot='drawer-content'], [data-slot='sheet-content']) {
   color-scheme: dark;
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
@@ -364,6 +364,117 @@
 }
 .hd-root.hx-app.is-inset.is-plain { display: contents; }
 
+
+/* ======================================================================
+   One shape language
+
+   Radii: card 14, tile or row inside a card 10, control 10, status badge round, small mark (kbd, code) 6.
+   The shared components size their small variants with --radius-md, which the workspace theme never defined,
+   so every small button, icon button and tab came out square. Define the scale here for the Hive dashboard.
+   ====================================================================== */
+
+.hive-app, body.dashboard-root {
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 10px;
+  --radius-xl: 14px;
+  --radius-2xl: 14px;
+}
+.dashboard-root {
+  --hx-r-card: 14px;
+  --hx-r-inner: 10px;
+  --hx-r-ctl: 10px;
+}
+.hd-root.hx-app.is-inset { --hx-r: 10px; }
+
+.hd-root.hx-app.is-inset :is(.hd-link-row, .hd-doc-icon, .hd-disclosure, .hd-cite, .hd-url, .hd-code, .hd-control-strip, .hd-brand-preview, .hd-brand-mark, .hd-untrusted, .hd-form-inline input, .hd-inline-form input, .hd-composer textarea, .hd-colour input, .hd-form input:not([type='checkbox']), .hd-form select, .hd-lang, .hd-select select, .hx-card, .hx-code, .hx-steps li, .hd-secret code, .hd-signal, .hd-alarm-row, .hd-finding, .hd-rfq, .hd-approval, .hd-doc-block) { border-radius: var(--hx-r-inner); }
+.hd-root.hx-app.is-inset .hd-msg { border-radius: var(--hx-r-card); }
+.hd-root.hx-app.is-inset :is(.hd-icon-btn, .hd-count-dot) { border-radius: var(--hx-r-ctl); }
+.hd-root.hx-app.is-inset .hd-count-dot { border-radius: 999px; }
+.dashboard-root [data-slot='tabs-list'] { border-radius: var(--hx-r-ctl); }
+.dashboard-root [data-slot='tabs-trigger'] { border-radius: calc(var(--hx-r-ctl) - 3px); }
+.dashboard-root [data-slot='dropdown-menu-content'], .dashboard-root [data-slot='select-content'], .dashboard-root [data-slot='popover-content'], body.dashboard-root [data-slot='dropdown-menu-content'], body.dashboard-root [data-slot='select-content'] { border-radius: var(--hx-r-card); }
+.dashboard-root [data-slot='dropdown-menu-item'], body.dashboard-root [data-slot='dropdown-menu-item'] { border-radius: var(--hx-r-ctl); }
+
+/* ======================================================================
+   Overlays
+
+   Wide screens: the search is a centred card that eases in, a detail view is a floating panel from the right.
+   Phones: both come up from the bottom as sheets (a handle, 28 px top corners, safe-area padding), like the menu.
+   Same backdrop, same shadow, same header, same footer everywhere. */
+
+@keyframes hx-fade { from { opacity: 0; } }
+@keyframes hx-sheet-up { from { transform: translateY(100%); } }
+@keyframes hx-panel-in { from { opacity: 0; transform: translateX(1.25rem); } }
+@keyframes hx-dialog-in { from { opacity: 0; transform: translateY(-0.5rem) scale(0.98); } }
+
+.hd-root.hx-app.is-inset .hd-drawer-wrap {
+  z-index: 60;
+  padding: 0.75rem;
+  background: rgb(0 0 0 / 0.42);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  animation: hx-fade 0.2s ease-out;
+}
+.hd-root.hx-app.is-inset .hd-drawer-wrap.is-center { padding-top: 12vh; }
+.hd-root.hx-app.is-inset :is(.hd-drawer, .hd-search-dialog) {
+  background: var(--popover);
+  color: var(--popover-foreground);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  box-shadow: 0 1px 0 rgb(255 255 255 / 0.06) inset, 0 32px 64px -16px rgb(0 0 0 / 0.45), 0 8px 20px -8px rgb(0 0 0 / 0.2);
+}
+.hd-root.hx-app.is-inset .hd-drawer { width: min(28rem, 100%); height: 100%; animation: hx-panel-in 0.28s cubic-bezier(0.2, 0.8, 0.2, 1); }
+.hd-root.hx-app.is-inset .hd-search-dialog { display: flex; flex-direction: column; width: min(40rem, 100%); max-height: min(34rem, 76vh); animation: hx-dialog-in 0.2s cubic-bezier(0.2, 0.8, 0.2, 1); }
+.hd-root.hx-app.is-inset .hd-search-dialog .hd-hits { flex: 1; min-height: 0; max-height: none; padding: 0.5rem; }
+.hd-root.hx-app.is-inset :is(.hd-drawer-head) { align-items: flex-start; padding: 1.25rem 1.25rem 0.75rem; }
+.hd-root.hx-app.is-inset .hd-drawer-head h3 { font-size: 1.0625rem; line-height: 1.3; letter-spacing: 0; }
+.hd-root.hx-app.is-inset .hd-drawer-head small { display: block; margin-top: 0.125rem; font-size: 0.8125rem; }
+.hd-root.hx-app.is-inset .hd-drawer-body { padding: 0 1.25rem 1.25rem; }
+.hd-root.hx-app.is-inset .hd-drawer-foot { gap: 0.5rem; padding: 0.875rem 1.25rem; border-top: 1px solid var(--border); background: color-mix(in srgb, var(--muted) 35%, transparent); border-radius: 0 0 20px 20px; }
+.hd-root.hx-app.is-inset .hd-drawer-foot .hd-btn { height: 2.5rem; }
+.hd-root.hx-app.is-inset .hd-search-input { padding: 0 1rem; height: 3.25rem; flex: none; }
+.hd-root.hx-app.is-inset .hd-search-input input { font-size: 1rem; }
+.hd-root.hx-app.is-inset .hd-hits button { padding: 0.625rem 0.75rem; min-height: 2.75rem; border-radius: var(--hx-r-ctl); align-items: center; }
+.hd-root.hx-app.is-inset .hd-hits .hd-empty { padding: 2rem 1rem; }
+.hd-root.hx-app.is-inset .hd-secret .hd-secret-body { padding: 0 1.25rem 1.25rem; display: grid; gap: 0.75rem; }
+.hd-root.hx-app.is-inset .hd-secret code { display: block; padding: 0.75rem 0.875rem; background: var(--muted); border: 1px solid var(--border); overflow-wrap: anywhere; font-size: 0.8125rem; }
+
+/* The bell's list on a phone (a shared Sheet) matches the menu drawer. */
+.dashboard-root [data-slot='sheet-content'].hx-sheet {
+  max-height: min(88dvh, 46rem);
+  border-radius: 28px 28px 0 0;
+  border: 1px solid var(--border);
+  border-bottom: 0;
+  background: var(--popover);
+  box-shadow: 0 -20px 60px -20px rgb(0 0 0 / 0.5);
+}
+.hx-sheet-handle, .hd-root.hx-app.is-inset .hd-drawer::before, .hd-root.hx-app.is-inset .hd-search-dialog::before { display: none; }
+.hx-sheet-handle { display: block; flex: none; width: 2.5rem; height: 0.375rem; margin: 0.625rem auto 0.25rem; border-radius: 999px; background: color-mix(in srgb, var(--foreground) 18%, transparent); }
+body.dashboard-root [data-slot='sheet-overlay'] { -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+
+@media (max-width: 767px) {
+  .hd-root.hx-app.is-inset .hd-drawer-wrap, .hd-root.hx-app.is-inset .hd-drawer-wrap.is-center { align-items: flex-end; justify-content: center; padding: 0; }
+  .hd-root.hx-app.is-inset :is(.hd-drawer, .hd-search-dialog) {
+    width: 100%; max-width: none; height: auto; max-height: min(88dvh, 46rem);
+    border-radius: 28px 28px 0 0; border-bottom: 0; align-self: auto;
+    padding-bottom: env(safe-area-inset-bottom);
+    animation: hx-sheet-up 0.32s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  .hd-root.hx-app.is-inset .hd-drawer { display: flex; flex-direction: column; }
+  .hd-root.hx-app.is-inset .hd-search-dialog { min-height: min(60dvh, 28rem); }
+  .hd-root.hx-app.is-inset :is(.hd-drawer, .hd-search-dialog)::before { content: ''; display: block; flex: none; width: 2.5rem; height: 0.375rem; margin: 0.625rem auto 0.125rem; border-radius: 999px; background: color-mix(in srgb, var(--foreground) 18%, transparent); }
+  .hd-root.hx-app.is-inset .hd-drawer-head { padding-top: 0.5rem; }
+  .hd-root.hx-app.is-inset .hd-drawer-foot { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; padding-bottom: 0.875rem; border-radius: 0; }
+  .hd-root.hx-app.is-inset .hd-drawer-foot .hd-btn { height: 2.75rem; width: 100%; }
+  .hd-root.hx-app.is-inset .hd-search-input { height: 3.5rem; }
+  .hd-root.hx-app.is-inset .hd-hits button { min-height: 3rem; }
+}
+@media (max-width: 767px) { .hd-root.hx-app.is-inset .hd-toast { bottom: calc(1rem + env(safe-area-inset-bottom)); border-radius: var(--hx-r-ctl); max-width: calc(100% - 2rem); } }
+@media (prefers-reduced-motion: reduce) {
+  .hd-root.hx-app.is-inset :is(.hd-drawer-wrap, .hd-drawer, .hd-search-dialog) { animation: none; }
+}
+
 /* ------------------------------------------------------------------ blocks drawn by the module screens */
 
 .hx-tablewrap { padding: 0 12px 12px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
@@ -456,3 +567,8 @@
 @media (prefers-reduced-motion: reduce) {
   .hd-root.hx-app *, .hd-root.hx-app *::before, .hd-root.hx-app *::after { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; scroll-behavior: auto !important; }
 }
+
+@media (pointer: coarse) { .hd-root.hx-app.is-inset .hd-search-input kbd { display: none; } }
+
+/* The module screens sit outside the legacy wrapper, so they restate the inner radius themselves. */
+.dashboard-root :is(.hx-card, .hx-code, .hx-steps li, .hx-table-card) { border-radius: var(--hx-r-inner); }

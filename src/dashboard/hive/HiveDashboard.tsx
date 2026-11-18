@@ -415,7 +415,7 @@ function Shell({ user, onSignOut, guest = false }: HiveDashboardProps) {
         value={{ className: surfaceClass, style: surfaceStyle }}
       >
         <div
-          className={cn("dashboard-root", dark && "dark")}
+          className={cn("dashboard-root hive-app", dark && "dark")}
           data-font="geist"
           style={surfaceStyle}
         >

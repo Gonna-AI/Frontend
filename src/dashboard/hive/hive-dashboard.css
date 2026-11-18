@@ -493,7 +493,7 @@
 }
 .hd-wallet {
   background: var(--hd-card);
-  border-radius: 12px;
+  border-radius: 10px;
   padding: 10px;
   display: grid;
   gap: 3px;
@@ -798,7 +798,7 @@
 .hd-ico-chip {
   width: 34px;
   height: 34px;
-  border-radius: 12px;
+  border-radius: 10px;
   background: var(--hd-panel);
   display: grid;
   place-items: center;
@@ -1416,7 +1416,7 @@ a.hd-rail-link {
 .hd-doc-icon {
   width: 36px;
   height: 36px;
-  border-radius: 12px;
+  border-radius: 10px;
   background: color-mix(in srgb, var(--hd-orange) 14%, transparent);
   color: var(--hd-orange);
   display: grid;
@@ -1626,7 +1626,7 @@ a.hd-rail-link {
   align-items: center;
   gap: 10px;
   padding: 9px 10px;
-  border-radius: 12px;
+  border-radius: 10px;
   text-align: left;
   font-size: 13px;
   color: var(--hd-text);
@@ -1649,7 +1649,7 @@ a.hd-rail-link {
   width: 100%;
   margin-top: 4px;
   padding: 9px;
-  border-radius: 12px;
+  border-radius: 10px;
   background: var(--hd-panel);
   font-size: 12.5px;
   font-weight: 500;
@@ -1727,7 +1727,7 @@ a.hd-rail-link {
   width: 100%;
   text-align: left;
   padding: 9px 10px;
-  border-radius: 12px;
+  border-radius: 10px;
   background: var(--hd-panel);
   margin-bottom: 6px;
   font-size: 13px;
@@ -1786,7 +1786,7 @@ a.hd-rail-link {
   align-items: baseline;
   gap: 12px;
   padding: 10px 12px;
-  border-radius: 12px;
+  border-radius: 10px;
   text-align: left;
   font-size: 14px;
 }
@@ -2046,7 +2046,7 @@ html.hd-lock body {
   gap: 1px;
   text-align: left;
   padding: 9px 12px;
-  border-radius: 12px;
+  border-radius: 10px;
   background: var(--hd-card);
   border-left: 4px solid #a9a9ad;
 }
@@ -2306,7 +2306,7 @@ html.hd-lock body {
   display: inline-grid;
   gap: 1px;
   padding: 6px 10px;
-  border-radius: 12px;
+  border-radius: 10px;
   background: var(--hd-card);
   box-shadow: 0 0 0 1px var(--hd-line) inset;
   font-size: 12px;
@@ -2383,7 +2383,7 @@ html.hd-lock body {
 .hd-untrusted {
   margin: 6px 0 0;
   padding: 10px 12px;
-  border-radius: 12px;
+  border-radius: 10px;
   background: var(--hd-card);
   font: inherit;
   font-size: 12.5px;
@@ -2458,7 +2458,7 @@ html.hd-lock body {
   color: var(--hd-muted);
   background: var(--hd-panel);
   padding: 10px 12px;
-  border-radius: 12px;
+  border-radius: 10px;
 }
 .hd-suggest {
   display: flex;
@@ -2619,7 +2619,7 @@ html.hd-lock body {
   width: 100%;
   word-break: break-all;
   background: var(--hd-panel);
-  border-radius: 12px;
+  border-radius: 10px;
   padding: 12px 14px;
   font-size: 13px;
 }
@@ -3192,7 +3192,7 @@ html.hd-lock body {
 .hd-form input,
 .hd-form-inline input {
   height: 38px;
-  border-radius: 12px;
+  border-radius: 10px;
   border: 1px solid var(--hd-line);
   background: var(--hd-card);
   color: var(--hd-text);
@@ -3228,7 +3228,7 @@ a.hd-btn { text-decoration: none; display: inline-flex; align-items: center; jus
   width: 100%;
   height: 260px;
   border: 0;
-  border-radius: 12px;
+  border-radius: 10px;
   background: transparent;
   display: block;
 }
@@ -3251,7 +3251,7 @@ a.hd-btn { text-decoration: none; display: inline-flex; align-items: center; jus
   align-items: center;
   padding: 6px 6px 6px 12px;
   background: var(--hd-panel);
-  border-radius: 12px;
+  border-radius: 10px;
   font-size: 13px;
 }
 .hd-checks li {
@@ -3261,7 +3261,7 @@ a.hd-btn { text-decoration: none; display: inline-flex; align-items: center; jus
   align-items: center;
   padding: 8px 12px;
   background: var(--hd-panel);
-  border-radius: 12px;
+  border-radius: 10px;
   font-size: 13px;
 }
 .hd-checks small { color: var(--hd-muted); }
