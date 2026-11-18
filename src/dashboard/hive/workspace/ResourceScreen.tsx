@@ -1,13 +1,15 @@
-import { ChevronRight, Plus, Search } from 'lucide-react-dash';
+import { Check, ChevronDown, ChevronRight, ListFilter, Plus, Search } from 'lucide-react-dash';
 import { useMemo, useState } from 'react';
 
 import { Button } from '@/components/dashboard-ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/dashboard-ui/card';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/dashboard-ui/dropdown-menu';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/dashboard-ui/dialog';
 import { Input } from '@/components/dashboard-ui/input';
 import { Progress } from '@/components/dashboard-ui/progress';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/dashboard-ui/sheet';
 import { Textarea } from '@/components/dashboard-ui/textarea';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
 
 import { useResource, type Row } from '../api/resource';
@@ -71,10 +73,10 @@ function Cell<T extends Row>({ col, row }: { col: Column<T>; row: T }) {
   }
 }
 
-function Kpis<T extends Row>({ view, rows }: { view: View<T>; rows: T[] }) {
+function Kpis<T extends Row>({ view, rows, paired }: { view: View<T>; rows: T[]; paired?: boolean }) {
   if (!view.kpis?.length) return null;
   return (
-    <div className="grid grid-cols-2 gap-3 md:gap-4 lg:grid-cols-[repeat(auto-fit,minmax(190px,1fr))]">
+    <div className={cn('grid grid-cols-2 gap-3 md:gap-4', paired ? 'content-start xl:grid-cols-2' : 'lg:grid-cols-[repeat(auto-fit,minmax(190px,1fr))]')}>
       {view.kpis.map((k) => {
         const hot = k.hot?.(rows);
         return (
@@ -206,9 +208,12 @@ function DetailSheet<T extends Row>({ view, row, onClose, onAction }: { view: Vi
   const fields = [...view.columns.filter((c) => c.key !== titleKey), ...(view.detail ?? [])];
   const actions = (view.actions ?? []).filter((a) => !a.when || a.when(row));
   const [confirming, setConfirming] = useState<Action<T> | null>(null);
+  // On a phone the record comes up from the bottom, like every other overlay; on a wide screen it slides in from the right.
+  const mobile = useIsMobile();
   return (
     <Sheet open onOpenChange={(o) => !o && onClose()}>
-      <SheetContent className="w-full gap-0 overflow-y-auto sm:max-w-md">
+      <SheetContent side={mobile ? 'bottom' : 'right'} showCloseButton={!mobile} className={cn('w-full gap-0 overflow-y-auto sm:max-w-md', mobile && 'hx-sheet p-0')}>
+        {mobile && <div className="hx-sheet-handle" aria-hidden="true" />}
         <SheetHeader className="gap-2 border-b pb-4">
           <div className="flex flex-wrap items-center gap-2">
             {statusCol && <Cell col={statusCol} row={row} />}
@@ -217,7 +222,8 @@ function DetailSheet<T extends Row>({ view, row, onClose, onAction }: { view: Vi
           <SheetTitle className="text-xl leading-snug">{humanize(row[titleKey])}</SheetTitle>
           <SheetDescription>{view.title}</SheetDescription>
         </SheetHeader>
-        <dl className="grid gap-0 px-4 py-2">
+        <h3 className="px-4 pt-4 pb-1.5 font-medium text-muted-foreground text-xs uppercase tracking-wider">{t('Details')}</h3>
+        <dl className="mx-4 mb-4 grid gap-0 overflow-hidden rounded-[var(--hx-r-inner,10px)] border px-3.5">
           {fields.map((f) => (
             <div key={f.key} className="grid grid-cols-[minmax(0,2fr)_minmax(0,3fr)] items-start gap-3 border-b py-2.5 text-sm last:border-0">
               <dt className="text-muted-foreground">{f.label}</dt>
@@ -228,7 +234,7 @@ function DetailSheet<T extends Row>({ view, row, onClose, onAction }: { view: Vi
           ))}
         </dl>
         {actions.length > 0 && (
-          <div className="flex flex-wrap gap-2 border-t px-4 py-4">
+          <div className="sticky bottom-0 mt-auto flex flex-wrap gap-2 border-t bg-popover px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
             {actions.map((a) => {
               const Icon = a.icon;
               return (
@@ -254,7 +260,7 @@ function DetailSheet<T extends Row>({ view, row, onClose, onAction }: { view: Vi
             </div>
           </div>
         )}
-        <p className="mt-auto border-t px-4 py-3 font-mono text-[11px] text-muted-foreground">
+        <p className={cn('border-t px-4 py-3 font-mono text-[11px] text-muted-foreground', actions.length === 0 && 'mt-auto')}>
           {view.resource.list} · {view.resource.path}
         </p>
       </SheetContent>
@@ -283,6 +289,7 @@ function ViewBody<T extends Row>({ view }: { view: View<T> }) {
   });
   const open = openId ? res.rows.find((r) => r.id === openId) : undefined;
   const phoneCols = view.columns.filter((c) => !c.wide).slice(0, 4);
+  const breakdownShown = Boolean(view.breakdown) && new Set(res.rows.map((r) => humanize(r[view.breakdown!.by]))).size >= 2;
 
   const run = (row: T, a: Action<T>) => {
     res.update(row.id, a.apply(row));
@@ -291,15 +298,18 @@ function ViewBody<T extends Row>({ view }: { view: View<T> }) {
 
   return (
     <div className="flex animate-in flex-col gap-4 fade-in-0 md:gap-6">
-      <Kpis view={view} rows={res.rows} />
-      <Breakdown view={view} rows={res.rows} />
+      {/* The figures and the breakdown sit side by side on a wide screen, so a list starts higher up the page. */}
+      <div className={cn('grid gap-4 md:gap-6', view.kpis?.length && view.breakdown && breakdownShown && 'xl:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)]')}>
+        <Kpis view={view} rows={res.rows} paired={Boolean(view.kpis?.length && view.breakdown && breakdownShown)} />
+        <Breakdown view={view} rows={res.rows} />
+      </div>
       <Card className="gap-0 overflow-hidden py-0">
         <div className="flex flex-wrap items-center gap-2 border-b px-4 py-3 md:px-5">
           <div className="relative w-full sm:w-64">
             <Search className="-translate-y-1/2 pointer-events-none absolute top-1/2 left-3 size-4 text-muted-foreground" aria-hidden="true" />
             <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder={`${t('Search')} ${view.title.toLowerCase()}`} aria-label={t('Search')} className="pl-9" />
           </div>
-          {statuses.length > 1 && (
+          {statuses.length > 1 && statuses.length <= 4 && (
             <div className="flex flex-wrap gap-1.5" role="group" aria-label={t('Filter')}>
               <Button type="button" size="sm" variant={status === null ? 'default' : 'outline'} aria-pressed={status === null} onClick={() => setStatus(null)}>
                 {t('All')} <span className="tabular-nums opacity-60">{res.rows.length}</span>
@@ -310,6 +320,35 @@ function ViewBody<T extends Row>({ view }: { view: View<T> }) {
                 </Button>
               ))}
             </div>
+          )}
+          {/* Five or more statuses would be a wall of chips: they become one menu, with the counts beside each. */}
+          {statuses.length > 4 && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button type="button" size="sm" variant="outline" className="gap-1.5 capitalize" aria-label={t('Filter by status')}>
+                  <ListFilter />
+                  {status ? humanize(status) : t('Status')}
+                  {status && <span className="tabular-nums opacity-60">{res.rows.filter((r) => String(r[view.statusKey!]) === status).length}</span>}
+                  <ChevronDown className="opacity-60" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-56">
+                <DropdownMenuLabel className="text-muted-foreground text-xs uppercase tracking-wider">{t('Status')}</DropdownMenuLabel>
+                <DropdownMenuItem onSelect={() => setStatus(null)}>
+                  {t('All')}
+                  <span className="ml-auto text-muted-foreground tabular-nums">{res.rows.length}</span>
+                  {status === null && <Check className="size-4" />}
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                {statuses.map((s) => (
+                  <DropdownMenuItem key={s} onSelect={() => setStatus(status === s ? null : s)} className="capitalize">
+                    {humanize(s)}
+                    <span className="ml-auto text-muted-foreground tabular-nums">{res.rows.filter((r) => String(r[view.statusKey!]) === s).length}</span>
+                    {status === s && <Check className="size-4" />}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
           )}
           <div className="ml-auto flex items-center gap-2">
             <SourceBadge source={res.source} loading={res.loading} />

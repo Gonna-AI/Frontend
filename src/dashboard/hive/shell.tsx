@@ -3,8 +3,8 @@
  * navigation, a slim header with a trigger, breadcrumb and tools, and one scrolling page.
  * The pieces are the same primitives the workspace dashboards use (components/dashboard-ui).
  */
-import { Bell, Check, ChevronRight, ChevronsUpDown, CircleHelp, LayoutPanelLeft, LogOut, Moon, Search, Settings, Sun, X, type LucideIcon } from 'lucide-react-dash';
-import { useEffect, useState } from 'react';
+import { Bell, Check, ChevronDown, ChevronRight, ChevronsUpDown, CircleHelp, LayoutPanelLeft, LogOut, Moon, Search, Settings, Sun, X, type LucideIcon } from 'lucide-react-dash';
+import { Fragment, useEffect, useState } from 'react';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/dashboard-ui/avatar';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/dashboard-ui/breadcrumb';
@@ -34,7 +34,7 @@ import {
 
 import { useBrand } from './branding';
 import { useLang, useT } from './i18n';
-import { NAV, NAV_PRIMARY, NAV_SECTIONS, sectionOf } from './nav';
+import { NAV, NAV_PRIMARY, NAV_SECTIONS, isHub, sectionOf } from './nav';
 import type { HiveApiState } from './hiveApi';
 import ApiStatus from './workspace/ApiStatus';
 import { useHive, type DetailRef } from './store';
@@ -189,14 +189,30 @@ export function HiveSidebar({
                       </CollapsibleTrigger>
                       <CollapsibleContent>
                         <SidebarMenuSub>
-                          {group.ids.map((id) => (
-                            <SidebarMenuSubItem key={id}>
-                              <SidebarMenuSubButton asChild isActive={section === id}>
-                                <a {...linkProps(id, go, closeOnPhone)} aria-current={section === id ? 'page' : undefined}>
-                                  <span>{t(NAV[id].title)}</span>
-                                </a>
-                              </SidebarMenuSubButton>
-                            </SidebarMenuSubItem>
+                          <SidebarMenuSubItem>
+                            <SidebarMenuSubButton asChild isActive={section === group.hub}>
+                              <a {...linkProps(group.hub, go, closeOnPhone)} aria-current={section === group.hub ? 'page' : undefined}>
+                                <span className="font-medium">{t('Overview')}</span>
+                              </a>
+                            </SidebarMenuSubButton>
+                          </SidebarMenuSubItem>
+                          {group.parts.map((part) => (
+                            <Fragment key={part.id}>
+                              {group.parts.length > 1 && (
+                                <li className="mt-2 px-2 pb-0.5 font-medium text-[0.6875rem] text-muted-foreground uppercase tracking-wider" aria-hidden="true">
+                                  {t(part.title)}
+                                </li>
+                              )}
+                              {part.ids.map((id) => (
+                                <SidebarMenuSubItem key={id}>
+                                  <SidebarMenuSubButton asChild isActive={section === id}>
+                                    <a {...linkProps(id, go, closeOnPhone)} aria-current={section === id ? 'page' : undefined}>
+                                      <span>{t(NAV[id].title)}</span>
+                                    </a>
+                                  </SidebarMenuSubButton>
+                                </SidebarMenuSubItem>
+                              ))}
+                            </Fragment>
                           ))}
                         </SidebarMenuSub>
                       </CollapsibleContent>
@@ -307,7 +323,7 @@ export function SiteHeader({
   const { data, markRead } = useHive();
   const { isMobile } = useSidebar();
   const [bellOpen, setBellOpen] = useState(false);
-  const group = section !== null ? sectionOf(section) : undefined;
+  const group = section !== null && !isHub(section) ? sectionOf(section) : undefined;
   const openAlarms = data.alarms.filter((a) => a.state === 'Open');
 
   return (
@@ -320,7 +336,35 @@ export function SiteHeader({
             <BreadcrumbList className="flex-nowrap">
               {group && (
                 <>
-                  <BreadcrumbItem className="hidden sm:inline-flex">{t(group.title)}</BreadcrumbItem>
+                  <BreadcrumbItem className="hidden sm:inline-flex">
+                    {/* The group name is a switcher: every screen in the group, by cluster, without opening the sidebar. */}
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <button type="button" className="-mx-1.5 inline-flex h-7 items-center gap-1 rounded-md px-1.5 text-muted-foreground outline-none transition-colors hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring data-[state=open]:bg-accent data-[state=open]:text-foreground">
+                          {t(group.title)}
+                          <ChevronDown className="size-3.5" aria-hidden="true" />
+                        </button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="start" className="max-h-[min(70vh,34rem)] w-64 overflow-y-auto">
+                        <DropdownMenuItem onSelect={() => go(group.hub)} className="font-medium">
+                          {t('Overview')}
+                          {section === group.hub && <Check className="ml-auto size-4" />}
+                        </DropdownMenuItem>
+                        {group.parts.map((part) => (
+                          <Fragment key={part.id}>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuLabel className="text-muted-foreground text-xs uppercase tracking-wider">{t(part.title)}</DropdownMenuLabel>
+                            {part.ids.map((id) => (
+                              <DropdownMenuItem key={id} onSelect={() => go(id)}>
+                                {t(NAV[id].title)}
+                                {section === id && <Check className="ml-auto size-4" />}
+                              </DropdownMenuItem>
+                            ))}
+                          </Fragment>
+                        ))}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </BreadcrumbItem>
                   <BreadcrumbSeparator className="hidden sm:block" />
                 </>
               )}
@@ -531,6 +575,37 @@ function DrawerRow({ icon: Icon, label, active, count, href, onClick, external }
   );
 }
 
+/** One group in the phone drawer: a header that opens the group, then its screens under their cluster names. */
+function DrawerGroup({ group, section, row }: { group: (typeof NAV_SECTIONS)[number]; section: string; row: (id: string, label: string, icon: LucideIcon) => React.ReactNode }) {
+  const t = useT();
+  const holds = group.ids.includes(section) || section === group.hub;
+  const [open, setOpen] = useState(holds);
+  const GroupIcon = group.icon;
+  return (
+    <Collapsible open={open} onOpenChange={setOpen} className="hx-well rounded-[1.25rem] p-1.5">
+      <CollapsibleTrigger asChild>
+        <button type="button" className="hx-well-item flex min-h-12 w-full items-center gap-3 rounded-[0.875rem] px-3.5 text-left text-[0.9375rem] outline-none" data-active={holds && !open ? 'true' : 'false'}>
+          <GroupIcon className="size-5 shrink-0 text-muted-foreground" strokeWidth={1.8} />
+          <span className="min-w-0 flex-1 truncate font-medium">{t(group.title)}</span>
+          <span className="text-muted-foreground text-xs tabular-nums">{group.ids.length}</span>
+          <ChevronRight className={`size-4 shrink-0 text-muted-foreground transition-transform duration-200 ${open ? 'rotate-90' : ''}`} />
+        </button>
+      </CollapsibleTrigger>
+      <CollapsibleContent>
+        <ul className="grid gap-0.5 pt-1 pb-0.5 [&>li]:contents">
+          {row(group.hub, t('Overview'), group.icon)}
+          {group.parts.map((part) => (
+            <Fragment key={part.id}>
+              {group.parts.length > 1 && <li className="px-3.5 pt-2.5 pb-0.5 font-medium text-[0.6875rem] text-muted-foreground uppercase tracking-wider">{t(part.title)}</li>}
+              {part.ids.map((id) => row(id, t(NAV[id].title), NAV[id].icon))}
+            </Fragment>
+          ))}
+        </ul>
+      </CollapsibleContent>
+    </Collapsible>
+  );
+}
+
 function DrawerList({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className="grid gap-2">
@@ -617,11 +692,14 @@ function MobileDrawer({
 
       <div className="grid min-h-0 flex-1 content-start gap-5 overflow-y-auto overscroll-contain px-4 pt-1 pb-[calc(1.25rem+env(safe-area-inset-bottom))]">
         <DrawerList title={t('Operate')}>{NAV_PRIMARY.map((id) => row(id, t(NAV[id].title), NAV[id].icon))}</DrawerList>
-        {NAV_SECTIONS.map((group) => (
-          <DrawerList key={group.id} title={t(group.title)}>
-            {group.ids.map((id) => row(id, t(NAV[id].title), NAV[id].icon))}
-          </DrawerList>
-        ))}
+        <section className="grid gap-2">
+          <h3 className="px-1 font-medium text-muted-foreground text-xs uppercase tracking-wider">{t('Explore')}</h3>
+          <div className="grid gap-2">
+            {NAV_SECTIONS.map((group) => (
+              <DrawerGroup key={group.id} group={group} section={section} row={row} />
+            ))}
+          </div>
+        </section>
 
         <DrawerList title={t('Preferences')}>
           {row('settings', t('Settings'), Settings)}

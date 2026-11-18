@@ -598,3 +598,22 @@ body.dashboard-root [data-slot='command-item'] { min-height: 2.5rem; }
   body.dashboard-root [data-slot='dialog-content'] [data-slot='command-list'] { max-height: none !important; flex: 1; }
   body.dashboard-root [data-slot='dialog-content'] [data-slot='command'] { height: 100%; min-height: 0; }
 }
+
+/* Forms and confirmations (shared Dialogs) follow the same rule as every overlay: a centred card on wide screens,
+   a bottom sheet on phones. */
+body.dashboard-root [data-slot='dialog-content']:not(:has([data-slot='command'])) {
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  box-shadow: 0 1px 0 rgb(255 255 255 / 0.06) inset, 0 32px 64px -16px rgb(0 0 0 / 0.45), 0 8px 20px -8px rgb(0 0 0 / 0.2);
+}
+@media (max-width: 767px) {
+  body.dashboard-root [data-slot='dialog-content']:not(:has([data-slot='command'])) {
+    top: auto !important; bottom: 0 !important; left: 0 !important; right: 0 !important;
+    width: 100% !important; max-width: 100% !important; max-height: 88dvh; overflow-y: auto;
+    transform: none !important; translate: none !important;
+    border-radius: 28px 28px 0 0; border-bottom: 0;
+    padding-bottom: calc(1.5rem + env(safe-area-inset-bottom));
+    animation: hx-sheet-up 0.32s cubic-bezier(0.2, 0.8, 0.2, 1) !important;
+  }
+  body.dashboard-root [data-slot='dialog-content']:not(:has([data-slot='command']))::before { content: ''; display: block; width: 2.5rem; height: 0.375rem; margin: -0.5rem auto 0.25rem; border-radius: 999px; background: color-mix(in srgb, var(--foreground) 18%, transparent); }
+}

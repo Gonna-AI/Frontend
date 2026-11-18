@@ -40,7 +40,8 @@ import { MachineDetail, MachinesView } from "./machines";
 import ModuleView from "./modules";
 import ResourceScreen from "./workspace/ResourceScreen";
 import { SCREENS } from "./workspace/registry";
-import { NAV, MODULE_SECTIONS, NAV_PRIMARY, sectionOf } from "./nav";
+import { NAV, MODULE_SECTIONS, NAV_PRIMARY, isHub, sectionOf } from "./nav";
+import HubView from "./HubView";
 import {
   ActivityView,
   AlarmsView,
@@ -353,6 +354,7 @@ function Shell({ user, onSignOut, guest = false }: HiveDashboardProps) {
         setCompact={setCompact}
       />
     );
+  else if (isHub(section)) view = <HubView id={section as string} go={go} />;
   else if (section && section in SCREENS)
     view = <ResourceScreen screen={SCREENS[section]} area={second} go={go} />;
   else if (section && (MODULE_SECTIONS as readonly string[]).includes(section))
@@ -403,6 +405,7 @@ function Shell({ user, onSignOut, guest = false }: HiveDashboardProps) {
   const modern =
     section === "" ||
     section === "admin" ||
+    isHub(section) ||
     (section !== null && section in SCREENS) ||
     (section !== null &&
       (MODULE_SECTIONS as readonly string[]).includes(section));
