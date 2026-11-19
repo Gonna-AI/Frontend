@@ -6,6 +6,8 @@ import { Input } from '@/components/dashboard-ui/input';
 import { Tabs as UiTabs, TabsList, TabsTrigger } from '@/components/dashboard-ui/tabs';
 import { Button } from '@/components/dashboard-ui/button';
 
+import { cn } from '@/lib/utils';
+
 import { useLang, useT } from './i18n';
 import { MODULES, type Block, type Cell, type CellValue, type Tab, type Txt } from './modulesData';
 import { NAV } from './nav';
@@ -58,17 +60,6 @@ function Panel({ title, sub, children, flush }: { title?: string; sub?: string; 
   );
 }
 
-function CellView({ v, label }: { v: CellValue; label: string }) {
-  const tr = useTx();
-  const c: Cell = isCell(v) ? v : { text: v };
-  const text = tr(c.text);
-  return (
-    <td data-label={label} className={c.mono ? 'is-mono' : undefined}>
-      {c.pill ? <ToneBadge tone={c.tone ?? 'gray'}>{text}</ToneBadge> : text}
-    </td>
-  );
-}
-
 function TableBlock({ block }: { block: Extract<Block, { kind: 'table' }> }) {
   const tr = useTx();
   const t = useT();
@@ -113,33 +104,36 @@ function TableBlock({ block }: { block: Extract<Block, { kind: 'table' }> }) {
           )}
         </div>
       )}
-      <div className="hx-tablewrap">
-        <table className="hx-table">
-          <thead>
-            <tr>
-              {block.cols.map((c, i) => (
-                <th key={i} className={c.align === 'end' ? 'is-end' : undefined} scope="col">
-                  {labels[i]}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((row, ri) => (
-              <tr key={ri}>
-                {row.map((cell, ci) => (
-                  <CellView key={ci} v={cell} label={labels[ci]} />
+      <ul className="hx-rows mx-5 mb-5 divide-y overflow-hidden rounded-[var(--hx-r-inner,10px)] border">
+        {rows.map((row, ri) => {
+          const cells = row.map((cell, ci) => ({ cell: isCell(cell) ? cell : ({ text: cell } as Cell), label: labels[ci] }));
+          const [head, second, ...rest] = cells;
+          const pills = rest.filter((c) => c.cell.pill);
+          const plain = rest.filter((c) => !c.cell.pill);
+          return (
+            <li key={ri} className="flex flex-wrap items-center gap-x-4 gap-y-2 px-4 py-3">
+              <span className="grid min-w-0 flex-1 basis-56 leading-snug">
+                <span className={cn('truncate font-medium text-sm', head.cell.mono && 'font-mono text-[0.8125rem]')}>{tr(head.cell.text)}</span>
+                {second && (second.cell.pill ? <span className="mt-1"><ToneBadge tone={second.cell.tone ?? 'gray'}>{tr(second.cell.text)}</ToneBadge></span> : <span className={cn('truncate text-muted-foreground text-xs', second.cell.mono && 'font-mono')}>{tr(second.cell.text)}</span>)}
+              </span>
+              <span className="flex flex-wrap items-center justify-end gap-x-5 gap-y-1.5">
+                {plain.map((c, i) => (
+                  <span key={i} className="grid text-right leading-tight">
+                    <span className="text-[0.6875rem] text-muted-foreground uppercase tracking-wide">{c.label}</span>
+                    <span className={cn('text-sm tabular-nums', c.cell.mono && 'font-mono text-[0.8125rem]')}>{tr(c.cell.text)}</span>
+                  </span>
                 ))}
-              </tr>
-            ))}
-            {rows.length === 0 && (
-              <tr className="is-empty">
-                <td colSpan={block.cols.length}>{t('Nothing found.')}</td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+                {pills.map((c, i) => (
+                  <ToneBadge key={i} tone={c.cell.tone ?? 'gray'}>
+                    {tr(c.cell.text)}
+                  </ToneBadge>
+                ))}
+              </span>
+            </li>
+          );
+        })}
+        {rows.length === 0 && <li className="px-4 py-8 text-center text-muted-foreground text-sm">{t('Nothing found.')}</li>}
+      </ul>
     </Panel>
   );
 }

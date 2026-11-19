@@ -1,5 +1,5 @@
 import { Check, Copy, Search, X, type LucideIcon } from 'lucide-react-dash';
-import { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
 
 import { formatAgo, formatDuration, formatNumber, useT } from './i18n';
 import { STATE_LABEL, type Applicability, type MachineState, type Severity } from './placeholder';
@@ -227,86 +227,44 @@ export function MobileCard({ spec, onClick }: { spec: CardSpec; onClick?: () => 
   );
 }
 
+/**
+ * A list of records as rows, not a table: an icon, what it is, its state, and any actions on the right.
+ * Every list in the dashboard that is not a board or a timeline is drawn this way, on every screen size.
+ * `card` says how a record reads; columns with an empty header are its actions.
+ */
 export function DataTable<T extends { id: string }>({ rows, cols, onOpen, empty, card }: { rows: T[]; cols: Col<T>[]; onOpen: (row: T) => void; empty: string; card?: (row: T) => CardSpec }) {
-  const phone = usePhone();
-  const [sortIdx, setSortIdx] = useState<number | null>(null);
-  const [desc, setDesc] = useState(false);
-  const sorted = useMemo(() => {
-    if (sortIdx === null || !cols[sortIdx]?.sort) return rows;
-    const cmp = cols[sortIdx].sort!;
-    return [...rows].sort((a, b) => (desc ? -cmp(a, b) : cmp(a, b)));
-  }, [rows, cols, sortIdx, desc]);
-
-  if (phone) {
-    return (
-      <div className="hd-mlist">
-        {sorted.map((r) => (
-          <MobileCard
-            key={r.id}
-            onClick={() => onOpen(r)}
-            spec={card ? card(r) : { title: cols[0].render(r), sub: cols[1]?.render(r), meta: cols[2]?.render(r) }}
-          />
-        ))}
-        {sorted.length === 0 && <p className="hd-empty">{empty}</p>}
-      </div>
-    );
-  }
-
+  const actions = cols.filter((c) => c.header === '');
+  if (rows.length === 0) return <p className="rounded-[14px] border border-dashed px-5 py-10 text-center text-muted-foreground text-sm">{empty}</p>;
   return (
-    <div className="hd-table-wrap">
-      <table className="hd-table">
-        <thead>
-          <tr>
-            {cols.map((c, i) => (
-              <th key={c.header} aria-sort={sortIdx === i ? (desc ? 'descending' : 'ascending') : undefined}>
-                {c.sort ? (
-                  <button
-                    type="button"
-                    className="hd-th-btn"
-                    onClick={() => {
-                      if (sortIdx === i) setDesc((d) => !d);
-                      else {
-                        setSortIdx(i);
-                        setDesc(false);
-                      }
-                    }}
-                  >
-                    {c.header}
-                    {sortIdx === i ? (desc ? ' ↓' : ' ↑') : ''}
-                  </button>
-                ) : (
-                  c.header
-                )}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {sorted.map((r) => (
-            <tr
-              key={r.id}
-              className="is-clickable"
-              tabIndex={0}
-              onClick={() => onOpen(r)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') onOpen(r);
-              }}
-            >
-              {cols.map((c) => (
-                <td key={c.header}>{c.render(r)}</td>
+    <ul className="hx-rows divide-y overflow-hidden rounded-[14px] border bg-card">
+      {rows.map((r) => {
+        const spec: CardSpec = card ? card(r) : { title: cols[0].render(r), sub: cols[1]?.render(r), meta: cols[2]?.render(r) };
+        const Icon = spec.icon;
+        return (
+          <li key={r.id} className="flex flex-wrap items-center gap-x-3 gap-y-2 px-3 py-2.5 sm:px-4">
+            <button type="button" onClick={() => onOpen(r)} className="flex min-w-0 flex-1 basis-56 items-center gap-3 rounded-[10px] text-left outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50">
+              {spec.time && <TimeCol time={spec.time} />}
+              {Icon && (
+                <span className="grid size-9 shrink-0 place-items-center rounded-[10px] border bg-muted text-foreground">
+                  <Icon size={16} />
+                </span>
+              )}
+              <span className="grid min-w-0 leading-snug">
+                <b className="truncate font-medium text-sm">{spec.title}</b>
+                {spec.sub && <small className="truncate text-muted-foreground text-xs">{spec.sub}</small>}
+              </span>
+            </button>
+            <span className="ml-auto flex flex-wrap items-center justify-end gap-2">
+              {spec.pill}
+              {spec.meta && <small className="max-w-[16rem] truncate text-muted-foreground text-xs">{spec.meta}</small>}
+              {actions.map((c, i) => (
+                <span key={i}>{c.render(r)}</span>
               ))}
-            </tr>
-          ))}
-          {sorted.length === 0 && (
-            <tr>
-              <td colSpan={cols.length} className="hd-empty">
-                {empty}
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
-    </div>
+            </span>
+          </li>
+        );
+      })}
+    </ul>
   );
 }
 
