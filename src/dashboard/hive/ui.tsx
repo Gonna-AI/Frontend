@@ -47,3 +47,41 @@ export function Surface({ children, plain }: { children: React.ReactNode; plain?
     <>{children}</>
   );
 }
+
+export interface Stat {
+  label: React.ReactNode;
+  value: React.ReactNode;
+  sub?: React.ReactNode;
+  /** Draws the value in the accent colour: this one needs attention. */
+  hot?: boolean;
+}
+
+/**
+ * The figures at the top of a screen: one bordered card divided into cells, not a row of separate boxes. The
+ * hairlines come from the gap, so any number of cells (and a last cell left over on a phone) stays tidy.
+ */
+export function StatStrip({ items, paired = false, className }: { items: Stat[]; paired?: boolean; className?: string }) {
+  const n = Math.min(items.length, 4);
+  return (
+    <dl
+      className={cn(
+        'grid grid-cols-2 gap-px overflow-hidden rounded-[var(--hx-r-card,14px)] border bg-border shadow-xs [&>*:last-child:nth-child(odd)]:col-span-2',
+        paired ? 'content-start xl:[&>*:last-child:nth-child(odd)]:col-span-2' : 'md:[&>*:last-child:nth-child(odd)]:col-span-1 md:[grid-template-columns:repeat(var(--n),minmax(0,1fr))]',
+        className,
+      )}
+      style={{ ['--n' as string]: n }}
+    >
+      {items.map((s, i) => (
+        <div key={i} className="grid content-start gap-1 bg-card px-4 py-4 md:px-5">
+          <dt className="text-muted-foreground text-sm">{s.label}</dt>
+          <dd className={cn('font-semibold text-2xl tabular-nums leading-tight tracking-tight md:text-[1.75rem]', s.hot && 'text-[var(--hd-orange,#ff4d00)]')}>{s.value}</dd>
+          {s.sub && <dd className="text-muted-foreground text-xs leading-snug">{s.sub}</dd>}
+        </div>
+      ))}
+    </dl>
+  );
+}
+
+/** The small segmented switch (a time range, a view): a pill, not a page-level tab. */
+export const PILL_LIST = 'h-9 justify-start gap-1 bg-muted p-1';
+export const PILL_TRIGGER = 'h-7 flex-none px-3 text-muted-foreground data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm dark:data-[state=active]:bg-input/40';

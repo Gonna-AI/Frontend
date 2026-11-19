@@ -15,28 +15,14 @@ import { useResource, type Row } from '../api/resource';
 import { useT } from '../i18n';
 import { Tabs } from '../modules';
 import { useHive } from '../store';
+import { StatStrip } from '../ui';
 import { Cell, humanize } from './cells';
 import { PresentBody, presentFor } from './present';
 import { type Action, type Column, type Screen, type View } from './types';
 
 function Kpis<T extends Row>({ view, rows, paired }: { view: View<T>; rows: T[]; paired?: boolean }) {
   if (!view.kpis?.length) return null;
-  return (
-    <div className={cn('grid grid-cols-2 gap-3 md:gap-4', paired ? 'content-start xl:grid-cols-2' : 'lg:grid-cols-[repeat(auto-fit,minmax(190px,1fr))]')}>
-      {view.kpis.map((k) => {
-        const hot = k.hot?.(rows);
-        return (
-          <Card key={k.label} className="gap-1.5 py-4">
-            <CardHeader className="grid-cols-1 gap-1">
-              <CardDescription>{k.label}</CardDescription>
-              <CardTitle className={cn('font-semibold text-2xl tabular-nums md:text-3xl', hot && 'text-[var(--hd-orange,#ff4d00)]')}>{k.value(rows)}</CardTitle>
-            </CardHeader>
-            {k.sub && <CardContent className="text-muted-foreground text-xs">{typeof k.sub === 'function' ? k.sub(rows) : k.sub}</CardContent>}
-          </Card>
-        );
-      })}
-    </div>
-  );
+  return <StatStrip paired={paired} items={view.kpis.map((k) => ({ label: k.label, value: k.value(rows), hot: Boolean(k.hot?.(rows)), sub: typeof k.sub === 'function' ? k.sub(rows) : k.sub }))} />;
 }
 
 function Breakdown<T extends Row>({ view, rows }: { view: View<T>; rows: T[] }) {
@@ -236,6 +222,7 @@ function ViewBody<T extends Row>({ view, screenId }: { view: View<T>; screenId: 
   const present = presentFor(screenId, view.id);
   const isBoard = present.kind === 'board';
   const breakdownShown = Boolean(view.breakdown) && new Set(res.rows.map((r) => humanize(r[view.breakdown!.by]))).size >= 2;
+  const paired = Boolean(view.kpis?.length && breakdownShown);
 
   const run = (row: T, a: Action<T>) => {
     res.update(row.id, a.apply(row));
@@ -243,20 +230,23 @@ function ViewBody<T extends Row>({ view, screenId }: { view: View<T>; screenId: 
   };
 
   return (
-    <div className="flex animate-in flex-col gap-4 fade-in-0 md:gap-6">
-      {/* The figures and the breakdown sit side by side on a wide screen, so a list starts higher up the page. */}
-      <div className={cn('grid gap-4 md:gap-6', view.kpis?.length && view.breakdown && breakdownShown && 'xl:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)]')}>
-        <Kpis view={view} rows={res.rows} paired={Boolean(view.kpis?.length && view.breakdown && breakdownShown)} />
+    <div className={cn('flex animate-in flex-col gap-4 fade-in-0 md:gap-6', paired && 'xl:grid xl:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)]')}>
+      {/* On a wide screen the figures and the breakdown sit side by side. On a phone the list comes before the
+          breakdown, so what a person came for is not pushed below a chart. */}
+      <div className={cn('contents', paired && 'xl:col-start-1 xl:row-start-1 xl:block')}>
+        <Kpis view={view} rows={res.rows} paired={paired} />
+      </div>
+      <div className={cn('order-last md:order-none', paired && 'xl:col-start-2 xl:row-start-1')}>
         <Breakdown view={view} rows={res.rows} />
       </div>
-      <div className="flex flex-col gap-4">
+      <div className={cn('flex flex-col gap-4', paired && 'xl:col-span-2')}>
         <div className="flex flex-wrap items-center gap-2">
-          <div className="relative w-full sm:w-64">
+          <div className="relative min-w-0 flex-1 basis-40 sm:w-64 sm:flex-none">
             <Search className="-translate-y-1/2 pointer-events-none absolute top-1/2 left-3 size-4 text-muted-foreground" aria-hidden="true" />
             <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder={`${t('Search')} ${view.title.toLowerCase()}`} aria-label={t('Search')} className="pl-9" />
           </div>
           {!isBoard && statuses.length > 1 && statuses.length <= 4 && (
-            <div className="flex flex-wrap gap-1.5" role="group" aria-label={t('Filter')}>
+            <div className="order-last flex w-full gap-1.5 overflow-x-auto pb-0.5 [scrollbar-width:none] sm:order-none sm:w-auto sm:flex-wrap sm:overflow-visible [&>*]:shrink-0" role="group" aria-label={t('Filter')}>
               <Button type="button" size="sm" variant={status === null ? 'default' : 'outline'} aria-pressed={status === null} onClick={() => setStatus(null)}>
                 {t('All')} <span className="tabular-nums opacity-60">{res.rows.length}</span>
               </Button>
@@ -296,8 +286,10 @@ function ViewBody<T extends Row>({ view, screenId }: { view: View<T>; screenId: 
               </DropdownMenuContent>
             </DropdownMenu>
           )}
-          <div className="ml-auto flex items-center gap-2">
-            <SourceBadge source={res.source} loading={res.loading} />
+          <div className="flex items-center gap-2 sm:ml-auto">
+            <span className="hidden sm:inline-flex">
+              <SourceBadge source={res.source} loading={res.loading} />
+            </span>
             {view.create && (
               <Button size="sm" onClick={() => setCreating(true)}>
                 <Plus />

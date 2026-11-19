@@ -516,8 +516,9 @@ body.dashboard-root [data-slot='sheet-overlay'] { -webkit-backdrop-filter: blur(
 /* ------------------------------------------------------------------ phones */
 
 @media (max-width: 699px) {
-  .hx-bars li { grid-template-columns: minmax(0, 1fr) auto; gap: 8px 12px; }
-  .hx-bars i { grid-column: 1 / -1; grid-row: 2; }
+  .hx-bars { gap: 10px; }
+  .hx-bars li { grid-template-columns: minmax(4.5rem, 0.4fr) minmax(0, 1fr) auto; gap: 10px; font-size: 13px; }
+  .hx-bars em { min-width: 2.25rem; }
 
   /* Tables become cards: each cell carries its own label. */
   .hx-tablewrap { padding: 0 12px 14px; overflow: visible; }

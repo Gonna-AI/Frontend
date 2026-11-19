@@ -11,7 +11,7 @@ import { cn } from '@/lib/utils';
 import { useLang, useT } from './i18n';
 import { MODULES, type Block, type Cell, type CellValue, type Tab, type Txt } from './modulesData';
 import { NAV } from './nav';
-import { TAB_LIST, TAB_TRIGGER, ToneBadge } from './ui';
+import { StatStrip, TAB_LIST, TAB_TRIGGER, ToneBadge } from './ui';
 
 /**
  * The generic screen for Hive modules that are specified but not built yet. It draws the tabs and blocks
@@ -143,20 +143,19 @@ function BlockView({ block }: { block: Block }) {
   switch (block.kind) {
     case 'kpis':
       return (
-        <div className="grid grid-cols-2 gap-3 md:gap-4 lg:grid-cols-[repeat(auto-fit,minmax(200px,1fr))]">
-          {block.items.map((k, i) => (
-            <Card key={i} className="gap-2 py-4">
-              <CardHeader className="grid-cols-1 gap-1">
-                <CardDescription>{tr(k.label)}</CardDescription>
-                <CardTitle className="font-semibold text-2xl tabular-nums md:text-3xl">{tr(k.value)}</CardTitle>
-              </CardHeader>
-              <CardContent className="flex flex-wrap items-center gap-2 text-muted-foreground text-xs">
+        <StatStrip
+          items={block.items.map((k) => ({
+            label: tr(k.label),
+            value: tr(k.value),
+            hot: k.hot,
+            sub: k.delta || k.sub ? (
+              <span className="flex flex-wrap items-center gap-1.5">
                 {k.delta && <ToneBadge tone={k.up ? 'green' : 'red'}>{k.up ? '↗' : '↘'} {k.delta}</ToneBadge>}
                 {k.sub && <span>{tr(k.sub)}</span>}
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+              </span>
+            ) : undefined,
+          }))}
+        />
       );
     case 'table':
       return <TableBlock block={block} />;

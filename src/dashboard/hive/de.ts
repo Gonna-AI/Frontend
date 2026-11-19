@@ -982,4 +982,6 @@ export const de: Record<string, string> = {
   'The only ways HIVE may write to a machine, and the safety around them.': 'Die einzigen Wege, auf denen HIVE an eine Maschine schreiben darf, und die Sicherheit darum.',
   'What the plant is reporting right now, and the rules that react to it.': 'Was das Werk gerade meldet und die Regeln, die darauf reagieren.',
   'What the plant knows: documents, notes, findings, the graph and reports.': 'Was das Werk weiß: Dokumente, Notizen, Befunde, der Graph und Berichte.',
+  'All alarms': 'Alle Alarme',
+  'Plant now': 'Werk jetzt',
 };

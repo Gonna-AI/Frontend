@@ -1,51 +1,60 @@
 /**
- * Home, laid out like shadcn's dashboard-01: four figures, one chart, one tabbed table.
- * It answers the questions in the order the specification gives (APP-HOME): what is wrong,
- * what is waiting for me, how is the plant doing.
+ * Home: what is wrong, what is waiting for me, how the plant is doing, in that order (APP-HOME).
+ * Each question is one card, and every row in it opens the screen that answers it.
  */
-import { ArrowDownRight, ArrowUpRight } from 'lucide-react-dash';
+import { ArrowRight, ChevronRight } from 'lucide-react-dash';
 import { useMemo, useState } from 'react';
 import { Area, AreaChart, CartesianGrid, XAxis } from 'recharts';
 
-import { Badge } from '@/components/dashboard-ui/badge';
+import { Button } from '@/components/dashboard-ui/button';
 import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/dashboard-ui/card';
 import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from '@/components/dashboard-ui/chart';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/dashboard-ui/table';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/dashboard-ui/tabs';
+import { Tabs, TabsList, TabsTrigger } from '@/components/dashboard-ui/tabs';
 
-import { formatDuration, localize, useT } from './i18n';
+import { formatDuration, useT } from './i18n';
 import { useAttention } from './OverviewView';
-import { STATE_LABEL, type MachineState } from './placeholder';
+import { MACHINE_STATES, STATE_LABEL, type MachineState } from './placeholder';
 import { useHive } from './store';
-import { TAB_LIST, TAB_TRIGGER, ToneBadge, type BadgeTone } from './ui';
+import { PILL_LIST, PILL_TRIGGER, StatStrip, ToneBadge, type BadgeTone } from './ui';
 
 const STATE_TONE: Record<MachineState, BadgeTone> = { producing: 'green', idle: 'amber', setup: 'orange', planned_stop: 'gray', unplanned_stop: 'red', fault: 'red', off: 'gray', unknown: 'gray' };
+const STATE_BAR: Record<MachineState, string> = { producing: 'bg-emerald-500', idle: 'bg-amber-400', setup: 'bg-[var(--hd-orange,#ff4d00)]', planned_stop: 'bg-muted-foreground/40', unplanned_stop: 'bg-destructive', fault: 'bg-destructive', off: 'bg-muted-foreground/25', unknown: 'bg-muted-foreground/15' };
+const DOT: Record<BadgeTone, string> = { green: 'bg-emerald-500', red: 'bg-destructive', amber: 'bg-amber-500', orange: 'bg-[var(--hd-orange,#ff4d00)]', gray: 'bg-muted-foreground/50', black: 'bg-foreground' };
 
-function Figure({ label, value, unit, trend, up, foot, sub, onClick, accent }: { label: string; value: string; unit?: string; trend?: string; up?: boolean; foot: string; sub: string; onClick: () => void; accent?: boolean }) {
-  const Icon = up ? ArrowUpRight : ArrowDownRight;
+/** A card that answers one question, with a link to the full list. */
+function Panel({ title, sub, action, onAction, children }: { title: string; sub?: string; action?: string; onAction?: () => void; children: React.ReactNode }) {
   return (
-    <Card className="@container/card cursor-pointer gap-2 transition-shadow hover:shadow-md" role="link" tabIndex={0} onClick={onClick} onKeyDown={(e) => e.key === 'Enter' && onClick()}>
-      <CardHeader className="grid-cols-1">
-        <div className="flex min-h-6 items-center justify-between gap-2">
-          <CardDescription>{label}</CardDescription>
-          {trend && (
-            <Badge variant="outline" className={`hidden sm:inline-flex ${accent ? 'border-[var(--hd-orange,#ff4d00)]/40 text-[var(--hd-orange,#ff4d00)]' : ''}`}>
-              <Icon />
-              {trend}
-            </Badge>
+    <Card className="gap-0 overflow-hidden py-0">
+      <CardHeader className="grid-cols-1 gap-0.5 border-b px-5 py-4">
+        <div className="flex items-center justify-between gap-3">
+          <CardTitle className="text-base">{title}</CardTitle>
+          {action && (
+            <Button variant="ghost" size="sm" className="-mr-2 gap-1 text-muted-foreground" onClick={onAction}>
+              {action}
+              <ArrowRight />
+            </Button>
           )}
         </div>
-        <CardTitle className="font-semibold text-2xl tabular-nums sm:text-3xl">
-          {value}
-          {unit && <span className="ml-1 font-normal text-base text-muted-foreground">{unit}</span>}
-        </CardTitle>
+        {sub && <CardDescription>{sub}</CardDescription>}
       </CardHeader>
-      <CardContent className="grid gap-0.5 text-sm">
-        <span className="font-medium">{foot}</span>
-        <span className="hidden text-muted-foreground sm:block">{sub}</span>
-        {trend && <span className="text-muted-foreground sm:hidden">{trend}</span>}
-      </CardContent>
+      {children}
     </Card>
+  );
+}
+
+function Row({ onClick, lead, title, sub, trail }: { onClick: () => void; lead?: React.ReactNode; title: React.ReactNode; sub?: React.ReactNode; trail?: React.ReactNode }) {
+  return (
+    <li>
+      <button type="button" onClick={onClick} className="flex w-full items-center gap-3 px-5 py-3 text-left outline-none transition-colors hover:bg-accent/50 focus-visible:bg-accent/50">
+        {lead}
+        <span className="grid min-w-0 flex-1 leading-snug">
+          <span className="truncate font-medium text-sm">{title}</span>
+          {sub && <span className="truncate text-muted-foreground text-xs">{sub}</span>}
+        </span>
+        {trail}
+        <ChevronRight className="size-4 shrink-0 text-muted-foreground/60" aria-hidden="true" />
+      </button>
+    </li>
   );
 }
 
@@ -54,227 +63,126 @@ export default function HomeView({ go }: { go: (section: string) => void }) {
   const { data } = useHive();
   const { attention, waiting } = useAttention(go);
   const [range, setRange] = useState<'8' | '4'>('8');
-  const [tab, setTab] = useState('attention');
 
   const critical = attention.filter((a) => a.tone === 'red').length;
   const openAlarms = data.alarms.filter((a) => a.state === 'Open').length;
   const online = data.machines.filter((m) => m.state !== 'unknown' && m.state !== 'off').length;
-  const pendingApprovals = data.approvals.filter((a) => a.state === 'Pending');
-  const tiles = Object.fromEntries(data.tiles.map((x) => [x.key, x]));
+  const pending = data.approvals.filter((a) => a.state === 'Pending');
   const volume = useMemo(() => data.alarmVolume.slice(range === '4' ? -4 : 0), [data.alarmVolume, range]);
-
-  const chartConfig = { raised: { label: t('Raised'), color: 'var(--hd-orange,#ff4d00)' }, resolved: { label: t('Resolved'), color: 'var(--muted-foreground)' } } satisfies ChartConfig;
+  const counts = MACHINE_STATES.map((s) => [s, data.machines.filter((m) => m.state === s).length] as const).filter(([, n]) => n > 0);
+  const watch = data.machines.filter((m) => m.state === 'fault' || m.state === 'unplanned_stop' || m.openAlarms > 0);
+  const chartConfig = { raised: { label: t('Raised'), color: 'var(--hd-orange)' }, resolved: { label: t('Resolved'), color: 'var(--muted-foreground)' } } satisfies ChartConfig;
 
   return (
     <div className="flex flex-col gap-4 md:gap-6">
-      <section className="grid grid-cols-2 gap-3 @container/main md:gap-4 xl:grid-cols-4" aria-label={t('Key figures')}>
-        <Figure
-          label={t('Plant availability')}
-          value={data.plant.availability.replace('%', '')}
-          unit="%"
-          trend={`${data.plant.delta}`}
-          up={data.plant.deltaUp}
-          foot={t('than last week')}
-          sub={`${data.plant.name} · ${t('Total {n} sites', { n: data.sites.length })}`}
-          onClick={() => go('production')}
-        />
-        <Figure
-          label={t('Open alarms')}
-          value={String(openAlarms)}
-          trend={critical ? `${critical} ${t('critical')}` : undefined}
-          up
-          accent
-          foot={critical ? t('Needs attention first') : t('Nothing critical')}
-          sub={tiles.alarms ? `${tiles.alarms.delta} ${t('This month').toLowerCase()}` : ''}
-          onClick={() => go('alarms')}
-        />
-        <Figure label={t('Machines online')} value={`${online}`} unit={`/ ${data.machines.length}`} foot={t('Machine states')} sub={t('Unknown is never shown as off.')} onClick={() => go('machines')} />
-        <Figure label={t('Waiting for me')} value={String(waiting)} foot={t('Approvals and findings')} sub={t('Decisions only a person can make')} onClick={() => go('inbox')} />
-      </section>
+      <StatStrip
+        items={[
+          { label: t('Plant availability'), value: <>{data.plant.availability.replace('%', '')}<span className="font-normal text-base text-muted-foreground"> %</span></>, sub: `${data.plant.deltaUp ? '↗' : '↘'} ${data.plant.delta} ${t('than last week')}` },
+          { label: t('Open alarms'), value: String(openAlarms), hot: critical > 0, sub: critical ? `${critical} ${t('critical')}` : t('Nothing critical') },
+          { label: t('Machines online'), value: <>{online}<span className="font-normal text-base text-muted-foreground"> / {data.machines.length}</span></>, sub: `${data.sites.length} ${t('Sites').toLowerCase()}` },
+          { label: t('Waiting for me'), value: String(waiting), sub: t('Approvals and findings') },
+        ]}
+      />
 
-      <Card className="@container/card">
-        <CardHeader>
-          <CardTitle>{t('Alarm volume')}</CardTitle>
-          <CardDescription>{t('Alarms raised and resolved per week')}</CardDescription>
-          <CardAction>
-            <Tabs value={range} onValueChange={(v) => setRange(v as '8' | '4')} aria-label={t('Time range')}>
-              <TabsList className={TAB_LIST}>
-                <TabsTrigger value="8" className={TAB_TRIGGER}>{t('8 weeks')}</TabsTrigger>
-                <TabsTrigger value="4" className={TAB_TRIGGER}>{t('4 weeks')}</TabsTrigger>
-              </TabsList>
-            </Tabs>
-          </CardAction>
-        </CardHeader>
-        <CardContent>
-          <ChartContainer config={chartConfig} className="aspect-auto h-56 w-full">
-            <AreaChart data={volume} margin={{ left: 4, right: 4 }}>
-              <defs>
-                <linearGradient id="hv-raised" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="var(--color-raised)" stopOpacity={0.5} />
-                  <stop offset="95%" stopColor="var(--color-raised)" stopOpacity={0.05} />
-                </linearGradient>
-                <linearGradient id="hv-resolved" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="var(--color-resolved)" stopOpacity={0.35} />
-                  <stop offset="95%" stopColor="var(--color-resolved)" stopOpacity={0.03} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid vertical={false} />
-              <XAxis dataKey="label" tickLine={false} axisLine={false} tickMargin={8} />
-              <ChartTooltip cursor={false} content={<ChartTooltipContent indicator="dot" />} />
-              <Area dataKey="resolved" type="natural" fill="url(#hv-resolved)" stroke="var(--color-resolved)" strokeWidth={1.5} />
-              <Area dataKey="raised" type="natural" fill="url(#hv-raised)" stroke="var(--color-raised)" strokeWidth={2} />
-            </AreaChart>
-          </ChartContainer>
-        </CardContent>
-      </Card>
+      <div className="grid gap-4 md:gap-6 xl:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)]">
+        <Panel title={t('Needs attention')} sub={t('Ordered by priority. Critical first.')} action={t('All alarms')} onAction={() => go('alarms')}>
+          <ul className="divide-y">
+            {attention.slice(0, 5).map((a) => (
+              <Row
+                key={a.key}
+                onClick={a.open}
+                lead={<span className={`size-2.5 shrink-0 rounded-full ${DOT[a.tone === 'red' ? 'red' : a.tone === 'orange' ? 'orange' : a.tone === 'amber' ? 'amber' : 'gray']}`} aria-hidden="true" />}
+                title={a.title}
+                sub={a.where}
+                trail={<ToneBadge tone={a.tone === 'red' ? 'red' : a.tone === 'orange' ? 'orange' : a.tone === 'amber' ? 'amber' : 'gray'}>{t(a.label)}</ToneBadge>}
+              />
+            ))}
+            {attention.length === 0 && <li className="px-5 py-10 text-center text-muted-foreground text-sm">{t('Nothing needs attention. Last checked just now.')}</li>}
+          </ul>
+          <p className="border-t px-5 py-3 text-muted-foreground text-xs">{t('Alarms shown here are not a replacement for the plant’s safety systems.')}</p>
+        </Panel>
 
-      <Tabs value={tab} onValueChange={setTab} className="flex-col gap-4">
-        <div className="-mx-1 overflow-x-auto px-1 pb-1">
-          <TabsList className={TAB_LIST}>
-            <TabsTrigger value="attention" className={`${TAB_TRIGGER} gap-1.5`}>
-              {t('Needs attention')} <Badge variant="secondary" className="h-5 px-1.5">{attention.length}</Badge>
-            </TabsTrigger>
-            <TabsTrigger value="waiting" className={`${TAB_TRIGGER} gap-1.5`}>
-              {t('Waiting for me')} <Badge variant="secondary" className="h-5 px-1.5">{pendingApprovals.length}</Badge>
-            </TabsTrigger>
-            <TabsTrigger value="machines" className={`${TAB_TRIGGER} gap-1.5`}>
-              {t('Machines')} <Badge variant="secondary" className="h-5 px-1.5">{data.machines.length}</Badge>
-            </TabsTrigger>
-            <TabsTrigger value="connections" className={`${TAB_TRIGGER} gap-1.5`}>
-              {t('Connections')} <Badge variant="secondary" className="h-5 px-1.5">{data.gatewayFleet.length}</Badge>
-            </TabsTrigger>
-          </TabsList>
-        </div>
+        <Panel title={t('Waiting for me')} sub={t('Decisions only a person can make')} action={t('Inbox')} onAction={() => go('inbox')}>
+          <ul className="divide-y">
+            {pending.slice(0, 4).map((a) => (
+              <Row key={a.id} onClick={() => go('inbox')} title={a.title} sub={a.machine} trail={<ToneBadge>{a.tier}</ToneBadge>} />
+            ))}
+            {pending.length === 0 && <li className="px-5 py-10 text-center text-muted-foreground text-sm">{t('Nothing waiting for you.')}</li>}
+          </ul>
+        </Panel>
+      </div>
 
-        <TabsContent value="attention">
-          <Card className="overflow-hidden py-0">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="pl-5">{t('What')}</TableHead>
-                  <TableHead>{t('Priority')}</TableHead>
-                  <TableHead className="hidden sm:table-cell">{t('Where')}</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {attention.slice(0, 8).map((a) => (
-                  <TableRow key={a.key} className="cursor-pointer" tabIndex={0} onClick={a.open} onKeyDown={(e) => e.key === 'Enter' && a.open()}>
-                    <TableCell className="py-3 pl-5">
-                      <span className="block font-medium">{a.title}</span>
-                      <span className="block text-muted-foreground text-xs sm:hidden">{a.where}</span>
-                    </TableCell>
-                    <TableCell>
-                      <ToneBadge tone={a.tone === 'red' ? 'red' : a.tone === 'orange' ? 'orange' : a.tone === 'amber' ? 'amber' : 'gray'}>{t(a.label)}</ToneBadge>
-                    </TableCell>
-                    <TableCell className="hidden text-muted-foreground sm:table-cell">{a.where}</TableCell>
-                  </TableRow>
-                ))}
-                {attention.length === 0 && (
-                  <TableRow>
-                    <TableCell colSpan={3} className="py-10 text-center text-muted-foreground">
-                      {t('Nothing needs attention. Last checked just now.')}
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
-            <p className="border-t px-5 py-3 text-muted-foreground text-xs">{t('Alarms shown here are not a replacement for the plant’s safety systems.')}</p>
-          </Card>
-        </TabsContent>
+      <div className="grid gap-4 md:gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.35fr)]">
+        <Panel title={t('Plant now')} sub={t('Machine states')} action={t('All machines')} onAction={() => go('machines')}>
+          <CardContent className="grid gap-4 py-5">
+            <div className="flex h-3 gap-0.5 overflow-hidden rounded-full" role="img" aria-label={counts.map(([s, n]) => `${t(STATE_LABEL[s])} ${n}`).join(', ')}>
+              {counts.map(([s, n]) => (
+                <span key={s} className={`${STATE_BAR[s]} first:rounded-l-full last:rounded-r-full`} style={{ flex: n }} />
+              ))}
+            </div>
+            <ul className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+              {counts.map(([s, n]) => (
+                <li key={s} className="flex items-center gap-2">
+                  <span className={`size-2.5 shrink-0 rounded-full ${STATE_BAR[s]}`} aria-hidden="true" />
+                  <span className="flex-1 truncate text-muted-foreground">{t(STATE_LABEL[s])}</span>
+                  <b className="font-medium tabular-nums">{n}</b>
+                </li>
+              ))}
+            </ul>
+          </CardContent>
+          {watch.length > 0 && (
+            <ul className="divide-y border-t">
+              {watch.slice(0, 3).map((m) => (
+                <Row key={m.id} onClick={() => go(`machines/${m.id}`)} title={m.key} sub={`${m.type} · ${m.site}`} trail={<ToneBadge tone={STATE_TONE[m.state]}>{t(STATE_LABEL[m.state])} · {formatDuration(m.stateAgeS)}</ToneBadge>} />
+              ))}
+            </ul>
+          )}
+        </Panel>
 
-        <TabsContent value="waiting">
-          <Card className="overflow-hidden py-0">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="pl-5">{t('Request')}</TableHead>
-                  <TableHead className="hidden sm:table-cell">{t('Machine')}</TableHead>
-                  <TableHead>{t('Tier')}</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {pendingApprovals.map((a) => (
-                  <TableRow key={a.id} className="cursor-pointer" tabIndex={0} onClick={() => go('inbox')} onKeyDown={(e) => e.key === 'Enter' && go('inbox')}>
-                    <TableCell className="whitespace-normal py-3 pl-5 font-medium">{a.title}</TableCell>
-                    <TableCell className="hidden text-muted-foreground sm:table-cell">{a.machine}</TableCell>
-                    <TableCell>
-                      <ToneBadge>{a.tier}</ToneBadge>
-                    </TableCell>
-                  </TableRow>
-                ))}
-                {pendingApprovals.length === 0 && (
-                  <TableRow>
-                    <TableCell colSpan={3} className="py-10 text-center text-muted-foreground">
-                      {t('Nothing waiting for you.')}
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          </Card>
-        </TabsContent>
+        <Card className="@container/card">
+          <CardHeader>
+            <CardTitle className="text-base">{t('Alarm volume')}</CardTitle>
+            <CardDescription>{t('Alarms raised and resolved per week')}</CardDescription>
+            <CardAction>
+              <Tabs value={range} onValueChange={(v) => setRange(v as '8' | '4')} aria-label={t('Time range')}>
+                <TabsList className={PILL_LIST}>
+                  <TabsTrigger value="8" className={PILL_TRIGGER}>{t('8 weeks')}</TabsTrigger>
+                  <TabsTrigger value="4" className={PILL_TRIGGER}>{t('4 weeks')}</TabsTrigger>
+                </TabsList>
+              </Tabs>
+            </CardAction>
+          </CardHeader>
+          <CardContent>
+            <ChartContainer config={chartConfig} className="aspect-auto h-56 w-full">
+              <AreaChart data={volume} margin={{ left: 4, right: 4 }}>
+                <defs>
+                  <linearGradient id="hv-raised" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="var(--color-raised)" stopOpacity={0.5} />
+                    <stop offset="95%" stopColor="var(--color-raised)" stopOpacity={0.05} />
+                  </linearGradient>
+                  <linearGradient id="hv-resolved" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="var(--color-resolved)" stopOpacity={0.35} />
+                    <stop offset="95%" stopColor="var(--color-resolved)" stopOpacity={0.03} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid vertical={false} />
+                <XAxis dataKey="label" tickLine={false} axisLine={false} tickMargin={8} />
+                <ChartTooltip cursor={false} content={<ChartTooltipContent indicator="dot" />} />
+                <Area dataKey="resolved" type="natural" fill="url(#hv-resolved)" stroke="var(--color-resolved)" strokeWidth={1.5} />
+                <Area dataKey="raised" type="natural" fill="url(#hv-raised)" stroke="var(--color-raised)" strokeWidth={2} />
+              </AreaChart>
+            </ChartContainer>
+          </CardContent>
+        </Card>
+      </div>
 
-        <TabsContent value="machines">
-          <Card className="overflow-hidden py-0">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="pl-5">{t('Machine')}</TableHead>
-                  <TableHead>{t('State')}</TableHead>
-                  <TableHead className="hidden sm:table-cell">{t('Line')}</TableHead>
-                  <TableHead className="hidden pr-5 text-right md:table-cell">OEE</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {data.machines.map((m) => (
-                  <TableRow key={m.id} className="cursor-pointer" tabIndex={0} onClick={() => go(`machines/${m.id}`)} onKeyDown={(e) => e.key === 'Enter' && go(`machines/${m.id}`)}>
-                    <TableCell className="py-3 pl-5">
-                      <span className="block font-medium">{m.key}</span>
-                      <span className="block text-muted-foreground text-xs">{m.type}</span>
-                    </TableCell>
-                    <TableCell>
-                      <ToneBadge tone={STATE_TONE[m.state]}>
-                        {t(STATE_LABEL[m.state])} · {formatDuration(m.stateAgeS)}
-                      </ToneBadge>
-                    </TableCell>
-                    <TableCell className="hidden text-muted-foreground sm:table-cell">{m.line}</TableCell>
-                    <TableCell className="hidden pr-5 text-right tabular-nums md:table-cell">{m.oee ? `${localize(String(m.oee))} %` : '–'}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="connections">
-          <Card className="overflow-hidden py-0">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="pl-5">{t('Gateway')}</TableHead>
-                  <TableHead>{t('Link')}</TableHead>
-                  <TableHead className="hidden sm:table-cell">{t('Version')}</TableHead>
-                  <TableHead className="hidden pr-5 text-right sm:table-cell">{t('Buffer')}</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {data.gatewayFleet.map((g) => (
-                  <TableRow key={g.id} className="cursor-pointer" tabIndex={0} onClick={() => go('admin/connections')} onKeyDown={(e) => e.key === 'Enter' && go('admin/connections')}>
-                    <TableCell className="py-3 pl-5 font-medium">{g.site}</TableCell>
-                    <TableCell>
-                      <ToneBadge tone={g.link === 'Online' ? 'green' : g.link === 'Buffering' ? 'amber' : 'red'}>{t(g.link)}</ToneBadge>
-                    </TableCell>
-                    <TableCell className="hidden text-muted-foreground sm:table-cell">
-                      {g.version} · {g.uptime}
-                    </TableCell>
-                    <TableCell className="hidden pr-5 text-right tabular-nums sm:table-cell">{g.bufferPct} %</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </Card>
-        </TabsContent>
-      </Tabs>
+      <Panel title={t('Connections')} sub={t('Gateways and the edge buffer')} action={t('Manage')} onAction={() => go('gateways')}>
+        <ul className="grid divide-y md:grid-cols-2 md:divide-y-0 md:[&>li]:border-b md:[&>li:nth-child(odd)]:border-r md:[&>li:nth-last-child(-n+2)]:border-b-0">
+          {data.gatewayFleet.map((g) => (
+            <Row key={g.id} onClick={() => go('gateways')} lead={<span className={`size-2.5 shrink-0 rounded-full ${g.link === 'Online' ? 'bg-emerald-500' : g.link === 'Buffering' ? 'bg-amber-500' : 'bg-destructive'}`} aria-hidden="true" />} title={g.site} sub={`${g.version} · ${g.uptime} · ${g.drivers}`} trail={<ToneBadge tone={g.link === 'Online' ? 'green' : g.link === 'Buffering' ? 'amber' : 'red'}>{t(g.link)}</ToneBadge>} />
+          ))}
+        </ul>
+      </Panel>
     </div>
   );
 }
